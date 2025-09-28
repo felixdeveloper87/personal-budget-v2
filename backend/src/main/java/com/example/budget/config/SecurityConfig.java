@@ -39,6 +39,7 @@ public class SecurityConfig {
         
         // Para produção - adicione a URL da Vercel aqui
         configuration.addAllowedOrigin("https://personal-budget.vercel.app");
+        configuration.addAllowedOrigin("https://personal-budget-v2.vercel.app");
         configuration.addAllowedOrigin("https://*.vercel.app");
         
         // Para permitir qualquer origem em desenvolvimento (remover em produção)
