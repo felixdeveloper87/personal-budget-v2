@@ -33,23 +33,20 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
+        // Permitir todas as origens da Vercel
+        configuration.addAllowedOrigin("https://personal-budget-v2.vercel.app");
+        configuration.addAllowedOrigin("https://personal-budget.vercel.app");
+        configuration.addAllowedOriginPattern("https://*.vercel.app");
+        
         // Para desenvolvimento local
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:5173");
         
-        // Para produção - adicione a URL da Vercel aqui
-        configuration.addAllowedOrigin("https://personal-budget.vercel.app");
-        configuration.addAllowedOrigin("https://personal-budget-v2.vercel.app");
-        configuration.addAllowedOrigin("https://*.vercel.app");
-        
-        // Para permitir qualquer origem em desenvolvimento (remover em produção)
-        if (System.getProperty("spring.profiles.active", "").contains("dev")) {
-            configuration.addAllowedOriginPattern("*");
-        }
-        
+        // Configurações mais permissivas
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
