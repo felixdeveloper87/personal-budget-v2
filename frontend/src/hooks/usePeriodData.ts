@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Transaction, MonthlySummary } from '../types'
-import { PeriodType } from '../components/PeriodFilter'
+import { PeriodType } from '../components/PeriodNavigator'
 
 export interface PeriodData {
   startDate: Date

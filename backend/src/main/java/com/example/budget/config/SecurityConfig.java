@@ -32,7 +32,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOriginPattern("*");
+        
+        // Para desenvolvimento local
+        configuration.addAllowedOrigin("http://localhost:3000");
+        configuration.addAllowedOrigin("http://localhost:5173");
+        
+        // Para produção - adicione a URL da Vercel aqui
+        configuration.addAllowedOrigin("https://personal-budget.vercel.app");
+        configuration.addAllowedOrigin("https://*.vercel.app");
+        
+        // Para permitir qualquer origem em desenvolvimento (remover em produção)
+        if (System.getProperty("spring.profiles.active", "").contains("dev")) {
+            configuration.addAllowedOriginPattern("*");
+        }
+        
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);

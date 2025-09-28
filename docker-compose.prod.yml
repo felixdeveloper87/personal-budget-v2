@@ -11,10 +11,11 @@ services:
     volumes:
       - dbdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
   # Backend Spring Boot
   backend:
@@ -36,17 +37,5 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # Frontend React/Vite
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    restart: unless-stopped
-
 volumes:
   dbdata:
-

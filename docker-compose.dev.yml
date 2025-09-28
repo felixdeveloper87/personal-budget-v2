@@ -3,9 +3,9 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: personalbudget
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${DB_NAME:-personalbudget}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -26,9 +26,11 @@ services:
     environment:
       - DB_HOST=db
       - DB_PORT=5432
-      - DB_NAME=personalbudget
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
+      - DB_NAME=${DB_NAME:-personalbudget}
+      - DB_USER=${DB_USER:-postgres}
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
     depends_on:
       db:
         condition: service_healthy

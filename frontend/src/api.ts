@@ -1,7 +1,9 @@
 import axios from 'axios'
 import { Transaction, MonthlySummary, User, LoginRequest, RegisterRequest } from './types'
 
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({ 
+  baseURL: import.meta.env.VITE_API_URL || '/api' 
+})
 
 // Auth API
 export async function login(credentials: LoginRequest): Promise<User> {
