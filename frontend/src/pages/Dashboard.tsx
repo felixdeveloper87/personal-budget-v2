@@ -26,7 +26,7 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
   const { user } = useAuth()
 
-  // Processa dados do período
+  // Processa dados do períodoo
   const periodData = usePeriodData(
     transactions,
     monthSummary,
