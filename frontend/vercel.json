@@ -4,6 +4,6 @@
   "installCommand": "npm install",
   "framework": "vite",
   "env": {
-    "VITE_API_URL": "https://budget.seudominio.com"
+    "VITE_API_URL": "https://91.98.88.120"
   }
 }
