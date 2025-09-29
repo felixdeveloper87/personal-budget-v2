@@ -14,6 +14,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -32,26 +34,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Permitir todas as origens da Vercel
-        configuration.addAllowedOrigin("https://personal-budget-v2.vercel.app");
-        configuration.addAllowedOrigin("https://personal-budget.vercel.app");
-        configuration.addAllowedOriginPattern("https://*.vercel.app");
-        
-        // Permitir o domínio principal
-        configuration.addAllowedOrigin("https://www.personalbudget.co.uk");
-        configuration.addAllowedOrigin("https://personalbudget.co.uk");
-        
-        // Para desenvolvimento local
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://localhost:5173");
-        
-        // Configurações mais permissivas
+
+        configuration.setAllowedOrigins(Arrays.asList(
+            "https://personal-budget-v2.vercel.app",
+            "https://personal-budget.vercel.app",
+            "https://www.personalbudget.co.uk",
+            "https://personalbudget.co.uk",
+            "http://localhost:3000",
+            "http://localhost:5173"
+        ));
+
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -65,7 +62,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/health").permitAll()  
+                .requestMatchers("/health").permitAll()
                 .requestMatchers("/api/transactions/**").authenticated()
                 .requestMatchers("/api/summary/**").authenticated()
                 .anyRequest().authenticated()
