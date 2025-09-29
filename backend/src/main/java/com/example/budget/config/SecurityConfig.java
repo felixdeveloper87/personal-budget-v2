@@ -38,6 +38,10 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("https://personal-budget.vercel.app");
         configuration.addAllowedOriginPattern("https://*.vercel.app");
         
+        // Permitir o domínio principal
+        configuration.addAllowedOrigin("https://www.personalbudget.co.uk");
+        configuration.addAllowedOrigin("https://personalbudget.co.uk");
+        
         // Para desenvolvimento local
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://localhost:5173");
