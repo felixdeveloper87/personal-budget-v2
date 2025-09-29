@@ -25,4 +25,9 @@ public class AuthController {
     public AuthResponse login(@RequestBody LoginRequest request) {
         return authService.login(request);
     }
+
+    @GetMapping("/health")
+    public String health() {
+        return "OK";
+    }
 }
