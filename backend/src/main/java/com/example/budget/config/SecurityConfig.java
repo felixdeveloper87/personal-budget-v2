@@ -14,8 +14,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -35,14 +33,13 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(Arrays.asList(
-            "https://personal-budget-v2.vercel.app",
-            "https://personal-budget.vercel.app",
-            "https://www.personalbudget.co.uk",
-            "https://personalbudget.co.uk",
-            "http://localhost:3000",
-            "http://localhost:5173"
-        ));
+        // Padrões que aceitam múltiplos domínios
+        configuration.addAllowedOriginPattern("https://*.vercel.app");
+        configuration.addAllowedOriginPattern("https://*.personalbudget.co.uk");
+        configuration.addAllowedOriginPattern("https://personalbudget.co.uk");
+
+        // Dev local
+        configuration.addAllowedOriginPattern("http://localhost:*");
 
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
