@@ -159,30 +159,32 @@ export default function TransactionForm({
   return (
     <Box w="full">
       <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
-        <CardBody p={{ base: 6, md: 10 }}>
-          <VStack spacing={6} align="stretch">
+        <CardBody p={{ base: 4, sm: 6, md: 10 }}>
+          <VStack spacing={{ base: 4, md: 6 }} align="stretch">
             {/* Header */}
-            <HStack spacing={3} align="center">
-              <Heading size="lg" color={colors.text.label}>
-                Add {type === 'INCOME' ? 'Income' : 'Expense'}
-              </Heading>
-              <Badge colorScheme={type === 'INCOME' ? 'green' : 'red'} borderRadius="full" px={3}>
-                {type === 'INCOME' ? 'Money in' : 'Money out'}
-              </Badge>
-            </HStack>
-            <Text fontSize="sm" color={colors.text.secondary}>
-              {type === 'INCOME'
-                ? 'Track money coming into your account'
-                : 'Record money going out of your account'}
-            </Text>
+            <VStack spacing={2} align={{ base: "center", md: "flex-start" }}>
+              <HStack spacing={3} align="center" flexWrap="wrap" justify={{ base: "center", md: "flex-start" }}>
+                <Heading size={{ base: "md", md: "lg" }} color={colors.text.label}>
+                  Add {type === 'INCOME' ? 'Income' : 'Expense'}
+                </Heading>
+                <Badge colorScheme={type === 'INCOME' ? 'green' : 'red'} borderRadius="full" px={3} fontSize={{ base: "xs", md: "sm" }}>
+                  {type === 'INCOME' ? 'Money in' : 'Money out'}
+                </Badge>
+              </HStack>
+              <Text fontSize={{ base: "xs", md: "sm" }} color={colors.text.secondary} textAlign={{ base: "center", md: "left" }}>
+                {type === 'INCOME'
+                  ? 'Track money coming into your account'
+                  : 'Record money going out of your account'}
+              </Text>
+            </VStack>
 
             <Divider />
 
             {/* Form */}
             <form onSubmit={onSubmit}>
-              <VStack spacing={8} align="stretch">
+              <VStack spacing={{ base: 6, md: 8 }} align="stretch">
                 {/* Transaction Type Toggle */}
-                <Box>
+                <Box w="full">
                   <Text fontWeight="600" mb={4} color={colors.text.label}>
                     Transaction Type
                   </Text>
@@ -191,21 +193,23 @@ export default function TransactionForm({
                     bg={colors.border}
                     borderRadius="2xl"
                     p={1}
-                    display="inline-block"
+                    w="full"
+                    maxW="400px"
+                    mx="auto"
                     boxShadow="inset 0 2px 4px rgba(0, 0, 0, 0.1)"
                   >
-                    <HStack spacing={0}>
+                    <HStack spacing={0} w="full">
                       <Button
                         onClick={() => handleTypeChange('INCOME')}
                         variant="ghost"
-                        size="lg"
-                        px={8}
-                        py={6}
+                        size={{ base: "md", md: "lg" }}
+                        px={{ base: 4, md: 8 }}
+                        py={{ base: 4, md: 6 }}
                         borderRadius="xl"
                         bg={type === 'INCOME' ? 'white' : 'transparent'}
                         color={type === 'INCOME' ? 'green.600' : colors.text.secondary}
                         fontWeight="600"
-                        fontSize="md"
+                        fontSize={{ base: "sm", md: "md" }}
                         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         boxShadow={type === 'INCOME' ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none'}
                         transform={type === 'INCOME' ? 'scale(1.02)' : 'scale(1)'}
@@ -220,28 +224,30 @@ export default function TransactionForm({
                         rightIcon={
                           type === 'INCOME' ? (
                             <Box
-                              w={2}
-                              h={2}
+                              w={{ base: 1.5, md: 2 }}
+                              h={{ base: 1.5, md: 2 }}
                               bg="green.500"
                               borderRadius="full"
                               boxShadow="0 0 8px rgba(34, 197, 94, 0.6)"
                             />
                           ) : undefined
                         }
+                        flex={1}
                       >
-                        Income
+                        <Text display={{ base: "none", sm: "inline" }}>Income</Text>
+                        <Text display={{ base: "inline", sm: "none" }}>+</Text>
                       </Button>
                       <Button
                         onClick={() => handleTypeChange('EXPENSE')}
                         variant="ghost"
-                        size="lg"
-                        px={8}
-                        py={6}
+                        size={{ base: "md", md: "lg" }}
+                        px={{ base: 4, md: 8 }}
+                        py={{ base: 4, md: 6 }}
                         borderRadius="xl"
                         bg={type === 'EXPENSE' ? 'white' : 'transparent'}
                         color={type === 'EXPENSE' ? 'red.600' : colors.text.secondary}
                         fontWeight="600"
-                        fontSize="md"
+                        fontSize={{ base: "sm", md: "md" }}
                         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         boxShadow={type === 'EXPENSE' ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none'}
                         transform={type === 'EXPENSE' ? 'scale(1.02)' : 'scale(1)'}
@@ -256,20 +262,22 @@ export default function TransactionForm({
                         rightIcon={
                           type === 'EXPENSE' ? (
                             <Box
-                              w={2}
-                              h={2}
+                              w={{ base: 1.5, md: 2 }}
+                              h={{ base: 1.5, md: 2 }}
                               bg="red.500"
                               borderRadius="full"
                               boxShadow="0 0 8px rgba(239, 68, 68, 0.6)"
                             />
                           ) : undefined
                         }
+                        flex={1}
                       >
-                        Expense
+                        <Text display={{ base: "none", sm: "inline" }}>Expense</Text>
+                        <Text display={{ base: "inline", sm: "none" }}>-</Text>
                       </Button>
                     </HStack>
                   </Box>
-                  <Text fontSize="sm" color={colors.text.muted} mt={2} textAlign="center">
+                  <Text fontSize={{ base: "xs", md: "sm" }} color={colors.text.muted} mt={2} textAlign="center">
                     {type === 'INCOME' 
                       ? '💰 Money coming into your account' 
                       : '💸 Money going out of your account'
@@ -278,7 +286,7 @@ export default function TransactionForm({
                 </Box>
 
                 {/* Date & Amount */}
-                <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={8}>
+                <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 6, md: 8 }}>
                   {/* Date */}
                   <Box>
                     <Text fontWeight="600" mb={3} color={colors.text.label}>Date</Text>
@@ -296,11 +304,13 @@ export default function TransactionForm({
                       {quickDates.map((qd) => (
                         <WrapItem key={qd.label}>
                           <Button
-                            size="sm"
+                            size={{ base: "xs", sm: "sm" }}
                             variant={date === qd.date.toISOString().slice(0, 10) ? 'solid' : 'outline'}
                             colorScheme="blue"
                             borderRadius="full"
                             onClick={() => handleQuickDate(qd.date)}
+                            fontSize={{ base: "xs", sm: "sm" }}
+                            px={{ base: 2, sm: 3 }}
                           >
                             {qd.label}
                           </Button>
@@ -335,11 +345,13 @@ export default function TransactionForm({
                       {quickAmounts.map((qa) => (
                         <WrapItem key={qa}>
                           <Button
-                            size="sm"
+                            size={{ base: "xs", sm: "sm" }}
                             variant={amount === qa ? 'solid' : 'outline'}
                             colorScheme="blue"
                             borderRadius="full"
                             onClick={() => setAmount(qa)}
+                            fontSize={{ base: "xs", sm: "sm" }}
+                            px={{ base: 2, sm: 3 }}
                           >
                             £{qa}
                           </Button>
@@ -354,7 +366,7 @@ export default function TransactionForm({
                   <Text fontWeight="600" mb={3} color={colors.text.label}>
                     {type === 'INCOME' ? 'Income Category' : 'Expense Category'}
                   </Text>
-                  <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3}>
+                  <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={{ base: 2, md: 3 }}>
                     {currentCategories.map((cat) => {
                       const IconComponent = cat.icon
                       return (
@@ -365,10 +377,17 @@ export default function TransactionForm({
                           borderRadius="xl"
                           justifyContent="flex-start"
                           onClick={() => setCategory(cat.name)}
+                          size={{ base: "sm", md: "md" }}
+                          px={{ base: 2, md: 3 }}
+                          py={{ base: 3, md: 4 }}
+                          fontSize={{ base: "xs", sm: "sm" }}
                         >
-                          <HStack spacing={2}>
+                          <HStack spacing={{ base: 1, md: 2 }}>
                             <IconComponent size={18} />
-                            <Text>{cat.name}</Text>
+                            <Text display={{ base: "none", sm: "inline" }}>{cat.name}</Text>
+                            <Text display={{ base: "inline", sm: "none" }} fontSize="xs">
+                              {cat.name.length > 6 ? cat.name.substring(0, 6) + '...' : cat.name}
+                            </Text>
                           </HStack>
                         </Button>
                       )
@@ -377,30 +396,34 @@ export default function TransactionForm({
                 </Box>
 
                 {/* Description + Submit */}
-                <Grid templateColumns={{ base: '1fr', md: '1fr auto' }} gap={8}>
+                <VStack spacing={{ base: 4, md: 8 }} align="stretch">
                   <Textarea
                     placeholder="Add a note (optional)"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    size="lg"
+                    size={{ base: "md", md: "lg" }}
                     rows={4}
                     borderRadius="xl"
                     border="2px"
                     borderColor={colors.border}
+                    fontSize={{ base: "sm", md: "md" }}
                   />
                   <Button
                     type="submit"
                     colorScheme="blue"
-                    size="lg"
+                    size={{ base: "md", md: "lg" }}
                     isLoading={loading}
                     loadingText="Saving..."
                     borderRadius="xl"
-                    px={10}
+                    px={{ base: 6, md: 10 }}
+                    py={{ base: 4, md: 6 }}
                     fontWeight="600"
+                    fontSize={{ base: "sm", md: "md" }}
+                    w="full"
                   >
                     {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
                   </Button>
-                </Grid>
+                </VStack>
               </VStack>
             </form>
           </VStack>
@@ -408,7 +431,7 @@ export default function TransactionForm({
       </Card>
 
       {/* Recent Transactions */}
-      <Box mt={8}>
+      <Box mt={{ base: 6, md: 8 }}>
         <RecentTransactions
           transactions={transactions}
           type={type}
@@ -418,16 +441,16 @@ export default function TransactionForm({
       </Box>
 
       {/* Number Pad Modal */}
-      <Modal isOpen={isOpen} onClose={onClose} size="sm">
+      <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", sm: "sm" }}>
         <ModalOverlay />
-        <ModalContent borderRadius="2xl">
-          <ModalHeader textAlign="center">Enter Amount</ModalHeader>
+        <ModalContent borderRadius={{ base: "none", sm: "2xl" }} m={0} h={{ base: "100vh", sm: "auto" }}>
+          <ModalHeader textAlign="center" fontSize={{ base: "lg", sm: "md" }}>Enter Amount</ModalHeader>
           <ModalCloseButton />
-          <ModalBody p={6}>
+          <ModalBody p={{ base: 4, sm: 6 }}>
             <NumberPad value={amount} onValueChange={setAmount} />
             <HStack mt={6} justify="space-between">
-              <Button variant="ghost" onClick={onClose}>Cancel</Button>
-              <Button colorScheme="blue" onClick={onClose}>Done</Button>
+              <Button variant="ghost" onClick={onClose} size={{ base: "md", sm: "sm" }}>Cancel</Button>
+              <Button colorScheme="blue" onClick={onClose} size={{ base: "md", sm: "sm" }}>Done</Button>
             </HStack>
           </ModalBody>
         </ModalContent>
