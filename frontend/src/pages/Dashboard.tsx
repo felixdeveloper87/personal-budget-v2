@@ -11,6 +11,7 @@ import {
   AccordionIcon,
   VStack,
   HStack,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import TransactionForm from '../components/TransactionForm'
 import SingleRowSummary from '../components/SingleRowSummary'
@@ -70,13 +71,22 @@ export default function Dashboard() {
     loadData()
   }, [loadData])
 
+  const defaultAccordionButtonProps = {
+    px: 4,
+    py: 3,
+    borderRadius: "xl",
+    bg: useColorModeValue("gray.200", "gray.700"),
+    _hover: { bg: useColorModeValue("gray.300", "gray.600") },
+    _expanded: { bg: "blue.500", color: "white" },
+  }
+
   return (
     <Box px={{ base: 4, md: 8, lg: 12 }} py={{ base: 4, md: 8 }}>
       <Accordion defaultIndex={[0, 1, 2, 3, 4]} allowMultiple>
         {/* Transaction Form */}
         <AccordionItem border="none">
           <h2>
-            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+            <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
                 Transaction Form
               </Box>
@@ -91,7 +101,7 @@ export default function Dashboard() {
         {/* Period Navigator */}
         <AccordionItem border="none">
           <h2>
-            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+            <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
                 Period Navigator
               </Box>
@@ -112,7 +122,7 @@ export default function Dashboard() {
         {/* Summary */}
         <AccordionItem border="none">
           <h2>
-            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+            <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
                 Summary
               </Box>
@@ -127,7 +137,7 @@ export default function Dashboard() {
         {/* Charts */}
         <AccordionItem border="none">
           <h2>
-            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+            <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
                 Charts
               </Box>
@@ -144,7 +154,6 @@ export default function Dashboard() {
                   selectedPeriod={selectedPeriod}
                 />
               </Box>
-
               <Box w="full" rounded="2xl" borderWidth="1px" shadow="lg" bg="white" _dark={{ bg: '#111111' }}>
                 <CategoryTabsChart transactions={periodData.transactions} selectedPeriod={selectedPeriod} />
               </Box>
@@ -155,7 +164,7 @@ export default function Dashboard() {
         {/* Transactions List */}
         <AccordionItem border="none">
           <h2>
-            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+            <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
                 Transactions
               </Box>
