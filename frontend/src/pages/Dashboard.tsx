@@ -88,7 +88,7 @@ export default function Dashboard() {
           <h2>
             <AccordionButton {...defaultAccordionButtonProps}>
               <Box flex="1" textAlign="left" fontWeight="semibold">
-                Transaction Form
+                Add Transaction
               </Box>
               <AccordionIcon />
             </AccordionButton>

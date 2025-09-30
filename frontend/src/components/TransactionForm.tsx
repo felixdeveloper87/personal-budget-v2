@@ -25,9 +25,6 @@ import {
   Card,
   CardBody,
   Divider,
-  Tabs,
-  TabList,
-  Tab,
   Badge,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
@@ -184,18 +181,101 @@ export default function TransactionForm({
             {/* Form */}
             <form onSubmit={onSubmit}>
               <VStack spacing={8} align="stretch">
-                {/* Transaction Type */}
-                <Tabs
-                  index={type === 'INCOME' ? 0 : 1}
-                  onChange={(i) => handleTypeChange(i === 0 ? 'INCOME' : 'EXPENSE')}
-                  variant="soft-rounded"
-                  colorScheme={type === 'INCOME' ? 'green' : 'red'}
-                >
-                  <TabList>
-                    <Tab gap={2}><TrendingUp size={18} /> Income</Tab>
-                    <Tab gap={2}><TrendingDown size={18} /> Expense</Tab>
-                  </TabList>
-                </Tabs>
+                {/* Transaction Type Toggle */}
+                <Box>
+                  <Text fontWeight="600" mb={4} color={colors.text.label}>
+                    Transaction Type
+                  </Text>
+                  <Box
+                    position="relative"
+                    bg={colors.border}
+                    borderRadius="2xl"
+                    p={1}
+                    display="inline-block"
+                    boxShadow="inset 0 2px 4px rgba(0, 0, 0, 0.1)"
+                  >
+                    <HStack spacing={0}>
+                      <Button
+                        onClick={() => handleTypeChange('INCOME')}
+                        variant="ghost"
+                        size="lg"
+                        px={8}
+                        py={6}
+                        borderRadius="xl"
+                        bg={type === 'INCOME' ? 'white' : 'transparent'}
+                        color={type === 'INCOME' ? 'green.600' : colors.text.secondary}
+                        fontWeight="600"
+                        fontSize="md"
+                        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                        boxShadow={type === 'INCOME' ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none'}
+                        transform={type === 'INCOME' ? 'scale(1.02)' : 'scale(1)'}
+                        _hover={{
+                          bg: type === 'INCOME' ? 'white' : 'rgba(255, 255, 255, 0.1)',
+                          transform: 'scale(1.05)',
+                        }}
+                        _active={{
+                          transform: 'scale(0.98)',
+                        }}
+                        leftIcon={<TrendingUp size={20} />}
+                        rightIcon={
+                          type === 'INCOME' ? (
+                            <Box
+                              w={2}
+                              h={2}
+                              bg="green.500"
+                              borderRadius="full"
+                              boxShadow="0 0 8px rgba(34, 197, 94, 0.6)"
+                            />
+                          ) : undefined
+                        }
+                      >
+                        Income
+                      </Button>
+                      <Button
+                        onClick={() => handleTypeChange('EXPENSE')}
+                        variant="ghost"
+                        size="lg"
+                        px={8}
+                        py={6}
+                        borderRadius="xl"
+                        bg={type === 'EXPENSE' ? 'white' : 'transparent'}
+                        color={type === 'EXPENSE' ? 'red.600' : colors.text.secondary}
+                        fontWeight="600"
+                        fontSize="md"
+                        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                        boxShadow={type === 'EXPENSE' ? '0 4px 12px rgba(0, 0, 0, 0.15)' : 'none'}
+                        transform={type === 'EXPENSE' ? 'scale(1.02)' : 'scale(1)'}
+                        _hover={{
+                          bg: type === 'EXPENSE' ? 'white' : 'rgba(255, 255, 255, 0.1)',
+                          transform: 'scale(1.05)',
+                        }}
+                        _active={{
+                          transform: 'scale(0.98)',
+                        }}
+                        leftIcon={<TrendingDown size={20} />}
+                        rightIcon={
+                          type === 'EXPENSE' ? (
+                            <Box
+                              w={2}
+                              h={2}
+                              bg="red.500"
+                              borderRadius="full"
+                              boxShadow="0 0 8px rgba(239, 68, 68, 0.6)"
+                            />
+                          ) : undefined
+                        }
+                      >
+                        Expense
+                      </Button>
+                    </HStack>
+                  </Box>
+                  <Text fontSize="sm" color={colors.text.muted} mt={2} textAlign="center">
+                    {type === 'INCOME' 
+                      ? '💰 Money coming into your account' 
+                      : '💸 Money going out of your account'
+                    }
+                  </Text>
+                </Box>
 
                 {/* Date & Amount */}
                 <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={8}>
