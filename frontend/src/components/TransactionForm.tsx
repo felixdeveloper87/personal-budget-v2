@@ -34,25 +34,25 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { createTransaction } from '../api'
 import { Transaction } from '../types'
 import { useAuth } from '../contexts/AuthContext'
-import RecentTransactions from './RecentTransactions'
 import NumberPad from './NumberPad'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Briefcase, 
-  Laptop, 
-  TrendingUp as Investment, 
-  Building, 
-  Home, 
-  Gift, 
-  RotateCcw, 
-  FileText, 
-  ShoppingCart, 
-  Car, 
-  Film, 
-  Heart, 
-  Zap, 
-  ShoppingBag 
+import RecentTransactions from './RecentTransactions'
+import {
+  TrendingUp,
+  TrendingDown,
+  Briefcase,
+  Laptop,
+  TrendingUp as Investment,
+  Building,
+  Home,
+  Gift,
+  RotateCcw,
+  FileText,
+  ShoppingCart,
+  Car,
+  Film,
+  Heart,
+  Zap,
+  ShoppingBag,
 } from 'lucide-react'
 
 const incomeCategories = [
@@ -83,27 +83,25 @@ interface TransactionFormProps {
   transactions: Transaction[]
 }
 
-export default function TransactionForm({ onCreated, onTransactionDeleted, transactions }: TransactionFormProps) {
-  const [date, setDate] = useState<string>(() => new Date().toISOString().slice(0, 10))
+export default function TransactionForm({
+  onCreated,
+  onTransactionDeleted,
+  transactions,
+}: TransactionFormProps) {
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
-  const [category, setCategory] = useState<string>('Salary')
-  const [description, setDescription] = useState<string>('')
-  const [amount, setAmount] = useState<number>(0)
+  const [category, setCategory] = useState('Salary')
+  const [description, setDescription] = useState('')
+  const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  // Memoize expensive operations to prevent recalculation on every render
-  const currentCategories = useMemo(() => {
-    return type === 'INCOME' ? incomeCategories : expenseCategories
-  }, [type])
-
-  const getCategoryIcon = useCallback((categoryName: string) => {
-    const allCategories = [...incomeCategories, ...expenseCategories]
-    const category = allCategories.find(cat => cat.name === categoryName)
-    return category?.icon || FileText
-  }, [])
+  const currentCategories = useMemo(
+    () => (type === 'INCOME' ? incomeCategories : expenseCategories),
+    [type]
+  )
 
   const handleTypeChange = useCallback((newType: 'INCOME' | 'EXPENSE') => {
     setType(newType)
@@ -113,19 +111,16 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
     setDescription('')
   }, [])
 
-  const quickAmounts = useMemo(() => 
-    type === 'INCOME' ? [100, 500, 1000, 2000] : [10, 25, 50, 100],
+  const quickAmounts = useMemo(
+    () => (type === 'INCOME' ? [100, 500, 1000, 2000] : [10, 25, 50, 100]),
     [type]
   )
 
   const quickDates = useMemo(() => {
     const today = new Date()
-    const yesterday = new Date(today)
-    yesterday.setDate(yesterday.getDate() - 1)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    const weekAgo = new Date(today)
-    weekAgo.setDate(weekAgo.getDate() - 7)
+    const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1)
+    const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1)
+    const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7)
     const firstOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
     const lastOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
 
@@ -139,8 +134,8 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
     ]
   }, [])
 
-  const handleQuickDate = useCallback((date: Date) => {
-    setDate(date.toISOString().slice(0, 10))
+  const handleQuickDate = useCallback((d: Date) => {
+    setDate(d.toISOString().slice(0, 10))
   }, [])
 
   const onSubmit = useCallback(async (e: React.FormEvent) => {
@@ -169,6 +164,7 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
       <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
         <CardBody p={{ base: 6, md: 10 }}>
           <VStack spacing={6} align="stretch">
+            {/* Header */}
             <HStack spacing={3} align="center">
               <Heading size="lg" color={colors.text.label}>
                 Add {type === 'INCOME' ? 'Income' : 'Expense'}
@@ -178,11 +174,14 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
               </Badge>
             </HStack>
             <Text fontSize="sm" color={colors.text.secondary}>
-              {type === 'INCOME' ? 'Track money coming into your account' : 'Record money going out of your account'}
+              {type === 'INCOME'
+                ? 'Track money coming into your account'
+                : 'Record money going out of your account'}
             </Text>
 
             <Divider />
 
+            {/* Form */}
             <form onSubmit={onSubmit}>
               <VStack spacing={8} align="stretch">
                 {/* Transaction Type */}
@@ -191,15 +190,10 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
                   onChange={(i) => handleTypeChange(i === 0 ? 'INCOME' : 'EXPENSE')}
                   variant="soft-rounded"
                   colorScheme={type === 'INCOME' ? 'green' : 'red'}
-                  w="full"
                 >
                   <TabList>
-                    <Tab gap={2} px={6} py={3} fontWeight="600">
-                      <TrendingUp size={18} /> Income
-                    </Tab>
-                    <Tab gap={2} px={6} py={3} fontWeight="600">
-                      <TrendingDown size={18} /> Expense
-                    </Tab>
+                    <Tab gap={2}><TrendingUp size={18} /> Income</Tab>
+                    <Tab gap={2}><TrendingDown size={18} /> Expense</Tab>
                   </TabList>
                 </Tabs>
 
@@ -207,9 +201,7 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
                 <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={8}>
                   {/* Date */}
                   <Box>
-                    <Text fontWeight="600" mb={3} color={colors.text.label}>
-                      Date
-                    </Text>
+                    <Text fontWeight="600" mb={3} color={colors.text.label}>Date</Text>
                     <Input
                       type="date"
                       value={date}
@@ -221,33 +213,28 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
                       _focus={{ borderColor: colors.accent }}
                     />
                     <Wrap mt={3} spacing={2}>
-                      {quickDates.map((qd) => {
-                        const isSelected = date === qd.date.toISOString().slice(0, 10)
-                        return (
-                          <WrapItem key={qd.label}>
-                            <Button
-                              size="sm"
-                              variant={isSelected ? 'solid' : 'outline'}
-                              colorScheme="blue"
-                              borderRadius="full"
-                              onClick={() => handleQuickDate(qd.date)}
-                            >
-                              {qd.label}
-                            </Button>
-                          </WrapItem>
-                        )
-                      })}
+                      {quickDates.map((qd) => (
+                        <WrapItem key={qd.label}>
+                          <Button
+                            size="sm"
+                            variant={date === qd.date.toISOString().slice(0, 10) ? 'solid' : 'outline'}
+                            colorScheme="blue"
+                            borderRadius="full"
+                            onClick={() => handleQuickDate(qd.date)}
+                          >
+                            {qd.label}
+                          </Button>
+                        </WrapItem>
+                      ))}
                     </Wrap>
                   </Box>
 
                   {/* Amount */}
                   <Box>
-                    <Text fontWeight="600" mb={3} color={colors.text.label}>
-                      Amount
-                    </Text>
+                    <Text fontWeight="600" mb={3} color={colors.text.label}>Amount</Text>
                     <NumberInput
                       value={amount}
-                      onChange={(_, value) => setAmount(value || 0)}
+                      onChange={(_, val) => setAmount(val || 0)}
                       size="lg"
                       precision={2}
                       step={0.01}
@@ -284,7 +271,7 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
 
                 {/* Category */}
                 <Box>
-                    <Text fontWeight="600" mb={3} color={colors.text.label}>
+                  <Text fontWeight="600" mb={3} color={colors.text.label}>
                     {type === 'INCOME' ? 'Income Category' : 'Expense Category'}
                   </Text>
                   <SimpleGrid columns={{ base: 2, md: 4 }} spacing={3}>
@@ -353,18 +340,14 @@ export default function TransactionForm({ onCreated, onTransactionDeleted, trans
       {/* Number Pad Modal */}
       <Modal isOpen={isOpen} onClose={onClose} size="sm">
         <ModalOverlay />
-        <ModalContent borderRadius="2xl" overflow="hidden">
+        <ModalContent borderRadius="2xl">
           <ModalHeader textAlign="center">Enter Amount</ModalHeader>
           <ModalCloseButton />
           <ModalBody p={6}>
             <NumberPad value={amount} onValueChange={setAmount} />
             <HStack mt={6} justify="space-between">
-              <Button variant="ghost" onClick={onClose}>
-                Cancel
-              </Button>
-              <Button colorScheme="blue" onClick={onClose}>
-                Done
-              </Button>
+              <Button variant="ghost" onClick={onClose}>Cancel</Button>
+              <Button colorScheme="blue" onClick={onClose}>Done</Button>
             </HStack>
           </ModalBody>
         </ModalContent>

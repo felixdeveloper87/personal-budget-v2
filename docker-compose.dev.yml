@@ -1,5 +1,8 @@
 services:
-  # Banco de dados PostgreSQL
+  # Comandos úteis:
+  #   docker compose -f docker-compose.dev.yml up
+  #   docker compose -f docker-compose.dev.yml up -d
+  #   docker compose -f docker-compose.dev.yml down
   db:
     image: postgres:16
     environment:
@@ -15,8 +18,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - app-network
 
   # Backend Spring Boot
+  # ===================
   backend:
     build:
       context: ./backend
@@ -35,8 +41,11 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - app-network
 
   # Frontend React/Vite com Hot Reload
+  # ==================================
   frontend:
     build:
       context: ./frontend
@@ -49,6 +58,13 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   dbdata:
+
+networks:
+  app-network:
+    name: personal-budget-v2-network
+    driver: bridge

@@ -7,6 +7,14 @@ const config: ThemeConfig = {
 
 const theme = extendTheme({
   config,
+  breakpoints: {
+    base: '0px',
+    sm: '480px',
+    md: '768px',
+    lg: '992px',
+    xl: '1280px',
+    '2xl': '1536px',
+  },
   fonts: {
     heading: 'Inter, system-ui, sans-serif',
     body: 'Inter, system-ui, sans-serif',

@@ -1,12 +1,16 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+// Dashboard.tsx
+import { useEffect, useState, useCallback } from 'react'
 import {
   Box,
-  Container,
   Heading,
   Text,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
   VStack,
   HStack,
-  Flex,
 } from '@chakra-ui/react'
 import TransactionForm from '../components/TransactionForm'
 import SingleRowSummary from '../components/SingleRowSummary'
@@ -26,25 +30,11 @@ export default function Dashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
   const { user } = useAuth()
 
-  // Processa dados do períodoo
-  const periodData = usePeriodData(
-    transactions,
-    monthSummary,
-    selectedPeriod,
-    selectedDate
-  )
+  const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
 
-  // Converte valores numéricos do backend - memoized to prevent recreation
   const convertMonthlySummary = useCallback((summary: any): MonthlySummary => {
     if (!summary)
-      return {
-        year: 0,
-        month: 0,
-        totalIncome: 0,
-        totalExpense: 0,
-        balance: 0,
-        byCategory: [],
-      }
+      return { year: 0, month: 0, totalIncome: 0, totalExpense: 0, balance: 0, byCategory: [] }
 
     return {
       year: summary.year || 0,
@@ -61,35 +51,12 @@ export default function Dashboard() {
     }
   }, [])
 
-  // Carrega dados iniciais
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!user?.token) return
-
-    const loadData = async () => {
-      try {
-        const [transactionsData, summaryData] = await Promise.all([
-          listTransactions(user.token),
-          getMonthlySummary(selectedDate, user.token)
-        ])
-        setTransactions(transactionsData)
-        setMonthSummary(convertMonthlySummary(summaryData))
-      } catch (error) {
-        setTransactions([])
-        setMonthSummary(null)
-      }
-    }
-
-    loadData()
-  }, [selectedDate, user?.token, convertMonthlySummary])
-
-  // Funções de atualização - memoized to prevent recreation
-  const refreshData = useCallback(async () => {
-    if (!user?.token) return
-    
     try {
       const [transactionsData, summaryData] = await Promise.all([
         listTransactions(user.token),
-        getMonthlySummary(selectedDate, user.token)
+        getMonthlySummary(selectedDate, user.token),
       ])
       setTransactions(transactionsData)
       setMonthSummary(convertMonthlySummary(summaryData))
@@ -99,117 +66,115 @@ export default function Dashboard() {
     }
   }, [user?.token, selectedDate, convertMonthlySummary])
 
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
   return (
-    <Container
-      maxW={{
-        base: "100%",
-        md: "4xl",
-        lg: "6xl",
-        xl: "7xl",
-        "2xl": "8xl",
-        "3xl": "container.3xl", // novo breakpoint para telas >1800px
-      }}
-      py={{ base: 4, md: 6 }}
-      px={{ base: 4, md: 6 }}
-    >
-      {/* Formulário de transações */}
-      <TransactionForm
-        transactions={transactions}
-        onCreated={refreshData}
-        onTransactionDeleted={refreshData}
-      />
+    <Box px={{ base: 4, md: 8, lg: 12 }} py={{ base: 4, md: 8 }}>
+      <Accordion defaultIndex={[0, 1, 2, 3, 4]} allowMultiple>
+        {/* Transaction Form */}
+        <AccordionItem border="none">
+          <h2>
+            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+              <Box flex="1" textAlign="left" fontWeight="semibold">
+                Transaction Form
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={6}>
+            <TransactionForm transactions={transactions} onCreated={loadData} onTransactionDeleted={loadData} />
+          </AccordionPanel>
+        </AccordionItem>
 
-      {/* Time Period and Navigation */}
-      <Box mt={6}>
-        <PeriodNavigator
-          selectedPeriod={selectedPeriod}
-          selectedDate={selectedDate}
-          onDateChange={setSelectedDate}
-          onPeriodChange={setSelectedPeriod}
-          periodLabel={periodData.label}
-        />
-      </Box>
+        {/* Period Navigator */}
+        <AccordionItem border="none">
+          <h2>
+            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+              <Box flex="1" textAlign="left" fontWeight="semibold">
+                Period Navigator
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={6}>
+            <PeriodNavigator
+              selectedPeriod={selectedPeriod}
+              selectedDate={selectedDate}
+              onDateChange={setSelectedDate}
+              onPeriodChange={setSelectedPeriod}
+              periodLabel={periodData.label}
+            />
+          </AccordionPanel>
+        </AccordionItem>
 
-      {/* Financial Summary - Single Row */}
-      <Box mt={6}>
-        <SingleRowSummary periodData={periodData} />
-      </Box>
+        {/* Summary */}
+        <AccordionItem border="none">
+          <h2>
+            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+              <Box flex="1" textAlign="left" fontWeight="semibold">
+                Summary
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={6}>
+            <SingleRowSummary periodData={periodData} />
+          </AccordionPanel>
+        </AccordionItem>
 
-      {/* Gráficos */}
-      <Flex
-        gap={{ base: 4, md: 6 }}
-        mt={6}
-        direction={{ base: 'column', lg: 'row' }}
-        align="stretch"
-      >
-        <Box
-          flex="1"
-          p={{ base: 6, md: 8 }}
-          rounded="2xl"
-          borderWidth="1px"
-          borderColor="gray.200"
-          bg="white"
-          shadow="lg"
-          _dark={{
-            bg: "#111111",
-            borderColor: "gray.800",
-          }}
-        >
-          <SummaryChart
-            income={periodData.income}
-            expense={periodData.expense}
-            balance={periodData.balance}
-            selectedPeriod={selectedPeriod}
-          />
-        </Box>
+        {/* Charts */}
+        <AccordionItem border="none">
+          <h2>
+            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+              <Box flex="1" textAlign="left" fontWeight="semibold">
+                Charts
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={6}>
+            <VStack spacing={6}>
+              <Box w="full" p={6} rounded="2xl" borderWidth="1px" shadow="lg" bg="white" _dark={{ bg: '#111111' }}>
+                <SummaryChart
+                  income={periodData.income}
+                  expense={periodData.expense}
+                  balance={periodData.balance}
+                  selectedPeriod={selectedPeriod}
+                />
+              </Box>
 
-        <Box
-          flex="1"
-          rounded="2xl"
-          borderWidth="1px"
-          borderColor="gray.200"
-          bg="white"
-          shadow="lg"
-          overflow="hidden"
-          _dark={{
-            bg: "#111111",
-            borderColor: "gray.800",
-          }}
-        >
-          <CategoryTabsChart
-            transactions={periodData.transactions}
-            selectedPeriod={selectedPeriod}
-          />
-        </Box>
-      </Flex>
+              <Box w="full" rounded="2xl" borderWidth="1px" shadow="lg" bg="white" _dark={{ bg: '#111111' }}>
+                <CategoryTabsChart transactions={periodData.transactions} selectedPeriod={selectedPeriod} />
+              </Box>
+            </VStack>
+          </AccordionPanel>
+        </AccordionItem>
 
-      {/* Lista de transações */}
-      <Box 
-        mt={6} 
-        p={{ base: 6, md: 8 }} 
-        rounded="2xl" 
-        borderWidth="1px" 
-        borderColor="gray.200"
-        bg="white"
-        shadow="lg"
-        _dark={{
-          bg: "#111111",
-          borderColor: "gray.800",
-        }}
-      >
-        <HStack justify="space-between" mb={6} wrap="wrap" gap={2}>
-          <Heading size={{ base: 'md', md: 'lg' }} color="gray.700" _dark={{ color: "gray.200" }}>
-            Transactions ({selectedPeriod})
-          </Heading>
-          <Text fontSize="sm" color="gray.500" _dark={{ color: "gray.400" }}>
-            {periodData.transactions.length} transactions
-          </Text>
-        </HStack>
-        <TransactionList
-          transactions={periodData.transactions}
-          onTransactionDeleted={refreshData}
-        />
-      </Box>
-    </Container>
+        {/* Transactions List */}
+        <AccordionItem border="none">
+          <h2>
+            <AccordionButton px={4} py={3} borderRadius="xl" _expanded={{ bg: 'blue.500', color: 'white' }}>
+              <Box flex="1" textAlign="left" fontWeight="semibold">
+                Transactions
+              </Box>
+              <AccordionIcon />
+            </AccordionButton>
+          </h2>
+          <AccordionPanel pb={6}>
+            <Box p={4} rounded="2xl" borderWidth="1px" shadow="lg" bg="white" _dark={{ bg: '#111111' }}>
+              <HStack justify="space-between" mb={6}>
+                <Heading size="md">Transactions ({selectedPeriod})</Heading>
+                <Text fontSize="sm" color="gray.500" _dark={{ color: 'gray.400' }}>
+                  {periodData.transactions.length} transactions
+                </Text>
+              </HStack>
+              <TransactionList transactions={periodData.transactions} onTransactionDeleted={loadData} />
+            </Box>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+    </Box>
   )
 }
