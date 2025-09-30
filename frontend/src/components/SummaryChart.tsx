@@ -21,8 +21,12 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
   const incomePercentage = total > 0 ? (income / total) * 100 : 0
   const expensePercentage = total > 0 ? (expense / total) * 100 : 0
 
+  const textPrimary = useColorModeValue("gray.700", "gray.300")
+  const textSecondary = useColorModeValue("gray.500", "gray.400")
+
   return (
     <VStack spacing={{ base: 4, md: 6 }} align="stretch">
+      {/* Header */}
       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
         <Text 
           fontSize={{ base: "md", md: "lg" }} 
@@ -43,15 +47,12 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
 
       {/* Income vs Expense Bars */}
       <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+        {/* Income */}
         <Box>
-          <HStack justify="space-between" mb={2} wrap="wrap" gap={2}>
+          <HStack justify="space-between" mb={2}>
             <HStack spacing={2}>
               <Box w={3} h={3} bg="green.500" borderRadius="sm" />
-              <Text 
-                fontSize="sm" 
-                fontWeight="medium" 
-                color={useColorModeValue("gray.700", "gray.300")}
-              >
+              <Text fontSize="sm" fontWeight="medium" color={textPrimary}>
                 Income
               </Text>
             </HStack>
@@ -62,24 +63,21 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
           <Progress
             value={incomePercentage}
             colorScheme="green"
-            size={{ base: "md", md: "lg" }}
+            size="md"
             borderRadius="md"
             bg={useColorModeValue("gray.100", "gray.700")}
           />
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")} mt={1}>
+          <Text fontSize="xs" color={textSecondary} mt={1}>
             {incomePercentage.toFixed(1)}% of total
           </Text>
         </Box>
 
+        {/* Expenses */}
         <Box>
-          <HStack justify="space-between" mb={2} wrap="wrap" gap={2}>
+          <HStack justify="space-between" mb={2}>
             <HStack spacing={2}>
               <Box w={3} h={3} bg="red.500" borderRadius="sm" />
-              <Text 
-                fontSize="sm" 
-                fontWeight="medium" 
-                color={useColorModeValue("gray.700", "gray.300")}
-              >
+              <Text fontSize="sm" fontWeight="medium" color={textPrimary}>
                 Expenses
               </Text>
             </HStack>
@@ -90,11 +88,11 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
           <Progress
             value={expensePercentage}
             colorScheme="red"
-            size={{ base: "md", md: "lg" }}
+            size="md"
             borderRadius="md"
             bg={useColorModeValue("gray.100", "gray.700")}
           />
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")} mt={1}>
+          <Text fontSize="xs" color={textSecondary} mt={1}>
             {expensePercentage.toFixed(1)}% of total
           </Text>
         </Box>
@@ -115,7 +113,7 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
           : useColorModeValue("red.200", "red.700")}
       >
         <VStack spacing={2}>
-          <Text fontSize="sm" fontWeight="semibold" color={useColorModeValue("gray.700", "gray.300")}>
+          <Text fontSize="sm" fontWeight="semibold" color={textPrimary}>
             Net Balance
           </Text>
           <Text 
@@ -125,36 +123,13 @@ export default function SummaryChart({ income, expense, balance, selectedPeriod 
           >
             £{balance.toFixed(2)}
           </Text>
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")} textAlign="center">
+          <Text fontSize="xs" color={textSecondary} textAlign="center">
             {balance >= 0 
               ? `You have £${balance.toFixed(2)} more income than expenses`
-              : `You have £${Math.abs(balance).toFixed(2)} more expenses than income`
-            }
+              : `You have £${Math.abs(balance).toFixed(2)} more expenses than income`}
           </Text>
         </VStack>
       </Box>
-
-      {/* Quick Stats */}
-      <HStack justify="space-around" pt={2} wrap="wrap" gap={2}>
-        <VStack spacing={1} minW="60px">
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")}>Income</Text>
-          <Text fontSize="sm" fontWeight="semibold" color="green.600">
-            £{income.toFixed(2)}
-          </Text>
-        </VStack>
-        <VStack spacing={1} minW="60px">
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")}>Expenses</Text>
-          <Text fontSize="sm" fontWeight="semibold" color="red.600">
-            £{expense.toFixed(2)}
-          </Text>
-        </VStack>
-        <VStack spacing={1} minW="60px">
-          <Text fontSize="xs" color={useColorModeValue("gray.500", "gray.400")}>Balance</Text>
-          <Text fontSize="sm" fontWeight="semibold" color={balance >= 0 ? "green.600" : "red.600"}>
-            £{balance.toFixed(2)}
-          </Text>
-        </VStack>
-      </HStack>
     </VStack>
   )
 }

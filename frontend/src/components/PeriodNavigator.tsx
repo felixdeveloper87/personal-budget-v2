@@ -65,6 +65,19 @@ export default function PeriodNavigator({
     { type: 'year' as PeriodType, label: 'Year', icon: BarChart3 },
   ]
 
+  // 🔥 Formata o rótulo de acordo com o período selecionado
+  const formatLabel = () => {
+    if (selectedPeriod === 'month') {
+      // Exibe abreviação do mês + ano (ex.: "Jan 2025")
+      return selectedDate.toLocaleString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      })
+      .toUpperCase()
+    }
+    return periodLabel
+  }
+
   return (
     <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
       <CardBody p={{ base: 4, md: 6 }}>
@@ -186,7 +199,7 @@ export default function PeriodNavigator({
                 textAlign="center"
                 flex="1"
               >
-                {periodLabel}
+                {formatLabel()}
               </Text>
 
               <Button

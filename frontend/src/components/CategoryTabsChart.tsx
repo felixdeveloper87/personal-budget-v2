@@ -28,9 +28,9 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.300')
   const labelColor = useColorModeValue('gray.700', 'white')
-  const tabBg = useColorModeValue('gray.50', '#1a1a1a')
   const tabSelectedBg = useColorModeValue('white', '#111111')
   const tabBorder = useColorModeValue('gray.200', 'gray.800')
+  const iconColor = textColor
 
   return (
     <Card bg={cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={borderColor} h="full">
@@ -39,7 +39,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
           {/* Header */}
           <Box p={{ base: 4, md: 6 }} borderBottom="1px" borderColor={borderColor}>
             <HStack spacing={3} align="center">
-              <BarChart3 size={20} color={useColorModeValue('gray.600', 'gray.300')} />
+              <BarChart3 size={20} color={iconColor} />
               <Text fontSize="lg" fontWeight="600" color={labelColor}>
                 Category Analysis
               </Text>
@@ -53,19 +53,25 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
           </Box>
 
           {/* Tabs */}
-          <Tabs variant="enclosed" colorScheme="blue" defaultIndex={0} flex="1" display="flex" flexDirection="column">
+          <Tabs 
+            variant="enclosed" 
+            colorScheme="blue" 
+            defaultIndex={0} 
+            flex="1" 
+            display="flex" 
+            flexDirection="column"
+          >
             <TabList borderBottom="1px" borderColor={borderColor}>
-              <Tab 
+              <Tab
                 _selected={{ 
                   bg: tabSelectedBg, 
                   borderColor: tabBorder,
                   borderBottomColor: tabSelectedBg,
                   fontWeight: '600',
-                  color: 'blue.500'
+                  color: 'red.500'
                 }}
                 borderRadius="0"
-                px={6}
-                py={4}
+                p={4}
                 fontSize="sm"
               >
                 <HStack spacing={2}>
@@ -73,7 +79,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
                   <Text>Expenses</Text>
                 </HStack>
               </Tab>
-              <Tab 
+              <Tab
                 _selected={{ 
                   bg: tabSelectedBg, 
                   borderColor: tabBorder,
@@ -82,8 +88,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
                   color: 'green.500'
                 }}
                 borderRadius="0"
-                px={6}
-                py={4}
+                p={4}
                 fontSize="sm"
               >
                 <HStack spacing={2}>
@@ -94,7 +99,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
             </TabList>
 
             <TabPanels flex="1" display="flex" flexDirection="column">
-              <TabPanel p={0} flex="1" display="flex" flexDirection="column">
+              <TabPanel p={0} flex="1">
                 <Box p={{ base: 4, md: 6 }} flex="1">
                   <ExpenseChart
                     transactions={transactions}
@@ -102,7 +107,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
                   />
                 </Box>
               </TabPanel>
-              <TabPanel p={0} flex="1" display="flex" flexDirection="column">
+              <TabPanel p={0} flex="1">
                 <Box p={{ base: 4, md: 6 }} flex="1">
                   <IncomeChart
                     transactions={transactions}

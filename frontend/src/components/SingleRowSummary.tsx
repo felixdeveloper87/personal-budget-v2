@@ -1,7 +1,6 @@
 import { 
   SimpleGrid, 
   Stat, 
-  StatLabel, 
   StatNumber, 
   StatHelpText,
   useColorModeValue,
@@ -24,12 +23,12 @@ interface SingleRowSummaryProps {
 export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) {
   const { transactions, income, expense, balance, label } = periodData
 
-  // Calculate additional statistics
+  // Calcula qtd de transações de cada tipo
   const { incomeTransactions, expenseTransactions } = useMemo(() => {
-    const incomeTransactions = transactions.filter(t => t.type === 'INCOME').length
-    const expenseTransactions = transactions.filter(t => t.type === 'EXPENSE').length
-    
-    return { incomeTransactions, expenseTransactions }
+    return {
+      incomeTransactions: transactions.filter(t => t.type === 'INCOME').length,
+      expenseTransactions: transactions.filter(t => t.type === 'EXPENSE').length
+    }
   }, [transactions])
 
   const cardBg = useColorModeValue('white', '#111111')
@@ -40,7 +39,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
   const stats = [
     {
       label: 'Total Transactions',
-      value: transactions.length,
       icon: BarChart3,
       color: 'blue.500',
       bgColor: 'blue.50',
@@ -50,7 +48,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
     },
     {
       label: 'Income',
-      value: income,
       icon: TrendingUp,
       color: 'green.500',
       bgColor: 'green.50',
@@ -60,7 +57,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
     },
     {
       label: 'Expenses',
-      value: expense,
       icon: TrendingDown,
       color: 'red.500',
       bgColor: 'red.50',
@@ -70,7 +66,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
     },
     {
       label: 'Balance',
-      value: balance,
       icon: DollarSign,
       color: balance >= 0 ? 'green.500' : 'red.500',
       bgColor: balance >= 0 ? 'green.50' : 'red.50',
@@ -126,11 +121,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
                         </Text>
                       </HStack>
                       <Stat textAlign="center">
-                        <StatNumber 
-                          fontSize="2xl" 
-                          fontWeight="700" 
-                          color={stat.color}
-                        >
+                        <StatNumber fontSize="2xl" fontWeight="700" color={stat.color}>
                           {stat.displayValue}
                         </StatNumber>
                         <StatHelpText fontSize="xs" color={textColor}>
