@@ -98,10 +98,16 @@ export default function Dashboard() {
     px: 4,
     py: 3,
     borderRadius: 'xl',
-    bg: useColorModeValue('gray.200', 'gray.700'),
-    _hover: { bg: useColorModeValue('gray.300', 'gray.600') },
-    _expanded: { bg: 'blue.500', color: 'white' },
+    bg: useColorModeValue('gray.400', 'gray.700'),
+    color: useColorModeValue('white', 'gray.100'),
+    fontWeight: 'semibold',
+    _hover: { bg: useColorModeValue('gray.500', 'gray.600') },
+    _expanded: {
+      bg: useColorModeValue('blue.400', 'blue.700'),
+      color: useColorModeValue('white', 'gray.100')
+    },
   }
+
 
   return (
     <Box px={{ base: 4, md: 8, lg: 12 }} py={{ base: 4, md: 8 }}>

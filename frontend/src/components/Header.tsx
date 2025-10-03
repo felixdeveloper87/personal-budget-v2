@@ -32,13 +32,13 @@ interface HeaderProps {
 export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const { user, logout } = useAuth()
-  const { filters, setFilters } = useSearch() // contexto de busca
+  const { filters, setFilters } = useSearch()
 
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   const bg = useColorModeValue(
-    'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 50%, #8b5cf6 100%)',
-    'linear-gradient(135deg, #000000 0%, #111111 50%, #1a1a1a 100%)'
+    'linear-gradient(135deg, #095b81ff 0%, #316dccff 50%, #4b698cff 100%)',
+    'linear-gradient(135deg, #131313ff 0%, #212121ff 50%, #373737ff 100%)'
   )
 
   const textColor = 'white'
@@ -49,9 +49,14 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
       {/* Main Header */}
       <Box as="header" bg={bg} position="sticky" top={0} zIndex={1000}>
         <Container maxW="100%" px={{ base: 4, md: 6, lg: 10 }}>
-          <Flex h={{ base: 20, sm: 24, md: 28, lg: 32 }} align="center" justify="space-between" gap={3}>
+          <Flex
+            h={{ base: 20, sm: 24, md: 28, lg: 32 }}
+            align="center"
+            justify="space-between"
+            gap={3}
+          >
             {/* Logo + Title */}
-            <HStack spacing={{ base: 4, sm: 6, md: 8 }} flex="1" minW={0}>
+            <HStack spacing={{ base: 4, sm: 6, md: 8 }} flex="1" minW={0} ml={{ base: 2, sm: 4, md: 8 }}>
               <Box
                 as="button"
                 w={{ base: 12, sm: 14, md: 18 }}
@@ -61,7 +66,6 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                position="relative"
                 transition="all 0.3s ease"
                 _hover={{ transform: 'scale(1.1) rotate(2deg)', cursor: 'pointer' }}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
@@ -77,8 +81,14 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                   sx={{
                     animation: 'logoPulse 4s infinite ease-in-out',
                     '@keyframes logoPulse': {
-                      '0%, 100%': { transform: 'scale(1)', textShadow: '0 0 10px rgba(255,255,255,0.5)' },
-                      '50%': { transform: 'scale(1.08)', textShadow: '0 0 20px rgba(255,255,255,0.9)' },
+                      '0%, 100%': {
+                        transform: 'scale(1)',
+                        textShadow: '0 0 10px rgba(255,255,255,0.5)',
+                      },
+                      '50%': {
+                        transform: 'scale(1.08)',
+                        textShadow: '0 0 20px rgba(255,255,255,0.9)',
+                      },
                     },
                   }}
                 >
@@ -86,7 +96,12 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                 </Text>
               </Box>
 
-              <VStack spacing={0} align="start" minW={0} display={{ base: 'none', sm: 'flex' }}>
+              <VStack
+                spacing={0}
+                align="start"
+                minW={0}
+                display={{ base: 'none', sm: 'flex' }}
+              >
                 <Text
                   fontSize={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }}
                   fontWeight="bold"
@@ -95,15 +110,43 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                 >
                   Personal Budget
                 </Text>
-                <Text fontSize={{ base: 'xs', sm: 'sm', md: 'md' }} color={secondaryTextColor} noOfLines={1}>
+                <Text
+                  fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
+                  color={secondaryTextColor}
+                  noOfLines={1}
+                >
                   Smart Financial Management
                 </Text>
               </VStack>
+
+              {/* Navegação extra - só desktop */}
+              <HStack
+                spacing={6}
+                ml={10}
+                display={{ base: 'none', md: 'flex' }}
+                fontWeight="500"
+                color="white"
+              >
+                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
+                  Dashboard
+                </Button>
+                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
+                  Reports
+                </Button>
+                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
+                  Goals
+                </Button>
+              </HStack>
             </HStack>
 
             {/* Botão Filters (desktop) */}
             {user && (
-              <Box flex="2" maxW="400px" display={{ base: 'none', md: 'flex' }} justifyContent="center">
+              <Box
+                flex="2"
+                maxW="400px"
+                display={{ base: 'none', md: 'flex' }}
+                justifyContent="center"
+              >
                 <Button
                   onClick={onSearchOpen}
                   leftIcon={<SearchIcon />}
@@ -149,7 +192,11 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                   onClick={toggleColorMode}
                   variant="ghost"
                   size={{ base: 'sm', sm: 'md' }}
-                  color="white"
+                  fontSize={{ base: '18px', md: '22px', lg: '26px' }}
+                  color={useColorModeValue('gray.800', 'white')}
+                  _hover={{
+                    bg: useColorModeValue('gray.100', 'gray.700'),
+                  }}
                 />
               </Tooltip>
 
