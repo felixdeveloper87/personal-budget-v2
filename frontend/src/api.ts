@@ -47,3 +47,21 @@ export async function getMonthlySummary(date: Date, token: string): Promise<Mont
   return data
 }
 
+export async function searchTransactions(
+  filters: {
+    text?: string
+    type?: 'income' | 'expense'
+    category?: string
+    startDate?: string
+    endDate?: string
+  },
+  token: string
+): Promise<Transaction[]> {
+  const { data } = await api.get('/transactions/search', {
+    params: filters,
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  return data
+}
+
+

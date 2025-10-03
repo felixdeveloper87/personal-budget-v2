@@ -15,11 +15,32 @@ public class MonthlySummary {
         public String category;
         public BigDecimal income;
         public BigDecimal expense;
+
         public CategoryAggregate(String category, BigDecimal income, BigDecimal expense) {
             this.category = category;
             this.income = income;
             this.expense = expense;
         }
+
+        @Override
+        public String toString() {
+            return "CategoryAggregate{" +
+                    "category='" + category + '\'' +
+                    ", income=" + income +
+                    ", expense=" + expense +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "MonthlySummary{" +
+                "year=" + year +
+                ", month=" + month +
+                ", totalIncome=" + totalIncome +
+                ", totalExpense=" + totalExpense +
+                ", balance=" + balance +
+                ", byCategory=" + byCategory +
+                '}';
     }
 }
-

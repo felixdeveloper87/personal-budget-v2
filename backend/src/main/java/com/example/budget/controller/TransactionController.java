@@ -1,6 +1,7 @@
 package com.example.budget.controller;
 
 import com.example.budget.dto.MonthlySummary;
+import com.example.budget.dto.TransactionSearchDTO;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.service.TransactionService;
@@ -54,4 +55,28 @@ public class TransactionController {
             throw e;
         }
     }
+
+    @GetMapping("/transactions/search")
+    public List<TransactionSearchDTO> searchTransactions(
+            @RequestParam(required = false) String text,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            Authentication authentication) {
+
+        User user = (User) authentication.getPrincipal();
+        List<Transaction> results = service.searchTransactions(text, type, category, startDate, endDate, user);
+
+        return results.stream()
+                .map(tx -> new TransactionSearchDTO(
+                        tx.getId(),
+                        tx.getDescription(),
+                        tx.getType(),
+                        tx.getCategory(),
+                        tx.getAmount(),
+                        tx.getDate()))
+                .toList();
+    }
+
 }

@@ -23,7 +23,7 @@ import java.util.Collections;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
 
@@ -33,19 +33,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                  HttpServletResponse response, 
-                                  FilterChain filterChain) throws ServletException, IOException {
-        
+    protected void doFilterInternal(HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
+
         // Skip JWT authentication for auth endpoints
         String requestPath = request.getRequestURI();
         if (requestPath.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
             return;
         }
-        
+
         final String authHeader = request.getHeader("Authorization");
-        
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -53,23 +53,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String token = jwtUtil.extractTokenFromHeader(authHeader);
-            
+
             if (token != null && jwtUtil.validateToken(token)) {
                 String email = jwtUtil.getEmailFromToken(token);
-                
+
                 if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     User user = userRepository.findByEmail(email).orElse(null);
-                    
+
                     if (user != null) {
-                        UsernamePasswordAuthenticationToken authToken = 
-                            new UsernamePasswordAuthenticationToken(
-                                user, 
-                                null, 
-                                new ArrayList<>()
-                            );
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                user, // pode ser o objeto User
+                                null,
+                                Collections.emptyList() // ✅ lista vazia de authorities
+                        );
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
+                        logger.info("Authenticated user: {}", email);
                     }
+
                 }
             }
         } catch (Exception e) {

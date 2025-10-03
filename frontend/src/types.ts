@@ -1,14 +1,20 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
 
+// Transação padrão
 export interface Transaction {
-  id?: number
-  date: string // ISO date
+  id?: number // opcional apenas na criação
+  date: string // ISO date (yyyy-MM-dd)
   type: TransactionType
   category: string
-  description?: string
+  description: string
   amount: number
+  userId?: number // opcional porque o backend não retorna no DTO de busca
 }
 
+// DTO do /transactions/search (não retorna userId)
+export type TransactionSearch = Omit<Transaction, 'userId'>
+
+// Resumo mensal
 export interface MonthlySummary {
   year: number
   month: number // 1-12
@@ -18,13 +24,15 @@ export interface MonthlySummary {
   byCategory: { category: string; income: number; expense: number }[]
 }
 
+// Usuário autenticado (AuthResponse do backend)
 export interface User {
-  userId: number
+  id: number
   name: string
   email: string
   token: string
 }
 
+// Auth Requests
 export interface LoginRequest {
   email: string
   password: string
@@ -35,4 +43,3 @@ export interface RegisterRequest {
   email: string
   password: string
 }
-

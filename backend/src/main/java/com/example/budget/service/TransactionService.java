@@ -5,7 +5,11 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.repository.TransactionRepository;
+
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import java.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,12 +36,12 @@ public class TransactionService {
 
     public void delete(Long id, User user) {
         Transaction transaction = repository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Transaction not found"));
-        
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
         if (!transaction.getUser().getId().equals(user.getId())) {
             throw new RuntimeException("Access denied");
         }
-        
+
         repository.deleteById(id);
     }
 
@@ -50,12 +54,13 @@ public class TransactionService {
         BigDecimal expense = repository.sumByDateBetweenAndTypeAndUser(start, end, TransactionType.EXPENSE, user);
         BigDecimal balance = income.subtract(expense);
 
-        List<MonthlySummary.CategoryAggregate> byCategory = repository.sumByCategoryBetweenAndUser(start, end, user).stream()
+        List<MonthlySummary.CategoryAggregate> byCategory = repository.sumByCategoryBetweenAndUser(start, end, user)
+                .stream()
                 .map(row -> new MonthlySummary.CategoryAggregate(
                         (String) row[0],
                         (BigDecimal) row[1],
-                        (BigDecimal) row[2]
-                )).collect(Collectors.toList());
+                        (BigDecimal) row[2]))
+                .collect(Collectors.toList());
 
         MonthlySummary s = new MonthlySummary();
         s.year = year;
@@ -66,5 +71,66 @@ public class TransactionService {
         s.byCategory = byCategory;
         return s;
     }
-}
 
+    public List<Transaction> searchTransactions(
+            String text,
+            String type,
+            String category,
+            String startDate,
+            String endDate,
+            User user) {
+        final LocalDate start;
+        final LocalDate end;
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        if (StringUtils.hasText(startDate)) {
+            start = LocalDate.parse(startDate, formatter);
+        } else {
+            start = null;
+        }
+        if (StringUtils.hasText(endDate)) {
+            end = LocalDate.parse(endDate, formatter);
+        } else {
+            end = null;
+        }
+
+        final TransactionType txType;
+        if ("income".equalsIgnoreCase(type)) {
+            txType = TransactionType.INCOME;
+        } else if ("expense".equalsIgnoreCase(type)) {
+            txType = TransactionType.EXPENSE;
+        } else {
+            txType = null;
+        }
+
+        Specification<Transaction> spec = (root, query, cb) -> cb.conjunction();
+
+        // sempre restringe ao usuário logado
+        spec = spec.and((root, query, cb) -> cb.equal(root.get("user"), user));
+
+        if (StringUtils.hasText(text)) {
+            String likeText = "%" + text.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("description")), likeText));
+        }
+
+        if (txType != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("type"), txType));
+        }
+
+        if (StringUtils.hasText(category)) {
+            String likeCategory = "%" + category.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("category")), likeCategory));
+        }
+
+        if (start != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("date"), start));
+        }
+
+        if (end != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("date"), end));
+        }
+
+        return repository.findAll(spec);
+    }
+}
