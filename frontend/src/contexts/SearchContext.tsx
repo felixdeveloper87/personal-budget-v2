@@ -1,9 +1,9 @@
 import { createContext, useContext, useState, ReactNode } from 'react'
-import { Transaction, User } from '../types'
+import { Transaction } from '../types'
 import { searchTransactions } from '../api'
 import { useAuth } from './AuthContext'
 
-interface SearchFilters {
+export interface SearchFilters {
   text?: string
   type?: 'income' | 'expense'
   category?: string
