@@ -1,10 +1,6 @@
-import DashboardSection from '../components/DashboardSection'
 import { VStack } from '@chakra-ui/react'
-import { ChartCard } from '../components/cards'
-import SummaryChart from '../components/SummaryChart'
-import CategoryTabsChart from '../components/CategoryTabsChart'
+import { DashboardSection, ChartCard, SummaryChart, CategoryTabsChart, PeriodType } from '../components'
 import { Transaction } from '../types'
-import { PeriodType } from '../components/PeriodNavigator'
 
 interface ChartsSectionProps {
   income: number

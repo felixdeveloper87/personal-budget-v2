@@ -14,9 +14,9 @@ import {
   Heading,
 } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
-import { Transaction } from '../types'
-import { deleteTransaction } from '../api'
-import { useAuth } from '../contexts/AuthContext'
+import { Transaction } from '../../types'
+import { deleteTransaction } from '../../api'
+import { useAuth } from '../../contexts/AuthContext'
 import { useMemo, useCallback } from 'react'
 
 interface TransactionListProps {

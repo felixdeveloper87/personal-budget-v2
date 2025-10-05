@@ -20,9 +20,9 @@ import {
 } from '@chakra-ui/react'
 import { SunIcon, MoonIcon, SearchIcon } from '@chakra-ui/icons'
 import { SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-import { useAuth } from '../contexts/AuthContext'
-import { useSearch } from '../contexts/SearchContext'
-import SearchModal from './SearchModal'
+import { useAuth } from '../../contexts/AuthContext'
+import { useSearch } from '../../contexts/SearchContext'
+import SearchModal from '../ui/SearchModal'
 
 interface HeaderProps {
   onOpenSettings?: () => void
@@ -128,7 +128,7 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                 color="white"
               >
                 <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
-                  Transactions
+                  Dashboard
                 </Button>
                 <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
                   Reports
@@ -242,7 +242,7 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
         <SearchModal
           isOpen={isSearchOpen}
           onClose={onSearchClose}
-          onSearch={(filters) => {
+          onSearch={(filters: any) => {
             setFilters({
               ...filters,
               type: filters.type === null ? undefined : filters.type,

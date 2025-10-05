@@ -1,8 +1,8 @@
 import { Box, Flex, useDisclosure } from '@chakra-ui/react'
 import { useState } from 'react'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 import Header from './Header'
-import AuthHeader from './AuthHeader'
+import AuthHeader from '../auth/AuthHeader'
 import Footer from './Footer'
 
 interface LayoutProps {

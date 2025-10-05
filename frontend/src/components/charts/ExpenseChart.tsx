@@ -1,14 +1,14 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue } from '@chakra-ui/react'
-import { Transaction } from '../types'
-import CategoryModal from './CategoryModal'
+import { Transaction } from '../../types'
+import CategoryModal from '../ui/CategoryModal'
 import { useMemo } from 'react'
 
-interface IncomeChartProps {
+interface ExpenseChartProps {
   transactions: Transaction[]
   selectedPeriod: string
 }
 
-export default function IncomeChart({ transactions, selectedPeriod }: IncomeChartProps) {
+export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const progressBg = useColorModeValue("gray.100", "gray.800")
   const borderColor = useColorModeValue("gray.200", "gray.800")
@@ -16,12 +16,12 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const labelColor = useColorModeValue("gray.700", "gray.300")
   
   // Memoize expensive calculations to prevent recalculation on every render
-  const { incomeTransactions, sortedCategories, totalIncome } = useMemo(() => {
-    // Filter only income transactions
-    const incomeTransactions = transactions.filter(t => t.type === 'INCOME')
+  const { expenseTransactions, sortedCategories, totalExpenses } = useMemo(() => {
+    // Filter only expense transactions
+    const expenseTransactions = transactions.filter(t => t.type === 'EXPENSE')
     
     // Group by category and calculate totals
-    const categoryTotals = incomeTransactions.reduce((acc, transaction) => {
+    const categoryTotals = expenseTransactions.reduce((acc, transaction) => {
       const category = transaction.category
       if (!acc[category]) {
         acc[category] = 0
@@ -35,22 +35,22 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       .map(([category, amount]) => ({ category, amount }))
       .sort((a, b) => b.amount - a.amount)
 
-    const totalIncome = sortedCategories.reduce((sum, cat) => sum + cat.amount, 0)
+    const totalExpenses = sortedCategories.reduce((sum, cat) => sum + cat.amount, 0)
     
-    return { incomeTransactions, sortedCategories, totalIncome }
+    return { expenseTransactions, sortedCategories, totalExpenses }
   }, [transactions])
 
   // Category colors
   const categoryColors = [
-    'green.500', 'emerald.500', 'teal.500', 'cyan.500', 
-    'blue.500', 'indigo.500', 'purple.500', 'violet.500'
+    'red.500', 'orange.500', 'yellow.500', 'green.500', 
+    'teal.500', 'blue.500', 'purple.500', 'pink.500'
   ]
 
   if (sortedCategories.length === 0) {
     return (
       <Box p={6} textAlign="center" color="gray.500">
-        <Text fontSize="lg" mb={2}>No income found</Text>
-        <Text fontSize="sm">Add some income transactions to see the breakdown</Text>
+        <Text fontSize="lg" mb={2}>No expenses found</Text>
+        <Text fontSize="sm">Add some expense transactions to see the breakdown</Text>
       </Box>
     )
   }
@@ -59,17 +59,17 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
     <VStack spacing={4} align="stretch">
       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
         <Text fontSize="lg" fontWeight="semibold" color="gray.800">
-          Income by Category
+          Expenses by Category
         </Text>
         <HStack spacing={2}>
-          <Badge colorScheme="green" fontSize="sm" px={2} py={1}>
+          <Badge colorScheme="red" fontSize="sm" px={2} py={1}>
             {sortedCategories.length} categories
           </Badge>
           {sortedCategories.length > 0 && (
             <Button
               size="sm"
               variant="outline"
-              colorScheme="green"
+              colorScheme="red"
               onClick={onOpen}
             >
               Show All
@@ -80,7 +80,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
 
       <VStack spacing={3} align="stretch">
         {sortedCategories.slice(0, 5).map(({ category, amount }, index) => {
-          const percentage = totalIncome > 0 ? (amount / totalIncome) * 100 : 0
+          const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
           const color = categoryColors[index % categoryColors.length]
           
           return (
@@ -122,10 +122,10 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       <Box pt={2} borderTop="1px solid" borderColor={borderColor}>
         <HStack justify="space-between">
           <Text fontSize="sm" fontWeight="semibold" color={labelColor}>
-            Total Income
+            Total Expenses
           </Text>
-          <Text fontSize="lg" fontWeight="bold" color="green.600">
-            £{totalIncome.toFixed(2)}
+          <Text fontSize="lg" fontWeight="bold" color="red.600">
+            £{totalExpenses.toFixed(2)}
           </Text>
         </HStack>
       </Box>
@@ -135,7 +135,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         isOpen={isOpen}
         onClose={onClose}
         transactions={transactions}
-        type="INCOME"
+        type="EXPENSE"
         selectedPeriod={selectedPeriod}
       />
     </VStack>

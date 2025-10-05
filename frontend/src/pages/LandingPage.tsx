@@ -16,8 +16,7 @@ import {
   CalendarIcon,
   AddIcon
 } from '@chakra-ui/icons'
-import Header from '../components/Header'
-import Footer from '../components/Footer'
+import { Header, Footer } from '../components'
 
 const MotionBox = motion.create(Box)
 const MotionButton = motion.create(Button)

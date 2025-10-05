@@ -1,9 +1,8 @@
 import { Box, Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
-import AuthPage from './components/AuthPage'
+import { AuthPage, Layout } from './components'
 import LandingPage from './pages/LandingPage'
-import Layout from './components/Layout'
 import { useState, useEffect } from 'react'
 
 function AppContent() {

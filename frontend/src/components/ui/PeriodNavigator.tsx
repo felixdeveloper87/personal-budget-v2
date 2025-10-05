@@ -13,7 +13,7 @@ import {
   SimpleGrid,
   useBreakpointValue,
 } from '@chakra-ui/react'
-import { useThemeColors } from '../hooks/useThemeColors'
+import { useThemeColors } from '../../hooks/useThemeColors'
 import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
 import { Calendar, RotateCcw, CalendarDays, CalendarRange, BarChart3 } from 'lucide-react'
 

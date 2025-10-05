@@ -13,7 +13,7 @@ import {
   Card,
   CardBody
 } from '@chakra-ui/react'
-import { Transaction } from '../types'
+import { Transaction } from '../../types'
 import ExpenseChart from './ExpenseChart'
 import IncomeChart from './IncomeChart'
 import { TrendingDown, TrendingUp, BarChart3 } from 'lucide-react'

@@ -1,5 +1,4 @@
-import DashboardSection from '../components/DashboardSection'
-import SingleRowSummary from '../components/SingleRowSummary'
+import { DashboardSection, SingleRowSummary } from '../components'
 import { PeriodData } from '../hooks/usePeriodData'
 
 interface SummarySectionProps {

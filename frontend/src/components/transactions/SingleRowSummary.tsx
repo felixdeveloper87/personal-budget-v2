@@ -13,7 +13,7 @@ import {
   Divider
 } from '@chakra-ui/react'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
-import { PeriodData } from '../hooks/usePeriodData'
+import { PeriodData } from '../../hooks/usePeriodData'
 import { useMemo } from 'react'
 
 interface SingleRowSummaryProps {

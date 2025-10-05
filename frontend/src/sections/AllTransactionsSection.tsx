@@ -1,6 +1,4 @@
-import DashboardSection from '../components/DashboardSection'
-import AllTransactionsCard from '../components/cards/AllTransactionsCard'
-import TransactionList from '../components/TransactionList'
+import { DashboardSection, AllTransactionsCard, TransactionList } from '../components'
 import { Transaction } from '../types'
 
 interface AllTransactionsSectionProps {

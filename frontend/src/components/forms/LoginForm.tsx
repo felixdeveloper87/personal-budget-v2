@@ -16,37 +16,27 @@ import {
   InputRightElement,
   IconButton,
   Checkbox,
-  FormErrorMessage,
-  Progress
+  FormErrorMessage
 } from '@chakra-ui/react'
-import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon, StarIcon } from '@chakra-ui/icons'
+import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon } from '@chakra-ui/icons'
 import { motion } from 'framer-motion'
-import { useAuth } from '../contexts/AuthContext'
+import { useAuth } from '../../contexts/AuthContext'
 
 const MotionBox = motion.create(Box)
 const MotionButton = motion.create(Button)
 
-interface RegisterFormProps {
+interface LoginFormProps {
   onToggleMode: () => void
 }
 
-export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
-  const [name, setName] = useState('')
+export default function LoginForm({ onToggleMode }: LoginFormProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
-  const [errors, setErrors] = useState<{
-    name?: string
-    email?: string
-    password?: string
-    confirmPassword?: string
-    terms?: string
-  }>({})
-  const { register } = useAuth()
+  const [rememberMe, setRememberMe] = useState(false)
+  const [errors, setErrors] = useState<{email?: string, password?: string}>({})
+  const { login } = useAuth()
   const toast = useToast()
 
   const textColor = useColorModeValue('gray.600', 'gray.300')
@@ -54,31 +44,8 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
   const linkColor = useColorModeValue('blue.500', 'blue.400')
   const hoverColor = useColorModeValue('blue.600', 'blue.300')
 
-  const getPasswordStrength = (password: string) => {
-    let strength = 0
-    if (password.length >= 6) strength += 20
-    if (password.length >= 8) strength += 20
-    if (/[A-Z]/.test(password)) strength += 20
-    if (/[0-9]/.test(password)) strength += 20
-    if (/[^A-Za-z0-9]/.test(password)) strength += 20
-    return strength
-  }
-
-  const passwordStrength = getPasswordStrength(password)
-  const getStrengthColor = (strength: number) => {
-    if (strength < 40) return 'red'
-    if (strength < 80) return 'yellow'
-    return 'green'
-  }
-
   const validateForm = () => {
-    const newErrors: typeof errors = {}
-    
-    if (!name.trim()) {
-      newErrors.name = 'Name is required'
-    } else if (name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters'
-    }
+    const newErrors: {email?: string, password?: string} = {}
     
     if (!email) {
       newErrors.email = 'Email is required'
@@ -90,16 +57,6 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
       newErrors.password = 'Password is required'
     } else if (password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters'
-    }
-    
-    if (!confirmPassword) {
-      newErrors.confirmPassword = 'Please confirm your password'
-    } else if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
-    }
-    
-    if (!acceptTerms) {
-      newErrors.terms = 'You must accept the terms and conditions'
     }
     
     setErrors(newErrors)
@@ -115,18 +72,18 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
     setErrors({})
     
     try {
-      await register({ name: name.trim(), email, password })
+      await login({ email, password })
       toast({ 
-        title: 'Welcome to Personal Budget!', 
-        description: 'Your account has been created successfully. You can now start managing your finances.',
+        title: 'Welcome back!', 
+        description: 'You have successfully signed in.',
         status: 'success',
-        duration: 4000,
+        duration: 3000,
         isClosable: true
       })
     } catch (error: any) {
       toast({ 
-        title: 'Registration failed', 
-        description: error?.response?.data?.message || 'Unable to create account. Please try again.',
+        title: 'Sign in failed', 
+        description: error?.response?.data?.message || 'Invalid email or password. Please try again.',
         status: 'error',
         duration: 5000,
         isClosable: true
@@ -146,10 +103,10 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
         {/* Header */}
         <VStack spacing={2} textAlign="center">
           <Text fontSize="2xl" fontWeight="bold" color={labelColor}>
-            Create Account
+            Sign In
           </Text>
           <Text fontSize="sm" color={textColor}>
-            Join Personal Budget and start managing your finances today
+            Enter your credentials to access your account
           </Text>
         </VStack>
 
@@ -158,41 +115,6 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <VStack spacing={5} align="stretch">
-            {/* Name Field */}
-            <FormControl isInvalid={!!errors.name}>
-              <FormLabel fontSize="sm" fontWeight="600" color={labelColor}>
-                Full Name
-              </FormLabel>
-              <Input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your full name"
-                autoComplete="name"
-                borderRadius="xl"
-                border="2px solid"
-                borderColor={errors.name ? 'red.300' : 'gray.200'}
-                _hover={{
-                  borderColor: errors.name ? 'red.400' : 'blue.300'
-                }}
-                _focus={{
-                  borderColor: errors.name ? 'red.400' : 'blue.500',
-                  boxShadow: errors.name ? '0 0 0 1px red.400' : '0 0 0 1px blue.500'
-                }}
-                _dark={{
-                  borderColor: errors.name ? 'red.500' : 'gray.600',
-                  _hover: {
-                    borderColor: errors.name ? 'red.400' : 'blue.400'
-                  },
-                  _focus: {
-                    borderColor: errors.name ? 'red.400' : 'blue.400',
-                    boxShadow: errors.name ? '0 0 0 1px red.400' : '0 0 0 1px blue.400'
-                  }
-                }}
-              />
-              <FormErrorMessage>{errors.name}</FormErrorMessage>
-            </FormControl>
-            
             {/* Email Field */}
             <FormControl isInvalid={!!errors.email}>
               <FormLabel fontSize="sm" fontWeight="600" color={labelColor}>
@@ -243,8 +165,8 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a strong password"
-                  autoComplete="new-password"
+                  placeholder="Enter your password"
+                  autoComplete="current-password"
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={errors.password ? 'red.300' : 'gray.200'}
@@ -278,97 +200,38 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
                   />
                 </InputRightElement>
               </InputGroup>
-              {password && (
-                <VStack spacing={2} mt={2}>
-                  <HStack w="full" justify="space-between">
-                    <Text fontSize="xs" color={textColor}>
-                      Password strength
-                    </Text>
-                    <Text fontSize="xs" color={`${getStrengthColor(passwordStrength)}.500`}>
-                      {passwordStrength < 40 ? 'Weak' : passwordStrength < 80 ? 'Medium' : 'Strong'}
-                    </Text>
-                  </HStack>
-                  <Progress
-                    value={passwordStrength}
-                    colorScheme={getStrengthColor(passwordStrength)}
-                    size="sm"
-                    borderRadius="full"
-                    w="full"
-                  />
-                </VStack>
-              )}
               <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
-            
-            {/* Confirm Password Field */}
-            <FormControl isInvalid={!!errors.confirmPassword}>
-              <FormLabel fontSize="sm" fontWeight="600" color={labelColor}>
-                Confirm Password
-              </FormLabel>
-              <InputGroup>
-                <Input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm your password"
-                  autoComplete="new-password"
-                  borderRadius="xl"
-                  border="2px solid"
-                  borderColor={errors.confirmPassword ? 'red.300' : 'gray.200'}
-                  _hover={{
-                    borderColor: errors.confirmPassword ? 'red.400' : 'blue.300'
-                  }}
-                  _focus={{
-                    borderColor: errors.confirmPassword ? 'red.400' : 'blue.500',
-                    boxShadow: errors.confirmPassword ? '0 0 0 1px red.400' : '0 0 0 1px blue.500'
-                  }}
-                  _dark={{
-                    borderColor: errors.confirmPassword ? 'red.500' : 'gray.600',
-                    _hover: {
-                      borderColor: errors.confirmPassword ? 'red.400' : 'blue.400'
-                    },
-                    _focus: {
-                      borderColor: errors.confirmPassword ? 'red.400' : 'blue.400',
-                      boxShadow: errors.confirmPassword ? '0 0 0 1px red.400' : '0 0 0 1px blue.400'
-                    }
-                  }}
-                />
-                <InputRightElement>
-                  <IconButton
-                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                    icon={showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    color="gray.400"
-                    _hover={{ color: 'blue.500' }}
-                  />
-                </InputRightElement>
-              </InputGroup>
-              <FormErrorMessage>{errors.confirmPassword}</FormErrorMessage>
-            </FormControl>
 
-            {/* Terms and Conditions */}
-            <FormControl isInvalid={!!errors.terms}>
+            {/* Remember Me & Forgot Password */}
+            <HStack justify="space-between" align="center">
               <Checkbox
-                isChecked={acceptTerms}
-                onChange={(e) => setAcceptTerms(e.target.checked)}
+                isChecked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
                 colorScheme="blue"
                 size="sm"
               >
                 <Text fontSize="sm" color={textColor}>
-                  I agree to the{' '}
-                  <Link color={linkColor} _hover={{ color: hoverColor }}>
-                    Terms of Service
-                  </Link>
-                  {' '}and{' '}
-                  <Link color={linkColor} _hover={{ color: hoverColor }}>
-                    Privacy Policy
-                  </Link>
+                  Remember me
                 </Text>
               </Checkbox>
-              <FormErrorMessage>{errors.terms}</FormErrorMessage>
-            </FormControl>
+              <Link
+                fontSize="sm"
+                color={linkColor}
+                _hover={{ color: hoverColor }}
+                onClick={() => {
+                  toast({
+                    title: 'Feature coming soon',
+                    description: 'Password reset functionality will be available soon.',
+                    status: 'info',
+                    duration: 3000,
+                    isClosable: true
+                  })
+                }}
+              >
+                Forgot password?
+              </Link>
+            </HStack>
             
             {/* Submit Button */}
             <MotionButton
@@ -377,7 +240,7 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
               size="lg"
               width="full"
               isLoading={loading}
-              loadingText="Creating account..."
+              loadingText="Signing in..."
               borderRadius="xl"
               fontWeight="600"
               py={6}
@@ -395,17 +258,17 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
               }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              Create Account
+              Sign In
             </MotionButton>
           </VStack>
         </form>
         
-        {/* Sign In Link */}
+        {/* Sign Up Link */}
         <VStack spacing={3}>
           <Divider />
           <HStack spacing={1} fontSize="sm">
             <Text color={textColor}>
-              Already have an account?
+              Don't have an account?
             </Text>
             <Link 
               color={linkColor} 
@@ -416,7 +279,7 @@ export default function RegisterForm({ onToggleMode }: RegisterFormProps) {
               }}
               onClick={onToggleMode}
             >
-              Sign in here
+              Sign up here
             </Link>
           </HStack>
         </VStack>

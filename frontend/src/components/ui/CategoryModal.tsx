@@ -19,7 +19,7 @@ import {
   Td,
   Progress,
 } from '@chakra-ui/react'
-import { Transaction } from '../types'
+import { Transaction } from '../../types'
 import { useMemo } from 'react'
 
 interface CategoryModalProps {

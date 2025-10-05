@@ -15,9 +15,9 @@ import {
 } from '@chakra-ui/react'
 import { ArrowBackIcon, AddIcon } from '@chakra-ui/icons'
 import { motion } from 'framer-motion'
-import LoginForm from './LoginForm'
-import RegisterForm from './RegisterForm'
-import Header from './Header'
+import LoginForm from '../forms/LoginForm'
+import RegisterForm from '../forms/RegisterForm'
+import Header from '../layout/Header'
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
