@@ -9,7 +9,7 @@ function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
 
-  // Reset showAuth quando o usuário faz logout (quando user se torna null)
+  // Reset showAuth quando o usuário faz logout ?(quando user se torna null)
   useEffect(() => {
     if (!user && !loading) {
       console.log('User is null and not loading, resetting showAuth to false')
