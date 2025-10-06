@@ -17,7 +17,7 @@ export default function DescriptionInput({ value, onChange, type, loading }: Des
         placeholder="Add a note (optional)"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={{ base: 5, sm: 4 }}
+        rows={5}
         borderRadius="xl"
         border="2px"
         borderColor={colors.border}
