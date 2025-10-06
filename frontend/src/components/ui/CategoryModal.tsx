@@ -18,7 +18,6 @@ import {
   Td,
   Progress,
   Button,
-  Collapse,
 } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../types'
@@ -40,7 +39,7 @@ interface CategoryModalProps {
 }
 
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
-  // Theme colors
+  // 🎨 Theme colors
   const colors = {
     text: useColorModeValue('gray.800', 'gray.100'),
     secondary: useColorModeValue('gray.600', 'gray.400'),
@@ -49,11 +48,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
     modalHeaderBg: useColorModeValue('linear(to-r, blue.50, purple.50)', 'linear(to-r, gray.800, gray.700)'),
   }
 
+  // Filter by type
   const filteredTransactions = useMemo(
     () => transactions.filter(t => t.type === type),
     [transactions, type]
   )
 
+  // Group by category + sort + total
   const { sortedCategories, total } = useMemo(() => {
     const categoryTotals = filteredTransactions.reduce((acc, transaction) => {
       const category = transaction.category
@@ -63,7 +64,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
       return acc
     }, {} as Record<string, { total: number; transactions: Transaction[] }>)
 
-    // Sort transactions within each category
     Object.values(categoryTotals).forEach(cat =>
       cat.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     )
@@ -76,11 +76,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
     return { sortedCategories, total }
   }, [filteredTransactions])
 
-  // Track expanded categories (to show full list)
+  // 🔁 Expanded state per category (unique per type)
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
 
   const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({ ...prev, [category]: !prev[category] }))
+    const key = `${type}-${category}` // ✅ unique per type
+    setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
   return (
@@ -112,7 +113,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           py={{ base: 4, md: 6 }}
         >
           <VStack spacing={3} align="stretch" w="full">
-            {/* 🔹 Main title */}
+            {/* Header */}
             <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
               <HStack spacing={3} align="center">
                 <Box
@@ -158,7 +159,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               </HStack>
             </HStack>
 
-            {/* 🔸 Quick stats */}
+            {/* Quick Stats */}
             <HStack
               spacing={{ base: 2, md: 4 }}
               justify="space-around"
@@ -209,6 +210,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           transition="all 0.2s"
         />
 
+        {/* Main content */}
         <ModalBody pb={6} px={{ base: 4, md: 6 }} flex="1" overflowY="auto">
           {sortedCategories.length === 0 ? (
             <Box p={{ base: 4, md: 6 }} textAlign="center" color={colors.secondary}>
@@ -224,14 +226,24 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               {sortedCategories.map(({ category, total: categoryTotal, transactions: categoryTransactions }, index) => {
                 const percentage = total > 0 ? (categoryTotal / total) * 100 : 0
                 const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length]
-                const isExpanded = expandedCategories[category]
-
+                const key = `${type}-${category}` // ✅ unique per type
+                const isExpanded = !!expandedCategories[key]
                 const visibleTransactions = isExpanded
                   ? categoryTransactions
                   : categoryTransactions.slice(0, 5)
 
                 return (
-                  <Box key={category} p={{ base: 3, md: 4 }} border="1px solid" borderColor={colors.border} borderRadius="lg">
+                  <Box
+                    key={key}
+                    p={{ base: 4, md: 5 }}
+                    border="1px solid"
+                    borderColor={colors.border}
+                    borderRadius="xl"
+                    bg={useColorModeValue('white', 'gray.800')}
+                    boxShadow={useColorModeValue('sm', 'md')}
+                    transition="all 0.2s ease"
+                    _hover={{ transform: 'translateY(-2px)', boxShadow: useColorModeValue('md', 'lg') }}
+                  >
                     <VStack spacing={3} align="stretch">
                       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
                         <HStack spacing={3} minW="0" flex="1">
@@ -256,6 +268,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         size="lg"
                         borderRadius="md"
                         bg={useColorModeValue('gray.100', 'gray.700')}
+                        sx={{
+                          '& > div': {
+                            background: type === 'INCOME'
+                              ? 'linear-gradient(to right, #48BB78, #38A169)'
+                              : 'linear-gradient(to right, #F56565, #E53E3E)',
+                          },
+                        }}
                       />
 
                       <Box>
@@ -263,34 +282,37 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                           Transactions ({categoryTransactions.length})
                         </Text>
 
-                        <Collapse in={isExpanded} animateOpacity startingHeight={170}>
-                          <Box overflowX="auto">
-                            <Table size="sm" variant="simple" minW="300px">
-                              <Thead>
-                                <Tr>
-                                  <Th fontSize="xs" color={colors.secondary}>Date</Th>
-                                  <Th fontSize="xs" color={colors.secondary}>Description</Th>
-                                  <Th fontSize="xs" color={colors.secondary} isNumeric>Amount</Th>
+                        {/* Table — always visible, with smooth transition */}
+                        <Box
+                          overflowX="auto"
+                          transition="opacity 0.3s ease"
+                          opacity={1}
+                        >
+                          <Table size="sm" variant="simple" minW="300px">
+                            <Thead>
+                              <Tr>
+                                <Th fontSize="xs" color={colors.secondary}>Date</Th>
+                                <Th fontSize="xs" color={colors.secondary}>Description</Th>
+                                <Th fontSize="xs" color={colors.secondary} isNumeric>Amount</Th>
+                              </Tr>
+                            </Thead>
+                            <Tbody>
+                              {visibleTransactions.map((t) => (
+                                <Tr key={t.id}>
+                                  <Td fontSize="xs" color={colors.text}>
+                                    {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  </Td>
+                                  <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
+                                    {t.description || 'No description'}
+                                  </Td>
+                                  <Td fontSize="xs" fontWeight="semibold" color={colors.text} isNumeric>
+                                    £{t.amount.toFixed(2)}
+                                  </Td>
                                 </Tr>
-                              </Thead>
-                              <Tbody>
-                                {visibleTransactions.map((t) => (
-                                  <Tr key={t.id}>
-                                    <Td fontSize="xs" color={colors.text}>
-                                      {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                                    </Td>
-                                    <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
-                                      {t.description || 'No description'}
-                                    </Td>
-                                    <Td fontSize="xs" fontWeight="semibold" color={colors.text} isNumeric>
-                                      £{t.amount.toFixed(2)}
-                                    </Td>
-                                  </Tr>
-                                ))}
-                              </Tbody>
-                            </Table>
-                          </Box>
-                        </Collapse>
+                              ))}
+                            </Tbody>
+                          </Table>
+                        </Box>
 
                         {categoryTransactions.length > 5 && (
                           <Button
