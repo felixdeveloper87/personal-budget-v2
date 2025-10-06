@@ -32,7 +32,7 @@ interface HeaderProps {
 export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const { user, logout } = useAuth()
-  const { filters, setFilters } = useSearch()
+  const { filters, setFilters, runSearch } = useSearch()
 
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
@@ -242,8 +242,8 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
         <SearchModal
           isOpen={isSearchOpen}
           onClose={onSearchClose}
-          onSearch={(filters: any) => {
-            setFilters({
+          onSearch={async (filters: any) => {
+            await runSearch({
               ...filters,
               type: filters.type === null ? undefined : filters.type,
             })

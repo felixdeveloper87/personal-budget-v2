@@ -1,11 +1,13 @@
-import { Box, HStack, Heading, Text } from '@chakra-ui/react'
-import { ReactNode } from 'react'
+import { Box, HStack, Heading, Text, Switch, FormControl, FormLabel, VStack, Divider } from '@chakra-ui/react'
+import { ReactNode, useState } from 'react'
 
 interface AllTransactionsCardProps {
   title: string
   count: number
   children: ReactNode
   filtered?: boolean
+  groupByMonth?: boolean
+  onGroupByMonthChange?: (grouped: boolean) => void
 }
 
 export default function AllTransactionsCard({
@@ -13,7 +15,17 @@ export default function AllTransactionsCard({
   count,
   children,
   filtered = false,
+  groupByMonth = false,
+  onGroupByMonthChange,
 }: AllTransactionsCardProps) {
+  const [isGrouped, setIsGrouped] = useState(groupByMonth)
+
+  const handleToggle = () => {
+    const newValue = !isGrouped
+    setIsGrouped(newValue)
+    onGroupByMonthChange?.(newValue)
+  }
+
   return (
     <Box
       p={4}
@@ -23,15 +35,35 @@ export default function AllTransactionsCard({
       bg="white"
       _dark={{ bg: '#111111' }}
     >
-      <HStack justify="space-between" mb={6}>
-        <Heading size="md">
-          {filtered ? `Filtered ${title}` : title}
-        </Heading>
-        <Text fontSize="sm" color="gray.500" _dark={{ color: 'gray.400' }}>
-          {count} transactions
-        </Text>
-      </HStack>
-      {children}
+      <VStack spacing={4} align="stretch">
+        <HStack justify="space-between">
+          <Heading size="md">
+            {filtered ? `Filtered ${title}` : title}
+          </Heading>
+          <Text fontSize="sm" color="gray.500" _dark={{ color: 'gray.400' }}>
+            {count} transactions
+          </Text>
+        </HStack>
+
+        <HStack justify="space-between" align="center">
+          <FormControl display="flex" alignItems="center">
+            <FormLabel htmlFor="group-by-month" mb="0" fontSize="sm" color="gray.600" _dark={{ color: 'gray.400' }}>
+              Group by month
+            </FormLabel>
+            <Switch
+              id="group-by-month"
+              isChecked={isGrouped}
+              onChange={handleToggle}
+              colorScheme="blue"
+              size="sm"
+            />
+          </FormControl>
+        </HStack>
+
+        <Divider />
+
+        {children}
+      </VStack>
     </Box>
   )
 }

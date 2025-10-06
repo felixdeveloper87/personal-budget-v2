@@ -294,7 +294,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                 onCreated={handleTransactionCreated}
                 onTransactionDeleted={onRefresh}
                 initialType={transactionType}
-                showRecentTransactions={false}
+                showRecentTransactions={true}
                 compact={true}
               />
             </Box>

@@ -1,6 +1,7 @@
 import DashboardSection from './DashboardSection'
-import { AllTransactionsCard, TransactionList } from '../components'
+import { AllTransactionsCard, TransactionList, TransactionListGrouped } from '../components'
 import { Transaction } from '../types'
+import { useState } from 'react'
 
 interface AllTransactionsSectionProps {
   transactions: Transaction[]
@@ -13,17 +14,28 @@ export default function AllTransactionsSection({
   hasFilters,
   onRefresh,
 }: AllTransactionsSectionProps) {
+  const [groupByMonth, setGroupByMonth] = useState(false)
+
   return (
     <DashboardSection title="All Transactions">
       <AllTransactionsCard
         title="All Transactions"
         count={transactions.length}
         filtered={hasFilters}
+        groupByMonth={groupByMonth}
+        onGroupByMonthChange={setGroupByMonth}
       >
-        <TransactionList
-          transactions={transactions}
-          onTransactionDeleted={onRefresh}
-        />
+        {groupByMonth ? (
+          <TransactionListGrouped
+            transactions={transactions}
+            onTransactionDeleted={onRefresh}
+          />
+        ) : (
+          <TransactionList
+            transactions={transactions}
+            onTransactionDeleted={onRefresh}
+          />
+        )}
       </AllTransactionsCard>
     </DashboardSection>
   )
