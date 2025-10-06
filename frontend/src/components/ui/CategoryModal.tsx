@@ -23,7 +23,6 @@ import { useMemo, useState } from 'react'
 import { Transaction } from '../../types'
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 
-// 🎨 Fixed color palette (outside component for performance)
 const CATEGORY_COLORS = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
   '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
@@ -39,7 +38,6 @@ interface CategoryModalProps {
 }
 
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
-  // 🎨 Theme colors
   const colors = {
     text: useColorModeValue('gray.800', 'gray.100'),
     secondary: useColorModeValue('gray.600', 'gray.400'),
@@ -48,13 +46,11 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
     modalHeaderBg: useColorModeValue('linear(to-r, blue.50, purple.50)', 'linear(to-r, gray.800, gray.700)'),
   }
 
-  // Filter by type
   const filteredTransactions = useMemo(
     () => transactions.filter(t => t.type === type),
     [transactions, type]
   )
 
-  // Group by category + sort + total
   const { sortedCategories, total } = useMemo(() => {
     const categoryTotals = filteredTransactions.reduce((acc, transaction) => {
       const category = transaction.category
@@ -76,11 +72,10 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
     return { sortedCategories, total }
   }, [filteredTransactions])
 
-  // 🔁 Expanded state per category (unique per type)
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
 
   const toggleCategory = (category: string) => {
-    const key = `${type}-${category}` // ✅ unique per type
+    const key = `${type}-${category}`
     setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }))
   }
 
@@ -101,7 +96,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         display="flex"
         flexDirection="column"
         borderRadius={{ base: 0, md: "xl" }}
-        boxShadow="2xl"
+        boxShadow="none"
       >
         <ModalHeader
           flexShrink={0}
@@ -113,7 +108,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           py={{ base: 4, md: 6 }}
         >
           <VStack spacing={3} align="stretch" w="full">
-            {/* Header */}
             <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
               <HStack spacing={3} align="center">
                 <Box
@@ -128,28 +122,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
-                  boxShadow={type === 'INCOME'
-                    ? '0 0 8px rgba(72,187,120,0.6)'
-                    : '0 0 8px rgba(245,101,101,0.6)'
-                  }
                 >
-                  <Text
-                    fontSize="lg"
-                    color="white"
-                    fontWeight="bold"
-                    textShadow="0 1px 2px rgba(0,0,0,0.3)"
-                  >
-                    £
-                  </Text>
+                  <Text fontSize="lg" color="white" fontWeight="bold">£</Text>
                 </Box>
 
                 <VStack spacing={0} align="start">
-                  <Text
-                    fontSize={{ base: "lg", md: "xl" }}
-                    fontWeight="bold"
-                    color={colors.text}
-                    lineHeight="1.2"
-                  >
+                  <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={colors.text}>
                     {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
                   </Text>
                   <Text fontSize="sm" color={colors.secondary} fontWeight="500">
@@ -159,7 +137,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               </HStack>
             </HStack>
 
-            {/* Quick Stats */}
             <HStack
               spacing={{ base: 2, md: 4 }}
               justify="space-around"
@@ -202,15 +179,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           zIndex={10}
           bg={useColorModeValue('white', 'gray.800')}
           borderRadius="full"
-          boxShadow="md"
           _hover={{
             bg: useColorModeValue('gray.100', 'gray.700'),
-            transform: 'scale(1.1)',
+            transform: 'none',
           }}
-          transition="all 0.2s"
+          transition="none"
         />
 
-        {/* Main content */}
         <ModalBody pb={6} px={{ base: 4, md: 6 }} flex="1" overflowY="auto">
           {sortedCategories.length === 0 ? (
             <Box p={{ base: 4, md: 6 }} textAlign="center" color={colors.secondary}>
@@ -226,7 +201,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               {sortedCategories.map(({ category, total: categoryTotal, transactions: categoryTransactions }, index) => {
                 const percentage = total > 0 ? (categoryTotal / total) * 100 : 0
                 const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length]
-                const key = `${type}-${category}` // ✅ unique per type
+                const key = `${type}-${category}`
                 const isExpanded = !!expandedCategories[key]
                 const visibleTransactions = isExpanded
                   ? categoryTransactions
@@ -239,10 +214,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                     border="1px solid"
                     borderColor={colors.border}
                     borderRadius="xl"
-                    bg={useColorModeValue('white', 'gray.800')}
-                    boxShadow={useColorModeValue('sm', 'md')}
-                    transition="all 0.2s ease"
-                    _hover={{ transform: 'translateY(-2px)', boxShadow: useColorModeValue('md', 'lg') }}
+                    bg="transparent"
                   >
                     <VStack spacing={3} align="stretch">
                       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
@@ -268,13 +240,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         size="lg"
                         borderRadius="md"
                         bg={useColorModeValue('gray.100', 'gray.700')}
-                        sx={{
-                          '& > div': {
-                            background: type === 'INCOME'
-                              ? 'linear-gradient(to right, #48BB78, #38A169)'
-                              : 'linear-gradient(to right, #F56565, #E53E3E)',
-                          },
-                        }}
                       />
 
                       <Box>
@@ -282,12 +247,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                           Transactions ({categoryTransactions.length})
                         </Text>
 
-                        {/* Table — always visible, with smooth transition */}
-                        <Box
-                          overflowX="auto"
-                          transition="opacity 0.3s ease"
-                          opacity={1}
-                        >
+                        <Box overflowX="auto">
                           <Table size="sm" variant="simple" minW="300px">
                             <Thead>
                               <Tr>
