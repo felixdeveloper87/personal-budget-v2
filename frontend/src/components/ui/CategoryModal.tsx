@@ -104,7 +104,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                   h={8}
                   borderRadius="full"
                   bgGradient={type === 'INCOME' 
-                    ? 'linear(to-r, green.400, emerald.500)'
+                    ? 'linear(to-r, green.400, green.500)'
                     : 'linear(to-r, red.400, pink.500)'
                   }
                   display="flex"
@@ -112,8 +112,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                   justifyContent="center"
                   boxShadow="md"
                 >
-                  <Text fontSize="lg" color="white" fontWeight="bold">
-                    {type === 'INCOME' ? '£' : '£'}
+                  <Text 
+                    fontSize="lg" 
+                    color="white" 
+                    fontWeight="bold"
+                    textShadow="0 1px 2px rgba(0,0,0,0.3)"
+                  >
+                    £
                   </Text>
                 </Box>
                 <VStack spacing={0} align="start">
