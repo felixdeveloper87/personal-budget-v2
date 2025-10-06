@@ -15,7 +15,6 @@ import {
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import DashboardSection from './DashboardSection'
 import { FormCard, TransactionForm } from '../components'
 import { Transaction } from '../types'
 
@@ -46,8 +45,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
 
   return (
     <>
-      <DashboardSection title="Quick Actions">
-        <FormCard>
+      <FormCard>
           <VStack spacing={{ base: 4, md: 6 }} align="stretch">
             <Text 
               fontSize={{ base: "xs", sm: "sm" }} 
@@ -188,7 +186,6 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
             </HStack>
           </VStack>
         </FormCard>
-      </DashboardSection>
 
       {/* Modal com TransactionForm */}
       <Modal 

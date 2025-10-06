@@ -1,4 +1,3 @@
-import DashboardSection from './DashboardSection'
 import { AllTransactionsCard, TransactionList, TransactionListGrouped } from '../components'
 import { Transaction } from '../types'
 import { useState } from 'react'
@@ -17,26 +16,24 @@ export default function AllTransactionsSection({
   const [groupByMonth, setGroupByMonth] = useState(false)
 
   return (
-    <DashboardSection title="All Transactions">
-      <AllTransactionsCard
-        title="All Transactions"
-        count={transactions.length}
-        filtered={hasFilters}
-        groupByMonth={groupByMonth}
-        onGroupByMonthChange={setGroupByMonth}
-      >
-        {groupByMonth ? (
-          <TransactionListGrouped
-            transactions={transactions}
-            onTransactionDeleted={onRefresh}
-          />
-        ) : (
-          <TransactionList
-            transactions={transactions}
-            onTransactionDeleted={onRefresh}
-          />
-        )}
-      </AllTransactionsCard>
-    </DashboardSection>
+    <AllTransactionsCard
+      title="All Transactions"
+      count={transactions.length}
+      filtered={hasFilters}
+      groupByMonth={groupByMonth}
+      onGroupByMonthChange={setGroupByMonth}
+    >
+      {groupByMonth ? (
+        <TransactionListGrouped
+          transactions={transactions}
+          onTransactionDeleted={onRefresh}
+        />
+      ) : (
+        <TransactionList
+          transactions={transactions}
+          onTransactionDeleted={onRefresh}
+        />
+      )}
+    </AllTransactionsCard>
   )
 }

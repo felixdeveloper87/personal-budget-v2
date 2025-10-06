@@ -1,4 +1,3 @@
-import DashboardSection from './DashboardSection'
 import { SingleRowSummary } from '../components'
 import { PeriodData } from '../hooks/usePeriodData'
 
@@ -8,8 +7,6 @@ interface SummarySectionProps {
 
 export default function SummarySection({ periodData }: SummarySectionProps) {
   return (
-    <DashboardSection title="Summary">
-      <SingleRowSummary periodData={periodData} />
-    </DashboardSection>
+    <SingleRowSummary periodData={periodData} />
   )
 }

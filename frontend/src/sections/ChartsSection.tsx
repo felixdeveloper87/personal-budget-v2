@@ -1,5 +1,4 @@
 import { VStack } from '@chakra-ui/react'
-import DashboardSection from './DashboardSection'
 import { ChartCard, SummaryChart, CategoryTabsChart, PeriodType } from '../components'
 import { Transaction } from '../types'
 
@@ -19,23 +18,21 @@ export default function ChartsSection({
   selectedPeriod,
 }: ChartsSectionProps) {
   return (
-    <DashboardSection title="Charts">
-      <VStack spacing={6}>
-        <ChartCard>
-          <SummaryChart
-            income={income}
-            expense={expense}
-            balance={balance}
-            selectedPeriod={selectedPeriod}
-          />
-        </ChartCard>
-        <ChartCard>
-          <CategoryTabsChart
-            transactions={transactions}
-            selectedPeriod={selectedPeriod}
-          />
-        </ChartCard>
-      </VStack>
-    </DashboardSection>
+    <VStack spacing={6}>
+      <ChartCard>
+        <SummaryChart
+          income={income}
+          expense={expense}
+          balance={balance}
+          selectedPeriod={selectedPeriod}
+        />
+      </ChartCard>
+      <ChartCard>
+        <CategoryTabsChart
+          transactions={transactions}
+          selectedPeriod={selectedPeriod}
+        />
+      </ChartCard>
+    </VStack>
   )
 }

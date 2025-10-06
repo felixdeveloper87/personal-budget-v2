@@ -61,9 +61,6 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
 
   return (
     <Box>
-      <Heading size="md" mb={4}>
-        All Transactions
-      </Heading>
       <TableContainer>
         <Table variant="simple" size="sm">
           <Thead>

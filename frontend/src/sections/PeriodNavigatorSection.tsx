@@ -1,4 +1,3 @@
-import DashboardSection from './DashboardSection'
 import { PeriodNavigator, PeriodType } from '../components'
 
 interface PeriodNavigatorSectionProps {
@@ -17,14 +16,12 @@ export default function PeriodNavigatorSection({
   label,
 }: PeriodNavigatorSectionProps) {
   return (
-    <DashboardSection title="Period Navigator">
-      <PeriodNavigator
-        selectedPeriod={selectedPeriod}
-        selectedDate={selectedDate}
-        onDateChange={onDateChange}
-        onPeriodChange={onPeriodChange}
-        periodLabel={label}
-      />
-    </DashboardSection>
+    <PeriodNavigator
+      selectedPeriod={selectedPeriod}
+      selectedDate={selectedDate}
+      onDateChange={onDateChange}
+      onPeriodChange={onPeriodChange}
+      periodLabel={label}
+    />
   )
 }

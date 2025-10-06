@@ -1,4 +1,4 @@
-import { Box, Text, Accordion, VStack, Spinner } from '@chakra-ui/react'
+import { Box, Text, VStack, Spinner } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -27,7 +27,7 @@ export default function Dashboard() {
           <Text>Loading data...</Text>
         </VStack>
       ) : (
-        <Accordion defaultIndex={[0, 1, 2, 3, 4]} allowMultiple>
+        <VStack spacing={6} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
 
           {!hasActiveFilters(filters) && (
@@ -58,7 +58,7 @@ export default function Dashboard() {
             onRefresh={loadData}
           />
 
-        </Accordion>
+        </VStack>
       )}
     </Box>
   )
