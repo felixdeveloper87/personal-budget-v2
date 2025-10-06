@@ -65,30 +65,123 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={{ base: "full", md: "xl" }} isCentered>
-      <ModalOverlay />
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size={{ base: "full", md: "xl" }} 
+      isCentered
+      closeOnOverlayClick={true}
+      closeOnEsc={true}
+      blockScrollOnMount={true}
+    >
+      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
       <ModalContent
         maxH={{ base: "100vh", md: "90vh" }}
         m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
+        borderRadius={{ base: 0, md: "xl" }}
+        boxShadow="2xl"
       >
-        <ModalHeader flexShrink={0}>
-          <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
-            <Text fontSize={{ base: "md", md: "lg" }}>
-              {type === 'INCOME' ? 'Income' : 'Expenses'} by Category ({selectedPeriod})
-            </Text>
-            <Badge 
-              colorScheme={type === 'INCOME' ? 'green' : 'red'} 
-              fontSize="sm" 
-              px={2} 
-              py={1}
+        <ModalHeader 
+          flexShrink={0} 
+          position="relative" 
+          pr={{ base: 12, md: 16 }}
+          bgGradient={useColorModeValue(
+            'linear(to-r, blue.50, purple.50)',
+            'linear(to-r, gray.800, gray.700)'
+          )}
+          borderBottom="1px solid"
+          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          py={{ base: 4, md: 6 }}
+        >
+          <VStack spacing={3} align="stretch" w="full">
+            {/* Main Title */}
+            <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
+              <HStack spacing={3} align="center">
+                <Box
+                  w={8}
+                  h={8}
+                  borderRadius="full"
+                  bgGradient={type === 'INCOME' 
+                    ? 'linear(to-r, green.400, emerald.500)'
+                    : 'linear(to-r, red.400, pink.500)'
+                  }
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  boxShadow="md"
+                >
+                  <Text fontSize="lg" color="white" fontWeight="bold">
+                    {type === 'INCOME' ? '£' : '£'}
+                  </Text>
+                </Box>
+                <VStack spacing={0} align="start">
+                  <Text 
+                    fontSize={{ base: "lg", md: "xl" }} 
+                    fontWeight="bold" 
+                    color={useColorModeValue('gray.800', 'white')}
+                    lineHeight="1.2"
+                  >
+                    {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
+                  </Text>
+                  <Text 
+                    fontSize="sm" 
+                    color={useColorModeValue('gray.600', 'gray.400')}
+                    fontWeight="500"
+                  >
+                    {selectedPeriod}
+                  </Text>
+                </VStack>
+              </HStack>
+              
+            </HStack>
+
+            {/* Quick Stats */}
+            <HStack 
+              spacing={{ base: 2, md: 4 }} 
+              justify="space-around" 
+              wrap="wrap"
+              p={{ base: 3, md: 4 }} 
+              bg={headerBg} 
+              borderRadius="md"
             >
-              {sortedCategories.length} categories
-            </Badge>
-          </HStack>
+              <VStack spacing={1} minW="80px">
+                <Text fontSize="xs" color={secondaryTextColor}>Total {type}</Text>
+                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={type === 'INCOME' ? 'green.600' : 'red.600'}>
+                  £{total.toFixed(2)}
+                </Text>
+              </VStack>
+              <VStack spacing={1} minW="80px">
+                <Text fontSize="xs" color={secondaryTextColor}>Categories</Text>
+                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={textColor}>
+                  {sortedCategories.length}
+                </Text>
+              </VStack>
+              <VStack spacing={1} minW="80px">
+                <Text fontSize="xs" color={secondaryTextColor}>Transactions</Text>
+                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={textColor}>
+                  {filteredTransactions.length}
+                </Text>
+              </VStack>
+            </HStack>
+          </VStack>
         </ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton 
+          size="lg"
+          position="absolute"
+          top={{ base: 4, md: 6 }}
+          right={{ base: 4, md: 6 }}
+          zIndex={10}
+          bg={useColorModeValue('white', 'gray.800')}
+          borderRadius="full"
+          boxShadow="md"
+          _hover={{
+            bg: useColorModeValue('gray.100', 'gray.700'),
+            transform: 'scale(1.1)'
+          }}
+          transition="all 0.2s"
+        />
 
         <ModalBody pb={6} px={{ base: 4, md: 6 }} flex="1" overflowY="auto">
           {sortedCategories.length === 0 ? (
@@ -98,28 +191,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
             </Box>
           ) : (
             <VStack spacing={4} align="stretch">
-              {/* Summary */}
-              <HStack spacing={{ base: 2, md: 4 }} justify="space-around" p={{ base: 3, md: 4 }} bg={headerBg} borderRadius="md" wrap="wrap">
-                <VStack spacing={1} minW="80px">
-                  <Text fontSize="xs" color={secondaryTextColor}>Total {type}</Text>
-                  <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={type === 'INCOME' ? 'green.600' : 'red.600'}>
-                    £{total.toFixed(2)}
-                  </Text>
-                </VStack>
-                <VStack spacing={1} minW="80px">
-                  <Text fontSize="xs" color={secondaryTextColor}>Categories</Text>
-                  <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={textColor}>
-                    {sortedCategories.length}
-                  </Text>
-                </VStack>
-                <VStack spacing={1} minW="80px">
-                  <Text fontSize="xs" color={secondaryTextColor}>Transactions</Text>
-                  <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={textColor}>
-                    {filteredTransactions.length}
-                  </Text>
-                </VStack>
-              </HStack>
-
               {/* Breakdown */}
               <VStack spacing={3} align="stretch">
                 {sortedCategories.map(({ category, total: categoryTotal, transactions: categoryTransactions }, index) => {

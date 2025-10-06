@@ -1,5 +1,6 @@
 import { VStack } from '@chakra-ui/react'
-import { DashboardSection, ChartCard, SummaryChart, CategoryTabsChart, PeriodType } from '../components'
+import DashboardSection from './DashboardSection'
+import { ChartCard, SummaryChart, CategoryTabsChart, PeriodType } from '../components'
 import { Transaction } from '../types'
 
 interface ChartsSectionProps {

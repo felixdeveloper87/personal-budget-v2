@@ -1,4 +1,5 @@
-import { DashboardSection, PeriodNavigator, PeriodType } from '../components'
+import DashboardSection from './DashboardSection'
+import { PeriodNavigator, PeriodType } from '../components'
 
 interface PeriodNavigatorSectionProps {
   selectedPeriod: PeriodType

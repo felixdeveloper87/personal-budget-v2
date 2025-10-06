@@ -15,7 +15,8 @@ import {
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown } from 'lucide-react'
-import { DashboardSection, FormCard, TransactionForm } from '../components'
+import DashboardSection from './DashboardSection'
+import { FormCard, TransactionForm } from '../components'
 import { Transaction } from '../types'
 
 interface AddTransactionSectionProps {

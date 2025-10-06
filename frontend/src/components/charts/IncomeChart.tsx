@@ -1,7 +1,7 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from '../ui/CategoryModal'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 
 interface IncomeChartProps {
   transactions: Transaction[]
@@ -14,6 +14,11 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const borderColor = useColorModeValue("gray.200", "gray.800")
   const textColor = useColorModeValue("gray.500", "gray.400")
   const labelColor = useColorModeValue("gray.700", "gray.300")
+  
+  // Memoize the close handler to prevent unnecessary re-renders
+  const handleClose = useCallback(() => {
+    onClose()
+  }, [onClose])
   
   // Memoize expensive calculations to prevent recalculation on every render
   const { incomeTransactions, sortedCategories, totalIncome } = useMemo(() => {
@@ -133,7 +138,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       {/* Category Modal */}
       <CategoryModal
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         transactions={transactions}
         type="INCOME"
         selectedPeriod={selectedPeriod}
