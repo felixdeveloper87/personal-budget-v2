@@ -82,128 +82,170 @@ export default function NumberPad({ value, onValueChange }: NumberPadProps) {
   const displayText = useColorModeValue('gray.800', 'white')
 
   return (
-    <Box>
+    <Box w="full" maxW={{ base: "100%", sm: "320px" }} mx="auto">
       {/* Display */}
       <Box 
-        p={4} 
+        p={{ base: 6, sm: 4 }} 
         bg={displayBg}
-        borderRadius="lg" 
-        mb={4} 
+        borderRadius="xl" 
+        mb={{ base: 6, sm: 4 }} 
         textAlign="center"
         border="2px solid"
         borderColor={displayBorder}
-        minH="60px"
+        minH={{ base: "80px", sm: "60px" }}
         display="flex"
         alignItems="center"
         justifyContent="center"
       >
-        <Text fontSize="2xl" fontWeight="bold" color={displayText}>
+        <Text fontSize={{ base: "3xl", sm: "2xl" }} fontWeight="bold" color={displayText}>
           £{formatDisplayValue(displayValue)}
         </Text>
       </Box>
 
       {/* Number Pad */}
-      <Grid templateColumns="repeat(3, 1fr)" gap={2} maxW="240px">
+      <Grid 
+        templateColumns="repeat(3, 1fr)" 
+        gap={{ base: 3, sm: 2 }} 
+        w="full"
+        maxW={{ base: "100%", sm: "240px" }}
+        mx="auto"
+      >
         {/* Row 1 */}
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('1')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           1
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('2')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           2
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('3')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           3
         </Button>
         
         {/* Row 2 */}
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('4')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           4
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('5')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           5
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('6')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           6
         </Button>
         
         {/* Row 3 */}
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('7')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           7
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('8')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           8
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('9')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           9
         </Button>
         
         {/* Row 4 */}
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={handleDecimal} 
           colorScheme="blue"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           .
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={() => handleNumberClick('0')}
           colorScheme="gray"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           0
         </Button>
         <Button 
-          size="lg" 
+          size={{ base: "xl", sm: "lg" }}
+          h={{ base: "60px", sm: "48px" }}
           onClick={handleBackspace} 
           colorScheme="red"
           variant="outline"
+          fontSize={{ base: "xl", sm: "lg" }}
+          fontWeight="bold"
         >
           ⌫
         </Button>
@@ -211,12 +253,15 @@ export default function NumberPad({ value, onValueChange }: NumberPadProps) {
 
       {/* Clear Button - only show in modal context */}
       <Button 
-        size="sm" 
+        size={{ base: "lg", sm: "sm" }}
+        h={{ base: "50px", sm: "40px" }}
         colorScheme="red" 
         variant="outline" 
         w="full" 
-        mt={2}
+        mt={{ base: 4, sm: 2 }}
         onClick={handleClear}
+        fontSize={{ base: "lg", sm: "sm" }}
+        fontWeight="bold"
       >
         Clear
       </Button>

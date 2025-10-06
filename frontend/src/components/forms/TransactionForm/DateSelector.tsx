@@ -33,21 +33,27 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
         type="date"
         value={date}
         onChange={(e) => onChange(e.target.value)}
-        size="lg"
+        size={{ base: "xl", sm: "lg" }}
+        h={{ base: "60px", sm: "48px" }}
         borderRadius="xl"
         border="2px"
         borderColor={colors.border}
         _focus={{ borderColor: colors.accent }}
+        fontSize={{ base: "lg", sm: "md" }}
       />
-      <Wrap mt={3} spacing={2}>
+      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 3, sm: 2 }}>
         {quickDates.map((qd) => (
           <WrapItem key={qd.label}>
             <Button
-              size="sm"
+              size={{ base: "md", sm: "sm" }}
+              h={{ base: "45px", sm: "36px" }}
               variant={date === qd.date.toISOString().slice(0, 10) ? 'solid' : 'outline'}
               colorScheme="blue"
               borderRadius="full"
               onClick={() => onChange(qd.date.toISOString().slice(0, 10))}
+              fontSize={{ base: "md", sm: "sm" }}
+              fontWeight="bold"
+              px={{ base: 6, sm: 4 }}
             >
               {qd.label}
             </Button>

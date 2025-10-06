@@ -54,7 +54,11 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
       <Text fontWeight="600" mb={3} color={colors.text.label}>
         {type === 'INCOME' ? 'Income Category' : 'Expense Category'}
       </Text>
-      <SimpleGrid columns={{ base: 2, sm: 3, md: 4 }} spacing={3}>
+      <SimpleGrid 
+        columns={{ base: 2, sm: 3, md: 4 }} 
+        spacing={{ base: 4, sm: 3 }}
+        w="full"
+      >
         {categories.map((cat) => {
           const IconComponent = cat.icon
           return (
@@ -64,11 +68,22 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               colorScheme={category === cat.name ? 'blue' : 'gray'}
               borderRadius="xl"
               onClick={() => onChange(cat.name)}
-              size="sm"
+              size={{ base: "md", sm: "sm" }}
+              h={{ base: "60px", sm: "48px" }}
+              fontSize={{ base: "sm", sm: "xs" }}
+              fontWeight="bold"
+              p={{ base: 2, sm: 1 }}
             >
-              <HStack spacing={2}>
-                <IconComponent size={18} />
-                <Text>{cat.name}</Text>
+              <HStack spacing={{ base: 2, sm: 1 }} justify="center" w="full">
+                <IconComponent size={20} />
+                <Text 
+                  fontSize={{ base: "sm", sm: "xs" }}
+                  fontWeight="bold"
+                  textAlign="center"
+                  noOfLines={1}
+                >
+                  {cat.name}
+                </Text>
               </HStack>
             </Button>
           )

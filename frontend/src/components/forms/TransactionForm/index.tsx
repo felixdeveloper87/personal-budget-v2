@@ -64,7 +64,13 @@ export default function TransactionForm({
     <Box w="full">
       {compact ? (
         // Layout compacto para modais
-        <VStack spacing={6} align="stretch" as="form" onSubmit={onSubmit}>
+        <VStack 
+          spacing={{ base: 6, sm: 4 }} 
+          align="stretch" 
+          as="form" 
+          onSubmit={onSubmit}
+          w="full"
+        >
           <DateSelector date={date} onChange={setDate} />
           <AmountInput amount={amount} onChange={setAmount} type={type} />
           <CategorySelector type={type} category={category} onChange={setCategory} />
@@ -77,9 +83,22 @@ export default function TransactionForm({
         </VStack>
       ) : (
         // Layout completo para outras páginas
-        <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
-          <CardBody p={{ base: 4, sm: 6, md: 10 }}>
-            <VStack spacing={{ base: 4, md: 6 }} align="stretch" as="form" onSubmit={onSubmit}>
+        <Card 
+          bg={colors.cardBg} 
+          shadow="lg" 
+          borderRadius="2xl" 
+          border="1px" 
+          borderColor={colors.border}
+          w="full"
+        >
+          <CardBody p={{ base: 6, sm: 6, md: 10 }}>
+            <VStack 
+              spacing={{ base: 6, sm: 4, md: 6 }} 
+              align="stretch" 
+              as="form" 
+              onSubmit={onSubmit}
+              w="full"
+            >
               <DateSelector date={date} onChange={setDate} />
               <AmountInput amount={amount} onChange={setAmount} type={type} />
               <CategorySelector type={type} category={category} onChange={setCategory} />
