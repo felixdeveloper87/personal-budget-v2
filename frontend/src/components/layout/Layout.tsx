@@ -6,9 +6,11 @@ import Footer from './Footer'
 
 interface LayoutProps {
   children: React.ReactNode
+  currentPage?: 'dashboard' | 'transactions'
+  onPageChange?: (page: 'dashboard' | 'transactions') => void
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, currentPage = 'dashboard', onPageChange }: LayoutProps) {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const { user } = useAuth()
 
@@ -19,7 +21,11 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <Flex direction="column" minH="100vh">
-      <Header onOpenSettings={handleOpenSettings} />
+      <Header 
+        onOpenSettings={handleOpenSettings} 
+        currentPage={currentPage}
+        onPageChange={onPageChange}
+      />
 
       <Box as="main" flex="1">
         {children}

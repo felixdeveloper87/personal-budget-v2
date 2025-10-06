@@ -10,7 +10,6 @@ import {
   PeriodNavigatorSection,
   SummarySection,
   ChartsSection,
-  AllTransactionsSection,
 } from '../sections'
 
 export default function Dashboard() {
@@ -51,12 +50,6 @@ export default function Dashboard() {
               selectedPeriod={selectedPeriod}
             />
           )}
-
-          <AllTransactionsSection
-            transactions={transactions}
-            hasFilters={hasActiveFilters(filters)}
-            onRefresh={loadData}
-          />
 
         </VStack>
       )}

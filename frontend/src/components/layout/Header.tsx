@@ -27,9 +27,11 @@ import SearchModal from '../ui/SearchModal'
 interface HeaderProps {
   onOpenSettings?: () => void
   onLogin?: () => void
+  currentPage?: 'dashboard' | 'transactions'
+  onPageChange?: (page: 'dashboard' | 'transactions') => void
 }
 
-export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
+export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboard', onPageChange }: HeaderProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const { user, logout } = useAuth()
   const { filters, setFilters, runSearch } = useSearch()
@@ -119,22 +121,29 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                 </Text>
               </VStack>
 
-              {/* Navegação extra - só desktop */}
+              {/* Navegação - só desktop */}
               <HStack
-                spacing={6}
+                spacing={4}
                 ml={10}
                 display={{ base: 'none', md: 'flex' }}
                 fontWeight="500"
                 color="white"
               >
-                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
+                <Button 
+                  variant="ghost" 
+                  _hover={{ color: 'yellow.300' }}
+                  color={currentPage === 'dashboard' ? 'yellow.300' : 'white'}
+                  onClick={() => onPageChange?.('dashboard')}
+                >
                   Dashboard
                 </Button>
-                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
-                  Reports
-                </Button>
-                <Button variant="ghost" _hover={{ color: 'yellow.300' }}>
-                  Goals
+                <Button 
+                  variant="ghost" 
+                  _hover={{ color: 'yellow.300' }}
+                  color={currentPage === 'transactions' ? 'yellow.300' : 'white'}
+                  onClick={() => onPageChange?.('transactions')}
+                >
+                  All Transactions
                 </Button>
               </HStack>
             </HStack>
@@ -209,7 +218,23 @@ export default function Header({ onOpenSettings, onLogin }: HeaderProps) {
                     icon={<Avatar size={{ base: 'sm', md: 'md' }} name={user?.name} />}
                     variant="ghost"
                   />
-                  <MenuList>
+                  <MenuList zIndex={9999}>
+                    {/* Navegação mobile */}
+                    <MenuItem 
+                      onClick={() => onPageChange?.('dashboard')}
+                      color={currentPage === 'dashboard' ? 'blue.500' : undefined}
+                      fontWeight={currentPage === 'dashboard' ? 'semibold' : 'normal'}
+                    >
+                      Dashboard
+                    </MenuItem>
+                    <MenuItem 
+                      onClick={() => onPageChange?.('transactions')}
+                      color={currentPage === 'transactions' ? 'blue.500' : undefined}
+                      fontWeight={currentPage === 'transactions' ? 'semibold' : 'normal'}
+                    >
+                      All Transactions
+                    </MenuItem>
+                    <MenuDivider />
                     <MenuItem icon={<InfoIcon />}>Profile</MenuItem>
                     <MenuItem icon={<SettingsIcon />} onClick={onOpenSettings}>
                       Settings
