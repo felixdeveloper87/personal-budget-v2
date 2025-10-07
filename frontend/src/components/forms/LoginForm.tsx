@@ -18,7 +18,7 @@ import {
   Checkbox,
   FormErrorMessage
 } from '@chakra-ui/react'
-import { ViewIcon, ViewOffIcon, EmailIcon, LockIcon } from '@chakra-ui/icons'
+import { ViewIcon, ViewOffIcon, EmailIcon } from '@chakra-ui/icons'
 import { motion } from 'framer-motion'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -30,60 +30,61 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onToggleMode }: LoginFormProps) {
+  // --- State ---
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
-  const [errors, setErrors] = useState<{email?: string, password?: string}>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+
+  // --- Hooks ---
   const { login } = useAuth()
   const toast = useToast()
 
+  // --- Colors ---
   const textColor = useColorModeValue('gray.600', 'gray.300')
   const labelColor = useColorModeValue('gray.700', 'gray.200')
   const linkColor = useColorModeValue('blue.500', 'blue.400')
   const hoverColor = useColorModeValue('blue.600', 'blue.300')
 
+  // --- Form validation ---
   const validateForm = () => {
-    const newErrors: {email?: string, password?: string} = {}
-    
-    if (!email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
+    const newErrors: { email?: string; password?: string } = {}
+
+    if (!email) newErrors.email = 'Email is required'
+    else if (!/\S+@\S+\.\S+/.test(email))
       newErrors.email = 'Please enter a valid email'
-    }
-    
-    if (!password) {
-      newErrors.password = 'Password is required'
-    } else if (password.length < 6) {
+
+    if (!password) newErrors.password = 'Password is required'
+    else if (password.length < 6)
       newErrors.password = 'Password must be at least 6 characters'
-    }
-    
+
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+  // --- Submit handler ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (!validateForm()) return
-    
+
     setLoading(true)
-    setErrors({})
-    
     try {
-      await login({ email, password })
-      toast({ 
-        title: 'Welcome back!', 
+      await login({ email, password }) // triggers backend call
+      toast({
+        title: 'Welcome back!',
         description: 'You have successfully signed in.',
         status: 'success',
         duration: 3000,
         isClosable: true
       })
     } catch (error: any) {
-      toast({ 
-        title: 'Sign in failed', 
-        description: error?.response?.data?.message || 'Invalid email or password. Please try again.',
+      toast({
+        title: 'Sign in failed',
+        description:
+          error?.response?.data?.message ||
+          'Invalid email or password. Please try again.',
         status: 'error',
         duration: 5000,
         isClosable: true
@@ -97,7 +98,7 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
     <MotionBox
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
     >
       <VStack spacing={6} align="stretch">
         {/* Header */}
@@ -115,6 +116,7 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
         {/* Form */}
         <form onSubmit={handleSubmit}>
           <VStack spacing={5} align="stretch">
+
             {/* Email Field */}
             <FormControl isInvalid={!!errors.email}>
               <FormLabel fontSize="sm" fontWeight="600" color={labelColor}>
@@ -130,21 +132,21 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={errors.email ? 'red.300' : 'gray.200'}
-                  _hover={{
-                    borderColor: errors.email ? 'red.400' : 'blue.300'
-                  }}
+                  _hover={{ borderColor: errors.email ? 'red.400' : 'blue.300' }}
                   _focus={{
                     borderColor: errors.email ? 'red.400' : 'blue.500',
-                    boxShadow: errors.email ? '0 0 0 1px red.400' : '0 0 0 1px blue.500'
+                    boxShadow: errors.email
+                      ? '0 0 0 1px red.400'
+                      : '0 0 0 1px blue.500'
                   }}
                   _dark={{
                     borderColor: errors.email ? 'red.500' : 'gray.600',
-                    _hover: {
-                      borderColor: errors.email ? 'red.400' : 'blue.400'
-                    },
+                    _hover: { borderColor: errors.email ? 'red.400' : 'blue.400' },
                     _focus: {
                       borderColor: errors.email ? 'red.400' : 'blue.400',
-                      boxShadow: errors.email ? '0 0 0 1px red.400' : '0 0 0 1px blue.400'
+                      boxShadow: errors.email
+                        ? '0 0 0 1px red.400'
+                        : '0 0 0 1px blue.400'
                     }
                   }}
                 />
@@ -154,7 +156,7 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
               </InputGroup>
               <FormErrorMessage>{errors.email}</FormErrorMessage>
             </FormControl>
-            
+
             {/* Password Field */}
             <FormControl isInvalid={!!errors.password}>
               <FormLabel fontSize="sm" fontWeight="600" color={labelColor}>
@@ -175,16 +177,18 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
                   }}
                   _focus={{
                     borderColor: errors.password ? 'red.400' : 'blue.500',
-                    boxShadow: errors.password ? '0 0 0 1px red.400' : '0 0 0 1px blue.500'
+                    boxShadow: errors.password
+                      ? '0 0 0 1px red.400'
+                      : '0 0 0 1px blue.500'
                   }}
                   _dark={{
                     borderColor: errors.password ? 'red.500' : 'gray.600',
-                    _hover: {
-                      borderColor: errors.password ? 'red.400' : 'blue.400'
-                    },
+                    _hover: { borderColor: errors.password ? 'red.400' : 'blue.400' },
                     _focus: {
                       borderColor: errors.password ? 'red.400' : 'blue.400',
-                      boxShadow: errors.password ? '0 0 0 1px red.400' : '0 0 0 1px blue.400'
+                      boxShadow: errors.password
+                        ? '0 0 0 1px red.400'
+                        : '0 0 0 1px blue.400'
                     }
                   }}
                 />
@@ -203,7 +207,7 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
               <FormErrorMessage>{errors.password}</FormErrorMessage>
             </FormControl>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me + Forgot Password */}
             <HStack justify="space-between" align="center">
               <Checkbox
                 isChecked={rememberMe}
@@ -215,30 +219,32 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
                   Remember me
                 </Text>
               </Checkbox>
+
               <Link
                 fontSize="sm"
                 color={linkColor}
                 _hover={{ color: hoverColor }}
-                onClick={() => {
+                onClick={() =>
                   toast({
                     title: 'Feature coming soon',
-                    description: 'Password reset functionality will be available soon.',
+                    description:
+                      'Password reset functionality will be available soon.',
                     status: 'info',
                     duration: 3000,
                     isClosable: true
                   })
-                }}
+                }
               >
                 Forgot password?
               </Link>
             </HStack>
-            
-            {/* Submit Button */}
+
+            {/* Submit */}
             <MotionButton
               type="submit"
               colorScheme="blue"
               size="lg"
-              width="full"
+              w="full"
               isLoading={loading}
               loadingText="Signing in..."
               borderRadius="xl"
@@ -248,7 +254,7 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
               whileTap={{ scale: 0.98 }}
               bg="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
               _hover={{
-                bg: "linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)",
+                bg: 'linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)',
                 transform: 'translateY(-2px)',
                 shadow: 'lg'
               }}
@@ -256,24 +262,22 @@ export default function LoginForm({ onToggleMode }: LoginFormProps) {
                 transform: 'translateY(0)',
                 shadow: 'md'
               }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
             >
               Sign In
             </MotionButton>
           </VStack>
         </form>
-        
-        {/* Sign Up Link */}
+
+        {/* Sign Up link */}
         <VStack spacing={3}>
           <Divider />
           <HStack spacing={1} fontSize="sm">
-            <Text color={textColor}>
-              Don't have an account?
-            </Text>
-            <Link 
-              color={linkColor} 
+            <Text color={textColor}>Don't have an account?</Text>
+            <Link
+              color={linkColor}
               fontWeight="600"
-              _hover={{ 
+              _hover={{
                 color: hoverColor,
                 textDecoration: 'underline'
               }}

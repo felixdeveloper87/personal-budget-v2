@@ -17,6 +17,7 @@ import {
   ShoppingBag,
 } from 'lucide-react'
 
+// 🔹 Predefined categories for income transactions
 const incomeCategories = [
   { name: 'Salary', icon: Briefcase },
   { name: 'Freelance', icon: Laptop },
@@ -28,6 +29,7 @@ const incomeCategories = [
   { name: 'Others', icon: FileText },
 ]
 
+// 🔹 Predefined categories for expense transactions
 const expenseCategories = [
   { name: 'Groceries', icon: ShoppingCart },
   { name: 'Rent', icon: Home },
@@ -45,39 +47,55 @@ interface CategorySelectorProps {
   onChange: (c: string) => void
 }
 
+/**
+ * 💡 CategorySelector Component
+ * - Displays a grid of category buttons depending on transaction type (INCOME / EXPENSE)
+ * - Each button shows an icon + name
+ * - The selected category is highlighted using a solid color scheme
+ */
 export default function CategorySelector({ type, category, onChange }: CategorySelectorProps) {
   const colors = useThemeColors()
+
+  // Pick the correct list based on transaction type
   const categories = type === 'INCOME' ? incomeCategories : expenseCategories
 
   return (
     <Box>
+      {/* Section title */}
       <Text fontWeight="600" mb={3} color={colors.text.label}>
         {type === 'INCOME' ? 'Income Category' : 'Expense Category'}
       </Text>
-      <SimpleGrid 
-        columns={{ base: 2, sm: 3, md: 4 }} 
+
+      {/* Responsive grid layout for category buttons */}
+      <SimpleGrid
+        columns={{ base: 2, sm: 3, md: 4 }}
         spacing={{ base: 4, sm: 3 }}
         w="full"
       >
         {categories.map((cat) => {
           const IconComponent = cat.icon
+          const isSelected = category === cat.name
+
           return (
             <Button
               key={cat.name}
-              variant={category === cat.name ? 'solid' : 'outline'}
-              colorScheme={category === cat.name ? 'blue' : 'gray'}
+              aria-label={`Select ${cat.name} category`} // ♿ Accessibility: describes each button
+              variant={isSelected ? 'solid' : 'outline'}
+              colorScheme={isSelected ? 'blue' : 'gray'}
               borderRadius="xl"
               onClick={() => onChange(cat.name)}
-              size={{ base: "md", sm: "sm" }}
-              h={{ base: "60px", sm: "48px" }}
-              fontSize={{ base: "sm", sm: "xs" }}
+              size={{ base: 'md', sm: 'sm' }}
+              h={{ base: '60px', sm: '48px' }}
+              fontSize={{ base: 'sm', sm: 'xs' }}
               fontWeight="bold"
               p={{ base: 2, sm: 1 }}
             >
               <HStack spacing={{ base: 2, sm: 1 }} justify="center" w="full">
-                <IconComponent size={20} />
-                <Text 
-                  fontSize={{ base: "sm", sm: "xs" }}
+                {/* Icon for category */}
+                <IconComponent size={20} aria-hidden="true" />
+                {/* Category label */}
+                <Text
+                  fontSize={{ base: 'sm', sm: 'xs' }}
                   fontWeight="bold"
                   textAlign="center"
                   noOfLines={1}

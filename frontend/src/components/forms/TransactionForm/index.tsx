@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react'
-import { Box, VStack, Card, CardBody, Divider, useToast } from '@chakra-ui/react'
+import React, { useState, useCallback } from 'react'
+import { Box, VStack, Card, CardBody, useToast } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { createTransaction } from '../../../api'
@@ -19,6 +19,12 @@ interface TransactionFormProps {
   compact?: boolean
 }
 
+/**
+ * 💼 TransactionForm
+ * Handles transaction creation with modular input components.
+ * Can render in full or compact mode (for modal usage).
+ * Integrates with AuthContext to send authenticated API requests.
+ */
 export default function TransactionForm({
   onCreated,
   onTransactionDeleted,
@@ -31,6 +37,7 @@ export default function TransactionForm({
   const toast = useToast()
   const colors = useThemeColors()
 
+  // 🗓️ Controlled form states
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>(initialType)
   const [category, setCategory] = useState(type === 'INCOME' ? 'Salary' : 'Groceries')
@@ -38,6 +45,12 @@ export default function TransactionForm({
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
 
+  /**
+   * 🧾 Handle form submission:
+   * - Sends transaction data to API
+   * - Displays success/error toast
+   * - Resets description and amount on success
+   */
   const onSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
@@ -45,14 +58,33 @@ export default function TransactionForm({
 
       setLoading(true)
       try {
-        const tx: Transaction = { date, type, category, description, amount: Number(amount) }
-        const created = await createTransaction(tx, user.token)
+        const tx: Transaction = {
+          date,
+          type,
+          category,
+          description,
+          amount: Number(amount),
+        }
+        const created = await createTransaction(tx)
         onCreated(created)
-        toast({ title: 'Transaction saved', status: 'success', duration: 2000 })
+
+        toast({
+          title: 'Transaction saved',
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+        })
+
         setAmount(0)
         setDescription('')
       } catch (err: any) {
-        toast({ title: 'Error saving', status: 'error', description: err?.message })
+        toast({
+          title: 'Error saving transaction',
+          description: err?.message || 'Please try again later.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        })
       } finally {
         setLoading(false)
       }
@@ -63,13 +95,18 @@ export default function TransactionForm({
   return (
     <Box w="full">
       {compact ? (
-        // Layout compacto para modais
-        <VStack 
-          spacing={{ base: 6, sm: 4 }} 
-          align="stretch" 
-          as="form" 
+        /**
+         * 🧩 Compact layout (used inside modals)
+         * - Lightweight and vertically stacked
+         * - Same logic, smaller spacing
+         */
+        <VStack
+          spacing={{ base: 6, sm: 4 }}
+          align="stretch"
+          as="form"
           onSubmit={onSubmit}
           w="full"
+          aria-label="Add transaction form" // ♿ Accessibility
         >
           <DateSelector date={date} onChange={setDate} />
           <AmountInput amount={amount} onChange={setAmount} type={type} />
@@ -82,20 +119,25 @@ export default function TransactionForm({
           />
         </VStack>
       ) : (
-        // Layout completo para outras páginas
-        <Card 
-          bg={colors.cardBg} 
-          shadow="lg" 
-          borderRadius="2xl" 
-          border="1px" 
+        /**
+         * 🪟 Full layout (used on dashboard pages)
+         * - Includes Card container and wider spacing
+         */
+        <Card
+          bg={colors.cardBg}
+          shadow="lg"
+          borderRadius="2xl"
+          border="1px"
           borderColor={colors.border}
           w="full"
+          role="region" // ♿ Accessibility: marks card as a section
+          aria-label="Transaction entry form"
         >
           <CardBody p={{ base: 6, sm: 6, md: 10 }}>
-            <VStack 
-              spacing={{ base: 6, sm: 4, md: 6 }} 
-              align="stretch" 
-              as="form" 
+            <VStack
+              spacing={{ base: 6, sm: 4, md: 6 }}
+              align="stretch"
+              as="form"
               onSubmit={onSubmit}
               w="full"
             >
@@ -113,6 +155,7 @@ export default function TransactionForm({
         </Card>
       )}
 
+      {/* 📊 Optional section showing recent transactions */}
       {showRecentTransactions && (
         <Box mt={{ base: 6, md: 8 }}>
           <RecentTransactions

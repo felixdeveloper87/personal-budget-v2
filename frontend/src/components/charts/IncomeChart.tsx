@@ -47,7 +47,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
 
   // Category colors
   const categoryColors = [
-    'green.500', 'emerald.500', 'teal.500', 'cyan.500', 
+    'green.500', 'green.500', 'teal.500', 'cyan.500', 
     'blue.500', 'indigo.500', 'purple.500', 'violet.500'
   ]
 

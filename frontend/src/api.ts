@@ -1,67 +1,121 @@
 import axios from 'axios'
-import { Transaction, MonthlySummary, User, LoginRequest, RegisterRequest } from './types'
+import {
+  Transaction,
+  MonthlySummary,
+  User,
+  LoginRequest,
+  RegisterRequest
+} from './types'
 
-const api = axios.create({ 
-  baseURL: import.meta.env.VITE_API_URL || '/api' 
+// ----------------------------------------------------
+// 🌐 Create main Axios instance
+// ----------------------------------------------------
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || '/api'
 })
 
-// Auth API
+// ----------------------------------------------------
+// 🧠 Axios Interceptors
+// ----------------------------------------------------
+
+// 🔹 Request Interceptor:
+// Automatically attach Authorization header if user token exists.
+api.interceptors.request.use(
+  (config) => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try {
+        const { token } = JSON.parse(storedUser)
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`
+        }
+      } catch {
+        // If parsing fails, clear corrupted storage
+        localStorage.removeItem('user')
+      }
+    }
+    return config
+  },
+  (error) => Promise.reject(error)
+)
+
+// 🔹 Response Interceptor:
+// Automatically handle expired or invalid tokens (HTTP 401).
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token invalid or expired → clear session and redirect
+      localStorage.removeItem('user')
+
+      // Prevent infinite redirect loop if already on auth page
+      if (!window.location.pathname.includes('/auth')) {
+        window.location.href = '/auth'
+      }
+    }
+    return Promise.reject(error)
+  }
+)
+
+// ----------------------------------------------------
+// 🔐 AUTH ENDPOINTS
+// ----------------------------------------------------
+
+// Login → POST /auth/login
 export async function login(credentials: LoginRequest): Promise<User> {
-  const { data } = await api.post('/auth/login', credentials)
+  const { data } = await api.post<User>('/auth/login', credentials)
   return data
 }
 
-export async function register(data: RegisterRequest): Promise<User> {
-  const { data: response } = await api.post('/auth/register', data)
-  return response
-}
-
-// Transaction API
-export async function listTransactions(token: string): Promise<Transaction[]> {
-  const { data } = await api.get('/transactions', {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+// Register → POST /auth/register
+export async function register(payload: RegisterRequest): Promise<User> {
+  const { data } = await api.post<User>('/auth/register', payload)
   return data
 }
 
-export async function createTransaction(tx: Transaction, token: string): Promise<Transaction> {
-  const { data } = await api.post('/transactions', tx, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+// ----------------------------------------------------
+// 💸 TRANSACTION ENDPOINTS
+// ----------------------------------------------------
+
+// Get all transactions → GET /transactions
+export async function listTransactions(): Promise<Transaction[]> {
+  const { data } = await api.get<Transaction[]>('/transactions')
   return data
 }
 
-export async function deleteTransaction(id: number, token: string): Promise<void> {
-  await api.delete(`/transactions/${id}`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
+// Create a transaction → POST /transactions
+export async function createTransaction(tx: Transaction): Promise<Transaction> {
+  const { data } = await api.post<Transaction>('/transactions', tx)
+  return data
 }
 
-export async function getMonthlySummary(date: Date, token: string): Promise<MonthlySummary> {
+// Delete a transaction → DELETE /transactions/:id
+export async function deleteTransaction(id: number): Promise<void> {
+  await api.delete(`/transactions/${id}`)
+}
+
+// Get monthly summary → GET /summary/month?year=&month=
+export async function getMonthlySummary(date: Date): Promise<MonthlySummary> {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
-  const { data } = await api.get('/summary/month', { 
-    params: { year, month },
-    headers: { Authorization: `Bearer ${token}` }
+  const { data } = await api.get<MonthlySummary>('/summary/month', {
+    params: { year, month }
   })
   return data
 }
 
-export async function searchTransactions(
-  filters: {
-    text?: string
-    type?: 'income' | 'expense'
-    category?: string
-    startDate?: string
-    endDate?: string
-  },
-  token: string
-): Promise<Transaction[]> {
-  const { data } = await api.get('/transactions/search', {
-    params: filters,
-    headers: { Authorization: `Bearer ${token}` }
+// Search transactions → GET /transactions/search
+export async function searchTransactions(filters: {
+  text?: string
+  type?: 'income' | 'expense'
+  category?: string
+  startDate?: string
+  endDate?: string
+}): Promise<Transaction[]> {
+  const { data } = await api.get<Transaction[]>('/transactions/search', {
+    params: filters
   })
   return data
 }
 
-
+export default api

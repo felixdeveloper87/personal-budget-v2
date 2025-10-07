@@ -38,8 +38,10 @@ export function usePeriodData(
 
       case 'week':
         const dayOfWeek = now.getDay()
+        // Ajusta para que segunda-feira seja o primeiro dia da semana (0 = domingo, 1 = segunda)
+        const adjustedDayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1
         const startOfWeek = new Date(now)
-        startOfWeek.setDate(now.getDate() - dayOfWeek)
+        startOfWeek.setDate(now.getDate() - adjustedDayOfWeek)
         startDate = new Date(startOfWeek.getFullYear(), startOfWeek.getMonth(), startOfWeek.getDate())
         
         const endOfWeek = new Date(startOfWeek)

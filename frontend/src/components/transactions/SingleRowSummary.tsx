@@ -12,8 +12,9 @@ import {
   Badge,
   Divider
 } from '@chakra-ui/react'
-import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, DollarSign, PieChart, Calculator, FileText, Wallet } from 'lucide-react'
 import { PeriodData } from '../../hooks/usePeriodData'
+import { useThemeColors } from '../../hooks/useThemeColors'
 import { useMemo } from 'react'
 
 interface SingleRowSummaryProps {
@@ -22,6 +23,7 @@ interface SingleRowSummaryProps {
 
 export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) {
   const { transactions, income, expense, balance, label } = periodData
+  const colors = useThemeColors()
 
   // Calcula qtd de transações de cada tipo
   const { incomeTransactions, expenseTransactions } = useMemo(() => {
@@ -30,11 +32,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
       expenseTransactions: transactions.filter(t => t.type === 'EXPENSE').length
     }
   }, [transactions])
-
-  const cardBg = useColorModeValue('white', '#111111')
-  const borderColor = useColorModeValue('gray.200', 'gray.800')
-  const textColor = useColorModeValue('gray.600', 'gray.300')
-  const labelColor = useColorModeValue('gray.700', 'white')
 
   const stats = [
     {
@@ -76,18 +73,19 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
   ]
 
   return (
-    <Card bg={cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={borderColor}>
+    <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
       <CardBody p={{ base: 6, md: 8 }}>
         <VStack spacing={6} align="stretch">
           <HStack spacing={3} align="center">
-            <Text fontSize="lg" fontWeight="600" color={labelColor}>
+            <PieChart size={20} color={colors.text.secondary} />
+            <Text fontSize="lg" fontWeight="600" color={colors.text.label}>
               Financial Summary
             </Text>
             <Badge colorScheme="blue" borderRadius="full" px={3}>
               {label}
             </Badge>
           </HStack>
-          <Text fontSize="sm" color={textColor}>
+          <Text fontSize="sm" color={colors.text.secondary}>
             Complete financial overview for the selected period
           </Text>
           
@@ -116,7 +114,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
                     <VStack spacing={4} align="center">
                       <HStack spacing={3} align="center">
                         <IconComponent size={20} color={stat.color} />
-                        <Text fontSize="sm" fontWeight="600" color={labelColor}>
+                        <Text fontSize="sm" fontWeight="600" color={colors.text.label}>
                           {stat.label}
                         </Text>
                       </HStack>
@@ -124,7 +122,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
                         <StatNumber fontSize="2xl" fontWeight="700" color={stat.color}>
                           {stat.displayValue}
                         </StatNumber>
-                        <StatHelpText fontSize="xs" color={textColor}>
+                        <StatHelpText fontSize="xs" color={colors.text.secondary}>
                           {stat.helpText}
                         </StatHelpText>
                       </Stat>
