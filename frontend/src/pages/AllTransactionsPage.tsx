@@ -19,10 +19,10 @@ export default function AllTransactionsPage() {
     setLoading(true)
     try {
       if (hasActiveFilters(filters)) {
-        const filtered = await searchTransactions(filters ?? {}, user.token)
+        const filtered = await searchTransactions(filters ?? {})
         setTransactions(filtered)
       } else {
-        const transactionsData = await listTransactions(user.token)
+        const transactionsData = await listTransactions()
         setTransactions(transactionsData)
       }
     } catch (err) {

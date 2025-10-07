@@ -64,7 +64,7 @@ import {
         searchTransactions({
           ...searchFilters,
           type: searchFilters.type === null ? undefined : searchFilters.type
-        }, user.token)
+        })
           .then(data => setTransactions(data))
           .catch(err => {
             console.error('Erro ao buscar transações:', err)

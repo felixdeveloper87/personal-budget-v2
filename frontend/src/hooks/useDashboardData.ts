@@ -19,13 +19,13 @@ export function useDashboardData(selectedDate: Date) {
     setLoading(true)
     try {
       if (hasActiveFilters(filters)) {
-        const filtered = await searchTransactions(filters ?? {}, user.token)
+        const filtered = await searchTransactions(filters ?? {})
         setTransactions(filtered)
         setMonthSummary(null)
       } else {
         const [transactionsData, summaryData] = await Promise.all([
-          listTransactions(user.token),
-          getMonthlySummary(selectedDate, user.token),
+          listTransactions(),
+          getMonthlySummary(selectedDate),
         ])
         setTransactions(transactionsData)
         setMonthSummary(convertMonthlySummary(summaryData))

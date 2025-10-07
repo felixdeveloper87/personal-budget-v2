@@ -33,7 +33,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     setIsSearching(true)
     setFilters(newFilters)
     try {
-      const data = await searchTransactions(newFilters, user.token)
+      const data = await searchTransactions(newFilters)
       setResults(data)
     } catch (err) {
       console.error('Erro ao buscar transações', err)

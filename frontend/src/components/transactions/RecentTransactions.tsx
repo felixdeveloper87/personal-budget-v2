@@ -31,7 +31,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
     if (!user?.token) return
     
     try {
-      await deleteTransaction(transactionId, user.token)
+      await deleteTransaction(transactionId)
       toast({ title: 'Transaction deleted', status: 'success' })
       onTransactionDeleted?.()
     } catch (error: any) {

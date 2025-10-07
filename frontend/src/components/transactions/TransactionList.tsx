@@ -32,7 +32,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
     if (!user?.token) return
     
     try {
-      await deleteTransaction(transactionId, user.token)
+      await deleteTransaction(transactionId)
       toast({ title: 'Transaction deleted', status: 'success' })
       onTransactionDeleted?.()
     } catch (error: any) {
