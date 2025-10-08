@@ -4,6 +4,7 @@ import { Transaction } from '../../types'
 import { deleteTransaction } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemo, useCallback } from 'react'
+import { formatTransactionDateTime } from '../../utils/dateTime'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
@@ -71,13 +72,15 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                     {tx.description}
                   </Text>
                 )}
-                {/* ✅ Já certo: exibe só a data */}
-                <Text fontSize="xs" color="gray.500">
-                  {new Date(tx.dateTime).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                </Text>
+                {/* Exibe data e horário */}
+                <VStack align="start" spacing={0}>
+                  <Text fontSize="xs" color="gray.500">
+                    {formatTransactionDateTime(tx.dateTime).shortDate}
+                  </Text>
+                  <Text fontSize="xs" color="gray.400">
+                    {formatTransactionDateTime(tx.dateTime).time}
+                  </Text>
+                </VStack>
               </VStack>
 
               <HStack spacing={2}>

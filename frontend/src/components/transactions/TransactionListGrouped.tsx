@@ -24,6 +24,7 @@ import { Transaction } from '../../types'
 import { deleteTransaction } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
 import { useMemo, useCallback, useState } from 'react'
+import { formatTransactionDateTime } from '../../utils/dateTime'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
@@ -210,7 +211,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                     <Table variant="simple" size="sm">
                       <Thead>
                         <Tr>
-                          <Th>Date</Th>
+                          <Th>Date & Time</Th>
                           <Th>Type</Th>
                           <Th>Category</Th>
                           <Th>Description</Th>
@@ -222,13 +223,14 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                         {group.transactions.map((tx) => (
                           <Tr key={tx.id}>
                             <Td>
-                              <Text fontSize="sm">
-                                {new Date(tx.dateTime).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric'
-                                })}
-                              </Text>
+                              <VStack spacing={1} align="start">
+                                <Text fontSize="sm" fontWeight="medium">
+                                  {formatTransactionDateTime(tx.dateTime).date}
+                                </Text>
+                                <Text fontSize="xs" color="gray.500">
+                                  {formatTransactionDateTime(tx.dateTime).time}
+                                </Text>
+                              </VStack>
                             </Td>
                             <Td>
                               <Badge
