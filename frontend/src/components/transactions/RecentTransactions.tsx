@@ -18,27 +18,27 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
   const { user } = useAuth()
   const toast = useToast()
 
-  // Memoize filtered and sorted transactions to prevent recalculation on every render
-  const filteredTransactions = useMemo(() => 
-    transactions
-      .filter(tx => tx.type === type)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, limit),
+  const filteredTransactions = useMemo(
+    () =>
+      transactions
+        .filter(tx => tx.type === type)
+        .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
+        .slice(0, limit),
     [transactions, type, limit]
   )
 
   const handleDelete = useCallback(async (transactionId: number) => {
     if (!user?.token) return
-    
+
     try {
       await deleteTransaction(transactionId)
       toast({ title: 'Transaction deleted', status: 'success' })
       onTransactionDeleted?.()
     } catch (error: any) {
-      toast({ 
-        title: 'Error deleting transaction', 
+      toast({
+        title: 'Error deleting transaction',
         description: error?.response?.data?.message || 'Failed to delete transaction',
-        status: 'error' 
+        status: 'error'
       })
     }
   }, [user?.token, toast, onTransactionDeleted])
@@ -71,13 +71,15 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                     {tx.description}
                   </Text>
                 )}
+                {/* ✅ Já certo: exibe só a data */}
                 <Text fontSize="xs" color="gray.500">
-                  {new Date(tx.date).toLocaleDateString('en-US', { 
-                    month: 'short', 
-                    day: 'numeric' 
+                  {new Date(tx.dateTime).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
                   })}
                 </Text>
               </VStack>
+
               <HStack spacing={2}>
                 <Badge
                   colorScheme={type === 'INCOME' ? 'green' : 'red'}

@@ -9,11 +9,12 @@ import com.example.budget.repository.TransactionRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import java.time.format.DateTimeFormatter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,11 +48,11 @@ public class TransactionService {
 
     public MonthlySummary monthlySummary(int year, int month, User user) {
         YearMonth ym = YearMonth.of(year, month);
-        LocalDate start = ym.atDay(1);
-        LocalDate end = ym.atEndOfMonth();
+        LocalDateTime start = ym.atDay(1).atStartOfDay();
+        LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59);
 
-        BigDecimal income = repository.sumByDateBetweenAndTypeAndUser(start, end, TransactionType.INCOME, user);
-        BigDecimal expense = repository.sumByDateBetweenAndTypeAndUser(start, end, TransactionType.EXPENSE, user);
+        BigDecimal income = repository.sumByDateTimeBetweenAndTypeAndUser(start, end, TransactionType.INCOME, user);
+        BigDecimal expense = repository.sumByDateTimeBetweenAndTypeAndUser(start, end, TransactionType.EXPENSE, user);
         BigDecimal balance = income.subtract(expense);
 
         List<MonthlySummary.CategoryAggregate> byCategory = repository.sumByCategoryBetweenAndUser(start, end, user)
@@ -79,18 +80,19 @@ public class TransactionService {
             String startDate,
             String endDate,
             User user) {
-        final LocalDate start;
-        final LocalDate end;
+
+        final LocalDateTime start;
+        final LocalDateTime end;
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         if (StringUtils.hasText(startDate)) {
-            start = LocalDate.parse(startDate, formatter);
+            start = LocalDate.parse(startDate, formatter).atStartOfDay();
         } else {
             start = null;
         }
         if (StringUtils.hasText(endDate)) {
-            end = LocalDate.parse(endDate, formatter);
+            end = LocalDate.parse(endDate, formatter).atTime(23, 59, 59);
         } else {
             end = null;
         }
@@ -124,11 +126,11 @@ public class TransactionService {
         }
 
         if (start != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("date"), start));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("dateTime"), start));
         }
 
         if (end != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("date"), end));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("dateTime"), end));
         }
 
         return repository.findAll(spec);

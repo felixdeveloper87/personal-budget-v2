@@ -38,7 +38,6 @@ export function usePeriodData(
 
       case 'week':
         const dayOfWeek = now.getDay()
-        // Ajusta para que segunda-feira seja o primeiro dia da semana (0 = domingo, 1 = segunda)
         const adjustedDayOfWeek = dayOfWeek === 0 ? 6 : dayOfWeek - 1
         const startOfWeek = new Date(now)
         startOfWeek.setDate(now.getDate() - adjustedDayOfWeek)
@@ -69,13 +68,13 @@ export function usePeriodData(
         label = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
     }
 
-    // Filter transactions for the selected period
+    // ✅ Filtro ajustado: trabalha apenas com "tx.dateTime"
     const periodTransactions = transactions.filter(tx => {
-      const txDate = new Date(tx.date)
+      const txDate = new Date(tx.dateTime)
       return txDate >= startDate && txDate <= endDate
     })
 
-    // Calculate totals
+    // ✅ Totais coerentes
     const income = periodTransactions
       .filter(tx => tx.type === 'INCOME')
       .reduce((sum, tx) => sum + tx.amount, 0)

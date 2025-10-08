@@ -65,7 +65,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     const groups: Record<string, MonthGroup> = {}
 
     transactions.forEach(transaction => {
-      const date = new Date(transaction.date)
+      const date = new Date(transaction.dateTime)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
       
@@ -93,7 +93,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     // Calculate net amount and sort transactions within each group
     Object.values(groups).forEach(group => {
       group.netAmount = group.totalIncome - group.totalExpense
-      group.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      group.transactions.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
     })
 
     // Sort groups by month (newest first)
@@ -223,7 +223,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                           <Tr key={tx.id}>
                             <Td>
                               <Text fontSize="sm">
-                                {new Date(tx.date).toLocaleDateString('en-US', {
+                                {new Date(tx.dateTime).toLocaleDateString('en-US', {
                                   month: 'short',
                                   day: 'numeric',
                                   year: 'numeric'

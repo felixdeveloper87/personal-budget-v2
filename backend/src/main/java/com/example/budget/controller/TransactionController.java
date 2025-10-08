@@ -14,6 +14,7 @@ import java.util.List;
 @RequestMapping("/api")
 @CrossOrigin
 public class TransactionController {
+
     private final TransactionService service;
 
     public TransactionController(TransactionService service) {
@@ -23,6 +24,7 @@ public class TransactionController {
     @GetMapping("/transactions")
     public List<Transaction> all(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
+        System.out.println("DEBUG: Logged user ID = " + user.getId() + ", email = " + user.getEmail());
         return service.findAllByUser(user);
     }
 
@@ -75,8 +77,7 @@ public class TransactionController {
                         tx.getType(),
                         tx.getCategory(),
                         tx.getAmount(),
-                        tx.getDate()))
+                        tx.getDateTime().toLocalDate()))
                 .toList();
     }
-
 }

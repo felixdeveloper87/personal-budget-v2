@@ -58,8 +58,12 @@ export default function TransactionForm({
 
       setLoading(true)
       try {
+        const now = new Date()
+        const selectedDate = new Date(date)
+        selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+
         const tx: Transaction = {
-          date,
+          dateTime: selectedDate.toISOString(),
           type,
           category,
           description,

@@ -3,7 +3,7 @@ package com.example.budget.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "transactions")
@@ -13,7 +13,8 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
+    @Column(name = "date_time")
+    private LocalDateTime dateTime;
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
@@ -30,25 +31,68 @@ public class Transaction {
     @JsonIgnore
     private User user;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    // ⚡ Define automaticamente o horário ao criar a transação
+    @PrePersist
+    protected void onCreate() {
+        if (this.dateTime == null) {
+            this.dateTime = LocalDateTime.now();
+        }
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    // Getters e Setters
+    public Long getId() {
+        return id;
+    }
 
-    public TransactionType getType() { return type; }
-    public void setType(TransactionType type) { this.type = type; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public TransactionType getType() {
+        return type;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
-

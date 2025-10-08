@@ -3,7 +3,7 @@ export type TransactionType = 'INCOME' | 'EXPENSE'
 // Transação padrão
 export interface Transaction {
   id?: number // opcional apenas na criação
-  date: string // ISO date (yyyy-MM-dd)
+  dateTime: string // ISO date (yyyy-MM-dd)
   type: TransactionType
   category: string
   description: string

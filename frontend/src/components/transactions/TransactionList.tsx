@@ -45,9 +45,9 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
   }, [user?.token, toast, onTransactionDeleted])
 
   // Memoize sorted transactions to prevent recalculation on every render
-  const sortedTransactions = useMemo(() => 
+   const sortedTransactions = useMemo(() => 
     transactions
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
+      .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()),
     [transactions]
   )
 
@@ -78,7 +78,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
               <Tr key={tx.id}>
                 <Td>
                   <Text fontSize="sm">
-                    {new Date(tx.date).toLocaleDateString('en-US', {
+                    {new Date(tx.dateTime).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
                       year: 'numeric'
