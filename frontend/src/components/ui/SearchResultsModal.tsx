@@ -79,7 +79,7 @@ import {
         const matchesText = searchFilters.text ? t.description.toLowerCase().includes(searchFilters.text.toLowerCase()) : true
         const matchesType = searchFilters.type ? t.type.toLowerCase() === searchFilters.type : true
         const matchesCategory = searchFilters.category ? t.category.toLowerCase() === searchFilters.category.toLowerCase() : true
-        const transactionDate = new Date(t.date)
+        const transactionDate = new Date(t.dateTime)
         const matchesStartDate = searchFilters.startDate ? transactionDate >= new Date(searchFilters.startDate) : true
         const matchesEndDate = searchFilters.endDate ? transactionDate <= new Date(searchFilters.endDate) : true
   
@@ -101,7 +101,7 @@ import {
       })
   
       Object.values(grouped).forEach(cat =>
-        cat.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        cat.transactions.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
       )
   
       const groupedByCategory = Object.entries(grouped)
@@ -294,7 +294,7 @@ import {
                               {visibleTransactions.map((t) => (
                                 <Tr key={t.id}>
                                   <Td fontSize="xs" color={colors.text}>
-                                    {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {new Date(t.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                   </Td>
                                   <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
                                     {t.description || 'No description'}

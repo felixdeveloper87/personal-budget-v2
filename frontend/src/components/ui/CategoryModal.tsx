@@ -61,7 +61,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
     }, {} as Record<string, { total: number; transactions: Transaction[] }>)
 
     Object.values(categoryTotals).forEach(cat =>
-      cat.transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      cat.transactions.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
     )
 
     const sortedCategories = Object.entries(categoryTotals)
@@ -260,7 +260,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                               {visibleTransactions.map((t) => (
                                 <Tr key={t.id}>
                                   <Td fontSize="xs" color={colors.text}>
-                                    {new Date(t.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {new Date(t.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                   </Td>
                                   <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
                                     {t.description || 'No description'}
