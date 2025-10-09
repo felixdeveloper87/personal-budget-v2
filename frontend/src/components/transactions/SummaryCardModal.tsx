@@ -72,13 +72,6 @@ export default function SummaryCardModal({
             />
           )}
           
-          {!selectedCard && (
-            <VStack spacing={4} align="stretch">
-              <Text color={colors.text.secondary}>
-                Select a card to view detailed analytics and charts.
-              </Text>
-            </VStack>
-          )}
         </ModalBody>
       </ModalContent>
     </Modal>
