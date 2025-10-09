@@ -2,5 +2,5 @@
 export { default as CategoryTabsChart } from './CategoryTabsChart'
 export { default as ExpenseChart } from './ExpenseChart'
 export { default as IncomeChart } from './IncomeChart'
-export { default as SummaryChart } from './SummaryChart'
+// export { default as SummaryChart } from './SummaryChart'
 

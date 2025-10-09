@@ -10,12 +10,14 @@ import {
   HStack,
   Text,
   Badge,
-  Divider
+  Divider,
+  useDisclosure
 } from '@chakra-ui/react'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, PieChart, Calculator, FileText, Wallet } from 'lucide-react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { useThemeColors } from '../../hooks/useThemeColors'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import SummaryCardModal from './SummaryCardModal'
 
 interface SingleRowSummaryProps {
   periodData: PeriodData
@@ -24,6 +26,8 @@ interface SingleRowSummaryProps {
 export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) {
   const { transactions, income, expense, balance, label } = periodData
   const colors = useThemeColors()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [selectedCard, setSelectedCard] = useState<string | null>(null)
 
   // Calcula qtd de transações de cada tipo
   const { incomeTransactions, expenseTransactions } = useMemo(() => {
@@ -35,6 +39,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
 
   const stats = [
     {
+      id: 'transactions',
       label: 'Total Transactions',
       icon: BarChart3,
       color: 'blue.500',
@@ -44,6 +49,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
       displayValue: transactions.length.toString()
     },
     {
+      id: 'income',
       label: 'Income',
       icon: TrendingUp,
       color: 'green.500',
@@ -53,6 +59,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
       displayValue: `£${income.toFixed(2)}`
     },
     {
+      id: 'expenses',
       label: 'Expenses',
       icon: TrendingDown,
       color: 'red.500',
@@ -62,6 +69,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
       displayValue: `£${expense.toFixed(2)}`
     },
     {
+      id: 'balance',
       label: 'Balance',
       icon: DollarSign,
       color: balance >= 0 ? 'green.500' : 'red.500',
@@ -72,7 +80,13 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
     }
   ]
 
+  const handleCardClick = (cardId: string) => {
+    setSelectedCard(cardId)
+    onOpen()
+  }
+
   return (
+    <>
     <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
       <CardBody p={{ base: 6, md: 8 }}>
         <VStack spacing={6} align="stretch">
@@ -104,11 +118,13 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
                   borderColor={useColorModeValue('gray.100', 'gray.700')}
                   borderRadius="xl"
                   shadow="sm"
+                  cursor="pointer"
                   _hover={{
                     transform: 'translateY(-2px)',
                     shadow: 'md'
                   }}
                   transition="all 0.2s"
+                  onClick={() => handleCardClick(stat.id)}
                 >
                   <CardBody p={6}>
                     <VStack spacing={4} align="center">
@@ -135,5 +151,16 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
         </VStack>
       </CardBody>
     </Card>
+
+    <SummaryCardModal
+      isOpen={isOpen}
+      onClose={onClose}
+      selectedCard={selectedCard}
+      cardLabel={selectedCard ? stats.find(s => s.id === selectedCard)?.label : undefined}
+      transactions={transactions}
+      selectedPeriod={label}
+      currentBalance={balance}
+    />
+  </>
   )
 }

@@ -3,4 +3,5 @@ export { default as TransactionList } from './TransactionList'
 export { default as TransactionListGrouped } from './TransactionListGrouped'
 export { default as RecentTransactions } from './RecentTransactions'
 export { default as SingleRowSummary } from './SingleRowSummary'
+export { default as SummaryCardModal } from './SummaryCardModal'
 

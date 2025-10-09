@@ -1,5 +1,5 @@
 import { VStack } from '@chakra-ui/react'
-import { ChartCard, SummaryChart, CategoryTabsChart, PeriodType } from '../components'
+import { ChartCard, /* SummaryChart, */ CategoryTabsChart, PeriodType } from '../components'
 import { Transaction } from '../types'
 
 interface ChartsSectionProps {
@@ -19,14 +19,14 @@ export default function ChartsSection({
 }: ChartsSectionProps) {
   return (
     <VStack spacing={6}>
-      <ChartCard>
+      {/* <ChartCard>
         <SummaryChart
           income={income}
           expense={expense}
           balance={balance}
           selectedPeriod={selectedPeriod}
         />
-      </ChartCard>
+      </ChartCard> */}
       <ChartCard>
         <CategoryTabsChart
           transactions={transactions}
