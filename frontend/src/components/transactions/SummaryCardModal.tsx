@@ -33,74 +33,13 @@ export default function SummaryCardModal({
 }: SummaryCardModalProps) {
   const colors = useThemeColors()
 
-  const getModalContent = () => {
-    switch (selectedCard) {
-      case 'transactions':
-        return {
-          title: 'Transaction Details',
-          description: 'Complete list of all transactions for the selected period',
-          content: [
-            '• View all transactions chronologically',
-            '• Filter by transaction type (Income/Expense)',
-            '• Search and sort functionality',
-            '• Export transaction data'
-          ]
-        }
-      case 'income':
-        return {
-          title: 'Income Analysis',
-          description: 'Detailed breakdown of all income sources',
-          content: [
-            '• Income by category breakdown',
-            '• Income trends over time',
-            '• Top income sources',
-            '• Income vs previous periods comparison'
-          ]
-        }
-      case 'expenses':
-        return {
-          title: 'Expense Analysis',
-          description: 'Detailed breakdown of all expenses',
-          content: [
-            '• Expenses by category breakdown',
-            '• Expense trends over time',
-            '• Top spending categories',
-            '• Budget vs actual spending'
-          ]
-        }
-      case 'balance':
-        return {
-          title: 'Balance Overview',
-          description: 'Financial balance analysis and insights',
-          content: [
-            '• Balance trends over time',
-            '• Savings rate analysis',
-            '• Financial health indicators',
-            '• Future projections'
-          ]
-        }
-      default:
-        return {
-          title: 'Card Details',
-          description: 'Additional information about this metric',
-          content: [
-            '• Detailed breakdown coming soon',
-            '• Interactive charts and graphs',
-            '• Export and sharing options',
-            '• Historical comparisons'
-          ]
-        }
-    }
-  }
-
-  const modalContent = getModalContent()
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl">
       <ModalOverlay />
       <ModalContent bg={colors.cardBg}>
         <ModalHeader>
-          {cardLabel || modalContent.title}
+          {cardLabel} Details
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody pb={6}>
