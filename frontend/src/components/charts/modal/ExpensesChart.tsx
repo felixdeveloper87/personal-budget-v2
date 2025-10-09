@@ -186,43 +186,6 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         </ResponsiveContainer>
       </Box>
 
-      {/* Lista de categorias com detalhes e progresso */}
-      <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
-          Category Breakdown
-        </Text>
-        <VStack spacing={3} align="stretch">
-          {categoryData.map((item, index) => {
-            const percentage = (item.amount / totalExpenses) * 100
-            return (
-              <Box key={item.category} p={3} bg={colors.cardBg} borderRadius="md">
-                <HStack justify="space-between" mb={2}>
-                  <HStack spacing={3}>
-                    <Box w={3} h={3} bg={pieData[index]?.color} borderRadius="sm" />
-                    <Text fontWeight="medium">{item.category}</Text>
-                    <Badge colorScheme="red" size="sm">{item.count} transactions</Badge>
-                  </HStack>
-                  <Text fontWeight="bold" color="red.500">
-                    £{item.amount.toFixed(2)}
-                  </Text>
-                </HStack>
-                <HStack spacing={2}>
-                  <Progress 
-                    value={percentage} 
-                    colorScheme="red" 
-                    size="sm" 
-                    flex={1}
-                    borderRadius="md"
-                  />
-                  <Text fontSize="sm" color={colors.text.secondary} minW="50px">
-                    {percentage.toFixed(1)}%
-                  </Text>
-                </HStack>
-              </Box>
-            )
-          })}
-        </VStack>
-      </Box>
     </VStack>
   )
 }

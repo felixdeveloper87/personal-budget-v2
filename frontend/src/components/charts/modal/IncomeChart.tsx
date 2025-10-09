@@ -186,26 +186,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         </ResponsiveContainer>
       </Box>
 
-      {/* Lista de categorias com detalhes */}
-      <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
-          Category Breakdown
-        </Text>
-        <VStack spacing={2} align="stretch">
-          {categoryData.map((item, index) => (
-            <HStack key={item.category} justify="space-between" p={3} bg={colors.cardBg} borderRadius="md">
-              <HStack spacing={3}>
-                <Box w={3} h={3} bg={pieData[index]?.color} borderRadius="sm" />
-                <Text fontWeight="medium">{item.category}</Text>
-                <Badge colorScheme="green" size="sm">{item.count} transactions</Badge>
-              </HStack>
-              <Text fontWeight="bold" color="green.500">
-                £{item.amount.toFixed(2)}
-              </Text>
-            </HStack>
-          ))}
-        </VStack>
-      </Box>
     </VStack>
   )
 }
