@@ -105,7 +105,7 @@ export default function AddTransactionSection({
             </Button>
 
             <Button
-              aria-label="Add expense transaction" // ♿ Accessibility
+              aria-label="Add expense transaction" // ♿ Accessibilityy
               onClick={handleAddExpense}
               size="lg"
               leftIcon={<TrendingDown size={24} aria-hidden="true" />}
