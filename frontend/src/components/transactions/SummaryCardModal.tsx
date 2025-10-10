@@ -10,14 +10,14 @@ import {
   Text,
   Box,
   Badge,
-  Divider,
-  useColorModeValue,
-  Icon as ChakraIcon,
   Center,
   Spinner,
+  useColorModeValue,
+  Icon as ChakraIcon,
+  useBreakpointValue,
 } from '@chakra-ui/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useMemo } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../charts/modal'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
@@ -26,10 +26,11 @@ const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
 const MotionBadge = motion.create(Badge)
 
+// ✅ Tipagem explícita das props do modal
 interface SummaryCardModalProps {
   isOpen: boolean
   onClose: () => void
-  selectedCard: string | null | undefined
+  selectedCard: 'transactions' | 'income' | 'expenses' | 'balance' | null | undefined
   cardLabel?: string
   transactions?: any[]
   selectedPeriod?: string
@@ -46,87 +47,96 @@ export default function SummaryCardModal({
 }: SummaryCardModalProps) {
   const colors = useThemeColors()
 
-  const headerInfo = useMemo(() => {
-    const map: Record<
-      string,
-      {
-        icon: React.ElementType
-        title: string
-        subtitle: string
-        color: string
-        bg: string
-        bgDark: string
-      }
-    > = {
-      transactions: {
-        icon: BarChart3,
-        title: 'Transaction Analytics',
-        subtitle: 'Complete overview of your activity',
-        color: 'blue.500',
-        bg: 'blue.50',
-        bgDark: 'blue.900',
-      },
-      income: {
-        icon: TrendingUp,
-        title: 'Income Analysis',
-        subtitle: 'Track and visualize your income streams',
-        color: 'green.500',
-        bg: 'green.50',
-        bgDark: 'green.900',
-      },
-      expenses: {
-        icon: TrendingDown,
-        title: 'Expense Analysis',
-        subtitle: 'See where your money goes',
-        color: 'red.500',
-        bg: 'red.50',
-        bgDark: 'red.900',
-      },
-      balance: {
-        icon: DollarSign,
-        title: 'Balance Overview',
-        subtitle: 'Understand your overall financial health',
-        color: 'purple.500',
-        bg: 'purple.50',
-        bgDark: 'purple.900',
-      },
-    }
+  // ✅ Tipagem do mapa de ícones e informações
+  type HeaderKey = 'transactions' | 'income' | 'expenses' | 'balance'
 
-    return map[selectedCard ?? 'transactions']
+  interface HeaderInfo {
+    icon: React.ElementType
+    title: string
+    subtitle: string
+    color: string
+    bg: string
+    bgDark: string
+  }
+
+  const headerInfoMap: Record<HeaderKey, HeaderInfo> = {
+    transactions: {
+      icon: BarChart3,
+      title: 'Transaction Analytics',
+      subtitle: 'Complete overview of your activity',
+      color: 'blue.500',
+      bg: 'blue.50',
+      bgDark: 'blue.900',
+    },
+    income: {
+      icon: TrendingUp,
+      title: 'Income Analysis',
+      subtitle: 'Track and visualize your income streams',
+      color: 'green.500',
+      bg: 'green.50',
+      bgDark: 'green.900',
+    },
+    expenses: {
+      icon: TrendingDown,
+      title: 'Expense Analysis',
+      subtitle: 'See where your money goes',
+      color: 'red.500',
+      bg: 'red.50',
+      bgDark: 'red.900',
+    },
+    balance: {
+      icon: DollarSign,
+      title: 'Balance Overview',
+      subtitle: 'Understand your overall financial health',
+      color: 'purple.500',
+      bg: 'purple.50',
+      bgDark: 'purple.900',
+    },
+  }
+
+  const headerInfo = useMemo<HeaderInfo>(() => {
+    return headerInfoMap[(selectedCard as HeaderKey) ?? 'transactions']
   }, [selectedCard])
 
-  const IconEl = headerInfo.icon as React.ElementType
+  const IconEl = headerInfo.icon
   const iconBg = useColorModeValue(headerInfo.bg, headerInfo.bgDark)
-
   const headerGradient = useColorModeValue(
     'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.15) 100%)',
     'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.25) 100%)'
   )
 
+  const modalSize = useBreakpointValue({ base: 'full', sm: 'lg', md: 'xl' })
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" motionPreset="slideInBottom">
+    <Modal isOpen={isOpen} onClose={onClose} size={modalSize} motionPreset="slideInBottom" isCentered>
       <ModalOverlay backdropFilter="blur(6px) brightness(0.9)" />
       <ModalContent
+        h={{ base: '100vh', md: 'auto' }}
+        maxH={{ base: '100vh', md: '90vh' }}
+        borderRadius={{ base: '0', md: '2xl' }}
         bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
         backdropFilter="blur(10px)"
-        borderRadius="2xl"
         boxShadow="xl"
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.700')}
         overflow="hidden"
       >
-        {/* 🌈 Header com gradiente + animações */}
+        {/* 🌈 Header */}
         <Box
           bg={headerGradient}
           backdropFilter="blur(8px)"
-          px={6}
-          pt={5}
-          pb={3}
+          px={{ base: 4, md: 6 }}
+          pt={{ base: 4, md: 5 }}
+          pb={{ base: 2, md: 3 }}
           borderBottom="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.700')}
-          boxShadow={useColorModeValue('0 2px 6px rgba(0,0,0,0.05)', '0 2px 10px rgba(0,0,0,0.4)')}
         >
-          <HStack spacing={4} align="center">
+          <HStack
+            spacing={{ base: 3, md: 4 }}
+            align="center"
+            flexWrap="wrap"
+            justify={{ base: 'center', sm: 'flex-start' }}
+          >
             <MotionBox
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -143,16 +153,25 @@ export default function SummaryCardModal({
 
             <MotionVStack
               spacing={0}
-              align="start"
+              align={{ base: 'center', sm: 'start' }}
               flex={1}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
             >
-              <Text fontSize="lg" fontWeight="700" color={colors.text.label}>
+              <Text
+                fontSize={{ base: 'md', md: 'lg' }}
+                fontWeight="700"
+                color={colors.text.label}
+                textAlign={{ base: 'center', sm: 'left' }}
+              >
                 {headerInfo.title}
               </Text>
-              <Text fontSize="sm" color={colors.text.secondary}>
+              <Text
+                fontSize={{ base: 'xs', md: 'sm' }}
+                color={colors.text.secondary}
+                textAlign={{ base: 'center', sm: 'left' }}
+              >
                 {headerInfo.subtitle}
               </Text>
             </MotionVStack>
@@ -162,16 +181,15 @@ export default function SummaryCardModal({
                 selectedCard === 'income'
                   ? 'green'
                   : selectedCard === 'expenses'
-                    ? 'red'
-                    : selectedCard === 'balance'
-                      ? 'purple'
-                      : 'blue'
+                  ? 'red'
+                  : selectedCard === 'balance'
+                  ? 'purple'
+                  : 'blue'
               }
               px={3}
               py={1}
               borderRadius="full"
-              variant="subtle"
-              fontSize="sm"
+              fontSize={{ base: 'xs', md: 'sm' }}
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.25, ease: 'easeOut' }}
@@ -181,137 +199,79 @@ export default function SummaryCardModal({
           </HStack>
         </Box>
 
-        <ModalCloseButton />
+        <ModalCloseButton top={{ base: 3, md: 4 }} right={{ base: 3, md: 4 }} />
 
-        {/* 🧊 Corpo com cards glassmorphism + animações */}
-        <ModalBody py={6} px={6}>
+        {/* 🧊 Corpo responsivo */}
+        <ModalBody
+          py={{ base: 4, md: 6 }}
+          px={{ base: 4, md: 6 }}
+          overflowY="auto"
+          maxH={{ base: 'calc(100vh - 180px)', md: '70vh' }}
+        >
           {!transactions.length ? (
             <Center py={10}>
-              <Spinner
-                size="lg"
-                color={useColorModeValue('blue.500', 'blue.300')}
-                thickness="3px"
-              />
-
+              <Spinner size="lg" color={useColorModeValue('blue.500', 'blue.300')} thickness="3px" />
             </Center>
           ) : (
             <AnimatePresence mode="wait">
               {selectedCard === 'transactions' && (
-                <motion.div
-                  key="transactions"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  <Box
-                    p={5}
-                    borderRadius="2xl"
-                    bg={useColorModeValue('rgba(255,255,255,0.65)', 'rgba(26,26,26,0.6)')}
-                    boxShadow={useColorModeValue(
-                      '0 2px 10px rgba(0,0,0,0.08)',
-                      '0 2px 12px rgba(0,0,0,0.4)'
-                    )}
-                    backdropFilter="blur(10px)"
-                    border="1px solid"
-                    borderColor={useColorModeValue('gray.200', 'gray.700')}
-                  >
-                    <TransactionsChart
-                      transactions={transactions}
-                      selectedPeriod={selectedPeriod}
-                    />
-                  </Box>
-                </motion.div>
+                <AnimatedCard>
+                  <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                </AnimatedCard>
               )}
-
               {selectedCard === 'income' && (
-                <motion.div
-                  key="income"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  <Box
-                    p={5}
-                    borderRadius="2xl"
-                    bg={useColorModeValue('rgba(235,255,245,0.7)', 'rgba(26,36,26,0.6)')}
-                    boxShadow={useColorModeValue(
-                      '0 2px 10px rgba(0,0,0,0.08)',
-                      '0 2px 12px rgba(0,0,0,0.4)'
-                    )}
-                    backdropFilter="blur(10px)"
-                    border="1px solid"
-                    borderColor={useColorModeValue('green.100', 'green.800')}
-                  >
-                    <IncomeChart
-                      transactions={transactions}
-                      selectedPeriod={selectedPeriod}
-                    />
-                  </Box>
-                </motion.div>
+                <AnimatedCard>
+                  <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                </AnimatedCard>
               )}
-
               {selectedCard === 'expenses' && (
-                <motion.div
-                  key="expenses"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  <Box
-                    p={5}
-                    borderRadius="2xl"
-                    bg={useColorModeValue('rgba(255,240,240,0.7)', 'rgba(36,26,26,0.6)')}
-                    boxShadow={useColorModeValue(
-                      '0 2px 10px rgba(0,0,0,0.08)',
-                      '0 2px 12px rgba(0,0,0,0.4)'
-                    )}
-                    backdropFilter="blur(10px)"
-                    border="1px solid"
-                    borderColor={useColorModeValue('red.100', 'red.800')}
-                  >
-                    <ExpensesChart
-                      transactions={transactions}
-                      selectedPeriod={selectedPeriod}
-                    />
-                  </Box>
-                </motion.div>
+                <AnimatedCard>
+                  <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                </AnimatedCard>
               )}
-
               {selectedCard === 'balance' && (
-                <motion.div
-                  key="balance"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.25, ease: 'easeOut' }}
-                >
-                  <Box
-                    p={5}
-                    borderRadius="2xl"
-                    bg={useColorModeValue('rgba(240,235,255,0.7)', 'rgba(26,26,36,0.6)')}
-                    boxShadow={useColorModeValue(
-                      '0 2px 10px rgba(0,0,0,0.08)',
-                      '0 2px 12px rgba(0,0,0,0.4)'
-                    )}
-                    backdropFilter="blur(10px)"
-                    border="1px solid"
-                    borderColor={useColorModeValue('purple.100', 'purple.800')}
-                  >
-                    <BalanceChart
-                      transactions={transactions}
-                      selectedPeriod={selectedPeriod}
-                      currentBalance={currentBalance}
-                    />
-                  </Box>
-                </motion.div>
+                <AnimatedCard>
+                  <BalanceChart
+                    transactions={transactions}
+                    selectedPeriod={selectedPeriod}
+                    currentBalance={currentBalance}
+                  />
+                </AnimatedCard>
               )}
             </AnimatePresence>
           )}
         </ModalBody>
       </ModalContent>
     </Modal>
+  )
+}
+
+// ✅ Tipagem do AnimatedCard
+interface AnimatedCardProps {
+  children: ReactNode
+}
+
+function AnimatedCard({ children }: AnimatedCardProps) {
+  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(26,26,26,0.6)')
+  const borderColor = useColorModeValue('gray.200', 'gray.700')
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+    >
+      <Box
+        p={{ base: 4, md: 5 }}
+        borderRadius="2xl"
+        bg={bg}
+        boxShadow={useColorModeValue('0 2px 10px rgba(0,0,0,0.08)', '0 2px 12px rgba(0,0,0,0.4)')}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={borderColor}
+      >
+        {children}
+      </Box>
+    </motion.div>
   )
 }
