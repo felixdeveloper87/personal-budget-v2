@@ -69,9 +69,9 @@ export default function AddTransactionSection({
             Choose an action to quickly add a transaction
           </Text>
 
-          {/* 📱 Mobile layout (stacked buttons) */}
+          {/* 📱 Mobile layout (stacked buttons) - Otimizado para iPhone */}
           <VStack
-            spacing={{ base: 4, sm: 5 }}
+            spacing={{ base: 3, sm: 4 }}
             align="stretch"
             display={{ base: 'flex', sm: 'none' }}
           >
@@ -79,11 +79,11 @@ export default function AddTransactionSection({
               aria-label="Add income transaction" // ♿ Accessibility
               onClick={handleAddIncome}
               size="lg"
-              leftIcon={<TrendingUp size={28} aria-hidden="true" />}
+              leftIcon={<TrendingUp size={24} aria-hidden="true" />}
               borderRadius="2xl"
-              px={8}
-              py={8}
-              fontSize="lg"
+              px={6}
+              py={6}
+              fontSize={{ base: "md", sm: "lg" }}
               fontWeight="800"
               bg="linear-gradient(135deg, #22c55e, #16a34a)"
               color="white"
@@ -108,11 +108,11 @@ export default function AddTransactionSection({
               aria-label="Add expense transaction" // ♿ Accessibility
               onClick={handleAddExpense}
               size="lg"
-              leftIcon={<TrendingDown size={28} aria-hidden="true" />}
+              leftIcon={<TrendingDown size={24} aria-hidden="true" />}
               borderRadius="2xl"
-              px={8}
-              py={8}
-              fontSize="lg"
+              px={6}
+              py={6}
+              fontSize={{ base: "md", sm: "lg" }}
               fontWeight="800"
               bg="linear-gradient(135deg, #ef4444, #b91c1c)"
               color="white"
@@ -204,13 +204,13 @@ export default function AddTransactionSection({
         </VStack>
       </FormCard>
 
-      {/* 🧾 Modal with Transaction Form */}
+      {/* 🧾 Modal with Transaction Form - Otimizado para iPhone 14 Pro */}
       <Modal
         isOpen={isOpen}
         onClose={onClose}
         size={{ base: 'full', sm: 'md', md: 'lg', lg: 'xl' }}
         closeOnOverlayClick={false}
-        isCentered
+        isCentered={false}
         motionPreset="slideInBottom"
       >
         <ModalOverlay
@@ -224,8 +224,8 @@ export default function AddTransactionSection({
         <ModalContent
           borderRadius={{ base: 'none', sm: '3xl', md: '3xl' }}
           m={0}
-          h={{ base: '100vh', sm: 'auto', md: 'auto' }}
-          maxH={{ base: '100vh', sm: '85vh', md: '80vh' }}
+          h={{ base: '100dvh', sm: 'auto', md: 'auto' }}
+          maxH={{ base: '100dvh', sm: '85vh', md: '80vh' }}
           overflow="hidden"
           mx={{ base: 0, sm: 4 }}
           my={{ base: 0, sm: 4 }}
@@ -233,14 +233,22 @@ export default function AddTransactionSection({
           boxShadow="0 25px 50px -12px rgba(0, 0, 0, 0.25)"
           border="1px solid"
           borderColor={colors.border}
+          // 👇 Safe area support para iPhone 14 Pro
+          sx={{
+            paddingTop: 'env(safe-area-inset-top, 0px)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+            paddingLeft: 'env(safe-area-inset-left, 0px)',
+            paddingRight: 'env(safe-area-inset-right, 0px)',
+          }}
         >
-          {/* 🏷️ Modal Header with gradient based on transaction type */}
+          {/* 🏷️ Modal Header com espaçamento adequado para iPhone 14 Pro */}
           <ModalHeader
             textAlign="center"
             borderBottom="1px"
             borderColor={colors.border}
-            fontSize={{ base: 'xl', sm: '2xl' }}
-            py={{ base: 6, sm: 8 }}
+            fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+            py={{ base: 8, sm: 8, md: 8 }}
+            px={{ base: 4, sm: 6, md: 8 }}
             bg={
               transactionType === 'INCOME'
                 ? 'linear-gradient(135deg, #22c55e, #16a34a)'
@@ -249,6 +257,10 @@ export default function AddTransactionSection({
             color="white"
             position="relative"
             overflow="hidden"
+            // 👇 Espaçamento extra para Dynamic Island/Notch
+            sx={{
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
+            }}
           >
             <Box
               position="absolute"
@@ -281,19 +293,30 @@ export default function AddTransactionSection({
           <ModalCloseButton
             aria-label="Close transaction form" // ♿ Accessibility
             size="lg"
-            top={{ base: 4, sm: 6 }}
+            top={{ base: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', sm: 6 }}
             right={{ base: 4, sm: 6 }}
             color="white"
-            bg="rgba(0, 0, 0, 0.2)"
+            bg="rgba(0, 0, 0, 0.3)"
             borderRadius="full"
-            _hover={{ bg: 'rgba(0, 0, 0, 0.3)' }}
+            _hover={{ bg: 'rgba(0, 0, 0, 0.5)' }}
             zIndex={2}
+            backdropFilter="blur(8px)"
           />
 
-          {/* 🧩 Modal Body with Transaction Form */}
+          {/* 🧩 Modal Body otimizado para iPhone 14 Pro */}
           <ModalBody
             p={0}
             overflowY="auto"
+            maxH={{ base: 'calc(100dvh - 200px)', sm: '70vh' }}
+            // 👇 Safe area completo para iPhone 14 Pro
+            sx={{
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+              paddingLeft: 'env(safe-area-inset-left, 0px)',
+              paddingRight: 'env(safe-area-inset-right, 0px)',
+              WebkitOverflowScrolling: 'touch',
+              scrollBehavior: 'smooth',
+              overscrollBehavior: 'contain',
+            }}
             css={{
               '&::-webkit-scrollbar': { width: '6px' },
               '&::-webkit-scrollbar-track': { background: 'transparent' },
@@ -304,7 +327,7 @@ export default function AddTransactionSection({
               },
             }}
           >
-            <Box p={{ base: 6, sm: 8, md: 10 }}>
+            <Box p={{ base: 4, sm: 6, md: 8, lg: 10 }}>
               <TransactionForm
                 transactions={transactions}
                 onCreated={handleTransactionCreated}

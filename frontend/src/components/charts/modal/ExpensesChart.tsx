@@ -12,7 +12,7 @@ import {
   LineChart,
   Line
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge, Progress } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, Badge, Progress, useBreakpointValue } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
 interface ExpensesChartProps {
@@ -22,6 +22,8 @@ interface ExpensesChartProps {
 
 export default function ExpensesChart({ transactions, selectedPeriod }: ExpensesChartProps) {
   const colors = useThemeColors()
+  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
+  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250, lg: 300 })
 
   // Filtrar apenas transações de despesas
   const expenseTransactions = transactions.filter(t => t.type === 'EXPENSE')
@@ -78,26 +80,49 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
   const avgExpense = expenseTransactions.length > 0 ? totalExpenses / expenseTransactions.length : 0
 
   return (
-    <VStack spacing={6} align="stretch">
-      {/* Estatísticas rápidas */}
-      <HStack spacing={6} justify="center">
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="red.500">
+    <VStack spacing={{ base: 4, sm: 5, md: 6 }} align="stretch">
+      {/* Estatísticas rápidas - responsivas para iPhone */}
+      <HStack 
+        spacing={{ base: 3, sm: 4, md: 6 }} 
+        justify="center" 
+        wrap="wrap"
+        gap={{ base: 2, sm: 3 }}
+      >
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="red.500"
+          >
             £{totalExpenses.toFixed(2)}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Total Expenses</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Total Expenses
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="blue.500"
+          >
             {expenseTransactions.length}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Transactions</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Transactions
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="purple.500"
+          >
             £{avgExpense.toFixed(2)}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Average</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Average
+          </Text>
         </Box>
       </HStack>
 
@@ -126,10 +151,15 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
 
       {/* Gráfico de pizza - distribuição por categoria */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Expense Distribution
         </Text>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={smallChartHeight}>
           <PieChart>
             <Pie
               data={pieData}
@@ -159,10 +189,15 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
 
       {/* Gráfico de linha - tendência temporal */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Expense Timeline
         </Text>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={smallChartHeight}>
           <LineChart data={timelineData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
