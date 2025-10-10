@@ -27,7 +27,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
   const { transactions, income, expense, balance, label } = periodData
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedCard, setSelectedCard] = useState<string | null>(null)
+  const [selectedCard, setSelectedCard] = useState<'transactions' | 'income' | 'expenses' | 'balance' | null>(null)
 
   // Calcula qtd de transações de cada tipo
   const { incomeTransactions, expenseTransactions } = useMemo(() => {
@@ -80,7 +80,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
     }
   ]
 
-  const handleCardClick = (cardId: string) => {
+  const handleCardClick = (cardId: 'transactions' | 'income' | 'expenses' | 'balance') => {
     setSelectedCard(cardId)
     onOpen()
   }
@@ -124,7 +124,7 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
                     shadow: 'md'
                   }}
                   transition="all 0.2s"
-                  onClick={() => handleCardClick(stat.id)}
+                  onClick={() => handleCardClick(stat.id as 'transactions' | 'income' | 'expenses' | 'balance')}
                 >
                   <CardBody p={6}>
                     <VStack spacing={4} align="center">
