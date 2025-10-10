@@ -156,7 +156,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
         </ResponsiveContainer>
       </Box>
 
-      {/* Gráfico de pizza - distribuição por tipo */}
+      {/* Gráfico de pizza - distribuição por tipo
       <Box>
         <Text 
           fontSize={{ base: "md", sm: "lg" }} 
@@ -191,7 +191,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
             />
           </PieChart>
         </ResponsiveContainer>
-      </Box>
+      </Box> */}
     </VStack>
   )
 }

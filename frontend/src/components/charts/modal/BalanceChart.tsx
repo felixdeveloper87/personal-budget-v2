@@ -113,7 +113,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
       </HStack>
 
       {/* Gráfico de área - evolução do saldo */}
-      <Box>
+      {/* <Box>
         <Text 
           fontSize={{ base: "md", sm: "lg" }} 
           fontWeight="semibold" 
@@ -144,7 +144,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
             />
           </AreaChart>
         </ResponsiveContainer>
-      </Box>
+      </Box> */}
 
       {/* Gráfico de linha - saldo com pontos de inflexão */}
       <Box>

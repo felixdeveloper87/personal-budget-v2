@@ -102,7 +102,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       </HStack>
 
       {/* Gráfico de barras - receitas por categoria */}
-      <Box>
+      {/* <Box>
         <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
           Income by Category
         </Text>
@@ -122,7 +122,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             <Bar dataKey="amount" fill="#38A169" />
           </BarChart>
         </ResponsiveContainer>
-      </Box>
+      </Box> */}
 
       {/* Gráfico de pizza - distribuição por categoria */}
       <Box>

@@ -102,7 +102,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
       </HStack>
 
       {/* Gráfico de barras - despesas por categoria */}
-      <Box>
+      {/* <Box>
         <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
           Expenses by Category
         </Text>
@@ -122,7 +122,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
             <Bar dataKey="amount" fill="#E53E3E" />
           </BarChart>
         </ResponsiveContainer>
-      </Box>
+      </Box> */}
 
       {/* Gráfico de pizza - distribuição por categoria */}
       <Box>
