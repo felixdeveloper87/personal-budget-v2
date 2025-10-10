@@ -15,6 +15,49 @@ const theme = extendTheme({
     xl: '1280px',
     '2xl': '1536px',
   },
+  styles: {
+    global: {
+      // 👇 Estilos específicos para navegadores móveis (Safari/Chrome no iPhone)
+      html: {
+        // Suporte para safe areas em navegadores móveis
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+        // Melhor scroll no iOS
+        WebkitOverflowScrolling: 'touch',
+        // Previne zoom indesejado no iOS
+        touchAction: 'manipulation',
+      },
+      body: {
+        // Garante que o body use toda a altura disponível
+        minHeight: '100dvh', // Dynamic viewport height para navegadores modernos
+        // Previne scroll horizontal indesejado
+        overflowX: 'hidden',
+        // Estilos de tema
+        bg: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+        color: '#1e293b',
+        transition: 'background-color 0.3s ease, color 0.3s ease',
+      },
+      // Estilos para modo escuro
+      '[data-theme="dark"] body': {
+        bg: '#000000',
+        color: '#ffffff',
+      },
+      // Bordas globais
+      '*': {
+        borderColor: '#e2e8f0',
+      },
+      '[data-theme="dark"] *': {
+        borderColor: 'gray.800',
+      },
+      // Melhora a experiência de scroll em modais no iOS
+      '.chakra-modal__content': {
+        WebkitOverflowScrolling: 'touch',
+        overscrollBehavior: 'contain',
+      },
+    },
+  },
   fonts: {
     heading: 'Inter, system-ui, sans-serif',
     body: 'Inter, system-ui, sans-serif',
@@ -73,19 +116,6 @@ const theme = extendTheme({
         muted: 'gray.400',
       },
     },
-  },
-  styles: {
-    global: (props: any) => ({
-      body: {
-        bg: props.colorMode === 'dark' ? '#000000' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        color: props.colorMode === 'dark' ? '#ffffff' : '#1e293b',
-        transition: 'background-color 0.3s ease, color 0.3s ease',
-        minHeight: '100vh',
-      },
-      '*': {
-        borderColor: props.colorMode === 'dark' ? 'gray.800' : '#e2e8f0',
-      },
-    }),
   },
   components: {
     Button: {
