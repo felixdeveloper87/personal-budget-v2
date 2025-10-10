@@ -108,11 +108,17 @@ export default function SummaryCardModal({
   const modalSize = useBreakpointValue({ base: 'full', sm: 'lg', md: 'xl' })
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size={modalSize} motionPreset="slideInBottom" isCentered>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={useBreakpointValue({ base: 'full', sm: 'md', md: 'xl' })}
+      motionPreset="slideInBottom"
+      isCentered
+    >
       <ModalOverlay backdropFilter="blur(6px) brightness(0.9)" />
       <ModalContent
-        h={{ base: '100vh', md: 'auto' }}
-        maxH={{ base: '100vh', md: '90vh' }}
+        h={{ base: '100dvh', md: 'auto' }}
+        maxH={{ base: '100dvh', md: '90vh' }}
         borderRadius={{ base: '0', md: '2xl' }}
         bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
         backdropFilter="blur(10px)"
@@ -121,92 +127,82 @@ export default function SummaryCardModal({
         borderColor={useColorModeValue('gray.200', 'gray.700')}
         overflow="hidden"
       >
-        {/* 🌈 Header */}
+        {/* 🌈 Header compacto em telas pequenas */}
         <Box
           bg={headerGradient}
           backdropFilter="blur(8px)"
-          px={{ base: 4, md: 6 }}
-          pt={{ base: 4, md: 5 }}
+          px={{ base: 3, sm: 4, md: 6 }}
+          pt={{ base: 3, sm: 4, md: 5 }}
           pb={{ base: 2, md: 3 }}
           borderBottom="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.700')}
         >
-          <HStack
-            spacing={{ base: 3, md: 4 }}
-            align="center"
-            flexWrap="wrap"
-            justify={{ base: 'center', sm: 'flex-start' }}
-          >
+          <VStack spacing={{ base: 2, sm: 3 }} align="center" textAlign="center">
             <MotionBox
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.35, ease: 'easeOut' }}
-              p={3}
+              transition={{ duration: 0.3 }}
+              p={2.5}
               bg={iconBg}
               borderRadius="xl"
               border="1px solid"
               borderColor={useColorModeValue('gray.200', 'gray.700')}
               boxShadow="md"
             >
-              <ChakraIcon as={IconEl} boxSize={5} color={headerInfo.color} />
+              <ChakraIcon as={IconEl} boxSize={{ base: 4, sm: 5 }} color={headerInfo.color} />
             </MotionBox>
 
-            <MotionVStack
-              spacing={0}
-              align={{ base: 'center', sm: 'start' }}
-              flex={1}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.1, ease: 'easeOut' }}
-            >
+            <VStack spacing={1} align="center">
               <Text
-                fontSize={{ base: 'md', md: 'lg' }}
+                fontSize={{ base: 'sm', sm: 'md', md: 'lg' }}
                 fontWeight="700"
                 color={colors.text.label}
-                textAlign={{ base: 'center', sm: 'left' }}
+                noOfLines={2}
+                wordBreak="break-word"
               >
                 {headerInfo.title}
               </Text>
               <Text
-                fontSize={{ base: 'xs', md: 'sm' }}
+                fontSize={{ base: 'xs', sm: 'sm' }}
                 color={colors.text.secondary}
-                textAlign={{ base: 'center', sm: 'left' }}
+                noOfLines={2}
+                wordBreak="break-word"
               >
                 {headerInfo.subtitle}
               </Text>
-            </MotionVStack>
+            </VStack>
 
             <MotionBadge
               colorScheme={
                 selectedCard === 'income'
                   ? 'green'
                   : selectedCard === 'expenses'
-                  ? 'red'
-                  : selectedCard === 'balance'
-                  ? 'purple'
-                  : 'blue'
+                    ? 'red'
+                    : selectedCard === 'balance'
+                      ? 'purple'
+                      : 'blue'
               }
               px={3}
-              py={1}
+              py={0.5}
               borderRadius="full"
-              fontSize={{ base: 'xs', md: 'sm' }}
+              fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.25, ease: 'easeOut' }}
+              transition={{ duration: 0.3, delay: 0.1 }}
             >
               {selectedPeriod}
             </MotionBadge>
-          </HStack>
+          </VStack>
         </Box>
 
-        <ModalCloseButton top={{ base: 3, md: 4 }} right={{ base: 3, md: 4 }} />
+        <ModalCloseButton top={{ base: 2, md: 4 }} right={{ base: 3, md: 4 }} />
 
         {/* 🧊 Corpo responsivo */}
         <ModalBody
-          py={{ base: 4, md: 6 }}
-          px={{ base: 4, md: 6 }}
+          py={{ base: 3, sm: 4, md: 6 }}
+          px={{ base: 3, sm: 4, md: 6 }}
           overflowY="auto"
-          maxH={{ base: 'calc(100vh - 180px)', md: '70vh' }}
+          maxH={{ base: 'calc(100dvh - 180px)', md: '70vh' }}
         >
           {!transactions.length ? (
             <Center py={10}>
@@ -214,30 +210,24 @@ export default function SummaryCardModal({
             </Center>
           ) : (
             <AnimatePresence mode="wait">
-              {selectedCard === 'transactions' && (
-                <AnimatedCard>
+              <AnimatedCard>
+                {selectedCard === 'transactions' && (
                   <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                </AnimatedCard>
-              )}
-              {selectedCard === 'income' && (
-                <AnimatedCard>
+                )}
+                {selectedCard === 'income' && (
                   <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                </AnimatedCard>
-              )}
-              {selectedCard === 'expenses' && (
-                <AnimatedCard>
+                )}
+                {selectedCard === 'expenses' && (
                   <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                </AnimatedCard>
-              )}
-              {selectedCard === 'balance' && (
-                <AnimatedCard>
+                )}
+                {selectedCard === 'balance' && (
                   <BalanceChart
                     transactions={transactions}
                     selectedPeriod={selectedPeriod}
                     currentBalance={currentBalance}
                   />
-                </AnimatedCard>
-              )}
+                )}
+              </AnimatedCard>
             </AnimatePresence>
           )}
         </ModalBody>
