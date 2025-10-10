@@ -21,8 +21,8 @@ interface TransactionsChartProps {
 
 export default function TransactionsChart({ transactions, selectedPeriod }: TransactionsChartProps) {
   const colors = useThemeColors()
-  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300 })
-  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250 })
+  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
+  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250, lg: 300 })
 
   // Dados para o gráfico de barras - transações por dia
   const dailyData = transactions.reduce((acc: any[], transaction: any) => {
@@ -89,7 +89,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
         wrap="wrap"
         gap={{ base: 2, sm: 3 }}
       >
-        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px", lg: "110px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 
@@ -101,7 +101,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
             Income
           </Text>
         </Box>
-        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px", lg: "110px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 
@@ -113,7 +113,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
             Expenses
           </Text>
         </Box>
-        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px", lg: "110px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 

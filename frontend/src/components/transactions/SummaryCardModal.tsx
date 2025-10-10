@@ -111,7 +111,7 @@ export default function SummaryCardModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={useBreakpointValue({ base: 'full', sm: 'md', md: 'xl' })}
+      size={useBreakpointValue({ base: 'full', sm: 'md', md: 'xl', lg: '2xl' })}
       motionPreset="slideInBottom"
       isCentered={false}
     >
@@ -138,9 +138,9 @@ export default function SummaryCardModal({
         <Box
           bg={headerGradient}
           backdropFilter="blur(8px)"
-          px={{ base: 4, sm: 5, md: 6 }}
-          pt={{ base: 6, sm: 6, md: 5 }}
-          pb={{ base: 4, sm: 4, md: 3 }}
+          px={{ base: 4, sm: 5, md: 6, lg: 8 }}
+          pt={{ base: 6, sm: 6, md: 5, lg: 6 }}
+          pb={{ base: 4, sm: 4, md: 3, lg: 4 }}
           borderBottom="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.700')}
           // 👇 Espaçamento extra para Dynamic Island/Notch
@@ -220,8 +220,8 @@ export default function SummaryCardModal({
 
         {/* 🧊 Corpo responsivo com safe-area para iPhone 14 Pro */}
         <ModalBody
-          py={{ base: 4, sm: 5, md: 6 }}
-          px={{ base: 4, sm: 5, md: 6 }}
+          py={{ base: 4, sm: 5, md: 6, lg: 8 }}
+          px={{ base: 4, sm: 5, md: 6, lg: 8 }}
           overflowY="auto"
           maxH={{ base: 'calc(100dvh - 200px)', md: '70vh' }}
           // 👇 Safe area completo para iPhone 14 Pro

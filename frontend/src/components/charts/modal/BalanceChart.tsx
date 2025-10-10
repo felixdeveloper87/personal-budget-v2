@@ -22,8 +22,8 @@ interface BalanceChartProps {
 
 export default function BalanceChart({ transactions, selectedPeriod, currentBalance }: BalanceChartProps) {
   const colors = useThemeColors()
-  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300 })
-  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250 })
+  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
+  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250, lg: 300 })
 
   // Calcular saldo acumulado ao longo do tempo
   const balanceData = transactions
@@ -74,7 +74,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         wrap="wrap"
         gap={{ base: 2, sm: 3 }}
       >
-        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 
@@ -86,7 +86,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
             Current Balance
           </Text>
         </Box>
-        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 
@@ -98,7 +98,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
             Savings Rate
           </Text>
         </Box>
-        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px", lg: "120px" }}>
           <Text 
             fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
             fontWeight="bold" 
