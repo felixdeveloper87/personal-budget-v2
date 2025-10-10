@@ -8,6 +8,12 @@ interface PeriodNavigatorSectionProps {
   label: string
 }
 
+/**
+ * 🗓️ PeriodNavigatorSection
+ * - Wrapper section for the PeriodNavigator component
+ * - Maintains consistent section structure with AddTransactionSection
+ * - Handles period selection and navigation logic
+ */
 export default function PeriodNavigatorSection({
   selectedPeriod,
   selectedDate,

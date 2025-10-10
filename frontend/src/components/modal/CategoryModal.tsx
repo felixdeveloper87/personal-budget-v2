@@ -23,6 +23,21 @@ import { useMemo, useState } from 'react'
 import { Transaction } from '../../types'
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 
+// 🎨 Animações CSS para melhor UX
+const shimmer = `
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+`
+
+const pulse = `
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+`
+
 const CATEGORY_COLORS = [
   '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
   '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
@@ -80,113 +95,139 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={{ base: "full", md: "xl" }}
-      isCentered
-      closeOnOverlayClick
-      closeOnEsc
-      blockScrollOnMount
-    >
-      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(4px)" />
+    <>
+      <style>
+        {shimmer}
+        {pulse}
+      </style>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size={{ base: 'full', sm: 'md', md: 'lg', lg: 'xl' }}
+        closeOnOverlayClick={false}
+        isCentered={false}
+        motionPreset="slideInBottom"
+      >
+      <ModalOverlay
+        bg="blackAlpha.600"
+        backdropFilter="blur(12px)"
+        css={{
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
+      />
       <ModalContent
-        maxH={{ base: "100vh", md: "90vh" }}
-        m={{ base: 0, md: 4 }}
-        display="flex"
-        flexDirection="column"
-        borderRadius={{ base: 0, md: "xl" }}
-        boxShadow="none"
+        borderRadius={{ base: 'none', sm: '3xl', md: '3xl' }}
+        m={0}
+        h={{ base: '100dvh', sm: 'auto', md: 'auto' }}
+        maxH={{ base: '100dvh', sm: '85vh', md: '80vh' }}
+        overflow="hidden"
+        mx={{ base: 0, sm: 4 }}
+        my={{ base: 0, sm: 4 }}
+        maxW={{ base: '100vw', sm: '95vw', md: '90vw', lg: '800px' }}
+        boxShadow="0 32px 64px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)"
+        border="1px solid"
+        borderColor={colors.border}
+        position="relative"
+        _before={{
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: type === 'INCOME' 
+            ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
+            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)',
+          borderRadius: '3xl 3xl 0 0',
+        }}
+        // 👇 Safe area support para iPhone 14 Pro
+        sx={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingLeft: 'env(safe-area-inset-left, 0px)',
+          paddingRight: 'env(safe-area-inset-right, 0px)',
+        }}
       >
         <ModalHeader
-          flexShrink={0}
-          position="relative"
-          pr={{ base: 12, md: 16 }}
-          bgGradient={colors.modalHeaderBg}
-          borderBottom="1px solid"
+          textAlign="center"
+          borderBottom="1px"
           borderColor={colors.border}
-          py={{ base: 4, md: 6 }}
+          fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+          py={{ base: 8, sm: 8, md: 8 }}
+          px={{ base: 4, sm: 6, md: 8 }}
+          bg={
+            type === 'INCOME'
+              ? 'linear-gradient(135deg, #10b981, #059669, #047857)'
+              : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
+          }
+          backgroundSize="200% 100%"
+          color="white"
+          position="relative"
+          overflow="hidden"
+          // 👇 Espaçamento extra para Dynamic Island/Notch
+          sx={{
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
+            animation: 'shimmer 3s ease-in-out infinite',
+          }}
         >
-          <VStack spacing={3} align="stretch" w="full">
-            <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
-              <HStack spacing={3} align="center">
-                <Box
-                  w={8}
-                  h={8}
-                  borderRadius="full"
-                  bgGradient={
-                    type === 'INCOME'
-                      ? 'linear(to-r, green.400, green.500)'
-                      : 'linear(to-r, red.400, pink.500)'
-                  }
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Text fontSize="lg" color="white" fontWeight="bold">£</Text>
-                </Box>
+          <Box position="relative" zIndex={1}>
+            <Box display="flex" alignItems="center" justifyContent="center" gap={3} mb={2}>
+              <Box
+                p={2}
+                borderRadius="full"
+                bg="rgba(255, 255, 255, 0.2)"
+                animation="pulse 2s ease-in-out infinite"
+              >
+                <Text fontSize="lg" color="white" fontWeight="bold">£</Text>
+              </Box>
+              <Text fontWeight="800" letterSpacing="wide">
+                {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
+              </Text>
+            </Box>
+            <Text fontSize="sm" opacity={0.9} fontWeight="500" textAlign="center">
+              {selectedPeriod}
+            </Text>
+          </Box>
 
-                <VStack spacing={0} align="start">
-                  <Text fontSize={{ base: "lg", md: "xl" }} fontWeight="bold" color={colors.text}>
-                    {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
-                  </Text>
-                  <Text fontSize="sm" color={colors.secondary} fontWeight="500">
-                    {selectedPeriod}
-                  </Text>
-                </VStack>
-              </HStack>
-            </HStack>
-
-            <HStack
-              spacing={{ base: 2, md: 4 }}
-              justify="space-around"
-              wrap="wrap"
-              p={{ base: 3, md: 4 }}
-              bg={colors.headerBg}
-              borderRadius="md"
-            >
-              <VStack spacing={1} minW="80px">
-                <Text fontSize="xs" color={colors.secondary}>Total {type}</Text>
-                <Text
-                  fontSize={{ base: "md", md: "lg" }}
-                  fontWeight="bold"
-                  color={type === 'INCOME' ? 'green.600' : 'red.600'}
-                >
-                  £{total.toFixed(2)}
-                </Text>
-              </VStack>
-              <VStack spacing={1} minW="80px">
-                <Text fontSize="xs" color={colors.secondary}>Categories</Text>
-                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={colors.text}>
-                  {sortedCategories.length}
-                </Text>
-              </VStack>
-              <VStack spacing={1} minW="80px">
-                <Text fontSize="xs" color={colors.secondary}>Transactions</Text>
-                <Text fontSize={{ base: "md", md: "lg" }} fontWeight="bold" color={colors.text}>
-                  {filteredTransactions.length}
-                </Text>
-              </VStack>
-            </HStack>
-          </VStack>
         </ModalHeader>
 
         <ModalCloseButton
+          aria-label="Close category analysis" // ♿ Accessibility
           size="lg"
           position="absolute"
-          top={{ base: 4, md: 6 }}
-          right={{ base: 4, md: 6 }}
+          top="calc(env(safe-area-inset-top, 0px) + 0.5rem)"
+          right={{ base: 4, sm: 6, md: 8 }}
           zIndex={10}
-          bg={useColorModeValue('white', 'gray.800')}
+          bg="rgba(255, 255, 255, 0.9)"
+          color="gray.700"
           borderRadius="full"
           _hover={{
-            bg: useColorModeValue('gray.100', 'gray.700'),
-            transform: 'none',
+            bg: 'rgba(255, 255, 255, 1)',
+            transform: 'scale(1.05)',
           }}
-          transition="none"
+          _active={{
+            transform: 'scale(0.95)',
+          }}
+          backdropFilter="blur(8px)"
+          transition="all 0.2s ease"
         />
 
-        <ModalBody pb={6} px={{ base: 4, md: 6 }} flex="1" overflowY="auto">
+        <ModalBody
+          py={{ base: 4, sm: 5, md: 6 }}
+          px={{ base: 4, sm: 5, md: 6 }}
+          flex="1"
+          overflowY="auto"
+          // 👇 Safe area support para iPhone 14 Pro
+          sx={{
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
+            paddingLeft: 'env(safe-area-inset-left, 0px)',
+            paddingRight: 'env(safe-area-inset-right, 0px)',
+            WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
+            scrollBehavior: 'smooth',
+            overscrollBehavior: 'contain', // Prevent scroll chaining
+          }}
+        >
           {sortedCategories.length === 0 ? (
             <Box p={{ base: 4, md: 6 }} textAlign="center" color={colors.secondary}>
               <Text fontSize={{ base: "md", md: "lg" }} mb={2}>
@@ -210,11 +251,17 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                 return (
                   <Box
                     key={key}
-                    p={{ base: 4, md: 5 }}
+                    p={{ base: 4, sm: 5, md: 6 }}
                     border="1px solid"
                     borderColor={colors.border}
-                    borderRadius="xl"
-                    bg="transparent"
+                    borderRadius="2xl"
+                    bg={useColorModeValue('white', 'gray.800')}
+                    shadow="sm"
+                    _hover={{
+                      shadow: 'md',
+                      transform: 'translateY(-2px)',
+                    }}
+                    transition="all 0.2s ease"
                   >
                     <VStack spacing={3} align="stretch">
                       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
@@ -247,25 +294,37 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                           Transactions ({categoryTransactions.length})
                         </Text>
 
-                        <Box overflowX="auto">
+                        <Box 
+                          overflowX="auto" 
+                          borderRadius="lg"
+                          border="1px solid"
+                          borderColor={colors.border}
+                        >
                           <Table size="sm" variant="simple" minW="300px">
-                            <Thead>
+                            <Thead bg={useColorModeValue('gray.50', 'gray.700')}>
                               <Tr>
-                                <Th fontSize="xs" color={colors.secondary}>Date</Th>
-                                <Th fontSize="xs" color={colors.secondary}>Description</Th>
-                                <Th fontSize="xs" color={colors.secondary} isNumeric>Amount</Th>
+                                <Th fontSize={{ base: "xs", sm: "sm" }} color={colors.secondary} py={3}>Date</Th>
+                                <Th fontSize={{ base: "xs", sm: "sm" }} color={colors.secondary} py={3}>Description</Th>
+                                <Th fontSize={{ base: "xs", sm: "sm" }} color={colors.secondary} isNumeric py={3}>Amount</Th>
                               </Tr>
                             </Thead>
                             <Tbody>
-                              {visibleTransactions.map((t) => (
-                                <Tr key={t.id}>
-                                  <Td fontSize="xs" color={colors.text}>
+                              {visibleTransactions.map((t, index) => (
+                                <Tr 
+                                  key={t.id}
+                                  bg={index % 2 === 0 ? 'transparent' : useColorModeValue('gray.25', 'gray.750')}
+                                  _hover={{
+                                    bg: useColorModeValue('gray.50', 'gray.600'),
+                                  }}
+                                  transition="background-color 0.2s ease"
+                                >
+                                  <Td fontSize={{ base: "xs", sm: "sm" }} color={colors.text} py={3}>
                                     {new Date(t.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                   </Td>
-                                  <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
+                                  <Td fontSize={{ base: "xs", sm: "sm" }} color={colors.text} maxW="120px" isTruncated py={3}>
                                     {t.description || 'No description'}
                                   </Td>
-                                  <Td fontSize="xs" fontWeight="semibold" color={colors.text} isNumeric>
+                                  <Td fontSize={{ base: "xs", sm: "sm" }} fontWeight="semibold" color={colors.text} isNumeric py={3}>
                                     £{t.amount.toFixed(2)}
                                   </Td>
                                 </Tr>
@@ -277,12 +336,21 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         {categoryTransactions.length > 5 && (
                           <Button
                             onClick={() => toggleCategory(category)}
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
-                            mt={2}
+                            mt={3}
                             w="full"
                             colorScheme={type === 'INCOME' ? 'green' : 'red'}
                             rightIcon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                            borderRadius="lg"
+                            _hover={{
+                              transform: 'translateY(-1px)',
+                              shadow: 'md',
+                            }}
+                            _active={{
+                              transform: 'translateY(0)',
+                            }}
+                            transition="all 0.2s ease"
                           >
                             {isExpanded ? 'Show less' : `Show ${categoryTransactions.length - 5} more`}
                           </Button>
@@ -297,5 +365,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         </ModalBody>
       </ModalContent>
     </Modal>
+    </>
   )
 }

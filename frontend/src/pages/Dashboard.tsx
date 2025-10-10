@@ -14,7 +14,7 @@ import {
 
 export default function Dashboard() {
   const { selectedDate, selectedPeriod, onDateChange, onPeriodChange } = usePeriodNavigator()
-  const { transactions, monthSummary, loading, loadData, filters } = useDashboardData(selectedDate)
+  const { transactions, monthSummary, loading, loadData, filters } = useDashboardData(selectedDate, selectedPeriod)
 
   const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
 

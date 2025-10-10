@@ -3,7 +3,6 @@ import {
   Stat,
   StatNumber,
   StatHelpText,
-  useColorModeValue,
   Card,
   CardBody,
   VStack,
@@ -32,6 +31,12 @@ interface SingleRowSummaryProps {
   periodData: PeriodData
 }
 
+/**
+ * 📊 SingleRowSummary - Componente base para resumo financeiro
+ * - Componente simples e reutilizável
+ * - Sem UI/UX complexa (fica nas sections)
+ * - Focado na funcionalidade básica
+ */
 export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) {
   const { transactions, income, expense, balance, label } = periodData
   const colors = useThemeColors()
@@ -58,12 +63,12 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
   }[] = [
     {
       id: 'transactions',
-      label: 'Total Transactions',
+      label: 'Transactions',
       icon: BarChart3,
       color: 'blue.500',
       bgColor: 'blue.50',
       darkBgColor: 'blue.900',
-      helpText: `${incomeTransactions} income, ${expenseTransactions} expense`,
+      helpText: 'Total transactions',
       displayValue: transactions.length.toString(),
     },
     {
@@ -90,10 +95,10 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
       id: 'balance',
       label: 'Balance',
       icon: DollarSign,
-      color: balance >= 0 ? 'green.500' : 'red.500',
-      bgColor: balance >= 0 ? 'green.50' : 'red.50',
-      darkBgColor: balance >= 0 ? 'green.900' : 'red.900',
-      helpText: `${balance >= 0 ? 'Positive' : 'Negative'} balance`,
+      color: 'purple.500',
+      bgColor: 'purple.50',
+      darkBgColor: 'purple.900',
+      helpText: 'Current balance',
       displayValue: `£${balance.toFixed(2)}`,
     },
   ]
@@ -133,57 +138,50 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
 
             <Divider />
 
-            <SimpleGrid columns={{ base: 2, md: 4 }} spacing={6}>
-              {stats.map(stat => {
+            <SimpleGrid
+              columns={{ base: 2, sm: 4 }}
+              spacing={{ base: 3, sm: 4, md: 6 }}
+              w="full"
+            >
+              {stats.map((stat) => {
                 const IconComponent = stat.icon
-                const iconBg = useColorModeValue(stat.bgColor, stat.darkBgColor)
-
                 return (
-                  <Card
+                  <Stat
                     key={stat.id}
-                    bg={iconBg}
-                    border="1px"
-                    borderColor={useColorModeValue('gray.100', 'gray.700')}
+                    textAlign="center"
+                    p={{ base: 3, sm: 4, md: 5 }}
                     borderRadius="xl"
-                    shadow="sm"
+                    bg={colors.cardBg}
+                    border="1px"
+                    borderColor={colors.border}
                     cursor="pointer"
+                    transition="all 0.2s"
                     _hover={{
                       transform: 'translateY(-2px)',
-                      shadow: 'md',
+                      boxShadow: 'lg',
+                      borderColor: stat.color,
                     }}
-                    transition="all 0.2s"
                     onClick={() => handleCardClick(stat.id)}
                   >
-                    <CardBody p={6}>
-                      <VStack spacing={4} align="center">
-                        <HStack spacing={3} align="center">
-                          <IconComponent size={20} color={stat.color} />
-                          <Text
-                            fontSize="sm"
-                            fontWeight="600"
-                            color={colors.text.label}
-                          >
-                            {stat.label}
-                          </Text>
-                        </HStack>
-                        <Stat textAlign="center">
-                          <StatNumber
-                            fontSize="2xl"
-                            fontWeight="700"
-                            color={stat.color}
-                          >
-                            {stat.displayValue}
-                          </StatNumber>
-                          <StatHelpText
-                            fontSize="xs"
-                            color={colors.text.secondary}
-                          >
-                            {stat.helpText}
-                          </StatHelpText>
-                        </Stat>
-                      </VStack>
-                    </CardBody>
-                  </Card>
+                    <VStack spacing={2}>
+                      <IconComponent size={20} color={stat.color} />
+                      <StatNumber
+                        fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+                        fontWeight="700"
+                        color={colors.text.label}
+                      >
+                        {stat.displayValue}
+                      </StatNumber>
+                      <StatHelpText
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        fontWeight="500"
+                        color={colors.text.secondary}
+                        m={0}
+                      >
+                        {stat.label}
+                      </StatHelpText>
+                    </VStack>
+                  </Stat>
                 )
               })}
             </SimpleGrid>
@@ -191,7 +189,6 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
         </CardBody>
       </Card>
 
-      {/* ✅ Tipagem coerente com SummaryCardModal */}
       <SummaryCardModal
         isOpen={isOpen}
         onClose={onClose}

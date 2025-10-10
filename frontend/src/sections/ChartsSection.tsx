@@ -1,6 +1,7 @@
 import { VStack } from '@chakra-ui/react'
-import { ChartCard, /* SummaryChart, */ CategoryTabsChart, PeriodType } from '../components'
+import { ChartCard, /* SummaryChart, */ PeriodType } from '../components'
 import { Transaction } from '../types'
+import CategoryAnalysisSection from './CategoryAnalysisSection'
 
 interface ChartsSectionProps {
   income: number
@@ -10,6 +11,11 @@ interface ChartsSectionProps {
   selectedPeriod: PeriodType
 }
 
+/**
+ * 📊 ChartsSection - Wrapper para seções de gráficos
+ * - Usa CategoryAnalysisSection com UI/UX completa
+ * - Mantém consistência com outras sections
+ */
 export default function ChartsSection({
   income,
   expense,
@@ -27,12 +33,10 @@ export default function ChartsSection({
           selectedPeriod={selectedPeriod}
         />
       </ChartCard> */}
-      <ChartCard>
-        <CategoryTabsChart
-          transactions={transactions}
-          selectedPeriod={selectedPeriod}
-        />
-      </ChartCard>
+      <CategoryAnalysisSection
+        transactions={transactions}
+        selectedPeriod={selectedPeriod}
+      />
     </VStack>
   )
 }

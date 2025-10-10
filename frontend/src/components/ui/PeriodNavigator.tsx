@@ -1,21 +1,19 @@
 import {
   Box,
   Button,
-  ButtonGroup,
   HStack,
   Text,
   IconButton,
   Card,
   CardBody,
   VStack,
-  Badge,
-  Divider,
   SimpleGrid,
   useBreakpointValue,
+  useColorModeValue,
+  Icon,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../../hooks/useThemeColors'
-import { ChevronLeftIcon, ChevronRightIcon } from '@chakra-ui/icons'
-import { Calendar, RotateCcw, CalendarDays, CalendarRange, BarChart3 } from 'lucide-react'
+import { Calendar, RotateCcw, CalendarDays, CalendarRange, BarChart3, ArrowLeft, ArrowRight } from 'lucide-react'
 
 export type PeriodType = 'day' | 'week' | 'month' | 'year'
 
@@ -79,141 +77,115 @@ export default function PeriodNavigator({
   }
 
   return (
-    <Card bg={colors.cardBg} shadow="lg" borderRadius="2xl" border="1px" borderColor={colors.border}>
-      <CardBody p={{ base: 4, md: 6 }}>
-        <VStack spacing={6} align="stretch">
-          {/* Time Period Filter */}
-          <VStack spacing={4} align="stretch">
-            <HStack spacing={3} align="center">
-              <Calendar size={20} color={colors.text.secondary} />
-              <Text fontSize="lg" fontWeight="600" color={colors.text.label}>
-                Time Period
+    <Card bg={colors.cardBg} shadow="md" borderRadius="xl" border="1px" borderColor={colors.border}>
+      <CardBody p={{ base: 4, md: 5 }}>
+        <VStack spacing={4} align="stretch">
+          {/* Título principal */}
+          <HStack justify="space-between" align="center">
+            <HStack spacing={2}>
+              <Icon as={Calendar} boxSize={5} color="blue.500" />
+              <Text fontSize="lg" fontWeight="700" color={colors.text.label}>
+                Period Filter
               </Text>
-              {!isMobile && (
-                <Badge colorScheme="blue" borderRadius="full" px={3}>
-                  Filter
-                </Badge>
-              )}
             </HStack>
+            <Button
+              size="sm"
+              variant="ghost"
+              colorScheme="blue"
+              leftIcon={<RotateCcw size={14} />}
+              onClick={goToToday}
+            >
+              Today
+            </Button>
+          </HStack>
 
-            {!isMobile && (
-              <Text fontSize="sm" color={colors.text.secondary}>
-                Choose how you want to view your financial data
-              </Text>
-            )}
-
-            {isMobile ? (
-              <SimpleGrid columns={2} spacing={3} w="full">
-                {periods.map((period) => {
-                  const IconComponent = period.icon
-                  return (
-                    <Button
-                      key={period.type}
-                      colorScheme={selectedPeriod === period.type ? 'blue' : 'gray'}
-                      variant={selectedPeriod === period.type ? 'solid' : 'outline'}
-                      onClick={() => onPeriodChange(period.type)}
-                      borderRadius="xl"
-                      fontWeight="600"
-                      h="16"
-                    >
-                      <VStack spacing={1}>
-                        <IconComponent size={18} />
-                        <Text fontSize="xs">{period.label}</Text>
-                      </VStack>
-                    </Button>
-                  )
-                })}
-              </SimpleGrid>
-            ) : (
-              <ButtonGroup isAttached variant="outline" size="md" w="full">
-                {periods.map((period) => {
-                  const IconComponent = period.icon
-                  return (
-                    <Button
-                      key={period.type}
-                      colorScheme={selectedPeriod === period.type ? 'blue' : 'gray'}
-                      variant={selectedPeriod === period.type ? 'solid' : 'outline'}
-                      onClick={() => onPeriodChange(period.type)}
-                      borderRadius="xl"
-                      flex={1}
-                      fontWeight="600"
-                    >
-                      <HStack spacing={2}>
-                        <IconComponent size={18} />
-                        <Text>{period.label}</Text>
-                      </HStack>
-                    </Button>
-                  )
-                })}
-              </ButtonGroup>
-            )}
-          </VStack>
-
-          <Divider />
-
-          {/* Period Navigation */}
-          <VStack spacing={4} align="stretch">
-            <HStack spacing={3} align="center" justify="center">
-              <Text fontSize="lg" fontWeight="600" color={colors.text.label}>
-                Period Navigation
-              </Text>
-              {!isMobile && (
-                <Badge colorScheme="green" borderRadius="full" px={3}>
-                  Navigate
-                </Badge>
-              )}
+          {/* Seleção de período compacta */}
+          {isMobile ? (
+            <SimpleGrid columns={4} spacing={2} w="full">
+              {periods.map((period) => {
+                const IconComponent = period.icon
+                const isSelected = selectedPeriod === period.type
+                return (
+                  <Button
+                    key={period.type}
+                    colorScheme={isSelected ? 'blue' : 'gray'}
+                    variant={isSelected ? 'solid' : 'outline'}
+                    onClick={() => onPeriodChange(period.type)}
+                    borderRadius="md"
+                    size="sm"
+                    px={2}
+                  >
+                    <VStack spacing={0.5}>
+                      <IconComponent size={14} />
+                      <Text fontSize="2xs" fontWeight="600">{period.label}</Text>
+                    </VStack>
+                  </Button>
+                )
+              })}
+            </SimpleGrid>
+          ) : (
+            <HStack spacing={2} w="full">
+              {periods.map((period) => {
+                const IconComponent = period.icon
+                const isSelected = selectedPeriod === period.type
+                return (
+                  <Button
+                    key={period.type}
+                    colorScheme={isSelected ? 'blue' : 'gray'}
+                    variant={isSelected ? 'solid' : 'outline'}
+                    onClick={() => onPeriodChange(period.type)}
+                    flex={1}
+                    size="md"
+                    leftIcon={<IconComponent size={16} />}
+                  >
+                    {period.label}
+                  </Button>
+                )
+              })}
             </HStack>
+          )}
 
-            {!isMobile && (
-              <Text fontSize="sm" color={colors.text.secondary} textAlign="center">
-                Navigate through different time periods
-              </Text>
-            )}
-
-            <HStack spacing={4} align="center" justify="space-between" flexWrap="wrap">
-              <HStack spacing={2}>
-                <IconButton
-                  aria-label="Previous period"
-                  icon={<ChevronLeftIcon />}
-                  size={isMobile ? 'lg' : 'md'}
-                  variant="outline"
-                  colorScheme="blue"
-                  borderRadius="xl"
-                  onClick={() => navigatePeriod('prev')}
-                />
-                <IconButton
-                  aria-label="Next period"
-                  icon={<ChevronRightIcon />}
-                  size={isMobile ? 'lg' : 'md'}
-                  variant="outline"
-                  colorScheme="blue"
-                  borderRadius="xl"
-                  onClick={() => navigatePeriod('next')}
-                />
-              </HStack>
-
+          {/* Navegação integrada */}
+          <HStack spacing={2} justify="space-between" w="full">
+            <IconButton
+              aria-label="Previous period"
+              icon={<ArrowLeft size={18} />}
+              onClick={() => navigatePeriod('prev')}
+              size="md"
+              variant="outline"
+              colorScheme="blue"
+              borderRadius="md"
+            />
+            
+            <Box
+              flex="1"
+              textAlign="center"
+              px={4}
+              py={2}
+              borderRadius="md"
+              bg={useColorModeValue('blue.50', 'blue.900')}
+              border="1px solid"
+              borderColor={useColorModeValue('blue.200', 'blue.700')}
+            >
               <Text
-                fontSize={isMobile ? 'md' : 'lg'}
-                fontWeight="600"
-                color={colors.text.label}
-                textAlign="center"
-                flex="1"
+                fontSize={{ base: 'sm', md: 'md' }}
+                fontWeight="700"
+                color="blue.600"
               >
                 {formatLabel()}
               </Text>
-
-              <Button
-                size={isMobile ? 'sm' : 'md'}
-                variant="outline"
-                colorScheme="blue"
-                borderRadius="xl"
-                leftIcon={<RotateCcw size={16} />}
-                onClick={goToToday}
-              >
-                Today
-              </Button>
-            </HStack>
-          </VStack>
+            </Box>
+            
+            <IconButton
+              aria-label="Next period"
+              icon={<ArrowRight size={18} />}
+              onClick={() => navigatePeriod('next')}
+              size="md"
+              variant="outline"
+              colorScheme="blue"
+              borderRadius="md"
+            />
+          </HStack>
         </VStack>
       </CardBody>
     </Card>

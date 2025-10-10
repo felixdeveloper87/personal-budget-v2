@@ -6,7 +6,7 @@ import { getMonthlySummary, listTransactions, searchTransactions } from '../api'
 import { convertMonthlySummary } from '../utils/summary'
 import { hasActiveFilters } from '../utils/filters'
 
-export function useDashboardData(selectedDate: Date) {
+export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [monthSummary, setMonthSummary] = useState<MonthlySummary | null>(null)
   const [loading, setLoading] = useState(false)
@@ -37,7 +37,7 @@ export function useDashboardData(selectedDate: Date) {
     } finally {
       setLoading(false)
     }
-  }, [user?.token, selectedDate, filters])
+  }, [user?.token, selectedDate, filters]) // ✅ Removido selectedPeriod - não precisa recarregar
 
   useEffect(() => {
     loadData()

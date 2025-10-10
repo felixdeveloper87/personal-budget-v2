@@ -1,6 +1,6 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue } from '@chakra-ui/react'
 import { Transaction } from '../../types'
-import CategoryModal from '../ui/CategoryModal'
+import CategoryModal from '../modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 
 interface ExpenseChartProps {

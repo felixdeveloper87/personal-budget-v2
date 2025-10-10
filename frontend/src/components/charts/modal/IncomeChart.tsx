@@ -126,30 +126,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         </Box>
       </HStack>
 
-      {/* Gráfico de barras - receitas por categoria */}
-      {/* <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
-          Income by Category
-        </Text>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={categoryData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="category" />
-            <YAxis />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: colors.cardBg,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '8px'
-              }}
-              formatter={(value, name) => [`£${value}`, 'Amount']}
-            />
-            <Bar dataKey="amount" fill="#38A169" />
-          </BarChart>
-        </ResponsiveContainer>
-      </Box> */}
-
-      {/* Gráfico de pizza - distribuição por categoria */}
       <Box>
         <Text 
           fontSize={{ base: "md", sm: "lg" }} 

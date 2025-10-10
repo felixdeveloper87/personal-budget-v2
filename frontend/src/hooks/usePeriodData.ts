@@ -19,7 +19,8 @@ export function usePeriodData(
   selectedDate: Date
 ): PeriodData {
   return useMemo(() => {
-    const now = new Date(selectedDate)
+    // Force recalculation by creating new date objects
+    const now = new Date(selectedDate.getTime())
     let startDate: Date
     let endDate: Date
     let label: string
@@ -73,6 +74,7 @@ export function usePeriodData(
       const txDate = new Date(tx.dateTime)
       return txDate >= startDate && txDate <= endDate
     })
+    
 
     // ✅ Totais coerentes
     const income = periodTransactions

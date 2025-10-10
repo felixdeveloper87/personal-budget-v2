@@ -24,15 +24,15 @@ interface CategoryTabsChartProps {
 }
 
 /**
- * 📊 CategoryTabsChart
- * Displays category-based breakdown of income and expenses using tabbed charts.
- * - "Expenses" and "Income" charts shown in separate tabs
- * - Adaptive to light/dark mode via Chakra’s color mode values
+ * 📊 CategoryTabsChart - Componente base para análise de categorias
+ * - Componente simples e reutilizável
+ * - Sem UI/UX complexa (fica nas sections)
+ * - Focado na funcionalidade básica
  */
 export default function CategoryTabsChart({ transactions, selectedPeriod }: CategoryTabsChartProps) {
-  // 🎨 Theme-dependent colors
   const colors = useThemeColors()
   const isMobile = useBreakpointValue({ base: true, md: false })
+  
   const tabStyle = {
     bg: colors.cardBg,
     borderColor: colors.border,
@@ -42,7 +42,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
 
   return (
     <VStack spacing={0} align="stretch" h="full">
-      {/* 🔹 Header section with title and subtitle */}
+      {/* Header básico */}
       <Box p={{ base: 4, md: 6 }} borderBottom="1px" borderColor={colors.border}>
         <VStack spacing={4} align="stretch">
           <HStack spacing={3} align="center">
@@ -64,7 +64,7 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
         </VStack>
       </Box>
 
-      {/* 🔹 Tabs for switching between Expense / Income charts */}
+      {/* Tabs básicos */}
       <Tabs 
         variant="enclosed"
         colorScheme="blue"
@@ -73,9 +73,8 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
         display="flex"
         flexDirection="column"
       >
-        {/* Tab buttons */}
+        {/* Tab buttons básicos */}
         <TabList borderBottom="1px" borderColor={colors.border}>
-          {/* Expenses Tab */}
           <Tab
             _selected={{ ...tabStyle, color: 'red.500' }}
             borderRadius="0"
@@ -87,8 +86,6 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
               <Text>Expenses</Text>
             </HStack>
           </Tab>
-
-          {/* Income Tab */}
           <Tab
             _selected={{ ...tabStyle, color: 'green.500' }}
             borderRadius="0"
@@ -102,9 +99,8 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
           </Tab>
         </TabList>
 
-        {/* 🔹 Tab content panels */}
+        {/* Tab content panels básicos */}
         <TabPanels flex="1" display="flex" flexDirection="column">
-          {/* Expense Chart Panel */}
           <TabPanel p={0} flex="1">
             <Box p={{ base: 4, md: 6 }} flex="1">
               <ExpenseChart
@@ -113,8 +109,6 @@ export default function CategoryTabsChart({ transactions, selectedPeriod }: Cate
               />
             </Box>
           </TabPanel>
-
-          {/* Income Chart Panel */}
           <TabPanel p={0} flex="1">
             <Box p={{ base: 4, md: 6 }} flex="1">
               <IncomeChart
