@@ -11,7 +11,7 @@ import {
   BarChart,
   Bar
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge, Stat, StatNumber, StatHelpText } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, Badge, Stat, StatNumber, StatHelpText, useBreakpointValue } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
 interface BalanceChartProps {
@@ -22,6 +22,8 @@ interface BalanceChartProps {
 
 export default function BalanceChart({ transactions, selectedPeriod, currentBalance }: BalanceChartProps) {
   const colors = useThemeColors()
+  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300 })
+  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250 })
 
   // Calcular saldo acumulado ao longo do tempo
   const balanceData = transactions
@@ -64,35 +66,63 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
   }))
 
   return (
-    <VStack spacing={6} align="stretch">
-      {/* Estatísticas principais */}
-      <HStack spacing={6} justify="center">
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color={currentBalance >= 0 ? "green.500" : "red.500"}>
+    <VStack spacing={{ base: 4, sm: 5, md: 6 }} align="stretch">
+      {/* Estatísticas principais - responsivas para iPhone */}
+      <HStack 
+        spacing={{ base: 3, sm: 4, md: 6 }} 
+        justify="center" 
+        wrap="wrap"
+        gap={{ base: 2, sm: 3 }}
+      >
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color={currentBalance >= 0 ? "green.500" : "red.500"}
+          >
             £{currentBalance.toFixed(2)}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Current Balance</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Current Balance
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="blue.500"
+          >
             {savingsRate.toFixed(1)}%
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Savings Rate</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Savings Rate
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="purple.500">
+        <Box textAlign="center" minW={{ base: "80px", sm: "100px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="purple.500"
+          >
             £{balanceRange.toFixed(2)}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Balance Range</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Balance Range
+          </Text>
         </Box>
       </HStack>
 
       {/* Gráfico de área - evolução do saldo */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Balance Evolution Over Time
         </Text>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <AreaChart data={balanceData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -118,10 +148,15 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
 
       {/* Gráfico de linha - saldo com pontos de inflexão */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Balance Trend
         </Text>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={smallChartHeight}>
           <LineChart data={balanceData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -151,10 +186,15 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
 
       {/* Gráfico de barras - receitas vs despesas diárias */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Daily Income vs Expenses
         </Text>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={smallChartHeight}>
           <BarChart data={dailyComparison}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -175,7 +215,12 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
 
       {/* Análise de saúde financeira */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Financial Health Analysis
         </Text>
         <VStack spacing={4} align="stretch">

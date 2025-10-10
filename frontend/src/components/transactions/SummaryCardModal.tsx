@@ -113,7 +113,7 @@ export default function SummaryCardModal({
       onClose={onClose}
       size={useBreakpointValue({ base: 'full', sm: 'md', md: 'xl' })}
       motionPreset="slideInBottom"
-      isCentered
+      isCentered={false}
     >
       <ModalOverlay backdropFilter="blur(6px) brightness(0.9)" />
       <ModalContent
@@ -126,16 +126,27 @@ export default function SummaryCardModal({
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.700')}
         overflow="hidden"
+        // 👇 Safe area support para iPhone 14 Pro
+        sx={{
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          paddingLeft: 'env(safe-area-inset-left, 0px)',
+          paddingRight: 'env(safe-area-inset-right, 0px)',
+        }}
       >
-        {/* 🌈 Header compacto em telas pequenas */}
+        {/* 🌈 Header com espaçamento adequado para iPhone 14 Pro */}
         <Box
           bg={headerGradient}
           backdropFilter="blur(8px)"
-          px={{ base: 3, sm: 4, md: 6 }}
-          pt={{ base: 3, sm: 4, md: 5 }}
-          pb={{ base: 2, md: 3 }}
+          px={{ base: 4, sm: 5, md: 6 }}
+          pt={{ base: 6, sm: 6, md: 5 }}
+          pb={{ base: 4, sm: 4, md: 3 }}
           borderBottom="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.700')}
+          // 👇 Espaçamento extra para Dynamic Island/Notch
+          sx={{
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)',
+          }}
         >
           <VStack spacing={{ base: 2, sm: 3 }} align="center" textAlign="center">
             <MotionBox
@@ -195,19 +206,34 @@ export default function SummaryCardModal({
           </VStack>
         </Box>
 
-        <ModalCloseButton top={{ base: 2, md: 4 }} right={{ base: 3, md: 4 }} />
+        <ModalCloseButton 
+          top={{ base: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', md: 4 }} 
+          right={{ base: 4, md: 4 }}
+          size="lg"
+          borderRadius="full"
+          bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(0,0,0,0.6)')}
+          _hover={{
+            bg: useColorModeValue('rgba(255,255,255,1)', 'rgba(0,0,0,0.8)')
+          }}
+          backdropFilter="blur(8px)"
+        />
 
-        {/* 🧊 Corpo responsivo com safe-area para iPhone */}
+        {/* 🧊 Corpo responsivo com safe-area para iPhone 14 Pro */}
         <ModalBody
-          py={{ base: 3, sm: 4, md: 6 }}
-          px={{ base: 3, sm: 4, md: 6 }}
+          py={{ base: 4, sm: 5, md: 6 }}
+          px={{ base: 4, sm: 5, md: 6 }}
           overflowY="auto"
-          maxH={{ base: 'calc(100dvh - 180px)', md: '70vh' }}
-          // 👇 safe area padding automático (iPhones)
+          maxH={{ base: 'calc(100dvh - 200px)', md: '70vh' }}
+          // 👇 Safe area completo para iPhone 14 Pro
           sx={{
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+            paddingTop: '1rem',
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
+            paddingLeft: 'env(safe-area-inset-left, 0px)',
+            paddingRight: 'env(safe-area-inset-right, 0px)',
             WebkitOverflowScrolling: 'touch',
             scrollBehavior: 'smooth',
+            // 👇 Melhor scroll no iOS
+            overscrollBehavior: 'contain',
           }}
         >
           {!transactions.length ? (
@@ -259,13 +285,17 @@ function AnimatedCard({ children }: AnimatedCardProps) {
       transition={{ duration: 0.25, ease: 'easeOut' }}
     >
       <Box
-        p={{ base: 4, md: 5 }}
+        p={{ base: 3, sm: 4, md: 5 }}
         borderRadius="2xl"
         bg={bg}
         boxShadow={useColorModeValue('0 2px 10px rgba(0,0,0,0.08)', '0 2px 12px rgba(0,0,0,0.4)')}
         backdropFilter="blur(10px)"
         border="1px solid"
         borderColor={borderColor}
+        // 👇 Melhor espaçamento para gráficos no iPhone
+        sx={{
+          minHeight: { base: '300px', sm: '350px', md: '400px' },
+        }}
       >
         {children}
       </Box>

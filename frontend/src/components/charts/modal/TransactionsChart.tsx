@@ -11,7 +11,7 @@ import {
   Pie,
   Cell
 } from 'recharts'
-import { VStack, Text, HStack, Box } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, useBreakpointValue } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
 interface TransactionsChartProps {
@@ -21,6 +21,8 @@ interface TransactionsChartProps {
 
 export default function TransactionsChart({ transactions, selectedPeriod }: TransactionsChartProps) {
   const colors = useThemeColors()
+  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300 })
+  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250 })
 
   // Dados para o gráfico de barras - transações por dia
   const dailyData = transactions.reduce((acc: any[], transaction: any) => {
@@ -79,35 +81,63 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
   const expenseCount = transactions.filter(t => t.type === 'EXPENSE').length
 
   return (
-    <VStack spacing={6} align="stretch">
-      {/* Estatísticas rápidas */}
-      <HStack spacing={6} justify="center">
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="green.500">
+    <VStack spacing={{ base: 4, sm: 5, md: 6 }} align="stretch">
+      {/* Estatísticas rápidas - responsivas para iPhone */}
+      <HStack 
+        spacing={{ base: 3, sm: 4, md: 6 }} 
+        justify="center" 
+        wrap="wrap"
+        gap={{ base: 2, sm: 3 }}
+      >
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="green.500"
+          >
             {incomeCount}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Income</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Income
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="red.500">
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="red.500"
+          >
             {expenseCount}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Expenses</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Expenses
+          </Text>
         </Box>
-        <Box textAlign="center">
-          <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+        <Box textAlign="center" minW={{ base: "70px", sm: "90px" }}>
+          <Text 
+            fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+            fontWeight="bold" 
+            color="blue.500"
+          >
             {totalTransactions}
           </Text>
-          <Text fontSize="sm" color={colors.text.secondary}>Total</Text>
+          <Text fontSize={{ base: "xs", sm: "sm" }} color={colors.text.secondary}>
+            Total
+          </Text>
         </Box>
       </HStack>
 
       {/* Gráfico de barras - transações por dia */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Daily Transaction Activity
         </Text>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
           <BarChart data={dailyData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="date" />
@@ -128,10 +158,15 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
 
       {/* Gráfico de pizza - distribuição por tipo */}
       <Box>
-        <Text fontSize="lg" fontWeight="semibold" mb={4} color={colors.text.label}>
+        <Text 
+          fontSize={{ base: "md", sm: "lg" }} 
+          fontWeight="semibold" 
+          mb={{ base: 3, sm: 4 }} 
+          color={colors.text.label}
+        >
           Transaction Type Distribution
         </Text>
-        <ResponsiveContainer width="100%" height={250}>
+        <ResponsiveContainer width="100%" height={smallChartHeight}>
           <PieChart>
             <Pie
               data={typeData}
