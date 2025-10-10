@@ -197,12 +197,18 @@ export default function SummaryCardModal({
 
         <ModalCloseButton top={{ base: 2, md: 4 }} right={{ base: 3, md: 4 }} />
 
-        {/* 🧊 Corpo responsivo */}
+        {/* 🧊 Corpo responsivo com safe-area para iPhone */}
         <ModalBody
           py={{ base: 3, sm: 4, md: 6 }}
           px={{ base: 3, sm: 4, md: 6 }}
           overflowY="auto"
           maxH={{ base: 'calc(100dvh - 180px)', md: '70vh' }}
+          // 👇 safe area padding automático (iPhones)
+          sx={{
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+            WebkitOverflowScrolling: 'touch',
+            scrollBehavior: 'smooth',
+          }}
         >
           {!transactions.length ? (
             <Center py={10}>
@@ -231,6 +237,7 @@ export default function SummaryCardModal({
             </AnimatePresence>
           )}
         </ModalBody>
+
       </ModalContent>
     </Modal>
   )
