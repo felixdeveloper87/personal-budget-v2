@@ -69,7 +69,7 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
       {/* Responsive grid layout for category buttons */}
       <SimpleGrid
         columns={{ base: 2, sm: 3, md: 4 }}
-        spacing={{ base: 4, sm: 3 }}
+        spacing={{ base: 3, sm: 3 }}
         w="full"
       >
         {categories.map((cat) => {
@@ -84,18 +84,27 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               colorScheme={isSelected ? 'blue' : 'gray'}
               borderRadius="xl"
               onClick={() => onChange(cat.name)}
-              size={{ base: 'md', sm: 'sm' }}
-              h={{ base: '60px', sm: '48px' }}
-              fontSize={{ base: 'sm', sm: 'xs' }}
+              size={{ base: 'lg', sm: 'md' }}
+              h={{ base: '70px', sm: '56px' }}
+              fontSize={{ base: 'md', sm: 'sm' }}
               fontWeight="bold"
-              p={{ base: 2, sm: 1 }}
+              borderWidth="2px"
+              p={{ base: 3, sm: 2 }}
+              _hover={{
+                transform: 'translateY(-2px)',
+                shadow: 'md',
+              }}
+              _active={{
+                transform: 'translateY(0)',
+              }}
+              transition="all 0.2s"
             >
               <HStack spacing={{ base: 2, sm: 1 }} justify="center" w="full">
                 {/* Icon for category */}
-                <IconComponent size={20} aria-hidden="true" />
+                <IconComponent size={24} aria-hidden="true" />
                 {/* Category label */}
                 <Text
-                  fontSize={{ base: 'sm', sm: 'xs' }}
+                  fontSize={{ base: 'md', sm: 'sm' }}
                   fontWeight="bold"
                   textAlign="center"
                   noOfLines={1}

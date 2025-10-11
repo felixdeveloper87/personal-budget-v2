@@ -30,9 +30,6 @@ export default function Dashboard() {
         <VStack spacing={6} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
 
-          {/* Seção de Parcelamentos */}
-          <InstallmentPlansSection />
-
           {!hasActiveFilters(filters) && (
             <PeriodNavigatorSection
               selectedPeriod={selectedPeriod}
@@ -44,6 +41,9 @@ export default function Dashboard() {
           )}
 
           {monthSummary && <SummarySection periodData={periodData} />}
+
+          {/* Active Installment Plans - After summary, before charts */}
+          <InstallmentPlansSection />
 
           {monthSummary && (
             <ChartsSection

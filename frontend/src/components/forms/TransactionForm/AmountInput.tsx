@@ -74,33 +74,46 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
       >
         <NumberInputField
           placeholder="£0.00"
-          fontSize={{ base: 'xl', sm: 'lg' }}
-          fontWeight="600"
+          fontSize={{ base: '2xl', sm: 'xl' }}
+          fontWeight="700"
           borderRadius="xl"
           border="2px solid"
           borderColor={colors.border}
           onClick={handleOpen}
           cursor="pointer"
           aria-label="Enter amount"
-          h={{ base: '60px', sm: '48px' }}
-          _focus={{ borderColor: colors.accent }}
+          h={{ base: '70px', sm: '56px' }}
+          textAlign="center"
+          _focus={{ borderColor: colors.accent, shadow: 'md' }}
+          _hover={{ borderColor: colors.accent }}
+          transition="all 0.2s"
         />
       </NumberInput>
 
       {/* Quick-select preset buttons */}
-      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 3, sm: 2 }}>
+      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 2, sm: 2 }} justify="center">
         {quickAmounts.map((qa) => (
           <WrapItem key={qa}>
             <Button
-              size={{ base: 'md', sm: 'sm' }}
-              h={{ base: '45px', sm: '36px' }}
+              size={{ base: 'lg', sm: 'md' }}
+              h={{ base: '52px', sm: '42px' }}
               variant={amount === qa ? 'solid' : 'outline'}
               colorScheme="blue"
-              borderRadius="full"
+              borderRadius="xl"
+              borderWidth="2px"
               onClick={() => onChange(qa)}
-              fontSize={{ base: 'md', sm: 'sm' }}
+              fontSize={{ base: 'lg', sm: 'md' }}
               fontWeight="bold"
-              px={{ base: 6, sm: 4 }}
+              px={{ base: 8, sm: 6 }}
+              minW={{ base: '80px', sm: '70px' }}
+              _hover={{
+                transform: 'translateY(-2px)',
+                shadow: 'md',
+              }}
+              _active={{
+                transform: 'translateY(0)',
+              }}
+              transition="all 0.2s"
             >
               £{qa}
             </Button>

@@ -122,7 +122,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                   Installment value
                 </Text>
                 <Text fontSize="xl" fontWeight="bold" color={colors.accent}>
-                  ${plan.installmentValue.toFixed(2)}
+                  £{plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
 
@@ -131,7 +131,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                   Total
                 </Text>
                 <Text fontSize="lg" fontWeight="semibold">
-                  ${plan.totalAmount.toFixed(2)}
+                  £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
             </HStack>
@@ -186,7 +186,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                           {transaction.installmentNumber}/{plan.totalInstallments}
                         </Badge>
                         <Text fontSize="sm" fontWeight="semibold">
-                          ${transaction.amount.toFixed(2)}
+                          £{transaction.amount.toFixed(2)}
                         </Text>
                       </HStack>
                     </HStack>

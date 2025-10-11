@@ -50,6 +50,7 @@ export default function TransactionForm({
   const [installmentEnabled, setInstallmentEnabled] = useState(false)
   const [installments, setInstallments] = useState(3)
 
+
   /**
    * 🧾 Handle form submission:
    * - Creates installment plan if enabled (EXPENSE only)
@@ -76,7 +77,7 @@ export default function TransactionForm({
 
           toast({
             title: '✅ Installment plan created!',
-            description: `${installments}x of $${amount.toFixed(2)}`,
+            description: `${installments}x of £${amount.toFixed(2)}`,
             status: 'success',
             duration: 3000,
             isClosable: true,
@@ -148,7 +149,7 @@ export default function TransactionForm({
          * - Same logic, smaller spacing
          */
         <VStack
-          spacing={{ base: 6, sm: 4 }}
+          spacing={{ base: 6, sm: 5 }}
           align="stretch"
           as="form"
           onSubmit={onSubmit}
@@ -156,14 +157,8 @@ export default function TransactionForm({
           aria-label="Add transaction form" // ♿ Accessibility
         >
           <DateSelector date={date} onChange={setDate} />
-          <AmountInput amount={amount} onChange={setAmount} type={type} />
           <CategorySelector type={type} category={category} onChange={setCategory} />
-          <DescriptionInput
-            value={description}
-            onChange={setDescription}
-            type={type}
-            loading={loading}
-          />
+          <AmountInput amount={amount} onChange={setAmount} type={type} />
           {/* Show installment selector only for EXPENSE */}
           {type === 'EXPENSE' && (
             <InstallmentSelector
@@ -174,6 +169,12 @@ export default function TransactionForm({
               amount={amount}
             />
           )}
+          <DescriptionInput
+            value={description}
+            onChange={setDescription}
+            type={type}
+            loading={loading}
+          />
         </VStack>
       ) : (
         /**
@@ -190,23 +191,17 @@ export default function TransactionForm({
           role="region" // ♿ Accessibility: marks card as a section
           aria-label="Transaction entry form"
         >
-          <CardBody p={{ base: 6, sm: 6, md: 10 }}>
+          <CardBody p={{ base: 6, sm: 6, md: 8 }}>
             <VStack
-              spacing={{ base: 6, sm: 4, md: 6 }}
+              spacing={{ base: 6, sm: 5, md: 6 }}
               align="stretch"
               as="form"
               onSubmit={onSubmit}
               w="full"
             >
               <DateSelector date={date} onChange={setDate} />
-              <AmountInput amount={amount} onChange={setAmount} type={type} />
               <CategorySelector type={type} category={category} onChange={setCategory} />
-              <DescriptionInput
-                value={description}
-                onChange={setDescription}
-                type={type}
-                loading={loading}
-              />
+              <AmountInput amount={amount} onChange={setAmount} type={type} />
               {/* Show installment selector only for EXPENSE */}
               {type === 'EXPENSE' && (
                 <InstallmentSelector
@@ -217,6 +212,12 @@ export default function TransactionForm({
                   amount={amount}
                 />
               )}
+              <DescriptionInput
+                value={description}
+                onChange={setDescription}
+                type={type}
+                loading={loading}
+              />
             </VStack>
           </CardBody>
         </Card>

@@ -135,11 +135,11 @@ export default function InstallmentSelector({
                   {installments}x of
                 </Text>
                 <Text fontSize="lg" fontWeight="bold" color={colors.accent}>
-                  ${installmentValue.toFixed(2)}
+                  £{installmentValue.toFixed(2)}
                 </Text>
               </HStack>
               <Text fontSize="xs" color={colors.text.secondary} mt={1}>
-                Total: ${amount.toFixed(2)}
+                Total: £{amount.toFixed(2)}
               </Text>
             </Box>
           )}

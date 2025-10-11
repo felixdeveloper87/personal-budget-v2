@@ -42,35 +42,47 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
         type="date"
         value={date}
         onChange={(e) => onChange(e.target.value)}
-        size={{ base: 'xl', sm: 'lg' }}
-        h={{ base: '60px', sm: '48px' }}
+        size="lg"
+        h={{ base: '56px', sm: '48px' }}
         borderRadius="xl"
         border="2px"
         borderColor={colors.border}
-        _focus={{ borderColor: colors.accent }}
+        _focus={{ borderColor: colors.accent, shadow: 'md' }}
+        _hover={{ borderColor: colors.accent }}
         fontSize={{ base: 'lg', sm: 'md' }}
+        fontWeight="600"
         aria-label="Select date" // ♿ Accessibility: describes input purpose
+        transition="all 0.2s"
       />
 
       {/* Quick date buttons */}
-      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 3, sm: 2 }}>
+      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 2, sm: 2 }} justify="center">
         {quickDates.map((qd) => (
           <WrapItem key={qd.label}>
             <Button
               aria-label={`Select ${qd.label.toLowerCase()} date`} // ♿ Accessibility
-              size={{ base: 'md', sm: 'sm' }}
-              h={{ base: '45px', sm: '36px' }}
+              size={{ base: 'lg', sm: 'md' }}
+              h={{ base: '48px', sm: '40px' }}
               variant={
                 date === qd.date.toISOString().slice(0, 10) ? 'solid' : 'outline'
               }
               colorScheme="blue"
-              borderRadius="full"
+              borderRadius="xl"
+              borderWidth="2px"
               onClick={() =>
                 onChange(qd.date.toISOString().slice(0, 10))
               }
               fontSize={{ base: 'md', sm: 'sm' }}
               fontWeight="bold"
-              px={{ base: 6, sm: 4 }}
+              px={{ base: 6, sm: 5 }}
+              _hover={{
+                transform: 'translateY(-2px)',
+                shadow: 'md',
+              }}
+              _active={{
+                transform: 'translateY(0)',
+              }}
+              transition="all 0.2s"
             >
               {qd.label}
             </Button>

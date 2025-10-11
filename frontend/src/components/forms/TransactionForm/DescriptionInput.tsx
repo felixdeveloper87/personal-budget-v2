@@ -44,17 +44,26 @@ export default function DescriptionInput({
       <Button
         type="submit"
         aria-label={type === 'INCOME' ? 'Add income' : 'Add expense'} // ♿ Accessibility
-        colorScheme="blue"
-        size={{ base: 'xl', sm: 'lg' }}
-        h={{ base: '60px', sm: '48px' }}
+        colorScheme={type === 'INCOME' ? 'green' : 'red'}
+        size="lg"
+        h={{ base: '65px', sm: '56px' }}
         isLoading={loading}
         loadingText="Saving..."
         borderRadius="xl"
         w="full"
-        fontSize={{ base: 'lg', sm: 'md' }}
+        fontSize={{ base: 'xl', sm: 'lg' }}
         fontWeight="bold"
+        shadow="lg"
+        _hover={{
+          transform: 'translateY(-2px)',
+          shadow: 'xl',
+        }}
+        _active={{
+          transform: 'translateY(0)',
+        }}
+        transition="all 0.2s"
       >
-        {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
+        {type === 'INCOME' ? '✅ Add Income' : '💸 Add Expense'}
       </Button>
     </VStack>
   )
