@@ -75,8 +75,8 @@ export default function TransactionForm({
           })
 
           toast({
-            title: '✅ Parcelamento criado!',
-            description: `${installments}x de R$ ${amount.toFixed(2)}`,
+            title: '✅ Installment plan created!',
+            description: `${installments}x of $${amount.toFixed(2)}`,
             status: 'success',
             duration: 3000,
             isClosable: true,

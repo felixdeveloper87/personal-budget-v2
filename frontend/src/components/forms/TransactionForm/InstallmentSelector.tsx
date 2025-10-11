@@ -14,6 +14,7 @@ import {
   Text,
   Icon,
   Collapse,
+  Button,
 } from '@chakra-ui/react'
 import { FiCreditCard } from 'react-icons/fi'
 import { useThemeColors } from '../../../hooks/useThemeColors'
@@ -41,6 +42,8 @@ export default function InstallmentSelector({
 
   const installmentValue = amount > 0 && installments > 0 ? amount / installments : 0
 
+  const quickButtons = [3, 4, 5, 6, 10, 12]
+
   return (
     <VStack align="stretch" spacing={4}>
       {/* Toggle switch for installments */}
@@ -49,7 +52,7 @@ export default function InstallmentSelector({
           <HStack spacing={2}>
             <Icon as={FiCreditCard} color={colors.accent} fontSize="xl" />
             <FormLabel htmlFor="installment-toggle" mb={0} fontWeight="600">
-              Parcelar despesa
+              Split into installments
             </FormLabel>
           </HStack>
           <Switch
@@ -72,9 +75,30 @@ export default function InstallmentSelector({
           border="1px"
           borderColor={colors.border}
         >
+          {/* Quick buttons */}
+          <Box>
+            <Text fontSize="xs" fontWeight="600" color={colors.text.secondary} mb={2}>
+              Quick select
+            </Text>
+            <HStack spacing={2} flexWrap="wrap">
+              {quickButtons.map((num) => (
+                <Button
+                  key={num}
+                  size="sm"
+                  variant={installments === num ? 'solid' : 'outline'}
+                  colorScheme={installments === num ? 'purple' : 'gray'}
+                  onClick={() => onInstallmentsChange(num)}
+                  minW="50px"
+                >
+                  {num}x
+                </Button>
+              ))}
+            </HStack>
+          </Box>
+
           <FormControl>
             <FormLabel fontSize="sm" fontWeight="600" color={colors.text.secondary}>
-              Número de parcelas
+              Number of installments
             </FormLabel>
             <NumberInput
               value={installments}
@@ -84,7 +108,7 @@ export default function InstallmentSelector({
               step={1}
             >
               <NumberInputField
-                placeholder="Ex: 3"
+                placeholder="e.g. 3"
                 bg={colors.inputBg}
                 borderColor={colors.border}
                 _hover={{ borderColor: colors.accent }}
@@ -108,14 +132,14 @@ export default function InstallmentSelector({
             >
               <HStack justify="space-between">
                 <Text fontSize="sm" color={colors.text.secondary}>
-                  {installments}x de
+                  {installments}x of
                 </Text>
                 <Text fontSize="lg" fontWeight="bold" color={colors.accent}>
-                  R$ {installmentValue.toFixed(2)}
+                  ${installmentValue.toFixed(2)}
                 </Text>
               </HStack>
               <Text fontSize="xs" color={colors.text.secondary} mt={1}>
-                Total: R$ {amount.toFixed(2)}
+                Total: ${amount.toFixed(2)}
               </Text>
             </Box>
           )}

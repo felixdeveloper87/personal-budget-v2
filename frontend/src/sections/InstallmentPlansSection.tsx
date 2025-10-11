@@ -65,10 +65,10 @@ export default function InstallmentPlansSection() {
       >
         <Icon as={FiCreditCard} fontSize="4xl" color={colors.text.secondary} />
         <Text color={colors.text.secondary} fontSize="lg" textAlign="center">
-          Nenhum parcelamento ativo
+          No active installment plans
         </Text>
         <Text color={colors.text.secondary} fontSize="sm" textAlign="center">
-          Crie despesas parceladas no formulário acima
+          Create installment expenses in the form above
         </Text>
       </VStack>
     )
@@ -86,7 +86,7 @@ export default function InstallmentPlansSection() {
         color={colors.text}
       >
         <Icon as={FiCreditCard} />
-        Parcelamentos Ativos
+        Active Installment Plans
       </Heading>
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={4}>

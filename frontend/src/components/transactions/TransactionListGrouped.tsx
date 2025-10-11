@@ -255,7 +255,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                                   {tx.description || '-'}
                                 </Text>
                                 {tx.isInstallment && (
-                                  <Tooltip label="Parcela" hasArrow>
+                                  <Tooltip label="Installment" hasArrow>
                                     <span>
                                       <Icon as={FiCreditCard} color="purple.500" fontSize="sm" />
                                     </span>

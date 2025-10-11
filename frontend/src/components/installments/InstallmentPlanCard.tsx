@@ -60,8 +60,8 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
     try {
       await deleteInstallmentPlan(plan.id)
       toast({
-        title: 'Parcelamento excluído',
-        description: 'Todas as parcelas foram removidas',
+        title: 'Installment plan deleted',
+        description: 'All installments have been removed',
         status: 'success',
         duration: 2000,
       })
@@ -69,8 +69,8 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
       onClose()
     } catch (err: any) {
       toast({
-        title: 'Erro ao excluir',
-        description: err?.message || 'Tente novamente',
+        title: 'Error deleting',
+        description: err?.message || 'Please try again',
         status: 'error',
         duration: 3000,
       })
@@ -106,7 +106,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                 </VStack>
               </HStack>
               <IconButton
-                aria-label="Excluir parcelamento"
+                aria-label="Delete installment plan"
                 icon={<FiTrash2 />}
                 size="sm"
                 colorScheme="red"
@@ -119,10 +119,10 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
             <HStack justify="space-between" flexWrap="wrap" gap={3}>
               <VStack align="start" spacing={0}>
                 <Text fontSize="xs" color={colors.text.secondary}>
-                  Valor da parcela
+                  Installment value
                 </Text>
                 <Text fontSize="xl" fontWeight="bold" color={colors.accent}>
-                  R$ {plan.installmentValue.toFixed(2)}
+                  ${plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
 
@@ -131,7 +131,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                   Total
                 </Text>
                 <Text fontSize="lg" fontWeight="semibold">
-                  R$ {plan.totalAmount.toFixed(2)}
+                  ${plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
             </HStack>
@@ -139,7 +139,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
             {/* Progress */}
             <HStack justify="space-between">
               <Badge colorScheme="purple" fontSize="sm" px={2} py={1} borderRadius="md">
-                {paidCount}/{plan.totalInstallments} pagas
+                {paidCount}/{plan.totalInstallments} paid
               </Badge>
               <Button
                 size="sm"
@@ -147,7 +147,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                 rightIcon={isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                 onClick={() => setIsExpanded(!isExpanded)}
               >
-                {isExpanded ? 'Ocultar' : 'Ver parcelas'}
+                {isExpanded ? 'Hide' : 'View installments'}
               </Button>
             </HStack>
 
@@ -186,7 +186,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                           {transaction.installmentNumber}/{plan.totalInstallments}
                         </Badge>
                         <Text fontSize="sm" fontWeight="semibold">
-                          R$ {transaction.amount.toFixed(2)}
+                          ${transaction.amount.toFixed(2)}
                         </Text>
                       </HStack>
                     </HStack>
@@ -203,17 +203,16 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
         <AlertDialogOverlay>
           <AlertDialogContent bg={colors.cardBg} borderColor={colors.border}>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Excluir Parcelamento
+              Delete Installment Plan
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Tem certeza? Todas as {plan.totalInstallments} parcelas serão removidas
-              permanentemente.
+              Are you sure? All {plan.totalInstallments} installments will be permanently removed.
             </AlertDialogBody>
 
             <AlertDialogFooter>
               <Button ref={cancelRef} onClick={onClose}>
-                Cancelar
+                Cancel
               </Button>
               <Button
                 colorScheme="red"
@@ -221,7 +220,7 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                 ml={3}
                 isLoading={isDeleting}
               >
-                Excluir
+                Delete
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
