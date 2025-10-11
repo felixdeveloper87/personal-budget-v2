@@ -17,9 +17,12 @@ import {
   Container,
   useDisclosure,
   Tooltip,
+  Badge,
+  Icon,
 } from '@chakra-ui/react'
 import { SunIcon, MoonIcon, SearchIcon } from '@chakra-ui/icons'
 import { SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
+import { Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearch } from '../../contexts/SearchContext'
 import SearchModal from '../ui/SearchModal'
@@ -39,63 +42,85 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   const bg = useColorModeValue(
-    'linear-gradient(135deg, #095b81ff 0%, #316dccff 50%, #4b698cff 100%)',
-    'linear-gradient(135deg, #131313ff 0%, #212121ff 50%, #373737ff 100%)'
+    'rgba(255, 255, 255, 0.95)',
+    'rgba(17, 17, 17, 0.95)'
   )
 
-  const textColor = 'white'
-  const secondaryTextColor = 'rgba(255,255,255,0.8)'
+  const borderColor = useColorModeValue('gray.200', 'gray.800')
+  const textColor = useColorModeValue('gray.800', 'white')
+  const secondaryTextColor = useColorModeValue('gray.600', 'gray.400')
 
   return (
     <>
       {/* Main Header */}
-      <Box as="header" bg={bg} position="sticky" top={0} zIndex={1000}>
-        <Container maxW="100%" px={{ base: 4, md: 6, lg: 10 }}>
+      <Box 
+        as="header" 
+        bg={bg}
+        backdropFilter="blur(10px)"
+        position="sticky" 
+        top={0} 
+        zIndex={1000}
+        borderBottom="1px solid"
+        borderColor={borderColor}
+        boxShadow={useColorModeValue(
+          '0 1px 3px rgba(0,0,0,0.05)',
+          '0 1px 3px rgba(0,0,0,0.3)'
+        )}
+        w="100%"
+      >
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <Flex
-            h={{ base: 20, sm: 24, md: 28, lg: 32 }}
+            h={{ base: 16, md: 20, lg: 24 }}
             align="center"
             justify="space-between"
-            gap={3}
+            gap={4}
           >
             {/* Logo + Title */}
-            <HStack spacing={{ base: 4, sm: 6, md: 8 }} flex="1" minW={0} ml={{ base: 2, sm: 4, md: 8 }}>
+            <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW={0}>
               <Box
                 as="button"
-                w={{ base: 12, sm: 14, md: 18 }}
-                h={{ base: 12, sm: 14, md: 18 }}
+                position="relative"
+                w={{ base: 10, md: 12, lg: 14 }}
+                h={{ base: 10, md: 12, lg: 14 }}
                 flexShrink={0}
-                borderRadius="2xl"
+                bg={useColorModeValue(
+                  'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+                  'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+                )}
+                borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
                 transition="all 0.3s ease"
-                _hover={{ transform: 'scale(1.1) rotate(2deg)', cursor: 'pointer' }}
+                boxShadow="0 4px 12px rgba(59, 130, 246, 0.3)"
+                _hover={{ 
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+                  cursor: 'pointer' 
+                }}
+                _active={{ transform: 'translateY(0)' }}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               >
                 <Text
-                  fontSize={{ base: '2xl', sm: '3xl', md: '4xl', lg: '5xl' }}
+                  fontSize={{ base: 'xl', md: '2xl', lg: '3xl' }}
                   fontWeight="extrabold"
-                  color={useColorModeValue('white', 'black')}
-                  textShadow={useColorModeValue(
-                    '0 0 12px rgba(255,255,255,0.8)',
-                    '0 0 12px rgba(255,255,255,0.3)'
-                  )}
-                  sx={{
-                    animation: 'logoPulse 4s infinite ease-in-out',
-                    '@keyframes logoPulse': {
-                      '0%, 100%': {
-                        transform: 'scale(1)',
-                        textShadow: '0 0 10px rgba(255,255,255,0.5)',
-                      },
-                      '50%': {
-                        transform: 'scale(1.08)',
-                        textShadow: '0 0 20px rgba(255,255,255,0.9)',
-                      },
-                    },
-                  }}
+                  color="white"
                 >
                   £
                 </Text>
+                {user && (
+                  <Box
+                    position="absolute"
+                    top="-2px"
+                    right="-2px"
+                    w="8px"
+                    h="8px"
+                    bg="green.400"
+                    borderRadius="full"
+                    border="2px solid"
+                    borderColor={bg}
+                  />
+                )}
               </Box>
 
               <VStack
@@ -104,92 +129,130 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                 minW={0}
                 display={{ base: 'none', sm: 'flex' }}
               >
+                <HStack spacing={2}>
+                  <Text
+                    fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
+                    fontWeight="bold"
+                    color={textColor}
+                    noOfLines={1}
+                  >
+                    Personal Budget
+                  </Text>
+                  {!user && (
+                    <Badge
+                      colorScheme="green"
+                      fontSize={{ base: "2xs", lg: "xs" }}
+                      px={2}
+                      py={0.5}
+                      borderRadius="md"
+                      fontWeight="600"
+                    >
+                      Free
+                    </Badge>
+                  )}
+                </HStack>
                 <Text
-                  fontSize={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }}
-                  fontWeight="bold"
-                  color={textColor}
-                  noOfLines={1}
-                >
-                  Personal Budget
-                </Text>
-                <Text
-                  fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
+                  fontSize={{ base: "xs", lg: "sm" }}
                   color={secondaryTextColor}
                   noOfLines={1}
                 >
-                  Smart Financial Management
+                  Financial Management
                 </Text>
               </VStack>
 
               {/* Navegação - só desktop */}
-              <HStack
-                spacing={4}
-                ml={10}
-                display={{ base: 'none', md: 'flex' }}
-                fontWeight="500"
-                color="white"
-              >
-                <Button 
-                  variant="ghost" 
-                  _hover={{ color: 'yellow.300' }}
-                  color={currentPage === 'dashboard' ? 'yellow.300' : 'white'}
-                  onClick={() => onPageChange?.('dashboard')}
+              {user && (
+                <HStack
+                  spacing={{ md: 2, lg: 3 }}
+                  ml={{ md: 6, lg: 10, xl: 14 }}
+                  display={{ base: 'none', md: 'flex' }}
                 >
-                  Dashboard
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  _hover={{ color: 'yellow.300' }}
-                  color={currentPage === 'transactions' ? 'yellow.300' : 'white'}
-                  onClick={() => onPageChange?.('transactions')}
-                >
-                  All Transactions
-                </Button>
-              </HStack>
+                  <Button 
+                    variant="ghost" 
+                    size={{ md: "sm", lg: "md" }}
+                    fontWeight="600"
+                    fontSize={{ md: "sm", lg: "md" }}
+                    color={currentPage === 'dashboard' ? 'blue.500' : textColor}
+                    bg={currentPage === 'dashboard' ? useColorModeValue('blue.50', 'blue.900') : 'transparent'}
+                    _hover={{ 
+                      bg: useColorModeValue('gray.100', 'gray.700'),
+                      color: 'blue.500'
+                    }}
+                    onClick={() => onPageChange?.('dashboard')}
+                    borderRadius="lg"
+                    px={{ md: 4, lg: 6 }}
+                  >
+                    Dashboard
+                  </Button>
+                  <Button 
+                    variant="ghost"
+                    size={{ md: "sm", lg: "md" }}
+                    fontWeight="600"
+                    fontSize={{ md: "sm", lg: "md" }}
+                    color={currentPage === 'transactions' ? 'blue.500' : textColor}
+                    bg={currentPage === 'transactions' ? useColorModeValue('blue.50', 'blue.900') : 'transparent'}
+                    _hover={{ 
+                      bg: useColorModeValue('gray.100', 'gray.700'),
+                      color: 'blue.500'
+                    }}
+                    onClick={() => onPageChange?.('transactions')}
+                    borderRadius="lg"
+                    px={{ md: 4, lg: 6 }}
+                  >
+                    Transactions
+                  </Button>
+                </HStack>
+              )}
             </HStack>
 
-            {/* Botão Filters (desktop) */}
+            {/* Botão Search/Filters (desktop) */}
             {user && (
               <Box
-                flex="2"
-                maxW="400px"
-                display={{ base: 'none', md: 'flex' }}
+                flex="1"
+                maxW={{ lg: "300px", xl: "400px" }}
+                display={{ base: 'none', lg: 'flex' }}
                 justifyContent="center"
               >
                 <Button
                   onClick={onSearchOpen}
                   leftIcon={<SearchIcon />}
-                  px={6}
-                  py={5}
+                  size={{ lg: "sm", xl: "md" }}
+                  px={{ lg: 6, xl: 8 }}
                   fontWeight="600"
-                  fontSize={{ base: 'sm', md: 'md' }}
+                  fontSize={{ lg: "sm", xl: "md" }}
                   borderRadius="full"
-                  bgGradient="linear(to-r, blue.400, purple.500)"
-                  color="white"
-                  boxShadow="0 4px 10px rgba(0,0,0,0.2)"
+                  variant="outline"
+                  borderColor={useColorModeValue('gray.300', 'gray.600')}
+                  color={textColor}
+                  bg={useColorModeValue('white', 'gray.800')}
                   _hover={{
-                    transform: 'scale(1.05)',
-                    boxShadow: '0 6px 14px rgba(0,0,0,0.25)',
-                    bgGradient: 'linear(to-r, blue.500, purple.600)',
+                    bg: useColorModeValue('gray.50', 'gray.700'),
+                    borderColor: 'blue.500',
+                    color: 'blue.500',
                   }}
-                  _active={{ transform: 'scale(0.98)' }}
                 >
-                  Filters
+                  Search & Filters
                 </Button>
               </Box>
             )}
 
             {/* Right Controls */}
-            <HStack spacing={{ base: 2, md: 4 }} flexShrink={0}>
-              {/* Lupa (mobile) */}
+            <HStack spacing={{ base: 2, md: 3, lg: 4 }} flexShrink={0}>
+              {/* Search (mobile/tablet only) */}
               {user && (
                 <IconButton
-                  display={{ base: 'flex', md: 'none' }}
+                  display={{ base: 'flex', lg: 'none' }}
                   aria-label="Search"
                   icon={<SearchIcon />}
                   variant="ghost"
-                  color="white"
+                  size="sm"
+                  color={textColor}
                   onClick={onSearchOpen}
+                  borderRadius="lg"
+                  _hover={{
+                    bg: useColorModeValue('gray.100', 'gray.700'),
+                    color: 'blue.500'
+                  }}
                 />
               )}
 
@@ -200,61 +263,120 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                   icon={colorMode === 'light' ? <MoonIcon /> : <SunIcon />}
                   onClick={toggleColorMode}
                   variant="ghost"
-                  size={{ base: 'sm', sm: 'md' }}
-                  fontSize={{ base: '18px', md: '22px', lg: '26px' }}
-                  color={useColorModeValue('gray.800', 'white')}
+                  size={{ base: "sm", lg: "md" }}
+                  fontSize={{ base: "md", lg: "lg" }}
+                  color={textColor}
+                  borderRadius="lg"
                   _hover={{
                     bg: useColorModeValue('gray.100', 'gray.700'),
+                    color: 'blue.500'
                   }}
                 />
               </Tooltip>
 
-              {/* User menu */}
+              {/* User menu or Login */}
               {user ? (
                 <Menu placement="bottom-end">
                   <MenuButton
-                    as={IconButton}
-                    aria-label="User menu"
-                    icon={<Avatar size={{ base: 'sm', md: 'md' }} name={user?.name} />}
+                    as={Button}
                     variant="ghost"
-                  />
-                  <MenuList zIndex={9999}>
+                    size={{ base: "sm", lg: "md" }}
+                    p={{ base: 1, lg: 2 }}
+                    borderRadius="lg"
+                    _hover={{
+                      bg: useColorModeValue('gray.100', 'gray.700'),
+                    }}
+                  >
+                    <HStack spacing={{ base: 2, lg: 3 }}>
+                      <Avatar 
+                        size={{ base: "sm", lg: "md" }}
+                        name={user?.name}
+                        bg="blue.500"
+                      />
+                      <Text 
+                        fontSize={{ base: "sm", lg: "md" }}
+                        fontWeight="600"
+                        color={textColor}
+                        display={{ base: 'none', md: 'block' }}
+                      >
+                        {user?.name.split(' ')[0]}
+                      </Text>
+                    </HStack>
+                  </MenuButton>
+                  <MenuList 
+                    zIndex={9999}
+                    borderColor={borderColor}
+                    shadow="lg"
+                  >
+                    <Box px={4} py={3}>
+                      <Text fontSize="sm" fontWeight="600" color={textColor}>
+                        {user?.name}
+                      </Text>
+                      <Text fontSize="xs" color={secondaryTextColor}>
+                        {user?.email}
+                      </Text>
+                    </Box>
+                    <MenuDivider />
+                    
                     {/* Navegação mobile */}
                     <MenuItem 
+                      icon={<Icon as={Zap} boxSize={4} />}
                       onClick={() => onPageChange?.('dashboard')}
                       color={currentPage === 'dashboard' ? 'blue.500' : undefined}
-                      fontWeight={currentPage === 'dashboard' ? 'semibold' : 'normal'}
+                      fontWeight={currentPage === 'dashboard' ? '600' : 'normal'}
+                      display={{ base: 'flex', md: 'none' }}
                     >
                       Dashboard
                     </MenuItem>
                     <MenuItem 
+                      icon={<SearchIcon />}
                       onClick={() => onPageChange?.('transactions')}
                       color={currentPage === 'transactions' ? 'blue.500' : undefined}
-                      fontWeight={currentPage === 'transactions' ? 'semibold' : 'normal'}
+                      fontWeight={currentPage === 'transactions' ? '600' : 'normal'}
+                      display={{ base: 'flex', md: 'none' }}
                     >
-                      All Transactions
+                      Transactions
                     </MenuItem>
-                    <MenuDivider />
+                    <MenuDivider display={{ base: 'block', md: 'none' }} />
+                    
                     <MenuItem icon={<InfoIcon />}>Profile</MenuItem>
                     <MenuItem icon={<SettingsIcon />} onClick={onOpenSettings}>
                       Settings
                     </MenuItem>
                     <MenuDivider />
-                    <MenuItem icon={<ExternalLinkIcon />} onClick={logout} color="red.500">
+                    <MenuItem 
+                      icon={<ExternalLinkIcon />} 
+                      onClick={logout} 
+                      color="red.500"
+                      fontWeight="600"
+                    >
                       Sign Out
                     </MenuItem>
                   </MenuList>
                 </Menu>
               ) : (
                 <Button
-                  colorScheme="brand"
-                  variant="solid"
                   onClick={onLogin}
-                  size={{ base: 'sm', sm: 'md' }}
+                  size={{ base: "sm", lg: "md" }}
                   fontWeight="600"
-                  px={{ base: 3, sm: 6 }}
+                  fontSize={{ base: "sm", lg: "md" }}
+                  px={{ base: 4, md: 6, lg: 8 }}
+                  borderRadius="lg"
+                  bg={useColorModeValue(
+                    'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+                    'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+                  )}
+                  color="white"
+                  boxShadow="0 4px 12px rgba(59, 130, 246, 0.3)"
+                  _hover={{
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                  }}
                 >
-                  Login
+                  Get Started
                 </Button>
               )}
             </HStack>

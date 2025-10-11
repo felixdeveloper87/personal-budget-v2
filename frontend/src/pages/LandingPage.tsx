@@ -283,9 +283,9 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
           }}
         />
         <Container
-          maxW="7xl"
+          maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }}
           py={{ base: 14, sm: 20, md: 28 }}
-          px={{ base: 4, sm: 6, md: 8 }}
+          px={{ base: 4, md: 8, lg: 12, xl: 16 }}
           position="relative"
           zIndex={1}
         >
@@ -371,7 +371,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
 
       {/* Stats Section */}
       <Box py={{ base: 12, md: 16 }} bg={useColorModeValue('white', 'gray.900')}>
-        <Container maxW="7xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 6, md: 8 }}>
             {stats.map((stat, index) => (
               <MotionBox
@@ -406,7 +406,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
       {/* Features Section */}
       <Box id="features" py={{ base: 12, sm: 16, md: 20, lg: 24 }} bg={useColorModeValue('gray.50', 'gray.800')}>
-        <Container maxW="7xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
@@ -481,7 +481,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
 
       {/* How It Works Section */}
       <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('white', 'gray.900')}>
-        <Container maxW="7xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
@@ -590,7 +590,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
 
       {/* Benefits Section */}
       <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('gray.50', 'gray.800')}>
-        <Container maxW="7xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
@@ -661,7 +661,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
 
       {/* Testimonials Section */}
       <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('white', 'gray.900')}>
-        <Container maxW="7xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
@@ -730,7 +730,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
 
       {/* FAQ Section */}
       <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('gray.50', 'gray.800')}>
-        <Container maxW="4xl" px={{ base: 4, sm: 6, md: 8 }}>
+        <Container maxW={{ base: "100%", lg: "900px", xl: "1000px", "2xl": "1200px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 8, md: 12 }}>
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
@@ -812,7 +812,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
           bgSize="40px 40px"
         />
         
-        <Container maxW="5xl" px={{ base: 4, sm: 6, md: 8 }} position="relative" zIndex={1}>
+        <Container maxW={{ base: "100%", lg: "1000px", xl: "1100px", "2xl": "1300px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }} position="relative" zIndex={1}>
           <MotionBox
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
