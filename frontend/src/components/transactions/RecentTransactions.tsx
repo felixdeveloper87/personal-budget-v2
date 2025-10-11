@@ -1,10 +1,10 @@
-import { Box, Text, VStack, HStack, Badge, Divider, useColorModeValue, IconButton, useToast } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack, Badge, Divider, useColorModeValue, IconButton } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
 import { Transaction } from '../../types'
-import { deleteTransaction } from '../../api'
-import { useAuth } from '../../contexts/AuthContext'
-import { useMemo, useCallback } from 'react'
+import { useMemo } from 'react'
 import { formatTransactionDateTime } from '../../utils/dateTime'
+import { DeleteTransactionDialog } from '../ui'
+import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
@@ -16,8 +16,7 @@ interface RecentTransactionsProps {
 export default function RecentTransactions({ transactions, type, limit = 5, onTransactionDeleted }: RecentTransactionsProps) {
   const bgColor = useColorModeValue('gray.50', '#1a1a1a')
   const borderColor = useColorModeValue('gray.200', 'gray.800')
-  const { user } = useAuth()
-  const toast = useToast()
+  const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
 
   const filteredTransactions = useMemo(
     () =>
@@ -27,22 +26,6 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
         .slice(0, limit),
     [transactions, type, limit]
   )
-
-  const handleDelete = useCallback(async (transactionId: number) => {
-    if (!user?.token) return
-
-    try {
-      await deleteTransaction(transactionId)
-      toast({ title: 'Transaction deleted', status: 'success' })
-      onTransactionDeleted?.()
-    } catch (error: any) {
-      toast({
-        title: 'Error deleting transaction',
-        description: error?.response?.data?.message || 'Failed to delete transaction',
-        status: 'error'
-      })
-    }
-  }, [user?.token, toast, onTransactionDeleted])
 
   if (filteredTransactions.length === 0) {
     return (
@@ -101,7 +84,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                     size="xs"
                     colorScheme="red"
                     variant="ghost"
-                    onClick={() => handleDelete(tx.id!)}
+                    onClick={() => openDeleteDialog(tx)}
                   />
                 )}
               </HStack>
@@ -110,6 +93,14 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
           </Box>
         ))}
       </VStack>
+      
+      {/* Delete Transaction Dialog */}
+      <DeleteTransactionDialog
+        transaction={transactionToDelete}
+        isOpen={isOpen}
+        onClose={closeDeleteDialog}
+        onDeleted={onTransactionDeleted || (() => {})}
+      />
     </Box>
   )
 }

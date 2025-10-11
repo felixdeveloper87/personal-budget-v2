@@ -66,6 +66,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 🔑 importante para preflight
                 .requestMatchers("/api/transactions/**").authenticated()
                 .requestMatchers("/api/summary/**").authenticated()
+                .requestMatchers("/api/installment-plans/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

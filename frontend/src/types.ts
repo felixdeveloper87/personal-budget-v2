@@ -70,4 +70,5 @@ export interface CreateInstallmentPlanRequest {
   category: string
   description: string
   startDate: string // yyyy-MM-dd
+  startDateTime?: string // yyyy-MM-ddTHH:mm:ss.sssZ (opcional)
 }

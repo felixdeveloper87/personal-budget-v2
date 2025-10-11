@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,7 +55,15 @@ public class InstallmentPlanService {
 
         // Criar as transações para cada parcela
         List<Transaction> transactions = new ArrayList<>();
-        LocalDate currentDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+        
+        // Usar startDateTime se disponível, senão usar startDate com horário atual
+        LocalDateTime baseDateTime;
+        if (request.getStartDateTime() != null) {
+            baseDateTime = request.getStartDateTime();
+        } else {
+            LocalDate currentDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+            baseDateTime = currentDate.atTime(12, 0); // Usar meio-dia como padrão
+        }
 
         for (int i = 1; i <= request.getTotalInstallments(); i++) {
             Transaction transaction = new Transaction();
@@ -63,15 +72,12 @@ public class InstallmentPlanService {
             transaction.setDescription(String.format("%s (Parcela %d/%d)", 
                                        request.getDescription(), i, request.getTotalInstallments()));
             transaction.setAmount(request.getInstallmentValue());
-            transaction.setDateTime(currentDate.atStartOfDay());
+            transaction.setDateTime(baseDateTime.plusMonths(i - 1)); // Incrementar meses mantendo horário
             transaction.setUser(user);
             transaction.setInstallmentPlan(plan);
             transaction.setInstallmentNumber(i); // Define o número da parcela
 
             transactions.add(transaction);
-            
-            // Incrementar a data em 1 mês para a próxima parcela
-            currentDate = currentDate.plusMonths(1);
         }
 
         // Salvar todas as transações

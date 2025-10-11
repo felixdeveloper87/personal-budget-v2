@@ -1,14 +1,28 @@
 package com.example.budget.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class CreateInstallmentPlanRequest {
+    @JsonProperty("totalInstallments")
     private int totalInstallments;
+    
+    @JsonProperty("installmentValue")
     private BigDecimal installmentValue;
+    
+    @JsonProperty("category")
     private String category;
+    
+    @JsonProperty("description")
     private String description;
+    
+    @JsonProperty("startDate")
     private LocalDate startDate; // Data da primeira parcela
+    
+    @JsonProperty("startDateTime")
+    private LocalDateTime startDateTime; // Data e hora da primeira parcela (opcional)
 
     // Getters e Setters
     public int getTotalInstallments() {
@@ -49,6 +63,14 @@ public class CreateInstallmentPlanRequest {
 
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
+    }
+
+    public LocalDateTime getStartDateTime() {
+        return startDateTime;
+    }
+
+    public void setStartDateTime(LocalDateTime startDateTime) {
+        this.startDateTime = startDateTime;
     }
 }
 

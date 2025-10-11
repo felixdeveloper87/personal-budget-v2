@@ -67,12 +67,18 @@ export default function TransactionForm({
       try {
         // 💳 Create installment plan (only for EXPENSE)
         if (installmentEnabled && type === 'EXPENSE' && installments > 1) {
+          // Create proper datetime for installment plan
+          const now = new Date()
+          const selectedDate = new Date(date)
+          selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+          
           await createInstallmentPlan({
             totalInstallments: installments,
             installmentValue: Number(amount),
             category,
             description,
-            startDate: date,
+            startDate: selectedDate.toISOString().slice(0, 10), // Keep as date string for API
+            startDateTime: selectedDate.toISOString(), // Add full datetime
           })
 
           toast({

@@ -3,7 +3,6 @@ import {
   Text, 
   Badge, 
   IconButton, 
-  useToast,
   Table,
   Thead,
   Tbody,
@@ -20,10 +19,10 @@ import {
 import { DeleteIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
-import { deleteTransaction } from '../../api'
-import { useAuth } from '../../contexts/AuthContext'
-import { useMemo, useCallback } from 'react'
+import { useMemo } from 'react'
 import { formatTransactionDateTime } from '../../utils/dateTime'
+import { DeleteTransactionDialog } from '../ui'
+import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -31,24 +30,7 @@ interface TransactionListProps {
 }
 
 export default function TransactionList({ transactions, onTransactionDeleted }: TransactionListProps) {
-  const { user } = useAuth()
-  const toast = useToast()
-
-  const handleDelete = useCallback(async (transactionId: number) => {
-    if (!user?.token) return
-    
-    try {
-      await deleteTransaction(transactionId)
-      toast({ title: 'Transaction deleted', status: 'success' })
-      onTransactionDeleted?.()
-    } catch (error: any) {
-      toast({ 
-        title: 'Error deleting transaction', 
-        description: error?.response?.data?.message || 'Failed to delete transaction',
-        status: 'error' 
-      })
-    }
-  }, [user?.token, toast, onTransactionDeleted])
+  const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
 
   // Memoize sorted transactions to prevent recalculation on every render
    const sortedTransactions = useMemo(() => 
@@ -137,7 +119,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                       size="sm"
                       colorScheme="red"
                       variant="ghost"
-                      onClick={() => handleDelete(tx.id!)}
+                      onClick={() => openDeleteDialog(tx)}
                     />
                   )}
                 </Td>
@@ -146,6 +128,14 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
           </Tbody>
         </Table>
       </TableContainer>
+      
+      {/* Delete Transaction Dialog */}
+      <DeleteTransactionDialog
+        transaction={transactionToDelete}
+        isOpen={isOpen}
+        onClose={closeDeleteDialog}
+        onDeleted={onTransactionDeleted || (() => {})}
+      />
     </Box>
   )
 }
