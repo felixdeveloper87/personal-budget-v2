@@ -9,6 +9,8 @@ export interface Transaction {
   description: string
   amount: number
   userId?: number // opcional porque o backend não retorna no DTO de busca
+  installmentPlanId?: number // ID do plano de parcelamento (se houver)
+  isInstallment?: boolean // Indica se faz parte de um parcelamento
 }
 
 // DTO do /transactions/search (não retorna userId)
@@ -42,4 +44,30 @@ export interface RegisterRequest {
   name: string
   email: string
   password: string
+}
+
+// Plano de parcelamento
+export interface InstallmentPlan {
+  id: number
+  totalInstallments: number
+  totalAmount: number
+  installmentValue: number
+  transactions: InstallmentTransaction[]
+}
+
+export interface InstallmentTransaction {
+  id: number
+  description: string
+  amount: number
+  category: string
+  date: string // yyyy-MM-dd
+  installmentNumber: number
+}
+
+export interface CreateInstallmentPlanRequest {
+  totalInstallments: number
+  installmentValue: number
+  category: string
+  description: string
+  startDate: string // yyyy-MM-dd
 }

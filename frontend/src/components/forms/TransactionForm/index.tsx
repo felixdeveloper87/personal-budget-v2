@@ -2,12 +2,13 @@ import React, { useState, useCallback } from 'react'
 import { Box, VStack, Card, CardBody, useToast } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { createTransaction } from '../../../api'
+import { createTransaction, createInstallmentPlan } from '../../../api'
 import RecentTransactions from '../../transactions/RecentTransactions'
 import DateSelector from './DateSelector'
 import AmountInput from './AmountInput'
 import CategorySelector from './CategorySelector'
 import DescriptionInput from './DescriptionInput'
+import InstallmentSelector from './InstallmentSelector'
 import { Transaction } from '../../../types'
 
 interface TransactionFormProps {
@@ -45,11 +46,16 @@ export default function TransactionForm({
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
 
+  // 💳 Installment states
+  const [installmentEnabled, setInstallmentEnabled] = useState(false)
+  const [installments, setInstallments] = useState(3)
+
   /**
    * 🧾 Handle form submission:
-   * - Sends transaction data to API
+   * - Creates installment plan if enabled (EXPENSE only)
+   * - Otherwise creates a single transaction
    * - Displays success/error toast
-   * - Resets description and amount on success
+   * - Resets form on success
    */
   const onSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -58,32 +64,58 @@ export default function TransactionForm({
 
       setLoading(true)
       try {
-        const now = new Date()
-        const selectedDate = new Date(date)
-        selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+        // 💳 Create installment plan (only for EXPENSE)
+        if (installmentEnabled && type === 'EXPENSE' && installments > 1) {
+          await createInstallmentPlan({
+            totalInstallments: installments,
+            installmentValue: Number(amount),
+            category,
+            description,
+            startDate: date,
+          })
 
-        const tx: Transaction = {
-          dateTime: selectedDate.toISOString(),
-          type,
-          category,
-          description,
-          amount: Number(amount),
+          toast({
+            title: '✅ Parcelamento criado!',
+            description: `${installments}x de R$ ${amount.toFixed(2)}`,
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          })
+        } else {
+          // 💰 Create single transaction
+          const now = new Date()
+          const selectedDate = new Date(date)
+          selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
+
+          const tx: Transaction = {
+            dateTime: selectedDate.toISOString(),
+            type,
+            category,
+            description,
+            amount: Number(amount),
+          }
+          const created = await createTransaction(tx)
+          onCreated(created)
+
+          toast({
+            title: 'Transaction saved',
+            status: 'success',
+            duration: 2000,
+            isClosable: true,
+          })
         }
-        const created = await createTransaction(tx)
-        onCreated(created)
 
-        toast({
-          title: 'Transaction saved',
-          status: 'success',
-          duration: 2000,
-          isClosable: true,
-        })
-
+        // Reset form
         setAmount(0)
         setDescription('')
+        setInstallmentEnabled(false)
+        setInstallments(3)
+
+        // Trigger parent refresh
+        onCreated({} as Transaction)
       } catch (err: any) {
         toast({
-          title: 'Error saving transaction',
+          title: 'Error saving',
           description: err?.message || 'Please try again later.',
           status: 'error',
           duration: 3000,
@@ -93,7 +125,18 @@ export default function TransactionForm({
         setLoading(false)
       }
     },
-    [date, type, category, description, amount, user?.token, onCreated, toast]
+    [
+      date,
+      type,
+      category,
+      description,
+      amount,
+      installmentEnabled,
+      installments,
+      user?.token,
+      onCreated,
+      toast,
+    ]
   )
 
   return (
@@ -121,6 +164,16 @@ export default function TransactionForm({
             type={type}
             loading={loading}
           />
+          {/* Show installment selector only for EXPENSE */}
+          {type === 'EXPENSE' && (
+            <InstallmentSelector
+              enabled={installmentEnabled}
+              onEnabledChange={setInstallmentEnabled}
+              installments={installments}
+              onInstallmentsChange={setInstallments}
+              amount={amount}
+            />
+          )}
         </VStack>
       ) : (
         /**
@@ -154,6 +207,16 @@ export default function TransactionForm({
                 type={type}
                 loading={loading}
               />
+              {/* Show installment selector only for EXPENSE */}
+              {type === 'EXPENSE' && (
+                <InstallmentSelector
+                  enabled={installmentEnabled}
+                  onEnabledChange={setInstallmentEnabled}
+                  installments={installments}
+                  onInstallmentsChange={setInstallments}
+                  amount={amount}
+                />
+              )}
             </VStack>
           </CardBody>
         </Card>

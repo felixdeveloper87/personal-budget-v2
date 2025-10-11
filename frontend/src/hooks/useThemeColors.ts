@@ -4,6 +4,7 @@ export const useThemeColors = () => {
   return {
     // Backgrounds
     bg: useColorModeValue('linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', '#000000'),
+    bgSecondary: useColorModeValue('#f8fafc', '#0a0a0a'),
     cardBg: useColorModeValue('white', '#111111'),
     cardHover: useColorModeValue('#fefefe', '#111111'),
     inputBg: useColorModeValue('#f8fafc', '#1a1a1a'),

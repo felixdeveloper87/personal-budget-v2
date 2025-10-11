@@ -4,7 +4,9 @@ import {
   MonthlySummary,
   User,
   LoginRequest,
-  RegisterRequest
+  RegisterRequest,
+  InstallmentPlan,
+  CreateInstallmentPlanRequest
 } from './types'
 
 // ----------------------------------------------------
@@ -116,6 +118,35 @@ export async function searchTransactions(filters: {
     params: filters
   })
   return data
+}
+
+// ----------------------------------------------------
+// 📊 INSTALLMENT PLAN ENDPOINTS
+// ----------------------------------------------------
+
+// Get all installment plans → GET /installment-plans
+export async function listInstallmentPlans(): Promise<InstallmentPlan[]> {
+  const { data } = await api.get<InstallmentPlan[]>('/installment-plans')
+  return data
+}
+
+// Create installment plan → POST /installment-plans
+export async function createInstallmentPlan(
+  request: CreateInstallmentPlanRequest
+): Promise<InstallmentPlan> {
+  const { data } = await api.post<InstallmentPlan>('/installment-plans', request)
+  return data
+}
+
+// Get installment plan by ID → GET /installment-plans/:id
+export async function getInstallmentPlan(id: number): Promise<InstallmentPlan> {
+  const { data } = await api.get<InstallmentPlan>(`/installment-plans/${id}`)
+  return data
+}
+
+// Delete installment plan → DELETE /installment-plans/:id
+export async function deleteInstallmentPlan(id: number): Promise<void> {
+  await api.delete(`/installment-plans/${id}`)
 }
 
 export default api

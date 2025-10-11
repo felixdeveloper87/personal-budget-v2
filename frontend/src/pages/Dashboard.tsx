@@ -10,6 +10,7 @@ import {
   PeriodNavigatorSection,
   SummarySection,
   ChartsSection,
+  InstallmentPlansSection,
 } from '../sections'
 
 export default function Dashboard() {
@@ -28,6 +29,9 @@ export default function Dashboard() {
       ) : (
         <VStack spacing={6} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
+
+          {/* Seção de Parcelamentos */}
+          <InstallmentPlansSection />
 
           {!hasActiveFilters(filters) && (
             <PeriodNavigatorSection

@@ -13,8 +13,12 @@ import {
   TableContainer,
   Heading,
   VStack,
+  HStack,
+  Icon,
+  Tooltip,
 } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
+import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
 import { deleteTransaction } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
@@ -103,9 +107,18 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                   </Text>
                 </Td>
                 <Td>
-                  <Text fontSize="sm" color="gray.600" noOfLines={1} maxW="200px">
-                    {tx.description || '-'}
-                  </Text>
+                  <HStack spacing={2}>
+                    <Text fontSize="sm" color="gray.600" noOfLines={1} maxW="200px">
+                      {tx.description || '-'}
+                    </Text>
+                    {tx.isInstallment && (
+                      <Tooltip label="Parcela" hasArrow>
+                        <span>
+                          <Icon as={FiCreditCard} color="purple.500" fontSize="sm" />
+                        </span>
+                      </Tooltip>
+                    )}
+                  </HStack>
                 </Td>
                 <Td isNumeric>
                   <Text 
