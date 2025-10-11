@@ -231,14 +231,14 @@ export default function AddTransactionSection({
             <Button
               aria-label="Add income transaction" // ♿ Accessibility
               onClick={handleAddIncome}
-              size={{ base: 'lg', sm: 'xl', md: '2xl' }}
-              leftIcon={<Plus size={28} aria-hidden="true" />}
-              rightIcon={<TrendingUp size={24} aria-hidden="true" />}
+              size={{ base: 'lg', sm: 'lg', md: 'lg' }}
+              leftIcon={<Plus size={20} aria-hidden="true" />}
+              rightIcon={<TrendingUp size={18} aria-hidden="true" />}
               borderRadius="2xl"
-              px={{ base: 12, sm: 16, md: 20, lg: 24 }}
-              py={{ base: 6, sm: 8, md: 10 }}
-              fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
-              fontWeight="800"
+              px={{ base: 8, sm: 10, md: 12 }}
+              py={{ base: 4, sm: 5, md: 6 }}
+              fontSize={{ base: 'md', sm: 'lg', md: 'lg' }}
+              fontWeight="700"
               bg="linear-gradient(135deg, #22c55e, #16a34a, #15803d)"
               backgroundSize="200% 100%"
               color="white"
@@ -256,19 +256,19 @@ export default function AddTransactionSection({
               }}
               _hover={{
                 bg: 'linear-gradient(135deg, #16a34a, #15803d, #166534)',
-                transform: 'translateY(-4px) scale(1.02)',
-                boxShadow: '0 20px 40px rgba(34, 197, 94, 0.4), 0 8px 20px rgba(34, 197, 94, 0.2)',
+                transform: 'translateY(-2px) scale(1.01)',
+                boxShadow: '0 10px 25px rgba(34, 197, 94, 0.3), 0 4px 10px rgba(34, 197, 94, 0.2)',
                 _before: {
                   left: '100%',
                 },
               }}
               _active={{
                 bg: 'linear-gradient(135deg, #15803d, #166534, #14532d)',
-                transform: 'translateY(-2px) scale(0.98)',
-                boxShadow: '0 10px 25px rgba(34, 197, 94, 0.3)',
+                transform: 'translateY(-1px) scale(0.99)',
+                boxShadow: '0 6px 15px rgba(34, 197, 94, 0.3)',
               }}
-              boxShadow="0 10px 25px rgba(34, 197, 94, 0.3)"
-              minW={{ base: '180px', sm: '220px', md: '260px', lg: '300px' }}
+              boxShadow="0 6px 15px rgba(34, 197, 94, 0.3)"
+              minW={{ base: '160px', sm: '180px', md: '200px' }}
               flex={{ base: 1, sm: 'none' }}
               transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               letterSpacing="wide"
@@ -280,14 +280,14 @@ export default function AddTransactionSection({
             <Button
               aria-label="Add expense transaction" // ♿ Accessibility
               onClick={handleAddExpense}
-              size={{ base: 'lg', sm: 'xl', md: '2xl' }}
-              leftIcon={<Minus size={28} aria-hidden="true" />}
-              rightIcon={<TrendingDown size={24} aria-hidden="true" />}
+              size={{ base: 'lg', sm: 'lg', md: 'lg' }}
+              leftIcon={<Minus size={20} aria-hidden="true" />}
+              rightIcon={<TrendingDown size={18} aria-hidden="true" />}
               borderRadius="2xl"
-              px={{ base: 12, sm: 16, md: 20, lg: 24 }}
-              py={{ base: 6, sm: 8, md: 10 }}
-              fontSize={{ base: 'lg', md: 'xl', lg: '2xl' }}
-              fontWeight="800"
+              px={{ base: 8, sm: 10, md: 12 }}
+              py={{ base: 4, sm: 5, md: 6 }}
+              fontSize={{ base: 'md', sm: 'lg', md: 'lg' }}
+              fontWeight="700"
               bg="linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)"
               backgroundSize="200% 100%"
               color="white"
@@ -305,19 +305,19 @@ export default function AddTransactionSection({
               }}
               _hover={{
                 bg: 'linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)',
-                transform: 'translateY(-4px) scale(1.02)',
-                boxShadow: '0 20px 40px rgba(239, 68, 68, 0.4), 0 8px 20px rgba(239, 68, 68, 0.2)',
+                transform: 'translateY(-2px) scale(1.01)',
+                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3), 0 4px 10px rgba(239, 68, 68, 0.2)',
                 _before: {
                   left: '100%',
                 },
               }}
               _active={{
                 bg: 'linear-gradient(135deg, #b91c1c, #991b1b, #7f1d1d)',
-                transform: 'translateY(-2px) scale(0.98)',
-                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3)',
+                transform: 'translateY(-1px) scale(0.99)',
+                boxShadow: '0 6px 15px rgba(239, 68, 68, 0.3)',
               }}
-              boxShadow="0 10px 25px rgba(239, 68, 68, 0.3)"
-              minW={{ base: '180px', sm: '220px', md: '260px', lg: '300px' }}
+              boxShadow="0 6px 15px rgba(239, 68, 68, 0.3)"
+              minW={{ base: '160px', sm: '180px', md: '200px' }}
               flex={{ base: 1, sm: 'none' }}
               transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
               letterSpacing="wide"
