@@ -26,10 +26,21 @@ public class Transaction {
     @Column(precision = 14, scale = 2)
     private BigDecimal amount;
 
+    // 🔹 Relacionamento com o usuário
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
+
+    // 🔹 NOVO: relacionamento opcional com plano de parcelamento
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "installment_plan_id")
+    @JsonIgnore
+    private InstallmentPlan installmentPlan;
+
+    // 🔹 Número da parcela (ex: 1 para primeira parcela, 2 para segunda, etc.)
+    @Column(name = "installment_number")
+    private Integer installmentNumber;
 
     // ⚡ Define automaticamente o horário ao criar a transação
     @PrePersist
@@ -39,7 +50,8 @@ public class Transaction {
         }
     }
 
-    // Getters e Setters
+    // ---------- Getters e Setters ----------
+
     public Long getId() {
         return id;
     }
@@ -94,5 +106,21 @@ public class Transaction {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public InstallmentPlan getInstallmentPlan() {
+        return installmentPlan;
+    }
+
+    public void setInstallmentPlan(InstallmentPlan installmentPlan) {
+        this.installmentPlan = installmentPlan;
+    }
+
+    public Integer getInstallmentNumber() {
+        return installmentNumber;
+    }
+
+    public void setInstallmentNumber(Integer installmentNumber) {
+        this.installmentNumber = installmentNumber;
     }
 }

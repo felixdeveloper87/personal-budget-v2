@@ -11,6 +11,8 @@ public class TransactionSearchDTO {
     private String category;
     private BigDecimal amount;
     private LocalDate date;
+    private Long installmentPlanId; // ID do plano de parcelamento (se houver)
+    private boolean isInstallment; // Indica se faz parte de um parcelamento
 
     // construtor rápido
     public TransactionSearchDTO(Long id, String description, TransactionType type,
@@ -21,6 +23,21 @@ public class TransactionSearchDTO {
         this.category = category;
         this.amount = amount;
         this.date = date;
+        this.installmentPlanId = null;
+        this.isInstallment = false;
+    }
+
+    // construtor completo com informações de parcelamento
+    public TransactionSearchDTO(Long id, String description, TransactionType type,
+            String category, BigDecimal amount, LocalDate date, Long installmentPlanId) {
+        this.id = id;
+        this.description = description;
+        this.type = type;
+        this.category = category;
+        this.amount = amount;
+        this.date = date;
+        this.installmentPlanId = installmentPlanId;
+        this.isInstallment = (installmentPlanId != null);
     }
 
     // getters & setters
@@ -70,5 +87,22 @@ public class TransactionSearchDTO {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public Long getInstallmentPlanId() {
+        return installmentPlanId;
+    }
+
+    public void setInstallmentPlanId(Long installmentPlanId) {
+        this.installmentPlanId = installmentPlanId;
+        this.isInstallment = (installmentPlanId != null);
+    }
+
+    public boolean isInstallment() {
+        return isInstallment;
+    }
+
+    public void setInstallment(boolean installment) {
+        isInstallment = installment;
     }
 }

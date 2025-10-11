@@ -77,7 +77,8 @@ public class TransactionController {
                         tx.getType(),
                         tx.getCategory(),
                         tx.getAmount(),
-                        tx.getDateTime().toLocalDate()))
+                        tx.getDateTime().toLocalDate(),
+                        tx.getInstallmentPlan() != null ? tx.getInstallmentPlan().getId() : null))
                 .toList();
     }
 }
