@@ -69,7 +69,7 @@ public class InstallmentPlanService {
             Transaction transaction = new Transaction();
             transaction.setType(TransactionType.EXPENSE); // Parcelamentos são sempre despesas
             transaction.setCategory(request.getCategory());
-            transaction.setDescription(String.format("%s (Parcela %d/%d)", 
+            transaction.setDescription(String.format("%s (Installment %d/%d)", 
                                        request.getDescription(), i, request.getTotalInstallments()));
             transaction.setAmount(request.getInstallmentValue());
             transaction.setDateTime(baseDateTime.plusMonths(i - 1)); // Incrementar meses mantendo horário
@@ -156,14 +156,14 @@ public class InstallmentPlanService {
     }
 
     /**
-     * Extrai o número da parcela da descrição (ex: "Compra (Parcela 2/3)" -> 2)
+     * Extrai o número da parcela da descrição (ex: "Purchase (Installment 2/3)" -> 2)
      */
     private int extractInstallmentNumber(String description) {
         try {
-            // Procura por padrão "Parcela X/Y"
-            int start = description.indexOf("Parcela ") + 8;
+            // Procura por padrão "Installment X/Y"
+            int start = description.indexOf("Installment ") + 12;
             int end = description.indexOf("/", start);
-            if (start > 7 && end > start) {
+            if (start > 11 && end > start) {
                 return Integer.parseInt(description.substring(start, end));
             }
         } catch (Exception e) {

@@ -11,6 +11,8 @@ export interface Transaction {
   userId?: number // opcional porque o backend não retorna no DTO de busca
   installmentPlanId?: number // ID do plano de parcelamento (se houver)
   isInstallment?: boolean // Indica se faz parte de um parcelamento
+  installmentNumber?: number // Número da parcela (1, 2, 3, etc.)
+  isFutureInstallment?: boolean // Indica se é uma parcela futura calculada
 }
 
 // DTO do /transactions/search (não retorna userId)

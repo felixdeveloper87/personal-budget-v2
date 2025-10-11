@@ -233,13 +233,23 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                             </Td>
                             <Td>
                               <HStack spacing={2}>
-                                <Text fontSize="sm" color="gray.600" noOfLines={1} maxW="200px">
+                                <Text 
+                                  fontSize="sm" 
+                                  color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
+                                  noOfLines={1} 
+                                  maxW="200px"
+                                  fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
+                                >
                                   {tx.description || '-'}
                                 </Text>
                                 {tx.isInstallment && (
-                                  <Tooltip label="Installment" hasArrow>
+                                  <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
                                     <span>
-                                      <Icon as={FiCreditCard} color="purple.500" fontSize="sm" />
+                                      <Icon 
+                                        as={FiCreditCard} 
+                                        color={tx.isFutureInstallment ? "gray.400" : "purple.500"} 
+                                        fontSize="sm" 
+                                      />
                                     </span>
                                   </Tooltip>
                                 )}
@@ -249,13 +259,15 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                               <Text 
                                 fontSize="sm" 
                                 fontWeight="semibold"
-                                color={tx.type === 'INCOME' ? 'green.600' : 'red.600'}
+                                color={tx.isFutureInstallment ? "gray.500" : (tx.type === 'INCOME' ? 'green.600' : 'red.600')}
+                                fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                               >
                                 £{tx.amount.toFixed(2)}
+                                {tx.isFutureInstallment && " (future)"}
                               </Text>
                             </Td>
                             <Td>
-                              {tx.id && (
+                              {tx.id && !tx.isFutureInstallment && (
                                 <IconButton
                                   aria-label="Delete transaction"
                                   icon={<DeleteIcon />}

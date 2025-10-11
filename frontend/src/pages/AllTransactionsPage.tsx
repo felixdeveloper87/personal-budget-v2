@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import { hasActiveFilters } from '../utils/filters'
 import { useAuth } from '../contexts/AuthContext'
 import { useSearch } from '../contexts/SearchContext'
-import { listTransactions, searchTransactions } from '../api'
-import { Transaction } from '../types'
+import { listTransactions, searchTransactions, listInstallmentPlans } from '../api'
+import { Transaction, InstallmentPlan } from '../types'
+import { mergeTransactionsWithFutureInstallments } from '../utils/installments'
 
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const { filters } = useSearch()
@@ -18,16 +20,25 @@ export default function AllTransactionsPage() {
     if (!user?.token) return
     setLoading(true)
     try {
+      let realTransactions: Transaction[] = []
+      
       if (hasActiveFilters(filters)) {
-        const filtered = await searchTransactions(filters ?? {})
-        setTransactions(filtered)
+        realTransactions = await searchTransactions(filters ?? {})
       } else {
-        const transactionsData = await listTransactions()
-        setTransactions(transactionsData)
+        realTransactions = await listTransactions()
       }
+      
+      // Load installment plans to calculate future installments
+      const plans = await listInstallmentPlans()
+      setInstallmentPlans(plans)
+      
+      // Merge real transactions with future installments
+      const allTransactions = mergeTransactionsWithFutureInstallments(realTransactions, plans)
+      setTransactions(allTransactions)
     } catch (err) {
       console.error(err)
       setTransactions([])
+      setInstallmentPlans([])
     } finally {
       setLoading(false)
     }
