@@ -23,6 +23,7 @@ import { useMemo } from 'react'
 import { formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
+import { normalizeInstallmentDescription } from '../../utils/installments'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -97,7 +98,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                       maxW="200px"
                       fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                     >
-                      {tx.description || '-'}
+                      {normalizeInstallmentDescription(tx.description || '-')}
                     </Text>
                     {tx.isInstallment && (
                       <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>

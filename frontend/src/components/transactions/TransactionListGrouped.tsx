@@ -27,6 +27,7 @@ import { useMemo, useState } from 'react'
 import { formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
+import { normalizeInstallmentDescription } from '../../utils/installments'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
@@ -240,7 +241,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                                   maxW="200px"
                                   fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                                 >
-                                  {tx.description || '-'}
+                                  {normalizeInstallmentDescription(tx.description || '-')}
                                 </Text>
                                 {tx.isInstallment && (
                                   <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>

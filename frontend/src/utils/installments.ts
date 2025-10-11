@@ -1,6 +1,14 @@
 import { Transaction, InstallmentPlan } from '../types'
 
 /**
+ * 🔄 Normalize installment descriptions from Portuguese to English
+ * Converts "(Parcela X/Y)" to "(Installment X/Y)" for consistency
+ */
+export function normalizeInstallmentDescription(description: string): string {
+  return description.replace(/\(Parcela (\d+\/\d+)\)/g, '(Installment $1)')
+}
+
+/**
  * 📅 Calculate future installments for installment plans
  * Takes the first installment date and calculates future installments with 1-month intervals
  */
@@ -33,7 +41,7 @@ export function calculateFutureInstallments(
           dateTime: installmentDate.toISOString(),
           type: 'EXPENSE',
           category: firstInstallment.category,
-          description: `${firstInstallment.description.replace(/ \(Installment \d+\/\d+\)/, '')} (Installment ${i + 1}/${totalInstallments})`,
+          description: `${firstInstallment.description.replace(/ \(Parcela \d+\/\d+\)| \(Installment \d+\/\d+\)/, '')} (Installment ${i + 1}/${totalInstallments})`,
           amount: plan.installmentValue,
           installmentPlanId: plan.id,
           installmentNumber: i + 1,
@@ -59,8 +67,14 @@ export function mergeTransactionsWithFutureInstallments(
 ): Transaction[] {
   const futureInstallments = calculateFutureInstallments(installmentPlans)
   
+  // Normalize descriptions in real transactions
+  const normalizedRealTransactions = realTransactions.map(tx => ({
+    ...tx,
+    description: normalizeInstallmentDescription(tx.description)
+  }))
+  
   // Combine and sort by date
-  const allTransactions = [...realTransactions, ...futureInstallments]
+  const allTransactions = [...normalizedRealTransactions, ...futureInstallments]
   return allTransactions.sort((a, b) => 
     new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()
   )
