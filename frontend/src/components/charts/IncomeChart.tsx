@@ -1,8 +1,8 @@
-import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from '../modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
-import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
+import { TrendingUp, BarChart3, Eye, Sparkles, Plus } from 'lucide-react'
 
 interface IncomeChartProps {
   transactions: Transaction[]
@@ -13,6 +13,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const { isOpen, onOpen, onClose } = useDisclosure()
   const textColor = useColorModeValue('gray.700', 'gray.200')
   const bgColor = useColorModeValue('white', 'gray.800')
+  const isMobile = useBreakpointValue({ base: true, md: false })
 
   // Animações customizadas
   const slideIn = 'slideIn 0.6s ease-out'
@@ -197,10 +198,11 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               size="sm"
               variant="solid"
               colorScheme="blue"
-              rightIcon={<Icon as={Eye} boxSize={4} />}
+              rightIcon={!isMobile ? <Icon as={Eye} boxSize={4} /> : undefined}
+              leftIcon={isMobile ? <Icon as={Plus} boxSize={4} /> : undefined}
               onClick={onOpen}
               borderRadius="lg"
-              px={4}
+              px={isMobile ? 3 : 4}
               py={2}
               fontSize="sm"
               fontWeight="600"
@@ -223,7 +225,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               transition="all 0.2s ease"
               boxShadow="md"
             >
-              View Details ({sortedCategories.length})
+              {isMobile ? '' : `View Details (${sortedCategories.length})`}
             </Button>
           </HStack>
 

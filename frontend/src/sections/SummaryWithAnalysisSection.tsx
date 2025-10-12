@@ -186,14 +186,6 @@ export default function SummaryWithAnalysisSection({
                 </HStack>
 
                 <HStack spacing={3}>
-                  <Text
-                    fontSize={{ base: 'sm', md: 'md' }}
-                    fontWeight="700"
-                    color={colors.text.primary}
-                    whiteSpace="nowrap"
-                  >
-                    {formatLabel()}
-                  </Text>
                   <Button
                     size="sm"
                     variant="ghost"
