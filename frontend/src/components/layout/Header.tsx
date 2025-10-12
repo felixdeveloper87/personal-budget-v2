@@ -107,7 +107,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
         }}
       >
         <Container 
-          maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} 
+          maxW="100%"
           px={{ base: 4, md: 8, lg: 12 }}
           sx={{
             // Safe area support para iPhone 14 Pro

@@ -62,12 +62,8 @@ export default function InstallmentPlansSection() {
     return (
       <Box 
         w="full" 
-        px={{ base: 4, md: 8, lg: 12 }}
-        sx={{
-          // Safe area support para iPhone 14 Pro
-          paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-        }}
+        px={0}
+        sx={{}}
       >
         <Center py={8}>
           <VStack spacing={4}>
@@ -85,12 +81,8 @@ export default function InstallmentPlansSection() {
     <>
       <Box 
         w="full" 
-        px={{ base: 4, md: 8, lg: 12 }}
-        sx={{
-          // Safe area support para iPhone 14 Pro
-          paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-        }}
+        px={0}
+        sx={{}}
       >
         <Box position="relative" mb={8}>
           {/* Background decorativo com gradiente */}

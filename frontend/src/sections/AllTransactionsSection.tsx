@@ -39,12 +39,7 @@ export default function AllTransactionsSection({
   return (
     <Box 
       w="full" 
-      px={{ base: 4, md: 8, lg: 12 }}
-      sx={{
-        // Safe area support para iPhone 14 Pro
-        paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-        paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-      }}
+      px={0}
     >
       <Box position="relative" mb={8}>
         {/* Background decorativo com gradiente */}
