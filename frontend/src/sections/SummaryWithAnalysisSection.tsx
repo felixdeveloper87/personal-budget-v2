@@ -91,18 +91,20 @@ export default function SummaryWithAnalysisSection({
   const goToToday = () => onDateChange(new Date())
 
   const formatLabel = () => {
-    if (selectedPeriod === 'month')
+    if (selectedPeriod === 'month') {
       return selectedDate.toLocaleString('en-GB', {
         month: 'short',
         year: 'numeric',
-      })
-    if (selectedPeriod === 'day')
+      }).toUpperCase()
+    }
+    if (selectedPeriod === 'day') {
       return selectedDate.toLocaleDateString('en-GB', {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
         year: 'numeric',
       })
+    }
     if (selectedPeriod === 'week') {
       const start = new Date(selectedDate)
       const day = start.getDay()
@@ -114,7 +116,10 @@ export default function SummaryWithAnalysisSection({
         d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
       return `${fmt(start)} - ${fmt(end)}`
     }
-    return label
+    if (selectedPeriod === 'year') {
+      return selectedDate.getFullYear().toString()
+    }
+    return label || 'Unknown Period'
   }
 
   const periods = [
@@ -262,7 +267,7 @@ export default function SummaryWithAnalysisSection({
                   </HStack>
                 )}
 
-                <HStack spacing={2} justify="space-between">
+                <HStack spacing={2} justify="space-between" w="full">
                   <IconButton
                     aria-label="Previous period"
                     icon={<ArrowLeft size={18} />}
@@ -270,6 +275,26 @@ export default function SummaryWithAnalysisSection({
                     variant="outline"
                     colorScheme="blue"
                   />
+                  
+                  <Box
+                    flex="1"
+                    textAlign="center"
+                    px={4}
+                    py={2}
+                    borderRadius="md"
+                    bg={useColorModeValue('blue.50', 'blue.900')}
+                    border="1px solid"
+                    borderColor={useColorModeValue('blue.200', 'blue.700')}
+                  >
+                    <Text
+                      fontSize={{ base: 'sm', md: 'md' }}
+                      fontWeight="700"
+                      color="blue.600"
+                    >
+                      {formatLabel()}
+                    </Text>
+                  </Box>
+                  
                   <IconButton
                     aria-label="Next period"
                     icon={<ArrowRight size={18} />}

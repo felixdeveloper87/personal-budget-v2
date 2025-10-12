@@ -52,10 +52,10 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
     return (
       <Box
         position="relative"
-        bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
+        bg={useColorModeValue('rgba(255,255,255,0.95)', 'rgba(17,17,17,0.95)')}
         backdropFilter="blur(20px)"
-        border="1px solid"
-        borderColor={useColorModeValue('rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)')}
+        border="2px solid"
+        borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
         borderRadius="2xl"
         p={6}
         boxShadow="xl"
@@ -98,10 +98,10 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
     <>
       <Box
         position="relative"
-        bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
+        bg={useColorModeValue('rgba(255,255,255,0.95)', 'rgba(17,17,17,0.95)')}
         backdropFilter="blur(20px)"
-        border="1px solid"
-        borderColor={useColorModeValue('rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)')}
+        border="2px solid"
+        borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
         borderRadius="2xl"
         p={6}
         boxShadow="xl"
@@ -239,8 +239,8 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                   p={4}
                   bg={useColorModeValue('rgba(255,255,255,0.5)', 'rgba(255,255,255,0.05)')}
                   borderRadius="xl"
-                  border="1px solid"
-                  borderColor={useColorModeValue('rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)')}
+                  border="2px solid"
+                  borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
                   sx={{
                     animation: `${slideIn} ${index * 0.1}s ease-out`,
                     '@keyframes slideIn': {

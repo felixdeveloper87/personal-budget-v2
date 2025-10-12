@@ -41,13 +41,14 @@ export default function CategoryAnalysisTabs({
 
   return (
     <Box>
-      <VStack spacing={1} align="stretch">
-        {/* Header com botões na mesma linha */}
+      <VStack spacing={{ base: 2, md: 1 }} align="stretch">
+        {/* Header responsivo */}
         {showHeader && (
-          <HStack spacing={4} align="center" justify="space-between" w="full">
-            <HStack spacing={3} align="center">
+          <VStack spacing={{ base: 3, md: 0 }} align="stretch" w="full">
+            {/* Header principal */}
+            <HStack spacing={{ base: 2, md: 3 }} align="center" justify={{ base: 'center', md: 'flex-start' }}>
               <Box
-                p={2}
+                p={{ base: 1.5, md: 2 }}
                 borderRadius="xl"
                 bg={useColorModeValue(
                   'linear-gradient(135deg, #8b5cf6, #7c3aed)',
@@ -55,11 +56,11 @@ export default function CategoryAnalysisTabs({
                 )}
                 boxShadow="md"
               >
-                <Icon as={BarChart3} boxSize={4} color="white" />
+                <Icon as={BarChart3} boxSize={{ base: 3, md: 4 }} color="white" />
               </Box>
-              <VStack align="start" spacing={0.5}>
+              <VStack align={{ base: 'center', md: 'start' }} spacing={0.5}>
                 <Heading
-                  size="lg"
+                  size={{ base: 'md', md: 'lg' }}
                   bg={useColorModeValue(
                     'linear-gradient(135deg, #1e293b, #475569)',
                     'linear-gradient(135deg, #f8fafc, #e2e8f0)'
@@ -70,28 +71,28 @@ export default function CategoryAnalysisTabs({
                   Category Analysis
                 </Heading>
                 <Text
-                  fontSize={{ base: '2xs', sm: 'xs' }}
+                  fontSize={{ base: 'xs', md: 'sm' }}
                   color={useColorModeValue('gray.500', 'gray.400')}
                   fontWeight="400"
-                  opacity={0.8}
+                  textAlign={{ base: 'center', md: 'left' }}
                 >
                   Detailed category breakdown and insights
                 </Text>
               </VStack>
             </HStack>
 
-            {/* Botões compactos ao lado do header */}
-            <HStack spacing={2}>
+            {/* Botões - linha separada no mobile */}
+            <HStack spacing={{ base: 1, md: 2 }} justify={{ base: 'center', md: 'flex-end' }}>
               <Button
-                size="sm"
+                size={{ base: 'xs', md: 'sm' }}
                 variant={activeTab === 'expenses' ? 'solid' : 'outline'}
                 colorScheme="red"
-                leftIcon={<Icon as={TrendingDown} boxSize={3} />}
+                leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, md: 3 }} />}
                 borderRadius="lg"
-                fontSize="xs"
+                fontSize={{ base: '2xs', md: 'xs' }}
                 fontWeight="600"
-                px={3}
-                py={2}
+                px={{ base: 2, md: 3 }}
+                py={{ base: 1, md: 2 }}
                 h="auto"
                 bg={activeTab === 'expenses' ? 'red.50' : 'transparent'}
                 color={activeTab === 'expenses' ? 'red.600' : 'gray.600'}
@@ -106,15 +107,15 @@ export default function CategoryAnalysisTabs({
                 Expenses
               </Button>
               <Button
-                size="sm"
+                size={{ base: 'xs', md: 'sm' }}
                 variant={activeTab === 'incomes' ? 'solid' : 'outline'}
                 colorScheme="green"
                 leftIcon={<Icon as={TrendingUp} boxSize={3} />}
                 borderRadius="lg"
-                fontSize="xs"
+                fontSize={{ base: '2xs', md: 'xs' }}
                 fontWeight="600"
-                px={3}
-                py={2}
+                px={{ base: 2, md: 3 }}
+                py={{ base: 1, md: 2 }}
                 h="auto"
                 bg={activeTab === 'incomes' ? 'green.50' : 'transparent'}
                 color={activeTab === 'incomes' ? 'green.600' : 'gray.600'}
@@ -129,7 +130,7 @@ export default function CategoryAnalysisTabs({
                 Incomes
               </Button>
             </HStack>
-          </HStack>
+          </VStack>
         )}
 
 
