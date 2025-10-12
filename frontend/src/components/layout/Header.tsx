@@ -42,8 +42,8 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   const bg = useColorModeValue(
-    'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
-    'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(17, 17, 17, 0.9)'
   )
 
   const borderColor = useColorModeValue('gray.100', 'gray.700')
@@ -56,19 +56,48 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
       <Box 
         as="header" 
         bg={bg}
-        backdropFilter="blur(10px)"
+        backdropFilter="blur(20px)"
         position="sticky" 
         top={0} 
         zIndex={1000}
         borderBottom="1px solid"
-        borderColor={borderColor}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         boxShadow={useColorModeValue(
-          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
+          '0 8px 32px rgba(0, 0, 0, 0.1)',
+          '0 8px 32px rgba(0, 0, 0, 0.3)'
         )}
         w="100%"
+        overflow="hidden"
+        sx={{
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, #3b82f6, #10b981, #ef4444, #8b5cf6, #f59e0b)',
+            backgroundSize: '300% 100%',
+            animation: 'shimmer 4s ease-in-out infinite',
+            '@keyframes shimmer': {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            }
+          }
+        }}
       >
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
+        <Container 
+          maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} 
+          px={{ base: 4, md: 8, lg: 12 }}
+          sx={{
+            // Safe area support para iPhone 14 Pro
+            paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+          }}
+        >
           <Flex
             h={{ base: 16, md: 20, lg: 24 }}
             align="center"
@@ -84,21 +113,35 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                 h={{ base: 10, md: 12, lg: 14 }}
                 flexShrink={0}
                 bg={useColorModeValue(
-                  'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
-                  'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+                  'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
                 )}
-                borderRadius="xl"
+                borderRadius="2xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                transition="all 0.3s ease"
-                boxShadow="0 4px 12px rgba(59, 130, 246, 0.3)"
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                boxShadow="0 8px 25px rgba(59, 130, 246, 0.3)"
+                overflow="hidden"
+                sx={{
+                  animation: 'glow 3s ease-in-out infinite',
+                  '@keyframes glow': {
+                    '0%, 100%': { 
+                      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)' 
+                    },
+                    '50%': { 
+                      boxShadow: '0 8px 25px rgba(59, 130, 246, 0.5), 0 0 20px rgba(59, 130, 246, 0.3)' 
+                    }
+                  }
+                }}
                 _hover={{ 
-                  transform: 'translateY(-2px)',
-                  boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+                  transform: 'translateY(-3px) scale(1.05)',
+                  boxShadow: '0 12px 35px rgba(59, 130, 246, 0.4)',
                   cursor: 'pointer' 
                 }}
-                _active={{ transform: 'translateY(0)' }}
+                _active={{ 
+                  transform: 'translateY(-1px) scale(1.02)',
+                }}
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               >
                 <Text
@@ -132,9 +175,14 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                 <HStack spacing={2}>
                   <Text
                     fontSize={{ base: 'md', md: 'lg', lg: 'xl' }}
-                    fontWeight="bold"
-                    color={textColor}
+                    fontWeight="800"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #1e293b, #475569)',
+                      'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+                    )}
+                    bgClip="text"
                     noOfLines={1}
+                    letterSpacing="wide"
                   >
                     Personal Budget
                   </Text>
@@ -170,34 +218,64 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                   <Button 
                     variant="ghost" 
                     size={{ md: "sm", lg: "md" }}
-                    fontWeight="600"
+                    fontWeight="700"
                     fontSize={{ md: "sm", lg: "md" }}
-                    color={currentPage === 'dashboard' ? 'blue.500' : textColor}
-                    bg={currentPage === 'dashboard' ? useColorModeValue('blue.50', 'blue.900') : 'transparent'}
+                    color={currentPage === 'dashboard' ? 'white' : textColor}
+                    bg={currentPage === 'dashboard' ? 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      ) : 
+                      'transparent'
+                    }
                     _hover={{ 
-                      bg: useColorModeValue('gray.100', 'gray.700'),
-                      color: 'blue.500'
+                      bg: currentPage === 'dashboard' ? 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #2563eb, #1e40af)',
+                          'linear-gradient(135deg, #3b82f6, #2563eb)'
+                        ) :
+                        useColorModeValue('gray.100', 'gray.700'),
+                      color: currentPage === 'dashboard' ? 'white' : 'blue.500',
+                      transform: 'translateY(-1px)',
+                      boxShadow: currentPage === 'dashboard' ? 'lg' : 'sm'
                     }}
                     onClick={() => onPageChange?.('dashboard')}
-                    borderRadius="lg"
+                    borderRadius="xl"
                     px={{ md: 4, lg: 6 }}
+                    transition="all 0.2s ease"
+                    boxShadow={currentPage === 'dashboard' ? 'md' : 'none'}
                   >
                     Dashboard
                   </Button>
                   <Button 
                     variant="ghost"
                     size={{ md: "sm", lg: "md" }}
-                    fontWeight="600"
+                    fontWeight="700"
                     fontSize={{ md: "sm", lg: "md" }}
-                    color={currentPage === 'transactions' ? 'blue.500' : textColor}
-                    bg={currentPage === 'transactions' ? useColorModeValue('blue.50', 'blue.900') : 'transparent'}
+                    color={currentPage === 'transactions' ? 'white' : textColor}
+                    bg={currentPage === 'transactions' ? 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      ) : 
+                      'transparent'
+                    }
                     _hover={{ 
-                      bg: useColorModeValue('gray.100', 'gray.700'),
-                      color: 'blue.500'
+                      bg: currentPage === 'transactions' ? 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #2563eb, #1e40af)',
+                          'linear-gradient(135deg, #3b82f6, #2563eb)'
+                        ) :
+                        useColorModeValue('gray.100', 'gray.700'),
+                      color: currentPage === 'transactions' ? 'white' : 'blue.500',
+                      transform: 'translateY(-1px)',
+                      boxShadow: currentPage === 'transactions' ? 'lg' : 'sm'
                     }}
                     onClick={() => onPageChange?.('transactions')}
-                    borderRadius="lg"
+                    borderRadius="xl"
                     px={{ md: 4, lg: 6 }}
+                    transition="all 0.2s ease"
+                    boxShadow={currentPage === 'transactions' ? 'md' : 'none'}
                   >
                     Transactions
                   </Button>
@@ -218,18 +296,28 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                   leftIcon={<SearchIcon />}
                   size={{ lg: "sm", xl: "md" }}
                   px={{ lg: 6, xl: 8 }}
-                  fontWeight="600"
+                  fontWeight="700"
                   fontSize={{ lg: "sm", xl: "md" }}
-                  borderRadius="full"
+                  borderRadius="2xl"
                   variant="outline"
                   borderColor={useColorModeValue('gray.300', 'gray.600')}
                   color={textColor}
-                  bg={useColorModeValue('white', 'gray.800')}
+                  bg={useColorModeValue(
+                    'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+                    'linear-gradient(135deg, #1e293b, #334155)'
+                  )}
                   _hover={{
-                    bg: useColorModeValue('gray.50', 'gray.700'),
+                    bg: useColorModeValue(
+                      'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                      'linear-gradient(135deg, #334155, #475569)'
+                    ),
                     borderColor: 'blue.500',
                     color: 'blue.500',
+                    transform: 'translateY(-1px)',
+                    boxShadow: 'md'
                   }}
+                  transition="all 0.2s ease"
+                  boxShadow="sm"
                 >
                   Search & Filters
                 </Button>
@@ -358,23 +446,25 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                 <Button
                   onClick={onLogin}
                   size={{ base: "sm", lg: "md" }}
-                  fontWeight="600"
+                  fontWeight="800"
                   fontSize={{ base: "sm", lg: "md" }}
                   px={{ base: 4, md: 6, lg: 8 }}
-                  borderRadius="lg"
+                  borderRadius="2xl"
                   bg={useColorModeValue(
-                    'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
-                    'linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)'
+                    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                    'linear-gradient(135deg, #60a5fa, #3b82f6)'
                   )}
                   color="white"
-                  boxShadow="0 4px 12px rgba(59, 130, 246, 0.3)"
+                  boxShadow="0 8px 25px rgba(59, 130, 246, 0.3)"
                   _hover={{
-                    transform: 'translateY(-2px)',
-                    boxShadow: '0 6px 16px rgba(59, 130, 246, 0.4)',
+                    transform: 'translateY(-3px) scale(1.05)',
+                    boxShadow: '0 12px 35px rgba(59, 130, 246, 0.4)',
                   }}
                   _active={{
-                    transform: 'translateY(0)',
+                    transform: 'translateY(-1px) scale(1.02)',
                   }}
+                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                  letterSpacing="wide"
                 >
                   Get Started
                 </Button>
