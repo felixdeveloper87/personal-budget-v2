@@ -15,6 +15,7 @@ import {
   Icon,
   Flex,
   useBreakpointValue,
+  Stack,
 } from '@chakra-ui/react'
 import {
   Activity,
@@ -162,18 +163,36 @@ export default function SummaryWithAnalysisSection({
                     <Icon as={Activity} color="white" boxSize={5} />
                   </Box>
 
-                  <VStack align="start" spacing={1}>
-                    <Heading
-                      size="lg"
-                      bg={useColorModeValue(
-                        'linear-gradient(135deg, #1e293b, #475569)',
-                        'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                      )}
-                      bgClip="text"
-                      fontWeight="800"
-                    >
-                      Financial Overview
-                    </Heading>
+                  <VStack align="start" spacing={1} flex="1">
+                    <HStack spacing={2} align="center" justify="space-between" w="full">
+                      <Heading
+                        size="lg"
+                        bg={useColorModeValue(
+                          'linear-gradient(135deg, #1e293b, #475569)',
+                          'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+                        )}
+                        bgClip="text"
+                        fontWeight="800"
+                      >
+                        Financial Overview
+                      </Heading>
+                      
+                      {/* Botão Today - compacto no mobile */}
+                      <Button
+                        size="xs"
+                        variant="ghost"
+                        colorScheme="blue"
+                        leftIcon={<RotateCcw size={12} />}
+                        onClick={goToToday}
+                        px={2}
+                        py={1}
+                        fontSize="2xs"
+                        minW="auto"
+                        display={{ base: 'flex', md: 'none' }}
+                      >
+                        Today
+                      </Button>
+                    </HStack>
                     <Text
                       fontSize={{ base: '2xs', sm: 'xs' }}
                       color={colors.text.secondary}
@@ -185,17 +204,17 @@ export default function SummaryWithAnalysisSection({
                   </VStack>
                 </HStack>
 
-                <HStack spacing={3}>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    colorScheme="blue"
-                    leftIcon={<RotateCcw size={14} />}
-                    onClick={goToToday}
-                  >
-                    Today
-                  </Button>
-                </HStack>
+                {/* Botão Today - desktop */}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="blue"
+                  leftIcon={<RotateCcw size={14} />}
+                  onClick={goToToday}
+                  display={{ base: 'none', md: 'flex' }}
+                >
+                  Today
+                </Button>
               </Flex>
 
               {/* PERIOD SELECTOR */}
@@ -357,7 +376,11 @@ export default function SummaryWithAnalysisSection({
                     </VStack>
                     
                     {/* Botões Expenses/Incomes */}
-                    <HStack spacing={2}>
+                    <Stack 
+                      spacing={2} 
+                      direction={{ base: 'column', md: 'row' }}
+                      align={{ base: 'stretch', md: 'center' }}
+                    >
                       <Button
                         size="sm"
                         variant={activeTab === 'expenses' ? 'solid' : 'outline'}
@@ -404,7 +427,7 @@ export default function SummaryWithAnalysisSection({
                       >
                         Incomes
                       </Button>
-                    </HStack>
+                    </Stack>
                   </HStack>
                 </HStack>
               </HStack>
