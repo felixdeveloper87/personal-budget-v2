@@ -74,7 +74,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       {/* 💳 Add Transaction Section */}
       <Box
         w="full"
-        px={{ base: 3, sm: 4, md: 6 }}
+        px={{ base: 4, md: 8, lg: 12 }}
         sx={{
           paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
@@ -131,11 +131,11 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               <VStack spacing={{ base: 6, md: 8 }} align="stretch">
                 {/* Header */}
                 <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'center', sm: 'center' }}
+                  direction={{ base: 'column', md: 'row' }}
+                  align={{ base: 'center', md: 'center' }}
                   justify="space-between"
-                  gap={{ base: 2, sm: 4 }}
-                  textAlign={{ base: 'center', sm: 'left' }}
+                  gap={{ base: 4, md: 6 }}
+                  textAlign={{ base: 'center', md: 'left' }}
                 >
                   <HStack spacing={{ base: 3, sm: 4 }} align="center">
                     <Box
@@ -160,7 +160,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       <Icon as={Sparkles} boxSize={{ base: 5, sm: 6 }} color="white" />
                     </Box>
 
-                    <VStack align={{ base: 'center', sm: 'start' }} spacing={0}>
+                    <VStack align={{ base: 'center', md: 'start' }} spacing={0}>
                       <Heading
                         size={{ base: 'md', sm: 'lg' }}
                         bg={useColorModeValue(
@@ -181,76 +181,76 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       </Text>
                     </VStack>
                   </HStack>
-                </Flex>
 
-                {/* Botões */}
-                <HStack
-                  spacing={{ base: 3, sm: 4 }}
-                  justify="center"
-                  flexWrap="wrap"
-                  direction={{ base: 'column', sm: 'row' }}
-                  w="full"
-                >
-                  {[
-                    {
-                      label: 'Add Money',
-                      icon: Plus,
-                      accent: TrendingUp,
-                      gradient: GRADIENTS.income,
-                      type: 'INCOME' as const,
-                    },
-                    {
-                      label: 'Add Expense',
-                      icon: Minus,
-                      accent: TrendingDown,
-                      gradient: GRADIENTS.expense,
-                      type: 'EXPENSE' as const,
-                    },
-                  ].map(({ label, icon, accent, gradient, type: t }, i) => (
-                    <Button
-                      key={t}
-                      aria-label={label}
-                      onClick={() => handleOpen(t)}
-                      size="lg"
-                      leftIcon={<Icon as={icon} boxSize={5} />}
-                      rightIcon={<Icon as={accent} boxSize={4} />}
-                      borderRadius="2xl"
-                      px={{ base: 8, md: 10 }}
-                      py={6}
-                      fontSize="lg"
-                      fontWeight="800"
-                      bg={gradient}
-                      color="white"
-                      position="relative"
-                      overflow="hidden"
-                      minW={{ base: '160px', md: '200px' }}
-                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                      letterSpacing="wide"
-                      sx={{
-                        animation: `${ANIMATIONS.float} ${i ? '1.5s' : '0s'} infinite`,
-                        '@keyframes float': {
-                          '0%,100%': { transform: 'translateY(0)' },
-                          '50%': { transform: 'translateY(-5px)' },
-                        },
-                      }}
-                      _hover={{
-                        transform: 'translateY(-8px) scale(1.02)',
-                        boxShadow: `0 25px 50px -12px ${
+                  {/* Botões - Agora ao lado do header no desktop */}
+                  <HStack
+                    spacing={{ base: 3, sm: 4 }}
+                    justify={{ base: 'center', md: 'flex-end' }}
+                    flexWrap="wrap"
+                    direction={{ base: 'column', sm: 'row' }}
+                    w={{ base: 'full', md: 'auto' }}
+                  >
+                    {[
+                      {
+                        label: 'Add Money',
+                        icon: Plus,
+                        accent: TrendingUp,
+                        gradient: GRADIENTS.income,
+                        type: 'INCOME' as const,
+                      },
+                      {
+                        label: 'Add Expense',
+                        icon: Minus,
+                        accent: TrendingDown,
+                        gradient: GRADIENTS.expense,
+                        type: 'EXPENSE' as const,
+                      },
+                    ].map(({ label, icon, accent, gradient, type: t }, i) => (
+                      <Button
+                        key={t}
+                        aria-label={label}
+                        onClick={() => handleOpen(t)}
+                        size={{ base: 'lg', md: 'md' }}
+                        leftIcon={<Icon as={icon} boxSize={{ base: 5, md: 4 }} />}
+                        rightIcon={<Icon as={accent} boxSize={{ base: 4, md: 3 }} />}
+                        borderRadius="2xl"
+                        px={{ base: 8, md: 6 }}
+                        py={{ base: 6, md: 4 }}
+                        fontSize={{ base: 'lg', md: 'md' }}
+                        fontWeight="800"
+                        bg={gradient}
+                        color="white"
+                        position="relative"
+                        overflow="hidden"
+                        minW={{ base: '160px', md: '140px' }}
+                        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                        letterSpacing="wide"
+                        sx={{
+                          animation: `${ANIMATIONS.float} ${i ? '1.5s' : '0s'} infinite`,
+                          '@keyframes float': {
+                            '0%,100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                          },
+                        }}
+                        _hover={{
+                          transform: 'translateY(-8px) scale(1.02)',
+                          boxShadow: `0 25px 50px -12px ${
+                            t === 'INCOME'
+                              ? 'rgba(34,197,94,0.4)'
+                              : 'rgba(239,68,68,0.4)'
+                          }`,
+                        }}
+                        boxShadow={`0 10px 25px ${
                           t === 'INCOME'
-                            ? 'rgba(34,197,94,0.4)'
-                            : 'rgba(239,68,68,0.4)'
-                        }`,
-                      }}
-                      boxShadow={`0 10px 25px ${
-                        t === 'INCOME'
-                          ? 'rgba(34,197,94,0.3)'
-                          : 'rgba(239,68,68,0.3)'
-                      }`}
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </HStack>
+                            ? 'rgba(34,197,94,0.3)'
+                            : 'rgba(239,68,68,0.3)'
+                        }`}
+                      >
+                        {label}
+                      </Button>
+                    ))}
+                  </HStack>
+                </Flex>
               </VStack>
             </CardBody>
           </Card>

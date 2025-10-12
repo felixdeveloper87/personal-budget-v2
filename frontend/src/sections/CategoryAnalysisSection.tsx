@@ -54,7 +54,7 @@ export default function CategoryAnalysisSection({ transactions, selectedPeriod }
   return (
     <Box 
       w="full" 
-      px={{ base: 3, sm: 4, md: 6 }}
+      px={{ base: 4, md: 8, lg: 12 }}
       sx={{
         // Safe area support para iPhone 14 Pro
         paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',

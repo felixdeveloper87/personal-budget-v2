@@ -17,6 +17,8 @@ import {
   Flex,
   Heading,
   useToken,
+  Button,
+  IconButton,
 } from '@chakra-ui/react'
 import {
   BarChart3,
@@ -27,12 +29,20 @@ import {
   Sparkles,
   Activity,
   Zap,
+  Calendar,
+  RotateCcw,
+  CalendarDays,
+  CalendarRange,
+  ArrowLeft,
+  ArrowRight,
 } from 'lucide-react'
 import { PeriodData } from '../hooks/usePeriodData'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { useMemo, useState } from 'react'
 import SummaryCardModal from '../components/transactions/SummaryCardModal'
 import { SUMMARY_CARD_COLORS } from '../constants/summaryColors'
+import { PeriodType } from '../components/ui/PeriodNavigator'
+import { useBreakpointValue } from '@chakra-ui/react'
 
 // 🎨 Animações personalizadas aprimoradas
 const shimmer = 'shimmer 4s ease-in-out infinite'
@@ -44,21 +54,32 @@ const slideIn = 'slideIn 0.6s ease-out'
 // ✅ Tipagem explícita dos tipos válidos de card
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
-interface SummarySectionProps {
+interface SummaryWithPeriodSectionProps {
   periodData: PeriodData
+  selectedPeriod: PeriodType
+  selectedDate: Date
+  onDateChange: (date: Date) => void
+  onPeriodChange: (period: PeriodType) => void
 }
 
 /**
- * 💰 SummarySection - Financial Summary com UI/UX Aprimorada
- * - Design fluido e intuitivo
+ * 💰 SummaryWithPeriodSection - Financial Summary com Period Navigator integrado
+ * - Design fluido e intuitivo com header unificado
  * - Animações e micro-interações
  * - Responsivo para mobile e desktop
  */
-export default function SummarySection({ periodData }: SummarySectionProps) {
+export default function SummaryWithPeriodSection({ 
+  periodData, 
+  selectedPeriod, 
+  selectedDate, 
+  onDateChange, 
+  onPeriodChange 
+}: SummaryWithPeriodSectionProps) {
   const { transactions, income, expense, balance, label } = periodData
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
+  const isMobile = useBreakpointValue({ base: true, md: false })
 
   const { incomeTransactions, expenseTransactions } = useMemo(() => {
     return {
@@ -127,6 +148,47 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
 
   const selectedLabel =
     selectedCard ? stats.find(s => s.id === selectedCard)?.label ?? undefined : undefined
+
+  // 🔥 Formata o rótulo de acordo com o período selecionado
+  const formatLabel = () => {
+    if (selectedPeriod === 'month') {
+      // Exibe abreviação do mês + ano (ex.: "Jan 2025")
+      return selectedDate.toLocaleString('en-US', {
+        month: 'short',
+        year: 'numeric',
+      })
+      .toUpperCase()
+    }
+    return label
+  }
+
+  const navigatePeriod = (direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate)
+    switch (selectedPeriod) {
+      case 'day':
+        newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 1 : -1))
+        break
+      case 'week':
+        newDate.setDate(selectedDate.getDate() + (direction === 'next' ? 7 : -7))
+        break
+      case 'month':
+        newDate.setMonth(selectedDate.getMonth() + (direction === 'next' ? 1 : -1))
+        break
+      case 'year':
+        newDate.setFullYear(selectedDate.getFullYear() + (direction === 'next' ? 1 : -1))
+        break
+    }
+    onDateChange(newDate)
+  }
+
+  const goToToday = () => onDateChange(new Date())
+
+  const periods = [
+    { type: 'day' as PeriodType, label: 'Day', icon: Calendar },
+    { type: 'week' as PeriodType, label: 'Week', icon: CalendarDays },
+    { type: 'month' as PeriodType, label: 'Month', icon: CalendarRange },
+    { type: 'year' as PeriodType, label: 'Year', icon: BarChart3 },
+  ]
 
   return (
     <>
@@ -203,7 +265,7 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
             
             <CardBody p={{ base: 4, sm: 5, md: 8 }}>
               <VStack spacing={{ base: 6, md: 8 }} align="stretch">
-                {/* Header com design moderno */}
+                {/* Header unificado com Summary e Period Navigator */}
                 <Flex
                   direction={{ base: 'column', sm: 'row' }}
                   align="center"
@@ -243,7 +305,7 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
                         bgClip="text"
                         fontWeight="800"
                       >
-                        Financial Summary
+                        Summary
                       </Heading>
                       <Text
                         fontSize="sm"
@@ -255,26 +317,195 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
                     </VStack>
                   </HStack>
                   
-                  <Badge
-                    colorScheme="blue"
-                    variant="solid"
-                    borderRadius="full"
-                    px={4}
-                    py={2}
-                    fontSize="sm"
-                    fontWeight="600"
-                    bg={useColorModeValue(
-                      'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                      'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                    )}
-                    boxShadow="md"
-                  >
-                    <HStack spacing={2}>
-                      <Icon as={Zap} boxSize={3} />
-                      <Text>{label}</Text>
-                    </HStack>
-                  </Badge>
+                  <HStack spacing={3}>
+                    <Badge
+                      colorScheme="blue"
+                      variant="solid"
+                      borderRadius="full"
+                      px={4}
+                      py={2}
+                      fontSize="sm"
+                      fontWeight="600"
+                      bg={useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      )}
+                      boxShadow="md"
+                    >
+                      <HStack spacing={2}>
+                        <Icon as={Zap} boxSize={3} />
+                        <Text>{formatLabel()}</Text>
+                      </HStack>
+                    </Badge>
+                    
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="blue"
+                      leftIcon={<RotateCcw size={14} />}
+                      onClick={goToToday}
+                    >
+                      Today
+                    </Button>
+                  </HStack>
                 </Flex>
+
+                {/* Period Navigator integrado */}
+                <Box>
+                  <VStack spacing={4} align="stretch">
+                    {/* Seleção de período */}
+                    {isMobile ? (
+                      <SimpleGrid columns={4} spacing={2} w="full">
+                        {periods.map((period) => {
+                          const IconComponent = period.icon
+                          const isSelected = selectedPeriod === period.type
+                          return (
+                            <Button
+                              key={period.type}
+                              colorScheme={isSelected ? 'blue' : 'gray'}
+                              variant={isSelected ? 'solid' : 'outline'}
+                              onClick={() => onPeriodChange(period.type)}
+                              borderRadius="xl"
+                              size="sm"
+                              px={2}
+                              bg={isSelected ? 
+                                useColorModeValue(
+                                  'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                                ) : 
+                                useColorModeValue(
+                                  'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+                                  'linear-gradient(135deg, #1e293b, #334155)'
+                                )
+                              }
+                              color={isSelected ? 'white' : useColorModeValue('gray.700', 'gray.300')}
+                              borderColor={isSelected ? 'transparent' : useColorModeValue('gray.300', 'gray.600')}
+                              _hover={{
+                                bg: isSelected ? 
+                                  useColorModeValue(
+                                    'linear-gradient(135deg, #2563eb, #1e40af)',
+                                    'linear-gradient(135deg, #3b82f6, #2563eb)'
+                                  ) : 
+                                  useColorModeValue(
+                                    'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                                    'linear-gradient(135deg, #334155, #475569)'
+                                  ),
+                                transform: 'translateY(-1px)',
+                                boxShadow: 'md'
+                              }}
+                              _active={{
+                                transform: 'translateY(0)',
+                              }}
+                              transition="all 0.2s ease"
+                              boxShadow={isSelected ? 'lg' : 'sm'}
+                            >
+                              <VStack spacing={0.5}>
+                                <IconComponent size={14} />
+                                <Text fontSize="2xs" fontWeight="600">{period.label}</Text>
+                              </VStack>
+                            </Button>
+                          )
+                        })}
+                      </SimpleGrid>
+                    ) : (
+                      <HStack spacing={2} w="full">
+                        {periods.map((period) => {
+                          const IconComponent = period.icon
+                          const isSelected = selectedPeriod === period.type
+                          return (
+                            <Button
+                              key={period.type}
+                              colorScheme={isSelected ? 'blue' : 'gray'}
+                              variant={isSelected ? 'solid' : 'outline'}
+                              onClick={() => onPeriodChange(period.type)}
+                              flex={1}
+                              size="md"
+                              leftIcon={<IconComponent size={16} />}
+                              borderRadius="xl"
+                              bg={isSelected ? 
+                                useColorModeValue(
+                                  'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                                ) : 
+                                useColorModeValue(
+                                  'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+                                  'linear-gradient(135deg, #1e293b, #334155)'
+                                )
+                              }
+                              color={isSelected ? 'white' : useColorModeValue('gray.700', 'gray.300')}
+                              borderColor={isSelected ? 'transparent' : useColorModeValue('gray.300', 'gray.600')}
+                              _hover={{
+                                bg: isSelected ? 
+                                  useColorModeValue(
+                                    'linear-gradient(135deg, #2563eb, #1e40af)',
+                                    'linear-gradient(135deg, #3b82f6, #2563eb)'
+                                  ) : 
+                                  useColorModeValue(
+                                    'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                                    'linear-gradient(135deg, #334155, #475569)'
+                                  ),
+                                transform: 'translateY(-1px)',
+                                boxShadow: 'lg'
+                              }}
+                              _active={{
+                                transform: 'translateY(0)',
+                              }}
+                              transition="all 0.2s ease"
+                              boxShadow={isSelected ? 'lg' : 'sm'}
+                              fontWeight="600"
+                            >
+                              {period.label}
+                            </Button>
+                          )
+                        })}
+                      </HStack>
+                    )}
+
+                    {/* Navegação integrada */}
+                    <HStack spacing={2} justify="space-between" w="full">
+                      <IconButton
+                        aria-label="Previous period"
+                        icon={<ArrowLeft size={18} />}
+                        onClick={() => navigatePeriod('prev')}
+                        size="md"
+                        variant="outline"
+                        colorScheme="blue"
+                        borderRadius="md"
+                      />
+                      
+                      <Box
+                        flex="1"
+                        textAlign="center"
+                        px={4}
+                        py={2}
+                        borderRadius="md"
+                        bg={useColorModeValue('blue.50', 'blue.900')}
+                        border="1px solid"
+                        borderColor={useColorModeValue('blue.200', 'blue.700')}
+                      >
+                        <Text
+                          fontSize={{ base: 'sm', md: 'md' }}
+                          fontWeight="700"
+                          color="blue.600"
+                        >
+                          {formatLabel()}
+                        </Text>
+                      </Box>
+                      
+                      <IconButton
+                        aria-label="Next period"
+                        icon={<ArrowRight size={18} />}
+                        onClick={() => navigatePeriod('next')}
+                        size="md"
+                        variant="outline"
+                        colorScheme="blue"
+                        borderRadius="md"
+                      />
+                    </HStack>
+                  </VStack>
+                </Box>
+
+                <Divider />
 
                 {/* Grid de cards otimizado para iPhone 14 Pro */}
                 <SimpleGrid

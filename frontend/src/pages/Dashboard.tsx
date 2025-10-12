@@ -7,11 +7,9 @@ import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 // Seções centralizadas
 import {
   AddTransactionSection,
-  PeriodNavigatorSection,
-  SummarySection,
+  SummaryWithAnalysisSection,
   InstallmentPlansSection,
 } from '../sections'
-import CategoryAnalysisSection from '../sections/CategoryAnalysisSection'
 
 export default function Dashboard() {
   const { selectedDate, selectedPeriod, onDateChange, onPeriodChange } = usePeriodNavigator()
@@ -41,25 +39,16 @@ export default function Dashboard() {
         <VStack spacing={6} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
 
-          {!hasActiveFilters(filters) && (
-            <PeriodNavigatorSection
+          {/* Active Installment Plans - Right after Add Transaction */}
+          <InstallmentPlansSection />
+
+          {!hasActiveFilters(filters) && monthSummary && (
+            <SummaryWithAnalysisSection
+              periodData={periodData}
               selectedPeriod={selectedPeriod}
               selectedDate={selectedDate}
               onDateChange={onDateChange}
               onPeriodChange={onPeriodChange}
-              label={periodData.label}
-            />
-          )}
-
-          {monthSummary && <SummarySection periodData={periodData} />}
-
-          {/* Active Installment Plans - After summary, before charts */}
-          <InstallmentPlansSection />
-
-          {monthSummary && (
-            <CategoryAnalysisSection
-              transactions={periodData.transactions}
-              selectedPeriod={selectedPeriod}
             />
           )}
 

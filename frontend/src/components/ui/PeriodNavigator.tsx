@@ -111,9 +111,39 @@ export default function PeriodNavigator({
                     colorScheme={isSelected ? 'blue' : 'gray'}
                     variant={isSelected ? 'solid' : 'outline'}
                     onClick={() => onPeriodChange(period.type)}
-                    borderRadius="md"
+                    borderRadius="xl"
                     size="sm"
                     px={2}
+                    bg={isSelected ? 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      ) : 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+                        'linear-gradient(135deg, #1e293b, #334155)'
+                      )
+                    }
+                    color={isSelected ? 'white' : useColorModeValue('gray.700', 'gray.300')}
+                    borderColor={isSelected ? 'transparent' : useColorModeValue('gray.300', 'gray.600')}
+                    _hover={{
+                      bg: isSelected ? 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #2563eb, #1e40af)',
+                          'linear-gradient(135deg, #3b82f6, #2563eb)'
+                        ) : 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                          'linear-gradient(135deg, #334155, #475569)'
+                        ),
+                      transform: 'translateY(-1px)',
+                      boxShadow: 'md'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                    }}
+                    transition="all 0.2s ease"
+                    boxShadow={isSelected ? 'lg' : 'sm'}
                   >
                     <VStack spacing={0.5}>
                       <IconComponent size={14} />
@@ -137,6 +167,38 @@ export default function PeriodNavigator({
                     flex={1}
                     size="md"
                     leftIcon={<IconComponent size={16} />}
+                    borderRadius="xl"
+                    bg={isSelected ? 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      ) : 
+                      useColorModeValue(
+                        'linear-gradient(135deg, #f8fafc, #e2e8f0)',
+                        'linear-gradient(135deg, #1e293b, #334155)'
+                      )
+                    }
+                    color={isSelected ? 'white' : useColorModeValue('gray.700', 'gray.300')}
+                    borderColor={isSelected ? 'transparent' : useColorModeValue('gray.300', 'gray.600')}
+                    _hover={{
+                      bg: isSelected ? 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #2563eb, #1e40af)',
+                          'linear-gradient(135deg, #3b82f6, #2563eb)'
+                        ) : 
+                        useColorModeValue(
+                          'linear-gradient(135deg, #e2e8f0, #cbd5e1)',
+                          'linear-gradient(135deg, #334155, #475569)'
+                        ),
+                      transform: 'translateY(-1px)',
+                      boxShadow: 'lg'
+                    }}
+                    _active={{
+                      transform: 'translateY(0)',
+                    }}
+                    transition="all 0.2s ease"
+                    boxShadow={isSelected ? 'lg' : 'sm'}
+                    fontWeight="600"
                   >
                     {period.label}
                   </Button>

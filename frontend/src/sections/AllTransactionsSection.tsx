@@ -39,7 +39,7 @@ export default function AllTransactionsSection({
   return (
     <Box 
       w="full" 
-      px={{ base: 3, sm: 4, md: 6 }}
+      px={{ base: 4, md: 8, lg: 12 }}
       sx={{
         // Safe area support para iPhone 14 Pro
         paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
@@ -313,7 +313,7 @@ export default function AllTransactionsSection({
 
               {/* Lista de transações */}
               <Box 
-                p={{ base: 3, sm: 4, md: 6 }}
+                p={{ base: 4, sm: 5, md: 6 }}
                 sx={{
                   // Safe area support para iPhone 14 Pro
                   paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
