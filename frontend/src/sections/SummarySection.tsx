@@ -27,6 +27,7 @@ import { PeriodData } from '../hooks/usePeriodData'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { useMemo, useState } from 'react'
 import SummaryCardModal from '../components/transactions/SummaryCardModal'
+import { SUMMARY_CARD_COLORS } from '../constants/summaryColors'
 
 // 🎨 Animações personalizadas
 const pulse = 'pulse 2s ease-in-out infinite'
@@ -59,7 +60,7 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
     }
   }, [transactions])
 
-  // ✅ Define stats com tipo inferido corretamente
+  // ✅ Define stats usando cores centralizadas
   const stats: {
     id: CardId
     label: string
@@ -74,9 +75,9 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
       id: 'transactions',
       label: 'Transactions',
       icon: BarChart3,
-      color: 'blue.500',
-      bgColor: 'blue.50',
-      darkBgColor: 'blue.900',
+      color: SUMMARY_CARD_COLORS.transactions.color,
+      bgColor: SUMMARY_CARD_COLORS.transactions.bg,
+      darkBgColor: SUMMARY_CARD_COLORS.transactions.bgDark,
       helpText: 'Total transactions',
       displayValue: transactions.length.toString(),
     },
@@ -84,9 +85,9 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
       id: 'income',
       label: 'Income',
       icon: TrendingUp,
-      color: 'green.500',
-      bgColor: 'green.50',
-      darkBgColor: 'green.900',
+      color: SUMMARY_CARD_COLORS.income.color,
+      bgColor: SUMMARY_CARD_COLORS.income.bg,
+      darkBgColor: SUMMARY_CARD_COLORS.income.bgDark,
       helpText: 'Total income',
       displayValue: `£${income.toFixed(2)}`,
     },
@@ -94,9 +95,9 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
       id: 'expenses',
       label: 'Expenses',
       icon: TrendingDown,
-      color: 'red.500',
-      bgColor: 'red.50',
-      darkBgColor: 'red.900',
+      color: SUMMARY_CARD_COLORS.expenses.color,
+      bgColor: SUMMARY_CARD_COLORS.expenses.bg,
+      darkBgColor: SUMMARY_CARD_COLORS.expenses.bgDark,
       helpText: 'Total expenses',
       displayValue: `£${expense.toFixed(2)}`,
     },
@@ -104,9 +105,9 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
       id: 'balance',
       label: 'Balance',
       icon: DollarSign,
-      color: 'purple.500',
-      bgColor: 'purple.50',
-      darkBgColor: 'purple.900',
+      color: SUMMARY_CARD_COLORS.balance.color,
+      bgColor: SUMMARY_CARD_COLORS.balance.bg,
+      darkBgColor: SUMMARY_CARD_COLORS.balance.bgDark,
       helpText: 'Current balance',
       displayValue: `£${balance.toFixed(2)}`,
     },
@@ -172,19 +173,15 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
                 spacing={{ base: 3, sm: 4, md: 6 }}
                 w="full"
               >
-                {stats.map((stat, index) => {
+                {stats.map((stat) => {
                   const IconComponent = stat.icon
-                  const isSelected = selectedCard === stat.id
                   
                   return (
                     <Card
                       key={stat.id}
-                      bg={isSelected 
-                        ? `linear-gradient(135deg, ${stat.bgColor}, ${stat.darkBgColor})`
-                        : stat.bgColor
-                      }
+                      bg={useColorModeValue(stat.bgColor, SUMMARY_CARD_COLORS[stat.id].bgDark)}
                       border="1px solid"
-                      borderColor={isSelected ? stat.color : 'transparent'}
+                      borderColor="transparent"
                       borderRadius="xl"
                       shadow="sm"
                       cursor="pointer"
@@ -198,38 +195,37 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
                         transform: 'translateY(0)',
                       }}
                       onClick={() => handleCardClick(stat.id)}
-                      position="relative"
-                      overflow="hidden"
-                      animation={isSelected ? `${pulse} 2s ease-in-out infinite` : 'none'}
                     >
-                      <CardBody p={3}>
-                        <VStack spacing={2} align="center">
+                      <CardBody p={4}>
+                        <VStack spacing={3} align="center">
                           <Box
                             p={2}
                             borderRadius="full"
-                            bg={isSelected ? `${stat.color}20` : `${stat.color}10`}
-                            animation={isSelected ? `${float} 2s ease-in-out infinite` : 'none'}
+                            bg={`${stat.color}10`}
                           >
                             <IconComponent size={16} color={stat.color} />
                           </Box>
-                          <Stat textAlign="center">
-                            <StatNumber
-                              fontSize={{ base: 'sm', sm: 'md', md: 'lg' }}
-                              fontWeight="700"
+                          <VStack spacing={1} align="center">
+                            <Text
+                              fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
+                              fontWeight="800"
                               color={stat.color}
-                              lineHeight="shorter"
+                              textAlign="center"
                             >
                               {stat.displayValue}
-                            </StatNumber>
-                            <StatHelpText
-                              fontSize="xs"
-                              fontWeight="500"
-                              color={isSelected ? stat.color : colors.text.label}
-                              m={0}
+                            </Text>
+                            <Text
+                              fontSize={{ base: 'sm', sm: 'md' }}
+                              fontWeight="600"
+                              color={useColorModeValue(
+                                SUMMARY_CARD_COLORS[stat.id].textColor,
+                                SUMMARY_CARD_COLORS[stat.id].textColorDark
+                              )}
+                              textAlign="center"
                             >
                               {stat.label}
-                            </StatHelpText>
-                          </Stat>
+                            </Text>
+                          </VStack>
                         </VStack>
                       </CardBody>
                     </Card>

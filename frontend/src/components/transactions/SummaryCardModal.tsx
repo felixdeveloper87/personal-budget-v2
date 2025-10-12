@@ -21,6 +21,7 @@ import React, { ReactNode, useMemo } from 'react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../charts/modal'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
@@ -30,7 +31,7 @@ const MotionBadge = motion.create(Badge)
 interface SummaryCardModalProps {
   isOpen: boolean
   onClose: () => void
-  selectedCard: 'transactions' | 'income' | 'expenses' | 'balance' | null | undefined
+  selectedCard: SummaryCardType | null | undefined
   cardLabel?: string
   transactions?: any[]
   selectedPeriod?: string
@@ -47,55 +48,20 @@ export default function SummaryCardModal({
 }: SummaryCardModalProps) {
   const colors = useThemeColors()
 
-  // ✅ Tipagem do mapa de ícones e informações
-  type HeaderKey = 'transactions' | 'income' | 'expenses' | 'balance'
+  // ✅ Usar cores centralizadas
+  const iconMap = {
+    transactions: BarChart3,
+    income: TrendingUp,
+    expenses: TrendingDown,
+    balance: DollarSign,
+  } as const
 
-  interface HeaderInfo {
-    icon: React.ElementType
-    title: string
-    subtitle: string
-    color: string
-    bg: string
-    bgDark: string
-  }
-
-  const headerInfoMap: Record<HeaderKey, HeaderInfo> = {
-    transactions: {
-      icon: BarChart3,
-      title: 'Transaction Analytics',
-      subtitle: 'Complete overview of your activity',
-      color: 'blue.500',
-      bg: 'blue.50',
-      bgDark: 'blue.900',
-    },
-    income: {
-      icon: TrendingUp,
-      title: 'Income Analysis',
-      subtitle: 'Track and visualize your income streams',
-      color: 'green.500',
-      bg: 'green.50',
-      bgDark: 'green.900',
-    },
-    expenses: {
-      icon: TrendingDown,
-      title: 'Expense Analysis',
-      subtitle: 'See where your money goes',
-      color: 'red.500',
-      bg: 'red.50',
-      bgDark: 'red.900',
-    },
-    balance: {
-      icon: DollarSign,
-      title: 'Balance Overview',
-      subtitle: 'Understand your overall financial health',
-      color: 'purple.500',
-      bg: 'purple.50',
-      bgDark: 'purple.900',
-    },
-  }
-
-  const headerInfo = useMemo<HeaderInfo>(() => {
-    return headerInfoMap[(selectedCard as HeaderKey) ?? 'transactions']
+  const headerInfo = useMemo(() => {
+    const cardType = selectedCard ?? 'transactions'
+    return {
+      icon: iconMap[cardType],
+      ...SUMMARY_CARD_COLORS[cardType],
+    }
   }, [selectedCard])
 
   const IconEl = headerInfo.icon

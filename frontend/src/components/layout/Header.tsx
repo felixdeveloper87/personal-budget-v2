@@ -42,11 +42,11 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   const bg = useColorModeValue(
-    'rgba(255, 255, 255, 0.95)',
-    'rgba(17, 17, 17, 0.95)'
+    'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+    'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
   )
 
-  const borderColor = useColorModeValue('gray.200', 'gray.800')
+  const borderColor = useColorModeValue('gray.100', 'gray.700')
   const textColor = useColorModeValue('gray.800', 'white')
   const secondaryTextColor = useColorModeValue('gray.600', 'gray.400')
 
@@ -63,8 +63,8 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
         borderBottom="1px solid"
         borderColor={borderColor}
         boxShadow={useColorModeValue(
-          '0 1px 3px rgba(0,0,0,0.05)',
-          '0 1px 3px rgba(0,0,0,0.3)'
+          '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)'
         )}
         w="100%"
       >
