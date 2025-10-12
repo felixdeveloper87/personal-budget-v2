@@ -27,7 +27,7 @@ export default function Dashboard() {
     <Box 
       bg={bg}
       minH="100vh"
-      px={{ base: 1, md: 2, lg: 3 }} 
+      px={{ base: 0.5, md: 1, lg: 1.5 }} 
       py={{ base: 3, md: 6 }}
     >
       {loading ? (

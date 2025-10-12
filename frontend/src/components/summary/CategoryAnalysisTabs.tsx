@@ -27,15 +27,10 @@ export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: C
   const [activeTab, setActiveTab] = useState<'expenses' | 'incomes'>('expenses')
 
   return (
-    <Box p={{ base: 4, sm: 5, md: 6 }}>
-      <VStack spacing={6} align="stretch">
-        {/* Header com botões integrados */}
-        <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          align={{ base: 'stretch', sm: 'center' }}
-          justify="space-between"
-          gap={{ base: 3, sm: 4 }}
-        >
+    <Box>
+      <VStack spacing={6} align="stretch" p={{ base: 4, sm: 5, md: 6 }}>
+        {/* Header com botões na mesma linha */}
+        <HStack spacing={4} align="center" justify="space-between" w="full">
           <HStack spacing={3} align="center">
             <Box
               p={2}
@@ -48,7 +43,7 @@ export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: C
             >
               <Icon as={BarChart3} boxSize={4} color="white" />
             </Box>
-            <VStack align="start" spacing={1}>
+            <VStack align="start" spacing={0.5}>
               <Heading
                 size="lg"
                 bg={useColorModeValue(
@@ -120,31 +115,20 @@ export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: C
               Incomes
             </Button>
           </HStack>
-        </Flex>
+        </HStack>
 
         {/* Charts */}
-        <Box 
-          p={0} 
-          flex="1"
-          bg={activeTab === 'expenses' 
-            ? "linear-gradient(135deg, rgba(239, 68, 68, 0.02), rgba(239, 68, 68, 0.05))"
-            : "linear-gradient(135deg, rgba(34, 197, 94, 0.02), rgba(34, 197, 94, 0.05))"
-          }
-          minH={{ base: '280px', sm: '320px', md: '380px' }}
-          w="full"
-        >
-          {activeTab === 'expenses' ? (
-            <ExpenseChart
-              transactions={transactions}
-              selectedPeriod={selectedPeriod}
-            />
-          ) : (
-            <IncomeChart
-              transactions={transactions}
-              selectedPeriod={selectedPeriod}
-            />
-          )}
-        </Box>
+        {activeTab === 'expenses' ? (
+          <ExpenseChart
+            transactions={transactions}
+            selectedPeriod={selectedPeriod}
+          />
+        ) : (
+          <IncomeChart
+            transactions={transactions}
+            selectedPeriod={selectedPeriod}
+          />
+        )}
       </VStack>
     </Box>
   )
