@@ -1,68 +1,52 @@
-import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Badge,
+import React, { useState } from 'react'
+import { 
+  Box, 
+  VStack, 
+  HStack, 
+  Text, 
+  Heading, 
+  Icon, 
   Flex,
-  Heading,
-  Icon,
-  useColorModeValue,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,
+  Button,
+  useColorModeValue
 } from '@chakra-ui/react'
-import { BarChart3, TrendingUp, TrendingDown, Sparkles } from 'lucide-react'
+import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
+import { Transaction } from '../../types'
+import { PeriodType } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import ExpenseChart from '../charts/ExpenseChart'
 import IncomeChart from '../charts/IncomeChart'
 
-// 🎨 Animações personalizadas
-const float = 'float 3s ease-in-out infinite'
-const glow = 'glow 3s ease-in-out infinite'
-
 interface CategoryAnalysisTabsProps {
-  transactions: any[]
-  selectedPeriod: string
+  transactions: Transaction[]
+  selectedPeriod: PeriodType
 }
 
 export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: CategoryAnalysisTabsProps) {
   const colors = useThemeColors()
+  const [activeTab, setActiveTab] = useState<'expenses' | 'incomes'>('expenses')
 
   return (
     <Box p={{ base: 4, sm: 5, md: 6 }}>
       <VStack spacing={6} align="stretch">
-        {/* Header da análise de categorias */}
+        {/* Header com botões integrados */}
         <Flex
           direction={{ base: 'column', sm: 'row' }}
-          align="center"
+          align={{ base: 'stretch', sm: 'center' }}
           justify="space-between"
-          gap={4}
+          gap={{ base: 3, sm: 4 }}
         >
-          <HStack spacing={4} align="center">
+          <HStack spacing={3} align="center">
             <Box
-              p={3}
-              borderRadius="2xl"
+              p={2}
+              borderRadius="xl"
               bg={useColorModeValue(
                 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
                 'linear-gradient(135deg, #a78bfa, #8b5cf6)'
               )}
-              boxShadow="lg"
-              sx={{
-                animation: glow,
-                '@keyframes glow': {
-                  '0%, 100%': { 
-                    boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' 
-                  },
-                  '50%': { 
-                    boxShadow: '0 0 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)' 
-                  }
-                }
-              }}
+              boxShadow="md"
             >
-              <Icon as={BarChart3} boxSize={6} color="white" />
+              <Icon as={BarChart3} boxSize={4} color="white" />
             </Box>
             <VStack align="start" spacing={1}>
               <Heading
@@ -78,267 +62,89 @@ export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: C
               </Heading>
               <Text
                 fontSize={{ base: '2xs', sm: 'xs' }}
-                color={colors.text.secondary}
+                color={useColorModeValue('gray.500', 'gray.400')}
                 fontWeight="400"
                 opacity={0.8}
               >
-                Detailed breakdown by categories
+                Complete overview with category analysis
               </Text>
             </VStack>
           </HStack>
-          
-          <Badge
-            colorScheme="purple"
-            variant="solid"
-            borderRadius="full"
-            px={4}
-            py={2}
-            fontSize="sm"
-            fontWeight="600"
-            bg={useColorModeValue(
-              'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-              'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-            )}
-            boxShadow="md"
-          >
-            <HStack spacing={2}>
-              <Icon as={Sparkles} boxSize={3} />
-              <Text>Charts</Text>
-            </HStack>
-          </Badge>
+
+          {/* Botões compactos ao lado do header */}
+          <HStack spacing={2}>
+            <Button
+              size="sm"
+              variant={activeTab === 'expenses' ? 'solid' : 'outline'}
+              colorScheme="red"
+              leftIcon={<Icon as={TrendingDown} boxSize={3} />}
+              borderRadius="lg"
+              fontSize="xs"
+              fontWeight="600"
+              px={3}
+              py={2}
+              h="auto"
+              bg={activeTab === 'expenses' ? 'red.50' : 'transparent'}
+              color={activeTab === 'expenses' ? 'red.600' : 'gray.600'}
+              borderColor={activeTab === 'expenses' ? 'red.200' : 'gray.300'}
+              _hover={{
+                bg: activeTab === 'expenses' ? 'red.100' : 'red.50',
+                color: 'red.600',
+                borderColor: 'red.300'
+              }}
+              onClick={() => setActiveTab('expenses')}
+            >
+              Expenses
+            </Button>
+            <Button
+              size="sm"
+              variant={activeTab === 'incomes' ? 'solid' : 'outline'}
+              colorScheme="green"
+              leftIcon={<Icon as={TrendingUp} boxSize={3} />}
+              borderRadius="lg"
+              fontSize="xs"
+              fontWeight="600"
+              px={3}
+              py={2}
+              h="auto"
+              bg={activeTab === 'incomes' ? 'green.50' : 'transparent'}
+              color={activeTab === 'incomes' ? 'green.600' : 'gray.600'}
+              borderColor={activeTab === 'incomes' ? 'green.200' : 'gray.300'}
+              _hover={{
+                bg: activeTab === 'incomes' ? 'green.100' : 'green.50',
+                color: 'green.600',
+                borderColor: 'green.300'
+              }}
+              onClick={() => setActiveTab('incomes')}
+            >
+              Incomes
+            </Button>
+          </HStack>
         </Flex>
 
-        {/* Tabs para análise de categorias */}
-        <Tabs 
-          variant="enclosed"
-          colorScheme="purple"
-          defaultIndex={0}
+        {/* Charts */}
+        <Box 
+          p={0} 
           flex="1"
-          display="flex"
-          flexDirection="column"
+          bg={activeTab === 'expenses' 
+            ? "linear-gradient(135deg, rgba(239, 68, 68, 0.02), rgba(239, 68, 68, 0.05))"
+            : "linear-gradient(135deg, rgba(34, 197, 94, 0.02), rgba(34, 197, 94, 0.05))"
+          }
+          minH={{ base: '280px', sm: '320px', md: '380px' }}
+          w="full"
         >
-          {/* Tab buttons modernas */}
-          <TabList 
-            bg={useColorModeValue('gray.50', 'gray.800')}
-            borderRadius="2xl"
-            p={1}
-            border="none"
-            boxShadow="sm"
-          >
-            {/* Expenses Tab */}
-            <Tab
-              _selected={{ 
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #fca5a5, #f87171)',
-                  'linear-gradient(135deg, #dc2626, #b91c1c)'
-                ),
-                color: 'white',
-                transform: 'translateY(-1px)',
-                boxShadow: useColorModeValue(
-                  '0 8px 25px rgba(239, 68, 68, 0.2)',
-                  '0 8px 25px rgba(239, 68, 68, 0.4)'
-                ),
-                '& .icon-container': {
-                  bg: 'rgba(255, 255, 255, 0.3)',
-                },
-                '& .icon': {
-                  color: 'white',
-                }
-              }}
-              borderRadius="xl"
-              p={{ base: 3, sm: 4, md: 5 }}
-              fontSize={{ base: 'sm', sm: 'md' }}
-              fontWeight="700"
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              color={useColorModeValue('gray.600', 'gray.300')}
-              bg="transparent"
-              _hover={{
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #fef2f2, #fecaca)',
-                  'linear-gradient(135deg, #991b1b, #7f1d1d)'
-                ),
-                color: useColorModeValue('red.500', 'red.400'),
-                transform: 'translateY(-1px)',
-                boxShadow: 'lg',
-                '& .icon-container': {
-                  bg: useColorModeValue(
-                    'rgba(239, 68, 68, 0.2)',
-                    'rgba(239, 68, 68, 0.3)'
-                  ),
-                },
-                '& .icon': {
-                  color: useColorModeValue('#dc2626', '#f87171'),
-                }
-              }}
-              flex="1"
-              minH={{ base: '56px', sm: '60px' }}
-              position="relative"
-              overflow="hidden"
-            >
-              <HStack spacing={3} justify="center">
-                <Box
-                  className="icon-container"
-                  p={2}
-                  borderRadius="xl"
-                  bg={useColorModeValue(
-                    'rgba(239, 68, 68, 0.1)',
-                    'rgba(239, 68, 68, 0.2)'
-                  )}
-                  transition="all 0.3s ease"
-                  sx={{
-                    animation: `${float} 3s ease-in-out infinite`,
-                    '@keyframes float': {
-                      '0%, 100%': { transform: 'translateY(0px)' },
-                      '50%': { transform: 'translateY(-2px)' }
-                    }
-                  }}
-                >
-                  <TrendingDown 
-                    className="icon"
-                    size={18} 
-                    color={useColorModeValue('#ef4444', '#f87171')}
-                    style={{ transition: 'color 0.3s ease' }}
-                  />
-                </Box>
-                <Text 
-                  fontSize={{ base: 'sm', sm: 'md' }}
-                  fontWeight="700"
-                  letterSpacing="wide"
-                >
-                  Expenses
-                </Text>
-              </HStack>
-            </Tab>
-
-            {/* Income Tab */}
-            <Tab
-              _selected={{ 
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #86efac, #4ade80)',
-                  'linear-gradient(135deg, #16a34a, #15803d)'
-                ),
-                color: 'white',
-                transform: 'translateY(-1px)',
-                boxShadow: useColorModeValue(
-                  '0 8px 25px rgba(34, 197, 94, 0.2)',
-                  '0 8px 25px rgba(34, 197, 94, 0.4)'
-                ),
-                '& .icon-container': {
-                  bg: 'rgba(255, 255, 255, 0.3)',
-                },
-                '& .icon': {
-                  color: 'white',
-                }
-              }}
-              borderRadius="xl"
-              p={{ base: 3, sm: 4, md: 5 }}
-              fontSize={{ base: 'sm', sm: 'md' }}
-              fontWeight="700"
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              color={useColorModeValue('gray.600', 'gray.300')}
-              bg="transparent"
-              _hover={{
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #f0fdf4, #bbf7d0)',
-                  'linear-gradient(135deg, #166534, #14532d)'
-                ),
-                color: useColorModeValue('green.500', 'green.400'),
-                transform: 'translateY(-1px)',
-                boxShadow: 'lg',
-                '& .icon-container': {
-                  bg: useColorModeValue(
-                    'rgba(34, 197, 94, 0.2)',
-                    'rgba(34, 197, 94, 0.3)'
-                  ),
-                },
-                '& .icon': {
-                  color: useColorModeValue('#16a34a', '#4ade80'),
-                }
-              }}
-              flex="1"
-              minH={{ base: '56px', sm: '60px' }}
-              position="relative"
-              overflow="hidden"
-            >
-              <HStack spacing={3} justify="center">
-                <Box
-                  className="icon-container"
-                  p={2}
-                  borderRadius="xl"
-                  bg={useColorModeValue(
-                    'rgba(34, 197, 94, 0.1)',
-                    'rgba(34, 197, 94, 0.2)'
-                  )}
-                  transition="all 0.3s ease"
-                  sx={{
-                    animation: `${float} 3s ease-in-out infinite 1.5s`,
-                    '@keyframes float': {
-                      '0%, 100%': { transform: 'translateY(0px)' },
-                      '50%': { transform: 'translateY(-2px)' }
-                    }
-                  }}
-                >
-                  <TrendingUp 
-                    className="icon"
-                    size={18} 
-                    color={useColorModeValue('#22c55e', '#4ade80')}
-                    style={{ transition: 'color 0.3s ease' }}
-                  />
-                </Box>
-                <Text 
-                  fontSize={{ base: 'sm', sm: 'md' }}
-                  fontWeight="700"
-                  letterSpacing="wide"
-                >
-                  Income
-                </Text>
-              </HStack>
-            </Tab>
-          </TabList>
-
-          {/* Tab content panels */}
-          <TabPanels flex="1" display="flex" flexDirection="column">
-            {/* Expense Chart Panel */}
-            <TabPanel p={0} flex="1">
-              <Box 
-                p={{ base: 3, sm: 4, md: 6 }} 
-                flex="1"
-                bg="linear-gradient(135deg, rgba(239, 68, 68, 0.02), rgba(239, 68, 68, 0.05))"
-                minH={{ base: '280px', sm: '320px', md: '380px' }}
-                sx={{
-                  // Safe area support para iPhone 14 Pro
-                  paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-                  paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-                }}
-              >
-                <ExpenseChart
-                  transactions={transactions}
-                  selectedPeriod={selectedPeriod}
-                />
-              </Box>
-            </TabPanel>
-
-            {/* Income Chart Panel */}
-            <TabPanel p={0} flex="1">
-              <Box 
-                p={{ base: 3, sm: 4, md: 6 }} 
-                flex="1"
-                bg="linear-gradient(135deg, rgba(34, 197, 94, 0.02), rgba(34, 197, 94, 0.05))"
-                minH={{ base: '280px', sm: '320px', md: '380px' }}
-                sx={{
-                  // Safe area support para iPhone 14 Pro
-                  paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-                  paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-                }}
-              >
-                <IncomeChart
-                  transactions={transactions}
-                  selectedPeriod={selectedPeriod}
-                />
-              </Box>
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+          {activeTab === 'expenses' ? (
+            <ExpenseChart
+              transactions={transactions}
+              selectedPeriod={selectedPeriod}
+            />
+          ) : (
+            <IncomeChart
+              transactions={transactions}
+              selectedPeriod={selectedPeriod}
+            />
+          )}
+        </Box>
       </VStack>
     </Box>
   )

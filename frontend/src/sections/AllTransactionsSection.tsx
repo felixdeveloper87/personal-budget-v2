@@ -39,7 +39,12 @@ export default function AllTransactionsSection({
   return (
     <Box 
       w="full" 
-      px={0}
+      px={{ base: 1, md: 2, lg: 3 }}
+      sx={{
+        // Safe area support para iPhone 14 Pro
+          paddingLeft: 'max(4px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(4px, env(safe-area-inset-right, 0px))',
+      }}
     >
       <Box position="relative">
         {/* Background decorativo com gradiente */}
@@ -312,8 +317,8 @@ export default function AllTransactionsSection({
                 p={{ base: 4, sm: 5, md: 6 }}
                 sx={{
                   // Safe area support para iPhone 14 Pro
-                  paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-                  paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+          paddingLeft: 'max(4px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(4px, env(safe-area-inset-right, 0px))',
                 }}
     >
       {groupByMonth ? (

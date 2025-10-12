@@ -70,7 +70,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
           '0 20px 50px rgba(96, 165, 250, 0.2), 0 8px 32px rgba(0, 0, 0, 0.4)'
         )}
         w="100%"
-        overflow="hidden"
+        overflow="visible"
         sx={{
           '&::before': {
             content: '""',
@@ -124,7 +124,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
             zIndex={1}
           >
             {/* Logo + Title */}
-            <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW={0}>
+            <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW="fit-content">
               <Box
                 as="button"
                 position="relative"
@@ -246,7 +246,6 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                       'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
                     )}
                     bgClip="text"
-                    noOfLines={1}
                     letterSpacing="wide"
                     textShadow={useColorModeValue(
                       '0 2px 4px rgba(0, 0, 0, 0.1)',
@@ -261,11 +260,14 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                   {!user && (
                     <Badge
                       colorScheme="green"
-                      fontSize={{ base: "2xs", lg: "xs" }}
-                      px={2}
-                      py={0.5}
-                      borderRadius="md"
-                      fontWeight="600"
+                      fontSize={{ base: "xs", sm: "sm", lg: "sm" }}
+                      px={3}
+                      py={1}
+                      borderRadius="full"
+                      fontWeight="700"
+                      boxShadow="sm"
+                      bg="linear-gradient(135deg, #22c55e, #16a34a)"
+                      color="white"
                     >
                       Free
                     </Badge>
@@ -523,6 +525,8 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                       color={currentPage === 'dashboard' ? 'blue.500' : undefined}
                       fontWeight={currentPage === 'dashboard' ? '600' : 'normal'}
                       display={{ base: 'flex', md: 'none' }}
+                      bg={currentPage === 'dashboard' ? 'blue.50' : 'transparent'}
+                      _hover={{ bg: 'blue.50' }}
                     >
                       Dashboard
                     </MenuItem>
@@ -532,6 +536,8 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
                       color={currentPage === 'transactions' ? 'blue.500' : undefined}
                       fontWeight={currentPage === 'transactions' ? '600' : 'normal'}
                       display={{ base: 'flex', md: 'none' }}
+                      bg={currentPage === 'transactions' ? 'blue.50' : 'transparent'}
+                      _hover={{ bg: 'blue.50' }}
                     >
                       Transactions
                     </MenuItem>

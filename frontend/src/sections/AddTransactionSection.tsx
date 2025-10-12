@@ -74,7 +74,11 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       {/* 💳 Add Transaction Section */}
       <Box
         w="full"
-        px={0}
+        px={{ base: 1, md: 2, lg: 3 }}
+        sx={{
+          paddingLeft: 'max(4px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(4px, env(safe-area-inset-right, 0px))',
+        }}
       >
         <Box position="relative">
           {/* Background Blur Glow */}
