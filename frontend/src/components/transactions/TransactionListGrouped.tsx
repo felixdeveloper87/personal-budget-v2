@@ -121,8 +121,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
 
   return (
     <Box>
-      <HStack justify="space-between" mb={4}>
-        <Heading size="md">All Transactions</Heading>
+      <HStack justify="flex-end" mb={4}>
         <HStack spacing={2}>
           <Button size="xs" variant="outline" onClick={expandAll}>
             Expand All

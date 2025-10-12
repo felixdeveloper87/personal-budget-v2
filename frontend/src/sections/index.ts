@@ -1,6 +1,5 @@
 export { default as AddTransactionSection } from './AddTransactionSection'
 export { default as PeriodNavigatorSection } from './PeriodNavigatorSection'
 export { default as SummarySection } from './SummarySection'
-export { default as ChartsSection } from './ChartsSection'
 export { default as AllTransactionsSection } from './AllTransactionsSection'
 export { default as InstallmentPlansSection } from './InstallmentPlansSection'

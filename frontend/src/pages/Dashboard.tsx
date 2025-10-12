@@ -9,9 +9,9 @@ import {
   AddTransactionSection,
   PeriodNavigatorSection,
   SummarySection,
-  ChartsSection,
   InstallmentPlansSection,
 } from '../sections'
+import CategoryAnalysisSection from '../sections/CategoryAnalysisSection'
 
 export default function Dashboard() {
   const { selectedDate, selectedPeriod, onDateChange, onPeriodChange } = usePeriodNavigator()
@@ -57,10 +57,7 @@ export default function Dashboard() {
           <InstallmentPlansSection />
 
           {monthSummary && (
-            <ChartsSection
-              income={periodData.income}
-              expense={periodData.expense}
-              balance={periodData.balance}
+            <CategoryAnalysisSection
               transactions={periodData.transactions}
               selectedPeriod={selectedPeriod}
             />

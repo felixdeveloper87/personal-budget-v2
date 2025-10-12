@@ -1,5 +1,5 @@
 import { Box, VStack, Spinner, Text } from '@chakra-ui/react'
-import { AllTransactionsCard, TransactionList, TransactionListGrouped } from '../components'
+import AllTransactionsSection from '../sections/AllTransactionsSection'
 import { useState, useEffect } from 'react'
 import { hasActiveFilters } from '../utils/filters'
 import { useAuth } from '../contexts/AuthContext'
@@ -14,7 +14,6 @@ export default function AllTransactionsPage() {
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const { filters } = useSearch()
-  const [groupByMonth, setGroupByMonth] = useState(false)
 
   const loadData = async () => {
     if (!user?.token) return
@@ -60,28 +59,12 @@ export default function AllTransactionsPage() {
   }
 
   return (
-    <Box px={{ base: 4, md: 8, lg: 12 }} py={{ base: 4, md: 8 }}>
-      <VStack spacing={6} align="stretch">
-        <AllTransactionsCard
-          title="All Transactions"
-          count={transactions.length}
-          filtered={hasActiveFilters(filters)}
-          groupByMonth={groupByMonth}
-          onGroupByMonthChange={setGroupByMonth}
-        >
-          {groupByMonth ? (
-            <TransactionListGrouped
-              transactions={transactions}
-              onTransactionDeleted={loadData}
-            />
-          ) : (
-            <TransactionList
-              transactions={transactions}
-              onTransactionDeleted={loadData}
-            />
-          )}
-        </AllTransactionsCard>
-      </VStack>
+    <Box>
+      <AllTransactionsSection
+        transactions={transactions}
+        hasFilters={hasActiveFilters(filters)}
+        onRefresh={loadData}
+      />
     </Box>
   )
 }

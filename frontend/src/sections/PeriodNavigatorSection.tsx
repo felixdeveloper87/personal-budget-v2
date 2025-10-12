@@ -156,26 +156,6 @@ export default function PeriodNavigatorSection({
                     </Text>
                   </VStack>
                 </HStack>
-                
-                <Badge
-                  colorScheme="blue"
-                  variant="solid"
-                  borderRadius="full"
-                  px={4}
-                  py={2}
-                  fontSize="sm"
-                  fontWeight="600"
-                  bg={useColorModeValue(
-                    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-                    'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                  )}
-                  boxShadow="md"
-                >
-                  <HStack spacing={2}>
-                    <Icon as={RotateCcw} boxSize={3} />
-                    <Text>Today</Text>
-                  </HStack>
-                </Badge>
               </Flex>
 
               {/* PeriodNavigator integrado */}
