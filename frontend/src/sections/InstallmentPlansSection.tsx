@@ -84,7 +84,7 @@ export default function InstallmentPlansSection() {
         px={0}
         sx={{}}
       >
-        <Box position="relative" mb={8}>
+        <Box position="relative">
           {/* Background decorativo com gradiente */}
           <Box
             position="absolute"

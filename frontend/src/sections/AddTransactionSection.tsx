@@ -76,7 +76,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         w="full"
         px={0}
       >
-        <Box position="relative" mb={{ base: 6, md: 8 }}>
+        <Box position="relative">
           {/* Background Blur Glow */}
           <Box
             position="absolute"

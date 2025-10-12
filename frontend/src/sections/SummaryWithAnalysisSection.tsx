@@ -176,7 +176,7 @@ export default function SummaryWithAnalysisSection({
         w="full" 
         px={0}
       >
-        <Box position="relative" mb={8}>
+        <Box position="relative">
           {/* Background decorativo com gradiente */}
           <Box
             position="absolute"
