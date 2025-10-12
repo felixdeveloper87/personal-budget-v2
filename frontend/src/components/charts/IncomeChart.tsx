@@ -183,33 +183,47 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             </Badge>
             <Badge
               colorScheme="gray"
-              variant="outline"
-              borderRadius="full"
-              px={3}
-              py={1}
-              fontSize="xs"
-              fontWeight="500"
+              variant="subtle"
+              borderRadius="md"
+              px={2}
+              py={0.5}
+              fontSize="2xs"
+              fontWeight="400"
+              opacity={0.7}
             >
               {selectedPeriod}
             </Badge>
             <Button
-              size="xs"
-              variant="ghost"
-              colorScheme="green"
-              rightIcon={<Icon as={Eye} boxSize={3} />}
+              size="sm"
+              variant="solid"
+              colorScheme="blue"
+              rightIcon={<Icon as={Eye} boxSize={4} />}
               onClick={onOpen}
-              borderRadius="full"
-              px={3}
-              py={1}
-              fontSize="xs"
-              fontWeight="500"
+              borderRadius="lg"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="600"
+              bg={useColorModeValue(
+                'linear-gradient(135deg, #60a5fa, #3b82f6)',
+                'linear-gradient(135deg, #93c5fd, #60a5fa)'
+              )}
+              color="white"
               _hover={{
-                bg: useColorModeValue('green.50', 'green.900'),
-                transform: 'translateY(-1px)',
+                bg: useColorModeValue(
+                  'linear-gradient(135deg, #3b82f6, #2563eb)',
+                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                ),
+                transform: 'translateY(-2px)',
+                boxShadow: 'lg',
+              }}
+              _active={{
+                transform: 'translateY(0)',
               }}
               transition="all 0.2s ease"
+              boxShadow="md"
             >
-              View All ({sortedCategories.length})
+              View Details ({sortedCategories.length})
             </Button>
           </HStack>
 

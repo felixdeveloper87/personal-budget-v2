@@ -315,7 +315,7 @@ export default function SummaryWithAnalysisSection({
                   >
                     <Icon as={BarChart3} boxSize={{ base: 5, sm: 6 }} color="white" />
                   </Box>
-                  <HStack spacing={4} align="center">
+                  <HStack spacing={2} align="center">
                     <VStack align={{ base: 'center', md: 'start' }} spacing={0}>
                       <Heading
                         size={{ base: 'md', sm: 'lg' }}

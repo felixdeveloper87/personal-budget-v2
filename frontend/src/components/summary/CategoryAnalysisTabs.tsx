@@ -41,7 +41,7 @@ export default function CategoryAnalysisTabs({
 
   return (
     <Box>
-      <VStack spacing={6} align="stretch" p={{ base: 4, sm: 5, md: 6 }}>
+      <VStack spacing={1} align="stretch">
         {/* Header com botões na mesma linha */}
         {showHeader && (
           <HStack spacing={4} align="center" justify="space-between" w="full">
