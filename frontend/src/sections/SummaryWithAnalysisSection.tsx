@@ -762,57 +762,93 @@ export default function SummaryWithAnalysisSection({
                       display="flex"
                       flexDirection="column"
                     >
-                      {/* Tab buttons otimizadas para mobile */}
+                      {/* Tab buttons modernas */}
                       <TabList 
-                        borderBottom="1px" 
-                        borderColor={colors.border}
-                        bg={colors.cardBg}
+                        bg={useColorModeValue('gray.50', 'gray.800')}
+                        borderRadius="2xl"
+                        p={1}
+                        border="none"
+                        boxShadow="sm"
                       >
                         {/* Expenses Tab */}
                         <Tab
                           _selected={{ 
-                            ...tabStyle, 
-                            color: useColorModeValue('red.500', 'red.400'),
-                            bg: useColorModeValue('red.50', 'red.900'),
-                            borderColor: useColorModeValue('red.200', 'red.700'),
+                            bg: useColorModeValue(
+                              'linear-gradient(135deg, #fca5a5, #f87171)',
+                              'linear-gradient(135deg, #dc2626, #b91c1c)'
+                            ),
+                            color: 'white',
                             transform: 'translateY(-1px)',
                             boxShadow: useColorModeValue(
-                              '0 4px 12px rgba(239, 68, 68, 0.2)',
-                              '0 4px 12px rgba(239, 68, 68, 0.4)'
+                              '0 8px 25px rgba(239, 68, 68, 0.2)',
+                              '0 8px 25px rgba(239, 68, 68, 0.4)'
                             ),
+                            '& .icon-container': {
+                              bg: 'rgba(255, 255, 255, 0.3)',
+                            },
+                            '& .icon': {
+                              color: 'white',
+                            }
                           }}
-                          borderRadius="0"
-                          p={{ base: 2.5, sm: 3, md: 4 }}
-                          fontSize={{ base: 'xs', sm: 'sm' }}
-                          fontWeight="600"
-                          transition="all 0.2s ease"
+                          borderRadius="xl"
+                          p={{ base: 3, sm: 4, md: 5 }}
+                          fontSize={{ base: 'sm', sm: 'md' }}
+                          fontWeight="700"
+                          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                           color={useColorModeValue('gray.600', 'gray.300')}
+                          bg="transparent"
                           _hover={{
-                            bg: useColorModeValue('red.50', 'red.900'),
+                            bg: useColorModeValue(
+                              'linear-gradient(135deg, #fef2f2, #fecaca)',
+                              'linear-gradient(135deg, #991b1b, #7f1d1d)'
+                            ),
                             color: useColorModeValue('red.500', 'red.400'),
                             transform: 'translateY(-1px)',
+                            boxShadow: 'lg',
+                            '& .icon-container': {
+                              bg: useColorModeValue(
+                                'rgba(239, 68, 68, 0.2)',
+                                'rgba(239, 68, 68, 0.3)'
+                              ),
+                            },
+                            '& .icon': {
+                              color: useColorModeValue('#dc2626', '#f87171'),
+                            }
                           }}
                           flex="1"
-                          minH={{ base: '48px', sm: '52px' }}
+                          minH={{ base: '56px', sm: '60px' }}
+                          position="relative"
+                          overflow="hidden"
                         >
-                          <HStack spacing={{ base: 1.5, sm: 2 }} justify="center">
+                          <HStack spacing={3} justify="center">
                             <Box
-                              p={{ base: 1, sm: 1.5 }}
-                              borderRadius="full"
-                              bg={useColorModeValue('red.100', 'red.800')}
+                              className="icon-container"
+                              p={2}
+                              borderRadius="xl"
+                              bg={useColorModeValue(
+                                'rgba(239, 68, 68, 0.1)',
+                                'rgba(239, 68, 68, 0.2)'
+                              )}
+                              transition="all 0.3s ease"
                               sx={{
                                 animation: `${float} 3s ease-in-out infinite`,
                                 '@keyframes float': {
                                   '0%, 100%': { transform: 'translateY(0px)' },
-                                  '50%': { transform: 'translateY(-3px)' }
+                                  '50%': { transform: 'translateY(-2px)' }
                                 }
                               }}
                             >
-                              <TrendingDown size={14} color={useColorModeValue('#ef4444', '#f87171')} />
+                              <TrendingDown 
+                                className="icon"
+                                size={18} 
+                                color={useColorModeValue('#ef4444', '#f87171')}
+                                style={{ transition: 'color 0.3s ease' }}
+                              />
                             </Box>
                             <Text 
-                              fontSize={{ base: 'xs', sm: 'sm' }}
-                              color={useColorModeValue('gray.600', 'gray.300')}
+                              fontSize={{ base: 'sm', sm: 'md' }}
+                              fontWeight="700"
+                              letterSpacing="wide"
                             >
                               Expenses
                             </Text>
@@ -822,48 +858,82 @@ export default function SummaryWithAnalysisSection({
                         {/* Income Tab */}
                         <Tab
                           _selected={{ 
-                            ...tabStyle, 
-                            color: useColorModeValue('green.500', 'green.400'),
-                            bg: useColorModeValue('green.50', 'green.900'),
-                            borderColor: useColorModeValue('green.200', 'green.700'),
+                            bg: useColorModeValue(
+                              'linear-gradient(135deg, #86efac, #4ade80)',
+                              'linear-gradient(135deg, #16a34a, #15803d)'
+                            ),
+                            color: 'white',
                             transform: 'translateY(-1px)',
                             boxShadow: useColorModeValue(
-                              '0 4px 12px rgba(34, 197, 94, 0.2)',
-                              '0 4px 12px rgba(34, 197, 94, 0.4)'
+                              '0 8px 25px rgba(34, 197, 94, 0.2)',
+                              '0 8px 25px rgba(34, 197, 94, 0.4)'
                             ),
+                            '& .icon-container': {
+                              bg: 'rgba(255, 255, 255, 0.3)',
+                            },
+                            '& .icon': {
+                              color: 'white',
+                            }
                           }}
-                          borderRadius="0"
-                          p={{ base: 2.5, sm: 3, md: 4 }}
-                          fontSize={{ base: 'xs', sm: 'sm' }}
-                          fontWeight="600"
-                          transition="all 0.2s ease"
+                          borderRadius="xl"
+                          p={{ base: 3, sm: 4, md: 5 }}
+                          fontSize={{ base: 'sm', sm: 'md' }}
+                          fontWeight="700"
+                          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                           color={useColorModeValue('gray.600', 'gray.300')}
+                          bg="transparent"
                           _hover={{
-                            bg: useColorModeValue('green.50', 'green.900'),
+                            bg: useColorModeValue(
+                              'linear-gradient(135deg, #f0fdf4, #bbf7d0)',
+                              'linear-gradient(135deg, #166534, #14532d)'
+                            ),
                             color: useColorModeValue('green.500', 'green.400'),
                             transform: 'translateY(-1px)',
+                            boxShadow: 'lg',
+                            '& .icon-container': {
+                              bg: useColorModeValue(
+                                'rgba(34, 197, 94, 0.2)',
+                                'rgba(34, 197, 94, 0.3)'
+                              ),
+                            },
+                            '& .icon': {
+                              color: useColorModeValue('#16a34a', '#4ade80'),
+                            }
                           }}
                           flex="1"
-                          minH={{ base: '48px', sm: '52px' }}
+                          minH={{ base: '56px', sm: '60px' }}
+                          position="relative"
+                          overflow="hidden"
                         >
-                          <HStack spacing={{ base: 1.5, sm: 2 }} justify="center">
+                          <HStack spacing={3} justify="center">
                             <Box
-                              p={{ base: 1, sm: 1.5 }}
-                              borderRadius="full"
-                              bg={useColorModeValue('green.100', 'green.800')}
+                              className="icon-container"
+                              p={2}
+                              borderRadius="xl"
+                              bg={useColorModeValue(
+                                'rgba(34, 197, 94, 0.1)',
+                                'rgba(34, 197, 94, 0.2)'
+                              )}
+                              transition="all 0.3s ease"
                               sx={{
                                 animation: `${float} 3s ease-in-out infinite 1.5s`,
                                 '@keyframes float': {
                                   '0%, 100%': { transform: 'translateY(0px)' },
-                                  '50%': { transform: 'translateY(-3px)' }
+                                  '50%': { transform: 'translateY(-2px)' }
                                 }
                               }}
                             >
-                              <TrendingUp size={14} color={useColorModeValue('#22c55e', '#4ade80')} />
+                              <TrendingUp 
+                                className="icon"
+                                size={18} 
+                                color={useColorModeValue('#22c55e', '#4ade80')}
+                                style={{ transition: 'color 0.3s ease' }}
+                              />
                             </Box>
                             <Text 
-                              fontSize={{ base: 'xs', sm: 'sm' }}
-                              color={useColorModeValue('gray.600', 'gray.300')}
+                              fontSize={{ base: 'sm', sm: 'md' }}
+                              fontWeight="700"
+                              letterSpacing="wide"
                             >
                               Income
                             </Text>

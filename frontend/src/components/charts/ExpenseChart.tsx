@@ -2,6 +2,7 @@ import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useC
 import { Transaction } from '../../types'
 import CategoryModal from '../modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
+import { TrendingDown } from 'lucide-react'
 
 interface ExpenseChartProps {
   transactions: Transaction[]
@@ -63,9 +64,40 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <VStack spacing={4} align="stretch">
       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
-        <Text fontSize="lg" fontWeight="semibold" color={useColorModeValue("gray.800", "white")}>
-          Expenses by Category
-        </Text>
+        <HStack spacing={3} align="center">
+          <Box
+            p={2}
+            borderRadius="xl"
+            bg={useColorModeValue(
+              'linear-gradient(135deg, #fef2f2, #fee2e2)',
+              'linear-gradient(135deg, #7f1d1d, #991b1b)'
+            )}
+            boxShadow="sm"
+          >
+            <TrendingDown size={20} color={useColorModeValue('#ef4444', '#f87171')} />
+          </Box>
+          <VStack align="start" spacing={0}>
+            <Text
+              fontSize="lg"
+              fontWeight="800"
+              bg={useColorModeValue(
+                'linear-gradient(135deg, #1e293b, #475569)',
+                'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+              )}
+              bgClip="text"
+              letterSpacing="wide"
+            >
+              Expenses by Category
+            </Text>
+            <Text
+              fontSize="xs"
+              color={useColorModeValue('gray.600', 'gray.400')}
+              fontWeight="500"
+            >
+              Detailed breakdown of spending
+            </Text>
+          </VStack>
+        </HStack>
         <HStack spacing={2}>
           <Badge colorScheme="red" fontSize="sm" px={2} py={1}>
             {sortedCategories.length} categories
