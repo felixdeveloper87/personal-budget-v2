@@ -63,7 +63,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   return (
     <VStack spacing={4} align="stretch">
       <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
-        <Text fontSize="lg" fontWeight="semibold" color="gray.800">
+        <Text fontSize="lg" fontWeight="semibold" color={useColorModeValue("gray.800", "white")}>
           Income by Category
         </Text>
         <HStack spacing={2}>
@@ -91,14 +91,14 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
           return (
             <Box key={category}>
               <HStack justify="space-between" mb={1}>
-                <Text fontSize="sm" fontWeight="medium" color="gray.700">
+                <Text fontSize="sm" fontWeight="medium" color={useColorModeValue("gray.700", "gray.200")}>
                   {category}
                 </Text>
                 <HStack spacing={2}>
-                  <Text fontSize="sm" color="gray.600">
+                  <Text fontSize="sm" color={useColorModeValue("gray.600", "gray.300")}>
                     {percentage.toFixed(1)}%
                   </Text>
-                  <Text fontSize="sm" fontWeight="semibold" color="gray.800">
+                  <Text fontSize="sm" fontWeight="semibold" color={useColorModeValue("gray.800", "white")}>
                     £{amount.toFixed(2)}
                   </Text>
                 </HStack>
@@ -129,7 +129,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
           <Text fontSize="sm" fontWeight="semibold" color={labelColor}>
             Total Income
           </Text>
-          <Text fontSize="lg" fontWeight="bold" color="green.600">
+          <Text fontSize="lg" fontWeight="bold" color={useColorModeValue("green.600", "green.400")}>
             £{totalIncome.toFixed(2)}
           </Text>
         </HStack>

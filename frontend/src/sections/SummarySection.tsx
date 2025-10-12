@@ -14,6 +14,9 @@ import {
   useDisclosure,
   Box,
   Icon,
+  Flex,
+  Heading,
+  useToken,
 } from '@chakra-ui/react'
 import {
   BarChart3,
@@ -22,6 +25,8 @@ import {
   DollarSign,
   PieChart,
   Sparkles,
+  Activity,
+  Zap,
 } from 'lucide-react'
 import { PeriodData } from '../hooks/usePeriodData'
 import { useThemeColors } from '../hooks/useThemeColors'
@@ -29,10 +34,12 @@ import { useMemo, useState } from 'react'
 import SummaryCardModal from '../components/transactions/SummaryCardModal'
 import { SUMMARY_CARD_COLORS } from '../constants/summaryColors'
 
-// 🎨 Animações personalizadas
-const pulse = 'pulse 2s ease-in-out infinite'
+// 🎨 Animações personalizadas aprimoradas
+const shimmer = 'shimmer 4s ease-in-out infinite'
 const float = 'float 3s ease-in-out infinite'
-const shimmer = 'shimmer 3s ease-in-out infinite'
+const pulse = 'pulse 2s ease-in-out infinite'
+const glow = 'glow 3s ease-in-out infinite'
+const slideIn = 'slideIn 0.6s ease-out'
 
 // ✅ Tipagem explícita dos tipos válidos de card
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
@@ -123,118 +130,299 @@ export default function SummarySection({ periodData }: SummarySectionProps) {
 
   return (
     <>
-      <Box position="relative">
-        {/* Barra colorida animada no topo */}
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          height="3px"
-          background="linear-gradient(90deg, #3b82f6, #10b981, #ef4444, #8b5cf6)"
-          backgroundSize="200% 100%"
-          borderRadius="2xl 2xl 0 0"
-          zIndex={1}
-          sx={{
-            animation: `${shimmer} 3s ease-in-out infinite`,
-          }}
-        />
-        <Card
-          bg={colors.cardBg}
-          shadow="lg"
-          borderRadius="2xl"
-          border="1px"
-          borderColor={colors.border}
-        >
-          <CardBody p={{ base: 4, sm: 5, md: 6 }}>
-            <VStack spacing={4} align="stretch">
-              {/* Header compacto */}
-              <HStack spacing={3} align="center" justify="center">
-                <Icon as={PieChart} boxSize={5} color="blue.500" />
-                <Text fontSize="lg" fontWeight="600" color={colors.text.label}>
-                  Financial Summary
-                </Text>
-                <Badge
-                  colorScheme="blue"
-                  variant="subtle"
-                  borderRadius="full"
-                  px={3}
-                  fontSize="xs"
+      <Box 
+        w="full" 
+        px={{ base: 3, sm: 4, md: 6 }}
+        sx={{
+          // Safe area support para iPhone 14 Pro
+          paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+        }}
+      >
+        <Box position="relative" mb={8}>
+          {/* Background decorativo com gradiente */}
+          <Box
+            position="absolute"
+            top="-50px"
+            left="-50px"
+            right="-50px"
+            height="200px"
+            background={useColorModeValue(
+              'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 50%, rgba(139, 92, 246, 0.1) 100%)',
+              'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(16, 185, 129, 0.2) 50%, rgba(139, 92, 246, 0.2) 100%)'
+            )}
+            borderRadius="3xl"
+            filter="blur(40px)"
+            opacity={0.6}
+            zIndex={0}
+          />
+          
+          {/* Card principal com glassmorphism */}
+          <Card
+            position="relative"
+            bg={useColorModeValue(
+              'rgba(255, 255, 255, 0.9)',
+              'rgba(17, 17, 17, 0.9)'
+            )}
+            backdropFilter="blur(20px)"
+            border="1px solid"
+            borderColor={useColorModeValue(
+              'rgba(255, 255, 255, 0.2)',
+              'rgba(255, 255, 255, 0.1)'
+            )}
+            borderRadius="3xl"
+            shadow="2xl"
+            overflow="hidden"
+            sx={{
+              animation: slideIn,
+              '@keyframes slideIn': {
+                from: { 
+                  opacity: 0, 
+                  transform: 'translateY(20px) scale(0.95)' 
+                },
+                to: { 
+                  opacity: 1, 
+                  transform: 'translateY(0) scale(1)' 
+                }
+              }
+            }}
+          >
+            {/* Barra superior animada */}
+            <Box
+              height="4px"
+              background="linear-gradient(90deg, #3b82f6, #10b981, #ef4444, #8b5cf6, #f59e0b)"
+              backgroundSize="300% 100%"
+              sx={{
+                animation: shimmer,
+                '@keyframes shimmer': {
+                  '0%': { backgroundPosition: '-200% 0' },
+                  '100%': { backgroundPosition: '200% 0' }
+                }
+              }}
+            />
+            
+            <CardBody p={{ base: 4, sm: 5, md: 8 }}>
+              <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+                {/* Header com design moderno */}
+                <Flex
+                  direction={{ base: 'column', sm: 'row' }}
+                  align="center"
+                  justify="space-between"
+                  gap={4}
                 >
-                  {label}
-                </Badge>
-              </HStack>
-
-              <Divider />
-
-              {/* Stats Grid 2x2 compacto */}
-              <SimpleGrid
-                columns={{ base: 2, sm: 2, md: 4 }}
-                spacing={{ base: 3, sm: 4, md: 6 }}
-                w="full"
-              >
-                {stats.map((stat) => {
-                  const IconComponent = stat.icon
-                  
-                  return (
-                    <Card
-                      key={stat.id}
-                      bg={useColorModeValue(stat.bgColor, SUMMARY_CARD_COLORS[stat.id].bgDark)}
-                      border="1px solid"
-                      borderColor="transparent"
-                      borderRadius="xl"
-                      shadow="sm"
-                      cursor="pointer"
-                      transition="all 0.2s ease"
-                      _hover={{
-                        transform: 'translateY(-2px)',
-                        boxShadow: `0 4px 12px ${stat.color}30`,
-                        borderColor: stat.color,
+                  <HStack spacing={4} align="center">
+                    <Box
+                      p={3}
+                      borderRadius="2xl"
+                      bg={useColorModeValue(
+                        'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                        'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                      )}
+                      boxShadow="lg"
+                      sx={{
+                        animation: glow,
+                        '@keyframes glow': {
+                          '0%, 100%': { 
+                            boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)' 
+                          },
+                          '50%': { 
+                            boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)' 
+                          }
+                        }
                       }}
-                      _active={{
-                        transform: 'translateY(0)',
-                      }}
-                      onClick={() => handleCardClick(stat.id)}
                     >
-                      <CardBody p={4}>
-                        <VStack spacing={3} align="center">
-                          <Box
-                            p={2}
-                            borderRadius="full"
-                            bg={`${stat.color}10`}
-                          >
-                            <IconComponent size={16} color={stat.color} />
-                          </Box>
-                          <VStack spacing={1} align="center">
-                            <Text
-                              fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
-                              fontWeight="800"
-                              color={stat.color}
-                              textAlign="center"
-                            >
-                              {stat.displayValue}
-                            </Text>
-                            <Text
-                              fontSize={{ base: 'sm', sm: 'md' }}
-                              fontWeight="600"
-                              color={useColorModeValue(
-                                SUMMARY_CARD_COLORS[stat.id].textColor,
-                                SUMMARY_CARD_COLORS[stat.id].textColorDark
+                      <Icon as={Activity} boxSize={6} color="white" />
+                    </Box>
+                    <VStack align="start" spacing={1}>
+                      <Heading
+                        size="lg"
+                        bg={useColorModeValue(
+                          'linear-gradient(135deg, #1e293b, #475569)',
+                          'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+                        )}
+                        bgClip="text"
+                        fontWeight="800"
+                      >
+                        Financial Summary
+                      </Heading>
+                      <Text
+                        fontSize="sm"
+                        color={colors.text.secondary}
+                        fontWeight="500"
+                      >
+                        Complete overview of your finances
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  
+                  <Badge
+                    colorScheme="blue"
+                    variant="solid"
+                    borderRadius="full"
+                    px={4}
+                    py={2}
+                    fontSize="sm"
+                    fontWeight="600"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      'linear-gradient(135deg, #60a5fa, #3b82f6)'
+                    )}
+                    boxShadow="md"
+                  >
+                    <HStack spacing={2}>
+                      <Icon as={Zap} boxSize={3} />
+                      <Text>{label}</Text>
+                    </HStack>
+                  </Badge>
+                </Flex>
+
+                {/* Grid de cards otimizado para iPhone 14 Pro */}
+                <SimpleGrid
+                  columns={{ base: 2, sm: 2, md: 4 }}
+                  spacing={{ base: 3, sm: 4, md: 6 }}
+                  w="full"
+                >
+                  {stats.map((stat, index) => {
+                    const IconComponent = stat.icon
+                    
+                    return (
+                      <Card
+                        key={stat.id}
+                        position="relative"
+                        bg={useColorModeValue(
+                          `linear-gradient(135deg, ${stat.bgColor}, ${stat.bgColor}dd)`,
+                          `linear-gradient(135deg, ${SUMMARY_CARD_COLORS[stat.id].bgDark}, ${SUMMARY_CARD_COLORS[stat.id].bgDark}dd)`
+                        )}
+                        backdropFilter="blur(10px)"
+                        border="1px solid"
+                        borderColor={useColorModeValue(
+                          `${stat.color}20`,
+                          `${stat.color}30`
+                        )}
+                        borderRadius="2xl"
+                        shadow="xl"
+                        cursor="pointer"
+                        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                        overflow="hidden"
+                        sx={{
+                          animation: `${slideIn} ${0.2 + index * 0.1}s ease-out`,
+                          '@keyframes slideIn': {
+                            from: { 
+                              opacity: 0, 
+                              transform: 'translateY(20px) scale(0.95)' 
+                            },
+                            to: { 
+                              opacity: 1, 
+                              transform: 'translateY(0) scale(1)' 
+                            }
+                          }
+                        }}
+                        _hover={{
+                          transform: 'translateY(-8px) scale(1.02)',
+                          boxShadow: `0 25px 50px -12px ${stat.color}40`,
+                          borderColor: stat.color,
+                        }}
+                        _active={{
+                          transform: 'translateY(-4px) scale(1.01)',
+                        }}
+                        onClick={() => handleCardClick(stat.id)}
+                      >
+                        {/* Efeito de brilho no hover */}
+                        <Box
+                          position="absolute"
+                          top={0}
+                          left="-100%"
+                          width="100%"
+                          height="100%"
+                          background="linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
+                          transition="left 0.5s"
+                          _groupHover={{ left: '100%' }}
+                        />
+                        
+                        <CardBody p={{ base: 4, sm: 5, md: 6 }}>
+                          <VStack spacing={{ base: 3, sm: 4 }} align="center">
+                            {/* Ícone com efeito especial */}
+                            <Box
+                              position="relative"
+                              p={{ base: 3, sm: 4 }}
+                              borderRadius="2xl"
+                              bg={useColorModeValue(
+                                `${stat.color}15`,
+                                `${stat.color}25`
                               )}
-                              textAlign="center"
+                              boxShadow="lg"
+                              sx={{
+                                animation: `${float} 3s ease-in-out infinite`,
+                                animationDelay: `${index * 0.5}s`,
+                                '@keyframes float': {
+                                  '0%, 100%': { transform: 'translateY(0px)' },
+                                  '50%': { transform: 'translateY(-10px)' }
+                                }
+                              }}
                             >
-                              {stat.label}
-                            </Text>
+                              <Icon as={IconComponent} boxSize={{ base: 5, sm: 6 }} color={stat.color} />
+                              {/* Efeito de brilho no ícone */}
+                              <Box
+                                position="absolute"
+                                top="-2px"
+                                left="-2px"
+                                right="-2px"
+                                bottom="-2px"
+                                borderRadius="2xl"
+                                bg={`${stat.color}20`}
+                                filter="blur(8px)"
+                                opacity={0.6}
+                                zIndex={-1}
+                              />
+                            </Box>
+                            
+                            {/* Valores e labels - Otimizado para iPhone 14 Pro */}
+                            <VStack spacing={{ base: 1.5, sm: 2 }} align="center">
+                              <Text
+                                fontSize={{ base: 'lg', sm: 'xl', md: '2xl', lg: '3xl' }}
+                                fontWeight="900"
+                                color={stat.color}
+                                textAlign="center"
+                                lineHeight="1"
+                                sx={{
+                                  textShadow: `0 2px 4px ${stat.color}30`,
+                                }}
+                              >
+                                {stat.displayValue}
+                              </Text>
+                              <Text
+                                fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
+                                fontWeight="700"
+                                color={useColorModeValue(
+                                  SUMMARY_CARD_COLORS[stat.id].textColor,
+                                  SUMMARY_CARD_COLORS[stat.id].textColorDark
+                                )}
+                                textAlign="center"
+                                textTransform="uppercase"
+                                letterSpacing="0.5px"
+                              >
+                                {stat.label}
+                              </Text>
+                              <Text
+                                fontSize={{ base: '2xs', sm: 'xs' }}
+                                color={colors.text.muted}
+                                textAlign="center"
+                                fontWeight="500"
+                                display={{ base: 'none', sm: 'block' }}
+                              >
+                                {stat.helpText}
+                              </Text>
+                            </VStack>
                           </VStack>
-                        </VStack>
-                      </CardBody>
-                    </Card>
-                  )
-                })}
-              </SimpleGrid>
-            </VStack>
-          </CardBody>
-        </Card>
+                        </CardBody>
+                      </Card>
+                    )
+                  })}
+                </SimpleGrid>
+              </VStack>
+            </CardBody>
+          </Card>
+        </Box>
       </Box>
 
       {/* Modal com dados detalhados */}

@@ -15,16 +15,22 @@ import {
   Icon,
   Badge,
   useColorModeValue,
+  Card,
+  CardBody,
+  Flex,
+  Heading,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { FormCard, TransactionForm } from '../components'
 import { Transaction } from '../types'
 
-// 🎨 Animações personalizadas
-const pulse = 'pulse 2s ease-in-out infinite'
+// 🎨 Animações personalizadas aprimoradas
+const shimmer = 'shimmer 4s ease-in-out infinite'
 const float = 'float 3s ease-in-out infinite'
-const shimmer = 'shimmer 3s ease-in-out infinite'
+const pulse = 'pulse 2s ease-in-out infinite'
+const glow = 'glow 3s ease-in-out infinite'
+const slideIn = 'slideIn 0.6s ease-out'
 
 interface AddTransactionSectionProps {
   transactions: Transaction[]
@@ -65,269 +71,389 @@ export default function AddTransactionSection({
 
   return (
     <>
-      {/* 💳 Card wrapper for Add Transaction section - Design Aprimorado */}
-      <Box position="relative">
-        {/* Barra colorida animada no topo */}
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          height="3px"
-          background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6)"
-          backgroundSize="200% 100%"
-          borderRadius="2xl 2xl 0 0"
-          zIndex={1}
-          sx={{
-            animation: `${shimmer} 3s ease-in-out infinite`,
-          }}
-        />
-        <FormCard>
-        <VStack spacing={{ base: 5, md: 6 }} align="stretch">
-          {/* 🎯 Header com ícone e badge */}
-          <VStack spacing={3} align="center">
-            <HStack spacing={2} align="center">
-              <Icon as={Sparkles} boxSize={5} color="blue.500" />
-              <Text
-                fontSize={{ base: 'sm', sm: 'md' }}
-                fontWeight="600"
-                color={colors.text.label}
-                textAlign="center"
-              >
-                Quick Actions
-              </Text>
-              <Badge
-                colorScheme="blue"
-                variant="subtle"
-                borderRadius="full"
-                px={2}
-                py={1}
-                fontSize="xs"
-              >
-                New
-              </Badge>
-            </HStack>
-            <Text
-              fontSize={{ base: 'xs', sm: 'sm' }}
-              color={colors.text.secondary}
-              textAlign="center"
-              px={{ base: 2, sm: 0 }}
-              maxW="300px"
-            >
-              Choose an action to quickly add a transaction
-            </Text>
-          </VStack>
-
-          {/* 📱 Mobile layout (stacked buttons) - Otimizado para iPhone */}
-          <VStack
-            spacing={{ base: 3, sm: 4 }}
-            align="stretch"
-            display={{ base: 'flex', sm: 'none' }}
+      {/* 💳 Card wrapper for Add Transaction section - Otimizado para iPhone 14 Pro */}
+      <Box 
+        w="full" 
+        px={{ base: 3, sm: 4, md: 6 }}
+        sx={{
+          // Safe area support para iPhone 14 Pro
+          paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+        }}
+      >
+        <Box position="relative" mb={{ base: 6, md: 8 }}>
+          {/* Background decorativo com gradiente */}
+          <Box
+            position="absolute"
+            top="-50px"
+            left="-50px"
+            right="-50px"
+            height="200px"
+            background={useColorModeValue(
+              'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(59, 130, 246, 0.1) 50%, rgba(239, 68, 68, 0.1) 100%)',
+              'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(59, 130, 246, 0.2) 50%, rgba(239, 68, 68, 0.2) 100%)'
+            )}
+            borderRadius="3xl"
+            filter="blur(40px)"
+            opacity={0.6}
+            zIndex={0}
+          />
+          
+          {/* Card principal com glassmorphism */}
+          <Card
+            position="relative"
+            bg={useColorModeValue(
+              'rgba(255, 255, 255, 0.9)',
+              'rgba(17, 17, 17, 0.9)'
+            )}
+            backdropFilter="blur(20px)"
+            border="1px solid"
+            borderColor={useColorModeValue(
+              'rgba(255, 255, 255, 0.2)',
+              'rgba(255, 255, 255, 0.1)'
+            )}
+            borderRadius="3xl"
+            shadow="2xl"
+            overflow="hidden"
+            sx={{
+              animation: slideIn,
+              '@keyframes slideIn': {
+                from: { 
+                  opacity: 0, 
+                  transform: 'translateY(20px) scale(0.95)' 
+                },
+                to: { 
+                  opacity: 1, 
+                  transform: 'translateY(0) scale(1)' 
+                }
+              }
+            }}
           >
-            <Button
-              aria-label="Add income transaction" // ♿ Accessibility
-              onClick={handleAddIncome}
-              size="lg"
-              leftIcon={<Plus size={20} aria-hidden="true" />}
-              rightIcon={<TrendingUp size={18} aria-hidden="true" />}
-              borderRadius="2xl"
-              px={6}
-              py={6}
-              fontSize={{ base: "md", sm: "lg" }}
-              fontWeight="800"
-              bg="linear-gradient(135deg, #22c55e, #16a34a, #15803d)"
-              backgroundSize="200% 100%"
-              color="white"
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                transition: 'left 0.5s',
+            {/* Barra superior animada */}
+            <Box
+              height="4px"
+              background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6, #f59e0b)"
+              backgroundSize="300% 100%"
+              sx={{
+                animation: shimmer,
+                '@keyframes shimmer': {
+                  '0%': { backgroundPosition: '-200% 0' },
+                  '100%': { backgroundPosition: '200% 0' }
+                }
               }}
-              _hover={{
-                bg: 'linear-gradient(135deg, #16a34a, #15803d, #166534)',
-                transform: 'translateY(-3px) scale(1.02)',
-                boxShadow: '0 15px 35px rgba(34, 197, 94, 0.4), 0 5px 15px rgba(34, 197, 94, 0.2)',
-                _before: {
-                  left: '100%',
-                },
-              }}
-              _active={{
-                bg: 'linear-gradient(135deg, #15803d, #166534, #14532d)',
-                transform: 'translateY(-1px) scale(0.98)',
-                boxShadow: '0 8px 20px rgba(34, 197, 94, 0.3)',
-              }}
-              boxShadow="0 8px 20px rgba(34, 197, 94, 0.3)"
-              w="full"
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              letterSpacing="wide"
-              animation={`${float} 3s ease-in-out infinite`}
-            >
-              Add Money
-            </Button>
+            />
+            
+            <CardBody p={{ base: 4, sm: 5, md: 8 }}>
+              <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+                {/* Header com design moderno - Otimizado para iPhone 14 Pro */}
+                <Flex
+                  direction={{ base: 'column', sm: 'row' }}
+                  align="center"
+                  justify="space-between"
+                  gap={{ base: 3, sm: 4 }}
+                >
+                  <HStack spacing={{ base: 3, sm: 4 }} align="center">
+                    <Box
+                      p={{ base: 2.5, sm: 3 }}
+                      borderRadius="2xl"
+                      bg={useColorModeValue(
+                        'linear-gradient(135deg, #22c55e, #16a34a)',
+                        'linear-gradient(135deg, #4ade80, #22c55e)'
+                      )}
+                      boxShadow="lg"
+                      sx={{
+                        animation: glow,
+                        '@keyframes glow': {
+                          '0%, 100%': { 
+                            boxShadow: '0 0 5px rgba(34, 197, 94, 0.3)' 
+                          },
+                          '50%': { 
+                            boxShadow: '0 0 20px rgba(34, 197, 94, 0.6), 0 0 30px rgba(34, 197, 94, 0.4)' 
+                          }
+                        }
+                      }}
+                    >
+                      <Icon as={Sparkles} boxSize={{ base: 5, sm: 6 }} color="white" />
+                    </Box>
+                    <VStack align="start" spacing={1}>
+                      <Heading
+                        size={{ base: 'md', sm: 'lg' }}
+                        bg={useColorModeValue(
+                          'linear-gradient(135deg, #1e293b, #475569)',
+                          'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+                        )}
+                        bgClip="text"
+                        fontWeight="800"
+                      >
+                        Quick Actions
+                      </Heading>
+                      <Text
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        color={colors.text.secondary}
+                        fontWeight="500"
+                        textAlign={{ base: 'center', sm: 'left' }}
+                      >
+                        Choose an action to quickly add a transaction
+                      </Text>
+                    </VStack>
+                  </HStack>
+                  
+                  <Badge
+                    colorScheme="green"
+                    variant="solid"
+                    borderRadius="full"
+                    px={{ base: 3, sm: 4 }}
+                    py={{ base: 1.5, sm: 2 }}
+                    fontSize={{ base: 'xs', sm: 'sm' }}
+                    fontWeight="600"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #22c55e, #16a34a)',
+                      'linear-gradient(135deg, #4ade80, #22c55e)'
+                    )}
+                    boxShadow="md"
+                  >
+                    <HStack spacing={{ base: 1, sm: 2 }}>
+                      <Icon as={Sparkles} boxSize={{ base: 2.5, sm: 3 }} />
+                      <Text>NEW</Text>
+                    </HStack>
+                  </Badge>
+                </Flex>
 
-            <Button
-              aria-label="Add expense transaction" // ♿ Accessibility
-              onClick={handleAddExpense}
-              size="lg"
-              leftIcon={<Minus size={20} aria-hidden="true" />}
-              rightIcon={<TrendingDown size={18} aria-hidden="true" />}
-              borderRadius="2xl"
-              px={6}
-              py={6}
-              fontSize={{ base: "md", sm: "lg" }}
-              fontWeight="800"
-              bg="linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)"
-              backgroundSize="200% 100%"
-              color="white"
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                transition: 'left 0.5s',
-              }}
-              _hover={{
-                bg: 'linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)',
-                transform: 'translateY(-3px) scale(1.02)',
-                boxShadow: '0 15px 35px rgba(239, 68, 68, 0.4), 0 5px 15px rgba(239, 68, 68, 0.2)',
-                _before: {
-                  left: '100%',
-                },
-              }}
-              _active={{
-                bg: 'linear-gradient(135deg, #b91c1c, #991b1b, #7f1d1d)',
-                transform: 'translateY(-1px) scale(0.98)',
-                boxShadow: '0 8px 20px rgba(239, 68, 68, 0.3)',
-              }}
-              boxShadow="0 8px 20px rgba(239, 68, 68, 0.3)"
-              w="full"
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              letterSpacing="wide"
-              animation={`${float} 3s ease-in-out infinite 1.5s`}
-            >
-              Add Expense
-            </Button>
-          </VStack>
+                {/* Botões de ação otimizados para iPhone 14 Pro */}
+                <VStack
+                  spacing={{ base: 3, sm: 4 }}
+                  align="stretch"
+                  w="full"
+                >
+                  {/* Layout responsivo: vertical no mobile, horizontal no desktop */}
+                  <HStack
+                    spacing={{ base: 3, sm: 4 }}
+                    justify="center"
+                    flexWrap="wrap"
+                    display={{ base: 'none', sm: 'flex' }}
+                  >
+                    {/* Botão Add Money - Desktop */}
+                    <Button
+                      aria-label="Add income transaction"
+                      onClick={handleAddIncome}
+                      size="lg"
+                      leftIcon={<Icon as={Plus} boxSize={5} />}
+                      rightIcon={<Icon as={TrendingUp} boxSize={4} />}
+                      borderRadius="2xl"
+                      px={{ base: 8, md: 10 }}
+                      py={6}
+                      fontSize="lg"
+                      fontWeight="800"
+                      bg="linear-gradient(135deg, #22c55e, #16a34a, #15803d)"
+                      color="white"
+                      position="relative"
+                      overflow="hidden"
+                      minW={{ base: '160px', md: '200px' }}
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      letterSpacing="wide"
+                      sx={{
+                        animation: `${float} 3s ease-in-out infinite`,
+                        '@keyframes float': {
+                          '0%, 100%': { transform: 'translateY(0px)' },
+                          '50%': { transform: 'translateY(-5px)' }
+                        }
+                      }}
+                      _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.5s',
+                      }}
+                      _hover={{
+                        bg: 'linear-gradient(135deg, #16a34a, #15803d, #166534)',
+                        transform: 'translateY(-8px) scale(1.02)',
+                        boxShadow: '0 25px 50px -12px rgba(34, 197, 94, 0.4)',
+                        _before: {
+                          left: '100%',
+                        },
+                      }}
+                      _active={{
+                        transform: 'translateY(-4px) scale(1.01)',
+                      }}
+                      boxShadow="0 10px 25px rgba(34, 197, 94, 0.3)"
+                    >
+                      Add Money
+                    </Button>
 
-          {/* 💻 Desktop layout (side-by-side buttons) */}
-          <HStack
-            spacing={{ base: 4, sm: 6, md: 8 }}
-            justify="center"
-            display={{ base: 'none', sm: 'flex' }}
-            flexWrap="wrap"
-          >
-            <Button
-              aria-label="Add income transaction" // ♿ Accessibility
-              onClick={handleAddIncome}
-              size={{ base: 'lg', sm: 'lg', md: 'lg' }}
-              leftIcon={<Plus size={20} aria-hidden="true" />}
-              rightIcon={<TrendingUp size={18} aria-hidden="true" />}
-              borderRadius="2xl"
-              px={{ base: 8, sm: 10, md: 12 }}
-              py={{ base: 4, sm: 5, md: 6 }}
-              fontSize={{ base: 'md', sm: 'lg', md: 'lg' }}
-              fontWeight="700"
-              bg="linear-gradient(135deg, #22c55e, #16a34a, #15803d)"
-              backgroundSize="200% 100%"
-              color="white"
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                transition: 'left 0.5s',
-              }}
-              _hover={{
-                bg: 'linear-gradient(135deg, #16a34a, #15803d, #166534)',
-                transform: 'translateY(-2px) scale(1.01)',
-                boxShadow: '0 10px 25px rgba(34, 197, 94, 0.3), 0 4px 10px rgba(34, 197, 94, 0.2)',
-                _before: {
-                  left: '100%',
-                },
-              }}
-              _active={{
-                bg: 'linear-gradient(135deg, #15803d, #166534, #14532d)',
-                transform: 'translateY(-1px) scale(0.99)',
-                boxShadow: '0 6px 15px rgba(34, 197, 94, 0.3)',
-              }}
-              boxShadow="0 6px 15px rgba(34, 197, 94, 0.3)"
-              minW={{ base: '160px', sm: '180px', md: '200px' }}
-              flex={{ base: 1, sm: 'none' }}
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              letterSpacing="wide"
-              animation={`${pulse} 4s ease-in-out infinite`}
-            >
-              Add Money
-            </Button>
+                    {/* Botão Add Expense - Desktop */}
+                    <Button
+                      aria-label="Add expense transaction"
+                      onClick={handleAddExpense}
+                      size="lg"
+                      leftIcon={<Icon as={Minus} boxSize={5} />}
+                      rightIcon={<Icon as={TrendingDown} boxSize={4} />}
+                      borderRadius="2xl"
+                      px={{ base: 8, md: 10 }}
+                      py={6}
+                      fontSize="lg"
+                      fontWeight="800"
+                      bg="linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)"
+                      color="white"
+                      position="relative"
+                      overflow="hidden"
+                      minW={{ base: '160px', md: '200px' }}
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      letterSpacing="wide"
+                      sx={{
+                        animation: `${float} 3s ease-in-out infinite 1.5s`,
+                        '@keyframes float': {
+                          '0%, 100%': { transform: 'translateY(0px)' },
+                          '50%': { transform: 'translateY(-5px)' }
+                        }
+                      }}
+                      _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.5s',
+                      }}
+                      _hover={{
+                        bg: 'linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)',
+                        transform: 'translateY(-8px) scale(1.02)',
+                        boxShadow: '0 25px 50px -12px rgba(239, 68, 68, 0.4)',
+                        _before: {
+                          left: '100%',
+                        },
+                      }}
+                      _active={{
+                        transform: 'translateY(-4px) scale(1.01)',
+                      }}
+                      boxShadow="0 10px 25px rgba(239, 68, 68, 0.3)"
+                    >
+                      Add Expense
+                    </Button>
+                  </HStack>
 
-            <Button
-              aria-label="Add expense transaction" // ♿ Accessibility
-              onClick={handleAddExpense}
-              size={{ base: 'lg', sm: 'lg', md: 'lg' }}
-              leftIcon={<Minus size={20} aria-hidden="true" />}
-              rightIcon={<TrendingDown size={18} aria-hidden="true" />}
-              borderRadius="2xl"
-              px={{ base: 8, sm: 10, md: 12 }}
-              py={{ base: 4, sm: 5, md: 6 }}
-              fontSize={{ base: 'md', sm: 'lg', md: 'lg' }}
-              fontWeight="700"
-              bg="linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)"
-              backgroundSize="200% 100%"
-              color="white"
-              position="relative"
-              overflow="hidden"
-              _before={{
-                content: '""',
-                position: 'absolute',
-                top: 0,
-                left: '-100%',
-                width: '100%',
-                height: '100%',
-                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
-                transition: 'left 0.5s',
-              }}
-              _hover={{
-                bg: 'linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)',
-                transform: 'translateY(-2px) scale(1.01)',
-                boxShadow: '0 10px 25px rgba(239, 68, 68, 0.3), 0 4px 10px rgba(239, 68, 68, 0.2)',
-                _before: {
-                  left: '100%',
-                },
-              }}
-              _active={{
-                bg: 'linear-gradient(135deg, #b91c1c, #991b1b, #7f1d1d)',
-                transform: 'translateY(-1px) scale(0.99)',
-                boxShadow: '0 6px 15px rgba(239, 68, 68, 0.3)',
-              }}
-              boxShadow="0 6px 15px rgba(239, 68, 68, 0.3)"
-              minW={{ base: '160px', sm: '180px', md: '200px' }}
-              flex={{ base: 1, sm: 'none' }}
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              letterSpacing="wide"
-              animation={`${pulse} 4s ease-in-out infinite 2s`}
-            >
-              Add Expense
-            </Button>
-          </HStack>
-        </VStack>
-        </FormCard>
+                  {/* Layout Mobile - Otimizado para iPhone 14 Pro */}
+                  <VStack
+                    spacing={3}
+                    align="stretch"
+                    display={{ base: 'flex', sm: 'none' }}
+                  >
+                    {/* Botão Add Money - Mobile */}
+                    <Button
+                      aria-label="Add income transaction"
+                      onClick={handleAddIncome}
+                      size="lg"
+                      leftIcon={<Icon as={Plus} boxSize={6} />}
+                      rightIcon={<Icon as={TrendingUp} boxSize={5} />}
+                      borderRadius="2xl"
+                      px={6}
+                      py={8}
+                      fontSize="lg"
+                      fontWeight="800"
+                      bg="linear-gradient(135deg, #22c55e, #16a34a, #15803d)"
+                      color="white"
+                      position="relative"
+                      overflow="hidden"
+                      w="full"
+                      h="60px"
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      letterSpacing="wide"
+                      sx={{
+                        animation: `${float} 3s ease-in-out infinite`,
+                        '@keyframes float': {
+                          '0%, 100%': { transform: 'translateY(0px)' },
+                          '50%': { transform: 'translateY(-3px)' }
+                        }
+                      }}
+                      _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.5s',
+                      }}
+                      _hover={{
+                        bg: 'linear-gradient(135deg, #16a34a, #15803d, #166534)',
+                        transform: 'translateY(-4px) scale(1.01)',
+                        boxShadow: '0 20px 40px -12px rgba(34, 197, 94, 0.4)',
+                        _before: {
+                          left: '100%',
+                        },
+                      }}
+                      _active={{
+                        transform: 'translateY(-2px) scale(0.99)',
+                      }}
+                      boxShadow="0 8px 20px rgba(34, 197, 94, 0.3)"
+                    >
+                      Add Money
+                    </Button>
+
+                    {/* Botão Add Expense - Mobile */}
+                    <Button
+                      aria-label="Add expense transaction"
+                      onClick={handleAddExpense}
+                      size="lg"
+                      leftIcon={<Icon as={Minus} boxSize={6} />}
+                      rightIcon={<Icon as={TrendingDown} boxSize={5} />}
+                      borderRadius="2xl"
+                      px={6}
+                      py={8}
+                      fontSize="lg"
+                      fontWeight="800"
+                      bg="linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)"
+                      color="white"
+                      position="relative"
+                      overflow="hidden"
+                      w="full"
+                      h="60px"
+                      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                      letterSpacing="wide"
+                      sx={{
+                        animation: `${float} 3s ease-in-out infinite 1.5s`,
+                        '@keyframes float': {
+                          '0%, 100%': { transform: 'translateY(0px)' },
+                          '50%': { transform: 'translateY(-3px)' }
+                        }
+                      }}
+                      _before={{
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+                        transition: 'left 0.5s',
+                      }}
+                      _hover={{
+                        bg: 'linear-gradient(135deg, #dc2626, #b91c1c, #991b1b)',
+                        transform: 'translateY(-4px) scale(1.01)',
+                        boxShadow: '0 20px 40px -12px rgba(239, 68, 68, 0.4)',
+                        _before: {
+                          left: '100%',
+                        },
+                      }}
+                      _active={{
+                        transform: 'translateY(-2px) scale(0.99)',
+                      }}
+                      boxShadow="0 8px 20px rgba(239, 68, 68, 0.3)"
+                    >
+                      Add Expense
+                    </Button>
+                  </VStack>
+                </VStack>
+              </VStack>
+            </CardBody>
+          </Card>
+        </Box>
       </Box>
 
       {/* 🧾 Modal with Transaction Form - Otimizado para iPhone 14 Pro */}
@@ -338,6 +464,7 @@ export default function AddTransactionSection({
         closeOnOverlayClick={false}
         isCentered={false}
         motionPreset="slideInBottom"
+        scrollBehavior="inside"
       >
         <ModalOverlay
           bg="blackAlpha.600"
