@@ -192,27 +192,25 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
             >
               {selectedPeriod}
             </Badge>
-            {sortedCategories.length > 5 && (
-              <Button
-                size="xs"
-                variant="ghost"
-                colorScheme="red"
-                rightIcon={<Icon as={Eye} boxSize={3} />}
-                onClick={onOpen}
-                borderRadius="full"
-                px={3}
-                py={1}
-                fontSize="xs"
-                fontWeight="500"
-                _hover={{
-                  bg: useColorModeValue('red.50', 'red.900'),
-                  transform: 'translateY(-1px)',
-                }}
-                transition="all 0.2s ease"
-              >
-                View All
-              </Button>
-            )}
+            <Button
+              size="xs"
+              variant="ghost"
+              colorScheme="red"
+              rightIcon={<Icon as={Eye} boxSize={3} />}
+              onClick={onOpen}
+              borderRadius="full"
+              px={3}
+              py={1}
+              fontSize="xs"
+              fontWeight="500"
+              _hover={{
+                bg: useColorModeValue('red.50', 'red.900'),
+                transform: 'translateY(-1px)',
+              }}
+              transition="all 0.2s ease"
+            >
+              View All ({sortedCategories.length})
+            </Button>
           </HStack>
 
           {/* Progress bars melhorados */}

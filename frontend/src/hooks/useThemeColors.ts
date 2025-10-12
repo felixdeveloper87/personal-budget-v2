@@ -3,25 +3,25 @@ import { useColorModeValue } from '@chakra-ui/react'
 export const useThemeColors = () => {
   return {
     // Backgrounds
-    bg: useColorModeValue('linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)', '#000000'),
-    bgSecondary: useColorModeValue('#f8fafc', '#0a0a0a'),
+    bg: useColorModeValue('linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', '#000000'),
+    bgSecondary: useColorModeValue('#f1f5f9', '#0a0a0a'),
     cardBg: useColorModeValue('white', '#111111'),
-    cardHover: useColorModeValue('#fefefe', '#111111'),
+    cardHover: useColorModeValue('#f8fafc', '#111111'),
     inputBg: useColorModeValue('#f8fafc', '#1a1a1a'),
     tabBg: useColorModeValue('#f8fafc', '#1a1a1a'),
     tabSelectedBg: useColorModeValue('white', '#111111'),
     
     // Borders
-    border: useColorModeValue('#e2e8f0', 'gray.800'),
-    borderHover: useColorModeValue('#cbd5e1', 'gray.700'),
-    tabBorder: useColorModeValue('#e2e8f0', 'gray.800'),
+    border: useColorModeValue('#cbd5e1', 'gray.800'),
+    borderHover: useColorModeValue('#94a3b8', 'gray.700'),
+    tabBorder: useColorModeValue('#cbd5e1', 'gray.800'),
     
     // Text colors
     text: {
-      primary: useColorModeValue('#1e293b', 'white'),
-      secondary: useColorModeValue('#475569', 'gray.300'),
-      muted: useColorModeValue('#64748b', 'gray.400'),
-      label: useColorModeValue('#334155', 'white'),
+      primary: useColorModeValue('#0f172a', 'white'),
+      secondary: useColorModeValue('#334155', 'gray.300'),
+      muted: useColorModeValue('#475569', 'gray.400'),
+      label: useColorModeValue('#1e293b', 'white'),
     },
     
     // Accent colors

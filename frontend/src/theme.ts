@@ -35,8 +35,8 @@ const theme = extendTheme({
         // Previne scroll horizontal indesejado
         overflowX: 'hidden',
         // Estilos de tema
-        bg: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-        color: '#1e293b',
+        bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
+        color: '#0f172a',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
       // Estilos para modo escuro
@@ -89,17 +89,17 @@ const theme = extendTheme({
     },
     // Cores modernas para o tema light
     light: {
-      bg: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+      bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
       card: '#ffffff',
-      cardHover: '#fefefe',
+      cardHover: '#f8fafc',
       input: '#f8fafc',
-      border: '#e2e8f0',
-      borderHover: '#cbd5e1',
+      border: '#cbd5e1',
+      borderHover: '#94a3b8',
       text: {
-        primary: '#1e293b',
-        secondary: '#475569',
-        muted: '#64748b',
-        label: '#334155',
+        primary: '#0f172a',
+        secondary: '#334155',
+        muted: '#475569',
+        label: '#1e293b',
       },
       accent: '#0ea5e9',
       accentHover: '#0284c7',
@@ -132,12 +132,12 @@ const theme = extendTheme({
             : '0 4px 6px -1px rgba(14, 165, 233, 0.3), 0 2px 4px -1px rgba(14, 165, 233, 0.2)',
         }),
         outline: (props: any) => ({
-          borderColor: props.colorMode === 'dark' ? 'gray.600' : '#e2e8f0',
-          color: props.colorMode === 'dark' ? 'gray.200' : '#475569',
+          borderColor: props.colorMode === 'dark' ? 'gray.600' : '#cbd5e1',
+          color: props.colorMode === 'dark' ? 'gray.200' : '#334155',
           borderWidth: '2px',
         }),
         ghost: (props: any) => ({
-          color: props.colorMode === 'dark' ? 'gray.300' : '#64748b',
+          color: props.colorMode === 'dark' ? 'gray.300' : '#475569',
         }),
       },
     },
@@ -145,11 +145,11 @@ const theme = extendTheme({
       baseStyle: (props: any) => ({
         container: {
           bg: props.colorMode === 'dark' ? '#111111' : 'white',
-          borderColor: props.colorMode === 'dark' ? 'gray.800' : '#e2e8f0',
+          borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark' 
             ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02), 0 0 0 1px rgba(0, 0, 0, 0.02)',
+            : '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.04)',
         },
       }),
     },
@@ -159,12 +159,12 @@ const theme = extendTheme({
           field: {
             bg: props.colorMode === 'dark' ? '#1a1a1a' : '#f8fafc',
             border: '2px solid',
-            borderColor: props.colorMode === 'dark' ? 'gray.800' : '#e2e8f0',
-            color: props.colorMode === 'dark' ? 'white' : '#1e293b',
+            borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
+            color: props.colorMode === 'dark' ? 'white' : '#0f172a',
             borderRadius: 'xl',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             _hover: {
-              borderColor: props.colorMode === 'dark' ? 'gray.700' : '#cbd5e1',
+              borderColor: props.colorMode === 'dark' ? 'gray.700' : '#94a3b8',
               bg: props.colorMode === 'dark' ? '#1a1a1a' : '#f1f5f9',
             },
             _focus: {
@@ -182,12 +182,12 @@ const theme = extendTheme({
           field: {
             bg: props.colorMode === 'dark' ? '#1a1a1a' : '#f8fafc',
             border: '2px solid',
-            borderColor: props.colorMode === 'dark' ? 'gray.800' : '#e2e8f0',
-            color: props.colorMode === 'dark' ? 'white' : '#1e293b',
+            borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
+            color: props.colorMode === 'dark' ? 'white' : '#0f172a',
             borderRadius: 'xl',
             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
             _hover: {
-              borderColor: props.colorMode === 'dark' ? 'gray.700' : '#cbd5e1',
+              borderColor: props.colorMode === 'dark' ? 'gray.700' : '#94a3b8',
               bg: props.colorMode === 'dark' ? '#1a1a1a' : '#f1f5f9',
             },
             _focus: {
@@ -255,16 +255,16 @@ const theme = extendTheme({
     Tabs: {
       baseStyle: (props: any) => ({
         tablist: {
-          borderColor: props.colorMode === 'dark' ? 'gray.800' : 'gray.200',
+          borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
         },
         tab: {
           bg: props.colorMode === 'dark' ? '#1a1a1a' : 'gray.50',
-          color: props.colorMode === 'dark' ? 'gray.300' : 'gray.600',
-          borderColor: props.colorMode === 'dark' ? 'gray.800' : 'gray.200',
+          color: props.colorMode === 'dark' ? 'gray.300' : '#475569',
+          borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
           _selected: {
             bg: props.colorMode === 'dark' ? '#111111' : 'white',
-            color: props.colorMode === 'dark' ? 'white' : 'gray.800',
-            borderColor: props.colorMode === 'dark' ? 'gray.800' : 'gray.200',
+            color: props.colorMode === 'dark' ? 'white' : '#0f172a',
+            borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
           },
         },
       }),
@@ -272,23 +272,23 @@ const theme = extendTheme({
     Badge: {
       baseStyle: (props: any) => ({
         container: {
-          color: props.colorMode === 'dark' ? 'gray.300' : 'gray.600',
+          color: props.colorMode === 'dark' ? 'gray.300' : '#475569',
         },
       }),
     },
     Divider: {
       baseStyle: (props: any) => ({
-        borderColor: props.colorMode === 'dark' ? 'gray.800' : 'gray.200',
+        borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
       }),
     },
     Text: {
       baseStyle: (props: any) => ({
-        color: props.colorMode === 'dark' ? 'gray.100' : 'gray.800',
+        color: props.colorMode === 'dark' ? 'gray.100' : '#0f172a',
       }),
     },
     Heading: {
       baseStyle: (props: any) => ({
-        color: props.colorMode === 'dark' ? 'white' : 'gray.800',
+        color: props.colorMode === 'dark' ? 'white' : '#0f172a',
       }),
     },
     IconButton: {
