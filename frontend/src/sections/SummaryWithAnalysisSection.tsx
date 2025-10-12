@@ -175,9 +175,10 @@ export default function SummaryWithAnalysisSection({
                       Financial Overview
                     </Heading>
                     <Text
-                      fontSize="md"
-                      color={useColorModeValue('#1e293b', 'white')}
-                      fontWeight="600"
+                      fontSize={{ base: '2xs', sm: 'xs' }}
+                      color={colors.text.secondary}
+                      fontWeight="400"
+                      opacity={0.8}
                     >
                       Complete overview with category analysis
                     </Text>
