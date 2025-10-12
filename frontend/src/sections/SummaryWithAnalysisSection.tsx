@@ -288,12 +288,7 @@ export default function SummaryWithAnalysisSection({
                   borderColor={colors.border}
                   position="relative"
                 >
-                  <Flex
-                    direction={{ base: 'column', sm: 'row' }}
-                    align="center"
-                    justify="space-between"
-                    gap={4}
-                  >
+                  <HStack spacing={4} align="center" justify="space-between" w="full">
                     <HStack spacing={4} align="center">
                       <Box
                         p={3}
@@ -370,7 +365,7 @@ export default function SummaryWithAnalysisSection({
                         Today
                       </Button>
                     </HStack>
-                  </Flex>
+                  </HStack>
 
                   {/* Period Navigator integrado */}
                   <Box mt={6}>
@@ -532,7 +527,7 @@ export default function SummaryWithAnalysisSection({
                 <Box p={{ base: 4, sm: 5, md: 6 }}>
                   <SimpleGrid
                     columns={{ base: 2, sm: 2, md: 4 }}
-                    spacing={{ base: 3, sm: 4, md: 6 }}
+                    spacing={{ base: 2, sm: 3, md: 4 }}
                     w="full"
                     mb={6}
                   >
@@ -544,8 +539,34 @@ export default function SummaryWithAnalysisSection({
                           key={stat.id}
                           position="relative"
                           bg={useColorModeValue(
-                            `linear-gradient(135deg, ${stat.bgColor}, ${stat.bgColor}dd)`,
-                            `linear-gradient(135deg, ${SUMMARY_CARD_COLORS[stat.id].bgDark}, ${SUMMARY_CARD_COLORS[stat.id].bgDark}dd)`
+                            (() => {
+                              switch (stat.id) {
+                                case 'transactions':
+                                  return 'linear-gradient(135deg, #eff6ff, #dbeafe)'
+                                case 'income':
+                                  return 'linear-gradient(135deg, #f0fdf4, #dcfce7)'
+                                case 'expenses':
+                                  return 'linear-gradient(135deg, #fef2f2, #fee2e2)'
+                                case 'balance':
+                                  return 'linear-gradient(135deg, #fefce8, #fef3c7)'
+                                default:
+                                  return 'linear-gradient(135deg, #eff6ff, #dbeafe)'
+                              }
+                            })(),
+                            (() => {
+                              switch (stat.id) {
+                                case 'transactions':
+                                  return 'linear-gradient(135deg, #1e293b, #334155)'
+                                case 'income':
+                                  return 'linear-gradient(135deg, #1e293b, #334155)'
+                                case 'expenses':
+                                  return 'linear-gradient(135deg, #1e293b, #334155)'
+                                case 'balance':
+                                  return 'linear-gradient(135deg, #1e293b, #334155)'
+                                default:
+                                  return 'linear-gradient(135deg, #1e293b, #334155)'
+                              }
+                            })()
                           )}
                           backdropFilter="blur(10px)"
                           border="1px solid"
@@ -559,6 +580,30 @@ export default function SummaryWithAnalysisSection({
                           transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                           overflow="hidden"
                           sx={{
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              height: '4px',
+                              background: (() => {
+                                switch (stat.id) {
+                                  case 'transactions':
+                                    return 'linear-gradient(90deg, #3b82f6, #1d4ed8)'
+                                  case 'income':
+                                    return 'linear-gradient(90deg, #22c55e, #16a34a)'
+                                  case 'expenses':
+                                    return 'linear-gradient(90deg, #ef4444, #dc2626)'
+                                  case 'balance':
+                                    return 'linear-gradient(90deg, #f59e0b, #d97706)'
+                                  default:
+                                    return 'linear-gradient(90deg, #3b82f6, #1d4ed8)'
+                                }
+                              })(),
+                              borderRadius: '2xl 2xl 0 0',
+                              zIndex: 1
+                            },
                             animation: `${slideIn} ${0.2 + index * 0.1}s ease-out`,
                             '@keyframes slideIn': {
                               from: { 
@@ -593,28 +638,28 @@ export default function SummaryWithAnalysisSection({
                             _groupHover={{ left: '100%' }}
                           />
                           
-                          <CardBody p={{ base: 4, sm: 5, md: 6 }}>
-                            <VStack spacing={{ base: 3, sm: 4 }} align="center">
+                          <CardBody p={{ base: 3, sm: 4, md: 5 }}>
+                            <VStack spacing={{ base: 2, sm: 3 }} align="center">
                               {/* Ícone com efeito especial */}
                               <Box
                                 position="relative"
-                                p={{ base: 3, sm: 4 }}
-                                borderRadius="2xl"
+                                p={{ base: 2, sm: 3 }}
+                                borderRadius="xl"
                                 bg={useColorModeValue(
                                   `${stat.color}15`,
                                   `${stat.color}25`
                                 )}
-                                boxShadow="lg"
+                                boxShadow="md"
                                 sx={{
                                   animation: `${float} 3s ease-in-out infinite`,
                                   animationDelay: `${index * 0.5}s`,
                                   '@keyframes float': {
                                     '0%, 100%': { transform: 'translateY(0px)' },
-                                    '50%': { transform: 'translateY(-10px)' }
+                                    '50%': { transform: 'translateY(-6px)' }
                                   }
                                 }}
                               >
-                                <Icon as={IconComponent} boxSize={{ base: 5, sm: 6 }} color={stat.color} />
+                                <Icon as={IconComponent} boxSize={{ base: 4, sm: 5 }} color={stat.color} />
                                 {/* Efeito de brilho no ícone */}
                                 <Box
                                   position="absolute"
@@ -631,9 +676,9 @@ export default function SummaryWithAnalysisSection({
                               </Box>
                               
                               {/* Valores e labels - Otimizado para iPhone 14 Pro */}
-                              <VStack spacing={{ base: 1.5, sm: 2 }} align="center">
+                              <VStack spacing={{ base: 1, sm: 1.5 }} align="center">
                                 <Text
-                                  fontSize={{ base: 'lg', sm: 'xl', md: '2xl', lg: '3xl' }}
+                                  fontSize={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }}
                                   fontWeight="900"
                                   color={stat.color}
                                   textAlign="center"
@@ -645,7 +690,7 @@ export default function SummaryWithAnalysisSection({
                                   {stat.displayValue}
                                 </Text>
                                 <Text
-                                  fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
+                                  fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
                                   fontWeight="700"
                                   color={useColorModeValue(
                                     SUMMARY_CARD_COLORS[stat.id].textColor,
