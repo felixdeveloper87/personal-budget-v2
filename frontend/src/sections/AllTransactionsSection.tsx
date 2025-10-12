@@ -157,7 +157,7 @@ export default function AllTransactionsSection({
                         bgClip="text"
                         fontWeight="800"
                       >
-                        All Transactionssss
+                        All Transactions
                       </Heading>
                       <Text
                         fontSize="sm"
