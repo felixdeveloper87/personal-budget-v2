@@ -16,7 +16,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { CreditCard, Sparkles, Eye } from 'lucide-react'
+import { CreditCard, Sparkles } from 'lucide-react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
@@ -206,50 +206,39 @@ export default function InstallmentPlansSection() {
                   </VStack>
                 </HStack>
                 
-                <HStack spacing={3}>
-                  <Badge
-                    colorScheme="purple"
-                    variant="solid"
-                    borderRadius="full"
-                    px={4}
-                    py={2}
-                    fontSize="sm"
-                    fontWeight="600"
-                    bg={useColorModeValue(
-                      'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                      'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-                    )}
-                    boxShadow="md"
-                  >
-                    <HStack spacing={2}>
-                      <Icon as={Sparkles} boxSize={3} />
-                      <Text>{plans.length} Active</Text>
-                    </HStack>
-                  </Badge>
-                  
-                  <Button
-                    size="md"
-                    variant="outline"
-                    colorScheme="purple"
-                    leftIcon={<Eye size={16} />}
-                    onClick={onOpen}
-                    borderRadius="xl"
-                    borderColor={useColorModeValue('purple.300', 'purple.600')}
-                    color={useColorModeValue('purple.600', 'purple.400')}
-                    _hover={{
-                      bg: useColorModeValue('purple.50', 'purple.900'),
-                      transform: 'translateY(-1px)',
-                      boxShadow: 'md'
-                    }}
-                    _active={{
-                      transform: 'translateY(0)',
-                    }}
-                    transition="all 0.2s ease"
-                    fontWeight="600"
-                  >
-                    View Plans
-                  </Button>
-                </HStack>
+                <Badge
+                  colorScheme="purple"
+                  variant="solid"
+                  borderRadius="full"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  fontWeight="600"
+                  bg={useColorModeValue(
+                    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+                  )}
+                  boxShadow="md"
+                  cursor="pointer"
+                  onClick={onOpen}
+                  _hover={{
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'lg',
+                    bg: useColorModeValue(
+                      'linear-gradient(135deg, #7c3aed, #6d28d9)',
+                      'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+                    )
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                  }}
+                  transition="all 0.2s ease"
+                >
+                  <HStack spacing={2}>
+                    <Icon as={Sparkles} boxSize={3} />
+                    <Text>{plans.length} Active</Text>
+                  </HStack>
+                </Badge>
               </Flex>
             </CardBody>
           </Card>
