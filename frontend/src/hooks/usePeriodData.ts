@@ -29,7 +29,7 @@ export function usePeriodData(
       case 'day':
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
         endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-        label = now.toLocaleDateString('en-US', { 
+        label = now.toLocaleDateString('en-GB', { 
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -48,13 +48,13 @@ export function usePeriodData(
         endOfWeek.setDate(startOfWeek.getDate() + 6)
         endDate = new Date(endOfWeek.getFullYear(), endOfWeek.getMonth(), endOfWeek.getDate(), 23, 59, 59)
         
-        label = `Week of ${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+        label = `Week of ${startDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}`
         break
 
       case 'month':
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-        label = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+        label = now.toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
         break
 
       case 'year':
@@ -66,7 +66,7 @@ export function usePeriodData(
       default:
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-        label = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })
+        label = now.toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
     }
 
     // ✅ Filtro ajustado: trabalha apenas com "tx.dateTime"

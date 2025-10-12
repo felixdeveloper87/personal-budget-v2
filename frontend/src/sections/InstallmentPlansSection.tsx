@@ -197,9 +197,10 @@ export default function InstallmentPlansSection() {
                       Active Installment Plans
                     </Heading>
                     <Text
-                      fontSize="sm"
+                      fontSize={{ base: '2xs', sm: 'xs' }}
                       color={colors.text.secondary}
-                      fontWeight="500"
+                      fontWeight="400"
+                      opacity={0.8}
                     >
                       Track your ongoing payment plans
                     </Text>

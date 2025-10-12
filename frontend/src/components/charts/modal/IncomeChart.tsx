@@ -58,7 +58,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const timelineData = incomeTransactions
     .sort((a: any, b: any) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
     .reduce((acc: any[], transaction: any) => {
-      const date = new Date(transaction.dateTime).toLocaleDateString('en-US', { 
+      const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
         month: 'short', 
         day: 'numeric' 
       })

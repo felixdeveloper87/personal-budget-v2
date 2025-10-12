@@ -92,7 +92,7 @@ export default function SummaryWithAnalysisSection({
   const formatLabel = () => {
     if (selectedPeriod === 'month') {
       // Exibe abreviação do mês + ano (ex.: "Jan 2025")
-      return selectedDate.toLocaleString('en-US', {
+      return selectedDate.toLocaleString('en-GB', {
         month: 'short',
         year: 'numeric',
       })
@@ -108,6 +108,28 @@ export default function SummaryWithAnalysisSection({
         year: 'numeric',
       })
       .toUpperCase()
+    }
+    
+    // No modo mobile, quando week está selecionado, exibe formato de semana
+    if (selectedPeriod === 'week' && isMobile) {
+      // Calcular início e fim da semana
+      const startOfWeek = new Date(selectedDate)
+      const day = startOfWeek.getDay()
+      const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1) // Ajuste para segunda-feira
+      startOfWeek.setDate(diff)
+      
+      const endOfWeek = new Date(startOfWeek)
+      endOfWeek.setDate(startOfWeek.getDate() + 6)
+      
+      // Formatar datas no formato DD/MM
+      const formatDate = (date: Date) => {
+        return date.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+        })
+      }
+      
+      return `${formatDate(startOfWeek)} to ${formatDate(endOfWeek)}`
     }
     
     return label
@@ -268,29 +290,33 @@ export default function SummaryWithAnalysisSection({
                           Financial Overview
                         </Heading>
                         <Text
-                          fontSize="sm"
+                          fontSize={{ base: '2xs', sm: 'xs' }}
                           color={colors.text.secondary}
-                          fontWeight="500"
+                          fontWeight="400"
+                          opacity={0.8}
                         >
                           Complete overview with category analysis
                         </Text>
                       </VStack>
                     </HStack>
                     
-                    <HStack spacing={3}>
+                    <HStack spacing={3} flexWrap="wrap" justify="space-between">
                       <Badge
                         colorScheme="blue"
                         variant="solid"
                         borderRadius="full"
-                        px={4}
+                        px={{ base: 3, sm: 4 }}
                         py={2}
-                        fontSize="sm"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
                         fontWeight="600"
                         bg={useColorModeValue(
                           'linear-gradient(135deg, #3b82f6, #1d4ed8)',
                           'linear-gradient(135deg, #60a5fa, #3b82f6)'
                         )}
                         boxShadow="md"
+                        flex="1"
+                        minW="0"
+                        display={{ base: 'none', md: 'flex' }}
                       >
                         <HStack spacing={2}>
                           <Icon as={Zap} boxSize={3} />
@@ -304,6 +330,8 @@ export default function SummaryWithAnalysisSection({
                         colorScheme="blue"
                         leftIcon={<RotateCcw size={14} />}
                         onClick={goToToday}
+                        flexShrink={0}
+                        minW="fit-content"
                       >
                         Today
                       </Button>

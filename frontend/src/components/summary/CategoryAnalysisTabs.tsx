@@ -77,9 +77,10 @@ export default function CategoryAnalysisTabs({ transactions, selectedPeriod }: C
                 Category Analysis
               </Heading>
               <Text
-                fontSize="sm"
+                fontSize={{ base: '2xs', sm: 'xs' }}
                 color={colors.text.secondary}
-                fontWeight="500"
+                fontWeight="400"
+                opacity={0.8}
               >
                 Detailed breakdown by categories
               </Text>

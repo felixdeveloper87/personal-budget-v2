@@ -67,7 +67,7 @@ export default function PeriodNavigator({
   const formatLabel = () => {
     if (selectedPeriod === 'month') {
       // Exibe abreviação do mês + ano (ex.: "Jan 2025")
-      return selectedDate.toLocaleString('en-US', {
+      return selectedDate.toLocaleString('en-GB', {
         month: 'short',
         year: 'numeric',
       })

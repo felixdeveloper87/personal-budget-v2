@@ -319,7 +319,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                                   transition="background-color 0.2s ease"
                                 >
                                   <Td fontSize={{ base: "xs", sm: "sm" }} color={colors.text} py={3}>
-                                    {new Date(t.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {new Date(t.dateTime).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                                   </Td>
                                   <Td fontSize={{ base: "xs", sm: "sm" }} color={colors.text} maxW="120px" isTruncated py={3}>
                                     {t.description || 'No description'}

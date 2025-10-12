@@ -29,7 +29,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
   const balanceData = transactions
     .sort((a: any, b: any) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
     .reduce((acc: any[], transaction: any, index: number) => {
-      const date = new Date(transaction.dateTime).toLocaleDateString('en-US', { 
+      const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
         month: 'short', 
         day: 'numeric' 
       })

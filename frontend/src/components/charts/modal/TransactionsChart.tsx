@@ -26,7 +26,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
 
   // Dados para o gráfico de barras - transações por dia
   const dailyData = transactions.reduce((acc: any[], transaction: any) => {
-    const date = new Date(transaction.dateTime).toLocaleDateString('en-US', { 
+    const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
       month: 'short', 
       day: 'numeric' 
     })
@@ -50,14 +50,14 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
   }, []).sort((a: any, b: any) => {
     // Sort by the original transaction dates for proper chronological order
     const transactionsA = transactions.filter(t => {
-      const date = new Date(t.dateTime).toLocaleDateString('en-US', { 
+      const date = new Date(t.dateTime).toLocaleDateString('en-GB', { 
         month: 'short', 
         day: 'numeric' 
       })
       return date === a.date
     })
     const transactionsB = transactions.filter(t => {
-      const date = new Date(t.dateTime).toLocaleDateString('en-US', { 
+      const date = new Date(t.dateTime).toLocaleDateString('en-GB', { 
         month: 'short', 
         day: 'numeric' 
       })

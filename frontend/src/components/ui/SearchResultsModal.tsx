@@ -294,7 +294,7 @@ import {
                               {visibleTransactions.map((t) => (
                                 <Tr key={t.id}>
                                   <Td fontSize="xs" color={colors.text}>
-                                    {new Date(t.dateTime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                    {new Date(t.dateTime).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                                   </Td>
                                   <Td fontSize="xs" color={colors.text} maxW="120px" isTruncated>
                                     {t.description || 'No description'}

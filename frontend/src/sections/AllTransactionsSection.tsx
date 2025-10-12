@@ -160,9 +160,10 @@ export default function AllTransactionsSection({
                         All Transactions
                       </Heading>
                       <Text
-                        fontSize="sm"
+                        fontSize={{ base: '2xs', sm: 'xs' }}
                         color={useColorModeValue('gray.600', 'gray.300')}
-                        fontWeight="500"
+                        fontWeight="400"
+                        opacity={0.8}
                       >
                         Complete transaction history
                       </Text>

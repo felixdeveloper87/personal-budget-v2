@@ -131,7 +131,11 @@ export default function InstallmentPlansModal({
             <Text>Active Installment Plans</Text>
             <Sparkles size={20} />
           </Box>
-          <Text fontSize="sm" opacity={0.9}>
+          <Text 
+            fontSize={{ base: '2xs', sm: 'xs' }}
+            opacity={0.7}
+            fontWeight="400"
+          >
             Track your ongoing payment plans
           </Text>
         </ModalHeader>
@@ -248,9 +252,10 @@ export default function InstallmentPlansModal({
                         Active Installment Plans
                       </Heading>
                       <Text
-                        fontSize="sm"
+                        fontSize={{ base: '2xs', sm: 'xs' }}
                         color={colors.text.secondary}
-                        fontWeight="500"
+                        fontWeight="400"
+                        opacity={0.8}
                       >
                         Track your ongoing payment plans
                       </Text>

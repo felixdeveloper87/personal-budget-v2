@@ -132,7 +132,12 @@ export default function SingleRowSummary({ periodData }: SingleRowSummaryProps) 
               </Badge>
             </HStack>
 
-            <Text fontSize="sm" color={colors.text.secondary}>
+            <Text 
+              fontSize={{ base: '2xs', sm: 'xs' }}
+              color={colors.text.secondary}
+              fontWeight="400"
+              opacity={0.8}
+            >
               Complete financial overview for the selected period
             </Text>
 

@@ -90,9 +90,10 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               Income by Category
             </Text>
             <Text
-              fontSize="xs"
+              fontSize={{ base: '2xs', sm: 'xs' }}
               color={useColorModeValue('gray.600', 'gray.400')}
-              fontWeight="500"
+              fontWeight="400"
+              opacity={0.8}
             >
               Detailed breakdown of earnings
             </Text>

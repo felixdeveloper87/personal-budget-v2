@@ -173,9 +173,10 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         Quick Actions
                       </Heading>
                       <Text
-                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        fontSize={{ base: '2xs', sm: 'xs' }}
                         color={colors.text.secondary}
-                        fontWeight="500"
+                        fontWeight="400"
+                        opacity={0.8}
                       >
                         Choose an action to quickly add a transaction
                       </Text>
