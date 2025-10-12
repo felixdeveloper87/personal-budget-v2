@@ -15,7 +15,7 @@ import {
   HStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { FiCreditCard, CreditCard, Sparkles } from 'lucide-react'
+import { CreditCard, Sparkles } from 'lucide-react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlanCard } from '../components/installments'
 import { InstallmentPlan } from '../types'
