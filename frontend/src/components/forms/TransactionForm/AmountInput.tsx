@@ -60,7 +60,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
 
   return (
     <Box>
-      <Text fontWeight="600" mb={3} color={colors.text.label}>
+      <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
         Amount
       </Text>
 
@@ -74,7 +74,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
       >
         <NumberInputField
           placeholder="£0.00"
-          fontSize={{ base: '2xl', sm: 'xl' }}
+          fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
           fontWeight="700"
           borderRadius="xl"
           border="2px solid"
@@ -82,7 +82,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
           onClick={handleOpen}
           cursor="pointer"
           aria-label="Enter amount"
-          h={{ base: '70px', sm: '56px' }}
+          h={{ base: '60px', sm: '56px' }}
           textAlign="center"
           _focus={{ borderColor: colors.accent, shadow: 'md' }}
           _hover={{ borderColor: colors.accent }}
@@ -91,21 +91,21 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
       </NumberInput>
 
       {/* Quick-select preset buttons */}
-      <Wrap mt={{ base: 4, sm: 3 }} spacing={{ base: 2, sm: 2 }} justify="center">
+      <Wrap mt={{ base: 3, sm: 3 }} spacing={{ base: 1, sm: 2 }} justify="center">
         {quickAmounts.map((qa) => (
           <WrapItem key={qa}>
             <Button
-              size={{ base: 'lg', sm: 'md' }}
-              h={{ base: '52px', sm: '42px' }}
+              size="xs"
+              h={{ base: '28px', sm: '42px' }}
               variant={amount === qa ? 'solid' : 'outline'}
               colorScheme="blue"
-              borderRadius="xl"
-              borderWidth="2px"
+              borderRadius="md"
+              borderWidth="1px"
               onClick={() => onChange(qa)}
-              fontSize={{ base: 'lg', sm: 'md' }}
+              fontSize={{ base: '2xs', sm: 'md' }}
               fontWeight="bold"
-              px={{ base: 8, sm: 6 }}
-              minW={{ base: '80px', sm: '70px' }}
+              px={{ base: 2, sm: 6 }}
+              minW={{ base: '40px', sm: '70px' }}
               _hover={{
                 transform: 'translateY(-2px)',
                 shadow: 'md',

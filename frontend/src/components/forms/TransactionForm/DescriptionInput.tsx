@@ -29,15 +29,15 @@ export default function DescriptionInput({
         aria-label="Transaction description" // ♿ Accessibility: describes textarea purpose
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        rows={5}
+        rows={3}
         borderRadius="xl"
         border="2px"
         borderColor={colors.border}
-        fontSize={{ base: 'lg', sm: 'md' }}
-        p={{ base: 4, sm: 3 }}
+        fontSize={{ base: 'sm', sm: 'md' }}
+        p={{ base: 3, sm: 3 }}
         _focus={{ borderColor: colors.accent }}
         resize="vertical"
-        minH={{ base: '120px', sm: '100px' }}
+        minH={{ base: '70px', sm: '80px' }}
       />
 
       {/* Submit button for transaction */}
@@ -45,25 +45,25 @@ export default function DescriptionInput({
         type="submit"
         aria-label={type === 'INCOME' ? 'Add income' : 'Add expense'} // ♿ Accessibility
         colorScheme={type === 'INCOME' ? 'green' : 'red'}
-        size="lg"
-        h={{ base: '65px', sm: '56px' }}
+        size={{ base: 'md', sm: 'lg' }}
+        h={{ base: '55px', sm: '56px' }}
+        fontSize={{ base: 'md', sm: 'lg' }}
         isLoading={loading}
         loadingText="Saving..."
         borderRadius="xl"
         w="full"
-        fontSize={{ base: 'xl', sm: 'lg' }}
-        fontWeight="bold"
-        shadow="lg"
+        fontWeight="600"
+        shadow="md"
         _hover={{
-          transform: 'translateY(-2px)',
-          shadow: 'xl',
+          transform: 'translateY(-1px)',
+          shadow: 'lg',
         }}
         _active={{
           transform: 'translateY(0)',
         }}
-        transition="all 0.2s"
+        transition="all 0.2s ease"
       >
-        {type === 'INCOME' ? '✅ Add Income' : '💸 Add Expense'}
+        {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
       </Button>
     </VStack>
   )

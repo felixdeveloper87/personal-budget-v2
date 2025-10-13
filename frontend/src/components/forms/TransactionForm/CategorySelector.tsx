@@ -62,7 +62,7 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
   return (
     <Box>
       {/* Section title */}
-      <Text fontWeight="600" mb={3} color={colors.text.label}>
+      <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
         {type === 'INCOME' ? 'Income Category' : 'Expense Category'}
       </Text>
 
@@ -84,9 +84,9 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               colorScheme={isSelected ? 'blue' : 'gray'}
               borderRadius="xl"
               onClick={() => onChange(cat.name)}
-              size={{ base: 'lg', sm: 'md' }}
-              h={{ base: '70px', sm: '56px' }}
-              fontSize={{ base: 'md', sm: 'sm' }}
+              size={{ base: 'md', sm: 'md' }}
+              h={{ base: '60px', sm: '56px' }}
+              fontSize={{ base: 'xs', sm: 'sm', md: 'sm' }}
               fontWeight="bold"
               borderWidth="2px"
               p={{ base: 3, sm: 2 }}
@@ -99,12 +99,12 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               }}
               transition="all 0.2s"
             >
-              <HStack spacing={{ base: 2, sm: 1 }} justify="center" w="full">
+              <HStack spacing={{ base: 1.5, sm: 1, md: 1 }} justify="center" w="full">
                 {/* Icon for category */}
-                <IconComponent size={24} aria-hidden="true" />
+                <IconComponent size={20} aria-hidden="true" />
                 {/* Category label */}
                 <Text
-                  fontSize={{ base: 'md', sm: 'sm' }}
+                  fontSize={{ base: 'xs', sm: 'sm', md: 'sm' }}
                   fontWeight="bold"
                   textAlign="center"
                   noOfLines={1}
