@@ -140,7 +140,21 @@ export default function SummaryWithAnalysisSection({
           bg={colors.cardBg}
           backdropFilter="blur(16px)"
           shadow="xl"
+          overflow="hidden"
         >
+          {/* Barra superior animada */}
+          <Box
+            height="4px"
+            background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6, #f59e0b)"
+            backgroundSize="300% 100%"
+            sx={{
+              animation: 'shimmer 3s ease-in-out infinite',
+              '@keyframes shimmer': {
+                '0%': { backgroundPosition: '-200% 0' },
+                '100%': { backgroundPosition: '200% 0' },
+              }
+            }}
+          />
           <CardBody>
             <VStack spacing={6} align="stretch">
               {/* HEADER */}
@@ -238,7 +252,19 @@ export default function SummaryWithAnalysisSection({
                               : colors.bgSecondary
                           }
                           color={selected ? 'white' : colors.text.primary}
-                          _hover={{ transform: 'translateY(-1px)', boxShadow: 'md' }}
+                          border="1px solid"
+                          borderColor={
+                            selected
+                              ? useColorModeValue('blue.300', 'blue.600')
+                              : useColorModeValue('gray.200', 'gray.600')
+                          }
+                          _hover={{ 
+                            transform: 'translateY(-1px)', 
+                            boxShadow: 'md',
+                            borderColor: selected 
+                              ? useColorModeValue('blue.400', 'blue.500')
+                              : useColorModeValue('gray.300', 'gray.500')
+                          }}
                         >
                           <VStack spacing={0.5}>
                             <IconComp size={14} />
@@ -270,7 +296,19 @@ export default function SummaryWithAnalysisSection({
                               : colors.bgSecondary
                           }
                           color={selected ? 'white' : colors.text.primary}
-                          _hover={{ transform: 'translateY(-1px)', boxShadow: 'lg' }}
+                          border="1px solid"
+                          borderColor={
+                            selected
+                              ? useColorModeValue('blue.300', 'blue.600')
+                              : useColorModeValue('gray.200', 'gray.600')
+                          }
+                          _hover={{ 
+                            transform: 'translateY(-1px)', 
+                            boxShadow: 'lg',
+                            borderColor: selected 
+                              ? useColorModeValue('blue.400', 'blue.500')
+                              : useColorModeValue('gray.300', 'gray.500')
+                          }}
                         >
                           {label}
                         </Button>
@@ -329,7 +367,21 @@ export default function SummaryWithAnalysisSection({
               <Divider />
 
               {/* CATEGORY ANALYSIS HEADER */}
-              <HStack spacing={{ base: 3, sm: 4 }} align="center" justify="space-between">
+              <Box position="relative" overflow="hidden">
+                {/* Linha superior animada do Category Analysis */}
+                <Box
+                  height="3px"
+                  background="linear-gradient(90deg, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444)"
+                  backgroundSize="300% 100%"
+                  sx={{
+                    animation: 'shimmer 2.5s ease-in-out infinite',
+                    '@keyframes shimmer': {
+                      '0%': { backgroundPosition: '-200% 0' },
+                      '100%': { backgroundPosition: '200% 0' },
+                    }
+                  }}
+                />
+                <HStack spacing={{ base: 3, sm: 4 }} align="center" justify="space-between" pt={4}>
                 <HStack spacing={{ base: 3, sm: 4 }} align="center">
                   <Box
                     p={{ base: 2.5, sm: 3 }}
@@ -347,7 +399,7 @@ export default function SummaryWithAnalysisSection({
                           boxShadow:
                             '0 0 20px rgba(139,92,246,0.6), 0 0 30px rgba(139,92,246,0.4)',
                         },
-                      },
+                      }
                     }}
                   >
                     <Icon as={BarChart3} boxSize={{ base: 5, sm: 6 }} color="white" />
@@ -430,7 +482,8 @@ export default function SummaryWithAnalysisSection({
                     </Stack>
                   </HStack>
                 </HStack>
-              </HStack>
+                </HStack>
+              </Box>
 
               {/* CATEGORY ANALYSIS */}
               <CategoryAnalysisTabs
