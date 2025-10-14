@@ -90,9 +90,9 @@ const CategoryResultsList = memo(function CategoryResultsList({
   }
 
   return (
-    <VStack spacing={4} align="stretch">
+    <VStack spacing={4} align="stretch" w="full">
       {/* Results Header */}
-      <Box>
+      <Box w="full">
         <HStack justify="space-between" align="center" mb={4}>
           <HStack spacing={3}>
             <Text fontSize="lg" fontWeight="bold" color={textColor}>

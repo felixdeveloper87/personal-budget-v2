@@ -99,11 +99,11 @@ const CategoryResultCard = memo(function CategoryResultCard({
 
       {/* Transactions Table */}
       <Collapse in={isExpanded} animateOpacity>
-        <Box p={0}>
-          <Table variant="simple" size="sm" layout="fixed" w="full">
+        <Box p={0} overflow="visible">
+          <Table variant="simple" size="sm" w="full">
             <Thead bg={headerBg}>
               <Tr>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" w="120px">
+                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" minW="120px" w="120px">
                   <HStack spacing={1}>
                     <Icon as={Calendar} boxSize={3} />
                     <Text>Date</Text>
@@ -112,7 +112,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
                 <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase">
                   Description
                 </Th>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" isNumeric w="100px">
+                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" isNumeric minW="100px" w="100px">
                   <HStack spacing={1} justify="flex-end">
                     <Icon as={DollarSign} boxSize={3} />
                     <Text>Amount</Text>
@@ -127,7 +127,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
                   _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
                   transition="background-color 0.2s"
                 >
-                  <Td color={textColor} fontSize="sm" w="120px">
+                  <Td color={textColor} fontSize="sm" minW="120px" w="120px">
                     {formatDateBR((transaction as any).date || transaction.dateTime)}
                   </Td>
                   <Td color={textColor} fontSize="sm">
@@ -139,7 +139,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
                       {transaction.description}
                     </Text>
                   </Td>
-                  <Td isNumeric w="100px">
+                  <Td isNumeric minW="100px" w="100px">
                     <Text 
                       fontSize="sm" 
                       fontWeight="600" 

@@ -21,7 +21,7 @@ import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles } from '../../utils/ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 
@@ -35,6 +35,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const gradients = getGradients()
   const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.400')
 
@@ -127,12 +128,14 @@ const SearchResultsModal = memo(function SearchResultsModal({
       <ModalContent 
         borderRadius={{ base: 'none', sm: '3xl' }}
         overflow="hidden"
-        maxH={{ base: '100vh', sm: '90vh' }}
+        maxH={{ base: '100dvh', sm: '90vh' }}
+        h={{ base: '100dvh', sm: 'auto' }}
         m={{ base: 0, sm: 4 }}
+        display="flex"
+        flexDirection="column"
         sx={{
-          // Safe area support for iPhone 14 Pro
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          ...safeAreaStyles.container,
+          ...safariStyles.modal
         }}
       >
         {/* Decorative background */}
@@ -142,10 +145,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
           left="-50px"
           right="-50px"
           height="200px"
-          background={useColorModeValue(
-            'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%)',
-            'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 185, 129, 0.2) 100%)'
-          )}
+          background={gradients.decorative}
           borderRadius="3xl"
           filter="blur(40px)"
           opacity={0.6}
@@ -170,8 +170,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
           overflow="hidden"
           w="full"
           h="full"
+          display="flex"
+          flexDirection="column"
           sx={{
-            animation: 'slideIn 0.6s ease-out',
+            animation: animations.slideIn,
             '@keyframes slideIn': {
               from: { 
                 opacity: 0, 
@@ -190,7 +192,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
             background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
             backgroundSize="300% 100%"
             sx={{
-              animation: 'shimmer 4s ease-in-out infinite',
+              animation: animations.shimmer,
               '@keyframes shimmer': {
                 '0%': { backgroundPosition: '-200% 0' },
                 '100%': { backgroundPosition: '200% 0' }
@@ -233,13 +235,11 @@ const SearchResultsModal = memo(function SearchResultsModal({
             flex="1" 
             p={{ base: 4, sm: 5, md: 6 }}
             overflowY="auto"
+            minH="0"
+            maxH={{ base: 'calc(100dvh - 80px)', sm: 'none' }}
             sx={{
-              // Safe area support for iPhone 14 Pro
-              paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-              paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-              paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
-              // Smooth scroll for iPhone
-              WebkitOverflowScrolling: 'touch',
+              ...safeAreaStyles.content,
+              ...safariStyles.scrollable
             }}
           >
             {isLoading ? (
