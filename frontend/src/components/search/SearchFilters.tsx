@@ -12,7 +12,7 @@ export default function SearchFilters({
   availableCategories 
 }: SearchFiltersProps) {
   return (
-    <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+    <VStack spacing={{ base: 4, md: 6 }} align="stretch" pb={{ base: 4, md: 0 }}>
       {/* Main search field */}
       <Box>
         <Text 
@@ -161,8 +161,8 @@ export default function SearchFilters({
           </Wrap>
           {filters.category && (
             <Box
-              mt={4}
-              p={4}
+              mt={3}
+              p={{ base: 3, md: 4 }}
               bg={useColorModeValue('blue.50', 'blue.900')}
               borderRadius="2xl"
               border="2px solid"

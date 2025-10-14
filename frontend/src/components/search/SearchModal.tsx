@@ -56,6 +56,8 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         overflow="hidden"
         maxH={{ base: '100vh', sm: '90vh' }}
         m={{ base: 0, sm: 4 }}
+        display="flex"
+        flexDirection="column"
         sx={safeAreaStyles.container}
       >
         {/* Decorative background */}
@@ -118,16 +120,17 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
             }}
           />
           
-          <CardBody p={0}>
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
               {/* Header */}
               <SearchHeader onClose={onClose} />
 
-              {/* Modal content */}
+              {/* Modal content - Scrollable */}
               <Box 
                 flex="1" 
                 p={{ base: 4, sm: 5, md: 6 }}
                 overflowY="auto"
+                minH="0"
                 sx={safeAreaStyles.content}
               >
                 <SearchFilters
@@ -138,11 +141,13 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
                 />
               </Box>
 
-              {/* Footer */}
-              <SearchFooter
-                onClearAll={handleClearAll}
-                onSearch={handleSearchClick}
-              />
+              {/* Footer - Fixed at bottom */}
+              <Box flexShrink={0}>
+                <SearchFooter
+                  onClearAll={handleClearAll}
+                  onSearch={handleSearchClick}
+                />
+              </Box>
             </VStack>
           </CardBody>
         </Card>

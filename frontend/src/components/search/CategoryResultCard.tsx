@@ -17,8 +17,6 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from 'lucide-react'
 import { memo, useMemo } from 'react'
-import { Transaction } from '../../types'
-import { formatCurrency } from '../../utils/currency'
 import { formatDateBR } from '../../utils/dateTime'
 import { getTypeColor } from '../../utils/ui'
 import { CategoryResultCardProps } from '../../types'
@@ -88,7 +86,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
           </VStack>
           <HStack spacing={2}>
             <Text fontSize="xl" fontWeight="bold" color={typeColor}>
-              {formatCurrency(categoryTotal)}
+              £{categoryTotal.toFixed(2)}
             </Text>
             <Icon 
               as={isExpanded ? ChevronUp : ChevronDown} 
@@ -146,7 +144,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
                       fontWeight="600" 
                       color={typeColor}
                     >
-                      {type === 'INCOME' ? '+' : ''}{formatCurrency(Math.abs(transaction.amount))}
+                      {type === 'INCOME' ? '+' : ''}£{Math.abs(transaction.amount).toFixed(2)}
                     </Text>
                   </Td>
                 </Tr>
