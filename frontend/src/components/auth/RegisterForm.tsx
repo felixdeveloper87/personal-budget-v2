@@ -28,6 +28,7 @@ interface RegisterFormProps {
  * - Integrates with AuthContext for authentication
  */
 export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -42,7 +43,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!email || !password || !confirmPassword) {
+    if (!name || !email || !password || !confirmPassword) {
       toast({
         title: 'Error',
         description: 'Please fill in all fields',
@@ -77,7 +78,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
     setLoading(true)
     try {
-      await register({ email, password })
+      await register({ name, email, password })
       toast({
         title: 'Success',
         description: 'Account created successfully',
@@ -105,6 +106,25 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           Create Account
         </Text>
         
+        <FormControl isRequired>
+          <FormLabel color={colors.text.label}>Name</FormLabel>
+          <Input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter your name"
+            bg={colors.inputBg}
+            borderColor={colors.border}
+            _focus={{
+              borderColor: colors.accent,
+              boxShadow: `0 0 0 1px ${colors.accent}`,
+            }}
+            _hover={{
+              borderColor: colors.accent,
+            }}
+          />
+        </FormControl>
+
         <FormControl isRequired>
           <FormLabel color={colors.text.label}>Email</FormLabel>
           <Input
