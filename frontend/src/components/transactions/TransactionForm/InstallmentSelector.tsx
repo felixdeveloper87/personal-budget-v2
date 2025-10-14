@@ -1,4 +1,4 @@
-import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem } from '@chakra-ui/react'
+import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem, Input } from '@chakra-ui/react'
 import { CreditCard, Calendar, Calculator } from 'lucide-react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../../utils/ui'
@@ -9,6 +9,8 @@ interface InstallmentSelectorProps {
   installments: number
   onInstallmentsChange: (installments: number) => void
   amount: number
+  firstInstallmentDate: string
+  onFirstInstallmentDateChange: (date: string) => void
 }
 
 /**
@@ -23,6 +25,8 @@ export default function InstallmentSelector({
   installments,
   onInstallmentsChange,
   amount,
+  firstInstallmentDate,
+  onFirstInstallmentDateChange,
 }: InstallmentSelectorProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
@@ -171,6 +175,28 @@ export default function InstallmentSelector({
                   <NumberDecrementStepper />
                 </NumberInputStepper>
               </NumberInput>
+            </HStack>
+
+            <HStack justify="space-between" align="center">
+              <HStack spacing={2}>
+                <Icon as={Calendar} boxSize={4} color={colors.accent} />
+                <Text fontSize={{ base: 'sm', sm: 'md' }} color={colors.text.secondary}>
+                  First installment date:
+                </Text>
+              </HStack>
+              <Input
+                type="date"
+                value={firstInstallmentDate}
+                onChange={(e) => onFirstInstallmentDateChange(e.target.value)}
+                w="150px"
+                fontSize={{ base: 'sm', sm: 'md' }}
+                borderColor={colors.border}
+                _focus={{
+                  borderColor: colors.accent,
+                  boxShadow: `0 0 0 1px ${colors.accent}`,
+                }}
+                bg={colors.inputBg}
+              />
             </HStack>
 
             <HStack justify="space-between" align="center">

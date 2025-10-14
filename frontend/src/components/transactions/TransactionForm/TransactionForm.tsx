@@ -50,6 +50,10 @@ export default function TransactionForm({
   // 💳 Installment states
   const [installmentEnabled, setInstallmentEnabled] = useState(false)
   const [installments, setInstallments] = useState(3)
+  const [firstInstallmentDate, setFirstInstallmentDate] = useState(() => {
+    const today = new Date()
+    return today.toISOString().slice(0, 10)
+  })
 
 
   /**
@@ -69,9 +73,9 @@ export default function TransactionForm({
       try {
         // 💳 Create installment plan (only for EXPENSE)
         if (installmentEnabled && type === 'EXPENSE' && installments > 1) {
-          // Create proper datetime for installment plan
+          // Use the selected first installment date
+          const selectedDate = new Date(firstInstallmentDate)
           const now = new Date()
-          const selectedDate = new Date(date)
           selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
           
           await createInstallmentPlan({
@@ -79,7 +83,7 @@ export default function TransactionForm({
             installmentValue: Number(amount) / installments,
             category,
             description,
-            startDate: selectedDate.toISOString().slice(0, 10), // Keep as date string for API
+            startDate: firstInstallmentDate, // Use the selected date
             startDateTime: selectedDate.toISOString(), // Add full datetime
           })
 
@@ -173,6 +177,8 @@ export default function TransactionForm({
               installments={installments}
               onInstallmentsChange={setInstallments}
               amount={amount}
+              firstInstallmentDate={firstInstallmentDate}
+              onFirstInstallmentDateChange={setFirstInstallmentDate}
             />
           )}
           <DescriptionInput
@@ -248,6 +254,8 @@ export default function TransactionForm({
                   installments={installments}
                   onInstallmentsChange={setInstallments}
                   amount={amount}
+                  firstInstallmentDate={firstInstallmentDate}
+                  onFirstInstallmentDateChange={setFirstInstallmentDate}
                 />
               )}
               <DescriptionInput
