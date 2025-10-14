@@ -128,14 +128,18 @@ const SearchResultsModal = memo(function SearchResultsModal({
       <ModalContent 
         borderRadius={{ base: 'none', sm: '3xl' }}
         overflow="hidden"
-        maxH={{ base: '100dvh', sm: '90vh' }}
-        h={{ base: '100dvh', sm: 'auto' }}
+        maxH={{ base: '100vh', sm: '90vh' }}
+        h={{ base: '100vh', sm: 'auto' }}
         m={{ base: 0, sm: 4 }}
         display="flex"
         flexDirection="column"
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal
+          ...safariStyles.modal,
+          // Safari specific fixes
+          WebkitFlex: '1 1 auto',
+          flex: '1 1 auto',
+          minHeight: 0
         }}
       >
         {/* Decorative background */}
@@ -183,7 +187,11 @@ const SearchResultsModal = memo(function SearchResultsModal({
                 opacity: 1, 
                 transform: 'translateY(0) scale(1)' 
               }
-            }
+            },
+            // Safari specific fixes
+            WebkitFlex: '1 1 auto',
+            flex: '1 1 auto',
+            minHeight: 0
           }}
         >
           {/* Animated top bar */}
@@ -236,10 +244,14 @@ const SearchResultsModal = memo(function SearchResultsModal({
             p={{ base: 4, sm: 5, md: 6 }}
             overflowY="auto"
             minH="0"
-            maxH={{ base: 'calc(100dvh - 80px)', sm: 'none' }}
+            maxH={{ base: 'calc(100vh - 120px)', sm: 'none' }}
             sx={{
               ...safeAreaStyles.content,
-              ...safariStyles.scrollable
+              ...safariStyles.scrollable,
+              // Safari specific fixes
+              WebkitFlex: '1 1 auto',
+              flex: '1 1 auto',
+              position: 'relative'
             }}
           >
             {isLoading ? (
