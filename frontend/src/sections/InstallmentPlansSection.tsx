@@ -19,7 +19,7 @@ import { CreditCard, Sparkles } from 'lucide-react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
-import { InstallmentPlansModal } from '../components/ui'
+import { InstallmentPlansModal } from '../components/installments'
 import { getResponsiveStyles, getGradients, animations } from '../utils/ui'
 
 /**

@@ -19,14 +19,9 @@ import {
 } from '@chakra-ui/react'
 import { CreditCard, Sparkles, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
-import { InstallmentPlanCard } from '../installments'
+import InstallmentPlanCard from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
-
-
-// 🎨 Animações personalizadas
-const shimmer = 'shimmer 4s ease-in-out infinite'
-const slideIn = 'slideIn 0.6s ease-out'
-const glow = 'glow 3s ease-in-out infinite'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles } from '../../utils/ui'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean
@@ -42,6 +37,38 @@ export default function InstallmentPlansModal({
   onPlanDeleted,
 }: InstallmentPlansModalProps) {
   const colors = useThemeColors()
+  const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  
+  // Move all useColorModeValue calls to the top
+  const modalBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.95)',
+    'rgba(17, 17, 17, 0.95)'
+  )
+  const headerBg = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+  )
+  const emptyStateBg = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+  )
+  const titleBg = useColorModeValue(
+    'linear-gradient(135deg, #1e293b, #475569)',
+    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+  )
+  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')
+  const closeButtonBorderColor = useColorModeValue('gray.300', 'gray.600')
+  const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
+  const closeButtonIconColor = useColorModeValue('gray.700', 'gray.200')
+  const iconBg = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+  )
+  const badgeBg = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+  )
 
   return (
     <Modal
@@ -51,8 +78,16 @@ export default function InstallmentPlansModal({
       closeOnOverlayClick={true}
       motionPreset="slideInBottom"
       scrollBehavior="inside"
+      isCentered={false}
     >
-      <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(12px)" />
+      <ModalOverlay 
+        bg="blackAlpha.600" 
+        backdropFilter="blur(12px)"
+        css={{
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+        }}
+      />
       <ModalContent
         borderRadius={{ base: 'none', sm: '3xl' }}
         h={{ base: '100dvh', sm: 'auto' }}
@@ -63,8 +98,13 @@ export default function InstallmentPlansModal({
         borderColor={colors.border}
         boxShadow="0 32px 64px -12px rgba(0,0,0,0.4)"
         overflow="hidden"
+        bg={modalBg}
+        backdropFilter="blur(20px)"
+        position="relative"
         sx={{
-          animation: slideIn,
+          ...safeAreaStyles.container,
+          ...safariStyles.modal,
+          animation: animations.slideIn,
           '@keyframes slideIn': {
             from: { 
               opacity: 0, 
@@ -83,7 +123,7 @@ export default function InstallmentPlansModal({
           background="linear-gradient(90deg, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444)"
           backgroundSize="300% 100%"
           sx={{
-            animation: shimmer,
+            animation: animations.shimmer,
             '@keyframes shimmer': {
               '0%': { backgroundPosition: '-200% 0' },
               '100%': { backgroundPosition: '200% 0' }
@@ -96,14 +136,12 @@ export default function InstallmentPlansModal({
           borderBottom="1px"
           borderColor={colors.border}
           py={8}
-          bg={useColorModeValue(
-            'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-            'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-          )}
+          bg={headerBg}
           color="white"
           fontWeight="800"
           letterSpacing="wide"
           position="relative"
+          backdropFilter="blur(8px)"
         >
           <Box
             display="flex"
@@ -117,7 +155,7 @@ export default function InstallmentPlansModal({
               borderRadius="full"
               bg="rgba(255,255,255,0.2)"
               sx={{
-                animation: glow,
+                animation: animations.glow,
                 '@keyframes glow': {
                   '0%, 100%': { 
                     boxShadow: '0 0 5px rgba(255, 255, 255, 0.3)' 
@@ -151,12 +189,12 @@ export default function InstallmentPlansModal({
           onClick={onClose}
           borderRadius="full"
           p={3}
-          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+          bg={closeButtonBg}
           backdropFilter="blur(10px)"
           border="1px solid"
-          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          borderColor={closeButtonBorderColor}
           _hover={{
-            bg: useColorModeValue('red.50', 'red.900'),
+            bg: closeButtonHoverBg,
             borderColor: 'red.300',
             transform: 'scale(1.1)',
             boxShadow: 'lg',
@@ -169,7 +207,7 @@ export default function InstallmentPlansModal({
           boxShadow="md"
           aria-label="Close modal"
         >
-          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+          <Icon as={X} boxSize={5} color={closeButtonIconColor} />
         </Button>
 
         <ModalBody
@@ -177,8 +215,8 @@ export default function InstallmentPlansModal({
           overflowY="auto"
           maxH={{ base: 'calc(100dvh - 200px)', sm: '70vh' }}
           sx={{
+            ...safariStyles.scrollable,
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
-            WebkitOverflowScrolling: 'touch',
           }}
         >
           <Box p={{ base: 4, sm: 6, md: 8 }}>
@@ -187,13 +225,10 @@ export default function InstallmentPlansModal({
                 <Box
                   p={4}
                   borderRadius="2xl"
-                  bg={useColorModeValue(
-                    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-                  )}
+                  bg={emptyStateBg}
                   boxShadow="lg"
                   sx={{
-                    animation: glow,
+                    animation: animations.glow,
                     '@keyframes glow': {
                       '0%, 100%': { 
                         boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' 
@@ -210,10 +245,7 @@ export default function InstallmentPlansModal({
                 <VStack spacing={3} align="center">
                   <Heading
                     size="lg"
-                    bg={useColorModeValue(
-                      'linear-gradient(135deg, #1e293b, #475569)',
-                      'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                    )}
+                    bg={titleBg}
                     bgClip="text"
                     fontWeight="800"
                     textAlign="center"
@@ -244,13 +276,10 @@ export default function InstallmentPlansModal({
                     <Box
                       p={3}
                       borderRadius="2xl"
-                      bg={useColorModeValue(
-                        'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                        'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-                      )}
+                      bg={iconBg}
                       boxShadow="lg"
                       sx={{
-                        animation: glow,
+                        animation: animations.glow,
                         '@keyframes glow': {
                           '0%, 100%': { 
                             boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' 
@@ -266,10 +295,7 @@ export default function InstallmentPlansModal({
                     <VStack align="start" spacing={1}>
                       <Heading
                         size="lg"
-                        bg={useColorModeValue(
-                          'linear-gradient(135deg, #1e293b, #475569)',
-                          'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                        )}
+                        bg={titleBg}
                         bgClip="text"
                         fontWeight="800"
                       >
@@ -294,10 +320,7 @@ export default function InstallmentPlansModal({
                     py={2}
                     fontSize="sm"
                     fontWeight="600"
-                    bg={useColorModeValue(
-                      'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                      'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-                    )}
+                    bg={badgeBg}
                     boxShadow="md"
                   >
                     <HStack spacing={2}>
@@ -317,7 +340,7 @@ export default function InstallmentPlansModal({
                     <Box
                       key={plan.id}
                       sx={{
-                        animation: `${slideIn} ${0.2 + index * 0.1}s ease-out`,
+                        animation: `${animations.slideIn} ${0.2 + index * 0.1}s ease-out`,
                         '@keyframes slideIn': {
                           from: { 
                             opacity: 0, 
