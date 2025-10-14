@@ -163,6 +163,15 @@ export const getResponsiveStyles = () => ({
       height: '24px',
       padding: 1,
       fontSize: 'xs'
+    },
+    action: {
+      size: { base: 'md', md: 'lg' },
+      height: { base: '40px', md: '48px' },
+      padding: { base: 4, md: 6 },
+      fontSize: { base: 'sm', md: 'md' },
+      minWidth: { base: '120px', md: '140px' },
+      iconSize: { base: 4, md: 5 },
+      rightIconSize: { base: 3, md: 4 }
     }
   },
   categoryList: {

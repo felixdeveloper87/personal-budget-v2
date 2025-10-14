@@ -12,7 +12,7 @@ import {
 } from '@chakra-ui/react'
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
 import { Transaction } from '../../types'
-import { PeriodType } from '../ui'
+import { PeriodType } from '../ui/PeriodNavigator'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import ExpenseChart from '../charts/ExpenseChart'
 import IncomeChart from '../charts/IncomeChart'

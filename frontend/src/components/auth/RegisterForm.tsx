@@ -77,7 +77,7 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
     setLoading(true)
     try {
-      await register(email, password)
+      await register({ email, password })
       toast({
         title: 'Success',
         description: 'Account created successfully',

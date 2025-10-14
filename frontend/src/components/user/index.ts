@@ -1,3 +1,3 @@
 // User Components - User related components
-export { default as UserMenu } from './UserMenu'
+// UserMenu component will be added here when needed
 

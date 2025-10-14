@@ -17,7 +17,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { animations, getGradients } from '../utils/ui'
+import { animations, getGradients, getResponsiveStyles } from '../utils/ui'
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {
@@ -35,6 +35,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
   const colors = useThemeColors()
   const gradients = getGradients()
+  const responsiveStyles = getResponsiveStyles()
 
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
     setType(t)
@@ -188,19 +189,20 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         key={t}
                         aria-label={label}
                         onClick={() => handleOpen(t)}
-                        size={{ base: 'lg', md: 'md' }}
-                        leftIcon={<Icon as={icon} boxSize={{ base: 5, md: 4 }} />}
-                        rightIcon={<Icon as={accent} boxSize={{ base: 4, md: 3 }} />}
+                        size={responsiveStyles.buttons.action.size}
+                        leftIcon={<Icon as={icon} boxSize={responsiveStyles.buttons.action.iconSize} />}
+                        rightIcon={<Icon as={accent} boxSize={responsiveStyles.buttons.action.rightIconSize} />}
                         borderRadius="2xl"
-                        px={{ base: 8, md: 6 }}
-                        py={{ base: 6, md: 4 }}
-                        fontSize={{ base: 'lg', md: 'md' }}
+                        px={responsiveStyles.buttons.action.padding}
+                        py={responsiveStyles.buttons.action.padding}
+                        fontSize={responsiveStyles.buttons.action.fontSize}
                         fontWeight="800"
                         bg={gradient}
                         color="white"
                         position="relative"
                         overflow="hidden"
-                        minW={{ base: '160px', md: '140px' }}
+                        minW={responsiveStyles.buttons.action.minWidth}
+                        h={responsiveStyles.buttons.action.height}
                         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         letterSpacing="wide"
                         sx={{

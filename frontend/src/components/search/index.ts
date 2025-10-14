@@ -6,4 +6,4 @@ export { default as SearchFooter } from './SearchFooter'
 export { default as SearchSummaryHeader } from './SearchSummaryHeader'
 export { default as CategoryResultsList } from './CategoryResultsList'
 export { default as CategoryResultCard } from './CategoryResultCard'
-export { default as SearchButton } from './SearchButton'
+// SearchButton component will be added here when needed

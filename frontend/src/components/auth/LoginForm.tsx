@@ -52,7 +52,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
     setLoading(true)
     try {
-      await login(email, password)
+      await login({ email, password })
       toast({
         title: 'Success',
         description: 'Logged in successfully',
