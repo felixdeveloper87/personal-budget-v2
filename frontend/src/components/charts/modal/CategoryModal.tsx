@@ -18,12 +18,14 @@ import {
   Td,
   Progress,
   Button,
+  Icon,
 } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 import { getResponsiveStyles, animations } from '../../../utils/ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { X } from 'lucide-react'
   
   
   const CATEGORY_COLORS = [
@@ -173,26 +175,35 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   
           </ModalHeader>
   
-        <ModalCloseButton
-          aria-label="Close category analysis" // ♿ Accessibility
-          size={responsiveStyles.modals.category.closeButton.size}
+        <Button
           position="absolute"
-          top={responsiveStyles.modals.category.closeButton.top}
-          right={responsiveStyles.modals.category.closeButton.right}
-          zIndex={10}
-          bg="rgba(255, 255, 255, 0.9)"
-          color="gray.700"
+          top={{ base: 4, sm: 5, md: 6 }}
+          right={{ base: 4, sm: 5, md: 6 }}
+          size="lg"
+          variant="ghost"
+          onClick={onClose}
           borderRadius="full"
+          p={3}
+          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+          backdropFilter="blur(10px)"
+          border="1px solid"
+          borderColor={useColorModeValue('gray.300', 'gray.600')}
           _hover={{
-            bg: 'rgba(255, 255, 255, 1)',
-            transform: 'scale(1.05)',
+            bg: useColorModeValue('red.50', 'red.900'),
+            borderColor: 'red.300',
+            transform: 'scale(1.1)',
+            boxShadow: 'lg',
           }}
           _active={{
             transform: 'scale(0.95)',
           }}
-          backdropFilter="blur(8px)"
           transition="all 0.2s ease"
-        />
+          zIndex={10}
+          boxShadow="md"
+          aria-label="Close category analysis"
+        >
+          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+        </Button>
   
         <ModalBody
           py={responsiveStyles.modals.category.body.padding}

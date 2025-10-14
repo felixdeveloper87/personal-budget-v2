@@ -15,12 +15,14 @@ import {
   useColorModeValue,
   Icon as ChakraIcon,
   useBreakpointValue,
+  Button,
+  Icon,
 } from '@chakra-ui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { ReactNode, useMemo } from 'react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../charts/modal'
-import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
 import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
 
 const MotionBox = motion.create(Box)
@@ -172,17 +174,35 @@ export default function SummaryCardModal({
           </VStack>
         </Box>
 
-        <ModalCloseButton 
-          top={{ base: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', md: 4 }} 
-          right={{ base: 4, md: 4 }}
+        <Button
+          position="absolute"
+          top={{ base: 4, sm: 5, md: 6 }}
+          right={{ base: 4, sm: 5, md: 6 }}
           size="lg"
+          variant="ghost"
+          onClick={onClose}
           borderRadius="full"
-          bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(0,0,0,0.6)')}
+          p={3}
+          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+          backdropFilter="blur(10px)"
+          border="1px solid"
+          borderColor={useColorModeValue('gray.300', 'gray.600')}
           _hover={{
-            bg: useColorModeValue('rgba(255,255,255,1)', 'rgba(0,0,0,0.8)')
+            bg: useColorModeValue('red.50', 'red.900'),
+            borderColor: 'red.300',
+            transform: 'scale(1.1)',
+            boxShadow: 'lg',
           }}
-          backdropFilter="blur(8px)"
-        />
+          _active={{
+            transform: 'scale(0.95)',
+          }}
+          transition="all 0.2s ease"
+          zIndex={10}
+          boxShadow="md"
+          aria-label="Close modal"
+        >
+          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+        </Button>
 
         {/* 🧊 Corpo responsivo com safe-area para iPhone 14 Pro */}
         <ModalBody

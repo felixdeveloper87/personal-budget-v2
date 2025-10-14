@@ -6,8 +6,10 @@ import {
   Text,
   useColorModeValue,
   VStack,
+  Button,
+  Icon,
 } from '@chakra-ui/react'
-import { TrendingUp, TrendingDown, Plus, Minus } from 'lucide-react'
+import { TrendingUp, TrendingDown, Plus, Minus, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
@@ -154,37 +156,35 @@ export default function AddTransactionModal({
             </Text>
             
             {/* Close button */}
-            <Box
+            <Button
               position="absolute"
-              top={{ base: 3, md: 4 }}
-              right={{ base: 3, md: 4 }}
+              top={{ base: 4, sm: 5, md: 6 }}
+              right={{ base: 4, sm: 5, md: 6 }}
+              size="lg"
+              variant="ghost"
+              onClick={onClose}
+              borderRadius="full"
+              p={3}
+              bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+              backdropFilter="blur(10px)"
+              border="1px solid"
+              borderColor={useColorModeValue('gray.300', 'gray.600')}
+              _hover={{
+                bg: useColorModeValue('red.50', 'red.900'),
+                borderColor: 'red.300',
+                transform: 'scale(1.1)',
+                boxShadow: 'lg',
+              }}
+              _active={{
+                transform: 'scale(0.95)',
+              }}
+              transition="all 0.2s ease"
+              zIndex={10}
+              boxShadow="md"
+              aria-label="Close form"
             >
-              <Box
-                as="button"
-                aria-label="Close form"
-                color="white"
-                bg="rgba(255,255,255,0.2)"
-                borderRadius="full"
-                p={{ base: 2, md: 3 }}
-                _hover={{ 
-                  bg: 'rgba(255,255,255,0.3)',
-                  transform: 'scale(1.1)'
-                }}
-                onClick={onClose}
-                fontSize={{ base: 'lg', md: 'xl' }}
-                lineHeight={1}
-                w={{ base: 8, md: 10 }}
-                h={{ base: 8, md: 10 }}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                transition="all 0.2s ease"
-                border="1px solid rgba(255,255,255,0.3)"
-                backdropFilter="blur(10px)"
-              >
-                ×
-              </Box>
-            </Box>
+              <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+            </Button>
           </Box>
 
           {/* Modal content - Scrollable */}

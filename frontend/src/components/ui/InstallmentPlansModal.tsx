@@ -15,11 +15,13 @@ import {
   Heading,
   SimpleGrid,
   useColorModeValue,
+  Button,
 } from '@chakra-ui/react'
-import { CreditCard, Sparkles } from 'lucide-react'
+import { CreditCard, Sparkles, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { InstallmentPlanCard } from '../installments'
 import { InstallmentPlan } from '../../types'
+
 
 // 🎨 Animações personalizadas
 const shimmer = 'shimmer 4s ease-in-out infinite'
@@ -140,13 +142,35 @@ export default function InstallmentPlansModal({
           </Text>
         </ModalHeader>
 
-        <ModalCloseButton
-          aria-label="Close modal"
-          color="white"
-          bg="rgba(0,0,0,0.3)"
+        <Button
+          position="absolute"
+          top={{ base: 4, sm: 5, md: 6 }}
+          right={{ base: 4, sm: 5, md: 6 }}
+          size="lg"
+          variant="ghost"
+          onClick={onClose}
           borderRadius="full"
-          _hover={{ bg: 'rgba(0,0,0,0.5)' }}
-        />
+          p={3}
+          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+          backdropFilter="blur(10px)"
+          border="1px solid"
+          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          _hover={{
+            bg: useColorModeValue('red.50', 'red.900'),
+            borderColor: 'red.300',
+            transform: 'scale(1.1)',
+            boxShadow: 'lg',
+          }}
+          _active={{
+            transform: 'scale(0.95)',
+          }}
+          transition="all 0.2s ease"
+          zIndex={10}
+          boxShadow="md"
+          aria-label="Close modal"
+        >
+          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+        </Button>
 
         <ModalBody
           p={0}
