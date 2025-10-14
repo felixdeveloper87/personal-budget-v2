@@ -287,7 +287,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                     }}
                   />
                   
-                  <Text fontSize={responsiveStyles.charts.progress.text.percentageFontSize} color={colors.text.secondary} mt={2}>
+                  <Text fontSize="xs" color={colors.text.secondary} mt={2}>
                     {percentage.toFixed(1)}% of total income
                   </Text>
                 </Box>

@@ -287,7 +287,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                     }}
                   />
                   
-                  <Text fontSize={responsiveStyles.charts.progress.text.percentageFontSize} color={colors.text.secondary} mt={2}>
+                  <Text fontSize="xs" color={colors.text.secondary} mt={2}>
                     {percentage.toFixed(1)}% of total expenses
                   </Text>
                 </Box>
