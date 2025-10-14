@@ -139,6 +139,13 @@ export const getTableStyles = () => ({
 
 // Mobile detection and responsive utilities - iPhone 14 Pro as mobile base
 export const getResponsiveStyles = () => ({
+  // iPhone 14 Pro specific breakpoints
+  breakpoints: {
+    mobile: '375px',    // iPhone 14 Pro width
+    mobileLarge: '414px', // iPhone 14 Pro Max width
+    tablet: '768px',
+    desktop: '1024px'
+  },
   modal: {
     maxH: { base: '100vh', md: '90vh' },
     h: { base: '100vh', md: 'auto' }
@@ -165,13 +172,13 @@ export const getResponsiveStyles = () => ({
       fontSize: 'xs'
     },
     action: {
-      size: { base: 'md', md: 'lg' },
-      height: { base: '40px', md: '48px' },
-      padding: { base: 4, md: 6 },
-      fontSize: { base: 'sm', md: 'md' },
-      minWidth: { base: '120px', md: '140px' },
-      iconSize: { base: 4, md: 5 },
-      rightIconSize: { base: 3, md: 4 }
+      size: { base: 'sm', sm: 'md', md: 'lg' },
+      height: { base: '36px', sm: '40px', md: '48px' },
+      padding: { base: 3, sm: 4, md: 6 },
+      fontSize: { base: 'xs', sm: 'sm', md: 'md' },
+      minWidth: { base: '100px', sm: '120px', md: '140px' },
+      iconSize: { base: 3, sm: 4, md: 5 },
+      rightIconSize: { base: 2, sm: 3, md: 4 }
     }
   },
   categoryList: {
@@ -240,6 +247,81 @@ export const getResponsiveStyles = () => ({
         padding: { base: 2, lg: 2 },
         avatarSize: { base: 'md', lg: 'md' }
       }
+    }
+  },
+  addTransactionSection: {
+    container: {
+      padding: { base: 2, sm: 3, md: 4, lg: 6 },
+      safeArea: {
+        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))'
+      }
+    },
+    card: {
+      padding: { base: 3, sm: 4, md: 6, lg: 8 },
+      borderRadius: { base: '2xl', md: '3xl' },
+      spacing: { base: 4, sm: 5, md: 6, lg: 8 }
+    },
+    header: {
+      direction: { base: 'column' as const, sm: 'row' as const },
+      gap: { base: 3, sm: 4, md: 6 },
+      icon: {
+        padding: { base: 2, sm: 2.5, md: 3 },
+        size: { base: 4, sm: 5, md: 6 },
+        borderRadius: { base: 'xl', md: '2xl' }
+      },
+      title: {
+        size: { base: 'sm', sm: 'md', md: 'lg' },
+        fontSize: { base: 'xs', sm: 'sm' }
+      }
+    },
+    buttons: {
+      direction: { base: 'row' as const, sm: 'row' as const },
+      spacing: { base: 2, sm: 3, md: 4 },
+      width: { base: 'full', sm: 'auto' },
+      flex: { base: '1', sm: '0' }
+    }
+  },
+  installmentPlansSection: {
+    container: {
+      padding: { base: 2, sm: 3, md: 4, lg: 6 },
+      safeArea: {
+        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))'
+      }
+    },
+    card: {
+      padding: { base: 3, sm: 4, md: 5, lg: 6 },
+      borderRadius: { base: '2xl', md: '3xl' },
+      spacing: { base: 4, sm: 5, md: 6 }
+    },
+    header: {
+      direction: { base: 'column' as const, sm: 'row' as const },
+      gap: { base: 3, sm: 4, md: 4 },
+      icon: {
+        padding: { base: 2, sm: 2.5, md: 3 },
+        size: { base: 4, sm: 5, md: 6 },
+        borderRadius: { base: 'xl', md: '2xl' }
+      },
+      title: {
+        size: { base: 'sm', sm: 'md', md: 'lg' },
+        fontSize: { base: 'xs', sm: 'sm' }
+      }
+    },
+    badge: {
+      padding: { base: 3, sm: 4 },
+      fontSize: { base: 'xs', sm: 'sm' },
+      iconSize: { base: 2, sm: 3 },
+      spacing: { base: 1, sm: 2 }
+    },
+    background: {
+      top: { base: '-30px', md: '-50px' },
+      left: { base: '-20px', md: '-50px' },
+      right: { base: '-20px', md: '-50px' },
+      height: { base: '120px', md: '200px' },
+      borderRadius: { base: '2xl', md: '3xl' },
+      filter: { base: 'blur(20px)', md: 'blur(40px)' },
+      opacity: { base: 0.4, md: 0.6 }
     }
   }
 })

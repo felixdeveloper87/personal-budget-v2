@@ -52,24 +52,24 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       {/* 💳 Add Transaction Section */}
       <Box
         w="full"
-        px={{ base: 0.5, md: 1, lg: 1.5 }}
+        px={responsiveStyles.addTransactionSection.container.padding}
         sx={{
-          paddingLeft: 'max(2px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(2px, env(safe-area-inset-right, 0px))',
+          paddingLeft: responsiveStyles.addTransactionSection.container.safeArea.paddingLeft,
+          paddingRight: responsiveStyles.addTransactionSection.container.safeArea.paddingRight,
         }}
       >
         <Box position="relative">
           {/* Background Blur Glow */}
           <Box
             position="absolute"
-            top="-50px"
-            left="-50px"
-            right="-50px"
-            height="200px"
+            top={{ base: "-30px", md: "-50px" }}
+            left={{ base: "-20px", md: "-50px" }}
+            right={{ base: "-20px", md: "-50px" }}
+            height={{ base: "120px", md: "200px" }}
             background={gradients.decorative}
-            borderRadius="3xl"
-            filter="blur(40px)"
-            opacity={0.6}
+            borderRadius={{ base: "2xl", md: "3xl" }}
+            filter={{ base: "blur(20px)", md: "blur(40px)" }}
+            opacity={{ base: 0.4, md: 0.6 }}
             zIndex={0}
           />
 
@@ -105,20 +105,21 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               }}
             />
 
-            <CardBody p={{ base: 4, sm: 5, md: 8 }}>
-              <VStack spacing={{ base: 6, md: 8 }} align="stretch">
+            <CardBody p={responsiveStyles.addTransactionSection.card.padding}>
+              <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <Flex
-                  direction={{ base: 'column', md: 'row' }}
-                  align={{ base: 'center', md: 'center' }}
+                  direction={{ base: 'column', sm: 'row' }}
+                  align={{ base: 'center', sm: 'center' }}
                   justify="space-between"
-                  gap={{ base: 4, md: 6 }}
-                  textAlign={{ base: 'center', md: 'left' }}
+                  gap={responsiveStyles.addTransactionSection.header.gap}
+                  textAlign={{ base: 'center', sm: 'left' }}
+                  w="full"
                 >
-                  <HStack spacing={{ base: 3, sm: 4 }} align="center">
+                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
                     <Box
-                      p={{ base: 2.5, sm: 3 }}
-                      borderRadius="2xl"
+                      p={responsiveStyles.addTransactionSection.header.icon.padding}
+                      borderRadius={responsiveStyles.addTransactionSection.header.icon.borderRadius}
                       bg={useColorModeValue(
                         'linear-gradient(135deg, #22c55e, #16a34a)',
                         'linear-gradient(135deg, #4ade80, #22c55e)'
@@ -135,39 +136,43 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         },
                       }}
                     >
-                      <Icon as={Sparkles} boxSize={{ base: 5, sm: 6 }} color="white" />
+                      <Icon as={Sparkles} boxSize={responsiveStyles.addTransactionSection.header.icon.size} color="white" />
                     </Box>
 
-                    <VStack align={{ base: 'center', md: 'start' }} spacing={0}>
+                    <VStack align={{ base: 'center', sm: 'start' }} spacing={0} flex="1">
                       <Heading
-                        size={{ base: 'md', sm: 'lg' }}
+                        size={responsiveStyles.addTransactionSection.header.title.size}
                         bg={useColorModeValue(
                           'linear-gradient(135deg, #1e293b, #475569)',
                           'linear-gradient(135deg, #f8fafc, #e2e8f0)'
                         )}
                         bgClip="text"
                         fontWeight="800"
+                        textAlign={{ base: 'center', sm: 'left' }}
                       >
                         Quick Actions
                       </Heading>
                       <Text
-                        fontSize={{ base: '2xs', sm: 'xs' }}
+                        fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
                         color={colors.text.secondary}
                         fontWeight="400"
                         opacity={0.8}
+                        textAlign={{ base: 'center', sm: 'left' }}
+                        display={{ base: 'none', sm: 'block' }}
                       >
                         Choose an action to quickly add a transaction
                       </Text>
                     </VStack>
                   </HStack>
 
-                  {/* Botões - Agora ao lado do header no desktop */}
+                  {/* Botões - Responsivos para mobile */}
                   <HStack
-                    spacing={{ base: 3, sm: 4 }}
-                    justify={{ base: 'center', md: 'flex-end' }}
+                    spacing={responsiveStyles.addTransactionSection.buttons.spacing}
+                    justify={{ base: 'center', sm: 'flex-end' }}
                     flexWrap="wrap"
-                    direction={{ base: 'column', sm: 'row' }}
-                    w={{ base: 'full', md: 'auto' }}
+                    direction={{ base: 'row', sm: 'row' }}
+                    w={responsiveStyles.addTransactionSection.buttons.width}
+                    flex={responsiveStyles.addTransactionSection.buttons.flex}
                   >
                     {[
                       {
