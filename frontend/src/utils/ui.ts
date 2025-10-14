@@ -40,7 +40,18 @@ export const getScrollbarStyles = (useColorModeValue: any) => ({
   ...safariStyles.scrollbar,
   '&::-webkit-scrollbar-thumb': {
     background: useColorModeValue('rgba(0,0,0,0.2)', 'rgba(255,255,255,0.2)'),
-    borderRadius: '4px'
+    borderRadius: '4px',
+    WebkitAppearance: 'none'
+  },
+  // Mobile Safari specific
+  '@media screen and (max-width: 768px)': {
+    WebkitOverflowScrolling: 'touch',
+    overflowY: 'scroll',
+    '&::-webkit-scrollbar': {
+      width: '6px',
+      display: 'block !important',
+      WebkitAppearance: 'none'
+    }
   }
 })
 
@@ -81,15 +92,21 @@ export const safariStyles = {
   scrollbar: {
     WebkitOverflowScrolling: 'touch' as const,
     overflowScrolling: 'touch' as const,
+    // Force scrollbar on mobile Safari
+    overflowY: 'scroll' as const,
     '&::-webkit-scrollbar': {
       width: '8px',
-      display: 'block'
+      display: 'block',
+      WebkitAppearance: 'none'
     },
     '&::-webkit-scrollbar-track': {
-      background: 'transparent'
+      background: 'transparent',
+      WebkitAppearance: 'none'
     },
     '&::-webkit-scrollbar-thumb': {
-      borderRadius: '4px'
+      borderRadius: '4px',
+      WebkitAppearance: 'none',
+      minHeight: '20px'
     }
   }
 }

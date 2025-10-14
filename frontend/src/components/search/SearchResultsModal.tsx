@@ -245,7 +245,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
           <Box 
             flex="1" 
             p={responsiveStyles.spacing.container}
-            overflowY="auto"
+            overflowY="scroll"
             {...responsiveStyles.content}
             sx={{
               ...safeAreaStyles.content,
@@ -254,7 +254,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
               // Safari specific fixes
               WebkitFlex: '1 1 auto',
               flex: '1 1 auto',
-              position: 'relative'
+              position: 'relative',
+              // Force scrollbar on mobile
+              minHeight: '0',
+              maxHeight: '100%'
             }}
           >
             {isLoading ? (
