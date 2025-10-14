@@ -33,7 +33,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
   return (
     <Flex
       direction={responsiveStyles.addTransactionSection.header.direction}
-      align="center"
+      align={{ base: 'stretch', sm: 'center' }}
       justify="space-between"
       gap={responsiveStyles.addTransactionSection.header.gap}
     >
@@ -62,13 +62,13 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
           />
         </Box>
 
-        <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+        <VStack align="start" spacing={1} flex="1">
           <Heading
             size={responsiveStyles.addTransactionSection.header.title.size}
             bg={titleBg}
             bgClip="text"
             fontWeight="800"
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
           >
             Financial Overview
           </Heading>
@@ -77,7 +77,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
             color={colors.text.secondary}
             fontWeight="400"
             opacity={0.8}
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
             display={{ base: 'none', sm: 'block' }}
           >
             Complete overview with category analysis

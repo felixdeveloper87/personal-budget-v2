@@ -1,6 +1,6 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue } from '@chakra-ui/react'
 import { Transaction } from '../../types'
-import CategoryModal from '../modal/CategoryModal'
+import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
 import { getResponsiveStyles, getGradients, animations } from '../../utils/ui'

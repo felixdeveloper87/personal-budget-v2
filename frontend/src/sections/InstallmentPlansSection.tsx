@@ -146,7 +146,7 @@ export default function InstallmentPlansSection() {
               <CardBody p={responsiveStyles.installmentPlansSection.card.padding}>
                 <Flex
                   direction={responsiveStyles.installmentPlansSection.header.direction}
-                  align="center"
+                  align={{ base: 'stretch', sm: 'center' }}
                   justify="space-between"
                   gap={responsiveStyles.installmentPlansSection.header.gap}
                 >
@@ -175,13 +175,13 @@ export default function InstallmentPlansSection() {
                       />
                     </Box>
 
-                    <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+                    <VStack align="start" spacing={1} flex="1">
                       <Heading
                         size={responsiveStyles.installmentPlansSection.header.title.size}
                         bg={titleBg}
                         bgClip="text"
                         fontWeight="800"
-                        textAlign={{ base: 'center', sm: 'left' }}
+                        textAlign="left"
                       >
                         Active Installment Plans
                       </Heading>
@@ -190,7 +190,7 @@ export default function InstallmentPlansSection() {
                         color={colors.text.secondary}
                         fontWeight="400"
                         opacity={0.8}
-                        textAlign={{ base: 'center', sm: 'left' }}
+                        textAlign="left"
                         display={{ base: 'none', sm: 'block' }}
                       >
                         Track your ongoing payment plans
@@ -203,9 +203,9 @@ export default function InstallmentPlansSection() {
                     colorScheme="purple"
                     variant="solid"
                     borderRadius="full"
-                    px={responsiveStyles.installmentPlansSection.badge.padding}
-                    py={responsiveStyles.installmentPlansSection.badge.padding}
-                    fontSize={responsiveStyles.installmentPlansSection.badge.fontSize}
+                    px={3}
+                    py={1.5}
+                    fontSize="xs"
                     fontWeight="600"
                     bg={badgeBg}
                     boxShadow="md"
@@ -220,14 +220,23 @@ export default function InstallmentPlansSection() {
                       transform: 'translateY(0)',
                     }}
                     transition="all 0.2s ease"
-                    flex={{ base: '0', sm: '0' }}
+                    flex="0 0 auto"
+                    minW="auto"
+                    w="auto"
+                    h="auto"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <HStack spacing={responsiveStyles.installmentPlansSection.badge.spacing}>
+                    <HStack spacing={0}>
                       <Icon
                         as={Sparkles}
-                        boxSize={responsiveStyles.installmentPlansSection.badge.iconSize}
+                        boxSize={3}
+                        display="none"
                       />
-                      <Text>{plans.length} Active</Text>
+                      <Text fontSize="xs" lineHeight="1">
+                        {plans.length}
+                      </Text>
                     </HStack>
                   </Badge>
                 </Flex>

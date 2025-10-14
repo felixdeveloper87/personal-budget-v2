@@ -313,6 +313,99 @@ export const getResponsiveStyles = () => ({
       descriptionFontSize: { base: 'xs', sm: 'sm', md: 'sm' }
     }
   },
+  modals: {
+    // Standard close button configuration for all modals
+    closeButton: {
+      position: 'absolute',
+      top: { base: 4, sm: 5, md: 6 },
+      right: { base: 4, sm: 5, md: 6 },
+      size: 'lg',
+      variant: 'ghost',
+      borderRadius: 'full',
+      padding: 3,
+      bg: {
+        light: 'rgba(255, 255, 255, 0.8)',
+        dark: 'rgba(15, 23, 42, 0.8)'
+      },
+      backdropFilter: 'blur(10px)',
+      border: '1px solid',
+      borderColor: {
+        light: 'gray.300',
+        dark: 'gray.600'
+      },
+      hover: {
+        bg: {
+          light: 'red.50',
+          dark: 'red.900'
+        },
+        borderColor: 'red.300',
+        transform: 'scale(1.1)',
+        boxShadow: 'lg'
+      },
+      active: {
+        transform: 'scale(0.95)'
+      },
+      transition: 'all 0.2s ease',
+      zIndex: 10,
+      boxShadow: 'md',
+      iconColor: {
+        light: 'gray.700',
+        dark: 'gray.200'
+      },
+      iconSize: 5
+    },
+    category: {
+      container: {
+        size: { base: 'full', sm: 'md', md: 'lg', lg: 'xl' },
+        borderRadius: { base: 'none', sm: '3xl', md: '3xl' },
+        maxW: { base: '100vw', sm: '95vw', md: '90vw', lg: '800px' },
+        maxH: { base: '100dvh', sm: '85vh', md: '80vh' }
+      },
+      header: {
+        padding: { base: 8, sm: 8, md: 8 },
+        fontSize: { base: 'lg', sm: 'xl', md: '2xl' },
+        iconPadding: { base: 2, sm: 2, md: 2 },
+        iconSize: { base: 'lg', sm: 'lg', md: 'lg' },
+        titleFontSize: { base: 'sm', sm: 'sm', md: 'sm' }
+      },
+      closeButton: {
+        size: { base: 'lg', sm: 'lg', md: 'lg' },
+        top: { base: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', sm: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)', md: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' },
+        right: { base: 4, sm: 6, md: 8 }
+      },
+      body: {
+        padding: { base: 4, sm: 5, md: 6 }
+      },
+      categoryCard: {
+        padding: { base: 4, sm: 5, md: 6 },
+        spacing: { base: 3, sm: 3, md: 3 }
+      },
+      categoryHeader: {
+        spacing: { base: 3, sm: 3, md: 3 },
+        indicatorSize: { base: 4, sm: 4, md: 4 },
+        titleFontSize: { base: 'md', sm: 'md', md: 'lg' },
+        valueFontSize: { base: 'md', sm: 'md', md: 'lg' },
+        percentageFontSize: { base: 'sm', sm: 'sm', md: 'sm' }
+      },
+      progress: {
+        size: { base: 'md', sm: 'lg', md: 'lg' }
+      },
+      table: {
+        headerFontSize: { base: 'xs', sm: 'sm', md: 'sm' },
+        cellFontSize: { base: 'xs', sm: 'sm', md: 'sm' },
+        padding: { base: 3, sm: 3, md: 3 }
+      },
+      button: {
+        size: { base: 'sm', sm: 'sm', md: 'sm' },
+        marginTop: { base: 3, sm: 3, md: 3 }
+      },
+      empty: {
+        padding: { base: 4, sm: 6, md: 6 },
+        titleFontSize: { base: 'md', sm: 'lg', md: 'lg' },
+        descriptionFontSize: { base: 'sm', sm: 'sm', md: 'sm' }
+      }
+    }
+  },
   header: {
     icon: {
       boxSize: { base: 7, md: 6 },
@@ -395,7 +488,7 @@ export const getResponsiveStyles = () => ({
       spacing: { base: 4, sm: 5, md: 6 }
     },
     header: {
-      direction: { base: 'column' as const, sm: 'row' as const },
+      direction: { base: 'row' as const, sm: 'row' as const },
       gap: { base: 3, sm: 4, md: 4 },
       icon: {
         padding: { base: 2, sm: 2.5, md: 3 },

@@ -110,10 +110,9 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                 {/* Header */}
                 <Flex
                   direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'center', sm: 'center' }}
+                  align={{ base: 'stretch', sm: 'center' }}
                   justify="space-between"
                   gap={responsiveStyles.addTransactionSection.header.gap}
-                  textAlign={{ base: 'center', sm: 'left' }}
                   w="full"
                 >
                   <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
@@ -139,7 +138,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       <Icon as={Sparkles} boxSize={responsiveStyles.addTransactionSection.header.icon.size} color="white" />
                     </Box>
 
-                    <VStack align={{ base: 'center', sm: 'start' }} spacing={0} flex="1">
+                    <VStack align="start" spacing={0} flex="1">
                       <Heading
                         size={responsiveStyles.addTransactionSection.header.title.size}
                         bg={useColorModeValue(
@@ -148,7 +147,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         )}
                         bgClip="text"
                         fontWeight="800"
-                        textAlign={{ base: 'center', sm: 'left' }}
+                        textAlign="left"
                       >
                         Quick Actions
                       </Heading>
@@ -157,7 +156,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         color={colors.text.secondary}
                         fontWeight="400"
                         opacity={0.8}
-                        textAlign={{ base: 'center', sm: 'left' }}
+                        textAlign="left"
                         display={{ base: 'none', sm: 'block' }}
                       >
                         Choose an action to quickly add a transaction

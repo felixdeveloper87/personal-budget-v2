@@ -16,6 +16,4 @@ export * from './auth'
 // Transaction Components - Transaction specific components
 export * from './transactions'
 
-// Modal Components - Modal-specific components
-export * from './modal'
 

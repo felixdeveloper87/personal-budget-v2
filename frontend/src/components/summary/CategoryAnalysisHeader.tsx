@@ -37,7 +37,7 @@ export default function CategoryAnalysisHeader({
   return (
     <Flex
       direction={responsiveStyles.addTransactionSection.header.direction}
-      align="center"
+      align={{ base: 'stretch', sm: 'center' }}
       justify="space-between"
       gap={responsiveStyles.addTransactionSection.header.gap}
     >
@@ -66,13 +66,13 @@ export default function CategoryAnalysisHeader({
           />
         </Box>
 
-        <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+        <VStack align="start" spacing={1} flex="1">
           <Heading
             size={responsiveStyles.addTransactionSection.header.title.size}
             bg={titleBg}
             bgClip="text"
             fontWeight="800"
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
           >
             Category Analysis
           </Heading>
@@ -81,7 +81,7 @@ export default function CategoryAnalysisHeader({
             color={colors.text.secondary}
             fontWeight="400"
             opacity={0.8}
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
             display={{ base: 'none', sm: 'block' }}
           >
             Detailed category breakdown and insights
@@ -90,7 +90,7 @@ export default function CategoryAnalysisHeader({
       </HStack>
 
       {/* Right side - Tab Buttons */}
-      <HStack spacing={2} align="center">
+      <HStack spacing={2} align="center" justify="center">
         <Button
           size="sm"
           variant={activeTab === 'expenses' ? 'solid' : 'outline'}
