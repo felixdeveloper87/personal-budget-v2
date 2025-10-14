@@ -4,7 +4,7 @@ import {
 } from '@chakra-ui/react'
 import { Search, Sparkles, Calendar, Tag } from 'lucide-react'
 import { SearchFiltersProps } from '../../types'
-import { safariStyles } from '../../utils/ui'
+import { safariStyles, getResponsiveStyles } from '../../utils/ui'
 
 export default function SearchFilters({ 
   filters, 
@@ -12,6 +12,7 @@ export default function SearchFilters({
   onTypeChange, 
   availableCategories 
 }: SearchFiltersProps) {
+  const responsiveStyles = getResponsiveStyles()
   return (
     <VStack 
       spacing={{ base: 4, md: 6 }} 
@@ -136,13 +137,10 @@ export default function SearchFilters({
             {availableCategories.map((cat) => (
               <WrapItem key={cat}>
                 <Button
-                  size={{ base: 'md', sm: 'sm' }}
+                  {...responsiveStyles.buttons.category}
                   variant={filters.category === cat ? 'solid' : 'outline'}
                   colorScheme={filters.category === cat ? 'blue' : 'gray'}
                   borderRadius="full"
-                  h={{ base: '40px', sm: '36px' }}
-                  px={{ base: 4, sm: 3 }}
-                  fontSize={{ base: 'sm', sm: 'xs' }}
                   fontWeight="600"
                   bg={filters.category === cat ? 
                     useColorModeValue('blue.500', 'blue.600') : 

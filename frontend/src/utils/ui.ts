@@ -71,6 +71,95 @@ export const safariStyles = {
   }
 }
 
+// Responsive table utilities
+export const getTableStyles = () => ({
+  container: {
+    w: 'full',
+    overflow: 'visible' as const
+  },
+  table: {
+    variant: 'simple' as const,
+    size: 'sm' as const,
+    w: 'full'
+  },
+  columns: {
+    date: {
+      minW: { base: '100px', sm: '120px' },
+      w: { base: '100px', sm: '120px' }
+    },
+    description: {
+      // Flexível - ocupa espaço restante
+    },
+    amount: {
+      minW: { base: '100px', sm: '120px' },
+      w: { base: '100px', sm: '120px' }
+    }
+  }
+})
+
+// Mobile detection and responsive utilities - iPhone 14 Pro as mobile base
+export const getResponsiveStyles = () => ({
+  modal: {
+    maxH: { base: '100vh', md: '90vh' },
+    h: { base: '100vh', md: 'auto' }
+  },
+  content: {
+    maxH: { base: 'calc(100vh - 100px)', md: 'none' },
+    minH: '0'
+  },
+  spacing: {
+    container: { base: 3, md: 5, lg: 6 },
+    stack: { base: 3, md: 4, lg: 6 }
+  },
+  buttons: {
+    category: {
+      size: 'sm',
+      height: '28px',
+      padding: 2,
+      fontSize: 'xs'
+    },
+    expand: {
+      size: 'xs',
+      height: '24px',
+      padding: 1,
+      fontSize: 'xs'
+    }
+  },
+  categoryList: {
+    spacing: { base: 2, md: 3 },
+    header: {
+      fontSize: { base: 'sm', md: 'lg' },
+      marginBottom: { base: 2, md: 3 }
+    },
+    badge: {
+      padding: { base: 1, md: 3 },
+      fontSize: { base: 'xs', md: 'sm' }
+    },
+    controls: {
+      fontSize: { base: 'xs', md: 'sm' },
+      spacing: { base: 1, md: 2 }
+    }
+  },
+  categoryCard: {
+    header: {
+      padding: { base: 3, md: 4 },
+      fontSize: { base: 'sm', md: 'lg' },
+      height: { base: '48px', md: 'auto' }
+    },
+    badge: {
+      fontSize: { base: 'xs', md: 'sm' },
+      padding: { base: 1, md: 2 }
+    },
+    amount: {
+      fontSize: { base: 'md', md: 'xl' }
+    },
+    table: {
+      fontSize: { base: 'xs', md: 'sm' },
+      padding: { base: 2, md: 3 }
+    }
+  }
+})
+
 // Common styles
 export const commonStyles = {
   borderRadius: '2xl',

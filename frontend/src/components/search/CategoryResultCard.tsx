@@ -18,7 +18,7 @@ import {
 import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import { formatDateBR } from '../../utils/dateTime'
-import { getTypeColor } from '../../utils/ui'
+import { getTypeColor, getTableStyles, getResponsiveStyles } from '../../utils/ui'
 import { CategoryResultCardProps } from '../../types'
 
 const CategoryResultCard = memo(function CategoryResultCard({
@@ -33,6 +33,8 @@ const CategoryResultCard = memo(function CategoryResultCard({
   const textColor = useColorModeValue('gray.600', 'gray.400')
   const headerBg = useColorModeValue('gray.50', 'gray.700')
   const typeColor = getTypeColor(type)
+  const tableStyles = getTableStyles()
+  const responsiveStyles = getResponsiveStyles()
 
   // Memoized calculations
   const categoryTotal = useMemo(() => {
@@ -53,8 +55,8 @@ const CategoryResultCard = memo(function CategoryResultCard({
       {/* Category Header */}
       <Button
         w="full"
-        h="auto"
-        p={4}
+        h={responsiveStyles.categoryCard.header.height}
+        p={responsiveStyles.categoryCard.header.padding}
         bg={headerBg}
         borderRadius="none"
         onClick={onToggle}
@@ -63,34 +65,35 @@ const CategoryResultCard = memo(function CategoryResultCard({
         justifyContent="space-between"
         variant="ghost"
       >
-        <HStack spacing={4} flex={1}>
-          <Icon as={Tag} boxSize={5} color={typeColor} />
+        <HStack spacing={{ base: 2, md: 4 }} flex={1}>
+          <Icon as={Tag} boxSize={{ base: 4, md: 5 }} color={typeColor} />
           <VStack align="start" spacing={1} flex={1}>
-            <Text fontSize="lg" fontWeight="bold" color={textColor}>
+            <Text fontSize={responsiveStyles.categoryCard.header.fontSize} fontWeight="bold" color={textColor}>
               {category}
             </Text>
-            <HStack spacing={4}>
-              <Text fontSize="sm" color={textColor}>
+            <HStack spacing={{ base: 2, md: 4 }}>
+              <Text fontSize={responsiveStyles.categoryCard.table.fontSize} color={textColor}>
                 {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
               </Text>
               <Badge 
                 colorScheme={type === 'INCOME' ? 'green' : 'red'} 
                 variant="subtle"
-                px={2}
+                px={responsiveStyles.categoryCard.badge.padding}
                 py={1}
                 borderRadius="md"
+                fontSize={responsiveStyles.categoryCard.badge.fontSize}
               >
                 {type === 'INCOME' ? 'Income' : 'Expense'}
               </Badge>
             </HStack>
           </VStack>
           <HStack spacing={2}>
-            <Text fontSize="xl" fontWeight="bold" color={typeColor}>
+            <Text fontSize={responsiveStyles.categoryCard.amount.fontSize} fontWeight="bold" color={typeColor}>
               £{categoryTotal.toFixed(2)}
             </Text>
             <Icon 
               as={isExpanded ? ChevronUp : ChevronDown} 
-              boxSize={5} 
+              boxSize={{ base: 4, md: 5 }} 
               color={textColor} 
             />
           </HStack>
@@ -99,11 +102,11 @@ const CategoryResultCard = memo(function CategoryResultCard({
 
       {/* Transactions Table */}
       <Collapse in={isExpanded} animateOpacity>
-        <Box p={0} overflow="visible">
-          <Table variant="simple" size="sm" w="full">
+        <Box p={0} {...tableStyles.container}>
+          <Table {...tableStyles.table}>
             <Thead bg={headerBg}>
               <Tr>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" minW="120px" w="120px">
+                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" {...tableStyles.columns.date}>
                   <HStack spacing={1}>
                     <Icon as={Calendar} boxSize={3} />
                     <Text>Date</Text>
@@ -112,7 +115,7 @@ const CategoryResultCard = memo(function CategoryResultCard({
                 <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase">
                   Description
                 </Th>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" isNumeric minW="100px" w="100px">
+                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" isNumeric {...tableStyles.columns.amount}>
                   <HStack spacing={1} justify="flex-end">
                     <Icon as={DollarSign} boxSize={3} />
                     <Text>Amount</Text>
@@ -127,10 +130,10 @@ const CategoryResultCard = memo(function CategoryResultCard({
                   _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
                   transition="background-color 0.2s"
                 >
-                  <Td color={textColor} fontSize="sm" minW="120px" w="120px">
+                  <Td color={textColor} fontSize={responsiveStyles.categoryCard.table.fontSize} {...tableStyles.columns.date}>
                     {formatDateBR((transaction as any).date || transaction.dateTime)}
                   </Td>
-                  <Td color={textColor} fontSize="sm">
+                  <Td color={textColor} fontSize={responsiveStyles.categoryCard.table.fontSize}>
                     <Text 
                       isTruncated 
                       title={transaction.description}
@@ -139,9 +142,9 @@ const CategoryResultCard = memo(function CategoryResultCard({
                       {transaction.description}
                     </Text>
                   </Td>
-                  <Td isNumeric minW="100px" w="100px">
+                  <Td isNumeric {...tableStyles.columns.amount}>
                     <Text 
-                      fontSize="sm" 
+                      fontSize={responsiveStyles.categoryCard.table.fontSize} 
                       fontWeight="600" 
                       color={typeColor}
                       whiteSpace="nowrap"

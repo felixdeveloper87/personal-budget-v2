@@ -12,6 +12,7 @@ import { memo, useMemo, useState, useCallback } from 'react'
 import CategoryResultCard from './CategoryResultCard'
 import { Transaction } from '../../types'
 import { CategoryResultsListProps } from '../../types'
+import { getResponsiveStyles } from '../../utils/ui'
 
 const CategoryResultsList = memo(function CategoryResultsList({
   transactions,
@@ -19,6 +20,7 @@ const CategoryResultsList = memo(function CategoryResultsList({
 }: CategoryResultsListProps) {
   const textColor = useColorModeValue('gray.600', 'gray.400')
   const emptyStateColor = useColorModeValue('gray.500', 'gray.500')
+  const responsiveStyles = getResponsiveStyles()
 
   // State for expanded categories
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set())
@@ -90,28 +92,86 @@ const CategoryResultsList = memo(function CategoryResultsList({
   }
 
   return (
-    <VStack spacing={4} align="stretch" w="full">
+    <VStack spacing={responsiveStyles.categoryList.spacing} align="stretch" w="full">
       {/* Results Header */}
       <Box w="full">
-        <HStack justify="space-between" align="center" mb={4}>
-          <HStack spacing={3}>
-            <Text fontSize="lg" fontWeight="bold" color={textColor}>
+        {/* Mobile Layout - Stacked */}
+        <VStack spacing={2} align="stretch" display={{ base: 'flex', md: 'none' }}>
+          <HStack justify="space-between" align="center">
+            <Text fontSize={responsiveStyles.categoryList.header.fontSize} fontWeight="bold" color={textColor}>
               Results by Category
             </Text>
             <Badge 
               colorScheme="blue" 
               variant="subtle" 
-              px={3} 
+              px={responsiveStyles.categoryList.badge.padding}
               py={1} 
               borderRadius="full"
+              fontSize={responsiveStyles.categoryList.badge.fontSize}
             >
               {groupedTransactions.length} categor{groupedTransactions.length !== 1 ? 'ies' : 'y'}
             </Badge>
           </HStack>
           
           {groupedTransactions.length > 1 && (
-            <HStack spacing={2}>
-              <Text fontSize="sm" color={textColor}>
+            <HStack justify="space-between" align="center">
+              <Text fontSize={responsiveStyles.categoryList.controls.fontSize} color={textColor}>
+                {allExpanded ? 'All expanded' : `${expandedCategories.size}/${groupedTransactions.length} expanded`}
+              </Text>
+              {allExpanded ? (
+                <Badge 
+                  colorScheme="red" 
+                  variant="outline" 
+                  cursor="pointer"
+                  onClick={collapseAll}
+                  _hover={{ bg: useColorModeValue('red.50', 'red.900') }}
+                  px={2}
+                  py={1}
+                  borderRadius="md"
+                  {...responsiveStyles.buttons.expand}
+                >
+                  Collapse All
+                </Badge>
+              ) : (
+                <Badge 
+                  colorScheme="green" 
+                  variant="outline" 
+                  cursor="pointer"
+                  onClick={expandAll}
+                  _hover={{ bg: useColorModeValue('green.50', 'green.900') }}
+                  px={2}
+                  py={1}
+                  borderRadius="md"
+                  {...responsiveStyles.buttons.expand}
+                >
+                  Expand All
+                </Badge>
+              )}
+            </HStack>
+          )}
+        </VStack>
+
+        {/* Desktop Layout - Horizontal */}
+        <HStack justify="space-between" align="center" mb={responsiveStyles.categoryList.header.marginBottom} display={{ base: 'none', md: 'flex' }}>
+          <HStack spacing={responsiveStyles.categoryList.controls.spacing}>
+            <Text fontSize={responsiveStyles.categoryList.header.fontSize} fontWeight="bold" color={textColor}>
+              Results by Category
+            </Text>
+            <Badge 
+              colorScheme="blue" 
+              variant="subtle" 
+              px={responsiveStyles.categoryList.badge.padding}
+              py={1} 
+              borderRadius="full"
+              fontSize={responsiveStyles.categoryList.badge.fontSize}
+            >
+              {groupedTransactions.length} categor{groupedTransactions.length !== 1 ? 'ies' : 'y'}
+            </Badge>
+          </HStack>
+          
+          {groupedTransactions.length > 1 && (
+            <HStack spacing={responsiveStyles.categoryList.controls.spacing}>
+              <Text fontSize={responsiveStyles.categoryList.controls.fontSize} color={textColor}>
                 {allExpanded ? 'All expanded' : `${expandedCategories.size}/${groupedTransactions.length} expanded`}
               </Text>
               <Box>
@@ -125,6 +185,7 @@ const CategoryResultsList = memo(function CategoryResultsList({
                     px={2}
                     py={1}
                     borderRadius="md"
+                    {...responsiveStyles.buttons.expand}
                   >
                     Collapse All
                   </Badge>
@@ -138,6 +199,7 @@ const CategoryResultsList = memo(function CategoryResultsList({
                     px={2}
                     py={1}
                     borderRadius="md"
+                    {...responsiveStyles.buttons.expand}
                   >
                     Expand All
                   </Badge>

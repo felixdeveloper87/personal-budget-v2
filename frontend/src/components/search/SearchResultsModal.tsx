@@ -21,7 +21,7 @@ import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles } from '../../utils/ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 
@@ -36,6 +36,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const [error, setError] = useState<string | null>(null)
 
   const gradients = getGradients()
+  const responsiveStyles = getResponsiveStyles()
   const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.400')
 
@@ -128,11 +129,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
       <ModalContent 
         borderRadius={{ base: 'none', sm: '3xl' }}
         overflow="hidden"
-        maxH={{ base: '100vh', sm: '90vh' }}
-        h={{ base: '100vh', sm: 'auto' }}
         m={{ base: 0, sm: 4 }}
         display="flex"
         flexDirection="column"
+        {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
           ...safariStyles.modal,
@@ -241,10 +241,9 @@ const SearchResultsModal = memo(function SearchResultsModal({
           {/* Content */}
           <Box 
             flex="1" 
-            p={{ base: 4, sm: 5, md: 6 }}
+            p={responsiveStyles.spacing.container}
             overflowY="auto"
-            minH="0"
-            maxH={{ base: 'calc(100vh - 120px)', sm: 'none' }}
+            {...responsiveStyles.content}
             sx={{
               ...safeAreaStyles.content,
               ...safariStyles.scrollable,

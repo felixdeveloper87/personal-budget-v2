@@ -8,11 +8,12 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles } from '../../utils/ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
   const gradients = getGradients()
+  const responsiveStyles = getResponsiveStyles()
   const {
     filters,
     showResults,
@@ -52,13 +53,12 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         backdropFilter="blur(10px)"
       />
       <ModalContent 
-        borderRadius={{ base: 'none', sm: '3xl' }}
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
-        maxH={{ base: '100dvh', sm: '90vh' }}
-        h={{ base: '100dvh', sm: 'auto' }}
-        m={{ base: 0, sm: 4 }}
+        m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
+        {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
           ...safariStyles.modal
@@ -132,10 +132,9 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
               {/* Modal content - Scrollable */}
               <Box 
                 flex="1" 
-                p={{ base: 4, sm: 5, md: 6 }}
+                p={responsiveStyles.spacing.container}
                 overflowY="auto"
-                minH="0"
-                maxH={{ base: 'calc(100dvh - 140px)', sm: 'none' }}
+                {...responsiveStyles.content}
                 sx={{
                   ...safeAreaStyles.content,
                   ...safariStyles.scrollable
