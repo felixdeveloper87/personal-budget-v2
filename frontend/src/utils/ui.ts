@@ -35,6 +35,15 @@ export const getTypeColor = (type: 'INCOME' | 'EXPENSE') => {
   )
 }
 
+// Scrollbar utilities
+export const getScrollbarStyles = (useColorModeValue: any) => ({
+  ...safariStyles.scrollbar,
+  '&::-webkit-scrollbar-thumb': {
+    background: useColorModeValue('rgba(0,0,0,0.2)', 'rgba(255,255,255,0.2)'),
+    borderRadius: '4px'
+  }
+})
+
 // Safe area utilities
 export const safeAreaStyles = {
   container: {
@@ -68,6 +77,20 @@ export const safariStyles = {
   hardwareAcceleration: {
     WebkitTransform: 'translateZ(0)' as const,
     transform: 'translateZ(0)' as const,
+  },
+  scrollbar: {
+    WebkitOverflowScrolling: 'touch' as const,
+    overflowScrolling: 'touch' as const,
+    '&::-webkit-scrollbar': {
+      width: '8px',
+      display: 'block'
+    },
+    '&::-webkit-scrollbar-track': {
+      background: 'transparent'
+    },
+    '&::-webkit-scrollbar-thumb': {
+      borderRadius: '4px'
+    }
   }
 }
 

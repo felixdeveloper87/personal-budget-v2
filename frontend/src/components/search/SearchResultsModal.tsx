@@ -21,7 +21,7 @@ import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles } from '../../utils/ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 
@@ -37,6 +37,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
 
   const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
+  const scrollbarStyles = getScrollbarStyles(useColorModeValue)
   const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.400')
 
@@ -139,10 +140,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
           // Safari specific fixes
           WebkitFlex: '1 1 auto',
           flex: '1 1 auto',
-          minHeight: 0,
-          // Force scrollbar on Safari
-          WebkitOverflowScrolling: 'touch',
-          overflowY: 'auto'
+          minHeight: 0
         }}
       >
         {/* Decorative background */}
@@ -252,25 +250,11 @@ const SearchResultsModal = memo(function SearchResultsModal({
             sx={{
               ...safeAreaStyles.content,
               ...safariStyles.scrollable,
+              ...scrollbarStyles,
               // Safari specific fixes
               WebkitFlex: '1 1 auto',
               flex: '1 1 auto',
-              position: 'relative',
-              // Force scrollbar on Safari
-              WebkitOverflowScrolling: 'touch',
-              overflowScrolling: 'touch',
-              // Ensure scrollbar is visible
-              '&::-webkit-scrollbar': {
-                width: '8px',
-                display: 'block'
-              },
-              '&::-webkit-scrollbar-track': {
-                background: 'transparent'
-              },
-              '&::-webkit-scrollbar-thumb': {
-                background: useColorModeValue('rgba(0,0,0,0.2)', 'rgba(255,255,255,0.2)'),
-                borderRadius: '4px'
-              }
+              position: 'relative'
             }}
           >
             {isLoading ? (
