@@ -76,7 +76,7 @@ export default function TransactionForm({
           
           await createInstallmentPlan({
             totalInstallments: installments,
-            installmentValue: Number(amount),
+            installmentValue: Number(amount) / installments,
             category,
             description,
             startDate: selectedDate.toISOString().slice(0, 10), // Keep as date string for API
@@ -85,7 +85,7 @@ export default function TransactionForm({
 
           toast({
             title: '✅ Installment plan created!',
-            description: `${installments}x of £${amount.toFixed(2)}`,
+            description: `${installments}x of £${(Number(amount) / installments).toFixed(2)}`,
             status: 'success',
             duration: 3000,
             isClosable: true,
