@@ -375,7 +375,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                 color: colors.text.primary,
                 fontWeight: '600'
               }}
-              formatter={(value) => [`£${value}`, 'Amount']}
+              formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
             />
             <Line 
               type="monotone" 

@@ -258,7 +258,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
                 color: colors.text.primary,
                 fontWeight: '600'
               }}
-              formatter={(value) => [`£${value}`, 'Balance']}
+              formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Balance']}
             />
             <Line 
               type="monotone" 
@@ -332,7 +332,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
                 color: colors.text.primary,
                 fontWeight: '600'
               }}
-              formatter={(value, name) => [`£${value}`, name === 'income' ? 'Income' : name === 'expense' ? 'Expense' : 'Net']}
+              formatter={(value, name) => [`£${Number(value).toFixed(2)}`, name === 'income' ? 'Income' : name === 'expense' ? 'Expense' : 'Net']}
             />
             <Bar 
               dataKey="income" 

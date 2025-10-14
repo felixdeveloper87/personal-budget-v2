@@ -375,7 +375,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 color: colors.text.primary,
                 fontWeight: '600'
               }}
-              formatter={(value) => [`£${value}`, 'Amount']}
+              formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
             />
             <Line 
               type="monotone" 
