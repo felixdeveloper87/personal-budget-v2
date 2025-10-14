@@ -2,7 +2,9 @@ import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useC
 import { Transaction } from '../../types'
 import CategoryModal from '../modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
-import { TrendingUp, BarChart3, Eye, Sparkles, Plus } from 'lucide-react'
+import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
+import { getResponsiveStyles, getGradients, animations } from '../../utils/ui'
+import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface IncomeChartProps {
   transactions: Transaction[]
@@ -11,15 +13,10 @@ interface IncomeChartProps {
 
 export default function IncomeChart({ transactions, selectedPeriod }: IncomeChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const bgColor = useColorModeValue('white', 'gray.800')
+  const colors = useThemeColors()
+  const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
   const isMobile = useBreakpointValue({ base: true, md: false })
-
-  // Animações customizadas
-  const slideIn = 'slideIn 0.6s ease-out'
-  const float = 'float 3s ease-in-out infinite'
-  const pulse = 'pulse 2s ease-in-out infinite'
-  const glow = 'glow 2s ease-in-out infinite'
 
   const handleClose = useCallback(() => {
     onClose()
@@ -57,37 +54,37 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         backdropFilter="blur(20px)"
         border="2px solid"
         borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
-        borderRadius="2xl"
-        p={6}
+        borderRadius={responsiveStyles.charts.container.borderRadius}
+        p={responsiveStyles.charts.container.padding}
         boxShadow="xl"
         w="full"
         sx={{
-          animation: slideIn,
+          animation: animations.slideIn,
           '@keyframes slideIn': {
             from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
             to: { opacity: 1, transform: 'translateY(0) scale(1)' },
           }
         }}
       >
-        <VStack spacing={4} align="center" py={8}>
+        <VStack spacing={4} align="center" py={responsiveStyles.charts.empty.padding}>
           <Box
-            p={4}
+            p={responsiveStyles.charts.empty.iconPadding}
             borderRadius="full"
             bg={useColorModeValue('green.50', 'green.900')}
             sx={{
-              animation: pulse,
-              '@keyframes pulse': {
+              animation: animations.glow,
+              '@keyframes glow': {
                 '0%, 100%': { transform: 'scale(1)' },
                 '50%': { transform: 'scale(1.05)' },
               }
             }}
           >
-            <Icon as={BarChart3} boxSize={8} color={useColorModeValue('green.500', 'green.400')} />
+            <Icon as={BarChart3} boxSize={responsiveStyles.charts.empty.iconSize} color={useColorModeValue('green.500', 'green.400')} />
           </Box>
-          <Text fontSize="lg" fontWeight="600" color={textColor} textAlign="center">
+          <Text fontSize={responsiveStyles.charts.empty.titleFontSize} fontWeight="600" color={colors.text.primary} textAlign="center">
             No income data available
           </Text>
-          <Text fontSize="sm" color={useColorModeValue('gray.500', 'gray.400')} textAlign="center">
+          <Text fontSize={responsiveStyles.charts.empty.descriptionFontSize} color={colors.text.secondary} textAlign="center">
             Add some income to see your earnings breakdown
           </Text>
         </VStack>
@@ -103,12 +100,12 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         backdropFilter="blur(20px)"
         border="2px solid"
         borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
-        borderRadius="2xl"
-        p={6}
+        borderRadius={responsiveStyles.charts.container.borderRadius}
+        p={responsiveStyles.charts.container.padding}
         boxShadow="xl"
         w="full"
         sx={{
-          animation: slideIn,
+          animation: animations.slideIn,
           '@keyframes slideIn': {
             from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
             to: { opacity: 1, transform: 'translateY(0) scale(1)' },
@@ -132,11 +129,11 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
           zIndex={0}
         />
 
-        <VStack spacing={6} align="stretch" position="relative" zIndex={1}>
+        <VStack spacing={responsiveStyles.charts.header.spacing} align="stretch" position="relative" zIndex={1}>
           {/* Header compacto */}
-          <HStack spacing={3} align="center">
+          <HStack spacing={responsiveStyles.charts.header.spacing} align="center">
             <Box
-              p={2}
+              p={responsiveStyles.charts.header.icon.padding}
               borderRadius="xl"
               bg={useColorModeValue(
                 'linear-gradient(135deg, #22c55e, #16a34a)',
@@ -144,11 +141,11 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               )}
               boxShadow="md"
             >
-              <Icon as={TrendingUp} boxSize={4} color="white" />
+              <Icon as={TrendingUp} boxSize={responsiveStyles.charts.header.icon.size} color="white" />
             </Box>
             <VStack align="start" spacing={0.5}>
               <Heading
-                size="md"
+                size={responsiveStyles.charts.header.title.size}
                 bg={useColorModeValue(
                   'linear-gradient(135deg, #1e293b, #475569)',
                   'linear-gradient(135deg, #f8fafc, #e2e8f0)'
@@ -160,8 +157,8 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 Income Analysis
               </Heading>
               <Text
-                fontSize={{ base: 'xs', sm: 'sm' }}
-                color={useColorModeValue('gray.500', 'gray.400')}
+                fontSize={responsiveStyles.charts.header.title.fontSize}
+                color={colors.text.secondary}
                 fontWeight="400"
                 opacity={0.8}
               >
@@ -170,14 +167,14 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             </VStack>
           </HStack>
           
-          <HStack spacing={3}>
+          <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
             <Badge
               colorScheme="green"
               variant="solid"
               borderRadius="full"
-              px={3}
-              py={1}
-              fontSize="xs"
+              px={responsiveStyles.charts.badges.category.padding}
+              py={responsiveStyles.charts.badges.category.padding}
+              fontSize={responsiveStyles.charts.badges.category.fontSize}
               fontWeight="600"
             >
               {sortedCategories.length} Categories
@@ -186,25 +183,25 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               colorScheme="gray"
               variant="subtle"
               borderRadius="md"
-              px={2}
-              py={0.5}
-              fontSize="2xs"
+              px={responsiveStyles.charts.badges.period.padding}
+              py={responsiveStyles.charts.badges.period.padding}
+              fontSize={responsiveStyles.charts.badges.period.fontSize}
               fontWeight="400"
               opacity={0.7}
             >
               {selectedPeriod}
             </Badge>
             <Button
-              size="sm"
+              size={responsiveStyles.charts.button.size}
               variant="solid"
               colorScheme="blue"
-              rightIcon={!isMobile ? <Icon as={Eye} boxSize={4} /> : undefined}
-              leftIcon={isMobile ? <Icon as={Plus} boxSize={4} /> : undefined}
+              rightIcon={!isMobile ? <Icon as={Eye} boxSize={responsiveStyles.charts.button.iconSize} /> : undefined}
+              leftIcon={isMobile ? undefined : undefined}
               onClick={onOpen}
               borderRadius="lg"
-              px={isMobile ? 3 : 4}
-              py={2}
-              fontSize="sm"
+              px={responsiveStyles.charts.button.padding}
+              py={responsiveStyles.charts.button.padding}
+              fontSize={responsiveStyles.charts.button.fontSize}
               fontWeight="600"
               bg={useColorModeValue(
                 'linear-gradient(135deg, #60a5fa, #3b82f6)',
@@ -225,12 +222,12 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               transition="all 0.2s ease"
               boxShadow="md"
             >
-              {isMobile ? '' : `View Details (${sortedCategories.length})`}
+              {isMobile ? 'All' : `View Details (${sortedCategories.length})`}
             </Button>
           </HStack>
 
           {/* Progress bars melhorados */}
-          <VStack spacing={4} align="stretch">
+          <VStack spacing={responsiveStyles.charts.progress.container.spacing} align="stretch">
             {sortedCategories.slice(0, 5).map(({ category, amount }, index) => {
               const percentage = totalIncome > 0 ? (amount / totalIncome) * 100 : 0
               const color = categoryColors[index % categoryColors.length]
@@ -238,49 +235,50 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               return (
                 <Box 
                   key={category}
-                  p={4}
+                  p={responsiveStyles.charts.progress.item.padding}
                   bg={useColorModeValue('rgba(255,255,255,0.5)', 'rgba(255,255,255,0.05)')}
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
                   sx={{
-                    animation: `${slideIn} ${index * 0.1}s ease-out`,
+                    animation: `${animations.slideIn} ${index * 0.1}s ease-out`,
                     '@keyframes slideIn': {
                       from: { opacity: 0, transform: 'translateX(-20px)' },
                       to: { opacity: 1, transform: 'translateX(0)' },
                     }
                   }}
                 >
-                  <HStack justify="space-between" mb={3}>
-                    <HStack spacing={3}>
+                  <HStack justify="space-between" mb={responsiveStyles.charts.progress.item.spacing}>
+                    <HStack spacing={responsiveStyles.charts.progress.item.spacing}>
                       <Box
-                        w={3}
-                        h={3}
+                        w={responsiveStyles.charts.progress.indicator.size}
+                        h={responsiveStyles.charts.progress.indicator.size}
                         borderRadius="full"
                         bg={color}
                         sx={{
-                          animation: pulse,
-                          '@keyframes pulse': {
+                          animation: `${animations.shimmer} 4s ease-in-out infinite`,
+                          '@keyframes shimmer': {
                             '0%, 100%': { opacity: 1 },
                             '50%': { opacity: 0.7 },
                           }
                         }}
                       />
-                      <Text fontSize="sm" fontWeight="600" color={textColor}>
+                      <Text fontSize={responsiveStyles.charts.progress.text.fontSize} fontWeight="600" color={colors.text.primary}>
                         {category}
                       </Text>
                     </HStack>
-                    <Text fontSize="sm" fontWeight="700" color={textColor}>
+                    <Text fontSize={responsiveStyles.charts.progress.text.valueFontSize} fontWeight="700" color={colors.text.primary}>
                       £{amount.toFixed(2)}
                     </Text>
                   </HStack>
                   
                   <Progress
                     value={percentage}
-                    size="lg"
+                    size={responsiveStyles.charts.progress.bar.size}
                     borderRadius="full"
                     bg={useColorModeValue('gray.100', 'gray.700')}
                     sx={{
+                      height: responsiveStyles.charts.progress.bar.height,
                       '& > div': {
                         background: `linear-gradient(90deg, ${color} 0%, ${color}CC 100%)`,
                         borderRadius: 'full',
@@ -289,7 +287,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                     }}
                   />
                   
-                  <Text fontSize="xs" color={useColorModeValue('gray.500', 'gray.400')} mt={2}>
+                  <Text fontSize={responsiveStyles.charts.progress.text.percentageFontSize} color={colors.text.secondary} mt={2}>
                     {percentage.toFixed(1)}% of total income
                   </Text>
                 </Box>
@@ -300,15 +298,15 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             {sortedCategories.length > 5 && (
               <Box 
                 textAlign="center" 
-                py={4}
+                py={responsiveStyles.charts.progress.container.padding}
                 bg={useColorModeValue('rgba(255,255,255,0.3)', 'rgba(255,255,255,0.05)')}
                 borderRadius="xl"
                 border="1px dashed"
-                borderColor={useColorModeValue('gray.300', 'gray.600')}
+                borderColor={colors.border}
               >
                 <HStack justify="center" spacing={2}>
-                  <Icon as={Sparkles} boxSize={4} color={useColorModeValue('gray.500', 'gray.400')} />
-                  <Text fontSize="sm" color={textColor} fontWeight="500">
+                  <Icon as={Sparkles} boxSize={responsiveStyles.charts.button.iconSize} color={colors.text.secondary} />
+                  <Text fontSize={responsiveStyles.charts.progress.text.fontSize} color={colors.text.primary} fontWeight="500">
                     ... and {sortedCategories.length - 5} more categories
                   </Text>
                 </HStack>
@@ -318,23 +316,23 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
 
           {/* Footer melhorado */}
           <Box 
-            pt={4} 
+            pt={responsiveStyles.charts.footer.padding} 
             borderTop="2px solid" 
-            borderColor={useColorModeValue('gray.200', 'gray.700')}
+            borderColor={colors.border}
             bg={useColorModeValue('rgba(34, 197, 94, 0.05)', 'rgba(34, 197, 94, 0.1)')}
             borderRadius="xl"
-            p={4}
+            p={responsiveStyles.charts.footer.padding}
             mt={2}
           >
             <HStack justify="space-between" align="center">
-              <HStack spacing={2}>
-                <Icon as={TrendingUp} boxSize={5} color={useColorModeValue('green.500', 'green.400')} />
-                <Text fontSize="lg" fontWeight="700" color={textColor}>
+              <HStack spacing={responsiveStyles.charts.footer.spacing}>
+                <Icon as={TrendingUp} boxSize={responsiveStyles.charts.footer.iconSize} color={useColorModeValue('green.500', 'green.400')} />
+                <Text fontSize={responsiveStyles.charts.footer.titleFontSize} fontWeight="700" color={colors.text.primary}>
                   Total Income
                 </Text>
               </HStack>
               <Text
-                fontSize="2xl"
+                fontSize={responsiveStyles.charts.footer.valueFontSize}
                 fontWeight="800"
                 bg={useColorModeValue(
                   'linear-gradient(135deg, #22c55e, #16a34a)',

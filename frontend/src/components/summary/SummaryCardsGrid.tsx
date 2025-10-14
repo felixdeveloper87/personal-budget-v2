@@ -2,6 +2,7 @@ import { SimpleGrid, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
+import { getResponsiveStyles } from '../../utils/ui'
 import SummaryCard from './SummaryCard'
 
 // ✅ Tipagem explícita dos tipos válidos de card
@@ -22,6 +23,7 @@ export default function SummaryCardsGrid({
   balance, 
   onCardClick 
 }: SummaryCardsGridProps) {
+  const responsiveStyles = getResponsiveStyles()
   
   // ✅ Define stats usando cores centralizadas
   const stats: {
@@ -77,12 +79,12 @@ export default function SummaryCardsGrid({
   ], [transactions.length, income, expense, balance])
 
   return (
-    <Box p={{ base: 4, sm: 5, md: 6 }}>
+    <Box p={responsiveStyles.summaryCards.container.padding}>
       <SimpleGrid
-        columns={{ base: 2, sm: 2, md: 4 }}
-        spacing={{ base: 2, sm: 3, md: 4 }}
+        columns={responsiveStyles.summaryCards.grid.columns}
+        spacing={responsiveStyles.summaryCards.grid.spacing}
         w="full"
-        mb={6}
+        mb={2}
       >
         {stats.map((stat, index) => (
           <SummaryCard

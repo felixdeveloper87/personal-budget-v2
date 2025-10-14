@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
+import { getResponsiveStyles } from '../../utils/ui'
 
 // 🎨 Animações personalizadas
 const float = 'float 3s ease-in-out infinite'
@@ -30,6 +31,7 @@ interface SummaryCardProps {
 
 export default function SummaryCard({ stat, index, onCardClick }: SummaryCardProps) {
   const IconComponent = stat.icon
+  const responsiveStyles = getResponsiveStyles()
 
   return (
     <Card
@@ -151,12 +153,12 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         _groupHover={{ left: '100%' }}
       />
       
-      <CardBody p={{ base: 3, sm: 4, md: 5 }}>
-        <VStack spacing={{ base: 2, sm: 3 }} align="center">
+      <CardBody p={responsiveStyles.summaryCards.card.padding}>
+        <VStack spacing={responsiveStyles.summaryCards.card.spacing} align="center">
           {/* Ícone com efeito especial */}
           <Box
             position="relative"
-            p={{ base: 2, sm: 3 }}
+            p={responsiveStyles.summaryCards.icon.padding}
             borderRadius="xl"
             bg={useColorModeValue(
               `${stat.color}15`,
@@ -172,7 +174,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               }
             }}
           >
-            <Icon as={IconComponent} boxSize={{ base: 4, sm: 5 }} color={stat.color} />
+            <Icon as={IconComponent} boxSize={responsiveStyles.summaryCards.icon.size} color={stat.color} />
             {/* Efeito de brilho no ícone */}
             <Box
               position="absolute"
@@ -202,9 +204,9 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
           </Box>
           
           {/* Valores e labels */}
-          <VStack spacing={{ base: 1, sm: 1.5 }} align="center">
+          <VStack spacing={responsiveStyles.summaryCards.content.spacing} align="center">
             <Text
-              fontSize={{ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }}
+              fontSize={responsiveStyles.summaryCards.value.fontSize}
               fontWeight="900"
               color={stat.color}
               textAlign="center"
@@ -217,7 +219,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               {stat.displayValue}
             </Text>
             <Text
-              fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
+              fontSize={responsiveStyles.summaryCards.label.fontSize}
               fontWeight="700"
               color={useColorModeValue(
                 SUMMARY_CARD_COLORS[stat.id as keyof typeof SUMMARY_CARD_COLORS].textColor,

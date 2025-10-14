@@ -8,7 +8,8 @@ export const animations = {
   shimmer: 'shimmer 4s ease-in-out infinite',
   slideIn: 'slideIn 0.6s ease-out',
   glow: 'glow 3s ease-in-out infinite',
-  float: 'float 3s ease-in-out infinite'
+  float: 'float 3s ease-in-out infinite',
+  pulse: 'pulse 2s ease-in-out infinite'
 } as const
 
 // Gradient utilities
@@ -212,6 +213,104 @@ export const getResponsiveStyles = () => ({
     table: {
       fontSize: { base: 'xs', md: 'sm' },
       padding: { base: 2, md: 3 }
+    }
+  },
+  summaryCards: {
+    container: {
+      padding: { base: 3, sm: 4, md: 6 }
+    },
+    grid: {
+      columns: { base: 4, sm: 4, md: 4 },
+      spacing: { base: 1, sm: 1.5, md: 4 }
+    },
+    card: {
+      padding: { base: 2, sm: 3, md: 5 },
+      spacing: { base: 1, sm: 2, md: 3 }
+    },
+    icon: {
+      padding: { base: 1.5, sm: 2.5, md: 3 },
+      size: { base: 3, sm: 4, md: 5 }
+    },
+    content: {
+      spacing: { base: 0.5, sm: 1, md: 1.5 }
+    },
+    value: {
+      fontSize: { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' }
+    },
+    label: {
+      fontSize: { base: '3xs', sm: '2xs', md: 'xs' }
+    }
+  },
+  charts: {
+    container: {
+      padding: { base: 4, sm: 5, md: 6 },
+      borderRadius: { base: 'xl', sm: '2xl' }
+    },
+    header: {
+      spacing: { base: 2, sm: 3, md: 4 },
+      icon: {
+        padding: { base: 1.5, sm: 2, md: 2.5 },
+        size: { base: 3, sm: 4, md: 4 }
+      },
+      title: {
+        size: { base: 'sm', sm: 'md', md: 'lg' },
+        fontSize: { base: 'xs', sm: 'sm', md: 'sm' }
+      }
+    },
+    badges: {
+      container: {
+        spacing: { base: 2, sm: 3, md: 3 }
+      },
+      category: {
+        padding: { base: 2, sm: 3, md: 3 },
+        fontSize: { base: '2xs', sm: 'xs', md: 'xs' }
+      },
+      period: {
+        padding: { base: 1.5, sm: 2, md: 2 },
+        fontSize: { base: '3xs', sm: '2xs', md: '2xs' }
+      }
+    },
+    button: {
+      size: { base: 'xs', sm: 'sm', md: 'sm' },
+      padding: { base: 2, sm: 3, md: 4 },
+      fontSize: { base: '2xs', sm: 'sm', md: 'sm' },
+      iconSize: { base: 3, sm: 4, md: 4 }
+    },
+    progress: {
+      container: {
+        spacing: { base: 3, sm: 4, md: 4 },
+        padding: { base: 3, sm: 4, md: 4 }
+      },
+      item: {
+        padding: { base: 3, sm: 4, md: 4 },
+        spacing: { base: 2, sm: 3, md: 3 }
+      },
+      indicator: {
+        size: { base: 2, sm: 3, md: 3 }
+      },
+      bar: {
+        size: { base: 'sm', sm: 'md', md: 'lg' },
+        height: { base: '6px', sm: '8px', md: '12px' }
+      },
+      text: {
+        fontSize: { base: '2xs', sm: 'sm', md: 'sm' },
+        valueFontSize: { base: '2xs', sm: 'sm', md: 'sm' },
+        percentageFontSize: { base: '3xs', sm: 'xs', md: 'xs' }
+      }
+    },
+    footer: {
+      padding: { base: 3, sm: 4, md: 4 },
+      spacing: { base: 2, sm: 2, md: 2 },
+      iconSize: { base: 4, sm: 5, md: 5 },
+      titleFontSize: { base: 'sm', sm: 'md', md: 'lg' },
+      valueFontSize: { base: 'lg', sm: 'xl', md: '2xl' }
+    },
+    empty: {
+      padding: { base: 6, sm: 8, md: 8 },
+      iconPadding: { base: 3, sm: 4, md: 4 },
+      iconSize: { base: 6, sm: 8, md: 8 },
+      titleFontSize: { base: 'md', sm: 'lg', md: 'lg' },
+      descriptionFontSize: { base: 'xs', sm: 'sm', md: 'sm' }
     }
   },
   header: {
