@@ -5,11 +5,11 @@ export const useThemeColors = () => {
     // Backgrounds
     bg: useColorModeValue('linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', '#000000'),
     bgSecondary: useColorModeValue('#f1f5f9', '#0a0a0a'),
-    cardBg: useColorModeValue('white', '#111111'),
-    cardHover: useColorModeValue('#f8fafc', '#111111'),
+    cardBg: useColorModeValue('linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)', '#111111'),
+    cardHover: useColorModeValue('linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)', '#111111'),
     inputBg: useColorModeValue('#f8fafc', '#1a1a1a'),
     tabBg: useColorModeValue('#f8fafc', '#1a1a1a'),
-    tabSelectedBg: useColorModeValue('white', '#111111'),
+    tabSelectedBg: useColorModeValue('linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)', '#111111'),
     
     // Borders
     border: useColorModeValue('#cbd5e1', 'gray.800'),

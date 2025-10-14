@@ -88,7 +88,7 @@ export default function SummaryCardModal({
         h={{ base: '100dvh', md: 'auto' }}
         maxH={{ base: '100dvh', md: '90vh' }}
         borderRadius={{ base: '0', md: '2xl' }}
-        bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
+        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17,17,17,0.9)')}
         backdropFilter="blur(10px)"
         boxShadow="xl"
         border="1px solid"
@@ -261,7 +261,7 @@ interface AnimatedCardProps {
 }
 
 function AnimatedCard({ children }: AnimatedCardProps) {
-  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(26,26,26,0.6)')
+  const bg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.65) 0%, rgba(241, 245, 249, 0.65) 50%, rgba(226, 232, 240, 0.65) 100%)', 'rgba(26,26,26,0.6)')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   return (
     <motion.div

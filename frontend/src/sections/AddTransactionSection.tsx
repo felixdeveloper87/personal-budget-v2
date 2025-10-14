@@ -76,7 +76,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           {/* Card Principal */}
           <Card
             position="relative"
-            bg={useColorModeValue('rgba(255,255,255,0.9)', 'rgba(17,17,17,0.9)')}
+            bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17,17,17,0.9)')}
             backdropFilter="blur(20px)"
             border="1px solid"
             borderColor={useColorModeValue('rgba(255,255,255,0.2)', 'rgba(255,255,255,0.1)')}

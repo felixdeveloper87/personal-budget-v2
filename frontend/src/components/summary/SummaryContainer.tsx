@@ -50,7 +50,7 @@ export default function SummaryContainer({
   } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
 
   // Move useColorModeValue to top (always safe)
-  const cardBg = useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(17, 17, 17, 0.9)')
+  const cardBg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17, 17, 17, 0.9)')
   const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
 
   const handleCardClick = (cardId: string) => {

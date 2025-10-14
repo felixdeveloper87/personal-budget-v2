@@ -50,7 +50,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
     return (
       <Box
         position="relative"
-        bg={useColorModeValue('rgba(255,255,255,0.95)', 'rgba(17,17,17,0.95)')}
+        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
         backdropFilter="blur(20px)"
         border="2px solid"
         borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
@@ -96,7 +96,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
     <>
       <Box
         position="relative"
-        bg={useColorModeValue('rgba(255,255,255,0.95)', 'rgba(17,17,17,0.95)')}
+        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
         backdropFilter="blur(20px)"
         border="2px solid"
         borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}

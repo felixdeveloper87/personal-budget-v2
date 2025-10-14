@@ -90,8 +90,8 @@ const theme = extendTheme({
     // Cores modernas para o tema light
     light: {
       bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)',
-      card: '#ffffff',
-      cardHover: '#f8fafc',
+      card: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+      cardHover: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%)',
       input: '#f8fafc',
       border: '#cbd5e1',
       borderHover: '#94a3b8',
@@ -144,7 +144,7 @@ const theme = extendTheme({
     Card: {
       baseStyle: (props: any) => ({
         container: {
-          bg: props.colorMode === 'dark' ? '#111111' : 'white',
+          bg: props.colorMode === 'dark' ? '#111111' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
           borderColor: props.colorMode === 'dark' ? 'gray.800' : '#cbd5e1',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark' 
@@ -223,7 +223,7 @@ const theme = extendTheme({
     Modal: {
       baseStyle: (props: any) => ({
         dialog: {
-          bg: props.colorMode === 'dark' ? '#111111' : 'white',
+          bg: props.colorMode === 'dark' ? '#111111' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
           borderRadius: '2xl',
           border: props.colorMode === 'dark' ? '1px solid' : 'none',
           borderColor: props.colorMode === 'dark' ? 'gray.800' : 'transparent',
@@ -236,7 +236,7 @@ const theme = extendTheme({
     Drawer: {
       baseStyle: (props: any) => ({
         dialog: {
-          bg: props.colorMode === 'dark' ? '#111111' : 'white',
+          bg: props.colorMode === 'dark' ? '#111111' : 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
           border: props.colorMode === 'dark' ? '1px solid' : 'none',
           borderColor: props.colorMode === 'dark' ? 'gray.800' : 'transparent',
         },
