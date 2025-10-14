@@ -1,0 +1,189 @@
+import {
+  Modal, ModalOverlay, ModalContent, VStack, Box, Card, CardBody, useColorModeValue
+} from '@chakra-ui/react'
+import SearchResultsModal from './SearchResultsModal'
+import SearchHeader from './SearchHeader'
+import SearchFilters from './SearchFilters'
+import SearchFooter from './SearchFooter'
+import { useSearchFilters } from '../../hooks/useSearchFilters'
+import { useAuth } from '../../contexts/AuthContext'
+
+// 🎨 Custom animations
+const shimmer = 'shimmer 4s ease-in-out infinite'
+const slideIn = 'slideIn 0.6s ease-out'
+const glow = 'glow 3s ease-in-out infinite'
+const float = 'float 3s ease-in-out infinite'
+
+interface SearchModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSearch: (filters: {
+    text: string
+    type: 'income' | 'expense' | null
+    category: string
+    startDate: string
+    endDate: string
+  }) => void
+}
+
+export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
+  const { user } = useAuth()
+  const {
+    filters,
+    showResults,
+    setShowResults,
+    resetFilters,
+    updateFilter,
+    handleTypeChange,
+    handleSearch,
+    getAvailableCategories
+  } = useSearchFilters(isOpen)
+
+  const handleSearchClick = () => {
+    handleSearch()
+    // Don't call onSearch here to avoid closing the SearchModal
+    // onSearch(filters)
+  }
+
+  const handleClearAll = () => {
+    resetFilters()
+    // Don't call onSearch to avoid closing the modal
+    // Just clear filters locally
+  }
+
+  return (
+    <Modal 
+      isOpen={isOpen} 
+      onClose={onClose} 
+      size={{ base: 'full', sm: 'lg', md: 'xl' }} 
+      isCentered
+      scrollBehavior="inside"
+      closeOnOverlayClick={false}
+      closeOnEsc={true}
+      blockScrollOnMount={true}
+    >
+      <ModalOverlay 
+        bg="blackAlpha.600" 
+        backdropFilter="blur(10px)"
+      />
+      <ModalContent 
+        borderRadius={{ base: 'none', sm: '3xl' }}
+        overflow="hidden"
+        maxH={{ base: '100vh', sm: '90vh' }}
+        m={{ base: 0, sm: 4 }}
+        sx={{
+          // Safe area support for iPhone 14 Pro
+          paddingTop: 'env(safe-area-inset-top, 0px)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        {/* Decorative background */}
+        <Box
+          position="absolute"
+          top="-50px"
+          left="-50px"
+          right="-50px"
+          height="200px"
+          background={useColorModeValue(
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%)',
+            'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 185, 129, 0.2) 100%)'
+          )}
+          borderRadius="3xl"
+          filter="blur(40px)"
+          opacity={0.6}
+          zIndex={0}
+        />
+        
+        {/* Main card with glassmorphism */}
+        <Card
+          position="relative"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.95)',
+            'rgba(17, 17, 17, 0.95)'
+          )}
+          backdropFilter="blur(20px)"
+          border="1px solid"
+          borderColor={useColorModeValue(
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.1)'
+          )}
+          borderRadius={{ base: 'none', sm: '3xl' }}
+          shadow="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
+          sx={{
+            animation: slideIn,
+            '@keyframes slideIn': {
+              from: { 
+                opacity: 0, 
+                transform: 'translateY(20px) scale(0.95)' 
+              },
+              to: { 
+                opacity: 1, 
+                transform: 'translateY(0) scale(1)' 
+              }
+            }
+          }}
+        >
+          {/* Animated top bar */}
+          <Box
+            height="4px"
+            background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
+            backgroundSize="300% 100%"
+            sx={{
+              animation: shimmer,
+              '@keyframes shimmer': {
+                '0%': { backgroundPosition: '-200% 0' },
+                '100%': { backgroundPosition: '200% 0' }
+              }
+            }}
+          />
+          
+          <CardBody p={0}>
+            <VStack spacing={0} align="stretch" h="full">
+              {/* Header */}
+              <SearchHeader onClose={onClose} />
+
+              {/* Modal content */}
+              <Box 
+                flex="1" 
+                p={{ base: 4, sm: 5, md: 6 }}
+                overflowY="auto"
+                sx={{
+                  // Safe area support for iPhone 14 Pro
+                  paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+                  paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+                  paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+                  // Smooth scroll for iPhone
+                  WebkitOverflowScrolling: 'touch',
+                }}
+              >
+                <SearchFilters
+                  filters={filters}
+                  onUpdateFilter={updateFilter}
+                  onTypeChange={handleTypeChange}
+                  availableCategories={getAvailableCategories()}
+                />
+              </Box>
+
+              {/* Footer */}
+              <SearchFooter
+                onClearAll={handleClearAll}
+                onSearch={handleSearchClick}
+              />
+            </VStack>
+          </CardBody>
+        </Card>
+      </ModalContent>
+      
+      {/* Search Results Modal - Inside SearchModal */}
+      <SearchResultsModal
+        isOpen={showResults}
+        onClose={() => setShowResults(false)}
+        searchFilters={filters}
+        user={user || undefined}
+      />
+    </Modal>
+  )
+}

@@ -116,7 +116,8 @@ export { default as CategoryModal } from './CategoryModal'
 ### **1. Importar Componentes:**
 ```typescript
 // Importar de uma categoria específica
-import { FormCard, SearchModal } from '@/components/ui'
+import { FormCard } from '@/components/ui'
+import { SearchModal } from '@/components/search'
 
 // Importar de múltiplas categorias
 import { TransactionForm } from '@/components/forms'

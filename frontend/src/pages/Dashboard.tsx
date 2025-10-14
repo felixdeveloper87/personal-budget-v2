@@ -39,7 +39,7 @@ export default function Dashboard() {
         <VStack spacing={3} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
 
-          {/* Active Installment Planns - Right after Add Transaction */}
+          {/* Active Installment Plans - Right after Add Transaction */}
           <InstallmentPlansSection />
 
           {!hasActiveFilters(filters) && monthSummary && (

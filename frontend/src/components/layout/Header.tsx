@@ -25,7 +25,7 @@ import { SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { Sparkles, Zap } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearch } from '../../contexts/SearchContext'
-import SearchModal from '../ui/SearchModal'
+import SearchModal from '../search/SearchModal'
 
 interface HeaderProps {
   onOpenSettings?: () => void
