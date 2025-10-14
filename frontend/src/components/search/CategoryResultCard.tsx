@@ -13,21 +13,15 @@ import {
   Badge,
   useColorModeValue,
   Icon,
-  Collapse,
-  useDisclosure
+  Collapse
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from 'lucide-react'
 import { memo, useMemo } from 'react'
-
 import { Transaction } from '../../types'
-
-interface CategoryResultCardProps {
-  category: string
-  transactions: Transaction[]
-  type: 'INCOME' | 'EXPENSE'
-  isExpanded: boolean
-  onToggle: () => void
-}
+import { formatCurrency } from '../../utils/currency'
+import { formatDateBR } from '../../utils/dateTime'
+import { getTypeColor } from '../../utils/ui'
+import { CategoryResultCardProps } from '../../types'
 
 const CategoryResultCard = memo(function CategoryResultCard({
   category,
@@ -40,44 +34,12 @@ const CategoryResultCard = memo(function CategoryResultCard({
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const textColor = useColorModeValue('gray.600', 'gray.400')
   const headerBg = useColorModeValue('gray.50', 'gray.700')
-  const typeColor = useColorModeValue(
-    type === 'INCOME' ? 'green.600' : 'red.600',
-    type === 'INCOME' ? 'green.400' : 'red.400'
-  )
+  const typeColor = getTypeColor(type)
 
   // Memoized calculations
   const categoryTotal = useMemo(() => {
     return transactions.reduce((sum, transaction) => sum + transaction.amount, 0)
   }, [transactions])
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(amount)
-  }
-
-  const formatDateBR = (dateString: string) => {
-    try {
-      // Handle YYYY-MM-DD format from backend
-      if (dateString && dateString.includes('-')) {
-        const date = new Date(dateString + 'T00:00:00')
-        if (!isNaN(date.getTime())) {
-          return date.toLocaleDateString('pt-BR')
-        }
-      }
-      
-      // Fallback for other formats
-      const date = new Date(dateString)
-      if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('pt-BR')
-      }
-      
-      return 'Invalid Date'
-    } catch (error) {
-      return 'Invalid Date'
-    }
-  }
 
 
   return (

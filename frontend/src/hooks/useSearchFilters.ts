@@ -1,12 +1,5 @@
 import { useState, useEffect } from 'react'
-
-export interface SearchFilters {
-  text: string
-  type: 'income' | 'expense' | null
-  category: string
-  startDate: string
-  endDate: string
-}
+import { SearchFilters } from '../types'
 
 export const useSearchFilters = (isOpen: boolean) => {
   const [filters, setFilters] = useState<SearchFilters>({

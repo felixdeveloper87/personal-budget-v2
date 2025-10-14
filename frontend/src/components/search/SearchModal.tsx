@@ -7,27 +7,12 @@ import SearchFilters from './SearchFilters'
 import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
-
-// 🎨 Custom animations
-const shimmer = 'shimmer 4s ease-in-out infinite'
-const slideIn = 'slideIn 0.6s ease-out'
-const glow = 'glow 3s ease-in-out infinite'
-const float = 'float 3s ease-in-out infinite'
-
-interface SearchModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSearch: (filters: {
-    text: string
-    type: 'income' | 'expense' | null
-    category: string
-    startDate: string
-    endDate: string
-  }) => void
-}
+import { SearchModalProps } from '../../types'
+import { animations, getGradients, safeAreaStyles } from '../../utils/ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
+  const gradients = getGradients()
   const {
     filters,
     showResults,
@@ -71,11 +56,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         overflow="hidden"
         maxH={{ base: '100vh', sm: '90vh' }}
         m={{ base: 0, sm: 4 }}
-        sx={{
-          // Safe area support for iPhone 14 Pro
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-        }}
+        sx={safeAreaStyles.container}
       >
         {/* Decorative background */}
         <Box
@@ -84,10 +65,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
           left="-50px"
           right="-50px"
           height="200px"
-          background={useColorModeValue(
-            'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%)',
-            'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 185, 129, 0.2) 100%)'
-          )}
+          background={gradients.decorative}
           borderRadius="3xl"
           filter="blur(40px)"
           opacity={0.6}
@@ -113,7 +91,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
           w="full"
           h="full"
           sx={{
-            animation: slideIn,
+            animation: animations.slideIn,
             '@keyframes slideIn': {
               from: { 
                 opacity: 0, 
@@ -132,7 +110,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
             background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
             backgroundSize="300% 100%"
             sx={{
-              animation: shimmer,
+              animation: animations.shimmer,
               '@keyframes shimmer': {
                 '0%': { backgroundPosition: '-200% 0' },
                 '100%': { backgroundPosition: '200% 0' }
@@ -150,14 +128,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
                 flex="1" 
                 p={{ base: 4, sm: 5, md: 6 }}
                 overflowY="auto"
-                sx={{
-                  // Safe area support for iPhone 14 Pro
-                  paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-                  paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-                  paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
-                  // Smooth scroll for iPhone
-                  WebkitOverflowScrolling: 'touch',
-                }}
+                sx={safeAreaStyles.content}
               >
                 <SearchFilters
                   filters={filters}

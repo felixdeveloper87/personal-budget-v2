@@ -1,6 +1,5 @@
 import { 
   Box, 
-  Button, 
   Flex, 
   HStack,
   VStack, 
@@ -13,20 +12,13 @@ import {
 import { Search, Calendar } from 'lucide-react'
 import { memo } from 'react'
 import { formatTransactionDate } from '../../utils/dateTime'
-
-interface SearchSummaryHeaderProps {
-  searchFilters: {
-    text: string
-    type: 'income' | 'expense' | null
-    category: string
-    startDate: string
-    endDate: string
-  }
-}
+import { getGradients } from '../../utils/ui'
+import { SearchSummaryHeaderProps } from '../../types'
 
 const SearchSummaryHeader = memo(function SearchSummaryHeader({
   searchFilters
 }: SearchSummaryHeaderProps) {
+  const gradients = getGradients()
   const hasActiveFilters = searchFilters.text || searchFilters.type || searchFilters.category || searchFilters.startDate || searchFilters.endDate
 
   return (
@@ -35,10 +27,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
       borderBottom="1px" 
       borderColor={useColorModeValue('gray.200', 'gray.700')}
       position="relative"
-      bg={useColorModeValue(
-        'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-        'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
-      )}
+      bg={gradients.background}
       sx={{
         // Safe area support for iPhone 14 Pro
         paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',

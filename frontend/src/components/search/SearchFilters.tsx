@@ -3,14 +3,7 @@ import {
   Text, Wrap, WrapItem, Box, Icon 
 } from '@chakra-ui/react'
 import { Search, Sparkles, Calendar, Tag } from 'lucide-react'
-import { SearchFilters as SearchFiltersType } from '../../hooks/useSearchFilters'
-
-interface SearchFiltersProps {
-  filters: SearchFiltersType
-  onUpdateFilter: <K extends keyof SearchFiltersType>(key: K, value: SearchFiltersType[K]) => void
-  onTypeChange: (type: 'income' | 'expense' | null) => void
-  availableCategories: string[]
-}
+import { SearchFiltersProps } from '../../types'
 
 export default function SearchFilters({ 
   filters, 

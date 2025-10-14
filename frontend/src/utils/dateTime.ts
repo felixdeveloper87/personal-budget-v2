@@ -1,5 +1,5 @@
 /**
- * ✅ Formats a dateTime string from backend UTC (e.g. "2025-10-08T20:26:46")
+ * Formats a dateTime string from backend UTC (e.g. "2025-10-08T20:26:46")
  *    to the user's local timezone (e.g. "21:26" in London)
  */
 export function formatTransactionDateTime(dateTimeString: string) {
@@ -32,7 +32,33 @@ export function formatTransactionDateTime(dateTimeString: string) {
   export const formatTransactionTime = (s: string) =>
     formatTransactionDateTime(s).time
   
-  /** Shortcut for compact short date (e.g. “Oct 8”) */
+  /** Shortcut for compact short date (e.g. "Oct 8") */
   export const formatTransactionShortDate = (s: string) =>
     formatTransactionDateTime(s).shortDate
+
+  /**
+   * Formats date string to Brazilian format (DD/MM/YYYY)
+   * Handles both YYYY-MM-DD backend format and other date formats
+   */
+  export const formatDateBR = (dateString: string): string => {
+    try {
+      // Handle YYYY-MM-DD format from backend
+      if (dateString && dateString.includes('-')) {
+        const date = new Date(dateString + 'T00:00:00')
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('pt-BR')
+        }
+      }
+      
+      // Fallback for other formats
+      const date = new Date(dateString)
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleDateString('pt-BR')
+      }
+      
+      return 'Invalid Date'
+    } catch (error) {
+      return 'Invalid Date'
+    }
+  }
   

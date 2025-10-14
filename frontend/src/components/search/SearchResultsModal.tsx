@@ -20,24 +20,8 @@ import { useAuth } from '../../contexts/AuthContext'
 import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
-
-interface SearchResultsModalProps {
-  isOpen: boolean
-  onClose: () => void
-  searchFilters: {
-    text: string
-    type: 'income' | 'expense' | null
-    category: string
-    startDate: string
-    endDate: string
-  }
-  user?: {
-    id: number
-    name: string
-    email: string
-    token: string
-  }
-}
+import { SearchResultsModalProps } from '../../types'
+import { animations, getGradients, safeAreaStyles } from '../../utils/ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 

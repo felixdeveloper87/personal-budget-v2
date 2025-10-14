@@ -1,7 +1,7 @@
 import { Transaction, InstallmentPlan } from '../types'
 
 /**
- * 🔄 Normalize installment descriptions from Portuguese to English
+ * Normalize installment descriptions from Portuguese to English
  * Converts "(Parcela X/Y)" to "(Installment X/Y)" for consistency
  */
 export function normalizeInstallmentDescription(description: string): string {
@@ -9,7 +9,7 @@ export function normalizeInstallmentDescription(description: string): string {
 }
 
 /**
- * 📅 Calculate future installments for installment plans
+ * Calculate future installments for installment plans
  * Takes the first installment date and calculates future installments with 1-month intervals
  */
 export function calculateFutureInstallments(
@@ -58,7 +58,7 @@ export function calculateFutureInstallments(
 }
 
 /**
- * 🔄 Merge real transactions with future installments
+ * Merge real transactions with future installments
  * Sorts by date and combines both arrays
  */
 export function mergeTransactionsWithFutureInstallments(

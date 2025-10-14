@@ -7,22 +7,11 @@ import {
   Icon,
   Badge
 } from '@chakra-ui/react'
-import { Search, AlertCircle } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { memo, useMemo, useState, useCallback } from 'react'
 import CategoryResultCard from './CategoryResultCard'
-
 import { Transaction } from '../../types'
-
-interface CategoryResultsListProps {
-  transactions: Transaction[]
-  searchFilters: {
-    text: string
-    type: 'income' | 'expense' | null
-    category: string
-    startDate: string
-    endDate: string
-  }
-}
+import { CategoryResultsListProps } from '../../types'
 
 const CategoryResultsList = memo(function CategoryResultsList({
   transactions,

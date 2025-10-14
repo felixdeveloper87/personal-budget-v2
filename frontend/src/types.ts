@@ -1,5 +1,14 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
 
+// Search filters type (moved from useSearchFilters hook)
+export interface SearchFilters {
+  text: string
+  type: 'income' | 'expense' | null
+  category: string
+  startDate: string
+  endDate: string
+}
+
 // Transação padrão
 export interface Transaction {
   id?: number // opcional apenas na criação
@@ -73,4 +82,56 @@ export interface CreateInstallmentPlanRequest {
   description: string
   startDate: string // yyyy-MM-dd
   startDateTime?: string // yyyy-MM-ddTHH:mm:ss.sssZ (opcional)
+}
+
+// Search component interfaces
+export interface SearchModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSearch: (filters: SearchFilters) => void
+}
+
+export interface SearchResultsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  searchFilters: SearchFilters
+  user?: {
+    id: number
+    name: string
+    email: string
+    token: string
+  }
+}
+
+export interface SearchFiltersProps {
+  filters: SearchFilters
+  onUpdateFilter: <K extends keyof SearchFilters>(key: K, value: SearchFilters[K]) => void
+  onTypeChange: (type: 'income' | 'expense' | null) => void
+  availableCategories: string[]
+}
+
+export interface SearchFooterProps {
+  onClearAll: () => void
+  onSearch: () => void
+}
+
+export interface SearchHeaderProps {
+  onClose: () => void
+}
+
+export interface SearchSummaryHeaderProps {
+  searchFilters: SearchFilters
+}
+
+export interface CategoryResultCardProps {
+  category: string
+  transactions: Transaction[]
+  type: 'INCOME' | 'EXPENSE'
+  isExpanded: boolean
+  onToggle: () => void
+}
+
+export interface CategoryResultsListProps {
+  transactions: Transaction[]
+  searchFilters: SearchFilters
 }
