@@ -1,9 +1,10 @@
 import React, { useState, useCallback } from 'react'
-import { Box, VStack, Card, CardBody, useToast } from '@chakra-ui/react'
+import { Box, VStack, Card, CardBody, useToast, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { createTransaction, createInstallmentPlan } from '../../../api'
-import RecentTransactions from '../../transactions/RecentTransactions'
+import RecentTransactions from './RecentTransactions'
+import { Plus, Minus } from 'lucide-react'
 import DateSelector from './DateSelector'
 import AmountInput from './AmountInput'
 import CategorySelector from './CategorySelector'
@@ -59,9 +60,10 @@ export default function TransactionForm({
    * - Resets form on success
    */
   const onSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault()
+    async () => {
       if (!user?.token) return
+
+      if (loading) return
 
       setLoading(true)
       try {
@@ -154,14 +156,12 @@ export default function TransactionForm({
          * - Lightweight and vertically stacked
          * - Same logic, smaller spacing
          */
-        <VStack
-          spacing={{ base: 6, sm: 5 }}
-          align="stretch"
-          as="form"
-          onSubmit={onSubmit}
-          w="full"
-          aria-label="Add transaction form" // ♿ Accessibility
-        >
+            <VStack
+              spacing={{ base: 6, sm: 5 }}
+              align="stretch"
+              w="full"
+              aria-label="Add transaction form" // ♿ Accessibility
+            >
           <DateSelector date={date} onChange={setDate} />
           <CategorySelector type={type} category={category} onChange={setCategory} />
           <AmountInput amount={amount} onChange={setAmount} type={type} />
@@ -181,6 +181,40 @@ export default function TransactionForm({
             type={type}
             loading={loading}
           />
+          
+          {/* Submit Button - Only show in compact mode */}
+          {compact && (
+            <Button
+              size="lg"
+              colorScheme={type === 'INCOME' ? 'green' : 'red'}
+              bg={type === 'INCOME' 
+                ? 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)' 
+                : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
+              }
+              color="white"
+              fontWeight="bold"
+              borderRadius="2xl"
+              w="full"
+              h={14}
+              fontSize="lg"
+              leftIcon={type === 'INCOME' ? <Plus size={20} /> : <Minus size={20} />}
+              onClick={onSubmit}
+              isLoading={loading}
+              loadingText={type === 'INCOME' ? 'Adding Income...' : 'Adding Expense...'}
+              _hover={{
+                transform: 'translateY(-2px)',
+                boxShadow: 'xl',
+                filter: 'brightness(1.1)'
+              }}
+              _active={{
+                transform: 'translateY(0)'
+              }}
+              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              boxShadow="lg"
+            >
+              {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
+            </Button>
+          )}
         </VStack>
       ) : (
         /**
@@ -201,8 +235,6 @@ export default function TransactionForm({
             <VStack
               spacing={{ base: 6, sm: 5, md: 6 }}
               align="stretch"
-              as="form"
-              onSubmit={onSubmit}
               w="full"
             >
               <DateSelector date={date} onChange={setDate} />

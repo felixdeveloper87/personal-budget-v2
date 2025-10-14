@@ -4,9 +4,6 @@
 // UI Components - Reusable interface components
 export * from './ui'
 
-// Form Components - Form-related components  
-export * from './forms'
-
 // Chart Components - Data visualization components
 export * from './charts'
 

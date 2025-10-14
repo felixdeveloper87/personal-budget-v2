@@ -1,19 +1,12 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
   Box,
   Button,
   HStack,
   Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   useDisclosure,
   VStack,
   Icon,
-  Badge,
   useColorModeValue,
   Card,
   CardBody,
@@ -22,25 +15,14 @@ import {
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
-import { TransactionForm } from '../components'
+import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
+import { animations, getGradients } from '../utils/ui'
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {
   income: 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)',
   expense: 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)',
-  ambientLight: (isDark: boolean) =>
-    isDark
-      ? 'linear-gradient(135deg, rgba(34,197,94,0.2) 0%, rgba(59,130,246,0.2) 50%, rgba(239,68,68,0.2) 100%)'
-      : 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(59,130,246,0.1) 50%, rgba(239,68,68,0.1) 100%)',
-}
-
-const ANIMATIONS = {
-  shimmer: 'shimmer 4s ease-in-out infinite',
-  float: 'float 3s ease-in-out infinite',
-  pulse: 'pulse 2s ease-in-out infinite',
-  glow: 'glow 3s ease-in-out infinite',
-  slideIn: 'slideIn 0.6s ease-out',
 }
 
 interface AddTransactionSectionProps {
@@ -52,12 +34,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
   const colors = useThemeColors()
-  const isDark = useColorModeValue(false, true)
-
-  const gradient = useMemo(
-    () => (type === 'INCOME' ? GRADIENTS.income : GRADIENTS.expense),
-    [type]
-  )
+  const gradients = getGradients()
 
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
     setType(t)
@@ -88,7 +65,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
             left="-50px"
             right="-50px"
             height="200px"
-            background={GRADIENTS.ambientLight(isDark)}
+            background={gradients.decorative}
             borderRadius="3xl"
             filter="blur(40px)"
             opacity={0.6}
@@ -106,7 +83,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
             shadow="2xl"
             overflow="hidden"
             sx={{
-              animation: ANIMATIONS.slideIn,
+              animation: animations.slideIn,
               '@keyframes slideIn': {
                 from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
                 to: { opacity: 1, transform: 'translateY(0) scale(1)' },
@@ -119,7 +96,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6, #f59e0b)"
               backgroundSize="300% 100%"
               sx={{
-                animation: ANIMATIONS.shimmer,
+                animation: animations.shimmer,
                 '@keyframes shimmer': {
                   '0%': { backgroundPosition: '-200% 0' },
                   '100%': { backgroundPosition: '200% 0' },
@@ -147,7 +124,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       )}
                       boxShadow="lg"
                       sx={{
-                        animation: ANIMATIONS.glow,
+                        animation: animations.glow,
                         '@keyframes glow': {
                           '0%,100%': { boxShadow: '0 0 5px rgba(34,197,94,0.3)' },
                           '50%': {
@@ -227,7 +204,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         letterSpacing="wide"
                         sx={{
-                          animation: `${ANIMATIONS.float} ${i ? '1.5s' : '0s'} infinite`,
+                          animation: `${animations.float} ${i ? '1.5s' : '0s'} infinite`,
                           '@keyframes float': {
                             '0%,100%': { transform: 'translateY(0)' },
                             '50%': { transform: 'translateY(-5px)' },
@@ -259,102 +236,14 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       </Box>
 
       {/* 🧾 Modal */}
-      <Modal
+      <AddTransactionModal
         isOpen={isOpen}
         onClose={onClose}
-        size={{ base: 'full', sm: 'md', md: 'lg', lg: 'xl' }}
-        closeOnOverlayClick={false}
-        motionPreset="slideInBottom"
-        scrollBehavior="inside"
-      >
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(12px)" />
-        <ModalContent
-          borderRadius={{ base: 'none', sm: '3xl' }}
-          h={{ base: '100dvh', sm: 'auto' }}
-          maxH={{ base: '100dvh', sm: '85vh' }}
-          mx={{ base: 0, sm: 4 }}
-          my={{ base: 0, sm: 4 }}
-          border="1px solid"
-          borderColor={colors.border}
-          boxShadow="0 32px 64px -12px rgba(0,0,0,0.4)"
-          _before={{
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '3px',
-            background: gradient,
-          }}
-          sx={{
-            padding: 'env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px)',
-          }}
-        >
-          <ModalHeader
-            textAlign="center"
-            borderBottom="1px"
-            borderColor={colors.border}
-            py={8}
-            bg={gradient}
-            color="white"
-            fontWeight="800"
-            letterSpacing="wide"
-            position="relative"
-            sx={{ animation: ANIMATIONS.shimmer }}
-          >
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap={3}
-              mb={2}
-            >
-              <Box
-                p={2}
-                borderRadius="full"
-                bg="rgba(255,255,255,0.2)"
-                animation={ANIMATIONS.pulse}
-              >
-                {type === 'INCOME' ? <Plus size={22} /> : <Minus size={22} />}
-              </Box>
-              <Text>{type === 'INCOME' ? 'Add Income' : 'Add Expense'}</Text>
-              {type === 'INCOME' ? <TrendingUp size={20} /> : <TrendingDown size={20} />}
-            </Box>
-            <Text fontSize="sm" opacity={0.9}>
-              {type === 'INCOME' ? 'Track your incoming money' : 'Record your spending'}
-            </Text>
-          </ModalHeader>
-
-          <ModalCloseButton
-            aria-label="Close form"
-            color="white"
-            bg="rgba(0,0,0,0.3)"
-            borderRadius="full"
-            _hover={{ bg: 'rgba(0,0,0,0.5)' }}
-          />
-
-          <ModalBody
-            p={0}
-            overflowY="auto"
-            maxH={{ base: 'calc(100dvh - 200px)', sm: '70vh' }}
-            sx={{
-              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
-              WebkitOverflowScrolling: 'touch',
-            }}
-          >
-            <Box p={{ base: 4, sm: 6, md: 8 }}>
-              <TransactionForm
-                transactions={transactions}
-                onCreated={handleTransactionCreated}
-                onTransactionDeleted={onRefresh}
-                initialType={type}
-                showRecentTransactions
-                compact
-              />
-            </Box>
-          </ModalBody>
-        </ModalContent>
-      </Modal>
+        type={type}
+        transactions={transactions}
+        onTransactionCreated={handleTransactionCreated}
+        onRefresh={onRefresh}
+      />
     </>
   )
 }

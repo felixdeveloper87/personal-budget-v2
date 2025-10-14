@@ -1,5 +1,6 @@
 import { Box, Text, SimpleGrid, Button, HStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { getResponsiveStyles } from '../../../utils/ui'
 import {
   Briefcase,
   Laptop,
@@ -55,6 +56,7 @@ interface CategorySelectorProps {
  */
 export default function CategorySelector({ type, category, onChange }: CategorySelectorProps) {
   const colors = useThemeColors()
+  const responsiveStyles = getResponsiveStyles()
 
   // Pick the correct list based on transaction type
   const categories = type === 'INCOME' ? incomeCategories : expenseCategories
@@ -69,7 +71,7 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
       {/* Responsive grid layout for category buttons */}
       <SimpleGrid
         columns={{ base: 2, sm: 3, md: 4 }}
-        spacing={{ base: 3, sm: 3 }}
+        spacing={responsiveStyles.categoryList.spacing}
         w="full"
       >
         {categories.map((cat) => {
@@ -84,12 +86,10 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               colorScheme={isSelected ? 'blue' : 'gray'}
               borderRadius="xl"
               onClick={() => onChange(cat.name)}
-              size={{ base: 'md', sm: 'md' }}
-              h={{ base: '60px', sm: '56px' }}
-              fontSize={{ base: 'xs', sm: 'sm', md: 'sm' }}
+              {...responsiveStyles.buttons.category}
+              h={responsiveStyles.buttons.category.height}
               fontWeight="bold"
               borderWidth="2px"
-              p={{ base: 3, sm: 2 }}
               _hover={{
                 transform: 'translateY(-2px)',
                 shadow: 'md',
@@ -99,12 +99,12 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
               }}
               transition="all 0.2s"
             >
-              <HStack spacing={{ base: 1.5, sm: 1, md: 1 }} justify="center" w="full">
+              <HStack spacing={1} justify="center" w="full">
                 {/* Icon for category */}
-                <IconComponent size={20} aria-hidden="true" />
+                <IconComponent size={16} aria-hidden="true" />
                 {/* Category label */}
                 <Text
-                  fontSize={{ base: 'xs', sm: 'sm', md: 'sm' }}
+                  fontSize={responsiveStyles.buttons.category.fontSize}
                   fontWeight="bold"
                   textAlign="center"
                   noOfLines={1}
@@ -119,3 +119,4 @@ export default function CategorySelector({ type, category, onChange }: CategoryS
     </Box>
   )
 }
+

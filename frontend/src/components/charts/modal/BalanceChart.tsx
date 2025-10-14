@@ -112,40 +112,6 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         </Box>
       </HStack>
 
-      {/* Gráfico de área - evolução do saldo */}
-      {/* <Box>
-        <Text 
-          fontSize={{ base: "md", sm: "lg" }} 
-          fontWeight="semibold" 
-          mb={{ base: 3, sm: 4 }} 
-          color={colors.text.label}
-        >
-          Balance Evolution Over Time
-        </Text>
-        <ResponsiveContainer width="100%" height={chartHeight}>
-          <AreaChart data={balanceData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: colors.cardBg,
-                border: `1px solid ${colors.border}`,
-                borderRadius: '8px'
-              }}
-              formatter={(value) => [`£${value}`, 'Balance']}
-            />
-            <Area 
-              type="monotone" 
-              dataKey="balance" 
-              stroke={currentBalance >= 0 ? "#38A169" : "#E53E3E"}
-              fill={currentBalance >= 0 ? "#38A169" : "#E53E3E"}
-              fillOpacity={0.3}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Box> */}
-
       {/* Gráfico de linha - saldo com pontos de inflexão */}
       <Box>
         <Text 

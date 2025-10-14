@@ -10,9 +10,9 @@ import {
 } from '@chakra-ui/react'
 import { ArrowBackIcon } from '@chakra-ui/icons'
 import { motion } from 'framer-motion'
-import LoginForm from '../forms/LoginForm'
-import RegisterForm from '../forms/RegisterForm'
-import Header from '../layout/Header'
+import LoginForm from './LoginForm'
+import RegisterForm from './RegisterForm'
+import Header from '../layout/header/Header'
 
 // --- Motion Components ---
 const MotionBox = motion.create(Box)
@@ -237,13 +237,13 @@ export default function AuthPage({ onBackToLanding }: AuthPageProps) {
               }}
             >
               {/* Form Switch */}
-              <Box position="relative" zIndex={1}>
-                {isLogin ? (
-                  <LoginForm onToggleMode={() => setIsLogin(false)} />
-                ) : (
-                  <RegisterForm onToggleMode={() => setIsLogin(true)} />
-                )}
-              </Box>
+                <Box position="relative" zIndex={1}>
+                  {isLogin ? (
+                    <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
+                  ) : (
+                    <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
+                  )}
+                </Box>
             </Box>
           </MotionBox>
         </MotionVStack>

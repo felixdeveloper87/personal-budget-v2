@@ -197,6 +197,41 @@ export const getResponsiveStyles = () => ({
       fontSize: { base: 'xs', md: 'sm' },
       padding: { base: 2, md: 3 }
     }
+  },
+  header: {
+    icon: {
+      boxSize: { base: 7, md: 6 },
+      padding: { base: 4, md: 3 }
+    },
+    closeButton: {
+      size: { base: 'lg', md: 'lg' },
+      padding: { base: 4, md: 3 },
+      iconSize: { base: 6, md: 5 }
+    },
+    title: {
+      fontSize: { base: 'lg', md: 'lg' }
+    },
+    subtitle: {
+      fontSize: { base: 'sm', md: 'sm' }
+    },
+    mobileIcons: {
+      search: {
+        size: { base: 'md', lg: 'sm' },
+        fontSize: { base: 'lg', lg: 'md' },
+        padding: { base: 3, lg: 2 }
+      },
+      theme: {
+        size: { base: 'md', lg: 'md' },
+        fontSize: { base: 'lg', lg: 'lg' },
+        padding: { base: 3, lg: 2 }
+      },
+      profile: {
+        size: { base: 'md', lg: 'md' },
+        fontSize: { base: 'lg', lg: 'md' },
+        padding: { base: 2, lg: 2 },
+        avatarSize: { base: 'md', lg: 'md' }
+      }
+    }
   }
 })
 

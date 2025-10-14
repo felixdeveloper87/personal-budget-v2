@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 interface NumberPadProps {
   value: number
   onValueChange: (value: number) => void
+  onDone?: () => void
 }
 
-export default function NumberPad({ value, onValueChange }: NumberPadProps) {
+export default function NumberPad({ value, onValueChange, onDone }: NumberPadProps) {
   const [displayValue, setDisplayValue] = useState<string>('0.00')
 
   // Update display value when prop value changes
@@ -83,6 +84,22 @@ export default function NumberPad({ value, onValueChange }: NumberPadProps) {
 
   return (
     <Box w="full" maxW={{ base: "100%", sm: "320px" }} mx="auto">
+      {/* Animated top bar */}
+      <Box
+        height="4px"
+        background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
+        backgroundSize="300% 100%"
+        borderRadius="2xl 2xl 0 0"
+        mb={4}
+        sx={{
+          animation: 'shimmer 4s ease-in-out infinite',
+          '@keyframes shimmer': {
+            '0%': { backgroundPosition: '-200% 0' },
+            '100%': { backgroundPosition: '200% 0' }
+          }
+        }}
+      />
+      
       {/* Display */}
       <Box 
         p={{ base: 6, sm: 4 }} 
@@ -251,7 +268,7 @@ export default function NumberPad({ value, onValueChange }: NumberPadProps) {
         </Button>
       </Grid>
 
-      {/* Clear Button - only show in modal context */}
+      {/* Clear Button */}
       <Button 
         size={{ base: "lg", sm: "sm" }}
         h={{ base: "50px", sm: "40px" }}
@@ -265,6 +282,23 @@ export default function NumberPad({ value, onValueChange }: NumberPadProps) {
       >
         Clear
       </Button>
+
+      {/* Done Button - only show if onDone is provided */}
+      {onDone && (
+        <Button 
+          size={{ base: "lg", sm: "sm" }}
+          h={{ base: "50px", sm: "40px" }}
+          colorScheme="green" 
+          variant="solid" 
+          w="full" 
+          mt={2}
+          onClick={onDone}
+          fontSize={{ base: "lg", sm: "sm" }}
+          fontWeight="bold"
+        >
+          Done
+        </Button>
+      )}
     </Box>
   )
 }
