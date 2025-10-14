@@ -127,9 +127,9 @@ const SearchResultsModal = memo(function SearchResultsModal({
         backdropFilter="blur(10px)"
       />
       <ModalContent 
-        borderRadius={{ base: 'none', sm: '3xl' }}
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
-        m={{ base: 0, sm: 4 }}
+        m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
         {...responsiveStyles.modal}
@@ -139,7 +139,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
           // Safari specific fixes
           WebkitFlex: '1 1 auto',
           flex: '1 1 auto',
-          minHeight: 0
+          minHeight: 0,
+          // Force scrollbar on Safari
+          WebkitOverflowScrolling: 'touch',
+          overflowY: 'auto'
         }}
       >
         {/* Decorative background */}
@@ -169,7 +172,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
             'rgba(255, 255, 255, 0.2)',
             'rgba(255, 255, 255, 0.1)'
           )}
-          borderRadius={{ base: 'none', sm: '3xl' }}
+          borderRadius={{ base: 'none', md: '3xl' }}
           shadow="2xl"
           overflow="hidden"
           w="full"
@@ -191,7 +194,9 @@ const SearchResultsModal = memo(function SearchResultsModal({
             // Safari specific fixes
             WebkitFlex: '1 1 auto',
             flex: '1 1 auto',
-            minHeight: 0
+            minHeight: 0,
+            // Force scrollbar visibility
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           {/* Animated top bar */}
@@ -250,7 +255,22 @@ const SearchResultsModal = memo(function SearchResultsModal({
               // Safari specific fixes
               WebkitFlex: '1 1 auto',
               flex: '1 1 auto',
-              position: 'relative'
+              position: 'relative',
+              // Force scrollbar on Safari
+              WebkitOverflowScrolling: 'touch',
+              overflowScrolling: 'touch',
+              // Ensure scrollbar is visible
+              '&::-webkit-scrollbar': {
+                width: '8px',
+                display: 'block'
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent'
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: useColorModeValue('rgba(0,0,0,0.2)', 'rgba(255,255,255,0.2)'),
+                borderRadius: '4px'
+              }
             }}
           >
             {isLoading ? (
