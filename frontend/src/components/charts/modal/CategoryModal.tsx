@@ -23,7 +23,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, animations } from '../../../utils/ui'
+import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients } from '../../../utils/ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X } from 'lucide-react'
   
@@ -45,6 +45,22 @@ import { X } from 'lucide-react'
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  
+  // Move all useColorModeValue calls to the top
+  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')
+  const closeButtonBorderColor = useColorModeValue('gray.300', 'gray.600')
+  const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
+  const closeButtonIconColor = useColorModeValue('gray.700', 'gray.200')
+  const cardBg = useColorModeValue('white', 'gray.800')
+  const progressBg = useColorModeValue('gray.100', 'gray.700')
+  const tableHeaderBg = useColorModeValue('gray.50', 'gray.700')
+  const tableRowBg = useColorModeValue('gray.25', 'gray.750')
+  const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
+  const modalBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.95)',
+    'rgba(17, 17, 17, 0.95)'
+  )
   
     const filteredTransactions = useMemo(
       () => transactions.filter(t => t.type === type),
@@ -110,70 +126,106 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         border="1px solid"
         borderColor={colors.border}
         position="relative"
-          _before={{
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '3px',
-            background: type === 'INCOME' 
-              ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
-              : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)',
-            borderRadius: '3xl 3xl 0 0',
-          }}
-          // 👇 Safe area support para iPhone 14 Pro
+        bg={modalBg}
+        backdropFilter="blur(20px)"
+        _before={{
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: type === 'INCOME' 
+            ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
+            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)',
+          borderRadius: '3xl 3xl 0 0',
+        }}
+        sx={{
+          ...safeAreaStyles.container,
+          ...safariStyles.modal,
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
+        }}
+      >
+        {/* Barra superior animada */}
+        <Box
+          height="4px"
+          background={type === 'INCOME' 
+            ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
+            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)'
+          }
+          backgroundSize="300% 100%"
           sx={{
-            paddingTop: 'env(safe-area-inset-top, 0px)',
-            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-            paddingLeft: 'env(safe-area-inset-left, 0px)',
-            paddingRight: 'env(safe-area-inset-right, 0px)',
+            animation: animations.shimmer,
+            '@keyframes shimmer': {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' }
+            }
           }}
-        >
+        />
+
         <ModalHeader
           textAlign="center"
           borderBottom="1px"
           borderColor={colors.border}
-          fontSize={responsiveStyles.modals.category.header.fontSize}
-          py={responsiveStyles.modals.category.header.padding}
-          px={responsiveStyles.modals.category.header.padding}
+          py={8}
           bg={
             type === 'INCOME'
               ? 'linear-gradient(135deg, #10b981, #059669, #047857)'
               : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
           }
-          backgroundSize="200% 100%"
           color="white"
+          fontWeight="800"
+          letterSpacing="wide"
           position="relative"
-          overflow="hidden"
-          // 👇 Espaçamento extra para Dynamic Island/Notch
-          sx={{
-            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
-            animation: animations.shimmer,
-          }}
+          backdropFilter="blur(8px)"
         >
-            <Box position="relative" zIndex={1}>
-              <Box display="flex" alignItems="center" justifyContent="center" gap={3} mb={2}>
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={3}
+            mb={2}
+          >
             <Box
-              p={responsiveStyles.modals.category.header.iconPadding}
+              p={2}
               borderRadius="full"
-              bg="rgba(255, 255, 255, 0.2)"
+              bg="rgba(255,255,255,0.2)"
               sx={{
-                animation: animations.pulse,
+                animation: animations.glow,
+                '@keyframes glow': {
+                  '0%, 100%': { 
+                    boxShadow: '0 0 5px rgba(255, 255, 255, 0.3)' 
+                  },
+                  '50%': { 
+                    boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)' 
+                  }
+                }
               }}
             >
-              <Text fontSize={responsiveStyles.modals.category.header.iconSize} color="white" fontWeight="bold">£</Text>
+              <Text fontSize="lg" color="white" fontWeight="bold">£</Text>
             </Box>
-                <Text fontWeight="800" letterSpacing="wide">
-                  {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
-                </Text>
-              </Box>
-            <Text fontSize={responsiveStyles.modals.category.header.titleFontSize} opacity={0.9} fontWeight="500" textAlign="center">
-              {selectedPeriod}
+            <Text fontWeight="800" letterSpacing="wide">
+              {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
             </Text>
-            </Box>
-  
-          </ModalHeader>
+          </Box>
+          <Text 
+            fontSize={{ base: '2xs', sm: 'xs' }}
+            opacity={0.7}
+            fontWeight="400"
+          >
+            {selectedPeriod}
+          </Text>
+        </ModalHeader>
   
         <Button
           position="absolute"
@@ -184,12 +236,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           onClick={onClose}
           borderRadius="full"
           p={3}
-          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+          bg={closeButtonBg}
           backdropFilter="blur(10px)"
           border="1px solid"
-          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          borderColor={closeButtonBorderColor}
           _hover={{
-            bg: useColorModeValue('red.50', 'red.900'),
+            bg: closeButtonHoverBg,
             borderColor: 'red.300',
             transform: 'scale(1.1)',
             boxShadow: 'lg',
@@ -202,7 +254,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           boxShadow="md"
           aria-label="Close category analysis"
         >
-          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+          <Icon as={X} boxSize={5} color={closeButtonIconColor} />
         </Button>
   
         <ModalBody
@@ -210,16 +262,15 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           px={responsiveStyles.modals.category.body.padding}
           flex="1"
           overflowY="auto"
-            // 👇 Safe area support para iPhone 14 Pro
-            sx={{
-              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
-              paddingLeft: 'env(safe-area-inset-left, 0px)',
-              paddingRight: 'env(safe-area-inset-right, 0px)',
-              WebkitOverflowScrolling: 'touch', // iOS smooth scrolling
-              scrollBehavior: 'smooth',
-              overscrollBehavior: 'contain', // Prevent scroll chaining
-            }}
-          >
+          sx={{
+            ...safariStyles.scrollable,
+            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
+            paddingLeft: 'env(safe-area-inset-left, 0px)',
+            paddingRight: 'env(safe-area-inset-right, 0px)',
+            scrollBehavior: 'smooth',
+            overscrollBehavior: 'contain',
+          }}
+        >
           {sortedCategories.length === 0 ? (
             <Box p={responsiveStyles.modals.category.empty.padding} textAlign="center" color={colors.text.secondary}>
               <Text fontSize={responsiveStyles.modals.category.empty.titleFontSize} mb={2}>
@@ -247,7 +298,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                     border="1px solid"
                     borderColor={colors.border}
                     borderRadius="2xl"
-                    bg={useColorModeValue('white', 'gray.800')}
+                    bg={cardBg}
                     shadow="sm"
                     _hover={{
                       shadow: 'md',
@@ -278,7 +329,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         colorScheme={type === 'INCOME' ? 'green' : 'red'}
                         size={responsiveStyles.modals.category.progress.size}
                         borderRadius="md"
-                        bg={useColorModeValue('gray.100', 'gray.700')}
+                        bg={progressBg}
                       />
   
                         <Box>
@@ -293,7 +344,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                             borderColor={colors.border}
                           >
                             <Table size="sm" variant="simple" minW="300px">
-                            <Thead bg={useColorModeValue('gray.50', 'gray.700')}>
+                            <Thead bg={tableHeaderBg}>
                               <Tr>
                                 <Th fontSize={responsiveStyles.modals.category.table.headerFontSize} color={colors.text.secondary} py={responsiveStyles.modals.category.table.padding}>Date</Th>
                                 <Th fontSize={responsiveStyles.modals.category.table.headerFontSize} color={colors.text.secondary} py={responsiveStyles.modals.category.table.padding}>Description</Th>
@@ -304,9 +355,9 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                                 {visibleTransactions.map((t, index) => (
                                   <Tr 
                                     key={t.id}
-                                    bg={index % 2 === 0 ? 'transparent' : useColorModeValue('gray.25', 'gray.750')}
+                                    bg={index % 2 === 0 ? 'transparent' : tableRowBg}
                                     _hover={{
-                                      bg: useColorModeValue('gray.50', 'gray.600'),
+                                      bg: tableRowHoverBg,
                                     }}
                                     transition="background-color 0.2s ease"
                                   >
