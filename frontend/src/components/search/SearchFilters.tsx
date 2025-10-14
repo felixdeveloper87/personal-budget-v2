@@ -4,6 +4,7 @@ import {
 } from '@chakra-ui/react'
 import { Search, Sparkles, Calendar, Tag } from 'lucide-react'
 import { SearchFiltersProps } from '../../types'
+import { safariStyles } from '../../utils/ui'
 
 export default function SearchFilters({ 
   filters, 
@@ -12,7 +13,12 @@ export default function SearchFilters({
   availableCategories 
 }: SearchFiltersProps) {
   return (
-    <VStack spacing={{ base: 4, md: 6 }} align="stretch" pb={{ base: 4, md: 0 }}>
+    <VStack 
+      spacing={{ base: 4, md: 6 }} 
+      align="stretch" 
+      pb={{ base: 6, md: 0 }}
+      minH="fit-content"
+    >
       {/* Main search field */}
       <Box>
         <Text 
@@ -167,9 +173,17 @@ export default function SearchFilters({
               borderRadius="2xl"
               border="2px solid"
               borderColor={useColorModeValue('blue.200', 'blue.700')}
+              flexShrink={0}
+              sx={safariStyles.hardwareAcceleration}
             >
-              <HStack justify="space-between">
-                <Text fontSize="sm" color={useColorModeValue('blue.700', 'blue.200')} fontWeight="600">
+              <HStack justify="space-between" align="center">
+                <Text 
+                  fontSize="sm" 
+                  color={useColorModeValue('blue.700', 'blue.200')} 
+                  fontWeight="600"
+                  flex="1"
+                  minW="0"
+                >
                   Selected: <strong>{filters.category}</strong>
                 </Text>
                 <Button
@@ -177,6 +191,7 @@ export default function SearchFilters({
                   variant="ghost"
                   colorScheme="blue"
                   borderRadius="full"
+                  flexShrink={0}
                   onClick={() => onUpdateFilter('category', '')}
                   _hover={{
                     bg: useColorModeValue('blue.100', 'blue.800'),

@@ -51,6 +51,26 @@ export const safeAreaStyles = {
   }
 }
 
+// Safari specific utilities
+export const safariStyles = {
+  modal: {
+    WebkitOverflowScrolling: 'touch' as const,
+    position: 'relative' as const,
+  },
+  scrollable: {
+    WebkitOverflowScrolling: 'touch' as const,
+    overflowScrolling: 'touch' as const,
+  },
+  sticky: {
+    WebkitTransform: 'translateZ(0)' as const,
+    transform: 'translateZ(0)' as const,
+  },
+  hardwareAcceleration: {
+    WebkitTransform: 'translateZ(0)' as const,
+    transform: 'translateZ(0)' as const,
+  }
+}
+
 // Common styles
 export const commonStyles = {
   borderRadius: '2xl',

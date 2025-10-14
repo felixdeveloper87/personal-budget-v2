@@ -8,7 +8,7 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles } from '../../utils/ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
@@ -54,11 +54,15 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
       <ModalContent 
         borderRadius={{ base: 'none', sm: '3xl' }}
         overflow="hidden"
-        maxH={{ base: '100vh', sm: '90vh' }}
+        maxH={{ base: '100dvh', sm: '90vh' }}
+        h={{ base: '100dvh', sm: 'auto' }}
         m={{ base: 0, sm: 4 }}
         display="flex"
         flexDirection="column"
-        sx={safeAreaStyles.container}
+        sx={{
+          ...safeAreaStyles.container,
+          ...safariStyles.modal
+        }}
       >
         {/* Decorative background */}
         <Box
@@ -131,7 +135,11 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
                 p={{ base: 4, sm: 5, md: 6 }}
                 overflowY="auto"
                 minH="0"
-                sx={safeAreaStyles.content}
+                maxH={{ base: 'calc(100dvh - 140px)', sm: 'none' }}
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable
+                }}
               >
                 <SearchFilters
                   filters={filters}
@@ -142,7 +150,14 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
               </Box>
 
               {/* Footer - Fixed at bottom */}
-              <Box flexShrink={0}>
+              <Box 
+                flexShrink={0}
+                position={{ base: 'sticky', sm: 'relative' }}
+                bottom={0}
+                bg={useColorModeValue('white', 'gray.800')}
+                zIndex={10}
+                sx={safariStyles.sticky}
+              >
                 <SearchFooter
                   onClearAll={handleClearAll}
                   onSearch={handleSearchClick}
