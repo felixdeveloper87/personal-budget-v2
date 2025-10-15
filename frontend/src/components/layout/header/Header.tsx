@@ -24,7 +24,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   const bg = useColorModeValue(
-    'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9))',
+    'linear-gradient(135deg, rgba(226, 232, 240, 0.95), rgba(203, 213, 225, 0.9))',
     'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))'
   )
 

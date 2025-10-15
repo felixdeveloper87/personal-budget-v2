@@ -21,8 +21,8 @@ import { animations, getGradients, getResponsiveStyles, getShimmerStyles } from 
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {
-  income: 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)',
-  expense: 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)',
+  income: 'linear-gradient(135deg, #10b981, #059669, #047857)',
+  expense: 'linear-gradient(135deg, #f87171, #ef4444, #dc2626)',
 }
 
 interface AddTransactionSectionProps {
@@ -101,69 +101,124 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'stretch', sm: 'center' }}
+                  direction={responsiveStyles.addTransactionSection.header.direction}
+                  align={{ base: 'center', sm: 'center', md: 'center' }}
                   justify="space-between"
                   gap={responsiveStyles.addTransactionSection.header.gap}
                   w="full"
                 >
-                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+                  {/* Title Section */}
+                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" justify={{ base: 'center', sm: 'flex-start' }}>
+                    {/* Icon Container with Advanced Effects */}
                     <Box
+                      position="relative"
                       p={responsiveStyles.addTransactionSection.header.icon.padding}
                       borderRadius={responsiveStyles.addTransactionSection.header.icon.borderRadius}
                       bg={useColorModeValue(
-                        'linear-gradient(135deg, #22c55e, #16a34a)',
-                        'linear-gradient(135deg, #4ade80, #22c55e)'
+                        'linear-gradient(135deg, #10b981, #059669, #047857)',
+                        'linear-gradient(135deg, #34d399, #10b981, #059669)'
                       )}
-                      boxShadow="lg"
+                      boxShadow="xl"
+                      opacity={0.9}
                       sx={{
-                        animation: animations.glow,
-                        '@keyframes glow': {
-                          '0%,100%': { boxShadow: '0 0 5px rgba(34,197,94,0.3)' },
+                        animation: 'addTransactionGlow 3s ease-in-out infinite, iconFloat 4s ease-in-out infinite',
+                        '@keyframes addTransactionGlow': {
+                          '0%,100%': { 
+                            boxShadow: '0 0 20px rgba(16,185,129,0.3), 0 0 40px rgba(16,185,129,0.1), 0 0 60px rgba(16,185,129,0.05)',
+                            transform: 'scale(1)'
+                          },
                           '50%': {
-                            boxShadow:
-                              '0 0 20px rgba(34,197,94,0.6), 0 0 30px rgba(34,197,94,0.4)',
+                            boxShadow: '0 0 30px rgba(16,185,129,0.5), 0 0 60px rgba(16,185,129,0.2), 0 0 90px rgba(16,185,129,0.1)',
+                            transform: 'scale(1.05)'
                           },
                         },
+                        '@keyframes iconFloat': {
+                          '0%,100%': { transform: 'translateY(0px) rotate(0deg)' },
+                          '25%': { transform: 'translateY(-2px) rotate(1deg)' },
+                          '50%': { transform: 'translateY(-4px) rotate(0deg)' },
+                          '75%': { transform: 'translateY(-1px) rotate(-1deg)' }
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: '-2px',
+                          left: '-2px',
+                          right: '-2px',
+                          bottom: '-2px',
+                          background: 'linear-gradient(45deg, rgba(16,185,129,0.3), rgba(52,211,153,0.3), rgba(16,185,129,0.3))',
+                          borderRadius: 'inherit',
+                          zIndex: -1,
+                          filter: 'blur(8px)',
+                          opacity: 0.6,
+                          animation: 'shimmer 3s ease-in-out infinite'
+                        }
                       }}
                     >
-                      <Icon as={Sparkles} boxSize={responsiveStyles.addTransactionSection.header.icon.size} color="white" />
+                      <Icon 
+                        as={Sparkles} 
+                        boxSize={responsiveStyles.addTransactionSection.header.icon.size} 
+                        color="white"
+                        sx={{
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                          animation: 'sparkle 2s ease-in-out infinite',
+                          '@keyframes sparkle': {
+                            '0%,100%': { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
+                            '25%': { transform: 'scale(1.1) rotate(5deg)', filter: 'brightness(1.2)' },
+                            '50%': { transform: 'scale(1.05) rotate(0deg)', filter: 'brightness(1.1)' },
+                            '75%': { transform: 'scale(1.1) rotate(-5deg)', filter: 'brightness(1.2)' }
+                          }
+                        }}
+                      />
                     </Box>
 
-                    <VStack align="start" spacing={0} flex="1">
+                    <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
                       <Heading
                         size={responsiveStyles.addTransactionSection.header.title.size}
                         bg={useColorModeValue(
-                          'linear-gradient(135deg, #1e293b, #475569)',
-                          'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+                          'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
+                          'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
                         )}
                         bgClip="text"
-                        fontWeight="800"
-                        textAlign="left"
+                        fontWeight="900"
+                        textAlign={{ base: 'center', sm: 'left' }}
+                        sx={{
+                          animation: 'titleShimmer 4s ease-in-out infinite',
+                          '@keyframes titleShimmer': {
+                            '0%,100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' }
+                          },
+                          backgroundSize: '200% 200%',
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                        }}
                       >
                         Quick Actions
                       </Heading>
                       <Text
                         fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
                         color={colors.text.secondary}
-                        fontWeight="400"
-                        opacity={0.8}
-                        textAlign="left"
+                        fontWeight="500"
+                        opacity={0.9}
+                        textAlign={{ base: 'center', sm: 'left' }}
                         display={{ base: 'none', sm: 'block' }}
+                        sx={{
+                          animation: 'fadeInUp 0.8s ease-out 0.2s both',
+                          '@keyframes fadeInUp': {
+                            '0%': { opacity: 0, transform: 'translateY(10px)' },
+                            '100%': { opacity: 0.9, transform: 'translateY(0)' }
+                          }
+                        }}
                       >
                         Choose an action to quickly add a transaction
                       </Text>
                     </VStack>
                   </HStack>
 
-                  {/* Botões - Responsivos para mobile */}
+                  {/* Buttons Section */}
                   <HStack
                     spacing={responsiveStyles.addTransactionSection.buttons.spacing}
-                    justify={{ base: 'center', sm: 'flex-end' }}
-                    flexWrap="wrap"
-                    direction={{ base: 'row', sm: 'row' }}
-                    w={responsiveStyles.addTransactionSection.buttons.width}
-                    flex={responsiveStyles.addTransactionSection.buttons.flex}
+                    justify={{ base: 'center', sm: 'center', md: 'flex-end' }}
+                    align="center"
+                    flexWrap="nowrap"
                   >
                     {[
                       {
@@ -201,6 +256,8 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         h={responsiveStyles.buttons.action.height}
                         transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                         letterSpacing="wide"
+                        opacity={0.8}
+                        w={{ base: 'full', sm: 'auto', md: 'auto' }}
                         sx={{
                           animation: `${animations.float} ${i ? '1.5s' : '0s'} infinite`,
                           '@keyframes float': {
@@ -209,17 +266,17 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                           },
                         }}
                         _hover={{
-                          transform: 'translateY(-8px) scale(1.02)',
-                          boxShadow: `0 25px 50px -12px ${
+                          transform: 'translateY(-2px) scale(1.01)',
+                          boxShadow: `0 8px 25px -8px ${
                             t === 'INCOME'
-                              ? 'rgba(34,197,94,0.4)'
-                              : 'rgba(239,68,68,0.4)'
+                              ? 'rgba(16,185,129,0.4)'
+                              : 'rgba(248,113,113,0.4)'
                           }`,
                         }}
                         boxShadow={`0 10px 25px ${
                           t === 'INCOME'
-                            ? 'rgba(34,197,94,0.3)'
-                            : 'rgba(239,68,68,0.3)'
+                            ? 'rgba(16,185,129,0.2)'
+                            : 'rgba(248,113,113,0.2)'
                         }`}
                       >
                         {label}
