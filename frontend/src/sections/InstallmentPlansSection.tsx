@@ -20,7 +20,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles, getGradients, animations } from '../utils/ui'
+import { getResponsiveStyles, getGradients, animations, shimmerGradients, shimmerAnimations, shimmerStylesStatic } from '../utils/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -47,6 +47,10 @@ export default function InstallmentPlansSection() {
     'linear-gradient(135deg, #8b5cf6, #7c3aed)',
     'linear-gradient(135deg, #a78bfa, #8b5cf6)'
   )
+  
+  // Shimmer styles
+  const shimmerBackground = useColorModeValue(shimmerGradients.light, shimmerGradients.dark)
+  const shimmerAnimation = useColorModeValue(shimmerAnimations.light, shimmerAnimations.dark)
   const badgeHoverBg = useColorModeValue(
     'linear-gradient(135deg, #7c3aed, #6d28d9)',
     'linear-gradient(135deg, #8b5cf6, #7c3aed)'
@@ -132,14 +136,10 @@ export default function InstallmentPlansSection() {
               {/* Animated top border */}
               <Box
                 height="4px"
-                background="linear-gradient(90deg, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444)"
-                backgroundSize="300% 100%"
+                background={shimmerBackground}
                 sx={{
-                  animation: animations.shimmer,
-                  '@keyframes shimmer': {
-                    '0%': { backgroundPosition: '-200% 0' },
-                    '100%': { backgroundPosition: '200% 0' },
-                  },
+                  ...shimmerStylesStatic,
+                  animation: shimmerAnimation
                 }}
               />
 

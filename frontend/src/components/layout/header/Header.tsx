@@ -6,6 +6,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
+import { getShimmerStyles } from '../../../utils/ui'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
 import { Logo, Navigation, UserMenu, HeaderControls, SearchButton } from './'
@@ -58,17 +59,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
             left: 0,
             right: 0,
             height: '4px',
-            background: useColorModeValue(
-              'linear-gradient(90deg, #3b82f6, #10b981, #ef4444, #8b5cf6, #f59e0b, #06b6d4, #84cc16)',
-              'linear-gradient(90deg, #60a5fa, #34d399, #f87171, #a78bfa, #fbbf24, #22d3ee, #a3e635)'
-            ),
-            backgroundSize: '400% 100%',
-            animation: 'shimmer 6s ease-in-out infinite',
-            '@keyframes shimmer': {
-              '0%': { backgroundPosition: '-300% 0' },
-              '50%': { backgroundPosition: '300% 0' },
-              '100%': { backgroundPosition: '-300% 0' }
-            }
+            ...getShimmerStyles()
           },
           '&::after': {
             content: '""',

@@ -16,7 +16,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { List, Calendar, Filter, RefreshCw } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations } from '../utils/ui'
+import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../utils/ui'
 import { useThemeColors } from '../hooks/useThemeColors'
 
 interface AllTransactionsSectionProps {
@@ -100,15 +100,7 @@ export default function AllTransactionsSection({
           {/* Animated top border */}
           <Box
             height="4px"
-            background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-            backgroundSize="300% 100%"
-            sx={{
-              animation: animations.shimmer,
-              '@keyframes shimmer': {
-                '0%': { backgroundPosition: '-200% 0' },
-                '100%': { backgroundPosition: '200% 0' },
-              },
-            }}
+            sx={getShimmerStyles()}
           />
 
           <CardBody p={0}>

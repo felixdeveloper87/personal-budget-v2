@@ -17,7 +17,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { animations, getGradients, getResponsiveStyles } from '../utils/ui'
+import { animations, getGradients, getResponsiveStyles, getShimmerStyles } from '../utils/ui'
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {
@@ -94,15 +94,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
             {/* Linha Superior Animada */}
             <Box
               height="4px"
-              background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6, #f59e0b)"
-              backgroundSize="300% 100%"
-              sx={{
-                animation: animations.shimmer,
-                '@keyframes shimmer': {
-                  '0%': { backgroundPosition: '-200% 0' },
-                  '100%': { backgroundPosition: '200% 0' },
-                },
-              }}
+              sx={getShimmerStyles()}
             />
 
             <CardBody p={responsiveStyles.addTransactionSection.card.padding}>

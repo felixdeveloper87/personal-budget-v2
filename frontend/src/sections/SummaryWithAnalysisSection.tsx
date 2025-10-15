@@ -1,5 +1,5 @@
 import { PeriodData } from '../hooks/usePeriodData'
-import { PeriodType } from '../components/ui/PeriodNavigator'
+import { PeriodType } from '../types'
 import { SummaryContainer } from '../components/summary'
 
 interface SummaryWithAnalysisSectionProps {

@@ -8,7 +8,7 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles } from '../../utils/ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
@@ -113,15 +113,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
           {/* Animated top bar */}
           <Box
             height="4px"
-            background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-            backgroundSize="300% 100%"
-            sx={{
-              animation: animations.shimmer,
-              '@keyframes shimmer': {
-                '0%': { backgroundPosition: '-200% 0' },
-                '100%': { backgroundPosition: '200% 0' }
-              }
-            }}
+            sx={getShimmerStyles()}
           />
           
           <CardBody p={0} display="flex" flexDirection="column" h="full">

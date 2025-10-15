@@ -21,7 +21,7 @@ import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles } from '../../utils/ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 
@@ -200,15 +200,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
           {/* Animated top bar */}
           <Box
             height="4px"
-            background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-            backgroundSize="300% 100%"
-            sx={{
-              animation: animations.shimmer,
-              '@keyframes shimmer': {
-                '0%': { backgroundPosition: '-200% 0' },
-                '100%': { backgroundPosition: '200% 0' }
-              }
-            }}
+            sx={getShimmerStyles()}
           />
           
           {/* Close Button */}

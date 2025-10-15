@@ -6,9 +6,9 @@ import {
   Divider,
 } from '@chakra-ui/react'
 import { useColorModeValue } from '@chakra-ui/react'
-import { getResponsiveStyles, getGradients, animations } from '../../utils/ui'
+import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../../utils/ui'
 import { PeriodData } from '../../hooks/usePeriodData'
-import { PeriodType } from '../ui/PeriodNavigator'
+import { PeriodType } from '../../types'
 import { SummaryCardsGrid, CategoryAnalysisTabs } from './'
 import SummaryCardModal from '../transactions/SummaryCardModal'
 import SummaryHeader from './SummaryHeader'
@@ -103,15 +103,7 @@ export default function SummaryContainer({
             {/* Animated top border */}
             <Box
               height="4px"
-              background="linear-gradient(90deg, #22c55e, #3b82f6, #ef4444, #8b5cf6, #f59e0b)"
-              backgroundSize="300% 100%"
-              sx={{
-                animation: animations.shimmer,
-                '@keyframes shimmer': {
-                  '0%': { backgroundPosition: '-200% 0' },
-                  '100%': { backgroundPosition: '200% 0' },
-                },
-              }}
+              sx={getShimmerStyles()}
             />
 
             <CardBody p={responsiveStyles.addTransactionSection.card.padding}>

@@ -1,5 +1,8 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
 
+// Period types for navigation
+export type PeriodType = 'day' | 'week' | 'month' | 'year'
+
 // Search filters type (moved from useSearchFilters hook)
 export interface SearchFilters {
   text: string

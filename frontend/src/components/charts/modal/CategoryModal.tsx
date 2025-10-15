@@ -23,7 +23,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients } from '../../../utils/ui'
+import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients, getShimmerStyles } from '../../../utils/ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X } from 'lucide-react'
   
@@ -164,13 +164,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
             : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)'
           }
           backgroundSize="300% 100%"
-          sx={{
-            animation: animations.shimmer,
-            '@keyframes shimmer': {
-              '0%': { backgroundPosition: '-200% 0' },
-              '100%': { backgroundPosition: '200% 0' }
-            }
-          }}
+          sx={getShimmerStyles()}
         />
 
         <ModalHeader

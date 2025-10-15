@@ -12,6 +12,54 @@ export const animations = {
   pulse: 'pulse 2s ease-in-out infinite'
 } as const
 
+// Shimmer animation keyframes and styles
+export const shimmerStyles = {
+  keyframes: {
+    shimmer: {
+      '0%': { backgroundPosition: '-200% 0' },
+      '100%': { backgroundPosition: '200% 0' }
+    }
+  },
+  backgroundSize: '300% 100%',
+  animation: 'shimmer 4s ease-in-out infinite'
+} as const
+
+// Shimmer gradients for different color modes
+export const shimmerGradients = {
+  light: 'linear-gradient(90deg, #000000, #ffffff, #6b7280, #000000, #f9fafb, #374151, #ffffff, #9ca3af)',
+  dark: 'linear-gradient(90deg, #10b981, #60a5fa, #f87171, #a78bfa, #fbbf24)'
+} as const
+
+// Shimmer animations for different color modes
+export const shimmerAnimations = {
+  light: 'shimmer 12s ease-in-out infinite',
+  dark: 'shimmer 4s ease-in-out infinite'
+} as const
+
+// Shimmer styles with theme-specific animations and gradients
+export const getShimmerStyles = () => {
+  const background = useColorModeValue(shimmerGradients.light, shimmerGradients.dark)
+  const animation = useColorModeValue(shimmerAnimations.light, shimmerAnimations.dark)
+  
+  return {
+    background,
+    backgroundSize: shimmerStyles.backgroundSize,
+    animation,
+    ...shimmerStyles.keyframes
+  }
+}
+
+// Static shimmer styles that can be used in sx prop without hooks
+export const shimmerStylesStatic = {
+  backgroundSize: '300% 100%',
+  keyframes: {
+    shimmer: {
+      '0%': { backgroundPosition: '-200% 0' },
+      '100%': { backgroundPosition: '200% 0' }
+    }
+  }
+} as const
+
 // Gradient utilities
 export const getGradients = () => ({
   primary: useColorModeValue(

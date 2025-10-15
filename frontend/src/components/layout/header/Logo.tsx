@@ -1,5 +1,6 @@
 import { Box, Text, HStack, VStack, Badge, useColorModeValue } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
+import { getShimmerStyles } from '../../../utils/ui'
 
 interface LogoProps {
   user?: any

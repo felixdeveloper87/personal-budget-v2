@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { PeriodType } from '../components/ui/PeriodNavigator'
+import { PeriodType } from '../types'
 
 export const usePeriodNavigation = (
   selectedPeriod: PeriodType,

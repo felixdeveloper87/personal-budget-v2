@@ -17,7 +17,7 @@ import {
   ArrowLeft,
   ArrowRight,
 } from 'lucide-react'
-import { PeriodType } from '../ui/PeriodNavigator'
+import { PeriodType } from '../../types'
 import { getResponsiveStyles } from '../../utils/ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 

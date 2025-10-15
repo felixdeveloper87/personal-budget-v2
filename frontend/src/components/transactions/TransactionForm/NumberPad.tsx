@@ -1,5 +1,6 @@
 import { Box, Button, Grid, Text, useColorModeValue } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
+import { getShimmerStyles } from '../../../utils/ui'
 
 interface NumberPadProps {
   value: number
@@ -87,17 +88,9 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
       {/* Animated top bar */}
       <Box
         height="4px"
-        background="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-        backgroundSize="300% 100%"
         borderRadius="2xl 2xl 0 0"
         mb={4}
-        sx={{
-          animation: 'shimmer 4s ease-in-out infinite',
-          '@keyframes shimmer': {
-            '0%': { backgroundPosition: '-200% 0' },
-            '100%': { backgroundPosition: '200% 0' }
-          }
-        }}
+        sx={getShimmerStyles()}
       />
       
       {/* Display */}
