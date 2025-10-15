@@ -44,22 +44,20 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         borderRadius="lg"
         _hover={{
           bg: useColorModeValue('gray.100', 'gray.700'),
+          transform: 'translateY(-1px)',
         }}
+        transition="all 0.2s ease"
       >
         <HStack spacing={{ base: 2, lg: 3 }}>
           <Avatar 
             size="md"
             name={user?.name}
-            bg="blue.500"
+            bg={useColorModeValue(
+              'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+              'linear-gradient(135deg, #60a5fa, #3b82f6)'
+            )}
+            boxShadow="md"
           />
-          <Text 
-            fontSize={{ base: "sm", lg: "md" }}
-            fontWeight="600"
-            color={textColor}
-            display={{ base: 'none', md: 'block' }}
-          >
-            {user?.name.split(' ')[0]}
-          </Text>
         </HStack>
       </MenuButton>
       <MenuList 
@@ -94,7 +92,6 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         <Box 
           px={6} 
           py={5}
-          position="relative"
           bg={useColorModeValue(
             'linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(16, 185, 129, 0.03))',
             'linear-gradient(135deg, rgba(96, 165, 250, 0.08), rgba(52, 211, 153, 0.05))'
@@ -107,13 +104,10 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
               size="lg"
               name={user?.name}
               bg={useColorModeValue(
-                'linear-gradient(135deg, #3b82f6, #1d4ed8, #7c3aed)',
-                'linear-gradient(135deg, #60a5fa, #3b82f6, #a78bfa)'
+                'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                'linear-gradient(135deg, #60a5fa, #3b82f6)'
               )}
-              boxShadow={useColorModeValue(
-                '0 8px 25px rgba(59, 130, 246, 0.3)',
-                '0 8px 25px rgba(96, 165, 250, 0.4)'
-              )}
+              boxShadow="lg"
             />
             <VStack spacing={1} align="start" flex="1">
               <Text 
@@ -127,7 +121,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
                 bgClip="text"
                 letterSpacing="wide"
               >
-                {user?.name}
+                Budget
               </Text>
               <Text 
                 fontSize="sm" 

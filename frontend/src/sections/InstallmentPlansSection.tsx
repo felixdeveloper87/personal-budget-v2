@@ -152,74 +152,160 @@ export default function InstallmentPlansSection() {
                 >
                   {/* Left side */}
                   <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+                    {/* Icon Container with Advanced Effects */}
                     <Box
+                      position="relative"
                       p={responsiveStyles.installmentPlansSection.header.icon.padding}
                       borderRadius={responsiveStyles.installmentPlansSection.header.icon.borderRadius}
-                      bg={iconBg}
-                      boxShadow="lg"
+                      bg={useColorModeValue(
+                        'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+                        'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
+                      )}
+                      boxShadow="xl"
+                      opacity={0.9}
                       sx={{
-                        animation: animations.glow,
-                        '@keyframes glow': {
-                          '0%, 100%': { boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' },
+                        animation: 'installmentGlow 3s ease-in-out infinite, iconFloat 4s ease-in-out infinite',
+                        '@keyframes installmentGlow': {
+                          '0%,100%': { 
+                            boxShadow: '0 0 20px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1), 0 0 60px rgba(139,92,246,0.05)',
+                            transform: 'scale(1)'
+                          },
                           '50%': {
-                            boxShadow:
-                              '0 0 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)',
+                            boxShadow: '0 0 30px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2), 0 0 90px rgba(139,92,246,0.1)',
+                            transform: 'scale(1.05)'
                           },
                         },
+                        '@keyframes iconFloat': {
+                          '0%,100%': { transform: 'translateY(0px) rotate(0deg)' },
+                          '25%': { transform: 'translateY(-2px) rotate(1deg)' },
+                          '50%': { transform: 'translateY(-4px) rotate(0deg)' },
+                          '75%': { transform: 'translateY(-1px) rotate(-1deg)' }
+                        },
+                        '&::before': {
+                          content: '""',
+                          position: 'absolute',
+                          top: '-2px',
+                          left: '-2px',
+                          right: '-2px',
+                          bottom: '-2px',
+                          background: 'linear-gradient(45deg, rgba(139,92,246,0.3), rgba(167,139,250,0.3), rgba(139,92,246,0.3))',
+                          borderRadius: 'inherit',
+                          zIndex: -1,
+                          filter: 'blur(8px)',
+                          opacity: 0.6,
+                          animation: 'shimmer 3s ease-in-out infinite'
+                        }
                       }}
                     >
                       <Icon
                         as={CreditCard}
                         boxSize={responsiveStyles.installmentPlansSection.header.icon.size}
                         color="white"
+                        sx={{
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
+                          animation: 'cardPulse 2s ease-in-out infinite',
+                          '@keyframes cardPulse': {
+                            '0%,100%': { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
+                            '25%': { transform: 'scale(1.1) rotate(2deg)', filter: 'brightness(1.2)' },
+                            '50%': { transform: 'scale(1.05) rotate(0deg)', filter: 'brightness(1.1)' },
+                            '75%': { transform: 'scale(1.1) rotate(-2deg)', filter: 'brightness(1.2)' }
+                          }
+                        }}
                       />
                     </Box>
 
-                    <VStack align="start" spacing={1} flex="1">
+                    <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
                       <Heading
                         size={responsiveStyles.installmentPlansSection.header.title.size}
-                        bg={titleBg}
+                        bg={useColorModeValue(
+                          'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
+                          'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
+                        )}
                         bgClip="text"
-                        fontWeight="800"
-                        textAlign="left"
+                        fontWeight="900"
+                        textAlign={{ base: 'center', sm: 'left' }}
+                        sx={{
+                          animation: 'titleShimmer 4s ease-in-out infinite',
+                          '@keyframes titleShimmer': {
+                            '0%,100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' }
+                          },
+                          backgroundSize: '200% 200%',
+                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
+                        }}
                       >
                         Active Installment Plans
                       </Heading>
                       <Text
                         fontSize={responsiveStyles.installmentPlansSection.header.title.fontSize}
                         color={colors.text.secondary}
-                        fontWeight="400"
-                        opacity={0.8}
-                        textAlign="left"
+                        fontWeight="500"
+                        opacity={0.9}
+                        textAlign={{ base: 'center', sm: 'left' }}
                         display={{ base: 'none', sm: 'block' }}
+                        sx={{
+                          animation: 'fadeInUp 0.8s ease-out 0.2s both',
+                          '@keyframes fadeInUp': {
+                            '0%': { opacity: 0, transform: 'translateY(10px)' },
+                            '100%': { opacity: 0.9, transform: 'translateY(0)' }
+                          }
+                        }}
                       >
                         Track your ongoing payment plans
                       </Text>
                     </VStack>
                   </HStack>
 
-                  {/* Right side - Badge */}
+                  {/* Right side - Premium Badge */}
                   <Badge
                     colorScheme="purple"
                     variant="solid"
                     borderRadius="full"
-                    px={3}
-                    py={1.5}
-                    fontSize="xs"
-                    fontWeight="600"
-                    bg={badgeBg}
-                    boxShadow="md"
+                    px={4}
+                    py={2}
+                    fontSize="sm"
+                    fontWeight="700"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+                      'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
+                    )}
+                    boxShadow="xl"
                     cursor="pointer"
                     onClick={onOpen}
+                    position="relative"
+                    overflow="hidden"
+                    opacity={0.9}
+                    sx={{
+                      animation: 'badgeGlow 3s ease-in-out infinite',
+                      '@keyframes badgeGlow': {
+                        '0%,100%': { 
+                          boxShadow: '0 0 15px rgba(139,92,246,0.4), 0 0 30px rgba(139,92,246,0.2)',
+                          transform: 'scale(1)'
+                        },
+                        '50%': {
+                          boxShadow: '0 0 25px rgba(139,92,246,0.6), 0 0 50px rgba(139,92,246,0.3)',
+                          transform: 'scale(1.02)'
+                        },
+                      },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: '-100%',
+                        width: '100%',
+                        height: '100%',
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                        animation: 'shimmer 3s ease-in-out infinite'
+                      }
+                    }}
                     _hover={{
-                      transform: 'translateY(-2px)',
-                      boxShadow: 'lg',
-                      bg: badgeHoverBg,
+                      transform: 'translateY(-2px) scale(1.05)',
+                      boxShadow: '0 20px 40px rgba(139,92,246,0.4)',
                     }}
                     _active={{
-                      transform: 'translateY(0)',
+                      transform: 'translateY(0) scale(1.02)',
                     }}
-                    transition="all 0.2s ease"
+                    transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                     flex="0 0 auto"
                     minW="auto"
                     w="auto"
@@ -228,13 +314,28 @@ export default function InstallmentPlansSection() {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    <HStack spacing={0}>
+                    <HStack spacing={2}>
                       <Icon
                         as={Sparkles}
                         boxSize={3}
-                        display="none"
+                        sx={{
+                          animation: 'sparkle 2s ease-in-out infinite',
+                          '@keyframes sparkle': {
+                            '0%,100%': { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
+                            '25%': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.3)' },
+                            '50%': { transform: 'scale(1.1) rotate(0deg)', filter: 'brightness(1.2)' },
+                            '75%': { transform: 'scale(1.2) rotate(-10deg)', filter: 'brightness(1.3)' }
+                          }
+                        }}
                       />
-                      <Text fontSize="xs" lineHeight="1">
+                      <Text 
+                        fontSize="sm" 
+                        lineHeight="1" 
+                        fontWeight="700"
+                        sx={{
+                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
+                        }}
+                      >
                         {plans.length}
                       </Text>
                     </HStack>
