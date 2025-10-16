@@ -28,7 +28,6 @@ import {
   FiTrash2,
   FiCalendar,
 } from 'react-icons/fi'
-import { useThemeColors } from '../../hooks/useThemeColors'
 import { InstallmentPlan } from '../../types'
 import { deleteInstallmentPlan } from '../../api'
 
@@ -43,7 +42,6 @@ interface InstallmentPlanCardProps {
  * Allows expanding/collapsing and deletion
  */
 export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlanCardProps) {
-  const colors = useThemeColors()
   const toast = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -159,8 +157,10 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                 variant="ghost"
                 rightIcon={isExpanded ? <FiChevronUp /> : <FiChevronDown />}
                 onClick={() => setIsExpanded(!isExpanded)}
+                colorScheme="blue"
+                fontWeight="medium"
               >
-                {isExpanded ? 'Hide' : 'View installments'}
+                {isExpanded ? 'Hide' : 'View Installments'}
               </Button>
             </HStack>
 
@@ -169,53 +169,62 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
               <VStack
                 align="stretch"
                 spacing={2}
-                mt={2}
+                mt={3}
                 p={3}
-                bg={useColorModeValue('rgba(255, 255, 255, 0.5)', 'rgba(0, 0, 0, 0.3)')}
+                bg={useColorModeValue('white', 'gray.800')}
                 borderRadius="md"
-                maxH="300px"
+                maxH="350px"
                 overflowY="auto"
                 border="1px"
-                borderColor={useColorModeValue('rgba(96, 165, 250, 0.3)', 'rgba(96, 165, 250, 0.5)')}
+                borderColor={useColorModeValue('gray.200', 'gray.600')}
               >
                 {plan.transactions.map((transaction) => {
                   const isPaid = new Date(transaction.date) < new Date()
+                  const formattedDate = new Date(transaction.date).toLocaleDateString('pt-BR')
+                  
                   return (
                     <HStack
                       key={transaction.id}
                       justify="space-between"
                       p={2}
                       bg={useColorModeValue(
-                        isPaid ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.3)",
-                        isPaid ? "rgba(96, 165, 250, 0.2)" : "rgba(0, 0, 0, 0.2)"
+                        isPaid ? "green.50" : "gray.50",
+                        isPaid ? "green.900" : "gray.700"
                       )}
                       borderRadius="md"
                       border="1px"
                       borderColor={useColorModeValue(
-                        isPaid ? "#60a5fa" : 'transparent',
-                        isPaid ? "#60a5fa" : 'rgba(96, 165, 250, 0.3)'
+                        isPaid ? "green.200" : "gray.200",
+                        isPaid ? "green.600" : "gray.600"
                       )}
+                      flexWrap="wrap"
+                      gap={2}
                     >
-                      <HStack spacing={2}>
-                        <Icon as={FiCalendar} fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')} />
-                        <Text fontSize="sm" color={useColorModeValue('gray.800', 'white')}>
-                          {new Date(transaction.date).toLocaleDateString('pt-BR')}
-                        </Text>
+                      <HStack spacing={2} minW="0" flex="1">
+                        <Icon as={FiCalendar} fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} />
+                        <VStack align="start" spacing={0} minW="0">
+                          <Text fontSize="xs" fontWeight="medium" color={useColorModeValue('gray.800', 'white')}>
+                            {formattedDate}
+                          </Text>
+                          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')}>
+                            {transaction.installmentNumber}/{plan.totalInstallments}
+                          </Text>
+                        </VStack>
                       </HStack>
-                      <HStack spacing={2}>
-                        <Badge 
-                          bg={useColorModeValue(
-                            isPaid ? "#10b981" : "gray.400",
-                            isPaid ? "#10b981" : "gray.500"
-                          )} 
-                          color="white" 
-                          fontSize="xs"
-                        >
-                          {transaction.installmentNumber}/{plan.totalInstallments}
-                        </Badge>
-                        <Text fontSize="sm" fontWeight="semibold" color={useColorModeValue('gray.800', 'white')}>
+                      
+                      <HStack spacing={2} minW="0">
+                        <Text fontSize="xs" fontWeight="bold" color={useColorModeValue('gray.800', 'white')}>
                           £{transaction.amount.toFixed(2)}
                         </Text>
+                        <Badge 
+                          colorScheme={isPaid ? "green" : "gray"}
+                          size="sm"
+                          fontSize="xs"
+                          px={1}
+                          py={0}
+                        >
+                          {isPaid ? 'Paid' : 'Pending'}
+                        </Badge>
                       </HStack>
                     </HStack>
                   )

@@ -258,68 +258,28 @@ export default function InstallmentPlansModal({
             ) : (
               <VStack spacing={6} align="stretch">
                 {/* Header com contagem */}
-                <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  align="center"
-                  justify="space-between"
-                  gap={4}
-                >
-                  <HStack spacing={4} align="center">
-                    <Box
-                      p={3}
-                      borderRadius="2xl"
-                      bg={iconBg}
-                      boxShadow="lg"
-                      sx={{
-                        animation: animations.glow,
-                        '@keyframes glow': {
-                          '0%, 100%': { 
-                            boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
-                          },
-                          '50%': { 
-                            boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
-                          }
-                        }
-                      }}
+                <HStack justify="space-between" align="center" mb={4}>
+                  <HStack spacing={3}>
+                    <Text 
+                      fontSize={{ base: 'lg', md: 'xl' }} 
+                      fontWeight="bold" 
+                      color={useColorModeValue('gray.800', 'white')}
                     >
-                      <Icon as={CreditCard} boxSize={6} color="white" />
-                    </Box>
-                    <VStack align="start" spacing={1}>
-                      <Text
-                        fontSize={{ base: 'lg', sm: 'xl' }}
-                        color={colors.text.primary}
-                        fontWeight="600"
-                      >
-                        {plans.length} Active Plan{plans.length !== 1 ? 's' : ''}
-                      </Text>
-                      <Text
-                        fontSize={{ base: '2xs', sm: 'xs' }}
-                        color={colors.text.secondary}
-                        fontWeight="400"
-                        opacity={0.8}
-                      >
-                        Manage your payment schedules
-                      </Text>
-                    </VStack>
+                      Installment Plans
+                    </Text>
+                    <Badge 
+                      colorScheme="blue" 
+                      variant="subtle" 
+                      px={3}
+                      py={1} 
+                      borderRadius="full"
+                      fontSize="sm"
+                      fontWeight="500"
+                    >
+                      {plans.length} Active
+                    </Badge>
                   </HStack>
-                  
-                  <Badge
-                    colorScheme="purple"
-                    variant="solid"
-                    borderRadius="full"
-                    px={4}
-                    py={2}
-                    fontSize="sm"
-                    fontWeight="600"
-                    bg={badgeBg}
-                    boxShadow="md"
-                  >
-                    <HStack spacing={2}>
-                      <Icon as={Sparkles} boxSize={3} />
-                      <Text>{plans.length} Active</Text>
-                    </HStack>
-                  </Badge>
-                </Flex>
+                </HStack>
 
                 {/* Grid de plans */}
                 <SimpleGrid 
