@@ -16,7 +16,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { List, Calendar, Filter, RefreshCw } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../utils/ui'
+import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../components/ui'
 import { useThemeColors } from '../hooks/useThemeColors'
 
 interface AllTransactionsSectionProps {

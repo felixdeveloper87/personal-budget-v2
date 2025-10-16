@@ -10,7 +10,7 @@ import {
 } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 
 // 🎨 Animações personalizadas
 const float = 'float 3s ease-in-out infinite'

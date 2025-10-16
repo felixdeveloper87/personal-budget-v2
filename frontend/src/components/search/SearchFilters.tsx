@@ -4,7 +4,7 @@ import {
 } from '@chakra-ui/react'
 import { Search, Sparkles, Calendar, Tag } from 'lucide-react'
 import { SearchFiltersProps } from '../../types'
-import { safariStyles, getResponsiveStyles } from '../../utils/ui'
+import { safariStyles, getResponsiveStyles } from '../ui'
 
 export default function SearchFilters({ 
   filters, 

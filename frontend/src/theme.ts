@@ -44,13 +44,13 @@ const theme = extendTheme({
         bg: '#000000',
         color: '#ffffff',
       },
-      // Bordas globais
-      '*': {
-        borderColor: '#e2e8f0',
-      },
-      '[data-theme="dark"] *': {
-        borderColor: 'gray.800',
-      },
+      // Bordas globais - comentadas para evitar conflitos com botões
+      // '*': {
+      //   borderColor: '#e2e8f0',
+      // },
+      // '[data-theme="dark"] *': {
+      //   borderColor: 'gray.800',
+      // },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
         WebkitOverflowScrolling: 'touch',
@@ -118,29 +118,29 @@ const theme = extendTheme({
     },
   },
   components: {
-    Button: {
-      baseStyle: {
-        fontWeight: '600',
-        borderRadius: 'xl',
-      },
-      variants: {
-        solid: (props: any) => ({
-          bg: props.colorMode === 'dark' ? 'brand.500' : 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
-          color: 'white',
-          boxShadow: props.colorMode === 'dark' 
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
-            : '0 4px 6px -1px rgba(14, 165, 233, 0.3), 0 2px 4px -1px rgba(14, 165, 233, 0.2)',
-        }),
-        outline: (props: any) => ({
-          borderColor: props.colorMode === 'dark' ? 'gray.600' : '#cbd5e1',
-          color: props.colorMode === 'dark' ? 'gray.200' : '#334155',
-          borderWidth: '2px',
-        }),
-        ghost: (props: any) => ({
-          color: props.colorMode === 'dark' ? 'gray.300' : '#475569',
-        }),
-      },
-    },
+    // Button: {
+    //   baseStyle: {
+    //     fontWeight: '600',
+    //     borderRadius: 'xl',
+    //   },
+    //   variants: {
+    //     solid: (props: any) => ({
+    //       bg: props.colorMode === 'dark' ? 'brand.500' : 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)',
+    //       color: 'white',
+    //       boxShadow: props.colorMode === 'dark' 
+    //         ? '0 4px 6px -1px rgba(0, 0, 0, 0.3)'
+    //         : '0 4px 6px -1px rgba(14, 165, 233, 0.3), 0 2px 4px -1px rgba(14, 165, 233, 0.2)',
+    //     }),
+    //     outline: (props: any) => ({
+    //       borderColor: props.colorMode === 'dark' ? 'gray.600' : '#cbd5e1',
+    //       color: props.colorMode === 'dark' ? 'gray.200' : '#334155',
+    //       borderWidth: '2px',
+    //     }),
+    //     ghost: (props: any) => ({
+    //       color: props.colorMode === 'dark' ? 'gray.300' : '#475569',
+    //     }),
+    //   },
+    // },
     Card: {
       baseStyle: (props: any) => ({
         container: {

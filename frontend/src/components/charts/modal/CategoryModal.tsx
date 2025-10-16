@@ -23,7 +23,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients, getShimmerStyles } from '../../../utils/ui'
+import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients, getShimmerStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X } from 'lucide-react'
   

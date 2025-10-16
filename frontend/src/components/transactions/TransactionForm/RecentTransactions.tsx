@@ -6,7 +6,7 @@ import { formatTransactionDateTime } from '../../../utils/dateTime'
 import { DeleteTransactionDialog } from '../../ui'
 import { useDeleteTransaction } from '../../../hooks/useDeleteTransaction'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]

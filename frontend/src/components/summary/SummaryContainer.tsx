@@ -6,7 +6,7 @@ import {
   Divider,
 } from '@chakra-ui/react'
 import { useColorModeValue } from '@chakra-ui/react'
-import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../../utils/ui'
+import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../ui'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import { SummaryCardsGrid, CategoryAnalysisTabs } from './'

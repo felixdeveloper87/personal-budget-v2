@@ -3,7 +3,7 @@ import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations } from '../../utils/ui'
+import { getResponsiveStyles, getGradients, animations } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface ExpenseChartProps {

@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Activity, RotateCcw } from 'lucide-react'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface SummaryHeaderProps {

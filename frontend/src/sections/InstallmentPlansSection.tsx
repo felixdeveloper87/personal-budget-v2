@@ -20,7 +20,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles, getGradients, animations, shimmerGradients, shimmerAnimations, shimmerStylesStatic } from '../utils/ui'
+import { getResponsiveStyles, getGradients, animations, shimmerGradients, shimmerAnimations, shimmerStylesStatic } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -35,39 +35,23 @@ export default function InstallmentPlansSection() {
   // Move ALL useColorModeValue to top (always safe)
   const cardBg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17, 17, 17, 0.9)')
   const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
-  const iconBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-  )
-  const titleBg = useColorModeValue(
-    'linear-gradient(135deg, #1e293b, #475569)',
-    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-  )
-  const badgeBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-  )
   
   // Shimmer styles
   const shimmerBackground = useColorModeValue(shimmerGradients.light, shimmerGradients.dark)
   const shimmerAnimation = useColorModeValue(shimmerAnimations.light, shimmerAnimations.dark)
-  const badgeHoverBg = useColorModeValue(
-    'linear-gradient(135deg, #7c3aed, #6d28d9)',
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)'
-  )
 
   // Additional useColorModeValue calls that were in JSX
   const iconContainerBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
+    'linear-gradient(135deg,rgb(158, 130, 222),rgb(123, 93, 175),rgb(96, 63, 150))',
+    'linear-gradient(135deg, #a78bfa,rgb(149, 111, 237),rgb(107, 62, 185))'
   )
   const titleGradient = useColorModeValue(
     'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
     'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
   )
   const badgeGradient = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
+    'linear-gradient(135deg,rgb(158, 130, 222),rgb(123, 93, 175),rgb(96, 63, 150))',
+    'linear-gradient(135deg, #a78bfa,rgb(149, 111, 237),rgb(107, 62, 185))'
   )
 
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
@@ -141,10 +125,6 @@ export default function InstallmentPlansSection() {
               overflow="hidden"
               sx={{
                 animation: animations.slideIn,
-                '@keyframes slideIn': {
-                  from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-                  to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-                },
               }}
             >
               {/* Animated top border */}
@@ -178,33 +158,17 @@ export default function InstallmentPlansSection() {
                         animation: 'installmentGlow 3s ease-in-out infinite, iconFloat 4s ease-in-out infinite',
                         '@keyframes installmentGlow': {
                           '0%,100%': { 
-                            boxShadow: '0 0 20px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1), 0 0 60px rgba(139,92,246,0.05)',
+                            boxShadow: '0 0 20px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1)',
                             transform: 'scale(1)'
                           },
                           '50%': {
-                            boxShadow: '0 0 30px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2), 0 0 90px rgba(139,92,246,0.1)',
+                            boxShadow: '0 0 30px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2)',
                             transform: 'scale(1.05)'
                           },
                         },
                         '@keyframes iconFloat': {
                           '0%,100%': { transform: 'translateY(0px) rotate(0deg)' },
-                          '25%': { transform: 'translateY(-2px) rotate(1deg)' },
-                          '50%': { transform: 'translateY(-4px) rotate(0deg)' },
-                          '75%': { transform: 'translateY(-1px) rotate(-1deg)' }
-                        },
-                        '&::before': {
-                          content: '""',
-                          position: 'absolute',
-                          top: '-2px',
-                          left: '-2px',
-                          right: '-2px',
-                          bottom: '-2px',
-                          background: 'linear-gradient(45deg, rgba(139,92,246,0.3), rgba(167,139,250,0.3), rgba(139,92,246,0.3))',
-                          borderRadius: 'inherit',
-                          zIndex: -1,
-                          filter: 'blur(8px)',
-                          opacity: 0.6,
-                          animation: 'shimmer 3s ease-in-out infinite'
+                          '50%': { transform: 'translateY(-4px) rotate(0deg)' }
                         }
                       }}
                     >
@@ -216,10 +180,8 @@ export default function InstallmentPlansSection() {
                           filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
                           animation: 'cardPulse 2s ease-in-out infinite',
                           '@keyframes cardPulse': {
-                            '0%,100%': { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
-                            '25%': { transform: 'scale(1.1) rotate(2deg)', filter: 'brightness(1.2)' },
-                            '50%': { transform: 'scale(1.05) rotate(0deg)', filter: 'brightness(1.1)' },
-                            '75%': { transform: 'scale(1.1) rotate(-2deg)', filter: 'brightness(1.2)' }
+                            '0%,100%': { transform: 'scale(1)', filter: 'brightness(1)' },
+                            '50%': { transform: 'scale(1.05)', filter: 'brightness(1.1)' }
                           }
                         }}
                       />
@@ -291,16 +253,6 @@ export default function InstallmentPlansSection() {
                           boxShadow: '0 0 25px rgba(139,92,246,0.6), 0 0 50px rgba(139,92,246,0.3)',
                           transform: 'scale(1.02)'
                         },
-                      },
-                      '&::before': {
-                        content: '""',
-                        position: 'absolute',
-                        top: 0,
-                        left: '-100%',
-                        width: '100%',
-                        height: '100%',
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-                        animation: 'shimmer 3s ease-in-out infinite'
                       }
                     }}
                     _hover={{
@@ -326,10 +278,8 @@ export default function InstallmentPlansSection() {
                         sx={{
                           animation: 'sparkle 2s ease-in-out infinite',
                           '@keyframes sparkle': {
-                            '0%,100%': { transform: 'scale(1) rotate(0deg)', filter: 'brightness(1)' },
-                            '25%': { transform: 'scale(1.2) rotate(10deg)', filter: 'brightness(1.3)' },
-                            '50%': { transform: 'scale(1.1) rotate(0deg)', filter: 'brightness(1.2)' },
-                            '75%': { transform: 'scale(1.2) rotate(-10deg)', filter: 'brightness(1.3)' }
+                            '0%,100%': { transform: 'scale(1)', filter: 'brightness(1)' },
+                            '50%': { transform: 'scale(1.2)', filter: 'brightness(1.3)' }
                           }
                         }}
                       />

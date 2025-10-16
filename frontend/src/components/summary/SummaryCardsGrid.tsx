@@ -2,7 +2,7 @@ import { SimpleGrid, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign } from 'lucide-react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 import SummaryCard from './SummaryCard'
 
 // ✅ Tipagem explícita dos tipos válidos de card

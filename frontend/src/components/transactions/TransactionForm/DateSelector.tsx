@@ -1,7 +1,7 @@
 import { Box, Text, Input, HStack, Icon, Button, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { Calendar, Clock, CalendarCheck } from 'lucide-react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 
 interface DateSelectorProps {
   date: string

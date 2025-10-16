@@ -6,7 +6,7 @@ import {
   useDisclosure
 } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
-import { getShimmerStyles } from '../../../utils/ui'
+import { getShimmerStyles } from '../../ui'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
 import { Logo, Navigation, UserMenu, HeaderControls, SearchButton } from './'

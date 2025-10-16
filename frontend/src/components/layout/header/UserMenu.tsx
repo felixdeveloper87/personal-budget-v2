@@ -15,7 +15,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { SearchIcon, SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-import { getShimmerStyles } from '../../../utils/ui'
+import { getShimmerStyles } from '../../ui'
 import { 
   getUserMenuStyles, 
   getUserMenuSxStyles,

@@ -1,6 +1,6 @@
 import { Box, Text, Input, HStack, useDisclosure, VStack, Wrap, WrapItem, Button, Icon } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 import NumberPad from './NumberPad'
 
 interface AmountInputProps {

@@ -1,7 +1,7 @@
 import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem, Input } from '@chakra-ui/react'
 import { CreditCard, Calendar, Calculator } from 'lucide-react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 
 interface InstallmentSelectorProps {
   enabled: boolean

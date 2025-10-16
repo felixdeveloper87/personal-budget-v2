@@ -8,7 +8,7 @@ import {
   Box,
 } from '@chakra-ui/react'
 import { SunIcon, MoonIcon, SearchIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 import { 
   getHeaderControlsContainerStyles,
   getHeaderSearchButtonStyles,

@@ -11,6 +11,9 @@ export {
   sharedBreakpoints
 } from './sharedStyles'
 
+// UI Utilities - General UI utilities and responsive styles
+export * from './ui'
+
 // Header Styles - All header-related styling
 export * from './headerStyles/logoStyles'
 export * from './headerStyles/navigationStyles'

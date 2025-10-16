@@ -18,7 +18,7 @@ import {
 import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from 'lucide-react'
 import { memo, useMemo } from 'react'
 import { formatDateBR } from '../../utils/dateTime'
-import { getTypeColor, getTableStyles, getResponsiveStyles } from '../../utils/ui'
+import { getTypeColor, getTableStyles, getResponsiveStyles } from '../ui'
 import { CategoryResultCardProps } from '../../types'
 
 const CategoryResultCard = memo(function CategoryResultCard({

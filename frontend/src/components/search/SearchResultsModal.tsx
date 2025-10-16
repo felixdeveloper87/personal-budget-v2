@@ -21,7 +21,7 @@ import { X, AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles } from '../ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({ 
   isOpen, 

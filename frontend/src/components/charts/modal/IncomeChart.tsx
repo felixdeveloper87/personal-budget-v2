@@ -14,7 +14,7 @@ import {
 } from 'recharts'
 import { VStack, Text, HStack, Box, Badge, useBreakpointValue, useColorModeValue, Spinner, Center } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles, animations } from '../../../utils/ui'
+import { getResponsiveStyles, animations } from '../../ui'
 
 interface IncomeChartProps {
   transactions: any[]

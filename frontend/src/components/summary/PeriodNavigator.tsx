@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { PeriodType } from '../../types'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface PeriodNavigatorProps {
@@ -36,14 +36,13 @@ export default function PeriodNavigator({
   onGoToToday,
   formatLabel,
 }: PeriodNavigatorProps) {
-  const responsiveStyles = getResponsiveStyles()
   const colors = useThemeColors()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   // Colors for theme consistency
   const selectedBg = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-    'linear-gradient(135deg, #60a5fa, #3b82f6)'
+    'linear-gradient(135deg,rgb(31, 32, 33),rgb(101, 118, 173))',
+    'linear-gradient(135deg,rgb(8, 8, 8),rgb(44, 69, 120))'
   )
   const unselectedBg = colors.bgSecondary
   const unselectedColor = colors.text.primary
@@ -133,14 +132,16 @@ export default function PeriodNavigator({
           px={4}
           py={2}
           borderRadius="md"
-          bg={useColorModeValue('blue.50', 'blue.900')}
+          background={useColorModeValue(
+            'linear-gradient(135deg,rgb(106, 151, 209),rgb(142, 178, 223),rgb(132, 159, 188))',
+            'linear-gradient(135deg,rgb(20, 20, 21),rgb(50, 70, 135),rgb(19, 32, 59))'
+          )}
           border="1px solid"
           borderColor={useColorModeValue('blue.200', 'blue.700')}
         >
           <Text
             fontSize={{ base: 'sm', md: 'md' }}
-            fontWeight="700"
-            color={useColorModeValue('blue.600', 'blue.400')}
+            fontWeight="600"
           >
             {formatLabel()}
           </Text>

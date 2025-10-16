@@ -21,7 +21,7 @@ import { CreditCard, Sparkles, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
-import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles } from '../../utils/ui'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles } from '../ui'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean

@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface CategoryAnalysisHeaderProps {
@@ -26,8 +26,8 @@ export default function CategoryAnalysisHeader({
   const responsiveStyles = getResponsiveStyles()
 
   const analysisIconBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+    'linear-gradient(135deg,rgb(166, 145, 215),rgb(123, 99, 164))',
+    'linear-gradient(135deg, #a78bfa,rgb(166, 131, 247))'
   )
   const titleBg = useColorModeValue(
     'linear-gradient(135deg, #1e293b, #475569)',

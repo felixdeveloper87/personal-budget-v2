@@ -1,6 +1,6 @@
 import { Box, Text, SimpleGrid, Button, HStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../../utils/ui'
+import { getResponsiveStyles } from '../../ui'
 import {
   Briefcase,
   Laptop,

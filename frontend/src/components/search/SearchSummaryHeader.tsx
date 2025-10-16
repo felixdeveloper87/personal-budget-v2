@@ -12,7 +12,7 @@ import {
 import { Search, Calendar } from 'lucide-react'
 import { memo } from 'react'
 import { formatTransactionDate } from '../../utils/dateTime'
-import { getGradients } from '../../utils/ui'
+import { getGradients } from '../ui'
 import { SearchSummaryHeaderProps } from '../../types'
 
 const SearchSummaryHeader = memo(function SearchSummaryHeader({

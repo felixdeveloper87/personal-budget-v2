@@ -8,7 +8,7 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles } from '../ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()

@@ -13,7 +13,7 @@ import { TrendingUp, TrendingDown, Plus, Minus, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles } from '../../utils/ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles } from '../ui'
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {

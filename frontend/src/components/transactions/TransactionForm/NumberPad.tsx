@@ -1,6 +1,6 @@
 import { Box, Button, Grid, Text, useColorModeValue } from '@chakra-ui/react'
 import { useState, useEffect } from 'react'
-import { getShimmerStyles } from '../../../utils/ui'
+import { getShimmerStyles } from '../../ui'
 
 interface NumberPadProps {
   value: number

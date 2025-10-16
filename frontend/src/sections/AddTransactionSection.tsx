@@ -17,7 +17,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { animations, getGradients, getResponsiveStyles, getShimmerStyles } from '../utils/ui'
+import { animations, getGradients, getResponsiveStyles, getShimmerStyles } from '../components/ui'
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {

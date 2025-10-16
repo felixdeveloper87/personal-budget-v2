@@ -12,7 +12,7 @@ import { memo, useMemo, useState, useCallback } from 'react'
 import CategoryResultCard from './CategoryResultCard'
 import { Transaction } from '../../types'
 import { CategoryResultsListProps } from '../../types'
-import { getResponsiveStyles } from '../../utils/ui'
+import { getResponsiveStyles } from '../ui'
 
 const CategoryResultsList = memo(function CategoryResultsList({
   transactions,
