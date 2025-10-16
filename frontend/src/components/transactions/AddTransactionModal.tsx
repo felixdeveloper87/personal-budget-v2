@@ -17,8 +17,13 @@ import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveSt
 
 // 🎨 Constantes para gradientes e animações
 const GRADIENTS = {
-  income: 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)',
-  expense: 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)',
+  income: 'linear-gradient(135deg, #dcfce7, #bbf7d0, #86efac)', // Verde post-it
+  expense: 'linear-gradient(135deg, #fecaca, #fca5a5, #f87171)', // Rosa post-it
+}
+
+const DARK_GRADIENTS = {
+  income: 'linear-gradient(135deg, #166534, #15803d, #16a34a)', // Verde escuro
+  expense: 'linear-gradient(135deg, #991b1b, #dc2626, #ef4444)', // Vermelho escuro
 }
 
 const ANIMATIONS = {
@@ -46,7 +51,10 @@ export default function AddTransactionModal({
   const colors = useThemeColors()
   const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
-  const gradient = type === 'INCOME' ? GRADIENTS.income : GRADIENTS.expense
+  const gradient = useColorModeValue(
+    type === 'INCOME' ? GRADIENTS.income : GRADIENTS.expense,
+    type === 'INCOME' ? DARK_GRADIENTS.income : DARK_GRADIENTS.expense
+  )
   const handleTransactionCreated = () => {
     onTransactionCreated()
     onClose()
@@ -124,7 +132,7 @@ export default function AddTransactionModal({
             borderColor={colors.border}
             py={{ base: 4, md: 6 }}
             bg={gradient}
-            color="white"
+            color={useColorModeValue('gray.800', 'white')}
             fontWeight="800"
             letterSpacing="wide"
             position="relative"
@@ -140,16 +148,19 @@ export default function AddTransactionModal({
               <Box
                 p={{ base: 1.5, md: 2 }}
                 borderRadius="full"
-                bg="rgba(255,255,255,0.2)"
+                bg={useColorModeValue(
+                  type === 'INCOME' ? '#10b981' : '#ef4444',
+                  type === 'INCOME' ? '#22c55e' : '#dc2626'
+                )}
                 animation={ANIMATIONS.pulse}
                 boxSize={{ base: 8, md: 10 }}
               >
-                {type === 'INCOME' ? <Plus size={16} /> : <Minus size={16} />}
+                {type === 'INCOME' ? <Plus size={16} color="white" /> : <Minus size={16} color="white" />}
               </Box>
               <Text fontSize={{ base: 'md', md: 'lg' }}>
                 {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
               </Text>
-              {type === 'INCOME' ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
+              {type === 'INCOME' ? <TrendingUp size={16} color={useColorModeValue('#10b981', '#22c55e')} /> : <TrendingDown size={16} color={useColorModeValue('#ef4444', '#dc2626')} />}
             </Box>
             <Text fontSize={{ base: 'xs', md: 'sm' }} opacity={0.9}>
               {type === 'INCOME' ? 'Track your incoming money' : 'Record your spending'}
@@ -165,10 +176,10 @@ export default function AddTransactionModal({
               onClick={onClose}
               borderRadius="full"
               p={3}
-              bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
+              bg={useColorModeValue('rgba(255, 255, 255, 0.8)', colors.cardBg)}
               backdropFilter="blur(10px)"
               border="1px solid"
-              borderColor={useColorModeValue('gray.300', 'gray.600')}
+              borderColor={useColorModeValue('gray.300', colors.border)}
               _hover={{
                 bg: useColorModeValue('red.50', 'red.900'),
                 borderColor: 'red.300',
@@ -183,7 +194,7 @@ export default function AddTransactionModal({
               boxShadow="md"
               aria-label="Close form"
             >
-              <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
+              <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', colors.text.primary)} />
             </Button>
           </Box>
 

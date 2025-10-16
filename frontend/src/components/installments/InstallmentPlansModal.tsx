@@ -46,28 +46,28 @@ export default function InstallmentPlansModal({
     'rgba(17, 17, 17, 0.95)'
   )
   const headerBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+    '#dbeafe', // Azul post-it
+    colors.cardBg // Usar cor do tema para modo dark
   )
   const emptyStateBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+    '#dbeafe', // Azul post-it
+    colors.cardBg // Usar cor do tema para modo dark
   )
   const titleBg = useColorModeValue(
-    'linear-gradient(135deg, #1e293b, #475569)',
-    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
+    'gray.800', // Texto escuro
+    colors.text.primary // Usar cor do tema para modo dark
   )
-  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')
-  const closeButtonBorderColor = useColorModeValue('gray.300', 'gray.600')
+  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', colors.cardBg)
+  const closeButtonBorderColor = useColorModeValue('gray.300', colors.border)
   const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
-  const closeButtonIconColor = useColorModeValue('gray.700', 'gray.200')
+  const closeButtonIconColor = useColorModeValue('gray.700', colors.text.primary)
   const iconBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+    '#60a5fa', // Azul claro
+    colors.accent // Usar cor do tema para modo dark
   )
   const badgeBg = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-    'linear-gradient(135deg, #a78bfa, #8b5cf6)'
+    '#60a5fa', // Azul claro
+    colors.accent // Usar cor do tema para modo dark
   )
 
   return (
@@ -129,7 +129,7 @@ export default function InstallmentPlansModal({
           borderColor={colors.border}
           py={8}
           bg={headerBg}
-          color="white"
+          color={useColorModeValue('gray.800', 'white')}
           fontWeight="800"
           letterSpacing="wide"
           position="relative"
@@ -145,20 +145,20 @@ export default function InstallmentPlansModal({
             <Box
               p={2}
               borderRadius="full"
-              bg="rgba(255,255,255,0.2)"
+              bg="#60a5fa"
               sx={{
                 animation: animations.glow,
                 '@keyframes glow': {
                   '0%, 100%': { 
-                    boxShadow: '0 0 5px rgba(255, 255, 255, 0.3)' 
+                    boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
                   },
                   '50%': { 
-                    boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)' 
+                    boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
                   }
                 }
               }}
             >
-              <CreditCard size={22} />
+              <CreditCard size={22} color="white" />
             </Box>
             <Text>Active Installment Plans</Text>
             <Sparkles size={20} />
@@ -223,10 +223,10 @@ export default function InstallmentPlansModal({
                     animation: animations.glow,
                     '@keyframes glow': {
                       '0%, 100%': { 
-                        boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' 
+                        boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
                       },
                       '50%': { 
-                        boxShadow: '0 0 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)' 
+                        boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
                       }
                     }
                   }}
@@ -274,10 +274,10 @@ export default function InstallmentPlansModal({
                         animation: animations.glow,
                         '@keyframes glow': {
                           '0%, 100%': { 
-                            boxShadow: '0 0 5px rgba(139, 92, 246, 0.3)' 
+                            boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
                           },
                           '50%': { 
-                            boxShadow: '0 0 20px rgba(139, 92, 246, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)' 
+                            boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
                           }
                         }
                       }}
@@ -285,21 +285,20 @@ export default function InstallmentPlansModal({
                       <Icon as={CreditCard} boxSize={6} color="white" />
                     </Box>
                     <VStack align="start" spacing={1}>
-                      <Heading
-                        size="lg"
-                        bg={titleBg}
-                        bgClip="text"
-                        fontWeight="800"
+                      <Text
+                        fontSize={{ base: 'lg', sm: 'xl' }}
+                        color={colors.text.primary}
+                        fontWeight="600"
                       >
-                        Active Installment Plans
-                      </Heading>
+                        {plans.length} Active Plan{plans.length !== 1 ? 's' : ''}
+                      </Text>
                       <Text
                         fontSize={{ base: '2xs', sm: 'xs' }}
                         color={colors.text.secondary}
                         fontWeight="400"
                         opacity={0.8}
                       >
-                        Track your ongoing payment plans
+                        Manage your payment schedules
                       </Text>
                     </VStack>
                   </HStack>

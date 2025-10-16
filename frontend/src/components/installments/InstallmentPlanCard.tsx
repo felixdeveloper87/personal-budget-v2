@@ -19,6 +19,7 @@ import {
   AlertDialogContent,
   AlertDialogOverlay,
   useDisclosure,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   FiCreditCard,
@@ -82,25 +83,29 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
   return (
     <>
       <Card
-        bg={colors.cardBg}
-        shadow="md"
+        bg={useColorModeValue('#dbeafe', '#1e3a8a')} // Azul post-it no light, azul escuro no dark
+        shadow={useColorModeValue('md', 'lg')}
         borderRadius="xl"
-        border="1px"
-        borderColor={colors.border}
-        _hover={{ shadow: 'lg', borderColor: colors.accent }}
-        transition="all 0.2s"
+        border="2px"
+        borderColor={useColorModeValue('#60a5fa', '#3b82f6')} // Azul claro no light, azul mais escuro no dark
+        _hover={{ 
+          shadow: useColorModeValue('lg', 'xl'), 
+          borderColor: useColorModeValue('#3b82f6', '#60a5fa'),
+          transform: 'translateY(-2px)'
+        }}
+        transition="all 0.3s ease"
       >
         <CardBody p={5}>
           <VStack align="stretch" spacing={4}>
             {/* Header */}
             <HStack justify="space-between">
               <HStack spacing={2}>
-                <Icon as={FiCreditCard} fontSize="xl" color={colors.accent} />
+                <Icon as={FiCreditCard} fontSize="xl" color={useColorModeValue('#3b82f6', '#60a5fa')} />
                 <VStack align="start" spacing={0}>
-                  <Text fontWeight="bold" fontSize="md">
+                  <Text fontWeight="bold" fontSize="md" color={useColorModeValue('gray.800', 'white')}>
                     {firstTransaction?.description?.replace(/ \(Parcela.*\)/, '')}
                   </Text>
-                  <Text fontSize="sm" color={colors.text.secondary}>
+                  <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.300')}>
                     {firstTransaction?.category}
                   </Text>
                 </VStack>
@@ -118,19 +123,19 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
             {/* Summary */}
             <HStack justify="space-between" flexWrap="wrap" gap={3}>
               <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={colors.text.secondary}>
+                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')}>
                   Installment value
                 </Text>
-                <Text fontSize="xl" fontWeight="bold" color={colors.accent}>
+                <Text fontSize="xl" fontWeight="bold" color={useColorModeValue('#3b82f6', '#60a5fa')}>
                   £{plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
 
               <VStack align="end" spacing={0}>
-                <Text fontSize="xs" color={colors.text.secondary}>
+                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')}>
                   Total
                 </Text>
-                <Text fontSize="lg" fontWeight="semibold">
+                <Text fontSize="lg" fontWeight="semibold" color={useColorModeValue('gray.800', 'white')}>
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
@@ -138,7 +143,15 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
 
             {/* Progress */}
             <HStack justify="space-between">
-              <Badge colorScheme="purple" fontSize="sm" px={2} py={1} borderRadius="md">
+              <Badge 
+                bg={useColorModeValue('#60a5fa', '#3b82f6')} 
+                color="white" 
+                fontSize="sm" 
+                px={2} 
+                py={1} 
+                borderRadius="md"
+                boxShadow="sm"
+              >
                 {paidCount}/{plan.totalInstallments} paid
               </Badge>
               <Button
@@ -158,10 +171,12 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                 spacing={2}
                 mt={2}
                 p={3}
-                bg={colors.bgSecondary}
+                bg={useColorModeValue('rgba(255, 255, 255, 0.5)', 'rgba(0, 0, 0, 0.3)')}
                 borderRadius="md"
                 maxH="300px"
                 overflowY="auto"
+                border="1px"
+                borderColor={useColorModeValue('rgba(96, 165, 250, 0.3)', 'rgba(96, 165, 250, 0.5)')}
               >
                 {plan.transactions.map((transaction) => {
                   const isPaid = new Date(transaction.date) < new Date()
@@ -170,22 +185,35 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
                       key={transaction.id}
                       justify="space-between"
                       p={2}
-                      bg={isPaid ? colors.cardBg : colors.cardBg}
+                      bg={useColorModeValue(
+                        isPaid ? "rgba(255, 255, 255, 0.8)" : "rgba(255, 255, 255, 0.3)",
+                        isPaid ? "rgba(96, 165, 250, 0.2)" : "rgba(0, 0, 0, 0.2)"
+                      )}
                       borderRadius="md"
                       border="1px"
-                      borderColor={isPaid ? colors.border : 'transparent'}
+                      borderColor={useColorModeValue(
+                        isPaid ? "#60a5fa" : 'transparent',
+                        isPaid ? "#60a5fa" : 'rgba(96, 165, 250, 0.3)'
+                      )}
                     >
                       <HStack spacing={2}>
-                        <Icon as={FiCalendar} fontSize="sm" color={colors.text.secondary} />
-                        <Text fontSize="sm">
+                        <Icon as={FiCalendar} fontSize="sm" color={useColorModeValue('gray.600', 'gray.400')} />
+                        <Text fontSize="sm" color={useColorModeValue('gray.800', 'white')}>
                           {new Date(transaction.date).toLocaleDateString('pt-BR')}
                         </Text>
                       </HStack>
                       <HStack spacing={2}>
-                        <Badge colorScheme={isPaid ? 'green' : 'gray'} fontSize="xs">
+                        <Badge 
+                          bg={useColorModeValue(
+                            isPaid ? "#10b981" : "gray.400",
+                            isPaid ? "#10b981" : "gray.500"
+                          )} 
+                          color="white" 
+                          fontSize="xs"
+                        >
                           {transaction.installmentNumber}/{plan.totalInstallments}
                         </Badge>
-                        <Text fontSize="sm" fontWeight="semibold">
+                        <Text fontSize="sm" fontWeight="semibold" color={useColorModeValue('gray.800', 'white')}>
                           £{transaction.amount.toFixed(2)}
                         </Text>
                       </HStack>
@@ -201,7 +229,11 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
       {/* Delete confirmation dialog */}
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
         <AlertDialogOverlay>
-          <AlertDialogContent bg={colors.cardBg} borderColor={colors.border}>
+          <AlertDialogContent 
+            bg={useColorModeValue('#dbeafe', '#1e3a8a')} 
+            borderColor={useColorModeValue('#60a5fa', '#3b82f6')}
+            border="2px"
+          >
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
               Delete Installment Plan
             </AlertDialogHeader>
