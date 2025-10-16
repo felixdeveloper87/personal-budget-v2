@@ -40,66 +40,81 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         (() => {
           switch (stat.id) {
             case 'transactions':
-              return 'linear-gradient(135deg, #eff6ff, #dbeafe)'
+              return '#fef3c7' // Amarelo post-it
             case 'income':
-              return 'linear-gradient(135deg, #f0fdf4, #dcfce7)'
+              return '#dcfce7' // Verde post-it
             case 'expenses':
-              return 'linear-gradient(135deg, #fef2f2, #fee2e2)'
+              return '#fecaca' // Rosa post-it
             case 'balance':
-              return 'linear-gradient(135deg, #fefce8, #fef3c7)'
+              return '#dbeafe' // Azul post-it
             default:
-              return 'linear-gradient(135deg, #eff6ff, #dbeafe)'
+              return '#fef3c7'
           }
         })(),
         (() => {
           switch (stat.id) {
             case 'transactions':
-              return 'linear-gradient(135deg, #1e293b, #334155)'
+              return '#1e293b'
             case 'income':
-              return 'linear-gradient(135deg, #1e293b, #334155)'
+              return '#1e293b'
             case 'expenses':
-              return 'linear-gradient(135deg, #1e293b, #334155)'
+              return '#1e293b'
             case 'balance':
-              return 'linear-gradient(135deg, #1e293b, #334155)'
+              return '#1e293b'
             default:
-              return 'linear-gradient(135deg, #1e293b, #334155)'
+              return '#1e293b'
           }
         })()
       )}
-      backdropFilter="blur(10px)"
-      border="1px solid"
-      borderColor={useColorModeValue(
-        `${stat.color}20`,
-        `${stat.color}30`
-      )}
-      borderRadius="2xl"
-      shadow="2xl"
+      border="none"
+      borderRadius="0"
+      shadow="none"
       cursor="pointer"
-      transition="all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)"
-      overflow="hidden"
+      transition="all 0.3s ease"
+      overflow="visible"
+      transform={`rotate(${-2 + (index % 3) * 1}deg)`}
       sx={{
+        // Efeito de post-it colado
         '&::before': {
           content: '""',
           position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '4px',
-          background: (() => {
-            switch (stat.id) {
-              case 'transactions':
-                return 'linear-gradient(90deg, #3b82f6, #1d4ed8)'
-              case 'income':
-                return 'linear-gradient(90deg, #22c55e, #16a34a)'
-              case 'expenses':
-                return 'linear-gradient(90deg, #ef4444, #dc2626)'
-              case 'balance':
-                return 'linear-gradient(90deg, #f59e0b, #d97706)'
-              default:
-                return 'linear-gradient(90deg, #3b82f6, #1d4ed8)'
-            }
-          })(),
-          borderRadius: '2xl 2xl 0 0',
+          top: '-2px',
+          left: '-2px',
+          right: '-2px',
+          bottom: '-2px',
+          background: useColorModeValue(
+            (() => {
+              switch (stat.id) {
+                case 'transactions':
+                  return '#fbbf24' // Amarelo mais escuro
+                case 'income':
+                  return '#22c55e' // Verde mais escuro
+                case 'expenses':
+                  return '#f87171' // Rosa mais escuro
+                case 'balance':
+                  return '#60a5fa' // Azul mais escuro
+                default:
+                  return '#fbbf24'
+              }
+            })(),
+            '#374151'
+          ),
+          borderRadius: '4px',
+          zIndex: -1,
+          opacity: 0.3
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: '8px',
+          right: '8px',
+          width: '20px',
+          height: '20px',
+          background: useColorModeValue(
+            'rgba(0,0,0,0.1)',
+            'rgba(255,255,255,0.1)'
+          ),
+          borderRadius: '50%',
           zIndex: 1
         },
         animation: `slideIn ${0.2 + index * 0.1}s ease-out`,
@@ -115,42 +130,35 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         }
       }}
       _hover={{
-        transform: 'translateY(-12px) scale(1.03)',
-        boxShadow: `0 32px 64px -12px ${stat.color}50, 0 0 0 1px ${stat.color}30`,
-        borderColor: stat.color,
+        transform: 'rotate(-1deg) translateY(-8px) scale(1.05)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.1)',
         '&::before': {
-          height: '6px',
-          background: (() => {
-            switch (stat.id) {
-              case 'transactions':
-                return 'linear-gradient(90deg, #2563eb, #1d4ed8)'
-              case 'income':
-                return 'linear-gradient(90deg, #16a34a, #15803d)'
-              case 'expenses':
-                return 'linear-gradient(90deg, #dc2626, #b91c1c)'
-              case 'balance':
-                return 'linear-gradient(90deg, #d97706, #b45309)'
-              default:
-                return 'linear-gradient(90deg, #2563eb, #1d4ed8)'
-            }
-          })(),
+          opacity: 0.5,
+          transform: 'scale(1.02)'
+        },
+        '&::after': {
+          transform: 'scale(1.2)',
+          opacity: 0.3
         }
       }}
       _active={{
-        transform: 'translateY(-4px) scale(1.01)',
+        transform: 'rotate(-1deg) translateY(-4px) scale(1.02)',
       }}
       onClick={() => onCardClick(stat.id)}
     >
-      {/* Efeito de brilho no hover */}
+      {/* Efeito de cola no post-it */}
       <Box
         position="absolute"
-        top={0}
-        left="-100%"
-        width="100%"
-        height="100%"
-        background="linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)"
-        transition="left 0.5s"
-        _groupHover={{ left: '100%' }}
+        top="4px"
+        right="4px"
+        width="12px"
+        height="12px"
+        background={useColorModeValue(
+          'rgba(0,0,0,0.05)',
+          'rgba(255,255,255,0.05)'
+        )}
+        borderRadius="50%"
+        zIndex={1}
       />
       
       <CardBody p={responsiveStyles.summaryCards.card.padding}>
@@ -161,46 +169,12 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             p={responsiveStyles.summaryCards.icon.padding}
             borderRadius="xl"
             bg={useColorModeValue(
-              `${stat.color}15`,
-              `${stat.color}25`
+              `${stat.color}20`,
+              `${stat.color}30`
             )}
-            boxShadow="md"
-            sx={{
-              animation: `${float} 3s ease-in-out infinite`,
-              animationDelay: `${index * 0.5}s`,
-              '@keyframes float': {
-                '0%, 100%': { transform: 'translateY(0px)' },
-                '50%': { transform: 'translateY(-6px)' }
-              }
-            }}
+            boxShadow="sm"
           >
             <Icon as={IconComponent} boxSize={responsiveStyles.summaryCards.icon.size} color={stat.color} />
-            {/* Efeito de brilho no ícone */}
-            <Box
-              position="absolute"
-              top="-3px"
-              left="-3px"
-              right="-3px"
-              bottom="-3px"
-              borderRadius="2xl"
-              bg={`${stat.color}30`}
-              filter="blur(12px)"
-              opacity={0.8}
-              zIndex={-1}
-              sx={{
-                animation: `${glow} 2s ease-in-out infinite alternate`,
-                '@keyframes glow': {
-                  '0%': { 
-                    opacity: 0.4,
-                    transform: 'scale(0.95)'
-                  },
-                  '100%': { 
-                    opacity: 0.8,
-                    transform: 'scale(1.05)'
-                  }
-                }
-              }}
-            />
           </Box>
           
           {/* Valores e labels */}
@@ -212,9 +186,6 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               textAlign="center"
               lineHeight="1"
               letterSpacing="-0.02em"
-              sx={{
-                textShadow: `0 4px 8px ${stat.color}40, 0 0 16px ${stat.color}20`,
-              }}
             >
               {stat.displayValue}
             </Text>

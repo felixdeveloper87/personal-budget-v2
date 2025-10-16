@@ -277,7 +277,7 @@ export const getResponsiveStyles = () => ({
     },
     icon: {
       padding: { base: 1.5, sm: 2.5, md: 3 },
-      size: { base: 3, sm: 4, md: 5 }
+      size: { base: 4, sm: 5, md: 6 }
     },
     content: {
       spacing: { base: 0.5, sm: 1, md: 1.5 }
