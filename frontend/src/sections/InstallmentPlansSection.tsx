@@ -24,36 +24,35 @@ import { getResponsiveStyles } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
- * Displays a compact header with button to open installment plans modal.
+ * Displays a compact header card showing active installment plans
+ * and opens a modal to view or manage all plans.
  */
 export default function InstallmentPlansSection() {
+  // === Hooks must always appear in the same order ===
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  // Modern post-it inspired colors
-  const cardBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
-  )
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
-  const iconContainerBg = useColorModeValue(
-    '#fecaca', // Rosa post-it
-    '#2d1b1b'  // Rosa escuro
-  )
-  const iconColor = useColorModeValue('red.600', 'red.300')
-  const titleColor = useColorModeValue('gray.800', 'gray.100')
-  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-  const badgeBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
-  )
-  const badgeColor = useColorModeValue('red.600', 'red.300')
-  const badgeBorderColor = useColorModeValue('red.200', 'red.500')
-
+  // Local state
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
 
+  // === Color mode values (declared at top to avoid hook order issues) ===
+  const cardBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.05)')
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
+  const iconContainerBg = useColorModeValue('#fecaca', '#2d1b1b')
+  const iconColor = useColorModeValue('red.600', 'red.300')
+  const titleColor = useColorModeValue('gray.800', 'gray.100')
+  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
+  const badgeBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.05)')
+  const badgeColor = useColorModeValue('red.600', 'red.300')
+  const badgeBorderColor = useColorModeValue('red.200', 'red.500')
+  const hoverBorderColor = useColorModeValue('red.200', 'red.500')
+  const hoverBorderColor2 = useColorModeValue('red.300', 'red.400')
+  const topBorderColor = useColorModeValue('red.200', 'red.500')
+  const badgeHoverBg = useColorModeValue('red.50', 'red.900')
+
+  // === Data fetching ===
   const fetchPlans = async () => {
     try {
       setLoading(true)
@@ -74,6 +73,7 @@ export default function InstallmentPlansSection() {
     fetchPlans()
   }
 
+  // === Render ===
   return (
     <>
       <Box
@@ -97,138 +97,133 @@ export default function InstallmentPlansSection() {
         ) : (
           // 💳 Main Card
           <Card
-              position="relative"
-              bg={cardBg}
-              backdropFilter="blur(10px)"
-              border="1px solid"
-              borderColor={cardBorderColor}
-              borderRadius={responsiveStyles.installmentPlansSection.card.borderRadius}
-              shadow="sm"
-              overflow="hidden"
-              _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-                borderColor: useColorModeValue('red.200', 'red.500')
-              }}
-              transition="all 0.2s ease"
-            >
-              {/* Simple top border */}
-              <Box
-                height="3px"
-                bg={useColorModeValue('red.200', 'red.500')}
-              />
+            position="relative"
+            bg={cardBg}
+            backdropFilter="blur(10px)"
+            border="1px solid"
+            borderColor={cardBorderColor}
+            borderRadius={responsiveStyles.installmentPlansSection.card.borderRadius}
+            shadow="sm"
+            overflow="hidden"
+            _hover={{
+              transform: 'translateY(-2px)',
+              boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+              borderColor: hoverBorderColor,
+            }}
+            transition="all 0.2s ease"
+          >
+            {/* Decorative top border */}
+            <Box height="3px" bg={topBorderColor} />
 
-              <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
-                <Flex
-                  direction={responsiveStyles.installmentPlansSection.header.direction}
-                  align={{ base: 'stretch', sm: 'center' }}
-                  justify="space-between"
-                  gap={responsiveStyles.installmentPlansSection.header.gap}
-                >
-                  {/* Left side */}
-                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
-                    {/* Modern Icon Container */}
-                    <Box
-                      p={{ base: 2, sm: 2.5, md: 3 }}
-                      borderRadius={responsiveStyles.installmentPlansSection.header.icon.borderRadius}
-                      bg={iconContainerBg}
-                      border="1px solid"
-                      borderColor={useColorModeValue('red.200', 'red.500')}
-                      boxShadow="sm"
-                      _hover={{
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        borderColor: useColorModeValue('red.300', 'red.400')
-                      }}
-                      transition="all 0.2s ease"
-                    >
-                      <Icon
-                        as={CreditCard}
-                        boxSize={responsiveStyles.installmentPlansSection.header.icon.size}
-                        color={iconColor}
-                      />
-                    </Box>
-
-                    <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
-                      <Heading
-                        size={responsiveStyles.installmentPlansSection.header.title.size}
-                        color={titleColor}
-                        fontWeight="700"
-                        textAlign={{ base: 'center', sm: 'left' }}
-                        fontFamily="system-ui, -apple-system, sans-serif"
-                      >
-                        Active Installment Plans
-                      </Heading>
-                      <Text
-                        fontSize={responsiveStyles.installmentPlansSection.header.title.fontSize}
-                        color={subtitleColor}
-                        fontWeight="500"
-                        textAlign={{ base: 'center', sm: 'left' }}
-                        display={{ base: 'none', sm: 'block' }}
-                        fontFamily="system-ui, -apple-system, sans-serif"
-                      >
-                        Track your ongoing payment plans
-                      </Text>
-                    </VStack>
-                  </HStack>
-
-                  {/* Right side - Modern Badge */}
-                  <Badge
-                    borderRadius="xl"
-                    px={4}
-                    py={2}
-                    fontSize="sm"
-                    fontWeight="500"
-                    bg={badgeBg}
-                    color={badgeColor}
+            <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
+              <Flex
+                direction={responsiveStyles.installmentPlansSection.header.direction}
+                align={{ base: 'stretch', sm: 'center' }}
+                justify="space-between"
+                gap={responsiveStyles.installmentPlansSection.header.gap}
+              >
+                {/* Left side - Icon + Title */}
+                <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+                  <Box
+                    p={{ base: 2, sm: 2.5, md: 3 }}
+                    borderRadius={
+                      responsiveStyles.installmentPlansSection.header.icon.borderRadius
+                    }
+                    bg={iconContainerBg}
                     border="1px solid"
-                    borderColor={badgeBorderColor}
+                    borderColor={hoverBorderColor}
                     boxShadow="sm"
-                    cursor="pointer"
-                    onClick={onOpen}
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                    backdropFilter="blur(10px)"
                     _hover={{
                       transform: 'translateY(-1px)',
                       boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      borderColor: useColorModeValue('red.300', 'red.400'),
-                      bg: useColorModeValue('red.50', 'red.900')
-                    }}
-                    _active={{
-                      transform: 'translateY(0)',
+                      borderColor: hoverBorderColor2,
                     }}
                     transition="all 0.2s ease"
-                    flex="0 0 auto"
-                    minW="auto"
-                    w="auto"
-                    h="auto"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
                   >
-                    <HStack spacing={2}>
-                      <Icon
-                        as={Sparkles}
-                        boxSize={3}
-                        color={badgeColor}
-                      />
-                      <Text 
-                        fontSize="sm" 
-                        lineHeight="1" 
-                        fontWeight="500"
-                        color={badgeColor}
-                      >
-                        {plans.length}
-                      </Text>
-                    </HStack>
-                  </Badge>
-                </Flex>
-              </CardBody>
-            </Card>
+                    <Icon
+                      as={CreditCard}
+                      boxSize={responsiveStyles.installmentPlansSection.header.icon.size}
+                      color={iconColor}
+                    />
+                  </Box>
+
+                  <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+                    <Heading
+                      size={responsiveStyles.installmentPlansSection.header.title.size}
+                      color={titleColor}
+                      fontWeight="700"
+                      textAlign={{ base: 'center', sm: 'left' }}
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                    >
+                      Active Installment Plans
+                    </Heading>
+                    <Text
+                      fontSize={
+                        responsiveStyles.installmentPlansSection.header.title.fontSize
+                      }
+                      color={subtitleColor}
+                      fontWeight="500"
+                      textAlign={{ base: 'center', sm: 'left' }}
+                      display={{ base: 'none', sm: 'block' }}
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                    >
+                      Track your ongoing payment plans
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* Right side - Interactive Badge */}
+                <Badge
+                  borderRadius="xl"
+                  px={4}
+                  py={2}
+                  fontSize="sm"
+                  fontWeight="500"
+                  bg={badgeBg}
+                  color={badgeColor}
+                  border="1px solid"
+                  borderColor={badgeBorderColor}
+                  boxShadow="sm"
+                  cursor="pointer"
+                  onClick={onOpen}
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                  backdropFilter="blur(10px)"
+                  _hover={{
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderColor: hoverBorderColor2,
+                    bg: badgeHoverBg,
+                  }}
+                  _active={{
+                    transform: 'translateY(0)',
+                  }}
+                  transition="all 0.2s ease"
+                  flex="0 0 auto"
+                  w="auto"
+                  h="auto"
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                >
+                  <HStack spacing={2}>
+                    <Icon as={Sparkles} boxSize={3} color={badgeColor} />
+                    <Text
+                      fontSize="sm"
+                      lineHeight="1"
+                      fontWeight="500"
+                      color={badgeColor}
+                    >
+                      {plans.length}
+                    </Text>
+                  </HStack>
+                </Badge>
+              </Flex>
+            </CardBody>
+          </Card>
         )}
       </Box>
 
-      {/* Modal sempre renderizado */}
+      {/* Modal always mounted to preserve hook order */}
       <InstallmentPlansModal
         isOpen={isOpen}
         onClose={onClose}

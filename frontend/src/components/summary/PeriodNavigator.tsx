@@ -18,7 +18,6 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { PeriodType } from '../../types'
-import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface PeriodNavigatorProps {
@@ -46,7 +45,7 @@ export default function PeriodNavigator({
   )
   const unselectedBg = useColorModeValue(
     'rgba(255, 255, 255, 0.8)',
-    'rgba(255, 255, 255, 0.05)'
+    'rgba(30, 41, 59, 0.6)' // Azul escuro mais suave para botões não selecionados
   )
   const unselectedColor = useColorModeValue('gray.600', 'gray.300')
   const selectedColor = useColorModeValue('blue.600', 'blue.300')
@@ -83,7 +82,7 @@ export default function PeriodNavigator({
                   transform: 'translateY(-2px) scale(1.02)', 
                   boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
-                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'gray.700')
+                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
                 }}
                 _active={{
                   transform: 'translateY(0) scale(0.98)'
@@ -121,7 +120,7 @@ export default function PeriodNavigator({
                   transform: 'translateY(-2px) scale(1.02)', 
                   boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
-                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'gray.700')
+                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
                 }}
                 _active={{
                   transform: 'translateY(0) scale(0.98)'
@@ -161,15 +160,19 @@ export default function PeriodNavigator({
           borderRadius="xl"
           bg={useColorModeValue(
             'rgba(255, 255, 255, 0.9)',
-            'rgba(255, 255, 255, 0.05)'
+            'rgba(30, 41, 59, 0.8)' // Azul escuro mais suave
           )}
           border="1px solid"
-          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          borderColor={useColorModeValue('gray.200', 'blue.500')}
           backdropFilter="blur(10px)"
           _hover={{
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.200', 'blue.500')
+            borderColor: useColorModeValue('blue.200', 'blue.400'),
+            bg: useColorModeValue(
+              'rgba(255, 255, 255, 0.95)',
+              'rgba(30, 41, 59, 0.9)'
+            )
           }}
           transition="all 0.2s ease"
         >

@@ -54,19 +54,20 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         (() => {
           switch (stat.id) {
             case 'transactions':
-              return '#1e293b' // Azul escuro
+              return '#fef3c7' // Amarelo post-it igual ao light
             case 'income':
-              return '#1f2937' // Verde escuro
+              return '#dcfce7' // Verde post-it igual ao light
             case 'expenses':
-              return '#2d1b1b' // Vermelho escuro
+              return '#fecaca' // Rosa post-it igual ao light
             case 'balance':
-              return '#2d2b1b' // Amarelo escuro
+              return '#dbeafe' // Azul post-it igual ao light
             default:
-              return '#1e293b'
+              return '#fef3c7'
           }
         })()
       )}
-      border="none"
+      border={useColorModeValue("none", "2px solid")}
+      borderColor={useColorModeValue("transparent", "gray.600")}
       borderRadius="0"
       shadow="none"
       cursor="pointer"
@@ -100,21 +101,21 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             (() => {
               switch (stat.id) {
                 case 'transactions':
-                  return '#334155' // Azul mais escuro
+                  return '#fbbf24' // Amarelo mais escuro igual ao light
                 case 'income':
-                  return '#374151' // Verde mais escuro
+                  return '#22c55e' // Verde mais escuro igual ao light
                 case 'expenses':
-                  return '#3f1f1f' // Vermelho mais escuro
+                  return '#f87171' // Rosa mais escuro igual ao light
                 case 'balance':
-                  return '#3f3d1f' // Amarelo mais escuro
+                  return '#60a5fa' // Azul mais escuro igual ao light
                 default:
-                  return '#374151'
+                  return '#fbbf24'
               }
             })()
           ),
           borderRadius: '4px',
           zIndex: -1,
-          opacity: 0.3
+          opacity: useColorModeValue(0.3, 0.6)
         },
         animation: `slideIn ${0.2 + index * 0.1}s ease-out`,
         '@keyframes slideIn': {
@@ -130,9 +131,13 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
       }}
       _hover={{
         transform: 'rotate(-1deg) translateY(-8px) scale(1.05)',
-        boxShadow: '0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.1)',
+        boxShadow: useColorModeValue(
+          '0 20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.1)',
+          '0 20px 40px rgba(0,0,0,0.4), 0 0 0 2px rgba(255,255,255,0.1)'
+        ),
+        borderColor: useColorModeValue("transparent", "gray.500"),
         '&::before': {
-          opacity: 0.5,
+          opacity: useColorModeValue(0.5, 0.8),
           transform: 'scale(1.02)'
         }
       }}
@@ -179,9 +184,22 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               boxSize={responsiveStyles.summaryCards.icon.size} 
               color={useColorModeValue(
                 `${stat.color}`,
-                `${stat.color}`
+                (() => {
+                  switch (stat.id) {
+                    case 'transactions':
+                      return '#f59e0b' // Amarelo igual ao light
+                    case 'income':
+                      return '#10b981' // Verde igual ao light
+                    case 'expenses':
+                      return '#ef4444' // Vermelho igual ao light
+                    case 'balance':
+                      return '#3b82f6' // Azul igual ao light
+                    default:
+                      return '#f59e0b'
+                  }
+                })()
               )}
-              opacity={0.9}
+              opacity={useColorModeValue(0.9, 0.8)}
             />
           </Box>
           
@@ -190,7 +208,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             <Text
               fontSize={responsiveStyles.summaryCards.value.fontSize}
               fontWeight="600"
-              color={useColorModeValue('gray.800', 'gray.100')}
+              color={useColorModeValue('gray.800', 'gray.800')}
               textAlign="center"
               lineHeight="1.1"
               letterSpacing="-0.01em"
@@ -201,7 +219,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             <Text
               fontSize={responsiveStyles.summaryCards.label.fontSize}
               fontWeight="500"
-              color={useColorModeValue('gray.600', 'gray.300')}
+              color={useColorModeValue('gray.600', 'gray.600')}
               textAlign="center"
               textTransform="none"
               letterSpacing="0.02em"
@@ -211,12 +229,12 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             </Text>
             <Text
               fontSize={{ base: '2xs', sm: 'xs' }}
-              color={useColorModeValue('gray.500', 'gray.400')}
+              color={useColorModeValue('gray.500', 'gray.500')}
               textAlign="center"
               fontWeight="400"
               display={{ base: 'none', sm: 'block' }}
               fontFamily="system-ui, -apple-system, sans-serif"
-              opacity={0.8}
+              opacity={useColorModeValue(0.8, 0.8)}
             >
               {stat.helpText}
             </Text>

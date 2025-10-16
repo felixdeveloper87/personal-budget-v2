@@ -37,15 +37,13 @@ export default function Footer() {
   const colors = useThemeColors()
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-  // Precompute color values (for perf + readability)
-  const bgGradient = useColorModeValue(
-    'linear-gradient(135deg, rgba(59,130,246,0.05) 0%, rgba(16,185,129,0.05) 50%, rgba(139,92,246,0.05) 100%)',
-    'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(16,185,129,0.1) 50%, rgba(139,92,246,0.1) 100%)'
+  // Modern post-it inspired colors
+  const footerBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
   )
-  const brandText = useColorModeValue(
-    'linear-gradient(135deg, #1e293b, #475569)',
-    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-  )
+  const brandTextColor = useColorModeValue('gray.800', 'gray.100')
+  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
 
   const textSecondary = useColorModeValue(colors.text.secondary, 'gray.300')
   const textPrimary = useColorModeValue(colors.text.primary, 'white')
@@ -53,27 +51,18 @@ export default function Footer() {
   return (
     <Box
       as="footer"
-      bg={colors.bgSecondary}
+      bg={footerBg}
+      backdropFilter="blur(10px)"
       borderTop="1px solid"
-      borderColor={colors.border}
+      borderColor={useColorModeValue('gray.200', 'gray.600')}
       mt="auto"
       w="100%"
       position="relative"
-      overflow="hidden"
-      zIndex={0}
     >
-      {/* ✨ Background Glow */}
+      {/* Simple top border */}
       <Box
-        position="absolute"
-        top="-100px"
-        left="-100px"
-        right="-100px"
-        height="200px"
-        background={bgGradient}
-        borderRadius="3xl"
-        filter="blur(40px)"
-        opacity={0.6}
-        zIndex={0}
+        height="3px"
+        bg={useColorModeValue('blue.200', 'blue.500')}
       />
 
       <Container
@@ -90,34 +79,45 @@ export default function Footer() {
               <Box
                 w={{ base: 10, lg: 12 }}
                 h={{ base: 10, lg: 12 }}
-                bg={colors.buttonGradient}
-                borderRadius="2xl"
+                bg={useColorModeValue('#dbeafe', '#1e293b')} // Azul post-it
+                borderRadius="xl"
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
-                boxShadow={colors.shadow}
-                sx={{
-                  animation: 'glow 3s ease-in-out infinite',
-                  '@keyframes glow': {
-                    '0%, 100%': {
-                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
-                    },
-                    '50%': {
-                      boxShadow:
-                        '0 4px 20px rgba(59,130,246,0.5), 0 0 30px rgba(59,130,246,0.3)',
-                    },
-                  },
+                border="1px solid"
+                borderColor={useColorModeValue('blue.200', 'blue.500')}
+                boxShadow="sm"
+                _hover={{
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderColor: useColorModeValue('blue.300', 'blue.400')
                 }}
+                transition="all 0.2s ease"
               >
-                <Text fontSize={{ base: 'xl', lg: '2xl' }} fontWeight="bold" color="white">
+                <Text 
+                  fontSize={{ base: 'xl', lg: '2xl' }} 
+                  fontWeight="bold" 
+                  color={useColorModeValue('blue.600', 'blue.300')}
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                >
                   £
                 </Text>
               </Box>
               <VStack spacing={0} align="start">
-                <Heading size="md" bg={brandText} bgClip="text" fontWeight="800">
+                <Heading 
+                  size="md" 
+                  color={brandTextColor} 
+                  fontWeight="700"
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                >
                   Personal Budget
                 </Heading>
-                <Text fontSize="sm" color={textSecondary} fontWeight="500">
+                <Text 
+                  fontSize="sm" 
+                  color={subtitleColor} 
+                  fontWeight="500"
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                >
                   Financial Management
                 </Text>
               </VStack>
@@ -137,13 +137,23 @@ export default function Footer() {
                   key={text}
                   px={3}
                   py={1}
-                  borderRadius="lg"
+                  borderRadius="xl"
                   fontSize="xs"
-                  bg={useColorModeValue(`${color}.50`, `${color}.900`)}
-                  color={useColorModeValue(`${color}.700`, `${color}.300`)}
+                  bg={useColorModeValue(
+                    color === 'green' ? '#dcfce7' : color === 'blue' ? '#dbeafe' : '#f3e8ff',
+                    color === 'green' ? '#1f2937' : color === 'blue' ? '#1e293b' : '#2d1b1b'
+                  )}
+                  color={useColorModeValue(
+                    color === 'green' ? 'green.600' : color === 'blue' ? 'blue.600' : 'purple.600',
+                    color === 'green' ? 'green.300' : color === 'blue' ? 'blue.300' : 'purple.300'
+                  )}
                   border="1px solid"
-                  borderColor={useColorModeValue(`${color}.200`, `${color}.700`)}
-                  fontWeight="600"
+                  borderColor={useColorModeValue(
+                    color === 'green' ? 'green.200' : color === 'blue' ? 'blue.200' : 'purple.200',
+                    color === 'green' ? 'green.500' : color === 'blue' ? 'blue.500' : 'purple.500'
+                  )}
+                  fontWeight="500"
+                  fontFamily="system-ui, -apple-system, sans-serif"
                 >
                   <HStack spacing={1}>
                     <Icon as={icon} boxSize={3} />
@@ -157,20 +167,27 @@ export default function Footer() {
           {/* 🔗 Link Sections */}
           {linkSections.map((section) => (
             <VStack key={section.title} align="start" spacing={3}>
-              <Text fontSize="md" fontWeight="700" color={textPrimary} mb={1}>
+              <Text 
+                fontSize="md" 
+                fontWeight="700" 
+                color={useColorModeValue('gray.800', 'gray.100')} 
+                mb={1}
+                fontFamily="system-ui, -apple-system, sans-serif"
+              >
                 {section.title}
               </Text>
               {section.links.map((item) => (
                 <Link
                   key={item}
                   href="#"
-                  color={textSecondary}
+                  color={useColorModeValue('gray.600', 'gray.300')}
                   _hover={{
-                    color: colors.accent,
-                    transform: 'translateX(4px)',
+                    color: useColorModeValue('blue.600', 'blue.300'),
+                    transform: 'translateX(2px)',
                   }}
                   fontSize={{ base: 'sm', lg: 'md' }}
                   fontWeight="500"
+                  fontFamily="system-ui, -apple-system, sans-serif"
                   transition="all 0.2s ease"
                 >
                   {item}
@@ -208,17 +225,18 @@ export default function Footer() {
               variant="outline"
               borderRadius="xl"
               onClick={scrollToTop}
-              borderColor={colors.border}
-              color={textSecondary}
-              bg={useColorModeValue('white', 'gray.800')}
+              borderColor={useColorModeValue('gray.200', 'gray.600')}
+              color={useColorModeValue('gray.600', 'gray.300')}
+              bg={useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.05)')}
+              backdropFilter="blur(10px)"
               _hover={{
-                bg: colors.accent,
-                color: 'white',
-                borderColor: colors.accent,
-                transform: 'translateY(-2px)',
-                boxShadow: colors.shadowHover,
+                bg: useColorModeValue('#dbeafe', '#1e293b'),
+                color: useColorModeValue('blue.600', 'blue.300'),
+                borderColor: useColorModeValue('blue.300', 'blue.500'),
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
               }}
-              transition="all 0.25s ease"
+              transition="all 0.2s ease"
             />
           </Tooltip>
         </Flex>
