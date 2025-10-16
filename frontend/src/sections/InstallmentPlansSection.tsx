@@ -32,7 +32,7 @@ export default function InstallmentPlansSection() {
   const gradients = getGradients()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  // Move useColorModeValue to top (always safe)
+  // Move ALL useColorModeValue to top (always safe)
   const cardBg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17, 17, 17, 0.9)')
   const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
   const iconBg = useColorModeValue(
@@ -54,6 +54,20 @@ export default function InstallmentPlansSection() {
   const badgeHoverBg = useColorModeValue(
     'linear-gradient(135deg, #7c3aed, #6d28d9)',
     'linear-gradient(135deg, #8b5cf6, #7c3aed)'
+  )
+
+  // Additional useColorModeValue calls that were in JSX
+  const iconContainerBg = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
+  )
+  const titleGradient = useColorModeValue(
+    'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
+    'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
+  )
+  const badgeGradient = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
+    'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
   )
 
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
@@ -157,10 +171,7 @@ export default function InstallmentPlansSection() {
                       position="relative"
                       p={responsiveStyles.installmentPlansSection.header.icon.padding}
                       borderRadius={responsiveStyles.installmentPlansSection.header.icon.borderRadius}
-                      bg={useColorModeValue(
-                        'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
-                        'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
-                      )}
+                      bg={iconContainerBg}
                       boxShadow="xl"
                       opacity={0.9}
                       sx={{
@@ -217,10 +228,7 @@ export default function InstallmentPlansSection() {
                     <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
                       <Heading
                         size={responsiveStyles.installmentPlansSection.header.title.size}
-                        bg={useColorModeValue(
-                          'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
-                          'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
-                        )}
+                        bg={titleGradient}
                         bgClip="text"
                         fontWeight="900"
                         textAlign={{ base: 'center', sm: 'left' }}
@@ -265,10 +273,7 @@ export default function InstallmentPlansSection() {
                     py={2}
                     fontSize="sm"
                     fontWeight="700"
-                    bg={useColorModeValue(
-                      'linear-gradient(135deg, #8b5cf6, #7c3aed, #6d28d9)',
-                      'linear-gradient(135deg, #a78bfa, #8b5cf6, #7c3aed)'
-                    )}
+                    bg={badgeGradient}
                     boxShadow="xl"
                     cursor="pointer"
                     onClick={onOpen}

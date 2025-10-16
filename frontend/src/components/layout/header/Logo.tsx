@@ -26,7 +26,6 @@ export default function Logo({ user }: LogoProps) {
       {/* Symbol Icon */}
       <Box
         as="button"
-        position="relative"
         w={{ base: 12, md: 16, lg: 20, xl: 24 }}
         h={{ base: 12, md: 16, lg: 20, xl: 24 }}
         flexShrink={0}

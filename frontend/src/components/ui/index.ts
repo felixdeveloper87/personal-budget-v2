@@ -1,26 +1,18 @@
 // UI Components - Reusable interface components
 export { default as DeleteTransactionDialog } from './DeleteTransactionDialog'
 
-// Button Styles - Centralized button styling
-export { 
-  logoGradients, 
-  logoHoverGradients, 
-  getNavigationButtonStyles, 
-  navigationButtonSizes,
-  getSearchButtonStyles,
-  searchButtonContainerStyles,
-  getMobileSearchButtonStyles
-} from './buttonStyles'
-
-// Logo Styles - Centralized logo styling
+// Shared Styles - Common styles and utilities
 export {
-  logoGradients as logoGradientsFromLogo,
-  logoShadows,
-  logoAnimations,
-  getLogoIconStyles,
-  logoKeyframes,
-  getSymbolTextStyles,
-  getTitleStyles,
-  getBadgeStyles
-} from './logoStyles'
+  getSharedColors,
+  sharedTransitions,
+  sharedSizes,
+  getSharedEffects,
+  sharedHoverEffects,
+  sharedBreakpoints
+} from './sharedStyles'
+
+// Header Styles - All header-related styling
+export * from './headerStyles/logoStyles'
+export * from './headerStyles/navigationStyles'
+export * from './headerStyles/headerStyles'
 
