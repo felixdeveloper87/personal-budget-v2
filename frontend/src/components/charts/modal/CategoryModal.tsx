@@ -23,7 +23,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, animations, safeAreaStyles, safariStyles, getGradients, getShimmerStyles } from '../../ui'
+import { getResponsiveStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X } from 'lucide-react'
   
@@ -45,11 +45,13 @@ import { X } from 'lucide-react'
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   
-  // Move all useColorModeValue calls to the top
-  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')
-  const closeButtonBorderColor = useColorModeValue('gray.300', 'gray.600')
+  // Modern post-it inspired colors
+  const closeButtonBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
+  )
+  const closeButtonBorderColor = useColorModeValue('gray.200', 'gray.600')
   const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
   const closeButtonIconColor = useColorModeValue('gray.700', 'gray.200')
   const cardBg = useColorModeValue('white', 'gray.800')
@@ -58,8 +60,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   const tableRowBg = useColorModeValue('gray.25', 'gray.750')
   const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
   const modalBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.95)',
-    'rgba(17, 17, 17, 0.95)'
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
+  )
+  const topBorderColor = useColorModeValue(
+    type === 'INCOME' ? 'green.200' : 'red.200',
+    type === 'INCOME' ? 'green.500' : 'red.500'
   )
   
     const filteredTransactions = useMemo(
@@ -140,48 +146,29 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
             : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)',
           borderRadius: '3xl 3xl 0 0',
         }}
-        sx={{
-          ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { 
-              opacity: 0, 
-              transform: 'translateY(20px) scale(0.95)' 
-            },
-            to: { 
-              opacity: 1, 
-              transform: 'translateY(0) scale(1)' 
-            }
-          }
-        }}
       >
-        {/* Barra superior animada */}
+        {/* Simple top border */}
         <Box
-          height="4px"
-          background={type === 'INCOME' 
-            ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
-            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)'
-          }
-          backgroundSize="300% 100%"
-          sx={getShimmerStyles()}
+          height="3px"
+          bg={topBorderColor}
         />
 
         <ModalHeader
           textAlign="center"
           borderBottom="1px"
-          borderColor={colors.border}
-          py={8}
-          bg={
-            type === 'INCOME'
-              ? 'linear-gradient(135deg, #10b981, #059669, #047857)'
-              : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
-          }
-          color="white"
-          fontWeight="800"
-          letterSpacing="wide"
+          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          py={6}
+          bg={useColorModeValue(
+            type === 'INCOME' ? '#dcfce7' : '#fecaca',
+            type === 'INCOME' ? '#1f2937' : '#2d1b1b'
+          )}
+          color={useColorModeValue(
+            type === 'INCOME' ? 'green.600' : 'red.600',
+            type === 'INCOME' ? 'green.300' : 'red.300'
+          )}
+          fontWeight="700"
+          fontFamily="system-ui, -apple-system, sans-serif"
           position="relative"
-          backdropFilter="blur(8px)"
         >
           <Box
             display="flex"
@@ -192,30 +179,41 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           >
             <Box
               p={2}
-              borderRadius="full"
-              bg="rgba(255,255,255,0.2)"
-              sx={{
-                animation: animations.glow,
-                '@keyframes glow': {
-                  '0%, 100%': { 
-                    boxShadow: '0 0 5px rgba(255, 255, 255, 0.3)' 
-                  },
-                  '50%': { 
-                    boxShadow: '0 0 20px rgba(255, 255, 255, 0.6), 0 0 30px rgba(255, 255, 255, 0.4)' 
-                  }
-                }
-              }}
+              borderRadius="xl"
+              bg={useColorModeValue(
+                type === 'INCOME' ? 'green.100' : 'red.100',
+                type === 'INCOME' ? 'green.800' : 'red.800'
+              )}
+              border="1px solid"
+              borderColor={useColorModeValue(
+                type === 'INCOME' ? 'green.200' : 'red.200',
+                type === 'INCOME' ? 'green.600' : 'red.600'
+              )}
             >
-              <Text fontSize="lg" color="white" fontWeight="bold">£</Text>
+              <Text 
+                fontSize="lg" 
+                color={useColorModeValue(
+                  type === 'INCOME' ? 'green.600' : 'red.600',
+                  type === 'INCOME' ? 'green.300' : 'red.300'
+                )} 
+                fontWeight="bold"
+                fontFamily="system-ui, -apple-system, sans-serif"
+              >
+                £
+              </Text>
             </Box>
-            <Text fontWeight="800" letterSpacing="wide">
+            <Text 
+              fontWeight="700" 
+              fontFamily="system-ui, -apple-system, sans-serif"
+            >
               {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
             </Text>
           </Box>
           <Text 
             fontSize={{ base: '2xs', sm: 'xs' }}
-            opacity={0.7}
-            fontWeight="400"
+            color={useColorModeValue('gray.600', 'gray.300')}
+            fontWeight="500"
+            fontFamily="system-ui, -apple-system, sans-serif"
           >
             {selectedPeriod}
           </Text>
@@ -228,7 +226,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           size="lg"
           variant="ghost"
           onClick={onClose}
-          borderRadius="full"
+          borderRadius="xl"
           p={3}
           bg={closeButtonBg}
           backdropFilter="blur(10px)"
@@ -237,11 +235,11 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           _hover={{
             bg: closeButtonHoverBg,
             borderColor: 'red.300',
-            transform: 'scale(1.1)',
-            boxShadow: 'lg',
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
           }}
           _active={{
-            transform: 'scale(0.95)',
+            transform: 'translateY(0)',
           }}
           transition="all 0.2s ease"
           zIndex={10}
@@ -257,7 +255,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           flex="1"
           overflowY="auto"
           sx={{
-            ...safariStyles.scrollable,
             paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
             paddingLeft: 'env(safe-area-inset-left, 0px)',
             paddingRight: 'env(safe-area-inset-right, 0px)',
