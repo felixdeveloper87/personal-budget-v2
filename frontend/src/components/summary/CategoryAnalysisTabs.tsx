@@ -48,33 +48,36 @@ export default function CategoryAnalysisTabs({
             {/* Header principal */}
             <HStack spacing={{ base: 2, md: 3 }} align="center" justify={{ base: 'center', md: 'flex-start' }}>
               <Box
-                p={{ base: 1.5, md: 2 }}
+                p={{ base: 2, sm: 2.5, md: 3 }}
                 borderRadius="xl"
-                bg={useColorModeValue(
-                  'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-                  'linear-gradient(135deg, #a78bfa, #8b5cf6)'
-                )}
-                boxShadow="md"
+                bg={useColorModeValue('#dbeafe', '#1e293b')} // Azul post-it
+                border="1px solid"
+                borderColor={useColorModeValue('blue.200', 'blue.500')}
+                boxShadow="sm"
+                _hover={{
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderColor: useColorModeValue('blue.300', 'blue.400')
+                }}
+                transition="all 0.2s ease"
               >
-                <Icon as={BarChart3} boxSize={{ base: 3, md: 4 }} color="white" />
+                <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('blue.600', 'blue.300')} />
               </Box>
               <VStack align={{ base: 'center', md: 'start' }} spacing={0.5}>
                 <Heading
                   size={{ base: 'md', md: 'lg' }}
-                  bg={useColorModeValue(
-                    'linear-gradient(135deg, #1e293b, #475569)',
-                    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                  )}
-                  bgClip="text"
-                  fontWeight="800"
+                  color={useColorModeValue('gray.800', 'gray.100')}
+                  fontWeight="700"
+                  fontFamily="system-ui, -apple-system, sans-serif"
                 >
                   Category Analysis
                 </Heading>
                 <Text
                   fontSize={{ base: 'xs', md: 'sm' }}
-                  color={useColorModeValue('gray.500', 'gray.400')}
-                  fontWeight="400"
+                  color={useColorModeValue('gray.600', 'gray.300')}
+                  fontWeight="500"
                   textAlign={{ base: 'center', md: 'left' }}
+                  fontFamily="system-ui, -apple-system, sans-serif"
                 >
                   Detailed category breakdown and insights
                 </Text>
@@ -85,46 +88,76 @@ export default function CategoryAnalysisTabs({
             <HStack spacing={{ base: 1, md: 2 }} justify={{ base: 'center', md: 'flex-end' }}>
               <Button
                 size={{ base: 'xs', md: 'sm' }}
-                variant={activeTab === 'expenses' ? 'solid' : 'outline'}
-                colorScheme="red"
                 leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, md: 3 }} />}
-                borderRadius="lg"
+                borderRadius="xl"
                 fontSize={{ base: '2xs', md: 'xs' }}
-                fontWeight="600"
+                fontWeight="500"
                 px={{ base: 2, md: 3 }}
                 py={{ base: 1, md: 2 }}
                 h="auto"
-                bg={activeTab === 'expenses' ? 'red.50' : 'transparent'}
-                color={activeTab === 'expenses' ? 'red.600' : 'gray.600'}
-                borderColor={activeTab === 'expenses' ? 'red.200' : 'gray.300'}
+                bg={useColorModeValue(
+                  activeTab === 'expenses' ? '#fecaca' : 'rgba(255, 255, 255, 0.9)',
+                  activeTab === 'expenses' ? '#2d1b1b' : 'rgba(255, 255, 255, 0.05)'
+                )}
+                color={useColorModeValue(
+                  activeTab === 'expenses' ? 'red.600' : 'gray.600',
+                  activeTab === 'expenses' ? 'red.300' : 'gray.300'
+                )}
+                border="1px solid"
+                borderColor={useColorModeValue(
+                  activeTab === 'expenses' ? 'red.200' : 'gray.200',
+                  activeTab === 'expenses' ? 'red.500' : 'gray.600'
+                )}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                backdropFilter="blur(10px)"
                 _hover={{
-                  bg: activeTab === 'expenses' ? 'red.100' : 'red.50',
-                  color: 'red.600',
-                  borderColor: 'red.300'
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderColor: useColorModeValue('red.300', 'red.400'),
+                  bg: useColorModeValue('red.50', 'red.900')
                 }}
+                _active={{
+                  transform: 'translateY(0)',
+                }}
+                transition="all 0.2s ease"
                 onClick={() => setActiveTab('expenses')}
               >
                 Expenses
               </Button>
               <Button
                 size={{ base: 'xs', md: 'sm' }}
-                variant={activeTab === 'incomes' ? 'solid' : 'outline'}
-                colorScheme="green"
-                leftIcon={<Icon as={TrendingUp} boxSize={3} />}
-                borderRadius="lg"
+                leftIcon={<Icon as={TrendingUp} boxSize={{ base: 2, md: 3 }} />}
+                borderRadius="xl"
                 fontSize={{ base: '2xs', md: 'xs' }}
-                fontWeight="600"
+                fontWeight="500"
                 px={{ base: 2, md: 3 }}
                 py={{ base: 1, md: 2 }}
                 h="auto"
-                bg={activeTab === 'incomes' ? 'green.50' : 'transparent'}
-                color={activeTab === 'incomes' ? 'green.600' : 'gray.600'}
-                borderColor={activeTab === 'incomes' ? 'green.200' : 'gray.300'}
+                bg={useColorModeValue(
+                  activeTab === 'incomes' ? '#dcfce7' : 'rgba(255, 255, 255, 0.9)',
+                  activeTab === 'incomes' ? '#1f2937' : 'rgba(255, 255, 255, 0.05)'
+                )}
+                color={useColorModeValue(
+                  activeTab === 'incomes' ? 'green.600' : 'gray.600',
+                  activeTab === 'incomes' ? 'green.300' : 'gray.300'
+                )}
+                border="1px solid"
+                borderColor={useColorModeValue(
+                  activeTab === 'incomes' ? 'green.200' : 'gray.200',
+                  activeTab === 'incomes' ? 'green.500' : 'gray.600'
+                )}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                backdropFilter="blur(10px)"
                 _hover={{
-                  bg: activeTab === 'incomes' ? 'green.100' : 'green.50',
-                  color: 'green.600',
-                  borderColor: 'green.300'
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  borderColor: useColorModeValue('green.300', 'green.400'),
+                  bg: useColorModeValue('green.50', 'green.900')
                 }}
+                _active={{
+                  transform: 'translateY(0)',
+                }}
+                transition="all 0.2s ease"
                 onClick={() => setActiveTab('incomes')}
               >
                 Incomes

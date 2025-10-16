@@ -39,16 +39,20 @@ export default function PeriodNavigator({
   const colors = useThemeColors()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
-  // Colors for theme consistency
+  // Modern post-it inspired colors
   const selectedBg = useColorModeValue(
-    'linear-gradient(135deg,rgb(31, 32, 33),rgb(101, 118, 173))',
-    'linear-gradient(135deg,rgb(8, 8, 8),rgb(44, 69, 120))'
+    '#dbeafe', // Azul post-it
+    '#1e293b'  // Azul escuro
   )
-  const unselectedBg = colors.bgSecondary
-  const unselectedColor = colors.text.primary
-  const unselectedBorder = colors.border
-  const selectedBorder = useColorModeValue('blue.300', 'blue.600')
-  const hoverBorder = colors.borderHover
+  const unselectedBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.8)',
+    'rgba(255, 255, 255, 0.05)'
+  )
+  const unselectedColor = useColorModeValue('gray.600', 'gray.300')
+  const selectedColor = useColorModeValue('blue.600', 'blue.300')
+  const unselectedBorder = useColorModeValue('gray.200', 'gray.600')
+  const selectedBorder = useColorModeValue('blue.300', 'blue.500')
+  const hoverBorder = useColorModeValue('blue.200', 'blue.400')
 
   const periods = [
     { type: 'day' as PeriodType, label: 'Day', icon: Calendar },
@@ -70,18 +74,25 @@ export default function PeriodNavigator({
                 borderRadius="xl"
                 onClick={() => onPeriodChange(type)}
                 bg={selected ? selectedBg : unselectedBg}
-                color={selected ? 'white' : unselectedColor}
+                color={selected ? selectedColor : unselectedColor}
                 border="1px solid"
                 borderColor={selected ? selectedBorder : unselectedBorder}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                fontWeight="500"
                 _hover={{ 
-                  transform: 'translateY(-1px)', 
-                  boxShadow: 'md',
+                  transform: 'translateY(-2px) scale(1.02)', 
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
+                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'gray.700')
                 }}
+                _active={{
+                  transform: 'translateY(0) scale(0.98)'
+                }}
+                transition="all 0.2s ease"
               >
                 <VStack spacing={0.5}>
                   <IconComp size={14} />
-                  <Text fontSize="2xs" fontWeight="600">
+                  <Text fontSize="2xs" fontWeight="500">
                     {label}
                   </Text>
                 </VStack>
@@ -101,14 +112,21 @@ export default function PeriodNavigator({
                 leftIcon={<IconComp size={16} />}
                 onClick={() => onPeriodChange(type)}
                 bg={selected ? selectedBg : unselectedBg}
-                color={selected ? 'white' : unselectedColor}
+                color={selected ? selectedColor : unselectedColor}
                 border="1px solid"
                 borderColor={selected ? selectedBorder : unselectedBorder}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                fontWeight="500"
                 _hover={{ 
-                  transform: 'translateY(-1px)', 
-                  boxShadow: 'lg',
+                  transform: 'translateY(-2px) scale(1.02)', 
+                  boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
+                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'gray.700')
                 }}
+                _active={{
+                  transform: 'translateY(0) scale(0.98)'
+                }}
+                transition="all 0.2s ease"
               >
                 {label}
               </Button>
@@ -117,31 +135,49 @@ export default function PeriodNavigator({
         </HStack>
       )}
 
-      <HStack spacing={2} justify="space-between" w="full">
+      <HStack spacing={3} justify="space-between" w="full">
         <IconButton
           aria-label="Previous period"
           icon={<ArrowLeft size={18} />}
           onClick={() => onNavigatePeriod('prev')}
           variant="outline"
-          colorScheme="blue"
+          borderRadius="xl"
+          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          color={useColorModeValue('gray.600', 'gray.300')}
+          _hover={{
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            borderColor: useColorModeValue('blue.300', 'blue.500'),
+            color: useColorModeValue('blue.600', 'blue.300')
+          }}
+          transition="all 0.2s ease"
         />
         
         <Box
           flex="1"
           textAlign="center"
           px={4}
-          py={2}
-          borderRadius="md"
-          background={useColorModeValue(
-            'linear-gradient(135deg,rgb(106, 151, 209),rgb(142, 178, 223),rgb(132, 159, 188))',
-            'linear-gradient(135deg,rgb(20, 20, 21),rgb(50, 70, 135),rgb(19, 32, 59))'
+          py={3}
+          borderRadius="xl"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.9)',
+            'rgba(255, 255, 255, 0.05)'
           )}
           border="1px solid"
-          borderColor={useColorModeValue('blue.200', 'blue.700')}
+          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          backdropFilter="blur(10px)"
+          _hover={{
+            transform: 'translateY(-1px)',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+            borderColor: useColorModeValue('blue.200', 'blue.500')
+          }}
+          transition="all 0.2s ease"
         >
           <Text
             fontSize={{ base: 'sm', md: 'md' }}
             fontWeight="600"
+            color={useColorModeValue('gray.800', 'gray.100')}
+            fontFamily="system-ui, -apple-system, sans-serif"
           >
             {formatLabel()}
           </Text>
@@ -152,7 +188,16 @@ export default function PeriodNavigator({
           icon={<ArrowRight size={18} />}
           onClick={() => onNavigatePeriod('next')}
           variant="outline"
-          colorScheme="blue"
+          borderRadius="xl"
+          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          color={useColorModeValue('gray.600', 'gray.300')}
+          _hover={{
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            borderColor: useColorModeValue('blue.300', 'blue.500'),
+            color: useColorModeValue('blue.600', 'blue.300')
+          }}
+          transition="all 0.2s ease"
         />
       </HStack>
     </VStack>

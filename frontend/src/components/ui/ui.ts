@@ -280,13 +280,13 @@ export const getResponsiveStyles = () => ({
       size: { base: 4, sm: 5, md: 6 }
     },
     content: {
-      spacing: { base: 0.5, sm: 1, md: 1.5 }
+      spacing: { base: 1, sm: 1.5, md: 2 }
     },
     value: {
-      fontSize: { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' }
+      fontSize: { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' }
     },
     label: {
-      fontSize: { base: '3xs', sm: '2xs', md: 'xs' }
+      fontSize: { base: '2xs', sm: 'xs', md: 'sm' }
     }
   },
   charts: {

@@ -3,7 +3,7 @@ import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations, shimmerStyles } from '../ui'
+import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface IncomeChartProps {
@@ -15,7 +15,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const { isOpen, onOpen, onClose } = useDisclosure()
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   const handleClose = useCallback(() => {
@@ -49,42 +48,45 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   if (sortedCategories.length === 0) {
     return (
       <Box
-        position="relative"
-        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
-        backdropFilter="blur(20px)"
-        border="2px solid"
-        borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
-        borderRadius={responsiveStyles.charts.container.borderRadius}
-        p={responsiveStyles.charts.container.padding}
-        boxShadow="xl"
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.9)',
+          'rgba(255, 255, 255, 0.05)'
+        )}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderRadius="2xl"
+        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
+        boxShadow="sm"
         w="full"
-        sx={{
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-            to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-          }
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          borderColor: useColorModeValue('green.200', 'green.500')
         }}
+        transition="all 0.2s ease"
       >
-        <VStack spacing={4} align="center" py={responsiveStyles.charts.empty.padding}>
+        <VStack spacing={4} align="center" py={8}>
           <Box
-            p={responsiveStyles.charts.empty.iconPadding}
-            borderRadius="full"
-            bg={useColorModeValue('green.50', 'green.900')}
-            sx={{
-              animation: animations.glow,
-              '@keyframes glow': {
-                '0%, 100%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.05)' },
-              }
+            p={{ base: 2, sm: 2.5, md: 3 }}
+            borderRadius="xl"
+            bg={useColorModeValue('#dcfce7', '#1f2937')} // Verde post-it
+            border="1px solid"
+            borderColor={useColorModeValue('green.200', 'green.500')}
+            boxShadow="sm"
+            _hover={{
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              borderColor: useColorModeValue('green.300', 'green.400')
             }}
+            transition="all 0.2s ease"
           >
-            <Icon as={BarChart3} boxSize={responsiveStyles.charts.empty.iconSize} color={useColorModeValue('green.500', 'green.400')} />
+            <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('green.600', 'green.300')} />
           </Box>
-          <Text fontSize={responsiveStyles.charts.empty.titleFontSize} fontWeight="600" color={colors.text.primary} textAlign="center">
+          <Text fontSize={{ base: 'md', sm: 'lg', md: 'xl' }} fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
             No income data available
           </Text>
-          <Text fontSize={responsiveStyles.charts.empty.descriptionFontSize} color={colors.text.secondary} textAlign="center">
+          <Text fontSize={{ base: 'sm', sm: 'md' }} color={useColorModeValue('gray.600', 'gray.300')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
             Add some income to see your earnings breakdown
           </Text>
         </VStack>
@@ -95,72 +97,63 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   return (
     <>
       <Box
-        position="relative"
-        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
-        backdropFilter="blur(20px)"
-        border="2px solid"
-        borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
-        borderRadius={responsiveStyles.charts.container.borderRadius}
-        p={responsiveStyles.charts.container.padding}
-        boxShadow="xl"
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.9)',
+          'rgba(255, 255, 255, 0.05)'
+        )}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderRadius="2xl"
+        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
+        boxShadow="sm"
         w="full"
-        sx={{
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-            to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-          }
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          borderColor: useColorModeValue('green.200', 'green.500')
         }}
+        transition="all 0.2s ease"
       >
-        {/* Background decorativo */}
+        {/* Simple top border */}
         <Box
-          position="absolute"
-          top="-20px"
-          left="-20px"
-          right="-20px"
-          height="100px"
-          background={useColorModeValue(
-            'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(22, 163, 74, 0.1) 50%, rgba(21, 128, 61, 0.1) 100%)',
-            'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(22, 163, 74, 0.2) 50%, rgba(21, 128, 61, 0.2) 100%)'
-          )}
-          borderRadius="2xl"
-          filter="blur(20px)"
-          opacity={0.6}
-          zIndex={0}
+          height="3px"
+          bg={useColorModeValue('green.200', 'green.500')}
+          mb={4}
         />
-
-        <VStack spacing={responsiveStyles.charts.header.spacing} align="stretch" position="relative" zIndex={1}>
+        <VStack spacing={4} align="stretch">
           {/* Header compacto */}
-          <HStack spacing={responsiveStyles.charts.header.spacing} align="center">
+          <HStack spacing={4} align="center">
             <Box
-              p={responsiveStyles.charts.header.icon.padding}
+              p={{ base: 2, sm: 2.5, md: 3 }}
               borderRadius="xl"
-              bg={useColorModeValue(
-                'linear-gradient(135deg, #22c55e, #16a34a)',
-                'linear-gradient(135deg, #4ade80, #22c55e)'
-              )}
-              boxShadow="md"
+              bg={useColorModeValue('#dcfce7', '#1f2937')} // Verde post-it
+              border="1px solid"
+              borderColor={useColorModeValue('green.200', 'green.500')}
+              boxShadow="sm"
+              _hover={{
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                borderColor: useColorModeValue('green.300', 'green.400')
+              }}
+              transition="all 0.2s ease"
             >
-              <Icon as={TrendingUp} boxSize={responsiveStyles.charts.header.icon.size} color="white" />
+              <Icon as={TrendingUp} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('green.600', 'green.300')} />
             </Box>
             <VStack align="start" spacing={0.5}>
               <Heading
-                size={responsiveStyles.charts.header.title.size}
-                bg={useColorModeValue(
-                  'linear-gradient(135deg, #1e293b, #475569)',
-                  'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                )}
-                bgClip="text"
+                size={{ base: 'md', sm: 'lg', md: 'xl' }}
+                color={useColorModeValue('gray.800', 'gray.100')}
                 fontWeight="700"
-                letterSpacing="wide"
+                fontFamily="system-ui, -apple-system, sans-serif"
               >
                 Income Analysis
               </Heading>
               <Text
-                fontSize={responsiveStyles.charts.header.title.fontSize}
-                color={colors.text.secondary}
-                fontWeight="400"
-                opacity={0.8}
+                fontSize={{ base: 'sm', sm: 'md' }}
+                color={useColorModeValue('gray.600', 'gray.300')}
+                fontWeight="500"
+                fontFamily="system-ui, -apple-system, sans-serif"
               >
                 Detailed earnings breakdown by category
               </Text>
@@ -240,13 +233,12 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
-                  sx={{
-                    animation: `${animations.slideIn} ${index * 0.1}s ease-out`,
-                    '@keyframes slideIn': {
-                      from: { opacity: 0, transform: 'translateX(-20px)' },
-                      to: { opacity: 1, transform: 'translateX(0)' },
-                    }
+                  _hover={{
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderColor: useColorModeValue('green.200', 'green.500')
                   }}
+                  transition="all 0.2s ease"
                 >
                   <HStack justify="space-between" mb={responsiveStyles.charts.progress.item.spacing}>
                     <HStack spacing={responsiveStyles.charts.progress.item.spacing}>
@@ -255,13 +247,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                         h={responsiveStyles.charts.progress.indicator.size}
                         borderRadius="full"
                         bg={color}
-                        sx={{
-                          animation: `${animations.shimmer} 4s ease-in-out infinite`,
-                          '@keyframes shimmer': {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0.7 },
-                          }
-                        }}
                       />
                       <Text fontSize={responsiveStyles.charts.progress.text.fontSize} fontWeight="600" color={colors.text.primary}>
                         {category}

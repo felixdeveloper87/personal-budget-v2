@@ -20,7 +20,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles, getGradients, animations, shimmerGradients, shimmerAnimations, shimmerStylesStatic } from '../components/ui'
+import { getResponsiveStyles } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -29,30 +29,27 @@ import { getResponsiveStyles, getGradients, animations, shimmerGradients, shimme
 export default function InstallmentPlansSection() {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  // Move ALL useColorModeValue to top (always safe)
-  const cardBg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17, 17, 17, 0.9)')
-  const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
-  
-  // Shimmer styles
-  const shimmerBackground = useColorModeValue(shimmerGradients.light, shimmerGradients.dark)
-  const shimmerAnimation = useColorModeValue(shimmerAnimations.light, shimmerAnimations.dark)
-
-  // Additional useColorModeValue calls that were in JSX
+  // Modern post-it inspired colors
+  const cardBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
+  )
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
   const iconContainerBg = useColorModeValue(
-    'linear-gradient(135deg,rgb(158, 130, 222),rgb(123, 93, 175),rgb(96, 63, 150))',
-    'linear-gradient(135deg, #a78bfa,rgb(149, 111, 237),rgb(107, 62, 185))'
+    '#fecaca', // Rosa post-it
+    '#2d1b1b'  // Rosa escuro
   )
-  const titleGradient = useColorModeValue(
-    'linear-gradient(135deg, #1e293b, #475569, #64748b, #334155)',
-    'linear-gradient(135deg, #f8fafc, #e2e8f0, #cbd5e1, #94a3b8)'
+  const iconColor = useColorModeValue('red.600', 'red.300')
+  const titleColor = useColorModeValue('gray.800', 'gray.100')
+  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
+  const badgeBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
   )
-  const badgeGradient = useColorModeValue(
-    'linear-gradient(135deg,rgb(158, 130, 222),rgb(123, 93, 175),rgb(96, 63, 150))',
-    'linear-gradient(135deg, #a78bfa,rgb(149, 111, 237),rgb(107, 62, 185))'
-  )
+  const badgeColor = useColorModeValue('red.600', 'red.300')
+  const badgeBorderColor = useColorModeValue('red.200', 'red.500')
 
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
@@ -81,10 +78,10 @@ export default function InstallmentPlansSection() {
     <>
       <Box
         w="full"
-        px={responsiveStyles.installmentPlansSection.container.padding}
+        px={{ base: 2, sm: 3, md: 4, lg: 6 }}
         sx={{
-          paddingLeft: responsiveStyles.installmentPlansSection.container.safeArea.paddingLeft,
-          paddingRight: responsiveStyles.installmentPlansSection.container.safeArea.paddingRight,
+          paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
         }}
       >
         {loading ? (
@@ -99,45 +96,29 @@ export default function InstallmentPlansSection() {
           </Center>
         ) : (
           // 💳 Main Card
-          <Box position="relative">
-            {/* Decorative gradient background */}
-            <Box
-              position="absolute"
-              top={responsiveStyles.installmentPlansSection.background.top}
-              left={responsiveStyles.installmentPlansSection.background.left}
-              right={responsiveStyles.installmentPlansSection.background.right}
-              height={responsiveStyles.installmentPlansSection.background.height}
-              background={gradients.decorative}
-              borderRadius={responsiveStyles.installmentPlansSection.background.borderRadius}
-              filter={responsiveStyles.installmentPlansSection.background.filter}
-              opacity={responsiveStyles.installmentPlansSection.background.opacity}
-              zIndex={0}
-            />
-
-            <Card
+          <Card
               position="relative"
               bg={cardBg}
-              backdropFilter="blur(20px)"
+              backdropFilter="blur(10px)"
               border="1px solid"
               borderColor={cardBorderColor}
               borderRadius={responsiveStyles.installmentPlansSection.card.borderRadius}
-              shadow="2xl"
+              shadow="sm"
               overflow="hidden"
-              sx={{
-                animation: animations.slideIn,
+              _hover={{
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+                borderColor: useColorModeValue('red.200', 'red.500')
               }}
+              transition="all 0.2s ease"
             >
-              {/* Animated top border */}
+              {/* Simple top border */}
               <Box
-                height="4px"
-                background={shimmerBackground}
-                sx={{
-                  ...shimmerStylesStatic,
-                  animation: shimmerAnimation
-                }}
+                height="3px"
+                bg={useColorModeValue('red.200', 'red.500')}
               />
 
-              <CardBody p={responsiveStyles.installmentPlansSection.card.padding}>
+              <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
                 <Flex
                   direction={responsiveStyles.installmentPlansSection.header.direction}
                   align={{ base: 'stretch', sm: 'center' }}
@@ -146,123 +127,77 @@ export default function InstallmentPlansSection() {
                 >
                   {/* Left side */}
                   <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
-                    {/* Icon Container with Advanced Effects */}
+                    {/* Modern Icon Container */}
                     <Box
-                      position="relative"
-                      p={responsiveStyles.installmentPlansSection.header.icon.padding}
+                      p={{ base: 2, sm: 2.5, md: 3 }}
                       borderRadius={responsiveStyles.installmentPlansSection.header.icon.borderRadius}
                       bg={iconContainerBg}
-                      boxShadow="xl"
-                      opacity={0.9}
-                      sx={{
-                        animation: 'installmentGlow 3s ease-in-out infinite, iconFloat 4s ease-in-out infinite',
-                        '@keyframes installmentGlow': {
-                          '0%,100%': { 
-                            boxShadow: '0 0 20px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.1)',
-                            transform: 'scale(1)'
-                          },
-                          '50%': {
-                            boxShadow: '0 0 30px rgba(139,92,246,0.5), 0 0 60px rgba(139,92,246,0.2)',
-                            transform: 'scale(1.05)'
-                          },
-                        },
-                        '@keyframes iconFloat': {
-                          '0%,100%': { transform: 'translateY(0px) rotate(0deg)' },
-                          '50%': { transform: 'translateY(-4px) rotate(0deg)' }
-                        }
+                      border="1px solid"
+                      borderColor={useColorModeValue('red.200', 'red.500')}
+                      boxShadow="sm"
+                      _hover={{
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        borderColor: useColorModeValue('red.300', 'red.400')
                       }}
+                      transition="all 0.2s ease"
                     >
                       <Icon
                         as={CreditCard}
                         boxSize={responsiveStyles.installmentPlansSection.header.icon.size}
-                        color="white"
-                        sx={{
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-                          animation: 'cardPulse 2s ease-in-out infinite',
-                          '@keyframes cardPulse': {
-                            '0%,100%': { transform: 'scale(1)', filter: 'brightness(1)' },
-                            '50%': { transform: 'scale(1.05)', filter: 'brightness(1.1)' }
-                          }
-                        }}
+                        color={iconColor}
                       />
                     </Box>
 
                     <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
                       <Heading
                         size={responsiveStyles.installmentPlansSection.header.title.size}
-                        bg={titleGradient}
-                        bgClip="text"
-                        fontWeight="900"
+                        color={titleColor}
+                        fontWeight="700"
                         textAlign={{ base: 'center', sm: 'left' }}
-                        sx={{
-                          animation: 'titleShimmer 4s ease-in-out infinite',
-                          '@keyframes titleShimmer': {
-                            '0%,100%': { backgroundPosition: '0% 50%' },
-                            '50%': { backgroundPosition: '100% 50%' }
-                          },
-                          backgroundSize: '200% 200%',
-                          filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
-                        }}
+                        fontFamily="system-ui, -apple-system, sans-serif"
                       >
                         Active Installment Plans
                       </Heading>
                       <Text
                         fontSize={responsiveStyles.installmentPlansSection.header.title.fontSize}
-                        color={colors.text.secondary}
+                        color={subtitleColor}
                         fontWeight="500"
-                        opacity={0.9}
                         textAlign={{ base: 'center', sm: 'left' }}
                         display={{ base: 'none', sm: 'block' }}
-                        sx={{
-                          animation: 'fadeInUp 0.8s ease-out 0.2s both',
-                          '@keyframes fadeInUp': {
-                            '0%': { opacity: 0, transform: 'translateY(10px)' },
-                            '100%': { opacity: 0.9, transform: 'translateY(0)' }
-                          }
-                        }}
+                        fontFamily="system-ui, -apple-system, sans-serif"
                       >
                         Track your ongoing payment plans
                       </Text>
                     </VStack>
                   </HStack>
 
-                  {/* Right side - Premium Badge */}
+                  {/* Right side - Modern Badge */}
                   <Badge
-                    colorScheme="purple"
-                    variant="solid"
-                    borderRadius="full"
+                    borderRadius="xl"
                     px={4}
                     py={2}
                     fontSize="sm"
-                    fontWeight="700"
-                    bg={badgeGradient}
-                    boxShadow="xl"
+                    fontWeight="500"
+                    bg={badgeBg}
+                    color={badgeColor}
+                    border="1px solid"
+                    borderColor={badgeBorderColor}
+                    boxShadow="sm"
                     cursor="pointer"
                     onClick={onOpen}
-                    position="relative"
-                    overflow="hidden"
-                    opacity={0.9}
-                    sx={{
-                      animation: 'badgeGlow 3s ease-in-out infinite',
-                      '@keyframes badgeGlow': {
-                        '0%,100%': { 
-                          boxShadow: '0 0 15px rgba(139,92,246,0.4), 0 0 30px rgba(139,92,246,0.2)',
-                          transform: 'scale(1)'
-                        },
-                        '50%': {
-                          boxShadow: '0 0 25px rgba(139,92,246,0.6), 0 0 50px rgba(139,92,246,0.3)',
-                          transform: 'scale(1.02)'
-                        },
-                      }
-                    }}
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    backdropFilter="blur(10px)"
                     _hover={{
-                      transform: 'translateY(-2px) scale(1.05)',
-                      boxShadow: '0 20px 40px rgba(139,92,246,0.4)',
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      borderColor: useColorModeValue('red.300', 'red.400'),
+                      bg: useColorModeValue('red.50', 'red.900')
                     }}
                     _active={{
-                      transform: 'translateY(0) scale(1.02)',
+                      transform: 'translateY(0)',
                     }}
-                    transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                    transition="all 0.2s ease"
                     flex="0 0 auto"
                     minW="auto"
                     w="auto"
@@ -275,21 +210,13 @@ export default function InstallmentPlansSection() {
                       <Icon
                         as={Sparkles}
                         boxSize={3}
-                        sx={{
-                          animation: 'sparkle 2s ease-in-out infinite',
-                          '@keyframes sparkle': {
-                            '0%,100%': { transform: 'scale(1)', filter: 'brightness(1)' },
-                            '50%': { transform: 'scale(1.2)', filter: 'brightness(1.3)' }
-                          }
-                        }}
+                        color={badgeColor}
                       />
                       <Text 
                         fontSize="sm" 
                         lineHeight="1" 
-                        fontWeight="700"
-                        sx={{
-                          filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
-                        }}
+                        fontWeight="500"
+                        color={badgeColor}
                       >
                         {plans.length}
                       </Text>
@@ -298,7 +225,6 @@ export default function InstallmentPlansSection() {
                 </Flex>
               </CardBody>
             </Card>
-          </Box>
         )}
       </Box>
 

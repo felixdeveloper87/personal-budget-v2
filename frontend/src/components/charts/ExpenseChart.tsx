@@ -3,7 +3,7 @@ import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations } from '../ui'
+import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface ExpenseChartProps {
@@ -15,7 +15,6 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   const { isOpen, onOpen, onClose } = useDisclosure()
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   const handleClose = useCallback(() => {
@@ -49,42 +48,45 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   if (sortedCategories.length === 0) {
     return (
       <Box
-        position="relative"
-        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
-        backdropFilter="blur(20px)"
-        border="2px solid"
-        borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
-        borderRadius={responsiveStyles.charts.container.borderRadius}
-        p={responsiveStyles.charts.container.padding}
-        boxShadow="xl"
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.9)',
+          'rgba(255, 255, 255, 0.05)'
+        )}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderRadius="2xl"
+        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
+        boxShadow="sm"
         w="full"
-        sx={{
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-            to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-          }
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          borderColor: useColorModeValue('red.200', 'red.500')
         }}
+        transition="all 0.2s ease"
       >
-        <VStack spacing={4} align="center" py={responsiveStyles.charts.empty.padding}>
+        <VStack spacing={4} align="center" py={8}>
           <Box
-            p={responsiveStyles.charts.empty.iconPadding}
-            borderRadius="full"
-            bg={useColorModeValue('red.50', 'red.900')}
-            sx={{
-              animation: animations.pulse,
-              '@keyframes pulse': {
-                '0%, 100%': { transform: 'scale(1)' },
-                '50%': { transform: 'scale(1.05)' },
-              }
+            p={{ base: 2, sm: 2.5, md: 3 }}
+            borderRadius="xl"
+            bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
+            border="1px solid"
+            borderColor={useColorModeValue('red.200', 'red.500')}
+            boxShadow="sm"
+            _hover={{
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              borderColor: useColorModeValue('red.300', 'red.400')
             }}
+            transition="all 0.2s ease"
           >
-            <Icon as={BarChart3} boxSize={responsiveStyles.charts.empty.iconSize} color={useColorModeValue('red.500', 'red.400')} />
+            <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('red.600', 'red.300')} />
           </Box>
-          <Text fontSize={responsiveStyles.charts.empty.titleFontSize} fontWeight="600" color={colors.text.primary} textAlign="center">
+          <Text fontSize={{ base: 'md', sm: 'lg', md: 'xl' }} fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
             No expense data available
           </Text>
-          <Text fontSize={responsiveStyles.charts.empty.descriptionFontSize} color={colors.text.secondary} textAlign="center">
+          <Text fontSize={{ base: 'sm', sm: 'md' }} color={useColorModeValue('gray.600', 'gray.300')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
             Add some expenses to see your spending breakdown
           </Text>
         </VStack>
@@ -95,139 +97,134 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <>
       <Box
-        position="relative"
-        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.95) 0%, rgba(241, 245, 249, 0.95) 50%, rgba(226, 232, 240, 0.95) 100%)', 'rgba(17,17,17,0.95)')}
-        backdropFilter="blur(20px)"
-        border="2px solid"
-        borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
-        borderRadius={responsiveStyles.charts.container.borderRadius}
-        p={responsiveStyles.charts.container.padding}
-        boxShadow="xl"
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.9)',
+          'rgba(255, 255, 255, 0.05)'
+        )}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderRadius="2xl"
+        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
+        boxShadow="sm"
         w="full"
-        sx={{
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-            to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-          }
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          borderColor: useColorModeValue('red.200', 'red.500')
         }}
+        transition="all 0.2s ease"
       >
-        {/* Background decorativo */}
+        {/* Simple top border */}
         <Box
-          position="absolute"
-          top="-20px"
-          left="-20px"
-          right="-20px"
-          height="100px"
-          background={useColorModeValue(
-            'linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 50%, rgba(185, 28, 28, 0.1) 100%)',
-            'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 50%, rgba(185, 28, 28, 0.2) 100%)'
-          )}
-          borderRadius="2xl"
-          filter="blur(20px)"
-          opacity={0.6}
-          zIndex={0}
+          height="3px"
+          bg={useColorModeValue('red.200', 'red.500')}
+          mb={4}
         />
 
-        <VStack spacing={responsiveStyles.charts.header.spacing} align="stretch" position="relative" zIndex={1}>
+        <VStack spacing={4} align="stretch">
           {/* Header compacto */}
-          <HStack spacing={responsiveStyles.charts.header.spacing} align="center">
+          <HStack spacing={4} align="center">
             <Box
-              p={responsiveStyles.charts.header.icon.padding}
+              p={{ base: 2, sm: 2.5, md: 3 }}
               borderRadius="xl"
-              bg={useColorModeValue(
-                'linear-gradient(135deg, #ef4444, #dc2626)',
-                'linear-gradient(135deg, #f87171, #ef4444)'
-              )}
-              boxShadow="md"
+              bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
+              border="1px solid"
+              borderColor={useColorModeValue('red.200', 'red.500')}
+              boxShadow="sm"
+              _hover={{
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                borderColor: useColorModeValue('red.300', 'red.400')
+              }}
+              transition="all 0.2s ease"
             >
-              <Icon as={TrendingDown} boxSize={responsiveStyles.charts.header.icon.size} color="white" />
+              <Icon as={TrendingDown} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('red.600', 'red.300')} />
             </Box>
             <VStack align="start" spacing={0.5}>
               <Heading
-                size={responsiveStyles.charts.header.title.size}
-                bg={useColorModeValue(
-                  'linear-gradient(135deg, #1e293b, #475569)',
-                  'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-                )}
-                bgClip="text"
+                size={{ base: 'md', sm: 'lg', md: 'xl' }}
+                color={useColorModeValue('gray.800', 'gray.100')}
                 fontWeight="700"
-                letterSpacing="wide"
+                fontFamily="system-ui, -apple-system, sans-serif"
               >
                 Expense Analysis
               </Heading>
               <Text
-                fontSize={responsiveStyles.charts.header.title.fontSize}
-                color={colors.text.secondary}
-                fontWeight="400"
-                opacity={0.8}
+                fontSize={{ base: 'sm', sm: 'md' }}
+                color={useColorModeValue('gray.600', 'gray.300')}
+                fontWeight="500"
+                fontFamily="system-ui, -apple-system, sans-serif"
               >
                 Detailed spending breakdown by category
               </Text>
             </VStack>
           </HStack>
           
-          <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
-            <Badge
-              colorScheme="red"
-              variant="solid"
-              borderRadius="full"
-              px={responsiveStyles.charts.badges.category.padding}
-              py={responsiveStyles.charts.badges.category.padding}
-              fontSize={responsiveStyles.charts.badges.category.fontSize}
-              fontWeight="600"
-            >
-              {sortedCategories.length} Categories
-            </Badge>
-            <Badge
-              colorScheme="gray"
-              variant="subtle"
-              borderRadius="md"
-              px={responsiveStyles.charts.badges.period.padding}
-              py={responsiveStyles.charts.badges.period.padding}
-              fontSize={responsiveStyles.charts.badges.period.fontSize}
-              fontWeight="400"
-              opacity={0.7}
-            >
-              {selectedPeriod}
-            </Badge>
+          <HStack spacing={3} justify="space-between" align="center">
+            <HStack spacing={2}>
+              <Badge
+                borderRadius="xl"
+                px={3}
+                py={1}
+                fontSize="sm"
+                fontWeight="500"
+                bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
+                color={useColorModeValue('red.600', 'red.300')}
+                border="1px solid"
+                borderColor={useColorModeValue('red.200', 'red.500')}
+                fontFamily="system-ui, -apple-system, sans-serif"
+              >
+                {sortedCategories.length} Categories
+              </Badge>
+              <Badge
+                borderRadius="xl"
+                px={3}
+                py={1}
+                fontSize="sm"
+                fontWeight="500"
+                bg={useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.05)')}
+                color={useColorModeValue('gray.600', 'gray.300')}
+                border="1px solid"
+                borderColor={useColorModeValue('gray.200', 'gray.600')}
+                fontFamily="system-ui, -apple-system, sans-serif"
+                backdropFilter="blur(10px)"
+              >
+                {selectedPeriod}
+              </Badge>
+            </HStack>
             <Button
-              size={responsiveStyles.charts.button.size}
-              variant="solid"
-              colorScheme="blue"
-              rightIcon={!isMobile ? <Icon as={Eye} boxSize={responsiveStyles.charts.button.iconSize} /> : undefined}
-              leftIcon={isMobile ? undefined : undefined}
+              size="sm"
+              rightIcon={!isMobile ? <Icon as={Eye} boxSize={3} /> : undefined}
               onClick={onOpen}
-              borderRadius="lg"
-              px={responsiveStyles.charts.button.padding}
-              py={responsiveStyles.charts.button.padding}
-              fontSize={responsiveStyles.charts.button.fontSize}
-              fontWeight="600"
-              bg={useColorModeValue(
-                'linear-gradient(135deg, #60a5fa, #3b82f6)',
-                'linear-gradient(135deg, #93c5fd, #60a5fa)'
-              )}
-              color="white"
+              borderRadius="xl"
+              px={4}
+              py={2}
+              fontSize="sm"
+              fontWeight="500"
+              bg={useColorModeValue('#dbeafe', '#1e293b')} // Azul post-it
+              color={useColorModeValue('blue.600', 'blue.300')}
+              border="1px solid"
+              borderColor={useColorModeValue('blue.200', 'blue.500')}
+              fontFamily="system-ui, -apple-system, sans-serif"
+              backdropFilter="blur(10px)"
               _hover={{
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #3b82f6, #2563eb)',
-                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                ),
-                transform: 'translateY(-2px)',
-                boxShadow: 'lg',
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                borderColor: useColorModeValue('blue.300', 'blue.400'),
+                bg: useColorModeValue('blue.50', 'blue.900')
               }}
               _active={{
                 transform: 'translateY(0)',
               }}
               transition="all 0.2s ease"
-              boxShadow="md"
             >
               {isMobile ? 'All' : `View Details (${sortedCategories.length})`}
             </Button>
           </HStack>
 
-          {/* Progress bars melhorados */}
-          <VStack spacing={responsiveStyles.charts.progress.container.spacing} align="stretch">
+          {/* Progress bars modernizados */}
+          <VStack spacing={3} align="stretch">
             {sortedCategories.slice(0, 5).map(({ category, amount }, index) => {
               const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
               const color = categoryColors[index % categoryColors.length]
@@ -235,78 +232,68 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               return (
                 <Box 
                   key={category}
-                  p={responsiveStyles.charts.progress.item.padding}
+                  p={4}
                   bg={useColorModeValue('rgba(255,255,255,0.5)', 'rgba(255,255,255,0.05)')}
                   borderRadius="xl"
-                  border="2px solid"
-                  borderColor={useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(239, 68, 68, 0.2)')}
-                  sx={{
-                    animation: `${animations.slideIn} ${index * 0.1}s ease-out`,
-                    '@keyframes slideIn': {
-                      from: { opacity: 0, transform: 'translateX(-20px)' },
-                      to: { opacity: 1, transform: 'translateX(0)' },
-                    }
+                  border="1px solid"
+                  borderColor={useColorModeValue('gray.200', 'gray.600')}
+                  _hover={{
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    borderColor: useColorModeValue('red.200', 'red.500')
                   }}
+                  transition="all 0.2s ease"
                 >
-                  <HStack justify="space-between" mb={responsiveStyles.charts.progress.item.spacing}>
-                    <HStack spacing={responsiveStyles.charts.progress.item.spacing}>
+                  <HStack justify="space-between" mb={3}>
+                    <HStack spacing={3}>
                       <Box
-                        w={responsiveStyles.charts.progress.indicator.size}
-                        h={responsiveStyles.charts.progress.indicator.size}
+                        w={3}
+                        h={3}
                         borderRadius="full"
                         bg={color}
-                        sx={{
-                          animation: animations.pulse,
-                          '@keyframes pulse': {
-                            '0%, 100%': { opacity: 1 },
-                            '50%': { opacity: 0.7 },
-                          }
-                        }}
                       />
-                      <Text fontSize={responsiveStyles.charts.progress.text.fontSize} fontWeight="600" color={colors.text.primary}>
+                      <Text fontSize="sm" fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
                         {category}
                       </Text>
                     </HStack>
-                    <Text fontSize={responsiveStyles.charts.progress.text.valueFontSize} fontWeight="700" color={colors.text.primary}>
+                    <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
                       £{amount.toFixed(2)}
                     </Text>
                   </HStack>
                   
                   <Progress
                     value={percentage}
-                    size={responsiveStyles.charts.progress.bar.size}
+                    size="sm"
                     borderRadius="full"
                     bg={useColorModeValue('gray.100', 'gray.700')}
                     sx={{
-                      height: responsiveStyles.charts.progress.bar.height,
                       '& > div': {
-                        background: `linear-gradient(90deg, ${color} 0%, ${color}CC 100%)`,
+                        background: color,
                         borderRadius: 'full',
-                        boxShadow: `0 0 10px ${color}40`,
                       }
                     }}
                   />
                   
-                  <Text fontSize="xs" color={colors.text.secondary} mt={2}>
+                  <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')} mt={2} fontFamily="system-ui, -apple-system, sans-serif">
                     {percentage.toFixed(1)}% of total expenses
                   </Text>
                 </Box>
               )
             })}
 
-            {/* Show more indicator melhorado */}
+            {/* Show more indicator modernizado */}
             {sortedCategories.length > 5 && (
               <Box 
                 textAlign="center" 
-                py={responsiveStyles.charts.progress.container.padding}
+                py={4}
                 bg={useColorModeValue('rgba(255,255,255,0.3)', 'rgba(255,255,255,0.05)')}
                 borderRadius="xl"
                 border="1px dashed"
-                borderColor={colors.border}
+                borderColor={useColorModeValue('gray.300', 'gray.600')}
               >
                 <HStack justify="center" spacing={2}>
-                  <Icon as={Sparkles} boxSize={responsiveStyles.charts.button.iconSize} color={colors.text.secondary} />
-                  <Text fontSize={responsiveStyles.charts.progress.text.fontSize} color={colors.text.primary} fontWeight="500">
+                  <Icon as={Sparkles} boxSize={3} color={useColorModeValue('gray.500', 'gray.400')} />
+                  <Text fontSize="sm" color={useColorModeValue('gray.700', 'gray.300')} fontWeight="500" fontFamily="system-ui, -apple-system, sans-serif">
                     ... and {sortedCategories.length - 5} more categories
                   </Text>
                 </HStack>
@@ -314,31 +301,28 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
             )}
           </VStack>
 
-          {/* Footer melhorado */}
+          {/* Footer modernizado */}
           <Box 
-            pt={responsiveStyles.charts.footer.padding} 
-            borderTop="2px solid" 
-            borderColor={colors.border}
+            pt={4} 
+            borderTop="1px solid" 
+            borderColor={useColorModeValue('gray.200', 'gray.600')}
             bg={useColorModeValue('rgba(239, 68, 68, 0.05)', 'rgba(239, 68, 68, 0.1)')}
             borderRadius="xl"
-            p={responsiveStyles.charts.footer.padding}
+            p={4}
             mt={2}
           >
             <HStack justify="space-between" align="center">
-              <HStack spacing={responsiveStyles.charts.footer.spacing}>
-                <Icon as={TrendingDown} boxSize={responsiveStyles.charts.footer.iconSize} color={useColorModeValue('red.500', 'red.400')} />
-                <Text fontSize={responsiveStyles.charts.footer.titleFontSize} fontWeight="700" color={colors.text.primary}>
+              <HStack spacing={3}>
+                <Icon as={TrendingDown} boxSize={4} color={useColorModeValue('red.500', 'red.400')} />
+                <Text fontSize="md" fontWeight="700" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
                   Total Expenses
                 </Text>
               </HStack>
               <Text
-                fontSize={responsiveStyles.charts.footer.valueFontSize}
+                fontSize="lg"
                 fontWeight="800"
-                bg={useColorModeValue(
-                  'linear-gradient(135deg, #ef4444, #dc2626)',
-                  'linear-gradient(135deg, #f87171, #ef4444)'
-                )}
-                bgClip="text"
+                color={useColorModeValue('red.600', 'red.300')}
+                fontFamily="system-ui, -apple-system, sans-serif"
               >
                 £{totalExpenses.toFixed(2)}
               </Text>

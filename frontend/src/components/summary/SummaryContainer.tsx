@@ -6,7 +6,7 @@ import {
   Divider,
 } from '@chakra-ui/react'
 import { useColorModeValue } from '@chakra-ui/react'
-import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../ui'
+import { getResponsiveStyles } from '../ui'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import { SummaryCardsGrid, CategoryAnalysisTabs } from './'
@@ -37,7 +37,6 @@ export default function SummaryContainer({
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance, label } = periodData
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
 
@@ -49,9 +48,12 @@ export default function SummaryContainer({
     formatLabel,
   } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
 
-  // Move useColorModeValue to top (always safe)
-  const cardBg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17, 17, 17, 0.9)')
-  const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
+  // Modern post-it inspired colors
+  const cardBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
+  )
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
 
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
@@ -62,51 +64,34 @@ export default function SummaryContainer({
     <>
       <Box
         w="full"
-        px={responsiveStyles.addTransactionSection.container.padding}
+        px={{ base: 2, sm: 3, md: 4, lg: 6 }}
         sx={{
-          paddingLeft: responsiveStyles.addTransactionSection.container.safeArea.paddingLeft,
-          paddingRight: responsiveStyles.addTransactionSection.container.safeArea.paddingRight,
+          paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+          paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
         }}
       >
-        <Box position="relative">
-          {/* Decorative gradient background */}
+        <Card
+          bg={cardBg}
+          backdropFilter="blur(10px)"
+          border="1px solid"
+          borderColor={cardBorderColor}
+          borderRadius="2xl"
+          shadow="sm"
+          overflow="hidden"
+          _hover={{
+            transform: 'translateY(-2px)',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+            borderColor: useColorModeValue('blue.200', 'blue.500')
+          }}
+          transition="all 0.2s ease"
+        >
+          {/* Simple top border */}
           <Box
-            position="absolute"
-            top={responsiveStyles.installmentPlansSection.background.top}
-            left={responsiveStyles.installmentPlansSection.background.left}
-            right={responsiveStyles.installmentPlansSection.background.right}
-            height={responsiveStyles.installmentPlansSection.background.height}
-            background={gradients.decorative}
-            borderRadius={responsiveStyles.installmentPlansSection.background.borderRadius}
-            filter={responsiveStyles.installmentPlansSection.background.filter}
-            opacity={responsiveStyles.installmentPlansSection.background.opacity}
-            zIndex={0}
+            height="3px"
+            bg={useColorModeValue('blue.200', 'blue.500')}
           />
 
-          <Card
-            position="relative"
-            bg={cardBg}
-            backdropFilter="blur(20px)"
-            border="1px solid"
-            borderColor={cardBorderColor}
-            borderRadius={responsiveStyles.addTransactionSection.card.borderRadius}
-            shadow="2xl"
-            overflow="hidden"
-            sx={{
-              animation: animations.slideIn,
-              '@keyframes slideIn': {
-                from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-                to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-              },
-            }}
-          >
-            {/* Animated top border */}
-            <Box
-              height="4px"
-              sx={getShimmerStyles()}
-            />
-
-            <CardBody p={responsiveStyles.addTransactionSection.card.padding}>
+            <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <SummaryHeader onGoToToday={goToToday} />
@@ -148,7 +133,6 @@ export default function SummaryContainer({
               </VStack>
             </CardBody>
           </Card>
-        </Box>
       </Box>
 
       {/* Modal */}

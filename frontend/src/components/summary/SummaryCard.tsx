@@ -54,13 +54,13 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         (() => {
           switch (stat.id) {
             case 'transactions':
-              return '#1e293b'
+              return '#1e293b' // Azul escuro
             case 'income':
-              return '#1e293b'
+              return '#1f2937' // Verde escuro
             case 'expenses':
-              return '#1e293b'
+              return '#2d1b1b' // Vermelho escuro
             case 'balance':
-              return '#1e293b'
+              return '#2d2b1b' // Amarelo escuro
             default:
               return '#1e293b'
           }
@@ -97,25 +97,24 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
                   return '#fbbf24'
               }
             })(),
-            '#374151'
+            (() => {
+              switch (stat.id) {
+                case 'transactions':
+                  return '#334155' // Azul mais escuro
+                case 'income':
+                  return '#374151' // Verde mais escuro
+                case 'expenses':
+                  return '#3f1f1f' // Vermelho mais escuro
+                case 'balance':
+                  return '#3f3d1f' // Amarelo mais escuro
+                default:
+                  return '#374151'
+              }
+            })()
           ),
           borderRadius: '4px',
           zIndex: -1,
           opacity: 0.3
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          top: '8px',
-          right: '8px',
-          width: '20px',
-          height: '20px',
-          background: useColorModeValue(
-            'rgba(0,0,0,0.1)',
-            'rgba(255,255,255,0.1)'
-          ),
-          borderRadius: '50%',
-          zIndex: 1
         },
         animation: `slideIn ${0.2 + index * 0.1}s ease-out`,
         '@keyframes slideIn': {
@@ -135,10 +134,6 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         '&::before': {
           opacity: 0.5,
           transform: 'scale(1.02)'
-        },
-        '&::after': {
-          transform: 'scale(1.2)',
-          opacity: 0.3
         }
       }}
       _active={{
@@ -169,45 +164,59 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
             p={responsiveStyles.summaryCards.icon.padding}
             borderRadius="xl"
             bg={useColorModeValue(
-              `${stat.color}20`,
-              `${stat.color}30`
+              `${stat.color}15`,
+              `${stat.color}20`
             )}
-            boxShadow="sm"
+            boxShadow="none"
+            border="1px solid"
+            borderColor={useColorModeValue(
+              `${stat.color}30`,
+              `${stat.color}40`
+            )}
           >
-            <Icon as={IconComponent} boxSize={responsiveStyles.summaryCards.icon.size} color={stat.color} />
+            <Icon 
+              as={IconComponent} 
+              boxSize={responsiveStyles.summaryCards.icon.size} 
+              color={useColorModeValue(
+                `${stat.color}`,
+                `${stat.color}`
+              )}
+              opacity={0.9}
+            />
           </Box>
           
           {/* Valores e labels */}
           <VStack spacing={responsiveStyles.summaryCards.content.spacing} align="center">
             <Text
               fontSize={responsiveStyles.summaryCards.value.fontSize}
-              fontWeight="900"
-              color={stat.color}
+              fontWeight="600"
+              color={useColorModeValue('gray.800', 'gray.100')}
               textAlign="center"
-              lineHeight="1"
-              letterSpacing="-0.02em"
+              lineHeight="1.1"
+              letterSpacing="-0.01em"
+              fontFamily="system-ui, -apple-system, sans-serif"
             >
               {stat.displayValue}
             </Text>
             <Text
               fontSize={responsiveStyles.summaryCards.label.fontSize}
-              fontWeight="700"
-              color={useColorModeValue(
-                SUMMARY_CARD_COLORS[stat.id as keyof typeof SUMMARY_CARD_COLORS].textColor,
-                SUMMARY_CARD_COLORS[stat.id as keyof typeof SUMMARY_CARD_COLORS].textColorDark
-              )}
+              fontWeight="500"
+              color={useColorModeValue('gray.600', 'gray.300')}
               textAlign="center"
-              textTransform="uppercase"
-              letterSpacing="0.5px"
+              textTransform="none"
+              letterSpacing="0.02em"
+              fontFamily="system-ui, -apple-system, sans-serif"
             >
               {stat.label}
             </Text>
             <Text
               fontSize={{ base: '2xs', sm: 'xs' }}
-              color={useColorModeValue('gray.600', 'gray.400')}
+              color={useColorModeValue('gray.500', 'gray.400')}
               textAlign="center"
-              fontWeight="500"
+              fontWeight="400"
               display={{ base: 'none', sm: 'block' }}
+              fontFamily="system-ui, -apple-system, sans-serif"
+              opacity={0.8}
             >
               {stat.helpText}
             </Text>
