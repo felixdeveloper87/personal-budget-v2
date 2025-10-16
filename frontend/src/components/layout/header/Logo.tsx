@@ -20,6 +20,7 @@ interface LogoProps {
 export default function Logo({ user }: LogoProps) {
   const glowKeyframes = useColorModeValue(logoKeyframes.glow, logoKeyframes.glowDark)
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
+  const titleColor = useColorModeValue('gray.800', 'gray.100')
 
   return (
     <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW="fit-content">
@@ -81,25 +82,44 @@ export default function Logo({ user }: LogoProps) {
         <HStack spacing={2}>
           <Text
             fontSize={{ base: 'lg', md: 'xl', lg: '2xl', xl: '3xl' }}
-            fontWeight="900"
+            fontWeight="700"
             letterSpacing="wide"
+            color={titleColor}
+            fontFamily="system-ui, -apple-system, sans-serif"
             sx={{
-              ...getTitleStyles(),
               filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1))',
             }}
           >
             Personal Budget
           </Text>
 
-          {/* Show “Free” badge only for guests */}
+          {/* Show "Free" badge only for guests */}
           {!user && (
-            <Badge {...getBadgeStyles()} textTransform="uppercase" borderRadius="md">
+            <Badge 
+              bg={useColorModeValue('#dcfce7', '#1f2937')} // Verde post-it
+              color={useColorModeValue('green.600', 'green.300')}
+              border="1px solid"
+              borderColor={useColorModeValue('green.200', 'green.500')}
+              fontSize="xs"
+              fontWeight="500"
+              px={2}
+              py={1}
+              borderRadius="xl"
+              fontFamily="system-ui, -apple-system, sans-serif"
+              textTransform="none"
+            >
               Free
             </Badge>
           )}
         </HStack>
 
-        <Text fontSize={{ base: 'xs', lg: 'sm' }} color={subtitleColor} noOfLines={1}>
+        <Text 
+          fontSize={{ base: 'xs', lg: 'sm' }} 
+          color={subtitleColor} 
+          noOfLines={1}
+          fontWeight="500"
+          fontFamily="system-ui, -apple-system, sans-serif"
+        >
           Financial Management
         </Text>
       </VStack>

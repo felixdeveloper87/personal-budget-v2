@@ -23,15 +23,13 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { runSearch } = useSearch()
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
+  // Modern post-it inspired colors
   const bg = useColorModeValue(
-    'linear-gradient(135deg, rgba(226, 232, 240, 0.95), rgba(203, 213, 225, 0.9))',
-    'linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9))'
+    'rgba(255, 255, 255, 0.9)',
+    'rgba(255, 255, 255, 0.05)'
   )
 
-  const borderColor = useColorModeValue(
-    'rgba(59, 130, 246, 0.2)',
-    'rgba(96, 165, 250, 0.3)'
-  )
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   return (
     <>
@@ -39,43 +37,21 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
       <Box 
         as="header" 
         bg={bg}
-        backdropFilter="blur(24px)"
+        backdropFilter="blur(10px)"
         position="sticky" 
         top={0} 
         zIndex={1000}
-        borderBottom="2px solid"
+        borderBottom="1px solid"
         borderColor={borderColor}
-        boxShadow={useColorModeValue(
-          '0 20px 50px rgba(59, 130, 246, 0.15), 0 8px 32px rgba(0, 0, 0, 0.1)',
-          '0 20px 50px rgba(96, 165, 250, 0.2), 0 8px 32px rgba(0, 0, 0, 0.4)'
-        )}
+        boxShadow="sm"
         w="100%"
         overflow="visible"
-        sx={{
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            ...getShimmerStyles()
-          },
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: useColorModeValue(
-              'linear-gradient(135deg, rgba(59, 130, 246, 0.03), rgba(16, 185, 129, 0.02), rgba(139, 92, 246, 0.03))',
-              'linear-gradient(135deg, rgba(96, 165, 250, 0.05), rgba(52, 211, 153, 0.03), rgba(167, 139, 250, 0.05))'
-            ),
-            pointerEvents: 'none'
-          }
-        }}
       >
+        {/* Simple top border */}
+        <Box
+          height="3px"
+          bg={useColorModeValue('blue.200', 'blue.500')}
+        />
         <Container 
           maxW="100%"
           px={{ base: 4, md: 8, lg: 12 }}
