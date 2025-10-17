@@ -65,7 +65,7 @@ export default function AddTransactionModal({
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl' }}
-      isCentered
+      isCentered={false}
       scrollBehavior="inside"
       closeOnOverlayClick={false}
       closeOnEsc={true}
@@ -76,9 +76,12 @@ export default function AddTransactionModal({
         backdropFilter="blur(10px)"
       />
       <ModalContent 
-        borderRadius={{ base: 'none', md: '3xl' }}
+        borderRadius={{ base: '2xl', sm: '2xl', md: '3xl' }}
         overflow="visible"
-        m={{ base: 0, md: 4 }}
+        m={{ base: 4, sm: 4, md: 4 }}
+        mt={{ base: 8, sm: 8, md: 4 }}
+        mb={{ base: 4, sm: 4, md: 4 }}
+        mx={{ base: 4, sm: 4, md: 4 }}
         display="flex"
         flexDirection="column"
         bg={useColorModeValue(
@@ -93,7 +96,8 @@ export default function AddTransactionModal({
         )}
         shadow="2xl"
         position="relative"
-        {...responsiveStyles.modal}
+        maxH={{ base: 'calc(100vh - 2rem)', sm: '90vh', md: '90vh' }}
+        h={{ base: 'auto', sm: 'auto', md: 'auto' }}
         sx={{
           ...safeAreaStyles.container,
           ...safariStyles.modal,
