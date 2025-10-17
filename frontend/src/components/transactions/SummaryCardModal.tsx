@@ -24,6 +24,7 @@ import { useThemeColors } from '../../hooks/useThemeColors'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../charts/modal'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
 import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
+import InsightsCard from '../ui/InsightsCard'
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
@@ -227,26 +228,37 @@ export default function SummaryCardModal({
               <Spinner size="lg" color={useColorModeValue('blue.500', 'blue.300')} thickness="3px" />
             </Center>
           ) : (
-            <AnimatePresence mode="wait">
-              <AnimatedCard>
-                {selectedCard === 'transactions' && (
-                  <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                )}
-                {selectedCard === 'income' && (
-                  <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                )}
-                {selectedCard === 'expenses' && (
-                  <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                )}
-                {selectedCard === 'balance' && (
-                  <BalanceChart
-                    transactions={transactions}
-                    selectedPeriod={selectedPeriod}
-                    currentBalance={currentBalance}
-                  />
-                )}
-              </AnimatedCard>
-            </AnimatePresence>
+            <>
+              <AnimatePresence mode="wait">
+                <AnimatedCard key="chart">
+                  {selectedCard === 'transactions' && (
+                    <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  )}
+                  {selectedCard === 'income' && (
+                    <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  )}
+                  {selectedCard === 'expenses' && (
+                    <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  )}
+                  {selectedCard === 'balance' && (
+                    <BalanceChart
+                      transactions={transactions}
+                      selectedPeriod={selectedPeriod}
+                      currentBalance={currentBalance}
+                    />
+                  )}
+                </AnimatedCard>
+              </AnimatePresence>
+              
+              {/* Insights Card - Outside AnimatePresence to avoid key conflicts */}
+              <Box mt={4}>
+                <InsightsCard
+                  transactions={transactions}
+                  selectedPeriod={selectedPeriod}
+                  cardType={selectedCard || 'transactions'}
+                />
+              </Box>
+            </>
           )}
         </ModalBody>
 
