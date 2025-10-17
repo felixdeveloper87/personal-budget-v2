@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Activity, RotateCcw } from 'lucide-react'
-import { getResponsiveStyles, sectionTitleStyles } from '../ui'
+import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface SummaryHeaderProps {
@@ -38,30 +38,40 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
       gap={responsiveStyles.addTransactionSection.header.gap}
     >
       {/* Left side */}
-      <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+      <HStack 
+        direction={sectionHeaderStyles.iconAndTitle.direction}
+        align={sectionHeaderStyles.iconAndTitle.align}
+        spacing={sectionHeaderStyles.iconAndTitle.spacing}
+        flex={sectionHeaderStyles.iconAndTitle.flex}
+        justify="flex-start"
+      >
         {/* Modern Icon Container */}
         <Box
-          p={{ base: 2, sm: 2.5, md: 3 }}
-          borderRadius={responsiveStyles.addTransactionSection.header.icon.borderRadius}
+          p={sectionHeaderStyles.icon.padding}
+          borderRadius={sectionHeaderStyles.icon.borderRadius}
           bg={iconBg}
           border="1px solid"
           borderColor={useColorModeValue('blue.200', 'blue.500')}
-          boxShadow="sm"
+          boxShadow={sectionHeaderStyles.icon.boxShadow}
           _hover={{
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            transform: sectionHeaderStyles.icon.hover.transform,
+            boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
             borderColor: useColorModeValue('blue.300', 'blue.400')
           }}
-          transition="all 0.2s ease"
+          transition={sectionHeaderStyles.icon.transition}
         >
           <Icon
             as={Activity}
-            boxSize={responsiveStyles.addTransactionSection.header.icon.size}
+            boxSize={sectionHeaderStyles.icon.size}
             color={iconColor}
           />
         </Box>
 
-        <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+        <VStack 
+          align={sectionHeaderStyles.titleContainer.align}
+          spacing={sectionHeaderStyles.titleContainer.spacing}
+          flex={sectionHeaderStyles.titleContainer.flex}
+        >
           <Heading
             size={sectionTitleStyles.size}
             color={titleColor}

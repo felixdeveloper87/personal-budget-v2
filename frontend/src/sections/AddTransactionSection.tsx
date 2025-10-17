@@ -17,7 +17,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { getResponsiveStyles, sectionTitleStyles } from '../components/ui'
+import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 
 // 🎨 Modern post-it inspired colors
 const COLORS = {
@@ -104,45 +104,46 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <Flex
-                  direction={{ base: 'column', sm: 'row', md: 'row' }}
-                  align={{ base: 'stretch', sm: 'flex-start', md: 'center' }}
-                  justify="space-between"
-                  gap={{ base: 3, sm: 4, md: 6 }}
-                  w="full"
+                  direction={sectionHeaderStyles.container.direction}
+                  align={sectionHeaderStyles.container.align}
+                  justify={sectionHeaderStyles.container.justify}
+                  gap={sectionHeaderStyles.container.gap}
+                  w={sectionHeaderStyles.container.w}
                 >
                   {/* Icon and Title Section */}
                   <HStack 
-                    align="center" 
-                    spacing={{ base: 2, sm: 3, md: 4 }}
-                    flex="1"
-                    justify={{ base: 'center', sm: 'flex-start', md: 'flex-start' }}
+                    direction={sectionHeaderStyles.iconAndTitle.direction}
+                    align={sectionHeaderStyles.iconAndTitle.align}
+                    spacing={sectionHeaderStyles.iconAndTitle.spacing}
+                    flex={sectionHeaderStyles.iconAndTitle.flex}
+                    justify={sectionHeaderStyles.iconAndTitle.justify}
                   >
                     {/* Modern Icon Container */}
                     <Box
-                      p={{ base: 2, sm: 2.5, md: 3 }}
-                      borderRadius={responsiveStyles.addTransactionSection.header.icon.borderRadius}
+                      p={sectionHeaderStyles.icon.padding}
+                      borderRadius={sectionHeaderStyles.icon.borderRadius}
                       bg={useColorModeValue(COLORS.income.bg, COLORS.income.bgDark)}
                       border="1px solid"
                       borderColor={useColorModeValue(COLORS.income.border, COLORS.income.borderDark)}
-                      boxShadow="sm"
+                      boxShadow={sectionHeaderStyles.icon.boxShadow}
                       _hover={{
-                        transform: 'translateY(-1px)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        transform: sectionHeaderStyles.icon.hover.transform,
+                        boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
                         borderColor: useColorModeValue('green.300', 'green.400')
                       }}
-                      transition="all 0.2s ease"
+                      transition={sectionHeaderStyles.icon.transition}
                     >
                       <Icon 
                         as={Sparkles} 
-                        boxSize={responsiveStyles.addTransactionSection.header.icon.size} 
+                        boxSize={sectionHeaderStyles.icon.size} 
                         color={useColorModeValue(COLORS.income.color, COLORS.income.colorDark)}
                       />
                     </Box>
 
                     <VStack 
-                      align={{ base: 'center', sm: 'start', md: 'start' }} 
-                      spacing={1} 
-                      flex="1"
+                      align={sectionHeaderStyles.titleContainer.align}
+                      spacing={sectionHeaderStyles.titleContainer.spacing}
+                      flex={sectionHeaderStyles.titleContainer.flex}
                     >
                       <Heading
                         size={sectionTitleStyles.size}

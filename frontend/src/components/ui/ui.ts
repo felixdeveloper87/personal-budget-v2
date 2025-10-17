@@ -500,7 +500,7 @@ export const getResponsiveStyles = () => ({
     card: {
       padding: { base: 3, sm: 4, md: 6, lg: 8 },
       borderRadius: { base: '2xl', md: '3xl' },
-      spacing: { base: 4, sm: 5, md: 6, lg: 8 }
+      spacing: { base: 4, sm: 4, md: 5, lg: 6 }
     },
     header: {
       direction: { base: 'column' as const, sm: 'row' as const },
@@ -610,4 +610,38 @@ export const sectionTitleStyles = {
   fontWeight: '700',
   letterSpacing: { base: '-0.01em', sm: '-0.015em', md: '-0.02em' },
   lineHeight: { base: '1.1', sm: '1.15', md: '1.2' }
+} as const
+
+// Section header layout - unified across all components
+export const sectionHeaderStyles = {
+  container: {
+    direction: { base: 'row' as const, sm: 'row' as const, md: 'row' as const },
+    align: { base: 'center' as const, sm: 'center' as const, md: 'center' as const },
+    justify: 'space-between',
+    gap: { base: 3, sm: 4, md: 6 },
+    w: 'full'
+  },
+  iconAndTitle: {
+    direction: 'row' as const,
+    align: 'center' as const,
+    spacing: { base: 0.5, sm: 2, md: 3 },
+    flex: '1',
+    justify: 'flex-start'
+  },
+  icon: {
+    padding: { base: 2, sm: 2.5, md: 3 },
+    borderRadius: { base: 'xl', md: '2xl' },
+    size: { base: 4, sm: 5, md: 6 },
+    boxShadow: 'sm',
+    hover: {
+      transform: 'translateY(-1px)',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+    },
+    transition: 'all 0.2s ease'
+  },
+  titleContainer: {
+    align: { base: 'center', sm: 'start', md: 'start' },
+    spacing: 1,
+    flex: '1'
+  }
 } as const

@@ -20,7 +20,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles, sectionTitleStyles } from '../components/ui'
+import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -117,37 +117,46 @@ export default function InstallmentPlansSection() {
 
             <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
               <Flex
-                direction={responsiveStyles.installmentPlansSection.header.direction}
-                align={{ base: 'stretch', sm: 'center' }}
-                justify="space-between"
-                gap={responsiveStyles.installmentPlansSection.header.gap}
+                direction={sectionHeaderStyles.container.direction}
+                align={sectionHeaderStyles.container.align}
+                justify={sectionHeaderStyles.container.justify}
+                gap={sectionHeaderStyles.container.gap}
+                w={sectionHeaderStyles.container.w}
               >
                 {/* Left side - Icon + Title */}
-                <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+                <HStack 
+                  direction={sectionHeaderStyles.iconAndTitle.direction}
+                  align={sectionHeaderStyles.iconAndTitle.align}
+                  spacing={sectionHeaderStyles.iconAndTitle.spacing}
+                  flex={sectionHeaderStyles.iconAndTitle.flex}
+                  justify={sectionHeaderStyles.iconAndTitle.justify}
+                >
                   <Box
-                    p={{ base: 2, sm: 2.5, md: 3 }}
-                    borderRadius={
-                      responsiveStyles.installmentPlansSection.header.icon.borderRadius
-                    }
+                    p={sectionHeaderStyles.icon.padding}
+                    borderRadius={sectionHeaderStyles.icon.borderRadius}
                     bg={iconContainerBg}
                     border="1px solid"
                     borderColor={hoverBorderColor}
-                    boxShadow="sm"
+                    boxShadow={sectionHeaderStyles.icon.boxShadow}
                     _hover={{
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      transform: sectionHeaderStyles.icon.hover.transform,
+                      boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
                       borderColor: hoverBorderColor2,
                     }}
-                    transition="all 0.2s ease"
+                    transition={sectionHeaderStyles.icon.transition}
                   >
                     <Icon
                       as={CreditCard}
-                      boxSize={responsiveStyles.installmentPlansSection.header.icon.size}
+                      boxSize={sectionHeaderStyles.icon.size}
                       color={iconColor}
                     />
                   </Box>
 
-                  <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+                  <VStack 
+                    align={sectionHeaderStyles.titleContainer.align}
+                    spacing={sectionHeaderStyles.titleContainer.spacing}
+                    flex={sectionHeaderStyles.titleContainer.flex}
+                  >
                     <Heading
                       size={sectionTitleStyles.size}
                       color={titleColor}
