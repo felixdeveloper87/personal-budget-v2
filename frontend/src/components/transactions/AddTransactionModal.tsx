@@ -78,10 +78,10 @@ export default function AddTransactionModal({
       <ModalContent 
         borderRadius={{ base: '2xl', sm: '2xl', md: '3xl' }}
         overflow="visible"
-        m={{ base: 4, sm: 4, md: 4 }}
+        m={{ base: 0, sm: 4, md: 4 }}
         mt={{ base: 8, sm: 8, md: 4 }}
-        mb={{ base: 4, sm: 4, md: 4 }}
-        mx={{ base: 4, sm: 4, md: 4 }}
+        mb={{ base: 0, sm: 4, md: 4 }}
+        mx={{ base: 0, sm: 4, md: 4 }}
         display="flex"
         flexDirection="column"
         bg={useColorModeValue(
