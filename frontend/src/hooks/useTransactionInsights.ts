@@ -15,6 +15,9 @@ interface TransactionInsights {
   transactionTrend: 'increasing' | 'decreasing' | 'stable'
   averageIncomePerDay: number
   averageExpensePerDay: number
+  savingsRate: number
+  balanceTrend: 'positive' | 'negative'
+  financialStability: 'stable' | 'volatile'
   insights: string[]
 }
 
@@ -35,6 +38,9 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
         transactionTrend: 'stable' as const,
         averageIncomePerDay: 0,
         averageExpensePerDay: 0,
+        savingsRate: 0,
+        balanceTrend: 'positive' as const,
+        financialStability: 'stable' as const,
         insights: ['No transactions found for this period']
       }
     }
@@ -169,6 +175,24 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       return totalExpense / expenseDays.size
     }
 
+    // Financial Health Analysis
+    const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpense) / totalIncome) * 100 : 0
+    const balanceTrend = netBalance >= 0 ? 'positive' : 'negative'
+    
+    // Calculate balance volatility (simplified)
+    const balanceData = transactions
+      .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
+      .reduce((acc, transaction, index) => {
+        const newBalance = acc.length > 0 ? acc[acc.length - 1].balance + (transaction.type === 'INCOME' ? transaction.amount : -transaction.amount) : transaction.amount
+        acc.push({ balance: newBalance })
+        return acc
+      }, [] as { balance: number }[])
+    
+    const minBalance = Math.min(...balanceData.map(d => d.balance))
+    const maxBalance = Math.max(...balanceData.map(d => d.balance))
+    const balanceRange = maxBalance - minBalance
+    const financialStability = balanceRange > 0 ? 'stable' : 'volatile'
+
     return {
       totalTransactions,
       averageTransaction,
@@ -183,6 +207,9 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       transactionTrend,
       averageIncomePerDay: getAverageIncomePerDay(),
       averageExpensePerDay: getAverageExpensePerDay(),
+      savingsRate,
+      balanceTrend,
+      financialStability,
       insights
     }
   }, [transactions, selectedPeriod])

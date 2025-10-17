@@ -32,8 +32,6 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const spinnerColor = useColorModeValue('blue.500', 'blue.300')
   const gridStroke = useColorModeValue('#E2E8F0', '#4A5568')
-  const analysisCardBg = useColorModeValue('gray.50', 'gray.700')
-  const analysisHoverBg = useColorModeValue('gray.100', 'gray.600')
 
   // Calcular saldo acumulado ao longo do tempo
   const balanceData = transactions
@@ -58,14 +56,10 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
       return acc
     }, [])
 
-  // Calcular estatísticas
+
+  // Calcular estatísticas básicas
   const totalIncome = transactions.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0)
   const totalExpenses = transactions.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0)
-  const savingsRate = totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0
-  
-  const minBalance = Math.min(...balanceData.map(d => d.balance))
-  const maxBalance = Math.max(...balanceData.map(d => d.balance))
-  const balanceRange = maxBalance - minBalance
 
   // Dados para gráfico de barras - receitas vs despesas por dia
   const dailyComparison = balanceData.map((item: any) => ({
@@ -168,7 +162,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
             color="blue.500"
             mb={1}
           >
-            {savingsRate.toFixed(1)}%
+            {totalIncome > 0 ? (((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1) : '0.0'}%
           </Text>
           <Text fontSize={{ base: "2xs", sm: "xs", md: "sm" }} color={colors.text.secondary}>
             Savings Rate
@@ -198,10 +192,10 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
             color="purple.500"
             mb={1}
           >
-            £{balanceRange.toFixed(2)}
+            £{Math.abs(currentBalance).toFixed(2)}
           </Text>
           <Text fontSize={{ base: "2xs", sm: "xs", md: "sm" }} color={colors.text.secondary}>
-            Balance Range
+            Current Balance
           </Text>
         </Box>
       </HStack>
@@ -350,122 +344,6 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         </ResponsiveContainer>
       </Box>
 
-      {/* Análise de saúde financeira */}
-      <Box
-        p={6}
-        borderRadius="2xl"
-        bg={cardBg}
-        border="1px solid"
-        borderColor={borderColor}
-        shadow="sm"
-        _hover={{
-          shadow: 'md',
-        }}
-        transition="all 0.2s ease"
-        sx={{
-          animation: `${animations.slideIn} 0.8s ease-out`,
-        }}
-      >
-        <Text 
-          fontSize={{ base: "md", sm: "lg" }} 
-          fontWeight="semibold" 
-          mb={{ base: 3, sm: 4 }} 
-          color={colors.text.label}
-        >
-          Financial Health Analysis
-        </Text>
-        <VStack spacing={3} align="stretch">
-          <HStack 
-            justify="space-between" 
-            p={4} 
-            bg={analysisCardBg} 
-            borderRadius="lg"
-            _hover={{
-              bg: analysisHoverBg,
-              transform: 'translateX(4px)',
-            }}
-            transition="all 0.2s ease"
-            sx={{
-              animation: `${animations.slideIn} 0.9s ease-out`,
-            }}
-          >
-            <Text fontWeight="medium" color={colors.text.primary}>Savings Rate</Text>
-            <HStack spacing={2}>
-              <Badge 
-                colorScheme={savingsRate > 20 ? "green" : savingsRate > 10 ? "yellow" : "red"}
-                fontSize="sm"
-                px={2}
-                py={1}
-              >
-                {savingsRate.toFixed(1)}%
-              </Badge>
-              <Text fontSize="sm" color={colors.text.secondary}>
-                {savingsRate > 20 ? "Excellent" : savingsRate > 10 ? "Good" : "Needs Improvement"}
-              </Text>
-            </HStack>
-          </HStack>
-
-          <HStack 
-            justify="space-between" 
-            p={4} 
-            bg={analysisCardBg} 
-            borderRadius="lg"
-            _hover={{
-              bg: analysisHoverBg,
-              transform: 'translateX(4px)',
-            }}
-            transition="all 0.2s ease"
-            sx={{
-              animation: `${animations.slideIn} 1.0s ease-out`,
-            }}
-          >
-            <Text fontWeight="medium" color={colors.text.primary}>Balance Trend</Text>
-            <HStack spacing={2}>
-              <Badge 
-                colorScheme={currentBalance >= 0 ? "green" : "red"}
-                fontSize="sm"
-                px={2}
-                py={1}
-              >
-                {currentBalance >= 0 ? "Positive" : "Negative"}
-              </Badge>
-              <Text fontSize="sm" color={colors.text.secondary}>
-                {currentBalance >= 0 ? "Growing wealth" : "Spending more than earning"}
-              </Text>
-            </HStack>
-          </HStack>
-
-          <HStack 
-            justify="space-between" 
-            p={4} 
-            bg={analysisCardBg} 
-            borderRadius="lg"
-            _hover={{
-              bg: analysisHoverBg,
-              transform: 'translateX(4px)',
-            }}
-            transition="all 0.2s ease"
-            sx={{
-              animation: `${animations.slideIn} 1.1s ease-out`,
-            }}
-          >
-            <Text fontWeight="medium" color={colors.text.primary}>Financial Stability</Text>
-            <HStack spacing={2}>
-              <Badge 
-                colorScheme={balanceRange > 0 ? "green" : "gray"}
-                fontSize="sm"
-                px={2}
-                py={1}
-              >
-                {balanceRange > 0 ? "Stable" : "Volatile"}
-              </Badge>
-              <Text fontSize="sm" color={colors.text.secondary}>
-                {balanceRange > 0 ? "Consistent growth" : "High volatility"}
-              </Text>
-            </HStack>
-          </HStack>
-        </VStack>
-      </Box>
     </VStack>
   )
 }

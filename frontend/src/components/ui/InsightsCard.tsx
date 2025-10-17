@@ -92,6 +92,13 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
           specificInsights.push(`Income: £${insights.totalIncome.toFixed(2)}`)
           specificInsights.push(`Expenses: £${insights.totalExpense.toFixed(2)}`)
         }
+        
+        // Financial Health Analysis
+        if (insights.savingsRate !== 0) {
+          specificInsights.push(`Savings Rate: ${insights.savingsRate.toFixed(1)}%`)
+        }
+        specificInsights.push(`Balance Trend: ${insights.balanceTrend === 'positive' ? 'Growing wealth' : 'Spending more than earning'}`)
+        specificInsights.push(`Financial Stability: ${insights.financialStability === 'stable' ? 'Consistent growth' : 'High volatility'}`)
         break
     }
     
