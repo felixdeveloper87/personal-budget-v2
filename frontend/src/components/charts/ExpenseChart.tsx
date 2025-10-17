@@ -3,7 +3,7 @@ import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles } from '../ui'
+import { getResponsiveStyles, sectionTitleStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface ExpenseChartProps {
@@ -143,10 +143,12 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
             </Box>
             <VStack align="start" spacing={0.5}>
               <Heading
-                size={{ base: 'md', sm: 'lg', md: 'xl' }}
+                size={sectionTitleStyles.size}
                 color={useColorModeValue('gray.800', 'gray.100')}
-                fontWeight="700"
-                fontFamily="system-ui, -apple-system, sans-serif"
+                fontWeight={sectionTitleStyles.fontWeight}
+                fontFamily={sectionTitleStyles.fontFamily}
+                letterSpacing={sectionTitleStyles.letterSpacing}
+                lineHeight={sectionTitleStyles.lineHeight}
               >
                 Expense Analysis
               </Heading>

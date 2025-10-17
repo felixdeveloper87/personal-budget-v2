@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Activity, RotateCcw } from 'lucide-react'
-import { getResponsiveStyles } from '../ui'
+import { getResponsiveStyles, sectionTitleStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface SummaryHeaderProps {
@@ -63,11 +63,13 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
 
         <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
           <Heading
-            size={responsiveStyles.addTransactionSection.header.title.size}
+            size={sectionTitleStyles.size}
             color={titleColor}
-            fontWeight="700"
+            fontWeight={sectionTitleStyles.fontWeight}
             textAlign={{ base: 'center', sm: 'left' }}
-            fontFamily="system-ui, -apple-system, sans-serif"
+            fontFamily={sectionTitleStyles.fontFamily}
+            letterSpacing={sectionTitleStyles.letterSpacing}
+            lineHeight={sectionTitleStyles.lineHeight}
           >
             Financial Overview
           </Heading>

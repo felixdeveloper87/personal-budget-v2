@@ -20,7 +20,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles } from '../components/ui'
+import { getResponsiveStyles, sectionTitleStyles } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -113,7 +113,7 @@ export default function InstallmentPlansSection() {
             transition="all 0.2s ease"
           >
             {/* Decorative top border */}
-            <Box height="3px" bg={topBorderColor} />
+            <Box height="2px" bg={topBorderColor} />
 
             <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
               <Flex
@@ -149,11 +149,13 @@ export default function InstallmentPlansSection() {
 
                   <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
                     <Heading
-                      size={responsiveStyles.installmentPlansSection.header.title.size}
+                      size={sectionTitleStyles.size}
                       color={titleColor}
-                      fontWeight="700"
+                      fontWeight={sectionTitleStyles.fontWeight}
                       textAlign={{ base: 'center', sm: 'left' }}
-                      fontFamily="system-ui, -apple-system, sans-serif"
+                      fontFamily={sectionTitleStyles.fontFamily}
+                      letterSpacing={sectionTitleStyles.letterSpacing}
+                      lineHeight={sectionTitleStyles.lineHeight}
                     >
                       Active Installment Plans
                     </Heading>

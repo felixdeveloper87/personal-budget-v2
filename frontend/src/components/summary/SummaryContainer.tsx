@@ -87,7 +87,7 @@ export default function SummaryContainer({
         >
           {/* Simple top border */}
           <Box
-            height="3px"
+            height="2px"
             bg={useColorModeValue('blue.200', 'blue.500')}
           />
 

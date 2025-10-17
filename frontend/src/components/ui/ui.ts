@@ -512,14 +512,40 @@ export const getResponsiveStyles = () => ({
       },
       title: {
         size: { base: 'sm', sm: 'md', md: 'lg' },
-        fontSize: { base: 'xs', sm: 'sm' }
+        fontSize: { base: 'xs', sm: 'sm' },
+        fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+        fontWeight: '700',
+        letterSpacing: { base: '-0.01em', sm: '-0.015em', md: '-0.02em' },
+        lineHeight: { base: '1.1', sm: '1.15', md: '1.2' }
       }
     },
     buttons: {
       direction: { base: 'row' as const, sm: 'row' as const },
       spacing: { base: 2, sm: 3, md: 4 },
       width: { base: 'full', sm: 'auto' },
-      flex: { base: '1', sm: '0' }
+      flex: { base: '1', sm: '0' },
+      container: {
+        spacing: { base: 2, sm: 3, md: 4 },
+        justify: { base: 'center', sm: 'center', md: 'flex-end' },
+        align: 'center',
+        flexWrap: { base: 'wrap' as const, sm: 'nowrap' as const, md: 'nowrap' as const },
+        width: { base: 'full', sm: 'auto', md: 'auto' }
+      },
+      button: {
+        size: { base: 'sm', sm: 'sm', md: 'md', lg: 'lg' },
+        height: { base: '32px', sm: '36px', md: '40px', lg: '48px' },
+        minWidth: { base: '70px', sm: '100px', md: '120px', lg: '140px' },
+        maxWidth: { base: '120px', sm: '140px', md: '160px', lg: 'none' },
+        width: { base: 'calc(50% - 4px)', sm: 'auto', md: 'auto', lg: 'auto' },
+        padding: { base: 2, sm: 3, md: 4, lg: 6 },
+        fontSize: { base: 'xs', sm: 'xs', md: 'sm', lg: 'md' },
+        iconSize: { base: 3, sm: 3.5, md: 4, lg: 5 },
+        rightIconSize: { base: 2, sm: 2.5, md: 3, lg: 4 },
+        textDisplay: {
+          mobile: { base: 'block', sm: 'block', md: 'none', lg: 'none' },
+          desktop: { base: 'none', sm: 'none', md: 'block', lg: 'block' }
+        }
+      }
     }
   },
   installmentPlansSection: {
@@ -545,7 +571,11 @@ export const getResponsiveStyles = () => ({
       },
       title: {
         size: { base: 'sm', sm: 'md', md: 'lg' },
-        fontSize: { base: 'xs', sm: 'sm' }
+        fontSize: { base: 'xs', sm: 'sm' },
+        fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+        fontWeight: '700',
+        letterSpacing: { base: '-0.01em', sm: '-0.015em', md: '-0.02em' },
+        lineHeight: { base: '1.1', sm: '1.15', md: '1.2' }
       }
     },
     badge: {
@@ -571,4 +601,13 @@ export const commonStyles = {
   borderRadius: '2xl',
   shadow: 'lg',
   transition: 'all 0.2s ease'
+} as const
+
+// Section title styles - unified across all components
+export const sectionTitleStyles = {
+  size: { base: 'md', sm: 'lg', md: 'xl' },
+  fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", sans-serif',
+  fontWeight: '700',
+  letterSpacing: { base: '-0.01em', sm: '-0.015em', md: '-0.02em' },
+  lineHeight: { base: '1.1', sm: '1.15', md: '1.2' }
 } as const

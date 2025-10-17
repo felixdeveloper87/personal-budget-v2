@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
-import { getResponsiveStyles } from '../ui'
+import { getResponsiveStyles, sectionTitleStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 interface CategoryAnalysisHeaderProps {
@@ -62,11 +62,13 @@ export default function CategoryAnalysisHeader({
 
         <VStack align="start" spacing={1} flex="1">
           <Heading
-            size={{ base: 'md', sm: 'lg', md: 'xl' }}
+            size={sectionTitleStyles.size}
             color={titleColor}
-            fontWeight="700"
+            fontWeight={sectionTitleStyles.fontWeight}
             textAlign="left"
-            fontFamily="system-ui, -apple-system, sans-serif"
+            fontFamily={sectionTitleStyles.fontFamily}
+            letterSpacing={sectionTitleStyles.letterSpacing}
+            lineHeight={sectionTitleStyles.lineHeight}
           >
             Category Analysis
           </Heading>

@@ -14,6 +14,7 @@ import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
 import { Transaction } from '../../types'
 import { PeriodType } from '../../types'
 import { useThemeColors } from '../../hooks/useThemeColors'
+import { getResponsiveStyles, sectionTitleStyles } from '../ui'
 import ExpenseChart from '../charts/ExpenseChart'
 import IncomeChart from '../charts/IncomeChart'
 
@@ -33,6 +34,7 @@ export default function CategoryAnalysisTabs({
   setActiveTab: externalSetActiveTab 
 }: CategoryAnalysisTabsProps) {
   const colors = useThemeColors()
+  const responsiveStyles = getResponsiveStyles()
   const [internalActiveTab, setInternalActiveTab] = useState<'expenses' | 'incomes'>('expenses')
   
   // Usar props externas se fornecidas, senão usar estado interno
@@ -65,10 +67,12 @@ export default function CategoryAnalysisTabs({
               </Box>
               <VStack align={{ base: 'center', md: 'start' }} spacing={0.5}>
                 <Heading
-                  size={{ base: 'md', md: 'lg' }}
+                  size={sectionTitleStyles.size}
                   color={useColorModeValue('gray.800', 'gray.100')}
-                  fontWeight="700"
-                  fontFamily="system-ui, -apple-system, sans-serif"
+                  fontWeight={sectionTitleStyles.fontWeight}
+                  fontFamily={sectionTitleStyles.fontFamily}
+                  letterSpacing={sectionTitleStyles.letterSpacing}
+                  lineHeight={sectionTitleStyles.lineHeight}
                 >
                   Category Analysis
                 </Heading>

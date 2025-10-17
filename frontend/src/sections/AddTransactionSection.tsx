@@ -17,7 +17,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { getResponsiveStyles } from '../components/ui'
+import { getResponsiveStyles, sectionTitleStyles } from '../components/ui'
 
 // 🎨 Modern post-it inspired colors
 const COLORS = {
@@ -96,7 +96,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         >
           {/* Simple top border */}
           <Box
-            height="3px"
+            height="2px"
             bg={useColorModeValue('green.200', 'green.500')}
           />
 
@@ -104,14 +104,19 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <Flex
-                  direction={responsiveStyles.addTransactionSection.header.direction}
-                  align={{ base: 'center', sm: 'center', md: 'center' }}
+                  direction={{ base: 'column', sm: 'row', md: 'row' }}
+                  align={{ base: 'stretch', sm: 'flex-start', md: 'center' }}
                   justify="space-between"
-                  gap={responsiveStyles.addTransactionSection.header.gap}
+                  gap={{ base: 3, sm: 4, md: 6 }}
                   w="full"
                 >
-                  {/* Title Section */}
-                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" justify={{ base: 'center', sm: 'flex-start' }}>
+                  {/* Icon and Title Section */}
+                  <HStack 
+                    align="center" 
+                    spacing={{ base: 2, sm: 3, md: 4 }}
+                    flex="1"
+                    justify={{ base: 'center', sm: 'flex-start', md: 'flex-start' }}
+                  >
                     {/* Modern Icon Container */}
                     <Box
                       p={{ base: 2, sm: 2.5, md: 3 }}
@@ -134,13 +139,19 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       />
                     </Box>
 
-                    <VStack align={{ base: 'center', sm: 'start' }} spacing={1} flex="1">
+                    <VStack 
+                      align={{ base: 'center', sm: 'start', md: 'start' }} 
+                      spacing={1} 
+                      flex="1"
+                    >
                       <Heading
-                        size={responsiveStyles.addTransactionSection.header.title.size}
+                        size={sectionTitleStyles.size}
                         color={useColorModeValue('gray.800', 'gray.100')}
-                        fontWeight="700"
-                        textAlign={{ base: 'center', sm: 'left' }}
-                        fontFamily="system-ui, -apple-system, sans-serif"
+                        fontWeight={sectionTitleStyles.fontWeight}
+                        textAlign={{ base: 'center', sm: 'left', md: 'left' }}
+                        fontFamily={sectionTitleStyles.fontFamily}
+                        letterSpacing={sectionTitleStyles.letterSpacing}
+                        lineHeight={sectionTitleStyles.lineHeight}
                       >
                         Quick Actions
                       </Heading>
@@ -148,8 +159,8 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
                         color={useColorModeValue('gray.600', 'gray.300')}
                         fontWeight="500"
-                        textAlign={{ base: 'center', sm: 'left' }}
-                        display={{ base: 'none', sm: 'block' }}
+                        textAlign={{ base: 'center', sm: 'left', md: 'left' }}
+                        display={{ base: 'none', sm: 'block', md: 'block' }}
                         fontFamily="system-ui, -apple-system, sans-serif"
                       >
                         Choose an action to quickly add a transaction
@@ -159,46 +170,50 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
 
                   {/* Buttons Section */}
                   <HStack
-                    spacing={responsiveStyles.addTransactionSection.buttons.spacing}
-                    justify={{ base: 'center', sm: 'center', md: 'flex-end' }}
-                    align="center"
-                    flexWrap="nowrap"
+                    spacing={responsiveStyles.addTransactionSection.buttons.container.spacing}
+                    justify={responsiveStyles.addTransactionSection.buttons.container.justify}
+                    align={responsiveStyles.addTransactionSection.buttons.container.align}
+                    flexWrap={responsiveStyles.addTransactionSection.buttons.container.flexWrap as any}
+                    w={responsiveStyles.addTransactionSection.buttons.container.width}
                   >
                     {[
                       {
                         label: 'Add Money',
+                        mobileLabel: 'Money',
                         icon: Plus,
                         accent: TrendingUp,
                         type: 'INCOME' as const,
                       },
                       {
                         label: 'Add Expense',
+                        mobileLabel: 'Expense',
                         icon: Minus,
                         accent: TrendingDown,
                         type: 'EXPENSE' as const,
                       },
-                    ].map(({ label, icon, accent, type: t }) => (
+                    ].map(({ label, mobileLabel, icon, accent, type: t }) => (
                       <Button
                         key={t}
                         aria-label={label}
                         onClick={() => handleOpen(t)}
-                        size={responsiveStyles.buttons.action.size}
-                        leftIcon={<Icon as={icon} boxSize={responsiveStyles.buttons.action.iconSize} />}
-                        rightIcon={<Icon as={accent} boxSize={responsiveStyles.buttons.action.rightIconSize} />}
+                        size={responsiveStyles.addTransactionSection.buttons.button.size}
+                        leftIcon={<Icon as={icon} boxSize={responsiveStyles.addTransactionSection.buttons.button.iconSize} />}
+                        rightIcon={<Icon as={accent} boxSize={responsiveStyles.addTransactionSection.buttons.button.rightIconSize} />}
                         borderRadius="xl"
-                        px={responsiveStyles.buttons.action.padding}
-                        py={responsiveStyles.buttons.action.padding}
-                        fontSize={responsiveStyles.buttons.action.fontSize}
+                        px={responsiveStyles.addTransactionSection.buttons.button.padding}
+                        py={responsiveStyles.addTransactionSection.buttons.button.padding}
+                        fontSize={responsiveStyles.addTransactionSection.buttons.button.fontSize}
                         fontWeight="500"
                         bg={useColorModeValue(getButtonColors(t).bg, getButtonColors(t).bgDark)}
                         color={useColorModeValue(getButtonColors(t).color, getButtonColors(t).colorDark)}
                         border="1px solid"
                         borderColor={useColorModeValue(getButtonColors(t).border, getButtonColors(t).borderDark)}
-                        minW={responsiveStyles.buttons.action.minWidth}
-                        h={responsiveStyles.buttons.action.height}
+                        minW={responsiveStyles.addTransactionSection.buttons.button.minWidth}
+                        maxW={responsiveStyles.addTransactionSection.buttons.button.maxWidth}
+                        h={responsiveStyles.addTransactionSection.buttons.button.height}
                         fontFamily="system-ui, -apple-system, sans-serif"
                         backdropFilter="blur(10px)"
-                        w={{ base: 'full', sm: 'auto', md: 'auto' }}
+                        w={responsiveStyles.addTransactionSection.buttons.button.width}
                         _hover={{
                           transform: 'translateY(-2px)',
                           boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
@@ -216,7 +231,12 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         }}
                         transition="all 0.2s ease"
                       >
-                        {label}
+                        <Text display={responsiveStyles.addTransactionSection.buttons.button.textDisplay.mobile}>
+                          {mobileLabel}
+                        </Text>
+                        <Text display={responsiveStyles.addTransactionSection.buttons.button.textDisplay.desktop}>
+                          {label}
+                        </Text>
                       </Button>
                     ))}
                   </HStack>
