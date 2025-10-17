@@ -55,9 +55,12 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
             const date = new Date(insights.highestTransaction.dateTime).toLocaleDateString('en-US')
             specificInsights.push(`Highest income: $${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
           }
-          const avgIncome = insights.totalIncome / insights.totalTransactions
-          if (avgIncome > 0) {
-            specificInsights.push(`Average income: $${avgIncome.toFixed(2)}`)
+          // Only show average if it's not a single day and there are multiple income days
+          if (insights.averageIncomePerDay > 0 && selectedPeriod !== 'day') {
+            const periodLabel = selectedPeriod === 'week' ? 'per day' : 
+                              selectedPeriod === 'month' ? 'per day' : 
+                              selectedPeriod === 'year' ? 'per day' : 'average'
+            specificInsights.push(`Average income ${periodLabel}: $${insights.averageIncomePerDay.toFixed(2)}`)
           }
         }
         break
@@ -69,9 +72,12 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
             const date = new Date(insights.highestTransaction.dateTime).toLocaleDateString('en-US')
             specificInsights.push(`Highest expense: $${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
           }
-          const avgExpense = insights.totalExpense / insights.totalTransactions
-          if (avgExpense > 0) {
-            specificInsights.push(`Average expense: $${avgExpense.toFixed(2)}`)
+          // Only show average if it's not a single day and there are multiple expense days
+          if (insights.averageExpensePerDay > 0 && selectedPeriod !== 'day') {
+            const periodLabel = selectedPeriod === 'week' ? 'per day' : 
+                              selectedPeriod === 'month' ? 'per day' : 
+                              selectedPeriod === 'year' ? 'per day' : 'average'
+            specificInsights.push(`Average expense ${periodLabel}: $${insights.averageExpensePerDay.toFixed(2)}`)
           }
         }
         break

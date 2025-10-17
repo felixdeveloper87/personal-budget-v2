@@ -69,6 +69,8 @@ export default function InstallmentPlansModal({
     '#60a5fa', // Azul claro
     colors.accent // Usar cor do tema para modo dark
   )
+  const headerTextColor = useColorModeValue('gray.800', 'white')
+  const plansHeaderTextColor = useColorModeValue('gray.800', 'white')
 
   return (
     <Modal
@@ -129,7 +131,7 @@ export default function InstallmentPlansModal({
           borderColor={colors.border}
           py={8}
           bg={headerBg}
-          color={useColorModeValue('gray.800', 'white')}
+          color={headerTextColor}
           fontWeight="800"
           letterSpacing="wide"
           position="relative"
@@ -263,7 +265,7 @@ export default function InstallmentPlansModal({
                     <Text 
                       fontSize={{ base: 'lg', md: 'xl' }} 
                       fontWeight="bold" 
-                      color={useColorModeValue('gray.800', 'white')}
+                      color={plansHeaderTextColor}
                     >
                       Installment Plans
                     </Text>

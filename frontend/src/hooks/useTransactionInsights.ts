@@ -13,6 +13,8 @@ interface TransactionInsights {
   netBalance: number
   mostUsedCategory: string | null
   transactionTrend: 'increasing' | 'decreasing' | 'stable'
+  averageIncomePerDay: number
+  averageExpensePerDay: number
   insights: string[]
 }
 
@@ -31,6 +33,8 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
         netBalance: 0,
         mostUsedCategory: null,
         transactionTrend: 'stable' as const,
+        averageIncomePerDay: 0,
+        averageExpensePerDay: 0,
         insights: ['No transactions found for this period']
       }
     }
@@ -137,6 +141,34 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       insights.push(`⚠️ Negative balance: $${Math.abs(netBalance).toFixed(2)}`)
     }
 
+    // Calculate average income per day with actual income
+    const getAverageIncomePerDay = () => {
+      if (incomeTransactions.length === 0) return 0
+      
+      // Get unique days that had income transactions
+      const incomeDays = new Set(
+        incomeTransactions.map(t => 
+          new Date(t.dateTime).toLocaleDateString('en-US')
+        )
+      )
+      
+      return totalIncome / incomeDays.size
+    }
+
+    // Calculate average expense per day with actual expenses
+    const getAverageExpensePerDay = () => {
+      if (expenseTransactions.length === 0) return 0
+      
+      // Get unique days that had expense transactions
+      const expenseDays = new Set(
+        expenseTransactions.map(t => 
+          new Date(t.dateTime).toLocaleDateString('en-US')
+        )
+      )
+      
+      return totalExpense / expenseDays.size
+    }
+
     return {
       totalTransactions,
       averageTransaction,
@@ -149,6 +181,8 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       netBalance,
       mostUsedCategory,
       transactionTrend,
+      averageIncomePerDay: getAverageIncomePerDay(),
+      averageExpensePerDay: getAverageExpensePerDay(),
       insights
     }
   }, [transactions, selectedPeriod])
