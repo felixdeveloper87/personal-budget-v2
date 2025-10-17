@@ -50,34 +50,34 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
         
       case 'income':
         if (insights.totalIncome > 0) {
-          specificInsights.push(`Total income: $${insights.totalIncome.toFixed(2)}`)
+          specificInsights.push(`Total income: £${insights.totalIncome.toFixed(2)}`)
           if (insights.highestTransaction && insights.highestTransaction.type === 'INCOME') {
             const date = new Date(insights.highestTransaction.dateTime).toLocaleDateString('en-US')
-            specificInsights.push(`Highest income: $${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
+            specificInsights.push(`Highest income: £${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
           }
           // Only show average if it's not a single day and there are multiple income days
           if (insights.averageIncomePerDay > 0 && selectedPeriod !== 'day') {
             const periodLabel = selectedPeriod === 'week' ? 'per day' : 
                               selectedPeriod === 'month' ? 'per day' : 
                               selectedPeriod === 'year' ? 'per day' : 'average'
-            specificInsights.push(`Average income ${periodLabel}: $${insights.averageIncomePerDay.toFixed(2)}`)
+            specificInsights.push(`Average income ${periodLabel}: £${insights.averageIncomePerDay.toFixed(2)}`)
           }
         }
         break
         
       case 'expenses':
         if (insights.totalExpense > 0) {
-          specificInsights.push(`Total expenses: $${insights.totalExpense.toFixed(2)}`)
+          specificInsights.push(`Total expenses: £${insights.totalExpense.toFixed(2)}`)
           if (insights.highestTransaction && insights.highestTransaction.type === 'EXPENSE') {
             const date = new Date(insights.highestTransaction.dateTime).toLocaleDateString('en-US')
-            specificInsights.push(`Highest expense: $${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
+            specificInsights.push(`Highest expense: £${insights.highestTransaction.amount.toFixed(2)} on ${date}`)
           }
           // Only show average if it's not a single day and there are multiple expense days
           if (insights.averageExpensePerDay > 0 && selectedPeriod !== 'day') {
             const periodLabel = selectedPeriod === 'week' ? 'per day' : 
                               selectedPeriod === 'month' ? 'per day' : 
                               selectedPeriod === 'year' ? 'per day' : 'average'
-            specificInsights.push(`Average expense ${periodLabel}: $${insights.averageExpensePerDay.toFixed(2)}`)
+            specificInsights.push(`Average expense ${periodLabel}: £${insights.averageExpensePerDay.toFixed(2)}`)
           }
         }
         break
@@ -85,12 +85,12 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
       case 'balance':
         if (insights.netBalance !== 0) {
           if (insights.netBalance > 0) {
-            specificInsights.push(`Positive balance: $${insights.netBalance.toFixed(2)}`)
+            specificInsights.push(`Positive balance: £${insights.netBalance.toFixed(2)}`)
           } else {
-            specificInsights.push(`Negative balance: $${Math.abs(insights.netBalance).toFixed(2)}`)
+            specificInsights.push(`Negative balance: £${Math.abs(insights.netBalance).toFixed(2)}`)
           }
-          specificInsights.push(`Income: $${insights.totalIncome.toFixed(2)}`)
-          specificInsights.push(`Expenses: $${insights.totalExpense.toFixed(2)}`)
+          specificInsights.push(`Income: £${insights.totalIncome.toFixed(2)}`)
+          specificInsights.push(`Expenses: £${insights.totalExpense.toFixed(2)}`)
         }
         break
     }

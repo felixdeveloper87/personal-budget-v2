@@ -106,7 +106,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
     }
 
     if (averageTransaction > 0) {
-      insights.push(`Average transaction value: $${averageTransaction.toFixed(2)}`)
+      insights.push(`Average transaction value: £${averageTransaction.toFixed(2)}`)
     }
 
     if (mostActiveDay) {
@@ -120,7 +120,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
     if (highestTransaction) {
       const type = highestTransaction.type === 'INCOME' ? 'received' : 'spent'
       const date = new Date(highestTransaction.dateTime).toLocaleDateString('en-US')
-      insights.push(`On ${date} you ${type} $${highestTransaction.amount.toFixed(2)}`)
+      insights.push(`On ${date} you ${type} £${highestTransaction.amount.toFixed(2)}`)
     }
 
     if (mostUsedCategory) {
@@ -136,9 +136,9 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
 
     // Balance insights
     if (netBalance > 0) {
-      insights.push(`💰 Positive balance: $${netBalance.toFixed(2)}`)
+      insights.push(`💰 Positive balance: £${netBalance.toFixed(2)}`)
     } else if (netBalance < 0) {
-      insights.push(`⚠️ Negative balance: $${Math.abs(netBalance).toFixed(2)}`)
+      insights.push(`⚠️ Negative balance: £${Math.abs(netBalance).toFixed(2)}`)
     }
 
     // Calculate average income per day with actual income
