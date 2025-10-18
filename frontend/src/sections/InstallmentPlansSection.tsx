@@ -114,7 +114,7 @@ export default function InstallmentPlansSection() {
             transition="all 0.2s ease"
           >
             {/* Decorative top border */}
-            <Box height="2px" bg={topBorderColor} />
+            <Box height="1px" bg={topBorderColor} />
 
             <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
               <Flex

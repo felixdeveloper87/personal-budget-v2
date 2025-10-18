@@ -112,7 +112,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
       >
         {/* Simple top border */}
         <Box
-          height="3px"
+          height="1px"
           bg={useColorModeValue('red.200', 'red.500')}
           mb={4}
         />

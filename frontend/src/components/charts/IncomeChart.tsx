@@ -112,7 +112,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       >
         {/* Simple top border */}
         <Box
-          height="3px"
+          height="1px"
           bg={useColorModeValue('green.200', 'green.500')}
           mb={4}
         />

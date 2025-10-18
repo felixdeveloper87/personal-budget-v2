@@ -92,7 +92,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         >
           {/* Simple top border */}
           <Box
-            height="2px"
+            height="1px"
             bg={useColorModeValue('green.300', 'green.500')}
           />
 
