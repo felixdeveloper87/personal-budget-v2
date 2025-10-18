@@ -25,6 +25,7 @@ import { Transaction } from '../../../types'
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 import { getResponsiveStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { GRADIENTS } from '../../../theme'
 import { X } from 'lucide-react'
   
   
@@ -48,8 +49,8 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   
   // Modern post-it inspired colors
   const closeButtonBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
+    GRADIENTS.cardLight,
+    GRADIENTS.cardDark
   )
   const closeButtonBorderColor = useColorModeValue('gray.200', 'gray.600')
   const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
@@ -60,8 +61,8 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   const tableRowBg = useColorModeValue('gray.25', 'gray.750')
   const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
   const modalBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
+    GRADIENTS.cardLight,
+    GRADIENTS.cardDark
   )
   const topBorderColor = useColorModeValue(
     type === 'INCOME' ? 'green.200' : 'red.200',

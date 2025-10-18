@@ -5,6 +5,7 @@ import { useMemo, useCallback } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
 import { getResponsiveStyles, sectionTitleStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
+import { GRADIENTS } from '../../theme'
 
 interface ExpenseChartProps {
   transactions: Transaction[]
@@ -48,10 +49,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   if (sortedCategories.length === 0) {
     return (
       <Box
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.9)',
-          'rgba(255, 255, 255, 0.05)'
-        )}
+        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
         backdropFilter="blur(10px)"
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -97,10 +95,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <>
       <Box
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.9)',
-          'rgba(255, 255, 255, 0.05)'
-        )}
+        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
         backdropFilter="blur(10px)"
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -185,7 +180,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 py={1}
                 fontSize="sm"
                 fontWeight="500"
-                bg={useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.05)')}
+                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
                 color={useColorModeValue('gray.600', 'gray.300')}
                 border="1px solid"
                 borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -235,7 +230,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 <Box 
                   key={category}
                   p={4}
-                  bg={useColorModeValue('rgba(255,255,255,0.5)', 'rgba(255,255,255,0.05)')}
+                  bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
                   borderRadius="xl"
                   border="1px solid"
                   borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -288,7 +283,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               <Box 
                 textAlign="center" 
                 py={4}
-                bg={useColorModeValue('rgba(255,255,255,0.3)', 'rgba(255,255,255,0.05)')}
+                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
                 borderRadius="xl"
                 border="1px dashed"
                 borderColor={useColorModeValue('gray.300', 'gray.600')}

@@ -5,6 +5,7 @@ import { useMemo, useCallback } from 'react'
 import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
 import { getResponsiveStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
+import { GRADIENTS } from '../../theme'
 
 interface IncomeChartProps {
   transactions: Transaction[]
@@ -48,10 +49,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   if (sortedCategories.length === 0) {
     return (
       <Box
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.9)',
-          'rgba(255, 255, 255, 0.05)'
-        )}
+        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
         backdropFilter="blur(10px)"
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -97,10 +95,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   return (
     <>
       <Box
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.9)',
-          'rgba(255, 255, 255, 0.05)'
-        )}
+        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
         backdropFilter="blur(10px)"
         border="1px solid"
         borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -229,7 +224,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 <Box 
                   key={category}
                   p={responsiveStyles.charts.progress.item.padding}
-                  bg={useColorModeValue('rgba(255,255,255,0.5)', 'rgba(255,255,255,0.05)')}
+                  bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
@@ -284,7 +279,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               <Box 
                 textAlign="center" 
                 py={responsiveStyles.charts.progress.container.padding}
-                bg={useColorModeValue('rgba(255,255,255,0.3)', 'rgba(255,255,255,0.05)')}
+                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
                 borderRadius="xl"
                 border="1px dashed"
                 borderColor={colors.border}
