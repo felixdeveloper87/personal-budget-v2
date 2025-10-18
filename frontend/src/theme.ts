@@ -6,7 +6,7 @@ const GRADIENTS = {
   dark: 'linear-gradient(135deg, #0F0F10 0%, #18181B 100%)',
 
   cardLight: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)',
-  cardDark: 'linear-gradient(135deg, #1A1A1A 0%,rgb(8, 7, 7) 100%)',
+  cardDark: 'linear-gradient(135deg, #111111 0%, #000000 100%)',
 
   secondaryLight: 'linear-gradient(135deg, #E5E7EB 0%, #D1D5DB 100%)',
   secondaryDark: 'linear-gradient(135deg, #1E1E20 0%, #2A2A2D 100%)',
