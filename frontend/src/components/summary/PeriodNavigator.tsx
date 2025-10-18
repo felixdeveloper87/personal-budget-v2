@@ -71,6 +71,7 @@ export default function PeriodNavigator({
               <Button
                 key={type}
                 size="sm"
+                h="32px"
                 borderRadius="xl"
                 onClick={() => onPeriodChange(type)}
                 bg={selected ? selectedBg : unselectedBg}
@@ -108,6 +109,7 @@ export default function PeriodNavigator({
               <Button
                 key={type}
                 flex={1}
+                h="32px"
                 borderRadius="xl"
                 leftIcon={<IconComp size={16} />}
                 onClick={() => onPeriodChange(type)}
@@ -157,12 +159,16 @@ export default function PeriodNavigator({
           flex="1"
           textAlign="center"
           px={4}
-          py={3}
+          py={2}
           borderRadius="xl"
           bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           border="1px solid"
           borderColor={useColorModeValue('gray.200', 'blue.500')}
           backdropFilter="blur(10px)"
+          h="32px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
           _hover={{
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
