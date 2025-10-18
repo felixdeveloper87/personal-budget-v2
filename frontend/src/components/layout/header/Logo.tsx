@@ -54,8 +54,14 @@ export default function Logo({ user }: LogoProps) {
           fontSize={{ base: '2xl', md: '4xl', lg: '5xl', xl: '6xl' }}
           fontWeight="black"
           color="white"
-          textShadow="0 6px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.5)"
-          filter="drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))"
+          textShadow={useColorModeValue(
+            "0 6px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.5)",
+            "0 6px 12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2)"
+          )}
+          filter={useColorModeValue(
+            "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))",
+            "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) brightness(0.8)"
+          )}
           display="flex"
           alignItems="center"
           justifyContent="center"
