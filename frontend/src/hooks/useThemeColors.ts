@@ -12,6 +12,7 @@ export const useThemeColors = () => {
       'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #a7f3d0 100%)',
       '#1a1a1a'
     ),
+    inputBg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark),
 
     // 🔲 Borders
     border: useColorModeValue('#cbd5e1', 'gray.800'),
