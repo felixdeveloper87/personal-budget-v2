@@ -10,6 +10,8 @@
 
 **A modern, full-stack personal finance management application with advanced analytics and intuitive user experience.**
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Available-green?style=for-the-badge&logo=vercel&logoColor=white)](https://personalbudget.co.uk)
+
 </div>
 
 ---
@@ -236,8 +238,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Leandro** - *Full Stack Developer*
 
 - GitHub: [@yourusername](https://github.com/yourusername)
+- Website: [personalbudget.co.uk](https://personalbudget.co.uk)
 - LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Portfolio: [Your Portfolio](https://yourportfolio.com)
 
 ---
 
