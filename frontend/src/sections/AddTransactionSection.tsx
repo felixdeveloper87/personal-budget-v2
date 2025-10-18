@@ -13,7 +13,6 @@ import {
   Flex,
   Heading,
 } from '@chakra-ui/react'
-import { useThemeColors } from '../hooks/useThemeColors'
 import { GRADIENTS } from '../theme'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
@@ -25,18 +24,18 @@ const COLORS = {
   income: {
     bg: '#dcfce7', // Verde post-it
     bgDark: '#1f2937', // Verde escuro
-    color: 'green.600',
-    colorDark: 'green.300',
-    border: 'green.200',
-    borderDark: 'green.500'
+    color: 'green.900',
+    colorDark: 'green.400',
+    border: 'green.500',
+    borderDark: 'green.300'
   },
   expense: {
     bg: '#fecaca', // Rosa post-it
     bgDark: '#2d1b1b', // Rosa escuro
     color: 'red.600',
-    colorDark: 'red.300',
-    border: 'red.200',
-    borderDark: 'red.500'
+    colorDark: 'red.400',
+    border: 'red.500',
+    borderDark: 'red.300'
   }
 }
 
@@ -94,7 +93,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           {/* Simple top border */}
           <Box
             height="2px"
-            bg={useColorModeValue('green.200', 'green.500')}
+            bg={useColorModeValue('green.300', 'green.500')}
           />
 
             <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
@@ -144,7 +143,6 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     >
                       <Heading
                         size={sectionTitleStyles.size}
-                        color={useColorModeValue('gray.800', 'gray.100')}
                         fontWeight={sectionTitleStyles.fontWeight}
                         textAlign={{ base: 'center', sm: 'left', md: 'left' }}
                         fontFamily={sectionTitleStyles.fontFamily}
