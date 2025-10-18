@@ -217,7 +217,54 @@ export default function SearchFilters({
             <Text>Date Range</Text>
           </HStack>
         </Text>
-        <HStack spacing={3}>
+        
+        {/* Quick date buttons */}
+        <VStack spacing={3} align="stretch">
+          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} fontWeight="500">
+            Quick select:
+          </Text>
+          <HStack spacing={2} wrap="wrap">
+            {(() => {
+              const now = new Date()
+              const months = []
+              for (let i = 0; i < 3; i++) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
+                const monthName = date.toLocaleDateString('en-US', { month: 'long' })
+                const year = date.getFullYear()
+                const startDate = date.toISOString().split('T')[0]
+                const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
+                
+                months.push(
+                  <Button
+                    key={i}
+                    size="sm"
+                    variant="outline"
+                    borderRadius="full"
+                    fontSize="xs"
+                    fontWeight="500"
+                    bg={useColorModeValue('gray.50', 'gray.800')}
+                    borderColor={useColorModeValue('gray.300', 'gray.600')}
+                    color={useColorModeValue('gray.700', 'gray.200')}
+                    _hover={{
+                      bg: useColorModeValue('blue.50', 'blue.900'),
+                      borderColor: 'blue.300',
+                      color: 'blue.600'
+                    }}
+                    onClick={() => {
+                      onUpdateFilter('startDate', startDate)
+                      onUpdateFilter('endDate', endDate)
+                    }}
+                  >
+                    {monthName} {year}
+                  </Button>
+                )
+              }
+              return months
+            })()}
+          </HStack>
+        </VStack>
+        
+        <HStack spacing={3} mt={4}>
           <Box flex={1}>
             <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
               From
