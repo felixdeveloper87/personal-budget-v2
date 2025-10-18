@@ -532,8 +532,8 @@ export const getResponsiveStyles = () => ({
       button: {
         size: { base: 'sm', sm: 'sm', md: 'md', lg: 'lg' },
         height: { base: '32px', sm: '36px', md: '40px', lg: '48px' },
-        minWidth: { base: '70px', sm: '100px', md: '120px', lg: '140px' },
-        maxWidth: { base: '120px', sm: '140px', md: '160px', lg: 'none' },
+        minWidth: { base: '90px', sm: '100px', md: '120px', lg: '140px' },
+        maxWidth: { base: '140px', sm: '140px', md: '160px', lg: 'none' },
         width: { base: 'calc(50% - 4px)', sm: 'auto', md: 'auto', lg: 'auto' },
         padding: { base: 2, sm: 3, md: 4, lg: 6 },
         fontSize: { base: 'xs', sm: 'xs', md: 'sm', lg: 'md' },

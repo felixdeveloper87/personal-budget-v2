@@ -148,6 +148,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         fontFamily={sectionTitleStyles.fontFamily}
                         letterSpacing={sectionTitleStyles.letterSpacing}
                         lineHeight={sectionTitleStyles.lineHeight}
+                        display={{ base: 'none', sm: 'block', md: 'block' }}
                       >
                         Quick Actions
                       </Heading>
@@ -175,14 +176,14 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     {[
                       {
                         label: 'Add Money',
-                        mobileLabel: 'Money',
+                        mobileLabel: 'Add Money',
                         icon: Plus,
                         accent: TrendingUp,
                         type: 'INCOME' as const,
                       },
                       {
                         label: 'Add Expense',
-                        mobileLabel: 'Expense',
+                        mobileLabel: 'Add Expense',
                         icon: Minus,
                         accent: TrendingDown,
                         type: 'EXPENSE' as const,

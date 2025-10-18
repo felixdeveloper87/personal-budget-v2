@@ -167,7 +167,7 @@ export default function InstallmentPlansSection() {
                       letterSpacing={sectionTitleStyles.letterSpacing}
                       lineHeight={sectionTitleStyles.lineHeight}
                     >
-                      Active Installment Plans
+                      Active Installments
                     </Heading>
                     <Text
                       fontSize={
