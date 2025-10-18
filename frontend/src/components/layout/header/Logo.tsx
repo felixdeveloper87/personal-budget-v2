@@ -21,6 +21,7 @@ export default function Logo({ user }: LogoProps) {
   const glowKeyframes = useColorModeValue(logoKeyframes.glow, logoKeyframes.glowDark)
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
   const titleColor = useColorModeValue('gray.800', 'gray.100')
+  const isDark = useColorModeValue(false, true)
 
   return (
     <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW="fit-content">
@@ -58,10 +59,6 @@ export default function Logo({ user }: LogoProps) {
             "0 6px 12px rgba(0, 0, 0, 0.4), 0 0 30px rgba(255, 255, 255, 0.5)",
             "0 6px 12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(255, 255, 255, 0.2)"
           )}
-          filter={useColorModeValue(
-            "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))",
-            "drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5)) brightness(0.8)"
-          )}
           display="flex"
           alignItems="center"
           justifyContent="center"
@@ -69,7 +66,7 @@ export default function Logo({ user }: LogoProps) {
           minH="100%"
           minW="100%"
           sx={{
-            ...getSymbolTextStyles(),
+            ...getSymbolTextStyles(isDark),
             animation: 'shimmer 3s ease-in-out infinite',
             backgroundSize: '200% 200%',
             '@keyframes shimmer': {
