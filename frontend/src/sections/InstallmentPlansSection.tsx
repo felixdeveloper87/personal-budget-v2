@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import { CreditCard, Sparkles } from 'lucide-react'
 import { useThemeColors } from '../hooks/useThemeColors'
+import { GRADIENTS } from '../theme'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
@@ -38,13 +39,13 @@ export default function InstallmentPlansSection() {
   const [loading, setLoading] = useState(true)
 
   // === Color mode values (declared at top to avoid hook order issues) ===
-  const cardBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.05)')
+  const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
   const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
   const iconContainerBg = useColorModeValue('#fecaca', '#2d1b1b')
   const iconColor = useColorModeValue('red.600', 'red.300')
   const titleColor = useColorModeValue('gray.800', 'gray.100')
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-  const badgeBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.05)')
+  const badgeBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
   const badgeColor = useColorModeValue('red.600', 'red.300')
   const badgeBorderColor = useColorModeValue('red.200', 'red.500')
   const hoverBorderColor = useColorModeValue('red.200', 'red.500')

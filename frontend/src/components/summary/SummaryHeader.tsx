@@ -10,6 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Activity, RotateCcw } from 'lucide-react'
+import { GRADIENTS } from '../../theme'
 import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
@@ -106,10 +107,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
         px={4}
         py={2}
         fontWeight="500"
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.9)',
-          'rgba(255, 255, 255, 0.05)'
-        )}
+        bg="transparent"
         color={useColorModeValue('blue.600', 'blue.300')}
         border="1px solid"
         borderColor={useColorModeValue('blue.200', 'blue.500')}

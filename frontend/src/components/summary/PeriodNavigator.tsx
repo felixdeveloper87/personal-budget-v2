@@ -9,6 +9,7 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { GRADIENTS } from '../../theme'
 import {
   Activity,
   Calendar,
@@ -44,8 +45,8 @@ export default function PeriodNavigator({
     '#1e293b'  // Azul escuro
   )
   const unselectedBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.8)',
-    'rgba(30, 41, 59, 0.6)' // Azul escuro mais suave para botões não selecionados
+    GRADIENTS.cardLight,
+    GRADIENTS.cardDark
   )
   const unselectedColor = useColorModeValue('gray.600', 'gray.300')
   const selectedColor = useColorModeValue('blue.600', 'blue.300')
@@ -158,10 +159,7 @@ export default function PeriodNavigator({
           px={4}
           py={3}
           borderRadius="xl"
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.9)',
-            'rgba(30, 41, 59, 0.8)' // Azul escuro mais suave
-          )}
+          bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           border="1px solid"
           borderColor={useColorModeValue('gray.200', 'blue.500')}
           backdropFilter="blur(10px)"
@@ -169,10 +167,7 @@ export default function PeriodNavigator({
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
             borderColor: useColorModeValue('blue.200', 'blue.400'),
-            bg: useColorModeValue(
-              'rgba(255, 255, 255, 0.95)',
-              'rgba(30, 41, 59, 0.9)'
-            )
+            bg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
           }}
           transition="all 0.2s ease"
         >

@@ -5,6 +5,7 @@ import {
   useColorModeValue,
   useDisclosure
 } from '@chakra-ui/react'
+import { GRADIENTS } from '../../../theme'
 import { useAuth } from '../../../contexts/AuthContext'
 import { getShimmerStyles } from '../../ui'
 import { useSearch } from '../../../contexts/SearchContext'
@@ -24,10 +25,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
   // Modern post-it inspired colors
-  const bg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
-  )
+  const bg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
 
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 

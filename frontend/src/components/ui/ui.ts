@@ -2,6 +2,7 @@
  * UI utilities and shared styles
  */
 import { useColorModeValue } from '@chakra-ui/react'
+import { GRADIENTS } from '../../theme'
 
 // Animation utilities
 export const animations = {
@@ -66,10 +67,7 @@ export const getGradients = () => ({
     'linear-gradient(135deg, #3b82f6, #1d4ed8)',
     'linear-gradient(135deg, #60a5fa, #3b82f6)'
   ),
-  background: useColorModeValue(
-    'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-    'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
-  ),
+  background: useColorModeValue(GRADIENTS.light, GRADIENTS.dark),
   decorative: useColorModeValue(
     'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%)',
     'linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(139, 92, 246, 0.2) 50%, rgba(16, 185, 129, 0.2) 100%)'

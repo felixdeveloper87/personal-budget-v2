@@ -67,7 +67,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
               size={{ base: 'md', sm: 'lg' }}
               bg={useColorModeValue(
                 'linear-gradient(135deg, #0f172a, #1e293b)',
-                'linear-gradient(135deg, #f1f5f9, #cbd5e1)'
+                'linear-gradient(135deg, #f0fdf4, #dcfce7)'
               )}
               bgClip="text"
               fontWeight="800"

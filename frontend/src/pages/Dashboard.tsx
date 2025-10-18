@@ -1,4 +1,5 @@
 import { Box, Text, VStack, Spinner, useColorModeValue } from '@chakra-ui/react'
+import { GRADIENTS } from '../theme'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -17,11 +18,8 @@ export default function Dashboard() {
 
   const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
 
-  // Usar o mesmo gradiente do header
-  const bg = useColorModeValue(
-    'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
-    'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
-  )
+  // Usar o mesmo gradiente do tema
+  const bg = useColorModeValue(GRADIENTS.light, GRADIENTS.dark)
 
   return (
     <Box 

@@ -11,6 +11,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
+import { GRADIENTS } from '../../theme'
 import { Transaction } from '../../types'
 import { PeriodType } from '../../types'
 import { useThemeColors } from '../../hooks/useThemeColors'
@@ -100,8 +101,8 @@ export default function CategoryAnalysisTabs({
                 py={{ base: 1, md: 2 }}
                 h="auto"
                 bg={useColorModeValue(
-                  activeTab === 'expenses' ? '#fecaca' : 'rgba(255, 255, 255, 0.9)',
-                  activeTab === 'expenses' ? '#2d1b1b' : 'rgba(255, 255, 255, 0.05)'
+                  activeTab === 'expenses' ? '#fecaca' : GRADIENTS.cardLight,
+                  activeTab === 'expenses' ? '#2d1b1b' : GRADIENTS.cardDark
                 )}
                 color={useColorModeValue(
                   activeTab === 'expenses' ? 'red.600' : 'gray.600',
@@ -138,8 +139,8 @@ export default function CategoryAnalysisTabs({
                 py={{ base: 1, md: 2 }}
                 h="auto"
                 bg={useColorModeValue(
-                  activeTab === 'incomes' ? '#dcfce7' : 'rgba(255, 255, 255, 0.9)',
-                  activeTab === 'incomes' ? '#1f2937' : 'rgba(255, 255, 255, 0.05)'
+                  activeTab === 'incomes' ? '#dcfce7' : GRADIENTS.cardLight,
+                  activeTab === 'incomes' ? '#1f2937' : GRADIENTS.cardDark
                 )}
                 color={useColorModeValue(
                   activeTab === 'incomes' ? 'green.600' : 'gray.600',

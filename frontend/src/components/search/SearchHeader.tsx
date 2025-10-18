@@ -13,7 +13,7 @@ export default function SearchHeader({ onClose }: SearchHeaderProps) {
       borderColor={useColorModeValue('gray.200', 'gray.700')}
       position="relative"
       bg={useColorModeValue(
-        'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+        'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #ffffff 100%)',
         'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
       )}
       sx={{

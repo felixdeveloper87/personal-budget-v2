@@ -14,6 +14,7 @@ import {
   Heading,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../hooks/useThemeColors'
+import { GRADIENTS } from '../theme'
 import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
@@ -47,7 +48,6 @@ interface AddTransactionSectionProps {
 export default function AddTransactionSection({ transactions, onRefresh }: AddTransactionSectionProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
-  const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
 
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
@@ -77,10 +77,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         }}
       >
         <Card
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.9)',
-            'rgba(255, 255, 255, 0.05)'
-          )}
+          bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           backdropFilter="blur(10px)"
           border="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.600')}

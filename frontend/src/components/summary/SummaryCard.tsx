@@ -8,6 +8,7 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { GRADIENTS } from '../../theme'
 import { useMemo } from 'react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
 import { getResponsiveStyles } from '../ui'
@@ -155,7 +156,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         height="12px"
         background={useColorModeValue(
           'rgba(0,0,0,0.05)',
-          'rgba(255,255,255,0.05)'
+          'rgba(255,255,255,0.1)'
         )}
         borderRadius="50%"
         zIndex={1}

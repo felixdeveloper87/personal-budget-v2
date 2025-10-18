@@ -6,6 +6,7 @@ import {
   Divider,
 } from '@chakra-ui/react'
 import { useColorModeValue } from '@chakra-ui/react'
+import { GRADIENTS } from '../../theme'
 import { getResponsiveStyles } from '../ui'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
@@ -49,10 +50,7 @@ export default function SummaryContainer({
   } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
 
   // Modern post-it inspired colors
-  const cardBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
-  )
+  const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
   const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
 
   const handleCardClick = (cardId: string) => {
