@@ -24,7 +24,7 @@ export default function Logo({ user }: LogoProps) {
 
   return (
     <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW="fit-content">
-      {/* Symbol Icon */}
+      {/* Symbol Iconn */}
       <Box
         as="button"
         w={{ base: 12, md: 16, lg: 20, xl: 24 }}
