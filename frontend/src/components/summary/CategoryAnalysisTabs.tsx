@@ -49,7 +49,7 @@ export default function CategoryAnalysisTabs({
         {showHeader && (
           <VStack spacing={{ base: 3, md: 0 }} align="stretch" w="full">
             {/* Header principal */}
-            <HStack spacing={{ base: 2, md: 3 }} align="center" justify={{ base: 'center', md: 'flex-start' }}>
+            <HStack spacing={{ base: 2, sm: 2, md: 3 }} align="center" justify="flex-start">
               <Box
                 p={{ base: 2, sm: 2.5, md: 3 }}
                 borderRadius="xl"
@@ -66,7 +66,7 @@ export default function CategoryAnalysisTabs({
               >
                 <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('blue.600', 'blue.300')} />
               </Box>
-              <VStack align={{ base: 'center', md: 'start' }} spacing={0.5}>
+              <VStack align="flex-start" spacing={1} flex="0">
                 <Heading
                   size={sectionTitleStyles.size}
                   color={useColorModeValue('gray.800', 'gray.100')}
@@ -74,6 +74,8 @@ export default function CategoryAnalysisTabs({
                   fontFamily={sectionTitleStyles.fontFamily}
                   letterSpacing={sectionTitleStyles.letterSpacing}
                   lineHeight={sectionTitleStyles.lineHeight}
+                  textAlign="left"
+                  whiteSpace="nowrap"
                 >
                   Category Analysis
                 </Heading>
@@ -81,7 +83,7 @@ export default function CategoryAnalysisTabs({
                   fontSize={{ base: 'xs', md: 'sm' }}
                   color={useColorModeValue('gray.600', 'gray.300')}
                   fontWeight="500"
-                  textAlign={{ base: 'center', md: 'left' }}
+                  textAlign="left"
                   fontFamily="system-ui, -apple-system, sans-serif"
                 >
                   Detailed category breakdown and insights

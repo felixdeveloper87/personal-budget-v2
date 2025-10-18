@@ -128,9 +128,9 @@ export default function InstallmentPlansSection() {
                 <HStack 
                   direction={sectionHeaderStyles.iconAndTitle.direction}
                   align={sectionHeaderStyles.iconAndTitle.align}
-                  spacing={sectionHeaderStyles.iconAndTitle.spacing}
-                  flex={sectionHeaderStyles.iconAndTitle.flex}
-                  justify={sectionHeaderStyles.iconAndTitle.justify}
+                  spacing={{ base: 2, sm: 2, md: 3 }}
+                  flex="0"
+                  justify="flex-start"
                 >
                   <Box
                     p={sectionHeaderStyles.icon.padding}
@@ -154,18 +154,19 @@ export default function InstallmentPlansSection() {
                   </Box>
 
                   <VStack 
-                    align={sectionHeaderStyles.titleContainer.align}
-                    spacing={sectionHeaderStyles.titleContainer.spacing}
-                    flex={sectionHeaderStyles.titleContainer.flex}
+                    align="flex-start"
+                    spacing={1}
+                    flex="0"
                   >
                     <Heading
                       size={sectionTitleStyles.size}
                       color={titleColor}
                       fontWeight={sectionTitleStyles.fontWeight}
-                      textAlign={{ base: 'center', sm: 'left' }}
+                      textAlign="left"
                       fontFamily={sectionTitleStyles.fontFamily}
                       letterSpacing={sectionTitleStyles.letterSpacing}
                       lineHeight={sectionTitleStyles.lineHeight}
+                      whiteSpace="nowrap"
                     >
                       Active Installments
                     </Heading>
@@ -175,7 +176,7 @@ export default function InstallmentPlansSection() {
                       }
                       color={subtitleColor}
                       fontWeight="500"
-                      textAlign={{ base: 'center', sm: 'left' }}
+                      textAlign="left"
                       display={{ base: 'none', sm: 'block' }}
                       fontFamily="system-ui, -apple-system, sans-serif"
                     >

@@ -33,17 +33,18 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
 
   return (
     <Flex
-      direction={responsiveStyles.addTransactionSection.header.direction}
-      align={{ base: 'stretch', sm: 'center' }}
-      justify="space-between"
-      gap={responsiveStyles.addTransactionSection.header.gap}
+      direction={sectionHeaderStyles.container.direction}
+      align={sectionHeaderStyles.container.align}
+      justify={sectionHeaderStyles.container.justify}
+      gap={sectionHeaderStyles.container.gap}
+      w={sectionHeaderStyles.container.w}
     >
       {/* Left side */}
       <HStack 
         direction={sectionHeaderStyles.iconAndTitle.direction}
         align={sectionHeaderStyles.iconAndTitle.align}
-        spacing={sectionHeaderStyles.iconAndTitle.spacing}
-        flex={sectionHeaderStyles.iconAndTitle.flex}
+        spacing={{ base: 2, sm: 2, md: 3 }}
+        flex="0"
         justify="flex-start"
       >
         {/* Modern Icon Container */}
@@ -69,18 +70,19 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
         </Box>
 
         <VStack 
-          align={sectionHeaderStyles.titleContainer.align}
-          spacing={sectionHeaderStyles.titleContainer.spacing}
-          flex={sectionHeaderStyles.titleContainer.flex}
+          align="flex-start"
+          spacing={1}
+          flex="0"
         >
           <Heading
             size={sectionTitleStyles.size}
             color={titleColor}
             fontWeight={sectionTitleStyles.fontWeight}
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
             fontFamily={sectionTitleStyles.fontFamily}
             letterSpacing={sectionTitleStyles.letterSpacing}
             lineHeight={sectionTitleStyles.lineHeight}
+            whiteSpace="nowrap"
           >
             Financial Overview
           </Heading>
@@ -88,7 +90,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
             fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
             color={subtitleColor}
             fontWeight="500"
-            textAlign={{ base: 'center', sm: 'left' }}
+            textAlign="left"
             display={{ base: 'none', sm: 'block' }}
             fontFamily="system-ui, -apple-system, sans-serif"
           >

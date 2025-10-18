@@ -39,7 +39,7 @@ export default function CategoryAnalysisHeader({
       gap={responsiveStyles.addTransactionSection.header.gap}
     >
       {/* Left side */}
-      <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
+      <HStack spacing={{ base: 2, sm: 2, md: 3 }} align="center" flex="0">
         <Box
           p={{ base: 2, sm: 2.5, md: 3 }}
           borderRadius="xl"
@@ -61,7 +61,7 @@ export default function CategoryAnalysisHeader({
           />
         </Box>
 
-        <VStack align="start" spacing={1} flex="1">
+        <VStack align="flex-start" spacing={1} flex="0">
           <Heading
             size={sectionTitleStyles.size}
             color={titleColor}
@@ -70,6 +70,7 @@ export default function CategoryAnalysisHeader({
             fontFamily={sectionTitleStyles.fontFamily}
             letterSpacing={sectionTitleStyles.letterSpacing}
             lineHeight={sectionTitleStyles.lineHeight}
+            whiteSpace="nowrap"
           >
             Category Analysis
           </Heading>

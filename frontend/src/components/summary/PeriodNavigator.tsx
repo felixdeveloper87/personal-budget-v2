@@ -143,6 +143,8 @@ export default function PeriodNavigator({
           icon={<ArrowLeft size={18} />}
           onClick={() => onNavigatePeriod('prev')}
           variant="outline"
+          h="32px"
+          w="32px"
           borderRadius="xl"
           borderColor={useColorModeValue('gray.300', 'gray.600')}
           color={useColorModeValue('gray.600', 'gray.300')}
@@ -192,6 +194,8 @@ export default function PeriodNavigator({
           icon={<ArrowRight size={18} />}
           onClick={() => onNavigatePeriod('next')}
           variant="outline"
+          h="32px"
+          w="32px"
           borderRadius="xl"
           borderColor={useColorModeValue('gray.300', 'gray.600')}
           color={useColorModeValue('gray.600', 'gray.300')}
