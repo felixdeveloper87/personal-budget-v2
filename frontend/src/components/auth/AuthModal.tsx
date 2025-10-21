@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Modal, ModalOverlay, ModalContent,
+  Modal, ModalOverlay, ModalContent, Card, CardBody,
   Box, Button, HStack, VStack, Text,
   useColorModeValue, Icon, Flex
 } from '@chakra-ui/react'
@@ -8,7 +8,7 @@ import { ArrowBackIcon } from '@chakra-ui/icons'
 import { Home, X } from 'lucide-react'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
-import { getShimmerStyles, getModalHeaderStyles, safeAreaStyles, safariStyles, getResponsiveStyles } from '../ui'
+import { getShimmerStyles, getModalHeaderStyles, safeAreaStyles, safariStyles, getResponsiveStyles, animations, getGradients } from '../ui'
 
 export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
   isOpen: boolean
@@ -18,11 +18,12 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
   const [isLogin, setIsLogin] = useState(true)
   const headerStyles = getModalHeaderStyles(useColorModeValue)
   const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
   const cardBg = useColorModeValue('white', '#111')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
   // 🎨 Theme shortcuts
-  const gradients = {
+  const themeGradients = {
     title: useColorModeValue('linear-gradient(135deg,#fff,#f8fafc)','linear-gradient(135deg,#f1f5f9,#e2e8f0)'),
     subtitle: useColorModeValue('linear-gradient(135deg,#3b82f6,#8b5cf6)','linear-gradient(135deg,#60a5fa,#a78bfa)'),
     logo: useColorModeValue('linear-gradient(135deg,#3b82f6,#1d4ed8)','linear-gradient(135deg,#60a5fa,#3b82f6)')
@@ -33,46 +34,82 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
       isOpen={isOpen} 
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl' }}
-      isCentered={false}
+      isCentered
       scrollBehavior="inside" 
       closeOnOverlayClick={false}
       closeOnEsc={true}
       blockScrollOnMount={true}
     >
       <ModalOverlay 
-        bg="blackAlpha.700" 
-        backdropFilter="blur(12px)"
+        bg="blackAlpha.600" 
+        backdropFilter="blur(10px)"
       />
-      <ModalContent
-        borderRadius={{ base: 'none', sm: '3xl' }}
-        bg={cardBg} 
-        shadow="2xl" 
-        border="1px solid"
-        borderColor="rgba(255,255,255,0.1)"
-        m={{ base: 0, sm: 6 }} 
+      <ModalContent 
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
-        position="relative"
+        m={{ base: 0, md: 4 }}
+        display="flex"
+        flexDirection="column"
         {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          animation: 'slideIn .3s ease-out',
-          '@keyframes slideIn': { 
-            from: { opacity: 0, transform: 'translateY(100%) scale(.95)' }, 
-            to: { opacity: 1, transform: 'translateY(0) scale(1)' } 
-          }
+          ...safariStyles.modal
         }}
       >
         {/* Decorative background */}
-        <Box pos="absolute" top="-50px" left="-50px" right="-50px" h="200px"
-          bg="linear-gradient(135deg,rgba(59,130,246,.1),rgba(139,92,246,.1),rgba(16,185,129,.1))"
-          borderRadius="3xl" filter="blur(40px)" opacity={0.6} />
-
-        <VStack spacing={0} align="stretch" h="full">
-          <Box 
-            h="4px" 
+        <Box
+          position="absolute"
+          top="-50px"
+          left="-50px"
+          right="-50px"
+          height="200px"
+          background={gradients.decorative}
+          borderRadius="3xl"
+          filter="blur(40px)"
+          opacity={0.6}
+          zIndex={0}
+        />
+        
+        {/* Main card with glassmorphism */}
+        <Card
+          position="relative"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.95)',
+            'rgba(17, 17, 17, 0.95)'
+          )}
+          backdropFilter="blur(20px)"
+          border="1px solid"
+          borderColor={useColorModeValue(
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.1)'
+          )}
+          borderRadius={{ base: 'none', sm: '3xl' }}
+          shadow="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
+          sx={{
+            animation: animations.slideIn,
+            '@keyframes slideIn': {
+              from: { 
+                opacity: 0, 
+                transform: 'translateY(20px) scale(0.95)' 
+              },
+              to: { 
+                opacity: 1, 
+                transform: 'translateY(0) scale(1)' 
+              }
+            }
+          }}
+        >
+          {/* Animated top bar */}
+          <Box
+            height="4px"
             sx={getShimmerStyles()}
           />
+          
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
+            <VStack spacing={0} align="stretch" h="full">
 
           {/* Header */}
           <Box {...headerStyles.container}>
@@ -101,7 +138,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                 <Box 
                   p={{ base: 2, sm: 3 }} 
                   borderRadius="2xl" 
-                  bg={gradients.logo} 
+                  bg={themeGradients.logo} 
                   boxShadow="lg"
                   flexShrink={0}
                 >
@@ -120,7 +157,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                   minW={0}
                 >
                   <Text
-                    bg={gradients.title} 
+                    bg={themeGradients.title} 
                     bgClip="text"
                     fontWeight="800" 
                     fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
@@ -130,7 +167,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                     Personal Budget
                   </Text>
                   <Text
-                    bg={gradients.subtitle} 
+                    bg={themeGradients.subtitle} 
                     bgClip="text"
                     fontWeight="600" 
                     fontSize={{ base: 'xs', sm: 'sm' }}
@@ -159,13 +196,17 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
             </Flex>
           </Box>
 
-          {/* Body */}
-          <Box 
-            flex="1" 
-            p={{ base: 3, sm: 8 }} 
-            overflowY="auto"
-            sx={safeAreaStyles.content}
-          >
+              {/* Modal content - Scrollable */}
+              <Box 
+                flex="1" 
+                p={responsiveStyles.spacing.container}
+                overflowY="auto"
+                {...responsiveStyles.content}
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable
+                }}
+              >
             <Box
               bg={cardBg} 
               shadow="2xl" 
@@ -192,8 +233,10 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                 : <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
               }
             </Box>
-          </Box>
-        </VStack>
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
       </ModalContent>
     </Modal>
   )
