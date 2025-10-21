@@ -3,8 +3,6 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
-  ModalBody,
   Box,
   Button,
   HStack,
@@ -12,18 +10,14 @@ import {
   Text,
   useColorModeValue,
   Icon,
+  Flex,
 } from '@chakra-ui/react'
 import { ArrowBackIcon } from '@chakra-ui/icons'
+import { Home } from 'lucide-react'
 import { X } from 'lucide-react'
-import { motion } from 'framer-motion'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles } from '../ui'
-import { useThemeColors } from '../../hooks/useThemeColors'
-
-// --- Motion Components ---
-const MotionBox = motion.create(Box)
-const MotionVStack = motion.create(VStack)
+import { getShimmerStyles, getModalHeaderStyles } from '../ui'
 
 interface AuthModalProps {
   isOpen: boolean
@@ -33,33 +27,9 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, onBackToLanding }: AuthModalProps) {
   const [isLogin, setIsLogin] = useState(true)
-  const colors = useThemeColors()
-  const gradients = getGradients()
-  const responsiveStyles = getResponsiveStyles()
-
-  // --- Theme-dependent colors ---
-  const cardBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.95)',
-    'rgba(17, 17, 17, 0.95)'
-  )
+  const headerStyles = getModalHeaderStyles(useColorModeValue)
+  const cardBg = useColorModeValue('white', '#111111')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
-  const textColor = useColorModeValue('gray.600', 'gray.300')
-  const labelColor = useColorModeValue('gray.700', 'gray.200')
-
-  const backBtnGradient = useColorModeValue(
-    'linear(to-r, blue.500, purple.500)',
-    'linear(to-r, blue.400, purple.400)'
-  )
-
-  const backBtnShadow = useColorModeValue(
-    '0 0 20px rgba(59,130,246,0.4)',
-    '0 0 25px rgba(147,51,234,0.5)'
-  )
-
-  const headerGradient = useColorModeValue(
-    'linear-gradient(135deg, #0ea5e9, #3b82f6, #8b5cf6)',
-    'linear-gradient(135deg, #1e40af, #7c3aed, #c026d3)'
-  )
 
   return (
     <Modal
@@ -97,9 +67,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: AuthModa
         maxH={{ base: '100vh', sm: '90vh', md: '90vh' }}
         h={{ base: '100vh', sm: 'auto', md: 'auto' }}
         sx={{
-          ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          animation: animations.slideIn,
+          animation: 'slideIn 0.3s ease-out',
           '@keyframes slideIn': {
             from: { 
               opacity: 0, 
@@ -119,7 +87,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: AuthModa
           left="-50px"
           right="-50px"
           height="200px"
-          background={gradients.decorative}
+          background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(16, 185, 129, 0.1) 100%)"
           borderRadius="3xl"
           filter="blur(40px)"
           opacity={0.6}
@@ -127,231 +95,239 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: AuthModa
         />
         
         <VStack spacing={0} align="stretch" h="full" overflow="hidden">
+          {/* Animated top bar */}
+          <Box height="4px" sx={getShimmerStyles()} />
+          
           {/* Header */}
-          <Box
-            textAlign="center"
-            borderBottom="1px"
-            borderColor={colors.border}
-            py={{ base: 6, sm: 5, md: 6 }}
-            px={{ base: 4, sm: 6, md: 8 }}
-            bg={headerGradient}
-            color="white"
-            fontWeight="800"
-            letterSpacing="wide"
-            position="relative"
-            sx={{ animation: animations.shimmer }}
-            minH={{ base: '140px', sm: '120px', md: '140px' }}
-          >
-            {/* Animated top bar */}
-            <Box
-              height="4px"
-              sx={getShimmerStyles()}
-            />
-
-
-            {/* Close button - Mobile optimized */}
+          <Box {...headerStyles.container}>
+            {/* Fixed close button in top right corner */}
             <Button
-              position="absolute"
-              top={{ base: 3, sm: 4, md: 6 }}
-              right={{ base: 3, sm: 4, md: 6 }}
-              size={{ base: 'md', sm: 'lg', md: 'lg' }}
-              variant="ghost"
               onClick={onClose}
-              borderRadius="full"
-              p={{ base: 2, sm: 3, md: 3 }}
-              bg="rgba(255, 255, 255, 0.2)"
-              backdropFilter="blur(10px)"
-              border="1px solid"
-              borderColor="rgba(255, 255, 255, 0.3)"
-              _hover={{
-                bg: 'rgba(255, 255, 255, 0.3)',
-                transform: 'scale(1.1)',
-                boxShadow: 'lg',
-              }}
-              _active={{
-                transform: 'scale(0.95)',
-              }}
-              transition="all 0.2s ease"
-              zIndex={10}
-              boxShadow="md"
-              aria-label="Close modal"
-              minH={{ base: '32px', sm: '40px', md: '40px' }}
-              minW={{ base: '32px', sm: '40px', md: '40px' }}
+              {...headerStyles.closeButton}
             >
-              <Icon as={X} boxSize={{ base: 4, sm: 5, md: 5 }} color="white" />
+              <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={headerStyles.closeButton.iconColor} />
             </Button>
 
-            {/* Brand Section - Mobile optimized */}
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
-              textAlign="center"
-              position="relative"
+            <Flex 
+              direction={{ base: 'column', sm: 'row' }}
+              align={{ base: 'flex-start', sm: 'center' }}
+              justify={{ base: 'flex-start', sm: 'space-between' }}
+              gap={{ base: 3, sm: 4 }}
               w="full"
+              pr={{ base: 16, sm: 16, md: 20 }} // Space for close button on all sizes
             >
-              <VStack spacing={{ base: 4, sm: 5, md: 6 }}>
-                <HStack spacing={{ base: 3, sm: 4, md: 4 }} justify="center">
-                  {/* Logo Icon - Mobile optimized */}
-                  <Box
-                    w={{ base: 16, sm: 18, md: 20 }}
-                    h={{ base: 16, sm: 18, md: 20 }}
-                    bg="rgba(255, 255, 255, 0.2)"
-                    borderRadius="3xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    boxShadow="0 0 30px rgba(255, 255, 255, 0.3)"
-                    _hover={{
-                      transform: 'scale(1.1) rotate(5deg)',
-                      boxShadow: '0 0 40px rgba(255, 255, 255, 0.5)',
-                    }}
-                    transition="all 0.4s cubic-bezier(0.4, 0, 0.2, 1)"
-                  >
+              {/* Mobile: Icon, Title and Subtitle stacked */}
+              <VStack 
+                align="flex-start" 
+                spacing={2}
+                display={{ base: 'flex', sm: 'none' }}
+                w="full"
+              >
+                {/* Icon and Title row */}
+                <HStack 
+                  spacing={2} 
+                  align="center"
+                >
+                  <Box {...headerStyles.iconContainer}>
                     <Text
-                      fontSize={{ base: '2xl', sm: '3xl', md: '4xl' }}
+                      fontSize="xl"
                       fontWeight="extrabold"
                       color="white"
                     >
                       £
                     </Text>
                   </Box>
-
-                  {/* Brand Text - Mobile optimized */}
-                  <VStack spacing={{ base: 1, sm: 2, md: 2 }} align="start">
-                    <Text
-                      fontSize={{ base: 'xl', sm: '2xl', md: '3xl' }}
-                      fontWeight="bold"
-                      color="white"
-                      lineHeight="shorter"
-                    >
-                      Personal Budget
-                    </Text>
-                    <Text
-                      fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
-                      color="rgba(255, 255, 255, 0.8)"
-                      fontWeight="500"
-                      letterSpacing="wide"
-                      display={{ base: 'none', sm: 'block' }}
-                    >
-                      Smart Financial Management
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                {/* Welcome / Join message - Mobile optimized */}
-                <VStack spacing={{ base: 3, sm: 4, md: 4 }}>
-                  <Text
-                    fontSize={{ base: 'lg', sm: 'xl', md: 'xl' }}
-                    fontWeight="700"
-                    color="white"
-                    textAlign="center"
+                  <Text 
+                    {...headerStyles.title}
+                    textAlign="left"
+                    fontSize="lg"
+                    fontWeight="800"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #ffffff, #f8fafc)',
+                      'linear-gradient(135deg, #f1f5f9, #e2e8f0)'
+                    )}
+                    bgClip="text"
+                    textShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+                    _hover={{
+                      transform: 'scale(1.02)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    letterSpacing="wide"
+                    lineHeight="shorter"
                   >
-                    {isLogin ? 'Welcome Back!' : 'Join Us Today!'}
+                    Personal Budget
                   </Text>
-                  <Text
-                    fontSize={{ base: 'sm', sm: 'md', md: 'md' }}
+                </HStack>
+                
+                {/* Subtitle with Back Button row */}
+                <HStack 
+                  spacing={2} 
+                  align="center" 
+                  justify="flex-start"
+                  flexWrap="nowrap"
+                  w="full"
+                >
+                  <Text 
+                    {...headerStyles.subtitle}
+                    textAlign="left"
+                    fontSize="sm"
+                    fontWeight="600"
                     color="rgba(255, 255, 255, 0.9)"
-                    textAlign="center"
-                    maxW={{ base: '280px', sm: 'md', md: 'md' }}
-                    lineHeight={{ base: 1.5, sm: 1.6, md: 1.6 }}
-                    px={{ base: 2, sm: 0, md: 0 }}
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                      'linear-gradient(135deg, #60a5fa, #a78bfa)'
+                    )}
+                    bgClip="text"
+                    px={3}
+                    py={1}
+                    borderRadius="full"
+                    bgGradient={useColorModeValue(
+                      'linear(to-r, blue.400, purple.400)',
+                      'linear(to-r, blue.300, purple.300)'
+                    )}
+                    _hover={{
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    whiteSpace="nowrap"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    maxW="200px"
                   >
-                    {isLogin
-                      ? 'Sign in to access your financial dashboard and take control of your budget.'
-                      : 'Create your account and start managing your finances with confidence.'}
+                    {isLogin ? '✨ Welcome Back!' : '🚀 Join Us Today!'}
                   </Text>
                   
-                  {/* Back to Home Button - Inside VStack */}
+                  {/* Back Button - Next to subtitle on mobile */}
                   {onBackToLanding && (
-                    <MotionBox
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.6, delay: 0.3, ease: 'easeOut' }}
-                      mt={{ base: 2, sm: 3, md: 4 }}
+                    <Button
+                      onClick={onBackToLanding}
+                      {...headerStyles.backButton}
+                      size="xs"
+                      px={2}
+                      py={1}
+                      minW="auto"
+                      borderRadius="full"
                     >
-                      <Button
-                        leftIcon={<ArrowBackIcon boxSize={{ base: 3, sm: 4, md: 5 }} />}
-                        onClick={onBackToLanding}
-                        color="white"
-                        bg="rgba(255, 255, 255, 0.2)"
-                        border="2px solid"
-                        borderColor="rgba(255, 255, 255, 0.3)"
-                        backdropFilter="blur(10px)"
-                        _hover={{
-                          transform: 'translateX(-4px) scale(1.05)',
-                          bg: 'rgba(255, 255, 255, 0.3)',
-                          filter: 'brightness(1.1)',
-                        }}
-                        size={{ base: 'xs', sm: 'sm', md: 'md' }}
-                        fontWeight="600"
-                        fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
-                        px={{ base: 4, sm: 5, md: 6 }}
-                        py={{ base: 2, sm: 2, md: 3 }}
-                        borderRadius="full"
-                        transition="all 0.25s ease-in-out"
-                        minH={{ base: '32px', sm: '36px', md: '40px' }}
-                      >
-                        <Text display={{ base: 'none', sm: 'inline' }}>Back to Home</Text>
-                        <Text display={{ base: 'inline', sm: 'none' }}>Back</Text>
-                      </Button>
-                    </MotionBox>
+                      <HStack spacing={1}>
+                        <ArrowBackIcon boxSize={3} />
+                        <Icon as={Home} boxSize={3} />
+                      </HStack>
+                    </Button>
                   )}
-                </VStack>
+                </HStack>
               </VStack>
-            </MotionBox>
+
+              {/* Desktop: Logo and Brand Section */}
+              <HStack 
+                spacing={4} 
+                align="center" 
+                justify="center"
+                display={{ base: 'none', sm: 'flex' }}
+              >
+                <Box {...headerStyles.iconContainer}>
+                  <Text
+                    fontSize="2xl"
+                    fontWeight="extrabold"
+                    color="white"
+                  >
+                    £
+                  </Text>
+                </Box>
+                <VStack align="start" spacing={1}>
+                  <Text 
+                    {...headerStyles.title}
+                    textAlign="left"
+                    fontSize={{ sm: 'xl', md: '2xl' }}
+                    fontWeight="800"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #ffffff, #f8fafc)',
+                      'linear-gradient(135deg, #f1f5f9, #e2e8f0)'
+                    )}
+                    bgClip="text"
+                    textShadow="0 2px 4px rgba(0, 0, 0, 0.1)"
+                    _hover={{
+                      transform: 'scale(1.02)',
+                      transition: 'all 0.2s ease'
+                    }}
+                    letterSpacing="wide"
+                    lineHeight="shorter"
+                  >
+                    Personal Budget
+                  </Text>
+                  <Text 
+                    {...headerStyles.subtitle}
+                    textAlign="left"
+                    fontSize="sm"
+                    fontWeight="600"
+                    color="rgba(255, 255, 255, 0.9)"
+                    bg={useColorModeValue(
+                      'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                      'linear-gradient(135deg, #60a5fa, #a78bfa)'
+                    )}
+                    bgClip="text"
+                    _hover={{
+                      transform: 'scale(1.05)',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    {isLogin ? '✨ Welcome Back!' : '🚀 Join Us Today!'}
+                  </Text>
+                </VStack>
+              </HStack>
+
+              {/* Desktop: Back to Home Button - Positioned correctly */}
+              {onBackToLanding && (
+                <Button
+                  onClick={onBackToLanding}
+                  {...headerStyles.backButton}
+                  size="sm"
+                  px={3}
+                  py={2}
+                  display={{ base: 'none', sm: 'flex' }}
+                  borderRadius="full"
+                >
+                  <HStack spacing={1}>
+                    <ArrowBackIcon boxSize={4} />
+                    <Icon as={Home} boxSize={4} />
+                  </HStack>
+                </Button>
+              )}
+            </Flex>
           </Box>
 
-          {/* Modal content - Mobile optimized */}
-          <Box 
-            flex="1" 
-            p={{ base: 4, sm: 6, md: 8 }}
-            overflowY="auto"
-            {...responsiveStyles.content}
-            sx={{
-              ...safeAreaStyles.content,
-              ...safariStyles.scrollable,
-            }}
-          >
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4, ease: 'easeOut' }}
+          {/* Modal content */}
+          <Box flex="1" p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
+            <Box
               w="full"
               maxW={{ base: '100%', sm: 'md', md: 'lg' }}
               mx="auto"
+              bg={cardBg}
+              shadow="2xl"
+              borderRadius={{ base: '2xl', sm: '3xl', md: '3xl' }}
+              border="1px"
+              borderColor={borderColor}
+              p={{ base: 6, sm: 8, md: 10 }}
+              position="relative"
+              overflow="hidden"
+              _before={{
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '4px',
+                background: 'linear-gradient(90deg, #0ea5e9, #3b82f6, #8b5cf6, #ec4899)',
+                borderRadius: { base: '2xl 2xl 0 0', sm: '3xl 3xl 0 0', md: '3xl 3xl 0 0' }
+              }}
             >
-              <Box
-                bg={useColorModeValue('white', '#111111')}
-                shadow="2xl"
-                borderRadius={{ base: '2xl', sm: '3xl', md: '3xl' }}
-                border="1px"
-                borderColor={borderColor}
-                p={{ base: 6, sm: 8, md: 10 }}
-                position="relative"
-                overflow="hidden"
-                _before={{
-                  content: '""',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '4px',
-                  background:
-                    'linear-gradient(90deg, #0ea5e9, #3b82f6, #8b5cf6, #ec4899)',
-                  borderRadius: { base: '2xl 2xl 0 0', sm: '3xl 3xl 0 0', md: '3xl 3xl 0 0' }
-                }}
-              >
-                {/* Form Switch */}
-                <Box position="relative" zIndex={1}>
-                  {isLogin ? (
-                    <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
-                  ) : (
-                    <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
-                  )}
-                </Box>
+              <Box position="relative" zIndex={1}>
+                {isLogin ? (
+                  <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
+                ) : (
+                  <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
+                )}
               </Box>
-            </MotionBox>
+            </Box>
           </Box>
         </VStack>
       </ModalContent>

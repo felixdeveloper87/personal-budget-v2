@@ -74,6 +74,72 @@ export const getGradients = () => ({
   )
 })
 
+// Modal header utilities
+export const getModalHeaderStyles = (useColorModeValue: any) => {
+  const responsiveStyles = getResponsiveStyles()
+  
+  return {
+    container: {
+      ...responsiveStyles.modals.header.container,
+      borderColor: useColorModeValue(
+        responsiveStyles.modals.header.container.borderColor.light,
+        responsiveStyles.modals.header.container.borderColor.dark
+      ),
+      bg: useColorModeValue(
+        responsiveStyles.modals.header.container.bg.light,
+        responsiveStyles.modals.header.container.bg.dark
+      ),
+      sx: responsiveStyles.modals.header.container.sx
+    },
+    closeButton: {
+      ...responsiveStyles.modals.header.closeButton,
+      bg: useColorModeValue(
+        responsiveStyles.modals.header.closeButton.bg.light,
+        responsiveStyles.modals.header.closeButton.bg.dark
+      ),
+      borderColor: useColorModeValue(
+        responsiveStyles.modals.header.closeButton.borderColor.light,
+        responsiveStyles.modals.header.closeButton.borderColor.dark
+      ),
+      _hover: {
+        ...responsiveStyles.modals.header.closeButton._hover,
+        bg: useColorModeValue(
+          responsiveStyles.modals.header.closeButton._hover.bg.light,
+          responsiveStyles.modals.header.closeButton._hover.bg.dark
+        )
+      },
+      iconColor: useColorModeValue(
+        responsiveStyles.modals.header.closeButton.iconColor.light,
+        responsiveStyles.modals.header.closeButton.iconColor.dark
+      )
+    },
+    content: responsiveStyles.modals.header.content,
+    iconContainer: {
+      ...responsiveStyles.modals.header.iconContainer,
+      bg: useColorModeValue(
+        responsiveStyles.modals.header.iconContainer.bg.light,
+        responsiveStyles.modals.header.iconContainer.bg.dark
+      ),
+      sx: responsiveStyles.modals.header.iconContainer.sx
+    },
+    title: {
+      ...responsiveStyles.modals.header.title,
+      bg: useColorModeValue(
+        responsiveStyles.modals.header.title.bg.light,
+        responsiveStyles.modals.header.title.bg.dark
+      )
+    },
+    subtitle: {
+      ...responsiveStyles.modals.header.subtitle,
+      color: useColorModeValue(
+        responsiveStyles.modals.header.subtitle.color.light,
+        responsiveStyles.modals.header.subtitle.color.dark
+      )
+    },
+    backButton: responsiveStyles.modals.header.backButton
+  }
+}
+
 // Color utilities
 export const getTypeColor = (type: 'INCOME' | 'EXPENSE') => {
   return useColorModeValue(
@@ -360,7 +426,103 @@ export const getResponsiveStyles = () => ({
     }
   },
   modals: {
-    // Standard close button configuration for all modals
+    // Standard modal header styles - used by AuthModal and SearchModal
+    header: {
+      container: {
+        p: { base: 4, sm: 5, md: 6 },
+        borderBottom: '1px',
+        borderColor: { light: 'gray.200', dark: 'gray.700' },
+        position: 'relative' as const,
+        bg: {
+          light: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #ffffff 100%)',
+          dark: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+        },
+        sx: {
+          // Safe area support for iPhone 14 Pro
+          paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+        }
+      },
+      closeButton: {
+        position: 'absolute' as const,
+        top: { base: 4, sm: 5, md: 6 },
+        right: { base: 4, sm: 5, md: 6 },
+        size: 'lg' as const,
+        variant: 'ghost' as const,
+        borderRadius: 'full',
+        p: 3,
+        bg: { light: 'rgba(255, 255, 255, 0.8)', dark: 'rgba(15, 23, 42, 0.8)' },
+        backdropFilter: 'blur(10px)',
+        border: '1px solid',
+        borderColor: { light: 'gray.300', dark: 'gray.600' },
+        _hover: {
+          bg: { light: 'red.50', dark: 'red.900' },
+          borderColor: 'red.300',
+          transform: 'scale(1.1)',
+          boxShadow: 'lg',
+        },
+        _active: {
+          transform: 'scale(0.95)',
+        },
+        transition: 'all 0.2s ease',
+        zIndex: 10,
+        boxShadow: 'md',
+        iconColor: { light: 'gray.700', dark: 'gray.200' },
+        iconSize: 5
+      },
+      content: {
+        direction: { base: 'column' as const, sm: 'row' as const },
+        align: 'center' as const,
+        justify: 'space-between' as const,
+        gap: 4,
+        pr: { base: 16, sm: 20, md: 20 } // Space for close button
+      },
+      iconContainer: {
+        p: 3,
+        borderRadius: '2xl',
+        bg: {
+          light: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+          dark: 'linear-gradient(135deg, #60a5fa, #3b82f6)'
+        },
+        boxShadow: 'lg',
+        sx: {
+          animation: 'glow 3s ease-in-out infinite',
+          '@keyframes glow': {
+            '0%, 100%': { 
+              boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)' 
+            },
+            '50%': { 
+              boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)' 
+            }
+          }
+        }
+      },
+      title: {
+        fontSize: { base: 'lg', sm: 'xl', md: '2xl' },
+        fontWeight: 800,
+        bg: {
+          light: 'linear-gradient(135deg, #0f172a, #1e293b)',
+          dark: 'linear-gradient(135deg, #f1f5f9, #cbd5e1)'
+        },
+        bgClip: 'text'
+      },
+      subtitle: {
+        fontSize: { base: 'xs', sm: 'sm' },
+        color: { light: 'gray.700', dark: 'gray.200' },
+        fontWeight: 500
+      },
+      backButton: {
+        size: { base: 'sm', sm: 'md' },
+        variant: 'ghost',
+        borderRadius: 'full',
+        _hover: {
+          bg: 'blue.50',
+          transform: 'translateX(-2px)',
+          boxShadow: 'md',
+        },
+        transition: 'all 0.2s ease'
+      }
+    },
+    // Legacy close button configuration for other modals
     closeButton: {
       position: 'absolute',
       top: { base: 4, sm: 5, md: 6 },
