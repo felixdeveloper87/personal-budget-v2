@@ -252,9 +252,9 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 <Button
                   size={{ base: 'sm', sm: 'md' }}
                   variant="ghost"
-                  colorScheme="green"
+                  color={headerStyles.title.color}
                   onClick={onOpen}
-                  rightIcon={<Icon as={Eye} boxSize={4} />}
+                  rightIcon={<Icon as={Eye} boxSize={4} color={headerStyles.title.color} />}
                   _hover={{
                     bg: useColorModeValue('green.50', 'green.900'),
                     transform: 'translateY(-1px)',

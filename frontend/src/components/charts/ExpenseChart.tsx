@@ -253,9 +253,9 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 <Button
                   size={{ base: 'sm', sm: 'md' }}
                   variant="ghost"
-                  colorScheme="red"
+                  color={headerStyles.title.color}
                   onClick={onOpen}
-                  rightIcon={<Icon as={Eye} boxSize={4} />}
+                  rightIcon={<Icon as={Eye} boxSize={4} color={headerStyles.title.color} />}
                   _hover={{
                     bg: useColorModeValue('red.50', 'red.900'),
                     transform: 'translateY(-1px)',
