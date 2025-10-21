@@ -51,26 +51,34 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
   return (
     <Box>
       <TableContainer>
-        <Table variant="simple" size="sm">
+        <Table 
+          variant="simple" 
+          size={{ base: "xs", md: "sm" }}
+          sx={{
+            'th, td': {
+              padding: { base: '8px 4px', md: '12px 8px' }
+            }
+          }}
+        >
           <Thead>
             <Tr>
-              <Th>Date & Time</Th>
-              <Th>Type</Th>
-              <Th>Category</Th>
-              <Th>Description</Th>
-              <Th isNumeric>Amount</Th>
-              <Th>Actions</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>Date & Time</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>Type</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>Category</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>Description</Th>
+              <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>Amount</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>Actions</Th>
             </Tr>
           </Thead>
           <Tbody>
             {sortedTransactions.map((tx) => (
-              <Tr key={tx.id}>
+              <Tr key={tx.id} _hover={{ bg: 'gray.50' }}>
                 <Td>
-                  <VStack spacing={1} align="start">
-                    <Text fontSize="sm" fontWeight="medium">
+                  <VStack spacing={{ base: 0.5, md: 1 }} align="start">
+                    <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
                       {formatTransactionDateTime(tx.dateTime).date}
                     </Text>
-                    <Text fontSize="xs" color="gray.500">
+                    <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
                       {formatTransactionDateTime(tx.dateTime).time}
                     </Text>
                   </VStack>
@@ -79,20 +87,20 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                   <Badge
                     colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
                     variant="subtle"
-                    fontSize="xs"
+                    fontSize={{ base: "2xs", md: "xs" }}
                   >
                     {tx.type}
                   </Badge>
                 </Td>
                 <Td>
-                  <Text fontSize="sm" fontWeight="medium">
+                  <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
                     {tx.category}
                   </Text>
                 </Td>
                 <Td>
-                  <HStack spacing={2}>
+                  <HStack spacing={{ base: 1, md: 2 }}>
                     <Text 
-                      fontSize="sm" 
+                      fontSize={{ base: "xs", md: "sm" }} 
                       color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
                       noOfLines={1} 
                       maxW="200px"
@@ -106,7 +114,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                           <Icon 
                             as={FiCreditCard} 
                             color={tx.isFutureInstallment ? "gray.400" : "purple.500"} 
-                            fontSize="sm" 
+                            fontSize={{ base: "xs", md: "sm" }} 
                           />
                         </span>
                       </Tooltip>
@@ -115,7 +123,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 </Td>
                 <Td isNumeric>
                   <Text 
-                    fontSize="sm" 
+                    fontSize={{ base: "xs", md: "sm" }} 
                     fontWeight="semibold"
                     color={tx.isFutureInstallment ? "gray.500" : (tx.type === 'INCOME' ? 'green.600' : 'red.600')}
                     fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
@@ -129,7 +137,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                     <IconButton
                       aria-label="Delete transaction"
                       icon={<DeleteIcon />}
-                      size="sm"
+                      size={{ base: "xs", md: "sm" }}
                       colorScheme="red"
                       variant="ghost"
                       onClick={() => openDeleteDialog(tx)}
