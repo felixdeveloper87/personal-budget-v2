@@ -15,21 +15,8 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { SearchIcon, SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
-import { getShimmerStyles } from '../../ui'
-import { 
-  getUserMenuStyles, 
-  getUserMenuSxStyles,
-  getUserMenuHeaderStyles, 
-  getUserMenuHeaderSxStyles,
-  getUserMenuAvatarStyles, 
-  getUserMenuAvatarSxStyles,
-  getUserMenuTitleStyles, 
-  getUserMenuTitleSxStyles,
-  getUserMenuBadgeStyles,
-  getUserMenuBadgeSxStyles,
-  getMobileNavButtonStyles
-} from '../../ui/headerStyles'
-import { Zap } from 'lucide-react'
+import { GRADIENTS } from '../../../theme'
+import { Home, FileText, User, LogOut } from 'lucide-react'
 
 interface UserMenuProps {
   user: any
@@ -42,10 +29,9 @@ interface UserMenuProps {
 export default function UserMenu({ user, currentPage, onPageChange, onOpenSettings, onLogout }: UserMenuProps) {
   const textColor = useColorModeValue('gray.800', 'white')
   const secondaryTextColor = useColorModeValue('gray.600', 'gray.300')
-  const borderColor = useColorModeValue(
-    'rgba(59, 130, 246, 0.2)',
-    'rgba(96, 165, 250, 0.3)'
-  )
+  const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const hoverBorderColor = useColorModeValue('blue.200', 'blue.500')
 
   return (
     <Menu placement="bottom-end">
@@ -54,93 +40,97 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         variant="ghost"
         size="md"
         p={2}
-        borderRadius="lg"
+        borderRadius="xl"
         _hover={{
-          transform: 'scale(1.02)',
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
         }}
         _focus={{
           boxShadow: 'none',
           outline: 'none'
         }}
         _active={{
-          boxShadow: 'none',
-          transform: 'scale(1.02)'
+          transform: 'translateY(0)',
         }}
         transition="all 0.2s ease"
-        sx={{
-          '&:hover .chakra-avatar__initials': {
-            transform: 'scale(1.1)',
-            transition: 'transform 0.2s ease'
-          }
-        }}
       >
         <HStack spacing={{ base: 2, lg: 3 }}>
           <Avatar 
             size="md"
             name={user?.name}
-            {...getUserMenuAvatarStyles()}
-            sx={getUserMenuAvatarSxStyles()}
+            bg={useColorModeValue('blue.500', 'blue.400')}
+            color="white"
+            fontWeight="600"
+            _hover={{
+              transform: 'scale(1.05)',
+            }}
+            transition="transform 0.2s ease"
           />
         </HStack>
       </MenuButton>
       <MenuList 
         zIndex={9999}
-        {...getUserMenuStyles()}
-        border="2px solid"
-        sx={{
-          ...getUserMenuSxStyles(),
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '4px',
-            ...getShimmerStyles()
-          }
+        bg={cardBg}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={borderColor}
+        borderRadius="2xl"
+        shadow="lg"
+        overflow="hidden"
+        _hover={{
+          borderColor: hoverBorderColor
         }}
+        transition="all 0.2s ease"
       >
+        {/* Simple top border */}
+        <Box
+          height="1px"
+          bg={useColorModeValue('blue.200', 'blue.500')}
+        />
+
         {/* Header do Menu */}
-        <Box 
-          px={6} 
-          py={5}
-          {...getUserMenuHeaderStyles()}
-          sx={getUserMenuHeaderSxStyles()}
-        >
-          <HStack spacing={4} align="center">
+        <Box px={6} py={4}>
+          <HStack spacing={3} align="center">
             <Avatar 
-              size="lg"
+              size="md"
               name={user?.name}
-              {...getUserMenuAvatarStyles()}
-              sx={getUserMenuAvatarSxStyles()}
+              bg={useColorModeValue('blue.500', 'blue.400')}
+              color="white"
+              fontWeight="600"
             />
-            <VStack spacing={1} align="start" flex="1">
+            <VStack spacing={0.5} align="start" flex="1">
               <Text 
-                fontSize="lg" 
-                {...getUserMenuTitleStyles()}
-                sx={getUserMenuTitleSxStyles()}
-              >
-                Budget
-              </Text>
-              <Text 
-                fontSize="sm" 
-                color={secondaryTextColor}
-                noOfLines={1}
-                maxW="200px"
-              >
-                {user?.email}
-              </Text>
-              <Badge
-                fontSize="xs"
-                px={2}
-                py={1}
-                borderRadius="full"
+                fontSize="md" 
                 fontWeight="700"
-                {...getUserMenuBadgeStyles()}
-                sx={getUserMenuBadgeSxStyles()}
+                color={textColor}
+                letterSpacing="-0.01em"
+                noOfLines={1}
               >
-                Active
-              </Badge>
+                {user?.name || 'Budget User'}
+              </Text>
+              <HStack spacing={2} align="center">
+                <Text 
+                  fontSize="xs" 
+                  color={secondaryTextColor}
+                  noOfLines={1}
+                  maxW="150px"
+                >
+                  {user?.email}
+                </Text>
+                <Badge
+                  fontSize="2xs"
+                  px={2}
+                  py={0.5}
+                  borderRadius="full"
+                  fontWeight="600"
+                  bg={useColorModeValue('green.100', 'green.900')}
+                  color={useColorModeValue('green.700', 'green.300')}
+                  border="1px solid"
+                  borderColor={useColorModeValue('green.200', 'green.700')}
+                >
+                  Active
+                </Badge>
+              </HStack>
             </VStack>
           </HStack>
         </Box>
@@ -148,23 +138,25 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         
         {/* Navegação mobile */}
         <MenuItem 
-          icon={<Icon as={Zap} boxSize={4} />}
-          onClick={() => onPageChange?.('dashboard')}
-          {...getMobileNavButtonStyles(currentPage === 'dashboard')}
+          icon={<Icon as={currentPage === 'dashboard' ? FileText : Home} boxSize={4} />}
+          onClick={() => onPageChange?.(currentPage === 'dashboard' ? 'transactions' : 'dashboard')}
+          color={textColor}
+          fontWeight="500"
+          display={{ base: 'flex', md: 'none' }}
+          bg="transparent"
+          px={6}
+          py={3}
+          _hover={{ 
+            bg: useColorModeValue('blue.50', 'blue.900'),
+            color: 'blue.500'
+          }}
         >
-          Dashboard
-        </MenuItem>
-        <MenuItem 
-          icon={<SearchIcon />}
-          onClick={() => onPageChange?.('transactions')}
-          {...getMobileNavButtonStyles(currentPage === 'transactions')}
-        >
-          Transactions
+          {currentPage === 'dashboard' ? 'All Transactions' : 'Dashboard'}
         </MenuItem>
         <MenuDivider display={{ base: 'block', md: 'none' }} m={0} />
         
         <MenuItem 
-          icon={<InfoIcon />}
+          icon={<Icon as={User} boxSize={4} />}
           color={textColor}
           fontWeight="500"
           px={6}
@@ -192,10 +184,10 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         </MenuItem>
         <MenuDivider m={0} />
         <MenuItem 
-          icon={<ExternalLinkIcon />} 
+          icon={<Icon as={LogOut} boxSize={4} />} 
           onClick={onLogout} 
           color="red.500"
-          fontWeight="700"
+          fontWeight="600"
           px={6}
           py={3}
           _hover={{ 

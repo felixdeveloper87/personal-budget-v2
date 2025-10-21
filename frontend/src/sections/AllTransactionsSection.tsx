@@ -16,8 +16,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { List, Calendar, Filter, RefreshCw } from 'lucide-react'
-import { getResponsiveStyles, getGradients, animations, getShimmerStyles } from '../components/ui'
-import { useThemeColors } from '../hooks/useThemeColors'
+import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 import { GRADIENTS } from '../theme'
 
 interface AllTransactionsSectionProps {
@@ -32,285 +31,280 @@ export default function AllTransactionsSection({
   onRefresh,
 }: AllTransactionsSectionProps) {
   const [groupByMonth, setGroupByMonth] = useState(false)
-  const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
 
-  // Move useColorModeValue to top (always safe)
+  // Modern post-it inspired colors
   const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const cardBorderColor = useColorModeValue('rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)')
-  const iconBg = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-    'linear-gradient(135deg, #60a5fa, #3b82f6)'
-  )
-  const titleBg = useColorModeValue(
-    'linear-gradient(135deg, #1e293b, #475569)',
-    'linear-gradient(135deg, #f8fafc, #e2e8f0)'
-  )
-  const badgeBg = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-    'linear-gradient(135deg, #60a5fa, #3b82f6)'
-  )
-  const filterBadgeBg = useColorModeValue(
-    'linear-gradient(135deg, #f59e0b, #d97706)',
-    'linear-gradient(135deg, #fbbf24, #f59e0b)'
-  )
+  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const hoverBorderColor = useColorModeValue('blue.200', 'blue.500')
+  const textColor = useColorModeValue('gray.800', 'white')
+  const secondaryTextColor = useColorModeValue('gray.600', 'gray.300')
 
   return (
     <Box
       w="full"
-      px={responsiveStyles.addTransactionSection.container.padding}
+      px={{ base: 1, sm: 2, md: 3, lg: 4 }}
       sx={{
-        paddingLeft: responsiveStyles.addTransactionSection.container.safeArea.paddingLeft,
-        paddingRight: responsiveStyles.addTransactionSection.container.safeArea.paddingRight,
+        paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+        paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
       }}
     >
-      <Box position="relative">
-        {/* Decorative gradient background */}
+      <Card
+        bg={cardBg}
+        backdropFilter="blur(10px)"
+        border="1px solid"
+        borderColor={borderColor}
+        borderRadius="2xl"
+        shadow="sm"
+        overflow="hidden"
+        _hover={{
+          transform: 'translateY(-2px)',
+          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          borderColor: hoverBorderColor
+        }}
+        transition="all 0.2s ease"
+      >
+        {/* Simple top border */}
         <Box
-          position="absolute"
-          top={responsiveStyles.installmentPlansSection.background.top}
-          left={responsiveStyles.installmentPlansSection.background.left}
-          right={responsiveStyles.installmentPlansSection.background.right}
-          height={responsiveStyles.installmentPlansSection.background.height}
-          background={gradients.decorative}
-          borderRadius={responsiveStyles.installmentPlansSection.background.borderRadius}
-          filter={responsiveStyles.installmentPlansSection.background.filter}
-          opacity={responsiveStyles.installmentPlansSection.background.opacity}
-          zIndex={0}
+          height="1px"
+          bg={useColorModeValue('blue.200', 'blue.500')}
         />
 
-        <Card
-          position="relative"
-          bg={cardBg}
-          backdropFilter="blur(20px)"
-          border="1px solid"
-          borderColor={cardBorderColor}
-          borderRadius={responsiveStyles.addTransactionSection.card.borderRadius}
-          shadow="2xl"
-          overflow="hidden"
-          w="full"
-          sx={{
-            animation: animations.slideIn,
-            '@keyframes slideIn': {
-              from: { opacity: 0, transform: 'translateY(20px) scale(0.95)' },
-              to: { opacity: 1, transform: 'translateY(0) scale(1)' },
-            },
-          }}
-        >
-          {/* Animated top border */}
-          <Box
-            height="4px"
-            sx={getShimmerStyles()}
-          />
-
-          <CardBody p={0}>
-            <VStack spacing={0} align="stretch" h="full">
+          <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }}>
+            <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
               {/* Header */}
-              <Box 
-                p={responsiveStyles.addTransactionSection.card.padding} 
-                borderBottom="1px" 
-                borderColor={colors.border}
-                position="relative"
+              <Flex
+                direction={sectionHeaderStyles.container.direction}
+                align={sectionHeaderStyles.container.align}
+                justify={sectionHeaderStyles.container.justify}
+                gap={sectionHeaderStyles.container.gap}
+                w={sectionHeaderStyles.container.w}
               >
-                <Flex
-                  direction={responsiveStyles.addTransactionSection.header.direction}
-                  align={{ base: 'stretch', sm: 'center' }}
-                  justify="space-between"
-                  gap={responsiveStyles.addTransactionSection.header.gap}
+                {/* Icon and Title Section */}
+                <HStack 
+                  direction={sectionHeaderStyles.iconAndTitle.direction}
+                  align={sectionHeaderStyles.iconAndTitle.align}
+                  spacing={sectionHeaderStyles.iconAndTitle.spacing}
+                  flex={sectionHeaderStyles.iconAndTitle.flex}
+                  justify={sectionHeaderStyles.iconAndTitle.justify}
                 >
-                  <HStack spacing={{ base: 2, sm: 3, md: 4 }} align="center" flex="1">
-                    <Box
-                      p={responsiveStyles.addTransactionSection.header.icon.padding}
-                      borderRadius={responsiveStyles.addTransactionSection.header.icon.borderRadius}
-                      bg={iconBg}
-                      boxShadow="lg"
-                      sx={{
-                        animation: animations.glow,
-                        '@keyframes glow': {
-                          '0%, 100%': { boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)' },
-                          '50%': {
-                            boxShadow:
-                              '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)',
-                          },
-                        },
-                      }}
-                    >
-                      <Icon
-                        as={List}
-                        boxSize={responsiveStyles.addTransactionSection.header.icon.size}
-                        color="white"
-                      />
-                    </Box>
-
-                    <VStack align="start" spacing={1} flex="1">
-                      <Heading
-                        size={responsiveStyles.addTransactionSection.header.title.size}
-                        bg={titleBg}
-                        bgClip="text"
-                        fontWeight="800"
-                        textAlign="left"
-                      >
-                        All Transactions
-                      </Heading>
-                      <Text
-                        fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
-                        color={colors.text.secondary}
-                        fontWeight="400"
-                        opacity={0.8}
-                        textAlign="left"
-                        display={{ base: 'none', sm: 'block' }}
-                      >
-                        Complete transaction history
-                      </Text>
-                    </VStack>
-                  </HStack>
-                  
-                  {/* Right side - Badges */}
-                  <HStack spacing={3}>
-                    <Badge
-                      colorScheme="blue"
-                      variant="solid"
-                      borderRadius="full"
-                      px={responsiveStyles.installmentPlansSection.badge.padding}
-                      py={responsiveStyles.installmentPlansSection.badge.padding}
-                      fontSize={responsiveStyles.installmentPlansSection.badge.fontSize}
-                      fontWeight="600"
-                      bg={badgeBg}
-                      boxShadow="md"
-                    >
-                      <HStack spacing={responsiveStyles.installmentPlansSection.badge.spacing}>
-                        <Text>{transactions.length}</Text>
-                        <Text>transactions</Text>
-                      </HStack>
-                    </Badge>
-                    
-                    {hasFilters && (
-                      <Badge
-                        colorScheme="orange"
-                        variant="solid"
-                        borderRadius="full"
-                        px={responsiveStyles.installmentPlansSection.badge.padding}
-                        py={responsiveStyles.installmentPlansSection.badge.padding}
-                        fontSize={responsiveStyles.installmentPlansSection.badge.fontSize}
-                        fontWeight="600"
-                        bg={filterBadgeBg}
-                        boxShadow="md"
-                      >
-                        <HStack spacing={responsiveStyles.installmentPlansSection.badge.spacing}>
-                          <Icon as={Filter} boxSize={responsiveStyles.installmentPlansSection.badge.iconSize} />
-                          <Text>Filtered</Text>
-                        </HStack>
-                      </Badge>
-                    )}
-                  </HStack>
-                </Flex>
-              </Box>
-
-              {/* View Controls */}
-              <Box 
-                p={responsiveStyles.addTransactionSection.card.padding}
-                borderBottom="1px" 
-                borderColor={colors.border}
-                bg={colors.bgSecondary}
-              >
-                <Flex
-                  direction={responsiveStyles.addTransactionSection.header.direction}
-                  justify="space-between"
-                  align={{ base: 'stretch', sm: 'center' }}
-                  gap={responsiveStyles.addTransactionSection.header.gap}
-                >
-                  <HStack spacing={3} justify={{ base: 'center', sm: 'flex-start' }}>
-                    <Button
-                      size={responsiveStyles.buttons.action.size}
-                      variant={!groupByMonth ? 'solid' : 'outline'}
-                      colorScheme="blue"
-                      borderRadius="2xl"
-                      h={responsiveStyles.buttons.action.height}
-                      px={responsiveStyles.buttons.action.padding}
-                      fontSize={responsiveStyles.buttons.action.fontSize}
-                      fontWeight="600"
-                      bg={!groupByMonth ? 
-                        useColorModeValue('blue.500', 'blue.600') : 
-                        'transparent'
-                      }
-                      borderColor={useColorModeValue('blue.300', 'blue.600')}
-                      color={!groupByMonth ? 'white' : useColorModeValue('blue.600', 'blue.400')}
-                      _hover={{
-                        transform: 'translateY(-2px)',
-                        boxShadow: 'lg',
-                      }}
-                      onClick={() => setGroupByMonth(false)}
-                    >
-                      <HStack spacing={2}>
-                        <Icon as={List} boxSize={responsiveStyles.buttons.action.iconSize} />
-                        <Text>List View</Text>
-                      </HStack>
-                    </Button>
-                    
-                    <Button
-                      size={responsiveStyles.buttons.action.size}
-                      variant={groupByMonth ? 'solid' : 'outline'}
-                      colorScheme="purple"
-                      borderRadius="2xl"
-                      h={responsiveStyles.buttons.action.height}
-                      px={responsiveStyles.buttons.action.padding}
-                      fontSize={responsiveStyles.buttons.action.fontSize}
-                      fontWeight="600"
-                      bg={groupByMonth ? 
-                        useColorModeValue('purple.500', 'purple.600') : 
-                        'transparent'
-                      }
-                      borderColor={useColorModeValue('purple.300', 'purple.600')}
-                      color={groupByMonth ? 'white' : useColorModeValue('purple.600', 'purple.400')}
-                      _hover={{
-                        transform: 'translateY(-2px)',
-                        boxShadow: 'lg',
-                      }}
-                      onClick={() => setGroupByMonth(true)}
-                    >
-                      <HStack spacing={2}>
-                        <Icon as={Calendar} boxSize={responsiveStyles.buttons.action.iconSize} />
-                        <Text>Grouped</Text>
-                      </HStack>
-                    </Button>
-                  </HStack>
-                  
-                  <Button
-                    size={responsiveStyles.buttons.action.size}
-                    variant="outline"
-                    colorScheme="gray"
-                    borderRadius="2xl"
-                    h={responsiveStyles.buttons.action.height}
-                    px={responsiveStyles.buttons.action.padding}
-                    fontSize={responsiveStyles.buttons.action.fontSize}
-                    fontWeight="600"
-                    borderColor={colors.border}
-                    color={colors.text.primary}
+                  {/* Modern Icon Container */}
+                  <Box
+                    p={sectionHeaderStyles.icon.padding}
+                    borderRadius={sectionHeaderStyles.icon.borderRadius}
+                    bg={useColorModeValue('#dbeafe', '#1e293b')}
+                    border="1px solid"
+                    borderColor={useColorModeValue('blue.300', 'blue.500')}
+                    boxShadow={sectionHeaderStyles.icon.boxShadow}
                     _hover={{
-                      bg: colors.cardHover,
-                      transform: 'translateY(-2px)',
-                      boxShadow: 'md',
+                      transform: sectionHeaderStyles.icon.hover.transform,
+                      boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
+                      borderColor: useColorModeValue('blue.200', 'blue.400')
                     }}
-                    onClick={onRefresh}
-                    w={{ base: 'full', sm: 'auto' }}
+                    transition={sectionHeaderStyles.icon.transition}
+                  >
+                    <Icon 
+                      as={List} 
+                      boxSize={sectionHeaderStyles.icon.size} 
+                      color={useColorModeValue('blue.600', 'blue.300')}
+                    />
+                  </Box>
+
+                  <HStack align="center" spacing={3} flex="0">
+                    <Heading
+                      size={sectionTitleStyles.size}
+                      fontWeight="600"
+                      textAlign="left"
+                      fontFamily={sectionTitleStyles.fontFamily}
+                      letterSpacing="-0.01em"
+                      lineHeight="1.2"
+                      whiteSpace="nowrap"
+                      fontSize={{ base: 'sm', sm: 'lg' }}
+                      display={{ base: 'none', sm: 'block', md: 'block' }}
+                      opacity={0.9}
+                      color={textColor}
+                    >
+                      All Transactions
+                    </Heading>
+                    <Text
+                      fontSize={{ base: 'sm', sm: 'md' }}
+                      color={secondaryTextColor}
+                      fontWeight="500"
+                      textAlign="left"
+                      display={{ base: 'none', sm: 'block', md: 'block' }}
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                      whiteSpace="nowrap"
+                    >
+                      Complete transaction history
+                    </Text>
+                  </HStack>
+                </HStack>
+
+                {/* Badges Section */}
+                <HStack spacing={3}>
+                  <Badge
+                    borderRadius="xl"
+                    px={4}
+                    py={2}
+                    fontSize="sm"
+                    fontWeight="500"
+                    bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                    color={useColorModeValue('blue.600', 'blue.300')}
+                    border="1px solid"
+                    borderColor={useColorModeValue('blue.200', 'blue.500')}
+                    boxShadow="sm"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    backdropFilter="blur(10px)"
+                    _hover={{
+                      transform: 'translateY(-1px)',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      borderColor: useColorModeValue('blue.300', 'blue.400'),
+                    }}
+                    transition="all 0.2s ease"
+                    flex="0 0 auto"
                   >
                     <HStack spacing={2}>
-                      <Icon as={RefreshCw} boxSize={responsiveStyles.buttons.action.iconSize} />
-                      <Text>Refresh</Text>
+                      <Text
+                        fontSize="sm"
+                        lineHeight="1"
+                        fontWeight="500"
+                        color={useColorModeValue('blue.600', 'blue.300')}
+                      >
+                        {transactions.length} transactions
+                      </Text>
+                    </HStack>
+                  </Badge>
+                  
+                  {hasFilters && (
+                    <Badge
+                      borderRadius="xl"
+                      px={4}
+                      py={2}
+                      fontSize="sm"
+                      fontWeight="500"
+                      bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                      color={useColorModeValue('orange.600', 'orange.300')}
+                      border="1px solid"
+                      borderColor={useColorModeValue('orange.200', 'orange.500')}
+                      boxShadow="sm"
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                      backdropFilter="blur(10px)"
+                      _hover={{
+                        transform: 'translateY(-1px)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        borderColor: useColorModeValue('orange.300', 'orange.400'),
+                      }}
+                      transition="all 0.2s ease"
+                      flex="0 0 auto"
+                    >
+                      <HStack spacing={2}>
+                        <Icon as={Filter} boxSize={3} color={useColorModeValue('orange.600', 'orange.300')} />
+                        <Text
+                          fontSize="sm"
+                          lineHeight="1"
+                          fontWeight="500"
+                          color={useColorModeValue('orange.600', 'orange.300')}
+                        >
+                          Filtered
+                        </Text>
+                      </HStack>
+                    </Badge>
+                  )}
+                </HStack>
+              </Flex>
+
+              {/* View Controls */}
+              <Flex
+                direction={{ base: 'column', sm: 'row' }}
+                justify="space-between"
+                align={{ base: 'stretch', sm: 'center' }}
+                gap={4}
+                wrap="wrap"
+              >
+                <HStack spacing={3} justify={{ base: 'center', sm: 'flex-start' }}>
+                  <Button
+                    size="sm"
+                    variant={!groupByMonth ? 'solid' : 'outline'}
+                    colorScheme="blue"
+                    borderRadius="xl"
+                    h="32px"
+                    px={4}
+                    fontSize="sm"
+                    fontWeight="500"
+                    bg={!groupByMonth ? 
+                      useColorModeValue('blue.500', 'blue.600') : 
+                      'transparent'
+                    }
+                    borderColor={useColorModeValue('blue.300', 'blue.600')}
+                    color={!groupByMonth ? 'white' : useColorModeValue('blue.600', 'blue.400')}
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'lg',
+                    }}
+                    onClick={() => setGroupByMonth(false)}
+                  >
+                    <HStack spacing={2}>
+                      <Icon as={List} boxSize={4} />
+                      <Text>List View</Text>
                     </HStack>
                   </Button>
-                </Flex>
-              </Box>
+                  
+                  <Button
+                    size="sm"
+                    variant={groupByMonth ? 'solid' : 'outline'}
+                    colorScheme="purple"
+                    borderRadius="xl"
+                    h="32px"
+                    px={4}
+                    fontSize="sm"
+                    fontWeight="500"
+                    bg={groupByMonth ? 
+                      useColorModeValue('purple.500', 'purple.600') : 
+                      'transparent'
+                    }
+                    borderColor={useColorModeValue('purple.300', 'purple.600')}
+                    color={groupByMonth ? 'white' : useColorModeValue('purple.600', 'purple.400')}
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      boxShadow: 'lg',
+                    }}
+                    onClick={() => setGroupByMonth(true)}
+                  >
+                    <HStack spacing={2}>
+                      <Icon as={Calendar} boxSize={4} />
+                      <Text>Grouped</Text>
+                    </HStack>
+                  </Button>
+                </HStack>
+                
+                <Button
+                  size="sm"
+                  variant="outline"
+                  colorScheme="gray"
+                  borderRadius="xl"
+                  h="32px"
+                  px={4}
+                  fontSize="sm"
+                  fontWeight="500"
+                  borderColor={borderColor}
+                  color={textColor}
+                  _hover={{
+                    bg: useColorModeValue('gray.50', 'gray.700'),
+                    transform: 'translateY(-2px)',
+                    boxShadow: 'md',
+                  }}
+                  onClick={onRefresh}
+                  w={{ base: 'full', sm: 'auto' }}
+                >
+                  <HStack spacing={2}>
+                    <Icon as={RefreshCw} boxSize={4} />
+                    <Text>Refresh</Text>
+                  </HStack>
+                </Button>
+              </Flex>
 
               {/* Transaction List */}
-              <Box 
-                p={responsiveStyles.addTransactionSection.card.padding}
-                sx={{
-                  paddingLeft: responsiveStyles.addTransactionSection.container.safeArea.paddingLeft,
-                  paddingRight: responsiveStyles.addTransactionSection.container.safeArea.paddingRight,
-                }}
-              >
+              <Box>
                 {groupByMonth ? (
                   <TransactionListGrouped
                     transactions={transactions}
@@ -326,7 +320,6 @@ export default function AllTransactionsSection({
             </VStack>
           </CardBody>
         </Card>
-      </Box>
     </Box>
   )
 }
