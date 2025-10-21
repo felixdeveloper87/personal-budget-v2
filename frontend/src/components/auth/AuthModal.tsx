@@ -69,7 +69,24 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
           borderRadius="3xl" filter="blur(40px)" opacity={0.6} />
 
         <VStack spacing={0} align="stretch" h="full">
-          <Box h="4px" sx={getShimmerStyles()} />
+          <Box 
+            h="4px" 
+            background={useColorModeValue(
+              'linear-gradient(90deg, #000000, #ffffff, #6b7280, #000000, #f9fafb, #374151, #ffffff, #9ca3af)',
+              'linear-gradient(90deg, #10b981, #60a5fa, #f87171, #a78bfa, #fbbf24)'
+            )}
+            backgroundSize="300% 100%"
+            animation={useColorModeValue(
+              'shimmer 12s ease-in-out infinite',
+              'shimmer 4s ease-in-out infinite'
+            )}
+            sx={{
+              '@keyframes shimmer': {
+                '0%': { backgroundPosition: '-200% 0' },
+                '100%': { backgroundPosition: '200% 0' }
+              }
+            }}
+          />
 
           {/* Header */}
           <Box {...headerStyles.container}>
