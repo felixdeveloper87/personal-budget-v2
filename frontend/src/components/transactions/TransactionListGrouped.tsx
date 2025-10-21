@@ -132,7 +132,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
         </HStack>
       </HStack>
 
-      <VStack spacing={4} align="stretch">
+      <VStack spacing={{ base: 2, md: 4 }} align="stretch">
         {monthGroups.map((group) => {
           const isExpanded = expandedMonths[group.monthKey] || false
           const transactionCount = group.transactions.length
@@ -148,24 +148,40 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
               {/* Month Header */}
               <Box
                 bg={headerBg}
-                p={4}
+                p={{ base: 3, md: 4 }}
                 cursor="pointer"
                 onClick={() => toggleMonth(group.monthKey)}
                 _hover={{ bg: useColorModeValue('gray.100', 'gray.600') }}
                 transition="background-color 0.2s"
               >
-                <HStack justify="space-between" align="center">
-                  <HStack spacing={4} align="center">
-                    <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                <HStack justify="space-between" align="center" wrap="nowrap" overflow="hidden">
+                  <HStack spacing={{ base: 2, md: 4 }} align="center" minW={0} flex={1}>
+                    <Text 
+                      fontSize={{ base: "sm", md: "lg" }} 
+                      fontWeight="bold" 
+                      color={textColor}
+                      noOfLines={1}
+                      minW={0}
+                    >
                       {group.monthName}
                     </Text>
-                    <Badge colorScheme="blue" variant="subtle">
-                      {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
+                    <Badge 
+                      colorScheme="blue" 
+                      variant="subtle" 
+                      fontSize="xs"
+                      px={2}
+                      py={0.5}
+                      borderRadius="full"
+                      minW="20px"
+                      textAlign="center"
+                      flexShrink={0}
+                    >
+                      {transactionCount}
                     </Badge>
                   </HStack>
 
-                  <HStack spacing={6} align="center">
-                    <VStack spacing={0} align="end">
+                  <HStack spacing={{ base: 2, md: 6 }} align="center" flexShrink={0}>
+                    <VStack spacing={0} align="end" display={{ base: "none", sm: "flex" }}>
                       <Text fontSize="sm" color={secondaryTextColor}>
                         Income: <Text as="span" color="green.600" fontWeight="bold">£{group.totalIncome.toFixed(2)}</Text>
                       </Text>
@@ -179,11 +195,24 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                       </Text>
                     </VStack>
 
+                    {/* Mobile summary */}
+                    <Text 
+                      fontSize="xs" 
+                      color={secondaryTextColor}
+                      display={{ base: "block", sm: "none" }}
+                      whiteSpace="nowrap"
+                    >
+                      Net: <Text as="span" color={group.netAmount >= 0 ? 'green.600' : 'red.600'} fontWeight="bold">
+                        £{group.netAmount.toFixed(2)}
+                      </Text>
+                    </Text>
+
                     <IconButton
                       aria-label={isExpanded ? 'Collapse month' : 'Expand month'}
                       icon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                       size="sm"
                       variant="ghost"
+                      flexShrink={0}
                     />
                   </HStack>
                 </HStack>
