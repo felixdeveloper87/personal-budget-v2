@@ -173,7 +173,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         >
           {/* Animated top bar */}
           <Box
-            height="4px"
+            height="2px"
             sx={getShimmerStyles()}
           />
           

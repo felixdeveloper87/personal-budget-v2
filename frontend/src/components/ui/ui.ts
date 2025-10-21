@@ -17,24 +17,24 @@ export const animations = {
 export const shimmerStyles = {
   keyframes: {
     shimmer: {
-      '0%': { backgroundPosition: '-200% 0' },
-      '100%': { backgroundPosition: '200% 0' }
+      '0%': { backgroundPosition: '-150% 0' },
+      '100%': { backgroundPosition: '150% 0' }
     }
   },
-  backgroundSize: '300% 100%',
+  backgroundSize: '200% 100%',
   animation: 'shimmer 4s ease-in-out infinite'
 } as const
 
 // Shimmer gradients for different color modes
 export const shimmerGradients = {
-  light: 'linear-gradient(90deg, #000000, #ffffff, #6b7280, #000000, #f9fafb, #374151, #ffffff, #9ca3af)',
-  dark: 'linear-gradient(90deg, #10b981, #60a5fa, #f87171, #a78bfa, #fbbf24)'
+  light: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.6), rgba(59, 130, 246, 0.3), transparent)',
+  dark: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), rgba(59, 130, 246, 0.8), rgba(59, 130, 246, 0.4), transparent)'
 } as const
 
 // Shimmer animations for different color modes
 export const shimmerAnimations = {
-  light: 'shimmer 12s ease-in-out infinite',
-  dark: 'shimmer 4s ease-in-out infinite'
+  light: 'shimmer 8s ease-in-out infinite',
+  dark: 'shimmer 6s ease-in-out infinite'
 } as const
 
 // Shimmer styles with theme-specific animations and gradients
@@ -52,11 +52,11 @@ export const getShimmerStyles = () => {
 
 // Static shimmer styles that can be used in sx prop without hooks
 export const shimmerStylesStatic = {
-  backgroundSize: '300% 100%',
+  backgroundSize: '200% 100%',
   keyframes: {
     shimmer: {
-      '0%': { backgroundPosition: '-200% 0' },
-      '100%': { backgroundPosition: '200% 0' }
+      '0%': { backgroundPosition: '-150% 0' },
+      '100%': { backgroundPosition: '150% 0' }
     }
   }
 } as const

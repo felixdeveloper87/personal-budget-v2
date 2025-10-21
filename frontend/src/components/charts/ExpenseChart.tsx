@@ -80,7 +80,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
       >
         {/* Animated top bar */}
         <Box
-          height="4px"
+          height="2px"
           sx={getShimmerStyles()}
         />
         
@@ -186,7 +186,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
       >
         {/* Animated top bar */}
         <Box
-          height="4px"
+          height="2px"
           sx={getShimmerStyles()}
         />
         
@@ -241,7 +241,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                     <Text
                       color={headerStyles.subtitle.color}
                       fontWeight="600"
-                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      fontSize={responsiveStyles.charts.progress.text.valueFontSize}
                       noOfLines={1}
                     >
                       {selectedPeriod} • ${totalExpenses.toLocaleString()}
@@ -264,7 +264,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                   transition="all 0.2s ease"
                   flexShrink={0}
                 >
-                  {isMobile ? 'View' : 'View Details'}
+                  {isMobile ? 'View All' : 'View All Details'}
                 </Button>
               </Flex>
             </Box>
@@ -413,7 +413,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 </Text>
               </HStack>
               <Text
-                fontSize="lg"
+                fontSize={{ base: 'xs', sm: 'md', md: 'lg' }}
                 fontWeight="800"
                 color={useColorModeValue('red.600', 'red.300')}
                 fontFamily="system-ui, -apple-system, sans-serif"

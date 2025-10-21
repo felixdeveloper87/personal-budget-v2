@@ -134,7 +134,7 @@ export default function InstallmentPlansModal({
         >
           {/* Animated top bar */}
           <Box
-            height="4px"
+            height="2px"
             sx={getShimmerStyles()}
           />
           

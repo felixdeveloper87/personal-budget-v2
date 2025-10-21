@@ -176,36 +176,33 @@ export default function InstallmentPlansSection() {
                     />
                   </Box>
 
-                  <VStack 
-                    align="flex-start"
-                    spacing={1}
-                    flex="0"
-                  >
+                  <HStack align="center" spacing={3} flex="0">
                     <Heading
                       size={sectionTitleStyles.size}
                       color={titleColor}
-                      fontWeight={sectionTitleStyles.fontWeight}
+                      fontWeight="600"
                       textAlign="left"
                       fontFamily={sectionTitleStyles.fontFamily}
-                      letterSpacing={sectionTitleStyles.letterSpacing}
-                      lineHeight={sectionTitleStyles.lineHeight}
+                      letterSpacing="-0.01em"
+                      lineHeight="1.2"
                       whiteSpace="nowrap"
+                      fontSize={{ base: 'sm', sm: 'lg' }}
+                      opacity={0.9}
                     >
                       Active Installments
                     </Heading>
                     <Text
-                      fontSize={
-                        responsiveStyles.installmentPlansSection.header.title.fontSize
-                      }
+                      fontSize={{ base: 'sm', sm: 'md' }}
                       color={subtitleColor}
                       fontWeight="500"
                       textAlign="left"
                       display={{ base: 'none', sm: 'block' }}
                       fontFamily="system-ui, -apple-system, sans-serif"
+                      whiteSpace="nowrap"
                     >
                       Track your ongoing payment plans
                     </Text>
-                  </VStack>
+                  </HStack>
                 </HStack>
 
                 {/* Right side - Interactive Badge */}

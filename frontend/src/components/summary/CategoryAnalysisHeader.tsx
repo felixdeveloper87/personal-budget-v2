@@ -33,10 +33,10 @@ export default function CategoryAnalysisHeader({
 
   return (
     <Flex
-      direction={responsiveStyles.addTransactionSection.header.direction}
-      align={{ base: 'stretch', sm: 'center' }}
+      direction={{ base: 'row', sm: 'row' }}
+      align="center"
       justify="space-between"
-      gap={responsiveStyles.addTransactionSection.header.gap}
+      gap={{ base: 2, sm: 4 }}
     >
       {/* Left side */}
       <HStack spacing={{ base: 2, sm: 2, md: 3 }} align="center" flex="0">
@@ -61,18 +61,20 @@ export default function CategoryAnalysisHeader({
           />
         </Box>
 
-        <VStack align="flex-start" spacing={1} flex="0">
+        <HStack align="center" spacing={3} flex="0">
           <Heading
             size={sectionTitleStyles.size}
             color={titleColor}
-            fontWeight={sectionTitleStyles.fontWeight}
+            fontWeight="600"
             textAlign="left"
             fontFamily={sectionTitleStyles.fontFamily}
-            letterSpacing={sectionTitleStyles.letterSpacing}
-            lineHeight={sectionTitleStyles.lineHeight}
+            letterSpacing="-0.01em"
+            lineHeight="1.2"
             whiteSpace="nowrap"
+            fontSize={{ base: 'sm', sm: 'lg' }}
+            opacity={0.9}
           >
-            Category Analysis
+            Categories
           </Heading>
           <Text
             fontSize={{ base: 'sm', sm: 'md' }}
@@ -81,22 +83,23 @@ export default function CategoryAnalysisHeader({
             textAlign="left"
             display={{ base: 'none', sm: 'block' }}
             fontFamily="system-ui, -apple-system, sans-serif"
+            whiteSpace="nowrap"
           >
             Detailed category breakdown and insights
           </Text>
-        </VStack>
+        </HStack>
       </HStack>
 
       {/* Right side - Tab Buttons */}
-      <HStack spacing={2} align="center" justify="center">
+      <HStack spacing={{ base: 1, sm: 2 }} align="center" justify="center">
         <Button
-          size="sm"
-          leftIcon={<Icon as={TrendingDown} boxSize={3} />}
+          size={{ base: 'xs', sm: 'sm' }}
+          leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, sm: 3 }} />}
           borderRadius="xl"
-          fontSize="xs"
+          fontSize={{ base: '2xs', sm: 'xs' }}
           fontWeight="500"
-          px={3}
-          py={2}
+          px={{ base: 2, sm: 3 }}
+          py={{ base: 1, sm: 2 }}
           h="auto"
           bg={useColorModeValue(
             activeTab === 'expenses' ? '#fecaca' : GRADIENTS.cardLight,
@@ -128,13 +131,13 @@ export default function CategoryAnalysisHeader({
           Expenses
         </Button>
         <Button
-          size="sm"
-          leftIcon={<Icon as={TrendingUp} boxSize={3} />}
+          size={{ base: 'xs', sm: 'sm' }}
+          leftIcon={<Icon as={TrendingUp} boxSize={{ base: 2, sm: 3 }} />}
           borderRadius="xl"
-          fontSize="xs"
+          fontSize={{ base: '2xs', sm: 'xs' }}
           fontWeight="500"
-          px={3}
-          py={2}
+          px={{ base: 2, sm: 3 }}
+          py={{ base: 1, sm: 2 }}
           h="auto"
           bg={useColorModeValue(
             activeTab === 'incomes' ? '#dcfce7' : GRADIENTS.cardLight,

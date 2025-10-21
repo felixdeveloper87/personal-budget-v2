@@ -80,7 +80,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       >
         {/* Animated top bar */}
         <Box
-          height="4px"
+          height="2px"
           sx={getShimmerStyles()}
         />
         
@@ -186,7 +186,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       >
         {/* Animated top bar */}
         <Box
-          height="4px"
+          height="2px"
           sx={getShimmerStyles()}
         />
         
@@ -240,7 +240,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                     <Text
                       color={headerStyles.subtitle.color}
                       fontWeight="600"
-                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      fontSize={responsiveStyles.charts.progress.text.valueFontSize}
                       noOfLines={1}
                     >
                       {selectedPeriod} • ${totalIncome.toLocaleString()}
@@ -263,7 +263,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                   transition="all 0.2s ease"
                   flexShrink={0}
                 >
-                  {isMobile ? 'View' : 'View Details'}
+                  {isMobile ? 'View All' : 'View All Details'}
                 </Button>
               </Flex>
             </Box>
@@ -427,7 +427,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 </Text>
               </HStack>
               <Text
-                fontSize={responsiveStyles.charts.footer.valueFontSize}
+                fontSize={{ base: 'xs', sm: 'md', md: 'lg' }}
                 fontWeight="800"
                 bg={useColorModeValue(
                   'linear-gradient(135deg, #22c55e, #16a34a)',

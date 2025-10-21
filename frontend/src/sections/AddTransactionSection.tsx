@@ -154,33 +154,33 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       />
                     </Box>
 
-                    <VStack 
-                      align={sectionHeaderStyles.titleContainer.align}
-                      spacing={sectionHeaderStyles.titleContainer.spacing}
-                      flex={sectionHeaderStyles.titleContainer.flex}
-                    >
+                    <HStack align="center" spacing={3} flex="0">
                       <Heading
                         size={sectionTitleStyles.size}
-                        fontWeight={sectionTitleStyles.fontWeight}
-                        textAlign={{ base: 'center', sm: 'left', md: 'left' }}
+                        fontWeight="600"
+                        textAlign="left"
                         fontFamily={sectionTitleStyles.fontFamily}
-                        letterSpacing={sectionTitleStyles.letterSpacing}
-                        lineHeight={sectionTitleStyles.lineHeight}
+                        letterSpacing="-0.01em"
+                        lineHeight="1.2"
+                        whiteSpace="nowrap"
+                        fontSize={{ base: 'sm', sm: 'lg' }}
                         display={{ base: 'none', sm: 'block', md: 'block' }}
+                        opacity={0.9}
                       >
                         Quick Actions
                       </Heading>
                       <Text
-                        fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
+                        fontSize={{ base: 'sm', sm: 'md' }}
                         color={useColorModeValue('gray.600', 'gray.300')}
                         fontWeight="500"
-                        textAlign={{ base: 'center', sm: 'left', md: 'left' }}
+                        textAlign="left"
                         display={{ base: 'none', sm: 'block', md: 'block' }}
                         fontFamily="system-ui, -apple-system, sans-serif"
+                        whiteSpace="nowrap"
                       >
                         Choose an action to quickly add a transaction
                       </Text>
-                    </VStack>
+                    </HStack>
                   </HStack>
 
                   {/* Buttons Section */}

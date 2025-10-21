@@ -104,7 +104,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
         >
           {/* Animated top bar */}
           <Box
-            height="4px"
+            height="2px"
             sx={getShimmerStyles()}
           />
 

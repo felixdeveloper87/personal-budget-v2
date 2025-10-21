@@ -69,34 +69,33 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
           />
         </Box>
 
-        <VStack 
-          align="flex-start"
-          spacing={1}
-          flex="0"
-        >
+        <HStack align="center" spacing={3} flex="0">
           <Heading
             size={sectionTitleStyles.size}
             color={titleColor}
-            fontWeight={sectionTitleStyles.fontWeight}
+            fontWeight="600"
             textAlign="left"
             fontFamily={sectionTitleStyles.fontFamily}
-            letterSpacing={sectionTitleStyles.letterSpacing}
-            lineHeight={sectionTitleStyles.lineHeight}
+            letterSpacing="-0.01em"
+            lineHeight="1.2"
             whiteSpace="nowrap"
+            fontSize={{ base: 'sm', sm: 'lg' }}
+            opacity={0.9}
           >
             Financial Overview
           </Heading>
           <Text
-            fontSize={responsiveStyles.addTransactionSection.header.title.fontSize}
+            fontSize={{ base: 'sm', sm: 'md' }}
             color={subtitleColor}
             fontWeight="500"
             textAlign="left"
             display={{ base: 'none', sm: 'block' }}
             fontFamily="system-ui, -apple-system, sans-serif"
+            whiteSpace="nowrap"
           >
             Complete overview with category analysis
           </Text>
-        </VStack>
+        </HStack>
       </HStack>
 
       {/* Right side - Modern Today Button */}
