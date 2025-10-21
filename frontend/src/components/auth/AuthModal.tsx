@@ -24,7 +24,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
 
   // 🎨 Theme shortcuts
   const themeGradients = {
-    title: useColorModeValue('linear-gradient(135deg,#fff,#f8fafc)', 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'),
+    title: useColorModeValue('black', 'linear-gradient(135deg,#f1f5f9,#e2e8f0)'),
     subtitle: useColorModeValue('linear-gradient(135deg,#3b82f6,#8b5cf6)', 'linear-gradient(135deg,#60a5fa,#a78bfa)'),
     logo: useColorModeValue('linear-gradient(135deg,#3b82f6,#1d4ed8)', 'linear-gradient(135deg,#60a5fa,#3b82f6)')
   }
@@ -158,16 +158,15 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                       flex="1"
                       minW={0}
                     >
-                      <Text
-                        bg={themeGradients.title}
-                        bgClip="text"
-                        fontWeight="800"
-                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
-                        lineHeight="shorter"
-                        noOfLines={1}
-                      >
-                        Personal Budget
-                      </Text>
+                       <Text
+                         color={themeGradients.title}
+                         fontWeight="800"
+                         fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                         lineHeight="shorter"
+                         noOfLines={1}
+                       >
+                         Personal Budget
+                       </Text>
                       <Text
                         bg={themeGradients.subtitle}
                         bgClip="text"
