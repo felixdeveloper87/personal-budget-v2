@@ -126,7 +126,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      Expense Analysis
+                      {useBreakpointValue({ base: 'Expense', sm: 'Expense Analysis' })}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
@@ -236,7 +236,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      Expense Analysis
+                      {useBreakpointValue({ base: 'Expense', sm: 'Expense Analysis' })}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
