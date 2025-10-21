@@ -70,7 +70,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
             {/* Logo + Title */}
             <Logo user={user} />
 
-            {/* Navigation */}
+            {/* Navigation (desktop) */}
             <Navigation 
               user={user} 
               currentPage={currentPage} 
@@ -80,11 +80,13 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
             {/* Search Button (desktop) */}
             <SearchButton user={user} onSearchOpen={onSearchOpen} />
 
-            {/* Right Controls */}
+            {/* Right Controls (includes mobile navigation) */}
             <HeaderControls 
               user={user} 
               onSearchOpen={onSearchOpen} 
-              onLogin={onLogin} 
+              onLogin={onLogin}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
             />
 
             {/* User Menu */}

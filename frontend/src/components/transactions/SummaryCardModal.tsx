@@ -207,13 +207,18 @@ export default function SummaryCardModal({
                         lineHeight="shorter"
                         noOfLines={1}
                       >
-                        {headerInfo.title}
+                        {selectedCard === 'transactions' ? 'Transactions Analytics' :
+                         selectedCard === 'income' ? 'Incomes' :
+                         selectedCard === 'expenses' ? 'Expenses' :
+                         selectedCard === 'balance' ? 'Balance' :
+                         headerInfo.title}
                       </Text>
                       <Text
                         color={useColorModeValue('gray.600', 'gray.300')}
                         fontWeight="600"
                         fontSize={{ base: 'xs', sm: 'sm' }}
                         noOfLines={1}
+                        display={{ base: 'none', sm: 'block' }}
                       >
                         {headerInfo.subtitle}
                       </Text>

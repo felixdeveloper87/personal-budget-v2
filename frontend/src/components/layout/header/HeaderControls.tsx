@@ -16,24 +16,34 @@ import {
   getLoginButtonStyles,
   getMobileSearchButtonStyles
 } from '../../ui'
+import MobileNavigation from './MobileNavigation'
 
 interface HeaderControlsProps {
   user?: any
   onSearchOpen: () => void
   onLogin?: () => void
+  currentPage?: 'dashboard' | 'transactions'
+  onPageChange?: (page: 'dashboard' | 'transactions') => void
 }
 
 /**
  * 🌫️ HeaderControls (Liquid Glass Edition - Fixed aria-label)
  * - Modern, glassy header actions with safe accessibility and theme awareness.
  */
-export default function HeaderControls({ user, onSearchOpen, onLogin }: HeaderControlsProps) {
+export default function HeaderControls({ user, onSearchOpen, onLogin, currentPage, onPageChange }: HeaderControlsProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const responsive = getResponsiveStyles()
 
   return (
     <Box {...getHeaderControlsContainerStyles()}>
       <HStack spacing={{ base: 2, md: 3, lg: 4 }}>
+        {/* 📱 Mobile Navigation */}
+        <MobileNavigation 
+          user={user} 
+          currentPage={currentPage} 
+          onPageChange={onPageChange} 
+        />
+
         {/* 🔍 Search (mobile/tablet) */}
         {user && (
           <Tooltip label="Search" hasArrow>
