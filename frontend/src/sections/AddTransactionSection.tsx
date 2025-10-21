@@ -92,22 +92,16 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
             content: '""',
             position: 'absolute',
             top: 0,
-            left: '-100%',
-            width: '100%',
+            left: 0,
+            right: 0,
             height: '2px',
             background: useColorModeValue(
-              'linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.6), transparent)',
-              'linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.8), transparent)'
+              'linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3))',
+              'linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.5))'
             ),
-            animation: 'shimmer 3s infinite',
+            borderRadius: '2xl 2xl 0 0',
             zIndex: 1,
             pointerEvents: 'none'
-          }}
-          sx={{
-            '@keyframes shimmer': {
-              '0%': { left: '-100%' },
-              '100%': { left: '100%' }
-            }
           }}
           _hover={{
             transform: 'translateY(-2px)',
