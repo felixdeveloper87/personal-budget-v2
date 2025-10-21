@@ -244,7 +244,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                       fontSize={responsiveStyles.charts.progress.text.valueFontSize}
                       noOfLines={1}
                     >
-                      {selectedPeriod} • ${totalExpenses.toLocaleString()}
+                      {selectedPeriod} • £{totalExpenses.toLocaleString()}
                     </Text>
                   </VStack>
                 </HStack>

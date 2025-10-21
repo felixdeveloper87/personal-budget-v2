@@ -231,7 +231,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         fontSize={{ base: 'xs', sm: 'sm' }}
                         noOfLines={1}
                       >
-                        {selectedPeriod} • ${total.toLocaleString()}
+                        {selectedPeriod} • £{total.toLocaleString()}
                       </Text>
                     </VStack>
                   </HStack>

@@ -48,11 +48,11 @@ export default function PeriodNavigator({
     GRADIENTS.cardLight,
     GRADIENTS.cardDark
   )
-  const unselectedColor = useColorModeValue('gray.600', 'gray.300')
+  const unselectedColor = useColorModeValue('gray.700', 'gray.100')
   const selectedColor = useColorModeValue('blue.600', 'blue.300')
-  const unselectedBorder = useColorModeValue('gray.200', 'gray.600')
-  const selectedBorder = useColorModeValue('blue.300', 'blue.500')
-  const hoverBorder = useColorModeValue('blue.200', 'blue.400')
+  const unselectedBorder = useColorModeValue('gray.400', 'gray.700')
+  const selectedBorder = useColorModeValue('blue.400', 'blue.500')
+  const hoverBorder = useColorModeValue('blue.300', 'blue.400')
 
   const periods = [
     { type: 'day' as PeriodType, label: 'Day', icon: Calendar },
@@ -146,12 +146,12 @@ export default function PeriodNavigator({
           h="32px"
           w="32px"
           borderRadius="xl"
-          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          borderColor={useColorModeValue('gray.400', 'gray.600')}
           color={useColorModeValue('gray.600', 'gray.300')}
           _hover={{
             transform: 'translateY(-1px)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.300', 'blue.500'),
+            borderColor: useColorModeValue('blue.400', 'blue.500'),
             color: useColorModeValue('blue.600', 'blue.300')
           }}
           transition="all 0.2s ease"
@@ -165,7 +165,7 @@ export default function PeriodNavigator({
           borderRadius="xl"
           bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           border="1px solid"
-          borderColor={useColorModeValue('gray.200', 'blue.500')}
+          borderColor={useColorModeValue('gray.300', 'blue.500')}
           backdropFilter="blur(10px)"
           h="32px"
           display="flex"
@@ -174,7 +174,7 @@ export default function PeriodNavigator({
           _hover={{
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.200', 'blue.400'),
+            borderColor: useColorModeValue('blue.300', 'blue.400'),
             bg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
           }}
           transition="all 0.2s ease"
@@ -197,12 +197,12 @@ export default function PeriodNavigator({
           h="32px"
           w="32px"
           borderRadius="xl"
-          borderColor={useColorModeValue('gray.300', 'gray.600')}
+          borderColor={useColorModeValue('gray.400', 'gray.600')}
           color={useColorModeValue('gray.600', 'gray.300')}
           _hover={{
             transform: 'translateY(-1px)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.300', 'blue.500'),
+            borderColor: useColorModeValue('blue.400', 'blue.500'),
             color: useColorModeValue('blue.600', 'blue.300')
           }}
           transition="all 0.2s ease"

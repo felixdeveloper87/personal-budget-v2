@@ -243,7 +243,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                       fontSize={responsiveStyles.charts.progress.text.valueFontSize}
                       noOfLines={1}
                     >
-                      {selectedPeriod} • ${totalIncome.toLocaleString()}
+                      {selectedPeriod} • £{totalIncome.toLocaleString()}
                     </Text>
                   </VStack>
                 </HStack>
