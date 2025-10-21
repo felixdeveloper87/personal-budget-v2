@@ -40,7 +40,6 @@ export default function InstallmentPlansSection() {
 
   // === Color mode values (declared at top to avoid hook order issues) ===
   const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
   const iconContainerBg = useColorModeValue('#fecaca', '#2d1b1b')
   const iconColor = useColorModeValue('red.600', 'red.300')
   const titleColor = useColorModeValue('gray.800', 'gray.100')
@@ -50,8 +49,21 @@ export default function InstallmentPlansSection() {
   const badgeBorderColor = useColorModeValue('red.200', 'red.500')
   const hoverBorderColor = useColorModeValue('red.200', 'red.500')
   const hoverBorderColor2 = useColorModeValue('red.300', 'red.400')
-  const topBorderColor = useColorModeValue('red.200', 'red.500')
   const badgeHoverBg = useColorModeValue('red.50', 'red.900')
+  
+  // Additional color mode values for conditional rendering
+  const cardBackgroundImage = useColorModeValue(
+    'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3)) border-box',
+    'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.4)) border-box'
+  )
+  const borderGradient = useColorModeValue(
+    'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3))',
+    'linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.5))'
+  )
+  const cardHoverBackgroundImage = useColorModeValue(
+    'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.4)) border-box',
+    'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.5)) border-box'
+  )
 
   // === Data fetching ===
   const fetchPlans = async () => {
@@ -79,7 +91,7 @@ export default function InstallmentPlansSection() {
     <>
       <Box
         w="full"
-        px={{ base: 2, sm: 3, md: 4, lg: 6 }}
+        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
         sx={{
           paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
@@ -101,22 +113,33 @@ export default function InstallmentPlansSection() {
             position="relative"
             bg={cardBg}
             backdropFilter="blur(10px)"
-            border="1px solid"
-            borderColor={cardBorderColor}
+            border="2px solid"
+            borderColor="transparent"
+            backgroundImage={cardBackgroundImage}
             borderRadius={responsiveStyles.installmentPlansSection.card.borderRadius}
             shadow="sm"
             overflow="hidden"
+            _before={{
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '2px',
+              background: borderGradient,
+              borderRadius: `${responsiveStyles.installmentPlansSection.card.borderRadius} ${responsiveStyles.installmentPlansSection.card.borderRadius} 0 0`,
+              zIndex: 1,
+              pointerEvents: 'none'
+            }}
             _hover={{
               transform: 'translateY(-2px)',
               boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-              borderColor: hoverBorderColor,
+              backgroundImage: cardHoverBackgroundImage
             }}
             transition="all 0.2s ease"
           >
-            {/* Decorative top border */}
-            <Box height="1px" bg={topBorderColor} />
 
-            <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
+            <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
               <Flex
                 direction={sectionHeaderStyles.container.direction}
                 align={sectionHeaderStyles.container.align}

@@ -69,7 +69,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       {/* 💳 Add Transaction Section */}
       <Box
         w="full"
-        px={{ base: 2, sm: 3, md: 4, lg: 6 }}
+        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
         sx={{
           paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
@@ -79,24 +79,48 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           backdropFilter="blur(10px)"
           border="1px solid"
-          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          borderColor="transparent"
+          backgroundImage={useColorModeValue(
+            'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3)) border-box',
+            'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.4)) border-box'
+          )}
           borderRadius="2xl"
           shadow="sm"
           overflow="hidden"
+          position="relative"
+          _before={{
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: '-100%',
+            width: '100%',
+            height: '2px',
+            background: useColorModeValue(
+              'linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.6), transparent)',
+              'linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.8), transparent)'
+            ),
+            animation: 'shimmer 3s infinite',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }}
+          sx={{
+            '@keyframes shimmer': {
+              '0%': { left: '-100%' },
+              '100%': { left: '100%' }
+            }
+          }}
           _hover={{
             transform: 'translateY(-2px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('green.200', 'green.500')
+            backgroundImage: useColorModeValue(
+              'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.4)) border-box',
+              'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.5)) border-box'
+            )
           }}
           transition="all 0.2s ease"
         >
-          {/* Simple top border */}
-          <Box
-            height="1px"
-            bg={useColorModeValue('green.300', 'green.500')}
-          />
 
-            <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
+            <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <Flex

@@ -107,11 +107,14 @@ export const getModalHeaderStyles = (useColorModeValue: any) => {
           responsiveStyles.modals.header.closeButton._hover.bg.light,
           responsiveStyles.modals.header.closeButton._hover.bg.dark
         )
-      },
-      iconColor: useColorModeValue(
+      }
+    },
+    closeButtonIcon: {
+      color: useColorModeValue(
         responsiveStyles.modals.header.closeButton.iconColor.light,
         responsiveStyles.modals.header.closeButton.iconColor.dark
-      )
+      ),
+      boxSize: responsiveStyles.modals.header.closeButton.iconSize
     },
     content: responsiveStyles.modals.header.content,
     iconContainer: {

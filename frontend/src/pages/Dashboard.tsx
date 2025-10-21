@@ -34,7 +34,7 @@ export default function Dashboard() {
           <Text>Loading data...</Text>
         </VStack>
       ) : (
-        <VStack spacing={3} align="stretch">
+        <VStack spacing={2} align="stretch">
           <AddTransactionSection transactions={transactions} onRefresh={loadData} />
 
           {/* Active Installment Plans - Right after Add Transaction */}

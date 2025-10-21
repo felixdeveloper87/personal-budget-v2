@@ -146,7 +146,7 @@ export default function InstallmentPlansModal({
                   onClick={onClose} 
                   {...headerStyles.closeButton}
                 >
-                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
+                  <Icon as={X} {...headerStyles.closeButtonIcon} />
                 </Button>
 
                 <Flex
