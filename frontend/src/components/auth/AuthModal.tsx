@@ -211,27 +211,17 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                   ...safariStyles.scrollable
                 }}
               >
-                <Box
-                  bg={cardBg}
-                  shadow="2xl"
-                  borderRadius={{ base: '2xl', sm: '3xl' }}
-                  border="1px"
-                  borderColor={borderColor}
-                  maxW={{ base: '100%', sm: 'lg' }}
-                  mx="auto"
-                  p={{ base: 4, sm: 8 }}
-                  pos="relative"
-                  _before={{
-                    content: '""',
-                    pos: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    h: '4px',
-                    bg: 'linear-gradient(90deg,#0ea5e9,#3b82f6,#8b5cf6,#ec4899)',
-                    borderTopRadius: { base: '2xl', sm: '3xl' }
-                  }}
-                >
+                 <Box
+                   bg={cardBg}
+                   shadow="2xl"
+                   borderRadius={{ base: '2xl', sm: '3xl' }}
+                   border="1px"
+                   borderColor={borderColor}
+                   maxW={{ base: '100%', sm: 'lg' }}
+                   mx="auto"
+                   p={{ base: 4, sm: 8 }}
+                   pos="relative"
+                 >
                   {isLogin
                     ? <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
                     : <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
