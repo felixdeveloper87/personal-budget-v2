@@ -79,40 +79,22 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           backdropFilter="blur(10px)"
           border="1px solid"
-          borderColor="transparent"
-          backgroundImage={useColorModeValue(
-            'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3)) border-box',
-            'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.4)) border-box'
-          )}
+          borderColor={useColorModeValue('gray.200', 'gray.600')}
           borderRadius="2xl"
           shadow="sm"
           overflow="hidden"
-          position="relative"
-          _before={{
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            height: '2px',
-            background: useColorModeValue(
-              'linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.3))',
-              'linear-gradient(135deg, rgba(34, 197, 94, 0.5), rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.5))'
-            ),
-            borderRadius: '2xl 2xl 0 0',
-            zIndex: 1,
-            pointerEvents: 'none'
-          }}
           _hover={{
             transform: 'translateY(-2px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            backgroundImage: useColorModeValue(
-              'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.4)) border-box',
-              'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.5)) border-box'
-            )
+            borderColor: useColorModeValue('green.200', 'green.500')
           }}
           transition="all 0.2s ease"
         >
+          {/* Simple top border with green color */}
+          <Box
+            height="1px"
+            bg={useColorModeValue('green.200', 'green.500')}
+          />
 
             <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">

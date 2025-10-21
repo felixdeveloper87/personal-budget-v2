@@ -51,19 +51,6 @@ export default function InstallmentPlansSection() {
   const hoverBorderColor2 = useColorModeValue('red.300', 'red.400')
   const badgeHoverBg = useColorModeValue('red.50', 'red.900')
   
-  // Additional color mode values for conditional rendering
-  const cardBackgroundImage = useColorModeValue(
-    'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3)) border-box',
-    'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.4)) border-box'
-  )
-  const borderGradient = useColorModeValue(
-    'linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.3))',
-    'linear-gradient(135deg, rgba(239, 68, 68, 0.5), rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.5))'
-  )
-  const cardHoverBackgroundImage = useColorModeValue(
-    'linear-gradient(white, white) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.4)) border-box',
-    'linear-gradient(rgba(26, 32, 44, 0.8), rgba(26, 32, 44, 0.8)) padding-box, linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.5)) border-box'
-  )
 
   // === Data fetching ===
   const fetchPlans = async () => {
@@ -110,34 +97,25 @@ export default function InstallmentPlansSection() {
         ) : (
           // 💳 Main Card
           <Card
-            position="relative"
             bg={cardBg}
             backdropFilter="blur(10px)"
-            border="2px solid"
-            borderColor="transparent"
-            backgroundImage={cardBackgroundImage}
-            borderRadius={responsiveStyles.installmentPlansSection.card.borderRadius}
+            border="1px solid"
+            borderColor={useColorModeValue('gray.200', 'gray.600')}
+            borderRadius="2xl"
             shadow="sm"
             overflow="hidden"
-            _before={{
-              content: '""',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: '2px',
-              background: borderGradient,
-              borderRadius: `${responsiveStyles.installmentPlansSection.card.borderRadius} ${responsiveStyles.installmentPlansSection.card.borderRadius} 0 0`,
-              zIndex: 1,
-              pointerEvents: 'none'
-            }}
             _hover={{
               transform: 'translateY(-2px)',
               boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-              backgroundImage: cardHoverBackgroundImage
+              borderColor: useColorModeValue('red.200', 'red.500')
             }}
             transition="all 0.2s ease"
           >
+            {/* Simple top border with red color */}
+            <Box
+              height="1px"
+              bg={useColorModeValue('red.200', 'red.500')}
+            />
 
             <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
               <Flex
