@@ -141,38 +141,22 @@ export default function AllTransactionsSection({
                 </HStack>
 
                 {/* Badges Section */}
-                <HStack spacing={3}>
+                <HStack spacing={6}>
+                  {/* Transaction count badge */}
                   <Badge
-                    borderRadius="xl"
-                    px={4}
-                    py={2}
-                    fontSize="sm"
+                    borderRadius="full"
+                    px={3}
+                    py={1}
+                    fontSize="xs"
                     fontWeight="500"
-                    bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                    bg={useColorModeValue('blue.100', 'blue.900')}
                     color={useColorModeValue('blue.600', 'blue.300')}
                     border="1px solid"
-                    borderColor={useColorModeValue('blue.200', 'blue.500')}
-                    boxShadow="sm"
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                    backdropFilter="blur(10px)"
-                    _hover={{
-                      transform: 'translateY(-1px)',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                      borderColor: useColorModeValue('blue.300', 'blue.400'),
-                    }}
-                    transition="all 0.2s ease"
-                    flex="0 0 auto"
+                    borderColor={useColorModeValue('blue.200', 'blue.700')}
+                    textAlign="center"
+                    flexShrink={0}
                   >
-                    <HStack spacing={2}>
-                      <Text
-                        fontSize="sm"
-                        lineHeight="1"
-                        fontWeight="500"
-                        color={useColorModeValue('blue.600', 'blue.300')}
-                      >
-                        {transactions.length} transactions
-                      </Text>
-                    </HStack>
+                    {transactions.length} transactions
                   </Badge>
                   
                   {hasFilters && (
