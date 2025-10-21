@@ -79,7 +79,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           backdropFilter="blur(10px)"
           border="1px solid"
-          borderColor={useColorModeValue('gray.200', 'gray.600')}
+          borderColor={useColorModeValue('gray.400', 'gray.700')}
           borderRadius="2xl"
           shadow="sm"
           overflow="hidden"
@@ -93,7 +93,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           {/* Simple top border with green color */}
           <Box
             height="1px"
-            bg={useColorModeValue('green.200', 'green.500')}
+            bg={useColorModeValue('green.400', 'green.500')}
           />
 
             <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>

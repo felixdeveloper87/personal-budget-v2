@@ -100,7 +100,7 @@ export default function InstallmentPlansSection() {
             bg={cardBg}
             backdropFilter="blur(10px)"
             border="1px solid"
-            borderColor={useColorModeValue('gray.200', 'gray.600')}
+            borderColor={useColorModeValue('gray.400', 'gray.700')}
             borderRadius="2xl"
             shadow="sm"
             overflow="hidden"
@@ -114,7 +114,7 @@ export default function InstallmentPlansSection() {
             {/* Simple top border with red color */}
             <Box
               height="1px"
-              bg={useColorModeValue('red.200', 'red.500')}
+              bg={useColorModeValue('red.400', 'red.500')}
             />
 
             <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>

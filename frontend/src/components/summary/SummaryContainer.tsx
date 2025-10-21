@@ -51,7 +51,7 @@ export default function SummaryContainer({
 
   // Modern post-it inspired colors
   const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.600')
+  const cardBorderColor = useColorModeValue('gray.400', 'gray.700')
 
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
