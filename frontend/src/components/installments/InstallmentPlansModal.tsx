@@ -2,9 +2,8 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
+  Card,
+  CardBody,
   Box,
   VStack,
   HStack,
@@ -21,7 +20,7 @@ import { CreditCard, Sparkles, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
-import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles } from '../ui'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles } from '../ui'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean
@@ -39,16 +38,9 @@ export default function InstallmentPlansModal({
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
+  const headerStyles = getModalHeaderStyles(useColorModeValue)
   
-  // Move all useColorModeValue calls to the top
-  const modalBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.95)',
-    'rgba(17, 17, 17, 0.95)'
-  )
-  const headerBg = useColorModeValue(
-    '#dbeafe', // Azul post-it
-    colors.cardBg // Usar cor do tema para modo dark
-  )
+  // Simplified color values
   const emptyStateBg = useColorModeValue(
     '#dbeafe', // Azul post-it
     colors.cardBg // Usar cor do tema para modo dark
@@ -57,10 +49,6 @@ export default function InstallmentPlansModal({
     'gray.800', // Texto escuro
     colors.text.primary // Usar cor do tema para modo dark
   )
-  const closeButtonBg = useColorModeValue('rgba(255, 255, 255, 0.8)', colors.cardBg)
-  const closeButtonBorderColor = useColorModeValue('gray.300', colors.border)
-  const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
-  const closeButtonIconColor = useColorModeValue('gray.700', colors.text.primary)
   const iconBg = useColorModeValue(
     '#60a5fa', // Azul claro
     colors.accent // Usar cor do tema para modo dark
@@ -69,150 +57,173 @@ export default function InstallmentPlansModal({
     '#60a5fa', // Azul claro
     colors.accent // Usar cor do tema para modo dark
   )
-  const headerTextColor = useColorModeValue('gray.800', 'white')
   const plansHeaderTextColor = useColorModeValue('gray.800', 'white')
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'md', md: 'lg', lg: 'xl' }}
-      closeOnOverlayClick={true}
-      motionPreset="slideInBottom"
+      size={{ base: 'full', sm: 'lg', md: 'xl' }}
+      isCentered
       scrollBehavior="inside"
-      isCentered={false}
+      closeOnOverlayClick={false}
+      closeOnEsc={true}
+      blockScrollOnMount={true}
     >
       <ModalOverlay 
         bg="blackAlpha.600" 
-        backdropFilter="blur(12px)"
-        css={{
-          backdropFilter: 'blur(12px)',
-          WebkitBackdropFilter: 'blur(12px)',
-        }}
+        backdropFilter="blur(10px)"
       />
-      <ModalContent
-        borderRadius={{ base: 'none', sm: '3xl' }}
-        h={{ base: '100dvh', sm: 'auto' }}
-        maxH={{ base: '100dvh', sm: '85vh' }}
-        mx={{ base: 0, sm: 4 }}
-        my={{ base: 0, sm: 4 }}
-        border="1px solid"
-        borderColor={colors.border}
-        boxShadow="0 32px 64px -12px rgba(0,0,0,0.4)"
+      <ModalContent 
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
-        bg={modalBg}
-        backdropFilter="blur(20px)"
-        position="relative"
+        m={{ base: 0, md: 4 }}
+        display="flex"
+        flexDirection="column"
+        {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { 
-              opacity: 0, 
-              transform: 'translateY(20px) scale(0.95)' 
-            },
-            to: { 
-              opacity: 1, 
-              transform: 'translateY(0) scale(1)' 
-            }
-          }
+          ...safariStyles.modal
         }}
       >
-        {/* Barra superior animada */}
+        {/* Decorative background */}
         <Box
-          height="4px"
-          sx={getShimmerStyles()}
-        />
-
-        <ModalHeader
-          textAlign="center"
-          borderBottom="1px"
-          borderColor={colors.border}
-          py={8}
-          bg={headerBg}
-          color={headerTextColor}
-          fontWeight="800"
-          letterSpacing="wide"
-          position="relative"
-          backdropFilter="blur(8px)"
-        >
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={3}
-            mb={2}
-          >
-            <Box
-              p={2}
-              borderRadius="full"
-              bg="#60a5fa"
-              sx={{
-                animation: animations.glow,
-                '@keyframes glow': {
-                  '0%, 100%': { 
-                    boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
-                  },
-                  '50%': { 
-                    boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
-                  }
-                }
-              }}
-            >
-              <CreditCard size={22} color="white" />
-            </Box>
-            <Text>Active Installment Plans</Text>
-            <Sparkles size={20} />
-          </Box>
-          <Text 
-            fontSize={{ base: '2xs', sm: 'xs' }}
-            opacity={0.7}
-            fontWeight="400"
-          >
-            Track your ongoing payment plans
-          </Text>
-        </ModalHeader>
-
-        <Button
           position="absolute"
-          top={{ base: 4, sm: 5, md: 6 }}
-          right={{ base: 4, sm: 5, md: 6 }}
-          size="lg"
-          variant="ghost"
-          onClick={onClose}
-          borderRadius="full"
-          p={3}
-          bg={closeButtonBg}
-          backdropFilter="blur(10px)"
+          top="-50px"
+          left="-50px"
+          right="-50px"
+          height="200px"
+          background={gradients.decorative}
+          borderRadius="3xl"
+          filter="blur(40px)"
+          opacity={0.6}
+          zIndex={0}
+        />
+        
+        {/* Main card with glassmorphism */}
+        <Card
+          position="relative"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.95)',
+            'rgba(17, 17, 17, 0.95)'
+          )}
+          backdropFilter="blur(20px)"
           border="1px solid"
-          borderColor={closeButtonBorderColor}
-          _hover={{
-            bg: closeButtonHoverBg,
-            borderColor: 'red.300',
-            transform: 'scale(1.1)',
-            boxShadow: 'lg',
-          }}
-          _active={{
-            transform: 'scale(0.95)',
-          }}
-          transition="all 0.2s ease"
-          zIndex={10}
-          boxShadow="md"
-          aria-label="Close modal"
-        >
-          <Icon as={X} boxSize={5} color={closeButtonIconColor} />
-        </Button>
-
-        <ModalBody
-          p={0}
-          overflowY="auto"
-          maxH={{ base: 'calc(100dvh - 200px)', sm: '70vh' }}
+          borderColor={useColorModeValue(
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.1)'
+          )}
+          borderRadius={{ base: 'none', sm: '3xl' }}
+          shadow="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
           sx={{
-            ...safariStyles.scrollable,
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1rem)',
+            animation: animations.slideIn,
+            '@keyframes slideIn': {
+              from: { 
+                opacity: 0, 
+                transform: 'translateY(20px) scale(0.95)' 
+              },
+              to: { 
+                opacity: 1, 
+                transform: 'translateY(0) scale(1)' 
+              }
+            }
           }}
         >
+          {/* Animated top bar */}
+          <Box
+            height="4px"
+            sx={getShimmerStyles()}
+          />
+          
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
+            <VStack spacing={0} align="stretch" h="full">
+              {/* Header */}
+              <Box {...headerStyles.container}>
+                <Button 
+                  onClick={onClose} 
+                  {...headerStyles.closeButton}
+                >
+                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
+                </Button>
+
+                <Flex
+                  direction="row"
+                  align="center"
+                  justify="center"
+                  flexWrap="wrap"
+                  pr={{ base: 14, sm: 20 }}
+                  pt={{ base: 2, sm: 0 }}
+                  gap={{ base: 2, sm: 3 }}
+                >
+                  {/* Logo + Text */}
+                  <HStack
+                    spacing={{ base: 2, sm: 3 }}
+                    align="center"
+                    flex="1"
+                    minW={0}
+                  >
+                    <Box
+                      p={{ base: 2, sm: 3 }}
+                      borderRadius="2xl"
+                      bg={iconBg}
+                      boxShadow="lg"
+                      flexShrink={0}
+                      sx={{
+                        animation: animations.glow,
+                        '@keyframes glow': {
+                          '0%, 100%': { 
+                            boxShadow: '0 0 5px rgba(96, 165, 250, 0.3)' 
+                          },
+                          '50%': { 
+                            boxShadow: '0 0 20px rgba(96, 165, 250, 0.6), 0 0 30px rgba(96, 165, 250, 0.4)' 
+                          }
+                        }
+                      }}
+                    >
+                      <CreditCard size={22} color="white" />
+                    </Box>
+                    <VStack
+                      align="start"
+                      spacing={0}
+                      flex="1"
+                      minW={0}
+                    >
+                      <Text
+                        color={useColorModeValue('black', 'white')}
+                        fontWeight="800"
+                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                        lineHeight="shorter"
+                        noOfLines={1}
+                      >
+                        Active Installment Plans
+                      </Text>
+                      <Text
+                        color={useColorModeValue('gray.600', 'gray.300')}
+                        fontWeight="600"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        noOfLines={1}
+                      >
+                        Track your ongoing payment plans
+                      </Text>
+                    </VStack>
+                  </HStack>
+                </Flex>
+              </Box>
+
+              {/* Modal content - Scrollable */}
+              <Box 
+                flex="1" 
+                p={responsiveStyles.spacing.container}
+                overflowY="auto"
+                {...responsiveStyles.content}
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable
+                }}
+              >
           <Box p={{ base: 4, sm: 6, md: 8 }}>
             {plans.length === 0 ? (
               <VStack spacing={6} align="center" py={20}>
@@ -312,8 +323,11 @@ export default function InstallmentPlansModal({
                 </SimpleGrid>
               </VStack>
             )}
-          </Box>
-        </ModalBody>
+                </Box>
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
       </ModalContent>
     </Modal>
   )

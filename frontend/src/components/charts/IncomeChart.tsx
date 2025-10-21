@@ -1,11 +1,10 @@
-import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue, Card, CardBody } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles } from '../ui'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
-import { GRADIENTS } from '../../theme'
 
 interface IncomeChartProps {
   transactions: Transaction[]
@@ -16,6 +15,8 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const { isOpen, onOpen, onClose } = useDisclosure()
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'INCOME')
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   const handleClose = useCallback(() => {
@@ -48,112 +49,224 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
 
   if (sortedCategories.length === 0) {
     return (
-      <Box
-        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
-        backdropFilter="blur(10px)"
+      <Card
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        )}
+        backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         borderRadius="2xl"
-        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
-        boxShadow="sm"
+        shadow="2xl"
+        overflow="hidden"
         w="full"
-        _hover={{
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-          borderColor: useColorModeValue('green.200', 'green.500')
+        sx={{
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
         }}
-        transition="all 0.2s ease"
       >
-        <VStack spacing={4} align="center" py={8}>
-          <Box
-            p={{ base: 2, sm: 2.5, md: 3 }}
-            borderRadius="xl"
-            bg={useColorModeValue('#dcfce7', '#1f2937')} // Verde post-it
-            border="1px solid"
-            borderColor={useColorModeValue('green.200', 'green.500')}
-            boxShadow="sm"
-            _hover={{
-              transform: 'translateY(-1px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              borderColor: useColorModeValue('green.300', 'green.400')
-            }}
-            transition="all 0.2s ease"
-          >
-            <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('green.600', 'green.300')} />
-          </Box>
-          <Text fontSize={{ base: 'md', sm: 'lg', md: 'xl' }} fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
-            No income data available
-          </Text>
-          <Text fontSize={{ base: 'sm', sm: 'md' }} color={useColorModeValue('gray.600', 'gray.300')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
-            Add some income to see your earnings breakdown
-          </Text>
-        </VStack>
-      </Box>
+        {/* Animated top bar */}
+        <Box
+          height="4px"
+          sx={getShimmerStyles()}
+        />
+        
+        <CardBody p={0} display="flex" flexDirection="column" h="full">
+          <VStack spacing={0} align="stretch" h="full">
+            {/* Header */}
+            <Box {...headerStyles.container}>
+              <Flex
+                direction="row"
+                align="center"
+                justify="center"
+                flexWrap="wrap"
+                pr={{ base: 4, sm: 6 }}
+                pt={{ base: 2, sm: 0 }}
+                gap={{ base: 2, sm: 3 }}
+              >
+                {/* Logo + Text */}
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
+                  align="center"
+                  flex="1"
+                  minW={0}
+                >
+                  <Box
+                    p={{ base: 2, sm: 3 }}
+                    borderRadius="2xl"
+                    bg={headerStyles.iconContainer.bg}
+                    boxShadow="lg"
+                    flexShrink={0}
+                  >
+                    <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color="white" />
+                  </Box>
+                  <VStack
+                    align="start"
+                    spacing={0}
+                    flex="1"
+                    minW={0}
+                  >
+                    <Text
+                      color={headerStyles.title.color}
+                      fontWeight="800"
+                      fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                      lineHeight="shorter"
+                      noOfLines={1}
+                    >
+                      Income Analysis
+                    </Text>
+                    <Text
+                      color={headerStyles.subtitle.color}
+                      fontWeight="600"
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      noOfLines={1}
+                    >
+                      No income data available
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Flex>
+            </Box>
+
+            {/* Content */}
+            <Box p={{ base: 4, sm: 6, md: 8 }} textAlign="center">
+              <Text fontSize={{ base: 'sm', sm: 'md' }} color={headerStyles.subtitle.color}>
+                Add some income to see your earnings breakdown
+              </Text>
+            </Box>
+          </VStack>
+        </CardBody>
+      </Card>
     )
   }
 
   return (
     <>
-      <Box
-        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
-        backdropFilter="blur(10px)"
+      <Card
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        )}
+        backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         borderRadius="2xl"
-        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
-        boxShadow="sm"
+        shadow="2xl"
+        overflow="hidden"
         w="full"
-        _hover={{
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-          borderColor: useColorModeValue('green.200', 'green.500')
+        sx={{
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
         }}
-        transition="all 0.2s ease"
       >
-        {/* Simple top border */}
+        {/* Animated top bar */}
         <Box
-          height="1px"
-          bg={useColorModeValue('green.200', 'green.500')}
-          mb={4}
+          height="4px"
+          sx={getShimmerStyles()}
         />
-        <VStack spacing={4} align="stretch">
-          {/* Header compacto */}
-          <HStack spacing={4} align="center">
-            <Box
-              p={{ base: 2, sm: 2.5, md: 3 }}
-              borderRadius="xl"
-              bg={useColorModeValue('#dcfce7', '#1f2937')} // Verde post-it
-              border="1px solid"
-              borderColor={useColorModeValue('green.200', 'green.500')}
-              boxShadow="sm"
-              _hover={{
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                borderColor: useColorModeValue('green.300', 'green.400')
-              }}
-              transition="all 0.2s ease"
-            >
-              <Icon as={TrendingUp} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('green.600', 'green.300')} />
+        
+        <CardBody p={0} display="flex" flexDirection="column" h="full">
+          <VStack spacing={0} align="stretch" h="full">
+            {/* Content */}
+            <Box p={{ base: 4, sm: 6, md: 8 }}>
+              <VStack spacing={4} align="stretch">
+            {/* Header */}
+            <Box {...headerStyles.container}>
+              <Flex
+                direction="row"
+                align="center"
+                justify="space-between"
+                flexWrap="wrap"
+                pr={{ base: 4, sm: 6 }}
+                pt={{ base: 2, sm: 0 }}
+                gap={{ base: 2, sm: 3 }}
+              >
+                {/* Logo + Text */}
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
+                  align="center"
+                  flex="1"
+                  minW={0}
+                >
+                  <Box
+                    p={{ base: 2, sm: 3 }}
+                    borderRadius="2xl"
+                    bg={headerStyles.iconContainer.bg}
+                    boxShadow="lg"
+                    flexShrink={0}
+                  >
+                    <Icon as={TrendingUp} boxSize={{ base: 4, sm: 5, md: 6 }} color="white" />
+                  </Box>
+                  <VStack
+                    align="start"
+                    spacing={0}
+                    flex="1"
+                    minW={0}
+                  >
+                    <Text
+                      color={headerStyles.title.color}
+                      fontWeight="800"
+                      fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                      lineHeight="shorter"
+                      noOfLines={1}
+                    >
+                      Income Analysis
+                    </Text>
+                    <Text
+                      color={headerStyles.subtitle.color}
+                      fontWeight="600"
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      noOfLines={1}
+                    >
+                      {selectedPeriod} • ${totalIncome.toLocaleString()}
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* View Button */}
+                <Button
+                  size={{ base: 'sm', sm: 'md' }}
+                  variant="ghost"
+                  colorScheme="green"
+                  onClick={onOpen}
+                  rightIcon={<Icon as={Eye} boxSize={4} />}
+                  _hover={{
+                    bg: useColorModeValue('green.50', 'green.900'),
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  transition="all 0.2s ease"
+                  flexShrink={0}
+                >
+                  {isMobile ? 'View' : 'View Details'}
+                </Button>
+              </Flex>
             </Box>
-            <VStack align="start" spacing={0.5}>
-              <Heading
-                size={{ base: 'md', sm: 'lg', md: 'xl' }}
-                color={useColorModeValue('gray.800', 'gray.100')}
-                fontWeight="700"
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                Income Analysis
-              </Heading>
-              <Text
-                fontSize={{ base: 'sm', sm: 'md' }}
-                color={useColorModeValue('gray.600', 'gray.300')}
-                fontWeight="500"
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                Detailed earnings breakdown by category
-              </Text>
-            </VStack>
-          </HStack>
           
           <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
             <Badge
@@ -224,7 +337,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 <Box 
                   key={category}
                   p={responsiveStyles.charts.progress.item.padding}
-                  bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                  bg={useColorModeValue(gradients.background, gradients.background)}
                   borderRadius="xl"
                   border="2px solid"
                   borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
@@ -279,7 +392,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               <Box 
                 textAlign="center" 
                 py={responsiveStyles.charts.progress.container.padding}
-                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                bg={useColorModeValue(gradients.background, gradients.background)}
                 borderRadius="xl"
                 border="1px dashed"
                 borderColor={colors.border}
@@ -323,9 +436,12 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 £{totalIncome.toFixed(2)}
               </Text>
             </HStack>
-          </Box>
-        </VStack>
-      </Box>
+              </Box>
+              </VStack>
+            </Box>
+          </VStack>
+        </CardBody>
+      </Card>
 
       {/* Category Modal */}
       <CategoryModal

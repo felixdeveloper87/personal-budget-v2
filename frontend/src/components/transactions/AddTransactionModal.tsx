@@ -2,30 +2,24 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
+  Card,
+  CardBody,
   Box,
   Text,
   useColorModeValue,
   VStack,
   Button,
   Icon,
+  HStack,
+  Flex,
 } from '@chakra-ui/react'
 import { TrendingUp, TrendingDown, Plus, Minus, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles } from '../ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles, getTransactionModalHeaderStyles } from '../ui'
 
-// 🎨 Constantes para gradientes e animações
-const GRADIENTS = {
-  income: 'linear-gradient(135deg, #dcfce7, #bbf7d0, #86efac)', // Verde post-it
-  expense: 'linear-gradient(135deg, #fecaca, #fca5a5, #f87171)', // Rosa post-it
-}
-
-const DARK_GRADIENTS = {
-  income: 'linear-gradient(135deg, #166534, #15803d, #16a34a)', // Verde escuro
-  expense: 'linear-gradient(135deg, #991b1b, #dc2626, #ef4444)', // Vermelho escuro
-}
-
+// 🎨 Constantes para animações
 const ANIMATIONS = {
   shimmer: 'shimmer 4s ease-in-out infinite',
   pulse: 'pulse 2s ease-in-out infinite',
@@ -51,10 +45,8 @@ export default function AddTransactionModal({
   const colors = useThemeColors()
   const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
-  const gradient = useColorModeValue(
-    type === 'INCOME' ? GRADIENTS.income : GRADIENTS.expense,
-    type === 'INCOME' ? DARK_GRADIENTS.income : DARK_GRADIENTS.expense
-  )
+  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
+  
   const handleTransactionCreated = () => {
     onTransactionCreated()
     onClose()
@@ -65,7 +57,7 @@ export default function AddTransactionModal({
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl' }}
-      isCentered={false}
+      isCentered
       scrollBehavior="inside"
       closeOnOverlayClick={false}
       closeOnEsc={true}
@@ -76,42 +68,15 @@ export default function AddTransactionModal({
         backdropFilter="blur(10px)"
       />
       <ModalContent 
-        borderRadius={{ base: '2xl', sm: '2xl', md: '3xl' }}
-        overflow="visible"
-        m={{ base: 0, sm: 4, md: 4 }}
-        mt={{ base: 8, sm: 8, md: 4 }}
-        mb={{ base: 0, sm: 4, md: 4 }}
-        mx={{ base: 0, sm: 4, md: 4 }}
+        borderRadius={{ base: 'none', md: '3xl' }}
+        overflow="hidden"
+        m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.95)',
-          'rgba(17, 17, 17, 0.95)'
-        )}
-        backdropFilter="blur(20px)"
-        border="1px solid"
-        borderColor={useColorModeValue(
-          'rgba(255, 255, 255, 0.2)',
-          'rgba(255, 255, 255, 0.1)'
-        )}
-        shadow="2xl"
-        position="relative"
-        maxH={{ base: 'calc(100vh - 2rem)', sm: '90vh', md: '90vh' }}
-        h={{ base: 'auto', sm: 'auto', md: 'auto' }}
+        {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          animation: animations.slideIn,
-          '@keyframes slideIn': {
-            from: { 
-              opacity: 0, 
-              transform: 'translateY(20px) scale(0.95)' 
-            },
-            to: { 
-              opacity: 1, 
-              transform: 'translateY(0) scale(1)' 
-            }
-          }
+          ...safariStyles.modal
         }}
       >        
         {/* Decorative background */}
@@ -128,102 +93,151 @@ export default function AddTransactionModal({
           zIndex={0}
         />
         
-        <VStack spacing={0} align="stretch" h="full" overflow="hidden">
-          {/* Header */}
+        {/* Main card with glassmorphism */}
+        <Card
+          position="relative"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.95)',
+            'rgba(17, 17, 17, 0.95)'
+          )}
+          backdropFilter="blur(20px)"
+          border="1px solid"
+          borderColor={useColorModeValue(
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.1)'
+          )}
+          borderRadius={{ base: 'none', sm: '3xl' }}
+          shadow="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
+          sx={{
+            animation: animations.slideIn,
+            '@keyframes slideIn': {
+              from: { 
+                opacity: 0, 
+                transform: 'translateY(20px) scale(0.95)' 
+              },
+              to: { 
+                opacity: 1, 
+                transform: 'translateY(0) scale(1)' 
+              }
+            }
+          }}
+        >
+          {/* Animated top bar */}
           <Box
-            textAlign="center"
-            borderBottom="1px"
-            borderColor={colors.border}
-            py={{ base: 4, md: 6 }}
-            bg={gradient}
-            color={useColorModeValue('gray.800', 'white')}
-            fontWeight="800"
-            letterSpacing="wide"
-            position="relative"
-            sx={{ animation: animations.shimmer }}
-          >
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              gap={{ base: 2, md: 3 }}
-              mb={1}
-            >
-              <Box
-                p={{ base: 1.5, md: 2 }}
-                borderRadius="full"
-                bg={useColorModeValue(
-                  type === 'INCOME' ? '#10b981' : '#ef4444',
-                  type === 'INCOME' ? '#22c55e' : '#dc2626'
-                )}
-                animation={ANIMATIONS.pulse}
-                boxSize={{ base: 8, md: 10 }}
-              >
-                {type === 'INCOME' ? <Plus size={16} color="white" /> : <Minus size={16} color="white" />}
-              </Box>
-              <Text fontSize={{ base: 'md', md: 'lg' }}>
-                {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
-              </Text>
-              {type === 'INCOME' ? <TrendingUp size={16} color={useColorModeValue('#10b981', '#22c55e')} /> : <TrendingDown size={16} color={useColorModeValue('#ef4444', '#dc2626')} />}
-            </Box>
-            <Text fontSize={{ base: 'xs', md: 'sm' }} opacity={0.9}>
-              {type === 'INCOME' ? 'Track your incoming money' : 'Record your spending'}
-            </Text>
-            
-            {/* Close button */}
-            <Button
-              position="absolute"
-              top={{ base: 4, sm: 5, md: 6 }}
-              right={{ base: 4, sm: 5, md: 6 }}
-              size="lg"
-              variant="ghost"
-              onClick={onClose}
-              borderRadius="full"
-              p={3}
-              bg={useColorModeValue('rgba(255, 255, 255, 0.8)', colors.cardBg)}
-              backdropFilter="blur(10px)"
-              border="1px solid"
-              borderColor={useColorModeValue('gray.300', colors.border)}
-              _hover={{
-                bg: useColorModeValue('red.50', 'red.900'),
-                borderColor: 'red.300',
-                transform: 'scale(1.1)',
-                boxShadow: 'lg',
-              }}
-              _active={{
-                transform: 'scale(0.95)',
-              }}
-              transition="all 0.2s ease"
-              zIndex={10}
-              boxShadow="md"
-              aria-label="Close form"
-            >
-              <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', colors.text.primary)} />
-            </Button>
-          </Box>
+            height="4px"
+            sx={getShimmerStyles()}
+          />
+          
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
+            <VStack spacing={0} align="stretch" h="full">
+              {/* Header */}
+              <Box {...headerStyles.container}>
+                <Button 
+                  onClick={onClose} 
+                  {...headerStyles.closeButton}
+                >
+                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
+                </Button>
 
-          {/* Modal content - Scrollable */}
-          <Box 
-            flex="1" 
-            p={responsiveStyles.spacing.container}
-            overflowY="auto"
-            {...responsiveStyles.content}
-            sx={{
-              ...safeAreaStyles.content,
-              ...safariStyles.scrollable,
-              ...getScrollbarStyles(useColorModeValue)
-            }}
-          >
-            <TransactionForm
-              transactions={transactions}
-              onCreated={handleTransactionCreated}
-              onTransactionDeleted={onRefresh}
-              initialType={type}
-              showRecentTransactions
-              compact
-            />
-          </Box>
-        </VStack>
+                <Flex
+                  direction="row"
+                  align="center"
+                  justify="center"
+                  flexWrap="wrap"
+                  pr={{ base: 14, sm: 20 }}
+                  pt={{ base: 2, sm: 0 }}
+                  gap={{ base: 2, sm: 3 }}
+                >
+                  {/* Logo + Text */}
+                  <HStack
+                    spacing={{ base: 2, sm: 3 }}
+                    align="center"
+                    flex="1"
+                    minW={0}
+                  >
+                    <Box
+                      p={{ base: 2, sm: 3 }}
+                      borderRadius="2xl"
+                      bg={headerStyles.iconContainer.bg}
+                      boxShadow="lg"
+                      flexShrink={0}
+                      sx={{
+                        animation: ANIMATIONS.pulse,
+                        '@keyframes pulse': {
+                          '0%, 100%': { 
+                            boxShadow: `0 0 5px ${headerStyles.iconContainer.bg}40` 
+                          },
+                          '50%': { 
+                            boxShadow: `0 0 20px ${headerStyles.iconContainer.bg}80, 0 0 30px ${headerStyles.iconContainer.bg}60` 
+                          }
+                        }
+                      }}
+                    >
+                      {type === 'INCOME' ? <Plus size={20} color="white" /> : <Minus size={20} color="white" />}
+                    </Box>
+                    <VStack
+                      align="start"
+                      spacing={0}
+                      flex="1"
+                      minW={0}
+                    >
+                      <Text
+                        color={headerStyles.title.color}
+                        fontWeight="800"
+                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                        lineHeight="shorter"
+                        noOfLines={1}
+                      >
+                        {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
+                      </Text>
+                      <Text
+                        color={headerStyles.subtitle.color}
+                        fontWeight="600"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        noOfLines={1}
+                      >
+                        {type === 'INCOME' ? 'Track your incoming money' : 'Record your spending'}
+                      </Text>
+                    </VStack>
+                  </HStack>
+
+                  {/* Type Icon */}
+                  <Box flexShrink={0}>
+                    {type === 'INCOME' ? 
+                      <TrendingUp size={20} color={headerStyles.iconContainer.bg} /> : 
+                      <TrendingDown size={20} color={useColorModeValue('#ef4444', '#fca5a5')} />
+                    }
+                  </Box>
+                </Flex>
+              </Box>
+
+              {/* Modal content - Scrollable */}
+              <Box 
+                flex="1" 
+                p={responsiveStyles.spacing.container}
+                overflowY="auto"
+                {...responsiveStyles.content}
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable,
+                  ...getScrollbarStyles(useColorModeValue)
+                }}
+              >
+                <TransactionForm
+                  transactions={transactions}
+                  onCreated={handleTransactionCreated}
+                  onTransactionDeleted={onRefresh}
+                  initialType={type}
+                  showRecentTransactions
+                  compact
+                />
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
       </ModalContent>
     </Modal>
   )

@@ -41,7 +41,7 @@ export const shimmerAnimations = {
 export const getShimmerStyles = () => {
   const background = useColorModeValue(shimmerGradients.light, shimmerGradients.dark)
   const animation = useColorModeValue(shimmerAnimations.light, shimmerAnimations.dark)
-  
+
   return {
     background,
     backgroundSize: shimmerStyles.backgroundSize,
@@ -135,6 +135,69 @@ export const getModalHeaderStyles = (useColorModeValue: any) => {
         responsiveStyles.modals.header.subtitle.color.light,
         responsiveStyles.modals.header.subtitle.color.dark
       )
+    },
+    backButton: responsiveStyles.modals.header.backButton
+  }
+}
+
+// Transaction-specific modal header utilities
+export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'INCOME' | 'EXPENSE') => {
+  const responsiveStyles = getResponsiveStyles()
+  
+  // Cores específicas para cada tipo de transação
+  const incomeGradient = useColorModeValue(
+    'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)', // Verde claro
+    'linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)'  // Verde escuro
+  )
+  
+  const expenseGradient = useColorModeValue(
+    'linear-gradient(135deg, #fecaca 0%, #fca5a5 40%, #f87171 100%)', // Vermelho claro
+    'linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%)'  // Vermelho escuro
+  )
+  
+  return {
+    container: {
+      ...responsiveStyles.modals.header.container,
+      borderColor: useColorModeValue(
+        type === 'INCOME' ? 'green.200' : 'red.200',
+        type === 'INCOME' ? 'green.700' : 'red.700'
+      ),
+      bg: type === 'INCOME' ? incomeGradient : expenseGradient,
+      sx: responsiveStyles.modals.header.container.sx
+    },
+    closeButton: {
+      ...responsiveStyles.modals.header.closeButton,
+      bg: useColorModeValue(
+        'rgba(255, 255, 255, 0.9)',
+        'rgba(15, 23, 42, 0.9)'
+      ),
+      borderColor: useColorModeValue(
+        type === 'INCOME' ? 'green.300' : 'red.300',
+        type === 'INCOME' ? 'green.600' : 'red.600'
+      ),
+      _hover: {
+        ...responsiveStyles.modals.header.closeButton._hover,
+        bg: useColorModeValue('red.50', 'red.900'),
+        borderColor: 'red.300'
+      },
+      iconColor: useColorModeValue('gray.700', 'gray.200')
+    },
+    content: responsiveStyles.modals.header.content,
+    iconContainer: {
+      ...responsiveStyles.modals.header.iconContainer,
+      bg: useColorModeValue(
+        type === 'INCOME' ? '#10b981' : '#ef4444',
+        type === 'INCOME' ? '#22c55e' : '#dc2626'
+      ),
+      sx: responsiveStyles.modals.header.iconContainer.sx
+    },
+    title: {
+      ...responsiveStyles.modals.header.title,
+      color: useColorModeValue('gray.800', 'white')
+    },
+    subtitle: {
+      ...responsiveStyles.modals.header.subtitle,
+      color: useColorModeValue('gray.600', 'gray.300')
     },
     backButton: responsiveStyles.modals.header.backButton
   }
@@ -434,8 +497,20 @@ export const getResponsiveStyles = () => ({
         borderColor: { light: 'gray.200', dark: 'gray.700' },
         position: 'relative' as const,
         bg: {
-          light: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #ffffff 100%)',
-          dark: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)'
+          light: `
+            linear-gradient(135deg,
+              rgba(245, 250, 255, 1) 0%,
+              rgba(210, 230, 255, 0.95) 25%,
+              rgba(130, 170, 255, 0.9) 65%,
+              rgba(100, 140, 255, 1) 100%
+            )`,
+          dark: `
+            linear-gradient(135deg,
+              rgba(10, 25, 47, 1) 0%,
+              rgba(15, 32, 58, 1) 35%,
+              rgba(18, 40, 67, 1) 65%,
+              rgba(22, 50, 84, 1) 100%
+            )`
         },
         sx: {
           // Safe area support for iPhone 14 Pro
@@ -487,11 +562,11 @@ export const getResponsiveStyles = () => ({
         sx: {
           animation: 'glow 3s ease-in-out infinite',
           '@keyframes glow': {
-            '0%, 100%': { 
-              boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)' 
+            '0%, 100%': {
+              boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)'
             },
-            '50%': { 
-              boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)' 
+            '50%': {
+              boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)'
             }
           }
         }

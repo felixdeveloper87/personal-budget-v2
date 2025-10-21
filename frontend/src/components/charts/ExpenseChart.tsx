@@ -1,11 +1,10 @@
-import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue, Card, CardBody } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles, sectionTitleStyles } from '../ui'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
-import { GRADIENTS } from '../../theme'
 
 interface ExpenseChartProps {
   transactions: Transaction[]
@@ -16,6 +15,8 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   const { isOpen, onOpen, onClose } = useDisclosure()
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'EXPENSE')
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   const handleClose = useCallback(() => {
@@ -48,175 +49,269 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
 
   if (sortedCategories.length === 0) {
     return (
-      <Box
-        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
-        backdropFilter="blur(10px)"
+      <Card
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        )}
+        backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         borderRadius="2xl"
-        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
-        boxShadow="sm"
+        shadow="2xl"
+        overflow="hidden"
         w="full"
-        _hover={{
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-          borderColor: useColorModeValue('red.200', 'red.500')
+        sx={{
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
         }}
-        transition="all 0.2s ease"
       >
-        <VStack spacing={4} align="center" py={8}>
-          <Box
-            p={{ base: 2, sm: 2.5, md: 3 }}
-            borderRadius="xl"
-            bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
-            border="1px solid"
-            borderColor={useColorModeValue('red.200', 'red.500')}
-            boxShadow="sm"
-            _hover={{
-              transform: 'translateY(-1px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              borderColor: useColorModeValue('red.300', 'red.400')
-            }}
-            transition="all 0.2s ease"
-          >
-            <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('red.600', 'red.300')} />
-          </Box>
-          <Text fontSize={{ base: 'md', sm: 'lg', md: 'xl' }} fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
-            No expense data available
-          </Text>
-          <Text fontSize={{ base: 'sm', sm: 'md' }} color={useColorModeValue('gray.600', 'gray.300')} textAlign="center" fontFamily="system-ui, -apple-system, sans-serif">
-            Add some expenses to see your spending breakdown
-          </Text>
-        </VStack>
-      </Box>
+        {/* Animated top bar */}
+        <Box
+          height="4px"
+          sx={getShimmerStyles()}
+        />
+        
+        <CardBody p={0} display="flex" flexDirection="column" h="full">
+          <VStack spacing={0} align="stretch" h="full">
+            {/* Header */}
+            <Box {...headerStyles.container}>
+              <Flex
+                direction="row"
+                align="center"
+                justify="center"
+                flexWrap="wrap"
+                pr={{ base: 4, sm: 6 }}
+                pt={{ base: 2, sm: 0 }}
+                gap={{ base: 2, sm: 3 }}
+              >
+                {/* Logo + Text */}
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
+                  align="center"
+                  flex="1"
+                  minW={0}
+                >
+                  <Box
+                    p={{ base: 2, sm: 3 }}
+                    borderRadius="2xl"
+                    bg={headerStyles.iconContainer.bg}
+                    boxShadow="lg"
+                    flexShrink={0}
+                  >
+                    <Icon as={BarChart3} boxSize={{ base: 4, sm: 5, md: 6 }} color="white" />
+                  </Box>
+                  <VStack
+                    align="start"
+                    spacing={0}
+                    flex="1"
+                    minW={0}
+                  >
+                    <Text
+                      color={headerStyles.title.color}
+                      fontWeight="800"
+                      fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                      lineHeight="shorter"
+                      noOfLines={1}
+                    >
+                      Expense Analysis
+                    </Text>
+                    <Text
+                      color={headerStyles.subtitle.color}
+                      fontWeight="600"
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      noOfLines={1}
+                    >
+                      No expense data available
+                    </Text>
+                  </VStack>
+                </HStack>
+              </Flex>
+            </Box>
+
+            {/* Content */}
+            <Box p={{ base: 4, sm: 6, md: 8 }} textAlign="center">
+              <Text fontSize={{ base: 'sm', sm: 'md' }} color={headerStyles.subtitle.color}>
+                Add some expenses to see your spending breakdown
+              </Text>
+            </Box>
+          </VStack>
+        </CardBody>
+      </Card>
     )
   }
 
   return (
     <>
-      <Box
-        bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
-        backdropFilter="blur(10px)"
+      <Card
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        )}
+        backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.600')}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         borderRadius="2xl"
-        p={{ base: 3, sm: 4, md: 5, lg: 6 }}
-        boxShadow="sm"
+        shadow="2xl"
+        overflow="hidden"
         w="full"
-        _hover={{
-          transform: 'translateY(-2px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-          borderColor: useColorModeValue('red.200', 'red.500')
+        sx={{
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
         }}
-        transition="all 0.2s ease"
       >
-        {/* Simple top border */}
+        {/* Animated top bar */}
         <Box
-          height="1px"
-          bg={useColorModeValue('red.200', 'red.500')}
-          mb={4}
+          height="4px"
+          sx={getShimmerStyles()}
         />
+        
+        <CardBody p={0} display="flex" flexDirection="column" h="full">
+          <VStack spacing={0} align="stretch" h="full">
+            {/* Content */}
+            <Box p={{ base: 4, sm: 6, md: 8 }}>
+              <VStack spacing={4} align="stretch">
 
-        <VStack spacing={4} align="stretch">
-          {/* Header compacto */}
-          <HStack spacing={4} align="center">
-            <Box
-              p={{ base: 2, sm: 2.5, md: 3 }}
-              borderRadius="xl"
-              bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
-              border="1px solid"
-              borderColor={useColorModeValue('red.200', 'red.500')}
-              boxShadow="sm"
-              _hover={{
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                borderColor: useColorModeValue('red.300', 'red.400')
-              }}
-              transition="all 0.2s ease"
-            >
-              <Icon as={TrendingDown} boxSize={{ base: 4, sm: 5, md: 6 }} color={useColorModeValue('red.600', 'red.300')} />
+            {/* Header */}
+            <Box {...headerStyles.container}>
+              <Flex
+                direction="row"
+                align="center"
+                justify="space-between"
+                flexWrap="wrap"
+                pr={{ base: 4, sm: 6 }}
+                pt={{ base: 2, sm: 0 }}
+                gap={{ base: 2, sm: 3 }}
+              >
+                {/* Logo + Text */}
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
+                  align="center"
+                  flex="1"
+                  minW={0}
+                >
+                  <Box
+                    p={{ base: 2, sm: 3 }}
+                    borderRadius="2xl"
+                    bg={headerStyles.iconContainer.bg}
+                    boxShadow="lg"
+                    flexShrink={0}
+                  >
+                    <Icon as={TrendingDown} boxSize={{ base: 4, sm: 5, md: 6 }} color="white" />
+                  </Box>
+                  <VStack
+                    align="start"
+                    spacing={0}
+                    flex="1"
+                    minW={0}
+                  >
+                    <Text
+                      color={headerStyles.title.color}
+                      fontWeight="800"
+                      fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                      lineHeight="shorter"
+                      noOfLines={1}
+                    >
+                      Expense Analysis
+                    </Text>
+                    <Text
+                      color={headerStyles.subtitle.color}
+                      fontWeight="600"
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      noOfLines={1}
+                    >
+                      {selectedPeriod} • ${totalExpenses.toLocaleString()}
+                    </Text>
+                  </VStack>
+                </HStack>
+
+                {/* View Button */}
+                <Button
+                  size={{ base: 'sm', sm: 'md' }}
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={onOpen}
+                  rightIcon={<Icon as={Eye} boxSize={4} />}
+                  _hover={{
+                    bg: useColorModeValue('red.50', 'red.900'),
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                  }}
+                  transition="all 0.2s ease"
+                  flexShrink={0}
+                >
+                  {isMobile ? 'View' : 'View Details'}
+                </Button>
+              </Flex>
             </Box>
-            <VStack align="start" spacing={0.5}>
-              <Heading
-                size={sectionTitleStyles.size}
-                color={useColorModeValue('gray.800', 'gray.100')}
-                fontWeight={sectionTitleStyles.fontWeight}
-                fontFamily={sectionTitleStyles.fontFamily}
-                letterSpacing={sectionTitleStyles.letterSpacing}
-                lineHeight={sectionTitleStyles.lineHeight}
-              >
-                Expense Analysis
-              </Heading>
-              <Text
-                fontSize={{ base: 'sm', sm: 'md' }}
-                color={useColorModeValue('gray.600', 'gray.300')}
-                fontWeight="500"
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                Detailed spending breakdown by category
-              </Text>
-            </VStack>
-          </HStack>
           
-          <HStack spacing={3} justify="space-between" align="center">
-            <HStack spacing={2}>
-              <Badge
-                borderRadius="xl"
-                px={3}
-                py={1}
-                fontSize="sm"
-                fontWeight="500"
-                bg={useColorModeValue('#fecaca', '#2d1b1b')} // Rosa post-it
-                color={useColorModeValue('red.600', 'red.300')}
-                border="1px solid"
-                borderColor={useColorModeValue('red.200', 'red.500')}
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                {sortedCategories.length} Categories
-              </Badge>
-              <Badge
-                borderRadius="xl"
-                px={3}
-                py={1}
-                fontSize="sm"
-                fontWeight="500"
-                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
-                color={useColorModeValue('gray.600', 'gray.300')}
-                border="1px solid"
-                borderColor={useColorModeValue('gray.200', 'gray.600')}
-                fontFamily="system-ui, -apple-system, sans-serif"
-                backdropFilter="blur(10px)"
-              >
-                {selectedPeriod}
-              </Badge>
-            </HStack>
+          <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
+            <Badge
+              colorScheme="red"
+              variant="solid"
+              borderRadius="full"
+              px={responsiveStyles.charts.badges.category.padding}
+              py={responsiveStyles.charts.badges.category.padding}
+              fontSize={responsiveStyles.charts.badges.category.fontSize}
+              fontWeight="600"
+            >
+              {sortedCategories.length} Categories
+            </Badge>
+            <Badge
+              colorScheme="gray"
+              variant="subtle"
+              borderRadius="md"
+              px={responsiveStyles.charts.badges.period.padding}
+              py={responsiveStyles.charts.badges.period.padding}
+              fontSize={responsiveStyles.charts.badges.period.fontSize}
+              fontWeight="400"
+              opacity={0.7}
+            >
+              {selectedPeriod}
+            </Badge>
             <Button
-              size="sm"
-              rightIcon={!isMobile ? <Icon as={Eye} boxSize={3} /> : undefined}
+              size={responsiveStyles.charts.button.size}
+              variant="solid"
+              colorScheme="blue"
+              rightIcon={!isMobile ? <Icon as={Eye} boxSize={responsiveStyles.charts.button.iconSize} /> : undefined}
               onClick={onOpen}
               borderRadius="xl"
-              px={4}
-              py={2}
-              fontSize="sm"
-              fontWeight="500"
-              bg={useColorModeValue('#dbeafe', '#1e293b')} // Azul post-it
-              color={useColorModeValue('blue.600', 'blue.300')}
-              border="1px solid"
-              borderColor={useColorModeValue('blue.200', 'blue.500')}
-              fontFamily="system-ui, -apple-system, sans-serif"
-              backdropFilter="blur(10px)"
               _hover={{
                 transform: 'translateY(-1px)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                borderColor: useColorModeValue('blue.300', 'blue.400'),
-                bg: useColorModeValue('blue.50', 'blue.900')
               }}
               _active={{
                 transform: 'translateY(0)',
               }}
               transition="all 0.2s ease"
+              fontFamily="system-ui, -apple-system, sans-serif"
+              fontWeight="500"
             >
-              {isMobile ? 'All' : `View Details (${sortedCategories.length})`}
+              {isMobile ? 'View' : 'View Details'}
             </Button>
           </HStack>
 
@@ -230,7 +325,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 <Box 
                   key={category}
                   p={4}
-                  bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                  bg={useColorModeValue(gradients.background, gradients.background)}
                   borderRadius="xl"
                   border="1px solid"
                   borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -283,7 +378,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               <Box 
                 textAlign="center" 
                 py={4}
-                bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+                bg={useColorModeValue(gradients.background, gradients.background)}
                 borderRadius="xl"
                 border="1px dashed"
                 borderColor={useColorModeValue('gray.300', 'gray.600')}
@@ -325,8 +420,11 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               </Text>
             </HStack>
           </Box>
-        </VStack>
-      </Box>
+              </VStack>
+            </Box>
+          </VStack>
+        </CardBody>
+      </Card>
 
       {/* Category Modal */}
       <CategoryModal

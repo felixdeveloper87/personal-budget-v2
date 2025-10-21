@@ -19,14 +19,16 @@ import {
   Progress,
   Button,
   Icon,
+  Card,
+  CardBody,
+  Flex,
 } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles } from '../../ui'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles, safeAreaStyles, safariStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { GRADIENTS } from '../../../theme'
-import { X } from 'lucide-react'
+import { X, TrendingUp, TrendingDown } from 'lucide-react'
   
   
   const CATEGORY_COLORS = [
@@ -46,11 +48,13 @@ import { X } from 'lucide-react'
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
   
   // Modern post-it inspired colors
   const closeButtonBg = useColorModeValue(
-    GRADIENTS.cardLight,
-    GRADIENTS.cardDark
+    gradients.background,
+    gradients.background
   )
   const closeButtonBorderColor = useColorModeValue('gray.200', 'gray.600')
   const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
@@ -61,8 +65,8 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
   const tableRowBg = useColorModeValue('gray.25', 'gray.750')
   const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
   const modalBg = useColorModeValue(
-    GRADIENTS.cardLight,
-    GRADIENTS.cardDark
+    gradients.background,
+    gradients.background
   )
   const topBorderColor = useColorModeValue(
     type === 'INCOME' ? 'green.200' : 'red.200',
@@ -109,7 +113,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         onClose={onClose}
         size={responsiveStyles.modals.category.container.size}
         closeOnOverlayClick={false}
-        isCentered={false}
+        isCentered={true}
         motionPreset="slideInBottom"
       >
         <ModalOverlay
@@ -121,7 +125,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           }}
         />
       <ModalContent
-        borderRadius={responsiveStyles.modals.category.container.borderRadius}
+        borderRadius="2xl"
         m={0}
         h={{ base: '100dvh', sm: 'auto', md: 'auto' }}
         maxH={responsiveStyles.modals.category.container.maxH}
@@ -131,138 +135,129 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         maxW={responsiveStyles.modals.category.container.maxW}
         boxShadow="0 32px 64px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)"
         border="1px solid"
-        borderColor={colors.border}
+        borderColor={useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )}
         position="relative"
-        bg={modalBg}
+        bg={useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        )}
         backdropFilter="blur(20px)"
-        _before={{
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          height: '3px',
-          background: type === 'INCOME' 
-            ? 'linear-gradient(90deg, #10b981, #059669, #047857)'
-            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)',
-          borderRadius: '3xl 3xl 0 0',
+        sx={{
+          ...safeAreaStyles,
+          ...safariStyles,
+          animation: animations.slideIn,
+          '@keyframes slideIn': {
+            from: { 
+              opacity: 0, 
+              transform: 'translateY(20px) scale(0.95)' 
+            },
+            to: { 
+              opacity: 1, 
+              transform: 'translateY(0) scale(1)' 
+            }
+          }
         }}
       >
-        {/* Simple top border */}
-        <Box
-          height="3px"
-          bg={topBorderColor}
-        />
-
-        <ModalHeader
-          textAlign="center"
-          borderBottom="1px"
-          borderColor={useColorModeValue('gray.200', 'gray.600')}
-          py={6}
-          bg={useColorModeValue(
-            type === 'INCOME' ? '#dcfce7' : '#fecaca',
-            type === 'INCOME' ? '#1f2937' : '#2d1b1b'
-          )}
-          color={useColorModeValue(
-            type === 'INCOME' ? 'green.600' : 'red.600',
-            type === 'INCOME' ? 'green.300' : 'red.300'
-          )}
-          fontWeight="700"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          position="relative"
+        <Card
+          bg="transparent"
+          border="none"
+          borderRadius="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
+          display="flex"
+          flexDirection="column"
         >
+          {/* Animated top bar */}
           <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={3}
-            mb={2}
-          >
-            <Box
-              p={2}
-              borderRadius="xl"
-              bg={useColorModeValue(
-                type === 'INCOME' ? 'green.100' : 'red.100',
-                type === 'INCOME' ? 'green.800' : 'red.800'
-              )}
-              border="1px solid"
-              borderColor={useColorModeValue(
-                type === 'INCOME' ? 'green.200' : 'red.200',
-                type === 'INCOME' ? 'green.600' : 'red.600'
-              )}
-            >
-              <Text 
-                fontSize="lg" 
-                color={useColorModeValue(
-                  type === 'INCOME' ? 'green.600' : 'red.600',
-                  type === 'INCOME' ? 'green.300' : 'red.300'
-                )} 
-                fontWeight="bold"
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                £
-              </Text>
-            </Box>
-            <Text 
-              fontWeight="700" 
-              fontFamily="system-ui, -apple-system, sans-serif"
-            >
-              {type === 'INCOME' ? 'Income' : 'Expenses'} by Category
-            </Text>
-          </Box>
-          <Text 
-            fontSize={{ base: '2xs', sm: 'xs' }}
-            color={useColorModeValue('gray.600', 'gray.300')}
-            fontWeight="500"
-            fontFamily="system-ui, -apple-system, sans-serif"
-          >
-            {selectedPeriod}
-          </Text>
-        </ModalHeader>
+            height="4px"
+            sx={getShimmerStyles()}
+          />
+          
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
+            <VStack spacing={0} align="stretch" h="full">
+              {/* Header */}
+              <Box {...headerStyles.container}>
+                <Flex
+                  direction="row"
+                  align="center"
+                  justify="space-between"
+                  flexWrap="wrap"
+                  pr={{ base: 4, sm: 6 }}
+                  pt={{ base: 2, sm: 0 }}
+                  gap={{ base: 2, sm: 3 }}
+                >
+                  {/* Logo + Text */}
+                  <HStack
+                    spacing={{ base: 2, sm: 3 }}
+                    align="center"
+                    flex="1"
+                    minW={0}
+                  >
+                    <Box
+                      p={{ base: 2, sm: 3 }}
+                      borderRadius="2xl"
+                      bg={headerStyles.iconContainer.bg}
+                      boxShadow="lg"
+                      flexShrink={0}
+                    >
+                      <Icon 
+                        as={type === 'INCOME' ? TrendingUp : TrendingDown} 
+                        boxSize={{ base: 4, sm: 5, md: 6 }} 
+                        color="white" 
+                      />
+                    </Box>
+                    <VStack
+                      align="start"
+                      spacing={0}
+                      flex="1"
+                      minW={0}
+                    >
+                      <Text
+                        color={headerStyles.title.color}
+                        fontWeight="800"
+                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                        lineHeight="shorter"
+                        noOfLines={1}
+                      >
+                        {type === 'INCOME' ? 'Income' : 'Expense'} Analysis
+                      </Text>
+                      <Text
+                        color={headerStyles.subtitle.color}
+                        fontWeight="600"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        noOfLines={1}
+                      >
+                        {selectedPeriod} • ${total.toLocaleString()}
+                      </Text>
+                    </VStack>
+                  </HStack>
+
+                  {/* Close Button */}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={onClose}
+                    bg={headerStyles.closeButton.bg}
+                    border="1px solid"
+                    borderColor={headerStyles.closeButton.borderColor}
+                    borderRadius="xl"
+                    p={2}
+                    _hover={headerStyles.closeButton._hover}
+                    transition="all 0.2s ease"
+                    flexShrink={0}
+                  >
+                    <Icon as={X} boxSize={4} color={headerStyles.closeButton.iconColor} />
+                  </Button>
+                </Flex>
+              </Box>
+
+              {/* Content */}
+              <Box p={{ base: 4, sm: 6, md: 8 }} flex="1" overflow="auto">
   
-        <Button
-          position="absolute"
-          top={{ base: 4, sm: 5, md: 6 }}
-          right={{ base: 4, sm: 5, md: 6 }}
-          size="lg"
-          variant="ghost"
-          onClick={onClose}
-          borderRadius="xl"
-          p={3}
-          bg={closeButtonBg}
-          backdropFilter="blur(10px)"
-          border="1px solid"
-          borderColor={closeButtonBorderColor}
-          _hover={{
-            bg: closeButtonHoverBg,
-            borderColor: 'red.300',
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          }}
-          _active={{
-            transform: 'translateY(0)',
-          }}
-          transition="all 0.2s ease"
-          zIndex={10}
-          boxShadow="md"
-          aria-label="Close category analysis"
-        >
-          <Icon as={X} boxSize={5} color={closeButtonIconColor} />
-        </Button>
-  
-        <ModalBody
-          py={responsiveStyles.modals.category.body.padding}
-          px={responsiveStyles.modals.category.body.padding}
-          flex="1"
-          overflowY="auto"
-          sx={{
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
-            paddingLeft: 'env(safe-area-inset-left, 0px)',
-            paddingRight: 'env(safe-area-inset-right, 0px)',
-            scrollBehavior: 'smooth',
-            overscrollBehavior: 'contain',
-          }}
-        >
           {sortedCategories.length === 0 ? (
             <Box p={responsiveStyles.modals.category.empty.padding} textAlign="center" color={colors.text.secondary}>
               <Text fontSize={responsiveStyles.modals.category.empty.titleFontSize} mb={2}>
@@ -397,10 +392,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                 })}
               </VStack>
             )}
-          </ModalBody>
-        </ModalContent>
-      </Modal>
-      </>
-    )
-  }
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
+      </ModalContent>
+    </Modal>
+    </>
+  )
+}
   

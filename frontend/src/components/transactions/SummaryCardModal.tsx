@@ -2,9 +2,8 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
+  Card,
+  CardBody,
   VStack,
   HStack,
   Text,
@@ -17,6 +16,7 @@ import {
   useBreakpointValue,
   Button,
   Icon,
+  Flex,
 } from '@chakra-ui/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import React, { ReactNode, useMemo } from 'react'
@@ -25,6 +25,7 @@ import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
 import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
 import InsightsCard from '../ui/InsightsCard'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles } from '../ui'
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
@@ -50,6 +51,9 @@ export default function SummaryCardModal({
   currentBalance = 0,
 }: SummaryCardModalProps) {
   const colors = useThemeColors()
+  const responsiveStyles = getResponsiveStyles()
+  const gradients = getGradients()
+  const headerStyles = getModalHeaderStyles(useColorModeValue)
 
   // ✅ Usar cores centralizadas
   const iconMap = {
@@ -69,160 +73,189 @@ export default function SummaryCardModal({
 
   const IconEl = headerInfo.icon
   const iconBg = useColorModeValue(headerInfo.bg, headerInfo.bgDark)
-  const headerGradient = useColorModeValue(
-    'linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(139,92,246,0.15) 100%)',
-    'linear-gradient(135deg, rgba(59,130,246,0.15) 0%, rgba(139,92,246,0.25) 100%)'
-  )
-
-  const modalSize = useBreakpointValue({ base: 'full', sm: 'lg', md: 'xl' })
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={useBreakpointValue({ base: 'full', sm: 'md', md: 'xl', lg: '2xl' })}
-      motionPreset="slideInBottom"
-      isCentered={false}
+      size={{ base: 'full', sm: 'lg', md: 'xl' }}
+      isCentered
+      scrollBehavior="inside"
+      closeOnOverlayClick={false}
+      closeOnEsc={true}
+      blockScrollOnMount={true}
     >
-      <ModalOverlay backdropFilter="blur(6px) brightness(0.9)" />
-      <ModalContent
-        h={{ base: '100dvh', md: 'auto' }}
-        maxH={{ base: '100dvh', md: '90vh' }}
-        borderRadius={{ base: '0', md: '2xl' }}
-        bg={useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.9) 50%, rgba(226, 232, 240, 0.9) 100%)', 'rgba(17,17,17,0.9)')}
+      <ModalOverlay 
+        bg="blackAlpha.600" 
         backdropFilter="blur(10px)"
-        boxShadow="xl"
-        border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.700')}
+      />
+      <ModalContent 
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
-        // 👇 Safe area support para iPhone 14 Pro
+        m={{ base: 0, md: 4 }}
+        display="flex"
+        flexDirection="column"
+        {...responsiveStyles.modal}
         sx={{
-          paddingTop: 'env(safe-area-inset-top, 0px)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          paddingLeft: 'env(safe-area-inset-left, 0px)',
-          paddingRight: 'env(safe-area-inset-right, 0px)',
+          ...safeAreaStyles.container,
+          ...safariStyles.modal
         }}
       >
-        {/* 🌈 Header com espaçamento adequado para iPhone 14 Pro */}
+        {/* Decorative background */}
         <Box
-          bg={headerGradient}
-          backdropFilter="blur(8px)"
-          px={{ base: 4, sm: 5, md: 6, lg: 8 }}
-          pt={{ base: 6, sm: 6, md: 5, lg: 6 }}
-          pb={{ base: 4, sm: 4, md: 3, lg: 4 }}
-          borderBottom="1px solid"
-          borderColor={useColorModeValue('gray.200', 'gray.700')}
-          // 👇 Espaçamento extra para Dynamic Island/Notch
-          sx={{
-            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1.5rem)',
-          }}
-        >
-          <VStack spacing={{ base: 2, sm: 3 }} align="center" textAlign="center">
-            <MotionBox
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.3 }}
-              p={2.5}
-              bg={iconBg}
-              borderRadius="xl"
-              border="1px solid"
-              borderColor={useColorModeValue('gray.200', 'gray.700')}
-              boxShadow="md"
-            >
-              <ChakraIcon as={IconEl} boxSize={{ base: 4, sm: 5 }} color={headerInfo.color} />
-            </MotionBox>
-
-            <VStack spacing={1} align="center">
-              <Text
-                fontSize={{ base: 'sm', sm: 'md', md: 'lg' }}
-                fontWeight="700"
-                color={colors.text.label}
-                noOfLines={2}
-                wordBreak="break-word"
-              >
-                {headerInfo.title}
-              </Text>
-              <Text
-                fontSize={{ base: 'xs', sm: 'sm' }}
-                color={colors.text.secondary}
-                noOfLines={2}
-                wordBreak="break-word"
-              >
-                {headerInfo.subtitle}
-              </Text>
-            </VStack>
-
-            <MotionBadge
-              colorScheme={
-                selectedCard === 'income'
-                  ? 'green'
-                  : selectedCard === 'expenses'
-                    ? 'red'
-                    : selectedCard === 'balance'
-                      ? 'purple'
-                      : 'blue'
-              }
-              px={3}
-              py={0.5}
-              borderRadius="full"
-              fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-            >
-              {selectedPeriod}
-            </MotionBadge>
-          </VStack>
-        </Box>
-
-        <Button
           position="absolute"
-          top={{ base: 4, sm: 5, md: 6 }}
-          right={{ base: 4, sm: 5, md: 6 }}
-          size="lg"
-          variant="ghost"
-          onClick={onClose}
-          borderRadius="full"
-          p={3}
-          bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
-          backdropFilter="blur(10px)"
+          top="-50px"
+          left="-50px"
+          right="-50px"
+          height="200px"
+          background={gradients.decorative}
+          borderRadius="3xl"
+          filter="blur(40px)"
+          opacity={0.6}
+          zIndex={0}
+        />
+        
+        {/* Main card with glassmorphism */}
+        <Card
+          position="relative"
+          bg={useColorModeValue(
+            'rgba(255, 255, 255, 0.95)',
+            'rgba(17, 17, 17, 0.95)'
+          )}
+          backdropFilter="blur(20px)"
           border="1px solid"
-          borderColor={useColorModeValue('gray.300', 'gray.600')}
-          _hover={{
-            bg: useColorModeValue('red.50', 'red.900'),
-            borderColor: 'red.300',
-            transform: 'scale(1.1)',
-            boxShadow: 'lg',
-          }}
-          _active={{
-            transform: 'scale(0.95)',
-          }}
-          transition="all 0.2s ease"
-          zIndex={10}
-          boxShadow="md"
-          aria-label="Close modal"
-        >
-          <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
-        </Button>
-
-        {/* 🧊 Corpo responsivo com safe-area para iPhone 14 Pro */}
-        <ModalBody
-          py={{ base: 4, sm: 5, md: 6, lg: 8 }}
-          px={{ base: 4, sm: 5, md: 6, lg: 8 }}
-          overflowY="auto"
-          maxH={{ base: 'calc(100dvh - 200px)', md: '70vh' }}
-          // 👇 Safe area completo para iPhone 14 Pro
+          borderColor={useColorModeValue(
+            'rgba(255, 255, 255, 0.2)',
+            'rgba(255, 255, 255, 0.1)'
+          )}
+          borderRadius={{ base: 'none', sm: '3xl' }}
+          shadow="2xl"
+          overflow="hidden"
+          w="full"
+          h="full"
           sx={{
-            paddingTop: '1rem',
-            paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 1.5rem)',
-            paddingLeft: 'env(safe-area-inset-left, 0px)',
-            paddingRight: 'env(safe-area-inset-right, 0px)',
-            WebkitOverflowScrolling: 'touch',
-            scrollBehavior: 'smooth',
-            // 👇 Melhor scroll no iOS
-            overscrollBehavior: 'contain',
+            animation: animations.slideIn,
+            '@keyframes slideIn': {
+              from: { 
+                opacity: 0, 
+                transform: 'translateY(20px) scale(0.95)' 
+              },
+              to: { 
+                opacity: 1, 
+                transform: 'translateY(0) scale(1)' 
+              }
+            }
           }}
         >
+          {/* Animated top bar */}
+          <Box
+            height="4px"
+            sx={getShimmerStyles()}
+          />
+          
+          <CardBody p={0} display="flex" flexDirection="column" h="full">
+            <VStack spacing={0} align="stretch" h="full">
+              {/* Header */}
+              <Box {...headerStyles.container}>
+                <Button 
+                  onClick={onClose} 
+                  {...headerStyles.closeButton}
+                >
+                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
+                </Button>
+
+                <Flex
+                  direction="row"
+                  align="center"
+                  justify="center"
+                  flexWrap="wrap"
+                  pr={{ base: 14, sm: 20 }}
+                  pt={{ base: 2, sm: 0 }}
+                  gap={{ base: 2, sm: 3 }}
+                >
+                  {/* Logo + Text */}
+                  <HStack
+                    spacing={{ base: 2, sm: 3 }}
+                    align="center"
+                    flex="1"
+                    minW={0}
+                  >
+                    <MotionBox
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.3 }}
+                      p={2.5}
+                      bg={iconBg}
+                      borderRadius="xl"
+                      border="1px solid"
+                      borderColor={useColorModeValue('gray.200', 'gray.700')}
+                      boxShadow="md"
+                      flexShrink={0}
+                    >
+                      <ChakraIcon as={IconEl} boxSize={{ base: 4, sm: 5 }} color={headerInfo.color} />
+                    </MotionBox>
+                    <VStack
+                      align="start"
+                      spacing={0}
+                      flex="1"
+                      minW={0}
+                    >
+                      <Text
+                        color={useColorModeValue('black', 'white')}
+                        fontWeight="800"
+                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                        lineHeight="shorter"
+                        noOfLines={1}
+                      >
+                        {headerInfo.title}
+                      </Text>
+                      <Text
+                        color={useColorModeValue('gray.600', 'gray.300')}
+                        fontWeight="600"
+                        fontSize={{ base: 'xs', sm: 'sm' }}
+                        noOfLines={1}
+                      >
+                        {headerInfo.subtitle}
+                      </Text>
+                    </VStack>
+                  </HStack>
+
+                  {/* Period Badge */}
+                  <MotionBadge
+                    colorScheme={
+                      selectedCard === 'income'
+                        ? 'green'
+                        : selectedCard === 'expenses'
+                          ? 'red'
+                          : selectedCard === 'balance'
+                            ? 'purple'
+                            : 'blue'
+                    }
+                    px={3}
+                    py={0.5}
+                    borderRadius="full"
+                    fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 }}
+                    flexShrink={0}
+                  >
+                    {selectedPeriod}
+                  </MotionBadge>
+                </Flex>
+              </Box>
+
+              {/* Modal content - Scrollable */}
+              <Box 
+                flex="1" 
+                p={responsiveStyles.spacing.container}
+                overflowY="auto"
+                {...responsiveStyles.content}
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable
+                }}
+              >
           {!transactions.length ? (
             <Center py={10}>
               <Spinner size="lg" color={useColorModeValue('blue.500', 'blue.300')} thickness="3px" />
@@ -230,7 +263,7 @@ export default function SummaryCardModal({
           ) : (
             <>
               <AnimatePresence mode="wait">
-                <AnimatedCard key="chart">
+                <Box key="chart">
                   {selectedCard === 'transactions' && (
                     <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
                   )}
@@ -247,7 +280,7 @@ export default function SummaryCardModal({
                       currentBalance={currentBalance}
                     />
                   )}
-                </AnimatedCard>
+                </Box>
               </AnimatePresence>
               
               {/* Insights Card - Outside AnimatePresence to avoid key conflicts */}
@@ -260,43 +293,12 @@ export default function SummaryCardModal({
               </Box>
             </>
           )}
-        </ModalBody>
-
+              </Box>
+            </VStack>
+          </CardBody>
+        </Card>
       </ModalContent>
     </Modal>
   )
 }
 
-// ✅ Tipagem do AnimatedCard
-interface AnimatedCardProps {
-  children: ReactNode
-}
-
-function AnimatedCard({ children }: AnimatedCardProps) {
-  const bg = useColorModeValue('linear-gradient(135deg, rgba(248, 250, 252, 0.65) 0%, rgba(241, 245, 249, 0.65) 50%, rgba(226, 232, 240, 0.65) 100%)', 'rgba(26,26,26,0.6)')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-    >
-      <Box
-        p={{ base: 3, sm: 4, md: 5 }}
-        borderRadius="2xl"
-        bg={bg}
-        boxShadow={useColorModeValue('0 2px 10px rgba(0,0,0,0.08)', '0 2px 12px rgba(0,0,0,0.4)')}
-        backdropFilter="blur(10px)"
-        border="1px solid"
-        borderColor={borderColor}
-        // 👇 Melhor espaçamento para gráficos no iPhone
-        sx={{
-          minHeight: { base: '300px', sm: '350px', md: '400px' },
-        }}
-      >
-        {children}
-      </Box>
-    </motion.div>
-  )
-}
