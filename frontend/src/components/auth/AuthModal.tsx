@@ -8,7 +8,7 @@ import { ArrowBackIcon } from '@chakra-ui/icons'
 import { Home, X } from 'lucide-react'
 import LoginForm from './LoginForm'
 import RegisterForm from './RegisterForm'
-import { getShimmerStyles, getModalHeaderStyles } from '../ui'
+import { getShimmerStyles, getModalHeaderStyles, safeAreaStyles, safariStyles, getResponsiveStyles } from '../ui'
 
 export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
   isOpen: boolean
@@ -17,6 +17,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
 }) {
   const [isLogin, setIsLogin] = useState(true)
   const headerStyles = getModalHeaderStyles(useColorModeValue)
+  const responsiveStyles = getResponsiveStyles()
   const cardBg = useColorModeValue('white', '#111')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
 
@@ -51,9 +52,10 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
         m={{ base: 0, sm: 6 }} 
         overflow="hidden"
         position="relative"
-        maxH={{ base: '100vh', sm: '90vh', md: '90vh' }}
-        h={{ base: '100vh', sm: 'auto', md: 'auto' }}
+        {...responsiveStyles.modal}
         sx={{
+          ...safeAreaStyles.container,
+          ...safariStyles.modal,
           animation: 'slideIn .3s ease-out',
           '@keyframes slideIn': { 
             from: { opacity: 0, transform: 'translateY(100%) scale(.95)' }, 
@@ -70,21 +72,10 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
           <Box h="4px" sx={getShimmerStyles()} />
 
           {/* Header */}
-          <Box 
-            {...headerStyles.container}
-            sx={{
-              // Safe area support for iPhone 14 Pro
-              paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
-              minHeight: 'max(80px, calc(80px + env(safe-area-inset-top, 0px)))'
-            }}
-          >
+          <Box {...headerStyles.container}>
             <Button 
               onClick={onClose} 
               {...headerStyles.closeButton}
-              sx={{
-                top: 'max(16px, calc(16px + env(safe-area-inset-top, 0px)))',
-                right: '16px'
-              }}
             >
               <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
             </Button>
@@ -170,10 +161,7 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
             flex="1" 
             p={{ base: 3, sm: 8 }} 
             overflowY="auto"
-            sx={{
-              // Safe area support for iPhone 14 Pro bottom
-              paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))'
-            }}
+            sx={safeAreaStyles.content}
           >
             <Box
               bg={cardBg} 
