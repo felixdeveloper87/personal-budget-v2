@@ -356,9 +356,14 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                         borderRadius="full"
                         bg={color}
                       />
-                      <Text fontSize={responsiveStyles.charts.progress.text.fontSize} fontWeight="600" color={colors.text.primary}>
-                        {category}
-                      </Text>
+                      <HStack spacing={2} align="center">
+                        <Text fontSize={responsiveStyles.charts.progress.text.fontSize} fontWeight="600" color={colors.text.primary}>
+                          {category}
+                        </Text>
+                        <Text fontSize={{ base: "xs", sm: "sm" }} fontWeight="500" color={colors.text.secondary}>
+                          {percentage.toFixed(1)}%
+                        </Text>
+                      </HStack>
                     </HStack>
                     <Text fontSize={responsiveStyles.charts.progress.text.valueFontSize} fontWeight="700" color={colors.text.primary}>
                       £{amount.toFixed(2)}
@@ -380,9 +385,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                     }}
                   />
                   
-                  <Text fontSize="xs" color={colors.text.secondary} mt={2}>
-                    {percentage.toFixed(1)}% of total income
-                  </Text>
                 </Box>
               )
             })}

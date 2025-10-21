@@ -344,9 +344,14 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                         borderRadius="full"
                         bg={color}
                       />
-                      <Text fontSize="sm" fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
-                        {category}
-                      </Text>
+                      <HStack spacing={2} align="center">
+                        <Text fontSize="sm" fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
+                          {category}
+                        </Text>
+                        <Text fontSize={{ base: "2xs", sm: "xs" }} fontWeight="500" color={useColorModeValue('gray.600', 'gray.300')} fontFamily="system-ui, -apple-system, sans-serif">
+                          {percentage.toFixed(1)}%
+                        </Text>
+                      </HStack>
                     </HStack>
                     <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
                       £{amount.toFixed(2)}
@@ -366,9 +371,6 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                     }}
                   />
                   
-                  <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')} mt={2} fontFamily="system-ui, -apple-system, sans-serif">
-                    {percentage.toFixed(1)}% of total expenses
-                  </Text>
                 </Box>
               )
             })}
