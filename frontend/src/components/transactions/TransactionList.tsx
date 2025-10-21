@@ -15,6 +15,7 @@ import {
   HStack,
   Icon,
   Tooltip,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { DeleteIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
@@ -72,7 +73,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
           </Thead>
           <Tbody>
             {sortedTransactions.map((tx) => (
-              <Tr key={tx.id} _hover={{ bg: 'gray.50' }}>
+              <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}>
                 <Td>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
                     <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
