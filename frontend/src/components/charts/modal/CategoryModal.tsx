@@ -146,8 +146,8 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         )}
         backdropFilter="blur(20px)"
         sx={{
-          ...safeAreaStyles,
-          ...safariStyles,
+          ...safeAreaStyles.container,
+          ...safariStyles.modal,
           animation: animations.slideIn,
           '@keyframes slideIn': {
             from: { 
@@ -256,7 +256,15 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               </Box>
 
               {/* Content */}
-              <Box p={{ base: 4, sm: 6, md: 8 }} flex="1" overflow="auto">
+              <Box 
+                p={{ base: 4, sm: 6, md: 8 }} 
+                flex="1" 
+                overflow="auto"
+                sx={{
+                  ...safeAreaStyles.content,
+                  ...safariStyles.scrollable
+                }}
+              >
   
           {sortedCategories.length === 0 ? (
             <Box p={responsiveStyles.modals.category.empty.padding} textAlign="center" color={colors.text.secondary}>
