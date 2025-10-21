@@ -126,7 +126,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      {useBreakpointValue({ base: 'Income', sm: 'Income Analysis' })}
+                      {useBreakpointValue({ base: 'Incomes', sm: 'Income Analysis' })}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
@@ -235,7 +235,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      {useBreakpointValue({ base: 'Income', sm: 'Income Analysis' })}
+                      {useBreakpointValue({ base: 'Incomes', sm: 'Income Analysis' })}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
