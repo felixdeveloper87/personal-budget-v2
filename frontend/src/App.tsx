@@ -2,7 +2,7 @@ import { Box, Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
-import { AuthPage, Layout } from './components'
+import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
 
@@ -50,11 +50,29 @@ function AppContent() {
 
   // Se não está logado e não clicou em "Começar", mostrar landing page
   if (!showAuth) {
-    return <LandingPage onGetStarted={() => setShowAuth(true)} />
+    return (
+      <>
+        <LandingPage onGetStarted={() => setShowAuth(true)} />
+        <AuthModal 
+          isOpen={showAuth} 
+          onClose={() => setShowAuth(false)} 
+          onBackToLanding={() => setShowAuth(false)} 
+        />
+      </>
+    )
   }
 
-  // Se clicou em "Começar", mostrar página de login/cadastro
-  return <AuthPage onBackToLanding={() => setShowAuth(false)} />
+  // Se clicou em "Começar", mostrar modal de login/cadastro
+  return (
+    <>
+      <LandingPage onGetStarted={() => setShowAuth(true)} />
+      <AuthModal 
+        isOpen={showAuth} 
+        onClose={() => setShowAuth(false)} 
+        onBackToLanding={() => setShowAuth(false)} 
+      />
+    </>
+  )
 }
 
 export default function App() {
