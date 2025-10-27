@@ -10,32 +10,37 @@ import {
   useColorModeValue,
   Card,
   CardBody,
-  Flex,
   Heading,
 } from '@chakra-ui/react'
-import { GRADIENTS } from '../theme'
-import { TrendingUp, TrendingDown, Plus, Minus, Sparkles } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
-import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 
-// 🎨 Modern post-it inspired colors
+// 🎨 Modern banking app colors (Revolut/Monzo inspired)
 const COLORS = {
   income: {
-    bg: '#dcfce7', // Verde post-it
-    bgDark: '#1f2937', // Verde escuro
-    color: 'green.900',
-    colorDark: 'green.400',
-    border: 'green.500',
-    borderDark: 'green.300'
+    gradientLight: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    gradientDark: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+    bg: 'white',
+    bgDark: '#0a0a0a',
+    color: 'white',
+    colorDark: 'white',
+    border: 'transparent',
+    borderDark: 'transparent',
+    hoverShadow: '0 8px 25px rgba(16, 185, 129, 0.25)',
+    hoverShadowDark: '0 8px 25px rgba(34, 197, 94, 0.3)'
   },
   expense: {
-    bg: '#fecaca', // Rosa post-it
-    bgDark: '#2d1b1b', // Rosa escuro
-    color: 'red.600',
-    colorDark: 'red.400',
-    border: 'red.500',
-    borderDark: 'red.300'
+    gradientLight: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    gradientDark: 'linear-gradient(135deg, #f87171 0%, #ef4444 100%)',
+    bg: 'white',
+    bgDark: '#0a0a0a',
+    color: 'white',
+    colorDark: 'white',
+    border: 'transparent',
+    borderDark: 'transparent',
+    hoverShadow: '0 8px 25px rgba(239, 68, 68, 0.25)',
+    hoverShadowDark: '0 8px 25px rgba(239, 68, 68, 0.3)'
   }
 }
 
@@ -47,7 +52,6 @@ interface AddTransactionSectionProps {
 export default function AddTransactionSection({ transactions, onRefresh }: AddTransactionSectionProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
-  const responsiveStyles = getResponsiveStyles()
 
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
     setType(t)
@@ -78,169 +82,109 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         <Card
           bg={useColorModeValue('white', '#0a0a0a')}
           backgroundImage={useColorModeValue(
-            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
+            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
           )}
           backdropFilter="blur(10px)"
-          border="0.5px solid"
-          borderColor={useColorModeValue('gray.200', 'gray.900')}
+          border="1px solid"
+          borderColor={useColorModeValue('gray.200', 'gray.800')}
           borderRadius="2xl"
-          shadow="sm"
+          shadow={useColorModeValue('0 1px 3px rgba(0,0,0,0.05)', '0 1px 3px rgba(0,0,0,0.2)')}
           overflow="hidden"
+          position="relative"
           _hover={{
-            transform: 'translateY(-2px)',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('green.200', 'green.500')
+            shadow: useColorModeValue('0 4px 12px rgba(0,0,0,0.08)', '0 4px 12px rgba(0,0,0,0.3)')
           }}
           transition="all 0.2s ease"
         >
-          {/* Simple top border with green color */}
-          <Box
-            height="1px"
-            bg={useColorModeValue('green.400', 'green.500')}
-          />
 
-            <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
-              <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
+            <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }} position="relative" zIndex={2}>
+              <VStack spacing={4} align="stretch">
                 {/* Header */}
-                <Flex
-                  direction={sectionHeaderStyles.container.direction}
-                  align={sectionHeaderStyles.container.align}
-                  justify={sectionHeaderStyles.container.justify}
-                  gap={sectionHeaderStyles.container.gap}
-                  w={sectionHeaderStyles.container.w}
-                >
-                  {/* Icon and Title Section */}
-                  <HStack 
-                    direction={sectionHeaderStyles.iconAndTitle.direction}
-                    align={sectionHeaderStyles.iconAndTitle.align}
-                    spacing={sectionHeaderStyles.iconAndTitle.spacing}
-                    flex={sectionHeaderStyles.iconAndTitle.flex}
-                    justify={sectionHeaderStyles.iconAndTitle.justify}
+                <HStack spacing={2} align="baseline">
+                  <Heading
+                    size="md"
+                    fontWeight="600"
+                    textAlign="left"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    letterSpacing="-0.015em"
+                    fontSize={{ base: 'lg', sm: 'xl' }}
+                    color={useColorModeValue('gray.800', 'white')}
                   >
-                    {/* Modern Icon Container */}
-                    <Box
-                      p={sectionHeaderStyles.icon.padding}
-                      borderRadius={sectionHeaderStyles.icon.borderRadius}
-                      bg={useColorModeValue(COLORS.income.bg, COLORS.income.bgDark)}
-                      border="1px solid"
-                      borderColor={useColorModeValue(COLORS.income.border, COLORS.income.borderDark)}
-                      boxShadow={sectionHeaderStyles.icon.boxShadow}
-                      _hover={{
-                        transform: sectionHeaderStyles.icon.hover.transform,
-                        boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
-                        borderColor: useColorModeValue('green.300', 'green.400')
-                      }}
-                      transition={sectionHeaderStyles.icon.transition}
-                    >
-                      <Icon 
-                        as={Sparkles} 
-                        boxSize={sectionHeaderStyles.icon.size} 
-                        color={useColorModeValue(COLORS.income.color, COLORS.income.colorDark)}
-                      />
-                    </Box>
-
-                    <VStack align="flex-start" spacing={1} flex="0">
-                      <Heading
-                        size={sectionTitleStyles.size}
-                        fontWeight="600"
-                        textAlign="left"
-                        fontFamily={sectionTitleStyles.fontFamily}
-                        letterSpacing="-0.01em"
-                        lineHeight="1.2"
-                        fontSize={{ base: 'sm', sm: 'lg' }}
-                        display={{ base: 'none', sm: 'block', md: 'block' }}
-                        opacity={0.9}
-                      >
-                        Quick Actions
-                      </Heading>
-                      <Text
-                        fontSize={{ base: 'xs', sm: 'sm' }}
-                        color={useColorModeValue('gray.600', 'gray.300')}
-                        fontWeight="400"
-                        textAlign="left"
-                        display={{ base: 'none', sm: 'block', md: 'block' }}
-                        fontFamily="system-ui, -apple-system, sans-serif"
-                        whiteSpace="nowrap"
-                      >
-                        Choose an action to quickly add a transaction
-                      </Text>
-                    </VStack>
-                  </HStack>
+                    Quick Actions
+                  </Heading>
+                  <Text
+                    fontSize={{ base: 'sm', sm: 'sm' }}
+                    color={useColorModeValue('gray.600', 'gray.400')}
+                    fontWeight="400"
+                    textAlign="left"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                  >
+                    • Add income or expense quickly
+                  </Text>
+                </HStack>
 
                   {/* Buttons Section */}
                   <HStack
-                    spacing={responsiveStyles.addTransactionSection.buttons.container.spacing}
-                    justify={responsiveStyles.addTransactionSection.buttons.container.justify}
-                    align={responsiveStyles.addTransactionSection.buttons.container.align}
-                    flexWrap={responsiveStyles.addTransactionSection.buttons.container.flexWrap as any}
-                    w={responsiveStyles.addTransactionSection.buttons.container.width}
+                    spacing={3}
+                    w="full"
+                    justify={{ base: 'stretch', sm: 'flex-start' }}
+                    align="stretch"
                   >
                     {[
                       {
                         label: 'Add Money',
-                        mobileLabel: 'Add Money',
+                        mobileLabel: 'Money',
                         icon: Plus,
-                        accent: TrendingUp,
                         type: 'INCOME' as const,
                       },
                       {
                         label: 'Add Expense',
-                        mobileLabel: 'Add Expense',
+                        mobileLabel: 'Expense',
                         icon: Minus,
-                        accent: TrendingDown,
                         type: 'EXPENSE' as const,
                       },
-                    ].map(({ label, mobileLabel, icon, accent, type: t }) => (
-                      <Button
-                        key={t}
-                        aria-label={label}
-                        onClick={() => handleOpen(t)}
-                        size={responsiveStyles.addTransactionSection.buttons.button.size}
-                        leftIcon={<Icon as={icon} boxSize={responsiveStyles.addTransactionSection.buttons.button.iconSize} />}
-                        rightIcon={<Icon as={accent} boxSize={responsiveStyles.addTransactionSection.buttons.button.rightIconSize} />}
-                        borderRadius="xl"
-                        px={responsiveStyles.addTransactionSection.buttons.button.padding}
-                        py={responsiveStyles.addTransactionSection.buttons.button.padding}
-                        fontSize={responsiveStyles.addTransactionSection.buttons.button.fontSize}
-                        fontWeight="500"
-                        bg={useColorModeValue(getButtonColors(t).bg, getButtonColors(t).bgDark)}
-                        color={useColorModeValue(getButtonColors(t).color, getButtonColors(t).colorDark)}
-                        border="1px solid"
-                        borderColor={useColorModeValue(getButtonColors(t).border, getButtonColors(t).borderDark)}
-                        minW={responsiveStyles.addTransactionSection.buttons.button.minWidth}
-                        maxW={responsiveStyles.addTransactionSection.buttons.button.maxWidth}
-                        h={responsiveStyles.addTransactionSection.buttons.button.height}
-                        fontFamily="system-ui, -apple-system, sans-serif"
-                        backdropFilter="blur(10px)"
-                        w={responsiveStyles.addTransactionSection.buttons.button.width}
-                        _hover={{
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-                          borderColor: useColorModeValue(
-                            t === 'INCOME' ? 'green.300' : 'red.300',
-                            t === 'INCOME' ? 'green.400' : 'red.400'
-                          ),
-                          bg: useColorModeValue(
-                            t === 'INCOME' ? 'green.50' : 'red.50',
-                            t === 'INCOME' ? 'green.900' : 'red.900'
-                          )
-                        }}
-                        _active={{
-                          transform: 'translateY(0)',
-                        }}
-                        transition="all 0.2s ease"
-                      >
-                        <Text display={responsiveStyles.addTransactionSection.buttons.button.textDisplay.mobile}>
-                          {mobileLabel}
-                        </Text>
-                        <Text display={responsiveStyles.addTransactionSection.buttons.button.textDisplay.desktop}>
-                          {label}
-                        </Text>
-                      </Button>
-                    ))}
+                    ].map(({ label, mobileLabel, icon, type: t }) => {
+                      const colors = getButtonColors(t)
+                      const gradient = useColorModeValue(colors.gradientLight, colors.gradientDark)
+                      const shadow = useColorModeValue(colors.hoverShadow, colors.hoverShadowDark)
+                      
+                      return (
+                        <Button
+                          key={t}
+                          aria-label={label}
+                          onClick={() => handleOpen(t)}
+                          size="md"
+                          leftIcon={<Icon as={icon} boxSize={4} />}
+                          borderRadius="lg"
+                          px={4}
+                          py={4}
+                          fontSize="sm"
+                          fontWeight="600"
+                          bg={gradient}
+                          color="white"
+                          border="none"
+                          flex={1}
+                          h={{ base: '42px', sm: '44px' }}
+                          fontFamily="system-ui, -apple-system, sans-serif"
+                          letterSpacing="-0.01em"
+                          shadow="0 2px 8px rgba(0,0,0,0.08)"
+                          _hover={{
+                            transform: 'translateY(-1px)',
+                            shadow: shadow,
+                          }}
+                          _active={{
+                            transform: 'translateY(0) scale(0.98)',
+                          }}
+                          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                        >
+                          <Text as="span">
+                            {mobileLabel}
+                          </Text>
+                        </Button>
+                      )
+                    })}
                   </HStack>
-                </Flex>
               </VStack>
             </CardBody>
           </Card>
