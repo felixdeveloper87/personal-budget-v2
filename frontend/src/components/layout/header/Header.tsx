@@ -24,10 +24,15 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { runSearch } = useSearch()
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
-  // Modern post-it inspired colors
-  const bg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-
+  // Modern post-it inspired colors with texture
+  const bg = useColorModeValue('white', 'black')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
+  
+  // Texture pattern with lines - dark mode: white lines on black bg, light mode: black lines on white bg
+  const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
+  const texturePatternDark = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23fff" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
+  
+  const texturePattern = useColorModeValue(texturePatternLight, texturePatternDark)
 
   return (
     <>
@@ -35,6 +40,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
       <Box 
         as="header" 
         bg={bg}
+        backgroundImage={texturePattern}
         backdropFilter="blur(10px)"
         position="sticky" 
         top={0} 

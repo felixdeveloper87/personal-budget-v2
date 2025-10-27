@@ -62,7 +62,7 @@ export default function SummaryContainer({
     <>
       <Box
         w="full"
-        px={{ base: 2, sm: 3, md: 4, lg: 6 }}
+        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
         sx={{
           paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',

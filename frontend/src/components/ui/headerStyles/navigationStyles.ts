@@ -1,15 +1,15 @@
 import { useColorModeValue } from '@chakra-ui/react'
 import { getSharedColors, sharedTransitions, sharedSizes, getSharedEffects, sharedHoverEffects, sharedBreakpoints } from '../sharedStyles'
 
-// Cores dos botões de navegação
+// Cores dos botões de navegação - Gradientes azul elegante
 export const navigationGradients = {
-  light: 'linear-gradient(135deg,rgb(116, 176, 198),rgb(98, 191, 162),rgb(126, 188, 171),rgb(61, 115, 100))',
-  dark: 'linear-gradient(135deg,rgb(147, 197, 253),rgb(134, 239, 172),rgb(131, 180, 157),rgb(110, 231, 183))'
+  light: 'linear-gradient(135deg, rgb(59, 130, 246), rgb(96, 165, 250), rgb(127, 182, 255))',
+  dark: 'linear-gradient(135deg, rgb(29, 78, 216), rgb(59, 130, 246), rgb(96, 165, 250))'
 }
 
 export const navigationHoverGradients = {
-  light: 'linear-gradient(135deg,rgb(98, 191, 162),rgb(117, 210, 183),rgb(61, 115, 100),rgb(52, 101, 88))',
-  dark: 'linear-gradient(135deg,rgb(134, 239, 172),rgb(167, 243, 208),rgb(110, 231, 183),rgb(77, 201, 142))'
+  light: 'linear-gradient(135deg, rgb(37, 99, 235), rgb(59, 130, 246), rgb(96, 165, 250))',
+  dark: 'linear-gradient(135deg, rgb(30, 64, 175), rgb(37, 99, 235), rgb(59, 130, 246))'
 }
 
 // Estilos dos botões de navegação

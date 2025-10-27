@@ -1,4 +1,4 @@
-import { Box, Text, VStack, Spinner, useColorModeValue } from '@chakra-ui/react'
+import { Box, Text, VStack, Spinner, HStack, useColorModeValue } from '@chakra-ui/react'
 import { GRADIENTS } from '../theme'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
@@ -35,10 +35,20 @@ export default function Dashboard() {
         </VStack>
       ) : (
         <VStack spacing={2} align="stretch">
-          <AddTransactionSection transactions={transactions} onRefresh={loadData} />
-
-          {/* Active Installment Plans - Right after Add Transaction */}
-          <InstallmentPlansSection />
+          {/* Quick Actions and Active Installments - Side by side on large screens */}
+          <Box
+            display="flex"
+            flexDirection={{ base: 'column', lg: 'row' }}
+            gap={2}
+            w="full"
+          >
+            <Box flex={{ base: 'none', lg: '1' }} w={{ base: 'full', lg: '0' }}>
+              <AddTransactionSection transactions={transactions} onRefresh={loadData} />
+            </Box>
+            <Box flex={{ base: 'none', lg: '1' }} w={{ base: 'full', lg: '0' }}>
+              <InstallmentPlansSection />
+            </Box>
+          </Box>
 
           {!hasActiveFilters(filters) && monthSummary && (
             <SummaryWithAnalysisSection

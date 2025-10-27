@@ -154,7 +154,7 @@ export default function InstallmentPlansSection() {
                     />
                   </Box>
 
-                  <HStack align="center" spacing={3} flex="0">
+                  <VStack align="flex-start" spacing={1} flex="0">
                     <Heading
                       size={sectionTitleStyles.size}
                       color={titleColor}
@@ -163,16 +163,15 @@ export default function InstallmentPlansSection() {
                       fontFamily={sectionTitleStyles.fontFamily}
                       letterSpacing="-0.01em"
                       lineHeight="1.2"
-                      whiteSpace="nowrap"
                       fontSize={{ base: 'sm', sm: 'lg' }}
                       opacity={0.9}
                     >
                       Active Installments
                     </Heading>
                     <Text
-                      fontSize={{ base: 'sm', sm: 'md' }}
+                      fontSize={{ base: 'xs', sm: 'sm' }}
                       color={subtitleColor}
-                      fontWeight="500"
+                      fontWeight="400"
                       textAlign="left"
                       display={{ base: 'none', sm: 'block' }}
                       fontFamily="system-ui, -apple-system, sans-serif"
@@ -180,7 +179,7 @@ export default function InstallmentPlansSection() {
                     >
                       Track your ongoing payment plans
                     </Text>
-                  </HStack>
+                  </VStack>
                 </HStack>
 
                 {/* Right side - Interactive Badge */}

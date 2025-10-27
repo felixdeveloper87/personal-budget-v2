@@ -136,7 +136,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       />
                     </Box>
 
-                    <HStack align="center" spacing={3} flex="0">
+                    <VStack align="flex-start" spacing={1} flex="0">
                       <Heading
                         size={sectionTitleStyles.size}
                         fontWeight="600"
@@ -144,7 +144,6 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         fontFamily={sectionTitleStyles.fontFamily}
                         letterSpacing="-0.01em"
                         lineHeight="1.2"
-                        whiteSpace="nowrap"
                         fontSize={{ base: 'sm', sm: 'lg' }}
                         display={{ base: 'none', sm: 'block', md: 'block' }}
                         opacity={0.9}
@@ -152,9 +151,9 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                         Quick Actions
                       </Heading>
                       <Text
-                        fontSize={{ base: 'sm', sm: 'md' }}
+                        fontSize={{ base: 'xs', sm: 'sm' }}
                         color={useColorModeValue('gray.600', 'gray.300')}
-                        fontWeight="500"
+                        fontWeight="400"
                         textAlign="left"
                         display={{ base: 'none', sm: 'block', md: 'block' }}
                         fontFamily="system-ui, -apple-system, sans-serif"
@@ -162,7 +161,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       >
                         Choose an action to quickly add a transaction
                       </Text>
-                    </HStack>
+                    </VStack>
                   </HStack>
 
                   {/* Buttons Section */}

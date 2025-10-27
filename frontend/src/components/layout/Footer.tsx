@@ -37,11 +37,15 @@ export default function Footer() {
   const colors = useThemeColors()
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-  // Modern post-it inspired colors
-  const footerBg = useColorModeValue(
-    'rgba(255, 255, 255, 0.9)',
-    'rgba(255, 255, 255, 0.05)'
-  )
+  // Modern post-it inspired colors with texture
+  const footerBg = useColorModeValue('white', 'black')
+  
+  // Texture pattern with lines - dark mode: white lines on black bg, light mode: black lines on white bg
+  const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
+  const texturePatternDark = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23fff" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
+  
+  const texturePattern = useColorModeValue(texturePatternLight, texturePatternDark)
+  
   const brandTextColor = useColorModeValue('gray.800', 'gray.100')
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
 
@@ -52,6 +56,7 @@ export default function Footer() {
     <Box
       as="footer"
       bg={footerBg}
+      backgroundImage={texturePattern}
       backdropFilter="blur(10px)"
       borderTop="1px solid"
       borderColor={useColorModeValue('gray.200', 'gray.600')}

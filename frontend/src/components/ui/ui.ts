@@ -763,25 +763,25 @@ export const getResponsiveStyles = () => ({
       width: { base: 'full', sm: 'auto' },
       flex: { base: '1', sm: '0' },
       container: {
-        spacing: { base: 2, sm: 3, md: 4 },
+        spacing: { base: 2, sm: 3, md: 4, lg: 3 },
         justify: { base: 'center', sm: 'center', md: 'flex-end' },
         align: 'center',
-        flexWrap: { base: 'wrap' as const, sm: 'nowrap' as const, md: 'nowrap' as const },
-        width: { base: 'full', sm: 'auto', md: 'auto' }
+        flexWrap: { base: 'wrap' as const, sm: 'nowrap' as const, md: 'nowrap' as const, lg: 'wrap' as const, xl: 'nowrap' as const },
+        width: { base: 'full', sm: 'auto', md: 'auto', lg: 'full' }
       },
       button: {
-        size: { base: 'sm', sm: 'sm', md: 'md', lg: 'lg' },
-        height: { base: '32px', sm: '36px', md: '40px', lg: '48px' },
-        minWidth: { base: '90px', sm: '100px', md: '120px', lg: '140px' },
-        maxWidth: { base: '140px', sm: '140px', md: '160px', lg: 'none' },
+        size: { base: 'sm', sm: 'sm', md: 'sm', lg: 'sm', xl: 'md', '2xl': 'lg' },
+        height: { base: '32px', sm: '36px', md: '36px', lg: '32px', xl: '40px', '2xl': '48px' },
+        minWidth: { base: '90px', sm: '100px', md: '100px', lg: '80px', xl: '110px', '2xl': '140px' },
+        maxWidth: { base: '140px', sm: '140px', md: '140px', lg: '100px', xl: '140px', '2xl': 'none' },
         width: { base: 'calc(50% - 4px)', sm: 'auto', md: 'auto', lg: 'auto' },
-        padding: { base: 2, sm: 3, md: 4, lg: 6 },
-        fontSize: { base: 'xs', sm: 'xs', md: 'sm', lg: 'md' },
-        iconSize: { base: 3, sm: 3.5, md: 4, lg: 5 },
-        rightIconSize: { base: 2, sm: 2.5, md: 3, lg: 4 },
+        padding: { base: 2, sm: 3, md: 3, lg: 2, xl: 4, '2xl': 6 },
+        fontSize: { base: 'xs', sm: 'xs', md: 'xs', lg: 'xs', xl: 'sm', '2xl': 'md' },
+        iconSize: { base: 3, sm: 3.5, md: 3.5, lg: 3, xl: 3.5, '2xl': 5 },
+        rightIconSize: { base: 2, sm: 2.5, md: 2.5, lg: 2, xl: 2.5, '2xl': 4 },
         textDisplay: {
-          mobile: { base: 'block', sm: 'block', md: 'none', lg: 'none' },
-          desktop: { base: 'none', sm: 'none', md: 'block', lg: 'block' }
+          mobile: { base: 'block', sm: 'block', md: 'block', lg: 'block', xl: 'none', '2xl': 'none' },
+          desktop: { base: 'none', sm: 'none', md: 'none', lg: 'none', xl: 'block', '2xl': 'block' }
         }
       }
     }
