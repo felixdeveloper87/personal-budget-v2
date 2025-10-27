@@ -50,8 +50,12 @@ export default function SummaryContainer({
   } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
 
   // Modern post-it inspired colors
-  const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const cardBorderColor = useColorModeValue('gray.400', 'gray.700')
+  const cardBg = useColorModeValue('white', '#0a0a0a')
+  const cardBgPattern = useColorModeValue(
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+  )
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.900')
 
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
@@ -70,6 +74,7 @@ export default function SummaryContainer({
       >
         <Card
           bg={cardBg}
+          backgroundImage={cardBgPattern}
           backdropFilter="blur(10px)"
           border="1px solid"
           borderColor={cardBorderColor}

@@ -76,10 +76,14 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         }}
       >
         <Card
-          bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+          bg={useColorModeValue('white', '#0a0a0a')}
+          backgroundImage={useColorModeValue(
+            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
+            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+          )}
           backdropFilter="blur(10px)"
-          border="1px solid"
-          borderColor={useColorModeValue('gray.400', 'gray.700')}
+          border="0.5px solid"
+          borderColor={useColorModeValue('gray.200', 'gray.900')}
           borderRadius="2xl"
           shadow="sm"
           overflow="hidden"

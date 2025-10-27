@@ -41,7 +41,7 @@ export default function CategoryAnalysisHeader({
       {/* Left side */}
       <HStack spacing={{ base: 2, sm: 2, md: 3 }} align="center" flex="0">
         <Box
-          p={{ base: 2, sm: 2.5, md: 3 }}
+          p={{ base: 1.5, sm: 2, md: 2.5 }}
           borderRadius="xl"
           bg={analysisIconBg}
           border="1px solid"
@@ -56,7 +56,7 @@ export default function CategoryAnalysisHeader({
         >
           <Icon
             as={BarChart3}
-            boxSize={{ base: 4, sm: 5, md: 6 }}
+            boxSize={{ base: 3.5, sm: 4, md: 5 }}
             color={useColorModeValue('blue.600', 'blue.300')}
           />
         </Box>
@@ -71,13 +71,13 @@ export default function CategoryAnalysisHeader({
             letterSpacing="-0.01em"
             lineHeight="1.2"
             whiteSpace="nowrap"
-            fontSize={{ base: 'sm', sm: 'lg' }}
+            fontSize={{ base: 'xs', sm: 'md' }}
             opacity={0.9}
           >
             Categories
           </Heading>
           <Text
-            fontSize={{ base: 'sm', sm: 'md' }}
+            fontSize={{ base: 'xs', sm: 'sm' }}
             color={subtitleColor}
             fontWeight="500"
             textAlign="left"
@@ -94,12 +94,12 @@ export default function CategoryAnalysisHeader({
       <HStack spacing={{ base: 1, sm: 2 }} align="center" justify="center">
         <Button
           size={{ base: 'xs', sm: 'sm' }}
-          leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, sm: 3 }} />}
+          leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, sm: 2.5 }} />}
           borderRadius="xl"
-          fontSize={{ base: '2xs', sm: 'xs' }}
+          fontSize={{ base: '2xs', sm: '2xs' }}
           fontWeight="500"
-          px={{ base: 2, sm: 3 }}
-          py={{ base: 1, sm: 2 }}
+          px={{ base: 2, sm: 2.5 }}
+          py={{ base: 1, sm: 1.5 }}
           h="auto"
           bg={useColorModeValue(
             activeTab === 'expenses' ? '#fecaca' : GRADIENTS.cardLight,
@@ -132,12 +132,12 @@ export default function CategoryAnalysisHeader({
         </Button>
         <Button
           size={{ base: 'xs', sm: 'sm' }}
-          leftIcon={<Icon as={TrendingUp} boxSize={{ base: 2, sm: 3 }} />}
+          leftIcon={<Icon as={TrendingUp} boxSize={{ base: 2, sm: 2.5 }} />}
           borderRadius="xl"
-          fontSize={{ base: '2xs', sm: 'xs' }}
+          fontSize={{ base: '2xs', sm: '2xs' }}
           fontWeight="500"
-          px={{ base: 2, sm: 3 }}
-          py={{ base: 1, sm: 2 }}
+          px={{ base: 2, sm: 2.5 }}
+          py={{ base: 1, sm: 1.5 }}
           h="auto"
           bg={useColorModeValue(
             activeTab === 'incomes' ? '#dcfce7' : GRADIENTS.cardLight,

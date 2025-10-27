@@ -50,16 +50,14 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   if (sortedCategories.length === 0) {
     return (
       <Card
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.95)',
-          'rgba(17, 17, 17, 0.95)'
+        bg={useColorModeValue('white', '#0a0a0a')}
+        backgroundImage={useColorModeValue(
+          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
+          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
         )}
         backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue(
-          'rgba(255, 255, 255, 0.2)',
-          'rgba(255, 255, 255, 0.1)'
-        )}
+        borderColor={useColorModeValue('gray.200', 'gray.900')}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
@@ -91,11 +89,11 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               <Flex
                 direction="row"
                 align="center"
-                justify="center"
+                justify="flex-start"
                 flexWrap="wrap"
-                pr={{ base: 4, sm: 6 }}
-                pt={{ base: 2, sm: 0 }}
-                gap={{ base: 2, sm: 3 }}
+                pr={{ base: 1, sm: 2 }}
+                pt={{ base: 0.5, sm: 0 }}
+                gap={{ base: 1.5, sm: 2 }}
               >
                 {/* Logo + Text */}
                 <HStack
@@ -156,16 +154,14 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <>
       <Card
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.95)',
-          'rgba(17, 17, 17, 0.95)'
+        bg={useColorModeValue('white', '#0a0a0a')}
+        backgroundImage={useColorModeValue(
+          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
+          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
         )}
         backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue(
-          'rgba(255, 255, 255, 0.2)',
-          'rgba(255, 255, 255, 0.1)'
-        )}
+        borderColor={useColorModeValue('gray.200', 'gray.900')}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
@@ -201,11 +197,11 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               <Flex
                 direction="row"
                 align="center"
-                justify="space-between"
+                justify="center"
                 flexWrap="wrap"
-                pr={{ base: 4, sm: 6 }}
-                pt={{ base: 2, sm: 0 }}
-                gap={{ base: 2, sm: 3 }}
+                pr={{ base: 1, sm: 2 }}
+                pt={{ base: 0.5, sm: 0 }}
+                gap={{ base: 1.5, sm: 2 }}
               >
                 {/* Logo + Text */}
                 <HStack

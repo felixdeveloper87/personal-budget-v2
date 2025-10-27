@@ -495,9 +495,10 @@ export const getResponsiveStyles = () => ({
     // Standard modal header styles - used by AuthModal and SearchModal
     header: {
       container: {
-        p: { base: 4, sm: 5, md: 6 },
+        p: { base: 1.5, sm: 2, md: 3 },
         borderBottom: '1px',
         borderColor: { light: 'gray.200', dark: 'gray.700' },
+        borderRadius: 'xl',
         position: 'relative' as const,
         bg: {
           light: `
