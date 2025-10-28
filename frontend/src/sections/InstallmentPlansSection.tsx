@@ -4,7 +4,6 @@ import {
   Heading,
   Text,
   VStack,
-  Icon,
   Spinner,
   Center,
   Card,
@@ -15,13 +14,10 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { CreditCard, Sparkles } from 'lucide-react'
 import { useThemeColors } from '../hooks/useThemeColors'
-import { GRADIENTS } from '../theme'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
-import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
@@ -29,31 +25,19 @@ import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '..
  * and opens a modal to view or manage all plans.
  */
 export default function InstallmentPlansSection() {
-  // === Hooks must always appear in the same order ===
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   // Local state
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
 
-  // === Color mode values (declared at top to avoid hook order issues) ===
+  // Color mode values
   const cardBg = useColorModeValue('white', '#0a0a0a')
   const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
   )
-  const iconContainerBg = useColorModeValue('#fecaca', '#2d1b1b')
-  const iconColor = useColorModeValue('red.600', 'red.300')
-  const titleColor = useColorModeValue('gray.800', 'gray.100')
-  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-  const badgeBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const badgeColor = useColorModeValue('red.600', 'red.300')
-  const badgeBorderColor = useColorModeValue('red.200', 'red.500')
-  const hoverBorderColor = useColorModeValue('red.200', 'red.500')
-  const hoverBorderColor2 = useColorModeValue('red.300', 'red.400')
-  const badgeHoverBg = useColorModeValue('red.50', 'red.900')
   
 
   // === Data fetching ===
@@ -104,133 +88,79 @@ export default function InstallmentPlansSection() {
             bg={cardBg}
             backgroundImage={cardBgPattern}
             backdropFilter="blur(10px)"
-            border="0.5px solid"
-            borderColor={useColorModeValue('gray.200', 'gray.900')}
+            border="1px solid"
+            borderColor={useColorModeValue('gray.200', 'gray.800')}
             borderRadius="2xl"
-            shadow="sm"
+            shadow={useColorModeValue('0 1px 3px rgba(0,0,0,0.05)', '0 1px 3px rgba(0,0,0,0.2)')}
             overflow="hidden"
+            position="relative"
             _hover={{
-              transform: 'translateY(-2px)',
-              boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-              borderColor: useColorModeValue('red.200', 'red.500')
+              shadow: useColorModeValue('0 4px 12px rgba(0,0,0,0.08)', '0 4px 12px rgba(0,0,0,0.3)')
             }}
             transition="all 0.2s ease"
           >
-            {/* Simple top border with red color */}
-            <Box
-              height="1px"
-              bg={useColorModeValue('red.400', 'red.500')}
-            />
-
-            <CardBody p={{ base: 2, sm: 3, md: 4, lg: 5 }} position="relative" zIndex={2}>
-              <Flex
-                direction={sectionHeaderStyles.container.direction}
-                align={sectionHeaderStyles.container.align}
-                justify={sectionHeaderStyles.container.justify}
-                gap={sectionHeaderStyles.container.gap}
-                w={sectionHeaderStyles.container.w}
-              >
-                {/* Left side - Icon + Title */}
-                <HStack 
-                  direction={sectionHeaderStyles.iconAndTitle.direction}
-                  align={sectionHeaderStyles.iconAndTitle.align}
-                  spacing={{ base: 2, sm: 2, md: 3 }}
-                  flex="0"
-                  justify="flex-start"
-                >
-                  <Box
-                    p={sectionHeaderStyles.icon.padding}
-                    borderRadius={sectionHeaderStyles.icon.borderRadius}
-                    bg={iconContainerBg}
-                    border="1px solid"
-                    borderColor={hoverBorderColor}
-                    boxShadow={sectionHeaderStyles.icon.boxShadow}
-                    _hover={{
-                      transform: sectionHeaderStyles.icon.hover.transform,
-                      boxShadow: sectionHeaderStyles.icon.hover.boxShadow,
-                      borderColor: hoverBorderColor2,
-                    }}
-                    transition={sectionHeaderStyles.icon.transition}
+            <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }} position="relative" zIndex={2}>
+              <Flex justify="space-between" align="center" w="full">
+                {/* Left side - Title */}
+                <HStack spacing={2} align="baseline" flex="1">
+                  <Heading
+                    size="md"
+                    fontWeight="600"
+                    textAlign="left"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                    letterSpacing="-0.015em"
+                    fontSize={{ base: 'md', sm: 'xl' }}
+                    color={useColorModeValue('gray.800', 'white')}
                   >
-                    <Icon
-                      as={CreditCard}
-                      boxSize={sectionHeaderStyles.icon.size}
-                      color={iconColor}
-                    />
-                  </Box>
-
-                  <VStack align="flex-start" spacing={1} flex="0">
-                    <Heading
-                      size={sectionTitleStyles.size}
-                      color={titleColor}
-                      fontWeight="600"
-                      textAlign="left"
-                      fontFamily={sectionTitleStyles.fontFamily}
-                      letterSpacing="-0.01em"
-                      lineHeight="1.2"
-                      fontSize={{ base: 'sm', sm: 'lg' }}
-                      opacity={0.9}
-                    >
-                      Active Installments
-                    </Heading>
-                    <Text
-                      fontSize={{ base: 'xs', sm: 'sm' }}
-                      color={subtitleColor}
-                      fontWeight="400"
-                      textAlign="left"
-                      display={{ base: 'none', sm: 'block' }}
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      whiteSpace="nowrap"
-                    >
-                      Track your ongoing payment plans
-                    </Text>
-                  </VStack>
+                    Active Installments
+                  </Heading>
+                  <Text
+                    fontSize={{ base: 'sm', sm: 'sm' }}
+                    color={useColorModeValue('gray.600', 'gray.400')}
+                    fontWeight="400"
+                    textAlign="left"
+                    fontFamily="system-ui, -apple-system, sans-serif"
+                  >
+                    • {plans.length} plan{plans.length !== 1 ? 's' : ''}
+                  </Text>
                 </HStack>
 
                 {/* Right side - Interactive Badge */}
                 <Badge
-                  borderRadius="xl"
-                  px={4}
+                  borderRadius="lg"
+                  px={3}
                   py={2}
-                  fontSize="sm"
-                  fontWeight="500"
-                  bg={badgeBg}
-                  color={badgeColor}
-                  border="1px solid"
-                  borderColor={badgeBorderColor}
-                  boxShadow="sm"
+                  fontSize="xs"
+                  fontWeight="600"
+                  bg="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
+                  color="white"
+                  border="none"
+                  boxShadow="0 2px 8px rgba(239, 68, 68, 0.2)"
                   cursor="pointer"
                   onClick={onOpen}
                   fontFamily="system-ui, -apple-system, sans-serif"
-                  backdropFilter="blur(10px)"
                   _hover={{
                     transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    borderColor: hoverBorderColor2,
-                    bg: badgeHoverBg,
+                    boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
                   }}
                   _active={{
-                    transform: 'translateY(0)',
+                    transform: 'translateY(0) scale(0.98)',
                   }}
-                  transition="all 0.2s ease"
+                  transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
                   flex="0 0 auto"
-                  w="auto"
-                  h="auto"
                   display="flex"
                   alignItems="center"
                   justifyContent="center"
+                  minW="60px"
                 >
-                  <HStack spacing={2}>
-                    <Icon as={Sparkles} boxSize={3} color={badgeColor} />
-                    <Text
-                      fontSize="sm"
-                      lineHeight="1"
-                      fontWeight="500"
-                      color={badgeColor}
-                    >
-                      {plans.length}
-                    </Text>
-                  </HStack>
+                  <Text
+                    fontSize="xs"
+                    lineHeight="1"
+                    fontWeight="600"
+                    color="white"
+                  >
+                    View
+                  </Text>
                 </Badge>
               </Flex>
             </CardBody>

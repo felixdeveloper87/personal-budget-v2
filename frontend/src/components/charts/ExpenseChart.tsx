@@ -180,11 +180,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
           }
         }}
       >
-        {/* Animated top bar */}
-        <Box
-          height="2px"
-          sx={getShimmerStyles()}
-        />
+
         
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
@@ -321,14 +317,15 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 <Box 
                   key={category}
                   p={4}
-                  bg={useColorModeValue(gradients.background, gradients.background)}
+                  bg={useColorModeValue('white', '#0a0a0a')}
                   borderRadius="xl"
-                  border="1px solid"
-                  borderColor={useColorModeValue('gray.200', 'gray.600')}
                   _hover={{
+                    bg: useColorModeValue(
+                      `${color}20`,
+                      `${color}30`
+                    ),
                     transform: 'translateY(-1px)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    borderColor: useColorModeValue('red.200', 'red.500')
                   }}
                   transition="all 0.2s ease"
                 >

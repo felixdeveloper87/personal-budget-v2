@@ -108,7 +108,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     textAlign="left"
                     fontFamily="system-ui, -apple-system, sans-serif"
                     letterSpacing="-0.015em"
-                    fontSize={{ base: 'lg', sm: 'xl' }}
+                    fontSize={{ base: 'md', sm: 'xl' }}
                     color={useColorModeValue('gray.800', 'white')}
                   >
                     Quick Actions
@@ -155,17 +155,17 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                           aria-label={label}
                           onClick={() => handleOpen(t)}
                           size="md"
-                          leftIcon={<Icon as={icon} boxSize={4} />}
+                          leftIcon={<Icon as={icon} boxSize={{ base: 3.5, sm: 4 }} />}
                           borderRadius="lg"
-                          px={4}
-                          py={4}
-                          fontSize="sm"
+                          px={{ base: 3, sm: 4 }}
+                          py={{ base: 3, sm: 4 }}
+                          fontSize={{ base: 'xs', sm: 'sm' }}
                           fontWeight="600"
                           bg={gradient}
                           color="white"
                           border="none"
                           flex={1}
-                          h={{ base: '42px', sm: '44px' }}
+                          h={{ base: '36px', sm: '44px' }}
                           fontFamily="system-ui, -apple-system, sans-serif"
                           letterSpacing="-0.01em"
                           shadow="0 2px 8px rgba(0,0,0,0.08)"

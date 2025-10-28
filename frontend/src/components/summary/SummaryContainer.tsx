@@ -1,12 +1,13 @@
+import { useState } from 'react'
 import {
   Box,
   VStack,
   Card,
   CardBody,
   Divider,
+  useDisclosure,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { useColorModeValue } from '@chakra-ui/react'
-import { GRADIENTS } from '../../theme'
 import { getResponsiveStyles } from '../ui'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
@@ -16,8 +17,6 @@ import SummaryHeader from './SummaryHeader'
 import PeriodNavigator from './PeriodNavigator'
 import CategoryAnalysisHeader from './CategoryAnalysisHeader'
 import { usePeriodNavigation } from '../../hooks/usePeriodNavigation'
-import { useDisclosure } from '@chakra-ui/react'
-import { useState } from 'react'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
@@ -49,13 +48,13 @@ export default function SummaryContainer({
     formatLabel,
   } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
 
-  // Modern post-it inspired colors
+  // Modern banking app colors
   const cardBg = useColorModeValue('white', '#0a0a0a')
   const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
   )
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.900')
+  const cardBorderColor = useColorModeValue('gray.200', 'gray.800')
 
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
@@ -79,22 +78,15 @@ export default function SummaryContainer({
           border="1px solid"
           borderColor={cardBorderColor}
           borderRadius="2xl"
-          shadow="sm"
+          shadow={useColorModeValue('0 1px 3px rgba(0,0,0,0.05)', '0 1px 3px rgba(0,0,0,0.2)')}
           overflow="hidden"
+          position="relative"
           _hover={{
-            transform: 'translateY(-2px)',
-            boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.200', 'blue.500')
+            shadow: useColorModeValue('0 4px 12px rgba(0,0,0,0.08)', '0 4px 12px rgba(0,0,0,0.3)')
           }}
           transition="all 0.2s ease"
         >
-          {/* Simple top border */}
-          <Box
-            height="1px"
-            bg={useColorModeValue('blue.200', 'blue.500')}
-          />
-
-            <CardBody p={{ base: 3, sm: 4, md: 5, lg: 6 }}>
+            <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }}>
               <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
                 {/* Header */}
                 <SummaryHeader onGoToToday={goToToday} />
@@ -129,7 +121,6 @@ export default function SummaryContainer({
                 <CategoryAnalysisTabs
                   transactions={transactions}
                   selectedPeriod={selectedPeriod}
-                  showHeader={false}
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
                 />

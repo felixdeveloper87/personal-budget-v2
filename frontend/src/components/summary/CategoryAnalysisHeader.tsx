@@ -1,18 +1,13 @@
 import {
   HStack,
-  VStack,
   Text,
   Button,
   Icon,
   Flex,
   Heading,
-  Box,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
-import { GRADIENTS } from '../../theme'
-import { getResponsiveStyles, sectionTitleStyles } from '../ui'
-import { useThemeColors } from '../../hooks/useThemeColors'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 
 interface CategoryAnalysisHeaderProps {
   activeTab: 'expenses' | 'incomes'
@@ -23,75 +18,42 @@ export default function CategoryAnalysisHeader({
   activeTab, 
   onTabChange 
 }: CategoryAnalysisHeaderProps) {
-  const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
-
-  // Modern post-it inspired colors
-  const analysisIconBg = useColorModeValue('#dbeafe', '#1e293b') // Azul post-it
-  const titleColor = useColorModeValue('gray.800', 'gray.100')
-  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-
   return (
     <Flex
-      direction={{ base: 'row', sm: 'row' }}
+      direction="row"
       align="center"
       justify="space-between"
       gap={{ base: 2, sm: 4 }}
+      w="full"
     >
       {/* Left side */}
-      <HStack spacing={{ base: 2, sm: 2, md: 3 }} align="center" flex="0">
-        <Box
-          p={{ base: 1.5, sm: 2, md: 2.5 }}
-          borderRadius="xl"
-          bg={analysisIconBg}
-          border="1px solid"
-          borderColor={useColorModeValue('blue.200', 'blue.500')}
-          boxShadow="sm"
-          _hover={{
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('blue.300', 'blue.400')
-          }}
-          transition="all 0.2s ease"
+      <HStack spacing={2} align="baseline" flex="1" minW={0}>
+        <Heading
+          size="md"
+          fontWeight="600"
+          textAlign="left"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          letterSpacing="-0.015em"
+          fontSize={{ base: 'md', sm: 'lg', md: 'xl' }}
+          color={useColorModeValue('gray.800', 'white')}
         >
-          <Icon
-            as={BarChart3}
-            boxSize={{ base: 3.5, sm: 4, md: 5 }}
-            color={useColorModeValue('blue.600', 'blue.300')}
-          />
-        </Box>
-
-        <HStack align="center" spacing={3} flex="0">
-          <Heading
-            size={sectionTitleStyles.size}
-            color={titleColor}
-            fontWeight="600"
-            textAlign="left"
-            fontFamily={sectionTitleStyles.fontFamily}
-            letterSpacing="-0.01em"
-            lineHeight="1.2"
-            whiteSpace="nowrap"
-            fontSize={{ base: 'xs', sm: 'md' }}
-            opacity={0.9}
-          >
-            Categories
-          </Heading>
-          <Text
-            fontSize={{ base: 'xs', sm: 'sm' }}
-            color={subtitleColor}
-            fontWeight="500"
-            textAlign="left"
-            display={{ base: 'none', sm: 'block' }}
-            fontFamily="system-ui, -apple-system, sans-serif"
-            whiteSpace="nowrap"
-          >
-            Detailed category breakdown and insights
-          </Text>
-        </HStack>
+          Categories
+        </Heading>
+        <Text
+          fontSize={{ base: 'xs', sm: 'sm' }}
+          color={useColorModeValue('gray.600', 'gray.400')}
+          fontWeight="400"
+          textAlign="left"
+          fontFamily="system-ui, -apple-system, sans-serif"
+          display={{ base: 'none', sm: 'block' }}
+          whiteSpace="nowrap"
+        >
+          • Detailed category breakdown and insights
+        </Text>
       </HStack>
 
       {/* Right side - Tab Buttons */}
-      <HStack spacing={{ base: 1, sm: 2 }} align="center" justify="center">
+      <HStack spacing={{ base: 1, sm: 2 }} align="center" justify="flex-end" flexShrink={0}>
         <Button
           size={{ base: 'xs', sm: 'sm' }}
           leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, sm: 2.5 }} />}
@@ -102,8 +64,8 @@ export default function CategoryAnalysisHeader({
           py={{ base: 1, sm: 1.5 }}
           h="auto"
           bg={useColorModeValue(
-            activeTab === 'expenses' ? '#fecaca' : GRADIENTS.cardLight,
-            activeTab === 'expenses' ? '#2d1b1b' : GRADIENTS.cardDark
+            activeTab === 'expenses' ? '#fecaca' : 'white',
+            activeTab === 'expenses' ? '#2d1b1b' : '#0a0a0a'
           )}
           color={useColorModeValue(
             activeTab === 'expenses' ? 'red.600' : 'gray.600',
@@ -140,8 +102,8 @@ export default function CategoryAnalysisHeader({
           py={{ base: 1, sm: 1.5 }}
           h="auto"
           bg={useColorModeValue(
-            activeTab === 'incomes' ? '#dcfce7' : GRADIENTS.cardLight,
-            activeTab === 'incomes' ? '#1f2937' : GRADIENTS.cardDark
+            activeTab === 'incomes' ? '#dcfce7' : 'white',
+            activeTab === 'incomes' ? '#1f2937' : '#0a0a0a'
           )}
           color={useColorModeValue(
             activeTab === 'incomes' ? 'green.600' : 'gray.600',

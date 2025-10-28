@@ -75,13 +75,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             }
           }
         }}
-      >
-        {/* Animated top bar */}
-        <Box
-          height="2px"
-          sx={getShimmerStyles()}
-        />
-        
+      >        
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
             {/* Header */}
@@ -154,6 +148,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   return (
     <>
       <Card
+        w="full"
         bg={useColorModeValue('white', '#0a0a0a')}
         backgroundImage={useColorModeValue(
           'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
@@ -165,7 +160,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
-        w="full"
         sx={{
           animation: animations.slideIn,
           '@keyframes slideIn': {
@@ -333,14 +327,15 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                 <Box 
                   key={category}
                   p={responsiveStyles.charts.progress.item.padding}
-                  bg={useColorModeValue(gradients.background, gradients.background)}
+                  bg={useColorModeValue('white', '#0a0a0a')}
                   borderRadius="xl"
-                  border="2px solid"
-                  borderColor={useColorModeValue('rgba(34, 197, 94, 0.3)', 'rgba(34, 197, 94, 0.2)')}
                   _hover={{
+                    bg: useColorModeValue(
+                      `${color}20`,
+                      `${color}30`
+                    ),
                     transform: 'translateY(-1px)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    borderColor: useColorModeValue('green.200', 'green.500')
                   }}
                   transition="all 0.2s ease"
                 >
