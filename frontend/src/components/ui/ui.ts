@@ -149,8 +149,8 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
   
   // Cores específicas para cada tipo de transação
   const incomeGradient = useColorModeValue(
-    'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)', // Verde claro
-    'linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)'  // Verde escuro
+    'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Verde claro
+    'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'  // Verde escuro
   )
   
   const expenseGradient = useColorModeValue(
