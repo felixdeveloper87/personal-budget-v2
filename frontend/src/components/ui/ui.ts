@@ -149,13 +149,13 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
   
   // Cores específicas para cada tipo de transação
   const incomeGradient = useColorModeValue(
-    'linear-gradient(135deg, #10b981 0%, #059669 100%)', // Verde claro
-    'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'  // Verde escuro
+    'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)', // Verde claro
+    'linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)'  // Verde escuro
   )
   
   const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, #fef2f2 0%, #fee2e2 40%, #fecaca 100%)', // Vermelho muito suave
-    'linear-gradient(135deg, #4c1d1d 0%, #7f1d1d 50%, #991b1b 100%)'  // Vermelho escuro suave
+    'linear-gradient(135deg, #fecaca 0%, #fca5a5 40%, #f87171 100%)', // Vermelho claro
+    'linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%)'  // Vermelho escuro
   )
   
   return {
@@ -189,7 +189,7 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
     iconContainer: {
       ...responsiveStyles.modals.header.iconContainer,
       bg: useColorModeValue(
-        type === 'INCOME' ? '#10b981' : '#f87171',
+        type === 'INCOME' ? '#10b981' : '#ef4444',
         type === 'INCOME' ? '#22c55e' : '#dc2626'
       ),
       sx: responsiveStyles.modals.header.iconContainer.sx

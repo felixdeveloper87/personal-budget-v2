@@ -53,6 +53,13 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
 
+  // Color mode values
+  const cardBg = useColorModeValue('white', '#0a0a0a')
+  const cardBgPattern = useColorModeValue(
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpathיל d="M10 5 L20 5 M50 10 L热潮10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
+  )
+
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
     setType(t)
     onOpen()
@@ -98,96 +105,96 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           transition="all 0.2s ease"
         >
 
-            <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }} position="relative" zIndex={2}>
-              <VStack spacing={4} align="stretch">
-                {/* Header */}
-                <HStack spacing={2} align="baseline">
-                  <Heading
-                    size="md"
-                    fontWeight="600"
-                    textAlign="left"
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                    letterSpacing="-0.015em"
-                    fontSize={{ base: 'md', sm: 'xl' }}
-                    color={useColorModeValue('gray.800', 'white')}
-                  >
-                    Quick Actions
-                  </Heading>
-                  <Text
-                    fontSize={{ base: 'sm', sm: 'sm' }}
-                    color={useColorModeValue('gray.600', 'gray.400')}
-                    fontWeight="400"
-                    textAlign="left"
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                  >
-                    • Add income or expense quickly
-                  </Text>
-                </HStack>
+          <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }} position="relative" zIndex={2}>
+            <VStack spacing={4} align="stretch">
+              {/* Header */}
+              <HStack spacing={2} align="baseline">
+                <Heading
+                  size="md"
+                  fontWeight="600"
+                  textAlign="left"
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                  letterSpacing="-0.015em"
+                  fontSize={{ base: 'md', sm: 'xl' }}
+                  color={useColorModeValue('gray.800', 'white')}
+                >
+                  Quick Actions
+                </Heading>
+                <Text
+                  fontSize={{ base: 'sm', sm: 'sm' }}
+                  color={useColorModeValue('gray.600', 'gray.400')}
+                  fontWeight="400"
+                  textAlign="left"
+                  fontFamily="system-ui, -apple-system, sans-serif"
+                >
+                  • Add income or expense quickly
+                </Text>
+              </HStack>
 
-                  {/* Buttons Section */}
-                  <HStack
-                    spacing={3}
-                    w="full"
-                    justify={{ base: 'stretch', sm: 'flex-start' }}
-                    align="stretch"
-                  >
-                    {[
-                      {
-                        label: 'Add Money',
-                        mobileLabel: 'Money',
-                        icon: Plus,
-                        type: 'INCOME' as const,
-                      },
-                      {
-                        label: 'Add Expense',
-                        mobileLabel: 'Expense',
-                        icon: Minus,
-                        type: 'EXPENSE' as const,
-                      },
-                    ].map(({ label, mobileLabel, icon, type: t }) => {
-                      const colors = getButtonColors(t)
-                      const gradient = useColorModeValue(colors.gradientLight, colors.gradientDark)
-                      const shadow = useColorModeValue(colors.hoverShadow, colors.hoverShadowDark)
-                      
-                      return (
-                        <Button
-                          key={t}
-                          aria-label={label}
-                          onClick={() => handleOpen(t)}
-                          size="md"
-                          leftIcon={<Icon as={icon} boxSize={{ base: 3.5, sm: 4 }} />}
-                          borderRadius="lg"
-                          px={{ base: 3, sm: 4 }}
-                          py={{ base: 3, sm: 4 }}
-                          fontSize={{ base: 'xs', sm: 'sm' }}
-                          fontWeight="600"
-                          bg={gradient}
-                          color="white"
-                          border="none"
-                          flex={1}
-                          h={{ base: '36px', sm: '44px' }}
-                          fontFamily="system-ui, -apple-system, sans-serif"
-                          letterSpacing="-0.01em"
-                          shadow="0 2px 8px rgba(0,0,0,0.08)"
-                          _hover={{
-                            transform: 'translateY(-1px)',
-                            shadow: shadow,
-                          }}
-                          _active={{
-                            transform: 'translateY(0) scale(0.98)',
-                          }}
-                          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                        >
-                          <Text as="span">
-                            {mobileLabel}
-                          </Text>
-                        </Button>
-                      )
-                    })}
-                  </HStack>
-              </VStack>
-            </CardBody>
-          </Card>
+              {/* Buttons Section */}
+              <HStack
+                spacing={3}
+                w="full"
+                justify={{ base: 'stretch', sm: 'flex-start' }}
+                align="stretch"
+              >
+                {[
+                  {
+                    label: 'Add Money',
+                    mobileLabel: 'Money',
+                    icon: Plus,
+                    type: 'INCOME' as const,
+                  },
+                  {
+                    label: 'Add Expense',
+                    mobileLabel: 'Expense',
+                    icon: Minus,
+                    type: 'EXPENSE' as const,
+                  },
+                ].map(({ label, mobileLabel, icon, type: t }) => {
+                  const colors = getButtonColors(t)
+                  const gradient = useColorModeValue(colors.gradientLight, colors.gradientDark)
+                  const shadow = useColorModeValue(colors.hoverShadow, colors.hoverShadowDark)
+
+                  return (
+                    <Button
+                      key={t}
+                      aria-label={label}
+                      onClick={() => handleOpen(t)}
+                      size="md"
+                      leftIcon={<Icon as={icon} boxSize={{ base: 3.5, sm: 4 }} />}
+                      borderRadius="lg"
+                      px={{ base: 3, sm: 4 }}
+                      py={{ base: 3, sm: 4 }}
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      fontWeight="600"
+                      bg={gradient}
+                      color="white"
+                      border="none"
+                      flex={1}
+                      h={{ base: '36px', sm: '44px' }}
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                      letterSpacing="-0.01em"
+                      shadow="0 2px 8px rgba(0,0,0,0.08)"
+                      _hover={{
+                        transform: 'translateY(-1px)',
+                        shadow: shadow,
+                      }}
+                      _active={{
+                        transform: 'translateY(0) scale(0.98)',
+                      }}
+                      transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    >
+                      <Text as="span">
+                        {mobileLabel}
+                      </Text>
+                    </Button>
+                  )
+                })}
+              </HStack>
+            </VStack>
+          </CardBody>
+        </Card>
       </Box>
 
       {/* 🧾 Modal */}
