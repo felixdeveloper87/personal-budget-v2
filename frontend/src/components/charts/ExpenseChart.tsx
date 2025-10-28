@@ -307,7 +307,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
             </Button>
           </HStack>
 
-          {/* Progress bars modernizados */}
+          {/* Progress bars modernizadods */}
           <VStack spacing={3} align="stretch">
             {sortedCategories.slice(0, 5).map(({ category, amount }, index) => {
               const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
