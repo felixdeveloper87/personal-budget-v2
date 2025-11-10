@@ -44,14 +44,14 @@ export default function MobileNavigation({ user, currentPage = 'dashboard', onPa
         return (
           <Tooltip key={item.page} label={item.tooltip} hasArrow>
             <IconButton
-              icon={<Icon as={item.icon} boxSize={3.5} />}
+              icon={<Icon as={item.icon} boxSize={4} />}
               aria-label={item.label}
               onClick={() => onPageChange?.(item.page)}
               size="sm"
               fontSize="sm"
-              p={1.5}
-              minW="32px"
-              h="32px"
+              p={2}
+              minW="36px"
+              h="36px"
               borderRadius={sharedSizes.borderRadius.md}
               {...getHeaderSearchButtonStyles()}
               boxShadow={sharedEffects.shadows.sm}

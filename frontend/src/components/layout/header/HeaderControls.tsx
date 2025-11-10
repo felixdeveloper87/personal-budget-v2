@@ -40,9 +40,9 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
   const mobileButtonSize = isMobile ? {
     size: 'sm' as const,
     fontSize: 'sm',
-    p: 1.5,
-    minW: '32px',
-    h: '32px'
+    p: 2,
+    minW: '36px',
+    h: '36px'
   } : {
     size: responsive.header.mobileIcons.search.size,
     fontSize: responsive.header.mobileIcons.search.fontSize,
@@ -65,7 +65,7 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
         {user && (
           <Tooltip label="Search" hasArrow>
             <IconButton
-              icon={<SearchIcon {...(isMobile && { boxSize: 3.5 })} />}
+              icon={<SearchIcon {...(isMobile && { boxSize: 4 })} />}
               aria-label="Open search"
               onClick={onSearchOpen}
               size={mobileButtonSize.size}
@@ -86,7 +86,7 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
         {/* 🌗 Theme Toggle */}
         <Tooltip label={`Switch to ${colorMode === 'light' ? 'dark' : 'light'} mode`} hasArrow>
           <IconButton
-            icon={colorMode === 'light' ? <MoonIcon {...(isMobile && { boxSize: 3.5 })} /> : <SunIcon {...(isMobile && { boxSize: 3.5 })} />}
+            icon={colorMode === 'light' ? <MoonIcon {...(isMobile && { boxSize: 4 })} /> : <SunIcon {...(isMobile && { boxSize: 4 })} />}
             aria-label="Toggle theme mode"
             onClick={toggleColorMode}
             size={mobileButtonSize.size}
