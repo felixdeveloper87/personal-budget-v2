@@ -2,6 +2,7 @@ import { Box, Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
+import ChartsPage from './pages/ChartsPage'
 import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
@@ -9,7 +10,7 @@ import { useState, useEffect } from 'react'
 function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'transactions'>('dashboard')
+  const [currentPage, setCurrentPage] = useState<'dashboard' | 'transactions' | 'charts'>('dashboard')
 
   // Reset showAuth quando o usuário faz logout ?(quando user se torna null)
   useEffect(() => {
@@ -43,7 +44,7 @@ function AppContent() {
   if (user) {
     return (
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
-        {currentPage === 'dashboard' ? <Dashboard /> : <AllTransactionsPage />}
+        {currentPage === 'dashboard' ? <Dashboard /> : currentPage === 'transactions' ? <AllTransactionsPage /> : <ChartsPage />}
       </Layout>
     )
   }

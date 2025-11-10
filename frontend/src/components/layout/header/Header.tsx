@@ -15,8 +15,8 @@ import { Logo, Navigation, UserMenu, HeaderControls, SearchButton } from './'
 interface HeaderProps {
   onOpenSettings?: () => void
   onLogin?: () => void
-  currentPage?: 'dashboard' | 'transactions'
-  onPageChange?: (page: 'dashboard' | 'transactions') => void
+  currentPage?: 'dashboard' | 'transactions' | 'charts'
+  onPageChange?: (page: 'dashboard' | 'transactions' | 'charts') => void
 }
 
 export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboard', onPageChange }: HeaderProps) {

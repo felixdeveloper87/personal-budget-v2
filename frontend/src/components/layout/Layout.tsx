@@ -6,8 +6,8 @@ import Footer from './Footer'
 
 interface LayoutProps {
   children: React.ReactNode
-  currentPage?: 'dashboard' | 'transactions'
-  onPageChange?: (page: 'dashboard' | 'transactions') => void
+  currentPage?: 'dashboard' | 'transactions' | 'charts'
+  onPageChange?: (page: 'dashboard' | 'transactions' | 'charts') => void
 }
 
 export default function Layout({ children, currentPage = 'dashboard', onPageChange }: LayoutProps) {

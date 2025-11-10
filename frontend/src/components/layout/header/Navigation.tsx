@@ -3,8 +3,8 @@ import { getNavigationButtonStyles, navigationButtonSizes } from '../../ui'
 
 interface NavigationProps {
   user?: any
-  currentPage?: 'dashboard' | 'transactions'
-  onPageChange?: (page: 'dashboard' | 'transactions') => void
+  currentPage?: 'dashboard' | 'transactions' | 'charts'
+  onPageChange?: (page: 'dashboard' | 'transactions' | 'charts') => void
 }
 
 export default function Navigation({ user, currentPage = 'dashboard', onPageChange }: NavigationProps) {
@@ -29,6 +29,13 @@ export default function Navigation({ user, currentPage = 'dashboard', onPageChan
         onClick={() => onPageChange?.('transactions')}
       >
         Transactions
+      </Button>
+      <Button 
+        {...getNavigationButtonStyles(currentPage === 'charts')}
+        {...navigationButtonSizes}
+        onClick={() => onPageChange?.('charts')}
+      >
+        Charts
       </Button>
     </HStack>
   )

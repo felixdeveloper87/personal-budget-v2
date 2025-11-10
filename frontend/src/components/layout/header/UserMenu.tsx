@@ -16,12 +16,12 @@ import {
 } from '@chakra-ui/react'
 import { SearchIcon, SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
 import { GRADIENTS } from '../../../theme'
-import { Home, FileText, User, LogOut } from 'lucide-react'
+import { Home, FileText, User, LogOut, BarChart3 } from 'lucide-react'
 
 interface UserMenuProps {
   user: any
-  currentPage?: 'dashboard' | 'transactions'
-  onPageChange?: (page: 'dashboard' | 'transactions') => void
+  currentPage?: 'dashboard' | 'transactions' | 'charts'
+  onPageChange?: (page: 'dashboard' | 'transactions' | 'charts') => void
   onOpenSettings?: () => void
   onLogout: () => void
 }
@@ -137,22 +137,60 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         <MenuDivider m={0} />
         
         {/* Navegação mobile */}
-        <MenuItem 
-          icon={<Icon as={currentPage === 'dashboard' ? FileText : Home} boxSize={4} />}
-          onClick={() => onPageChange?.(currentPage === 'dashboard' ? 'transactions' : 'dashboard')}
-          color={textColor}
-          fontWeight="500"
-          display={{ base: 'flex', md: 'none' }}
-          bg="transparent"
-          px={6}
-          py={3}
-          _hover={{ 
-            bg: useColorModeValue('blue.50', 'blue.900'),
-            color: 'blue.500'
-          }}
-        >
-          {currentPage === 'dashboard' ? 'All Transactions' : 'Dashboard'}
-        </MenuItem>
+        {currentPage !== 'dashboard' && (
+          <MenuItem 
+            icon={<Icon as={Home} boxSize={4} />}
+            onClick={() => onPageChange?.('dashboard')}
+            color={textColor}
+            fontWeight="500"
+            display={{ base: 'flex', md: 'none' }}
+            bg="transparent"
+            px={6}
+            py={3}
+            _hover={{ 
+              bg: useColorModeValue('blue.50', 'blue.900'),
+              color: 'blue.500'
+            }}
+          >
+            Dashboard
+          </MenuItem>
+        )}
+        {currentPage !== 'transactions' && (
+          <MenuItem 
+            icon={<Icon as={FileText} boxSize={4} />}
+            onClick={() => onPageChange?.('transactions')}
+            color={textColor}
+            fontWeight="500"
+            display={{ base: 'flex', md: 'none' }}
+            bg="transparent"
+            px={6}
+            py={3}
+            _hover={{ 
+              bg: useColorModeValue('blue.50', 'blue.900'),
+              color: 'blue.500'
+            }}
+          >
+            All Transactions
+          </MenuItem>
+        )}
+        {currentPage !== 'charts' && (
+          <MenuItem 
+            icon={<Icon as={BarChart3} boxSize={4} />}
+            onClick={() => onPageChange?.('charts')}
+            color={textColor}
+            fontWeight="500"
+            display={{ base: 'flex', md: 'none' }}
+            bg="transparent"
+            px={6}
+            py={3}
+            _hover={{ 
+              bg: useColorModeValue('blue.50', 'blue.900'),
+              color: 'blue.500'
+            }}
+          >
+            Charts
+          </MenuItem>
+        )}
         <MenuDivider display={{ base: 'block', md: 'none' }} m={0} />
         
         <MenuItem 
