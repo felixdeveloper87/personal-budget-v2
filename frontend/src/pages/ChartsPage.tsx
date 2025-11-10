@@ -1,4 +1,4 @@
-import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Divider, Heading, HStack, Button } from '@chakra-ui/react'
+import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Heading, HStack, Button } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import { usePeriodNavigation } from '../hooks/usePeriodNavigation'
@@ -30,6 +30,13 @@ export default function ChartsPage() {
   const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
   const texturePatternDark = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23fff" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
   const texturePattern = useColorModeValue(texturePatternLight, texturePatternDark)
+  
+  // Modern divider styles
+  const dividerColor = useColorModeValue(
+    'linear-gradient(90deg, transparent 0%, rgba(226, 232, 240, 0.8) 20%, rgba(226, 232, 240, 0.8) 80%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(75, 85, 99, 0.4) 20%, rgba(75, 85, 99, 0.4) 80%, transparent 100%)'
+  )
+  const dividerAccentColor = useColorModeValue('blue.300', 'blue.500')
 
   if (loading) {
     return (
@@ -151,7 +158,25 @@ export default function ChartsPage() {
                 formatLabel={formatLabel}
               />
 
-              <Divider />
+              {/* Modern Divider */}
+              <Box
+                h="1px"
+                w="100%"
+                bg={dividerColor}
+                my={6}
+                position="relative"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  w: '40px',
+                  h: '1px',
+                  bg: dividerAccentColor,
+                  opacity: 0.6,
+                }}
+              />
 
               {/* Charts Section */}
               <VStack spacing={6} align="stretch">
@@ -171,7 +196,25 @@ export default function ChartsPage() {
                   />
                 </Box>
 
-                <Divider />
+                {/* Modern Divider */}
+              <Box
+                h="1px"
+                w="100%"
+                bg={dividerColor}
+                my={6}
+                position="relative"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  w: '40px',
+                  h: '1px',
+                  bg: dividerAccentColor,
+                  opacity: 0.6,
+                }}
+              />
 
                 {/* Income Chart */}
                 <Box>
@@ -189,7 +232,25 @@ export default function ChartsPage() {
                   />
                 </Box>
 
-                <Divider />
+                {/* Modern Divider */}
+              <Box
+                h="1px"
+                w="100%"
+                bg={dividerColor}
+                my={6}
+                position="relative"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  w: '40px',
+                  h: '1px',
+                  bg: dividerAccentColor,
+                  opacity: 0.6,
+                }}
+              />
 
                 {/* Expenses Chart */}
                 <Box>
@@ -207,7 +268,25 @@ export default function ChartsPage() {
                   />
                 </Box>
 
-                <Divider />
+                {/* Modern Divider */}
+              <Box
+                h="1px"
+                w="100%"
+                bg={dividerColor}
+                my={6}
+                position="relative"
+                _before={{
+                  content: '""',
+                  position: 'absolute',
+                  left: '50%',
+                  top: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  w: '40px',
+                  h: '1px',
+                  bg: dividerAccentColor,
+                  opacity: 0.6,
+                }}
+              />
 
                 {/* Balance Chart */}
                 <Box>
