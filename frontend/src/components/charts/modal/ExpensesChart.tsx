@@ -12,9 +12,10 @@ import {
   LineChart,
   Line
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge, Progress, useBreakpointValue, useColorModeValue, Spinner, Center } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, Badge, Progress, useBreakpointValue, useColorModeValue, Spinner, Center, Icon } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles, animations } from '../../ui'
+import { DollarSign, TrendingDown, BarChart3 } from 'lucide-react'
 
 interface ExpensesChartProps {
   transactions: any[]
@@ -24,16 +25,50 @@ interface ExpensesChartProps {
 export default function ExpensesChart({ transactions, selectedPeriod }: ExpensesChartProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const chartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
-  const smallChartHeight = useBreakpointValue({ base: 200, sm: 230, md: 250, lg: 300 })
+  const chartHeight = useBreakpointValue({ base: 280, sm: 320, md: 360, lg: 400 })
+  const smallChartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
+  const pieOuterRadius = useBreakpointValue({ base: 70, sm: 85, md: 100 })
   
-  // Move all useColorModeValue calls to the top
-  const cardBg = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  // Modern color palette
+  const cardBg = useColorModeValue('white', '#0a0a0a')
+  const cardBgGradient = useColorModeValue(
+    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+    'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
+  )
+  const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(75, 85, 99, 0.3)')
   const spinnerColor = useColorModeValue('blue.500', 'blue.300')
-  const gridStroke = useColorModeValue('#E2E8F0', '#4A5568')
-  const legendBg = useColorModeValue('gray.50', 'gray.700')
-  const legendHoverBg = useColorModeValue('gray.100', 'gray.600')
+  const gridStroke = useColorModeValue('rgba(226, 232, 240, 0.5)', 'rgba(75, 85, 99, 0.2)')
+  const legendBg = useColorModeValue('rgba(239, 68, 68, 0.05)', 'rgba(248, 113, 113, 0.1)')
+  const legendHoverBg = useColorModeValue('rgba(239, 68, 68, 0.1)', 'rgba(248, 113, 113, 0.15)')
+  
+  // Modern gradient colors
+  const expenseGradient = useColorModeValue(
+    'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
+  )
+  const transactionsGradient = useColorModeValue(
+    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+    'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
+  )
+  const averageGradient = useColorModeValue(
+    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+    'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)'
+  )
+  
+  // Modern colors
+  const expenseColor = useColorModeValue('#ef4444', '#f87171')
+  const transactionsColor = useColorModeValue('#3b82f6', '#60a5fa')
+  const averageColor = useColorModeValue('#8b5cf6', '#a78bfa')
+  
+  // Hover border colors
+  const expenseHoverBorder = useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(248, 113, 113, 0.4)')
+  const transactionsHoverBorder = useColorModeValue('rgba(59, 130, 246, 0.3)', 'rgba(96, 165, 250, 0.4)')
+  const averageHoverBorder = useColorModeValue('rgba(139, 92, 246, 0.3)', 'rgba(167, 139, 250, 0.4)')
+  
+  // Badge colors
+  const redBadgeBg = useColorModeValue('red.50', 'red.900')
+  const redBadgeColor = useColorModeValue('red.600', 'red.300')
+  const grayBadgeBg = useColorModeValue('gray.100', 'gray.700')
 
   // Filtrar apenas transações de despesas
   const expenseTransactions = transactions.filter(t => t.type === 'EXPENSE')
@@ -121,128 +156,230 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         }
       }}
     >
-      {/* Estatísticas rápidas - responsivas para iPhone */}
+      {/* Modern Statistics Cards */}
       <HStack 
-        spacing={{ base: 3, sm: 4, md: 6 }} 
+        spacing={{ base: 2, sm: 3, md: 4 }} 
         justify="center" 
         wrap="wrap"
-        gap={{ base: 2, sm: 3 }}
+        gap={{ base: 2, sm: 2 }}
       >
+        {/* Total Expenses Card */}
         <Box 
-          textAlign="center" 
-          minW={{ base: "60px", sm: "80px", md: "100px", lg: "120px" }}
-          p={{ base: 2, sm: 3, md: 4 }}
-          borderRadius="xl"
+          position="relative"
+          minW={{ base: "60px", sm: "75px", lg: "90px" }}
+          p={{ base: 2.5, sm: 3 }}
+          borderRadius="lg"
           bg={cardBg}
+          background={cardBgGradient}
           border="1px solid"
           borderColor={borderColor}
-          shadow="sm"
+          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
           _hover={{
-            shadow: 'md',
-            transform: 'translateY(-2px)',
+            transform: 'translateY(-4px)',
+            boxShadow: '0 10px 25px rgba(239, 68, 68, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
+            borderColor: expenseHoverBorder,
           }}
-          transition="all 0.2s ease"
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
           sx={{
             animation: `${animations.slideIn} 0.3s ease-out`,
           }}
+          overflow="hidden"
         >
-          <Text 
-            fontSize={{ base: "sm", sm: "lg", md: "xl", lg: "2xl" }} 
-            fontWeight="bold" 
-            color="red.500"
-            mb={1}
-          >
-            £{totalExpenses.toFixed(2)}
-          </Text>
-          <Text fontSize={{ base: "2xs", sm: "xs", md: "sm" }} color={colors.text.secondary}>
-            Total Expenses
-          </Text>
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            h="2px"
+            bg={expenseGradient}
+          />
+          <VStack spacing={1} align="center">
+            <HStack spacing={1} align="center">
+              <Icon as={DollarSign} boxSize={3.5} color={expenseColor} />
+              <Text 
+                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+                fontWeight="800" 
+                bgGradient={expenseGradient}
+                bgClip="text"
+                lineHeight="1"
+              >
+                £{totalExpenses.toFixed(2)}
+              </Text>
+            </HStack>
+            <Text 
+              fontSize={{ base: "2xs", sm: "2xs" }} 
+              fontWeight="600"
+              color={colors.text.secondary}
+              letterSpacing="0.5px"
+              textTransform="uppercase"
+            >
+              Total Expenses
+            </Text>
+          </VStack>
         </Box>
+
+        {/* Transactions Card */}
         <Box 
-          textAlign="center" 
-          minW={{ base: "60px", sm: "80px", md: "100px", lg: "120px" }}
-          p={{ base: 2, sm: 3, md: 4 }}
-          borderRadius="xl"
+          position="relative"
+          minW={{ base: "60px", sm: "75px", lg: "90px" }}
+          p={{ base: 2.5, sm: 3 }}
+          borderRadius="lg"
           bg={cardBg}
+          background={cardBgGradient}
           border="1px solid"
           borderColor={borderColor}
-          shadow="sm"
+          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
           _hover={{
-            shadow: 'md',
-            transform: 'translateY(-2px)',
+            transform: 'translateY(-4px)',
+            boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
+            borderColor: transactionsHoverBorder,
           }}
-          transition="all 0.2s ease"
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
           sx={{
             animation: `${animations.slideIn} 0.4s ease-out`,
           }}
+          overflow="hidden"
         >
-          <Text 
-            fontSize={{ base: "sm", sm: "lg", md: "xl", lg: "2xl" }} 
-            fontWeight="bold" 
-            color="blue.500"
-            mb={1}
-          >
-            {expenseTransactions.length}
-          </Text>
-          <Text fontSize={{ base: "2xs", sm: "xs", md: "sm" }} color={colors.text.secondary}>
-            Transactions
-          </Text>
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            h="2px"
+            bg={transactionsGradient}
+          />
+          <VStack spacing={1} align="center">
+            <HStack spacing={1} align="center">
+              <Icon as={BarChart3} boxSize={3.5} color={transactionsColor} />
+              <Text 
+                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+                fontWeight="800" 
+                bgGradient={transactionsGradient}
+                bgClip="text"
+                lineHeight="1"
+              >
+                {expenseTransactions.length}
+              </Text>
+            </HStack>
+            <Text 
+              fontSize={{ base: "2xs", sm: "2xs" }} 
+              fontWeight="600"
+              color={colors.text.secondary}
+              letterSpacing="0.5px"
+              textTransform="uppercase"
+            >
+              Transactions
+            </Text>
+          </VStack>
         </Box>
+
+        {/* Average Card */}
         <Box 
-          textAlign="center" 
-          minW={{ base: "60px", sm: "80px", md: "100px", lg: "120px" }}
-          p={{ base: 2, sm: 3, md: 4 }}
-          borderRadius="xl"
+          position="relative"
+          minW={{ base: "60px", sm: "75px", lg: "90px" }}
+          p={{ base: 2.5, sm: 3 }}
+          borderRadius="lg"
           bg={cardBg}
+          background={cardBgGradient}
           border="1px solid"
           borderColor={borderColor}
-          shadow="sm"
+          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
           _hover={{
-            shadow: 'md',
-            transform: 'translateY(-2px)',
+            transform: 'translateY(-4px)',
+            boxShadow: '0 10px 25px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
+            borderColor: averageHoverBorder,
           }}
-          transition="all 0.2s ease"
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
           sx={{
             animation: `${animations.slideIn} 0.5s ease-out`,
           }}
+          overflow="hidden"
         >
-          <Text 
-            fontSize={{ base: "sm", sm: "lg", md: "xl", lg: "2xl" }} 
-            fontWeight="bold" 
-            color="purple.500"
-            mb={1}
-          >
-            £{avgExpense.toFixed(2)}
-          </Text>
-          <Text fontSize={{ base: "2xs", sm: "xs", md: "sm" }} color={colors.text.secondary}>
-            Average
-          </Text>
+          <Box
+            position="absolute"
+            top={0}
+            left={0}
+            right={0}
+            h="2px"
+            bg={averageGradient}
+          />
+          <VStack spacing={1} align="center">
+            <HStack spacing={1} align="center">
+              <Icon as={TrendingDown} boxSize={3.5} color={averageColor} />
+              <Text 
+                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+                fontWeight="800" 
+                bgGradient={averageGradient}
+                bgClip="text"
+                lineHeight="1"
+              >
+                £{avgExpense.toFixed(2)}
+              </Text>
+            </HStack>
+            <Text 
+              fontSize={{ base: "2xs", sm: "2xs" }} 
+              fontWeight="600"
+              color={colors.text.secondary}
+              letterSpacing="0.5px"
+              textTransform="uppercase"
+            >
+              Average
+            </Text>
+          </VStack>
         </Box>
       </HStack>
 
+      {/* Modern Pie Chart */}
       <Box
-        p={6}
+        position="relative"
+        p={{ base: 5, sm: 6, md: 8 }}
         borderRadius="2xl"
         bg={cardBg}
+        background={cardBgGradient}
         border="1px solid"
         borderColor={borderColor}
-        shadow="sm"
+        boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
         _hover={{
-          shadow: 'md',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
         }}
-        transition="all 0.2s ease"
+        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         sx={{
           animation: `${animations.slideIn} 0.6s ease-out`,
         }}
+        overflow="hidden"
       >
-        <Text 
-          fontSize={{ base: "md", sm: "lg" }} 
-          fontWeight="semibold" 
-          mb={{ base: 3, sm: 4 }} 
-          color={colors.text.label}
-        >
-          Expense Distribution
-        </Text>
+        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
+          <VStack align="start" spacing={1}>
+            <Text 
+              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+              fontWeight="700" 
+              color={colors.text.primary}
+              letterSpacing="-0.02em"
+            >
+              Expense Distribution
+            </Text>
+            <Text 
+              fontSize={{ base: "xs", sm: "sm" }} 
+              color={colors.text.secondary}
+              fontWeight="500"
+            >
+              Breakdown by category
+            </Text>
+          </VStack>
+          <Badge
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg={redBadgeBg}
+            color={redBadgeColor}
+            fontSize="xs"
+            fontWeight="600"
+            textTransform="uppercase"
+            letterSpacing="0.5px"
+          >
+            {selectedPeriod}
+          </Badge>
+        </HStack>
         <ResponsiveContainer width="100%" height={smallChartHeight}>
           <PieChart>
             <Pie
@@ -250,9 +387,11 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={80}
+              outerRadius={pieOuterRadius}
               fill="#8884d8"
               dataKey="value"
+              stroke={cardBg}
+              strokeWidth={2}
             >
               {pieData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
@@ -261,9 +400,9 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
           </PieChart>
         </ResponsiveContainer>
         
-        {/* Legenda compacta responsiva */}
-        <Box mt={3}>
-          <VStack spacing={1} align="stretch">
+        {/* Modern Legend */}
+        <Box mt={4}>
+          <VStack spacing={2} align="stretch">
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalExpenses) * 100).toFixed(1)
               return (
@@ -271,50 +410,58 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                   key={`legend-${index}`}
                   justify="space-between" 
                   align="center"
-                  p={2}
-                  borderRadius="md"
+                  p={3}
+                  borderRadius="xl"
                   bg={legendBg}
+                  border="1px solid"
+                  borderColor={borderColor}
                   _hover={{
                     bg: legendHoverBg,
-                    transform: 'translateX(2px)',
+                    transform: 'translateX(4px)',
+                    borderColor: entry.color,
                   }}
-                  transition="all 0.2s ease"
+                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
                   sx={{
                     animation: `${animations.slideIn} ${0.8 + index * 0.1}s ease-out`,
                   }}
                 >
-                  <HStack spacing={2} align="center" minW={0} flex={1}>
+                  <HStack spacing={3} align="center" minW={0} flex={1}>
                     <Box
-                      w={3}
-                      h={3}
-                      borderRadius="sm"
+                      w={4}
+                      h={4}
+                      borderRadius="md"
                       bg={entry.color}
                       flexShrink={0}
+                      boxShadow="0 2px 4px rgba(0,0,0,0.1)"
                     />
                     <Text 
-                      fontSize={{ base: 'xs', sm: 'sm' }}
-                      fontWeight="500"
+                      fontSize={{ base: 'sm', sm: 'md' }}
+                      fontWeight="600"
                       color={colors.text.primary}
                       isTruncated
                     >
                       {entry.name}
                     </Text>
                   </HStack>
-                  <HStack spacing={2} align="center" flexShrink={0}>
+                  <HStack spacing={3} align="center" flexShrink={0}>
                     <Text 
-                      fontSize={{ base: 'xs', sm: 'sm' }}
-                      fontWeight="bold"
+                      fontSize={{ base: 'sm', sm: 'md' }}
+                      fontWeight="700"
                       color={colors.text.primary}
                     >
                       £{entry.value.toFixed(2)}
                     </Text>
-                    <Text 
-                      fontSize={{ base: 'xs', sm: 'sm' }}
-                      color={colors.text.secondary}
-                      fontWeight="500"
+                    <Badge
+                      px={2}
+                      py={0.5}
+                      borderRadius="full"
+                      bg={grayBadgeBg}
+                      color={colors.text.primary}
+                      fontSize="xs"
+                      fontWeight="600"
                     >
                       {percentage}%
-                    </Text>
+                    </Badge>
                   </HStack>
                 </HStack>
               )
@@ -323,67 +470,137 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         </Box>
       </Box>
 
-      {/* Gráfico de linha - tendência temporal */}
+      {/* Modern Line Chart */}
       <Box
-        p={6}
+        position="relative"
+        p={{ base: 5, sm: 6, md: 8 }}
         borderRadius="2xl"
         bg={cardBg}
+        background={cardBgGradient}
         border="1px solid"
         borderColor={borderColor}
-        shadow="sm"
+        boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
         _hover={{
-          shadow: 'md',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
         }}
-        transition="all 0.2s ease"
+        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
         sx={{
           animation: `${animations.slideIn} 0.7s ease-out`,
         }}
+        overflow="hidden"
       >
-        <Text 
-          fontSize={{ base: "md", sm: "lg" }} 
-          fontWeight="semibold" 
-          mb={{ base: 3, sm: 4 }} 
-          color={colors.text.label}
-        >
-          Expense Timeline
-        </Text>
+        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
+          <VStack align="start" spacing={1}>
+            <Text 
+              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
+              fontWeight="700" 
+              color={colors.text.primary}
+              letterSpacing="-0.02em"
+            >
+              Expense Timeline
+            </Text>
+            <Text 
+              fontSize={{ base: "xs", sm: "sm" }} 
+              color={colors.text.secondary}
+              fontWeight="500"
+            >
+              Daily expense trend
+            </Text>
+          </VStack>
+          <Badge
+            px={3}
+            py={1}
+            borderRadius="full"
+            bg={redBadgeBg}
+            color={redBadgeColor}
+            fontSize="xs"
+            fontWeight="600"
+            textTransform="uppercase"
+            letterSpacing="0.5px"
+          >
+            {selectedPeriod}
+          </Badge>
+        </HStack>
         <ResponsiveContainer width="100%" height={smallChartHeight}>
-          <LineChart data={timelineData}>
+          <LineChart 
+            data={timelineData}
+            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+          >
+            <defs>
+              <linearGradient id="expenseLineGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={expenseColor} stopOpacity={0.3}/>
+                <stop offset="100%" stopColor={expenseColor} stopOpacity={0}/>
+              </linearGradient>
+            </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke={gridStroke}
+              vertical={false}
             />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 12, fill: colors.text.secondary }}
-              axisLine={{ stroke: colors.border }}
+              tick={{ 
+                fontSize: 11, 
+                fill: colors.text.secondary,
+                fontWeight: 500
+              }}
+              axisLine={{ 
+                stroke: borderColor,
+                strokeWidth: 1
+              }}
+              tickLine={false}
             />
             <YAxis 
-              tick={{ fontSize: 12, fill: colors.text.secondary }}
-              axisLine={{ stroke: colors.border }}
+              tick={{ 
+                fontSize: 11, 
+                fill: colors.text.secondary,
+                fontWeight: 500
+              }}
+              axisLine={false}
+              tickLine={false}
             />
             <Tooltip 
               contentStyle={{
                 backgroundColor: cardBg,
                 border: `1px solid ${borderColor}`,
                 borderRadius: '12px',
-                boxShadow: 'lg',
-                fontSize: '14px',
-                color: colors.text.primary
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
+                fontSize: '13px',
+                padding: '12px 16px'
               }}
               labelStyle={{
                 color: colors.text.primary,
-                fontWeight: '600'
+                fontWeight: '700',
+                fontSize: '12px',
+                marginBottom: '8px',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px'
+              }}
+              itemStyle={{
+                color: colors.text.primary,
+                fontWeight: '600',
+                padding: '4px 0'
               }}
               formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
+              cursor={{ stroke: expenseColor, strokeWidth: 2, strokeDasharray: '5 5' }}
             />
             <Line 
               type="monotone" 
               dataKey="amount" 
-              stroke="#E53E3E" 
+              stroke={expenseColor}
               strokeWidth={3}
-              dot={{ fill: '#E53E3E', strokeWidth: 2, r: 5 }}
-              activeDot={{ r: 7, stroke: '#E53E3E', strokeWidth: 2 }}
+              dot={{ 
+                fill: expenseColor, 
+                strokeWidth: 2, 
+                r: 5,
+                stroke: cardBg
+              }}
+              activeDot={{ 
+                r: 7, 
+                stroke: expenseColor, 
+                strokeWidth: 2,
+                fill: cardBg
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
