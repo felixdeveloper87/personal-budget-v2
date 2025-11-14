@@ -1,7 +1,7 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue, Card, CardBody } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
 import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
@@ -13,15 +13,40 @@ interface ExpenseChartProps {
 
 export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'EXPENSE')
   const isMobile = useBreakpointValue({ base: true, md: false })
+  
+  // Pre-compute all useColorModeValue calls
+  const cardBg = useColorModeValue('white', '#0a0a0a')
+  const cardBgPattern = useColorModeValue(
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
+    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
+  )
+  const borderColor = useColorModeValue('gray.200', 'gray.900')
+  const boxHoverBg = useColorModeValue('white', '#0a0a0a')
+  const textColor = useColorModeValue('gray.800', 'gray.100')
+  const textColorSecondary = useColorModeValue('gray.600', 'gray.300')
+  const buttonHoverBg = useColorModeValue('red.50', 'red.900')
+  const footerBg = useColorModeValue('rgba(239, 68, 68, 0.05)', 'rgba(239, 68, 68, 0.1)')
+  const footerBorderColor = useColorModeValue('gray.200', 'gray.600')
+  const redColor = useColorModeValue('red.600', 'red.300')
+  const redIcon = useColorModeValue('red.500', 'red.400')
+  const progressBg = useColorModeValue('gray.100', 'gray.700')
+  const titleText = useBreakpointValue({ base: 'Expenses', sm: 'Expense Analysis' })
 
   const handleClose = useCallback(() => {
+    setSelectedCategory(undefined)
     onClose()
   }, [onClose])
+
+  const handleCategoryClick = useCallback((category: string) => {
+    setSelectedCategory(category)
+    onOpen()
+  }, [onOpen])
 
   // Cores para as categorias
   const categoryColors = [
@@ -50,14 +75,11 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   if (sortedCategories.length === 0) {
     return (
       <Card
-        bg={useColorModeValue('white', '#0a0a0a')}
-        backgroundImage={useColorModeValue(
-          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
-        )}
+        bg={cardBg}
+        backgroundImage={cardBgPattern}
         backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.900')}
+        borderColor={borderColor}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
@@ -124,7 +146,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      {useBreakpointValue({ base: 'Expenses', sm: 'Expense Analysis' })}
+                      {titleText}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
@@ -154,14 +176,11 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <>
       <Card
-        bg={useColorModeValue('white', '#0a0a0a')}
-        backgroundImage={useColorModeValue(
-          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-          'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
-        )}
+        bg={cardBg}
+        backgroundImage={cardBgPattern}
         backdropFilter="blur(20px)"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.900')}
+        borderColor={borderColor}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
@@ -228,7 +247,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                       lineHeight="shorter"
                       noOfLines={1}
                     >
-                      {useBreakpointValue({ base: 'Expenses', sm: 'Expense Analysis' })}
+                      {titleText}
                     </Text>
                     <Text
                       color={headerStyles.subtitle.color}
@@ -249,7 +268,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                   onClick={onOpen}
                   rightIcon={<Icon as={Eye} boxSize={4} color={headerStyles.title.color} />}
                   _hover={{
-                    bg: useColorModeValue('red.50', 'red.900'),
+                    bg: buttonHoverBg,
                     transform: 'translateY(-1px)',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                   }}
@@ -317,15 +336,14 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                 <Box 
                   key={category}
                   p={4}
-                  bg={useColorModeValue('white', '#0a0a0a')}
+                  bg={boxHoverBg}
                   borderRadius="xl"
+                  cursor="pointer"
+                  onClick={() => handleCategoryClick(category)}
                   _hover={{
-                    bg: useColorModeValue(
-                      `${color}20`,
-                      `${color}30`
-                    ),
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    bg: `${color}20`,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
                   }}
                   transition="all 0.2s ease"
                 >
@@ -338,15 +356,15 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                         bg={color}
                       />
                       <HStack spacing={2} align="center">
-                        <Text fontSize="sm" fontWeight="600" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
+                        <Text fontSize="sm" fontWeight="600" color={textColor} fontFamily="system-ui, -apple-system, sans-serif">
                           {category}
                         </Text>
-                        <Text fontSize={{ base: "2xs", sm: "xs" }} fontWeight="500" color={useColorModeValue('gray.600', 'gray.300')} fontFamily="system-ui, -apple-system, sans-serif">
+                        <Text fontSize={{ base: "2xs", sm: "xs" }} fontWeight="500" color={textColorSecondary} fontFamily="system-ui, -apple-system, sans-serif">
                           {percentage.toFixed(1)}%
                         </Text>
                       </HStack>
                     </HStack>
-                    <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
+                    <Text fontSize="sm" fontWeight="700" color={textColor} fontFamily="system-ui, -apple-system, sans-serif">
                       £{amount.toFixed(2)}
                     </Text>
                   </HStack>
@@ -355,7 +373,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                     value={percentage}
                     size="sm"
                     borderRadius="full"
-                    bg={useColorModeValue('gray.100', 'gray.700')}
+                    bg={progressBg}
                     sx={{
                       '& > div': {
                         background: color,
@@ -373,14 +391,14 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
               <Box 
                 textAlign="center" 
                 py={4}
-                bg={useColorModeValue(gradients.background, gradients.background)}
+                bg={gradients.background}
                 borderRadius="xl"
                 border="1px dashed"
-                borderColor={useColorModeValue('gray.300', 'gray.600')}
+                borderColor={footerBorderColor}
               >
                 <HStack justify="center" spacing={2}>
-                  <Icon as={Sparkles} boxSize={3} color={useColorModeValue('gray.500', 'gray.400')} />
-                  <Text fontSize="sm" color={useColorModeValue('gray.700', 'gray.300')} fontWeight="500" fontFamily="system-ui, -apple-system, sans-serif">
+                  <Icon as={Sparkles} boxSize={3} color={textColorSecondary} />
+                  <Text fontSize="sm" color={textColorSecondary} fontWeight="500" fontFamily="system-ui, -apple-system, sans-serif">
                     ... and {sortedCategories.length - 5} more categories
                   </Text>
                 </HStack>
@@ -392,23 +410,23 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
           <Box 
             pt={4} 
             borderTop="1px solid" 
-            borderColor={useColorModeValue('gray.200', 'gray.600')}
-            bg={useColorModeValue('rgba(239, 68, 68, 0.05)', 'rgba(239, 68, 68, 0.1)')}
+            borderColor={footerBorderColor}
+            bg={footerBg}
             borderRadius="xl"
             p={4}
             mt={2}
           >
             <HStack justify="space-between" align="center">
               <HStack spacing={3}>
-                <Icon as={TrendingDown} boxSize={4} color={useColorModeValue('red.500', 'red.400')} />
-                <Text fontSize="md" fontWeight="700" color={useColorModeValue('gray.800', 'gray.100')} fontFamily="system-ui, -apple-system, sans-serif">
+                <Icon as={TrendingDown} boxSize={4} color={redIcon} />
+                <Text fontSize="md" fontWeight="700" color={textColor} fontFamily="system-ui, -apple-system, sans-serif">
                   Total Expenses
                 </Text>
               </HStack>
               <Text
                 fontSize={{ base: 'xs', sm: 'md', md: 'lg' }}
                 fontWeight="800"
-                color={useColorModeValue('red.600', 'red.300')}
+                color={redColor}
                 fontFamily="system-ui, -apple-system, sans-serif"
               >
                 £{totalExpenses.toFixed(2)}
@@ -428,6 +446,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
         transactions={transactions}
         type="EXPENSE"
         selectedPeriod={selectedPeriod}
+        initialCategory={selectedCategory}
       />
     </>
   )

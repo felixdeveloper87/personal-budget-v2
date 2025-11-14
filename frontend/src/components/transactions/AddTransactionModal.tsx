@@ -56,7 +56,7 @@ export default function AddTransactionModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl' }}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       isCentered
       scrollBehavior="inside"
       closeOnOverlayClick={false}
@@ -69,14 +69,23 @@ export default function AddTransactionModal({
       />
       <ModalContent 
         borderRadius={{ base: 'none', md: '3xl' }}
-        overflow="hidden"
         m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
         {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal
+          ...safariStyles.modal,
+          '&::-webkit-scrollbar': {
+            width: '10px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: useColorModeValue('#cbd5e1', '#4b5563'),
+            borderRadius: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: useColorModeValue('#f1f5f9', '#1e293b'),
+          }
         }}
       >        
         {/* Decorative background */}

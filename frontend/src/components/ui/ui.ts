@@ -50,17 +50,6 @@ export const getShimmerStyles = () => {
   }
 }
 
-// Static shimmer styles that can be used in sx prop without hooks
-export const shimmerStylesStatic = {
-  backgroundSize: '200% 100%',
-  keyframes: {
-    shimmer: {
-      '0%': { backgroundPosition: '-150% 0' },
-      '100%': { backgroundPosition: '150% 0' }
-    }
-  }
-} as const
-
 // Gradient utilities
 export const getGradients = () => ({
   primary: useColorModeValue(
@@ -214,23 +203,24 @@ export const getTypeColor = (type: 'INCOME' | 'EXPENSE') => {
   )
 }
 
-// Scrollbar utilities
 export const getScrollbarStyles = (useColorModeValue: any) => ({
-  ...safariStyles.scrollbar,
-  '&::-webkit-scrollbar-thumb': {
-    background: useColorModeValue('rgba(0,0,0,0.2)', 'rgba(255,255,255,0.2)'),
-    borderRadius: '4px',
+  // Safari iOS fix
+  WebkitOverflowScrolling: 'touch',
+
+  '&::-webkit-scrollbar': {
+    width: '8px',
+    height: '8px',
+    display: 'block !important',
     WebkitAppearance: 'none'
   },
-  // Mobile Safari specific
-  '@media screen and (max-width: 768px)': {
-    WebkitOverflowScrolling: 'touch',
-    overflowY: 'scroll',
-    '&::-webkit-scrollbar': {
-      width: '6px',
-      display: 'block !important',
-      WebkitAppearance: 'none'
-    }
+
+  '&::-webkit-scrollbar-thumb': {
+    background: useColorModeValue('rgba(0,0,0,0.25)', 'rgba(255,255,255,0.25)'),
+    borderRadius: '6px'
+  },
+
+  '&::-webkit-scrollbar-track': {
+    background: useColorModeValue('rgba(0,0,0,0.05)', 'rgba(255,255,255,0.05)')
   }
 })
 
@@ -316,21 +306,21 @@ export const getTableStyles = () => ({
   }
 })
 
-// Mobile detection and responsive utilities - iPhone 14 Pro as mobile base
+// Responsive utilities for all screen sizes (mobile, tablet, desktop)
 export const getResponsiveStyles = () => ({
-  // iPhone 14 Pro specific breakpoints
+  // Breakpoints used across the application
   breakpoints: {
-    mobile: '375px',    // iPhone 14 Pro width
+    mobile: '375px',    // iPhone 14 Pro width (base)
     mobileLarge: '414px', // iPhone 14 Pro Max width
-    tablet: '768px',
-    desktop: '1024px'
+    tablet: '768px',    // md breakpoint
+    desktop: '1024px'   // lg breakpoint
   },
   modal: {
     maxH: { base: '100vh', md: '90vh' },
     h: { base: '100vh', md: 'auto' }
   },
   content: {
-    maxH: { base: 'calc(100vh - 100px)', md: 'none' },
+    maxH: { base: 'calc(100vh - 100px)', md: 'calc(90vh - 200px)', lg: 'calc(90vh - 180px)' },
     minH: '0'
   },
   spacing: {
@@ -834,13 +824,6 @@ export const getResponsiveStyles = () => ({
     }
   }
 })
-
-// Common styles
-export const commonStyles = {
-  borderRadius: '2xl',
-  shadow: 'lg',
-  transition: 'all 0.2s ease'
-} as const
 
 // Section title styles - unified across all components
 export const sectionTitleStyles = {

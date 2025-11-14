@@ -20,7 +20,7 @@ import { CreditCard, Sparkles, X } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
-import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles } from '../ui'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles, getScrollbarStyles } from '../ui'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean
@@ -221,7 +221,8 @@ export default function InstallmentPlansModal({
                 {...responsiveStyles.content}
                 sx={{
                   ...safeAreaStyles.content,
-                  ...safariStyles.scrollable
+                  ...safariStyles.scrollable,
+                  ...getScrollbarStyles(useColorModeValue)
                 }}
               >
           <Box p={{ base: 4, sm: 6, md: 8 }}>

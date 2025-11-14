@@ -8,7 +8,7 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles } from '../ui'
+import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles, getScrollbarStyles } from '../ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
@@ -41,7 +41,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
-      size={{ base: 'full', sm: 'lg', md: 'xl' }} 
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }} 
       isCentered
       scrollBehavior="inside"
       closeOnOverlayClick={false}
@@ -129,7 +129,8 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
                 {...responsiveStyles.content}
                 sx={{
                   ...safeAreaStyles.content,
-                  ...safariStyles.scrollable
+                  ...safariStyles.scrollable,
+                  ...getScrollbarStyles(useColorModeValue)
                 }}
               >
                 <SearchFilters

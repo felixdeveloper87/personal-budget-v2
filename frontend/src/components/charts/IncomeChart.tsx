@@ -1,7 +1,7 @@
 import { Box, Text, VStack, HStack, Progress, Badge, Button, useDisclosure, useColorModeValue, Icon, Flex, Heading, useBreakpointValue, Card, CardBody } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
-import { useMemo, useCallback } from 'react'
+import { useMemo, useCallback, useState } from 'react'
 import { TrendingUp, BarChart3, Eye, Sparkles } from 'lucide-react'
 import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles } from '../ui'
 import { useThemeColors } from '../../hooks/useThemeColors'
@@ -13,6 +13,7 @@ interface IncomeChartProps {
 
 export default function IncomeChart({ transactions, selectedPeriod }: IncomeChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
@@ -20,8 +21,14 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
   const isMobile = useBreakpointValue({ base: true, md: false })
 
   const handleClose = useCallback(() => {
+    setSelectedCategory(undefined)
     onClose()
   }, [onClose])
+
+  const handleCategoryClick = useCallback((category: string) => {
+    setSelectedCategory(category)
+    onOpen()
+  }, [onOpen])
 
   // Cores para as categorias
   const categoryColors = [
@@ -329,13 +336,15 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                   p={responsiveStyles.charts.progress.item.padding}
                   bg={useColorModeValue('white', '#0a0a0a')}
                   borderRadius="xl"
+                  cursor="pointer"
+                  onClick={() => handleCategoryClick(category)}
                   _hover={{
                     bg: useColorModeValue(
                       `${color}20`,
                       `${color}30`
                     ),
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 8px 20px rgba(0,0,0,0.15)',
                   }}
                   transition="all 0.2s ease"
                 >
@@ -443,6 +452,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         transactions={transactions}
         type="INCOME"
         selectedPeriod={selectedPeriod}
+        initialCategory={selectedCategory}
       />
     </>
   )

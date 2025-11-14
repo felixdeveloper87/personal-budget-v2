@@ -26,7 +26,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles, safeAreaStyles, safariStyles } from '../../ui'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles, safeAreaStyles, safariStyles, getScrollbarStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X, TrendingUp, TrendingDown } from 'lucide-react'
   
@@ -37,15 +37,16 @@ import { X, TrendingUp, TrendingDown } from 'lucide-react'
     '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA'
   ]
   
-  interface CategoryModalProps {
-    isOpen: boolean
-    onClose: () => void
-    transactions: Transaction[]
-    type: 'INCOME' | 'EXPENSE'
-    selectedPeriod: string
-  }
+interface CategoryModalProps {
+  isOpen: boolean
+  onClose: () => void
+  transactions: Transaction[]
+  type: 'INCOME' | 'EXPENSE'
+  selectedPeriod: string
+  initialCategory?: string  // Nova prop para categoria inicial expandida
+}
   
-export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod }: CategoryModalProps) {
+export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod, initialCategory }: CategoryModalProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
@@ -99,12 +100,18 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
       return { sortedCategories, total }
     }, [filteredTransactions])
   
-    const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({})
-  
-    const toggleCategory = (category: string) => {
-      const key = `${type}-${category}`
-      setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }))
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
+    // Se houver categoria inicial, expandi-la automaticamente
+    if (initialCategory) {
+      return { [`${type}-${initialCategory}`]: true }
     }
+    return {}
+  })
+
+  const toggleCategory = (category: string) => {
+    const key = `${type}-${category}`
+    setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }))
+  }
   
   return (
     <>
@@ -115,6 +122,9 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
         closeOnOverlayClick={false}
         isCentered={true}
         motionPreset="slideInBottom"
+        scrollBehavior="inside"
+        closeOnEsc={true}
+        blockScrollOnMount={true}
       >
         <ModalOverlay
           bg="blackAlpha.600"
@@ -125,26 +135,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           }}
         />
       <ModalContent
-        borderRadius="2xl"
-        m={0}
-        h={{ base: '100dvh', sm: 'auto', md: 'auto' }}
-        maxH={responsiveStyles.modals.category.container.maxH}
-        overflow="hidden"
-        mx={{ base: 0, sm: 4 }}
-        my={{ base: 0, sm: 4 }}
+        borderRadius={{ base: 'none', md: '3xl' }}
+        m={{ base: 0, md: 4 }}
+        display="flex"
+        flexDirection="column"
         maxW={responsiveStyles.modals.category.container.maxW}
-        boxShadow="0 32px 64px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05)"
-        border="1px solid"
-        borderColor={useColorModeValue(
-          'rgba(255, 255, 255, 0.2)',
-          'rgba(255, 255, 255, 0.1)'
-        )}
-        position="relative"
-        bg={useColorModeValue(
-          'rgba(255, 255, 255, 0.95)',
-          'rgba(17, 17, 17, 0.95)'
-        )}
-        backdropFilter="blur(20px)"
+        {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
           ...safariStyles.modal,
@@ -259,10 +255,12 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               <Box 
                 p={{ base: 4, sm: 6, md: 8 }} 
                 flex="1" 
-                overflow="auto"
+                overflowY="auto"
+                {...responsiveStyles.content}
                 sx={{
                   ...safeAreaStyles.content,
-                  ...safariStyles.scrollable
+                  ...safariStyles.scrollable,
+                  ...getScrollbarStyles(useColorModeValue)
                 }}
               >
   

@@ -25,7 +25,7 @@ import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
 import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
 import InsightsCard from '../ui/InsightsCard'
-import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles } from '../ui'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles, getScrollbarStyles } from '../ui'
 
 const MotionBox = motion.create(Box)
 const MotionVStack = motion.create(VStack)
@@ -258,7 +258,8 @@ export default function SummaryCardModal({
                 {...responsiveStyles.content}
                 sx={{
                   ...safeAreaStyles.content,
-                  ...safariStyles.scrollable
+                  ...safariStyles.scrollable,
+                  ...getScrollbarStyles(useColorModeValue)
                 }}
               >
           {!transactions.length ? (
