@@ -289,39 +289,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             >
               {selectedPeriod}
             </Badge>
-            <Button
-              size={responsiveStyles.charts.button.size}
-              variant="solid"
-              colorScheme="blue"
-              rightIcon={!isMobile ? <Icon as={Eye} boxSize={responsiveStyles.charts.button.iconSize} /> : undefined}
-              leftIcon={isMobile ? undefined : undefined}
-              onClick={onOpen}
-              borderRadius="lg"
-              px={responsiveStyles.charts.button.padding}
-              py={responsiveStyles.charts.button.padding}
-              fontSize={responsiveStyles.charts.button.fontSize}
-              fontWeight="600"
-              bg={useColorModeValue(
-                'linear-gradient(135deg, #60a5fa, #3b82f6)',
-                'linear-gradient(135deg, #93c5fd, #60a5fa)'
-              )}
-              color="white"
-              _hover={{
-                bg: useColorModeValue(
-                  'linear-gradient(135deg, #3b82f6, #2563eb)',
-                  'linear-gradient(135deg, #60a5fa, #3b82f6)'
-                ),
-                transform: 'translateY(-2px)',
-                boxShadow: 'lg',
-              }}
-              _active={{
-                transform: 'translateY(0)',
-              }}
-              transition="all 0.2s ease"
-              boxShadow="md"
-            >
-              {isMobile ? 'All' : `View Details (${sortedCategories.length})`}
-            </Button>
           </HStack>
 
           {/* Progress bars melhorados */}

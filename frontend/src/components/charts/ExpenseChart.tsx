@@ -304,26 +304,6 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
             >
               {selectedPeriod}
             </Badge>
-            <Button
-              size={responsiveStyles.charts.button.size}
-              variant="solid"
-              colorScheme="blue"
-              rightIcon={!isMobile ? <Icon as={Eye} boxSize={responsiveStyles.charts.button.iconSize} /> : undefined}
-              onClick={onOpen}
-              borderRadius="xl"
-              _hover={{
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              }}
-              _active={{
-                transform: 'translateY(0)',
-              }}
-              transition="all 0.2s ease"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              fontWeight="500"
-            >
-              {isMobile ? 'View' : 'View Details'}
-            </Button>
           </HStack>
 
           {/* Progress bars modernizadods */}
