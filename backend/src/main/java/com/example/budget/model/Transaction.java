@@ -50,6 +50,18 @@ public class Transaction {
         }
     }
 
+    // Constructors
+    public Transaction() {
+    }
+
+    public Transaction(TransactionType type, String category, String description, BigDecimal amount, User user) {
+        this.type = type;
+        this.category = category;
+        this.description = description;
+        this.amount = amount;
+        this.user = user;
+    }
+
     // ---------- Getters e Setters ----------
 
     public Long getId() {

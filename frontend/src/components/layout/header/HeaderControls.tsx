@@ -52,8 +52,11 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
   }
 
   return (
-    <Box {...getHeaderControlsContainerStyles()}>
-      <HStack spacing={{ base: 0.5, md: 3, lg: 4 }}>
+    <Box 
+      {...getHeaderControlsContainerStyles()}
+      flexShrink={0}
+    >
+      <HStack spacing={{ base: 0.5, sm: 1, md: 2, lg: 3, xl: 4 }}>
         {/* 📱 Mobile Navigation */}
         <MobileNavigation 
           user={user} 

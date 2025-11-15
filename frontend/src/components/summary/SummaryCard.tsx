@@ -2,20 +2,13 @@ import {
   Card,
   CardBody,
   VStack,
-  HStack,
   Text,
   Box,
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { GRADIENTS } from '../../theme'
-import { useMemo } from 'react'
-import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
 import { getResponsiveStyles } from '../ui'
 
-// 🎨 Animações personalizadas
-const float = 'float 3s ease-in-out infinite'
-const glow = 'glow 2s ease-in-out infinite alternate'
 
 interface SummaryCardProps {
   stat: {

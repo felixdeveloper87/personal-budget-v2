@@ -63,7 +63,7 @@ export default function InstallmentPlansModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl' }}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       isCentered
       scrollBehavior="inside"
       closeOnOverlayClick={false}

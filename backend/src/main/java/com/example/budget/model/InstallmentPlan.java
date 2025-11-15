@@ -34,6 +34,17 @@ public class InstallmentPlan {
     @OneToMany(mappedBy = "installmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
 
+    // Constructors
+    public InstallmentPlan() {
+    }
+
+    public InstallmentPlan(int totalInstallments, BigDecimal totalAmount, BigDecimal installmentValue, User user) {
+        this.totalInstallments = totalInstallments;
+        this.totalAmount = totalAmount;
+        this.installmentValue = installmentValue;
+        this.user = user;
+    }
+
     // ---- Getters e Setters ----
     public Long getId() {
         return id;

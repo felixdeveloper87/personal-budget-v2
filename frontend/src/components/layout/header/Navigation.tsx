@@ -12,9 +12,10 @@ export default function Navigation({ user, currentPage = 'dashboard', onPageChan
 
   return (
     <HStack
-      spacing={{ md: 2, lg: 3 }}
-      ml={{ md: 6, lg: 10, xl: 14 }}
+      spacing={{ md: 1, lg: 2, xl: 3 }}
+      ml={{ md: 2, lg: 4, xl: 6 }}
       display={{ base: 'none', md: 'flex' }}
+      flexShrink={0}
     >
       <Button 
         {...getNavigationButtonStyles(currentPage === 'dashboard')}

@@ -13,22 +13,22 @@ import {
   Spinner,
   useColorModeValue,
   Icon as ChakraIcon,
-  useBreakpointValue,
   Button,
   Icon,
   Flex,
 } from '@chakra-ui/react'
 import { motion, AnimatePresence } from 'framer-motion'
-import React, { ReactNode, useMemo } from 'react'
-import { useThemeColors } from '../../hooks/useThemeColors'
-import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../charts/modal'
+import React, { useMemo } from 'react'
+import TransactionsChart from './TransactionsChart'
+import IncomeChart from './IncomeChart'
+import ExpensesChart from './ExpensesChart'
+import BalanceChart from './BalanceChart'
 import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
-import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../constants/summaryColors'
-import InsightsCard from '../ui/InsightsCard'
-import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles, getScrollbarStyles } from '../ui'
+import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../../constants/summaryColors'
+import InsightsCard from '../../ui/InsightsCard'
+import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles, getScrollbarStyles } from '../../ui'
 
 const MotionBox = motion.create(Box)
-const MotionVStack = motion.create(VStack)
 const MotionBadge = motion.create(Badge)
 
 // ✅ Tipagem explícita das props do modal
@@ -50,7 +50,6 @@ export default function SummaryCardModal({
   selectedPeriod = 'Current Period',
   currentBalance = 0,
 }: SummaryCardModalProps) {
-  const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
   const headerStyles = getModalHeaderStyles(useColorModeValue)
@@ -78,7 +77,7 @@ export default function SummaryCardModal({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl' }}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       isCentered
       scrollBehavior="inside"
       closeOnOverlayClick={false}

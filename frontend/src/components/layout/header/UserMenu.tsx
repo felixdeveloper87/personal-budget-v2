@@ -38,9 +38,10 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
       <MenuButton
         as={Button}
         variant="ghost"
-        size="md"
-        p={2}
+        size={{ base: 'sm', md: 'md' }}
+        p={{ base: 1.5, md: 2 }}
         borderRadius="xl"
+        flexShrink={0}
         _hover={{
           transform: 'translateY(-2px)',
           boxShadow: '0 8px 25px rgba(0,0,0,0.1)',

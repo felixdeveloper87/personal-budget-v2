@@ -24,7 +24,13 @@ export default function Logo({ user }: LogoProps) {
   const isDark = useColorModeValue(false, true)
 
   return (
-    <HStack spacing={{ base: 3, md: 4, lg: 5 }} flex="1" minW="fit-content">
+    <HStack 
+      spacing={{ base: 2, sm: 3, md: 4, lg: 5 }} 
+      flex="1" 
+      minW="fit-content"
+      flexShrink={0}
+      maxW={{ base: '50%', sm: '60%', md: 'auto' }}
+    >
       {/* Symbol Iconn */}
       <Box
         as="button"

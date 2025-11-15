@@ -37,7 +37,7 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
     } finally {
       setLoading(false)
     }
-  }, [user?.token, selectedDate, filters]) // ✅ Removido selectedPeriod - não precisa recarregar
+  }, [user?.token, selectedDate, filters])
 
   useEffect(() => {
     loadData()

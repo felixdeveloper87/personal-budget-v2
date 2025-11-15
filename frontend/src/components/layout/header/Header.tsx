@@ -58,20 +58,21 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
         />
         <Container 
           maxW="100%"
-          px={{ base: 4, md: 8, lg: 12 }}
+          px={{ base: 2, sm: 3, md: 6, lg: 8, xl: 12 }}
           sx={{
             // Safe area support para iPhone 14 Pro
-            paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-            paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+            paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
           }}
         >
           <Flex
             h={{ base: 20, md: 24, lg: 28, xl: 32 }}
             align="center"
             justify="space-between"
-            gap={{ base: 3, md: 4, lg: 6 }}
+            gap={{ base: 1, sm: 2, md: 3, lg: 4, xl: 6 }}
             position="relative"
             zIndex={1}
+            flexWrap="nowrap"
           >
             {/* Logo + Title */}
             <Logo user={user} />

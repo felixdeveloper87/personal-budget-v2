@@ -66,7 +66,7 @@ export const getGradients = () => ({
 // Modal header utilities
 export const getModalHeaderStyles = (useColorModeValue: any) => {
   const responsiveStyles = getResponsiveStyles()
-  
+
   return {
     container: {
       ...responsiveStyles.modals.header.container,
@@ -135,18 +135,18 @@ export const getModalHeaderStyles = (useColorModeValue: any) => {
 // Transaction-specific modal header utilities
 export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'INCOME' | 'EXPENSE') => {
   const responsiveStyles = getResponsiveStyles()
-  
+
   // Cores específicas para cada tipo de transação
   const incomeGradient = useColorModeValue(
-    'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 40%, #86efac 100%)', // Verde claro
-    'linear-gradient(135deg, #166534 0%, #15803d 50%, #16a34a 100%)'  // Verde escuro
+    'linear-gradient(135deg, rgb(220, 252, 231) 0%, rgb(134, 239, 172) 30%, rgb(34, 197, 94) 70%, rgb(16, 185, 129) 100%)', // Verde claro vibrante
+    'linear-gradient(135deg, rgb(20, 83, 45) 0%, rgb(22, 101, 52) 30%, rgb(21, 128, 61) 70%, rgb(34, 197, 94) 100%)'  // Verde escuro rico
   )
-  
+
   const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, #fecaca 0%, #fca5a5 40%, #f87171 100%)', // Vermelho claro
-    'linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ef4444 100%)'  // Vermelho escuro
+    'linear-gradient(135deg, rgb(254, 242, 242) 0%, rgb(252, 165, 165) 30%, rgb(248, 113, 113) 70%, rgb(239, 68, 68) 100%)', // Vermelho claro intenso
+    'linear-gradient(135deg, rgb(127, 29, 29) 0%, rgb(153, 27, 27) 30%, rgb(220, 38, 38) 70%, rgb(248, 113, 113) 100%)'  // Vermelho escuro elegante
   )
-  
+
   return {
     container: {
       ...responsiveStyles.modals.header.container,
@@ -159,22 +159,13 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
     },
     closeButton: {
       ...responsiveStyles.modals.header.closeButton,
-      bg: useColorModeValue(
-        'rgba(255, 255, 255, 0.9)',
-        'rgba(15, 23, 42, 0.9)'
-      ),
-      borderColor: useColorModeValue(
-        type === 'INCOME' ? 'green.300' : 'red.300',
-        type === 'INCOME' ? 'green.600' : 'red.600'
-      ),
       _hover: {
         ...responsiveStyles.modals.header.closeButton._hover,
         bg: useColorModeValue('red.50', 'red.900'),
         borderColor: 'red.300'
       },
-      iconColor: useColorModeValue('gray.700', 'gray.200')
+      iconColor: useColorModeValue('black', 'gray.100')
     },
-    content: responsiveStyles.modals.header.content,
     iconContainer: {
       ...responsiveStyles.modals.header.iconContainer,
       bg: useColorModeValue(
@@ -190,8 +181,7 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
     subtitle: {
       ...responsiveStyles.modals.header.subtitle,
       color: useColorModeValue('gray.600', 'gray.300')
-    },
-    backButton: responsiveStyles.modals.header.backButton
+    }
   }
 }
 

@@ -7,9 +7,6 @@ import {
   Tooltip, 
   Legend, 
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts'
 import { VStack, Text, HStack, Box, useBreakpointValue, useColorModeValue, Spinner, Center, Badge } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
@@ -24,7 +21,6 @@ interface TransactionsChartProps {
 
 export default function TransactionsChart({ transactions, selectedPeriod }: TransactionsChartProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
   const chartHeight = useBreakpointValue({ base: 280, sm: 320, md: 360, lg: 400 })
   
   // Modern color palette
@@ -55,11 +51,6 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
   const incomeColor = useColorModeValue('#10b981', '#22c55e')
   const expenseColor = useColorModeValue('#ef4444', '#f87171')
   
-  // Stat card colors
-  const incomeCardBg = useColorModeValue('rgba(16, 185, 129, 0.08)', 'rgba(34, 197, 94, 0.12)')
-  const expenseCardBg = useColorModeValue('rgba(239, 68, 68, 0.08)', 'rgba(248, 113, 113, 0.12)')
-  const totalCardBg = useColorModeValue('rgba(59, 130, 246, 0.08)', 'rgba(96, 165, 250, 0.12)')
-
   // Dados para o gráfico de barras - transações por dia
   const dailyData = transactions.reduce((acc: any[], transaction: any) => {
     const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 

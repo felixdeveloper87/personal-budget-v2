@@ -3,8 +3,7 @@ import { Transaction } from '../../types'
 import CategoryModal from './modal/CategoryModal'
 import { useMemo, useCallback, useState } from 'react'
 import { TrendingDown, BarChart3, Eye, Sparkles } from 'lucide-react'
-import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles } from '../ui'
-import { useThemeColors } from '../../hooks/useThemeColors'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations } from '../ui'
 
 interface ExpenseChartProps {
   transactions: Transaction[]
@@ -14,14 +13,13 @@ interface ExpenseChartProps {
 export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
-  const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const gradients = getGradients()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'EXPENSE')
   const isMobile = useBreakpointValue({ base: true, md: false })
   
   // Pre-compute all useColorModeValue calls
-  const cardBg = useColorModeValue('white', '#0a0a0a')
+
   const cardBgPattern = useColorModeValue(
     'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
     'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
@@ -75,10 +73,10 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   if (sortedCategories.length === 0) {
     return (
       <Card
-        bg={cardBg}
+        // bg={cardBg}
         backgroundImage={cardBgPattern}
         backdropFilter="blur(20px)"
-        border="1px solid"
+        // border="1px solid"
         borderColor={borderColor}
         borderRadius="2xl"
         shadow="2xl"
@@ -99,10 +97,10 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
         }}
       >
         {/* Animated top bar */}
-        <Box
+        {/* <Box
           height="2px"
           sx={getShimmerStyles()}
-        />
+        /> */}
         
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
@@ -176,7 +174,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
   return (
     <>
       <Card
-        bg={cardBg}
+        // bg={cardBg}
         backgroundImage={cardBgPattern}
         backdropFilter="blur(20px)"
         border="1px solid"
@@ -242,7 +240,7 @@ export default function ExpenseChart({ transactions, selectedPeriod }: ExpenseCh
                   >
                     <Text
                       color={headerStyles.title.color}
-                      fontWeight="800"
+                      fontWeight="500"
                       fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
                       lineHeight="shorter"
                       noOfLines={1}

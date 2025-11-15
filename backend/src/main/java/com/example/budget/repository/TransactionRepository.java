@@ -14,9 +14,6 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
 
-        // 🔹 Ajustado para LocalDateTime e dateTime
-        List<Transaction> findByDateTimeBetween(LocalDateTime start, LocalDateTime end);
-
         List<Transaction> findByUser(User user);
 
         @Query("SELECT COALESCE(SUM(t.amount), 0) " +

@@ -9,7 +9,6 @@ import {
   useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { GRADIENTS } from '../../theme'
 import {
   Activity,
   Calendar,
@@ -19,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react'
 import { PeriodType } from '../../types'
-import { useThemeColors } from '../../hooks/useThemeColors'
+
 
 interface PeriodNavigatorProps {
   selectedPeriod: PeriodType
@@ -33,21 +32,15 @@ export default function PeriodNavigator({
   selectedPeriod,
   onPeriodChange,
   onNavigatePeriod,
-  onGoToToday,
   formatLabel,
 }: PeriodNavigatorProps) {
-  const colors = useThemeColors()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
-  // Modern post-it inspired colors
   const selectedBg = useColorModeValue(
-    '#dbeafe', // Azul post-it
-    '#1e293b'  // Azul escuro
+    'linear-gradient(135deg, rgb(219, 234, 254) 0%, rgb(191, 219, 254) 50%, rgb(147, 197, 253) 100%)',
+    'linear-gradient(135deg, rgb(30, 41, 59) 0%, rgb(51, 65, 85) 50%, rgb(71, 85, 105) 100%)'
   )
-  const unselectedBg = useColorModeValue(
-    GRADIENTS.cardLight,
-    GRADIENTS.cardDark
-  )
+
   const unselectedColor = useColorModeValue('gray.700', 'gray.100')
   const selectedColor = useColorModeValue('blue.600', 'blue.300')
   const unselectedBorder = useColorModeValue('gray.400', 'gray.700')
@@ -74,7 +67,7 @@ export default function PeriodNavigator({
                 h="32px"
                 borderRadius="xl"
                 onClick={() => onPeriodChange(type)}
-                bg={selected ? selectedBg : unselectedBg}
+                background={selected ? selectedBg : 'transparent'}
                 color={selected ? selectedColor : unselectedColor}
                 border="1px solid"
                 borderColor={selected ? selectedBorder : unselectedBorder}
@@ -84,7 +77,7 @@ export default function PeriodNavigator({
                   transform: 'translateY(-2px) scale(1.02)', 
                   boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
-                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
+                  background: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
                 }}
                 _active={{
                   transform: 'translateY(0) scale(0.98)'
@@ -113,7 +106,7 @@ export default function PeriodNavigator({
                 borderRadius="xl"
                 leftIcon={<IconComp size={16} />}
                 onClick={() => onPeriodChange(type)}
-                bg={selected ? selectedBg : unselectedBg}
+                background={selected ? selectedBg : 'transparent'}
                 color={selected ? selectedColor : unselectedColor}
                 border="1px solid"
                 borderColor={selected ? selectedBorder : unselectedBorder}
@@ -123,7 +116,7 @@ export default function PeriodNavigator({
                   transform: 'translateY(-2px) scale(1.02)', 
                   boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
                   borderColor: selected ? selectedBorder : hoverBorder,
-                  bg: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
+                  background: selected ? selectedBg : useColorModeValue('gray.50', 'rgba(30, 41, 59, 0.8)')
                 }}
                 _active={{
                   transform: 'translateY(0) scale(0.98)'
@@ -163,7 +156,7 @@ export default function PeriodNavigator({
           px={4}
           py={2}
           borderRadius="xl"
-          bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
+          // bg={useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)}
           border="1px solid"
           borderColor={useColorModeValue('gray.300', 'blue.500')}
           backdropFilter="blur(10px)"
@@ -175,7 +168,7 @@ export default function PeriodNavigator({
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
             borderColor: useColorModeValue('blue.300', 'blue.400'),
-            bg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
+            // bg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
           }}
           transition="all 0.2s ease"
         >
