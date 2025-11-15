@@ -50,7 +50,6 @@ export default function Footer() {
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
 
   const textSecondary = useColorModeValue(colors.text.secondary, 'gray.300')
-  const textPrimary = useColorModeValue(colors.text.primary, 'white')
 
   return (
     <Box
