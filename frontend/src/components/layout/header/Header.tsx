@@ -5,9 +5,7 @@ import {
   useColorModeValue,
   useDisclosure
 } from '@chakra-ui/react'
-import { GRADIENTS } from '../../../theme'
 import { useAuth } from '../../../contexts/AuthContext'
-import { getShimmerStyles } from '../../ui'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
 import { Logo, Navigation, UserMenu, HeaderControls, SearchButton } from './'
@@ -24,9 +22,8 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { runSearch } = useSearch()
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
-  // Modern post-it inspired colors with texture
   const bg = useColorModeValue('white', 'black')
-  const borderColor = useColorModeValue('gray.200', 'gray.600')
+  const borderColor = useColorModeValue('gray.400', 'gray.600')
   
   // Texture pattern with lines - dark mode: white lines on black bg, light mode: black lines on white bg
   const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
@@ -45,7 +42,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
         position="sticky" 
         top={0} 
         zIndex={1000}
-        borderBottom="1px solid"
+        borderBottom="2px solid"
         borderColor={borderColor}
         boxShadow="sm"
         w="100%"
@@ -58,7 +55,7 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
         />
         <Container 
           maxW="100%"
-          px={{ base: 2, sm: 3, md: 6, lg: 8, xl: 12 }}
+          px={{ base: 2, sm: 3, md: 6, lg: 8 }}
           sx={{
             // Safe area support para iPhone 14 Pro
             paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
@@ -71,7 +68,6 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
             justify="space-between"
             gap={{ base: 1, sm: 2, md: 3, lg: 4, xl: 6 }}
             position="relative"
-            zIndex={1}
             flexWrap="nowrap"
           >
             {/* Logo + Title */}

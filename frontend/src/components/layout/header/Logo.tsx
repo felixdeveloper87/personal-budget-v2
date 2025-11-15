@@ -2,9 +2,7 @@ import { Box, Text, HStack, VStack, Badge, useColorModeValue } from '@chakra-ui/
 import { 
   getLogoIconStyles, 
   logoKeyframes, 
-  getSymbolTextStyles, 
-  getTitleStyles, 
-  getBadgeStyles 
+  getSymbolTextStyles,
 } from '../../ui'
 
 interface LogoProps {

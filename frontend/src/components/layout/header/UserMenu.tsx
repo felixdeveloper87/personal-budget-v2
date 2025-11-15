@@ -14,7 +14,7 @@ import {
   Icon,
   useColorModeValue
 } from '@chakra-ui/react'
-import { SearchIcon, SettingsIcon, InfoIcon, ExternalLinkIcon } from '@chakra-ui/icons'
+import { SettingsIcon } from '@chakra-ui/icons'
 import { GRADIENTS } from '../../../theme'
 import { Home, FileText, User, LogOut, BarChart3 } from 'lucide-react'
 

@@ -4,7 +4,6 @@ import {
   Button,
   Tooltip,
   useColorMode,
-  useColorModeValue,
   Box,
   useBreakpointValue,
 } from '@chakra-ui/react'
