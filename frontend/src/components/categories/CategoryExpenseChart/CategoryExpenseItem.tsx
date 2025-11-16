@@ -9,16 +9,19 @@ export const CategoryExpenseItem = React.memo<CategoryExpenseItemProps>(({
   color,
   onClick,
 }) => {
-  const boxHoverBg = useColorModeValue('white', '#0a0a0a')
+  const boxHoverBg = useColorModeValue('gray.50', 'black')
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const textColorSecondary = useColorModeValue('gray.600', 'gray.300')
   const progressBg = useColorModeValue('gray.100', 'gray.700')
+  const borderColor = useColorModeValue('gray.200', 'gray.900')
 
   return (
     <Box
       p={4}
       bg={boxHoverBg}
       borderRadius="xl"
+      border="1px solid"
+      borderColor={borderColor}
       cursor="pointer"
       onClick={onClick}
       _hover={{

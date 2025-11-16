@@ -10,7 +10,7 @@ import { CategoryIncomeChartHeader } from './CategoryIncomeChartHeader'
 import { CategoryIncomeItem } from './CategoryIncomeItem'
 import { CategoryIncomeChartFooter } from './CategoryIncomeChartFooter'
 import { CategoryIncomeChartEmptyState } from './CategoryIncomeChartEmptyState'
-import { CategoryIncomeChartShowMore } from './CategoryIncomeChartShowMore'
+// import { CategoryIncomeChartShowMore } from './CategoryIncomeChartShowMore'
 
 /**
  * CategoryIncomeChart Component
@@ -34,12 +34,8 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
   const { sortedCategories, totalIncome, isEmpty } = useIncomeCategories(transactions)
 
   // Theme values
-  const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
-  )
   const borderColor = useColorModeValue('gray.200', 'gray.900')
-  const cardBg = useColorModeValue('white', '#0a0a0a')
+  const cardBg = useColorModeValue('gray.100', 'black')
 
   // Event handlers with useCallback for performance
   const handleClose = useCallback(() => {
@@ -71,15 +67,14 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
 
   // Early return for empty state
   if (isEmpty) {
-    return <CategoryIncomeChartEmptyState title={titleText || 'Incomes'} cardBgPattern={cardBgPattern} />
+    return <CategoryIncomeChartEmptyState title={titleText || 'Incomes'} cardBg={cardBg} />
   }
 
   return (
     <>
       <Card
-        w="full"
         bg={cardBg}
-        backgroundImage={cardBgPattern}
+        w="full"
         backdropFilter="blur(20px)"
         border="1px solid"
         borderColor={borderColor}
@@ -158,9 +153,6 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
                       />
                     )
                   })}
-
-                  {/* Show More Indicator */}
-                  {hasMoreCategories && <CategoryIncomeChartShowMore remainingCount={remainingCount} />}
                 </VStack>
 
                 {/* Footer Component */}

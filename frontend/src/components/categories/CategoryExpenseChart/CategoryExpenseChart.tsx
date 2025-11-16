@@ -33,10 +33,7 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
   const { sortedCategories, totalExpenses, isEmpty } = useExpenseCategories(transactions)
 
   // Theme values
-  const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.25" stroke-linecap="round"/%3E%3C/svg%3E'
-  )
+  const cardBg = useColorModeValue('gray.100', 'black')
   const borderColor = useColorModeValue('gray.200', 'gray.900')
 
   // Event handlers with useCallback for performance
@@ -66,13 +63,13 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
 
   // Early return for empty state
   if (isEmpty) {
-    return <CategoryExpenseChartEmptyState title={titleText || 'Expenses'} cardBgPattern={cardBgPattern} />
+    return <CategoryExpenseChartEmptyState title={titleText || 'Expenses'} cardBg={cardBg} />
   }
 
   return (
     <>
       <Card
-        backgroundImage={cardBgPattern}
+        bg={cardBg}
         backdropFilter="blur(20px)"
         border="1px solid"
         borderColor={borderColor}

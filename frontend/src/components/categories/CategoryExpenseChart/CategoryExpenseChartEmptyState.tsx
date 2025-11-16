@@ -6,18 +6,18 @@ import React from 'react'
 
 interface CategoryExpenseChartEmptyStateProps {
   title: string
-  cardBgPattern: string
+  cardBg: string
 }
 
 export const CategoryExpenseChartEmptyState = React.memo<CategoryExpenseChartEmptyStateProps>(({
   title,
-  cardBgPattern,
+  cardBg,
 }) => {
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'EXPENSE')
 
   return (
     <Card
-      backgroundImage={cardBgPattern}
+      bg={cardBg}
       backdropFilter="blur(20px)"
       borderRadius="2xl"
       shadow="2xl"

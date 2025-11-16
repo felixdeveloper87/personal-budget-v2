@@ -53,13 +53,6 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
 
-  // Color mode values
-  const cardBg = useColorModeValue('white', '#0a0a0a')
-  const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpathיל d="M10 5 L20 5 M50 10 L热潮10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
-  )
-
   const handleOpen = (t: 'INCOME' | 'EXPENSE') => {
     setType(t)
     onOpen()
@@ -87,11 +80,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
         }}
       >
         <Card
-          bg={useColorModeValue('white', '#0a0a0a')}
-          backgroundImage={useColorModeValue(
-            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
-            'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
-          )}
+          bg={useColorModeValue('gray.100', 'black')}
           backdropFilter="blur(10px)"
           border="1px solid"
           borderColor={useColorModeValue('gray.200', 'gray.800')}

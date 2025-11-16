@@ -17,7 +17,7 @@ export const CategoryIncomeChartFooter = React.memo<CategoryIncomeChartFooterPro
   return (
     <Box
       pt={responsiveStyles.charts.footer.padding}
-      borderTop="2px solid"
+      borderTop="1px solid"
       borderColor={colors.border}
       bg={footerBg}
       borderRadius="xl"

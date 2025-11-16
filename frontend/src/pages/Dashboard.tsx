@@ -40,7 +40,7 @@ export default function Dashboard() {
   return (
     <Box 
       bg={bg}
-      backgroundImage={texturePattern}
+      // backgroundImage={texturePattern}
       minH="100vh"
       px={{ base: 0.5, md: 1, lg: 1.5 }} 
       py={{ base: 3, md: 6 }}

@@ -13,14 +13,17 @@ export const CategoryIncomeItem = React.memo<CategoryIncomeItemProps>(({
 }) => {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
-  const boxHoverBg = useColorModeValue('white', '#0a0a0a')
+  const boxHoverBg = useColorModeValue('gray.50', 'black')
   const progressBg = useColorModeValue('gray.100', 'gray.700')
+  const borderColor = useColorModeValue('gray.200', 'gray.900')
 
   return (
     <Box
       p={responsiveStyles.charts.progress.item.padding}
       bg={boxHoverBg}
       borderRadius="xl"
+      border="1px solid"
+      borderColor={borderColor}
       cursor="pointer"
       onClick={onClick}
       _hover={{

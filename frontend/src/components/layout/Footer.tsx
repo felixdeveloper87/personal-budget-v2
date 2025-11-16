@@ -29,7 +29,7 @@ const linkSections = [
   },
   {
     title: 'Legal',
-    links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Licenses'],
+    links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Licenses',],
   },
 ]
 
@@ -70,13 +70,13 @@ export default function Footer() {
       />
 
       <Container
-        maxW={{ base: '100%', xl: '1400px', '2xl': '1600px' }}
-        px={{ base: 4, md: 8, lg: 12, xl: 16 }}
-        py={{ base: 8, md: 12, lg: 16 }}
+        maxW={{ base: '100%', xl: '1400px', '2xl': '2200px' }}
+        px={{ base: 4, md: 8 }}
+        py={6}
         position="relative"
         zIndex={1}
       >
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 8, md: 10, lg: 12 }}>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 8, md: 10, lg: 16}}>
           {/* 🪙 Brand Section */}
           <VStack align="start" spacing={5}>
             <HStack spacing={4}>
