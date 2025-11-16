@@ -5,12 +5,11 @@ import { getResponsiveStyles, animations } from '../../ui'
 import CategoryModal from '../../charts/modal/CategoryModal'
 import { useExpenseCategories } from '../../../hooks/useExpenseCategories'
 import { CategoryExpenseChartProps } from './types'
-import { EXPENSE_CATEGORY_COLORS, MAX_VISIBLE_CATEGORIES } from './constants'
+import { EXPENSE_CATEGORY_COLORS } from './constants'
 import { CategoryExpenseChartHeader } from './CategoryExpenseChartHeader'
 import { CategoryExpenseItem } from './CategoryExpenseItem'
 import { CategoryExpenseChartFooter } from './CategoryExpenseChartFooter'
 import { CategoryExpenseChartEmptyState } from './CategoryExpenseChartEmptyState'
-import { CategoryExpenseChartShowMore } from './CategoryExpenseChartShowMore'
 
 /**
  * CategoryExpenseChart Component
@@ -59,14 +58,11 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
     onOpen()
   }, [onOpen])
 
-  // Memoized visible categories
+  // Use all categories instead of limiting
   const visibleCategories = useMemo(
-    () => sortedCategories.slice(0, MAX_VISIBLE_CATEGORIES),
+    () => sortedCategories,
     [sortedCategories]
   )
-
-  const hasMoreCategories = sortedCategories.length > MAX_VISIBLE_CATEGORIES
-  const remainingCount = sortedCategories.length - MAX_VISIBLE_CATEGORIES
 
   // Early return for empty state
   if (isEmpty) {
@@ -100,7 +96,7 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
       >
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
-            <Box p={{ base: 4, sm: 6, md: 8 }}>
+            <Box p={2}>
               <VStack spacing={4} align="stretch">
                 {/* Header Component */}
                 <CategoryExpenseChartHeader
@@ -113,7 +109,7 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
                 />
 
                 {/* Badges */}
-                <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
+                <HStack spacing={responsiveStyles.charts.badges.container.spacing} p={2}>
                   <Badge
                     colorScheme="red"
                     variant="solid"
@@ -156,9 +152,6 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
                       />
                     )
                   })}
-
-                  {/* Show More Indicator */}
-                  {hasMoreCategories && <CategoryExpenseChartShowMore remainingCount={remainingCount} />}
                 </VStack>
 
                 {/* Footer Component */}

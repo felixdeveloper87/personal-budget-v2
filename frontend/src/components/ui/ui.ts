@@ -154,7 +154,7 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
         type === 'INCOME' ? 'green.200' : 'red.200',
         type === 'INCOME' ? 'green.700' : 'red.700'
       ),
-      bg: type === 'INCOME' ? incomeGradient : expenseGradient,
+      // bg: type === 'INCOME' ? incomeGradient : expenseGradient,
       sx: responsiveStyles.modals.header.container.sx
     },
     closeButton: {

@@ -102,7 +102,7 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
       >
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
-            <Box p={{ base: 4, sm: 6, md: 8 }}>
+            <Box p={2}>
               <VStack spacing={4} align="stretch">
                 {/* Header Component */}
                 <CategoryIncomeChartHeader
@@ -115,7 +115,7 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
                 />
 
                 {/* Badges */}
-                <HStack spacing={responsiveStyles.charts.badges.container.spacing}>
+                <HStack spacing={responsiveStyles.charts.badges.container.spacing} p={2}>
                   <Badge
                     colorScheme="green"
                     variant="solid"

@@ -168,7 +168,6 @@ export default function PeriodNavigator({
             transform: 'translateY(-1px)',
             boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
             borderColor: useColorModeValue('blue.300', 'blue.400'),
-            // bg: useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
           }}
           transition="all 0.2s ease"
         >
