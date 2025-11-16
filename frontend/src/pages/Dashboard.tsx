@@ -13,7 +13,17 @@ import {
 } from '../sections'
 
 export default function Dashboard() {
-  const { selectedDate, selectedPeriod, onDateChange, onPeriodChange } = usePeriodNavigator()
+  const { 
+    selectedDate, 
+    selectedPeriod, 
+    onDateChange, 
+    onPeriodChange,
+    navigatePeriod,
+    goToToday,
+    formatLabel,
+    activeTab,
+    setActiveTab,
+  } = usePeriodNavigator()
   const { transactions, monthSummary, loading, loadData, filters } = useDashboardData(selectedDate, selectedPeriod)
 
   const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
@@ -64,6 +74,11 @@ export default function Dashboard() {
               selectedDate={selectedDate}
               onDateChange={onDateChange}
               onPeriodChange={onPeriodChange}
+              navigatePeriod={navigatePeriod}
+              goToToday={goToToday}
+              formatLabel={formatLabel}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
             />
           )}
 

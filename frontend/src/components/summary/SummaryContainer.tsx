@@ -16,7 +16,6 @@ import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import SummaryHeader from './SummaryHeader'
 import PeriodNavigator from './PeriodNavigator'
 import { CategoryAnalysisHeader, CategoryAnalysisTabs } from '../categories'
-import { usePeriodNavigation } from '../../hooks/usePeriodNavigation'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
@@ -26,6 +25,11 @@ interface SummaryContainerProps {
   selectedDate: Date
   onDateChange: (date: Date) => void
   onPeriodChange: (period: PeriodType) => void
+  navigatePeriod?: (direction: 'prev' | 'next') => void
+  goToToday?: () => void
+  formatLabel?: () => string
+  activeTab?: 'expenses' | 'incomes'
+  setActiveTab?: (tab: 'expenses' | 'incomes') => void
 }
 
 export default function SummaryContainer({
@@ -34,19 +38,78 @@ export default function SummaryContainer({
   selectedDate,
   onDateChange,
   onPeriodChange,
+  navigatePeriod: externalNavigatePeriod,
+  goToToday: externalGoToToday,
+  formatLabel: externalFormatLabel,
+  activeTab: externalActiveTab,
+  setActiveTab: externalSetActiveTab,
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance, label } = periodData
   const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
 
-  const {
-    activeTab,
-    setActiveTab,
-    navigatePeriod,
-    goToToday,
-    formatLabel,
-  } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
+  // Use internal state if not provided via props
+  const [internalActiveTab, setInternalActiveTab] = useState<'expenses' | 'incomes'>('expenses')
+  const activeTab = externalActiveTab ?? internalActiveTab
+  const setActiveTab = externalSetActiveTab ?? setInternalActiveTab
+  
+  // Navigation functions - use provided ones or create local ones
+  const navigatePeriod = externalNavigatePeriod ?? ((direction: 'prev' | 'next') => {
+    const newDate = new Date(selectedDate)
+    const offset = direction === 'next' ? 1 : -1
+
+    switch (selectedPeriod) {
+      case 'day':
+        newDate.setDate(selectedDate.getDate() + offset)
+        break
+      case 'week':
+        newDate.setDate(selectedDate.getDate() + offset * 7)
+        break
+      case 'month':
+        newDate.setMonth(selectedDate.getMonth() + offset)
+        break
+      case 'year':
+        newDate.setFullYear(selectedDate.getFullYear() + offset)
+        break
+    }
+
+    onDateChange(newDate)
+  })
+
+  const goToToday = externalGoToToday ?? (() => onDateChange(new Date()))
+
+  const formatLabel = externalFormatLabel ?? (() => {
+    if (selectedPeriod === 'month') {
+      return selectedDate.toLocaleString('en-GB', {
+        month: 'short',
+        year: 'numeric',
+      }).toUpperCase()
+    }
+    if (selectedPeriod === 'day') {
+      return selectedDate.toLocaleDateString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    }
+    if (selectedPeriod === 'week') {
+      const start = new Date(selectedDate)
+      const day = start.getDay()
+      const diff = start.getDate() - day + (day === 0 ? -6 : 1)
+      start.setDate(diff)
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      const fmt = (d: Date) =>
+        d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+      return `${fmt(start)} - ${fmt(end)}`
+    }
+    if (selectedPeriod === 'year') {
+      return selectedDate.getFullYear().toString()
+    }
+    return 'Unknown Period'
+  })
 
   // Modern banking app colors
   const cardBg = useColorModeValue('white', '#0a0a0a')

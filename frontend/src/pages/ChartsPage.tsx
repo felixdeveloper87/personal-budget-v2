@@ -1,7 +1,6 @@
 import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Heading, HStack, Button } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
-import { usePeriodNavigation } from '../hooks/usePeriodNavigation'
 import { useDashboardData } from '../hooks/useDashboardData'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../components/charts/modal'
@@ -9,15 +8,16 @@ import { getResponsiveStyles } from '../components/ui'
 import { RotateCcw } from 'lucide-react'
 
 export default function ChartsPage() {
-  const { selectedDate, selectedPeriod, onDateChange, onPeriodChange } = usePeriodNavigator()
-  const { transactions, monthSummary, loading } = useDashboardData(selectedDate, selectedPeriod)
-  const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
-
-  const {
+  const { 
+    selectedDate, 
+    selectedPeriod, 
+    onPeriodChange,
     navigatePeriod,
     goToToday,
     formatLabel,
-  } = usePeriodNavigation(selectedPeriod, selectedDate, onDateChange, onPeriodChange)
+  } = usePeriodNavigator()
+  const { transactions, monthSummary, loading } = useDashboardData(selectedDate, selectedPeriod)
+  const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
 
   const responsiveStyles = getResponsiveStyles()
   const cardBg = useColorModeValue('white', '#0a0a0a')
