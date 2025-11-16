@@ -17,14 +17,15 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { DeleteIcon } from '@chakra-ui/icons'
+import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
+import EditTransactionModal from './EditTransactionModal'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -33,6 +34,8 @@ interface TransactionListProps {
 
 export default function TransactionList({ transactions, onTransactionDeleted }: TransactionListProps) {
   const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
+  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   // Memoize sorted transactions to prevent recalculation on every render
    const sortedTransactions = useMemo(() => 
@@ -135,14 +138,27 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 </Td>
                 <Td>
                   {tx.id && !tx.isFutureInstallment && (
-                    <IconButton
-                      aria-label="Delete transaction"
-                      icon={<DeleteIcon />}
-                      size={{ base: "xs", md: "sm" }}
-                      colorScheme="red"
-                      variant="ghost"
-                      onClick={() => openDeleteDialog(tx)}
-                    />
+                    <HStack spacing={1}>
+                      <IconButton
+                        aria-label="Edit transaction"
+                        icon={<EditIcon />}
+                        size={{ base: "xs", md: "sm" }}
+                        colorScheme="blue"
+                        variant="ghost"
+                        onClick={() => {
+                          setTransactionToEdit(tx)
+                          setIsEditModalOpen(true)
+                        }}
+                      />
+                      <IconButton
+                        aria-label="Delete transaction"
+                        icon={<DeleteIcon />}
+                        size={{ base: "xs", md: "sm" }}
+                        colorScheme="red"
+                        variant="ghost"
+                        onClick={() => openDeleteDialog(tx)}
+                      />
+                    </HStack>
                   )}
                 </Td>
               </Tr>
@@ -157,6 +173,21 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
         isOpen={isOpen}
         onClose={closeDeleteDialog}
         onDeleted={onTransactionDeleted || (() => {})}
+      />
+
+      {/* Edit Transaction Modal */}
+      <EditTransactionModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false)
+          setTransactionToEdit(null)
+        }}
+        transaction={transactionToEdit}
+        onTransactionUpdated={() => {
+          onTransactionDeleted?.()
+          setIsEditModalOpen(false)
+          setTransactionToEdit(null)
+        }}
       />
     </Box>
   )

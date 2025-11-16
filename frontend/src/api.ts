@@ -91,6 +91,12 @@ export async function createTransaction(tx: Transaction): Promise<Transaction> {
   return data
 }
 
+// Update a transaction → PUT /transactions/:id
+export async function updateTransaction(id: number, tx: Transaction): Promise<Transaction> {
+  const { data } = await api.put<Transaction>(`/transactions/${id}`, tx)
+  return data
+}
+
 // Delete a transaction → DELETE /transactions/:id
 export async function deleteTransaction(id: number): Promise<void> {
   await api.delete(`/transactions/${id}`)

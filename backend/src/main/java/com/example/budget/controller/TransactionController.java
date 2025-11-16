@@ -34,6 +34,12 @@ public class TransactionController {
         return service.save(tx, user);
     }
 
+    @PutMapping("/transactions/{id}")
+    public Transaction update(@PathVariable("id") Long id, @RequestBody Transaction tx, Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return service.update(id, tx, user);
+    }
+
     @DeleteMapping("/transactions/{id}")
     public void delete(@PathVariable("id") Long id, Authentication authentication) {
         User user = (User) authentication.getPrincipal();

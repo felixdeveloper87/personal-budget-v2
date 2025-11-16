@@ -35,6 +35,24 @@ public class TransactionService {
         return repository.save(t);
     }
 
+    public Transaction update(Long id, Transaction updatedTx, User user) {
+        Transaction transaction = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+
+        if (!transaction.getUser().getId().equals(user.getId())) {
+            throw new RuntimeException("Access denied");
+        }
+
+        // Update fields
+        transaction.setDateTime(updatedTx.getDateTime());
+        transaction.setType(updatedTx.getType());
+        transaction.setCategory(updatedTx.getCategory());
+        transaction.setDescription(updatedTx.getDescription());
+        transaction.setAmount(updatedTx.getAmount());
+
+        return repository.save(transaction);
+    }
+
     public void delete(Long id, User user) {
         Transaction transaction = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Transaction not found"));
