@@ -54,8 +54,6 @@ import {
   Calendar,
   DollarSign,
   Eye,
-  Download,
-  Bell,
   CreditCard
 } from 'lucide-react'
 
@@ -67,9 +65,8 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
     'linear(to-br, blue.50, purple.50, pink.50)',
     'linear(to-br, black, gray.900, gray.800)'
   )
-  const cardBg = useColorModeValue('white', '#111111')
-  const textColor = useColorModeValue('gray.600', 'gray.300')
-  const headingColor = useColorModeValue('gray.800', 'white')
+  const cardBg = useColorModeValue('white', 'black')
+  const textColor = useColorModeValue('gray.600', 'gray.50')
 
   const features = [
     {
@@ -370,7 +367,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* Stats Section */}
-      <Box py={{ base: 12, md: 16 }} bg={useColorModeValue('white', 'gray.900')}>
+      <Box py={{ base: 12, md: 16 }} bg={cardBg}>
         <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 6, md: 8 }}>
             {stats.map((stat, index) => (
@@ -405,7 +402,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
         </Container>
       </Box>
       {/* Features Section */}
-      <Box id="features" py={{ base: 12, sm: 16, md: 20, lg: 24 }} bg={useColorModeValue('gray.50', 'gray.800')}>
+      <Box id="features" py={{ base: 12, sm: 16, md: 20, lg: 24 }} bg={cardBg}>
         <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
@@ -442,7 +439,6 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   p={{ base: 6, md: 8 }}
-                  bg={cardBg}
                   rounded="2xl"
                   shadow="lg"
                   border="1px solid"
@@ -480,7 +476,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* How It Works Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('white', 'gray.900')}>
+      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
         <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
@@ -589,7 +585,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* Benefits Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('gray.50', 'gray.800')}>
+      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
         <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
@@ -660,7 +656,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* Testimonials Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('white', 'gray.900')}>
+      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
         <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 12, sm: 16 }}>
             <MotionBox
@@ -729,7 +725,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* FAQ Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={useColorModeValue('gray.50', 'gray.800')}>
+      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
         <Container maxW={{ base: "100%", lg: "900px", xl: "1000px", "2xl": "1200px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
           <VStack spacing={{ base: 8, md: 12 }}>
             <MotionBox
