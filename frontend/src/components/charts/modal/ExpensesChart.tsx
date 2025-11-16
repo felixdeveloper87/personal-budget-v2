@@ -12,10 +12,14 @@ import {
   LineChart,
   Line
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge, Progress, useBreakpointValue, useColorModeValue, Spinner, Center, Icon } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, Badge, useColorModeValue } from '@chakra-ui/react'
+import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles, animations } from '../../ui'
+import { animations } from '../../ui'
 import { DollarSign, TrendingDown, BarChart3 } from 'lucide-react'
+import { useChartColors, useChartDimensions } from './hooks'
+import { ChartCard, ChartLoadingState } from './components'
+import { processTransactionsByCategory, processTimelineData, calculateTotals } from './utils'
 
 interface ExpensesChartProps {
   transactions: any[]
@@ -24,118 +28,48 @@ interface ExpensesChartProps {
 
 export default function ExpensesChart({ transactions, selectedPeriod }: ExpensesChartProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
-  const chartHeight = useBreakpointValue({ base: 280, sm: 320, md: 360, lg: 400 })
-  const smallChartHeight = useBreakpointValue({ base: 250, sm: 280, md: 300, lg: 350 })
-  const pieOuterRadius = useBreakpointValue({ base: 70, sm: 85, md: 100 })
+  const chartColors = useChartColors()
+  const { smallChartHeight, pieOuterRadius } = useChartDimensions()
   
-  // Modern color palette
-  const cardBg = useColorModeValue('white', '#0a0a0a')
-  const cardBgGradient = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
-  )
-  const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(75, 85, 99, 0.3)')
-  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
-  const gridStroke = useColorModeValue('rgba(226, 232, 240, 0.5)', 'rgba(75, 85, 99, 0.2)')
+  // Legend colors específicas para expenses (vermelho)
   const legendBg = useColorModeValue('rgba(239, 68, 68, 0.05)', 'rgba(248, 113, 113, 0.1)')
   const legendHoverBg = useColorModeValue('rgba(239, 68, 68, 0.1)', 'rgba(248, 113, 113, 0.15)')
-  
-  // Modern gradient colors
-  const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
-  )
-  const transactionsGradient = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-    'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
-  )
-  const averageGradient = useColorModeValue(
-    'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-    'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)'
-  )
-  
-  // Modern colors
-  const expenseColor = useColorModeValue('#ef4444', '#f87171')
-  const transactionsColor = useColorModeValue('#3b82f6', '#60a5fa')
-  const averageColor = useColorModeValue('#8b5cf6', '#a78bfa')
-  
-  // Hover border colors
-  const expenseHoverBorder = useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(248, 113, 113, 0.4)')
-  const transactionsHoverBorder = useColorModeValue('rgba(59, 130, 246, 0.3)', 'rgba(96, 165, 250, 0.4)')
-  const averageHoverBorder = useColorModeValue('rgba(139, 92, 246, 0.3)', 'rgba(167, 139, 250, 0.4)')
-  
-  // Badge colors
-  const redBadgeBg = useColorModeValue('red.50', 'red.900')
-  const redBadgeColor = useColorModeValue('red.600', 'red.300')
-  const grayBadgeBg = useColorModeValue('gray.100', 'gray.700')
 
   // Filtrar apenas transações de despesas
-  const expenseTransactions = transactions.filter(t => t.type === 'EXPENSE')
+  const expenseTransactions = useMemo(
+    () => transactions.filter(t => t.type === 'EXPENSE'),
+    [transactions]
+  )
 
-  // Dados para gráfico de barras - despesas por categoria
-  const categoryData = expenseTransactions.reduce((acc: any[], transaction: any) => {
-    const category = transaction.category || 'Uncategorized'
-    const existing = acc.find((item: any) => item.category === category)
-    
-    if (existing) {
-      existing.amount += transaction.amount
-      existing.count += 1
-    } else {
-      acc.push({
-        category,
-        amount: transaction.amount,
-        count: 1
-      })
-    }
-    
-    return acc
-  }, []).sort((a: any, b: any) => b.amount - a.amount)
+  // Processar dados usando utilitários centralizados
+  const categoryData = useMemo(
+    () => processTransactionsByCategory(expenseTransactions),
+    [expenseTransactions]
+  )
+
+  const timelineData = useMemo(
+    () => processTimelineData(expenseTransactions, 'EXPENSE'),
+    [expenseTransactions]
+  )
+
+  const { total: totalExpenses, average: avgExpense } = useMemo(
+    () => calculateTotals(expenseTransactions),
+    [expenseTransactions]
+  )
 
   // Dados para gráfico de pizza - distribuição por categoria
-  const pieData = categoryData.map((item, index) => ({
-    name: item.category,
-    value: item.amount,
-    color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores diferentes para cada categoria
-  }))
-
-  // Dados para gráfico de linha - tendência temporal
-  const timelineData = expenseTransactions
-    .sort((a: any, b: any) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
-    .reduce((acc: any[], transaction: any) => {
-      const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
-      const existing = acc.find((item: any) => item.date === date)
-      
-      if (existing) {
-        existing.amount += transaction.amount
-      } else {
-        acc.push({
-          date,
-          amount: transaction.amount
-        })
-      }
-      
-      return acc
-    }, [])
-
-  const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0)
-  const avgExpense = expenseTransactions.length > 0 ? totalExpenses / expenseTransactions.length : 0
+  const pieData = useMemo(
+    () => categoryData.map((item, index) => ({
+      name: item.category,
+      value: item.amount,
+      color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores diferentes para cada categoria
+    })),
+    [categoryData]
+  )
 
   // Loading state
   if (expenseTransactions.length === 0) {
-    return (
-      <Center py={20}>
-        <VStack spacing={4}>
-          <Spinner size="lg" color={spinnerColor} thickness="3px" />
-          <Text color={colors.text.secondary} fontSize="sm">
-            Loading expense data...
-          </Text>
-        </VStack>
-      </Center>
-    )
+    return <ChartLoadingState message="Loading expense data..." />
   }
 
   return (
@@ -163,170 +97,33 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         wrap="wrap"
         gap={{ base: 2, sm: 2 }}
       >
-        {/* Total Expenses Card */}
-        <Box 
-          position="relative"
-          minW={{ base: "60px", sm: "75px", lg: "90px" }}
-          p={{ base: 2.5, sm: 3 }}
-          borderRadius="lg"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(239, 68, 68, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: expenseHoverBorder,
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.3s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={expenseGradient}
-          />
-          <VStack spacing={1} align="center">
-            <HStack spacing={1} align="center">
-              <Icon as={DollarSign} boxSize={3.5} color={expenseColor} />
-              <Text 
-                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-                fontWeight="800" 
-                bgGradient={expenseGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                £{totalExpenses.toFixed(2)}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "2xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Total Expenses
-            </Text>
-          </VStack>
-        </Box>
-
-        {/* Transactions Card */}
-        <Box 
-          position="relative"
-          minW={{ base: "60px", sm: "75px", lg: "90px" }}
-          p={{ base: 2.5, sm: 3 }}
-          borderRadius="lg"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: transactionsHoverBorder,
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.4s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={transactionsGradient}
-          />
-          <VStack spacing={1} align="center">
-            <HStack spacing={1} align="center">
-              <Icon as={BarChart3} boxSize={3.5} color={transactionsColor} />
-              <Text 
-                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-                fontWeight="800" 
-                bgGradient={transactionsGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                {expenseTransactions.length}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "2xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Transactions
-            </Text>
-          </VStack>
-        </Box>
-
-        {/* Average Card */}
-        <Box 
-          position="relative"
-          minW={{ base: "60px", sm: "75px", lg: "90px" }}
-          p={{ base: 2.5, sm: 3 }}
-          borderRadius="lg"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: averageHoverBorder,
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.5s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={averageGradient}
-          />
-          <VStack spacing={1} align="center">
-            <HStack spacing={1} align="center">
-              <Icon as={TrendingDown} boxSize={3.5} color={averageColor} />
-              <Text 
-                fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-                fontWeight="800" 
-                bgGradient={averageGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                £{avgExpense.toFixed(2)}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "2xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Average
-            </Text>
-          </VStack>
-        </Box>
+        <ChartCard
+          icon={DollarSign}
+          value={`£${totalExpenses.toFixed(2)}`}
+          label="Total Expenses"
+          gradient={chartColors.expenseGradient}
+          color={chartColors.expenseColor}
+          hoverBorderColor={chartColors.expenseHoverBorder}
+          delay={0}
+        />
+        <ChartCard
+          icon={BarChart3}
+          value={expenseTransactions.length}
+          label="Transactions"
+          gradient={chartColors.transactionsGradient}
+          color={chartColors.transactionsColor}
+          hoverBorderColor={chartColors.transactionsHoverBorder}
+          delay={0.1}
+        />
+        <ChartCard
+          icon={TrendingDown}
+          value={`£${avgExpense.toFixed(2)}`}
+          label="Average"
+          gradient={chartColors.averageGradient}
+          color={chartColors.averageColor}
+          hoverBorderColor={chartColors.averageHoverBorder}
+          delay={0.2}
+        />
       </HStack>
 
       {/* Modern Pie Chart */}
@@ -334,10 +131,10 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         position="relative"
         p={{ base: 5, sm: 6, md: 8 }}
         borderRadius="2xl"
-        bg={cardBg}
-        background={cardBgGradient}
+        bg={chartColors.cardBg}
+        background={chartColors.cardBgGradient}
         border="1px solid"
-        borderColor={borderColor}
+        borderColor={chartColors.borderColor}
         boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
         _hover={{
           boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
@@ -370,8 +167,8 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
             px={3}
             py={1}
             borderRadius="full"
-            bg={redBadgeBg}
-            color={redBadgeColor}
+            bg={chartColors.redBadgeBg}
+            color={chartColors.redBadgeColor}
             fontSize="xs"
             fontWeight="600"
             textTransform="uppercase"
@@ -390,7 +187,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
               outerRadius={pieOuterRadius}
               fill="#8884d8"
               dataKey="value"
-              stroke={cardBg}
+              stroke={chartColors.cardBg}
               strokeWidth={2}
             >
               {pieData.map((entry, index) => (
@@ -414,7 +211,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                   borderRadius="xl"
                   bg={legendBg}
                   border="1px solid"
-                  borderColor={borderColor}
+                  borderColor={chartColors.borderColor}
                   _hover={{
                     bg: legendHoverBg,
                     transform: 'translateX(4px)',
@@ -455,7 +252,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                       px={2}
                       py={0.5}
                       borderRadius="full"
-                      bg={grayBadgeBg}
+                      bg={chartColors.grayBadgeBg}
                       color={colors.text.primary}
                       fontSize="xs"
                       fontWeight="600"
@@ -475,10 +272,10 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
         position="relative"
         p={{ base: 5, sm: 6, md: 8 }}
         borderRadius="2xl"
-        bg={cardBg}
-        background={cardBgGradient}
+        bg={chartColors.cardBg}
+        background={chartColors.cardBgGradient}
         border="1px solid"
-        borderColor={borderColor}
+        borderColor={chartColors.borderColor}
         boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
         _hover={{
           boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
@@ -511,8 +308,8 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
             px={3}
             py={1}
             borderRadius="full"
-            bg={redBadgeBg}
-            color={redBadgeColor}
+            bg={chartColors.redBadgeBg}
+            color={chartColors.redBadgeColor}
             fontSize="xs"
             fontWeight="600"
             textTransform="uppercase"
@@ -528,13 +325,13 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
           >
             <defs>
               <linearGradient id="expenseLineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={expenseColor} stopOpacity={0.3}/>
-                <stop offset="100%" stopColor={expenseColor} stopOpacity={0}/>
+                <stop offset="0%" stopColor={chartColors.expenseColor} stopOpacity={0.3}/>
+                <stop offset="100%" stopColor={chartColors.expenseColor} stopOpacity={0}/>
               </linearGradient>
             </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke={gridStroke}
+              stroke={chartColors.gridStroke}
               vertical={false}
             />
             <XAxis 
@@ -545,7 +342,7 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                 fontWeight: 500
               }}
               axisLine={{ 
-                stroke: borderColor,
+                stroke: chartColors.borderColor,
                 strokeWidth: 1
               }}
               tickLine={false}
@@ -561,8 +358,8 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
             />
             <Tooltip 
               contentStyle={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
+                backgroundColor: chartColors.cardBg,
+                border: `1px solid ${chartColors.borderColor}`,
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
                 fontSize: '13px',
@@ -582,24 +379,24 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
                 padding: '4px 0'
               }}
               formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
-              cursor={{ stroke: expenseColor, strokeWidth: 2, strokeDasharray: '5 5' }}
+              cursor={{ stroke: chartColors.expenseColor, strokeWidth: 2, strokeDasharray: '5 5' }}
             />
             <Line 
               type="monotone" 
               dataKey="amount" 
-              stroke={expenseColor}
+              stroke={chartColors.expenseColor}
               strokeWidth={3}
               dot={{ 
-                fill: expenseColor, 
+                fill: chartColors.expenseColor, 
                 strokeWidth: 2, 
                 r: 5,
-                stroke: cardBg
+                stroke: chartColors.cardBg
               }}
               activeDot={{ 
                 r: 7, 
-                stroke: expenseColor, 
+                stroke: chartColors.expenseColor, 
                 strokeWidth: 2,
-                fill: cardBg
+                fill: chartColors.cardBg
               }}
             />
           </LineChart>

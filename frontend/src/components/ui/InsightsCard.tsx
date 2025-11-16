@@ -29,8 +29,6 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const textColor = useColorModeValue('gray.700', 'gray.200')
   const iconColor = useColorModeValue('blue.500', 'blue.300')
-  const badgeColor = useColorModeValue('blue.100', 'blue.900')
-  const badgeTextColor = useColorModeValue('blue.700', 'blue.200')
 
   const getCardSpecificInsights = () => {
     const specificInsights: string[] = []

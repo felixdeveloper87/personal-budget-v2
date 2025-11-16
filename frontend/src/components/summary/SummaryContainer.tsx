@@ -11,11 +11,11 @@ import {
 import { getResponsiveStyles } from '../ui'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
-import { SummaryCardsGrid, CategoryAnalysisTabs } from './'
+import { SummaryCardsGrid } from './'
 import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import SummaryHeader from './SummaryHeader'
 import PeriodNavigator from './PeriodNavigator'
-import CategoryAnalysisHeader from './CategoryAnalysisHeader'
+import { CategoryAnalysisHeader, CategoryAnalysisTabs } from '../categories'
 import { usePeriodNavigation } from '../../hooks/usePeriodNavigation'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'

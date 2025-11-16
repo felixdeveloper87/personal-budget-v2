@@ -138,13 +138,13 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
 
   // Cores específicas para cada tipo de transação
   const incomeGradient = useColorModeValue(
-    'linear-gradient(135deg, rgb(220, 252, 231) 0%, rgb(134, 239, 172) 30%, rgb(34, 197, 94) 70%, rgb(16, 185, 129) 100%)', // Verde claro vibrante
-    'linear-gradient(135deg, rgb(20, 83, 45) 0%, rgb(22, 101, 52) 30%, rgb(21, 128, 61) 70%, rgb(34, 197, 94) 100%)'  // Verde escuro rico
+    'linear-gradient(135deg, rgb(220, 252, 231) 0%, rgb(134, 239, 172) 30%, rgb(34, 197, 94) 70%)',
+    'linear-gradient(135deg, rgb(16, 96, 48) 0%, rgb(22, 101, 52) 30%, rgb(21, 128, 61) 70%)' 
   )
 
   const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, rgb(254, 242, 242) 0%, rgb(252, 165, 165) 30%, rgb(248, 113, 113) 70%, rgb(239, 68, 68) 100%)', // Vermelho claro intenso
-    'linear-gradient(135deg, rgb(127, 29, 29) 0%, rgb(153, 27, 27) 30%, rgb(220, 38, 38) 70%, rgb(248, 113, 113) 100%)'  // Vermelho escuro elegante
+    'linear-gradient(135deg, rgb(255, 142, 142) 0%, rgb(206, 143, 143) 30%, rgb(248, 113, 113) 70%)', 
+    'linear-gradient(135deg, rgb(215, 89, 89) 0%, rgb(154, 54, 54) 30%, rgb(201, 66, 66) 70%)'
   )
 
   return {

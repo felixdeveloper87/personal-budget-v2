@@ -9,8 +9,6 @@ import {
   Text,
   Box,
   Badge,
-  Center,
-  Spinner,
   useColorModeValue,
   Icon as ChakraIcon,
   Button,
@@ -27,6 +25,7 @@ import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react
 import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../../constants/summaryColors'
 import InsightsCard from '../../ui/InsightsCard'
 import { getResponsiveStyles, getGradients, animations, safeAreaStyles, safariStyles, getShimmerStyles, getModalHeaderStyles, getScrollbarStyles } from '../../ui'
+import { ChartLoadingState } from './components'
 
 const MotionBox = motion.create(Box)
 const MotionBadge = motion.create(Badge)
@@ -54,7 +53,6 @@ export default function SummaryCardModal({
   const gradients = getGradients()
   const headerStyles = getModalHeaderStyles(useColorModeValue)
 
-  // ✅ Usar cores centralizadas
   const iconMap = {
     transactions: BarChart3,
     income: TrendingUp,
@@ -72,6 +70,22 @@ export default function SummaryCardModal({
 
   const IconEl = headerInfo.icon
   const iconBg = useColorModeValue(headerInfo.bg, headerInfo.bgDark)
+
+  // Títulos do modal baseados no tipo de card
+  const modalTitle = useMemo(() => {
+    switch (selectedCard) {
+      case 'transactions':
+        return 'Transactions Analytics'
+      case 'income':
+        return 'Incomes'
+      case 'expenses':
+        return 'Expenses'
+      case 'balance':
+        return 'Balance'
+      default:
+        return headerInfo.title
+    }
+  }, [selectedCard, headerInfo.title])
 
   return (
     <Modal
@@ -146,11 +160,6 @@ export default function SummaryCardModal({
             }
           }}
         >
-          {/* Animated top bar */}
-          <Box
-            height="2px"
-            sx={getShimmerStyles()}
-          />
           
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
@@ -206,11 +215,7 @@ export default function SummaryCardModal({
                         lineHeight="shorter"
                         noOfLines={1}
                       >
-                        {selectedCard === 'transactions' ? 'Transactions Analytics' :
-                         selectedCard === 'income' ? 'Incomes' :
-                         selectedCard === 'expenses' ? 'Expenses' :
-                         selectedCard === 'balance' ? 'Balance' :
-                         headerInfo.title}
+                        {modalTitle}
                       </Text>
                       <Text
                         color={useColorModeValue('gray.600', 'gray.300')}
@@ -262,9 +267,7 @@ export default function SummaryCardModal({
                 }}
               >
           {!transactions.length ? (
-            <Center py={10}>
-              <Spinner size="lg" color={useColorModeValue('blue.500', 'blue.300')} thickness="3px" />
-            </Center>
+            <ChartLoadingState message="Loading chart data..." />
           ) : (
             <>
               <AnimatePresence mode="wait">

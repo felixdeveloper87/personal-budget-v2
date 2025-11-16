@@ -8,11 +8,14 @@ import {
   Legend, 
   ResponsiveContainer,
 } from 'recharts'
-import { VStack, Text, HStack, Box, useBreakpointValue, useColorModeValue, Spinner, Center, Badge } from '@chakra-ui/react'
+import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
+import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles, animations } from '../../ui'
+import { animations } from '../../ui'
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react'
-import { Icon } from '@chakra-ui/react'
+import { useChartColors, useChartDimensions } from './hooks'
+import { ChartCard, ChartLoadingState } from './components'
+import { processTransactionsByDate } from './utils'
 
 interface TransactionsChartProps {
   transactions: any[]
@@ -21,104 +24,26 @@ interface TransactionsChartProps {
 
 export default function TransactionsChart({ transactions, selectedPeriod }: TransactionsChartProps) {
   const colors = useThemeColors()
-  const chartHeight = useBreakpointValue({ base: 280, sm: 320, md: 360, lg: 400 })
-  
-  // Modern color palette
-  const cardBg = useColorModeValue('white', '#0a0a0a')
-  const cardBgGradient = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
-  )
-  const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(75, 85, 99, 0.3)')
-  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
-  const gridStroke = useColorModeValue('rgba(226, 232, 240, 0.5)', 'rgba(75, 85, 99, 0.2)')
-  
-  // Modern gradient colors
-  const incomeGradient = useColorModeValue(
-    'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-  )
-  const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    'linear-gradient(135deg, #f87171 0%, #ef4444 100%)'
-  )
-  const totalGradient = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-    'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)'
-  )
-  
-  // Modern bar colors
-  const incomeColor = useColorModeValue('#10b981', '#22c55e')
-  const expenseColor = useColorModeValue('#ef4444', '#f87171')
-  
-  // Dados para o gráfico de barras - transações por dia
-  const dailyData = transactions.reduce((acc: any[], transaction: any) => {
-    const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
-      month: 'short', 
-      day: 'numeric' 
-    })
-    const existing = acc.find((item: any) => item.date === date)
-    
-    if (existing) {
-      if (transaction.type === 'INCOME') {
-        existing.income += transaction.amount
-      } else {
-        existing.expense += transaction.amount
-      }
-    } else {
-      acc.push({
-        date,
-        income: transaction.type === 'INCOME' ? transaction.amount : 0,
-        expense: transaction.type === 'EXPENSE' ? transaction.amount : 0
-      })
-    }
-    
-    return acc
-  }, []).sort((a: any, b: any) => {
-    // Sort by the original transaction dates for proper chronological order
-    const transactionsA = transactions.filter(t => {
-      const date = new Date(t.dateTime).toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
-      return date === a.date
-    })
-    const transactionsB = transactions.filter(t => {
-      const date = new Date(t.dateTime).toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
-      return date === b.date
-    })
-    
-    if (transactionsA.length > 0 && transactionsB.length > 0) {
-      return new Date(transactionsA[0].dateTime).getTime() - new Date(transactionsB[0].dateTime).getTime()
-    }
-    return 0
-  })
+  const chartColors = useChartColors()
+  const { chartHeight } = useChartDimensions()
 
-  // Dados para o gráfico de pizza - distribuição por tipo
-  const typeData = [
-    { name: 'Income', value: transactions.filter(t => t.type === 'INCOME').length, color: '#38A169' },
-    { name: 'Expenses', value: transactions.filter(t => t.type === 'EXPENSE').length, color: '#E53E3E' }
-  ]
+  // Processar dados usando utilitários centralizados
+  const dailyData = useMemo(
+    () => processTransactionsByDate(transactions),
+    [transactions]
+  )
 
-  const totalTransactions = transactions.length
-  const incomeCount = transactions.filter(t => t.type === 'INCOME').length
-  const expenseCount = transactions.filter(t => t.type === 'EXPENSE').length
+  // Calcular contagens
+  const { totalTransactions, incomeCount, expenseCount } = useMemo(() => {
+    const total = transactions.length
+    const income = transactions.filter(t => t.type === 'INCOME').length
+    const expense = transactions.filter(t => t.type === 'EXPENSE').length
+    return { totalTransactions: total, incomeCount: income, expenseCount: expense }
+  }, [transactions])
 
   // Loading state
   if (transactions.length === 0) {
-    return (
-      <Center py={20}>
-        <VStack spacing={4}>
-          <Spinner size="lg" color={spinnerColor} thickness="3px" />
-          <Text color={colors.text.secondary} fontSize="sm">
-            Loading transaction data...
-          </Text>
-        </VStack>
-      </Center>
-    )
+    return <ChartLoadingState message="Loading transaction data..." />
   }
 
   return (
@@ -146,173 +71,36 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
         wrap="wrap"
         gap={{ base: 2, sm: 2 }}
       >
-        {/* Income Card */}
-        <Box 
-          position="relative"
+        <ChartCard
+          icon={TrendingUp}
+          value={incomeCount}
+          label="Income"
+          gradient={chartColors.incomeGradient}
+          color={chartColors.incomeColor}
+          hoverBorderColor={chartColors.incomeHoverBorder}
+          delay={0}
           minW={{ base: "70px", sm: "85px", lg: "100px" }}
-          p={{ base: 3, sm: 3.5 }}
-          borderRadius="xl"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(16, 185, 129, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('rgba(16, 185, 129, 0.3)', 'rgba(34, 197, 94, 0.4)'),
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.3s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          {/* Accent bar */}
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={incomeGradient}
-          />
-          <VStack spacing={1.5} align="center">
-            <HStack spacing={1.5} align="center">
-              <Icon as={TrendingUp} boxSize={4} color={incomeColor} />
-              <Text 
-                fontSize={{ base: "xl", sm: "2xl", md: "3xl" }} 
-                fontWeight="800" 
-                bgGradient={incomeGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                {incomeCount}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Income
-            </Text>
-          </VStack>
-        </Box>
-
-        {/* Expense Card */}
-        <Box 
-          position="relative"
+        />
+        <ChartCard
+          icon={TrendingDown}
+          value={expenseCount}
+          label="Expenses"
+          gradient={chartColors.expenseGradient}
+          color={chartColors.expenseColor}
+          hoverBorderColor={chartColors.expenseHoverBorder}
+          delay={0.1}
           minW={{ base: "70px", sm: "85px", lg: "100px" }}
-          p={{ base: 3, sm: 3.5 }}
-          borderRadius="xl"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(239, 68, 68, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('rgba(239, 68, 68, 0.3)', 'rgba(248, 113, 113, 0.4)'),
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.4s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          {/* Accent bar */}
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={expenseGradient}
-          />
-          <VStack spacing={1.5} align="center">
-            <HStack spacing={1.5} align="center">
-              <Icon as={TrendingDown} boxSize={4} color={expenseColor} />
-              <Text 
-                fontSize={{ base: "xl", sm: "2xl", md: "3xl" }} 
-                fontWeight="800" 
-                bgGradient={expenseGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                {expenseCount}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Expenses
-            </Text>
-          </VStack>
-        </Box>
-
-        {/* Total Card */}
-        <Box 
-          position="relative"
+        />
+        <ChartCard
+          icon={Activity}
+          value={totalTransactions}
+          label="Total"
+          gradient={chartColors.transactionsGradient}
+          color={chartColors.transactionsColor}
+          hoverBorderColor={chartColors.transactionsHoverBorder}
+          delay={0.2}
           minW={{ base: "70px", sm: "85px", lg: "100px" }}
-          p={{ base: 3, sm: 3.5 }}
-          borderRadius="xl"
-          bg={cardBg}
-          background={cardBgGradient}
-          border="1px solid"
-          borderColor={borderColor}
-          boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-          _hover={{
-            transform: 'translateY(-4px)',
-            boxShadow: '0 10px 25px rgba(59, 130, 246, 0.15), 0 4px 10px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('rgba(59, 130, 246, 0.3)', 'rgba(96, 165, 250, 0.4)'),
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          sx={{
-            animation: `${animations.slideIn} 0.5s ease-out`,
-          }}
-          overflow="hidden"
-        >
-          {/* Accent bar */}
-          <Box
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            h="2px"
-            bg={totalGradient}
-          />
-          <VStack spacing={1.5} align="center">
-            <HStack spacing={1.5} align="center">
-              <Icon as={Activity} boxSize={4} color={useColorModeValue('#3b82f6', '#60a5fa')} />
-              <Text 
-                fontSize={{ base: "xl", sm: "2xl", md: "3xl" }} 
-                fontWeight="800" 
-                bgGradient={totalGradient}
-                bgClip="text"
-                lineHeight="1"
-              >
-                {totalTransactions}
-              </Text>
-            </HStack>
-            <Text 
-              fontSize={{ base: "2xs", sm: "xs" }} 
-              fontWeight="600"
-              color={colors.text.secondary}
-              letterSpacing="0.5px"
-              textTransform="uppercase"
-            >
-              Total
-            </Text>
-          </VStack>
-        </Box>
+        />
       </HStack>
 
       {/* Modern Bar Chart */}
@@ -320,10 +108,10 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
         position="relative"
         p={{ base: 5, sm: 6, md: 8 }}
         borderRadius="2xl"
-        bg={cardBg}
-        background={cardBgGradient}
+        bg={chartColors.cardBg}
+        background={chartColors.cardBgGradient}
         border="1px solid"
-        borderColor={borderColor}
+        borderColor={chartColors.borderColor}
         boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
         _hover={{
           boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
@@ -357,8 +145,8 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
             px={3}
             py={1}
             borderRadius="full"
-            bg={useColorModeValue('blue.50', 'blue.900')}
-            color={useColorModeValue('blue.600', 'blue.300')}
+            bg={chartColors.blueBadgeBg}
+            color={chartColors.blueBadgeColor}
             fontSize="xs"
             fontWeight="600"
             textTransform="uppercase"
@@ -375,17 +163,17 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
           >
             <defs>
               <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={useColorModeValue('#10b981', '#22c55e')} stopOpacity={1}/>
-                <stop offset="100%" stopColor={useColorModeValue('#059669', '#16a34a')} stopOpacity={0.8}/>
+                <stop offset="0%" stopColor={chartColors.incomeColor} stopOpacity={1}/>
+                <stop offset="100%" stopColor={chartColors.incomeColor} stopOpacity={0.8}/>
               </linearGradient>
               <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={useColorModeValue('#ef4444', '#f87171')} stopOpacity={1}/>
-                <stop offset="100%" stopColor={useColorModeValue('#dc2626', '#ef4444')} stopOpacity={0.8}/>
+                <stop offset="0%" stopColor={chartColors.expenseColor} stopOpacity={1}/>
+                <stop offset="100%" stopColor={chartColors.expenseColor} stopOpacity={0.8}/>
               </linearGradient>
             </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke={gridStroke}
+              stroke={chartColors.gridStroke}
               vertical={false}
             />
             <XAxis 
@@ -396,7 +184,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
                 fontWeight: 500
               }}
               axisLine={{ 
-                stroke: borderColor,
+                stroke: chartColors.borderColor,
                 strokeWidth: 1
               }}
               tickLine={false}
@@ -412,8 +200,8 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
             />
             <Tooltip 
               contentStyle={{
-                backgroundColor: cardBg,
-                border: `1px solid ${borderColor}`,
+                backgroundColor: chartColors.cardBg,
+                border: `1px solid ${chartColors.borderColor}`,
                 borderRadius: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
                 fontSize: '13px',

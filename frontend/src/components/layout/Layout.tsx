@@ -1,6 +1,4 @@
-import { Box, Flex, useDisclosure } from '@chakra-ui/react'
-import { useState } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
+import { Box, Flex } from '@chakra-ui/react'
 import Header from './header/Header'
 import Footer from './Footer'
 
@@ -11,12 +9,9 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, currentPage = 'dashboard', onPageChange }: LayoutProps) {
-  const [settingsOpen, setSettingsOpen] = useState(false)
-  const { user } = useAuth()
-
   const handleOpenSettings = () => {
-    setSettingsOpen(true)
-    console.log('Settings opened')
+    // TODO: Implement settings modal
+    console.log('Settings clicked')
   }
 
   return (

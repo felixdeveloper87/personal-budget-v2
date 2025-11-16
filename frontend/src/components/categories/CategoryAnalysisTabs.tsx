@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { Box, VStack } from '@chakra-ui/react'
 import { Transaction } from '../../types'
 import { PeriodType } from '../../types'
-import ExpenseChart from '../charts/ExpenseChart'
-import IncomeChart from '../charts/IncomeChart'
+import CategoryExpenseChart from './CategoryExpenseChart'
+import CategoryIncomeChart from './CategoryIncomeChart'
 
 interface CategoryAnalysisTabsProps {
   transactions: Transaction[]
@@ -34,12 +34,12 @@ export default function CategoryAnalysisTabs({
           mr={{ base: '-16px', sm: '-20px', md: '-24px' }}
         >
           {activeTab === 'expenses' ? (
-            <ExpenseChart
+            <CategoryExpenseChart
               transactions={transactions}
               selectedPeriod={selectedPeriod}
             />
           ) : (
-            <IncomeChart
+            <CategoryIncomeChart
               transactions={transactions}
               selectedPeriod={selectedPeriod}
             />

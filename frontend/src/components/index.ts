@@ -7,6 +7,9 @@ export * from './ui'
 // Chart Components - Data visualization components
 export * from './charts'
 
+// Category Components - Category analysis and visualization components
+export * from './categories'
+
 // Layout Components - Application structure components
 export * from './layout'
 

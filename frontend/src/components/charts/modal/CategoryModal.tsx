@@ -2,9 +2,6 @@ import {
   Modal,
   ModalOverlay,
   ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalCloseButton,
   VStack,
   HStack,
   Text,
@@ -26,16 +23,12 @@ import {
 import { useMemo, useState } from 'react'
 import { Transaction } from '../../../types' 
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, getTransactionModalHeaderStyles, getGradients, animations, getShimmerStyles, safeAreaStyles, safariStyles, getScrollbarStyles } from '../../ui'
+import { getResponsiveStyles, getTransactionModalHeaderStyles, animations, getShimmerStyles, safeAreaStyles, safariStyles, getScrollbarStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X, TrendingUp, TrendingDown } from 'lucide-react'
-  
-  
-  const CATEGORY_COLORS = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-    '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F',
-    '#BB8FCE', '#85C1E9', '#F8C471', '#82E0AA'
-  ]
+import { useChartColors } from './hooks'
+import { processCategoriesWithTransactions } from './utils'
+import { CATEGORY_COLORS } from './constants/categoryColors'
   
 interface CategoryModalProps {
   isOpen: boolean
@@ -48,57 +41,28 @@ interface CategoryModalProps {
   
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod, initialCategory }: CategoryModalProps) {
   const colors = useThemeColors()
+  const chartColors = useChartColors()
   const responsiveStyles = getResponsiveStyles()
-  const gradients = getGradients()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
-  
-  // Modern post-it inspired colors
-  const closeButtonBg = useColorModeValue(
-    gradients.background,
-    gradients.background
-  )
-  const closeButtonBorderColor = useColorModeValue('gray.200', 'gray.600')
-  const closeButtonHoverBg = useColorModeValue('red.50', 'red.900')
-  const closeButtonIconColor = useColorModeValue('gray.700', 'gray.200')
+
+  // Cores do modal
   const cardBg = useColorModeValue('white', 'gray.800')
   const progressBg = useColorModeValue('gray.100', 'gray.700')
   const tableHeaderBg = useColorModeValue('gray.50', 'gray.700')
   const tableRowBg = useColorModeValue('gray.25', 'gray.750')
   const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
-  const modalBg = useColorModeValue(
-    gradients.background,
-    gradients.background
-  )
-  const topBorderColor = useColorModeValue(
-    type === 'INCOME' ? 'green.200' : 'red.200',
-    type === 'INCOME' ? 'green.500' : 'red.500'
+
+  // Filtrar transações por tipo
+  const filteredTransactions = useMemo(
+    () => transactions.filter(t => t.type === type),
+    [transactions, type]
   )
   
-    const filteredTransactions = useMemo(
-      () => transactions.filter(t => t.type === type),
-      [transactions, type]
-    )
-  
-    const { sortedCategories, total } = useMemo(() => {
-      const categoryTotals = filteredTransactions.reduce((acc, transaction) => {
-        const category = transaction.category
-        if (!acc[category]) acc[category] = { total: 0, transactions: [] }
-        acc[category].total += transaction.amount
-        acc[category].transactions.push(transaction)
-        return acc
-      }, {} as Record<string, { total: number; transactions: Transaction[] }>)
-  
-      Object.values(categoryTotals).forEach(cat =>
-        cat.transactions.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
-      )
-  
-      const sortedCategories = Object.entries(categoryTotals)
-        .map(([category, data]) => ({ category, ...data }))
-        .sort((a, b) => b.total - a.total)
-  
-      const total = sortedCategories.reduce((sum, cat) => sum + cat.total, 0)
-      return { sortedCategories, total }
-    }, [filteredTransactions])
+  // Processar categorias usando utilitário centralizado
+  const { sortedCategories, total } = useMemo(
+    () => processCategoriesWithTransactions(filteredTransactions),
+    [filteredTransactions]
+  )
   
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
     // Se houver categoria inicial, expandi-la automaticamente
