@@ -25,32 +25,39 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
   const buttonHoverBg = useColorModeValue('red.50', 'red.900')
 
   return (
-    <Box {...headerStyles.container}>
+    <Box 
+      {...headerStyles.container} 
+      p={{ base: 0.5, sm: 2, md: 3 }}
+      sx={{
+        ...headerStyles.container.sx,
+        paddingTop: { base: '2px', sm: 'max(16px, env(safe-area-inset-top, 0px))' }
+      }}
+    >
       <Flex
         direction="row"
         align="center"
-        justify="center"
-        flexWrap="wrap"
-        pr={{ base: 1, sm: 2 }}
-        pt={{ base: 0.5, sm: 0 }}
-        gap={{ base: 1.5, sm: 2 }}
+        justify="space-between"
+        flexWrap="nowrap"
+        gap={{ base: 1, sm: 2 }}
+        w="full"
+        py={0}
       >
-        <HStack spacing={{ base: 2, sm: 3 }} align="center" flex="1" minW={0}>
+        <HStack spacing={{ base: 1.5, sm: 3 }} align="center" flex="1" minW={0} overflow="hidden">
           <Box
-            p={{ base: 2, sm: 3 }}
-            borderRadius="2xl"
+            p={{ base: 1, sm: 3 }}
+            borderRadius="xl"
             bg={headerStyles.iconContainer.bg}
             boxShadow="lg"
             flexShrink={0}
           >
-            <Icon as={TrendingDown} boxSize={{ base: 4, sm: 5, md: 6 }} color="white" />
+            <Icon as={TrendingDown} boxSize={{ base: 3.5, sm: 5, md: 6 }} color="white" />
           </Box>
-          <VStack align="start" spacing={0} flex="1" minW={0}>
+          <VStack align="start" spacing={0} flex="1" minW={0} overflow="hidden">
             <Text
               color={headerStyles.title.color}
               fontWeight="500"
-              fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
-              lineHeight="shorter"
+              fontSize={{ base: 'sm', sm: 'xl', md: '2xl' }}
+              lineHeight="1.2"
               noOfLines={1}
             >
               {title}
@@ -58,7 +65,8 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
             <Text
               color={headerStyles.subtitle.color}
               fontWeight="600"
-              fontSize={{ base: 'xs', sm: 'sm', md: 'md' }}
+              fontSize={{ base: '2xs', sm: 'sm', md: 'md' }}
+              lineHeight="1.2"
               noOfLines={1}
             >
               {selectedPeriod} • £{totalExpenses.toLocaleString()}
@@ -67,11 +75,11 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
         </HStack>
 
         <Button
-          size={{ base: 'sm', sm: 'md' }}
+          size={{ base: 'xs', sm: 'md' }}
           variant="ghost"
           color={headerStyles.title.color}
           onClick={onViewAllClick}
-          rightIcon={<Icon as={Eye} boxSize={4} color={headerStyles.title.color} />}
+          rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} color={headerStyles.title.color} />}
           _hover={{
             bg: buttonHoverBg,
             transform: 'translateY(-1px)',
@@ -79,6 +87,7 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
           }}
           transition="all 0.2s ease"
           flexShrink={0}
+          px={{ base: 2, sm: 4 }}
         >
           {isMobile ? 'View All' : 'View All Details'}
         </Button>
