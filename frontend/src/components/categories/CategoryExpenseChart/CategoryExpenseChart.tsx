@@ -70,9 +70,6 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
     <>
       <Card
         bg={cardBg}
-        backdropFilter="blur(20px)"
-        border="1px solid"
-        borderColor={borderColor}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"

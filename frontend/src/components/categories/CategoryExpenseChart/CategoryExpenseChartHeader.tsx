@@ -26,7 +26,6 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
 
   return (
     <Box 
-      {...headerStyles.container} 
       p={{ base: 0.5, sm: 2, md: 3 }}
       sx={{
         ...headerStyles.container.sx,

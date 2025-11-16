@@ -40,7 +40,7 @@ export default function CategoryAnalysisHeader({
           Categories
         </Heading>
         <Text
-          fontSize={{ base: 'xs', sm: 'sm' }}
+          fontSize={{ base: 'xs', sm: 'md' }}
           color={useColorModeValue('gray.600', 'gray.400')}
           fontWeight="400"
           textAlign="left"

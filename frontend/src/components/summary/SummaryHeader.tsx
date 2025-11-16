@@ -30,7 +30,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
           Overview
         </Heading>
         <Text
-          fontSize={{ base: 'sm', sm: 'sm' }}
+          fontSize={{ base: 'sm', sm: 'md' }}
           color={useColorModeValue('gray.600', 'gray.400')}
           fontWeight="400"
           textAlign="left"

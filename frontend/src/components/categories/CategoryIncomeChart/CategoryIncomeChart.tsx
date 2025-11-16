@@ -75,9 +75,6 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
       <Card
         bg={cardBg}
         w="full"
-        backdropFilter="blur(20px)"
-        border="1px solid"
-        borderColor={borderColor}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"

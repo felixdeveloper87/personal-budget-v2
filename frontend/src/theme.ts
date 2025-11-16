@@ -3,7 +3,7 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
   light: 'linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%)',
-  dark: 'linear-gradient(135deg, #0F0F10 0%, #18181B 100%)',
+  dark: 'linear-gradient(135deg,rgb(12, 11, 11) 0%,rgb(4, 4, 4) 100%)',
 
   cardLight: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)',
   cardDark: 'linear-gradient(135deg, #111111 0%, #000000 100%)',
