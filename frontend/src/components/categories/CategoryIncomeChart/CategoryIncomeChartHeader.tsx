@@ -29,7 +29,8 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
       p={{ base: 0.5, sm: 2, md: 3 }}
       sx={{
         ...headerStyles.container.sx,
-        paddingTop: { base: '2px', sm: 'max(16px, env(safe-area-inset-top, 0px))' }
+        paddingTop: { base: '2px', sm: 'max(16px, env(safe-area-inset-top, 0px))' },
+        paddingBottom: {base: '2'}
       }}
     >
       <Flex
