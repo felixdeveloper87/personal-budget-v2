@@ -12,7 +12,6 @@ import {
   List,
   ListItem,
   ListIcon,
-  Flex,
   Stat,
   StatLabel,
   StatNumber,
@@ -65,7 +64,7 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
     'linear(to-br, blue.50, purple.50, pink.50)',
     'linear(to-br, black, gray.900, gray.800)'
   )
-  const cardBg = useColorModeValue('white', 'black')
+  const cardBg = useColorModeValue('gray.50', 'black')
   const textColor = useColorModeValue('gray.600', 'gray.50')
 
   const features = [
