@@ -53,7 +53,8 @@ import {
   Calendar,
   DollarSign,
   Eye,
-  CreditCard
+  CreditCard,
+  Repeat
 } from 'lucide-react'
 
 const MotionBox = motion.create(Box)
@@ -90,6 +91,13 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       details: ['Monthly summaries', 'Year overview', 'Historical data', 'Trend analysis']
     },
     {
+      icon: <Icon as={Repeat} boxSize={10} />,
+      color: 'teal.500',
+      title: 'Installment Plans',
+      description: 'Split large expenses into monthly installments. Automatically create recurring transactions for purchases paid over time.',
+      details: ['Create installment plans', 'Automatic monthly transactions', 'Track payment progress', 'Manage future expenses']
+    },
+    {
       icon: <Icon as={Search} boxSize={10} />,
       color: 'orange.500',
       title: 'Advanced Search & Filters',
@@ -102,13 +110,6 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       title: 'Bank-Level Security',
       description: 'Your data is protected with JWT authentication and modern encryption standards.',
       details: ['Encrypted data', 'Secure authentication', 'Private by default', 'No data sharing']
-    },
-    {
-      icon: <Icon as={Moon} boxSize={10} />,
-      color: 'indigo.500',
-      title: 'Dark Mode & Responsive',
-      description: 'Beautiful interface that works perfectly on any device, with dark mode support.',
-      details: ['Auto dark mode', 'Mobile optimized', 'Touch friendly', 'Fast & smooth']
     }
   ]
 
