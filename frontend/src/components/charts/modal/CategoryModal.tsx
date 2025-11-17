@@ -26,7 +26,6 @@ import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 import { getResponsiveStyles, getTransactionModalHeaderStyles, animations, getShimmerStyles, safeAreaStyles, safariStyles, getScrollbarStyles } from '../../ui'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { X, TrendingUp, TrendingDown } from 'lucide-react'
-import { useChartColors } from './hooks'
 import { processCategoriesWithTransactions } from './utils'
 import { CATEGORY_COLORS } from './constants/categoryColors'
   
@@ -41,12 +40,11 @@ interface CategoryModalProps {
   
 export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod, initialCategory }: CategoryModalProps) {
   const colors = useThemeColors()
-  const chartColors = useChartColors()
   const responsiveStyles = getResponsiveStyles()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
 
   // Cores do modal
-  const cardBg = useColorModeValue('white', 'gray.800')
+  const cardBg = useColorModeValue('gray.50', 'black')
   const progressBg = useColorModeValue('gray.100', 'gray.700')
   const tableHeaderBg = useColorModeValue('gray.50', 'gray.700')
   const tableRowBg = useColorModeValue('gray.25', 'gray.750')
@@ -99,6 +97,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           }}
         />
       <ModalContent
+        bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
         m={{ base: 0, md: 4 }}
         display="flex"

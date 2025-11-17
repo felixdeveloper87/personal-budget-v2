@@ -14,10 +14,9 @@ import {
   Flex,
 } from '@chakra-ui/react'
 import { TrendingUp, TrendingDown, Plus, Minus, X } from 'lucide-react'
-import { useThemeColors } from '../../hooks/useThemeColors'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles, getTransactionModalHeaderStyles } from '../ui'
+import { animations, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getTransactionModalHeaderStyles } from '../ui'
 
 // 🎨 Constantes para animações
 const ANIMATIONS = {
@@ -42,10 +41,9 @@ export default function AddTransactionModal({
   onTransactionCreated,
   onRefresh,
 }: AddTransactionModalProps) {
-  const colors = useThemeColors()
-  const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
+  const cardBg = useColorModeValue('gray.50', 'black')
   
   const handleTransactionCreated = () => {
     onTransactionCreated()
@@ -68,8 +66,8 @@ export default function AddTransactionModal({
         backdropFilter="blur(10px)"
       />
       <ModalContent 
+        bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
-        m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
         {...responsiveStyles.modal}
@@ -88,34 +86,11 @@ export default function AddTransactionModal({
           }
         }}
       >        
-        {/* Decorative background */}
-        <Box
-          position="absolute"
-          top="-50px"
-          left="-50px"
-          right="-50px"
-          height="200px"
-          background={gradients.decorative}
-          borderRadius="3xl"
-          filter="blur(40px)"
-          opacity={0.6}
-          zIndex={0}
-        />
         
         {/* Main card with glassmorphism */}
         <Card
           position="relative"
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.95)',
-            'rgba(17, 17, 17, 0.95)'
-          )}
-          backdropFilter="blur(20px)"
-          border="1px solid"
-          borderColor={useColorModeValue(
-            'rgba(255, 255, 255, 0.2)',
-            'rgba(255, 255, 255, 0.1)'
-          )}
-          borderRadius={{ base: 'none', sm: '3xl' }}
+          bg={cardBg}
           shadow="2xl"
           overflow="hidden"
           w="full"
@@ -134,12 +109,6 @@ export default function AddTransactionModal({
             }
           }}
         >
-          {/* Animated top bar */}
-          <Box
-            height="2px"
-            sx={getShimmerStyles()}
-          />
-          
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
               {/* Header */}
@@ -166,6 +135,7 @@ export default function AddTransactionModal({
                     align="center"
                     flex="1"
                     minW={0}
+                    mb={2}
                   >
                     <Box
                       p={{ base: 2, sm: 3 }}
@@ -173,17 +143,6 @@ export default function AddTransactionModal({
                       bg={headerStyles.iconContainer.bg}
                       boxShadow="lg"
                       flexShrink={0}
-                      sx={{
-                        animation: ANIMATIONS.pulse,
-                        '@keyframes pulse': {
-                          '0%, 100%': { 
-                            boxShadow: `0 0 5px ${headerStyles.iconContainer.bg}40` 
-                          },
-                          '50%': { 
-                            boxShadow: `0 0 20px ${headerStyles.iconContainer.bg}80, 0 0 30px ${headerStyles.iconContainer.bg}60` 
-                          }
-                        }
-                      }}
                     >
                       {type === 'INCOME' ? <Plus size={20} color="white" /> : <Minus size={20} color="white" />}
                     </Box>

@@ -34,7 +34,6 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
 
   // Theme values
   const cardBg = useColorModeValue('gray.100', 'black')
-  const borderColor = useColorModeValue('gray.200', 'gray.900')
 
   // Event handlers with useCallback for performance
   const handleClose = useCallback(() => {
