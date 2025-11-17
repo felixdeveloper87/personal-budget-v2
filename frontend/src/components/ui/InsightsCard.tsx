@@ -25,7 +25,7 @@ export default function InsightsCard({ transactions, selectedPeriod, cardType }:
   const { isOpen, onToggle } = useDisclosure()
   const insights = useTransactionInsights(transactions, selectedPeriod)
   
-  const cardBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(30, 41, 59, 0.8)')
+  const cardBg = useColorModeValue('gray.50', 'blackAlpha.500')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const textColor = useColorModeValue('gray.700', 'gray.200')
   const iconColor = useColorModeValue('blue.500', 'blue.300')

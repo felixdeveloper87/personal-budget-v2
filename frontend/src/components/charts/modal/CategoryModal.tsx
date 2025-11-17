@@ -130,11 +130,6 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           display="flex"
           flexDirection="column"
         >
-          {/* Animated top bar */}
-          <Box
-            height="2px"
-            sx={getShimmerStyles()}
-          />
           
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">

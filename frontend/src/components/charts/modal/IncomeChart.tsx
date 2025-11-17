@@ -72,19 +72,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
     <VStack 
       spacing={{ base: 4, sm: 5, md: 6 }} 
       align="stretch"
-      sx={{
-        animation: animations.slideIn,
-        '@keyframes slideIn': {
-          from: { 
-            opacity: 0, 
-            transform: 'translateY(20px) scale(0.95)' 
-          },
-          to: { 
-            opacity: 1, 
-            transform: 'translateY(0) scale(1)' 
-          }
-        }
-      }}
     >
       {/* Modern Statistics Cards */}
       <HStack 
@@ -126,19 +113,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       <Box
         position="relative"
         p={{ base: 5, sm: 6, md: 8 }}
-        borderRadius="2xl"
-        bg={chartColors.cardBg}
-        background={chartColors.cardBgGradient}
-        border="1px solid"
-        borderColor={chartColors.borderColor}
-        boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-        _hover={{
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
-        }}
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-        sx={{
-          animation: `${animations.slideIn} 0.6s ease-out`,
-        }}
         overflow="hidden"
       >
         <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
@@ -205,7 +179,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                   align="center"
                   p={3}
                   borderRadius="xl"
-                  bg={chartColors.legendBg}
                   border="1px solid"
                   borderColor={chartColors.borderColor}
                   _hover={{
@@ -267,19 +240,6 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
       <Box
         position="relative"
         p={{ base: 5, sm: 6, md: 8 }}
-        borderRadius="2xl"
-        bg={chartColors.cardBg}
-        background={chartColors.cardBgGradient}
-        border="1px solid"
-        borderColor={chartColors.borderColor}
-        boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
-        _hover={{
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)',
-        }}
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-        sx={{
-          animation: `${animations.slideIn} 0.7s ease-out`,
-        }}
         overflow="hidden"
       >
         <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>

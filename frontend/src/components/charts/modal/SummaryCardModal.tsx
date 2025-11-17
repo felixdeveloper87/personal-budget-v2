@@ -70,6 +70,7 @@ export default function SummaryCardModal({
 
   const IconEl = headerInfo.icon
   const iconBg = useColorModeValue(headerInfo.bg, headerInfo.bgDark)
+  const cardBg = useColorModeValue('gray.50', 'black')
 
   // Títulos do modal baseados no tipo de card
   const modalTitle = useMemo(() => {
@@ -103,7 +104,7 @@ export default function SummaryCardModal({
         backdropFilter="blur(10px)"
       />
       <ModalContent 
-        borderRadius={{ base: 'none', md: '3xl' }}
+        bg={cardBg}
         overflow="hidden"
         m={{ base: 0, md: 4 }}
         display="flex"
@@ -113,56 +114,18 @@ export default function SummaryCardModal({
           ...safeAreaStyles.container,
           ...safariStyles.modal
         }}
-      >
-        {/* Decorative background */}
-        <Box
-          position="absolute"
-          top="-50px"
-          left="-50px"
-          right="-50px"
-          height="200px"
-          background={gradients.decorative}
-          borderRadius="3xl"
-          filter="blur(40px)"
-          opacity={0.6}
-          zIndex={0}
-        />
-        
+      >        
         {/* Main card with glassmorphism */}
         <Card
           position="relative"
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.95)',
-            'rgba(17, 17, 17, 0.95)'
-          )}
-          backdropFilter="blur(20px)"
-          border="1px solid"
-          borderColor={useColorModeValue(
-            'rgba(255, 255, 255, 0.2)',
-            'rgba(255, 255, 255, 0.1)'
-          )}
-          borderRadius={{ base: 'none', sm: '3xl' }}
           shadow="2xl"
           overflow="hidden"
           w="full"
           h="full"
-          sx={{
-            animation: animations.slideIn,
-            '@keyframes slideIn': {
-              from: { 
-                opacity: 0, 
-                transform: 'translateY(20px) scale(0.95)' 
-              },
-              to: { 
-                opacity: 1, 
-                transform: 'translateY(0) scale(1)' 
-              }
-            }
-          }}
         >
           
           <CardBody p={0} display="flex" flexDirection="column" h="full">
-            <VStack spacing={0} align="stretch" h="full">
+            <VStack spacing={0} align="stretch" h="full" bg={cardBg}>
               {/* Header */}
               <Box {...headerStyles.container}>
                 <Button 

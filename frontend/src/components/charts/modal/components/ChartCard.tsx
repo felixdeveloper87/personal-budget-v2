@@ -25,11 +25,7 @@ export default function ChartCard({
   minW,
 }: ChartCardProps) {
   const colors = useThemeColors()
-  const cardBg = useColorModeValue('white', '#0a0a0a')
-  const cardBgGradient = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, #0a0a0a 0%, #111111 100%)'
-  )
+  const cardBg = useColorModeValue('gray.50', 'black')
   const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(75, 85, 99, 0.3)')
   
   return (
@@ -39,7 +35,6 @@ export default function ChartCard({
       p={{ base: 2.5, sm: 3 }}
       borderRadius="lg"
       bg={cardBg}
-      background={cardBgGradient}
       border="1px solid"
       borderColor={borderColor}
       boxShadow="0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1)"
