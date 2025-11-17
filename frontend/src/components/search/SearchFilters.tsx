@@ -37,16 +37,10 @@ export default function SearchFilters({
           <Input
             placeholder="Type to search transactions..."
             borderRadius="2xl"
-            bg={useColorModeValue('gray.50', 'gray.800')}
+            bg={useColorModeValue('gray.50', 'blackAlpha.500')}
             border="2px solid"
             borderColor={useColorModeValue('gray.200', 'gray.600')}
-            _focus={{
-              borderColor: 'blue.500',
-              boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-            }}
-            _hover={{
-              borderColor: useColorModeValue('gray.300', 'gray.500'),
-            }}
+
             value={filters.text}
             onChange={(e) => onUpdateFilter('text', e.target.value)}
             fontSize={{ base: 'md', sm: 'sm' }}
@@ -242,7 +236,7 @@ export default function SearchFilters({
                     borderRadius="full"
                     fontSize="xs"
                     fontWeight="500"
-                    bg={useColorModeValue('gray.50', 'gray.800')}
+                    bg={useColorModeValue('gray.50', 'blackAlpha.500')}
                     borderColor={useColorModeValue('gray.300', 'gray.600')}
                     color={useColorModeValue('gray.700', 'gray.200')}
                     _hover={{
@@ -274,7 +268,7 @@ export default function SearchFilters({
               borderRadius="2xl"
               h={{ base: '48px', sm: '44px' }}
               fontSize={{ base: 'md', sm: 'sm' }}
-              bg={useColorModeValue('gray.50', 'gray.800')}
+              bg={useColorModeValue('gray.50', 'blackAlpha.500')}
               border="2px solid"
               borderColor={useColorModeValue('gray.200', 'gray.600')}
               _focus={{
@@ -294,13 +288,9 @@ export default function SearchFilters({
               borderRadius="2xl"
               h={{ base: '48px', sm: '44px' }}
               fontSize={{ base: 'md', sm: 'sm' }}
-              bg={useColorModeValue('gray.50', 'gray.800')}
+              bg={useColorModeValue('gray.50', 'blackAlpha.500')}
               border="2px solid"
               borderColor={useColorModeValue('gray.200', 'gray.600')}
-              _focus={{
-                borderColor: 'blue.500',
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-              }}
               value={filters.endDate}
               onChange={(e) => onUpdateFilter('endDate', e.target.value)}
             />

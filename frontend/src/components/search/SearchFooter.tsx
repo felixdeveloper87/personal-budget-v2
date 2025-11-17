@@ -12,7 +12,6 @@ export default function SearchFooter({ onClearAll, onSearch }: SearchFooterProps
       p={{ base: 4, sm: 5, md: 6 }} 
       borderTop="1px" 
       borderColor={useColorModeValue('gray.200', 'gray.700')}
-      bg={useColorModeValue('gray.50', 'gray.800')}
       sx={{
         // Safe area support for iPhone 14 Pro
         paddingBottom: 'max(16px, env(safe-area-inset-bottom, 0px))',

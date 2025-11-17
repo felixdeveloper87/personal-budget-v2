@@ -8,11 +8,10 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles, getScrollbarStyles } from '../ui'
+import { animations, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles, getScrollbarStyles } from '../ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
-  const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
   const {
     filters,
@@ -36,6 +35,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
     // Don't call onSearch to avoid closing the modal
     // Just clear filters locally
   }
+  const cardBg = useColorModeValue('gray.50', 'black')
 
   return (
     <Modal 
@@ -53,6 +53,7 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         backdropFilter="blur(10px)"
       />
       <ModalContent 
+        bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
         m={{ base: 0, md: 4 }}
@@ -64,34 +65,11 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
           ...safariStyles.modal
         }}
       >
-        {/* Decorative background */}
-        <Box
-          position="absolute"
-          top="-50px"
-          left="-50px"
-          right="-50px"
-          height="200px"
-          background={gradients.decorative}
-          borderRadius="3xl"
-          filter="blur(40px)"
-          opacity={0.6}
-          zIndex={0}
-        />
         
         {/* Main card with glassmorphism */}
         <Card
           position="relative"
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.95)',
-            'rgba(17, 17, 17, 0.95)'
-          )}
-          backdropFilter="blur(20px)"
-          border="1px solid"
-          borderColor={useColorModeValue(
-            'rgba(255, 255, 255, 0.2)',
-            'rgba(255, 255, 255, 0.1)'
-          )}
-          borderRadius={{ base: 'none', sm: '3xl' }}
+          bg={cardBg}
           shadow="2xl"
           overflow="hidden"
           w="full"
@@ -110,11 +88,6 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
             }
           }}
         >
-          {/* Animated top bar */}
-          <Box
-            height="4px"
-            sx={getShimmerStyles()}
-          />
           
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
@@ -146,7 +119,6 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
                 flexShrink={0}
                 position={{ base: 'sticky', sm: 'relative' }}
                 bottom={0}
-                bg={useColorModeValue('white', 'gray.800')}
                 zIndex={10}
                 sx={safariStyles.sticky}
               >
