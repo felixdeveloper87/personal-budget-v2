@@ -159,7 +159,15 @@ export default function EditTransactionModal({
         />
 
         {/* Header */}
-        <Box {...headerStyles.container} position="relative" zIndex={1}>
+        <Box 
+          {...headerStyles.container} 
+          position="relative" 
+          zIndex={1}
+          sx={{
+            ...headerStyles.container.sx,
+            paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+          }}
+        >
           <Button 
             onClick={onClose} 
             {...headerStyles.closeButton}

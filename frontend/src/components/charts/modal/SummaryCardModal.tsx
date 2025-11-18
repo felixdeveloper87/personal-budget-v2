@@ -128,7 +128,13 @@ export default function SummaryCardModal({
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full" bg={cardBg}>
               {/* Header */}
-              <Box {...headerStyles.container}>
+              <Box 
+                {...headerStyles.container}
+                sx={{
+                  ...headerStyles.container.sx,
+                  paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+                }}
+              >
                 <Button 
                   onClick={onClose} 
                   {...headerStyles.closeButton}

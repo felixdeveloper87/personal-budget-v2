@@ -10,7 +10,13 @@ export default function SearchHeader({ onClose }: SearchHeaderProps) {
   const headerStyles = getModalHeaderStyles(useColorModeValue)
   
   return (
-    <Box {...headerStyles.container}>
+    <Box 
+      {...headerStyles.container}
+      sx={{
+        ...headerStyles.container.sx,
+        paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+      }}
+    >
       {/* Fixed close button in top right corner */}
       <Button
         onClick={onClose}

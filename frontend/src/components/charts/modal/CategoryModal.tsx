@@ -134,7 +134,13 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
               {/* Header */}
-              <Box {...headerStyles.container}>
+              <Box 
+                {...headerStyles.container}
+                sx={{
+                  ...headerStyles.container.sx,
+                  paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+                }}
+              >
                 <Flex
                   direction="row"
                   align="center"
