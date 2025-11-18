@@ -105,6 +105,7 @@ export default function SummaryCardModal({
       />
       <ModalContent 
         bg={cardBg}
+        borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
         m={{ base: 0, md: 4 }}
         display="flex"

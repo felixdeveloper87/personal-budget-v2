@@ -68,6 +68,7 @@ export default function AddTransactionModal({
       <ModalContent 
         bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
+        m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
         {...responsiveStyles.modal}

@@ -6,14 +6,10 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  Legend
 } from 'recharts'
 import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { animations } from '../../ui'
 import { Transaction } from '../../../types'
 import { Wallet, TrendingUp, Percent } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
@@ -32,7 +28,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
   const { chartHeight } = useChartDimensions()
 
   // Processar dados usando utilitários centralizados
-  const { balanceData, totalIncome, totalExpenses, dailyComparison } = useMemo(
+  const { balanceData, totalIncome, totalExpenses } = useMemo(
     () => processBalanceData(transactions),
     [transactions]
   )

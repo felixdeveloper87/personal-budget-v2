@@ -76,19 +76,6 @@ export default function ExpensesChart({ transactions, selectedPeriod }: Expenses
     <VStack 
       spacing={{ base: 4, sm: 5, md: 6 }} 
       align="stretch"
-      // sx={{
-      //   animation: animations.slideIn,
-      //   '@keyframes slideIn': {
-      //     from: { 
-      //       opacity: 0, 
-      //       transform: 'translateY(20px) scale(0.95)' 
-      //     },
-      //     to: { 
-      //       opacity: 1, 
-      //       transform: 'translateY(0) scale(1)' 
-      //     }
-      //   }
-      // }}
     >
       {/* Modern Statistics Cards */}
       <HStack 

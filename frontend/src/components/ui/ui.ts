@@ -217,28 +217,59 @@ export const getScrollbarStyles = (useColorModeValue: any) => ({
 // Safe area utilities
 export const safeAreaStyles = {
   container: {
+    // Safe area insets para iPhone com notch e Android
     paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
     paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
     paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
     paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+    // Suporte para Chrome mobile
+    minHeight: '100vh',
+    minHeightMoz: '-moz-available' as any,
+    minHeightWebkit: '-webkit-fill-available' as any,
+    // Prevenir scroll do body quando modal está aberto
+    position: 'relative' as const,
   },
   content: {
     paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
     paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
     paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+    // Smooth scrolling para Safari e Chrome
     WebkitOverflowScrolling: 'touch' as const,
+    overflowScrolling: 'touch' as const,
+    // Prevenir bounce no iOS
+    overscrollBehavior: 'contain' as const,
   }
 }
 
-// Safari specific utilities
+// Safari and Chrome mobile specific utilities
 export const safariStyles = {
   modal: {
-    WebkitOverflowScrolling: 'touch' as const,
-    position: 'relative' as const,
-  },
-  scrollable: {
+    // Smooth scrolling para Safari e Chrome
     WebkitOverflowScrolling: 'touch' as const,
     overflowScrolling: 'touch' as const,
+    position: 'relative' as const,
+    // Altura completa no mobile
+    height: '100vh',
+    heightMoz: '-moz-available' as any,
+    heightWebkit: '-webkit-fill-available' as any,
+    // Prevenir bounce no iOS
+    overscrollBehavior: 'contain' as const,
+    // Suporte para viewport-fit=cover (iPhone X+)
+    '@supports (padding: max(0px))': {
+      paddingTop: 'env(safe-area-inset-top)',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      paddingLeft: 'env(safe-area-inset-left)',
+      paddingRight: 'env(safe-area-inset-right)',
+    } as any,
+  },
+  scrollable: {
+    // Smooth scrolling para Safari e Chrome
+    WebkitOverflowScrolling: 'touch' as const,
+    overflowScrolling: 'touch' as const,
+    // Prevenir bounce no iOS
+    overscrollBehavior: 'contain' as const,
+    // Altura máxima para scroll correto
+    maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
   },
   sticky: {
     WebkitTransform: 'translateZ(0)' as const,
