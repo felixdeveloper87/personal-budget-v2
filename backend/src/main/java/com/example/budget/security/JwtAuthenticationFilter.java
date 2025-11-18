@@ -18,6 +18,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * JWT authentication filter for Spring Security.
+ * 
+ * Intercepts HTTP requests to extract and validate JWT tokens from the Authorization header.
+ * If a valid token is found, authenticates the user and sets the security context.
+ * Skips authentication for public endpoints (e.g., /api/auth/*).
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,12 +38,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userRepository = userRepository;
     }
 
+    /**
+     * Filters incoming requests to extract and validate JWT tokens.
+     * 
+     * Extracts the Bearer token from the Authorization header, validates it,
+     * and sets the authentication in the security context if valid.
+     * 
+     * @param request HTTP servlet request
+     * @param response HTTP servlet response
+     * @param filterChain Filter chain to continue processing
+     * @throws ServletException if a servlet error occurs
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-        // Skip JWT authentication for auth endpoints
         String requestPath = request.getRequestURI();
         if (requestPath.startsWith("/api/auth/")) {
             filterChain.doFilter(request, response);
@@ -61,9 +79,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     if (user != null) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                user, // pode ser o objeto User
+                                user,
                                 null,
-                                Collections.emptyList() // ✅ lista vazia de authorities
+                                Collections.emptyList()
                         );
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);

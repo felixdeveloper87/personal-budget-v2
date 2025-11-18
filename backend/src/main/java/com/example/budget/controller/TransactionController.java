@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for transaction management endpoints.
+ * 
+ * Handles CRUD operations for transactions and provides summary/search functionality.
+ * All endpoints require authentication and are scoped to the authenticated user.
+ */
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
@@ -21,49 +27,103 @@ public class TransactionController {
         this.service = service;
     }
 
+    /**
+     * Retrieves all transactions for the authenticated user.
+     * 
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return List of all transactions belonging to the authenticated user
+     */
     @GetMapping("/transactions")
     public List<Transaction> all(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        System.out.println("DEBUG: Logged user ID = " + user.getId() + ", email = " + user.getEmail());
         return service.findAllByUser(user);
     }
 
+    /**
+     * Creates a new transaction for the authenticated user.
+     * 
+     * @param tx Transaction object containing transaction details
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return Created transaction with generated ID
+     */
     @PostMapping("/transactions")
     public Transaction create(@RequestBody Transaction tx, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return service.save(tx, user);
     }
 
+    /**
+     * Updates an existing transaction.
+     * 
+     * Only the owner of the transaction can update it. Throws AccessDeniedException
+     * if the user attempts to update a transaction they don't own.
+     * 
+     * @param id Transaction ID to update
+     * @param tx Transaction object with updated fields
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return Updated transaction
+     */
     @PutMapping("/transactions/{id}")
     public Transaction update(@PathVariable("id") Long id, @RequestBody Transaction tx, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return service.update(id, tx, user);
     }
 
+    /**
+     * Deletes a transaction by ID.
+     * 
+     * Only the owner of the transaction can delete it. Throws AccessDeniedException
+     * if the user attempts to delete a transaction they don't own.
+     * 
+     * @param id Transaction ID to delete
+     * @param authentication Spring Security authentication object containing the authenticated user
+     */
     @DeleteMapping("/transactions/{id}")
     public void delete(@PathVariable("id") Long id, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         service.delete(id, user);
     }
 
+    /**
+     * Retrieves a monthly summary of transactions for the authenticated user.
+     * 
+     * Returns aggregated data including total income, total expenses, balance,
+     * and breakdown by category for the specified month.
+     * 
+     * @param year Year for the summary (e.g., 2024)
+     * @param month Month for the summary (1-12)
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return MonthlySummary containing aggregated transaction data
+     */
     @GetMapping("/summary/month")
     public MonthlySummary monthSummary(
             @RequestParam("year") int year,
             @RequestParam("month") int month,
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        System.out.println("Received year: " + year + ", month: " + month + ", user: " + user.getId());
-        try {
-            MonthlySummary result = service.monthlySummary(year, month, user);
-            System.out.println("Monthly summary result: " + result);
-            return result;
-        } catch (Exception e) {
-            System.err.println("Error in monthSummary: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
-        }
+        return service.monthlySummary(year, month, user);
     }
 
+    /**
+     * Searches transactions with optional filters.
+     * 
+     * Supports filtering by:
+     * - Text search in description
+     * - Transaction type (income/expense)
+     * - Category
+     * - Date range (startDate and endDate in yyyy-MM-dd format)
+     * 
+     * All filters are optional. If no filters are provided, returns all user transactions.
+     * Results are returned as TransactionSearchDTO objects optimized for search results.
+     * 
+     * @param text Optional text to search in transaction descriptions
+     * @param type Optional transaction type filter ("income" or "expense")
+     * @param category Optional category filter
+     * @param startDate Optional start date filter (yyyy-MM-dd format)
+     * @param endDate Optional end date filter (yyyy-MM-dd format)
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return List of TransactionSearchDTO matching the search criteria
+     */
     @GetMapping("/transactions/search")
     public List<TransactionSearchDTO> searchTransactions(
             @RequestParam(required = false) String text,

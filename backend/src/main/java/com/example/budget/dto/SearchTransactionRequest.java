@@ -4,6 +4,13 @@ import jakarta.validation.constraints.Pattern;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for transaction search requests.
+ * 
+ * Used to filter transactions by various criteria. All fields are optional,
+ * allowing flexible search combinations. Provides helper methods to convert
+ * date strings to LocalDateTime and check if any filters are applied.
+ */
 public class SearchTransactionRequest {
 
     private String text;
@@ -29,11 +36,6 @@ public class SearchTransactionRequest {
     )
     private String endDate;
 
-
-    // ----------------------------------------------------------
-    // CONSTRUCTORS
-    // ----------------------------------------------------------
-
     public SearchTransactionRequest() {
     }
 
@@ -50,11 +52,6 @@ public class SearchTransactionRequest {
         this.startDate = startDate;
         this.endDate = endDate;
     }
-
-
-    // ----------------------------------------------------------
-    // GETTERS (não expõe setters desnecessários)
-    // ----------------------------------------------------------
 
     public String getText() {
         return text;
@@ -75,11 +72,6 @@ public class SearchTransactionRequest {
     public String getEndDate() {
         return endDate;
     }
-
-
-    // ----------------------------------------------------------
-    // DERIVED VALUES
-    // ----------------------------------------------------------
 
     public LocalDateTime getStartDateTime() {
         return (startDate == null || startDate.isBlank())

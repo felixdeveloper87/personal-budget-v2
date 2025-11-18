@@ -5,6 +5,12 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * User entity representing an application user.
+ * 
+ * Stores user authentication credentials and profile information.
+ * Has a one-to-many relationship with Transaction entities.
+ */
 @Entity
 @Table(name = "users")
 public class User {
@@ -16,7 +22,7 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @JsonIgnore // nunca expor senha em JSON
+    @JsonIgnore
     @Column(nullable = false)
     private String password;
 
@@ -26,17 +32,15 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Transaction> transactions;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    // Relacionamento inverso (opcional, mas útil)
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<Transaction> transactions;
-
-    // Constructors
     public User() {
     }
 
@@ -45,8 +49,6 @@ public class User {
         this.password = password;
         this.name = name;
     }
-
-    // Getters e Setters
     public Long getId() {
         return id;
     }

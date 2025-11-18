@@ -4,6 +4,13 @@ import com.example.budget.model.TransactionType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Data Transfer Object for transaction search results.
+ * 
+ * Optimized DTO for search operations, containing only essential transaction
+ * information. Includes installment plan information if the transaction is
+ * part of an installment plan.
+ */
 public class TransactionSearchDTO {
     private Long id;
     private String description;
@@ -11,10 +18,9 @@ public class TransactionSearchDTO {
     private String category;
     private BigDecimal amount;
     private LocalDate date;
-    private Long installmentPlanId; // ID do plano de parcelamento (se houver)
-    private boolean isInstallment; // Indica se faz parte de um parcelamento
+    private Long installmentPlanId;
+    private boolean isInstallment;
 
-    // construtor rápido
     public TransactionSearchDTO(Long id, String description, TransactionType type,
             String category, BigDecimal amount, LocalDate date) {
         this.id = id;
@@ -27,7 +33,6 @@ public class TransactionSearchDTO {
         this.isInstallment = false;
     }
 
-    // construtor completo com informações de parcelamento
     public TransactionSearchDTO(Long id, String description, TransactionType type,
             String category, BigDecimal amount, LocalDate date, Long installmentPlanId) {
         this.id = id;
@@ -40,7 +45,6 @@ public class TransactionSearchDTO {
         this.isInstallment = (installmentPlanId != null);
     }
 
-    // getters & setters
     public Long getId() {
         return id;
     }

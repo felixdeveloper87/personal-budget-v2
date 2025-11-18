@@ -1,76 +1,81 @@
 package com.example.budget.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for creating a new installment plan.
+ * 
+ * Used to create an installment plan that automatically generates
+ * multiple transaction entries spaced monthly. The plan will create
+ * transactions for each installment starting from the specified date.
+ */
 public class CreateInstallmentPlanRequest {
-    @JsonProperty("totalInstallments")
-    private int totalInstallments;
-    
-    @JsonProperty("installmentValue")
-    private BigDecimal installmentValue;
-    
-    @JsonProperty("category")
-    private String category;
-    
-    @JsonProperty("description")
-    private String description;
-    
-    @JsonProperty("startDate")
-    private LocalDate startDate; // Data da primeira parcela
-    
-    @JsonProperty("startDateTime")
-    private LocalDateTime startDateTime; // Data e hora da primeira parcela (opcional)
 
-    // Getters e Setters
-    public int getTotalInstallments() {
-        return totalInstallments;
+    @NotNull(message = "Total installments is required")
+    @Positive(message = "Total installments must be greater than zero")
+    private Integer totalInstallments;
+
+    @NotNull(message = "Installment value is required")
+    @Positive(message = "Installment value must be greater than zero")
+    private BigDecimal installmentValue;
+
+    @NotBlank(message = "Category is required")
+    private String category;
+
+    @NotBlank(message = "Description is required")
+    private String description;
+
+    private LocalDate startDate;
+
+    private LocalDateTime startDateTime;
+
+    public CreateInstallmentPlanRequest() {
     }
 
-    public void setTotalInstallments(int totalInstallments) {
+    public CreateInstallmentPlanRequest(
+            Integer totalInstallments,
+            BigDecimal installmentValue,
+            String category,
+            String description,
+            LocalDate startDate,
+            LocalDateTime startDateTime
+    ) {
         this.totalInstallments = totalInstallments;
+        this.installmentValue = installmentValue;
+        this.category = category;
+        this.description = description;
+        this.startDate = startDate;
+        this.startDateTime = startDateTime;
+    }
+
+    public Integer getTotalInstallments() {
+        return totalInstallments;
     }
 
     public BigDecimal getInstallmentValue() {
         return installmentValue;
     }
 
-    public void setInstallmentValue(BigDecimal installmentValue) {
-        this.installmentValue = installmentValue;
-    }
-
     public String getCategory() {
         return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
     public LocalDateTime getStartDateTime() {
         return startDateTime;
-    }
-
-    public void setStartDateTime(LocalDateTime startDateTime) {
-        this.startDateTime = startDateTime;
     }
 }
 

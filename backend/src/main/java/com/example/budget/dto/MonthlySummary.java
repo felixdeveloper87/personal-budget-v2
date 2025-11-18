@@ -3,6 +3,12 @@ package com.example.budget.dto;
 import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Data Transfer Object for monthly transaction summary.
+ * 
+ * Contains aggregated financial data for a specific month, including
+ * total income, total expenses, balance, and breakdown by category.
+ */
 public class MonthlySummary {
     public int year;
     public int month;
@@ -11,6 +17,10 @@ public class MonthlySummary {
     public BigDecimal balance;
     public List<CategoryAggregate> byCategory;
 
+    /**
+     * Represents aggregated transaction data for a specific category.
+     * Contains total income and total expenses for that category in the month.
+     */
     public static class CategoryAggregate {
         public String category;
         public BigDecimal income;

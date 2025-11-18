@@ -7,14 +7,20 @@ import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 
 /**
- * Classe responsável por validações de negócio relacionadas a Transaction.
- * Centraliza todas as regras de validação para facilitar manutenção e testes.
+ * Validator for transaction business rules.
+ * 
+ * Centralizes all validation logic for transactions to facilitate maintenance and testing.
+ * Ensures data integrity and proper access control.
  */
 @Component
 public class TransactionValidator {
     
     /**
-     * Valida se a transação existe e lança exceção caso contrário.
+     * Validates that a transaction exists.
+     * 
+     * @param transaction Transaction to validate
+     * @param transactionId Transaction ID for error message
+     * @throws EntityNotFoundException if transaction is null
      */
     public void validateTransactionExists(Transaction transaction, Long transactionId) {
         if (transaction == null) {
@@ -23,21 +29,22 @@ public class TransactionValidator {
     }
     
     /**
-     * Valida se o usuário tem permissão para acessar/modificar a transação.
-     * Lança AccessDeniedException se o usuário não for o dono da transação.
+     * Validates that a user has permission to access or modify a transaction.
      * 
-     * @param transaction Transação a ser validada
-     * @param user Usuário que está tentando acessar a transação
-     * @throws IllegalArgumentException se transaction ou user forem null
-     * @throws IllegalStateException se a transação não tiver usuário associado (estado inválido)
-     * @throws AccessDeniedException se o usuário não for o dono da transação
+     * Performs defensive checks to ensure transaction and user are in valid states
+     * before checking ownership.
+     * 
+     * @param transaction Transaction to validate
+     * @param user User attempting to access the transaction
+     * @throws IllegalArgumentException if transaction or user is null
+     * @throws IllegalStateException if transaction has no associated user or user has no ID
+     * @throws AccessDeniedException if user is not the owner of the transaction
      */
     public void validateUserOwnership(Transaction transaction, User user) {
         if (transaction == null || user == null) {
             throw new IllegalArgumentException("Transaction and User cannot be null");
         }
         
-        // Validação defensiva: verifica se a transação tem usuário associado
         if (transaction.getUser() == null) {
             throw new IllegalStateException("Transaction does not have an associated user");
         }
@@ -52,8 +59,13 @@ public class TransactionValidator {
     }
     
     /**
-     * Valida se a transação existe e se o usuário tem permissão.
-     * Método combinado para facilitar uso comum.
+     * Validates both transaction existence and user ownership.
+     * 
+     * Convenience method that combines both validations for common use cases.
+     * 
+     * @param transaction Transaction to validate
+     * @param transactionId Transaction ID for error message
+     * @param user User attempting to access the transaction
      */
     public void validateTransactionAccess(Transaction transaction, Long transactionId, User user) {
         validateTransactionExists(transaction, transactionId);

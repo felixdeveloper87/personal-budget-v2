@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.List;
 
 /**
- * DTO genérico para representar resumo de transações em qualquer período.
- * Pode ser usado para resumos diários, semanais, mensais ou anuais.
+ * Generic Data Transfer Object for transaction summaries over any time period.
+ * 
+ * Can be used for daily, weekly, monthly, or annual summaries.
+ * Contains aggregated financial data including totals and category breakdowns.
  */
 public class PeriodSummary {
     
@@ -14,7 +16,6 @@ public class PeriodSummary {
     private BigDecimal balance;
     private List<CategoryAggregate> byCategory;
 
-    // Constructors
     public PeriodSummary() {
     }
     
@@ -26,7 +27,6 @@ public class PeriodSummary {
         this.byCategory = byCategory;
     }
 
-    // Getters and Setters
     public BigDecimal getTotalIncome() {
         return totalIncome;
     }
@@ -60,7 +60,9 @@ public class PeriodSummary {
     }
 
     /**
-     * Classe interna para representar agregação por categoria.
+     * Inner class representing aggregated transaction data for a specific category.
+     * 
+     * Contains total income and total expenses for a category within the period.
      */
     public static class CategoryAggregate {
         
@@ -68,7 +70,6 @@ public class PeriodSummary {
         private BigDecimal income;
         private BigDecimal expense;
 
-        // Constructors
         public CategoryAggregate() {
         }
         
@@ -78,7 +79,6 @@ public class PeriodSummary {
             this.expense = expense;
         }
 
-        // Getters and Setters
         public String getCategory() {
             return category;
         }

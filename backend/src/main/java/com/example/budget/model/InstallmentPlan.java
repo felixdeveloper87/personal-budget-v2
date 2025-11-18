@@ -5,6 +5,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * InstallmentPlan entity representing a plan to split a payment into multiple installments.
+ * 
+ * When created, automatically generates corresponding Transaction entities for each
+ * installment. The plan maintains a one-to-many relationship with these transactions.
+ */
 @Entity
 @Table(name = "installment_plan")
 public class InstallmentPlan {
@@ -13,28 +19,22 @@ public class InstallmentPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Quantidade total de parcelas (ex: 3)
     @Column(nullable = false)
     private int totalInstallments;
 
-    // Valor total do plano (ex: soma das parcelas)
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount;
 
-    // Valor de cada parcela (para controle e exibição)
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal installmentValue;
 
-    // Usuário dono do plano
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Transações geradas automaticamente (1 plano → N transações)
     @OneToMany(mappedBy = "installmentPlan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
 
-    // Constructors
     public InstallmentPlan() {
     }
 
@@ -44,8 +44,6 @@ public class InstallmentPlan {
         this.installmentValue = installmentValue;
         this.user = user;
     }
-
-    // ---- Getters e Setters ----
     public Long getId() {
         return id;
     }

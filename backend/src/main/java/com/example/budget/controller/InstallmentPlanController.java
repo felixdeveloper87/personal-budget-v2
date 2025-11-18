@@ -4,13 +4,20 @@ import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
 import com.example.budget.model.User;
 import com.example.budget.service.InstallmentPlanService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * REST controller for installment plan management endpoints.
+ * 
+ * Handles CRUD operations for installment plans. When a plan is created,
+ * it automatically generates the corresponding transaction entries for each installment.
+ * All endpoints require authentication and are scoped to the authenticated user.
+ */
 @RestController
 @RequestMapping("/api/installment-plans")
 @CrossOrigin
@@ -23,83 +30,76 @@ public class InstallmentPlanController {
     }
 
     /**
-     * Cria um novo plano de parcelamento
-     * POST /api/installment-plans
+     * Creates a new installment plan and generates corresponding transactions.
+     * 
+     * Creates an installment plan with the specified number of installments and value.
+     * Automatically generates transaction entries for each installment, spaced monthly
+     * from the start date.
+     * 
+     * @param request CreateInstallmentPlanRequest containing plan details (installments, value, category, description, dates)
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return InstallmentPlanDTO containing the created plan with all generated transactions (HTTP 201 CREATED)
      */
     @PostMapping
-    public ResponseEntity<InstallmentPlanDTO> createInstallmentPlan(
-            @RequestBody CreateInstallmentPlanRequest request,
+    @ResponseStatus(HttpStatus.CREATED)
+    public InstallmentPlanDTO createInstallmentPlan(
+            @Valid @RequestBody CreateInstallmentPlanRequest request,
             Authentication authentication) {
-        try {
-            User user = (User) authentication.getPrincipal();
-            InstallmentPlanDTO plan = installmentPlanService.createInstallmentPlan(request, user);
-            return ResponseEntity.status(HttpStatus.CREATED).body(plan);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            System.err.println("Erro ao criar plano de parcelamento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.createInstallmentPlan(request, user);
     }
 
     /**
-     * Lista todos os planos de parcelamento do usuário
-     * GET /api/installment-plans
+     * Retrieves all installment plans for the authenticated user.
+     * 
+     * Returns plans ordered by ID in descending order (newest first).
+     * 
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return List of InstallmentPlanDTO for the authenticated user
      */
     @GetMapping
-    public ResponseEntity<List<InstallmentPlanDTO>> getAllInstallmentPlans(Authentication authentication) {
-        try {
-            User user = (User) authentication.getPrincipal();
-            List<InstallmentPlanDTO> plans = installmentPlanService.findAllByUser(user);
-            return ResponseEntity.ok(plans);
-        } catch (Exception e) {
-            System.err.println("Erro ao listar planos de parcelamento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+    public List<InstallmentPlanDTO> getAllInstallmentPlans(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.findAllByUser(user);
     }
 
     /**
-     * Busca um plano de parcelamento específico
-     * GET /api/installment-plans/{id}
+     * Retrieves a specific installment plan by ID.
+     * 
+     * Only the owner of the plan can access it. Throws AccessDeniedException
+     * if the user attempts to access a plan they don't own.
+     * 
+     * @param id Installment plan ID
+     * @param authentication Spring Security authentication object containing the authenticated user
+     * @return InstallmentPlanDTO containing the plan details and all associated transactions
      */
     @GetMapping("/{id}")
-    public ResponseEntity<InstallmentPlanDTO> getInstallmentPlan(
+    public InstallmentPlanDTO getInstallmentPlan(
             @PathVariable Long id,
             Authentication authentication) {
-        try {
-            User user = (User) authentication.getPrincipal();
-            InstallmentPlanDTO plan = installmentPlanService.findById(id, user);
-            return ResponseEntity.ok(plan);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            System.err.println("Erro ao buscar plano de parcelamento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.findById(id, user);
     }
 
     /**
-     * Deleta um plano de parcelamento e todas as suas transações
-     * DELETE /api/installment-plans/{id}
+     * Deletes an installment plan and all associated transactions.
+     * 
+     * Only the owner of the plan can delete it. Throws AccessDeniedException
+     * if the user attempts to delete a plan they don't own.
+     * 
+     * Due to cascade configuration, deleting a plan automatically deletes
+     * all associated transaction entries.
+     * 
+     * @param id Installment plan ID to delete
+     * @param authentication Spring Security authentication object containing the authenticated user
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteInstallmentPlan(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteInstallmentPlan(
             @PathVariable Long id,
             Authentication authentication) {
-        try {
-            User user = (User) authentication.getPrincipal();
-            installmentPlanService.delete(id, user);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            System.err.println("Erro ao deletar plano de parcelamento: " + e.getMessage());
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        User user = (User) authentication.getPrincipal();
+        installmentPlanService.delete(id, user);
     }
 }
 

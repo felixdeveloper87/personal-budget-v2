@@ -5,6 +5,13 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Transaction entity representing a financial transaction.
+ * 
+ * Can be either an income or expense. May be part of an installment plan,
+ * in which case it represents a single installment. Automatically sets
+ * the date and time to the current moment if not provided during creation.
+ */
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -26,23 +33,19 @@ public class Transaction {
     @Column(precision = 14, scale = 2)
     private BigDecimal amount;
 
-    // 🔹 Relacionamento com o usuário
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
 
-    // 🔹 NOVO: relacionamento opcional com plano de parcelamento
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "installment_plan_id")
     @JsonIgnore
     private InstallmentPlan installmentPlan;
 
-    // 🔹 Número da parcela (ex: 1 para primeira parcela, 2 para segunda, etc.)
     @Column(name = "installment_number")
     private Integer installmentNumber;
 
-    // ⚡ Define automaticamente o horário ao criar a transação
     @PrePersist
     protected void onCreate() {
         if (this.dateTime == null) {
@@ -50,7 +53,6 @@ public class Transaction {
         }
     }
 
-    // Constructors
     public Transaction() {
     }
 
@@ -61,8 +63,6 @@ public class Transaction {
         this.amount = amount;
         this.user = user;
     }
-
-    // ---------- Getters e Setters ----------
 
     public Long getId() {
         return id;

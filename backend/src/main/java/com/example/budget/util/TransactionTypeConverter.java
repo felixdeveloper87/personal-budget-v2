@@ -5,18 +5,22 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * Utility class para conversão de strings para TransactionType enum.
- * Centraliza a lógica de parsing e validação.
+ * Utility class for converting strings to TransactionType enum.
+ * 
+ * Centralizes parsing and validation logic for transaction type conversion.
+ * Handles case-insensitive matching and returns null for invalid inputs.
  */
 @Component
 public class TransactionTypeConverter {
     
     /**
-     * Converte uma string para TransactionType enum.
-     * Retorna null se a string for null, vazia ou não corresponder a nenhum tipo válido.
+     * Converts a string to TransactionType enum.
      * 
-     * @param typeString String representando o tipo ("income" ou "expense", case-insensitive)
-     * @return TransactionType correspondente ou null se inválido
+     * Performs case-insensitive matching. Returns null if the string is null,
+     * empty, or does not match any valid transaction type.
+     * 
+     * @param typeString String representing the type ("income" or "expense", case-insensitive)
+     * @return TransactionType corresponding to the string, or null if invalid
      */
     public TransactionType fromString(String typeString) {
         if (!StringUtils.hasText(typeString)) {

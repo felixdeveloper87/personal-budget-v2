@@ -8,6 +8,12 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for updating an existing transaction.
+ * 
+ * Used to update transaction details. All fields are required and validated.
+ * The transaction ID is provided as a path variable, not in this DTO.
+ */
 public class UpdateTransactionRequest {
 
     @NotNull(message = "Date and time is required")
@@ -26,13 +32,7 @@ public class UpdateTransactionRequest {
     @Positive(message = "Amount must be positive")
     private BigDecimal amount;
 
-
-    // ----------------------------------------------------------
-    // CONSTRUCTORS
-    // ----------------------------------------------------------
-
     public UpdateTransactionRequest() {
-        // Jackson needs the default constructor
     }
 
     public UpdateTransactionRequest(
@@ -48,11 +48,6 @@ public class UpdateTransactionRequest {
         this.description = description;
         this.amount = amount;
     }
-
-
-    // ----------------------------------------------------------
-    // GETTERS (sem setters -> mais seguro e mais profissional)
-    // ----------------------------------------------------------
 
     public LocalDateTime getDateTime() {
         return dateTime;

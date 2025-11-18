@@ -8,6 +8,12 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Data Transfer Object for creating a new transaction.
+ * 
+ * Used to create a new income or expense transaction.
+ * All fields are required and validated.
+ */
 public class CreateTransactionRequest {
 
     @NotNull(message = "Date and time is required")
@@ -26,13 +32,7 @@ public class CreateTransactionRequest {
     @Positive(message = "Amount must be positive")
     private BigDecimal amount;
 
-
-    // ----------------------------------------------------------
-    // CONSTRUCTORS
-    // ----------------------------------------------------------
-
     public CreateTransactionRequest() {
-        // Jackson needs the default constructor
     }
 
     public CreateTransactionRequest(
@@ -48,11 +48,6 @@ public class CreateTransactionRequest {
         this.description = description;
         this.amount = amount;
     }
-
-
-    // ----------------------------------------------------------
-    // GETTERS (sem setters -> mais seguro e mais profissional)
-    // ----------------------------------------------------------
 
     public LocalDateTime getDateTime() {
         return dateTime;
