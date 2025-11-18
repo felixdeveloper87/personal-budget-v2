@@ -17,7 +17,7 @@ import { memo, useMemo, useState, useEffect, useCallback } from 'react'
 import { Transaction } from '../../types'
 import { searchTransactions } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
-import { X, AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
@@ -203,35 +203,6 @@ const SearchResultsModal = memo(function SearchResultsModal({
             sx={getShimmerStyles()}
           />
           
-          {/* Close Button */}
-          <Button
-            position="absolute"
-            top={{ base: 4, sm: 5, md: 6 }}
-            right={{ base: 4, sm: 5, md: 6 }}
-            size="lg"
-            variant="ghost"
-            onClick={onClose}
-            borderRadius="full"
-            p={3}
-            bg={useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(15, 23, 42, 0.8)')}
-            backdropFilter="blur(10px)"
-            border="1px solid"
-            borderColor={useColorModeValue('gray.300', 'gray.600')}
-            _hover={{
-              bg: useColorModeValue('red.50', 'red.900'),
-              borderColor: 'red.300',
-              transform: 'scale(1.1)',
-              boxShadow: 'lg',
-            }}
-            _active={{
-              transform: 'scale(0.95)',
-            }}
-            transition="all 0.2s ease"
-            zIndex={10}
-            boxShadow="md"
-          >
-            <Icon as={X} boxSize={5} color={useColorModeValue('gray.700', 'gray.200')} />
-          </Button>
 
           {/* Content */}
           <Box 
@@ -288,6 +259,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
                 {/* Summary Header */}
                 <SearchSummaryHeader
                   searchFilters={searchFilters}
+                  onClose={onClose}
                 />
 
                 {/* Results List */}

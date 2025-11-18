@@ -7,18 +7,21 @@ import {
   Badge, 
   useColorModeValue,
   Icon,
-  Heading
+  Heading,
+  Button
 } from '@chakra-ui/react'
-import { Search, Calendar } from 'lucide-react'
+import { Search, Calendar, X } from 'lucide-react'
 import { memo } from 'react'
 import { formatTransactionDate } from '../../utils/dateTime'
-import { getGradients } from '../ui'
+import { getGradients, getModalHeaderStyles } from '../ui'
 import { SearchSummaryHeaderProps } from '../../types'
 
 const SearchSummaryHeader = memo(function SearchSummaryHeader({
-  searchFilters
-}: SearchSummaryHeaderProps) {
+  searchFilters,
+  onClose
+}: SearchSummaryHeaderProps & { onClose?: () => void }) {
   const gradients = getGradients()
+  const headerStyles = getModalHeaderStyles(useColorModeValue)
   const hasActiveFilters = searchFilters.text || searchFilters.type || searchFilters.category || searchFilters.startDate || searchFilters.endDate
 
   return (
@@ -33,13 +36,18 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
         paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
       }}
     >
-      <Flex
-        direction={{ base: 'column', sm: 'row' }}
+      {/* Header with title and close button */}
+      <HStack
+        spacing={{ base: 2, sm: 3 }}
         align="center"
         justify="space-between"
-        gap={4}
+        flexWrap="nowrap"
+        pr={{ base: 2, sm: 4 }}
+        pt={{ base: 2, sm: 0 }}
+        mb={hasActiveFilters ? 4 : 0}
       >
-        <HStack spacing={4} align="center">
+        {/* Logo + Text */}
+        <HStack spacing={4} align="center" flex="1" minW={0}>
           <Box
             p={3}
             borderRadius="2xl"
@@ -48,6 +56,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
               'linear-gradient(135deg, #60a5fa, #3b82f6)'
             )}
             boxShadow="lg"
+            flexShrink={0}
             sx={{
               animation: 'glow 3s ease-in-out infinite',
               '@keyframes glow': {
@@ -62,7 +71,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
           >
             <Icon as={Search} boxSize={6} color="white" />
           </Box>
-          <VStack align="start" spacing={1}>
+          <VStack align="start" spacing={1} flex="1" minW={0}>
             <Heading
               size={{ base: 'md', sm: 'lg' }}
               bg={useColorModeValue(
@@ -83,49 +92,67 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
             </Text>
           </VStack>
         </HStack>
-
-        {/* Active Filters */}
-        {hasActiveFilters && (
-          <HStack spacing={2} flexWrap="wrap" justify="flex-end">
-            {searchFilters.text && (
-              <Badge colorScheme="blue" variant="subtle" px={3} py={1} borderRadius="full">
-                Text: "{searchFilters.text}"
-              </Badge>
-            )}
-            {searchFilters.type && (
-              <Badge 
-                colorScheme={searchFilters.type === 'income' ? 'green' : 'red'} 
-                variant="subtle" 
-                px={3} 
-                py={1} 
-                borderRadius="full"
-              >
-                {searchFilters.type === 'income' ? 'Income' : 'Expense'}
-              </Badge>
-            )}
-            {searchFilters.category && (
-              <Badge colorScheme="purple" variant="subtle" px={3} py={1} borderRadius="full">
-                {searchFilters.category}
-              </Badge>
-            )}
-            {(searchFilters.startDate || searchFilters.endDate) && (
-              <Badge colorScheme="orange" variant="subtle" px={3} py={1} borderRadius="full">
-                <HStack spacing={1}>
-                  <Icon as={Calendar} boxSize={3} />
-                  <Text>
-                    {searchFilters.startDate && searchFilters.endDate 
-                      ? `${formatTransactionDate(searchFilters.startDate)} - ${formatTransactionDate(searchFilters.endDate)}`
-                      : searchFilters.startDate 
-                        ? `From ${formatTransactionDate(searchFilters.startDate)}`
-                        : `Until ${formatTransactionDate(searchFilters.endDate)}`
-                    }
-                  </Text>
-                </HStack>
-              </Badge>
-            )}
-          </HStack>
+        {/* Close Button */}
+        {onClose && (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onClose}
+            bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
+            border="1px solid"
+            borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
+            borderRadius={headerStyles.closeButton.borderRadius}
+            p={headerStyles.closeButton.p}
+            _hover={headerStyles.closeButton._hover}
+            transition={headerStyles.closeButton.transition}
+            flexShrink={0}
+          >
+            <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
+          </Button>
         )}
-      </Flex>
+      </HStack>
+
+      {/* Active Filters */}
+      {hasActiveFilters && (
+        <HStack spacing={2} flexWrap="wrap" justify="flex-start" mt={2}>
+          {searchFilters.text && (
+            <Badge colorScheme="blue" variant="subtle" px={3} py={1} borderRadius="full">
+              Text: "{searchFilters.text}"
+            </Badge>
+          )}
+          {searchFilters.type && (
+            <Badge 
+              colorScheme={searchFilters.type === 'income' ? 'green' : 'red'} 
+              variant="subtle" 
+              px={3} 
+              py={1} 
+              borderRadius="full"
+            >
+              {searchFilters.type === 'income' ? 'Income' : 'Expense'}
+            </Badge>
+          )}
+          {searchFilters.category && (
+            <Badge colorScheme="purple" variant="subtle" px={3} py={1} borderRadius="full">
+              {searchFilters.category}
+            </Badge>
+          )}
+          {(searchFilters.startDate || searchFilters.endDate) && (
+            <Badge colorScheme="orange" variant="subtle" px={3} py={1} borderRadius="full">
+              <HStack spacing={1}>
+                <Icon as={Calendar} boxSize={3} />
+                <Text>
+                  {searchFilters.startDate && searchFilters.endDate 
+                    ? `${formatTransactionDate(searchFilters.startDate)} - ${formatTransactionDate(searchFilters.endDate)}`
+                    : searchFilters.startDate 
+                      ? `From ${formatTransactionDate(searchFilters.startDate)}`
+                      : `Until ${formatTransactionDate(searchFilters.endDate)}`
+                  }
+                </Text>
+              </HStack>
+            </Badge>
+          )}
+        </HStack>
+      )}
     </Box>
   )
 })

@@ -99,11 +99,11 @@ export default function SummaryCardModal({
       closeOnEsc={true}
       blockScrollOnMount={true}
     >
-      <ModalOverlay 
-        bg="blackAlpha.600" 
+      <ModalOverlay
+        bg="blackAlpha.600"
         backdropFilter="blur(10px)"
       />
-      <ModalContent 
+      <ModalContent
         bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
         overflow="hidden"
@@ -115,7 +115,7 @@ export default function SummaryCardModal({
           ...safeAreaStyles.container,
           ...safariStyles.modal
         }}
-      >        
+      >
         {/* Main card with glassmorphism */}
         <Card
           position="relative"
@@ -124,32 +124,26 @@ export default function SummaryCardModal({
           w="full"
           h="full"
         >
-          
+
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full" bg={cardBg}>
               {/* Header */}
-              <Box 
+              <Box
                 {...headerStyles.container}
                 sx={{
                   ...headerStyles.container.sx,
                   paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
                 }}
               >
-                <Button 
-                  onClick={onClose} 
-                  {...headerStyles.closeButton}
-                >
-                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
-                </Button>
 
-                <Flex
-                  direction="row"
+
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
                   align="center"
-                  justify="center"
-                  flexWrap="wrap"
-                  pr={{ base: 14, sm: 20 }}
+                  justify="space-between"
+                  flexWrap="nowrap"
+                  pr={{ base: 2, sm: 4 }}
                   pt={{ base: 2, sm: 0 }}
-                  gap={{ base: 2, sm: 3 }}
                 >
                   {/* Logo + Text */}
                   <HStack
@@ -197,36 +191,50 @@ export default function SummaryCardModal({
                         {headerInfo.subtitle}
                       </Text>
                     </VStack>
+                    {/* Period Badge */}
+                    <MotionBadge
+                      colorScheme={
+                        selectedCard === 'income'
+                          ? 'green'
+                          : selectedCard === 'expenses'
+                            ? 'red'
+                            : selectedCard === 'balance'
+                              ? 'purple'
+                              : 'blue'
+                      }
+                      px={3}
+                      py={0.5}
+                      borderRadius="full"
+                      fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
+                      initial={{ opacity: 0, y: -5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.1 }}
+                      flexShrink={0}
+                    >
+                      {selectedPeriod}
+                    </MotionBadge>
                   </HStack>
-
-                  {/* Period Badge */}
-                  <MotionBadge
-                    colorScheme={
-                      selectedCard === 'income'
-                        ? 'green'
-                        : selectedCard === 'expenses'
-                          ? 'red'
-                          : selectedCard === 'balance'
-                            ? 'purple'
-                            : 'blue'
-                    }
-                    px={3}
-                    py={0.5}
-                    borderRadius="full"
-                    fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
-                    initial={{ opacity: 0, y: -5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 }}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={onClose}
+                    bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
+                    border="1px solid"
+                    borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
+                    borderRadius={headerStyles.closeButton.borderRadius}
+                    p={headerStyles.closeButton.p}
+                    _hover={headerStyles.closeButton._hover}
+                    transition={headerStyles.closeButton.transition}
                     flexShrink={0}
                   >
-                    {selectedPeriod}
-                  </MotionBadge>
-                </Flex>
+                    <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
+                  </Button>
+                </HStack>
               </Box>
 
               {/* Modal content - Scrollable */}
-              <Box 
-                flex="1" 
+              <Box
+                flex="1"
                 p={responsiveStyles.spacing.container}
                 overflowY="auto"
                 {...responsiveStyles.content}
@@ -236,41 +244,41 @@ export default function SummaryCardModal({
                   ...getScrollbarStyles(useColorModeValue)
                 }}
               >
-          {!transactions.length ? (
-            <ChartLoadingState message="Loading chart data..." />
-          ) : (
-            <>
-              <AnimatePresence mode="wait">
-                <Box key="chart">
-                  {selectedCard === 'transactions' && (
-                    <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                  )}
-                  {selectedCard === 'income' && (
-                    <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                  )}
-                  {selectedCard === 'expenses' && (
-                    <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
-                  )}
-                  {selectedCard === 'balance' && (
-                    <BalanceChart
-                      transactions={transactions}
-                      selectedPeriod={selectedPeriod}
-                      currentBalance={currentBalance}
-                    />
-                  )}
-                </Box>
-              </AnimatePresence>
-              
-              {/* Insights Card - Outside AnimatePresence to avoid key conflicts */}
-              <Box mt={4}>
-                <InsightsCard
-                  transactions={transactions}
-                  selectedPeriod={selectedPeriod}
-                  cardType={selectedCard || 'transactions'}
-                />
-              </Box>
-            </>
-          )}
+                {!transactions.length ? (
+                  <ChartLoadingState message="Loading chart data..." />
+                ) : (
+                  <>
+                    <AnimatePresence mode="wait">
+                      <Box key="chart">
+                        {selectedCard === 'transactions' && (
+                          <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                        )}
+                        {selectedCard === 'income' && (
+                          <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                        )}
+                        {selectedCard === 'expenses' && (
+                          <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                        )}
+                        {selectedCard === 'balance' && (
+                          <BalanceChart
+                            transactions={transactions}
+                            selectedPeriod={selectedPeriod}
+                            currentBalance={currentBalance}
+                          />
+                        )}
+                      </Box>
+                    </AnimatePresence>
+
+                    {/* Insights Card - Outside AnimatePresence to avoid key conflicts */}
+                    <Box mt={4}>
+                      <InsightsCard
+                        transactions={transactions}
+                        selectedPeriod={selectedPeriod}
+                        cardType={selectedCard || 'transactions'}
+                      />
+                    </Box>
+                  </>
+                )}
               </Box>
             </VStack>
           </CardBody>

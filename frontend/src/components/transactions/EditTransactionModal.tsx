@@ -41,7 +41,7 @@ export default function EditTransactionModal({
   const responsiveStyles = getResponsiveStyles()
   const { user } = useAuth()
   const toast = useToast()
-  
+
   const type = transaction?.type || 'EXPENSE'
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
 
@@ -83,7 +83,7 @@ export default function EditTransactionModal({
       }
 
       await updateTransaction(transaction.id, updatedTx)
-      
+
       toast({
         title: 'Transaction updated',
         status: 'success',
@@ -119,11 +119,11 @@ export default function EditTransactionModal({
       closeOnEsc={true}
       blockScrollOnMount={true}
     >
-      <ModalOverlay 
-        bg="blackAlpha.600" 
+      <ModalOverlay
+        bg="blackAlpha.600"
         backdropFilter="blur(10px)"
       />
-      <ModalContent 
+      <ModalContent
         borderRadius={{ base: 'none', md: '3xl' }}
         m={{ base: 0, md: 4 }}
         display="flex"
@@ -143,7 +143,7 @@ export default function EditTransactionModal({
             background: useColorModeValue('#f1f5f9', '#1e293b'),
           }
         }}
-      >        
+      >
         {/* Decorative background */}
         <Box
           position="absolute"
@@ -159,30 +159,23 @@ export default function EditTransactionModal({
         />
 
         {/* Header */}
-        <Box 
-          {...headerStyles.container} 
-          position="relative" 
+        <Box
+          {...headerStyles.container}
+          position="relative"
           zIndex={1}
           sx={{
             ...headerStyles.container.sx,
             paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
           }}
         >
-          <Button 
-            onClick={onClose} 
-            {...headerStyles.closeButton}
-          >
-            <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
-          </Button>
 
-          <Flex
-            direction="row"
+          <HStack
+            spacing={{ base: 2, sm: 3 }}
             align="center"
-            justify="center"
-            flexWrap="wrap"
-            pr={{ base: 14, sm: 20 }}
+            justify="space-between"
+            flexWrap="nowrap"
+            pr={{ base: 2, sm: 4 }}
             pt={{ base: 2, sm: 0 }}
-            gap={{ base: 2, sm: 3 }}
           >
             <HStack
               spacing={{ base: 2, sm: 3 }}
@@ -223,9 +216,24 @@ export default function EditTransactionModal({
                 </Box>
               </VStack>
             </HStack>
-          </Flex>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={onClose}
+              bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
+              border="1px solid"
+              borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
+              borderRadius={headerStyles.closeButton.borderRadius}
+              p={headerStyles.closeButton.p}
+              _hover={headerStyles.closeButton._hover}
+              transition={headerStyles.closeButton.transition}
+              flexShrink={0}
+            >
+              <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
+            </Button>
+          </HStack>
         </Box>
-        
+
         <Box
           flex="1"
           overflowY="auto"
@@ -243,12 +251,12 @@ export default function EditTransactionModal({
               type={type}
               loading={loading}
             />
-            
+
             <Button
               size="lg"
               colorScheme={type === 'INCOME' ? 'green' : 'red'}
-              bg={type === 'INCOME' 
-                ? 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)' 
+              bg={type === 'INCOME'
+                ? 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)'
                 : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
               }
               color="white"

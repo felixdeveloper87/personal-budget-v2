@@ -44,7 +44,7 @@ export default function AddTransactionModal({
   const responsiveStyles = getResponsiveStyles()
   const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
   const cardBg = useColorModeValue('gray.50', 'black')
-  
+
   const handleTransactionCreated = () => {
     onTransactionCreated()
     onClose()
@@ -61,33 +61,24 @@ export default function AddTransactionModal({
       closeOnEsc={true}
       blockScrollOnMount={true}
     >
-      <ModalOverlay 
-        bg="blackAlpha.600" 
+      <ModalOverlay
+        bg="blackAlpha.600"
         backdropFilter="blur(10px)"
       />
-      <ModalContent 
+      <ModalContent
         bg={cardBg}
         borderRadius={{ base: 'none', md: '3xl' }}
+        overflow="hidden"
         m={{ base: 0, md: 4 }}
         display="flex"
         flexDirection="column"
         {...responsiveStyles.modal}
         sx={{
           ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          '&::-webkit-scrollbar': {
-            width: '10px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: useColorModeValue('#cbd5e1', '#4b5563'),
-            borderRadius: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: useColorModeValue('#f1f5f9', '#1e293b'),
-          }
+          ...safariStyles.modal
         }}
-      >        
-        
+      >
+
         {/* Main card with glassmorphism */}
         <Card
           position="relative"
@@ -99,13 +90,13 @@ export default function AddTransactionModal({
           sx={{
             animation: animations.slideIn,
             '@keyframes slideIn': {
-              from: { 
-                opacity: 0, 
-                transform: 'translateY(20px) scale(0.95)' 
+              from: {
+                opacity: 0,
+                transform: 'translateY(20px) scale(0.95)'
               },
-              to: { 
-                opacity: 1, 
-                transform: 'translateY(0) scale(1)' 
+              to: {
+                opacity: 1,
+                transform: 'translateY(0) scale(1)'
               }
             }
           }}
@@ -113,28 +104,20 @@ export default function AddTransactionModal({
           <CardBody p={0} display="flex" flexDirection="column" h="full">
             <VStack spacing={0} align="stretch" h="full">
               {/* Header */}
-              <Box 
+              <Box
                 {...headerStyles.container}
                 sx={{
                   ...headerStyles.container.sx,
                   paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
                 }}
               >
-                <Button 
-                  onClick={onClose} 
-                  {...headerStyles.closeButton}
-                >
-                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
-                </Button>
-
-                <Flex
-                  direction="row"
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
                   align="center"
-                  justify="center"
-                  flexWrap="wrap"
-                  pr={{ base: 14, sm: 20 }}
+                  justify="space-between"
+                  flexWrap="nowrap"
+                  pr={{ base: 2, sm: 4 }}
                   pt={{ base: 2, sm: 0 }}
-                  gap={{ base: 2, sm: 3 }}
                 >
                   {/* Logo + Text */}
                   <HStack
@@ -142,7 +125,6 @@ export default function AddTransactionModal({
                     align="center"
                     flex="1"
                     minW={0}
-                    mb={2}
                   >
                     <Box
                       p={{ base: 2, sm: 3 }}
@@ -177,21 +159,34 @@ export default function AddTransactionModal({
                         {type === 'INCOME' ? 'Track your incoming money' : 'Record your spending'}
                       </Text>
                     </VStack>
+                    <Box flexShrink={0}>
+                      {type === 'INCOME' ?
+                        <TrendingUp size={20} color={headerStyles.iconContainer.bg} /> :
+                        <TrendingDown size={20} color={useColorModeValue('#ef4444', '#fca5a5')} />
+                      }
+                    </Box>
                   </HStack>
-
-                  {/* Type Icon */}
-                  <Box flexShrink={0}>
-                    {type === 'INCOME' ? 
-                      <TrendingUp size={20} color={headerStyles.iconContainer.bg} /> : 
-                      <TrendingDown size={20} color={useColorModeValue('#ef4444', '#fca5a5')} />
-                    }
-                  </Box>
-                </Flex>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={onClose}
+                    bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
+                    border="1px solid"
+                    borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
+                    borderRadius={headerStyles.closeButton.borderRadius}
+                    p={headerStyles.closeButton.p}
+                    _hover={headerStyles.closeButton._hover}
+                    transition={headerStyles.closeButton.transition}
+                    flexShrink={0}
+                  >
+                    <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
+                  </Button>
+                </HStack>
               </Box>
 
               {/* Modal content - Scrollable */}
-              <Box 
-                flex="1" 
+              <Box
+                flex="1"
                 p={responsiveStyles.spacing.container}
                 overflowY="auto"
                 {...responsiveStyles.content}

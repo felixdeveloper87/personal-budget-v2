@@ -534,13 +534,10 @@ export const getResponsiveStyles = () => ({
         }
       },
       closeButton: {
-        position: 'absolute' as const,
-        top: { base: 4, sm: 5, md: 6 },
-        right: { base: 4, sm: 5, md: 6 },
-        size: 'lg' as const,
+        size: 'md' as const,
         variant: 'ghost' as const,
-        borderRadius: 'full',
-        p: 3,
+        borderRadius: 'xl',
+        p: 2,
         bg: { light: 'rgba(255, 255, 255, 0.8)', dark: 'rgba(15, 23, 42, 0.8)' },
         backdropFilter: 'blur(10px)',
         border: '1px solid',
@@ -555,17 +552,15 @@ export const getResponsiveStyles = () => ({
           transform: 'scale(0.95)',
         },
         transition: 'all 0.2s ease',
-        zIndex: 10,
         boxShadow: 'md',
         iconColor: { light: 'gray.700', dark: 'gray.200' },
-        iconSize: 5
+        iconSize: 4
       },
       content: {
         direction: { base: 'column' as const, sm: 'row' as const },
         align: 'center' as const,
         justify: 'space-between' as const,
         gap: 4,
-        pr: { base: 16, sm: 20, md: 20 } // Space for close button
       },
       iconContainer: {
         p: 3,

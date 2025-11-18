@@ -112,30 +112,21 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
             <VStack spacing={0} align="stretch" h="full">
 
               {/* Header */}
-              <Box 
+              <Box
                 {...headerStyles.container}
                 sx={{
                   ...headerStyles.container.sx,
                   paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
                 }}
               >
-                <Button
-                  onClick={onClose}
-                  {...headerStyles.closeButton}
-                >
-                  <Icon as={X} boxSize={headerStyles.closeButton.iconSize} />
-                </Button>
-
-                <Flex
-                  direction="row"
+                <HStack
+                  spacing={{ base: 2, sm: 3 }}
                   align="center"
                   justify="space-between"
-                  flexWrap="wrap"
-                  pr={{ base: 14, sm: 20 }}
+                  flexWrap="nowrap"
+                  pr={{ base: 2, sm: 4 }}
                   pt={{ base: 2, sm: 0 }}
-                  gap={{ base: 2, sm: 3 }}
                 >
-
                   {/* Logo + Text */}
                   <HStack
                     spacing={{ base: 2, sm: 3 }}
@@ -164,15 +155,15 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                       flex="1"
                       minW={0}
                     >
-                       <Text
-                         color={themeGradients.title}
-                         fontWeight="800"
-                         fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
-                         lineHeight="shorter"
-                         noOfLines={1}
-                       >
-                         Personal Budget
-                       </Text>
+                      <Text
+                        color={themeGradients.title}
+                        fontWeight="800"
+                        fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
+                        lineHeight="shorter"
+                        noOfLines={1}
+                      >
+                        Personal Budget
+                      </Text>
                       <Text
                         bg={themeGradients.subtitle}
                         bgClip="text"
@@ -183,26 +174,38 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                         {isLogin ? '✨ Welcome Back!' : '🚀 Join Us Today!'}
                       </Text>
                     </VStack>
-                  </HStack>
-
-                  {onBackToLanding && (
-                    <Button
-                      onClick={onBackToLanding}
-                      size={{ base: 'xs', sm: 'sm' }}
-                      borderRadius="full"
-                      px={{ base: 2, sm: 3 }}
-                      py={{ base: 1, sm: 2 }}
-                      ml={{ base: 'auto', sm: 0 }}
-                      flexShrink={0}
-                    >
-                      <HStack spacing={1}>
+                    {onBackToLanding && (
+                      <Button
+                        onClick={onBackToLanding}
+                        size={{ base: 'xs', sm: 'sm' }}
+                        borderRadius="full"
+                        px={{ base: 2, sm: 3 }}
+                        py={{ base: 1, sm: 2 }}
+                        flexShrink={0}
+                      >
+                        <HStack spacing={1}>
                         <ArrowBackIcon boxSize={{ base: 3, sm: 4 }} />
                         <Icon as={Home} boxSize={{ base: 3, sm: 4 }} />
                       </HStack>
                     </Button>
                   )}
-
-                </Flex>
+                  </HStack>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={onClose}
+                    bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
+                    border="1px solid"
+                    borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
+                    borderRadius={headerStyles.closeButton.borderRadius}
+                    p={headerStyles.closeButton.p}
+                    _hover={headerStyles.closeButton._hover}
+                    transition={headerStyles.closeButton.transition}
+                    flexShrink={0}
+                  >
+                    <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
+                  </Button>
+                </HStack>
               </Box>
 
               {/* Modal content - Scrollable */}
@@ -216,17 +219,17 @@ export default function AuthModal({ isOpen, onClose, onBackToLanding }: {
                   ...safariStyles.scrollable
                 }}
               >
-                 <Box
-                   bg={cardBg}
-                   shadow="2xl"
-                   borderRadius={{ base: '2xl', sm: '3xl' }}
-                   border="1px"
-                   borderColor={borderColor}
-                   maxW={{ base: '100%', sm: 'lg' }}
-                   mx="auto"
-                   p={{ base: 4, sm: 8 }}
-                   pos="relative"
-                 >
+                <Box
+                  bg={cardBg}
+                  shadow="2xl"
+                  borderRadius={{ base: '2xl', sm: '3xl' }}
+                  border="1px"
+                  borderColor={borderColor}
+                  maxW={{ base: '100%', sm: 'lg' }}
+                  mx="auto"
+                  p={{ base: 4, sm: 8 }}
+                  pos="relative"
+                >
                   {isLogin
                     ? <LoginForm onSwitchToRegister={() => setIsLogin(false)} />
                     : <RegisterForm onSwitchToLogin={() => setIsLogin(true)} />
