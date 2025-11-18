@@ -101,7 +101,7 @@ export default function InstallmentPlansModal({
                 p={{ base: 0.5, sm: 2, md: 3 }}
                 sx={{
                   ...headerStyles.container.sx,
-                  paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+                  paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
                   paddingBottom: { base: '2' }
                 }}
               >

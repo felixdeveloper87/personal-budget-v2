@@ -30,7 +30,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
       bg={gradients.background}
       sx={{
         // Safe area support for iPhone 14 Pro
-        paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+        paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
       }}
     >
       <Flex

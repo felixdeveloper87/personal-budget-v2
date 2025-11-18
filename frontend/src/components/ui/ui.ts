@@ -218,7 +218,8 @@ export const getScrollbarStyles = (useColorModeValue: any) => ({
 export const safeAreaStyles = {
   container: {
     // Safe area insets para iPhone com notch e Android
-    paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+    // Chrome mobile barra de URL tem ~56px, então usamos max para garantir espaço suficiente
+    paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
     paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
     paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
     paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
@@ -529,7 +530,7 @@ export const getResponsiveStyles = () => ({
         },
         sx: {
           // Safe area support for iPhone 14 Pro
-          paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+          paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
         }
       },
       closeButton: {

@@ -138,7 +138,7 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                 {...headerStyles.container}
                 sx={{
                   ...headerStyles.container.sx,
-                  paddingTop: 'max(16px, env(safe-area-inset-top, 0px))',
+                  paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
                 }}
               >
                 <Flex
