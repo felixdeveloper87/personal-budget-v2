@@ -74,6 +74,7 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
     <>
       <Card
         bg={cardBg}
+        ml={{ base: 2, sm: 5 }}
         w="full"
         borderRadius="2xl"
         shadow="2xl"
@@ -105,33 +106,6 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
                   onViewAllClick={handleViewAllClick}
                   isMobile={isMobile || false}
                 />
-
-                {/* Badges */}
-                <HStack spacing={responsiveStyles.charts.badges.container.spacing} p={2}>
-                  <Badge
-                    colorScheme="green"
-                    variant="solid"
-                    borderRadius="full"
-                    px={responsiveStyles.charts.badges.category.padding}
-                    py={responsiveStyles.charts.badges.category.padding}
-                    fontSize={responsiveStyles.charts.badges.category.fontSize}
-                    fontWeight="600"
-                  >
-                    {sortedCategories.length} Categories
-                  </Badge>
-                  <Badge
-                    colorScheme="gray"
-                    variant="subtle"
-                    borderRadius="md"
-                    px={responsiveStyles.charts.badges.period.padding}
-                    py={responsiveStyles.charts.badges.period.padding}
-                    fontSize={responsiveStyles.charts.badges.period.fontSize}
-                    fontWeight="400"
-                    opacity={0.7}
-                  >
-                    {selectedPeriod}
-                  </Badge>
-                </HStack>
 
                 {/* Category Items */}
                 <VStack spacing={responsiveStyles.charts.progress.container.spacing} align="stretch">

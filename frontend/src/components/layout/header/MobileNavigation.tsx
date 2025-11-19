@@ -1,4 +1,4 @@
-import { 
+import {
   IconButton,
   Tooltip,
   useBreakpointValue,
@@ -7,7 +7,7 @@ import {
   useColorModeValue
 } from '@chakra-ui/react'
 import { Home, FileText, BarChart3 } from 'lucide-react'
-import { getHeaderSearchButtonStyles} from '../../ui'
+import { getHeaderSearchButtonStyles } from '../../ui'
 import { getSharedEffects, sharedHoverEffects, sharedTransitions, sharedSizes, getSharedColors } from '../../ui/sharedStyles'
 
 interface MobileNavigationProps {
@@ -25,7 +25,7 @@ export default function MobileNavigation({ user, currentPage = 'dashboard', onPa
 
   const sharedEffects = getSharedEffects()
   const sharedColors = getSharedColors()
-  
+
   const activeBg = useColorModeValue('blue.100', 'blue.900')
   const activeColor = useColorModeValue('blue.600', 'blue.300')
   const activeBorder = useColorModeValue('blue.400', 'blue.500')
@@ -51,7 +51,6 @@ export default function MobileNavigation({ user, currentPage = 'dashboard', onPa
               p={2}
               minW="36px"
               h="36px"
-              borderRadius={sharedSizes.borderRadius.md}
               {...getHeaderSearchButtonStyles()}
               boxShadow={sharedEffects.shadows.sm}
               bg={isActive ? activeBg : 'transparent'}

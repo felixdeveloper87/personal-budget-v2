@@ -1,7 +1,6 @@
-import { Box, Text, VStack, HStack, Button, Icon, Flex, useBreakpointValue } from '@chakra-ui/react'
+import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge } from '@chakra-ui/react'
 import { TrendingDown, Eye } from 'lucide-react'
-import { getTransactionModalHeaderStyles } from '../../ui'
-import { useColorModeValue } from '@chakra-ui/react'
+import { getResponsiveStyles } from '../../ui'
 import React from 'react'
 
 interface CategoryExpenseChartHeaderProps {
@@ -15,84 +14,93 @@ interface CategoryExpenseChartHeaderProps {
 
 export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderProps>(({
   title,
-  subtitle,
   totalExpenses,
   selectedPeriod,
   onViewAllClick,
   isMobile,
 }) => {
-  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, 'EXPENSE')
   const buttonHoverBg = useColorModeValue('red.50', 'red.900')
 
-  return (
-    <Box 
-      p={{ base: 0.5, sm: 2, md: 3 }}
-      sx={{
-        ...headerStyles.container.sx,
-        paddingTop: { base: '2px', sm: 'max(16px, env(safe-area-inset-top, 0px))' },
-        paddingBottom: { base: '2'}
-      }}
-    >
-      <Flex
-        direction="row"
-        align="center"
-        justify="space-between"
-        flexWrap="nowrap"
-        gap={{ base: 1, sm: 2 }}
-        w="full"
-        py={0}
-      >
-        <HStack spacing={{ base: 1.5, sm: 3 }} align="center" flex="1" minW={0} overflow="hidden">
-          <Box
-            p={{ base: 1, sm: 3 }}
-            borderRadius="xl"
-            bg={headerStyles.iconContainer.bg}
-            boxShadow="lg"
-            flexShrink={0}
-          >
-            <Icon as={TrendingDown} boxSize={{ base: 3.5, sm: 5, md: 6 }} color="white" />
-          </Box>
-          <VStack align="start" spacing={0} flex="1" minW={0} overflow="hidden">
-            <Text
-              color={headerStyles.title.color}
-              fontWeight="500"
-              fontSize={{ base: 'sm', sm: 'xl', md: '2xl' }}
-              lineHeight="1.2"
-              noOfLines={1}
-            >
-              {title}
-            </Text>
-            <Text
-              color={headerStyles.subtitle.color}
-              fontWeight="600"
-              fontSize={{ base: '2xs', sm: 'sm', md: 'md' }}
-              lineHeight="1.2"
-              noOfLines={1}
-            >
-              {selectedPeriod} • £{totalExpenses.toLocaleString()}
-            </Text>
-          </VStack>
-        </HStack>
+  const responsiveStyles = getResponsiveStyles()
 
-        <Button
-          size={{ base: 'xs', sm: 'md' }}
-          variant="ghost"
-          color={headerStyles.title.color}
-          onClick={onViewAllClick}
-          rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} color={headerStyles.title.color} />}
-          _hover={{
-            bg: buttonHoverBg,
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          }}
-          transition="all 0.2s ease"
-          flexShrink={0}
-          px={{ base: 2, sm: 4 }}
+  return (
+    <Flex
+      direction="row"
+      align="center"
+      justify="space-between"
+      w="full"
+    >
+      <HStack spacing={4}>
+
+        <VStack align="start" spacing={0.5}>
+          <Text
+            fontWeight="700"
+            fontSize={{ base: 'md', sm: 'lg' }}
+            lineHeight="1.2"
+            fontFamily="system-ui, -apple-system, sans-serif"
+            letterSpacing="-0.02em"
+            bgGradient={useColorModeValue(
+              'linear(to-r, gray.800, gray.600)',
+              'linear(to-r, white, gray.300)'
+            )}
+            bgClip="text"
+          >
+            {title}
+          </Text>
+          <Text
+            color={useColorModeValue('gray.500', 'gray.400')}
+            fontWeight="600"
+            fontSize={{ base: 'xs', sm: 'sm' }}
+            lineHeight="1.2"
+            fontFamily="system-ui, -apple-system, sans-serif"
+          >
+            {selectedPeriod} • £{totalExpenses.toLocaleString()}
+          </Text>
+        </VStack>
+        <Box
+          p={2.5}
+          bg={useColorModeValue('red.50', 'whiteAlpha.100')}
+          color={useColorModeValue('red.500', 'red.300')}
+          borderRadius="xl"
+          boxShadow="0 4px 12px rgba(239, 68, 68, 0.15)"
         >
-          {isMobile ? 'View All' : 'View All Details'}
-        </Button>
-      </Flex>
-    </Box>
+          <Icon as={TrendingDown} boxSize={3} strokeWidth={2.5} />
+        </Box>
+        <Badge
+          colorScheme="gray"
+          variant="subtle"
+          borderRadius="md"
+          px={responsiveStyles.charts.badges.period.padding}
+          py={responsiveStyles.charts.badges.period.padding}
+          fontSize={responsiveStyles.charts.badges.period.fontSize}
+          fontWeight="400"
+          opacity={0.7}
+        >
+          {selectedPeriod}
+        </Badge>
+      </HStack>
+
+      <Button
+        size={{ base: 'xs', sm: 'sm' }}
+        variant="ghost"
+        color={useColorModeValue('red.600', 'red.300')}
+        onClick={onViewAllClick}
+        rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} />}
+        borderRadius="xl"
+        _hover={{
+          bg: buttonHoverBg,
+          transform: 'translateY(-1px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+        }}
+        transition="all 0.2s ease"
+        flexShrink={0}
+        px={{ base: 2, sm: 4 }}
+        fontWeight="600"
+        fontFamily="system-ui, -apple-system, sans-serif"
+      >
+        {isMobile ? 'View All' : 'View All Details'}
+      </Button>
+    </Flex>
   )
 })
 

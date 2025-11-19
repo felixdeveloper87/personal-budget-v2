@@ -5,34 +5,40 @@ import { getSharedColors, sharedTransitions, sharedSizes, getSharedEffects, shar
 export const getHeaderControlsContainerStyles = () => {
   const sharedColors = getSharedColors()
   const sharedEffects = getSharedEffects()
-  
+
   return {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: sharedSizes.borderRadius.md,
+    borderRadius: 'full', // Pill shape
     bg: sharedColors.background.glass,
     border: sharedColors.background.glassBorder,
     backdropFilter: sharedEffects.glass.backdropFilter,
     boxShadow: sharedEffects.shadows.md,
-    px: sharedSizes.padding.sm,
+    px: { base: 2, md: 3 },
     py: { base: 1.5, md: 2 },
     transition: sharedTransitions.smooth,
-    _hover: { backdropFilter: sharedEffects.glass.backdropFilterHover }
+    _hover: {
+      backdropFilter: sharedEffects.glass.backdropFilterHover,
+      boxShadow: sharedEffects.shadows.lg,
+      transform: 'translateY(-1px)'
+    }
   }
 }
 
 // Estilos do botão de busca mobile
 export const getHeaderSearchButtonStyles = () => {
   const sharedColors = getSharedColors()
-  
+
   return {
     variant: 'ghost' as const,
     bg: 'transparent',
     color: sharedColors.text.primary,
-    _hover: { 
-      bg: sharedColors.background.glassHover, 
-      transform: sharedHoverEffects.scale.medium
+    borderRadius: 'full',
+    _hover: {
+      bg: sharedColors.background.glassHover,
+      transform: sharedHoverEffects.scale.medium,
+      color: 'blue.500'
     },
     transition: sharedTransitions.fast
   }
@@ -42,59 +48,52 @@ export const getHeaderSearchButtonStyles = () => {
 export const getThemeToggleStyles = () => {
   return {
     variant: 'ghost' as const,
-    bg: useColorModeValue(
-      'linear-gradient(135deg, #e2e8f0, #cbd5e1)', // Modo claro: tons de lua
-      'linear-gradient(135deg, #fef3c7, #fde68a)'  // Modo escuro: amarelo pastel para o sol
-    ),
-    color: useColorModeValue('gray.700', 'yellow.800'),
-    borderRadius: sharedSizes.borderRadius.sm,
-    boxShadow: 'md',
+    bg: useColorModeValue('gray.100', 'whiteAlpha.200'),
+    color: useColorModeValue('gray.600', 'yellow.400'),
+    borderRadius: 'full',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
     _hover: {
-      bg: useColorModeValue(
-        'linear-gradient(135deg, #cbd5e1, #94a3b8)', // Modo claro: lua mais escura
-        'linear-gradient(135deg, #fde68a, #fcd34d)'  // Modo escuro: amarelo pastel mais intenso
-      ),
-      transform: sharedHoverEffects.scale.medium,
-      boxShadow: 'lg',
+      bg: useColorModeValue('gray.200', 'whiteAlpha.300'),
+      transform: 'rotate(15deg) scale(1.1)',
+      color: useColorModeValue('orange.500', 'yellow.300'),
+      boxShadow: '0 0 15px rgba(255, 200, 0, 0.3)'
     },
-    transition: sharedTransitions.fast
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
   }
 }
 
 // Estilos do botão de login
 export const getLoginButtonStyles = () => {
   const loginGradient = useColorModeValue(
-    'linear-gradient(135deg, rgba(59,130,246,0.9), rgba(124,58,237,0.85), rgba(16,185,129,0.8))',
-    'linear-gradient(135deg, rgba(96,165,250,0.85), rgba(167,139,250,0.8), rgba(52,211,153,0.75))'
+    'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
   )
-  const sharedEffects = getSharedEffects()
-  
+
   return {
     bg: loginGradient,
     color: 'white',
-    fontWeight: '900',
-    px: { base: 6, md: 8 },
-    py: { base: 3, md: 4 },
-    borderRadius: sharedSizes.borderRadius.md,
-    letterSpacing: 'wide',
-    fontSize: { base: 'md', lg: 'lg' },
-    boxShadow: '0 8px 25px rgba(59,130,246,0.3)',
+    fontWeight: '700',
+    px: { base: 5, md: 6 },
+    py: { base: 0, md: 0 }, // Let height control vertical size
+    height: '40px',
+    borderRadius: 'full',
+    letterSpacing: '0.02em',
+    fontSize: { base: 'sm', lg: 'sm' },
+    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
     backdropFilter: 'blur(8px)',
-    transition: sharedTransitions.slow,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
     _hover: {
-      transform: `${sharedHoverEffects.lift.medium} scale(1.06)`,
-      boxShadow: sharedEffects.shadows.lg,
-      filter: 'brightness(1.05)',
+      transform: 'translateY(-2px)',
+      boxShadow: '0 6px 20px rgba(37, 99, 235, 0.6)',
+      filter: 'brightness(1.1)',
     },
-    _active: { 
-      transform: `${sharedHoverEffects.lift.small} scale(1.03)` 
-    },
-    sx: {
-      animation: 'pulse 3s ease-in-out infinite',
-      '@keyframes pulse': {
-        '0%, 100%': { filter: 'brightness(1)' },
-        '50%': { filter: 'brightness(1.2)' },
-      },
+    _active: {
+      transform: 'translateY(0)',
+      boxShadow: '0 2px 10px rgba(37, 99, 235, 0.4)'
     }
   }
 }

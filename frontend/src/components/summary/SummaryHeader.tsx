@@ -5,8 +5,11 @@ import {
   Flex,
   Heading,
   useColorModeValue,
+  Icon,
+  Box,
+  VStack,
 } from '@chakra-ui/react'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw, TrendingUp } from 'lucide-react'
 
 interface SummaryHeaderProps {
   onGoToToday: () => void
@@ -17,27 +20,42 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
   return (
     <Flex justify="space-between" align="center" w="full">
       {/* Left side */}
-      <HStack spacing={2} align="baseline" flex="1">
-        <Heading
-          size="md"
-          fontWeight="600"
-          textAlign="left"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          letterSpacing="-0.015em"
-          fontSize={{ base: 'md', sm: 'xl' }}
-          color={useColorModeValue('gray.800', 'white')}
+      <HStack spacing={4}>
+        <Box
+          p={3}
+          bg={useColorModeValue('green.50', 'whiteAlpha.100')}
+          color={useColorModeValue('green.500', 'green.300')}
+          borderRadius="xl"
+          boxShadow="0 4px 12px rgba(34, 197, 94, 0.15)"
         >
-          Overview
-        </Heading>
-        <Text
-          fontSize={{ base: 'sm', sm: 'md' }}
-          color={useColorModeValue('gray.600', 'gray.400')}
-          fontWeight="400"
-          textAlign="left"
-          fontFamily="system-ui, -apple-system, sans-serif"
-        >
-          • Overview with category analysis
-        </Text>
+          <Icon as={TrendingUp} boxSize={6} strokeWidth={2.5} />
+        </Box>
+        <VStack align="start" spacing={0.5}>
+          <Heading
+            size="md"
+            fontWeight="700"
+            textAlign="left"
+            fontFamily="system-ui, -apple-system, sans-serif"
+            letterSpacing="-0.02em"
+            fontSize={{ base: 'lg', sm: 'xl' }}
+            bgGradient={useColorModeValue(
+              'linear(to-r, gray.800, gray.600)',
+              'linear(to-r, white, gray.300)'
+            )}
+            bgClip="text"
+          >
+            Overview
+          </Heading>
+          <Text
+            fontSize="sm"
+            color={useColorModeValue('gray.500', 'gray.400')}
+            fontWeight="600"
+            textAlign="left"
+            fontFamily="system-ui, -apple-system, sans-serif"
+          >
+            Financial summary & insights
+          </Text>
+        </VStack>
       </HStack>
 
       {/* Right side - Modern Today Button */}

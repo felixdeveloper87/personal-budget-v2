@@ -2,9 +2,6 @@ import { useState } from 'react'
 import {
   Box,
   VStack,
-  Card,
-  CardBody,
-  Divider,
   useDisclosure,
   useColorModeValue,
 } from '@chakra-ui/react'
@@ -15,7 +12,6 @@ import { SummaryCardsGrid } from './'
 import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import SummaryHeader from './SummaryHeader'
 import PeriodNavigator from './PeriodNavigator'
-import { CategoryAnalysisHeader, CategoryAnalysisTabs } from '../categories'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
@@ -28,11 +24,9 @@ interface SummaryContainerProps {
   navigatePeriod?: (direction: 'prev' | 'next') => void
   goToToday?: () => void
   formatLabel?: () => string
-  activeTab?: 'expenses' | 'incomes'
-  setActiveTab?: (tab: 'expenses' | 'incomes') => void
 }
 
-export default function ummaryContainer({
+export default function SummaryContainer({
   periodData,
   selectedPeriod,
   selectedDate,
@@ -41,19 +35,12 @@ export default function ummaryContainer({
   navigatePeriod: externalNavigatePeriod,
   goToToday: externalGoToToday,
   formatLabel: externalFormatLabel,
-  activeTab: externalActiveTab,
-  setActiveTab: externalSetActiveTab,
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance, label } = periodData
   const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
 
-  // Use internal state if not provided via props
-  const [internalActiveTab, setInternalActiveTab] = useState<'expenses' | 'incomes'>('expenses')
-  const activeTab = externalActiveTab ?? internalActiveTab
-  const setActiveTab = externalSetActiveTab ?? setInternalActiveTab
-  
   // Navigation functions - use provided ones or create local ones
   const navigatePeriod = externalNavigatePeriod ?? ((direction: 'prev' | 'next') => {
     const newDate = new Date(selectedDate)
@@ -111,10 +98,6 @@ export default function ummaryContainer({
     return 'Unknown Period'
   })
 
-  // Modern banking app colors
-  const cardBg = useColorModeValue('gray.100', 'black')
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.800')
-
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
     onOpen()
@@ -124,67 +107,73 @@ export default function ummaryContainer({
     <>
       <Box
         w="full"
+        h="full"
         px={{ base: 1, sm: 2, md: 3, lg: 4 }}
         sx={{
           paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
           paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
         }}
       >
-        <Card
-          bg={cardBg}
-          backdropFilter="blur(10px)"
+        <Box
+          h="full"
+          bg={useColorModeValue('rgba(255, 255, 255, 0.6)', 'rgba(0, 0, 0, 0.4)')}
+          backdropFilter="blur(20px)"
           border="1px solid"
-          borderColor={cardBorderColor}
+          borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
           borderRadius="2xl"
-          shadow={useColorModeValue('0 1px 3px rgba(0,0,0,0.05)', '0 1px 3px rgba(0,0,0,0.2)')}
+          boxShadow={useColorModeValue(
+            '0 8px 32px rgba(31, 38, 135, 0.07)',
+            '0 8px 32px rgba(0, 0, 0, 0.3)'
+          )}
           overflow="hidden"
           position="relative"
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
           _hover={{
-            shadow: useColorModeValue('0 4px 12px rgba(0,0,0,0.08)', '0 4px 12px rgba(0,0,0,0.3)')
+            boxShadow: useColorModeValue(
+              '0 12px 40px rgba(31, 38, 135, 0.12)',
+              '0 12px 40px rgba(0, 0, 0, 0.5)'
+            ),
+            transform: 'translateY(-2px)'
           }}
-          transition="all 0.2s ease"
         >
-            <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }}>
-              <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
-                {/* Header */}
-                <SummaryHeader onGoToToday={goToToday} />
+          {/* Decorative gradient blob */}
+          <Box
+            position="absolute"
+            top="-50%"
+            right="-10%"
+            width="300px"
+            height="300px"
+            bg="radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)"
+            filter="blur(40px)"
+            zIndex={0}
+            pointerEvents="none"
+          />
 
-                {/* Period Selector */}
-                <PeriodNavigator
-                  selectedPeriod={selectedPeriod}
-                  onPeriodChange={onPeriodChange}
-                  onNavigatePeriod={navigatePeriod}
-                  onGoToToday={goToToday}
-                  formatLabel={formatLabel}
-                />
+          <Box p={{ base: 5, sm: 6 }} position="relative" zIndex={1}>
+            <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
+              {/* Header */}
+              <SummaryHeader onGoToToday={goToToday} />
 
-                {/* Summary Grid */}
-                <SummaryCardsGrid
-                  transactions={transactions}
-                  income={income}
-                  expense={expense}
-                  balance={balance}
-                  onCardClick={handleCardClick}
-                />
+              {/* Period Selector */}
+              <PeriodNavigator
+                selectedPeriod={selectedPeriod}
+                onPeriodChange={onPeriodChange}
+                onNavigatePeriod={navigatePeriod}
+                onGoToToday={goToToday}
+                formatLabel={formatLabel}
+              />
 
-                <Divider />
-
-                {/* Category Analysis Header */}
-                <CategoryAnalysisHeader
-                  activeTab={activeTab}
-                  onTabChange={setActiveTab}
-                />
-
-                {/* Category Analysis */}
-                <CategoryAnalysisTabs
-                  transactions={transactions}
-                  selectedPeriod={selectedPeriod}
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                />
-              </VStack>
-            </CardBody>
-          </Card>
+              {/* Summary Grid */}
+              <SummaryCardsGrid
+                transactions={transactions}
+                income={income}
+                expense={expense}
+                balance={balance}
+                onCardClick={handleCardClick}
+              />
+            </VStack>
+          </Box>
+        </Box>
       </Box>
 
       {/* Modal */}

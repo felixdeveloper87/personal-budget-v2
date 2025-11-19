@@ -8,14 +8,15 @@ import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import {
   AddTransactionSection,
   SummaryWithAnalysisSection,
+  CategoryAnalysisSection,
   InstallmentPlansSection,
 } from '../sections'
 
 export default function Dashboard() {
-  const { 
-    selectedDate, 
-    selectedPeriod, 
-    onDateChange, 
+  const {
+    selectedDate,
+    selectedPeriod,
+    onDateChange,
     onPeriodChange,
     navigatePeriod,
     goToToday,
@@ -28,9 +29,9 @@ export default function Dashboard() {
   const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
 
   return (
-    <Box 
+    <Box
       minH="100vh"
-      px={{ base: 0.5, md: 1, lg: 1.5 }} 
+      px={{ base: 0.5, md: 1, lg: 1.5 }}
       py={{ base: 3, md: 6 }}
     >
       {loading ? (
@@ -56,18 +57,25 @@ export default function Dashboard() {
           </Box>
 
           {!hasActiveFilters(filters) && monthSummary && (
-            <SummaryWithAnalysisSection
-              periodData={periodData}
-              selectedPeriod={selectedPeriod}
-              selectedDate={selectedDate}
-              onDateChange={onDateChange}
-              onPeriodChange={onPeriodChange}
-              navigatePeriod={navigatePeriod}
-              goToToday={goToToday}
-              formatLabel={formatLabel}
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
+            <>
+              <SummaryWithAnalysisSection
+                periodData={periodData}
+                selectedPeriod={selectedPeriod}
+                selectedDate={selectedDate}
+                onDateChange={onDateChange}
+                onPeriodChange={onPeriodChange}
+                navigatePeriod={navigatePeriod}
+                goToToday={goToToday}
+                formatLabel={formatLabel}
+              />
+
+              <CategoryAnalysisSection
+                transactions={transactions}
+                selectedPeriod={selectedPeriod}
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+              />
+            </>
           )}
 
         </VStack>

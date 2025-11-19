@@ -11,8 +11,6 @@ interface SummaryWithAnalysisSectionProps {
   navigatePeriod: (direction: 'prev' | 'next') => void
   goToToday: () => void
   formatLabel: () => string
-  activeTab: 'expenses' | 'incomes'
-  setActiveTab: (tab: 'expenses' | 'incomes') => void
 }
 
 export default function SummaryWithAnalysisSection({
@@ -24,8 +22,6 @@ export default function SummaryWithAnalysisSection({
   navigatePeriod,
   goToToday,
   formatLabel,
-  activeTab,
-  setActiveTab,
 }: SummaryWithAnalysisSectionProps) {
   return (
     <SummaryContainer
@@ -37,8 +33,6 @@ export default function SummaryWithAnalysisSection({
       navigatePeriod={navigatePeriod}
       goToToday={goToToday}
       formatLabel={formatLabel}
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
     />
   )
 }

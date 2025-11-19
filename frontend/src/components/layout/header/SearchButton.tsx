@@ -11,7 +11,7 @@ export default function SearchButton({ user, onSearchOpen }: SearchButtonProps) 
   if (!user) return null
 
   return (
-    <Box 
+    <Box
       {...searchButtonContainerStyles}
       display={{ base: 'none', lg: 'block' }}
       flexShrink={0}
@@ -20,15 +20,23 @@ export default function SearchButton({ user, onSearchOpen }: SearchButtonProps) 
         onClick={onSearchOpen}
         leftIcon={<SearchIcon />}
         {...getSearchButtonStyles()}
-        size={{ lg: 'md', xl: 'md' }}
-        fontSize={{ lg: 'sm', xl: 'md' }}
-        px={{ lg: 3, xl: 4 }}
       >
-        <Box as="span" display={{ lg: 'none', xl: 'inline' }}>
-          Search & Filters
+        <Box as="span">
+          Search...
         </Box>
-        <Box as="span" display={{ lg: 'inline', xl: 'none' }}>
-          Search
+        <Box
+          as="span"
+          ml={4}
+          fontSize="xs"
+          color="gray.400"
+          display={{ base: 'none', xl: 'inline' }}
+          border="1px solid"
+          borderColor="gray.500"
+          borderRadius="md"
+          px={1.5}
+          py={0.5}
+        >
+          ⌘K
         </Box>
       </Button>
     </Box>

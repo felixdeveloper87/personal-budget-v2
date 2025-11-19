@@ -15,7 +15,7 @@ import {
   Icon,
   Heading,
 } from '@chakra-ui/react'
-import { ArrowUp, Heart, Shield, Lock, Zap } from 'lucide-react'
+import { ArrowUp, Heart, Shield, Lock, Zap, Wallet } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 
 const linkSections = [
@@ -37,25 +37,15 @@ export default function Footer() {
   const colors = useThemeColors()
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-  // Modern post-it inspired colors with texture
   const footerBg = useColorModeValue('white', 'black')
-  
-  // Texture pattern with lines - dark mode: white lines on black bg, light mode: black lines on white bg
-  const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
-  const texturePatternDark = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23fff" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
-  
-  const texturePattern = useColorModeValue(texturePatternLight, texturePatternDark)
-  
   const brandTextColor = useColorModeValue('gray.800', 'gray.100')
   const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-
   const textSecondary = useColorModeValue(colors.text.secondary, 'gray.300')
 
   return (
     <Box
       as="footer"
       bg={footerBg}
-      backgroundImage={texturePattern}
       backdropFilter="blur(10px)"
       borderTop="1px solid"
       borderColor={useColorModeValue('gray.200', 'gray.600')}
@@ -63,12 +53,6 @@ export default function Footer() {
       w="100%"
       position="relative"
     >
-      {/* Simple top border */}
-      <Box
-        height="3px"
-        bg={useColorModeValue('blue.200', 'blue.500')}
-      />
-
       <Container
         maxW={{ base: '100%', xl: '1400px', '2xl': '2200px' }}
         px={{ base: 4, md: 8 }}
@@ -76,53 +60,36 @@ export default function Footer() {
         position="relative"
         zIndex={1}
       >
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 8, md: 10, lg: 16}}>
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 8, md: 10, lg: 16 }}>
           {/* 🪙 Brand Section */}
           <VStack align="start" spacing={5}>
-            <HStack spacing={4}>
+            <HStack spacing={3} mb={2}>
               <Box
-                w={{ base: 10, lg: 12 }}
-                h={{ base: 10, lg: 12 }}
-                bg={useColorModeValue('#dbeafe', '#1e293b')} // Azul post-it
-                borderRadius="xl"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                border="1px solid"
-                borderColor={useColorModeValue('blue.200', 'blue.500')}
-                boxShadow="sm"
-                _hover={{
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                  borderColor: useColorModeValue('blue.300', 'blue.400')
-                }}
-                transition="all 0.2s ease"
+                p={2}
+                bg={useColorModeValue('brand.50', 'whiteAlpha.100')}
+                rounded="xl"
+                color={useColorModeValue('brand.500', 'brand.400')}
               >
-                <Text 
-                  fontSize={{ base: 'xl', lg: '2xl' }} 
-                  fontWeight="bold" 
-                  color={useColorModeValue('blue.600', 'blue.300')}
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                >
-                  £
-                </Text>
+                <Icon as={Wallet} boxSize={6} strokeWidth={2.5} />
               </Box>
               <VStack spacing={0} align="start">
-                <Heading 
-                  size="md" 
-                  color={brandTextColor} 
-                  fontWeight="700"
-                  fontFamily="system-ui, -apple-system, sans-serif"
+                <Heading
+                  size="md"
+                  color={brandTextColor}
+                  fontWeight="800"
+                  letterSpacing="tight"
+                  lineHeight="1"
                 >
                   Personal Budget
                 </Heading>
-                <Text 
-                  fontSize="sm" 
-                  color={subtitleColor} 
+                <Text
+                  fontSize="xs"
+                  color={subtitleColor}
                   fontWeight="500"
-                  fontFamily="system-ui, -apple-system, sans-serif"
+                  letterSpacing="wide"
+                  textTransform="uppercase"
                 >
-                  Financial Management
+                  Financial Freedom
                 </Text>
               </VStack>
             </HStack>
@@ -171,10 +138,10 @@ export default function Footer() {
           {/* 🔗 Link Sections */}
           {linkSections.map((section) => (
             <VStack key={section.title} align="start" spacing={3}>
-              <Text 
-                fontSize="md" 
-                fontWeight="700" 
-                color={useColorModeValue('gray.800', 'gray.100')} 
+              <Text
+                fontSize="md"
+                fontWeight="700"
+                color={useColorModeValue('gray.800', 'gray.100')}
                 mb={1}
                 fontFamily="system-ui, -apple-system, sans-serif"
               >

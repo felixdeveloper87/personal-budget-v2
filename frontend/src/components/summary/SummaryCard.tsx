@@ -113,13 +113,13 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         },
         animation: `slideIn ${0.2 + index * 0.1}s ease-out`,
         '@keyframes slideIn': {
-          from: { 
-            opacity: 0, 
-            transform: 'translateY(20px) scale(0.95)' 
+          from: {
+            opacity: 0,
+            transform: 'translateY(20px) scale(0.95)'
           },
-          to: { 
-            opacity: 1, 
-            transform: 'translateY(0) scale(1)' 
+          to: {
+            opacity: 1,
+            transform: 'translateY(0) scale(1)'
           }
         }
       }}
@@ -154,7 +154,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
         borderRadius="50%"
         zIndex={1}
       />
-      
+
       <CardBody p={responsiveStyles.summaryCards.card.padding}>
         <VStack spacing={responsiveStyles.summaryCards.card.spacing} align="center">
           {/* Ícone com efeito especial */}
@@ -173,9 +173,9 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               `${stat.color}40`
             )}
           >
-            <Icon 
-              as={IconComponent} 
-              boxSize={responsiveStyles.summaryCards.icon.size} 
+            <Icon
+              as={IconComponent}
+              boxSize={responsiveStyles.summaryCards.icon.size}
               color={useColorModeValue(
                 `${stat.color}`,
                 (() => {
@@ -196,7 +196,7 @@ export default function SummaryCard({ stat, index, onCardClick }: SummaryCardPro
               opacity={useColorModeValue(0.9, 0.8)}
             />
           </Box>
-          
+
           {/* Valores e labels */}
           <VStack spacing={responsiveStyles.summaryCards.content.spacing} align="center">
             <Text

@@ -6,17 +6,19 @@ import {
   Flex,
   Heading,
   useColorModeValue,
+  Box,
+  VStack,
 } from '@chakra-ui/react'
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp, PieChart } from 'lucide-react'
 
 interface CategoryAnalysisHeaderProps {
   activeTab: 'expenses' | 'incomes'
   onTabChange: (tab: 'expenses' | 'incomes') => void
 }
 
-export default function CategoryAnalysisHeader({ 
-  activeTab, 
-  onTabChange 
+export default function CategoryAnalysisHeader({
+  activeTab,
+  onTabChange
 }: CategoryAnalysisHeaderProps) {
   return (
     <Flex
@@ -27,29 +29,42 @@ export default function CategoryAnalysisHeader({
       w="full"
     >
       {/* Left side */}
-      <HStack spacing={2} align="baseline" flex="1" minW={0}>
-        <Heading
-          size="md"
-          fontWeight="600"
-          textAlign="left"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          letterSpacing="-0.015em"
-          fontSize={{ base: 'md', sm: 'lg', md: 'xl' }}
-          color={useColorModeValue('gray.800', 'white')}
+      <HStack spacing={4}>
+        <Box
+          p={3}
+          bg={useColorModeValue('purple.50', 'whiteAlpha.100')}
+          color={useColorModeValue('purple.500', 'purple.300')}
+          borderRadius="xl"
+          boxShadow="0 4px 12px rgba(168, 85, 247, 0.15)"
         >
-          Categories
-        </Heading>
-        <Text
-          fontSize={{ base: 'xs', sm: 'md' }}
-          color={useColorModeValue('gray.600', 'gray.400')}
-          fontWeight="400"
-          textAlign="left"
-          fontFamily="system-ui, -apple-system, sans-serif"
-          display={{ base: 'none', sm: 'block' }}
-          whiteSpace="nowrap"
-        >
-          • Detailed category breakdown and insights
-        </Text>
+          <Icon as={PieChart} boxSize={6} strokeWidth={2.5} />
+        </Box>
+        <VStack align="start" spacing={0.5}>
+          <Heading
+            size="md"
+            fontWeight="700"
+            textAlign="left"
+            fontFamily="system-ui, -apple-system, sans-serif"
+            letterSpacing="-0.02em"
+            fontSize={{ base: 'lg', sm: 'xl' }}
+            bgGradient={useColorModeValue(
+              'linear(to-r, gray.800, gray.600)',
+              'linear(to-r, white, gray.300)'
+            )}
+            bgClip="text"
+          >
+            Categories
+          </Heading>
+          <Text
+            fontSize="sm"
+            color={useColorModeValue('gray.500', 'gray.400')}
+            fontWeight="600"
+            textAlign="left"
+            fontFamily="system-ui, -apple-system, sans-serif"
+          >
+            Breakdown by category
+          </Text>
+        </VStack>
       </HStack>
 
       {/* Right side - Tab Buttons */}

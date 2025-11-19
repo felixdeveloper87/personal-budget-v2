@@ -3,146 +3,116 @@ import { getSharedColors, sharedTransitions, sharedSizes, getSharedEffects, shar
 
 // Cores dos botões de navegação - Gradientes azul elegante
 export const navigationGradients = {
-  light: 'linear-gradient(135deg, rgb(59, 130, 246), rgb(96, 165, 250), rgb(127, 182, 255))',
-  dark: 'linear-gradient(135deg, rgb(29, 78, 216), rgb(59, 130, 246), rgb(96, 165, 250))'
+  light: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+  dark: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
 }
 
 export const navigationHoverGradients = {
-  light: 'linear-gradient(135deg, rgb(37, 99, 235), rgb(59, 130, 246), rgb(96, 165, 250))',
-  dark: 'linear-gradient(135deg, rgb(30, 64, 175), rgb(37, 99, 235), rgb(59, 130, 246))'
+  light: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+  dark: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
 }
 
 // Estilos dos botões de navegação
 export const getNavigationButtonStyles = (isSelected: boolean) => {
   const sharedColors = getSharedColors()
   const sharedEffects = getSharedEffects()
-  
+
   return {
     variant: 'ghost' as const,
-    fontWeight: '800',
+    fontWeight: '600',
+    fontSize: { base: 'sm', lg: 'md' },
     color: isSelected ? 'white' : sharedColors.text.primary,
-    bg: isSelected ? 
-      useColorModeValue(navigationGradients.light, navigationGradients.dark) : 
+    bg: isSelected ?
+      useColorModeValue(navigationGradients.light, navigationGradients.dark) :
       'transparent',
+    border: '1px solid',
+    borderColor: isSelected ? 'transparent' : 'transparent',
     _hover: {
-      bg: isSelected ? 
+      bg: isSelected ?
         useColorModeValue(navigationHoverGradients.light, navigationHoverGradients.dark) :
-        sharedColors.gradients.gray,
+        useColorModeValue('rgba(59, 130, 246, 0.08)', 'rgba(59, 130, 246, 0.15)'), // Glass hover
       color: isSelected ? 'white' : 'blue.500',
-      transform: `${sharedHoverEffects.lift.small} scale(1.02)`,
-      boxShadow: isSelected ? 
-        sharedEffects.shadows.lg : 
-        sharedEffects.shadows.md
+      transform: 'translateY(-1px)',
+      boxShadow: isSelected ?
+        '0 4px 12px rgba(37, 99, 235, 0.3)' :
+        'none'
     },
-    boxShadow: isSelected ? sharedEffects.shadows.md : 'none',
-    borderRadius: sharedSizes.borderRadius.md,
-    transition: sharedTransitions.smooth,
-    letterSpacing: 'wide'
+    _active: {
+      transform: 'translateY(0)',
+      bg: isSelected ?
+        useColorModeValue(navigationGradients.light, navigationGradients.dark) :
+        useColorModeValue('rgba(59, 130, 246, 0.12)', 'rgba(59, 130, 246, 0.2)'),
+    },
+    boxShadow: isSelected ? '0 2px 8px rgba(37, 99, 235, 0.25)' : 'none',
+    borderRadius: 'full', // Pill shape
+    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+    letterSpacing: '0.01em',
+    height: 'auto',
+    minH: '40px'
   }
 }
 
 // Tamanhos responsivos dos botões
 export const navigationButtonSizes = {
-  size: { md: "md", lg: "lg", xl: "lg" },
-  fontSize: { md: "md", lg: "lg", xl: "xl" },
-  px: { md: 6, lg: 8, xl: 10 },
-  py: { md: 3, lg: 4, xl: 5 }
+  px: { md: 4, lg: 6 },
+  py: { md: 2, lg: 2.5 }
 }
 
 // Estilos base para botões de search (compartilhado)
 const getBaseSearchStyles = () => {
   const sharedColors = getSharedColors()
-  const sharedEffects = getSharedEffects()
-  
+
   return {
-    fontWeight: '700',
-    borderRadius: sharedSizes.borderRadius.md,
+    fontWeight: '500',
+    borderRadius: 'full', // Pill shape
     variant: 'outline' as const,
-    borderColor: useColorModeValue('gray.300', 'gray.600'),
-    color: sharedColors.text.primary,
-    bg: sharedColors.gradients.gray,
-    overflow: 'hidden',
-    sx: {
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        left: '-100%',
-        width: '100%',
-        height: '100%',
-        background: useColorModeValue(
-          'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent)',
-          'linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.2), transparent)'
-        ),
-        transition: 'left 0.5s ease'
-      }
-    },
+    borderColor: useColorModeValue('gray.200', 'gray.700'),
+    color: sharedColors.text.secondary,
+    bg: useColorModeValue('rgba(255, 255, 255, 0.5)', 'rgba(0, 0, 0, 0.2)'), // Glass bg
+    backdropFilter: 'blur(8px)',
     _hover: {
-      bg: sharedColors.gradients.gray,
-      borderColor: 'blue.500',
+      borderColor: 'blue.400',
+      bg: useColorModeValue('white', 'gray.800'),
+      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.15)',
       color: 'blue.500',
-      transform: `${sharedHoverEffects.lift.small} scale(1.02)`,
-      boxShadow: sharedEffects.shadows.lg,
-      sx: {
-        '&::before': { left: '100%' }
-      }
+      transform: 'translateY(-1px)'
     },
     _active: {
-      transform: `${sharedHoverEffects.lift.small} scale(1.01)`,
-      boxShadow: sharedEffects.shadows.md
+      transform: 'translateY(0)',
+      boxShadow: 'none'
     },
-    transition: sharedTransitions.smooth,
-    boxShadow: sharedEffects.shadows.sm
+    transition: 'all 0.2s ease',
+    height: '40px'
   }
 }
 
 // Estilos do botão de search desktop
 export const getSearchButtonStyles = () => ({
   ...getBaseSearchStyles(),
-  size: { lg: "sm", xl: "md" },
-  px: { lg: 6, xl: 8 },
-  fontSize: { lg: "sm", xl: "md" }
+  width: { lg: "200px", xl: "260px" },
+  justifyContent: 'flex-start',
+  px: 4,
+  fontSize: 'sm'
 })
 
 // Container do botão de search
 export const searchButtonContainerStyles = {
-  flex: '1',
-  maxW: { lg: "300px", xl: "400px" },
   display: sharedBreakpoints.display.desktopOnly,
-  justifyContent: 'center'
+  alignItems: 'center',
+  ml: 4
 }
 
 // Estilos do botão de search mobile
 export const getMobileSearchButtonStyles = () => {
-  const baseStyles = getBaseSearchStyles()
-  const sharedEffects = getSharedEffects()
-  
   return {
-    ...baseStyles,
-    display: sharedBreakpoints.display.mobileOnly,
+    display: { base: 'flex', md: 'none' },
     'aria-label': 'Search',
     variant: 'ghost' as const,
-    borderRadius: sharedSizes.borderRadius.sm,
-    position: 'relative' as const,
-    sx: {
-      ...baseStyles.sx,
-      '&::before': {
-        ...baseStyles.sx?.['&::before'],
-        background: useColorModeValue(
-          'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent)',
-          'linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.25), transparent)'
-        ),
-        transition: 'left 0.6s ease'
-      }
-    },
+    rounded: 'full',
+    color: useColorModeValue('gray.600', 'gray.400'),
     _hover: {
-      ...baseStyles._hover,
-      transform: `${sharedHoverEffects.lift.small} scale(1.05)`,
-      boxShadow: sharedEffects.shadows.md
-    },
-    _active: {
-      transform: `translateY(0px) scale(1.02)`,
-      boxShadow: sharedEffects.shadows.sm
+      bg: useColorModeValue('gray.100', 'whiteAlpha.200'),
+      color: 'blue.500'
     }
   }
 }

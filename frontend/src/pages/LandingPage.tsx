@@ -9,13 +9,6 @@ import {
   useColorModeValue,
   HStack,
   Icon,
-  List,
-  ListItem,
-  ListIcon,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
   Accordion,
   AccordionItem,
   AccordionButton,
@@ -23,207 +16,98 @@ import {
   AccordionIcon,
   Grid,
   GridItem,
-  Badge
+  Circle,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import {
   ArrowForwardIcon,
-  LockIcon,
-  ViewIcon,
-  CalendarIcon,
-  AddIcon,
   CheckCircleIcon,
   StarIcon,
   TimeIcon,
-  SearchIcon,
-  ChevronRightIcon
 } from '@chakra-ui/icons'
 import { Header, Footer } from '../components'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  PieChart, 
-  BarChart3, 
-  Shield, 
-  Zap, 
-  Smartphone, 
-  Moon, 
-  Search, 
-  Filter,
-  Calendar,
+import {
+  TrendingUp,
+  PieChart,
+  BarChart3,
+  Shield,
+  Zap,
+  Search,
   DollarSign,
-  Eye,
-  CreditCard,
-  Repeat
+  Repeat,
+  Globe
 } from 'lucide-react'
 
-const MotionBox = motion.create(Box)
-const MotionButton = motion.create(Button)
+const MotionBox = motion(Box)
 
 export default function LandingPage({ onGetStarted }: { onGetStarted: () => void }) {
-  const bgGradient = useColorModeValue(
-    'linear(to-br, blue.50, purple.50, pink.50)',
-    'linear(to-br, black, gray.900, gray.800)'
+
+  const heroGradient = useColorModeValue(
+    'radial(circle at 50% 0%, rgba(56, 189, 248, 0.1) 0%, transparent 50%)',
+    'radial(circle at 50% 0%, rgba(14, 165, 233, 0.15) 0%, transparent 50%)'
   )
-  const cardBg = useColorModeValue('gray.50', 'black')
-  const textColor = useColorModeValue('gray.600', 'gray.50')
+
+  const cardBg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(20, 20, 22, 0.6)')
+  const cardBorder = useColorModeValue('rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0.05)')
+  const cardBackdrop = 'blur(20px)'
+  const textColor = useColorModeValue('gray.600', 'gray.400')
 
   const features = [
     {
-      icon: <Icon as={TrendingUp} boxSize={10} />,
+      icon: TrendingUp,
       color: 'green.500',
-      title: 'Smart Transaction Management',
-      description: 'Add, edit, and delete transactions in seconds. Categorize automatically and track every penny with precision.',
-      details: ['Quick add with number pad', 'Custom categories', 'Date & time tracking', 'Detailed descriptions']
+      title: 'Smart Management',
+      description: 'Track every penny with precision. Auto-categorization and detailed insights.',
+      colSpan: 2
     },
     {
-      icon: <Icon as={PieChart} boxSize={10} />,
+      icon: PieChart,
       color: 'blue.500',
-      title: 'Interactive Charts & Analytics',
-      description: 'Visualize your spending patterns with beautiful, interactive pie charts and category breakdowns.',
-      details: ['Expense by category', 'Income analysis', 'Monthly comparisons', 'Real-time updates']
+      title: 'Visual Analytics',
+      description: 'Beautiful interactive charts that bring your financial data to life.',
+      colSpan: 1
     },
     {
-      icon: <Icon as={Calendar} boxSize={10} />,
+      icon: Repeat,
       color: 'purple.500',
-      title: 'Period Navigation',
-      description: 'Navigate through months and analyze your financial history with intuitive period controls.',
-      details: ['Monthly summaries', 'Year overview', 'Historical data', 'Trend analysis']
-    },
-    {
-      icon: <Icon as={Repeat} boxSize={10} />,
-      color: 'teal.500',
       title: 'Installment Plans',
-      description: 'Split large expenses into monthly installments. Automatically create recurring transactions for purchases paid over time.',
-      details: ['Create installment plans', 'Automatic monthly transactions', 'Track payment progress', 'Manage future expenses']
+      description: 'Manage split payments and recurring bills effortlessly.',
+      colSpan: 1
     },
     {
-      icon: <Icon as={Search} boxSize={10} />,
+      icon: Search,
       color: 'orange.500',
-      title: 'Advanced Search & Filters',
-      description: 'Find any transaction instantly with powerful search and filtering capabilities.',
-      details: ['Search by description', 'Filter by category', 'Date range filters', 'Type filtering']
-    },
-    {
-      icon: <Icon as={Shield} boxSize={10} />,
-      color: 'red.500',
-      title: 'Bank-Level Security',
-      description: 'Your data is protected with JWT authentication and modern encryption standards.',
-      details: ['Encrypted data', 'Secure authentication', 'Private by default', 'No data sharing']
+      title: 'Deep Search',
+      description: 'Find any transaction instantly with powerful filters.',
+      colSpan: 2
     }
   ]
 
   const stats = [
-    {
-      label: 'Setup Time',
-      value: '< 2 min',
-      helpText: 'Start tracking immediately',
-      icon: TimeIcon
-    },
-    {
-      label: 'Price',
-      value: '$0',
-      helpText: 'Free forever, no tricks',
-      icon: DollarSign
-    },
-    {
-      label: 'Categories',
-      value: 'Unlimited',
-      helpText: 'Customize as you need',
-      icon: Filter
-    },
-    {
-      label: 'Devices',
-      value: 'All',
-      helpText: 'Mobile, tablet, desktop',
-      icon: Smartphone
-    }
+    { label: 'Setup Time', value: '< 2 min', icon: TimeIcon },
+    { label: 'Price', value: 'Free', icon: DollarSign },
+    { label: 'Privacy', value: '100%', icon: Shield },
+    { label: 'Platform', value: 'All', icon: Globe }
   ]
 
   const howItWorks = [
     {
-      step: '1',
-      title: 'Create Your Account',
-      description: 'Sign up in seconds with just your name and email. No credit card required.',
-      icon: AddIcon
+      step: '01',
+      title: 'Sign Up',
+      description: 'Create your free account in seconds. No credit card needed.',
+      icon: Zap
     },
     {
-      step: '2',
-      title: 'Add Your Transactions',
-      description: 'Quickly log your income and expenses with our intuitive interface and number pad.',
-      icon: CreditCard
+      step: '02',
+      title: 'Add Data',
+      description: 'Log income and expenses quickly with our smart interface.',
+      icon: PlusIcon
     },
     {
-      step: '3',
-      title: 'Visualize & Analyze',
-      description: 'See your spending patterns through beautiful charts and get insights instantly.',
+      step: '03',
+      title: 'Analyze',
+      description: 'Get instant insights into your spending habits.',
       icon: BarChart3
-    },
-    {
-      step: '4',
-      title: 'Take Control',
-      description: 'Make better financial decisions with clear data and comprehensive summaries.',
-      icon: TrendingUp
-    }
-  ]
-
-  const benefits = [
-    {
-      icon: Zap,
-      title: 'Lightning Fast',
-      description: 'No loading times, no lag. Add transactions and see results instantly.'
-    },
-    {
-      icon: Shield,
-      title: 'Secure & Private',
-      description: 'Bank-level encryption. Your data is yours and only yours.'
-    },
-    {
-      icon: Smartphone,
-      title: 'Works Everywhere',
-      description: 'Perfect on mobile, tablet, and desktop. Track on the go or at home.'
-    },
-    {
-      icon: Moon,
-      title: 'Beautiful Design',
-      description: 'Clean, modern interface with dark mode. Easy on the eyes, easy to use.'
-    },
-    {
-      icon: DollarSign,
-      title: 'Free Forever',
-      description: 'No subscriptions, no hidden fees, no premium features. 100% free.'
-    },
-    {
-      icon: Eye,
-      title: 'Clear Insights',
-      description: 'See exactly where your money goes with detailed charts and breakdowns.'
-    }
-  ]
-
-  const faqs = [
-    {
-      question: 'Is Personal Budget really free?',
-      answer: 'Yes! 100% free, forever. No premium plans, no hidden fees, no credit card required. All features are available to everyone.'
-    },
-    {
-      question: 'Is my financial data secure?',
-      answer: 'Absolutely. We use bank-level encryption, JWT authentication, and modern security standards. Your data is encrypted and private.'
-    },
-    {
-      question: 'Can I use it on my phone?',
-      answer: 'Yes! Personal Budget is fully responsive and works beautifully on mobile, tablet, and desktop. Access your budget anywhere.'
-    },
-    {
-      question: 'Do I need to download anything?',
-      answer: 'No downloads needed! Personal Budget is a web app that works directly in your browser. Just sign up and start using it.'
-    },
-    {
-      question: 'Can I import my bank transactions?',
-      answer: 'Currently, you add transactions manually, which gives you full control and privacy. We\'re considering import features for future versions.'
-    },
-    {
-      question: 'How many categories can I create?',
-      answer: 'Unlimited! Create as many custom categories as you need to organize your finances exactly how you want.'
     }
   ]
 
@@ -231,490 +115,348 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
     {
       name: 'Sarah Johnson',
       role: 'Freelance Designer',
-      content: 'Finally, a budget app that doesn\'t overwhelm me! Super simple to use and the charts help me understand my spending patterns.',
+      content: "The most beautiful budget app I've ever used. It actually makes me want to track my finances.",
       rating: 5
     },
     {
       name: 'Michael Chen',
-      role: 'Software Developer',
-      content: 'I\'ve tried many budget apps, but this is the cleanest and fastest. The dark mode is perfect for late-night budget reviews.',
+      role: 'Software Engineer',
+      content: "Clean code, clean UI. The dark mode implementation is flawless. Exactly what I was looking for.",
       rating: 5
     },
     {
       name: 'Emma Williams',
       role: 'Small Business Owner',
-      content: 'Love that it\'s completely free with no catches. The category breakdown feature helped me save $500 last month!',
+      content: "Simple yet powerful. The installment tracking feature is a game changer for my business expenses.",
       rating: 5
     }
   ]
 
+  const faqs = [
+    {
+      question: 'Is Personal Budget really free?',
+      answer: 'Yes! 100% free, forever. We believe financial wellness should be accessible to everyone.'
+    },
+    {
+      question: 'Is my data secure?',
+      answer: 'Absolutely. We use bank-level encryption and strict privacy protocols. Your data is yours alone.'
+    },
+    {
+      question: 'Can I export my data?',
+      answer: 'Yes, you can export your transaction history at any time for your own records.'
+    }
+  ]
+
   return (
-    <Box minH="100vh" bgGradient={bgGradient} display="flex" flexDirection="column">
-      {/* Header */}
+    <Box minH="100vh" bg={useColorModeValue('gray.50', 'black')} overflowX="hidden">
       <Header onLogin={onGetStarted} />
 
       {/* Hero Section */}
-      <Box
-        as="section"
-        position="relative"
-        overflow="hidden"
-        bgGradient={useColorModeValue(
-          "linear(to-br, blue.50, purple.50, pink.50)",
-          "linear(to-br, gray.900, black, gray.800)"
-        )}
-      >
-        {/* Animated background effect */}
+      <Box position="relative" pt={{ base: 12, md: 20 }} pb={{ base: 10, md: 28 }}>
         <Box
           position="absolute"
-          inset={0}
-          bgGradient={useColorModeValue(
-            "radial(circle at 30% 30%, rgba(59,130,246,0.2), rgba(139,92,246,0.15), transparent 70%)",
-            "radial(circle at 20% 20%, rgba(59,130,246,0.25), transparent 70%)"
-          )}
-          animation="pulseBg 8s ease-in-out infinite"
-          sx={{
-            "@keyframes pulseBg": {
-              "0%, 100%": { transform: "scale(1)" },
-              "50%": { transform: "scale(1.05)" }
-            }
-          }}
+          top={0}
+          left={0}
+          right={0}
+          h="100vh"
+          bgGradient={heroGradient}
+          pointerEvents="none"
         />
-        <Container
-          maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }}
-          py={{ base: 14, sm: 20, md: 28 }}
-          px={{ base: 4, md: 8, lg: 12, xl: 16 }}
-          position="relative"
-          zIndex={1}
-        >
-          <VStack spacing={{ base: 6, sm: 8 }} textAlign="center">
-            {/* Title */}
-            <Heading
-              fontSize={{ base: "3xl", sm: "4xl", md: "6xl" }}
-              lineHeight="1.1"
-              fontWeight="extrabold"
-            >
-              <Text
-                as="span"
-                bgGradient="linear(to-r, blue.400, purple.400, pink.400)"
-                bgClip="text"
-                display="block"
-              >
-                Take Control of
-              </Text>
-              <Text
-                as="span"
-                color={useColorModeValue("gray.700", "gray.200")}
-                display="block"
-              >
-                Your Money, Today
-              </Text>
-            </Heading>
 
-            {/* Subheadline */}
-            <Text
-              fontSize={{ base: "md", sm: "lg", md: "xl" }}
-              color={useColorModeValue("gray.600", "gray.300")}
-              maxW="2xl"
-              lineHeight="1.6"
-            >
-              The simplest, fastest way to track income and expenses. 
-              Visualize your spending, make better decisions, and achieve your financial goals.
-            </Text>
+        {/* Abstract Shapes */}
+        <MotionBox
+          position="absolute"
+          top="20%"
+          right="10%"
+          w="500px"
+          h="500px"
+          bg="brand.400"
+          filter="blur(100px)"
+          opacity={0.1}
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <MotionBox
+          position="absolute"
+          bottom="20%"
+          left="10%"
+          w="400px"
+          h="400px"
+          bg="purple.500"
+          filter="blur(100px)"
+          opacity={0.1}
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [0, -90, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+        />
 
-            {/* Call to Actions */}
-            <VStack spacing={4} w={{ base: "full", sm: "auto" }}>
-              <MotionButton
-                size="lg"
-                colorScheme="brand"
-                rightIcon={<ArrowForwardIcon />}
-                onClick={onGetStarted}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                px={{ base: 8, sm: 10 }}
-                py={{ base: 6, sm: 7 }}
-                fontSize={{ base: "lg", sm: "xl" }}
-                fontWeight="700"
-                borderRadius="xl"
-                w={{ base: "full", sm: "auto" }}
-                bg="linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)"
-                _hover={{
-                  bg: "linear-gradient(135deg, #0284c7 0%, #2563eb 100%)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 10px 30px rgba(14, 165, 233, 0.5)",
-                }}
-                _active={{ transform: "translateY(0)" }}
-              >
-                Start Free Now
-              </MotionButton>
-
-              <HStack spacing={6} pt={2}>
-                <HStack spacing={2}>
-                  <CheckCircleIcon color="green.500" />
-                  <Text fontSize="sm" color={textColor}>No setup fees</Text>
-                </HStack>
-                <HStack spacing={2}>
-                  <CheckCircleIcon color="green.500" />
-                  <Text fontSize="sm" color={textColor}>No credit card</Text>
-                </HStack>
-                <HStack spacing={2}>
-                  <CheckCircleIcon color="green.500" />
-                  <Text fontSize="sm" color={textColor}>2 min setup</Text>
-                </HStack>
-              </HStack>
-            </VStack>
-          </VStack>
-        </Container>
-      </Box>
-
-      {/* Stats Section */}
-      <Box py={{ base: 12, md: 16 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <SimpleGrid columns={{ base: 2, md: 4 }} spacing={{ base: 6, md: 8 }}>
-            {stats.map((stat, index) => (
-              <MotionBox
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Stat textAlign="center">
-                  <Icon
-                    as={stat.icon}
-                    boxSize={8}
-                    color="blue.500"
-                    mb={3}
-                    mx="auto"
-                  />
-                  <StatNumber fontSize={{ base: "2xl", md: "3xl" }} fontWeight="bold">
-                    {stat.value}
-                  </StatNumber>
-                  <StatLabel fontSize={{ base: "sm", md: "md" }} fontWeight="600">
-                    {stat.label}
-                  </StatLabel>
-                  <StatHelpText fontSize="xs" color={textColor}>
-                    {stat.helpText}
-                  </StatHelpText>
-                </Stat>
-              </MotionBox>
-            ))}
-          </SimpleGrid>
-        </Container>
-      </Box>
-      {/* Features Section */}
-      <Box id="features" py={{ base: 12, sm: 16, md: 20, lg: 24 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <VStack spacing={{ base: 12, sm: 16 }}>
+        <Container maxW="container.xl" position="relative" zIndex={1}>
+          <VStack spacing={8} textAlign="center">
             <MotionBox
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              textAlign="center"
             >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                textTransform="uppercase"
-                color="blue.500"
-                mb={2}
-                letterSpacing="wider"
+              <Badge
+                px={4}
+                py={2}
+                rounded="full"
+                bg={useColorModeValue('white', 'whiteAlpha.100')}
+                color="brand.500"
+                border="1px solid"
+                borderColor={useColorModeValue('gray.200', 'whiteAlpha.200')}
+                mb={6}
+                boxShadow="sm"
               >
-                Features
-              </Text>
-              <Heading size={{ base: "xl", sm: "2xl" }} mb={{ base: 3, sm: 4 }}>
-                Everything You Need in One Place
+                The Future of Personal Finance
+              </Badge>
+              <Heading
+                as="h1"
+                fontSize={{ base: "4xl", md: "7xl" }}
+                fontWeight="900"
+                lineHeight="1.1"
+                letterSpacing="-0.02em"
+                mb={6}
+              >
+                Master Your Money <br />
+                <Text as="span" bgGradient="linear(to-r, brand.400, purple.500)" bgClip="text">
+                  With Elegance
+                </Text>
               </Heading>
-              <Text fontSize={{ base: "md", sm: "lg" }} color={textColor} maxW="2xl" mx="auto">
-                Powerful tools designed to make budget tracking effortless and effective
+              <Text
+                fontSize={{ base: "lg", md: "2xl" }}
+                color={textColor}
+                maxW="2xl"
+                mx="auto"
+                lineHeight="1.6"
+              >
+                Experience the perfect blend of power and simplicity.
+                Track, analyze, and grow your wealth with a tool designed for modern life.
               </Text>
             </MotionBox>
 
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={{ base: 6, md: 8 }} w="full">
-              {features.map((feature, index) => (
-                <MotionBox
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  p={{ base: 6, md: 8 }}
-                  rounded="2xl"
-                  shadow="lg"
-                  border="1px solid"
-                  borderColor={useColorModeValue('gray.200', 'gray.700')}
-                  _hover={{
-                    shadow: '2xl',
-                    transform: 'translateY(-8px)',
-                    borderColor: feature.color,
-                  }}
+            <MotionBox
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <HStack spacing={4} mt={8} justify="center" flexWrap="wrap">
+                <Button
+                  size="lg"
+                  h={14}
+                  px={10}
+                  fontSize="lg"
+                  colorScheme="brand"
+                  rounded="full"
+                  rightIcon={<ArrowForwardIcon />}
+                  onClick={onGetStarted}
+                  _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg' }}
+                  transition="all 0.2s"
                 >
-                  <VStack spacing={4} align="start">
-                    <Box color={feature.color}>
-                      {feature.icon}
-                    </Box>
-                    <Heading size="md" lineHeight="1.2">
-                      {feature.title}
-                    </Heading>
-                    <Text color={textColor} fontSize="sm" lineHeight="1.6">
-                      {feature.description}
-                    </Text>
-                    <List spacing={2} w="full">
-                      {feature.details.map((detail, idx) => (
-                        <ListItem key={idx} fontSize="sm">
-                          <ListIcon as={CheckCircleIcon} color={feature.color} />
-                          {detail}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </VStack>
-                </MotionBox>
-              ))}
-            </SimpleGrid>
-          </VStack>
-        </Container>
-      </Box>
-
-      {/* How It Works Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <VStack spacing={{ base: 12, sm: 16 }}>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              textAlign="center"
-            >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                textTransform="uppercase"
-                color="blue.500"
-                mb={2}
-                letterSpacing="wider"
-              >
-                How It Works
-              </Text>
-              <Heading size={{ base: "xl", sm: "2xl" }} mb={{ base: 3, sm: 4 }}>
-                Get Started in 4 Simple Steps
-              </Heading>
-              <Text fontSize={{ base: "md", sm: "lg" }} color={textColor} maxW="2xl" mx="auto">
-                From signup to insights in less than 2 minutes
-              </Text>
+                  Get Started Free
+                </Button>
+                <Button
+                  size="lg"
+                  h={14}
+                  px={10}
+                  fontSize="lg"
+                  variant="outline"
+                  rounded="full"
+                  leftIcon={<Icon as={CheckCircleIcon} />}
+                  borderColor={useColorModeValue('gray.300', 'whiteAlpha.300')}
+                  _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.100') }}
+                >
+                  No Credit Card
+                </Button>
+              </HStack>
             </MotionBox>
 
-            <Grid
-              templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }}
-              gap={{ base: 8, md: 6 }}
+            {/* Floating Stats Card */}
+            <MotionBox
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.4 }}
+              mt={20}
               w="full"
             >
-              {howItWorks.map((step, index) => (
-                <GridItem key={index}>
-                  <MotionBox
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: index * 0.15 }}
-                    viewport={{ once: true }}
+              <SimpleGrid
+                columns={{ base: 2, md: 4 }}
+                spacing={8}
+                bg={cardBg}
+                backdropFilter={cardBackdrop}
+                border="1px solid"
+                borderColor={cardBorder}
+                p={8}
+                rounded="3xl"
+                shadow="xl"
+              >
+                {stats.map((stat, idx) => (
+                  <VStack key={idx} spacing={2}>
+                    <Icon as={stat.icon} boxSize={6} color="brand.500" />
+                    <Text fontSize="3xl" fontWeight="bold">{stat.value}</Text>
+                    <Text fontSize="sm" color={textColor} textTransform="uppercase" letterSpacing="wide">
+                      {stat.label}
+                    </Text>
+                  </VStack>
+                ))}
+              </SimpleGrid>
+            </MotionBox>
+          </VStack>
+        </Container>
+      </Box>
+
+      {/* Features Section (Bento Grid) */}
+      <Box mb={{ base: 10, md: 20 }} position="relative">
+        <Container maxW="container.xl">
+          <VStack spacing={16}>
+            <Box textAlign="center" maxW="3xl" mx="auto">
+              <Text color="brand.500" fontWeight="bold" mb={2}>POWERFUL FEATURES</Text>
+              <Heading fontSize={{ base: "3xl", md: "5xl" }} mb={6}>Everything you need to succeed</Heading>
+              <Text fontSize="xl" color={textColor}>
+                We've stripped away the clutter to focus on what truly matters: your financial clarity.
+              </Text>
+            </Box>
+
+            <Grid
+              templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }}
+              gap={6}
+              w="full"
+            >
+              {features.map((feature, idx) => (
+                <GridItem
+                  key={idx}
+                  colSpan={{ base: 1, md: feature.colSpan }}
+                  as={motion.div}
+                  whileHover={{ y: -5 }}
+                  transition="0.2s"
+                >
+                  <Box
+                    h="full"
+                    p={8}
+                    bg={cardBg}
+                    backdropFilter={cardBackdrop}
+                    border="1px solid"
+                    borderColor={cardBorder}
+                    rounded="3xl"
+                    position="relative"
+                    overflow="hidden"
                   >
-                    <VStack spacing={4}>
-                      <Box
-                        position="relative"
-                        w="full"
-                        display="flex"
-                        justifyContent="center"
-                      >
-                        <Box
-                          bg="blue.500"
-                          color="white"
-                          borderRadius="full"
-                          w={16}
-                          h={16}
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          fontSize="2xl"
-                          fontWeight="bold"
-                          shadow="lg"
-                        >
-                          {step.step}
-                        </Box>
-                        {index < howItWorks.length - 1 && (
-                          <Icon
-                            as={ChevronRightIcon}
-                            position="absolute"
-                            right={{ base: "-20%", md: "-50%" }}
-                            top="50%"
-                            transform="translateY(-50%) rotate(90deg)"
-                            boxSize={8}
-                            color="blue.300"
-                            display={{ base: "none", md: "block" }}
-                          />
-                        )}
+                    <Box
+                      position="absolute"
+                      top={0}
+                      right={0}
+                      p={8}
+                      opacity={0.05}
+                      transform="scale(1.5)"
+                      transition="0.5s"
+                      _groupHover={{ transform: "scale(2) rotate(10deg)", opacity: 0.1 }}
+                    >
+                      <Icon as={feature.icon} boxSize={32} />
+                    </Box>
+
+                    <VStack align="start" spacing={6} position="relative" zIndex={1}>
+                      <Circle size={12} bg={useColorModeValue('white', 'whiteAlpha.100')} shadow="sm">
+                        <Icon as={feature.icon} color={feature.color} boxSize={6} />
+                      </Circle>
+                      <Box>
+                        <Heading size="lg" mb={3}>{feature.title}</Heading>
+                        <Text color={textColor} fontSize="lg">{feature.description}</Text>
                       </Box>
-                      <VStack spacing={2} textAlign="center">
-                        <Heading size="sm">{step.title}</Heading>
-                        <Text fontSize="sm" color={textColor} px={2}>
-                          {step.description}
-                        </Text>
-                      </VStack>
                     </VStack>
-                  </MotionBox>
+                  </Box>
                 </GridItem>
               ))}
             </Grid>
-
-            <MotionButton
-              size="lg"
-              colorScheme="blue"
-              rightIcon={<ArrowForwardIcon />}
-              onClick={onGetStarted}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              px={10}
-              py={7}
-              fontSize="lg"
-              fontWeight="600"
-              borderRadius="xl"
-              mt={8}
-            >
-              Start Your Journey
-            </MotionButton>
           </VStack>
         </Container>
       </Box>
 
-      {/* Benefits Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <VStack spacing={{ base: 12, sm: 16 }}>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              textAlign="center"
-            >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                textTransform="uppercase"
-                color="blue.500"
-                mb={2}
-                letterSpacing="wider"
-              >
-                Why Choose Us
-              </Text>
-              <Heading size={{ base: "xl", sm: "2xl" }} mb={{ base: 3, sm: 4 }}>
-                Built for Modern Financial Management
-              </Heading>
-              <Text fontSize={{ base: "md", sm: "lg" }} color={textColor} maxW="2xl" mx="auto">
-                The perfect balance of simplicity, power, and privacy
-              </Text>
-            </MotionBox>
+      {/* How It Works */}
+      <Box py={12} mb={{ base: 10, md: 20 }} >
+        <Container maxW="container.xl">
+          <VStack spacing={16}>
+            <Box textAlign="center">
+              <Heading fontSize={{ base: "3xl", md: "5xl" }} mb={6}>How it works</Heading>
+              <Text fontSize="xl" color={textColor}>Three simple steps to financial freedom</Text>
+            </Box>
 
-            <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} spacing={{ base: 6, md: 8 }} w="full">
-              {benefits.map((benefit, index) => (
-                <MotionBox
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  p={{ base: 6, md: 8 }}
-                  bg={cardBg}
-                  rounded="2xl"
-                  shadow="md"
-                  textAlign="center"
-                  border="1px solid"
-                  borderColor={useColorModeValue('gray.200', 'gray.700')}
-                  _hover={{
-                    shadow: 'xl',
-                    transform: 'translateY(-6px)',
-                  }}
-                >
-                  <VStack spacing={4}>
-                    <Box
-                      bg={useColorModeValue('blue.50', 'blue.900')}
-                      p={4}
-                      borderRadius="full"
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={12} w="full" position="relative">
+              {/* Connecting Line (Desktop) */}
+              <Box
+                display={{ base: 'none', md: 'block' }}
+                position="absolute"
+                top="40px"
+                left="10%"
+                right="10%"
+                h="2px"
+                bgGradient="linear(to-r, brand.500, purple.500)"
+                opacity={0.2}
+                zIndex={0}
+              />
+
+              {howItWorks.map((item, idx) => (
+                <VStack key={idx} spacing={6} position="relative" zIndex={1}>
+                  <Circle
+                    size={20}
+                    bg={useColorModeValue('white', 'gray.800')}
+                    border="4px solid"
+                    borderColor="brand.500"
+                    shadow="xl"
+                  >
+                    <Icon as={item.icon} boxSize={8} color="brand.500" />
+                  </Circle>
+                  <Box textAlign="center">
+                    <Text
+                      fontSize="sm"
+                      fontWeight="bold"
+                      color="brand.500"
+                      textTransform="uppercase"
+                      mb={2}
                     >
-                      <Icon as={benefit.icon} boxSize={8} color="blue.500" />
-                    </Box>
-                    <Heading size="md" lineHeight="1.2">
-                      {benefit.title}
-                    </Heading>
-                    <Text color={textColor} fontSize="sm" lineHeight="1.6">
-                      {benefit.description}
+                      Step {item.step}
                     </Text>
-                  </VStack>
-                </MotionBox>
+                    <Heading size="md" mb={3}>{item.title}</Heading>
+                    <Text color={textColor}>{item.description}</Text>
+                  </Box>
+                </VStack>
               ))}
             </SimpleGrid>
           </VStack>
         </Container>
       </Box>
 
-      {/* Testimonials Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", xl: "1400px", "2xl": "1600px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <VStack spacing={{ base: 12, sm: 16 }}>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              textAlign="center"
-            >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                textTransform="uppercase"
-                color="blue.500"
-                mb={2}
-                letterSpacing="wider"
-              >
-                Testimonials
-              </Text>
-              <Heading size={{ base: "xl", sm: "2xl" }} mb={{ base: 3, sm: 4 }}>
-                Loved by Users Worldwide
-              </Heading>
-              <Text fontSize={{ base: "md", sm: "lg" }} color={textColor} maxW="2xl" mx="auto">
-                See what others are saying about Personal Budget
-              </Text>
-            </MotionBox>
+      {/* Testimonials */}
+      <Box py={12} mb={{ base: 10, md: 20 }} position="relative" overflow="hidden">
+        <Container maxW="container.xl">
+          <VStack spacing={16}>
+            <Heading fontSize={{ base: "3xl", md: "5xl" }} textAlign="center">Loved by thousands</Heading>
 
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={{ base: 6, md: 8 }} w="full">
-              {testimonials.map((testimonial, index) => (
+            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={8} w="full">
+              {testimonials.map((t, idx) => (
                 <MotionBox
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.15 }}
-                  viewport={{ once: true }}
-                  p={{ base: 6, md: 8 }}
+                  key={idx}
+                  whileHover={{ y: -10 }}
+                  p={8}
                   bg={cardBg}
+                  backdropFilter={cardBackdrop}
+                  border="1px solid"
+                  borderColor={cardBorder}
                   rounded="2xl"
                   shadow="lg"
-                  border="1px solid"
-                  borderColor={useColorModeValue('gray.200', 'gray.700')}
                 >
-                  <VStack spacing={4} align="start">
-                    <HStack spacing={1}>
-                      {[...Array(testimonial.rating)].map((_, i) => (
-                        <StarIcon key={i} color="yellow.400" boxSize={4} />
-                      ))}
+                  <VStack align="start" spacing={4}>
+                    <HStack color="yellow.400">
+                      {[...Array(t.rating)].map((_, i) => <StarIcon key={i} />)}
                     </HStack>
-                    <Text color={textColor} fontSize="sm" lineHeight="1.7" fontStyle="italic">
-                      "{testimonial.content}"
-                    </Text>
-                    <Box>
-                      <Text fontWeight="bold" fontSize="sm">
-                        {testimonial.name}
-                      </Text>
-                      <Text fontSize="xs" color={textColor}>
-                        {testimonial.role}
-                      </Text>
+                    <Text fontSize="lg" fontStyle="italic" color={textColor}>"{t.content}"</Text>
+                    <Box pt={4}>
+                      <Text fontWeight="bold">{t.name}</Text>
+                      <Text fontSize="sm" color="brand.500">{t.role}</Text>
                     </Box>
                   </VStack>
                 </MotionBox>
@@ -724,63 +466,30 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
         </Container>
       </Box>
 
-      {/* FAQ Section */}
-      <Box py={{ base: 12, sm: 16, md: 20 }} bg={cardBg}>
-        <Container maxW={{ base: "100%", lg: "900px", xl: "1000px", "2xl": "1200px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }}>
-          <VStack spacing={{ base: 8, md: 12 }}>
-            <MotionBox
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              textAlign="center"
-            >
-              <Text
-                fontSize="sm"
-                fontWeight="bold"
-                textTransform="uppercase"
-                color="blue.500"
-                mb={2}
-                letterSpacing="wider"
-              >
-                FAQ
-              </Text>
-              <Heading size={{ base: "xl", sm: "2xl" }} mb={{ base: 3, sm: 4 }}>
-                Frequently Asked Questions
-              </Heading>
-              <Text fontSize={{ base: "md", sm: "lg" }} color={textColor}>
-                Everything you need to know about Personal Budget
-              </Text>
-            </MotionBox>
+      {/* FAQ */}
+      <Box py={12} mb={{ base: 10, md: 20 }}>
+        <Container maxW="container.md">
+          <VStack spacing={12}>
+            <Heading fontSize={{ base: "3xl", md: "4xl" }} textAlign="center">Common Questions</Heading>
 
             <Accordion allowToggle w="full">
-              {faqs.map((faq, index) => (
+              {faqs.map((faq, idx) => (
                 <AccordionItem
-                  key={index}
+                  key={idx}
                   border="none"
                   mb={4}
-                  bg={cardBg}
+                  bg={useColorModeValue('white', 'gray.900')}
                   rounded="xl"
                   shadow="sm"
                 >
-                  <AccordionButton
-                    p={6}
-                    _hover={{
-                      bg: useColorModeValue('gray.50', 'gray.700'),
-                    }}
-                    borderRadius="xl"
-                  >
-                    <Box flex="1" textAlign="left">
-                      <Heading size="sm" fontWeight="600">
-                        {faq.question}
-                      </Heading>
+                  <AccordionButton p={6} _hover={{ bg: useColorModeValue('gray.50', 'gray.800') }} rounded="xl">
+                    <Box flex="1" textAlign="left" fontWeight="bold">
+                      {faq.question}
                     </Box>
                     <AccordionIcon />
                   </AccordionButton>
-                  <AccordionPanel pb={6} px={6}>
-                    <Text color={textColor} fontSize="sm" lineHeight="1.7">
-                      {faq.answer}
-                    </Text>
+                  <AccordionPanel pb={6} px={6} color={textColor}>
+                    {faq.answer}
                   </AccordionPanel>
                 </AccordionItem>
               ))}
@@ -790,125 +499,71 @@ export default function LandingPage({ onGetStarted }: { onGetStarted: () => void
       </Box>
 
       {/* CTA Section */}
-      <Box 
-        py={{ base: 16, sm: 20, md: 24 }}
-        bgGradient={useColorModeValue(
-          'linear(to-br, blue.500, purple.600)',
-          'linear(to-br, blue.600, purple.900)'
-        )}
-        position="relative"
-        overflow="hidden"
-      >
-        {/* Decorative elements */}
+      <Box py={20} mb={{ base: 10, md: 20 }} position="relative" overflow="hidden">
         <Box
           position="absolute"
           inset={0}
-          opacity={0.1}
-          bgImage="radial-gradient(circle at 20px 20px, white 2px, transparent 0)"
-          bgSize="40px 40px"
+          bgGradient="linear(to-r, brand.600, purple.600)"
+          opacity={0.9}
         />
-        
-        <Container maxW={{ base: "100%", lg: "1000px", xl: "1100px", "2xl": "1300px" }} px={{ base: 4, md: 8, lg: 12, xl: 16 }} position="relative" zIndex={1}>
-          <MotionBox
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            textAlign="center"
-          >
-            <VStack spacing={{ base: 6, sm: 8 }}>
-              <Badge
-                colorScheme="whiteAlpha"
-                fontSize="sm"
-                px={4}
-                py={2}
-                borderRadius="full"
-                textTransform="uppercase"
-                fontWeight="bold"
-                bg="whiteAlpha.300"
-                color="white"
-              >
-                Join Thousands of Happy Users
-              </Badge>
-              
-              <Heading 
-                size={{ base: "xl", sm: "2xl", md: "3xl" }}
-                color="white"
-                lineHeight="1.2"
-              >
-                Ready to Transform Your
-                <br />
-                Financial Future?
-              </Heading>
-              
-              <Text 
-                fontSize={{ base: "md", sm: "lg", md: "xl" }}
-                color="whiteAlpha.900"
-                maxW="2xl"
-                lineHeight="1.6"
-              >
-                Start tracking your money smarter today. Join for free and take
-                the first step toward financial freedom.
-              </Text>
+        <Box
+          position="absolute"
+          inset={0}
+          bgImage="url('https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=2000&q=80')"
+          bgSize="cover"
+          bgPosition="center"
+          opacity={0.2}
+          mixBlendMode="overlay"
+        />
 
-              <VStack spacing={4} pt={4}>
-                <MotionButton
-                  size="lg"
-                  onClick={onGetStarted}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  px={{ base: 10, md: 12 }}
-                  py={{ base: 7, md: 8 }}
-                  fontSize={{ base: "lg", md: "xl" }}
-                  fontWeight="700"
-                  borderRadius="xl"
-                  bg="white"
-                  color="blue.600"
-                  rightIcon={<ArrowForwardIcon />}
-                  _hover={{
-                    bg: 'whiteAlpha.900',
-                    boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
-                  }}
-                  _active={{ transform: "translateY(0)" }}
-                  shadow="2xl"
-                >
-                  Start Free Now
-                </MotionButton>
-
-                <HStack spacing={4} pt={2} flexWrap="wrap" justify="center">
-                  <HStack spacing={2}>
-                    <CheckCircleIcon color="white" />
-                    <Text fontSize="sm" color="white" fontWeight="500">
-                      Free forever
-                    </Text>
-                  </HStack>
-                  <HStack spacing={2}>
-                    <CheckCircleIcon color="white" />
-                    <Text fontSize="sm" color="white" fontWeight="500">
-                      No credit card
-                    </Text>
-                  </HStack>
-                  <HStack spacing={2}>
-                    <CheckCircleIcon color="white" />
-                    <Text fontSize="sm" color="white" fontWeight="500">
-                      Setup in 2 minutes
-                    </Text>
-                  </HStack>
-                </HStack>
-              </VStack>
-
-              <Box pt={6}>
-                <Text fontSize="xs" color="whiteAlpha.800">
-                  🔒 Your data is encrypted and secure • 🌍 Access from anywhere • 📱 Works on all devices
-                </Text>
-              </Box>
-            </VStack>
-          </MotionBox>
+        <Container maxW="container.xl" position="relative" zIndex={1}>
+          <VStack spacing={8} textAlign="center" color="white">
+            <Heading fontSize={{ base: "4xl", md: "6xl" }}>
+              Ready to take control?
+            </Heading>
+            <Text fontSize="xl" maxW="2xl" opacity={0.9}>
+              Join thousands of users who are mastering their money with Personal Budget.
+              Free forever. No credit card required.
+            </Text>
+            <Button
+              size="lg"
+              h={16}
+              px={12}
+              fontSize="xl"
+              bg="white"
+              color="brand.600"
+              _hover={{ bg: 'gray.100', transform: 'scale(1.05)' }}
+              onClick={onGetStarted}
+              rounded="full"
+              shadow="2xl"
+              rightIcon={<ArrowForwardIcon />}
+            >
+              Start Your Journey Now
+            </Button>
+          </VStack>
         </Container>
       </Box>
 
-      {/* Footer */}
       <Footer />
     </Box>
   )
+}
+
+function Badge({ children, ...props }: any) {
+  return (
+    <Box
+      as="span"
+      display="inline-flex"
+      alignItems="center"
+      fontSize="sm"
+      fontWeight="bold"
+      {...props}
+    >
+      {children}
+    </Box>
+  )
+}
+
+function PlusIcon(props: any) {
+  return <Icon viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}><path d="M12 5v14M5 12h14" /></Icon>
 }
