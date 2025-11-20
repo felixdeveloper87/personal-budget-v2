@@ -16,15 +16,15 @@ interface SummaryCardsGridProps {
   onCardClick: (cardId: string) => void
 }
 
-export default function SummaryCardsGrid({ 
-  transactions, 
-  income, 
-  expense, 
-  balance, 
-  onCardClick 
+export default function SummaryCardsGrid({
+  transactions,
+  income,
+  expense,
+  balance,
+  onCardClick
 }: SummaryCardsGridProps) {
   const responsiveStyles = getResponsiveStyles()
-  
+
   // ✅ Define stats usando cores centralizadas
   const stats: {
     id: CardId
@@ -90,7 +90,6 @@ export default function SummaryCardsGrid({
           <SummaryCard
             key={stat.id}
             stat={stat}
-            index={index}
             onCardClick={onCardClick}
           />
         ))}

@@ -139,11 +139,11 @@ export const getTransactionModalHeaderStyles = (useColorModeValue: any, type: 'I
   // Cores específicas para cada tipo de transação
   const incomeGradient = useColorModeValue(
     'linear-gradient(135deg, rgb(220, 252, 231) 0%, rgb(134, 239, 172) 30%, rgb(34, 197, 94) 70%)',
-    'linear-gradient(135deg, rgb(16, 96, 48) 0%, rgb(22, 101, 52) 30%, rgb(21, 128, 61) 70%)' 
+    'linear-gradient(135deg, rgb(16, 96, 48) 0%, rgb(22, 101, 52) 30%, rgb(21, 128, 61) 70%)'
   )
 
   const expenseGradient = useColorModeValue(
-    'linear-gradient(135deg, rgb(255, 142, 142) 0%, rgb(206, 143, 143) 30%, rgb(248, 113, 113) 70%)', 
+    'linear-gradient(135deg, rgb(255, 142, 142) 0%, rgb(206, 143, 143) 30%, rgb(248, 113, 113) 70%)',
     'linear-gradient(135deg, rgb(215, 89, 89) 0%, rgb(154, 54, 54) 30%, rgb(201, 66, 66) 70%)'
   )
 
@@ -410,8 +410,8 @@ export const getResponsiveStyles = () => ({
       padding: { base: 3, sm: 4, md: 6 }
     },
     grid: {
-      columns: { base: 4, sm: 4, md: 4 },
-      spacing: { base: 1, sm: 1.5, md: 4 }
+      columns: { base: 2, sm: 2, md: 4, lg: 4 },
+      spacing: { base: 3, sm: 4, md: 4, lg: 6 }
     },
     card: {
       padding: { base: 2, sm: 3, md: 5 },

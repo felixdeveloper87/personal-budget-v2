@@ -93,16 +93,16 @@ export default function PeriodNavigator({
         pointerEvents="none"
       />
 
-      <Flex 
-        direction={{ base: 'column', lg: 'row' }} 
-        align={{ base: 'stretch', lg: 'center' }} 
+      <Flex
+        direction={{ base: 'column', xl: 'row' }}
+        align={{ base: 'stretch', xl: 'center' }}
         justify="space-between"
-        gap={4}
-        position="relative" 
+        gap={{ base: 3, md: 4 }}
+        position="relative"
         zIndex={1}
       >
         {/* Left Side - Label (Desktop Only) */}
-        <HStack spacing={3} display={{ base: 'none', lg: 'flex' }} minW="fit-content">
+        <HStack spacing={3} display={{ base: 'none', xl: 'flex' }} minW="fit-content">
           <Box
             p={2.5}
             borderRadius="xl"
@@ -135,140 +135,140 @@ export default function PeriodNavigator({
           {/* Period Selection Pills */}
           <Box
             bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.50')}
-          p={1}
-          borderRadius="xl"
-          border="1px solid"
-          borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
-        >
-          {isMobile ? (
-            <SimpleGrid columns={4} spacing={1}>
-              {periods.map(({ type, label, icon: IconComp }) => {
-                const selected = selectedPeriod === type
-                return (
-                  <Button
-                    key={type}
-                    size="sm"
-                    h="36px"
-                    borderRadius="lg"
-                    onClick={() => onPeriodChange(type)}
-                    bg={selected ? selectedBg : 'transparent'}
-                    color={selected ? 'white' : useColorModeValue('gray.600', 'gray.400')}
-                    _hover={{
-                      bg: selected ? selectedBg : useColorModeValue('whiteAlpha.800', 'whiteAlpha.100'),
-                    }}
-                    _active={{ transform: 'scale(0.95)' }}
-                    transition="all 0.2s ease"
-                    boxShadow={selected ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none'}
-                  >
-                    <VStack spacing={0}>
-                      <Icon as={IconComp} boxSize={4} strokeWidth={2.5} />
-                    </VStack>
-                  </Button>
-                )
-              })}
-            </SimpleGrid>
-          ) : (
-            <HStack spacing={1}>
-              {periods.map(({ type, label, icon: IconComp }) => {
-                const selected = selectedPeriod === type
-                return (
-                  <Button
-                    key={type}
-                    flex={1}
-                    h="36px"
-                    borderRadius="lg"
-                    leftIcon={<Icon as={IconComp} boxSize={4} strokeWidth={2.5} />}
-                    onClick={() => onPeriodChange(type)}
-                    bg={selected ? selectedBg : 'transparent'}
-                    color={selected ? 'white' : useColorModeValue('gray.600', 'gray.400')}
-                    fontWeight={selected ? '600' : '500'}
-                    _hover={{
-                      bg: selected ? selectedBg : useColorModeValue('whiteAlpha.800', 'whiteAlpha.100'),
-                      transform: 'translateY(-1px)'
-                    }}
-                    _active={{ transform: 'scale(0.98)' }}
-                    transition="all 0.2s ease"
-                    boxShadow={selected ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none'}
-                  >
-                    {label}
-                  </Button>
-                )
-              })}
-            </HStack>
-          )}
-        </Box>
-
-        {/* Date Navigation */}
-        <HStack spacing={3} justify="space-between" w="full">
-          <IconButton
-            aria-label="Previous period"
-            icon={<Icon as={ArrowLeft} boxSize={5} strokeWidth={2.5} />}
-            onClick={() => onNavigatePeriod('prev')}
-            variant="ghost"
-            isRound
-            size="md"
-            color={useColorModeValue('gray.600', 'gray.400')}
-            _hover={{
-              bg: useColorModeValue('whiteAlpha.800', 'whiteAlpha.200'),
-              color: 'blue.500',
-              transform: 'translateX(-2px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }}
-            transition="all 0.2s ease"
-          />
-
-          <HStack
-            flex="1"
-            justify="center"
-            spacing={3}
-            py={2}
-            px={4}
+            p={1}
             borderRadius="xl"
-            bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.50')}
             border="1px solid"
             borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
-            backdropFilter="blur(10px)"
-            transition="all 0.2s ease"
-            _hover={{
-              borderColor: 'blue.400',
-              boxShadow: '0 4px 15px rgba(59, 130, 246, 0.15)'
-            }}
           >
-            <Icon as={CalendarClock} boxSize={5} color="blue.500" />
-            <Text
-              fontSize={{ base: 'sm', md: 'md' }}
-              fontWeight="700"
-              bgGradient={useColorModeValue(
-                'linear(to-r, gray.800, gray.600)',
-                'linear(to-r, white, gray.300)'
-              )}
-              bgClip="text"
-              fontFamily="system-ui, -apple-system, sans-serif"
-              letterSpacing="wide"
-            >
-              {formatLabel()}
-            </Text>
-          </HStack>
+            {isMobile ? (
+              <SimpleGrid columns={4} spacing={1}>
+                {periods.map(({ type, label, icon: IconComp }) => {
+                  const selected = selectedPeriod === type
+                  return (
+                    <Button
+                      key={type}
+                      size="sm"
+                      h="36px"
+                      borderRadius="lg"
+                      onClick={() => onPeriodChange(type)}
+                      bg={selected ? selectedBg : 'transparent'}
+                      color={selected ? 'white' : useColorModeValue('gray.600', 'gray.400')}
+                      _hover={{
+                        bg: selected ? selectedBg : useColorModeValue('whiteAlpha.800', 'whiteAlpha.100'),
+                      }}
+                      _active={{ transform: 'scale(0.95)' }}
+                      transition="all 0.2s ease"
+                      boxShadow={selected ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none'}
+                    >
+                      <VStack spacing={0}>
+                        <Icon as={IconComp} boxSize={4} strokeWidth={2.5} />
+                      </VStack>
+                    </Button>
+                  )
+                })}
+              </SimpleGrid>
+            ) : (
+              <HStack spacing={1}>
+                {periods.map(({ type, label, icon: IconComp }) => {
+                  const selected = selectedPeriod === type
+                  return (
+                    <Button
+                      key={type}
+                      flex={1}
+                      h="36px"
+                      borderRadius="lg"
+                      leftIcon={<Icon as={IconComp} boxSize={4} strokeWidth={2.5} />}
+                      onClick={() => onPeriodChange(type)}
+                      bg={selected ? selectedBg : 'transparent'}
+                      color={selected ? 'white' : useColorModeValue('gray.600', 'gray.400')}
+                      fontWeight={selected ? '600' : '500'}
+                      _hover={{
+                        bg: selected ? selectedBg : useColorModeValue('whiteAlpha.800', 'whiteAlpha.100'),
+                        transform: 'translateY(-1px)'
+                      }}
+                      _active={{ transform: 'scale(0.98)' }}
+                      transition="all 0.2s ease"
+                      boxShadow={selected ? '0 4px 12px rgba(37, 99, 235, 0.3)' : 'none'}
+                    >
+                      {label}
+                    </Button>
+                  )
+                })}
+              </HStack>
+            )}
+          </Box>
 
-          <IconButton
-            aria-label="Next period"
-            icon={<Icon as={ArrowRight} boxSize={5} strokeWidth={2.5} />}
-            onClick={() => onNavigatePeriod('next')}
-            variant="ghost"
-            isRound
-            size="md"
-            color={useColorModeValue('gray.600', 'gray.400')}
-            _hover={{
-              bg: useColorModeValue('whiteAlpha.800', 'whiteAlpha.200'),
-              color: 'blue.500',
-              transform: 'translateX(2px)',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-            }}
-            transition="all 0.2s ease"
-          />
-        </HStack>
-      </VStack>
-    </Flex>
+          {/* Date Navigation */}
+          <HStack spacing={3} justify="space-between" w="full">
+            <IconButton
+              aria-label="Previous period"
+              icon={<Icon as={ArrowLeft} boxSize={5} strokeWidth={2.5} />}
+              onClick={() => onNavigatePeriod('prev')}
+              variant="ghost"
+              isRound
+              size="md"
+              color={useColorModeValue('gray.600', 'gray.400')}
+              _hover={{
+                bg: useColorModeValue('whiteAlpha.800', 'whiteAlpha.200'),
+                color: 'blue.500',
+                transform: 'translateX(-2px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}
+              transition="all 0.2s ease"
+            />
+
+            <HStack
+              flex="1"
+              justify="center"
+              spacing={3}
+              py={2}
+              px={4}
+              borderRadius="xl"
+              bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.50')}
+              border="1px solid"
+              borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
+              backdropFilter="blur(10px)"
+              transition="all 0.2s ease"
+              _hover={{
+                borderColor: 'blue.400',
+                boxShadow: '0 4px 15px rgba(59, 130, 246, 0.15)'
+              }}
+            >
+              <Icon as={CalendarClock} boxSize={5} color="blue.500" />
+              <Text
+                fontSize={{ base: 'sm', md: 'md' }}
+                fontWeight="700"
+                bgGradient={useColorModeValue(
+                  'linear(to-r, gray.800, gray.600)',
+                  'linear(to-r, white, gray.300)'
+                )}
+                bgClip="text"
+                fontFamily="system-ui, -apple-system, sans-serif"
+                letterSpacing="wide"
+              >
+                {formatLabel()}
+              </Text>
+            </HStack>
+
+            <IconButton
+              aria-label="Next period"
+              icon={<Icon as={ArrowRight} boxSize={5} strokeWidth={2.5} />}
+              onClick={() => onNavigatePeriod('next')}
+              variant="ghost"
+              isRound
+              size="md"
+              color={useColorModeValue('gray.600', 'gray.400')}
+              _hover={{
+                bg: useColorModeValue('whiteAlpha.800', 'whiteAlpha.200'),
+                color: 'blue.500',
+                transform: 'translateX(2px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+              }}
+              transition="all 0.2s ease"
+            />
+          </HStack>
+        </VStack>
+      </Flex>
     </Box>
   )
 }
