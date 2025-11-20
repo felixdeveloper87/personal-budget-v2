@@ -11,5 +11,7 @@ export interface CategoryIncomeItemProps {
   percentage: number
   color: string
   onClick: () => void
+  isExpanded?: boolean
+  transactions?: Transaction[]
 }
 

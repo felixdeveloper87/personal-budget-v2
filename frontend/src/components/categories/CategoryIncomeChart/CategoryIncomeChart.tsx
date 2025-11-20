@@ -26,6 +26,7 @@ import { CategoryIncomeChartEmptyState } from './CategoryIncomeChartEmptyState'
 export default function CategoryIncomeChart({ transactions, selectedPeriod }: CategoryIncomeChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const responsiveStyles = getResponsiveStyles()
   const isMobile = useBreakpointValue({ base: true, md: false })
   const titleText = useBreakpointValue({ base: 'Incomes', sm: 'Income Analysis' })
@@ -45,16 +46,24 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
 
   const handleCategoryClick = useCallback(
     (category: string) => {
-      setSelectedCategory(category)
-      onOpen()
+      // Toggle expand/collapse instead of opening modal
+      setExpandedCategory(prev => prev === category ? null : category)
     },
-    [onOpen]
+    []
   )
 
   const handleViewAllClick = useCallback(() => {
     setSelectedCategory(undefined)
+    setExpandedCategory(null)
     onOpen()
   }, [onOpen])
+
+  // Get transactions for a specific category
+  const getCategoryTransactions = useCallback((category: string) => {
+    return transactions.filter(
+      tx => tx.type === 'INCOME' && (tx.category || 'Uncategorized') === category
+    )
+  }, [transactions])
 
   // Memoized visible categories
   const visibleCategories = useMemo(
@@ -74,7 +83,6 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
     <>
       <Card
         bg={cardBg}
-        ml={{ base: 2, sm: 5 }}
         w="full"
         borderRadius="2xl"
         shadow="2xl"
@@ -95,8 +103,8 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
       >
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
-            <Box p={2}>
-              <VStack spacing={4} align="stretch">
+            <Box p={{ base: 4, sm: 6 }}>
+              <VStack spacing={6} align="stretch">
                 {/* Header Component */}
                 <CategoryIncomeChartHeader
                   title={titleText || 'Incomes'}
@@ -112,6 +120,8 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
                   {visibleCategories.map(({ category, amount }, index) => {
                     const percentage = totalIncome > 0 ? (amount / totalIncome) * 100 : 0
                     const color = INCOME_CATEGORY_COLORS[index % INCOME_CATEGORY_COLORS.length]
+                    const isExpanded = expandedCategory === category
+                    const categoryTransactions = getCategoryTransactions(category)
 
                     return (
                       <CategoryIncomeItem
@@ -121,6 +131,8 @@ export default function CategoryIncomeChart({ transactions, selectedPeriod }: Ca
                         percentage={percentage}
                         color={color}
                         onClick={() => handleCategoryClick(category)}
+                        isExpanded={isExpanded}
+                        transactions={categoryTransactions}
                       />
                     )
                   })}

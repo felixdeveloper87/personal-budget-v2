@@ -1,7 +1,8 @@
-import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge } from '@chakra-ui/react'
-import { TrendingDown, Eye } from 'lucide-react'
+import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge, Image } from '@chakra-ui/react'
+import { Eye } from 'lucide-react'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
+import trendingDownImage from '../../../../assets/trendingDown.png'
 
 interface CategoryExpenseChartHeaderProps {
   title: string
@@ -30,7 +31,22 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
       justify="space-between"
       w="full"
     >
-      <HStack spacing={4}>
+      <HStack spacing={2}>
+        <Box
+          p={2}
+          bg="transparent"
+          borderRadius="xl"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Image
+            src={trendingDownImage}
+            alt="Expenses"
+            boxSize={{ base: 8, sm: 6, md: 10 }}
+            objectFit="contain"
+          />
+        </Box>
 
         <VStack align="start" spacing={0.5}>
           <Text
@@ -57,15 +73,7 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
             {selectedPeriod} • £{totalExpenses.toLocaleString()}
           </Text>
         </VStack>
-        <Box
-          p={2.5}
-          bg={useColorModeValue('red.50', 'whiteAlpha.100')}
-          color={useColorModeValue('red.500', 'red.300')}
-          borderRadius="xl"
-          boxShadow="0 4px 12px rgba(239, 68, 68, 0.15)"
-        >
-          <Icon as={TrendingDown} boxSize={3} strokeWidth={2.5} />
-        </Box>
+
         <Badge
           colorScheme="gray"
           variant="subtle"

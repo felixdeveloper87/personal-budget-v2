@@ -1,7 +1,8 @@
-import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge } from '@chakra-ui/react'
-import { TrendingUp, Eye } from 'lucide-react'
+import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge, Image } from '@chakra-ui/react'
+import { Eye } from 'lucide-react'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
+import trendingUpImage from '../../../../assets/trendingUp.png'
 
 interface CategoryIncomeChartHeaderProps {
   title: string
@@ -31,6 +32,21 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
       w="full"
     >
       <HStack spacing={4}>
+        <Box
+          p={2}
+          bg="transparent"
+          borderRadius="xl"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <Image
+            src={trendingUpImage}
+            alt="Income"
+            boxSize={{ base: 5, sm: 6, md: 10 }}
+            objectFit="contain"
+          />
+        </Box>
         <VStack align="start" spacing={0.5}>
           <Text
             fontWeight="700"
@@ -56,15 +72,6 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
             {selectedPeriod} • £{totalIncome.toLocaleString()}
           </Text>
         </VStack>
-        <Box
-          p={2.5}
-          bg={useColorModeValue('green.50', 'whiteAlpha.100')}
-          color={useColorModeValue('green.500', 'green.300')}
-          borderRadius="xl"
-          boxShadow="0 4px 12px rgba(34, 197, 94, 0.15)"
-        >
-          <Icon as={TrendingUp} boxSize={3} strokeWidth={3} />
-        </Box>
         <Badge
           colorScheme="gray"
           variant="subtle"

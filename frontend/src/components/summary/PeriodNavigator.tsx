@@ -6,6 +6,7 @@ import {
   Text,
   Box,
   SimpleGrid,
+  Flex,
   useBreakpointValue,
   useColorModeValue,
   Icon,
@@ -92,10 +93,48 @@ export default function PeriodNavigator({
         pointerEvents="none"
       />
 
-      <VStack spacing={4} align="stretch" position="relative" zIndex={1}>
-        {/* Period Selection Pills */}
-        <Box
-          bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.50')}
+      <Flex 
+        direction={{ base: 'column', lg: 'row' }} 
+        align={{ base: 'stretch', lg: 'center' }} 
+        justify="space-between"
+        gap={4}
+        position="relative" 
+        zIndex={1}
+      >
+        {/* Left Side - Label (Desktop Only) */}
+        <HStack spacing={3} display={{ base: 'none', lg: 'flex' }} minW="fit-content">
+          <Box
+            p={2.5}
+            borderRadius="xl"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Icon as={CalendarClock} boxSize={12} color="blue.500" />
+          </Box>
+          <VStack align="start" spacing={0}>
+            <Text
+              fontSize="sm"
+              fontWeight="700"
+              color={useColorModeValue('gray.800', 'white')}
+            >
+              Period
+            </Text>
+            <Text
+              fontSize="xs"
+              fontWeight="500"
+              color={useColorModeValue('gray.500', 'gray.400')}
+            >
+              Navigate through time
+            </Text>
+          </VStack>
+        </HStack>
+
+        {/* Right Side - Controls */}
+        <VStack spacing={4} align="stretch" flex={1}>
+          {/* Period Selection Pills */}
+          <Box
+            bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.50')}
           p={1}
           borderRadius="xl"
           border="1px solid"
@@ -229,6 +268,7 @@ export default function PeriodNavigator({
           />
         </HStack>
       </VStack>
+    </Flex>
     </Box>
   )
 }

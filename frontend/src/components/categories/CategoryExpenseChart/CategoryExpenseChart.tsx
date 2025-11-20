@@ -25,6 +25,7 @@ import { CategoryExpenseChartEmptyState } from './CategoryExpenseChartEmptyState
 export default function CategoryExpenseChart({ transactions, selectedPeriod }: CategoryExpenseChartProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined)
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const responsiveStyles = getResponsiveStyles()
   const isMobile = useBreakpointValue({ base: true, md: false })
   const titleText = useBreakpointValue({ base: 'Expenses', sm: 'Expense Analysis' })
@@ -43,16 +44,24 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
 
   const handleCategoryClick = useCallback(
     (category: string) => {
-      setSelectedCategory(category)
-      onOpen()
+      // Toggle expand/collapse instead of opening modal
+      setExpandedCategory(prev => prev === category ? null : category)
     },
-    [onOpen]
+    []
   )
 
   const handleViewAllClick = useCallback(() => {
     setSelectedCategory(undefined)
+    setExpandedCategory(null)
     onOpen()
   }, [onOpen])
+
+  // Get transactions for a specific category
+  const getCategoryTransactions = useCallback((category: string) => {
+    return transactions.filter(
+      tx => tx.type === 'EXPENSE' && (tx.category || 'Uncategorized') === category
+    )
+  }, [transactions])
 
   // Use all categories instead of limiting
   const visibleCategories = useMemo(
@@ -69,7 +78,6 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
     <>
       <Card
         bg={cardBg}
-        ml={{ base: 2, sm: 5 }}
         borderRadius="2xl"
         shadow="2xl"
         overflow="hidden"
@@ -90,8 +98,8 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
       >
         <CardBody p={0} display="flex" flexDirection="column" h="full">
           <VStack spacing={0} align="stretch" h="full">
-            <Box p={2}>
-              <VStack spacing={4} align="stretch">
+            <Box p={{ base: 4, sm: 6 }}>
+              <VStack spacing={6} align="stretch">
                 {/* Header Component */}
                 <CategoryExpenseChartHeader
                   title={titleText || 'Expenses'}
@@ -107,6 +115,8 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
                   {visibleCategories.map(({ category, amount }, index) => {
                     const percentage = totalExpenses > 0 ? (amount / totalExpenses) * 100 : 0
                     const color = EXPENSE_CATEGORY_COLORS[index % EXPENSE_CATEGORY_COLORS.length]
+                    const isExpanded = expandedCategory === category
+                    const categoryTransactions = getCategoryTransactions(category)
 
                     return (
                       <CategoryExpenseItem
@@ -116,6 +126,8 @@ export default function CategoryExpenseChart({ transactions, selectedPeriod }: C
                         percentage={percentage}
                         color={color}
                         onClick={() => handleCategoryClick(category)}
+                        isExpanded={isExpanded}
+                        transactions={categoryTransactions}
                       />
                     )
                   })}

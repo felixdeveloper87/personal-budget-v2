@@ -1,28 +1,43 @@
 import {
   HStack,
   Text,
-  Button,
   Flex,
   Heading,
   useColorModeValue,
-  Icon,
   Box,
   VStack,
   Image,
 } from '@chakra-ui/react'
-import { RotateCcw } from 'lucide-react'
 import summaryImage from '../../../assets/summary.png'
+import PeriodNavigator from './PeriodNavigator'
+import { PeriodType } from '../../types'
 
 interface SummaryHeaderProps {
+  selectedPeriod: PeriodType
+  onPeriodChange: (period: PeriodType) => void
+  onNavigatePeriod: (direction: 'prev' | 'next') => void
   onGoToToday: () => void
+  formatLabel: () => string
 }
 
-export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
+export default function SummaryHeader({
+  selectedPeriod,
+  onPeriodChange,
+  onNavigatePeriod,
+  onGoToToday,
+  formatLabel
+}: SummaryHeaderProps) {
 
   return (
-    <Flex justify="space-between" align="center" w="full">
+    <Flex 
+      justify="space-between" 
+      align="center" 
+      w="full" 
+      direction={{ base: 'column', lg: 'row' }} 
+      gap={{ base: 4, lg: 8 }}
+    >
       {/* Left side */}
-      <HStack spacing={4}>
+      <HStack spacing={4} w={{ base: 'full', lg: 'auto' }}>
         <Box
           p={2}
           bg="transparent"
@@ -66,36 +81,16 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
         </VStack>
       </HStack>
 
-      {/* Right side - Modern Today Button */}
-      <Button
-        size="sm"
-        leftIcon={<RotateCcw size={14} />}
-        onClick={onGoToToday}
-        display={{ base: 'none', sm: 'flex' }}
-        borderRadius="xl"
-        px={4}
-        py={2}
-        fontWeight="500"
-        bg="transparent"
-        color={useColorModeValue('blue.600', 'blue.300')}
-        border="1px solid"
-        borderColor={useColorModeValue('blue.200', 'blue.500')}
-        boxShadow="sm"
-        fontFamily="system-ui, -apple-system, sans-serif"
-        backdropFilter="blur(10px)"
-        _hover={{
-          transform: 'translateY(-1px)',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-          borderColor: useColorModeValue('blue.300', 'blue.400'),
-          bg: useColorModeValue('blue.50', 'blue.900')
-        }}
-        _active={{
-          transform: 'translateY(0)',
-        }}
-        transition="all 0.2s ease"
-      >
-        Today
-      </Button>
+      {/* Right side - Period Navigator */}
+      <Box w={{ base: 'full', lg: '75%' }} maxW={{ lg: '900px' }}>
+        <PeriodNavigator
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={onPeriodChange}
+          onNavigatePeriod={onNavigatePeriod}
+          onGoToToday={onGoToToday}
+          formatLabel={formatLabel}
+        />
+      </Box>
     </Flex>
   )
 }

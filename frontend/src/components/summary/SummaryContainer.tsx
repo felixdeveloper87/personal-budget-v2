@@ -151,11 +151,8 @@ export default function SummaryContainer({
 
           <Box p={{ base: 5, sm: 6 }} position="relative" zIndex={1}>
             <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
-              {/* Header */}
-              <SummaryHeader onGoToToday={goToToday} />
-
-              {/* Period Selector */}
-              <PeriodNavigator
+              {/* Header with Period Navigator embedded */}
+              <SummaryHeader 
                 selectedPeriod={selectedPeriod}
                 onPeriodChange={onPeriodChange}
                 onNavigatePeriod={navigatePeriod}
