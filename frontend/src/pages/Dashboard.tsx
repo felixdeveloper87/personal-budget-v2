@@ -70,7 +70,7 @@ export default function Dashboard() {
               />
 
               <CategoryAnalysisSection
-                transactions={transactions}
+                transactions={periodData.transactions}
                 selectedPeriod={selectedPeriod}
                 activeTab={activeTab}
                 setActiveTab={setActiveTab}
