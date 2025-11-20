@@ -10,9 +10,11 @@ import {
   useColorModeValue,
   useDisclosure,
   Button,
+  Image,
   Icon
 } from '@chakra-ui/react'
-import { CreditCard, ChevronRight, Layers } from 'lucide-react'
+import { CreditCard, ChevronRight } from 'lucide-react'
+import installmentsImage from '../../assets/installments.png'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
@@ -117,13 +119,19 @@ export default function InstallmentPlansSection() {
                 {/* Left side - Title & Count */}
                 <HStack spacing={4}>
                   <Box
-                    p={3}
-                    bg={useColorModeValue('pink.50', 'whiteAlpha.100')}
-                    color={useColorModeValue('pink.500', 'pink.300')}
+                    p={2}
+                    bg="transparent"
                     borderRadius="xl"
-                    boxShadow="0 4px 12px rgba(236, 72, 153, 0.15)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Icon as={Layers} boxSize={6} strokeWidth={2.5} />
+                    <Image
+                      src={installmentsImage}
+                      alt="Installments"
+                      boxSize={{ base: 8, sm: 10, md: 12 }}
+                      objectFit="contain"
+                    />
                   </Box>
                   <VStack align="start" spacing={0.5}>
                     <Heading
@@ -141,7 +149,7 @@ export default function InstallmentPlansSection() {
                       Installments
                     </Heading>
                     <Text
-                      fontSize="sm"
+                      fontSize={{ base: 'xs', sm: 'xl' }}
                       color={useColorModeValue('gray.500', 'gray.400')}
                       fontWeight="600"
                     >
@@ -160,6 +168,7 @@ export default function InstallmentPlansSection() {
                   borderRadius="xl"
                   bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.100')}
                   color={useColorModeValue('pink.600', 'pink.300')}
+                  fontSize={{ base: 'md', sm: 'xl' }}
                   border="1px solid"
                   borderColor={useColorModeValue('pink.100', 'whiteAlpha.200')}
                   _hover={{

@@ -8,8 +8,10 @@ import {
   Icon,
   Box,
   VStack,
+  Image,
 } from '@chakra-ui/react'
-import { RotateCcw, TrendingUp } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
+import summaryImage from '../../../assets/summary.png'
 
 interface SummaryHeaderProps {
   onGoToToday: () => void
@@ -22,13 +24,19 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
       {/* Left side */}
       <HStack spacing={4}>
         <Box
-          p={3}
-          bg={useColorModeValue('green.50', 'whiteAlpha.100')}
-          color={useColorModeValue('green.500', 'green.300')}
+          p={2}
+          bg="transparent"
           borderRadius="xl"
-          boxShadow="0 4px 12px rgba(34, 197, 94, 0.15)"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
         >
-          <Icon as={TrendingUp} boxSize={6} strokeWidth={2.5} />
+          <Image
+            src={summaryImage}
+            alt="Summary"
+            boxSize={{ base: 8, sm: 10, md: 12 }}
+            objectFit="contain"
+          />
         </Box>
         <VStack align="start" spacing={0.5}>
           <Heading
@@ -47,7 +55,7 @@ export default function SummaryHeader({ onGoToToday }: SummaryHeaderProps) {
             Overview
           </Heading>
           <Text
-            fontSize="sm"
+            fontSize={{ base: 'xs', sm: 'xl' }}
             color={useColorModeValue('gray.500', 'gray.400')}
             fontWeight="600"
             textAlign="left"

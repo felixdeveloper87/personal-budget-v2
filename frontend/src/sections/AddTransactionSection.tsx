@@ -11,10 +11,12 @@ import {
   Card,
   CardBody,
   Heading,
+  Image,
 } from '@chakra-ui/react'
-import { Plus, Minus, Zap } from 'lucide-react'
+import { Plus, Minus } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
+import quickActionsImage from '../../assets/quickActions.png'
 
 interface AddTransactionSectionProps {
   transactions: Transaction[]
@@ -88,13 +90,19 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
               <HStack justify="space-between" align="center">
                 <HStack spacing={4}>
                   <Box
-                    p={3}
-                    bg={useColorModeValue('blue.50', 'whiteAlpha.100')}
-                    color={useColorModeValue('blue.500', 'blue.300')}
+                    p={2}
+                    bg="transparent"
                     borderRadius="xl"
-                    boxShadow="0 4px 12px rgba(59, 130, 246, 0.15)"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    <Icon as={Zap} boxSize={6} strokeWidth={2.5} />
+                    <Image
+                      src={quickActionsImage}
+                      alt="Quick Actions"
+                      boxSize={{ base: 10, sm: 10, md: 12 }}
+                      objectFit="contain"
+                    />
                   </Box>
                   <VStack align="start" spacing={0.5}>
                     <Heading
@@ -112,7 +120,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                       Quick Actions
                     </Heading>
                     <Text
-                      fontSize="sm"
+                      fontSize={{ base: 'xs', sm: 'xl' }}
                       color={useColorModeValue('gray.500', 'gray.400')}
                       fontWeight="600"
                     >
@@ -148,7 +156,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     key={t}
                     onClick={() => handleOpen(t)}
                     flex={1}
-                    height={{ base: '50px', sm: '60px' }}
+                    height={{ base: '40px', sm: '48px' }}
                     variant="unstyled"
                     position="relative"
                     role="group"
@@ -188,14 +196,13 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     >
                       <Box
                         p={1.5}
-                        bg="whiteAlpha.200"
+                        bg="transparent"
                         borderRadius="full"
-                        backdropFilter="blur(4px)"
                       >
-                        <Icon as={icon} boxSize={{ base: 5, sm: 6 }} strokeWidth={3} />
+                        <Icon as={icon} boxSize={{ base: 4, sm: 5 }} strokeWidth={3} />
                       </Box>
                       <Text
-                        fontSize={{ base: 'md', sm: 'lg' }}
+                        fontSize={'md'}
                         fontWeight="700"
                         letterSpacing="wide"
                       >

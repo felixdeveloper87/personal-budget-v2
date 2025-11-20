@@ -61,7 +61,7 @@ export default function Logo({ user }: LogoProps) {
       <Box textAlign="left" minW={0} flexShrink={1}>
         <HStack spacing={1.5} align="center" flexWrap="nowrap">
           <Text
-            fontSize={{ base: 'xs', sm: 'lg', md: '2xl', lg: '3xl' }}
+            fontSize={{ base: 'md', sm: 'lg', md: '2xl', lg: '3xl' }}
             fontWeight="900"
             letterSpacing="-0.03em"
             bgGradient={useColorModeValue(

@@ -1,4 +1,4 @@
-import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Heading, HStack, Button } from '@chakra-ui/react'
+import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Heading, HStack, Button, Image } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -6,6 +6,7 @@ import PeriodNavigator from '../components/summary/PeriodNavigator'
 import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../components/charts/modal'
 import { getResponsiveStyles } from '../components/ui'
 import { RotateCcw } from 'lucide-react'
+import chartsImage from '../../assets/charts.png'
 
 export default function ChartsPage() {
   const { 
@@ -94,27 +95,48 @@ export default function ChartsPage() {
             <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
               {/* Header */}
               <HStack justify="space-between" align="center" w="full">
-                <HStack spacing={2} align="baseline" flex="1">
-                  <Heading
-                    size="md"
-                    fontWeight="600"
-                    textAlign="left"
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                    letterSpacing="-0.015em"
-                    fontSize={{ base: 'md', sm: 'xl' }}
-                    color={useColorModeValue('gray.800', 'white')}
+                <HStack spacing={4} align="center" flex="1">
+                  <Box
+                    p={2}
+                    bg="transparent"
+                    borderRadius="xl"
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
                   >
-                    Charts & Analytics
-                  </Heading>
-                  <Text
-                    fontSize={{ base: 'sm', sm: 'sm' }}
-                    color={useColorModeValue('gray.600', 'gray.400')}
-                    fontWeight="400"
-                    textAlign="left"
-                    fontFamily="system-ui, -apple-system, sans-serif"
-                  >
-                    • Visualize your financial data
-                  </Text>
+                    <Image
+                      src={chartsImage}
+                      alt="Charts"
+                      boxSize={{ base: 8, sm: 10, md: 12 }}
+                      objectFit="contain"
+                    />
+                  </Box>
+                  <VStack spacing={0} align="start" flex="1">
+                    <Heading
+                      size="md"
+                      fontWeight="600"
+                      textAlign="left"
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                      letterSpacing="-0.015em"
+                      fontSize={{ base: 'md', sm: 'xl' }}
+                      color={useColorModeValue('gray.800', 'white')}
+                      lineHeight="1.2"
+                    >
+                      Charts & Analytics
+                    </Heading>
+                    <Text
+                      fontSize={{ base: 'xs', sm: 'sm' }}
+                      color={useColorModeValue('gray.600', 'gray.400')}
+                      fontWeight="400"
+                      textAlign="left"
+                      fontFamily="system-ui, -apple-system, sans-serif"
+                      mt={{ base: 0.5, sm: 0 }}
+                      ml={{ base: 0, sm: 1 }}
+                      display={{ base: 'block', sm: 'inline' }}
+                    >
+                      • Visualize your financial data
+                    </Text>
+                  </VStack>
                 </HStack>
 
                 {/* Today Button */}

@@ -8,9 +8,11 @@ import {
   useColorModeValue,
   Box,
   VStack,
+  Image,
 } from '@chakra-ui/react'
-import { TrendingDown, TrendingUp, PieChart } from 'lucide-react'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 import { sectionHeaderStyles, sectionTitleStyles } from '../ui'
+import categoriesImage from '../../../assets/categories.png'
 
 interface CategoryAnalysisHeaderProps {
   activeTab: 'expenses' | 'incomes'
@@ -82,24 +84,20 @@ export default function CategoryAnalysisHeader({
         flex={{ base: '1 1 auto', sm: '0 1 auto' }}
       >
         <Box
-          p={sectionHeaderStyles.icon.padding}
-          bg={iconBg}
-          color={iconColor}
+          p={2}
+          bg="transparent"
           borderRadius={sectionHeaderStyles.icon.borderRadius}
-          border="1px solid"
-          borderColor={iconBorderColor}
-          boxShadow="sm"
           display="flex"
           alignItems="center"
           justifyContent="center"
           transition="all 0.2s ease"
-          _hover={{
-            transform: 'translateY(-1px)',
-            boxShadow: 'md',
-            borderColor: useColorModeValue('purple.300', 'purple.400')
-          }}
         >
-          <Icon as={PieChart} boxSize={sectionHeaderStyles.icon.size} strokeWidth={2.5} />
+          <Image
+            src={categoriesImage}
+            alt="Categories"
+            boxSize={{ base: 8, sm: 10, md: 12 }}
+            objectFit="contain"
+          />
         </Box>
         
         <VStack align="start" spacing={0} ml={1}>
