@@ -1,5 +1,5 @@
-import { Box, Text, HStack, Badge, useColorModeValue, Icon } from '@chakra-ui/react'
-import { Wallet } from 'lucide-react'
+import { Box, Text, HStack, Badge, useColorModeValue, Image } from '@chakra-ui/react'
+import logoImage from '../../../../assets/logo.png'
 
 interface LogoProps {
   user?: any
@@ -38,33 +38,21 @@ export default function Logo({ user }: LogoProps) {
       flexShrink={1}
     >
       <Box
-        p={{ base: 1.5, sm: 2, md: 2.5 }}
-        bg={iconBg}
-        backdropFilter="blur(10px)"
+        p={{ base: 1, sm: 1.5, md: 2 }}
+        bg="transparent"
         rounded={{ base: 'lg', md: '2xl' }}
-        boxShadow={iconShadow}
-        border="1px solid"
-        borderColor={useColorModeValue('whiteAlpha.600', 'whiteAlpha.100')}
         position="relative"
         overflow="hidden"
         flexShrink={0}
-        _before={{
-          content: '""',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          bgGradient: iconGradient,
-          opacity: 0.1,
-          zIndex: 0
-        }}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
       >
-        <Icon 
-          as={Wallet} 
-          boxSize={{ base: 4, sm: 5, md: 7, lg: 8 }} 
-          strokeWidth={2.5}
-          color={useColorModeValue('blue.600', 'blue.300')}
+        <Image
+          src={logoImage}
+          alt="Personal Budget Logo"
+          boxSize={{ base: 6, sm: 7, md: 9, lg: 10 }}
+          objectFit="contain"
           position="relative"
           zIndex={1}
         />
@@ -86,9 +74,14 @@ export default function Logo({ user }: LogoProps) {
             overflow="hidden"
             textOverflow="ellipsis"
           >
-            Personal
-            <Text as="span" color={useColorModeValue('blue.500', 'blue.300')}>.</Text>
-            Budget
+            <Text as="span" display={{ base: 'inline', sm: 'none' }}>
+              P<Text as="span" color={useColorModeValue('blue.500', 'blue.300')}>.</Text> Budget
+            </Text>
+            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+              Personal
+              <Text as="span" color={useColorModeValue('blue.500', 'blue.300')}>.</Text>
+              Budget
+            </Text>
           </Text>
           {!user && (
             <Badge
