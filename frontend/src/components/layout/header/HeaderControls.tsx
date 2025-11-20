@@ -9,24 +9,14 @@ import {
 } from '@chakra-ui/react'
 import { SunIcon, MoonIcon, SearchIcon } from '@chakra-ui/icons'
 import { getResponsiveStyles } from '../../ui'
-import {
+import { 
   getHeaderControlsContainerStyles,
   getHeaderSearchButtonStyles,
   getThemeToggleStyles,
   getLoginButtonStyles,
+  getMobileSearchButtonStyles
 } from '../../ui'
 import MobileNavigation from './MobileNavigation'
-
-// Estilos do botão de search mobile
-const getMobileSearchButtonStyles = () => {
-  return {
-    display: { base: 'flex', md: 'none' },
-    'aria-label': 'Search',
-    variant: 'ghost',
-    rounded: 'full',
-    _hover: { bg: 'whiteAlpha.200' }
-  }
-}
 
 interface HeaderControlsProps {
   user?: any
@@ -61,16 +51,16 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
   }
 
   return (
-    <Box
+    <Box 
       {...getHeaderControlsContainerStyles()}
       flexShrink={0}
     >
       <HStack spacing={{ base: 0.5, sm: 1, md: 2, lg: 3, xl: 4 }}>
         {/* 📱 Mobile Navigation */}
-        <MobileNavigation
-          user={user}
-          currentPage={currentPage}
-          onPageChange={onPageChange}
+        <MobileNavigation 
+          user={user} 
+          currentPage={currentPage} 
+          onPageChange={onPageChange} 
         />
 
         {/* 🔍 Search (mobile/tablet) */}

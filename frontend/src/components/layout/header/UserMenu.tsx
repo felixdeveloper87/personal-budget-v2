@@ -38,10 +38,11 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
       <MenuButton
         as={Button}
         variant="ghost"
-        size={{ base: 'sm', md: 'md' }}
-        p={{ base: 1.5, md: 2 }}
+        size={{ base: 'xs', sm: 'sm', md: 'md' }}
+        p={{ base: 1, sm: 1.5, md: 2 }}
         borderRadius="xl"
         flexShrink={0}
+        minW="auto"
         _hover={{
           transform: 'translateY(-2px)',
           boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
@@ -55,9 +56,9 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         }}
         transition="all 0.2s ease"
       >
-        <HStack spacing={{ base: 2, lg: 3 }}>
+        <HStack spacing={{ base: 1, sm: 1.5, lg: 3 }}>
           <Avatar 
-            size="md"
+            size={{ base: 'sm', sm: 'sm', md: 'md' }}
             name={user?.name}
             bg={useColorModeValue('blue.500', 'blue.400')}
             color="white"

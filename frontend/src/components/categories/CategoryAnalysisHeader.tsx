@@ -10,6 +10,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { TrendingDown, TrendingUp, PieChart } from 'lucide-react'
+import { sectionHeaderStyles, sectionTitleStyles } from '../ui'
 
 interface CategoryAnalysisHeaderProps {
   activeTab: 'expenses' | 'incomes'
@@ -20,128 +21,146 @@ export default function CategoryAnalysisHeader({
   activeTab,
   onTabChange
 }: CategoryAnalysisHeaderProps) {
+  // Styles matching the premium look of AllTransactionsSection
+  const iconBg = useColorModeValue('purple.50', 'whiteAlpha.100')
+  const iconColor = useColorModeValue('purple.500', 'purple.300')
+  const iconBorderColor = useColorModeValue('purple.200', 'purple.500')
+
+  // Tab Button Styles
+  const getTabStyles = (isActive: boolean, type: 'expenses' | 'incomes') => {
+    const isExpense = type === 'expenses'
+    
+    // Active state colors
+    const activeBg = useColorModeValue(
+      isExpense ? 'red.50' : 'green.50', 
+      isExpense ? 'rgba(254, 202, 202, 0.1)' : 'rgba(187, 247, 208, 0.1)'
+    )
+    const activeColor = useColorModeValue(
+      isExpense ? 'red.600' : 'green.600', 
+      isExpense ? 'red.200' : 'green.200'
+    )
+    const activeBorder = useColorModeValue(
+      isExpense ? 'red.200' : 'green.200', 
+      isExpense ? 'red.500' : 'green.500'
+    )
+
+    // Inactive state colors
+    const inactiveBg = 'transparent'
+    const inactiveColor = useColorModeValue('gray.500', 'gray.400')
+    const inactiveBorder = useColorModeValue('gray.200', 'gray.700')
+
+    return {
+      bg: isActive ? activeBg : inactiveBg,
+      color: isActive ? activeColor : inactiveColor,
+      borderColor: isActive ? activeBorder : inactiveBorder,
+      _hover: {
+        bg: isActive ? activeBg : useColorModeValue('gray.50', 'whiteAlpha.50'),
+        borderColor: isActive ? activeBorder : useColorModeValue('gray.300', 'gray.600'),
+        transform: 'translateY(-1px)',
+        boxShadow: 'sm'
+      }
+    }
+  }
+
+  const expenseStyles = getTabStyles(activeTab === 'expenses', 'expenses')
+  const incomeStyles = getTabStyles(activeTab === 'incomes', 'incomes')
+
   return (
     <Flex
-      direction="row"
-      align="center"
-      justify="space-between"
-      gap={{ base: 2, sm: 4 }}
-      w="full"
+      direction={sectionHeaderStyles.container.direction}
+      align={sectionHeaderStyles.container.align}
+      justify={sectionHeaderStyles.container.justify}
+      gap={sectionHeaderStyles.container.gap}
+      w={sectionHeaderStyles.container.w}
+      mb={4}
+      flexWrap={{ base: 'wrap', sm: 'nowrap' }}
     >
-      {/* Left side */}
-      <HStack spacing={4}>
+      {/* Left side: Icon & Title */}
+      <HStack 
+        spacing={sectionHeaderStyles.iconAndTitle.spacing} 
+        align={sectionHeaderStyles.iconAndTitle.align}
+        flex={{ base: '1 1 auto', sm: '0 1 auto' }}
+      >
         <Box
-          p={3}
-          bg={useColorModeValue('purple.50', 'whiteAlpha.100')}
-          color={useColorModeValue('purple.500', 'purple.300')}
-          borderRadius="xl"
-          boxShadow="0 4px 12px rgba(168, 85, 247, 0.15)"
+          p={sectionHeaderStyles.icon.padding}
+          bg={iconBg}
+          color={iconColor}
+          borderRadius={sectionHeaderStyles.icon.borderRadius}
+          border="1px solid"
+          borderColor={iconBorderColor}
+          boxShadow="sm"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          transition="all 0.2s ease"
+          _hover={{
+            transform: 'translateY(-1px)',
+            boxShadow: 'md',
+            borderColor: useColorModeValue('purple.300', 'purple.400')
+          }}
         >
-          <Icon as={PieChart} boxSize={6} strokeWidth={2.5} />
+          <Icon as={PieChart} boxSize={sectionHeaderStyles.icon.size} strokeWidth={2.5} />
         </Box>
-        <VStack align="start" spacing={0.5}>
+        
+        <VStack align="start" spacing={0} ml={1}>
           <Heading
-            size="md"
-            fontWeight="700"
-            textAlign="left"
-            fontFamily="system-ui, -apple-system, sans-serif"
-            letterSpacing="-0.02em"
-            fontSize={{ base: 'lg', sm: 'xl' }}
-            bgGradient={useColorModeValue(
-              'linear(to-r, gray.800, gray.600)',
-              'linear(to-r, white, gray.300)'
-            )}
-            bgClip="text"
+            size={sectionTitleStyles.size}
+            fontWeight={sectionTitleStyles.fontWeight}
+            fontFamily={sectionTitleStyles.fontFamily}
+            letterSpacing={sectionTitleStyles.letterSpacing}
+            lineHeight={sectionTitleStyles.lineHeight}
+            color={useColorModeValue('gray.800', 'white')}
           >
             Categories
           </Heading>
           <Text
             fontSize="sm"
             color={useColorModeValue('gray.500', 'gray.400')}
-            fontWeight="600"
-            textAlign="left"
-            fontFamily="system-ui, -apple-system, sans-serif"
+            fontWeight="500"
+            display={{ base: 'none', sm: 'block' }}
           >
             Breakdown by category
           </Text>
         </VStack>
       </HStack>
 
-      {/* Right side - Tab Buttons */}
-      <HStack spacing={{ base: 1, sm: 2 }} align="center" justify="flex-end" flexShrink={0}>
+      {/* Right side: Tab Buttons (Segmented Control style) */}
+      <HStack 
+        spacing={0} 
+        p={1}
+        bg={useColorModeValue('gray.100', 'gray.800')}
+        borderRadius="xl"
+        border="1px solid"
+        borderColor={useColorModeValue('gray.200', 'gray.700')}
+        w={{ base: 'full', sm: 'auto' }}
+      >
         <Button
-          size={{ base: 'xs', sm: 'sm' }}
-          leftIcon={<Icon as={TrendingDown} boxSize={{ base: 2, sm: 2.5 }} />}
-          borderRadius="xl"
-          fontSize={{ base: '2xs', sm: '2xs' }}
-          fontWeight="500"
-          px={{ base: 2, sm: 2.5 }}
-          py={{ base: 1, sm: 1.5 }}
-          h="auto"
-          bg={useColorModeValue(
-            activeTab === 'expenses' ? '#fecaca' : 'white',
-            activeTab === 'expenses' ? '#2d1b1b' : '#0a0a0a'
-          )}
-          color={useColorModeValue(
-            activeTab === 'expenses' ? 'red.600' : 'gray.600',
-            activeTab === 'expenses' ? 'red.300' : 'gray.300'
-          )}
-          border="1px solid"
-          borderColor={useColorModeValue(
-            activeTab === 'expenses' ? 'red.200' : 'gray.200',
-            activeTab === 'expenses' ? 'red.500' : 'gray.600'
-          )}
-          fontFamily="system-ui, -apple-system, sans-serif"
-          backdropFilter="blur(10px)"
-          _hover={{
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('red.300', 'red.400'),
-            bg: useColorModeValue('red.50', 'red.900')
-          }}
-          _active={{
-            transform: 'translateY(0)',
-          }}
-          transition="all 0.2s ease"
+          size="sm"
+          leftIcon={<Icon as={TrendingDown} boxSize={4} />}
+          borderRadius="lg"
+          fontSize="xs"
+          fontWeight="600"
+          h="32px"
+          px={4}
+          flex={{ base: 1, sm: 'auto' }}
+          {...expenseStyles}
           onClick={() => onTabChange('expenses')}
+          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
         >
           Expenses
         </Button>
         <Button
-          size={{ base: 'xs', sm: 'sm' }}
-          leftIcon={<Icon as={TrendingUp} boxSize={{ base: 2, sm: 2.5 }} />}
-          borderRadius="xl"
-          fontSize={{ base: '2xs', sm: '2xs' }}
-          fontWeight="500"
-          px={{ base: 2, sm: 2.5 }}
-          py={{ base: 1, sm: 1.5 }}
-          h="auto"
-          bg={useColorModeValue(
-            activeTab === 'incomes' ? '#dcfce7' : 'white',
-            activeTab === 'incomes' ? '#1f2937' : '#0a0a0a'
-          )}
-          color={useColorModeValue(
-            activeTab === 'incomes' ? 'green.600' : 'gray.600',
-            activeTab === 'incomes' ? 'green.300' : 'gray.300'
-          )}
-          border="1px solid"
-          borderColor={useColorModeValue(
-            activeTab === 'incomes' ? 'green.200' : 'gray.200',
-            activeTab === 'incomes' ? 'green.500' : 'gray.600'
-          )}
-          fontFamily="system-ui, -apple-system, sans-serif"
-          backdropFilter="blur(10px)"
-          _hover={{
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderColor: useColorModeValue('green.300', 'green.400'),
-            bg: useColorModeValue('green.50', 'green.900')
-          }}
-          _active={{
-            transform: 'translateY(0)',
-          }}
-          transition="all 0.2s ease"
+          size="sm"
+          leftIcon={<Icon as={TrendingUp} boxSize={4} />}
+          borderRadius="lg"
+          fontSize="xs"
+          fontWeight="600"
+          h="32px"
+          px={4}
+          flex={{ base: 1, sm: 'auto' }}
+          {...incomeStyles}
           onClick={() => onTabChange('incomes')}
+          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
         >
           Incomes
         </Button>

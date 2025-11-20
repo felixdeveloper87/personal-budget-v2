@@ -12,7 +12,7 @@ import {
   CardBody,
   Heading,
 } from '@chakra-ui/react'
-import { Plus, Minus, Wallet } from 'lucide-react'
+import { Plus, Minus, Zap } from 'lucide-react'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
 
@@ -94,7 +94,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
                     borderRadius="xl"
                     boxShadow="0 4px 12px rgba(59, 130, 246, 0.15)"
                   >
-                    <Icon as={Wallet} boxSize={6} strokeWidth={2.5} />
+                    <Icon as={Zap} boxSize={6} strokeWidth={2.5} />
                   </Box>
                   <VStack align="start" spacing={0.5}>
                     <Heading

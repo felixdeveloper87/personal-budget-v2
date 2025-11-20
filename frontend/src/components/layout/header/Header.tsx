@@ -22,8 +22,12 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
   const { runSearch } = useSearch()
   const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
 
-  const bg = useColorModeValue('white', 'black')
-  const borderColor = useColorModeValue('gray.400', 'gray.600')
+  const bg = useColorModeValue('rgba(255, 255, 255, 0.8)', 'rgba(0, 0, 0, 0.6)')
+  const borderColor = useColorModeValue('whiteAlpha.300', 'whiteAlpha.100')
+  const shadow = useColorModeValue(
+    '0 4px 30px rgba(0, 0, 0, 0.05)',
+    '0 4px 30px rgba(0, 0, 0, 0.2)'
+  )
 
   return (
     <>
@@ -31,17 +35,19 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
       <Box
         as="header"
         bg={bg}
-        backdropFilter="blur(10px)"
+        backdropFilter="blur(20px)"
         position="sticky"
         top={0}
         zIndex={1000}
         borderBottom="1px solid"
         borderColor={borderColor}
+        boxShadow={shadow}
         w="100%"
+        transition="all 0.3s ease"
       >
         <Container
           maxW="100%"
-          px={{ base: 2, sm: 3, md: 6, lg: 8 }}
+          px={{ base: 1.5, sm: 2, md: 4, lg: 6, xl: 8 }}
           sx={{
             // Safe area support para iPhone 14 Pro
             paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
@@ -49,15 +55,18 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
           }}
         >
           <Flex
-            h={{ base: 20, md: 24, lg: 28, xl: 32 }}
+            h={{ base: 16, sm: 24, md: 24, lg: 28, xl: 32 }}
             align="center"
             justify="space-between"
-            gap={{ base: 1, sm: 2, md: 3, lg: 4, xl: 6 }}
+            gap={{ base: 0.5, sm: 1, md: 2, lg: 3, xl: 4 }}
             position="relative"
             flexWrap="nowrap"
+            minW={0}
           >
             {/* Logo + Title */}
-            <Logo user={user} />
+            <Box flexShrink={1} minW={0} maxW={{ base: '40%', sm: '50%', md: 'none' }}>
+              <Logo user={user} />
+            </Box>
 
             {/* Navigation (desktop) */}
             <Navigation
@@ -80,13 +89,15 @@ export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboa
 
             {/* User Menu */}
             {user && (
-              <UserMenu
-                user={user}
-                currentPage={currentPage}
-                onPageChange={onPageChange}
-                onOpenSettings={onOpenSettings}
-                onLogout={logout}
-              />
+              <Box flexShrink={0}>
+                <UserMenu
+                  user={user}
+                  currentPage={currentPage}
+                  onPageChange={onPageChange}
+                  onOpenSettings={onOpenSettings}
+                  onLogout={logout}
+                />
+              </Box>
             )}
           </Flex>
         </Container>
