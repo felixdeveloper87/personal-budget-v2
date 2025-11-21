@@ -6,7 +6,6 @@ import {
   Icon,
   useColorModeValue,
   Flex,
-  HStack,
 } from '@chakra-ui/react'
 
 interface SummaryCardProps {
@@ -26,84 +25,82 @@ interface SummaryCardProps {
 export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
   const IconComponent = stat.icon
 
-  const bg = useColorModeValue('white', 'gray.900')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  // Use the solid color for hover border, or a specific token if available. 
-  // Since we can't easily add opacity to 'blue.600', we'll use the color directly or a standard hover style.
-  // Let's use the stat.color directly for a nice pop.
-  const hoverBorderColor = stat.color
+  // Subtle background tint based on the stat color
+  // Using a gradient for a more premium feel
+  const bgGradient = useColorModeValue(
+    `linear(to-br, white, ${stat.color}.50)`,
+    `linear(to-br, gray.900, ${stat.color}.900)`
+  )
 
-  // Use the pre-defined background colors
-  const iconBg = useColorModeValue(stat.bgColor, stat.darkBgColor)
-  const iconColor = stat.color
+  const borderColor = useColorModeValue(`${stat.color}.100`, `${stat.color}.800`)
+  const hoverBorderColor = stat.color
 
   return (
     <Card
-      bg={bg}
+      bgGradient={bgGradient}
       border="1px solid"
       borderColor={borderColor}
       borderRadius="2xl"
       shadow="sm"
       cursor="pointer"
-      transition="all 0.2s ease-in-out"
+      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       position="relative"
       overflow="hidden"
       _hover={{
         transform: 'translateY(-4px)',
-        shadow: 'lg',
+        shadow: 'xl',
         borderColor: hoverBorderColor,
+        boxShadow: `0 10px 30px -10px ${stat.color}`, // Colored glow on hover
       }}
       onClick={() => onCardClick(stat.id)}
     >
-      <CardBody p={{ base: 3, md: 5 }}>
-        <Flex justify="space-between" align="center" mb={2}>
-          <Text
-            fontSize={{ base: 'xs', sm: 'sm' }}
-            fontWeight="600"
-            color="gray.500"
-            textTransform="uppercase"
-            letterSpacing="0.05em"
-            isTruncated
-          >
-            {stat.label}
-          </Text>
+      <CardBody p={{ base: 4, md: 5 }}>
+        <Flex justify="space-between" align="center" h="full">
+          <Box flex="1" minW={0} mr={4}>
+            <Text
+              fontSize={{ base: 'xs', sm: 'sm' }}
+              fontWeight="700"
+              color="gray.500"
+              textTransform="uppercase"
+              letterSpacing="0.05em"
+              mb={1}
+              isTruncated
+            >
+              {stat.label}
+            </Text>
 
-          <Flex
-            align="center"
-            justify="center"
-            w={{ base: 8, md: 12 }}
-            h={{ base: 8, md: 12 }}
-            borderRadius="xl"
-            bg={iconBg}
-            color={iconColor}
+            <Text
+              fontSize={{ base: 'xl', sm: '2xl', md: '3xl' }}
+              fontWeight="800"
+              color={useColorModeValue('gray.800', 'white')}
+              lineHeight="1.1"
+              letterSpacing="-0.02em"
+              mb={1}
+              isTruncated
+            >
+              {stat.displayValue}
+            </Text>
+
+            <Text
+              fontSize="xs"
+              color="gray.500"
+              fontWeight="500"
+              noOfLines={1}
+            >
+              {stat.helpText}
+            </Text>
+          </Box>
+
+          {/* Large Icon without background container */}
+          <Icon
+            as={IconComponent}
+            boxSize={{ base: 10, md: 12 }}
+            color={stat.color}
+            opacity={0.8}
             flexShrink={0}
-          >
-            <Icon as={IconComponent} boxSize={{ base: 4, md: 6 }} />
-          </Flex>
+            filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"
+          />
         </Flex>
-
-        <Box mb={2}>
-          <Text
-            fontSize={{ base: 'lg', sm: '2xl', md: '3xl' }}
-            fontWeight="700"
-            color={useColorModeValue('gray.800', 'white')}
-            lineHeight="1.2"
-            isTruncated
-          >
-            {stat.displayValue}
-          </Text>
-        </Box>
-
-        <HStack spacing={2} mt={1}>
-          <Text
-            fontSize="xs"
-            color="gray.500"
-            fontWeight="500"
-            noOfLines={1}
-          >
-            {stat.helpText}
-          </Text>
-        </HStack>
       </CardBody>
     </Card>
   )
