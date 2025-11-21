@@ -1,5 +1,6 @@
 // UI Components - Reusable interface components
 export { default as DeleteTransactionDialog } from './DeleteTransactionDialog'
+export { default as PremiumModal } from './PremiumModal'
 
 // Shared Styles - Common styles and utilities
 export {

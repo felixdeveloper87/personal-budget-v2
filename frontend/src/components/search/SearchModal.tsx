@@ -1,5 +1,6 @@
 import {
-  Modal, ModalOverlay, ModalContent, VStack, Box, Card, CardBody, useColorModeValue
+  Box,
+  useColorModeValue
 } from '@chakra-ui/react'
 import SearchResultsModal from './SearchResultsModal'
 import SearchHeader from './SearchHeader'
@@ -8,7 +9,7 @@ import SearchFooter from './SearchFooter'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { animations, safeAreaStyles, safariStyles, getResponsiveStyles, getShimmerStyles, getScrollbarStyles } from '../ui'
+import { safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, PremiumModal } from '../ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
@@ -37,101 +38,49 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
   }
   const cardBg = useColorModeValue('gray.50', 'black')
 
+  // Wrapper for SearchHeader to override padding if needed or just pass as is
+  // Since PremiumModal adds padding to the header container, and SearchHeader also has padding,
+  // we might want to adjust. However, SearchHeader uses getModalHeaderStyles which might be consistent.
+  // Let's pass it directly for now.
+
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }} 
-      isCentered
-      scrollBehavior="inside"
-      closeOnOverlayClick={false}
-      closeOnEsc={true}
-      blockScrollOnMount={true}
-    >
-      <ModalOverlay 
-        bg="blackAlpha.600" 
-        backdropFilter="blur(10px)"
-      />
-      <ModalContent 
-        bg={cardBg}
-        borderRadius={{ base: 'none', md: '3xl' }}
-        overflow="hidden"
-        m={{ base: 0, md: 4 }}
-        display="flex"
-        flexDirection="column"
-        {...responsiveStyles.modal}
-        sx={{
-          ...safeAreaStyles.container,
-          ...safariStyles.modal
+    <>
+      <PremiumModal
+        isOpen={isOpen}
+        onClose={onClose}
+        size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
+        header={<SearchHeader onClose={onClose} />}
+        footer={
+          <SearchFooter
+            onClearAll={handleClearAll}
+            onSearch={handleSearchClick}
+          />
+        }
+        contentProps={{
+          bg: cardBg,
         }}
       >
-        
-        {/* Main card with glassmorphism */}
-        <Card
-          position="relative"
-          bg={cardBg}
-          shadow="2xl"
-          overflow="hidden"
-          w="full"
-          h="full"
+        {/* Modal content - Scrollable */}
+        <Box
+          flex="1"
+          p={responsiveStyles.spacing.container}
+          overflowY="auto"
+          {...responsiveStyles.content}
           sx={{
-            animation: animations.slideIn,
-            '@keyframes slideIn': {
-              from: { 
-                opacity: 0, 
-                transform: 'translateY(20px) scale(0.95)' 
-              },
-              to: { 
-                opacity: 1, 
-                transform: 'translateY(0) scale(1)' 
-              }
-            }
+            ...safeAreaStyles.content,
+            ...safariStyles.scrollable,
+            ...getScrollbarStyles(useColorModeValue)
           }}
         >
-          
-          <CardBody p={0} display="flex" flexDirection="column" h="full">
-            <VStack spacing={0} align="stretch" h="full">
-              {/* Header */}
-              <SearchHeader onClose={onClose} />
+          <SearchFilters
+            filters={filters}
+            onUpdateFilter={updateFilter}
+            onTypeChange={handleTypeChange}
+            availableCategories={getAvailableCategories()}
+          />
+        </Box>
+      </PremiumModal>
 
-              {/* Modal content - Scrollable */}
-              <Box 
-                flex="1" 
-                p={responsiveStyles.spacing.container}
-                overflowY="auto"
-                {...responsiveStyles.content}
-                sx={{
-                  ...safeAreaStyles.content,
-                  ...safariStyles.scrollable,
-                  ...getScrollbarStyles(useColorModeValue)
-                }}
-              >
-                <SearchFilters
-                  filters={filters}
-                  onUpdateFilter={updateFilter}
-                  onTypeChange={handleTypeChange}
-                  availableCategories={getAvailableCategories()}
-                />
-              </Box>
-
-              {/* Footer - Fixed at bottom */}
-              <Box 
-                flexShrink={0}
-                position={{ base: 'sticky', sm: 'relative' }}
-                bottom={0}
-                zIndex={10}
-                sx={safariStyles.sticky}
-              >
-                <SearchFooter
-                  onClearAll={handleClearAll}
-                  onSearch={handleSearchClick}
-                />
-              </Box>
-            </VStack>
-          </CardBody>
-        </Card>
-      </ModalContent>
-      
       {/* Search Results Modal - Inside SearchModal */}
       <SearchResultsModal
         isOpen={showResults}
@@ -139,6 +88,6 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         searchFilters={filters}
         user={user || undefined}
       />
-    </Modal>
+    </>
   )
 }

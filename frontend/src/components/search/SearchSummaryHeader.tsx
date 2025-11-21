@@ -1,10 +1,10 @@
-import { 
-  Box, 
-  Flex, 
+import {
+  Box,
+  Flex,
   HStack,
-  VStack, 
-  Text, 
-  Badge, 
+  VStack,
+  Text,
+  Badge,
   useColorModeValue,
   Icon,
   Heading,
@@ -25,15 +25,14 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
   const hasActiveFilters = searchFilters.text || searchFilters.type || searchFilters.category || searchFilters.startDate || searchFilters.endDate
 
   return (
-    <Box 
-      p={{ base: 4, sm: 5, md: 6 }} 
-      borderBottom="1px" 
+    <Box
+      p={{ base: 4, sm: 5, md: 6 }}
+      borderBottom="1px"
       borderColor={useColorModeValue('gray.200', 'gray.700')}
       position="relative"
       bg={gradients.background}
       sx={{
-        // Safe area support for iPhone 14 Pro
-        paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
+        // Safe area support handled by PremiumModal
       }}
     >
       {/* Header with title and close button */}
@@ -60,11 +59,11 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
             sx={{
               animation: 'glow 3s ease-in-out infinite',
               '@keyframes glow': {
-                '0%, 100%': { 
-                  boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)' 
+                '0%, 100%': {
+                  boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)'
                 },
-                '50%': { 
-                  boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)' 
+                '50%': {
+                  boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)'
                 }
               }
             }}
@@ -121,11 +120,11 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
             </Badge>
           )}
           {searchFilters.type && (
-            <Badge 
-              colorScheme={searchFilters.type === 'income' ? 'green' : 'red'} 
-              variant="subtle" 
-              px={3} 
-              py={1} 
+            <Badge
+              colorScheme={searchFilters.type === 'income' ? 'green' : 'red'}
+              variant="subtle"
+              px={3}
+              py={1}
               borderRadius="full"
             >
               {searchFilters.type === 'income' ? 'Income' : 'Expense'}
@@ -141,9 +140,9 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
               <HStack spacing={1}>
                 <Icon as={Calendar} boxSize={3} />
                 <Text>
-                  {searchFilters.startDate && searchFilters.endDate 
+                  {searchFilters.startDate && searchFilters.endDate
                     ? `${formatTransactionDate(searchFilters.startDate)} - ${formatTransactionDate(searchFilters.endDate)}`
-                    : searchFilters.startDate 
+                    : searchFilters.startDate
                       ? `From ${formatTransactionDate(searchFilters.startDate)}`
                       : `Until ${formatTransactionDate(searchFilters.endDate)}`
                   }

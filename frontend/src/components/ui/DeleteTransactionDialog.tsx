@@ -9,6 +9,7 @@ import {
   Button,
   useToast,
   useDisclosure,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { deleteTransaction } from '../../api'
@@ -43,7 +44,7 @@ export default function DeleteTransactionDialog({
     setIsDeleting(true)
     try {
       await deleteTransaction(transaction.id)
-      
+
       toast({
         title: 'Transaction deleted',
         description: `${transaction.description || 'Transaction'} has been removed`,
@@ -51,7 +52,7 @@ export default function DeleteTransactionDialog({
         duration: 2000,
         isClosable: true,
       })
-      
+
       onDeleted()
       onClose()
     } catch (err: any) {
@@ -76,11 +77,16 @@ export default function DeleteTransactionDialog({
       onClose={onClose}
       isCentered
     >
-      <AlertDialogOverlay>
+      <AlertDialogOverlay
+        bg="blackAlpha.600"
+        backdropFilter="blur(10px)"
+      >
         <AlertDialogContent
-          bg={colors.cardBg}
+          bg={useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(26, 32, 44, 0.9)')}
+          backdropFilter="blur(20px)"
           borderColor={colors.border}
-          borderRadius="xl"
+          borderRadius="2xl"
+          boxShadow="xl"
           maxW="400px"
         >
           <AlertDialogHeader fontSize="lg" fontWeight="bold" color={colors.text.primary}>
@@ -91,9 +97,9 @@ export default function DeleteTransactionDialog({
             <p style={{ color: colors.text.secondary, marginBottom: '12px' }}>
               Are you sure you want to delete this transaction?
             </p>
-            <div style={{ 
-              padding: '12px', 
-              backgroundColor: colors.bgSecondary, 
+            <div style={{
+              padding: '12px',
+              backgroundColor: colors.bgSecondary,
               borderRadius: '8px',
               border: `1px solid ${colors.border}`
             }}>

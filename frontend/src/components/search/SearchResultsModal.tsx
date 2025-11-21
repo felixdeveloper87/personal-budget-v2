@@ -1,17 +1,12 @@
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalBody,
-  VStack,
   Box,
+  VStack,
   useColorModeValue,
   Spinner,
   Center,
   Text,
   Icon,
-  Button,
-  HStack
+  Button
 } from '@chakra-ui/react'
 import { memo, useMemo, useState, useEffect, useCallback } from 'react'
 import { Transaction } from '../../types'
@@ -21,11 +16,11 @@ import { AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { animations, getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getShimmerStyles } from '../ui'
+import { getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, PremiumModal } from '../ui'
 
-const SearchResultsModal = memo(function SearchResultsModal({ 
-  isOpen, 
-  onClose, 
+const SearchResultsModal = memo(function SearchResultsModal({
+  isOpen,
+  onClose,
   searchFilters,
   user: propUser
 }: SearchResultsModalProps) {
@@ -38,16 +33,13 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const gradients = getGradients()
   const responsiveStyles = getResponsiveStyles()
   const scrollbarStyles = getScrollbarStyles(useColorModeValue)
-  const bgColor = useColorModeValue('white', 'gray.800')
   const textColor = useColorModeValue('gray.600', 'gray.400')
 
   // Memoized calculations for performance
-  // Single pass through transactions to calculate totals (more efficient than multiple filters)
-  // Note: Backend already filters by search criteria, so we only need to separate by type for totals
   const summaryData = useMemo(() => {
     let totalIncome = 0
     let totalExpense = 0
-    
+
     for (const transaction of transactions) {
       if (transaction.type === 'INCOME') {
         totalIncome += transaction.amount
@@ -55,7 +47,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
         totalExpense += transaction.amount
       }
     }
-    
+
     const netAmount = totalIncome - totalExpense
     const totalTransactions = transactions.length
 
@@ -82,7 +74,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
         startDate: searchFilters.startDate || undefined,
         endDate: searchFilters.endDate || undefined
       }
-      
+
       const results = await searchTransactions(searchParams)
       setTransactions(results)
     } catch (err) {
@@ -113,166 +105,100 @@ const SearchResultsModal = memo(function SearchResultsModal({
   }, [performSearch])
 
   return (
-    <Modal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }} 
-      isCentered
-      scrollBehavior="inside"
-      closeOnOverlayClick={false}
-      closeOnEsc={true}
-      blockScrollOnMount={true}
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
+      header={
+        <SearchSummaryHeader
+          searchFilters={searchFilters}
+          onClose={onClose}
+        />
+      }
+      contentProps={{
+        bg: useColorModeValue(
+          'rgba(255, 255, 255, 0.95)',
+          'rgba(17, 17, 17, 0.95)'
+        ),
+        backdropFilter: "blur(20px)",
+        border: "1px solid",
+        borderColor: useColorModeValue(
+          'rgba(255, 255, 255, 0.2)',
+          'rgba(255, 255, 255, 0.1)'
+        )
+      }}
     >
-      <ModalOverlay 
-        bg="blackAlpha.600" 
-        backdropFilter="blur(10px)"
+      {/* Decorative background */}
+      <Box
+        position="absolute"
+        top="-50px"
+        left="-50px"
+        right="-50px"
+        height="200px"
+        background={gradients.decorative}
+        borderRadius="3xl"
+        filter="blur(40px)"
+        opacity={0.6}
+        zIndex={0}
+        pointerEvents="none"
       />
-      <ModalContent 
-        borderRadius={{ base: 'none', md: '3xl' }}
-        overflow="hidden"
-        m={{ base: 0, md: 4 }}
-        display="flex"
-        flexDirection="column"
-        {...responsiveStyles.modal}
+
+      {/* Content */}
+      <Box
+        flex="1"
+        p={responsiveStyles.spacing.container}
+        overflowY="auto"
+        {...responsiveStyles.content}
         sx={{
-          ...safeAreaStyles.container,
-          ...safariStyles.modal,
-          // Safari specific fixes
-          WebkitFlex: '1 1 auto',
-          flex: '1 1 auto',
-          minHeight: 0
+          ...safeAreaStyles.content,
+          ...safariStyles.scrollable,
+          ...scrollbarStyles,
+          position: 'relative',
+          zIndex: 1
         }}
       >
-        {/* Decorative background */}
-        <Box
-          position="absolute"
-          top="-50px"
-          left="-50px"
-          right="-50px"
-          height="200px"
-          background={gradients.decorative}
-          borderRadius="3xl"
-          filter="blur(40px)"
-          opacity={0.6}
-          zIndex={0}
-        />
-        
-        {/* Main card with glassmorphism */}
-        <Box
-          position="relative"
-          bg={useColorModeValue(
-            'rgba(255, 255, 255, 0.95)',
-            'rgba(17, 17, 17, 0.95)'
-          )}
-          backdropFilter="blur(20px)"
-          border="1px solid"
-          borderColor={useColorModeValue(
-            'rgba(255, 255, 255, 0.2)',
-            'rgba(255, 255, 255, 0.1)'
-          )}
-          borderRadius={{ base: 'none', md: '3xl' }}
-          shadow="2xl"
-          overflow="hidden"
-          w="full"
-          h="full"
-          display="flex"
-          flexDirection="column"
-          sx={{
-            animation: animations.slideIn,
-            '@keyframes slideIn': {
-              from: { 
-                opacity: 0, 
-                transform: 'translateY(20px) scale(0.95)' 
-              },
-              to: { 
-                opacity: 1, 
-                transform: 'translateY(0) scale(1)' 
-              }
-            },
-            // Safari specific fixes
-            WebkitFlex: '1 1 auto',
-            flex: '1 1 auto',
-            minHeight: 0,
-            // Force scrollbar visibility
-            WebkitOverflowScrolling: 'touch'
-          }}
-        >
-          {/* Animated top bar */}
-          <Box
-            height="4px"
-            sx={getShimmerStyles()}
-          />
-          
-
-          {/* Content */}
-          <Box 
-            flex="1" 
-            p={responsiveStyles.spacing.container}
-            overflowY="scroll"
-            {...responsiveStyles.content}
-            sx={{
-              ...safeAreaStyles.content,
-              ...safariStyles.scrollable,
-              ...scrollbarStyles,
-              // Safari specific fixes
-              WebkitFlex: '1 1 auto',
-              flex: '1 1 auto',
-              position: 'relative',
-              // Force scrollbar on mobile
-              minHeight: '0',
-              maxHeight: '100%'
-            }}
-          >
-            {isLoading ? (
-              <Center py={20}>
-                <VStack spacing={4}>
-                  <Spinner size="xl" color="blue.500" thickness="4px" />
-                  <Text color={textColor} fontSize="lg">
-                    Searching transactions...
-                  </Text>
-                </VStack>
-              </Center>
-            ) : error ? (
-              <Center py={20}>
-                <VStack spacing={6}>
-                  <Icon as={AlertCircle} boxSize={16} color="red.500" />
-                  <VStack spacing={2}>
-                    <Text fontSize="lg" fontWeight="bold" color={textColor}>
-                      Search Failed
-                    </Text>
-                    <Text color={textColor} textAlign="center">
-                      {error}
-                    </Text>
-                  </VStack>
-                  <Button
-                    leftIcon={<Icon as={RefreshCw} boxSize={4} />}
-                    colorScheme="blue"
-                    onClick={handleRetry}
-                    size="lg"
-                  >
-                    Try Again
-                  </Button>
-                </VStack>
-              </Center>
-            ) : (
-              <VStack spacing={6} align="stretch">
-                {/* Summary Header */}
-                <SearchSummaryHeader
-                  searchFilters={searchFilters}
-                  onClose={onClose}
-                />
-
-                {/* Results List */}
-                <CategoryResultsList
-                  transactions={transactions}
-                  searchFilters={searchFilters}
-                />
+        {isLoading ? (
+          <Center py={20}>
+            <VStack spacing={4}>
+              <Spinner size="xl" color="blue.500" thickness="4px" />
+              <Text color={textColor} fontSize="lg">
+                Searching transactions...
+              </Text>
+            </VStack>
+          </Center>
+        ) : error ? (
+          <Center py={20}>
+            <VStack spacing={6}>
+              <Icon as={AlertCircle} boxSize={16} color="red.500" />
+              <VStack spacing={2}>
+                <Text fontSize="lg" fontWeight="bold" color={textColor}>
+                  Search Failed
+                </Text>
+                <Text color={textColor} textAlign="center">
+                  {error}
+                </Text>
               </VStack>
-            )}
-          </Box>
-        </Box>
-      </ModalContent>
-    </Modal>
+              <Button
+                leftIcon={<Icon as={RefreshCw} boxSize={4} />}
+                colorScheme="blue"
+                onClick={handleRetry}
+                size="lg"
+              >
+                Try Again
+              </Button>
+            </VStack>
+          </Center>
+        ) : (
+          <VStack spacing={6} align="stretch">
+            {/* Results List */}
+            <CategoryResultsList
+              transactions={transactions}
+              searchFilters={searchFilters}
+            />
+          </VStack>
+        )}
+      </Box>
+    </PremiumModal>
   )
 })
 
