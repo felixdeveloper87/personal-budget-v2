@@ -27,9 +27,9 @@ interface SummaryCardsGridProps {
   onCardClick: (cardId: string) => void
 }
 
-const currencyFormatter = new Intl.NumberFormat('pt-BR', {
+const currencyFormatter = new Intl.NumberFormat('en-GB', {
   style: 'currency',
-  currency: 'BRL',
+  currency: 'GBP',
 })
 
 export default function SummaryCardsGrid({
