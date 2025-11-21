@@ -58,7 +58,7 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
         <Flex justify="space-between" align="center" h="full">
           <Box flex="1" minW={0} mr={4}>
             <Text
-              fontSize={{ base: 'xs', sm: 'sm' }}
+              fontSize={{ base: '3xs', sm: 'sm' }}
               fontWeight="700"
               color="gray.500"
               textTransform="uppercase"
@@ -70,7 +70,7 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
             </Text>
 
             <Text
-              fontSize={{ base: 'xl', sm: '2xl', md: '3xl' }}
+              fontSize={{ base: '2xs', sm: '2xl', md: '3xl' }}
               fontWeight="800"
               color={useColorModeValue('gray.800', 'white')}
               lineHeight="1.1"
@@ -82,7 +82,7 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
             </Text>
 
             <Text
-              fontSize="xs"
+              fontSize={{ base: '2xs', sm: '2xl', md: '3xl' }}
               color="gray.500"
               fontWeight="500"
               noOfLines={1}

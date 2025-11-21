@@ -43,7 +43,7 @@ export default function SummaryCardsGrid({
       color: SUMMARY_CARD_COLORS.transactions.color,
       bgColor: SUMMARY_CARD_COLORS.transactions.bg,
       darkBgColor: SUMMARY_CARD_COLORS.transactions.bgDark,
-      helpText: 'Total transactions',
+      helpText: 'Total',
       displayValue: transactions.length.toString(),
     },
     {
@@ -53,7 +53,7 @@ export default function SummaryCardsGrid({
       color: SUMMARY_CARD_COLORS.income.color,
       bgColor: SUMMARY_CARD_COLORS.income.bg,
       darkBgColor: SUMMARY_CARD_COLORS.income.bgDark,
-      helpText: 'Total income',
+      helpText: 'Total',
       displayValue: `£${income.toFixed(2)}`,
     },
     {
