@@ -107,7 +107,7 @@ export default function SummaryContainer({
     <>
       <Box
         w="full"
-        h="full" 
+        h="full"
       >
         <Box
           h="full"
@@ -115,7 +115,6 @@ export default function SummaryContainer({
           overflow="visible"
           position="relative"
         >
-
 
           <Box p={{ base: 2, sm: 4, md: 6 }} position="relative" zIndex={1}>
             <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">

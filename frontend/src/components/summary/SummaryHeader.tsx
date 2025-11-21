@@ -41,8 +41,9 @@ export default function SummaryHeader({
       borderColor={containerBorder}
       borderRadius="2xl"
       bg={containerBg}
-      // backdropFilter="blur(20px)"
-      // boxShadow="0 8px 32px rgba(31, 38, 135, 0.07)"
+      backdropFilter="blur(20px)"
+      boxShadow="0 8px 32px rgba(31, 38, 135, 0.07)"
+      p={{ base: 4, md: 6 }}
     >
       {/* Left side */}
       <HStack spacing={4} w={{ base: 'full', lg: 'auto' }}>
@@ -97,6 +98,7 @@ export default function SummaryHeader({
           onNavigatePeriod={onNavigatePeriod}
           onGoToToday={onGoToToday}
           formatLabel={formatLabel}
+          isEmbedded={true}
         />
       </Box>
     </Flex>

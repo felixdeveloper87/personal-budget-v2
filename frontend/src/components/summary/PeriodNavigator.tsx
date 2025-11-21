@@ -28,6 +28,7 @@ interface PeriodNavigatorProps {
   onNavigatePeriod: (direction: 'prev' | 'next') => void
   onGoToToday: () => void
   formatLabel: () => string
+  isEmbedded?: boolean
 }
 
 export default function PeriodNavigator({
@@ -35,6 +36,7 @@ export default function PeriodNavigator({
   onPeriodChange,
   onNavigatePeriod,
   formatLabel,
+  isEmbedded = false,
 }: PeriodNavigatorProps) {
   const isMobile = useBreakpointValue({ base: true, md: false })
 
@@ -59,39 +61,48 @@ export default function PeriodNavigator({
     { type: 'year' as PeriodType, label: 'Year', icon: Activity },
   ]
 
+  const containerProps = isEmbedded ? {
+    bg: 'transparent',
+    p: 0
+  } : {
+    bg: containerBg,
+    backdropFilter: 'blur(20px)',
+    border: '1px solid',
+    borderColor: containerBorder,
+    borderRadius: '2xl',
+    boxShadow: containerShadow,
+    p: { base: 3, md: 4 },
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    _hover: {
+      boxShadow: useColorModeValue(
+        '0 12px 40px rgba(31, 38, 135, 0.12)',
+        '0 12px 40px rgba(0, 0, 0, 0.5)'
+      ),
+      transform: 'translateY(-2px)'
+    }
+  }
+
   return (
     <Box
       w="full"
-      bg={containerBg}
-      backdropFilter="blur(20px)"
-      border="1px solid"
-      borderColor={containerBorder}
-      borderRadius="2xl"
-      boxShadow={containerShadow}
-      p={{ base: 3, md: 4 }}
       position="relative"
-      overflow="hidden"
-      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-      _hover={{
-        boxShadow: useColorModeValue(
-          '0 12px 40px rgba(31, 38, 135, 0.12)',
-          '0 12px 40px rgba(0, 0, 0, 0.5)'
-        ),
-        transform: 'translateY(-2px)'
-      }}
+      overflow="visible"
+      {...containerProps}
     >
-      {/* Decorative gradient blob */}
-      <Box
-        position="absolute"
-        top="-50%"
-        left="20%"
-        width="200px"
-        height="200px"
-        bg="radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)"
-        filter="blur(40px)"
-        zIndex={0}
-        pointerEvents="none"
-      />
+      {/* Decorative gradient blob - only if not embedded */}
+      {!isEmbedded && (
+        <Box
+          position="absolute"
+          top="-50%"
+          left="20%"
+          width="200px"
+          height="200px"
+          bg="radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)"
+          filter="blur(40px)"
+          zIndex={0}
+          pointerEvents="none"
+        />
+      )}
 
       <Flex
         direction={{ base: 'column', xl: 'row' }}
@@ -101,7 +112,8 @@ export default function PeriodNavigator({
         position="relative"
         zIndex={1}
       >
-        {/* Left Side - Label (Desktop Only) */}
+        {/* Left Side - Label (Desktop Only) - hide if embedded as header probably has it */}
+        {!isEmbedded && (
         <HStack spacing={3} display={{ base: 'none', xl: 'flex' }} minW="fit-content">
           <Box
             p={2.5}
@@ -129,6 +141,7 @@ export default function PeriodNavigator({
             </Text>
           </VStack>
         </HStack>
+        )}
 
         {/* Right Side - Controls */}
         <VStack spacing={4} align="stretch" flex={1}>
