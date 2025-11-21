@@ -139,6 +139,7 @@ export default function SummaryContainer({
                 income={income}
                 expense={expense}
                 balance={balance}
+                selectedPeriod={selectedPeriod}
                 onCardClick={handleCardClick}
               />
             </VStack>
