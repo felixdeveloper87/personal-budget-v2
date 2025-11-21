@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react'
-import { Box, VStack, Card, CardBody, useToast, Button, HStack, Tag, Text } from '@chakra-ui/react'
+import React, { useState, useCallback } from 'react'
+import { Box, VStack, Card, CardBody, useToast, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { createTransaction, createInstallmentPlan } from '../../../api'
@@ -38,15 +38,6 @@ export default function TransactionForm({
   const { user } = useAuth()
   const toast = useToast()
   const colors = useThemeColors()
-  const incomeShortcuts = useMemo(
-    () => [
-      { label: 'Salary', category: 'Salary', amount: 3000, description: 'Monthly salary' },
-      { label: 'Freelance', category: 'Freelance', amount: 750, description: 'Freelance work' },
-      { label: 'Bonus', category: 'Bonus', amount: 500, description: 'Performance bonus' },
-      { label: 'Rent', category: 'Rent', amount: 1200, description: 'Rental income' },
-    ],
-    []
-  )
 
   // 🗓️ Controlled form states
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
@@ -161,15 +152,6 @@ export default function TransactionForm({
     ]
   )
 
-  const handleIncomeShortcut = useCallback(
-    (presetCategory: string, presetAmount: number, presetDescription: string) => {
-      setCategory(presetCategory)
-      setAmount(presetAmount)
-      setDescription(presetDescription)
-    },
-    []
-  )
-
   return (
     <Box w="full">
       {compact ? (
@@ -186,34 +168,6 @@ export default function TransactionForm({
             >
           <DateSelector date={date} onChange={setDate} />
           <CategorySelector type={type} category={category} onChange={setCategory} />
-          {type === 'INCOME' && (
-            <VStack align="stretch" spacing={3}>
-              <Text fontSize="sm" fontWeight="700" color="green.600">
-                Quick income presets
-              </Text>
-              <HStack spacing={2} flexWrap="wrap">
-                {incomeShortcuts.map((shortcut) => (
-                  <Tag
-                    key={shortcut.label}
-                    size="lg"
-                    px={4}
-                    py={2}
-                    borderRadius="xl"
-                    cursor="pointer"
-                    onClick={() =>
-                      handleIncomeShortcut(shortcut.category, shortcut.amount, shortcut.description)
-                    }
-                    bg="green.50"
-                    color="green.700"
-                    _dark={{ bg: 'green.900', color: 'green.100' }}
-                    _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
-                  >
-                    {shortcut.label} · £{shortcut.amount}
-                  </Tag>
-                ))}
-              </HStack>
-            </VStack>
-          )}
           <AmountInput amount={amount} onChange={setAmount} type={type} />
           {/* Show installment selector only for EXPENSE */}
           {type === 'EXPENSE' && (
@@ -291,34 +245,6 @@ export default function TransactionForm({
             >
               <DateSelector date={date} onChange={setDate} />
               <CategorySelector type={type} category={category} onChange={setCategory} />
-              {type === 'INCOME' && (
-                <VStack align="stretch" spacing={3}>
-                  <Text fontSize="sm" fontWeight="700" color="green.600">
-                    Quick income presets
-                  </Text>
-                  <HStack spacing={2} flexWrap="wrap">
-                    {incomeShortcuts.map((shortcut) => (
-                      <Tag
-                        key={shortcut.label}
-                        size="lg"
-                        px={4}
-                        py={2}
-                        borderRadius="xl"
-                        cursor="pointer"
-                        onClick={() =>
-                          handleIncomeShortcut(shortcut.category, shortcut.amount, shortcut.description)
-                        }
-                        bg="green.50"
-                        color="green.700"
-                        _dark={{ bg: 'green.900', color: 'green.100' }}
-                        _hover={{ transform: 'translateY(-2px)', boxShadow: 'md' }}
-                      >
-                        {shortcut.label} · £{shortcut.amount}
-                      </Tag>
-                    ))}
-                  </HStack>
-                </VStack>
-              )}
               <AmountInput amount={amount} onChange={setAmount} type={type} />
               {/* Show installment selector only for EXPENSE */}
               {type === 'EXPENSE' && (
