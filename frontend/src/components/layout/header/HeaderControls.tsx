@@ -9,12 +9,15 @@ import {
 } from '@chakra-ui/react'
 import { SunIcon, MoonIcon, SearchIcon } from '@chakra-ui/icons'
 import { getResponsiveStyles } from '../../ui'
-import { 
+import {
   getHeaderControlsContainerStyles,
   getHeaderSearchButtonStyles,
   getThemeToggleStyles,
   getLoginButtonStyles,
-  getMobileSearchButtonStyles
+  getSharedEffects,
+  sharedHoverEffects,
+  sharedTransitions,
+  getSharedColors
 } from '../../ui'
 import MobileNavigation from './MobileNavigation'
 
@@ -35,12 +38,15 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
   const responsive = getResponsiveStyles()
   const isMobile = useBreakpointValue({ base: true, md: false })
 
+  const sharedEffects = getSharedEffects()
+  const sharedColors = getSharedColors()
+
   // Tamanhos para mobile (mesmos dos botões de navegação)
   const mobileButtonSize = isMobile ? {
     size: 'sm' as const,
     fontSize: 'sm',
     p: 2,
-    minW: '36px',
+    minW: '26px',
     h: '36px'
   } : {
     size: responsive.header.mobileIcons.search.size,
@@ -50,17 +56,34 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
     h: undefined
   }
 
+  const buttonStyles = {
+    ...getHeaderSearchButtonStyles(),
+    boxShadow: sharedEffects.shadows.sm,
+    bg: 'transparent',
+    _hover: {
+      bg: sharedColors.gradients.gray,
+      color: 'blue.500',
+      transform: `${sharedHoverEffects.lift.small} scale(1.05)`,
+      boxShadow: sharedEffects.shadows.md
+    },
+    _active: {
+      transform: `translateY(0px) scale(1.02)`,
+      boxShadow: sharedEffects.shadows.sm
+    },
+    transition: sharedTransitions.smooth
+  }
+
   return (
-    <Box 
+    <Box
       {...getHeaderControlsContainerStyles()}
       flexShrink={0}
     >
       <HStack spacing={{ base: 0.5, sm: 1, md: 2, lg: 3, xl: 4 }}>
         {/* 📱 Mobile Navigation */}
-        <MobileNavigation 
-          user={user} 
-          currentPage={currentPage} 
-          onPageChange={onPageChange} 
+        <MobileNavigation
+          user={user}
+          currentPage={currentPage}
+          onPageChange={onPageChange}
         />
 
         {/* 🔍 Search (mobile/tablet) */}
@@ -75,12 +98,8 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
               p={mobileButtonSize.p}
               minW={mobileButtonSize.minW}
               h={mobileButtonSize.h}
-              {...getHeaderSearchButtonStyles()}
-              {...Object.fromEntries(
-                Object.entries(getMobileSearchButtonStyles()).filter(
-                  ([key]) => key !== 'aria-label'
-                )
-              )}
+              {...buttonStyles}
+              display={{ base: 'flex', lg: 'none' }}
             />
           </Tooltip>
         )}
@@ -96,7 +115,7 @@ export default function HeaderControls({ user, onSearchOpen, onLogin, currentPag
             p={mobileButtonSize.p}
             minW={mobileButtonSize.minW}
             h={mobileButtonSize.h}
-            {...getThemeToggleStyles()}
+            {...buttonStyles}
           />
         </Tooltip>
 

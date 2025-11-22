@@ -45,6 +45,9 @@ export default function SummaryHeader({
       boxShadow="0 8px 32px rgba(31, 38, 135, 0.07)"
       p={{ base: 4, md: 6 }}
     >
+
+      {/* Decorative gradient blob */}
+
       {/* Left side */}
       <HStack spacing={4} w={{ base: 'full', lg: 'auto' }}>
         <Box

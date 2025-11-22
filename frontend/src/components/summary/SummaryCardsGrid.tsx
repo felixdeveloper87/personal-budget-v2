@@ -114,7 +114,7 @@ export default function SummaryCardsGrid({
         bgColor: SUMMARY_CARD_COLORS.income.bg,
         darkBgColor: SUMMARY_CARD_COLORS.income.bgDark,
         helpText: 'Confirmed inflows',
-        description: 'Everything that entered during the selected period',
+        description: 'Everything in for the selected period',
         displayValue: currencyFormatter.format(income),
       },
       {
@@ -125,7 +125,7 @@ export default function SummaryCardsGrid({
         bgColor: SUMMARY_CARD_COLORS.expenses.bg,
         darkBgColor: SUMMARY_CARD_COLORS.expenses.bgDark,
         helpText: 'Paid outflows',
-        description: 'Bills, payments, and purchases that were tracked',
+        description: 'Everything out for the selected period',
         displayValue: currencyFormatter.format(expense),
       },
       {
@@ -136,7 +136,7 @@ export default function SummaryCardsGrid({
         bgColor: SUMMARY_CARD_COLORS.balance.bg,
         darkBgColor: SUMMARY_CARD_COLORS.balance.bgDark,
         helpText: 'Available now',
-        description: 'Net figure after income and expenses',
+        description: 'Balance for the selected period',
         displayValue: currencyFormatter.format(balance),
       },
     ],
@@ -145,8 +145,7 @@ export default function SummaryCardsGrid({
 
   return (
     <Box
-      px={responsiveStyles.summaryCards.container.padding}
-      py={{ base: 4, md: 6 }}
+      px={{ base: 1, sm: 2 }}
     >
       <SimpleGrid
         columns={{ base: 1, sm: 2, md: 2, lg: 4 }}

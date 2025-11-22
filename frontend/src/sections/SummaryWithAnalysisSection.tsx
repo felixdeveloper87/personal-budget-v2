@@ -1,3 +1,4 @@
+import { Box } from '@chakra-ui/react'
 import { PeriodData } from '../hooks/usePeriodData'
 import { PeriodType } from '../types'
 import { SummaryContainer } from '../components/summary'

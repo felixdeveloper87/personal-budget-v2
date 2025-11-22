@@ -13,7 +13,7 @@ import {
   Image,
   Icon
 } from '@chakra-ui/react'
-import { CreditCard, ChevronRight } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import installmentsImage from '../../assets/installments.png'
 import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
@@ -60,22 +60,12 @@ export default function InstallmentPlansSection() {
       <Box
         w="full"
         h="full"
-        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
-        sx={{
-          paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
-        }}
+        px={{ base: 1, sm: 2, md: 3 }}
       >
         <Box
-          bg={useColorModeValue('rgba(255, 255, 255, 0.6)', 'rgba(0, 0, 0, 0.4)')}
-          backdropFilter="blur(20px)"
           border="1px solid"
           borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
           borderRadius="2xl"
-          boxShadow={useColorModeValue(
-            '0 8px 32px rgba(31, 38, 135, 0.07)',
-            '0 8px 32px rgba(0, 0, 0, 0.3)'
-          )}
           overflow="hidden"
           position="relative"
           h="full"
@@ -95,10 +85,10 @@ export default function InstallmentPlansSection() {
           <Box
             position="absolute"
             top="-50%"
-            left="-10%"
-            width="300px"
+            left="-5%"
+            width="100px"
             height="300px"
-            bg="radial-gradient(circle, rgba(236, 72, 153, 0.15) 0%, transparent 70%)"
+            bg="radial-gradient(circle, rgba(246, 59, 59, 0.15) 0%, transparent 70%)"
             filter="blur(40px)"
             zIndex={0}
             pointerEvents="none"

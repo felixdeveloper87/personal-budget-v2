@@ -43,11 +43,7 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
       <Box
         w="full"
         h="full"
-        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
-        sx={{
-          paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
-        }}
+        px={{ base: 1, sm: 2, md: 3 }}
       >
         <Box
           h="full"
@@ -75,8 +71,8 @@ export default function AddTransactionSection({ transactions, onRefresh }: AddTr
           <Box
             position="absolute"
             top="-50%"
-            right="-10%"
-            width="300px"
+            left="-5%"
+            width="100px"
             height="300px"
             bg="radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%)"
             filter="blur(40px)"

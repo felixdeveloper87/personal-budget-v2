@@ -116,7 +116,7 @@ export default function SummaryContainer({
           position="relative"
         >
 
-          <Box p={{ base: 2, sm: 4, md: 6 }} position="relative" zIndex={1}>
+          <Box p={{ base: 1, sm: 2, md: 3 }} position="relative" zIndex={1}>
             <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
               {/* Header with Period Navigator embedded */}
               <SummaryHeader

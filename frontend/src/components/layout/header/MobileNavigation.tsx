@@ -49,8 +49,7 @@ export default function MobileNavigation({ user, currentPage = 'dashboard', onPa
               size="sm"
               fontSize="sm"
               p={2}
-              minW="36px"
-              h="36px"
+              minW="26px"
               {...getHeaderSearchButtonStyles()}
               boxShadow={sharedEffects.shadows.sm}
               bg={isActive ? activeBg : 'transparent'}

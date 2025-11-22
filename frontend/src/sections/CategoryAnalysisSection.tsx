@@ -22,11 +22,7 @@ export default function CategoryAnalysisSection({
         <Box
             w="full"
             h="full"
-            px={{ base: 1, sm: 2, md: 3, lg: 4 }}
-            sx={{
-                paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-                paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
-            }}
+            px={{ base: 1, sm: 2, md: 3 }}
         >
             <Box
                 h="full"
