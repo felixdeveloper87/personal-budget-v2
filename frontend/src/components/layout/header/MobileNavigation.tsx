@@ -19,7 +19,7 @@ interface MobileNavigationProps {
 export default function MobileNavigation({ user, currentPage = 'dashboard', onPageChange }: MobileNavigationProps) {
   if (!user) return null
 
-  const isMobile = useBreakpointValue({ base: true, md: false })
+  const isMobile = useBreakpointValue({ base: true, lg: false })
 
   if (!isMobile) return null
 

@@ -14,7 +14,7 @@ import {
   Icon,
   useColorModeValue
 } from '@chakra-ui/react'
-import { SettingsIcon } from '@chakra-ui/icons'
+import { SettingsIcon, ChevronDownIcon } from '@chakra-ui/icons'
 import { GRADIENTS } from '../../../theme'
 import { Home, FileText, User, LogOut, BarChart3 } from 'lucide-react'
 
@@ -32,6 +32,13 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
   const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
   const borderColor = useColorModeValue('gray.200', 'gray.600')
   const hoverBorderColor = useColorModeValue('blue.200', 'blue.500')
+  const triggerBg = useColorModeValue('white', 'whiteAlpha.100')
+  const triggerBorder = useColorModeValue('gray.200', 'whiteAlpha.300')
+  const avatarBg = useColorModeValue('blue.500', 'blue.400')
+  const menuAccentGradient = useColorModeValue('linear(to-r, blue.300, purple.300)', 'linear(to-r, blue.200, purple.200)')
+  const menuItemHoverBg = useColorModeValue('gray.50', 'gray.700')
+  const mobileNavHoverBg = useColorModeValue('blue.50', 'blue.900')
+  const logoutHoverBg = useColorModeValue('red.50', 'red.900')
 
   return (
     <Menu placement="bottom-end">
@@ -43,12 +50,17 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         borderRadius="xl"
         flexShrink={0}
         minW="auto"
+        bg={triggerBg}
+        border="1px solid"
+        borderColor={triggerBorder}
+        rightIcon={<ChevronDownIcon />}
         _hover={{
           transform: 'translateY(-2px)',
-          boxShadow: '0 8px 25px rgba(0,0,0,0.1)',
+          boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
+          borderColor: hoverBorderColor,
         }}
         _focus={{
-          boxShadow: 'none',
+          boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.25)',
           outline: 'none'
         }}
         _active={{
@@ -60,7 +72,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
           <Avatar 
             size={{ base: 'sm', sm: 'sm', md: 'md' }}
             name={user?.name}
-            bg={useColorModeValue('blue.500', 'blue.400')}
+            bg={avatarBg}
             color="white"
             fontWeight="600"
             _hover={{
@@ -77,17 +89,17 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
         border="1px solid"
         borderColor={borderColor}
         borderRadius="2xl"
-        shadow="lg"
+        shadow="xl"
         overflow="hidden"
         _hover={{
           borderColor: hoverBorderColor
         }}
         transition="all 0.2s ease"
       >
-        {/* Simple top border */}
+        {/* Accent top border */}
         <Box
-          height="1px"
-          bg={useColorModeValue('blue.200', 'blue.500')}
+          height="2px"
+          bgGradient={menuAccentGradient}
         />
 
         {/* Header do Menu */}
@@ -96,7 +108,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
             <Avatar 
               size="md"
               name={user?.name}
-              bg={useColorModeValue('blue.500', 'blue.400')}
+              bg={avatarBg}
               color="white"
               fontWeight="600"
             />
@@ -150,7 +162,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
             px={6}
             py={3}
             _hover={{ 
-              bg: useColorModeValue('blue.50', 'blue.900'),
+              bg: mobileNavHoverBg,
               color: 'blue.500'
             }}
           >
@@ -168,7 +180,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
             px={6}
             py={3}
             _hover={{ 
-              bg: useColorModeValue('blue.50', 'blue.900'),
+              bg: mobileNavHoverBg,
               color: 'blue.500'
             }}
           >
@@ -186,7 +198,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
             px={6}
             py={3}
             _hover={{ 
-              bg: useColorModeValue('blue.50', 'blue.900'),
+              bg: mobileNavHoverBg,
               color: 'blue.500'
             }}
           >
@@ -202,7 +214,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
           px={6}
           py={3}
           _hover={{ 
-            bg: useColorModeValue('gray.50', 'gray.700'),
+            bg: menuItemHoverBg,
             color: 'blue.500'
           }}
         >
@@ -216,7 +228,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
           px={6}
           py={3}
           _hover={{ 
-            bg: useColorModeValue('gray.50', 'gray.700'),
+            bg: menuItemHoverBg,
             color: 'blue.500'
           }}
         >
@@ -231,7 +243,7 @@ export default function UserMenu({ user, currentPage, onPageChange, onOpenSettin
           px={6}
           py={3}
           _hover={{ 
-            bg: useColorModeValue('red.50', 'red.900'),
+            bg: logoutHoverBg,
             color: 'red.600'
           }}
         >
