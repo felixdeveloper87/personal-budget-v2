@@ -1,17 +1,10 @@
 import { useState } from 'react'
-import {
-  Box,
-  VStack,
-  useDisclosure,
-  useColorModeValue,
-} from '@chakra-ui/react'
-import { getResponsiveStyles } from '../ui'
+import { VStack, useDisclosure } from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
-import { SummaryCardsGrid } from './'
+import SummaryCardsGrid from './SummaryCardsGrid'
 import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import SummaryHeader from './SummaryHeader'
-import PeriodNavigator from './PeriodNavigator'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
@@ -26,6 +19,61 @@ interface SummaryContainerProps {
   formatLabel?: () => string
 }
 
+const fallbackFormatLabel = (date: Date, period: PeriodType) => {
+  if (period === 'month') {
+    return date
+      .toLocaleString('en-GB', { month: 'short', year: 'numeric' })
+      .toUpperCase()
+  }
+  if (period === 'day') {
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  }
+  if (period === 'week') {
+    const start = new Date(date)
+    const day = start.getDay()
+    const diff = start.getDate() - day + (day === 0 ? -6 : 1)
+    start.setDate(diff)
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    const fmt = (d: Date) =>
+      d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+    return `${fmt(start)} - ${fmt(end)}`
+  }
+  if (period === 'year') {
+    return date.getFullYear().toString()
+  }
+  return 'Unknown Period'
+}
+
+const fallbackNavigatePeriod = (
+  date: Date,
+  period: PeriodType,
+  direction: 'prev' | 'next',
+): Date => {
+  const next = new Date(date)
+  const offset = direction === 'next' ? 1 : -1
+  switch (period) {
+    case 'day':
+      next.setDate(date.getDate() + offset)
+      break
+    case 'week':
+      next.setDate(date.getDate() + offset * 7)
+      break
+    case 'month':
+      next.setMonth(date.getMonth() + offset)
+      break
+    case 'year':
+      next.setFullYear(date.getFullYear() + offset)
+      break
+  }
+  return next
+}
+
 export default function SummaryContainer({
   periodData,
   selectedPeriod,
@@ -37,66 +85,19 @@ export default function SummaryContainer({
   formatLabel: externalFormatLabel,
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance, label } = periodData
-  const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
 
-  // Navigation functions - use provided ones or create local ones
-  const navigatePeriod = externalNavigatePeriod ?? ((direction: 'prev' | 'next') => {
-    const newDate = new Date(selectedDate)
-    const offset = direction === 'next' ? 1 : -1
-
-    switch (selectedPeriod) {
-      case 'day':
-        newDate.setDate(selectedDate.getDate() + offset)
-        break
-      case 'week':
-        newDate.setDate(selectedDate.getDate() + offset * 7)
-        break
-      case 'month':
-        newDate.setMonth(selectedDate.getMonth() + offset)
-        break
-      case 'year':
-        newDate.setFullYear(selectedDate.getFullYear() + offset)
-        break
-    }
-
-    onDateChange(newDate)
-  })
+  const navigatePeriod =
+    externalNavigatePeriod ??
+    ((direction: 'prev' | 'next') =>
+      onDateChange(fallbackNavigatePeriod(selectedDate, selectedPeriod, direction)))
 
   const goToToday = externalGoToToday ?? (() => onDateChange(new Date()))
 
-  const formatLabel = externalFormatLabel ?? (() => {
-    if (selectedPeriod === 'month') {
-      return selectedDate.toLocaleString('en-GB', {
-        month: 'short',
-        year: 'numeric',
-      }).toUpperCase()
-    }
-    if (selectedPeriod === 'day') {
-      return selectedDate.toLocaleDateString('en-GB', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
-    }
-    if (selectedPeriod === 'week') {
-      const start = new Date(selectedDate)
-      const day = start.getDay()
-      const diff = start.getDate() - day + (day === 0 ? -6 : 1)
-      start.setDate(diff)
-      const end = new Date(start)
-      end.setDate(start.getDate() + 6)
-      const fmt = (d: Date) =>
-        d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
-      return `${fmt(start)} - ${fmt(end)}`
-    }
-    if (selectedPeriod === 'year') {
-      return selectedDate.getFullYear().toString()
-    }
-    return 'Unknown Period'
-  })
+  const formatLabel =
+    externalFormatLabel ??
+    (() => fallbackFormatLabel(selectedDate, selectedPeriod))
 
   const handleCardClick = (cardId: string) => {
     setSelectedCard(cardId as CardId)
@@ -105,43 +106,25 @@ export default function SummaryContainer({
 
   return (
     <>
-      <Box
-        w="full"
-        h="full"
-      >
-        <Box
-          h="full"
-          bg="transparent"
-          overflow="visible"
-          position="relative"
-        >
+      <VStack spacing={{ base: 3, md: 4 }} align="stretch" w="full">
+        <SummaryHeader
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={onPeriodChange}
+          onNavigatePeriod={navigatePeriod}
+          onGoToToday={goToToday}
+          formatLabel={formatLabel}
+        />
 
-          <Box p={{ base: 1, sm: 2, md: 3 }} position="relative" zIndex={1}>
-            <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
-              {/* Header with Period Navigator embedded */}
-              <SummaryHeader
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={onPeriodChange}
-                onNavigatePeriod={navigatePeriod}
-                onGoToToday={goToToday}
-                formatLabel={formatLabel}
-              />
+        <SummaryCardsGrid
+          transactions={transactions}
+          income={income}
+          expense={expense}
+          balance={balance}
+          selectedPeriod={selectedPeriod}
+          onCardClick={handleCardClick}
+        />
+      </VStack>
 
-              {/* Summary Grid */}
-              <SummaryCardsGrid
-                transactions={transactions}
-                income={income}
-                expense={expense}
-                balance={balance}
-                selectedPeriod={selectedPeriod}
-                onCardClick={handleCardClick}
-              />
-            </VStack>
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Modal */}
       <SummaryCardModal
         isOpen={isOpen}
         onClose={onClose}

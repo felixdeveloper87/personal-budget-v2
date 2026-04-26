@@ -1,56 +1,34 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
+  Badge,
   Box,
-  Heading,
+  Button,
+  HStack,
+  Icon,
+  Skeleton,
   Text,
   VStack,
-  Spinner,
-  Center,
-  HStack,
   useColorModeValue,
   useDisclosure,
-  Button,
-  Image,
-  Icon
 } from '@chakra-ui/react'
-import { ChevronRight } from 'lucide-react'
-import installmentsImage from '../../assets/installments.png'
-import { useThemeColors } from '../hooks/useThemeColors'
+import { ChevronRight, CreditCard } from 'lucide-react'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
 import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
+import { SectionCard, SectionHeader } from '../components/ui'
 
 /**
  * 💳 InstallmentPlansSection
- * Displays a compact header card showing active installment plans
- * and opens a modal to view or manage all plans.
+ * Compact dashboard card showing the count of active vs past plans and a
+ * shortcut to the full plans modal.
  */
 export default function InstallmentPlansSection() {
-  const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const cardBorder = useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')
-  const cardHoverShadow = useColorModeValue(
-    '0 12px 40px rgba(31, 38, 135, 0.12)',
-    '0 12px 40px rgba(0, 0, 0, 0.5)'
-  )
-  const loadingTextColor = useColorModeValue('gray.600', 'gray.400')
-  const titleGradient = useColorModeValue(
-    'linear(to-r, gray.800, gray.600)',
-    'linear(to-r, white, gray.300)'
-  )
-  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
-  const viewButtonBg = useColorModeValue('whiteAlpha.500', 'whiteAlpha.100')
-  const viewButtonColor = useColorModeValue('pink.600', 'pink.300')
-  const viewButtonBorder = useColorModeValue('pink.100', 'whiteAlpha.200')
-  const viewButtonHoverBg = useColorModeValue('pink.50', 'whiteAlpha.200')
-  const viewButtonHoverBorder = useColorModeValue('pink.200', 'whiteAlpha.300')
 
-  // Local state
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
 
-  // === Data fetching ===
   const fetchPlans = async () => {
     try {
       setLoading(true)
@@ -81,126 +59,114 @@ export default function InstallmentPlansSection() {
     return { activeCount: active, pastCount: past }
   }, [plans])
 
-  // === Render ===
+  const captionMutedColor = useColorModeValue('gray.500', 'gray.400')
+  const ctaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ctaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ctaColor = useColorModeValue('gray.700', 'gray.200')
+  const ctaHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const emptyBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const emptyBadgeColor = useColorModeValue('gray.600', 'gray.300')
+
+  const caption =
+    activeCount === 0
+      ? pastCount === 0
+        ? 'No plans yet — split a purchase into installments.'
+        : 'No active plans · open history to review past ones.'
+      : `${activeCount} active${
+          pastCount > 0 ? ` · ${pastCount} past` : ''
+        }`
+
   return (
     <>
-      <Box
-        w="full"
-        h="full"
-        px={{ base: 1, sm: 2, md: 3 }}
-      >
-        <Box
-          border="1px solid"
-          borderColor={cardBorder}
-          borderRadius="2xl"
-          overflow="hidden"
-          position="relative"
-          h="full"
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          _hover={{
-            boxShadow: cardHoverShadow,
-            transform: 'translateY(-2px)'
-          }}
-        >
-          {/* Decorative gradient blob */}
-          <Box
-            position="absolute"
-            top="-50%"
-            left="-5%"
-            width="100px"
-            height="300px"
-            bg="radial-gradient(circle, rgba(246, 59, 59, 0.15) 0%, transparent 70%)"
-            filter="blur(40px)"
-            zIndex={0}
-            pointerEvents="none"
-          />
+      <SectionCard h="full">
+        <Box p={{ base: 4, sm: 5 }}>
+          {loading ? (
+            <VStack align="stretch" spacing={3}>
+              <Skeleton height="20px" width="40%" borderRadius="md" />
+              <Skeleton height="14px" width="65%" borderRadius="md" />
+              <Skeleton height="40px" width="100%" borderRadius="lg" />
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={4}>
+              <SectionHeader
+                icon={CreditCard}
+                title="Installments"
+                caption={caption}
+                accent="violet"
+                rightSlot={
+                  activeCount > 0 ? (
+                    <Badge
+                      variant="subtle"
+                      colorScheme="purple"
+                      borderRadius="full"
+                      px={2.5}
+                      py={1}
+                      fontSize="xs"
+                      fontWeight={700}
+                    >
+                      {activeCount}
+                    </Badge>
+                  ) : pastCount > 0 ? (
+                    <Box
+                      px={2.5}
+                      py={1}
+                      borderRadius="full"
+                      bg={emptyBadgeBg}
+                      color={emptyBadgeColor}
+                      fontSize="xs"
+                      fontWeight={700}
+                    >
+                      {pastCount} done
+                    </Box>
+                  ) : null
+                }
+              />
 
-          <Box p={{ base: 5, sm: 6 }} position="relative" zIndex={1} w="full">
-            {loading ? (
-              <Center py={2}>
-                <HStack spacing={3}>
-                  <Spinner size="sm" color="pink.500" thickness="3px" />
-                  <Text color={loadingTextColor} fontSize="sm" fontWeight="500">
-                    Loading plans...
+              <Button
+                onClick={onOpen}
+                variant="unstyled"
+                w="full"
+                h="44px"
+                px={4}
+                borderRadius="xl"
+                bg={ctaBg}
+                border="1px solid"
+                borderColor={ctaBorder}
+                color={ctaColor}
+                fontWeight={600}
+                fontSize="sm"
+                transition="background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease"
+                _hover={{
+                  bg: ctaHoverBg,
+                  borderColor: ctaHoverBorder,
+                  transform: 'translateX(1px)',
+                }}
+                _active={{ transform: 'scale(0.99)' }}
+                _focusVisible={{
+                  outline: '2px solid',
+                  outlineColor: 'purple.300',
+                  outlineOffset: '2px',
+                }}
+              >
+                <HStack justify="space-between" align="center" w="full" px={1}>
+                  <Text noOfLines={1} color={ctaColor}>
+                    {plans.length === 0
+                      ? 'Create your first plan'
+                      : 'View all plans'}
                   </Text>
+                  <Icon
+                    as={ChevronRight}
+                    boxSize={4}
+                    color={captionMutedColor}
+                  />
                 </HStack>
-              </Center>
-            ) : (
-              <HStack justify="space-between" align="center" w="full" spacing={4}>
-                {/* Left side - Title & Count */}
-                <HStack spacing={4}>
-                  <Box
-                    p={2}
-                    bg="transparent"
-                    borderRadius="xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Image
-                      src={installmentsImage}
-                      alt="Installments"
-                      boxSize={{ base: 8, sm: 10, md: 12 }}
-                      objectFit="contain"
-                    />
-                  </Box>
-                  <VStack align="start" spacing={0.5}>
-                    <Heading
-                      size="md"
-                      fontWeight="700"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      letterSpacing="-0.02em"
-                      fontSize={{ base: 'lg', sm: 'xl' }}
-                      bgGradient={titleGradient}
-                      bgClip="text"
-                    >
-                      Installments
-                    </Heading>
-                    <Text
-                      fontSize={{ base: 'xs', sm: 'xl' }}
-                      color={subtitleColor}
-                      fontWeight="600"
-                    >
-                      {activeCount} Active Plan{activeCount !== 1 ? 's' : ''}
-                      {pastCount > 0 && ` · ${pastCount} past`}
-                    </Text>
-                  </VStack>
-                </HStack>
-
-                {/* Right side - View Button */}
-                <Button
-                  onClick={onOpen}
-                  variant="ghost"
-                  size="lg"
-                  height="50px"
-                  px={6}
-                  borderRadius="xl"
-                  bg={viewButtonBg}
-                  color={viewButtonColor}
-                  fontSize={{ base: 'md', sm: 'xl' }}
-                  border="1px solid"
-                  borderColor={viewButtonBorder}
-                  _hover={{
-                    bg: viewButtonHoverBg,
-                    transform: 'translateX(2px)',
-                    borderColor: viewButtonHoverBorder,
-                  }}
-                  rightIcon={<Icon as={ChevronRight} boxSize={5} />}
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  fontWeight="600"
-                >
-                  View All
-                </Button>
-              </HStack>
-            )}
-          </Box>
+              </Button>
+            </VStack>
+          )}
         </Box>
-      </Box>
+      </SectionCard>
 
-      {/* Modal always mounted to preserve hook order */}
       <InstallmentPlansModal
         isOpen={isOpen}
         onClose={onClose}

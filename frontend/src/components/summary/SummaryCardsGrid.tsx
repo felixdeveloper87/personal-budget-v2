@@ -1,4 +1,4 @@
-import { SimpleGrid, Box } from '@chakra-ui/react'
+import { SimpleGrid } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import {
@@ -12,7 +12,6 @@ import {
   CalendarClock,
 } from 'lucide-react'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
-import { getResponsiveStyles } from '../ui'
 import SummaryCard from './SummaryCard'
 import { PeriodType } from '../../types'
 
@@ -40,7 +39,6 @@ export default function SummaryCardsGrid({
   selectedPeriod,
   onCardClick,
 }: SummaryCardsGridProps) {
-  const responsiveStyles = getResponsiveStyles()
   const periodMeta = useMemo(() => {
     const meta: Record<
       PeriodType,
@@ -83,7 +81,7 @@ export default function SummaryCardsGrid({
   const stats: {
     id: CardId
     label: string
-    icon: any
+    icon: LucideIcon
     color: string
     bgColor: string
     darkBgColor: string
@@ -140,29 +138,23 @@ export default function SummaryCardsGrid({
         displayValue: currencyFormatter.format(balance),
       },
     ],
-    [transactions.length, income, expense, balance]
+    [transactions.length, income, expense, balance],
   )
 
   return (
-    <Box
-      px={{ base: 1, sm: 2 }}
+    <SimpleGrid
+      columns={{ base: 1, sm: 2, lg: 4 }}
+      spacing={{ base: 3, md: 4 }}
+      w="full"
     >
-      <SimpleGrid
-        columns={{ base: 1, sm: 2, md: 2, lg: 4 }}
-        spacing={responsiveStyles.summaryCards.grid.spacing}
-        minChildWidth={{ base: '260px', md: '220px' }}
-        w="full"
-        alignItems="stretch"
-      >
-        {stats.map((stat) => (
-          <SummaryCard
-            key={stat.id}
-            stat={stat}
-            onCardClick={onCardClick}
-            periodMeta={periodMeta}
-          />
-        ))}
-      </SimpleGrid>
-    </Box>
+      {stats.map((stat) => (
+        <SummaryCard
+          key={stat.id}
+          stat={stat}
+          onCardClick={onCardClick}
+          periodMeta={periodMeta}
+        />
+      ))}
+    </SimpleGrid>
   )
 }

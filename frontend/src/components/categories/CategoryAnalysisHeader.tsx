@@ -1,167 +1,151 @@
 import {
-  HStack,
-  Text,
   Button,
-  Icon,
   Flex,
-  Heading,
+  HStack,
+  Icon,
   useColorModeValue,
-  Box,
-  VStack,
-  Image,
 } from '@chakra-ui/react'
-import { TrendingDown, TrendingUp } from 'lucide-react'
-import { sectionHeaderStyles, sectionTitleStyles } from '../ui'
-import categoriesImage from '../../../assets/categories.png'
+import { Layers, TrendingDown, TrendingUp } from 'lucide-react'
+import { SectionHeader } from '../ui'
 
 interface CategoryAnalysisHeaderProps {
   activeTab: 'expenses' | 'incomes'
   onTabChange: (tab: 'expenses' | 'incomes') => void
 }
 
+interface TabPaletteTokens {
+  bg: string
+  color: string
+  border: string
+}
+
+interface TabPalette {
+  active: TabPaletteTokens
+  inactive: TabPaletteTokens
+}
+
 export default function CategoryAnalysisHeader({
   activeTab,
-  onTabChange
+  onTabChange,
 }: CategoryAnalysisHeaderProps) {
-  // Styles matching the premium look of AllTransactionsSection
-  const iconBg = useColorModeValue('purple.50', 'whiteAlpha.100')
-  const iconColor = useColorModeValue('purple.500', 'purple.300')
-  const iconBorderColor = useColorModeValue('purple.200', 'purple.500')
+  // Pre-resolve every color token at the top — no hooks inside loops or
+  // helper functions, no surprises with the Rules of Hooks.
+  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.50')
+  const trackBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
-  // Tab Button Styles
-  const getTabStyles = (isActive: boolean, type: 'expenses' | 'incomes') => {
-    const isExpense = type === 'expenses'
-    
-    // Active state colors
-    const activeBg = useColorModeValue(
-      isExpense ? 'red.50' : 'green.50', 
-      isExpense ? 'rgba(254, 202, 202, 0.1)' : 'rgba(187, 247, 208, 0.1)'
-    )
-    const activeColor = useColorModeValue(
-      isExpense ? 'red.600' : 'green.600', 
-      isExpense ? 'red.200' : 'green.200'
-    )
-    const activeBorder = useColorModeValue(
-      isExpense ? 'red.200' : 'green.200', 
-      isExpense ? 'red.500' : 'green.500'
-    )
+  const inactiveColor = useColorModeValue('gray.500', 'gray.400')
+  const inactiveHoverColor = useColorModeValue('gray.700', 'gray.200')
 
-    // Inactive state colors
-    const inactiveBg = 'transparent'
-    const inactiveColor = useColorModeValue('gray.500', 'gray.400')
-    const inactiveBorder = useColorModeValue('gray.200', 'gray.700')
-
-    return {
-      bg: isActive ? activeBg : inactiveBg,
-      color: isActive ? activeColor : inactiveColor,
-      borderColor: isActive ? activeBorder : inactiveBorder,
-      _hover: {
-        bg: isActive ? activeBg : useColorModeValue('gray.50', 'whiteAlpha.50'),
-        borderColor: isActive ? activeBorder : useColorModeValue('gray.300', 'gray.600'),
-        transform: 'translateY(-1px)',
-        boxShadow: 'sm'
-      }
-    }
+  const expensePalette: TabPalette = {
+    active: {
+      bg: useColorModeValue('white', 'whiteAlpha.200'),
+      color: useColorModeValue('red.600', 'red.300'),
+      border: useColorModeValue('red.200', 'rgba(239,68,68,0.35)'),
+    },
+    inactive: {
+      bg: 'transparent',
+      color: inactiveColor,
+      border: 'transparent',
+    },
   }
 
-  const expenseStyles = getTabStyles(activeTab === 'expenses', 'expenses')
-  const incomeStyles = getTabStyles(activeTab === 'incomes', 'incomes')
+  const incomePalette: TabPalette = {
+    active: {
+      bg: useColorModeValue('white', 'whiteAlpha.200'),
+      color: useColorModeValue('green.600', 'green.300'),
+      border: useColorModeValue('green.200', 'rgba(34,197,94,0.35)'),
+    },
+    inactive: {
+      bg: 'transparent',
+      color: inactiveColor,
+      border: 'transparent',
+    },
+  }
+
+  const tabs: Array<{
+    key: 'expenses' | 'incomes'
+    label: string
+    icon: typeof TrendingDown
+    palette: TabPalette
+  }> = [
+    {
+      key: 'expenses',
+      label: 'Expenses',
+      icon: TrendingDown,
+      palette: expensePalette,
+    },
+    {
+      key: 'incomes',
+      label: 'Incomes',
+      icon: TrendingUp,
+      palette: incomePalette,
+    },
+  ]
 
   return (
     <Flex
-      direction={sectionHeaderStyles.container.direction}
-      align={sectionHeaderStyles.container.align}
-      justify={sectionHeaderStyles.container.justify}
-      gap={sectionHeaderStyles.container.gap}
-      w={sectionHeaderStyles.container.w}
-      mb={4}
-      flexWrap={{ base: 'wrap', sm: 'nowrap' }}
+      direction={{ base: 'column', sm: 'row' }}
+      align={{ base: 'stretch', sm: 'center' }}
+      justify="space-between"
+      gap={3}
+      w="full"
     >
-      {/* Left side: Icon & Title */}
-      <HStack 
-        spacing={sectionHeaderStyles.iconAndTitle.spacing} 
-        align={sectionHeaderStyles.iconAndTitle.align}
-        flex={{ base: '1 1 auto', sm: '0 1 auto' }}
-      >
-        <Box
-          p={2}
-          bg="transparent"
-          borderRadius={sectionHeaderStyles.icon.borderRadius}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          transition="all 0.2s ease"
-        >
-          <Image
-            src={categoriesImage}
-            alt="Categories"
-            boxSize={{ base: 8, sm: 10, md: 12 }}
-            objectFit="contain"
-          />
-        </Box>
-        
-        <VStack align="start" spacing={0} ml={1}>
-          <Heading
-            size={sectionTitleStyles.size}
-            fontWeight={sectionTitleStyles.fontWeight}
-            fontFamily={sectionTitleStyles.fontFamily}
-            letterSpacing={sectionTitleStyles.letterSpacing}
-            lineHeight={sectionTitleStyles.lineHeight}
-            color={useColorModeValue('gray.800', 'white')}
-          >
-            Categories
-          </Heading>
-          <Text
-            fontSize="sm"
-            color={useColorModeValue('gray.500', 'gray.400')}
-            fontWeight="500"
-            display={{ base: 'none', sm: 'block' }}
-          >
-            Breakdown by category
-          </Text>
-        </VStack>
-      </HStack>
+      <SectionHeader
+        icon={Layers}
+        title="Categories"
+        caption="Breakdown by category for the selected period"
+        accent="violet"
+      />
 
-      {/* Right side: Tab Buttons (Segmented Control style) */}
-      <HStack 
-        spacing={0} 
+      <HStack
+        spacing={1}
         p={1}
-        bg={useColorModeValue('gray.100', 'gray.800')}
+        bg={trackBg}
         borderRadius="xl"
         border="1px solid"
-        borderColor={useColorModeValue('gray.200', 'gray.700')}
+        borderColor={trackBorder}
         w={{ base: 'full', sm: 'auto' }}
+        flexShrink={0}
       >
-        <Button
-          size="sm"
-          leftIcon={<Icon as={TrendingDown} boxSize={4} />}
-          borderRadius="lg"
-          fontSize="xs"
-          fontWeight="600"
-          h="32px"
-          px={4}
-          flex={{ base: 1, sm: 'auto' }}
-          {...expenseStyles}
-          onClick={() => onTabChange('expenses')}
-          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-        >
-          Expenses
-        </Button>
-        <Button
-          size="sm"
-          leftIcon={<Icon as={TrendingUp} boxSize={4} />}
-          borderRadius="lg"
-          fontSize="xs"
-          fontWeight="600"
-          h="32px"
-          px={4}
-          flex={{ base: 1, sm: 'auto' }}
-          {...incomeStyles}
-          onClick={() => onTabChange('incomes')}
-          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-        >
-          Incomes
-        </Button>
+        {tabs.map(({ key, label, icon, palette }) => {
+          const isActive = activeTab === key
+          const tokens = isActive ? palette.active : palette.inactive
+          return (
+            <Button
+              key={key}
+              size="sm"
+              h="32px"
+              px={3.5}
+              flex={{ base: 1, sm: 'none' }}
+              borderRadius="lg"
+              fontSize="xs"
+              fontWeight={600}
+              leftIcon={<Icon as={icon} boxSize={3.5} />}
+              bg={tokens.bg}
+              color={tokens.color}
+              borderWidth="1px"
+              borderStyle="solid"
+              borderColor={tokens.border}
+              boxShadow={
+                isActive ? '0 1px 2px rgba(15,23,42,0.06)' : 'none'
+              }
+              transition="background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease"
+              _hover={
+                isActive
+                  ? undefined
+                  : { color: inactiveHoverColor }
+              }
+              _focusVisible={{
+                outline: '2px solid',
+                outlineColor: 'blue.300',
+                outlineOffset: '2px',
+              }}
+              onClick={() => onTabChange(key)}
+            >
+              {label}
+            </Button>
+          )
+        })}
       </HStack>
     </Flex>
   )
