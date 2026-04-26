@@ -9,8 +9,12 @@ import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
 import type { AppPage } from './components/layout/header/navigation.config'
 
-const PAGE_RENDERERS: Record<AppPage, () => JSX.Element> = {
-  dashboard: () => <Dashboard />,
+interface PageRenderArgs {
+  onPageChange: (page: AppPage) => void
+}
+
+const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
+  dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
   transactions: () => <AllTransactionsPage />,
   categories: () => <CategoriesPage />,
   charts: () => <ChartsPage />,
@@ -54,7 +58,7 @@ function AppContent() {
     const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
-        {renderPage()}
+        {renderPage({ onPageChange: setCurrentPage })}
       </Layout>
     )
   }

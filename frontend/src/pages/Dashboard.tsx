@@ -8,10 +8,20 @@ import {
   AddTransactionSection,
   SummaryWithAnalysisSection,
   InstallmentPlansSection,
+  DiscoverSection,
 } from '../sections'
 import { DashboardHeader, DashboardSkeleton } from '../components/dashboard'
+import type { AppPage } from '../components/layout/header/navigation.config'
 
-export default function Dashboard() {
+export interface DashboardProps {
+  /**
+   * Optional handler used by in-dashboard CTAs (e.g. DiscoverSection)
+   * to navigate to other pages without a router.
+   */
+  onPageChange?: (page: AppPage) => void
+}
+
+export default function Dashboard({ onPageChange }: DashboardProps) {
   const {
     selectedDate,
     selectedPeriod,
@@ -76,6 +86,10 @@ export default function Dashboard() {
                 onRefresh={loadData}
               />
               <InstallmentPlansSection />
+            </Box>
+
+            <Box order={{ base: 3, lg: 3 }}>
+              <DiscoverSection onPageChange={onPageChange} />
             </Box>
           </VStack>
         )}
