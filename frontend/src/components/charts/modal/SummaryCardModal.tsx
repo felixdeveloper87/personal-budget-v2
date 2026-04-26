@@ -16,6 +16,7 @@ import { SummaryCardType } from '../../../constants/summaryColors'
 import InsightsCard from '../../ui/InsightsCard'
 import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
 import { ChartLoadingState } from './components'
+import type { PeriodType } from '../../../types'
 
 interface SummaryCardModalProps {
   isOpen: boolean
@@ -25,6 +26,12 @@ interface SummaryCardModalProps {
   transactions?: any[]
   selectedPeriod?: string
   currentBalance?: number
+  /**
+   * When provided, the inner charts also render the compact period bucket
+   * bar chart at the top (today / this week / this month / this year).
+   */
+  periodType?: PeriodType
+  selectedDate?: Date
 }
 
 const ICON_MAP = {
@@ -62,6 +69,8 @@ export default function SummaryCardModal({
   transactions = [],
   selectedPeriod = 'Current Period',
   currentBalance = 0,
+  periodType,
+  selectedDate,
 }: SummaryCardModalProps) {
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -118,13 +127,28 @@ export default function SummaryCardModal({
             <AnimatePresence mode="wait">
               <Box key="chart">
                 {selectedCard === 'transactions' && (
-                  <TransactionsChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  <TransactionsChart
+                    transactions={transactions}
+                    selectedPeriod={selectedPeriod}
+                    periodType={periodType}
+                    selectedDate={selectedDate}
+                  />
                 )}
                 {selectedCard === 'income' && (
-                  <IncomeChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  <IncomeChart
+                    transactions={transactions}
+                    selectedPeriod={selectedPeriod}
+                    periodType={periodType}
+                    selectedDate={selectedDate}
+                  />
                 )}
                 {selectedCard === 'expenses' && (
-                  <ExpensesChart transactions={transactions} selectedPeriod={selectedPeriod} />
+                  <ExpensesChart
+                    transactions={transactions}
+                    selectedPeriod={selectedPeriod}
+                    periodType={periodType}
+                    selectedDate={selectedDate}
+                  />
                 )}
                 {selectedCard === 'balance' && (
                   <BalanceChart

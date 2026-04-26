@@ -194,6 +194,8 @@ export default function ChartsPage() {
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
                 showPeriodBadge={false}
+                periodType={selectedPeriod}
+                selectedDate={selectedDate}
               />
             </ChartShell>
 
@@ -209,6 +211,8 @@ export default function ChartsPage() {
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
                 showPeriodBadge={false}
+                periodType={selectedPeriod}
+                selectedDate={selectedDate}
               />
             </ChartShell>
 
@@ -224,6 +228,8 @@ export default function ChartsPage() {
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
                 showPeriodBadge={false}
+                periodType={selectedPeriod}
+                selectedDate={selectedDate}
               />
             </ChartShell>
 

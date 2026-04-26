@@ -10,10 +10,16 @@ import {
 } from 'recharts'
 import { VStack, HStack } from '@chakra-ui/react'
 import { useMemo } from 'react'
+import type { PeriodType } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
-import { ChartCard, ChartPlotShell, ChartEmptyState } from './components'
+import {
+  ChartCard,
+  ChartPlotShell,
+  ChartEmptyState,
+  PeriodBucketBarChart,
+} from './components'
 import { processTransactionsByDate } from './utils'
 import { getRechartsTooltipProps } from './utils/chartTooltip'
 
@@ -25,12 +31,21 @@ export interface TransactionsChartProps {
    * already shows the range in the section header).
    */
   showPeriodBadge?: boolean
+  /**
+   * When `periodType` and `selectedDate` are provided, a compact period
+   * bucket bar chart (today / this week / this month / this year) is
+   * rendered above the detailed daily activity chart.
+   */
+  periodType?: PeriodType
+  selectedDate?: Date
 }
 
 export default function TransactionsChart({
   transactions,
   selectedPeriod,
   showPeriodBadge = true,
+  periodType,
+  selectedDate,
 }: TransactionsChartProps) {
   const colors = useThemeColors()
   const chartColors = useChartColors()
@@ -60,6 +75,16 @@ export default function TransactionsChart({
 
   return (
     <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+      {periodType && selectedDate && (
+        <PeriodBucketBarChart
+          transactions={transactions}
+          periodType={periodType}
+          selectedDate={selectedDate}
+          filter="ALL"
+          accent="violet"
+        />
+      )}
+
       <HStack
         spacing={{ base: 2, sm: 3 }}
         justify="center"

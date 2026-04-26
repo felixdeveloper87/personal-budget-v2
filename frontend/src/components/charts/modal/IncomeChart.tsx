@@ -12,10 +12,16 @@ import {
 } from 'recharts'
 import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
+import type { PeriodType } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
-import { ChartCard, ChartPlotShell, ChartEmptyState } from './components'
+import {
+  ChartCard,
+  ChartPlotShell,
+  ChartEmptyState,
+  PeriodBucketBarChart,
+} from './components'
 import {
   processTransactionsByCategory,
   processTimelineData,
@@ -27,12 +33,21 @@ export interface IncomeChartProps {
   transactions: any[]
   selectedPeriod: string
   showPeriodBadge?: boolean
+  /**
+   * When `periodType` and `selectedDate` are provided, a compact period
+   * bucket bar chart of incoming money for the active range is rendered
+   * above the category and timeline charts.
+   */
+  periodType?: PeriodType
+  selectedDate?: Date
 }
 
 export default function IncomeChart({
   transactions,
   selectedPeriod,
   showPeriodBadge = true,
+  periodType,
+  selectedDate,
 }: IncomeChartProps) {
   const colors = useThemeColors()
   const chartColors = useChartColors()
@@ -81,6 +96,16 @@ export default function IncomeChart({
 
   return (
     <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+      {periodType && selectedDate && (
+        <PeriodBucketBarChart
+          transactions={transactions}
+          periodType={periodType}
+          selectedDate={selectedDate}
+          filter="INCOME"
+          accent="green"
+        />
+      )}
+
       <HStack
         spacing={{ base: 2, sm: 3 }}
         justify="center"

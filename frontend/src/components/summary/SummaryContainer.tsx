@@ -133,6 +133,8 @@ export default function SummaryContainer({
         transactions={transactions}
         selectedPeriod={label}
         currentBalance={balance}
+        periodType={selectedPeriod}
+        selectedDate={selectedDate}
       />
     </>
   )
