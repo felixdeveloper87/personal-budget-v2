@@ -1,25 +1,24 @@
-import {
-  VStack,
-  HStack,
-  Text,
-  Box,
-  useColorModeValue,
-  Table,
-  Thead,
-  Tbody,
-  Tr,
-  Th,
-  Td,
-  Progress,
-  Button,
-  Icon,
-} from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
-import { Transaction } from '../../../types'
+import {
+  Box,
+  Button,
+  HStack,
+  Progress,
+  Table,
+  Tbody,
+  Td,
+  Text,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue,
+  VStack,
+} from '@chakra-ui/react'
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { getResponsiveStyles, getTransactionModalHeaderStyles, safeAreaStyles, safariStyles, getScrollbarStyles, PremiumModal } from '../../ui'
+import { TrendingDown, TrendingUp } from 'lucide-react'
+import { Transaction } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { X, TrendingUp, TrendingDown } from 'lucide-react'
+import { ModalHeader, PremiumModal } from '../../ui'
 import { processCategoriesWithTransactions } from './utils'
 import { CATEGORY_COLORS } from './constants/categoryColors'
 
@@ -32,156 +31,77 @@ interface CategoryModalProps {
   initialCategory?: string
 }
 
-export default function CategoryModal({ isOpen, onClose, transactions, type, selectedPeriod, initialCategory }: CategoryModalProps) {
+export default function CategoryModal({
+  isOpen,
+  onClose,
+  transactions,
+  type,
+  selectedPeriod,
+  initialCategory,
+}: CategoryModalProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
-  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
 
-  // Cores do modal
-  const cardBg = useColorModeValue('gray.50', 'black')
-  const progressBg = useColorModeValue('gray.100', 'gray.700')
-  const tableHeaderBg = useColorModeValue('gray.50', 'gray.700')
-  const tableRowBg = useColorModeValue('gray.25', 'gray.750')
-  const tableRowHoverBg = useColorModeValue('gray.50', 'gray.600')
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const cardBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const progressBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const tableHeaderBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const tableRowAlt = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const tableRowHover = useColorModeValue('gray.100', 'whiteAlpha.100')
 
-  // Filtrar transações por tipo
+  const isIncome = type === 'INCOME'
+
   const filteredTransactions = useMemo(
-    () => transactions.filter(t => t.type === type),
-    [transactions, type]
+    () => transactions.filter((t) => t.type === type),
+    [transactions, type],
   )
 
-  // Processar categorias usando utilitário centralizado
   const { sortedCategories, total } = useMemo(
     () => processCategoriesWithTransactions(filteredTransactions),
-    [filteredTransactions]
+    [filteredTransactions],
   )
 
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(() => {
-    // Se houver categoria inicial, expandi-la automaticamente
-    if (initialCategory) {
-      return { [`${type}-${initialCategory}`]: true }
-    }
-    return {}
-  })
+  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>(
+    () => (initialCategory ? { [`${type}-${initialCategory}`]: true } : {}),
+  )
 
   const toggleCategory = (category: string) => {
     const key = `${type}-${category}`
-    setExpandedCategories(prev => ({ ...prev, [key]: !prev[key] }))
+    setExpandedCategories((prev) => ({ ...prev, [key]: !prev[key] }))
   }
 
-  const ModalHeader = (
-    <Box
-      {...headerStyles.container}
-      sx={{
-        ...headerStyles.container.sx,
-        paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
-      }}
-    >
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        align="center"
-        justify="space-between"
-        flexWrap="nowrap"
-        pr={{ base: 2, sm: 4 }}
-        pt={{ base: 2, sm: 0 }}
-      >
-        {/* Logo + Text */}
-        <HStack
-          spacing={{ base: 2, sm: 3 }}
-          align="center"
-          flex="1"
-          minW={0}
-        >
-          <Box
-            p={{ base: 2, sm: 3 }}
-            borderRadius="2xl"
-            bg={headerStyles.iconContainer.bg}
-            boxShadow="lg"
-            flexShrink={0}
-          >
-            <Icon
-              as={type === 'INCOME' ? TrendingUp : TrendingDown}
-              boxSize={{ base: 4, sm: 5, md: 6 }}
-              color="white"
-            />
-          </Box>
-          <VStack
-            align="start"
-            spacing={0}
-            flex="1"
-            minW={0}
-          >
-            <Text
-              color={headerStyles.title.color}
-              fontWeight="800"
-              fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
-              lineHeight="shorter"
-              noOfLines={1}
-            >
-              {type === 'INCOME' ? 'Income' : 'Expense'} Analysis
-            </Text>
-            <Text
-              color={headerStyles.subtitle.color}
-              fontWeight="600"
-              fontSize={{ base: 'xs', sm: 'sm' }}
-              noOfLines={1}
-            >
-              {selectedPeriod} • £{total.toLocaleString()}
-            </Text>
-          </VStack>
-        </HStack>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onClose}
-          bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
-          border="1px solid"
-          borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
-          borderRadius={headerStyles.closeButton.borderRadius}
-          p={headerStyles.closeButton.p}
-          _hover={headerStyles.closeButton._hover}
-          transition={headerStyles.closeButton.transition}
-          flexShrink={0}
-        >
-          <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
-        </Button>
-      </HStack>
-    </Box>
+  const caption = useMemo(
+    () => `${selectedPeriod} • £${total.toLocaleString()}`,
+    [selectedPeriod, total],
   )
 
   return (
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={responsiveStyles.modals.category.container.size}
-      header={ModalHeader}
-      contentProps={{
-        bg: cardBg,
-        maxW: responsiveStyles.modals.category.container.maxW,
-      }}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
+      header={
+        <ModalHeader
+          icon={isIncome ? TrendingUp : TrendingDown}
+          title={isIncome ? 'Income breakdown' : 'Expense breakdown'}
+          caption={caption}
+          onClose={onClose}
+          accent={isIncome ? 'green' : 'red'}
+        />
+      }
+      contentProps={{ bg: surfaceBg }}
     >
-      {/* Content */}
-      <Box
-        p={{ base: 4, sm: 6, md: 8 }}
-        flex="1"
-        overflowY="auto"
-        {...responsiveStyles.content}
-        sx={{
-          ...safeAreaStyles.content,
-          ...safariStyles.scrollable,
-          ...getScrollbarStyles(useColorModeValue)
-        }}
-      >
-
+      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
         {sortedCategories.length === 0 ? (
-          <Box p={responsiveStyles.modals.category.empty.padding} textAlign="center" color={colors.text.secondary}>
-            <Text fontSize={responsiveStyles.modals.category.empty.titleFontSize} mb={2}>
+          <VStack spacing={2} py={16} textAlign="center" color={colors.text.secondary}>
+            <Text fontSize="md" fontWeight={600}>
               No {type.toLowerCase()} found
             </Text>
-            <Text fontSize={responsiveStyles.modals.category.empty.descriptionFontSize}>
-              Add some {type.toLowerCase()} transactions to see the breakdown
+            <Text fontSize="sm">
+              Add some {type.toLowerCase()} transactions to see the breakdown.
             </Text>
-          </Box>
+          </VStack>
         ) : (
           <VStack spacing={4} align="stretch">
             {sortedCategories.map(({ category, total: categoryTotal, transactions: categoryTransactions }, index) => {
@@ -196,31 +116,31 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
               return (
                 <Box
                   key={key}
-                  p={responsiveStyles.modals.category.categoryCard.padding}
+                  p={{ base: 4, md: 5 }}
                   border="1px solid"
-                  borderColor={colors.border}
-                  borderRadius="2xl"
+                  borderColor={cardBorder}
+                  borderRadius="xl"
                   bg={cardBg}
-                  shadow="sm"
-                  _hover={{
-                    shadow: 'md',
-                    transform: 'translateY(-2px)',
-                  }}
-                  transition="all 0.2s ease"
                 >
-                  <VStack spacing={responsiveStyles.modals.category.categoryCard.spacing} align="stretch">
+                  <VStack spacing={4} align="stretch">
                     <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
-                      <HStack spacing={responsiveStyles.modals.category.categoryHeader.spacing} minW="0" flex="1">
-                        <Box w={responsiveStyles.modals.category.categoryHeader.indicatorSize} h={responsiveStyles.modals.category.categoryHeader.indicatorSize} bg={color} borderRadius="sm" flexShrink={0} />
-                        <Text fontSize={responsiveStyles.modals.category.categoryHeader.titleFontSize} fontWeight="semibold" color={colors.text.primary} isTruncated>
+                      <HStack spacing={3} minW="0" flex="1">
+                        <Box
+                          w={3}
+                          h={3}
+                          bg={color}
+                          borderRadius="sm"
+                          flexShrink={0}
+                        />
+                        <Text fontSize="md" fontWeight={700} color={colors.text.primary} isTruncated>
                           {category}
                         </Text>
                       </HStack>
                       <VStack spacing={0} align="end" flexShrink={0}>
-                        <Text fontSize={responsiveStyles.modals.category.categoryHeader.valueFontSize} fontWeight="bold" color={colors.text.primary}>
+                        <Text fontSize="md" fontWeight={700} color={colors.text.primary}>
                           £{categoryTotal.toFixed(2)}
                         </Text>
-                        <Text fontSize={responsiveStyles.modals.category.categoryHeader.percentageFontSize} color={colors.text.secondary}>
+                        <Text fontSize="xs" color={colors.text.secondary}>
                           {percentage.toFixed(1)}% of total
                         </Text>
                       </VStack>
@@ -228,14 +148,14 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
 
                     <Progress
                       value={percentage}
-                      colorScheme={type === 'INCOME' ? 'green' : 'red'}
-                      size={responsiveStyles.modals.category.progress.size}
+                      colorScheme={isIncome ? 'green' : 'red'}
+                      size="sm"
                       borderRadius="md"
                       bg={progressBg}
                     />
 
                     <Box>
-                      <Text fontSize="sm" fontWeight="medium" color={colors.text.secondary} mb={2}>
+                      <Text fontSize="xs" fontWeight={600} color={colors.text.secondary} mb={2} textTransform="uppercase" letterSpacing="0.04em">
                         Transactions ({categoryTransactions.length})
                       </Text>
 
@@ -243,33 +163,34 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                         overflowX="auto"
                         borderRadius="lg"
                         border="1px solid"
-                        borderColor={colors.border}
+                        borderColor={cardBorder}
                       >
-                        <Table size="sm" variant="simple" minW="300px">
+                        <Table size="sm" variant="simple" minW="320px">
                           <Thead bg={tableHeaderBg}>
                             <Tr>
-                              <Th fontSize={responsiveStyles.modals.category.table.headerFontSize} color={colors.text.secondary} py={responsiveStyles.modals.category.table.padding}>Date</Th>
-                              <Th fontSize={responsiveStyles.modals.category.table.headerFontSize} color={colors.text.secondary} py={responsiveStyles.modals.category.table.padding}>Description</Th>
-                              <Th fontSize={responsiveStyles.modals.category.table.headerFontSize} color={colors.text.secondary} isNumeric py={responsiveStyles.modals.category.table.padding}>Amount</Th>
+                              <Th fontSize="xs" color={colors.text.secondary}>Date</Th>
+                              <Th fontSize="xs" color={colors.text.secondary}>Description</Th>
+                              <Th fontSize="xs" color={colors.text.secondary} isNumeric>Amount</Th>
                             </Tr>
                           </Thead>
                           <Tbody>
-                            {visibleTransactions.map((t, index) => (
+                            {visibleTransactions.map((t, idx) => (
                               <Tr
                                 key={t.id}
-                                bg={index % 2 === 0 ? 'transparent' : tableRowBg}
-                                _hover={{
-                                  bg: tableRowHoverBg,
-                                }}
-                                transition="background-color 0.2s ease"
+                                bg={idx % 2 === 0 ? 'transparent' : tableRowAlt}
+                                _hover={{ bg: tableRowHover }}
+                                transition="background-color 0.15s ease"
                               >
-                                <Td fontSize={responsiveStyles.modals.category.table.cellFontSize} color={colors.text.primary} py={responsiveStyles.modals.category.table.padding}>
-                                  {new Date(t.dateTime).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
+                                <Td fontSize="xs" color={colors.text.primary}>
+                                  {new Date(t.dateTime).toLocaleDateString('en-GB', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })}
                                 </Td>
-                                <Td fontSize={responsiveStyles.modals.category.table.cellFontSize} color={colors.text.primary} maxW="120px" isTruncated py={responsiveStyles.modals.category.table.padding}>
+                                <Td fontSize="xs" color={colors.text.primary} maxW="160px" isTruncated>
                                   {t.description || 'No description'}
                                 </Td>
-                                <Td fontSize={responsiveStyles.modals.category.table.cellFontSize} fontWeight="semibold" color={colors.text.primary} isNumeric py={responsiveStyles.modals.category.table.padding}>
+                                <Td fontSize="xs" fontWeight={600} color={colors.text.primary} isNumeric>
                                   £{t.amount.toFixed(2)}
                                 </Td>
                               </Tr>
@@ -281,21 +202,14 @@ export default function CategoryModal({ isOpen, onClose, transactions, type, sel
                       {categoryTransactions.length > 5 && (
                         <Button
                           onClick={() => toggleCategory(category)}
-                          variant="outline"
-                          size={responsiveStyles.modals.category.button.size}
-                          mt={responsiveStyles.modals.category.button.marginTop}
+                          variant="ghost"
+                          size="sm"
+                          mt={3}
                           w="full"
-                          colorScheme={type === 'INCOME' ? 'green' : 'red'}
+                          colorScheme={isIncome ? 'green' : 'red'}
                           rightIcon={isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                          borderRadius="lg"
-                          _hover={{
-                            transform: 'translateY(-1px)',
-                            shadow: 'md',
-                          }}
-                          _active={{
-                            transform: 'translateY(0)',
-                          }}
-                          transition="all 0.2s ease"
+                          fontWeight={600}
+                          fontSize="xs"
                         >
                           {isExpanded ? 'Show less' : `Show ${categoryTransactions.length - 5} more`}
                         </Button>

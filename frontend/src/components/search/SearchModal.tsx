@@ -1,19 +1,16 @@
-import {
-  Box,
-  useColorModeValue
-} from '@chakra-ui/react'
-import SearchResultsModal from './SearchResultsModal'
+import { useMemo } from 'react'
+import { Box, useColorModeValue } from '@chakra-ui/react'
 import SearchHeader from './SearchHeader'
 import SearchFilters from './SearchFilters'
 import SearchFooter from './SearchFooter'
+import SearchResultsModal from './SearchResultsModal'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, PremiumModal } from '../ui'
+import { PremiumModal } from '../ui'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
-  const responsiveStyles = getResponsiveStyles()
   const {
     filters,
     showResults,
@@ -22,55 +19,55 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
     updateFilter,
     handleTypeChange,
     handleSearch,
-    getAvailableCategories
+    getAvailableCategories,
   } = useSearchFilters(isOpen)
 
-  const handleSearchClick = () => {
-    handleSearch()
-    // Don't call onSearch here to avoid closing the SearchModal
-    // onSearch(filters)
-  }
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
 
-  const handleClearAll = () => {
-    resetFilters()
-    // Don't call onSearch to avoid closing the modal
-    // Just clear filters locally
-  }
-  const cardBg = useColorModeValue('gray.50', 'black')
+  const hasFilters = useMemo(
+    () =>
+      Boolean(
+        filters.text ||
+          filters.type ||
+          filters.category ||
+          filters.startDate ||
+          filters.endDate,
+      ),
+    [filters],
+  )
 
-  // Wrapper for SearchHeader to override padding if needed or just pass as is
-  // Since PremiumModal adds padding to the header container, and SearchHeader also has padding,
-  // we might want to adjust. However, SearchHeader uses getModalHeaderStyles which might be consistent.
-  // Let's pass it directly for now.
+  // intentionally not propagating onSearch here — the SearchModal stays open
+  // while the SearchResultsModal opens on top, matching the previous flow.
+  void onSearch
 
   return (
     <>
       <PremiumModal
         isOpen={isOpen}
         onClose={onClose}
-        size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
-        header={<SearchHeader onClose={onClose} />}
-        footer={
-          <SearchFooter
-            onClearAll={handleClearAll}
-            onSearch={handleSearchClick}
+        size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
+        header={
+          <SearchHeader
+            onClose={onClose}
+            searchText={filters.text}
+            onSearchTextChange={(v) => updateFilter('text', v)}
           />
         }
-        contentProps={{
-          bg: cardBg,
-        }}
+        footer={
+          <SearchFooter
+            onClearAll={resetFilters}
+            onSearch={handleSearch}
+            hasFilters={hasFilters}
+          />
+        }
+        contentProps={{ bg: surfaceBg }}
       >
-        {/* Modal content - Scrollable */}
         <Box
           flex="1"
-          p={responsiveStyles.spacing.container}
+          bg={surfaceBg}
+          px={{ base: 5, sm: 6 }}
+          py={{ base: 5, sm: 6 }}
           overflowY="auto"
-          {...responsiveStyles.content}
-          sx={{
-            ...safeAreaStyles.content,
-            ...safariStyles.scrollable,
-            ...getScrollbarStyles(useColorModeValue)
-          }}
         >
           <SearchFilters
             filters={filters}
@@ -81,7 +78,6 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         </Box>
       </PremiumModal>
 
-      {/* Search Results Modal - Inside SearchModal */}
       <SearchResultsModal
         isOpen={showResults}
         onClose={() => setShowResults(false)}

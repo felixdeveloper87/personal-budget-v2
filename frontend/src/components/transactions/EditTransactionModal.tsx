@@ -1,19 +1,17 @@
+import { useCallback, useEffect, useState } from 'react'
 import {
   Box,
-  useColorModeValue,
-  VStack,
   Button,
   Icon,
-  HStack,
+  useColorModeValue,
+  useToast,
+  VStack,
 } from '@chakra-ui/react'
-import { TrendingUp, TrendingDown, X } from 'lucide-react'
-import { useThemeColors } from '../../hooks/useThemeColors'
-import { Transaction } from '../../types'
-import { getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, getTransactionModalHeaderStyles, PremiumModal } from '../ui'
-import { useState, useCallback, useEffect } from 'react'
+import { Pencil, TrendingDown, TrendingUp } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { useToast } from '@chakra-ui/react'
 import { updateTransaction } from '../../api'
+import { Transaction } from '../../types'
+import { ModalHeader, PremiumModal } from '../ui'
 import DateSelector from './TransactionForm/DateSelector'
 import AmountInput from './TransactionForm/AmountInput'
 import CategorySelector from './TransactionForm/CategorySelector'
@@ -32,23 +30,21 @@ export default function EditTransactionModal({
   transaction,
   onTransactionUpdated,
 }: EditTransactionModalProps) {
-  const colors = useThemeColors()
-  const gradients = getGradients()
-  const responsiveStyles = getResponsiveStyles()
   const { user } = useAuth()
   const toast = useToast()
 
-  const type = transaction?.type || 'EXPENSE'
-  const headerStyles = getTransactionModalHeaderStyles(useColorModeValue, type)
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
 
-  // Form states
+  const type = transaction?.type || 'EXPENSE'
+  const isIncome = type === 'INCOME'
+
   const [date, setDate] = useState('')
   const [category, setCategory] = useState('')
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  // Initialize form when transaction changes
   useEffect(() => {
     if (transaction) {
       const txDate = new Date(transaction.dateTime)
@@ -60,9 +56,7 @@ export default function EditTransactionModal({
   }, [transaction])
 
   const handleSubmit = useCallback(async () => {
-    if (!user?.token || !transaction?.id) return
-
-    if (loading) return
+    if (!user?.token || !transaction?.id || loading) return
 
     setLoading(true)
     try {
@@ -100,129 +94,38 @@ export default function EditTransactionModal({
     } finally {
       setLoading(false)
     }
-  }, [date, category, description, amount, transaction, user?.token, onClose, onTransactionUpdated, toast, loading])
+  }, [
+    date,
+    category,
+    description,
+    amount,
+    transaction,
+    user?.token,
+    onClose,
+    onTransactionUpdated,
+    toast,
+    loading,
+  ])
 
   if (!transaction) return null
-
-  const ModalHeader = (
-    <Box
-      {...headerStyles.container}
-      position="relative"
-      zIndex={1}
-      sx={{
-        ...headerStyles.container.sx,
-        paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
-      }}
-    >
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        align="center"
-        justify="space-between"
-        flexWrap="nowrap"
-        pr={{ base: 2, sm: 4 }}
-        pt={{ base: 2, sm: 0 }}
-      >
-        <HStack
-          spacing={{ base: 2, sm: 3 }}
-          align="center"
-          flex="1"
-          minW={0}
-        >
-          <Box
-            p={{ base: 2, sm: 3 }}
-            borderRadius="2xl"
-            bg={headerStyles.iconContainer.bg}
-            boxShadow="lg"
-            flexShrink={0}
-          >
-            {type === 'INCOME' ? (
-              <Icon as={TrendingUp} boxSize={{ base: 5, sm: 6 }} color="white" />
-            ) : (
-              <Icon as={TrendingDown} boxSize={{ base: 5, sm: 6 }} color="white" />
-            )}
-          </Box>
-          <VStack align="start" spacing={0} flex="1" minW={0}>
-            <Box
-              color={headerStyles.title.color}
-              fontWeight="800"
-              fontSize={{ base: 'lg', sm: 'xl', md: '2xl' }}
-              lineHeight="shorter"
-              noOfLines={1}
-            >
-              Edit Transaction
-            </Box>
-            <Box
-              color={headerStyles.subtitle.color}
-              fontWeight="600"
-              fontSize={{ base: 'xs', sm: 'sm' }}
-              noOfLines={1}
-            >
-              Update transaction details
-            </Box>
-          </VStack>
-        </HStack>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onClose}
-          bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
-          border="1px solid"
-          borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
-          borderRadius={headerStyles.closeButton.borderRadius}
-          p={headerStyles.closeButton.p}
-          _hover={headerStyles.closeButton._hover}
-          transition={headerStyles.closeButton.transition}
-          flexShrink={0}
-        >
-          <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
-        </Button>
-      </HStack>
-    </Box>
-  )
 
   return (
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
-      header={ModalHeader}
-      contentProps={{
-        sx: {
-          '&::-webkit-scrollbar': {
-            width: '10px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: useColorModeValue('#cbd5e1', '#4b5563'),
-            borderRadius: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: useColorModeValue('#f1f5f9', '#1e293b'),
-          }
-        }
-      }}
+      header={
+        <ModalHeader
+          icon={Pencil}
+          title="Edit transaction"
+          caption={`Update this ${isIncome ? 'income' : 'expense'}`}
+          onClose={onClose}
+          accent={isIncome ? 'green' : 'red'}
+        />
+      }
+      contentProps={{ bg: surfaceBg }}
     >
-      {/* Decorative background */}
-      <Box
-        position="absolute"
-        top="-50px"
-        left="-50px"
-        right="-50px"
-        height="200px"
-        background={gradients.decorative}
-        borderRadius="3xl"
-        filter="blur(40px)"
-        opacity={0.3}
-        zIndex={0}
-        pointerEvents="none"
-      />
-
-      <Box
-        flex="1"
-        overflowY="auto"
-        position="relative"
-        zIndex={1}
-        p={{ base: 4, sm: 6, md: 8 }}
-      >
+      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
         <VStack spacing={6} align="stretch" w="full">
           <DateSelector date={date} onChange={setDate} />
           <CategorySelector type={type} category={category} onChange={setCategory} />
@@ -236,36 +139,42 @@ export default function EditTransactionModal({
 
           <Button
             size="lg"
-            colorScheme={type === 'INCOME' ? 'green' : 'red'}
-            bg={type === 'INCOME'
-              ? 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)'
-              : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
-            }
-            color="white"
-            fontWeight="bold"
-            borderRadius="2xl"
-            w="full"
             h={14}
-            fontSize="lg"
+            w="full"
+            fontSize="md"
+            fontWeight={700}
+            color="white"
+            borderRadius="xl"
+            bg={
+              isIncome
+                ? 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
+                : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
+            }
+            bgSize="200% 100%"
+            bgPosition="0% 50%"
+            boxShadow={
+              isIncome
+                ? '0 8px 24px -10px rgba(16, 185, 129, 0.55)'
+                : '0 8px 24px -10px rgba(244, 63, 94, 0.55)'
+            }
+            leftIcon={<Icon as={isIncome ? TrendingUp : TrendingDown} boxSize={4} />}
             onClick={handleSubmit}
             isLoading={loading}
-            loadingText="Updating..."
+            loadingText="Updating…"
             _hover={{
-              transform: 'translateY(-2px)',
-              boxShadow: 'xl',
-              filter: 'brightness(1.1)'
+              bgPosition: '100% 50%',
+              transform: 'translateY(-1px)',
+              boxShadow: isIncome
+                ? '0 12px 30px -10px rgba(16, 185, 129, 0.65)'
+                : '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
             }}
-            _active={{
-              transform: 'translateY(0)'
-            }}
-            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-            boxShadow="lg"
+            _active={{ transform: 'translateY(0)' }}
+            transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
           >
-            Update Transaction
+            Save changes
           </Button>
         </VStack>
       </Box>
     </PremiumModal>
   )
 }
-

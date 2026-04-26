@@ -3,6 +3,7 @@ import { ArrowForwardIcon } from '@chakra-ui/icons'
 import SearchTrigger from './SearchTrigger'
 import ThemeToggle from './ThemeToggle'
 import UserMenu from './UserMenu'
+import { BRAND } from './brand.config'
 
 interface HeaderActionsProps {
   user?: any
@@ -19,7 +20,12 @@ export default function HeaderActions({
   onOpenSettings,
   onLogout,
 }: HeaderActionsProps) {
-  const ctaLabel = useBreakpointValue({ base: 'Sign in', sm: 'Get Started', lg: 'Get Started Free' }) ?? 'Get Started'
+  const ctaLabel =
+    useBreakpointValue({
+      base: BRAND.cta.headerCompact,
+      sm: BRAND.cta.headerShort,
+      lg: BRAND.cta.headerLong,
+    }) ?? BRAND.cta.headerShort
   const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   return (

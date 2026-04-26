@@ -5,7 +5,6 @@ import {
   Database,
   Eye,
   EyeOff,
-  Lock,
   Moon,
   PieChart,
   Repeat,
@@ -18,6 +17,7 @@ import {
   Zap,
   type LucideIcon,
 } from 'lucide-react'
+import { BRAND, BRAND_PROMISES } from '../../components/layout/header/brand.config'
 
 export interface LandingFeature {
   id: string
@@ -49,16 +49,22 @@ export interface LandingFaq {
   answer: string
 }
 
+/**
+ * HERO copy — strings unique to the hero live here.
+ * Tagline split, CTAs and bullets are derived from BRAND so changing the
+ * voice of the product is a one-file edit (`brand.config.ts`).
+ */
 export const HERO_COPY = {
   eyebrow: 'Personal finance, distilled',
-  /** Two parts so the gradient hits the second line cleanly */
-  titlePrimary: 'Clarity for your',
-  titleAccent: 'money',
+  /** Tagline first words — `"Clarity for your"` */
+  titlePrimary: BRAND.taglinePrimary,
+  /** Tagline last word — gets the gradient. `"money"` */
+  titleAccent: BRAND.taglineAccent,
   subtitle:
     'Track income and expenses without the spreadsheet pain. Personal Budget keeps the picture sharp — every transaction, category, and trend in one calm place.',
-  primaryCta: 'Get started — it’s free',
-  secondaryCta: 'See the dashboard',
-  bullets: ['No credit card', 'Private by default', 'Set up in under a minute'],
+  primaryCta: BRAND.cta.hero,
+  secondaryCta: BRAND.cta.heroSecondary,
+  bullets: BRAND_PROMISES.hero,
 } as const
 
 export const FEATURES: ReadonlyArray<LandingFeature> = [
@@ -89,12 +95,13 @@ export const FEATURES: ReadonlyArray<LandingFeature> = [
     accent: '#14b8a6',
   },
   {
-    id: 'testing',
-    icon: Calendar,
-    title: 'Day · Week · Month · Year',
-    description: 'test in on a single day or out to a full year — same UI, same speed.',
+    id: 'quick-add',
+    icon: Zap,
+    title: 'Lightning-fast entry',
+    description:
+      'Number-pad input, smart category suggestions, two-tap logging. Recording a transaction takes less time than the receipt did.',
     variant: 'card',
-    accent: '#f97316',
+    accent: '#06b6d4',
   },
   {
     id: 'periods',
@@ -208,13 +215,17 @@ export const FAQS: ReadonlyArray<LandingFaq> = [
   },
 ] as const
 
+/**
+ * Final closing CTA — only the copy unique to this section lives here.
+ * CTA label and bullets are derived from BRAND for voice consistency.
+ */
 export const FINAL_CTA = {
   eyebrow: 'You vs. the spreadsheet',
   title: 'Open the dashboard you’ve been meaning to build.',
   subtitle:
     'Two minutes from now, your first month is logged and the charts are already telling you something.',
-  cta: 'Start free',
-  bullets: ['No card', 'Private by default', 'Export any time'],
+  cta: BRAND.cta.final,
+  bullets: BRAND_PROMISES.finalCta,
 } as const
 
 /** Decorative meta used by Hero / DashboardPreview */
@@ -242,5 +253,3 @@ export const PREVIEW_DATA = {
   ],
 } as const
 
-/** Tiny re-exports to keep one shared icon set if useful elsewhere */
-export const ICONS = { Lock, Zap }

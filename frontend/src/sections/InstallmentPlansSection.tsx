@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Heading,
@@ -19,6 +19,7 @@ import { useThemeColors } from '../hooks/useThemeColors'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'
+import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 
 /**
  * 💳 InstallmentPlansSection
@@ -28,6 +29,22 @@ import { InstallmentPlansModal } from '../components/installments'
 export default function InstallmentPlansSection() {
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const cardBorder = useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')
+  const cardHoverShadow = useColorModeValue(
+    '0 12px 40px rgba(31, 38, 135, 0.12)',
+    '0 12px 40px rgba(0, 0, 0, 0.5)'
+  )
+  const loadingTextColor = useColorModeValue('gray.600', 'gray.400')
+  const titleGradient = useColorModeValue(
+    'linear(to-r, gray.800, gray.600)',
+    'linear(to-r, white, gray.300)'
+  )
+  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
+  const viewButtonBg = useColorModeValue('whiteAlpha.500', 'whiteAlpha.100')
+  const viewButtonColor = useColorModeValue('pink.600', 'pink.300')
+  const viewButtonBorder = useColorModeValue('pink.100', 'whiteAlpha.200')
+  const viewButtonHoverBg = useColorModeValue('pink.50', 'whiteAlpha.200')
+  const viewButtonHoverBorder = useColorModeValue('pink.200', 'whiteAlpha.300')
 
   // Local state
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
@@ -54,6 +71,16 @@ export default function InstallmentPlansSection() {
     fetchPlans()
   }
 
+  const { activeCount, pastCount } = useMemo(() => {
+    let active = 0
+    let past = 0
+    for (const plan of plans) {
+      if (isInstallmentPlanCompleted(plan)) past++
+      else active++
+    }
+    return { activeCount: active, pastCount: past }
+  }, [plans])
+
   // === Render ===
   return (
     <>
@@ -64,7 +91,7 @@ export default function InstallmentPlansSection() {
       >
         <Box
           border="1px solid"
-          borderColor={useColorModeValue('whiteAlpha.400', 'whiteAlpha.100')}
+          borderColor={cardBorder}
           borderRadius="2xl"
           overflow="hidden"
           position="relative"
@@ -74,10 +101,7 @@ export default function InstallmentPlansSection() {
           justifyContent="center"
           transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
           _hover={{
-            boxShadow: useColorModeValue(
-              '0 12px 40px rgba(31, 38, 135, 0.12)',
-              '0 12px 40px rgba(0, 0, 0, 0.5)'
-            ),
+            boxShadow: cardHoverShadow,
             transform: 'translateY(-2px)'
           }}
         >
@@ -99,7 +123,7 @@ export default function InstallmentPlansSection() {
               <Center py={2}>
                 <HStack spacing={3}>
                   <Spinner size="sm" color="pink.500" thickness="3px" />
-                  <Text color={useColorModeValue('gray.600', 'gray.400')} fontSize="sm" fontWeight="500">
+                  <Text color={loadingTextColor} fontSize="sm" fontWeight="500">
                     Loading plans...
                   </Text>
                 </HStack>
@@ -130,20 +154,18 @@ export default function InstallmentPlansSection() {
                       fontFamily="system-ui, -apple-system, sans-serif"
                       letterSpacing="-0.02em"
                       fontSize={{ base: 'lg', sm: 'xl' }}
-                      bgGradient={useColorModeValue(
-                        'linear(to-r, gray.800, gray.600)',
-                        'linear(to-r, white, gray.300)'
-                      )}
+                      bgGradient={titleGradient}
                       bgClip="text"
                     >
                       Installments
                     </Heading>
                     <Text
                       fontSize={{ base: 'xs', sm: 'xl' }}
-                      color={useColorModeValue('gray.500', 'gray.400')}
+                      color={subtitleColor}
                       fontWeight="600"
                     >
-                      {plans.length} Active Plan{plans.length !== 1 ? 's' : ''}
+                      {activeCount} Active Plan{activeCount !== 1 ? 's' : ''}
+                      {pastCount > 0 && ` · ${pastCount} past`}
                     </Text>
                   </VStack>
                 </HStack>
@@ -156,15 +178,15 @@ export default function InstallmentPlansSection() {
                   height="50px"
                   px={6}
                   borderRadius="xl"
-                  bg={useColorModeValue('whiteAlpha.500', 'whiteAlpha.100')}
-                  color={useColorModeValue('pink.600', 'pink.300')}
+                  bg={viewButtonBg}
+                  color={viewButtonColor}
                   fontSize={{ base: 'md', sm: 'xl' }}
                   border="1px solid"
-                  borderColor={useColorModeValue('pink.100', 'whiteAlpha.200')}
+                  borderColor={viewButtonBorder}
                   _hover={{
-                    bg: useColorModeValue('pink.50', 'whiteAlpha.200'),
+                    bg: viewButtonHoverBg,
                     transform: 'translateX(2px)',
-                    borderColor: useColorModeValue('pink.200', 'whiteAlpha.300'),
+                    borderColor: viewButtonHoverBorder,
                   }}
                   rightIcon={<Icon as={ChevronRight} boxSize={5} />}
                   fontFamily="system-ui, -apple-system, sans-serif"

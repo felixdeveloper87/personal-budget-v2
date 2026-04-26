@@ -1,32 +1,33 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   Box,
   Button,
-  FormControl,
-  FormLabel,
-  Input,
-  InputGroup,
-  InputRightElement,
-  VStack,
-  Text,
-  useToast,
+  HStack,
+  Icon,
   IconButton,
+  Text,
+  VStack,
   useColorModeValue,
+  useToast,
 } from '@chakra-ui/react'
-import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { useThemeColors } from '../../hooks/useThemeColors'
+import AuthField from './AuthField'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
 }
 
-/**
- * 📝 RegisterForm Component
- * - Handles user registration with email, password, and confirm password
- * - Includes password visibility toggle
- * - Integrates with AuthContext for authentication
- */
+interface RegisterErrors {
+  name?: string
+  email?: string
+  password?: string
+  confirmPassword?: string
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+const MIN_PASSWORD_LENGTH = 6
+
 export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -35,64 +36,77 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  
+  const [errors, setErrors] = useState<RegisterErrors>({})
+
+  const nameRef = useRef<HTMLInputElement>(null)
+  const emailRef = useRef<HTMLInputElement>(null)
+  const passwordRef = useRef<HTMLInputElement>(null)
+  const confirmRef = useRef<HTMLInputElement>(null)
+
   const { register } = useAuth()
   const toast = useToast()
-  const colors = useThemeColors()
+
+  const subtleText = useColorModeValue('gray.500', 'gray.400')
+  const linkColor = useColorModeValue('blue.600', 'blue.300')
+  const linkHover = useColorModeValue('blue.700', 'blue.200')
+  const eyeIconColor = useColorModeValue('gray.500', 'gray.400')
+  const trustText = useColorModeValue('gray.500', 'gray.500')
+
+  const clearError = (field: keyof RegisterErrors) => {
+    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
+  }
+
+  const validate = (): boolean => {
+    const next: RegisterErrors = {}
+
+    if (!name.trim()) next.name = 'Name is required'
+    if (!email.trim()) next.email = 'Email is required'
+    else if (!EMAIL_REGEX.test(email)) next.email = 'Enter a valid email address'
+    if (!password) next.password = 'Password is required'
+    else if (password.length < MIN_PASSWORD_LENGTH)
+      next.password = `Use at least ${MIN_PASSWORD_LENGTH} characters`
+    if (!confirmPassword) next.confirmPassword = 'Please confirm your password'
+    else if (confirmPassword !== password)
+      next.confirmPassword = "Passwords don't match"
+
+    setErrors(next)
+
+    if (next.name) nameRef.current?.focus()
+    else if (next.email) emailRef.current?.focus()
+    else if (next.password) passwordRef.current?.focus()
+    else if (next.confirmPassword) confirmRef.current?.focus()
+
+    return Object.keys(next).length === 0
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    if (!name || !email || !password || !confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'Please fill in all fields',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
-
-    if (password !== confirmPassword) {
-      toast({
-        title: 'Error',
-        description: 'Passwords do not match',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
-
-    if (password.length < 6) {
-      toast({
-        title: 'Error',
-        description: 'Password must be at least 6 characters',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      })
-      return
-    }
+    if (loading) return
+    if (!validate()) return
 
     setLoading(true)
     try {
-      await register({ name, email, password })
+      await register({ name: name.trim(), email: email.trim(), password })
       toast({
-        title: 'Success',
-        description: 'Account created successfully',
+        title: 'Account created',
+        description: "You're all set — welcome aboard.",
         status: 'success',
         duration: 2000,
         isClosable: true,
+        position: 'top',
+        variant: 'subtle',
       })
     } catch (error: any) {
+      const message = error?.message || 'Could not create your account'
+      setErrors({ email: message })
       toast({
-        title: 'Registration failed',
-        description: error.message || 'Failed to create account',
+        title: 'Sign up failed',
+        description: message,
         status: 'error',
         duration: 3000,
         isClosable: true,
+        position: 'top',
+        variant: 'subtle',
       })
     } finally {
       setLoading(false)
@@ -100,135 +114,140 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <Box w="full" maxW="md" mx="auto">
-      <VStack spacing={6} as="form" onSubmit={handleSubmit}>
-        <Text fontSize="2xl" fontWeight="bold" color={colors.text.primary} textAlign="center">
-          Create Account
-        </Text>
-        
-        <FormControl isRequired>
-          <FormLabel color={colors.text.label}>Name</FormLabel>
-          <Input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter your name"
-            bg={colors.inputBg}
-            borderColor={colors.border}
-            _focus={{
-              borderColor: colors.accent,
-              boxShadow: `0 0 0 1px ${colors.accent}`,
-            }}
-            _hover={{
-              borderColor: colors.accent,
-            }}
-          />
-        </FormControl>
+    <Box as="form" onSubmit={handleSubmit} noValidate>
+      <VStack spacing={4} align="stretch">
+        <AuthField
+          ref={nameRef}
+          label="Name"
+          icon={User}
+          name="name"
+          value={name}
+          onChange={(v) => {
+            setName(v)
+            clearError('name')
+          }}
+          placeholder="Your name"
+          autoComplete="name"
+          error={errors.name}
+          isDisabled={loading}
+        />
 
-        <FormControl isRequired>
-          <FormLabel color={colors.text.label}>Email</FormLabel>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Enter your email"
-            bg={colors.inputBg}
-            borderColor={colors.border}
-            _focus={{
-              borderColor: colors.accent,
-              boxShadow: `0 0 0 1px ${colors.accent}`,
-            }}
-            _hover={{
-              borderColor: colors.accent,
-            }}
-          />
-        </FormControl>
+        <AuthField
+          ref={emailRef}
+          label="Email"
+          icon={Mail}
+          type="email"
+          name="email"
+          value={email}
+          onChange={(v) => {
+            setEmail(v)
+            clearError('email')
+          }}
+          placeholder="you@example.com"
+          autoComplete="email"
+          error={errors.email}
+          isDisabled={loading}
+        />
 
-        <FormControl isRequired>
-          <FormLabel color={colors.text.label}>Password</FormLabel>
-          <InputGroup>
-            <Input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              bg={colors.inputBg}
-              borderColor={colors.border}
-              _focus={{
-                borderColor: colors.accent,
-                boxShadow: `0 0 0 1px ${colors.accent}`,
-              }}
-              _hover={{
-                borderColor: colors.accent,
-              }}
+        <AuthField
+          ref={passwordRef}
+          label="Password"
+          icon={Lock}
+          type={showPassword ? 'text' : 'password'}
+          name="new-password"
+          value={password}
+          onChange={(v) => {
+            setPassword(v)
+            clearError('password')
+          }}
+          placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
+          autoComplete="new-password"
+          error={errors.password}
+          isDisabled={loading}
+          rightElement={
+            <IconButton
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              icon={<Icon as={showPassword ? EyeOff : Eye} boxSize={4} />}
+              variant="ghost"
+              size="sm"
+              color={eyeIconColor}
+              onClick={() => setShowPassword((s) => !s)}
+              tabIndex={-1}
             />
-            <InputRightElement>
-              <IconButton
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                icon={showPassword ? <ViewOffIcon /> : <ViewIcon />}
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowPassword(!showPassword)}
-              />
-            </InputRightElement>
-          </InputGroup>
-        </FormControl>
+          }
+        />
 
-        <FormControl isRequired>
-          <FormLabel color={colors.text.label}>Confirm Password</FormLabel>
-          <InputGroup>
-            <Input
-              type={showConfirmPassword ? 'text' : 'password'}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              bg={colors.inputBg}
-              borderColor={colors.border}
-              _focus={{
-                borderColor: colors.accent,
-                boxShadow: `0 0 0 1px ${colors.accent}`,
-              }}
-              _hover={{
-                borderColor: colors.accent,
-              }}
+        <AuthField
+          ref={confirmRef}
+          label="Confirm password"
+          icon={Lock}
+          type={showConfirmPassword ? 'text' : 'password'}
+          name="confirm-password"
+          value={confirmPassword}
+          onChange={(v) => {
+            setConfirmPassword(v)
+            clearError('confirmPassword')
+          }}
+          placeholder="Re-enter your password"
+          autoComplete="new-password"
+          error={errors.confirmPassword}
+          isDisabled={loading}
+          rightElement={
+            <IconButton
+              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              icon={<Icon as={showConfirmPassword ? EyeOff : Eye} boxSize={4} />}
+              variant="ghost"
+              size="sm"
+              color={eyeIconColor}
+              onClick={() => setShowConfirmPassword((s) => !s)}
+              tabIndex={-1}
             />
-            <InputRightElement>
-              <IconButton
-                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                icon={showConfirmPassword ? <ViewOffIcon /> : <ViewIcon />}
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              />
-            </InputRightElement>
-          </InputGroup>
-        </FormControl>
+          }
+        />
 
         <Button
           type="submit"
-          colorScheme="green"
-          size="lg"
-          w="full"
           isLoading={loading}
-          loadingText="Creating account..."
-          fontWeight="bold"
+          loadingText="Creating account"
+          rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
+          h="48px"
+          w="full"
+          mt={2}
+          fontSize="sm"
+          fontWeight={700}
+          color="white"
+          borderRadius="lg"
+          bg="linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
+          bgSize="200% 100%"
+          bgPosition="0% 50%"
+          boxShadow="0 8px 24px -10px rgba(79, 70, 229, 0.55)"
+          transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
           _hover={{
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg',
+            bgPosition: '100% 50%',
+            transform: 'translateY(-1px)',
+            boxShadow: '0 12px 30px -10px rgba(79, 70, 229, 0.65)',
           }}
-          transition="all 0.2s"
+          _active={{ transform: 'translateY(0)' }}
         >
-          Create Account
+          Create account
         </Button>
 
-        <Text textAlign="center" color={colors.text.secondary}>
+        <HStack spacing={2} justify="center" pt={1}>
+          <Icon as={ShieldCheck} boxSize={3.5} color={trustText} />
+          <Text fontSize="xs" color={trustText}>
+            No credit card. Cancel anytime.
+          </Text>
+        </HStack>
+
+        <Text textAlign="center" color={subtleText} fontSize="sm">
           Already have an account?{' '}
           <Button
             variant="link"
-            color={colors.accent}
+            color={linkColor}
+            fontWeight={600}
+            fontSize="sm"
             onClick={onSwitchToLogin}
-            fontWeight="bold"
-            _hover={{ textDecoration: 'underline' }}
+            _hover={{ color: linkHover, textDecoration: 'underline' }}
           >
             Sign in
           </Button>
@@ -237,4 +256,3 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     </Box>
   )
 }
-

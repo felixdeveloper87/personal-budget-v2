@@ -188,37 +188,40 @@ export default function TransactionForm({
             loading={loading}
           />
           
-          {/* Submit Button - Only show in compact mode */}
           {compact && (
             <Button
               size="lg"
-              colorScheme={type === 'INCOME' ? 'green' : 'red'}
-              bg={type === 'INCOME' 
-                ? 'linear-gradient(135deg, #22c55e, #16a34a, #15803d)' 
-                : 'linear-gradient(135deg, #ef4444, #dc2626, #b91c1c)'
-              }
-              color="white"
-              fontWeight="bold"
-              borderRadius="2xl"
-              w="full"
               h={14}
-              fontSize="lg"
-              leftIcon={type === 'INCOME' ? <Plus size={20} /> : <Minus size={20} />}
+              w="full"
+              fontSize="md"
+              fontWeight={700}
+              color="white"
+              borderRadius="xl"
+              bg={type === 'INCOME'
+                ? 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
+                : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
+              }
+              bgSize="200% 100%"
+              bgPosition="0% 50%"
+              boxShadow={type === 'INCOME'
+                ? '0 8px 24px -10px rgba(16, 185, 129, 0.55)'
+                : '0 8px 24px -10px rgba(244, 63, 94, 0.55)'
+              }
+              leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
               onClick={onSubmit}
               isLoading={loading}
-              loadingText={type === 'INCOME' ? 'Adding Income...' : 'Adding Expense...'}
+              loadingText={type === 'INCOME' ? 'Adding income…' : 'Adding expense…'}
               _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'xl',
-                filter: 'brightness(1.1)'
+                bgPosition: '100% 50%',
+                transform: 'translateY(-1px)',
+                boxShadow: type === 'INCOME'
+                  ? '0 12px 30px -10px rgba(16, 185, 129, 0.65)'
+                  : '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
               }}
-              _active={{
-                transform: 'translateY(0)'
-              }}
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              boxShadow="lg"
+              _active={{ transform: 'translateY(0)' }}
+              transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
             >
-              {type === 'INCOME' ? 'Add Income' : 'Add Expense'}
+              {type === 'INCOME' ? 'Add income' : 'Add expense'}
             </Button>
           )}
         </VStack>

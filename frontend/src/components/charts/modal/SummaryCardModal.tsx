@@ -1,30 +1,22 @@
+import { useMemo } from 'react'
 import {
-  VStack,
-  HStack,
-  Text,
-  Box,
+  AnimatePresence,
+} from 'framer-motion'
+import {
   Badge,
+  Box,
   useColorModeValue,
-  Icon as ChakraIcon,
-  Button,
-  Icon,
 } from '@chakra-ui/react'
-import { motion, AnimatePresence } from 'framer-motion'
-import React, { useMemo } from 'react'
+import { BarChart3, DollarSign, TrendingDown, TrendingUp } from 'lucide-react'
 import TransactionsChart from './TransactionsChart'
 import IncomeChart from './IncomeChart'
 import ExpensesChart from './ExpensesChart'
 import BalanceChart from './BalanceChart'
-import { BarChart3, TrendingUp, TrendingDown, DollarSign, X } from 'lucide-react'
-import { SUMMARY_CARD_COLORS, SummaryCardType } from '../../../constants/summaryColors'
+import { SummaryCardType } from '../../../constants/summaryColors'
 import InsightsCard from '../../ui/InsightsCard'
-import { getResponsiveStyles, getGradients, safeAreaStyles, safariStyles, getModalHeaderStyles, getScrollbarStyles, PremiumModal } from '../../ui'
+import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
 import { ChartLoadingState } from './components'
 
-const MotionBox = motion.create(Box)
-const MotionBadge = motion.create(Badge)
-
-// ✅ Tipagem explícita das props do modal
 interface SummaryCardModalProps {
   isOpen: boolean
   onClose: () => void
@@ -35,6 +27,34 @@ interface SummaryCardModalProps {
   currentBalance?: number
 }
 
+const ICON_MAP = {
+  transactions: BarChart3,
+  income: TrendingUp,
+  expenses: TrendingDown,
+  balance: DollarSign,
+} as const
+
+const TITLE_MAP: Record<SummaryCardType, { title: string; caption: string }> = {
+  transactions: { title: 'Transactions', caption: 'Daily activity & totals' },
+  income: { title: 'Income', caption: 'Inflows by category' },
+  expenses: { title: 'Expenses', caption: 'Outflows by category' },
+  balance: { title: 'Balance', caption: 'Net balance over time' },
+}
+
+const ACCENT_MAP: Record<SummaryCardType, ModalHeaderAccent> = {
+  transactions: 'blue',
+  income: 'green',
+  expenses: 'red',
+  balance: 'violet',
+}
+
+const BADGE_SCHEME: Record<SummaryCardType, string> = {
+  transactions: 'blue',
+  income: 'green',
+  expenses: 'red',
+  balance: 'purple',
+}
+
 export default function SummaryCardModal({
   isOpen,
   onClose,
@@ -43,146 +63,20 @@ export default function SummaryCardModal({
   selectedPeriod = 'Current Period',
   currentBalance = 0,
 }: SummaryCardModalProps) {
-  const responsiveStyles = getResponsiveStyles()
-  const headerStyles = getModalHeaderStyles(useColorModeValue)
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
 
-  const iconMap = {
-    transactions: BarChart3,
-    income: TrendingUp,
-    expenses: TrendingDown,
-    balance: DollarSign,
-  } as const
+  const card: SummaryCardType = selectedCard ?? 'transactions'
 
-  const headerInfo = useMemo(() => {
-    const cardType = selectedCard ?? 'transactions'
-    return {
-      icon: iconMap[cardType],
-      ...SUMMARY_CARD_COLORS[cardType],
-    }
-  }, [selectedCard])
-
-  const IconEl = headerInfo.icon
-  const iconBg = useColorModeValue(headerInfo.bg, headerInfo.bgDark)
-  const cardBg = useColorModeValue('gray.50', 'black')
-
-  // Títulos do modal baseados no tipo de card
-  const modalTitle = useMemo(() => {
-    switch (selectedCard) {
-      case 'transactions':
-        return 'Transactions Analytics'
-      case 'income':
-        return 'Incomes'
-      case 'expenses':
-        return 'Expenses'
-      case 'balance':
-        return 'Balance'
-      default:
-        return headerInfo.title
-    }
-  }, [selectedCard, headerInfo.title])
-
-  const ModalHeader = (
-    <Box
-      {...headerStyles.container}
-      sx={{
-        ...headerStyles.container.sx,
-        paddingTop: 'max(56px, env(safe-area-inset-top, 56px))',
-      }}
-    >
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        align="center"
-        justify="space-between"
-        flexWrap="nowrap"
-        pr={{ base: 2, sm: 4 }}
-        pt={{ base: 2, sm: 0 }}
-      >
-        {/* Logo + Text */}
-        <HStack
-          spacing={{ base: 2, sm: 3 }}
-          align="center"
-          flex="1"
-          minW={0}
-        >
-          <MotionBox
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            p={2.5}
-            bg={iconBg}
-            borderRadius="xl"
-            border="1px solid"
-            borderColor={useColorModeValue('gray.200', 'gray.700')}
-            boxShadow="md"
-            flexShrink={0}
-          >
-            <ChakraIcon as={IconEl} boxSize={{ base: 4, sm: 5 }} color={headerInfo.color} />
-          </MotionBox>
-          <VStack
-            align="start"
-            spacing={0}
-            flex="1"
-            minW={0}
-          >
-            <Text
-              color={useColorModeValue('black', 'white')}
-              fontWeight="800"
-              fontSize={{ base: 'md', sm: 'xl', md: '2xl' }}
-              lineHeight="shorter"
-              noOfLines={1}
-            >
-              {modalTitle}
-            </Text>
-            <Text
-              color={useColorModeValue('gray.600', 'gray.300')}
-              fontWeight="600"
-              fontSize={{ base: 'xs', sm: 'sm' }}
-              noOfLines={1}
-              display={{ base: 'none', sm: 'block' }}
-            >
-              {headerInfo.subtitle}
-            </Text>
-          </VStack>
-          {/* Period Badge */}
-          <MotionBadge
-            colorScheme={
-              selectedCard === 'income'
-                ? 'green'
-                : selectedCard === 'expenses'
-                  ? 'red'
-                  : selectedCard === 'balance'
-                    ? 'purple'
-                    : 'blue'
-            }
-            px={3}
-            py={0.5}
-            borderRadius="full"
-            fontSize={{ base: '2xs', sm: 'xs', md: 'sm' }}
-            initial={{ opacity: 0, y: -5 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-            flexShrink={0}
-          >
-            {selectedPeriod}
-          </MotionBadge>
-        </HStack>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onClose}
-          bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
-          border="1px solid"
-          borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
-          borderRadius={headerStyles.closeButton.borderRadius}
-          p={headerStyles.closeButton.p}
-          _hover={headerStyles.closeButton._hover}
-          transition={headerStyles.closeButton.transition}
-          flexShrink={0}
-        >
-          <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
-        </Button>
-      </HStack>
-    </Box>
+  const { icon, title, caption, accent, badgeScheme } = useMemo(
+    () => ({
+      icon: ICON_MAP[card],
+      title: TITLE_MAP[card].title,
+      caption: TITLE_MAP[card].caption,
+      accent: ACCENT_MAP[card],
+      badgeScheme: BADGE_SCHEME[card],
+    }),
+    [card],
   )
 
   return (
@@ -190,24 +84,33 @@ export default function SummaryCardModal({
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
-      header={ModalHeader}
-      contentProps={{
-        bg: cardBg,
-      }}
+      header={
+        <ModalHeader
+          icon={icon}
+          title={title}
+          caption={caption}
+          onClose={onClose}
+          accent={accent}
+          rightSlot={
+            <Badge
+              colorScheme={badgeScheme}
+              variant="subtle"
+              px={3}
+              py={1}
+              borderRadius="full"
+              fontSize="xs"
+              fontWeight={600}
+              textTransform="none"
+              letterSpacing="0"
+            >
+              {selectedPeriod}
+            </Badge>
+          }
+        />
+      }
+      contentProps={{ bg: surfaceBg }}
     >
-      {/* Modal content - Scrollable */}
-      <Box
-        flex="1"
-        p={responsiveStyles.spacing.container}
-        overflowY="auto"
-        bg={cardBg}
-        {...responsiveStyles.content}
-        sx={{
-          ...safeAreaStyles.content,
-          ...safariStyles.scrollable,
-          ...getScrollbarStyles(useColorModeValue)
-        }}
-      >
+      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
         {!transactions.length ? (
           <ChartLoadingState message="Loading chart data..." />
         ) : (
@@ -233,7 +136,6 @@ export default function SummaryCardModal({
               </Box>
             </AnimatePresence>
 
-            {/* Insights Card - Outside AnimatePresence to avoid key conflicts */}
             <Box mt={4}>
               <InsightsCard
                 transactions={transactions}
@@ -247,4 +149,3 @@ export default function SummaryCardModal({
     </PremiumModal>
   )
 }
-

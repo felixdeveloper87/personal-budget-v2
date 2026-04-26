@@ -1,58 +1,130 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import {
-  Box,
-  Card,
-  CardBody,
-  VStack,
-  HStack,
-  Text,
-  Icon,
-  Badge,
-  Button,
-  Collapse,
-  IconButton,
-  useToast,
   AlertDialog,
   AlertDialogBody,
+  AlertDialogContent,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogContent,
   AlertDialogOverlay,
-  useDisclosure,
+  Badge,
+  Box,
+  Button,
+  Card,
+  CardBody,
+  Collapse,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
   useColorModeValue,
+  useDisclosure,
+  useToast,
+  VStack,
 } from '@chakra-ui/react'
-import {
-  FiCreditCard,
-  FiChevronDown,
-  FiChevronUp,
-  FiTrash2,
-  FiCalendar,
-} from 'react-icons/fi'
+import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Trash2 } from 'lucide-react'
 import { InstallmentPlan } from '../../types'
 import { deleteInstallmentPlan } from '../../api'
 
 interface InstallmentPlanCardProps {
   plan: InstallmentPlan
   onDeleted: () => void
+  /**
+   * Visual treatment:
+   *  - `active`  → primary blue accent, progress bar, "View installments" CTA.
+   *  - `past`    → muted neutral accent, "Completed" badge, no progress bar.
+   * Defaults to `active`. Use `past` for plans that have all installments paid.
+   */
+  variant?: 'active' | 'past'
 }
 
 /**
- * 💳 InstallmentPlanCard
- * Displays an installment plan with all its transactions
- * Allows expanding/collapsing and deletion
+ * True when every installment in the plan has a date in the past — i.e. all
+ * payments have been settled and the plan is closed.
  */
-export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlanCardProps) {
+export function isInstallmentPlanCompleted(plan: InstallmentPlan): boolean {
+  if (plan.transactions.length === 0) return false
+  const now = Date.now()
+  return plan.transactions.every((t) => new Date(t.date).getTime() < now)
+}
+
+interface InstallmentRowTokens {
+  paidBg: string
+  paidBorder: string
+  paidColor: string
+  pendingBg: string
+  pendingBorder: string
+  pendingColor: string
+  metaColor: string
+  textColor: string
+}
+
+/**
+ * Compact card displaying an installment plan with progress and a collapsible
+ * list of all instalments. Confirms destructive delete with an `AlertDialog`.
+ */
+export default function InstallmentPlanCard({
+  plan,
+  onDeleted,
+  variant = 'active',
+}: InstallmentPlanCardProps) {
   const toast = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
+  const isPast = variant === 'past'
+
+  // ---- All useColorModeValue calls resolved once at the top ----
+  const cardBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const titleColor = useColorModeValue('gray.900', 'gray.50')
+  const captionColor = useColorModeValue('gray.500', 'gray.400')
+
+  const accentBgActive = useColorModeValue('blue.50', 'whiteAlpha.100')
+  const accentFgActive = useColorModeValue('blue.600', 'blue.300')
+  const accentBgPast = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const accentFgPast = useColorModeValue('gray.600', 'gray.400')
+
+  const accentBg = isPast ? accentBgPast : accentBgActive
+  const accentFg = isPast ? accentFgPast : accentFgActive
+  const valueColor = isPast ? titleColor : accentFgActive
+
+  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const collapseBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+
+  const completedBadgeBg = useColorModeValue('rgba(16,185,129,0.10)', 'rgba(16,185,129,0.16)')
+  const completedBadgeFg = useColorModeValue('green.700', 'green.300')
+
+  const rowTokens: InstallmentRowTokens = {
+    paidBg: useColorModeValue('rgba(16,185,129,0.08)', 'rgba(16,185,129,0.14)'),
+    paidBorder: useColorModeValue('rgba(16,185,129,0.25)', 'rgba(16,185,129,0.35)'),
+    paidColor: useColorModeValue('green.700', 'green.300'),
+    pendingBg: useColorModeValue('gray.50', 'whiteAlpha.50'),
+    pendingBorder: useColorModeValue('blackAlpha.100', 'whiteAlpha.100'),
+    pendingColor: useColorModeValue('gray.600', 'gray.400'),
+    metaColor: useColorModeValue('gray.500', 'gray.500'),
+    textColor: useColorModeValue('gray.900', 'gray.100'),
+  }
+
+  const cardHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const deleteHoverBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
+
+  // Dialog tokens
+  const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
+  const warningChipFg = useColorModeValue('red.600', 'red.300')
+
   const firstTransaction = plan.transactions[0]
-  const paidCount = plan.transactions.filter((t) => {
-    const txDate = new Date(t.date)
-    return txDate < new Date()
-  }).length
+
+  const paidCount = useMemo(() => {
+    const now = new Date()
+    return plan.transactions.filter((t) => new Date(t.date) < now).length
+  }, [plan.transactions])
+
+  const progressPct = plan.totalInstallments > 0
+    ? Math.min(100, Math.round((paidCount / plan.totalInstallments) * 100))
+    : 0
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -81,147 +153,203 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
   return (
     <>
       <Card
-        bg={useColorModeValue('#dbeafe', '#1e3a8a')} // Azul post-it no light, azul escuro no dark
-        shadow={useColorModeValue('md', 'lg')}
+        bg={cardBg}
+        border="1px solid"
+        borderColor={cardBorder}
         borderRadius="xl"
-        border="2px"
-        borderColor={useColorModeValue('#60a5fa', '#3b82f6')} // Azul claro no light, azul mais escuro no dark
-        _hover={{ 
-          shadow: useColorModeValue('lg', 'xl'), 
-          borderColor: useColorModeValue('#3b82f6', '#60a5fa'),
-          transform: 'translateY(-2px)'
+        boxShadow="0 1px 2px rgba(0,0,0,0.04)"
+        transition="border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease"
+        _hover={{
+          borderColor: cardHoverBorder,
+          boxShadow: '0 8px 20px -10px rgba(0,0,0,0.18)',
+          transform: 'translateY(-1px)',
         }}
-        transition="all 0.3s ease"
       >
         <CardBody p={5}>
           <VStack align="stretch" spacing={4}>
-            {/* Header */}
-            <HStack justify="space-between">
-              <HStack spacing={2}>
-                <Icon as={FiCreditCard} fontSize="xl" color={useColorModeValue('#3b82f6', '#60a5fa')} />
-                <VStack align="start" spacing={0}>
-                  <Text fontWeight="bold" fontSize="md" color={useColorModeValue('gray.800', 'white')}>
-                    {firstTransaction?.description?.replace(/ \(Parcela.*\)/, '')}
+            <HStack justify="space-between" align="flex-start">
+              <HStack spacing={3} minW={0} flex={1}>
+                <Box
+                  w={9}
+                  h={9}
+                  borderRadius="lg"
+                  bg={accentBg}
+                  color={accentFg}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  <Icon as={CreditCard} boxSize={4} strokeWidth={2.25} />
+                </Box>
+                <VStack align="flex-start" spacing={0} minW={0}>
+                  <Text
+                    fontWeight={700}
+                    fontSize="md"
+                    color={titleColor}
+                    lineHeight="1.2"
+                    noOfLines={1}
+                  >
+                    {firstTransaction?.description?.replace(/ \(Parcela.*\)/, '') || 'Installment plan'}
                   </Text>
-                  <Text fontSize="sm" color={useColorModeValue('gray.600', 'gray.300')}>
+                  <Text fontSize="xs" color={captionColor} noOfLines={1}>
                     {firstTransaction?.category}
                   </Text>
                 </VStack>
               </HStack>
               <IconButton
                 aria-label="Delete installment plan"
-                icon={<FiTrash2 />}
+                icon={<Icon as={Trash2} boxSize={4} />}
                 size="sm"
-                colorScheme="red"
                 variant="ghost"
+                color={captionColor}
+                _hover={{ bg: deleteHoverBg, color: 'red.500' }}
                 onClick={onOpen}
+                transition="background-color 0.15s ease, color 0.15s ease"
               />
             </HStack>
 
-            {/* Summary */}
-            <HStack justify="space-between" flexWrap="wrap" gap={3}>
-              <VStack align="start" spacing={0}>
-                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')}>
-                  Installment value
+            <HStack justify="space-between" align="flex-end">
+              <VStack align="flex-start" spacing={0}>
+                <Text fontSize="xs" color={captionColor} fontWeight={500}>
+                  Per installment
                 </Text>
-                <Text fontSize="xl" fontWeight="bold" color={useColorModeValue('#3b82f6', '#60a5fa')}>
+                <Text fontSize="xl" fontWeight={700} color={valueColor} lineHeight="1.1">
                   £{plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
-
-              <VStack align="end" spacing={0}>
-                <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.300')}>
+              <VStack align="flex-end" spacing={0}>
+                <Text fontSize="xs" color={captionColor} fontWeight={500}>
                   Total
                 </Text>
-                <Text fontSize="lg" fontWeight="semibold" color={useColorModeValue('gray.800', 'white')}>
+                <Text fontSize="md" fontWeight={600} color={titleColor} lineHeight="1.1">
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
             </HStack>
 
-            {/* Progress */}
-            <HStack justify="space-between">
-              <Badge 
-                bg={useColorModeValue('#60a5fa', '#3b82f6')} 
-                color="white" 
-                fontSize="sm" 
-                px={2} 
-                py={1} 
-                borderRadius="md"
-                boxShadow="sm"
-              >
-                {paidCount}/{plan.totalInstallments} paid
-              </Badge>
-              <Button
-                size="sm"
-                variant="ghost"
-                rightIcon={isExpanded ? <FiChevronUp /> : <FiChevronDown />}
-                onClick={() => setIsExpanded(!isExpanded)}
-                colorScheme="blue"
-                fontWeight="medium"
-              >
-                {isExpanded ? 'Hide' : 'View Installments'}
-              </Button>
-            </HStack>
+            {isPast ? (
+              <HStack justify="space-between" align="center">
+                <Badge
+                  px={2.5}
+                  py={1}
+                  borderRadius="full"
+                  bg={completedBadgeBg}
+                  color={completedBadgeFg}
+                  fontSize="2xs"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  letterSpacing="0.04em"
+                  display="inline-flex"
+                  alignItems="center"
+                  gap={1}
+                >
+                  <Icon as={CheckCircle2} boxSize={3} strokeWidth={2.5} />
+                  Completed
+                </Badge>
+                <Text fontSize="xs" color={captionColor}>
+                  {plan.totalInstallments} of {plan.totalInstallments} paid
+                </Text>
+              </HStack>
+            ) : (
+              <Box>
+                <HStack justify="space-between" mb={1.5}>
+                  <Text fontSize="xs" fontWeight={600} color={captionColor}>
+                    {paidCount} of {plan.totalInstallments} paid
+                  </Text>
+                  <Text fontSize="xs" fontWeight={600} color={valueColor}>
+                    {progressPct}%
+                  </Text>
+                </HStack>
+                <Box h="6px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
+                  <Box
+                    h="full"
+                    w={`${progressPct}%`}
+                    bg="linear-gradient(90deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
+                    borderRadius="full"
+                    transition="width 0.4s ease"
+                  />
+                </Box>
+              </Box>
+            )}
 
-            {/* Installment list (collapsible) */}
+            <Button
+              size="sm"
+              variant="ghost"
+              w="full"
+              fontSize="xs"
+              fontWeight={600}
+              color={accentFg}
+              rightIcon={<Icon as={isExpanded ? ChevronUp : ChevronDown} boxSize={3.5} />}
+              onClick={() => setIsExpanded(!isExpanded)}
+              _hover={{ bg: accentBg }}
+            >
+              {isExpanded
+                ? 'Hide installments'
+                : isPast
+                  ? `View ${plan.totalInstallments} payments`
+                  : `View ${plan.totalInstallments} installments`}
+            </Button>
+
             <Collapse in={isExpanded} animateOpacity>
               <VStack
                 align="stretch"
-                spacing={2}
-                mt={3}
+                spacing={1.5}
+                mt={1}
                 p={3}
-                bg={useColorModeValue('white', 'gray.800')}
-                borderRadius="md"
-                maxH="350px"
+                bg={collapseBg}
+                borderRadius="lg"
+                maxH="320px"
                 overflowY="auto"
-                border="1px"
-                borderColor={useColorModeValue('gray.200', 'gray.600')}
+                border="1px solid"
+                borderColor={dividerColor}
               >
                 {plan.transactions.map((transaction) => {
                   const isPaid = new Date(transaction.date) < new Date()
-                  const formattedDate = new Date(transaction.date).toLocaleDateString('pt-BR')
-                  
+                  const formattedDate = new Date(transaction.date).toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  })
                   return (
                     <HStack
                       key={transaction.id}
                       justify="space-between"
-                      p={2}
-                      bg={useColorModeValue(
-                        isPaid ? "green.50" : "gray.50",
-                        isPaid ? "green.900" : "gray.700"
-                      )}
+                      align="center"
+                      px={3}
+                      py={2}
+                      bg={isPaid ? rowTokens.paidBg : rowTokens.pendingBg}
                       borderRadius="md"
-                      border="1px"
-                      borderColor={useColorModeValue(
-                        isPaid ? "green.200" : "gray.200",
-                        isPaid ? "green.600" : "gray.600"
-                      )}
-                      flexWrap="wrap"
+                      border="1px solid"
+                      borderColor={isPaid ? rowTokens.paidBorder : rowTokens.pendingBorder}
                       gap={2}
+                      flexWrap="wrap"
                     >
-                      <HStack spacing={2} minW="0" flex="1">
-                        <Icon as={FiCalendar} fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} />
-                        <VStack align="start" spacing={0} minW="0">
-                          <Text fontSize="xs" fontWeight="medium" color={useColorModeValue('gray.800', 'white')}>
+                      <HStack spacing={2} minW={0} flex={1}>
+                        <Icon as={Calendar} boxSize={3} color={rowTokens.metaColor} />
+                        <VStack align="flex-start" spacing={0} minW={0}>
+                          <Text fontSize="xs" fontWeight={600} color={rowTokens.textColor}>
                             {formattedDate}
                           </Text>
-                          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')}>
+                          <Text fontSize="2xs" color={rowTokens.metaColor}>
                             {transaction.installmentNumber}/{plan.totalInstallments}
                           </Text>
                         </VStack>
                       </HStack>
-                      
-                      <HStack spacing={2} minW="0">
-                        <Text fontSize="xs" fontWeight="bold" color={useColorModeValue('gray.800', 'white')}>
+                      <HStack spacing={2}>
+                        <Text fontSize="xs" fontWeight={700} color={rowTokens.textColor}>
                           £{transaction.amount.toFixed(2)}
                         </Text>
-                        <Badge 
-                          colorScheme={isPaid ? "green" : "gray"}
-                          size="sm"
-                          fontSize="xs"
-                          px={1}
-                          py={0}
+                        <Badge
+                          fontSize="2xs"
+                          fontWeight={600}
+                          px={2}
+                          py={0.5}
+                          borderRadius="full"
+                          bg={isPaid ? rowTokens.paidBg : rowTokens.pendingBg}
+                          color={isPaid ? rowTokens.paidColor : rowTokens.pendingColor}
+                          textTransform="none"
+                          letterSpacing="0"
                         >
                           {isPaid ? 'Paid' : 'Pending'}
                         </Badge>
@@ -235,31 +363,89 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
         </CardBody>
       </Card>
 
-      {/* Delete confirmation dialog */}
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent 
-            bg={useColorModeValue('#dbeafe', '#1e3a8a')} 
-            borderColor={useColorModeValue('#60a5fa', '#3b82f6')}
-            border="2px"
+      {/* Destructive confirmation */}
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+        isCentered
+        motionPreset="slideInBottom"
+      >
+        <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
+          <AlertDialogContent
+            bg={dialogBg}
+            borderRadius="xl"
+            boxShadow="0 20px 60px -20px rgba(0,0,0,0.4)"
+            maxW="440px"
+            mx={4}
+            overflow="hidden"
           >
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Delete Installment Plan
+            <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
+              <Box
+                w={9}
+                h={9}
+                borderRadius="lg"
+                bg={warningChipBg}
+                color={warningChipFg}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Icon as={AlertTriangle} boxSize={4} strokeWidth={2.25} />
+              </Box>
+              <VStack align="flex-start" spacing={0}>
+                <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
+                  Delete installment plan
+                </Text>
+                <Text fontSize="xs" color={captionColor}>
+                  This cannot be undone.
+                </Text>
+              </VStack>
             </AlertDialogHeader>
 
-            <AlertDialogBody>
-              Are you sure? All {plan.totalInstallments} installments will be permanently removed.
+            <AlertDialogBody px={6} pb={4}>
+              <Text fontSize="sm" color={captionColor}>
+                All <Text as="span" fontWeight={700} color={titleColor}>{plan.totalInstallments}</Text>{' '}
+                installments will be permanently removed.
+              </Text>
             </AlertDialogBody>
 
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>
+            <AlertDialogFooter
+              px={6}
+              py={4}
+              borderTop="1px solid"
+              borderColor={dividerColor}
+              gap={2}
+            >
+              <Button
+                ref={cancelRef}
+                onClick={onClose}
+                variant="ghost"
+                fontSize="sm"
+                fontWeight={600}
+                color={captionColor}
+              >
                 Cancel
               </Button>
               <Button
-                colorScheme="red"
                 onClick={handleDelete}
-                ml={3}
                 isLoading={isDeleting}
+                loadingText="Deleting…"
+                fontSize="sm"
+                fontWeight={700}
+                color="white"
+                bg="linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)"
+                bgSize="200% 100%"
+                bgPosition="0% 50%"
+                boxShadow="0 8px 24px -10px rgba(244, 63, 94, 0.55)"
+                _hover={{
+                  bgPosition: '100% 50%',
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
+                }}
+                _active={{ transform: 'translateY(0)' }}
+                transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
               >
                 Delete
               </Button>
@@ -270,4 +456,3 @@ export default function InstallmentPlanCard({ plan, onDeleted }: InstallmentPlan
     </>
   )
 }
-

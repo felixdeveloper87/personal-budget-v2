@@ -1,28 +1,28 @@
+import { memo, useCallback, useEffect, useState } from 'react'
 import {
   Box,
+  Button,
+  Center,
+  Icon,
+  Spinner,
+  Text,
   VStack,
   useColorModeValue,
-  Spinner,
-  Center,
-  Text,
-  Icon,
-  Button
 } from '@chakra-ui/react'
-import { memo, useMemo, useState, useEffect, useCallback } from 'react'
+import { AlertCircle, RefreshCw } from 'lucide-react'
 import { Transaction } from '../../types'
 import { searchTransactions } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
-import { AlertCircle, RefreshCw } from 'lucide-react'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { getGradients, safeAreaStyles, safariStyles, getResponsiveStyles, getScrollbarStyles, PremiumModal } from '../ui'
+import { PremiumModal } from '../ui'
 
 const SearchResultsModal = memo(function SearchResultsModal({
   isOpen,
   onClose,
   searchFilters,
-  user: propUser
+  user: propUser,
 }: SearchResultsModalProps) {
   const { user: contextUser } = useAuth()
   const user = propUser || contextUser
@@ -30,36 +30,11 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const gradients = getGradients()
-  const responsiveStyles = getResponsiveStyles()
-  const scrollbarStyles = getScrollbarStyles(useColorModeValue)
-  const textColor = useColorModeValue('gray.600', 'gray.400')
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const subtleText = useColorModeValue('gray.500', 'gray.400')
+  const errorText = useColorModeValue('gray.700', 'gray.300')
+  const spinnerEmpty = useColorModeValue('gray.200', 'whiteAlpha.200')
 
-  // Memoized calculations for performance
-  const summaryData = useMemo(() => {
-    let totalIncome = 0
-    let totalExpense = 0
-
-    for (const transaction of transactions) {
-      if (transaction.type === 'INCOME') {
-        totalIncome += transaction.amount
-      } else if (transaction.type === 'EXPENSE') {
-        totalExpense += transaction.amount
-      }
-    }
-
-    const netAmount = totalIncome - totalExpense
-    const totalTransactions = transactions.length
-
-    return {
-      totalIncome,
-      totalExpense,
-      netAmount,
-      totalTransactions
-    }
-  }, [transactions])
-
-  // Search function with error handling
   const performSearch = useCallback(async () => {
     if (!(user as any)?.userId) return
 
@@ -72,27 +47,24 @@ const SearchResultsModal = memo(function SearchResultsModal({
         type: searchFilters.type || undefined,
         category: searchFilters.category || undefined,
         startDate: searchFilters.startDate || undefined,
-        endDate: searchFilters.endDate || undefined
+        endDate: searchFilters.endDate || undefined,
       }
-
       const results = await searchTransactions(searchParams)
       setTransactions(results)
     } catch (err) {
       console.error('Search error:', err)
-      setError('Failed to search transactions. Please try again.')
+      setError('We could not load your transactions. Please try again.')
     } finally {
       setIsLoading(false)
     }
   }, [(user as any)?.userId, searchFilters])
 
-  // Effect to trigger search when modal opens or filters change
   useEffect(() => {
     if (isOpen && (user as any)?.userId) {
       performSearch()
     }
   }, [isOpen, (user as any)?.userId, performSearch])
 
-  // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setTransactions([])
@@ -113,89 +85,57 @@ const SearchResultsModal = memo(function SearchResultsModal({
         <SearchSummaryHeader
           searchFilters={searchFilters}
           onClose={onClose}
+          resultCount={isLoading || error ? undefined : transactions.length}
         />
       }
-      contentProps={{
-        bg: useColorModeValue(
-          'rgba(255, 255, 255, 0.95)',
-          'rgba(17, 17, 17, 0.95)'
-        ),
-        backdropFilter: "blur(20px)",
-        border: "1px solid",
-        borderColor: useColorModeValue(
-          'rgba(255, 255, 255, 0.2)',
-          'rgba(255, 255, 255, 0.1)'
-        )
-      }}
+      contentProps={{ bg: surfaceBg }}
     >
-      {/* Decorative background */}
-      <Box
-        position="absolute"
-        top="-50px"
-        left="-50px"
-        right="-50px"
-        height="200px"
-        background={gradients.decorative}
-        borderRadius="3xl"
-        filter="blur(40px)"
-        opacity={0.6}
-        zIndex={0}
-        pointerEvents="none"
-      />
-
-      {/* Content */}
       <Box
         flex="1"
-        p={responsiveStyles.spacing.container}
+        bg={surfaceBg}
+        px={{ base: 4, sm: 6 }}
+        py={{ base: 5, sm: 6 }}
         overflowY="auto"
-        {...responsiveStyles.content}
-        sx={{
-          ...safeAreaStyles.content,
-          ...safariStyles.scrollable,
-          ...scrollbarStyles,
-          position: 'relative',
-          zIndex: 1
-        }}
       >
         {isLoading ? (
           <Center py={20}>
             <VStack spacing={4}>
-              <Spinner size="xl" color="blue.500" thickness="4px" />
-              <Text color={textColor} fontSize="lg">
-                Searching transactions...
+              <Spinner
+                size="lg"
+                color="blue.500"
+                thickness="3px"
+                emptyColor={spinnerEmpty}
+              />
+              <Text color={subtleText} fontSize="sm">
+                Searching transactions…
               </Text>
             </VStack>
           </Center>
         ) : error ? (
-          <Center py={20}>
-            <VStack spacing={6}>
-              <Icon as={AlertCircle} boxSize={16} color="red.500" />
-              <VStack spacing={2}>
-                <Text fontSize="lg" fontWeight="bold" color={textColor}>
-                  Search Failed
+          <Center py={16}>
+            <VStack spacing={5} maxW="sm" textAlign="center">
+              <Icon as={AlertCircle} boxSize={10} color="red.400" />
+              <VStack spacing={1}>
+                <Text fontSize="md" fontWeight={600} color={errorText}>
+                  Something went wrong
                 </Text>
-                <Text color={textColor} textAlign="center">
+                <Text color={subtleText} fontSize="sm">
                   {error}
                 </Text>
               </VStack>
               <Button
                 leftIcon={<Icon as={RefreshCw} boxSize={4} />}
-                colorScheme="blue"
                 onClick={handleRetry}
-                size="lg"
+                size="sm"
+                variant="outline"
+                borderRadius="lg"
               >
-                Try Again
+                Try again
               </Button>
             </VStack>
           </Center>
         ) : (
-          <VStack spacing={6} align="stretch">
-            {/* Results List */}
-            <CategoryResultsList
-              transactions={transactions}
-              searchFilters={searchFilters}
-            />
-          </VStack>
+          <CategoryResultsList transactions={transactions} searchFilters={searchFilters} />
         )}
       </Box>
     </PremiumModal>

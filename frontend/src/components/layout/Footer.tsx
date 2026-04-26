@@ -16,12 +16,12 @@ import {
 import {
   ArrowUp,
   EyeOff,
-  Lock,
   ShieldCheck,
   Wallet,
   type LucideIcon,
 } from 'lucide-react'
 import { BRAND } from './header/brand.config'
+import { LANDING_SECTIONS } from './header/navigation.config'
 
 /* -------------------------------------------------------------------------- */
 /* Data                                                                        */
@@ -38,14 +38,15 @@ interface FooterSection {
   links: ReadonlyArray<FooterLink>
 }
 
+/**
+ * Explore links are derived from LANDING_SECTIONS (the same source the
+ * header's LandingNav uses). Adding a section to the landing now updates
+ * both nav surfaces in one place.
+ */
 const SECTIONS: ReadonlyArray<FooterSection> = [
   {
     title: 'Explore',
-    links: [
-      { label: 'Features', href: '#features' },
-      { label: 'How it works', href: '#how-it-works' },
-      { label: 'FAQ', href: '#faq' },
-    ],
+    links: LANDING_SECTIONS.map((s) => ({ label: s.label, href: `#${s.id}` })),
   },
   {
     title: 'Trust',
@@ -138,7 +139,7 @@ export default function Footer() {
           {/* Link columns */}
           <SimpleGrid
             gridColumn={{ md: 'span 7' }}
-            columns={{ base: 2, sm: 3 }}
+            columns={{ base: 2, sm: 2 }}
             spacing={{ base: 8, md: 6 }}
           >
             {SECTIONS.map((section) => (
@@ -150,14 +151,6 @@ export default function Footer() {
                 linkHover={linkHover}
               />
             ))}
-
-            {/* Stay grounded column — replaces the dead "Help / Support" */}
-            <VStack align="flex-start" spacing={4}>
-              <ColumnTitle heading={heading}>Made for you</ColumnTitle>
-              <Text fontSize="sm" color={body} lineHeight={1.6} maxW="220px">
-                Personal Budget is a small, focused app — not a platform. No tracking, no upsell.
-              </Text>
-            </VStack>
           </SimpleGrid>
         </SimpleGrid>
 
@@ -251,7 +244,7 @@ function BrandColumn({ heading, body, logoBoxBg, logoBoxBorder, logoIconColor }:
       </HStack>
 
       <Text fontSize="sm" color={body} lineHeight={1.65}>
-        Track every transaction without the spreadsheet pain. Personal Budget keeps the picture sharp — income, expenses and trends, in one calm place.
+        A small, focused budget app. No platform ambitions, no tracking, no upsell — just a calm dashboard you actually open.
       </Text>
     </VStack>
   )

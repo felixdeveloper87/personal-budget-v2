@@ -1,156 +1,171 @@
+import { memo } from 'react'
 import {
   Box,
-  Flex,
   HStack,
-  VStack,
-  Text,
-  Badge,
-  useColorModeValue,
   Icon,
-  Heading,
-  Button
+  IconButton,
+  Tag,
+  TagLabel,
+  Text,
+  VStack,
+  Wrap,
+  WrapItem,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { Search, Calendar, X } from 'lucide-react'
-import { memo } from 'react'
+import { Calendar, ListFilter, Search, TrendingDown, TrendingUp, X } from 'lucide-react'
 import { formatTransactionDate } from '../../utils/dateTime'
-import { getGradients, getModalHeaderStyles } from '../ui'
 import { SearchSummaryHeaderProps } from '../../types'
+
+interface Props extends SearchSummaryHeaderProps {
+  onClose?: () => void
+  /** Optional total count to display next to the title. */
+  resultCount?: number
+}
 
 const SearchSummaryHeader = memo(function SearchSummaryHeader({
   searchFilters,
-  onClose
-}: SearchSummaryHeaderProps & { onClose?: () => void }) {
-  const gradients = getGradients()
-  const headerStyles = getModalHeaderStyles(useColorModeValue)
-  const hasActiveFilters = searchFilters.text || searchFilters.type || searchFilters.category || searchFilters.startDate || searchFilters.endDate
+  onClose,
+  resultCount,
+}: Props) {
+  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const titleColor = useColorModeValue('gray.900', 'gray.50')
+  const captionColor = useColorModeValue('gray.500', 'gray.400')
+  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
+  const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
+  const accentBg = useColorModeValue('blue.50', 'whiteAlpha.100')
+  const accentColor = useColorModeValue('blue.600', 'blue.300')
+  const tagBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const tagColor = useColorModeValue('gray.700', 'gray.200')
+  const incomeColor = useColorModeValue('green.700', 'green.200')
+  const incomeBg = useColorModeValue('green.50', 'rgba(34,197,94,0.12)')
+  const expenseColor = useColorModeValue('red.700', 'red.200')
+  const expenseBg = useColorModeValue('red.50', 'rgba(239,68,68,0.12)')
+
+  const hasActiveFilters = Boolean(
+    searchFilters.text ||
+      searchFilters.type ||
+      searchFilters.category ||
+      searchFilters.startDate ||
+      searchFilters.endDate,
+  )
+
+  const caption =
+    typeof resultCount === 'number'
+      ? resultCount === 1
+        ? '1 transaction found'
+        : `${resultCount} transactions found`
+      : hasActiveFilters
+        ? 'Showing filtered results'
+        : 'Showing all transactions'
 
   return (
     <Box
-      p={{ base: 4, sm: 5, md: 6 }}
-      borderBottom="1px"
-      borderColor={useColorModeValue('gray.200', 'gray.700')}
-      position="relative"
-      bg={gradients.background}
-      sx={{
-        // Safe area support handled by PremiumModal
-      }}
+      bg={surfaceBg}
+      borderBottom="1px solid"
+      borderColor={borderColor}
+      px={{ base: 4, sm: 6 }}
+      pt={{ base: 'max(1rem, env(safe-area-inset-top, 0px))', sm: 5 }}
+      pb={hasActiveFilters ? 4 : 5}
     >
-      {/* Header with title and close button */}
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        align="center"
-        justify="space-between"
-        flexWrap="nowrap"
-        pr={{ base: 2, sm: 4 }}
-        pt={{ base: 2, sm: 0 }}
-        mb={hasActiveFilters ? 4 : 0}
-      >
-        {/* Logo + Text */}
-        <HStack spacing={4} align="center" flex="1" minW={0}>
+      <HStack justify="space-between" align="center" mb={hasActiveFilters ? 3 : 0} spacing={3}>
+        <HStack spacing={3} minW={0}>
           <Box
-            p={3}
-            borderRadius="2xl"
-            bg={useColorModeValue(
-              'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-              'linear-gradient(135deg, #60a5fa, #3b82f6)'
-            )}
-            boxShadow="lg"
+            w={9}
+            h={9}
+            borderRadius="lg"
+            bg={accentBg}
+            color={accentColor}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
             flexShrink={0}
-            sx={{
-              animation: 'glow 3s ease-in-out infinite',
-              '@keyframes glow': {
-                '0%, 100%': {
-                  boxShadow: '0 0 5px rgba(59, 130, 246, 0.3)'
-                },
-                '50%': {
-                  boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 30px rgba(59, 130, 246, 0.4)'
-                }
-              }
-            }}
           >
-            <Icon as={Search} boxSize={6} color="white" />
+            <Icon as={ListFilter} boxSize={4} strokeWidth={2.25} />
           </Box>
-          <VStack align="start" spacing={1} flex="1" minW={0}>
-            <Heading
-              size={{ base: 'md', sm: 'lg' }}
-              bg={useColorModeValue(
-                'linear-gradient(135deg, #0f172a, #1e293b)',
-                'linear-gradient(135deg, #f0fdf4, #dcfce7)'
-              )}
-              bgClip="text"
-              fontWeight="800"
-            >
-              Search Results
-            </Heading>
+          <VStack align="flex-start" spacing={0} minW={0}>
             <Text
-              fontSize={{ base: 'xs', sm: 'sm' }}
-              color={useColorModeValue('gray.700', 'gray.200')}
-              fontWeight="500"
+              fontWeight={700}
+              fontSize="md"
+              color={titleColor}
+              lineHeight="1.2"
+              noOfLines={1}
             >
-              {hasActiveFilters ? 'Filtered transactions' : 'All transactions'}
+              Results
+            </Text>
+            <Text fontSize="xs" color={captionColor} noOfLines={1}>
+              {caption}
             </Text>
           </VStack>
         </HStack>
-        {/* Close Button */}
+
         {onClose && (
-          <Button
+          <IconButton
+            aria-label="Close"
+            icon={<Icon as={X} boxSize={4} />}
+            onClick={onClose}
             size="sm"
             variant="ghost"
-            onClick={onClose}
-            bg={useColorModeValue(headerStyles.closeButton.bg.light, headerStyles.closeButton.bg.dark)}
-            border="1px solid"
-            borderColor={useColorModeValue(headerStyles.closeButton.borderColor.light, headerStyles.closeButton.borderColor.dark)}
-            borderRadius={headerStyles.closeButton.borderRadius}
-            p={headerStyles.closeButton.p}
-            _hover={headerStyles.closeButton._hover}
-            transition={headerStyles.closeButton.transition}
-            flexShrink={0}
-          >
-            <Icon as={X} boxSize={headerStyles.closeButton.iconSize} color={useColorModeValue(headerStyles.closeButton.iconColor.light, headerStyles.closeButton.iconColor.dark)} />
-          </Button>
+            color={closeIdleColor}
+            _hover={{ bg: closeHoverBg, color: titleColor }}
+            transition="background-color 0.15s ease, color 0.15s ease"
+          />
         )}
       </HStack>
 
-      {/* Active Filters */}
       {hasActiveFilters && (
-        <HStack spacing={2} flexWrap="wrap" justify="flex-start" mt={2}>
+        <Wrap spacing={2}>
           {searchFilters.text && (
-            <Badge colorScheme="blue" variant="subtle" px={3} py={1} borderRadius="full">
-              Text: "{searchFilters.text}"
-            </Badge>
+            <WrapItem>
+              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
+                <Icon as={Search} boxSize={3} mr={1.5} />
+                <TagLabel maxW="180px" noOfLines={1}>
+                  {searchFilters.text}
+                </TagLabel>
+              </Tag>
+            </WrapItem>
           )}
           {searchFilters.type && (
-            <Badge
-              colorScheme={searchFilters.type === 'income' ? 'green' : 'red'}
-              variant="subtle"
-              px={3}
-              py={1}
-              borderRadius="full"
-            >
-              {searchFilters.type === 'income' ? 'Income' : 'Expense'}
-            </Badge>
+            <WrapItem>
+              <Tag
+                size="sm"
+                bg={searchFilters.type === 'income' ? incomeBg : expenseBg}
+                color={searchFilters.type === 'income' ? incomeColor : expenseColor}
+                borderRadius="full"
+                px={3}
+                py={1}
+              >
+                <Icon
+                  as={searchFilters.type === 'income' ? TrendingUp : TrendingDown}
+                  boxSize={3}
+                  mr={1.5}
+                />
+                <TagLabel>{searchFilters.type === 'income' ? 'Income' : 'Expense'}</TagLabel>
+              </Tag>
+            </WrapItem>
           )}
           {searchFilters.category && (
-            <Badge colorScheme="purple" variant="subtle" px={3} py={1} borderRadius="full">
-              {searchFilters.category}
-            </Badge>
+            <WrapItem>
+              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
+                <TagLabel>{searchFilters.category}</TagLabel>
+              </Tag>
+            </WrapItem>
           )}
           {(searchFilters.startDate || searchFilters.endDate) && (
-            <Badge colorScheme="orange" variant="subtle" px={3} py={1} borderRadius="full">
-              <HStack spacing={1}>
-                <Icon as={Calendar} boxSize={3} />
-                <Text>
+            <WrapItem>
+              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
+                <Icon as={Calendar} boxSize={3} mr={1.5} />
+                <TagLabel>
                   {searchFilters.startDate && searchFilters.endDate
-                    ? `${formatTransactionDate(searchFilters.startDate)} - ${formatTransactionDate(searchFilters.endDate)}`
+                    ? `${formatTransactionDate(searchFilters.startDate)} – ${formatTransactionDate(searchFilters.endDate)}`
                     : searchFilters.startDate
                       ? `From ${formatTransactionDate(searchFilters.startDate)}`
-                      : `Until ${formatTransactionDate(searchFilters.endDate)}`
-                  }
-                </Text>
-              </HStack>
-            </Badge>
+                      : `Until ${formatTransactionDate(searchFilters.endDate)}`}
+                </TagLabel>
+              </Tag>
+            </WrapItem>
           )}
-        </HStack>
+        </Wrap>
       )}
     </Box>
   )

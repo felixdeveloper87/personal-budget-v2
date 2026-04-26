@@ -58,7 +58,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
       />
 
       <Container
-        maxW={{ base: '100%', xl: '1280px', '2xl': '1400px' }}
+        maxW={{ base: '100%', xl: '1200px', '2xl': '1320px' }}
         px={{ base: 4, md: 8, lg: 12 }}
         position="relative"
         zIndex={1}

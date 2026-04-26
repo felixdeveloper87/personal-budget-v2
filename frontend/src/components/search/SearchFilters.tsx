@@ -1,298 +1,425 @@
-import { 
-  VStack, HStack, Input, InputGroup, InputLeftElement, Button, useColorModeValue, 
-  Text, Wrap, WrapItem, Box, Icon 
+import { useMemo } from 'react'
+import {
+  Box,
+  Button,
+  HStack,
+  Icon,
+  Input,
+  Text,
+  VStack,
+  Wrap,
+  WrapItem,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { Search, Sparkles, Calendar, Tag } from 'lucide-react'
+import { Calendar, Check, Tag, TrendingDown, TrendingUp, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { SearchFiltersProps } from '../../types'
-import { safariStyles, getResponsiveStyles } from '../ui'
 
-export default function SearchFilters({ 
-  filters, 
-  onUpdateFilter, 
-  onTypeChange, 
-  availableCategories 
+interface QuickRange {
+  id: string
+  label: string
+  start: string
+  end: string
+}
+
+interface TypeOption {
+  id: 'income' | 'expense'
+  label: string
+  caption: string
+  icon: LucideIcon
+}
+
+const TYPE_OPTIONS: ReadonlyArray<TypeOption> = [
+  { id: 'income', label: 'Income', caption: 'Money in', icon: TrendingUp },
+  { id: 'expense', label: 'Expense', caption: 'Money out', icon: TrendingDown },
+]
+
+const fmtDate = (d: Date) => d.toISOString().split('T')[0]
+
+function useQuickRanges(): ReadonlyArray<QuickRange> {
+  return useMemo(() => {
+    const today = new Date()
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+    const last30Start = new Date(today)
+    last30Start.setDate(today.getDate() - 30)
+
+    const last3MonthsStart = new Date(today.getFullYear(), today.getMonth() - 2, 1)
+    const startOfYear = new Date(today.getFullYear(), 0, 1)
+
+    return [
+      { id: 'thisMonth', label: 'This month', start: fmtDate(startOfMonth), end: fmtDate(endOfMonth) },
+      { id: 'last30', label: 'Last 30 days', start: fmtDate(last30Start), end: fmtDate(today) },
+      { id: 'last3', label: 'Last 3 months', start: fmtDate(last3MonthsStart), end: fmtDate(today) },
+      { id: 'thisYear', label: 'This year', start: fmtDate(startOfYear), end: fmtDate(today) },
+    ]
+  }, [])
+}
+
+export default function SearchFilters({
+  filters,
+  onUpdateFilter,
+  onTypeChange,
+  availableCategories,
 }: SearchFiltersProps) {
-  const responsiveStyles = getResponsiveStyles()
+  // Generic tokens — resolved once at the top.
+  const labelColor = useColorModeValue('gray.700', 'gray.300')
+  const subLabelColor = useColorModeValue('gray.500', 'gray.500')
+
+  const inputBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const inputBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const inputColor = useColorModeValue('gray.900', 'gray.50')
+  const focusBorder = useColorModeValue('#3b82f6', '#60a5fa')
+  const focusGlow = useColorModeValue(
+    'rgba(59, 130, 246, 0.18)',
+    'rgba(96, 165, 250, 0.28)',
+  )
+
+  const idleChipBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const idleChipBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const idleChipColor = useColorModeValue('gray.700', 'gray.300')
+  const idleChipHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+
+  const activeChipBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.15)')
+  const activeChipBorder = useColorModeValue('blue.300', 'rgba(96,165,250,0.45)')
+  const activeChipColor = useColorModeValue('blue.700', 'blue.200')
+
+  // ---------------------------------------------------------------------------
+  // Type buttons — pre-resolved tokens for both states (idle / active).
+  // We resolve these unconditionally to keep hook order stable.
+  // ---------------------------------------------------------------------------
+  const cardIdleBg = useColorModeValue('white', 'whiteAlpha.50')
+  const cardIdleBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const cardCaptionColor = useColorModeValue('gray.500', 'gray.500')
+
+  // Income (active)
+  const incomeFg = useColorModeValue('green.700', 'green.100')
+  const incomeCaption = useColorModeValue('green.600', 'green.300')
+  const incomeBgGradient = useColorModeValue(
+    'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)',
+    'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(16,185,129,0.10) 100%)',
+  )
+  const incomeRing = useColorModeValue(
+    '0 0 0 1px rgba(34,197,94,0.45) inset, 0 4px 14px -6px rgba(34,197,94,0.35)',
+    '0 0 0 1px rgba(74,222,128,0.55) inset, 0 4px 16px -6px rgba(34,197,94,0.45)',
+  )
+  const incomeIconBg = useColorModeValue('white', 'rgba(0,0,0,0.25)')
+  const incomeIconColor = useColorModeValue('green.500', 'green.300')
+  // Income (idle hint)
+  const incomeIdleIconBg = useColorModeValue('green.50', 'rgba(34,197,94,0.08)')
+  const incomeIdleIconColor = useColorModeValue('green.500', 'green.300')
+
+  // Expense (active)
+  const expenseFg = useColorModeValue('red.700', 'red.100')
+  const expenseCaption = useColorModeValue('red.600', 'red.300')
+  const expenseBgGradient = useColorModeValue(
+    'linear-gradient(135deg, #fef2f2 0%, #fff1f2 100%)',
+    'linear-gradient(135deg, rgba(239,68,68,0.18) 0%, rgba(244,63,94,0.10) 100%)',
+  )
+  const expenseRing = useColorModeValue(
+    '0 0 0 1px rgba(239,68,68,0.45) inset, 0 4px 14px -6px rgba(239,68,68,0.35)',
+    '0 0 0 1px rgba(248,113,113,0.55) inset, 0 4px 16px -6px rgba(239,68,68,0.45)',
+  )
+  const expenseIconBg = useColorModeValue('white', 'rgba(0,0,0,0.25)')
+  const expenseIconColor = useColorModeValue('red.500', 'red.300')
+  // Expense (idle hint)
+  const expenseIdleIconBg = useColorModeValue('red.50', 'rgba(239,68,68,0.08)')
+  const expenseIdleIconColor = useColorModeValue('red.500', 'red.300')
+
+  const typeStyleFor = (id: 'income' | 'expense', isActive: boolean) => {
+    if (id === 'income') {
+      return {
+        bg: isActive ? incomeBgGradient : cardIdleBg,
+        boxShadow: isActive ? incomeRing : 'none',
+        borderColor: isActive ? 'transparent' : cardIdleBorder,
+        labelColor: isActive ? incomeFg : labelColor,
+        captionColor: isActive ? incomeCaption : cardCaptionColor,
+        iconBg: isActive ? incomeIconBg : incomeIdleIconBg,
+        iconColor: isActive ? incomeIconColor : incomeIdleIconColor,
+        checkColor: incomeIconColor,
+      }
+    }
+    return {
+      bg: isActive ? expenseBgGradient : cardIdleBg,
+      boxShadow: isActive ? expenseRing : 'none',
+      borderColor: isActive ? 'transparent' : cardIdleBorder,
+      labelColor: isActive ? expenseFg : labelColor,
+      captionColor: isActive ? expenseCaption : cardCaptionColor,
+      iconBg: isActive ? expenseIconBg : expenseIdleIconBg,
+      iconColor: isActive ? expenseIconColor : expenseIdleIconColor,
+      checkColor: expenseIconColor,
+    }
+  }
+
+  const quickRanges = useQuickRanges()
+
+  const isQuickRangeActive = (r: QuickRange) =>
+    filters.startDate === r.start && filters.endDate === r.end
+
   return (
-    <VStack 
-      spacing={{ base: 4, md: 6 }} 
-      align="stretch" 
-      pb={{ base: 6, md: 0 }}
-      minH="fit-content"
-    >
-      {/* Main search field */}
+    <VStack spacing={6} align="stretch" pb={{ base: 4, md: 0 }} minH="fit-content">
+      {/* Type */}
       <Box>
-        <Text 
-          fontSize="sm" 
-          fontWeight="600" 
-          color={useColorModeValue('gray.700', 'gray.200')}
-          mb={3}
+        <Text
+          fontSize="xs"
+          fontWeight={600}
+          color={labelColor}
+          mb={2}
+          textTransform="uppercase"
+          letterSpacing="0.04em"
         >
-          Search by description
+          Type
         </Text>
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <Icon as={Search} color={useColorModeValue('gray.400', 'gray.500')} />
-          </InputLeftElement>
-          <Input
-            placeholder="Type to search transactions..."
-            borderRadius="2xl"
-            bg={useColorModeValue('gray.50', 'blackAlpha.500')}
-            border="2px solid"
-            borderColor={useColorModeValue('gray.200', 'gray.600')}
-
-            value={filters.text}
-            onChange={(e) => onUpdateFilter('text', e.target.value)}
-            fontSize={{ base: 'md', sm: 'sm' }}
-            h={{ base: '48px', sm: '44px' }}
-          />
-        </InputGroup>
-      </Box>
-
-      {/* Type filters */}
-      <Box>
-        <Text 
-          fontSize="sm" 
-          fontWeight="600" 
-          color={useColorModeValue('gray.700', 'gray.200')}
-          mb={3}
-        >
-          Transaction Type
-        </Text>
-        <HStack spacing={3}>
-          <Button
-            flex={1}
-            variant={filters.type === 'income' ? 'solid' : 'outline'}
-            colorScheme="green"
-            borderRadius="2xl"
-            h={{ base: '48px', sm: '44px' }}
-            fontSize={{ base: 'md', sm: 'sm' }}
-            fontWeight="600"
-            bg={filters.type === 'income' ? 
-              useColorModeValue('green.500', 'green.600') : 
-              'transparent'
-            }
-            borderColor={useColorModeValue('green.300', 'green.600')}
-            color={filters.type === 'income' ? 'white' : useColorModeValue('green.600', 'green.400')}
-            _hover={{
-              transform: 'translateY(-2px)',
-              boxShadow: 'lg',
-            }}
-            onClick={() => onTypeChange(filters.type === 'income' ? null : 'income')}
-          >
-            <HStack spacing={2}>
-              <Icon as={Sparkles} boxSize={4} />
-              <Text>Income</Text>
-            </HStack>
-          </Button>
-          <Button
-            flex={1}
-            variant={filters.type === 'expense' ? 'solid' : 'outline'}
-            colorScheme="red"
-            borderRadius="2xl"
-            h={{ base: '48px', sm: '44px' }}
-            fontSize={{ base: 'md', sm: 'sm' }}
-            fontWeight="600"
-            bg={filters.type === 'expense' ? 
-              useColorModeValue('red.500', 'red.600') : 
-              'transparent'
-            }
-            borderColor={useColorModeValue('red.300', 'red.600')}
-            color={filters.type === 'expense' ? 'white' : useColorModeValue('red.600', 'red.400')}
-            _hover={{
-              transform: 'translateY(-2px)',
-              boxShadow: 'lg',
-            }}
-            onClick={() => onTypeChange(filters.type === 'expense' ? null : 'expense')}
-          >
-            <HStack spacing={2}>
-              <Icon as={Sparkles} boxSize={4} />
-              <Text>Expense</Text>
-            </HStack>
-          </Button>
+        <HStack spacing={3} align="stretch">
+          {TYPE_OPTIONS.map((opt) => {
+            const isActive = filters.type === opt.id
+            const tone = typeStyleFor(opt.id, isActive)
+            return (
+              <Button
+                key={opt.id}
+                variant="unstyled"
+                flex={1}
+                h="64px"
+                px={4}
+                borderRadius="xl"
+                border="1px solid"
+                borderColor={tone.borderColor}
+                bg={tone.bg}
+                boxShadow={tone.boxShadow}
+                onClick={() => onTypeChange(isActive ? null : opt.id)}
+                aria-pressed={isActive}
+                position="relative"
+                textAlign="left"
+                whiteSpace="normal"
+                transition="background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease"
+                _hover={{
+                  bg: isActive ? tone.bg : idleChipHoverBg,
+                  transform: 'translateY(-1px)',
+                }}
+                _active={{ transform: 'translateY(0)' }}
+                _focusVisible={{
+                  boxShadow: `${tone.boxShadow}, 0 0 0 3px ${focusGlow}`,
+                }}
+              >
+                <HStack spacing={3} align="center" w="full">
+                  <Box
+                    w={9}
+                    h={9}
+                    borderRadius="lg"
+                    bg={tone.iconBg}
+                    color={tone.iconColor}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                    transition="background-color 0.18s ease, color 0.18s ease"
+                  >
+                    <Icon as={opt.icon} boxSize={4.5} strokeWidth={2.25} />
+                  </Box>
+                  <VStack align="flex-start" spacing={0} minW={0} flex={1}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight={700}
+                      color={tone.labelColor}
+                      lineHeight="1.2"
+                    >
+                      {opt.label}
+                    </Text>
+                    <Text fontSize="xs" color={tone.captionColor} fontWeight={500}>
+                      {opt.caption}
+                    </Text>
+                  </VStack>
+                  {isActive && (
+                    <Box
+                      w={5}
+                      h={5}
+                      borderRadius="full"
+                      bg={tone.checkColor}
+                      color="white"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                    >
+                      <Icon as={Check} boxSize={3} strokeWidth={3} />
+                    </Box>
+                  )}
+                </HStack>
+              </Button>
+            )
+          })}
         </HStack>
       </Box>
 
-      {/* Category filters */}
+      {/* Category */}
       {filters.type && (
         <Box>
-          <Text 
-            fontSize="sm" 
-            fontWeight="600" 
-            color={useColorModeValue('gray.700', 'gray.200')}
-            mb={3}
-          >
-            <HStack spacing={2}>
-              <Icon as={Tag} boxSize={4} />
-              <Text>Category</Text>
-            </HStack>
-          </Text>
-          <Wrap spacing={2}>
-            {availableCategories.map((cat) => (
-              <WrapItem key={cat}>
-                <Button
-                  {...responsiveStyles.buttons.category}
-                  variant={filters.category === cat ? 'solid' : 'outline'}
-                  colorScheme={filters.category === cat ? 'blue' : 'gray'}
-                  borderRadius="full"
-                  fontWeight="600"
-                  bg={filters.category === cat ? 
-                    useColorModeValue('blue.500', 'blue.600') : 
-                    'transparent'
-                  }
-                  borderColor={useColorModeValue('gray.300', 'gray.600')}
-                  color={filters.category === cat ? 'white' : useColorModeValue('gray.700', 'gray.300')}
-                  onClick={() => onUpdateFilter('category', filters.category === cat ? '' : cat)}
-                  _hover={{
-                    transform: 'scale(1.05)',
-                    boxShadow: 'md',
-                    bg: filters.category === cat ? 
-                      useColorModeValue('blue.600', 'blue.500') : 
-                      useColorModeValue('gray.100', 'gray.700')
-                  }}
-                  transition="all 0.2s"
-                >
-                  {cat}
-                </Button>
-              </WrapItem>
-            ))}
-          </Wrap>
-          {filters.category && (
-            <Box
-              mt={3}
-              p={{ base: 3, md: 4 }}
-              bg={useColorModeValue('blue.50', 'blue.900')}
-              borderRadius="2xl"
-              border="2px solid"
-              borderColor={useColorModeValue('blue.200', 'blue.700')}
-              flexShrink={0}
-              sx={safariStyles.hardwareAcceleration}
+          <HStack mb={2} spacing={2}>
+            <Icon as={Tag} boxSize={3.5} color={subLabelColor} />
+            <Text
+              fontSize="xs"
+              fontWeight={600}
+              color={labelColor}
+              textTransform="uppercase"
+              letterSpacing="0.04em"
             >
-              <HStack justify="space-between" align="center">
-                <Text 
-                  fontSize="sm" 
-                  color={useColorModeValue('blue.700', 'blue.200')} 
-                  fontWeight="600"
-                  flex="1"
-                  minW="0"
-                >
-                  Selected: <strong>{filters.category}</strong>
-                </Text>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  colorScheme="blue"
-                  borderRadius="full"
-                  flexShrink={0}
-                  onClick={() => onUpdateFilter('category', '')}
-                  _hover={{
-                    bg: useColorModeValue('blue.100', 'blue.800'),
-                    transform: 'scale(1.1)',
-                  }}
-                >
-                  Clear
-                </Button>
-              </HStack>
-            </Box>
-          )}
+              Category
+            </Text>
+            {filters.category && (
+              <Button
+                variant="link"
+                size="xs"
+                ml="auto"
+                color={subLabelColor}
+                fontWeight={500}
+                onClick={() => onUpdateFilter('category', '')}
+                rightIcon={<Icon as={X} boxSize={3} />}
+                _hover={{ color: activeChipColor, textDecoration: 'none' }}
+              >
+                Clear
+              </Button>
+            )}
+          </HStack>
+          <Wrap spacing={2}>
+            {availableCategories.map((cat) => {
+              const isActive = filters.category === cat
+              return (
+                <WrapItem key={cat}>
+                  <Button
+                    variant="unstyled"
+                    h="34px"
+                    px={3.5}
+                    fontSize="xs"
+                    fontWeight={600}
+                    borderRadius="full"
+                    border="1px solid"
+                    color={isActive ? activeChipColor : idleChipColor}
+                    bg={isActive ? activeChipBg : idleChipBg}
+                    borderColor={isActive ? activeChipBorder : idleChipBorder}
+                    onClick={() => onUpdateFilter('category', isActive ? '' : cat)}
+                    aria-pressed={isActive}
+                    transition="background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease"
+                    _hover={{ bg: isActive ? activeChipBg : idleChipHoverBg }}
+                    _focusVisible={{ boxShadow: `0 0 0 3px ${focusGlow}` }}
+                  >
+                    {cat}
+                  </Button>
+                </WrapItem>
+              )
+            })}
+          </Wrap>
         </Box>
       )}
 
-      {/* Date filters */}
+      {/* Date */}
       <Box>
-        <Text 
-          fontSize="sm" 
-          fontWeight="600" 
-          color={useColorModeValue('gray.700', 'gray.200')}
-          mb={3}
-        >
-          <HStack spacing={2}>
-            <Icon as={Calendar} boxSize={4} />
-            <Text>Date Range</Text>
-          </HStack>
-        </Text>
-        
-        {/* Quick date buttons */}
-        <VStack spacing={3} align="stretch">
-          <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} fontWeight="500">
-            Quick select:
+        <HStack mb={2} spacing={2}>
+          <Icon as={Calendar} boxSize={3.5} color={subLabelColor} />
+          <Text
+            fontSize="xs"
+            fontWeight={600}
+            color={labelColor}
+            textTransform="uppercase"
+            letterSpacing="0.04em"
+          >
+            Date range
           </Text>
-          <HStack spacing={2} wrap="wrap">
-            {(() => {
-              const now = new Date()
-              const months = []
-              for (let i = 0; i < 3; i++) {
-                const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-                const monthName = date.toLocaleDateString('en-US', { month: 'long' })
-                const year = date.getFullYear()
-                const startDate = date.toISOString().split('T')[0]
-                const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0]
-                
-                months.push(
-                  <Button
-                    key={i}
-                    size="sm"
-                    variant="outline"
-                    borderRadius="full"
-                    fontSize="xs"
-                    fontWeight="500"
-                    bg={useColorModeValue('gray.50', 'blackAlpha.500')}
-                    borderColor={useColorModeValue('gray.300', 'gray.600')}
-                    color={useColorModeValue('gray.700', 'gray.200')}
-                    _hover={{
-                      bg: useColorModeValue('blue.50', 'blue.900'),
-                      borderColor: 'blue.300',
-                      color: 'blue.600'
-                    }}
-                    onClick={() => {
-                      onUpdateFilter('startDate', startDate)
-                      onUpdateFilter('endDate', endDate)
-                    }}
-                  >
-                    {monthName} {year}
-                  </Button>
-                )
-              }
-              return months
-            })()}
-          </HStack>
-        </VStack>
-        
-        <HStack spacing={3} mt={4}>
+          {(filters.startDate || filters.endDate) && (
+            <Button
+              variant="link"
+              size="xs"
+              ml="auto"
+              color={subLabelColor}
+              fontWeight={500}
+              onClick={() => {
+                onUpdateFilter('startDate', '')
+                onUpdateFilter('endDate', '')
+              }}
+              rightIcon={<Icon as={X} boxSize={3} />}
+              _hover={{ color: activeChipColor, textDecoration: 'none' }}
+            >
+              Clear
+            </Button>
+          )}
+        </HStack>
+
+        <Wrap spacing={2} mb={3}>
+          {quickRanges.map((r) => {
+            const isActive = isQuickRangeActive(r)
+            return (
+              <WrapItem key={r.id}>
+                <Button
+                  variant="unstyled"
+                  h="34px"
+                  px={3.5}
+                  fontSize="xs"
+                  fontWeight={600}
+                  borderRadius="full"
+                  border="1px solid"
+                  color={isActive ? activeChipColor : idleChipColor}
+                  bg={isActive ? activeChipBg : idleChipBg}
+                  borderColor={isActive ? activeChipBorder : idleChipBorder}
+                  onClick={() => {
+                    if (isActive) {
+                      onUpdateFilter('startDate', '')
+                      onUpdateFilter('endDate', '')
+                    } else {
+                      onUpdateFilter('startDate', r.start)
+                      onUpdateFilter('endDate', r.end)
+                    }
+                  }}
+                  aria-pressed={isActive}
+                  transition="background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease"
+                  _hover={{ bg: isActive ? activeChipBg : idleChipHoverBg }}
+                  _focusVisible={{ boxShadow: `0 0 0 3px ${focusGlow}` }}
+                >
+                  {r.label}
+                </Button>
+              </WrapItem>
+            )
+          })}
+        </Wrap>
+
+        <HStack spacing={3} align="flex-end">
           <Box flex={1}>
-            <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
+            <Text fontSize="2xs" color={subLabelColor} mb={1.5} fontWeight={500}>
               From
             </Text>
             <Input
               type="date"
-              borderRadius="2xl"
-              h={{ base: '48px', sm: '44px' }}
-              fontSize={{ base: 'md', sm: 'sm' }}
-              bg={useColorModeValue('gray.50', 'blackAlpha.500')}
-              border="2px solid"
-              borderColor={useColorModeValue('gray.200', 'gray.600')}
-              _focus={{
-                borderColor: 'blue.500',
-                boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
-              }}
+              h="40px"
+              fontSize="sm"
+              bg={inputBg}
+              border="1px solid"
+              borderColor={inputBorder}
+              color={inputColor}
+              borderRadius="lg"
               value={filters.startDate}
               onChange={(e) => onUpdateFilter('startDate', e.target.value)}
+              _hover={{ borderColor: focusBorder }}
+              _focus={{ borderColor: focusBorder, boxShadow: `0 0 0 3px ${focusGlow}` }}
+              transition="border-color 0.15s ease, box-shadow 0.15s ease"
             />
           </Box>
           <Box flex={1}>
-            <Text fontSize="xs" color={useColorModeValue('gray.600', 'gray.400')} mb={1}>
+            <Text fontSize="2xs" color={subLabelColor} mb={1.5} fontWeight={500}>
               To
             </Text>
             <Input
               type="date"
-              borderRadius="2xl"
-              h={{ base: '48px', sm: '44px' }}
-              fontSize={{ base: 'md', sm: 'sm' }}
-              bg={useColorModeValue('gray.50', 'blackAlpha.500')}
-              border="2px solid"
-              borderColor={useColorModeValue('gray.200', 'gray.600')}
+              h="40px"
+              fontSize="sm"
+              bg={inputBg}
+              border="1px solid"
+              borderColor={inputBorder}
+              color={inputColor}
+              borderRadius="lg"
               value={filters.endDate}
               onChange={(e) => onUpdateFilter('endDate', e.target.value)}
+              _hover={{ borderColor: focusBorder }}
+              _focus={{ borderColor: focusBorder, boxShadow: `0 0 0 3px ${focusGlow}` }}
+              transition="border-color 0.15s ease, box-shadow 0.15s ease"
             />
           </Box>
         </HStack>
