@@ -66,13 +66,17 @@ export default function PremiumModal({
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 bg={contentBg}
                 backdropFilter="blur(20px) saturate(180%)"
-                borderRadius={{ base: '2xl', md: '3xl' }}
+                borderRadius={{ base: 0, md: '3xl' }}
                 border="1px solid"
                 borderColor={borderColor}
                 boxShadow={shadow}
                 overflow="hidden"
-                mx={{ base: 4, md: 0 }}
-                my={{ base: 4, md: 0 }}
+                // No margin on mobile: with `size='full'` + `100dvh` we want
+                // the modal to sit edge-to-edge in the visible viewport, so
+                // the X close button is never pushed under the iOS URL bar
+                // / Dynamic Island.
+                mx={{ base: 0, md: 0 }}
+                my={{ base: 0, md: 0 }}
                 {...responsiveStyles.modal}
                 sx={{
                     ...safariStyles.modal,
@@ -107,7 +111,9 @@ export default function PremiumModal({
                         px={{ base: 4, md: 6 }}
                         pt={{ base: 4, md: 6 }}
                         pb={{
-                            base: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+                            // Keep buttons clear of the iOS home indicator
+                            // with extra breathing room beyond the raw inset.
+                            base: 'max(1rem, calc(env(safe-area-inset-bottom, 0px) + 0.5rem))',
                             md: 6,
                         }}
                         borderTop="1px solid"

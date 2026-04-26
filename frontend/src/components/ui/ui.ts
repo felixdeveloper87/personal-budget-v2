@@ -223,10 +223,13 @@ export const safeAreaStyles = {
     paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
     paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
     paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
-    // Suporte para Chrome mobile
+    // Use dynamic viewport (dvh) so the URL bar / browser chrome on iOS
+    // Chrome / Safari does not push content out of view. We keep `100vh`
+    // as a fallback and override with `100dvh` where supported.
     minHeight: '100vh',
-    minHeightMoz: '-moz-available' as any,
-    minHeightWebkit: '-webkit-fill-available' as any,
+    '@supports (height: 100dvh)': {
+      minHeight: '100dvh',
+    },
     // Prevenir scroll do body quando modal está aberto
     position: 'relative' as const,
   },
@@ -249,10 +252,13 @@ export const safariStyles = {
     WebkitOverflowScrolling: 'touch' as const,
     overflowScrolling: 'touch' as const,
     position: 'relative' as const,
-    // Altura completa no mobile
+    // Altura no mobile usando o dynamic viewport (`dvh`) para que a barra
+    // de URL do iOS Chrome / Safari não empurre o topo do modal (X de
+    // fechar) para fora da área visível. `100vh` fica como fallback.
     height: '100vh',
-    heightMoz: '-moz-available' as any,
-    heightWebkit: '-webkit-fill-available' as any,
+    '@supports (height: 100dvh)': {
+      height: '100dvh',
+    },
     // Prevenir bounce no iOS
     overscrollBehavior: 'contain' as const,
     // Viewport insets: never use raw env() alone — on many Android phones
@@ -270,8 +276,11 @@ export const safariStyles = {
     overflowScrolling: 'touch' as const,
     // Prevenir bounce no iOS
     overscrollBehavior: 'contain' as const,
-    // Altura máxima para scroll correto
+    // Altura máxima para scroll correto — usar dvh quando suportado
     maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+    '@supports (height: 100dvh)': {
+      maxHeight: 'calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom))',
+    },
   },
   sticky: {
     WebkitTransform: 'translateZ(0)' as const,
@@ -339,11 +348,15 @@ export const getResponsiveStyles = () => ({
     desktop: '1024px'   // lg breakpoint
   },
   modal: {
-    maxH: { base: '100vh', md: '90vh' },
-    h: { base: '100vh', md: 'auto' }
+    // `100dvh` respects the dynamic browser chrome on iOS Chrome / Safari.
+    // Falls back gracefully on browsers without `dvh` support (the value is
+    // simply ignored and the platform default applies, which is fine since
+    // we also clamp via `safariStyles.modal` and Chakra's `size="full"`).
+    maxH: { base: '100dvh', md: '90vh' },
+    h: { base: '100dvh', md: 'auto' }
   },
   content: {
-    maxH: { base: 'calc(100vh - 100px)', md: 'calc(90vh - 200px)', lg: 'calc(90vh - 180px)' },
+    maxH: { base: 'calc(100dvh - 100px)', md: 'calc(90vh - 200px)', lg: 'calc(90vh - 180px)' },
     minH: '0'
   },
   spacing: {

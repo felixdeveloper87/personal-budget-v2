@@ -66,7 +66,9 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
       borderColor={borderColor}
       px={{ base: 4, sm: 6 }}
       pt={{
-        base: 'max(1.5rem, env(safe-area-inset-top, 0px))',
+        // Keep the X close button clear of the iOS Dynamic Island / status
+        // bar with extra breathing room beyond the raw safe-area inset.
+        base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
         sm: 5,
       }}
       pb={hasActiveFilters ? 4 : 5}

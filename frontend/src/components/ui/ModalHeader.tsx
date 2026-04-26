@@ -112,7 +112,11 @@ export default function ModalHeader({
       borderColor={borderColor}
       px={{ base: 4, sm: 6 }}
       pt={{
-        base: 'max(1.5rem, env(safe-area-inset-top, 0px))',
+        // Always leave breathing room above the close button:
+        //  - On Android / desktop / iOS Chrome (env() = 0) → 1.25rem
+        //  - On iOS Safari with bottom URL bar (env() ≈ 50px) → 50px + 0.75rem
+        // This keeps the X clear of the Dynamic Island / status bar.
+        base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
         sm: 5,
       }}
       pb={4}

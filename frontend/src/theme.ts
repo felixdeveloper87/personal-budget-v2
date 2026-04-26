@@ -62,6 +62,16 @@ const theme = extendTheme({
         WebkitOverflowScrolling: 'touch',
         overscrollBehavior: 'contain',
       },
+      // The Chakra modal portal wrapper is `position: fixed; height: 100vh`
+      // by default. On iOS Chrome / Safari, `100vh` is the URL-bar-hidden
+      // height — when the URL bar is visible, the wrapper extends behind it
+      // and the close button at the top of the modal can be clipped. Using
+      // `100dvh` keeps the wrapper inside the visible viewport.
+      '.chakra-modal__content-container': {
+        '@supports (height: 100dvh)': {
+          height: '100dvh',
+        },
+      },
     },
   },
   fonts: {
