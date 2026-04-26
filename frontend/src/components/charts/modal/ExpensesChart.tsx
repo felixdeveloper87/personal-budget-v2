@@ -1,15 +1,4 @@
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from 'recharts'
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Text, HStack, Box, Badge, useColorModeValue } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
@@ -21,12 +10,7 @@ import {
   ChartEmptyState,
   PeriodBucketBarChart,
 } from './components'
-import {
-  processTransactionsByCategory,
-  processTimelineData,
-  calculateTotals,
-} from './utils'
-import { getRechartsTooltipProps } from './utils/chartTooltip'
+import { processTransactionsByCategory, calculateTotals } from './utils'
 
 export interface ExpensesChartProps {
   transactions: any[]
@@ -35,7 +19,7 @@ export interface ExpensesChartProps {
   /**
    * When `periodType` and `selectedDate` are provided, a compact period
    * bucket bar chart of spending for the active range is rendered above
-   * the category and timeline charts.
+   * the category distribution chart.
    */
   periodType?: PeriodType
   selectedDate?: Date
@@ -51,7 +35,6 @@ export default function ExpensesChart({
   const colors = useThemeColors()
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
-  const tooltipProps = getRechartsTooltipProps(chartColors, colors.text.primary)
 
   const legendHoverBg = useColorModeValue(
     'rgba(239, 68, 68, 0.08)',
@@ -65,11 +48,6 @@ export default function ExpensesChart({
 
   const categoryData = useMemo(
     () => processTransactionsByCategory(expenseTransactions),
-    [expenseTransactions],
-  )
-
-  const timelineData = useMemo(
-    () => processTimelineData(expenseTransactions, 'EXPENSE'),
     [expenseTransactions],
   )
 
@@ -93,7 +71,7 @@ export default function ExpensesChart({
       <ChartEmptyState
         icon={TrendingDown}
         title="No expenses in this period"
-        description="Log spending or change the date range to see distribution and trends."
+        description="Log spending or change the date range to see distribution."
       />
     )
   }
@@ -198,75 +176,6 @@ export default function ExpensesChart({
             })}
           </VStack>
         </Box>
-      </ChartPlotShell>
-
-      <ChartPlotShell
-        title="Expense timeline"
-        caption="Daily spending in this range"
-        selectedPeriod={selectedPeriod}
-        showPeriodBadge={showPeriodBadge}
-        badgeBg={chartColors.redBadgeBg}
-        badgeColor={chartColors.redBadgeColor}
-      >
-        <ResponsiveContainer width="100%" height={smallChartHeight}>
-          <LineChart
-            data={timelineData}
-            margin={{ top: 8, right: 8, left: -12, bottom: 4 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={chartColors.gridStroke}
-              vertical={false}
-            />
-            <XAxis
-              dataKey="date"
-              tick={{
-                fontSize: 11,
-                fill: colors.text.secondary,
-                fontWeight: 500,
-              }}
-              axisLine={{
-                stroke: chartColors.borderColor,
-                strokeWidth: 1,
-              }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{
-                fontSize: 11,
-                fill: colors.text.secondary,
-                fontWeight: 500,
-              }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={tooltipProps.contentStyle}
-              labelStyle={tooltipProps.labelStyle}
-              itemStyle={tooltipProps.itemStyle}
-              formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
-              cursor={{ stroke: chartColors.expenseColor, strokeWidth: 1.5, strokeDasharray: '4 4' }}
-            />
-            <Line
-              type="monotone"
-              dataKey="amount"
-              stroke={chartColors.expenseColor}
-              strokeWidth={2.5}
-              dot={{
-                fill: chartColors.expenseColor,
-                strokeWidth: 2,
-                r: 4,
-                stroke: chartColors.cardBg,
-              }}
-              activeDot={{
-                r: 6,
-                stroke: chartColors.expenseColor,
-                strokeWidth: 2,
-                fill: chartColors.cardBg,
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
       </ChartPlotShell>
     </VStack>
   )

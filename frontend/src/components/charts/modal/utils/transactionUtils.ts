@@ -20,11 +20,6 @@ export interface BalanceData {
   expense: number
 }
 
-export interface TimelineData {
-  date: string
-  amount: number
-}
-
 /**
  * Process transactions by category
  */
@@ -149,36 +144,6 @@ export function processBalanceData(
   }))
 
   return { balanceData, totalIncome, totalExpenses, dailyComparison }
-}
-
-/**
- * Process timeline data for a specific transaction type
- */
-export function processTimelineData(
-  transactions: Transaction[],
-  type: 'INCOME' | 'EXPENSE'
-): TimelineData[] {
-  return transactions
-    .filter(t => t.type === type)
-    .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
-    .reduce((acc: TimelineData[], transaction) => {
-      const date = new Date(transaction.dateTime).toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric' 
-      })
-      const existing = acc.find((item) => item.date === date)
-      
-      if (existing) {
-        existing.amount += transaction.amount
-      } else {
-        acc.push({
-          date,
-          amount: transaction.amount
-        })
-      }
-      
-      return acc
-    }, [])
 }
 
 /**

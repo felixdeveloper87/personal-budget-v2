@@ -1,15 +1,4 @@
-import {
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-} from 'recharts'
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
@@ -21,12 +10,7 @@ import {
   ChartEmptyState,
   PeriodBucketBarChart,
 } from './components'
-import {
-  processTransactionsByCategory,
-  processTimelineData,
-  calculateTotals,
-} from './utils'
-import { getRechartsTooltipProps } from './utils/chartTooltip'
+import { processTransactionsByCategory, calculateTotals } from './utils'
 
 export interface IncomeChartProps {
   transactions: any[]
@@ -35,7 +19,7 @@ export interface IncomeChartProps {
   /**
    * When `periodType` and `selectedDate` are provided, a compact period
    * bucket bar chart of incoming money for the active range is rendered
-   * above the category and timeline charts.
+   * above the category distribution chart.
    */
   periodType?: PeriodType
   selectedDate?: Date
@@ -51,7 +35,6 @@ export default function IncomeChart({
   const colors = useThemeColors()
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
-  const tooltipProps = getRechartsTooltipProps(chartColors, colors.text.primary)
 
   const incomeTransactions = useMemo(
     () => transactions.filter((t) => t.type === 'INCOME'),
@@ -60,11 +43,6 @@ export default function IncomeChart({
 
   const categoryData = useMemo(
     () => processTransactionsByCategory(incomeTransactions),
-    [incomeTransactions],
-  )
-
-  const timelineData = useMemo(
-    () => processTimelineData(incomeTransactions, 'INCOME'),
     [incomeTransactions],
   )
 
@@ -88,7 +66,7 @@ export default function IncomeChart({
       <ChartEmptyState
         icon={TrendingUp}
         title="No income in this period"
-        description="Record income or pick a different range to see category splits and trends."
+        description="Record income or pick a different range to see category splits."
       />
     )
   }
@@ -193,75 +171,6 @@ export default function IncomeChart({
             })}
           </VStack>
         </Box>
-      </ChartPlotShell>
-
-      <ChartPlotShell
-        title="Income timeline"
-        caption="Daily income in this range"
-        selectedPeriod={selectedPeriod}
-        showPeriodBadge={showPeriodBadge}
-        badgeBg={chartColors.greenBadgeBg}
-        badgeColor={chartColors.greenBadgeColor}
-      >
-        <ResponsiveContainer width="100%" height={smallChartHeight}>
-          <LineChart
-            data={timelineData}
-            margin={{ top: 8, right: 8, left: -12, bottom: 4 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke={chartColors.gridStroke}
-              vertical={false}
-            />
-            <XAxis
-              dataKey="date"
-              tick={{
-                fontSize: 11,
-                fill: colors.text.secondary,
-                fontWeight: 500,
-              }}
-              axisLine={{
-                stroke: chartColors.borderColor,
-                strokeWidth: 1,
-              }}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{
-                fontSize: 11,
-                fill: colors.text.secondary,
-                fontWeight: 500,
-              }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={tooltipProps.contentStyle}
-              labelStyle={tooltipProps.labelStyle}
-              itemStyle={tooltipProps.itemStyle}
-              formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
-              cursor={{ stroke: chartColors.incomeColor, strokeWidth: 1.5, strokeDasharray: '4 4' }}
-            />
-            <Line
-              type="monotone"
-              dataKey="amount"
-              stroke={chartColors.incomeColor}
-              strokeWidth={2.5}
-              dot={{
-                fill: chartColors.incomeColor,
-                strokeWidth: 2,
-                r: 4,
-                stroke: chartColors.cardBg,
-              }}
-              activeDot={{
-                r: 6,
-                stroke: chartColors.incomeColor,
-                strokeWidth: 2,
-                fill: chartColors.cardBg,
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
       </ChartPlotShell>
     </VStack>
   )
