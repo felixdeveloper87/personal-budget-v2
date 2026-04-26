@@ -1,65 +1,75 @@
-import { 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
+import { VStack, HStack } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { Transaction } from '../../../types'
 import { Wallet, TrendingUp, Percent } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
-import { ChartCard, ChartLoadingState } from './components'
+import { ChartCard, ChartPlotShell, ChartEmptyState } from './components'
 import { processBalanceData } from './utils'
+import { getRechartsTooltipProps } from './utils/chartTooltip'
 
-interface BalanceChartProps {
+export interface BalanceChartProps {
   transactions: Transaction[]
   selectedPeriod: string
   currentBalance: number
+  showPeriodBadge?: boolean
 }
 
-export default function BalanceChart({ transactions, selectedPeriod, currentBalance }: BalanceChartProps) {
+export default function BalanceChart({
+  transactions,
+  selectedPeriod,
+  currentBalance,
+  showPeriodBadge = true,
+}: BalanceChartProps) {
   const colors = useThemeColors()
   const chartColors = useChartColors(currentBalance)
   const { chartHeight } = useChartDimensions()
+  const tooltipProps = getRechartsTooltipProps(chartColors, colors.text.primary)
 
-  // Processar dados usando utilitários centralizados
   const { balanceData, totalIncome, totalExpenses } = useMemo(
     () => processBalanceData(transactions),
-    [transactions]
+    [transactions],
   )
 
-  // Calcular savings rate
   const savingsRate = useMemo(
-    () => totalIncome > 0 ? (((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1) : '0.0',
-    [totalIncome, totalExpenses]
+    () =>
+      totalIncome > 0
+        ? (((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(1)
+        : '0.0',
+    [totalIncome, totalExpenses],
   )
 
-  // Loading state
   if (transactions.length === 0) {
-    return <ChartLoadingState message="Loading balance data..." />
+    return (
+      <ChartEmptyState
+        icon={Wallet}
+        title="No balance history yet"
+        description="Add transactions to see how your balance changes over time."
+      />
+    )
   }
 
   return (
-    <VStack 
-      spacing={{ base: 4, sm: 5, md: 6 }} 
-      align="stretch"
-    >
-      {/* Modern Statistics Cards */}
-      <HStack 
-        spacing={{ base: 2, sm: 3, md: 4 }} 
-        justify="center" 
+    <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+      <HStack
+        spacing={{ base: 2, sm: 3 }}
+        justify="center"
         wrap="wrap"
         gap={{ base: 2, sm: 2 }}
       >
         <ChartCard
           icon={Wallet}
           value={`£${currentBalance.toFixed(2)}`}
-          label="Current Balance"
+          label="Current balance"
           gradient={chartColors.balanceGradient}
           color={chartColors.balanceColor}
           hoverBorderColor={chartColors.balanceHoverBorder}
@@ -68,7 +78,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         <ChartCard
           icon={Percent}
           value={`${savingsRate}%`}
-          label="Savings Rate"
+          label="Savings rate"
           gradient={chartColors.savingsGradient}
           color={chartColors.savingsColor}
           hoverBorderColor={chartColors.savingsHoverBorder}
@@ -77,7 +87,7 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         <ChartCard
           icon={TrendingUp}
           value={`£${totalIncome.toFixed(2)}`}
-          label="Total Income"
+          label="Total income"
           gradient={chartColors.averageGradient}
           color={chartColors.averageColor}
           hoverBorderColor={chartColors.averageHoverBorder}
@@ -85,128 +95,74 @@ export default function BalanceChart({ transactions, selectedPeriod, currentBala
         />
       </HStack>
 
-      {/* Modern Balance Trend Chart */}
-      <Box
-        position="relative"
-        p={{ base: 5, sm: 6, md: 8 }}
-        overflow="hidden"
+      <ChartPlotShell
+        title="Balance trend"
+        caption="Running balance after each movement in this range"
+        selectedPeriod={selectedPeriod}
+        showPeriodBadge={showPeriodBadge}
+        badgeBg={chartColors.balanceBadgeBg}
+        badgeColor={chartColors.balanceBadgeColor}
       >
-        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
-          <VStack align="start" spacing={1}>
-            <Text 
-              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-              fontWeight="700" 
-              color={colors.text.primary}
-              letterSpacing="-0.02em"
-            >
-              Balance Trend
-            </Text>
-            <Text 
-              fontSize={{ base: "xs", sm: "sm" }} 
-              color={colors.text.secondary}
-              fontWeight="500"
-            >
-              Balance evolution over time
-            </Text>
-          </VStack>
-          <Badge
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg={chartColors.balanceBadgeBg}
-            color={chartColors.balanceBadgeColor}
-            fontSize="xs"
-            fontWeight="600"
-            textTransform="uppercase"
-            letterSpacing="0.5px"
-          >
-            {selectedPeriod}
-          </Badge>
-        </HStack>
         <ResponsiveContainer width="100%" height={chartHeight}>
-          <LineChart 
+          <LineChart
             data={balanceData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+            margin={{ top: 8, right: 8, left: -12, bottom: 4 }}
           >
-            <defs>
-              <linearGradient id="balanceLineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.balanceColor} stopOpacity={0.3}/>
-                <stop offset="100%" stopColor={chartColors.balanceColor} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
+            <CartesianGrid
+              strokeDasharray="3 3"
               stroke={chartColors.gridStroke}
               vertical={false}
             />
-            <XAxis 
-              dataKey="date" 
-              tick={{ 
-                fontSize: 11, 
+            <XAxis
+              dataKey="date"
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
-              axisLine={{ 
+              axisLine={{
                 stroke: chartColors.borderColor,
-                strokeWidth: 1
+                strokeWidth: 1,
               }}
               tickLine={false}
             />
-            <YAxis 
-              tick={{ 
-                fontSize: 11, 
+            <YAxis
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: chartColors.cardBg,
-                border: `1px solid ${chartColors.borderColor}`,
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
-                fontSize: '13px',
-                padding: '12px 16px'
-              }}
-              labelStyle={{
-                color: colors.text.primary,
-                fontWeight: '700',
-                fontSize: '12px',
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}
-              itemStyle={{
-                color: colors.text.primary,
-                fontWeight: '600',
-                padding: '4px 0'
-              }}
+            <Tooltip
+              contentStyle={tooltipProps.contentStyle}
+              labelStyle={tooltipProps.labelStyle}
+              itemStyle={tooltipProps.itemStyle}
               formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Balance']}
-              cursor={{ stroke: chartColors.balanceColor, strokeWidth: 2, strokeDasharray: '5 5' }}
+              cursor={{ stroke: chartColors.balanceColor, strokeWidth: 1.5, strokeDasharray: '4 4' }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="balance" 
+            <Line
+              type="monotone"
+              dataKey="balance"
               stroke={chartColors.balanceColor}
-              strokeWidth={3}
-              dot={{ 
-                fill: chartColors.balanceColor, 
-                strokeWidth: 2, 
-                r: 5,
-                stroke: chartColors.cardBg
-              }}
-              activeDot={{ 
-                r: 7, 
-                stroke: chartColors.balanceColor, 
+              strokeWidth={2.5}
+              dot={{
+                fill: chartColors.balanceColor,
                 strokeWidth: 2,
-                fill: chartColors.cardBg
+                r: 4,
+                stroke: chartColors.cardBg,
+              }}
+              activeDot={{
+                r: 6,
+                stroke: chartColors.balanceColor,
+                strokeWidth: 2,
+                fill: chartColors.cardBg,
               }}
             />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
+      </ChartPlotShell>
     </VStack>
   )
 }

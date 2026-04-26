@@ -1,63 +1,70 @@
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { VStack, Text, HStack, Box, Badge, useColorModeValue } from '@chakra-ui/react'
+import { VStack, HStack } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { animations } from '../../ui'
 import { TrendingUp, TrendingDown, Activity } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
-import { ChartCard, ChartLoadingState } from './components'
+import { ChartCard, ChartPlotShell, ChartEmptyState } from './components'
 import { processTransactionsByDate } from './utils'
+import { getRechartsTooltipProps } from './utils/chartTooltip'
 
-interface TransactionsChartProps {
+export interface TransactionsChartProps {
   transactions: any[]
   selectedPeriod: string
+  /**
+   * When false, period pills inside the plot are hidden (e.g. the Charts page
+   * already shows the range in the section header).
+   */
+  showPeriodBadge?: boolean
 }
 
-export default function TransactionsChart({ transactions, selectedPeriod }: TransactionsChartProps) {
+export default function TransactionsChart({
+  transactions,
+  selectedPeriod,
+  showPeriodBadge = true,
+}: TransactionsChartProps) {
   const colors = useThemeColors()
   const chartColors = useChartColors()
   const { chartHeight } = useChartDimensions()
-  
-  // Processar dados usando utilitários centralizados
+  const tooltipProps = getRechartsTooltipProps(chartColors, colors.text.primary)
+
   const dailyData = useMemo(
     () => processTransactionsByDate(transactions),
-    [transactions]
+    [transactions],
   )
 
-  // Calcular contagens
   const { totalTransactions, incomeCount, expenseCount } = useMemo(() => {
     const total = transactions.length
-    const income = transactions.filter(t => t.type === 'INCOME').length
-    const expense = transactions.filter(t => t.type === 'EXPENSE').length
+    const income = transactions.filter((t) => t.type === 'INCOME').length
+    const expense = transactions.filter((t) => t.type === 'EXPENSE').length
     return { totalTransactions: total, incomeCount: income, expenseCount: expense }
   }, [transactions])
 
-  // Loading state
   if (transactions.length === 0) {
-    return <ChartLoadingState message="Loading transaction data..." />
+    return (
+      <ChartEmptyState
+        title="No transactions in this range"
+        description="Pick another period or log income and expenses to see activity here."
+      />
+    )
   }
 
   return (
-    <VStack 
-      spacing={{ base: 4, sm: 5, md: 6 }} 
-      align="stretch"
-    >
-      {/* Modern Statistics Cards */}
-      <HStack 
-        spacing={{ base: 2, sm: 3, md: 4 }} 
-        justify="center" 
+    <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+      <HStack
+        spacing={{ base: 2, sm: 3 }}
+        justify="center"
         wrap="wrap"
         gap={{ base: 2, sm: 2 }}
-        
       >
         <ChartCard
           icon={TrendingUp}
@@ -67,7 +74,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
           color={chartColors.incomeColor}
           hoverBorderColor={chartColors.incomeHoverBorder}
           delay={0}
-          minW={{ base: "70px", sm: "85px", lg: "100px" }}
+          minW={{ base: '70px', sm: '85px', lg: '100px' }}
         />
         <ChartCard
           icon={TrendingDown}
@@ -77,7 +84,7 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
           color={chartColors.expenseColor}
           hoverBorderColor={chartColors.expenseHoverBorder}
           delay={0.1}
-          minW={{ base: "70px", sm: "85px", lg: "100px" }}
+          minW={{ base: '70px', sm: '85px', lg: '100px' }}
         />
         <ChartCard
           icon={Activity}
@@ -87,142 +94,91 @@ export default function TransactionsChart({ transactions, selectedPeriod }: Tran
           color={chartColors.transactionsColor}
           hoverBorderColor={chartColors.transactionsHoverBorder}
           delay={0.2}
-          minW={{ base: "70px", sm: "85px", lg: "100px" }}
+          minW={{ base: '70px', sm: '85px', lg: '100px' }}
         />
       </HStack>
 
-      {/* Modern Bar Chart */}
-      <Box
-        position="relative"
-        p={{ base: 5, sm: 6, md: 8 }}
-        borderRadius="2xl"
-        overflow="hidden"
+      <ChartPlotShell
+        title="Daily activity"
+        caption="Count of income vs expense entries per day"
+        selectedPeriod={selectedPeriod}
+        showPeriodBadge={showPeriodBadge}
+        badgeBg={chartColors.blueBadgeBg}
+        badgeColor={chartColors.blueBadgeColor}
       >
-        {/* Header */}
-        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
-          <VStack align="start" spacing={1}>
-            <Text 
-              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-              fontWeight="700" 
-              color={colors.text.primary}
-              letterSpacing="-0.02em"
-            >
-              Daily Activity
-            </Text>
-            <Text 
-              fontSize={{ base: "xs", sm: "sm" }} 
-              color={colors.text.secondary}
-              fontWeight="500"
-            >
-              Transaction overview by day
-            </Text>
-          </VStack>
-          <Badge
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg={chartColors.blueBadgeBg}
-            color={chartColors.blueBadgeColor}
-            fontSize="xs"
-            fontWeight="600"
-            textTransform="uppercase"
-            letterSpacing="0.5px"
-          >
-            {selectedPeriod}
-          </Badge>
-        </HStack>
-
         <ResponsiveContainer width="100%" height={chartHeight}>
-          <BarChart 
+          <BarChart
             data={dailyData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+            margin={{ top: 8, right: 8, left: -12, bottom: 4 }}
           >
             <defs>
-              <linearGradient id="incomeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.incomeColor} stopOpacity={1}/>
-                <stop offset="100%" stopColor={chartColors.incomeColor} stopOpacity={0.8}/>
+              <linearGradient id="txnIncomeGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={chartColors.incomeColor} stopOpacity={1} />
+                <stop offset="100%" stopColor={chartColors.incomeColor} stopOpacity={0.85} />
               </linearGradient>
-              <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.expenseColor} stopOpacity={1}/>
-                <stop offset="100%" stopColor={chartColors.expenseColor} stopOpacity={0.8}/>
+              <linearGradient id="txnExpenseGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={chartColors.expenseColor} stopOpacity={1} />
+                <stop offset="100%" stopColor={chartColors.expenseColor} stopOpacity={0.85} />
               </linearGradient>
             </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
+            <CartesianGrid
+              strokeDasharray="3 3"
               stroke={chartColors.gridStroke}
               vertical={false}
             />
-            <XAxis 
-              dataKey="date" 
-              tick={{ 
-                fontSize: 11, 
+            <XAxis
+              dataKey="date"
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
-              axisLine={{ 
+              axisLine={{
                 stroke: chartColors.borderColor,
-                strokeWidth: 1
+                strokeWidth: 1,
               }}
               tickLine={false}
             />
-            <YAxis 
-              tick={{ 
-                fontSize: 11, 
+            <YAxis
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: chartColors.cardBg,
-                border: `1px solid ${chartColors.borderColor}`,
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
-                fontSize: '13px',
-                padding: '12px 16px'
-              }}
-              labelStyle={{
-                color: colors.text.primary,
-                fontWeight: '700',
-                fontSize: '12px',
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}
-              itemStyle={{
-                color: colors.text.primary,
-                fontWeight: '600',
-                padding: '4px 0'
-              }}
-              cursor={{ fill: 'rgba(0,0,0,0.05)' }}
+            <Tooltip
+              contentStyle={tooltipProps.contentStyle}
+              labelStyle={tooltipProps.labelStyle}
+              itemStyle={tooltipProps.itemStyle}
+              cursor={{ fill: 'rgba(148, 163, 184, 0.08)' }}
             />
-            <Legend 
+            <Legend
               wrapperStyle={{
-                paddingTop: '24px',
-                fontSize: '13px',
-                fontWeight: '600'
+                paddingTop: '20px',
+                fontSize: '12px',
+                fontWeight: 600,
               }}
               iconType="circle"
             />
-            <Bar 
-              dataKey="income" 
-              fill="url(#incomeGradient)" 
+            <Bar
+              dataKey="income"
+              fill="url(#txnIncomeGrad)"
               name="Income"
-              radius={[8, 8, 0, 0]}
-              maxBarSize={60}
+              radius={[6, 6, 0, 0]}
+              maxBarSize={52}
             />
-            <Bar 
-              dataKey="expense" 
-              fill="url(#expenseGradient)" 
+            <Bar
+              dataKey="expense"
+              fill="url(#txnExpenseGrad)"
               name="Expenses"
-              radius={[8, 8, 0, 0]}
-              maxBarSize={60}
+              radius={[6, 6, 0, 0]}
+              maxBarSize={52}
             />
           </BarChart>
         </ResponsiveContainer>
-      </Box>
+      </ChartPlotShell>
     </VStack>
   )
 }

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import {
   Badge,
   Box,
+  Divider,
   Flex,
   VStack,
   useColorModeValue,
@@ -46,10 +47,6 @@ interface ChartShellProps {
   children: ReactNode
 }
 
-/**
- * Local shell that wraps each chart in a clean SectionCard with a header
- * (icon + title + period badge). Keeps the page declarative.
- */
 function ChartShell({
   icon,
   title,
@@ -59,6 +56,8 @@ function ChartShell({
   periodLabel,
   children,
 }: ChartShellProps) {
+  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+
   return (
     <SectionCard staticOnHover>
       <Box p={{ base: 4, sm: 5, md: 6 }}>
@@ -84,6 +83,7 @@ function ChartShell({
               </Badge>
             }
           />
+          <Divider borderColor={dividerColor} />
           {children}
         </VStack>
       </Box>
@@ -114,20 +114,19 @@ export default function ChartsPage() {
   const periodLabel = formatLabel()
   const overviewBadgeBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.14)')
   const overviewBadgeColor = useColorModeValue('blue.600', 'blue.300')
+  const pageBg = useColorModeValue('gray.50', '#060606')
 
   return (
     <Box
       minH="100vh"
+      bg={pageBg}
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 3, md: 5 }}
       maxW="1600px"
       mx="auto"
     >
       <VStack spacing={{ base: 3, md: 4 }} align="stretch">
-        <ChartsPageHeader
-          periodLabel={periodLabel}
-          onGoToToday={goToToday}
-        />
+        <ChartsPageHeader periodLabel={periodLabel} onGoToToday={goToToday} />
 
         {loading ? (
           <ChartsPageSkeleton />
@@ -194,6 +193,7 @@ export default function ChartsPage() {
               <TransactionsChart
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
+                showPeriodBadge={false}
               />
             </ChartShell>
 
@@ -208,6 +208,7 @@ export default function ChartsPage() {
               <IncomeChart
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
+                showPeriodBadge={false}
               />
             </ChartShell>
 
@@ -222,6 +223,7 @@ export default function ChartsPage() {
               <ExpensesChart
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
+                showPeriodBadge={false}
               />
             </ChartShell>
 
@@ -237,6 +239,7 @@ export default function ChartsPage() {
                 transactions={periodData.transactions}
                 selectedPeriod={periodData.label}
                 currentBalance={periodData.balance}
+                showPeriodBadge={false}
               />
             </ChartShell>
           </>

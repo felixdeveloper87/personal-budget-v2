@@ -1,89 +1,96 @@
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   LineChart,
-  Line
+  Line,
 } from 'recharts'
 import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { animations } from '../../ui'
 import { DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
-import { ChartCard, ChartLoadingState } from './components'
-import { processTransactionsByCategory, processTimelineData, calculateTotals } from './utils'
+import { ChartCard, ChartPlotShell, ChartEmptyState } from './components'
+import {
+  processTransactionsByCategory,
+  processTimelineData,
+  calculateTotals,
+} from './utils'
+import { getRechartsTooltipProps } from './utils/chartTooltip'
 
-interface IncomeChartProps {
+export interface IncomeChartProps {
   transactions: any[]
   selectedPeriod: string
+  showPeriodBadge?: boolean
 }
 
-export default function IncomeChart({ transactions, selectedPeriod }: IncomeChartProps) {
+export default function IncomeChart({
+  transactions,
+  selectedPeriod,
+  showPeriodBadge = true,
+}: IncomeChartProps) {
   const colors = useThemeColors()
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
+  const tooltipProps = getRechartsTooltipProps(chartColors, colors.text.primary)
 
-  // Filtrar apenas transações de receita
   const incomeTransactions = useMemo(
-    () => transactions.filter(t => t.type === 'INCOME'),
-    [transactions]
+    () => transactions.filter((t) => t.type === 'INCOME'),
+    [transactions],
   )
 
-  // Processar dados usando utilitários centralizados
   const categoryData = useMemo(
     () => processTransactionsByCategory(incomeTransactions),
-    [incomeTransactions]
+    [incomeTransactions],
   )
 
   const timelineData = useMemo(
     () => processTimelineData(incomeTransactions, 'INCOME'),
-    [incomeTransactions]
+    [incomeTransactions],
   )
 
   const { total: totalIncome, average: avgIncome } = useMemo(
     () => calculateTotals(incomeTransactions),
-    [incomeTransactions]
+    [incomeTransactions],
   )
 
-  // Dados para gráfico de pizza - distribuição por categoria
   const pieData = useMemo(
-    () => categoryData.map((item, index) => ({
-      name: item.category,
-      value: item.amount,
-      color: `hsl(${(index * 137.5) % 360}, 70%, 50%)` // Cores diferentes para cada categoria
-    })),
-    [categoryData]
+    () =>
+      categoryData.map((item, index) => ({
+        name: item.category,
+        value: item.amount,
+        color: `hsl(${(index * 137.5) % 360}, 58%, 52%)`,
+      })),
+    [categoryData],
   )
 
-  // Loading state
   if (incomeTransactions.length === 0) {
-    return <ChartLoadingState message="Loading income data..." />
+    return (
+      <ChartEmptyState
+        icon={TrendingUp}
+        title="No income in this period"
+        description="Record income or pick a different range to see category splits and trends."
+      />
+    )
   }
 
   return (
-    <VStack 
-      spacing={{ base: 4, sm: 5, md: 6 }} 
-      align="stretch"
-    >
-      {/* Modern Statistics Cards */}
-      <HStack 
-        spacing={{ base: 2, sm: 3, md: 4 }} 
-        justify="center" 
+    <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+      <HStack
+        spacing={{ base: 2, sm: 3 }}
+        justify="center"
         wrap="wrap"
         gap={{ base: 2, sm: 2 }}
       >
         <ChartCard
           icon={DollarSign}
           value={`£${totalIncome.toFixed(2)}`}
-          label="Total Income"
+          label="Total income"
           gradient={chartColors.incomeGradient}
           color={chartColors.incomeColor}
           hoverBorderColor={chartColors.incomeHoverBorder}
@@ -109,44 +116,14 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
         />
       </HStack>
 
-      {/* Modern Pie Chart */}
-      <Box
-        position="relative"
-        p={{ base: 5, sm: 6, md: 8 }}
-        overflow="hidden"
+      <ChartPlotShell
+        title="Income distribution"
+        caption="Share of income by category"
+        selectedPeriod={selectedPeriod}
+        showPeriodBadge={showPeriodBadge}
+        badgeBg={chartColors.greenBadgeBg}
+        badgeColor={chartColors.greenBadgeColor}
       >
-        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
-          <VStack align="start" spacing={1}>
-            <Text 
-              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-              fontWeight="700" 
-              color={colors.text.primary}
-              letterSpacing="-0.02em"
-            >
-              Income Distribution
-            </Text>
-            <Text 
-              fontSize={{ base: "xs", sm: "sm" }} 
-              color={colors.text.secondary}
-              fontWeight="500"
-            >
-              Breakdown by category
-            </Text>
-          </VStack>
-          <Badge
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg={chartColors.greenBadgeBg}
-            color={chartColors.greenBadgeColor}
-            fontSize="xs"
-            fontWeight="600"
-            textTransform="uppercase"
-            letterSpacing="0.5px"
-          >
-            {selectedPeriod}
-          </Badge>
-        </HStack>
         <ResponsiveContainer width="100%" height={smallChartHeight}>
           <PieChart>
             <Pie
@@ -155,7 +132,9 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
               cy="50%"
               labelLine={false}
               outerRadius={pieOuterRadius}
-              fill="#8884d8"
+              innerRadius={Math.round(pieOuterRadius * 0.52)}
+              paddingAngle={2}
+              cornerRadius={4}
               dataKey="value"
               stroke={chartColors.cardBg}
               strokeWidth={2}
@@ -166,43 +145,38 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        
-        {/* Modern Legend */}
+
         <Box mt={4}>
           <VStack spacing={2} align="stretch">
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalIncome) * 100).toFixed(1)
               return (
-                <HStack 
+                <HStack
                   key={`legend-${index}`}
-                  justify="space-between" 
+                  justify="space-between"
                   align="center"
                   p={3}
-                  borderRadius="xl"
+                  borderRadius="lg"
                   border="1px solid"
                   borderColor={chartColors.borderColor}
+                  transition="background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease"
                   _hover={{
                     bg: chartColors.legendHoverBg,
-                    transform: 'translateX(4px)',
+                    transform: 'translateX(2px)',
                     borderColor: entry.color,
-                  }}
-                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                  sx={{
-                    animation: `${animations.slideIn} ${0.8 + index * 0.1}s ease-out`,
                   }}
                 >
                   <HStack spacing={3} align="center" minW={0} flex={1}>
                     <Box
-                      w={4}
-                      h={4}
-                      borderRadius="md"
+                      w={3.5}
+                      h={3.5}
+                      borderRadius="sm"
                       bg={entry.color}
                       flexShrink={0}
-                      boxShadow="0 2px 4px rgba(0,0,0,0.1)"
                     />
-                    <Text 
-                      fontSize={{ base: 'sm', sm: 'md' }}
-                      fontWeight="600"
+                    <Text
+                      fontSize="sm"
+                      fontWeight={600}
                       color={colors.text.primary}
                       isTruncated
                     >
@@ -210,11 +184,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                     </Text>
                   </HStack>
                   <HStack spacing={3} align="center" flexShrink={0}>
-                    <Text 
-                      fontSize={{ base: 'sm', sm: 'md' }}
-                      fontWeight="700"
-                      color={colors.text.primary}
-                    >
+                    <Text fontSize="sm" fontWeight={700} color={colors.text.primary}>
                       £{entry.value.toFixed(2)}
                     </Text>
                     <Badge
@@ -224,7 +194,7 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
                       bg={chartColors.grayBadgeBg}
                       color={colors.text.primary}
                       fontSize="xs"
-                      fontWeight="600"
+                      fontWeight={600}
                     >
                       {percentage}%
                     </Badge>
@@ -234,131 +204,76 @@ export default function IncomeChart({ transactions, selectedPeriod }: IncomeChar
             })}
           </VStack>
         </Box>
-      </Box>
+      </ChartPlotShell>
 
-      {/* Modern Line Chart */}
-      <Box
-        position="relative"
-        p={{ base: 5, sm: 6, md: 8 }}
-        overflow="hidden"
+      <ChartPlotShell
+        title="Income timeline"
+        caption="Daily income in this range"
+        selectedPeriod={selectedPeriod}
+        showPeriodBadge={showPeriodBadge}
+        badgeBg={chartColors.greenBadgeBg}
+        badgeColor={chartColors.greenBadgeColor}
       >
-        <HStack justify="space-between" align="center" mb={{ base: 4, sm: 6 }}>
-          <VStack align="start" spacing={1}>
-            <Text 
-              fontSize={{ base: "lg", sm: "xl", md: "2xl" }} 
-              fontWeight="700" 
-              color={colors.text.primary}
-              letterSpacing="-0.02em"
-            >
-              Income Timeline
-            </Text>
-            <Text 
-              fontSize={{ base: "xs", sm: "sm" }} 
-              color={colors.text.secondary}
-              fontWeight="500"
-            >
-              Daily income trend
-            </Text>
-          </VStack>
-          <Badge
-            px={3}
-            py={1}
-            borderRadius="full"
-            bg={chartColors.greenBadgeBg}
-            color={chartColors.greenBadgeColor}
-            fontSize="xs"
-            fontWeight="600"
-            textTransform="uppercase"
-            letterSpacing="0.5px"
-          >
-            {selectedPeriod}
-          </Badge>
-        </HStack>
         <ResponsiveContainer width="100%" height={smallChartHeight}>
-          <LineChart 
+          <LineChart
             data={timelineData}
-            margin={{ top: 10, right: 10, left: -10, bottom: 5 }}
+            margin={{ top: 8, right: 8, left: -12, bottom: 4 }}
           >
-            <defs>
-              <linearGradient id="incomeLineGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={chartColors.incomeColor} stopOpacity={0.3}/>
-                <stop offset="100%" stopColor={chartColors.incomeColor} stopOpacity={0}/>
-              </linearGradient>
-            </defs>
-            <CartesianGrid 
-              strokeDasharray="3 3" 
+            <CartesianGrid
+              strokeDasharray="3 3"
               stroke={chartColors.gridStroke}
               vertical={false}
             />
-            <XAxis 
-              dataKey="date" 
-              tick={{ 
-                fontSize: 11, 
+            <XAxis
+              dataKey="date"
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
-              axisLine={{ 
+              axisLine={{
                 stroke: chartColors.borderColor,
-                strokeWidth: 1
+                strokeWidth: 1,
               }}
               tickLine={false}
             />
-            <YAxis 
-              tick={{ 
-                fontSize: 11, 
+            <YAxis
+              tick={{
+                fontSize: 11,
                 fill: colors.text.secondary,
-                fontWeight: 500
+                fontWeight: 500,
               }}
               axisLine={false}
               tickLine={false}
             />
-            <Tooltip 
-              contentStyle={{
-                backgroundColor: chartColors.cardBg,
-                border: `1px solid ${chartColors.borderColor}`,
-                borderRadius: '12px',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
-                fontSize: '13px',
-                padding: '12px 16px'
-              }}
-              labelStyle={{
-                color: colors.text.primary,
-                fontWeight: '700',
-                fontSize: '12px',
-                marginBottom: '8px',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px'
-              }}
-              itemStyle={{
-                color: colors.text.primary,
-                fontWeight: '600',
-                padding: '4px 0'
-              }}
+            <Tooltip
+              contentStyle={tooltipProps.contentStyle}
+              labelStyle={tooltipProps.labelStyle}
+              itemStyle={tooltipProps.itemStyle}
               formatter={(value) => [`£${Number(value).toFixed(2)}`, 'Amount']}
-              cursor={{ stroke: chartColors.incomeColor, strokeWidth: 2, strokeDasharray: '5 5' }}
+              cursor={{ stroke: chartColors.incomeColor, strokeWidth: 1.5, strokeDasharray: '4 4' }}
             />
-            <Line 
-              type="monotone" 
-              dataKey="amount" 
+            <Line
+              type="monotone"
+              dataKey="amount"
               stroke={chartColors.incomeColor}
-              strokeWidth={3}
-              dot={{ 
-                fill: chartColors.incomeColor, 
-                strokeWidth: 2, 
-                r: 5,
-                stroke: chartColors.cardBg
-              }}
-              activeDot={{ 
-                r: 7, 
-                stroke: chartColors.incomeColor, 
+              strokeWidth={2.5}
+              dot={{
+                fill: chartColors.incomeColor,
                 strokeWidth: 2,
-                fill: chartColors.cardBg
+                r: 4,
+                stroke: chartColors.cardBg,
+              }}
+              activeDot={{
+                r: 6,
+                stroke: chartColors.incomeColor,
+                strokeWidth: 2,
+                fill: chartColors.cardBg,
               }}
             />
           </LineChart>
         </ResponsiveContainer>
-      </Box>
-
+      </ChartPlotShell>
     </VStack>
   )
 }
