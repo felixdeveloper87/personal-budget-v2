@@ -1,5 +1,6 @@
-import { Badge, Box, HStack, Image, Text, useColorModeValue } from '@chakra-ui/react'
+import { Badge, Box, HStack, Image, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import logoImage from '../../../../assets/logo.png'
+import { BRAND } from './brand.config'
 
 interface LogoProps {
   user?: any
@@ -7,12 +8,13 @@ interface LogoProps {
 }
 
 export default function Logo({ user, onClick }: LogoProps) {
-  const accentColor = useColorModeValue('blue.500', 'blue.300')
-  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
-  const titleGradient = useColorModeValue(
-    'linear(to-br, gray.900, gray.700)',
-    'linear(to-br, white, gray.300)',
+  const wordMuted = useColorModeValue('gray.700', 'gray.300')
+  const wordBudgetGradient = useColorModeValue(
+    'linear(to-r, #1d4ed8, #5b21b6)',
+    'linear(to-r, #60a5fa, #a78bfa)',
   )
+  const separatorColor = useColorModeValue('gray.300', 'whiteAlpha.400')
+  const subtitleColor = useColorModeValue('gray.500', 'gray.500')
   const frameBg = useColorModeValue(
     'linear-gradient(135deg, #ffffff 0%, #eef2ff 50%, #e0e7ff 100%)',
     'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
@@ -39,11 +41,14 @@ export default function Logo({ user, onClick }: LogoProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  const titleFontSize = { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const
+  const sepFontSize = { base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const
+
   return (
     <HStack
       as="button"
       type="button"
-      aria-label="Personal Budget — go to top"
+      aria-label={`${BRAND.nameFull} — go to top`}
       onClick={handleClick}
       spacing={{ base: 2, md: 2.5 }}
       role="group"
@@ -92,33 +97,68 @@ export default function Logo({ user, onClick }: LogoProps) {
         />
       </Box>
 
-      <Box textAlign="left" minW={0} overflow="hidden">
-        <HStack spacing={1.5} align="center" minW={0}>
+      <VStack
+        align="flex-start"
+        spacing={0}
+        minW={0}
+        flex={1}
+        overflow="hidden"
+        lineHeight="1.1"
+      >
+        <HStack
+          align="baseline"
+          spacing={0}
+          minW={0}
+          w="100%"
+          flexWrap="nowrap"
+        >
           <Text
-            fontSize={{ base: 'md', md: 'xl', lg: '2xl' }}
-            fontWeight={800}
-            letterSpacing="-0.025em"
-            bgGradient={titleGradient}
-            bgClip="text"
-            lineHeight={1}
-            whiteSpace="nowrap"
-            overflow="hidden"
-            textOverflow="ellipsis"
+            as="span"
+            fontSize={titleFontSize}
+            fontWeight={600}
+            letterSpacing="-0.02em"
+            color={wordMuted}
+            noOfLines={1}
             minW={0}
+            flexShrink={1}
           >
-            <Box as="span" display={{ base: 'inline', sm: 'none' }}>
-              Personal<Text as="span" color={accentColor}>.</Text>Budget
-            </Box>
-            <Box as="span" display={{ base: 'none', sm: 'inline' }}>
-              Personal<Text as="span" color={accentColor}>.</Text>Budget
-            </Box>
+            {BRAND.nameFirst}
           </Text>
+
+          <Text
+            as="span"
+            fontSize={sepFontSize}
+            color={separatorColor}
+            fontWeight={400}
+            mx={{ base: 0.5, sm: 1 }}
+            lineHeight="1"
+            flexShrink={0}
+            aria-hidden
+          >
+            ·
+          </Text>
+
+          <Text
+            as="span"
+            fontSize={titleFontSize}
+            fontWeight={800}
+            letterSpacing="-0.03em"
+            bgGradient={wordBudgetGradient}
+            bgClip="text"
+            noOfLines={1}
+            minW={0}
+            flexShrink={1}
+          >
+            {BRAND.nameSecond}
+          </Text>
+
           {!user && (
             <Badge
               fontSize="2xs"
               fontWeight={700}
               px={1.5}
               py={0.5}
+              ml={1}
               rounded="full"
               textTransform="none"
               letterSpacing="0.02em"
@@ -127,23 +167,27 @@ export default function Logo({ user, onClick }: LogoProps) {
               border="1px solid"
               borderColor={badgeBorder}
               display={{ base: 'none', md: 'inline-flex' }}
+              flexShrink={0}
             >
               Free
             </Badge>
           )}
         </HStack>
+
         <Text
           fontSize="2xs"
-          fontWeight={600}
+          fontWeight={500}
           color={subtitleColor}
-          letterSpacing="0.18em"
-          textTransform="uppercase"
+          letterSpacing="0.04em"
+          lineHeight="1.2"
           mt={0.5}
+          noOfLines={2}
           display={{ base: 'none', lg: 'block' }}
+          _dark={{ color: 'gray.500' }}
         >
-          Smart Financial Freedom
+          {BRAND.tagline}
         </Text>
-      </Box>
+      </VStack>
     </HStack>
   )
 }

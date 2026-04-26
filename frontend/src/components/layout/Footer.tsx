@@ -2,216 +2,357 @@ import {
   Box,
   Container,
   Flex,
-  VStack,
   HStack,
-  Text,
-  Link,
-  Divider,
-  useColorModeValue,
-  SimpleGrid,
-  Badge,
-  Tooltip,
-  IconButton,
-  Icon,
   Heading,
+  Icon,
+  IconButton,
+  Link,
+  SimpleGrid,
+  Text,
+  Tooltip,
+  VStack,
+  useColorModeValue,
 } from '@chakra-ui/react'
-import { ArrowUp, Heart, Shield, Lock, Zap, Wallet } from 'lucide-react'
-import { useThemeColors } from '../../hooks/useThemeColors'
+import {
+  ArrowUp,
+  EyeOff,
+  Lock,
+  ShieldCheck,
+  Wallet,
+  type LucideIcon,
+} from 'lucide-react'
+import { BRAND } from './header/brand.config'
 
-const linkSections = [
+/* -------------------------------------------------------------------------- */
+/* Data                                                                        */
+/* -------------------------------------------------------------------------- */
+
+interface FooterLink {
+  label: string
+  href: string
+  external?: boolean
+}
+
+interface FooterSection {
+  title: string
+  links: ReadonlyArray<FooterLink>
+}
+
+const SECTIONS: ReadonlyArray<FooterSection> = [
   {
-    title: 'Quick Links',
-    links: ['Dashboard', 'Analytics', 'Transactions', 'Settings'],
+    title: 'Explore',
+    links: [
+      { label: 'Features', href: '#features' },
+      { label: 'How it works', href: '#how-it-works' },
+      { label: 'FAQ', href: '#faq' },
+    ],
   },
   {
-    title: 'Support',
-    links: ['Help Center', 'Documentation', 'Contact Us', 'Status'],
-  },
-  {
-    title: 'Legal',
-    links: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Licenses',],
+    title: 'Trust',
+    links: [
+      { label: 'What we promise', href: '#trust' },
+      { label: 'Privacy', href: '#' },
+      { label: 'Terms', href: '#' },
+    ],
   },
 ]
 
-export default function Footer() {
-  const colors = useThemeColors()
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+interface TrustBadge {
+  icon: LucideIcon
+  label: string
+  /** Tone: green / blue / violet — drives the accent palette */
+  tone: 'green' | 'blue' | 'violet'
+}
 
-  const footerBg = useColorModeValue('white', 'black')
-  const brandTextColor = useColorModeValue('gray.800', 'gray.100')
-  const subtitleColor = useColorModeValue('gray.600', 'gray.300')
-  const textSecondary = useColorModeValue(colors.text.secondary, 'gray.300')
+const TRUST_BADGES: ReadonlyArray<TrustBadge> = [
+  { icon: Wallet, label: 'Free', tone: 'green' },
+  { icon: ShieldCheck, label: 'Encrypted', tone: 'blue' },
+  { icon: EyeOff, label: 'No tracking', tone: 'violet' },
+]
+
+/* -------------------------------------------------------------------------- */
+/* Component                                                                   */
+/* -------------------------------------------------------------------------- */
+
+export default function Footer() {
+  // Centralize all theme tokens — calling useColorModeValue inside .map() is a
+  // Rules of Hooks violation. Pass colors down as props/strings instead.
+  const surface = useColorModeValue('white', '#06080b')
+  const surfaceTopBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const heading = useColorModeValue('gray.900', 'whiteAlpha.900')
+  const body = useColorModeValue('gray.600', 'gray.400')
+  const muted = useColorModeValue('gray.500', 'gray.500')
+  const linkColor = useColorModeValue('gray.600', 'gray.400')
+  const linkHover = useColorModeValue('gray.900', 'whiteAlpha.900')
+  const logoBoxBg = useColorModeValue('blue.50', 'whiteAlpha.100')
+  const logoBoxBorder = useColorModeValue('blue.100', 'whiteAlpha.200')
+  const logoIconColor = useColorModeValue('blue.600', 'blue.300')
+  const dividerColor = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const accentLineGradient = useColorModeValue(
+    'linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.5) 30%, rgba(139,92,246,0.5) 70%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(96,165,250,0.4) 30%, rgba(167,139,250,0.4) 70%, transparent 100%)',
+  )
+  const scrollBtnBg = useColorModeValue('white', 'rgba(255,255,255,0.04)')
+  const scrollBtnBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const scrollBtnHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+  const year = new Date().getFullYear()
 
   return (
     <Box
       as="footer"
-      bg={footerBg}
-      backdropFilter="blur(10px)"
+      role="contentinfo"
+      bg={surface}
       borderTop="1px solid"
-      borderColor={useColorModeValue('gray.200', 'gray.600')}
-      mt="auto"
-      w="100%"
+      borderColor={surfaceTopBorder}
       position="relative"
+      mt="auto"
     >
+      {/* Top accent line — mirrors the gradient strip at the bottom of the header */}
+      <Box
+        aria-hidden
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        h="1px"
+        background={accentLineGradient}
+      />
+
       <Container
-        maxW={{ base: '100%', xl: '1400px', '2xl': '2200px' }}
-        px={{ base: 4, md: 8 }}
-        py={6}
-        position="relative"
-        zIndex={1}
+        maxW={{ base: '100%', xl: '1200px', '2xl': '1320px' }}
+        px={{ base: 4, md: 8, lg: 12 }}
+        py={{ base: 12, md: 16 }}
       >
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 8, md: 10, lg: 16 }}>
-          {/* 🪙 Brand Section */}
-          <VStack align="start" spacing={5}>
-            <HStack spacing={3} mb={2}>
-              <Box
-                p={2}
-                bg={useColorModeValue('brand.50', 'whiteAlpha.100')}
-                rounded="xl"
-                color={useColorModeValue('brand.500', 'brand.400')}
-              >
-                <Icon as={Wallet} boxSize={6} strokeWidth={2.5} />
-              </Box>
-              <VStack spacing={0} align="start">
-                <Heading
-                  size="md"
-                  color={brandTextColor}
-                  fontWeight="800"
-                  letterSpacing="tight"
-                  lineHeight="1"
-                >
-                  Personal Budget
-                </Heading>
-                <Text
-                  fontSize="xs"
-                  color={subtitleColor}
-                  fontWeight="500"
-                  letterSpacing="wide"
-                  textTransform="uppercase"
-                >
-                  Financial Freedom
-                </Text>
-              </VStack>
-            </HStack>
+        <SimpleGrid columns={{ base: 1, md: 12 }} spacing={{ base: 10, md: 8 }}>
+          {/* Brand column — wider on desktop */}
+          <BrandColumn
+            heading={heading}
+            body={body}
+            logoBoxBg={logoBoxBg}
+            logoBoxBorder={logoBoxBorder}
+            logoIconColor={logoIconColor}
+          />
 
-            <Text fontSize={{ base: 'sm', lg: 'md' }} color={textSecondary} lineHeight="1.6">
-              Take control of your finances with smart tracking and insights.
-            </Text>
+          {/* Link columns */}
+          <SimpleGrid
+            gridColumn={{ md: 'span 7' }}
+            columns={{ base: 2, sm: 3 }}
+            spacing={{ base: 8, md: 6 }}
+          >
+            {SECTIONS.map((section) => (
+              <LinkColumn
+                key={section.title}
+                section={section}
+                heading={heading}
+                linkColor={linkColor}
+                linkHover={linkHover}
+              />
+            ))}
 
-            <HStack spacing={2} flexWrap="wrap">
-              {[
-                { icon: Zap, text: '100% Free', color: 'green' },
-                { icon: Shield, text: 'Secure', color: 'blue' },
-                { icon: Lock, text: 'Private', color: 'purple' },
-              ].map(({ icon, text, color }) => (
-                <Badge
-                  key={text}
-                  px={3}
-                  py={1}
-                  borderRadius="xl"
-                  fontSize="xs"
-                  bg={useColorModeValue(
-                    color === 'green' ? '#dcfce7' : color === 'blue' ? '#dbeafe' : '#f3e8ff',
-                    color === 'green' ? '#1f2937' : color === 'blue' ? '#1e293b' : '#2d1b1b'
-                  )}
-                  color={useColorModeValue(
-                    color === 'green' ? 'green.600' : color === 'blue' ? 'blue.600' : 'purple.600',
-                    color === 'green' ? 'green.300' : color === 'blue' ? 'blue.300' : 'purple.300'
-                  )}
-                  border="1px solid"
-                  borderColor={useColorModeValue(
-                    color === 'green' ? 'green.200' : color === 'blue' ? 'blue.200' : 'purple.200',
-                    color === 'green' ? 'green.500' : color === 'blue' ? 'blue.500' : 'purple.500'
-                  )}
-                  fontWeight="500"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                >
-                  <HStack spacing={1}>
-                    <Icon as={icon} boxSize={3} />
-                    <Text>{text}</Text>
-                  </HStack>
-                </Badge>
-              ))}
-            </HStack>
-          </VStack>
-
-          {/* 🔗 Link Sections */}
-          {linkSections.map((section) => (
-            <VStack key={section.title} align="start" spacing={3}>
-              <Text
-                fontSize="md"
-                fontWeight="700"
-                color={useColorModeValue('gray.800', 'gray.100')}
-                mb={1}
-                fontFamily="system-ui, -apple-system, sans-serif"
-              >
-                {section.title}
+            {/* Stay grounded column — replaces the dead "Help / Support" */}
+            <VStack align="flex-start" spacing={4}>
+              <ColumnTitle heading={heading}>Made for you</ColumnTitle>
+              <Text fontSize="sm" color={body} lineHeight={1.6} maxW="220px">
+                Personal Budget is a small, focused app — not a platform. No tracking, no upsell.
               </Text>
-              {section.links.map((item) => (
-                <Link
-                  key={item}
-                  href="#"
-                  color={useColorModeValue('gray.600', 'gray.300')}
-                  _hover={{
-                    color: useColorModeValue('blue.600', 'blue.300'),
-                    transform: 'translateX(2px)',
-                  }}
-                  fontSize={{ base: 'sm', lg: 'md' }}
-                  fontWeight="500"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  transition="all 0.2s ease"
-                >
-                  {item}
-                </Link>
-              ))}
             </VStack>
-          ))}
+          </SimpleGrid>
         </SimpleGrid>
 
-        <Divider my={{ base: 6, md: 8 }} borderColor={colors.border} />
+        {/* Hairline divider */}
+        <Box mt={{ base: 12, md: 14 }} mb={{ base: 6, md: 8 }} h="1px" bg={dividerColor} />
 
-        {/* 🧭 Bottom Bar */}
+        {/* Bottom bar */}
         <Flex
-          direction={{ base: 'column', md: 'row' }}
+          direction={{ base: 'column-reverse', md: 'row' }}
           justify="space-between"
           align="center"
-          gap={{ base: 4, lg: 6 }}
+          gap={6}
         >
-          <VStack spacing={2} align={{ base: 'center', md: 'start' }}>
-            <Text fontSize="sm" color={textSecondary} fontWeight="500">
-              © {new Date().getFullYear()} Personal Budget. All rights reserved.
-            </Text>
-            <HStack spacing={2} fontSize="sm" color={textSecondary}>
-              <Text>Made with</Text>
-              <Icon as={Heart} boxSize={3} color="red.500" />
-              <Text>for better financial health</Text>
-            </HStack>
-          </VStack>
+          <Text fontSize="xs" color={muted} fontWeight={500} textAlign={{ base: 'center', md: 'left' }}>
+            © {year} {BRAND.nameFull} — built with care, kept free.
+          </Text>
 
-          <Tooltip label="Back to top" hasArrow>
-            <IconButton
-              aria-label="Scroll to top"
-              icon={<ArrowUp size={16} />}
-              size="md"
-              variant="outline"
-              borderRadius="xl"
-              onClick={scrollToTop}
-              borderColor={useColorModeValue('gray.200', 'gray.600')}
-              color={useColorModeValue('gray.600', 'gray.300')}
-              bg={useColorModeValue('rgba(255, 255, 255, 0.9)', 'rgba(255, 255, 255, 0.05)')}
-              backdropFilter="blur(10px)"
-              _hover={{
-                bg: useColorModeValue('#dbeafe', '#1e293b'),
-                color: useColorModeValue('blue.600', 'blue.300'),
-                borderColor: useColorModeValue('blue.300', 'blue.500'),
-                transform: 'translateY(-1px)',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-              }}
-              transition="all 0.2s ease"
-            />
-          </Tooltip>
+          <HStack spacing={3} flexWrap="wrap" justify="center">
+            {TRUST_BADGES.map((b) => (
+              <TrustBadgePill key={b.label} badge={b} />
+            ))}
+            <Tooltip label="Back to top" hasArrow placement="top" openDelay={250}>
+              <IconButton
+                aria-label="Scroll to top"
+                icon={<ArrowUp size={14} strokeWidth={2.5} />}
+                size="sm"
+                variant="ghost"
+                borderRadius="full"
+                onClick={scrollToTop}
+                color={muted}
+                bg={scrollBtnBg}
+                border="1px solid"
+                borderColor={scrollBtnBorder}
+                _hover={{ bg: scrollBtnHoverBg, color: heading, transform: 'translateY(-1px)' }}
+                _active={{ transform: 'translateY(0)' }}
+                transition="all 0.2s cubic-bezier(0.32, 0.72, 0, 1)"
+              />
+            </Tooltip>
+          </HStack>
         </Flex>
       </Container>
     </Box>
   )
+}
+
+/* -------------------------------------------------------------------------- */
+/* Subcomponents                                                               */
+/* -------------------------------------------------------------------------- */
+
+interface BrandColumnProps {
+  heading: string
+  body: string
+  logoBoxBg: string
+  logoBoxBorder: string
+  logoIconColor: string
+}
+
+function BrandColumn({ heading, body, logoBoxBg, logoBoxBorder, logoIconColor }: BrandColumnProps) {
+  return (
+    <VStack gridColumn={{ md: 'span 5' }} align="flex-start" spacing={5} maxW="420px">
+      <HStack spacing={3}>
+        <Box
+          w="40px"
+          h="40px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          borderRadius="xl"
+          bg={logoBoxBg}
+          border="1px solid"
+          borderColor={logoBoxBorder}
+          color={logoIconColor}
+        >
+          <Icon as={Wallet} boxSize={5} strokeWidth={2.25} />
+        </Box>
+        <VStack spacing={0} align="flex-start">
+          <Heading
+            as="span"
+            fontSize="lg"
+            fontWeight={800}
+            color={heading}
+            letterSpacing="-0.02em"
+            lineHeight={1}
+          >
+            {BRAND.nameFull}
+          </Heading>
+          <Text fontSize="xs" color={body} fontWeight={500}>
+            {BRAND.tagline}
+          </Text>
+        </VStack>
+      </HStack>
+
+      <Text fontSize="sm" color={body} lineHeight={1.65}>
+        Track every transaction without the spreadsheet pain. Personal Budget keeps the picture sharp — income, expenses and trends, in one calm place.
+      </Text>
+    </VStack>
+  )
+}
+
+interface ColumnTitleProps {
+  heading: string
+  children: React.ReactNode
+}
+
+function ColumnTitle({ heading, children }: ColumnTitleProps) {
+  return (
+    <Text
+      fontSize="xs"
+      fontWeight={700}
+      color={heading}
+      letterSpacing="0.1em"
+      textTransform="uppercase"
+    >
+      {children}
+    </Text>
+  )
+}
+
+interface LinkColumnProps {
+  section: FooterSection
+  heading: string
+  linkColor: string
+  linkHover: string
+}
+
+function LinkColumn({ section, heading, linkColor, linkHover }: LinkColumnProps) {
+  return (
+    <VStack align="flex-start" spacing={4}>
+      <ColumnTitle heading={heading}>{section.title}</ColumnTitle>
+      <VStack as="ul" align="flex-start" spacing={2.5} listStyleType="none" m={0} p={0}>
+        {section.links.map((link) => (
+          <Box as="li" key={link.label}>
+            <Link
+              href={link.href}
+              isExternal={link.external}
+              fontSize="sm"
+              color={linkColor}
+              fontWeight={500}
+              _hover={{ color: linkHover, textDecoration: 'none' }}
+              transition="color 0.2s ease"
+            >
+              {link.label}
+            </Link>
+          </Box>
+        ))}
+      </VStack>
+    </VStack>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/* Trust badge pill                                                            */
+/* -------------------------------------------------------------------------- */
+
+function TrustBadgePill({ badge }: { badge: TrustBadge }) {
+  const tones = useTrustToneTokens()
+  const palette = tones[badge.tone]
+  return (
+    <HStack
+      as="span"
+      spacing={1.5}
+      px={2.5}
+      py={1}
+      borderRadius="full"
+      bg={palette.bg}
+      color={palette.fg}
+      border="1px solid"
+      borderColor={palette.border}
+      fontSize="2xs"
+      fontWeight={600}
+      letterSpacing="0.02em"
+    >
+      <Icon as={badge.icon} boxSize={3} strokeWidth={2.25} />
+      <Text as="span">{badge.label}</Text>
+    </HStack>
+  )
+}
+
+/** Pre-resolves all tone palettes so .map() doesn't call hooks. */
+function useTrustToneTokens() {
+  const greenBg = useColorModeValue('green.50', 'rgba(34,197,94,0.10)')
+  const greenFg = useColorModeValue('green.700', 'green.300')
+  const greenBorder = useColorModeValue('green.100', 'rgba(34,197,94,0.25)')
+
+  const blueBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.10)')
+  const blueFg = useColorModeValue('blue.700', 'blue.300')
+  const blueBorder = useColorModeValue('blue.100', 'rgba(59,130,246,0.25)')
+
+  const violetBg = useColorModeValue('purple.50', 'rgba(139,92,246,0.10)')
+  const violetFg = useColorModeValue('purple.700', 'purple.300')
+  const violetBorder = useColorModeValue('purple.100', 'rgba(139,92,246,0.25)')
+
+  return {
+    green: { bg: greenBg, fg: greenFg, border: greenBorder },
+    blue: { bg: blueBg, fg: blueFg, border: blueBorder },
+    violet: { bg: violetBg, fg: violetFg, border: violetBorder },
+  }
 }

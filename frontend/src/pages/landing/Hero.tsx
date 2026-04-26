@@ -1,0 +1,178 @@
+import {
+  Box,
+  Button,
+  Container,
+  Flex,
+  HStack,
+  Icon,
+  Text,
+  VStack,
+  useColorModeValue,
+} from '@chakra-ui/react'
+import { motion } from 'framer-motion'
+import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import DashboardPreview from './DashboardPreview'
+import { Eyebrow, GlowOrb, GridLines, fadeUp } from './shared'
+import { HERO_COPY } from './landing.config'
+
+const MotionBox = motion.create(Box)
+
+interface HeroProps {
+  onGetStarted: () => void
+}
+
+export default function Hero({ onGetStarted }: HeroProps) {
+  const bg = useColorModeValue(
+    'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
+    'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
+  )
+  const titleColor = useColorModeValue('gray.900', 'whiteAlpha.900')
+  const subColor = useColorModeValue('gray.600', 'gray.400')
+  const bulletColor = useColorModeValue('gray.500', 'gray.400')
+  const secondaryBtnBorder = useColorModeValue('gray.200', 'whiteAlpha.300')
+  const secondaryBtnHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+
+  return (
+    <Box
+      as="section"
+      position="relative"
+      overflow="hidden"
+      bg={bg}
+      pt={{ base: 14, md: 24, lg: 28 }}
+      pb={{ base: 16, md: 24, lg: 28 }}
+    >
+      <GridLines />
+      <GlowOrb
+        color={useColorModeValue('rgba(59,130,246,0.45)', 'rgba(59,130,246,0.55)')}
+        size="640px"
+        intensity={useColorModeValue(0.5, 0.55)}
+        top="-180px"
+        left="-200px"
+      />
+      <GlowOrb
+        color={useColorModeValue('rgba(139,92,246,0.4)', 'rgba(139,92,246,0.55)')}
+        size="560px"
+        intensity={useColorModeValue(0.4, 0.5)}
+        top="40%"
+        right="-160px"
+      />
+
+      <Container
+        maxW={{ base: '100%', xl: '1280px', '2xl': '1400px' }}
+        px={{ base: 4, md: 8, lg: 12 }}
+        position="relative"
+        zIndex={1}
+      >
+        <Flex
+          direction={{ base: 'column', lg: 'row' }}
+          align="center"
+          gap={{ base: 12, lg: 16 }}
+        >
+          {/* Left — copy */}
+          <MotionBox flex={1} maxW={{ base: 'full', lg: '560px' }} {...fadeUp}>
+            <VStack align={{ base: 'center', lg: 'flex-start' }} spacing={6} textAlign={{ base: 'center', lg: 'left' }}>
+              <Eyebrow>{HERO_COPY.eyebrow}</Eyebrow>
+
+              <Box
+                as="h1"
+                fontSize={{ base: '4xl', sm: '5xl', md: '6xl', lg: '6xl', xl: '7xl' }}
+                fontWeight={800}
+                letterSpacing="-0.04em"
+                lineHeight={1.02}
+                color={titleColor}
+              >
+                <Text as="span" display="block">
+                  {HERO_COPY.titlePrimary}{' '}
+                </Text>
+                <Text
+                  as="span"
+                  display="inline-block"
+                  bgGradient="linear(120deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)"
+                  bgClip="text"
+                  pb={1}
+                  sx={{
+                    WebkitTextFillColor: 'transparent',
+                  }}
+                >
+                  {HERO_COPY.titleAccent}.
+                </Text>
+              </Box>
+
+              <Text fontSize={{ base: 'md', md: 'lg' }} color={subColor} maxW="540px" lineHeight={1.55}>
+                {HERO_COPY.subtitle}
+              </Text>
+
+              <HStack spacing={3} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'flex-start' }}>
+                <Button
+                  size="lg"
+                  onClick={onGetStarted}
+                  rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+                  bg="linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
+                  bgSize="200% 100%"
+                  bgPosition="0% 50%"
+                  color="white"
+                  fontWeight={700}
+                  px={6}
+                  h="52px"
+                  borderRadius="xl"
+                  boxShadow="0 10px 30px -10px rgba(79, 70, 229, 0.5)"
+                  transition="all 0.3s cubic-bezier(0.32, 0.72, 0, 1)"
+                  _hover={{
+                    bgPosition: '100% 50%',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 18px 40px -12px rgba(79, 70, 229, 0.6)',
+                  }}
+                  _active={{ transform: 'translateY(0)' }}
+                >
+                  {HERO_COPY.primaryCta}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  borderColor={secondaryBtnBorder}
+                  color={titleColor}
+                  fontWeight={600}
+                  px={6}
+                  h="52px"
+                  borderRadius="xl"
+                  onClick={() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }}
+                  _hover={{ bg: secondaryBtnHoverBg, transform: 'translateY(-2px)' }}
+                  transition="all 0.2s ease"
+                >
+                  {HERO_COPY.secondaryCta}
+                </Button>
+              </HStack>
+
+              <HStack spacing={5} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'flex-start' }}>
+                {HERO_COPY.bullets.map((b) => (
+                  <HStack key={b} spacing={2}>
+                    <Icon as={CheckCircle2} boxSize={4} color="green.500" />
+                    <Text fontSize="sm" color={bulletColor} fontWeight={500}>
+                      {b}
+                    </Text>
+                  </HStack>
+                ))}
+              </HStack>
+            </VStack>
+          </MotionBox>
+
+          {/* Right — preview */}
+          <MotionBox
+            flex={1}
+            w="full"
+            display="flex"
+            justifyContent={{ base: 'center', lg: 'flex-end' }}
+            initial={{ opacity: 0, y: 30, scale: 0.97 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
+          >
+            <DashboardPreview />
+          </MotionBox>
+        </Flex>
+      </Container>
+    </Box>
+  )
+}
