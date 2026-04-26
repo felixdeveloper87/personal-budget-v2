@@ -90,12 +90,12 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
         },
       }}
     >
-      <Box p={5}>
-        <VStack align="stretch" spacing={4}>
+      <Box p={{ base: 3, sm: 5 }}>
+        <VStack align="stretch" spacing={{ base: 3, sm: 4 }}>
           <HStack justify="space-between" align="flex-start">
             <Flex
-              w={10}
-              h={10}
+              w={{ base: 9, sm: 10 }}
+              h={{ base: 9, sm: 10 }}
               align="center"
               justify="center"
               borderRadius="xl"
@@ -103,7 +103,11 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
               color={stat.color}
               flexShrink={0}
             >
-              <Icon as={IconComponent} boxSize={5} strokeWidth={2.25} />
+              <Icon
+                as={IconComponent}
+                boxSize={{ base: 4, sm: 5 }}
+                strokeWidth={2.25}
+              />
             </Flex>
             <Icon
               as={ArrowUpRight}
@@ -125,7 +129,7 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
               {stat.label}
             </Text>
             <Text
-              fontSize={{ base: '2xl', md: '3xl' }}
+              fontSize={{ base: 'lg', sm: '2xl', md: '3xl' }}
               fontWeight={800}
               color={valueColor}
               lineHeight="1.1"

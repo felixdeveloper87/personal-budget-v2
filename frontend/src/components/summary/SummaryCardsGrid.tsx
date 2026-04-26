@@ -143,7 +143,7 @@ export default function SummaryCardsGrid({
 
   return (
     <SimpleGrid
-      columns={{ base: 1, sm: 2, lg: 4 }}
+      columns={{ base: 2, sm: 2, lg: 4 }}
       spacing={{ base: 3, md: 4 }}
       w="full"
     >
