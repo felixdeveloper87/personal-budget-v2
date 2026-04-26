@@ -56,14 +56,6 @@ export default function ChartCard({
       }}
       overflow="hidden"
     >
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        h="2px"
-        bg={gradient}
-      />
       <VStack spacing={1} align="center">
         <HStack spacing={1} align="center">
           <Icon as={IconComponent} boxSize={3.5} color={color} strokeWidth={2.25} />

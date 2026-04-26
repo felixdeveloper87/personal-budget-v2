@@ -15,7 +15,8 @@ import BalanceChart from './BalanceChart'
 import { SummaryCardType } from '../../../constants/summaryColors'
 import InsightsCard from '../../ui/InsightsCard'
 import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
-import { ChartLoadingState } from './components'
+import { ChartHeaderStats, ChartLoadingState } from './components'
+import type { ChartHeaderStatsVariant } from './components'
 import type { PeriodType } from '../../../types'
 
 interface SummaryCardModalProps {
@@ -88,6 +89,8 @@ export default function SummaryCardModal({
     [card],
   )
 
+  const statsVariant: ChartHeaderStatsVariant = card
+
   return (
     <PremiumModal
       isOpen={isOpen}
@@ -124,6 +127,14 @@ export default function SummaryCardModal({
           <ChartLoadingState message="Loading chart data..." />
         ) : (
           <>
+            <Box mb={{ base: 4, sm: 5 }}>
+              <ChartHeaderStats
+                transactions={transactions}
+                variant={statsVariant}
+                currentBalance={currentBalance}
+              />
+            </Box>
+
             <AnimatePresence mode="wait">
               <Box key="chart">
                 {selectedCard === 'transactions' && (

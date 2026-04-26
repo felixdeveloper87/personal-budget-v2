@@ -14,10 +14,9 @@ import { VStack, Text, HStack, Box, Badge, useColorModeValue } from '@chakra-ui/
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { DollarSign, TrendingDown, BarChart3 } from 'lucide-react'
+import { TrendingDown } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
 import {
-  ChartCard,
   ChartPlotShell,
   ChartEmptyState,
   PeriodBucketBarChart,
@@ -74,7 +73,7 @@ export default function ExpensesChart({
     [expenseTransactions],
   )
 
-  const { total: totalExpenses, average: avgExpense } = useMemo(
+  const { total: totalExpenses } = useMemo(
     () => calculateTotals(expenseTransactions),
     [expenseTransactions],
   )
@@ -110,41 +109,6 @@ export default function ExpensesChart({
           accent="red"
         />
       )}
-
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        justify="center"
-        wrap="wrap"
-        gap={{ base: 2, sm: 2 }}
-      >
-        <ChartCard
-          icon={DollarSign}
-          value={`£${totalExpenses.toFixed(2)}`}
-          label="Total expenses"
-          gradient={chartColors.expenseGradient}
-          color={chartColors.expenseColor}
-          hoverBorderColor={chartColors.expenseHoverBorder}
-          delay={0}
-        />
-        <ChartCard
-          icon={BarChart3}
-          value={expenseTransactions.length}
-          label="Transactions"
-          gradient={chartColors.transactionsGradient}
-          color={chartColors.transactionsColor}
-          hoverBorderColor={chartColors.transactionsHoverBorder}
-          delay={0.1}
-        />
-        <ChartCard
-          icon={TrendingDown}
-          value={`£${avgExpense.toFixed(2)}`}
-          label="Average"
-          gradient={chartColors.averageGradient}
-          color={chartColors.averageColor}
-          hoverBorderColor={chartColors.averageHoverBorder}
-          delay={0.2}
-        />
-      </HStack>
 
       <ChartPlotShell
         title="Expense distribution"

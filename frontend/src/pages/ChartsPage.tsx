@@ -27,6 +27,8 @@ import {
   ExpensesChart,
   BalanceChart,
 } from '../components/charts/modal'
+import { ChartHeaderStats } from '../components/charts/modal/components'
+import type { ChartHeaderStatsVariant } from '../components/charts/modal/components'
 import {
   ChartsPageHeader,
   ChartsPageSkeleton,
@@ -44,6 +46,12 @@ interface ChartShellProps {
   accent: SectionHeaderAccent
   badgeScheme: string
   periodLabel: string
+  /**
+   * Optional KPI tiles rendered between the section title and the divider —
+   * grouped visually with the header. Used by the Transactions / Income /
+   * Expenses cards to surface their summary stats.
+   */
+  headerStats?: ReactNode
   children: ReactNode
 }
 
@@ -54,6 +62,7 @@ function ChartShell({
   accent,
   badgeScheme,
   periodLabel,
+  headerStats,
   children,
 }: ChartShellProps) {
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -62,33 +71,46 @@ function ChartShell({
     <SectionCard staticOnHover>
       <Box p={{ base: 4, sm: 5, md: 6 }}>
         <VStack spacing={{ base: 4, md: 5 }} align="stretch">
-          <SectionHeader
-            icon={icon}
-            title={title}
-            caption={caption}
-            accent={accent}
-            rightSlot={
-              <Badge
-                variant="subtle"
-                colorScheme={badgeScheme}
-                borderRadius="full"
-                px={2.5}
-                py={1}
-                fontSize="xs"
-                fontWeight={700}
-                textTransform="uppercase"
-                letterSpacing="0.04em"
-              >
-                {periodLabel}
-              </Badge>
-            }
-          />
+          <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+            <SectionHeader
+              icon={icon}
+              title={title}
+              caption={caption}
+              accent={accent}
+              rightSlot={
+                <Badge
+                  variant="subtle"
+                  colorScheme={badgeScheme}
+                  borderRadius="full"
+                  px={2.5}
+                  py={1}
+                  fontSize="xs"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  letterSpacing="0.04em"
+                >
+                  {periodLabel}
+                </Badge>
+              }
+            />
+            {headerStats}
+          </VStack>
           <Divider borderColor={dividerColor} />
           {children}
         </VStack>
       </Box>
     </SectionCard>
   )
+}
+
+const STATS_VARIANTS: Record<
+  'transactions' | 'income' | 'expenses' | 'balance',
+  ChartHeaderStatsVariant
+> = {
+  transactions: 'transactions',
+  income: 'income',
+  expenses: 'expenses',
+  balance: 'balance',
 }
 
 export default function ChartsPage() {
@@ -189,6 +211,12 @@ export default function ChartsPage() {
               accent="blue"
               badgeScheme="blue"
               periodLabel={periodLabel}
+              headerStats={
+                <ChartHeaderStats
+                  transactions={periodData.transactions}
+                  variant={STATS_VARIANTS.transactions}
+                />
+              }
             >
               <TransactionsChart
                 transactions={periodData.transactions}
@@ -206,6 +234,12 @@ export default function ChartsPage() {
               accent="green"
               badgeScheme="green"
               periodLabel={periodLabel}
+              headerStats={
+                <ChartHeaderStats
+                  transactions={periodData.transactions}
+                  variant={STATS_VARIANTS.income}
+                />
+              }
             >
               <IncomeChart
                 transactions={periodData.transactions}
@@ -223,6 +257,12 @@ export default function ChartsPage() {
               accent="red"
               badgeScheme="red"
               periodLabel={periodLabel}
+              headerStats={
+                <ChartHeaderStats
+                  transactions={periodData.transactions}
+                  variant={STATS_VARIANTS.expenses}
+                />
+              }
             >
               <ExpensesChart
                 transactions={periodData.transactions}
@@ -240,6 +280,13 @@ export default function ChartsPage() {
               accent="violet"
               badgeScheme="purple"
               periodLabel={periodLabel}
+              headerStats={
+                <ChartHeaderStats
+                  transactions={periodData.transactions}
+                  variant={STATS_VARIANTS.balance}
+                  currentBalance={periodData.balance}
+                />
+              }
             >
               <BalanceChart
                 transactions={periodData.transactions}

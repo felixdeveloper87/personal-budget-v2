@@ -62,6 +62,7 @@ export default function NavBar({
   const itemRefs = useRef<Record<AppPage, HTMLButtonElement | null>>({
     dashboard: null,
     transactions: null,
+    categories: null,
     charts: null,
   })
 

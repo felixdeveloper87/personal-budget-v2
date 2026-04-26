@@ -14,10 +14,9 @@ import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { DollarSign, TrendingUp, BarChart3 } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { useChartColors, useChartDimensions } from './hooks'
 import {
-  ChartCard,
   ChartPlotShell,
   ChartEmptyState,
   PeriodBucketBarChart,
@@ -69,7 +68,7 @@ export default function IncomeChart({
     [incomeTransactions],
   )
 
-  const { total: totalIncome, average: avgIncome } = useMemo(
+  const { total: totalIncome } = useMemo(
     () => calculateTotals(incomeTransactions),
     [incomeTransactions],
   )
@@ -105,41 +104,6 @@ export default function IncomeChart({
           accent="green"
         />
       )}
-
-      <HStack
-        spacing={{ base: 2, sm: 3 }}
-        justify="center"
-        wrap="wrap"
-        gap={{ base: 2, sm: 2 }}
-      >
-        <ChartCard
-          icon={DollarSign}
-          value={`£${totalIncome.toFixed(2)}`}
-          label="Total income"
-          gradient={chartColors.incomeGradient}
-          color={chartColors.incomeColor}
-          hoverBorderColor={chartColors.incomeHoverBorder}
-          delay={0}
-        />
-        <ChartCard
-          icon={BarChart3}
-          value={incomeTransactions.length}
-          label="Transactions"
-          gradient={chartColors.transactionsGradient}
-          color={chartColors.transactionsColor}
-          hoverBorderColor={chartColors.transactionsHoverBorder}
-          delay={0.1}
-        />
-        <ChartCard
-          icon={TrendingUp}
-          value={`£${avgIncome.toFixed(2)}`}
-          label="Average"
-          gradient={chartColors.averageGradient}
-          color={chartColors.averageColor}
-          hoverBorderColor={chartColors.averageHoverBorder}
-          delay={0.2}
-        />
-      </HStack>
 
       <ChartPlotShell
         title="Income distribution"

@@ -1,6 +1,12 @@
-import { LayoutDashboard, ReceiptText, ChartColumn, type LucideIcon } from 'lucide-react'
+import {
+  ChartColumn,
+  Layers,
+  LayoutDashboard,
+  ReceiptText,
+  type LucideIcon,
+} from 'lucide-react'
 
-export type AppPage = 'dashboard' | 'transactions' | 'charts'
+export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'charts'
 
 export interface NavItem {
   id: AppPage
@@ -24,6 +30,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Activity',
     icon: ReceiptText,
     description: 'All income and expenses',
+  },
+  {
+    id: 'categories',
+    label: 'Categories',
+    shortLabel: 'Categories',
+    icon: Layers,
+    description: 'Breakdown by category',
   },
   {
     id: 'charts',

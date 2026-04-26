@@ -1,16 +1,25 @@
-import { Box, Spinner, Center, VStack, Text } from '@chakra-ui/react'
+import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
 import ChartsPage from './pages/ChartsPage'
+import CategoriesPage from './pages/CategoriesPage'
 import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
+import type { AppPage } from './components/layout/header/navigation.config'
+
+const PAGE_RENDERERS: Record<AppPage, () => JSX.Element> = {
+  dashboard: () => <Dashboard />,
+  transactions: () => <AllTransactionsPage />,
+  categories: () => <CategoriesPage />,
+  charts: () => <ChartsPage />,
+}
 
 function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
-  const [currentPage, setCurrentPage] = useState<'dashboard' | 'transactions' | 'charts'>('dashboard')
+  const [currentPage, setCurrentPage] = useState<AppPage>('dashboard')
 
   // Reset showAuth quando o usuário faz logout ?(quando user se torna null)
   useEffect(() => {
@@ -42,9 +51,10 @@ function AppContent() {
 
   // Se usuário está logado, mostrar página atual
   if (user) {
+    const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
-        {currentPage === 'dashboard' ? <Dashboard /> : currentPage === 'transactions' ? <AllTransactionsPage /> : <ChartsPage />}
+        {renderPage()}
       </Layout>
     )
   }
