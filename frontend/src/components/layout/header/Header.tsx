@@ -1,194 +1,195 @@
-import {
-  Box,
-  Flex,
-  Container,
-  HStack,
-  Button,
-  useColorModeValue,
-  useDisclosure
-} from '@chakra-ui/react'
+import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
-import { Logo, Navigation, UserMenu, HeaderControls, SearchButton } from './'
+import HeaderActions from './HeaderActions'
+import LandingNav from './LandingNav'
+import Logo from './Logo'
+import NavBar from './NavBar'
+import type { AppPage } from './navigation.config'
 
 interface HeaderProps {
   onOpenSettings?: () => void
   onLogin?: () => void
-  currentPage?: 'dashboard' | 'transactions' | 'charts'
-  onPageChange?: (page: 'dashboard' | 'transactions' | 'charts') => void
+  currentPage?: AppPage
+  onPageChange?: (page: AppPage) => void
 }
 
-export default function Header({ onOpenSettings, onLogin, currentPage = 'dashboard', onPageChange }: HeaderProps) {
+export default function Header({
+  onOpenSettings,
+  onLogin,
+  currentPage = 'dashboard',
+  onPageChange,
+}: HeaderProps) {
   const { user, logout } = useAuth()
   const { runSearch } = useSearch()
-  const { isOpen: isSearchOpen, onOpen: onSearchOpen, onClose: onSearchClose } = useDisclosure()
+  const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useDisclosure()
   const [isScrolled, setIsScrolled] = useState(false)
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20)
-    handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => window.removeEventListener('scroll', handleScroll)
+    const onScroll = () => setIsScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
+  // Cmd/Ctrl+K to open search
+  useEffect(() => {
+    if (!user) return
+    const onKey = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.toLowerCase().includes('mac')
+      const mod = isMac ? e.metaKey : e.ctrlKey
+      if (mod && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        openSearch()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [user, openSearch])
+
   const bg = useColorModeValue(
-    user
-      ? 'rgba(255, 255, 255, 0.96)'
-      : isScrolled
-        ? 'rgba(255, 255, 255, 0.92)'
-        : 'rgba(255, 255, 255, 0.8)',
-    user
-      ? 'rgba(12, 12, 14, 0.94)'
-      : isScrolled
-        ? 'rgba(10, 10, 10, 0.86)'
-        : 'rgba(0, 0, 0, 0.6)'
+    isScrolled ? 'rgba(255, 255, 255, 0.78)' : 'rgba(255, 255, 255, 0.62)',
+    isScrolled ? 'rgba(10, 10, 12, 0.78)' : 'rgba(10, 10, 12, 0.55)',
   )
-  const borderColor = useColorModeValue(
-    user ? 'gray.200' : 'whiteAlpha.300',
-    user ? 'whiteAlpha.200' : 'whiteAlpha.100'
+  const bgOverlay = useColorModeValue(
+    'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
+    'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
+  )
+  const topHighlight = useColorModeValue(
+    'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))',
+    'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
+  )
+  const accentBorder = useColorModeValue(
+    'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.18) 30%, rgba(124, 58, 237, 0.18) 70%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
   )
   const shadow = useColorModeValue(
-    user
-      ? '0 6px 24px rgba(15, 23, 42, 0.08)'
-      : isScrolled
-        ? '0 8px 30px rgba(0, 0, 0, 0.1)'
-        : '0 4px 30px rgba(0, 0, 0, 0.05)',
-    user
-      ? '0 8px 28px rgba(0, 0, 0, 0.35)'
-      : isScrolled
-        ? '0 10px 30px rgba(0, 0, 0, 0.35)'
-        : '0 4px 30px rgba(0, 0, 0, 0.2)'
+    isScrolled ? '0 10px 30px rgba(15, 23, 42, 0.08)' : 'none',
+    isScrolled ? '0 14px 36px rgba(0, 0, 0, 0.5)' : 'none',
   )
-  const headerHeight = isScrolled ? 20 : 24
-  const landingNavColor = useColorModeValue('gray.700', 'gray.200')
-  const landingNavHoverBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const landingNavHoverColor = useColorModeValue('blue.600', 'blue.300')
-  const landingSections = [
-    { id: 'features', label: 'Features' },
-    { id: 'how-it-works', label: 'How it works' },
-    { id: 'faq', label: 'FAQ' },
-  ] as const
-
-  const scrollToSection = (id: string) => {
-    const section = document.getElementById(id)
-    if (!section) return
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
     <>
-      {/* Main Header */}
       <Box
         as="header"
-        bg={bg}
-        backdropFilter={user ? 'blur(14px)' : 'blur(20px)'}
         position="sticky"
         top={0}
         zIndex={1000}
-        borderBottom="1px solid"
-        borderColor={borderColor}
+        bg={bg}
         boxShadow={shadow}
-        w="100%"
-        transition="all 0.3s ease"
+        backdropFilter="saturate(180%) blur(20px)"
+        transition="background 0.3s ease, box-shadow 0.3s ease"
+        sx={{
+          // Top inner highlight (1px) — premium glass top edge
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            background: bgOverlay,
+            pointerEvents: 'none',
+            zIndex: 0,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '1px',
+            background: topHighlight,
+            pointerEvents: 'none',
+            zIndex: 1,
+          },
+        }}
       >
         <Container
           maxW="100%"
-          px={{ base: 1.5, sm: 2, md: 4, lg: 6, xl: 8 }}
+          px={{ base: 3, md: 6, lg: 8 }}
+          position="relative"
+          zIndex={2}
           sx={{
-            // Safe area support para iPhone 14 Pro
-            paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-            paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+            paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
           }}
         >
+          {/* Top row: brand + (desktop nav) + actions */}
           <Flex
-            h={headerHeight}
             align="center"
             justify="space-between"
-            gap={{ base: 0.5, sm: 1, md: 2, lg: 3, xl: 4 }}
-            position="relative"
-            flexWrap="nowrap"
+            gap={{ base: 2, md: 4, lg: 6 }}
+            h={{ base: '60px', md: '68px' }}
             minW={0}
           >
-            {/* Logo + Title */}
-            <Box flexShrink={1} minW={0} maxW={{ base: '40%', sm: '50%', md: 'none' }}>
-              <Logo user={user} />
-            </Box>
+            <Logo user={user} />
 
-            {/* Navigation (desktop) */}
-            <Navigation
-              user={user}
-              currentPage={currentPage}
-              onPageChange={onPageChange}
-            />
-
-            {/* Landing navigation (desktop) */}
-            {!user && (
-              <HStack
-                spacing={2}
-                display={{ base: 'none', md: 'flex' }}
-                ml={{ md: 2, lg: 4 }}
-              >
-                {landingSections.map((section) => (
-                  <Button
-                    key={section.id}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => scrollToSection(section.id)}
-                    color={landingNavColor}
-                    fontWeight="600"
-                    _hover={{
-                      bg: landingNavHoverBg,
-                      color: landingNavHoverColor,
-                    }}
-                  >
-                    {section.label}
-                  </Button>
-                ))}
-              </HStack>
-            )}
-
-            {/* Search Button (desktop) */}
-            <SearchButton user={user} onSearchOpen={onSearchOpen} />
-
-            {/* Right Controls (includes mobile navigation) */}
-            <HeaderControls
-              user={user}
-              onSearchOpen={onSearchOpen}
-              onLogin={onLogin}
-              currentPage={currentPage}
-              onPageChange={onPageChange}
-            />
-
-            {/* User Menu */}
+            {/* Desktop primary nav (md+). Mobile uses the second row below. */}
             {user && (
-              <Box flexShrink={0}>
-                <UserMenu
-                  user={user}
+              <Box
+                display={{ base: 'none', md: 'block' }}
+                flexShrink={0}
+                mx="auto"
+              >
+                <NavBar
+                  variant="desktop"
                   currentPage={currentPage}
                   onPageChange={onPageChange}
-                  onOpenSettings={onOpenSettings}
-                  onLogout={logout}
                 />
               </Box>
             )}
+
+            {/* Landing-page anchor nav (logged-out, md+). */}
+            {!user && <LandingNav />}
+
+            <HeaderActions
+              user={user}
+              onSearchOpen={openSearch}
+              onLogin={onLogin}
+              onOpenSettings={onOpenSettings}
+              onLogout={logout}
+            />
           </Flex>
+
+          {/* Mobile primary nav (base..md): second row, full-width segmented bar.
+              Always visible — no hamburger, no hidden buttons. */}
+          {user && (
+            <Box display={{ base: 'block', md: 'none' }} pb={2.5} pt={0.5}>
+              <NavBar
+                variant="mobile"
+                currentPage={currentPage}
+                onPageChange={onPageChange}
+              />
+            </Box>
+          )}
         </Container>
+
+        {/* Animated accent gradient bottom border */}
+        <Box
+          aria-hidden
+          position="absolute"
+          left={0}
+          right={0}
+          bottom={0}
+          h="1px"
+          background={accentBorder}
+          opacity={isScrolled ? 1 : 0.55}
+          transition="opacity 0.3s ease"
+          pointerEvents="none"
+          zIndex={3}
+        />
       </Box>
 
-      {/* Modal de busca */}
       {user && (
         <SearchModal
           isOpen={isSearchOpen}
-          onClose={onSearchClose}
+          onClose={closeSearch}
           onSearch={async (filters: any) => {
             await runSearch({
               ...filters,
               type: filters.type === null ? undefined : filters.type,
             })
-            onSearchClose()
+            closeSearch()
           }}
         />
       )}

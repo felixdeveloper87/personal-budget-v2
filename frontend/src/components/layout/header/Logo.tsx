@@ -1,156 +1,145 @@
-import { Box, Text, HStack, Badge, useColorModeValue, Image } from '@chakra-ui/react'
+import { Badge, Box, HStack, Image, Text, useColorModeValue } from '@chakra-ui/react'
 import logoImage from '../../../../assets/logo.png'
 
 interface LogoProps {
   user?: any
+  onClick?: () => void
 }
 
-export default function Logo({ user }: LogoProps) {
-  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
-  const logoTextGradient = useColorModeValue(
-    'linear(to-r, gray.900, gray.700)',
-    'linear(to-r, white, gray.200)'
-  )
+export default function Logo({ user, onClick }: LogoProps) {
   const accentColor = useColorModeValue('blue.500', 'blue.300')
-  const logoFrameBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(255,255,255,0.95), rgba(241,245,249,0.85))',
-    'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06))'
+  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
+  const titleGradient = useColorModeValue(
+    'linear(to-br, gray.900, gray.700)',
+    'linear(to-br, white, gray.300)',
   )
-  const logoFrameBorder = useColorModeValue('whiteAlpha.700', 'whiteAlpha.300')
-  const logoFrameShadow = useColorModeValue(
-    '0 10px 24px rgba(59, 130, 246, 0.22), 0 2px 8px rgba(15, 23, 42, 0.12)',
-    '0 12px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255,255,255,0.08)'
+  const frameBg = useColorModeValue(
+    'linear-gradient(135deg, #ffffff 0%, #eef2ff 50%, #e0e7ff 100%)',
+    'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
   )
-  const logoFrameHoverShadow = useColorModeValue(
-    '0 14px 30px rgba(59, 130, 246, 0.28), 0 4px 10px rgba(15, 23, 42, 0.16)',
-    '0 16px 34px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(147,197,253,0.2)'
+  const frameBorder = useColorModeValue('rgba(37, 99, 235, 0.18)', 'whiteAlpha.300')
+  const frameShadow = useColorModeValue(
+    '0 4px 14px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+    '0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.06)',
   )
-  const logoGlow = useColorModeValue(
-    'radial-gradient(circle, rgba(59,130,246,0.28) 0%, rgba(59,130,246,0) 70%)',
-    'radial-gradient(circle, rgba(96,165,250,0.35) 0%, rgba(96,165,250,0) 72%)'
+  const frameHoverShadow = useColorModeValue(
+    '0 8px 22px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255,255,255,0.95)',
+    '0 10px 26px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
   )
-  const logoImageDropShadow = useColorModeValue(
-    'drop-shadow(0 2px 8px rgba(30, 64, 175, 0.28))',
-    'drop-shadow(0 2px 8px rgba(147, 197, 253, 0.25))'
+  const glossOverlay = useColorModeValue(
+    'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
+    'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)',
   )
-  const freeBadgeBg = useColorModeValue('blue.50', 'whiteAlpha.200')
-  const freeBadgeColor = useColorModeValue('blue.700', 'blue.100')
-  const freeBadgeBorder = useColorModeValue('blue.200', 'whiteAlpha.300')
+  const badgeBg = useColorModeValue('blue.50', 'whiteAlpha.200')
+  const badgeColor = useColorModeValue('blue.700', 'blue.100')
+  const badgeBorder = useColorModeValue('blue.200', 'whiteAlpha.300')
+
+  const handleClick = () => {
+    if (onClick) return onClick()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
     <HStack
-      spacing={{ base: 1.5, sm: 2, md: 3 }}
       as="button"
       type="button"
-      aria-label="Go to top"
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="Personal Budget — go to top"
+      onClick={handleClick}
+      spacing={{ base: 2, md: 2.5 }}
+      role="group"
       cursor="pointer"
-      _hover={{ 
-        transform: 'translateY(-1px)'
-      }}
-      _active={{ transform: 'translateY(0)' }}
-      transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
       minW={0}
       flexShrink={1}
-      role="group"
+      transition="transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)"
+      _hover={{ transform: 'translateY(-1px)' }}
+      _active={{ transform: 'translateY(0)' }}
+      _focusVisible={{ outline: 'none' }}
     >
       <Box
-        p={{ base: 1.5, sm: 2, md: 2.5 }}
-        bg={logoFrameBg}
-        border="1px solid"
-        borderColor={logoFrameBorder}
-        rounded={{ base: 'lg', md: '2xl' }}
-        position="relative"
-        overflow="hidden"
         flexShrink={0}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        boxShadow={logoFrameShadow}
+        position="relative"
+        p={{ base: 1.5, md: 2 }}
+        bg={frameBg}
+        border="1px solid"
+        borderColor={frameBorder}
+        rounded={{ base: 'lg', md: 'xl' }}
+        boxShadow={frameShadow}
         backdropFilter="blur(8px)"
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        overflow="hidden"
+        transition="box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease"
         _groupHover={{
-          transform: 'translateY(-1px) scale(1.03)',
-          boxShadow: logoFrameHoverShadow,
+          transform: 'scale(1.05) rotate(-2deg)',
+          boxShadow: frameHoverShadow,
+        }}
+        sx={{
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            background: glossOverlay,
+            pointerEvents: 'none',
+          },
         }}
       >
-        <Box
-          position="absolute"
-          inset="-45%"
-          bg={logoGlow}
-          opacity={0.7}
-          transition="transform 0.5s ease, opacity 0.3s ease"
-          _groupHover={{
-            transform: 'scale(1.08)',
-            opacity: 0.95,
-          }}
-        />
         <Image
           src={logoImage}
-          alt="Personal Budget Logo"
-          boxSize={{ base: 6, sm: 7, md: 9, lg: 10 }}
+          alt=""
+          boxSize={{ base: 6, md: 8 }}
           objectFit="contain"
+          aria-hidden
           position="relative"
           zIndex={1}
-          filter={logoImageDropShadow}
-          transition="transform 0.3s ease"
-          _groupHover={{ transform: 'scale(1.05)' }}
         />
       </Box>
 
-      <Box textAlign="left" minW={0} flexShrink={1}>
-        <HStack spacing={1.5} align="center" flexWrap="nowrap">
+      <Box textAlign="left" minW={0} overflow="hidden">
+        <HStack spacing={1.5} align="center" minW={0}>
           <Text
-            fontSize={{ base: 'md', sm: 'lg', md: '2xl', lg: '3xl' }}
-            fontWeight="900"
-            letterSpacing="-0.03em"
-            bgGradient={logoTextGradient}
+            fontSize={{ base: 'md', md: 'xl', lg: '2xl' }}
+            fontWeight={800}
+            letterSpacing="-0.025em"
+            bgGradient={titleGradient}
             bgClip="text"
-            lineHeight="1"
+            lineHeight={1}
             whiteSpace="nowrap"
             overflow="hidden"
             textOverflow="ellipsis"
+            minW={0}
           >
-            <Text as="span" display={{ base: 'inline', sm: 'none' }}>
-              P<Text as="span" color={accentColor}>.</Text> Budget
-            </Text>
-            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
-              Personal
-              <Text as="span" color={accentColor}>.</Text>
-              Budget
-            </Text>
+            <Box as="span" display={{ base: 'inline', sm: 'none' }}>
+              Personal<Text as="span" color={accentColor}>.</Text>Budget
+            </Box>
+            <Box as="span" display={{ base: 'none', sm: 'inline' }}>
+              Personal<Text as="span" color={accentColor}>.</Text>Budget
+            </Box>
           </Text>
           {!user && (
             <Badge
-              variant="subtle"
-              fontSize={{ base: '3xs', sm: '2xs', md: 'xs' }}
-              px={{ base: 1.5, sm: 1.5, md: 2 }}
+              fontSize="2xs"
+              fontWeight={700}
+              px={1.5}
               py={0.5}
               rounded="full"
               textTransform="none"
               letterSpacing="0.02em"
-              fontWeight="600"
-              bg={freeBadgeBg}
-              color={freeBadgeColor}
+              bg={badgeBg}
+              color={badgeColor}
               border="1px solid"
-              borderColor={freeBadgeBorder}
-              boxShadow="xs"
-              flexShrink={0}
-              display={{ base: 'none', sm: 'inline-flex' }}
+              borderColor={badgeBorder}
+              display={{ base: 'none', md: 'inline-flex' }}
             >
               Free
             </Badge>
           )}
         </HStack>
         <Text
-          fontSize={{ base: '3xs', sm: '2xs', md: 'xs' }}
-          fontWeight="600"
+          fontSize="2xs"
+          fontWeight={600}
           color={subtitleColor}
-          letterSpacing="0.15em"
+          letterSpacing="0.18em"
           textTransform="uppercase"
-          opacity={0.8}
           mt={0.5}
-          display={{ base: 'none', md: 'block' }}
+          display={{ base: 'none', lg: 'block' }}
         >
           Smart Financial Freedom
         </Text>
@@ -158,4 +147,3 @@ export default function Logo({ user }: LogoProps) {
     </HStack>
   )
 }
-

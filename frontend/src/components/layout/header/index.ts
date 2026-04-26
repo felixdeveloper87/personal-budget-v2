@@ -1,11 +1,11 @@
-// Header Components - All header related components
+export { default } from './Header'
 export { default as Header } from './Header'
 export { default as Logo } from './Logo'
-export { default as Navigation } from './Navigation'
-export { default as MobileNavigation } from './MobileNavigation'
+export { default as NavBar } from './NavBar'
+export { default as LandingNav } from './LandingNav'
+export { default as HeaderActions } from './HeaderActions'
+export { default as SearchTrigger } from './SearchTrigger'
+export { default as ThemeToggle } from './ThemeToggle'
 export { default as UserMenu } from './UserMenu'
-export { default as HeaderControls } from './HeaderControls'
-export { default as SearchButton } from './SearchButton'
-
-// Default export for the main Header component
-export { default } from './Header'
+export type { AppPage, NavItem } from './navigation.config'
+export { NAV_ITEMS, LANDING_SECTIONS } from './navigation.config'
