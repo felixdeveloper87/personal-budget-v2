@@ -1,14 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Badge,
   Box,
+  Collapse,
   HStack,
+  Icon,
+  IconButton,
   SimpleGrid,
   Text,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { CreditCard } from 'lucide-react'
+import { ChevronDown, CreditCard } from 'lucide-react'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
@@ -124,6 +127,8 @@ export default function InstallmentPlansModal({
                 onDeleted={onPlanDeleted}
                 labelColor={sectionLabelColor}
                 dividerColor={dividerColor}
+                collapsible
+                defaultExpanded={false}
               />
             )}
           </VStack>
@@ -142,6 +147,10 @@ interface PlansSectionProps {
   emptyMessage?: string
   labelColor: string
   dividerColor: string
+  /** When set, section body can be shown or hidden via the header control. */
+  collapsible?: boolean
+  /** Initial expanded state when `collapsible` is true. Defaults to `true`. */
+  defaultExpanded?: boolean
 }
 
 function PlansSection({
@@ -153,49 +162,117 @@ function PlansSection({
   emptyMessage,
   labelColor,
   dividerColor,
+  collapsible = false,
+  defaultExpanded = true,
 }: PlansSectionProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
+  const chevronMuted = useColorModeValue('gray.400', 'gray.500')
+  const panelId = `installment-section-${label.toLowerCase().replace(/\s+/g, '-')}`
+
+  const isExpanded = collapsible ? expanded : true
+
+  const headerContent = (
+    <HStack spacing={3} align="center" flex={1} minW={0}>
+      <Text
+        fontSize="xs"
+        fontWeight={700}
+        color={labelColor}
+        textTransform="uppercase"
+        letterSpacing="0.06em"
+      >
+        {label}
+      </Text>
+      <Text fontSize="xs" color={labelColor} fontWeight={500}>
+        {count}
+      </Text>
+    </HStack>
+  )
+
   return (
     <Box>
       <HStack
-        spacing={3}
+        spacing={2}
         align="center"
         mb={3}
         pb={2}
         borderBottom="1px solid"
         borderColor={dividerColor}
       >
-        <Text
-          fontSize="xs"
-          fontWeight={700}
-          color={labelColor}
-          textTransform="uppercase"
-          letterSpacing="0.06em"
-        >
-          {label}
-        </Text>
-        <Text fontSize="xs" color={labelColor} fontWeight={500}>
-          {count}
-        </Text>
+        {collapsible ? (
+          <>
+            <HStack
+              as="button"
+              type="button"
+              flex={1}
+              minW={0}
+              spacing={0}
+              align="center"
+              onClick={() => setExpanded((e) => !e)}
+              aria-expanded={isExpanded}
+              aria-controls={panelId}
+              cursor="pointer"
+              bg="transparent"
+              border="none"
+              p={0}
+              textAlign="left"
+              _focusVisible={{
+                outline: '2px solid',
+                outlineColor: 'blue.400',
+                outlineOffset: '2px',
+                borderRadius: 'md',
+              }}
+            >
+              {headerContent}
+            </HStack>
+            <IconButton
+              aria-label={isExpanded ? `Hide ${label}` : `Show ${label}`}
+              icon={
+                <Icon
+                  as={ChevronDown}
+                  boxSize={5}
+                  transition="transform 0.2s ease"
+                  transform={isExpanded ? 'rotate(180deg)' : undefined}
+                />
+              }
+              variant="ghost"
+              size="sm"
+              color={chevronMuted}
+              onClick={() => setExpanded((e) => !e)}
+              aria-expanded={isExpanded}
+              aria-controls={panelId}
+            />
+          </>
+        ) : (
+          headerContent
+        )}
       </HStack>
 
-      {plans.length === 0 ? (
-        emptyMessage && (
-          <Text fontSize="sm" color={labelColor} py={2}>
-            {emptyMessage}
-          </Text>
-        )
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 5 }} w="full">
-          {plans.map((plan) => (
-            <InstallmentPlanCard
-              key={plan.id}
-              plan={plan}
-              onDeleted={onDeleted}
-              variant={variant}
-            />
-          ))}
-        </SimpleGrid>
-      )}
+      <Collapse in={isExpanded} animateOpacity>
+        <Box id={panelId} role="region">
+          {plans.length === 0 ? (
+            emptyMessage && (
+              <Text fontSize="sm" color={labelColor} py={2}>
+                {emptyMessage}
+              </Text>
+            )
+          ) : (
+            <SimpleGrid
+              columns={{ base: 1, md: 2 }}
+              spacing={{ base: 4, md: 5 }}
+              w="full"
+            >
+              {plans.map((plan) => (
+                <InstallmentPlanCard
+                  key={plan.id}
+                  plan={plan}
+                  onDeleted={onDeleted}
+                  variant={variant}
+                />
+              ))}
+            </SimpleGrid>
+          )}
+        </Box>
+      </Collapse>
     </Box>
   )
 }
