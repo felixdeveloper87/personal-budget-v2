@@ -105,7 +105,6 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
             borderColor={hintBorder}
             color={hintColor}
           >
-            Ctrl K
           </Kbd>
         </HStack>
       </Button>
