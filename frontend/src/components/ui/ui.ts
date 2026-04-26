@@ -255,12 +255,13 @@ export const safariStyles = {
     heightWebkit: '-webkit-fill-available' as any,
     // Prevenir bounce no iOS
     overscrollBehavior: 'contain' as const,
-    // Suporte para viewport-fit=cover (iPhone X+)
+    // Viewport insets: never use raw env() alone — on many Android phones
+    // safe-area-inset-top is 0 and was collapsing the modal flush to the
+    // status bar. Top inset is handled by modal headers (ModalHeader, etc.).
     '@supports (padding: max(0px))': {
-      paddingTop: 'env(safe-area-inset-top)',
-      paddingBottom: 'env(safe-area-inset-bottom)',
-      paddingLeft: 'env(safe-area-inset-left)',
-      paddingRight: 'env(safe-area-inset-right)',
+      paddingBottom: 'max(12px, env(safe-area-inset-bottom, 0px))',
+      paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
+      paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
     } as any,
   },
   scrollable: {

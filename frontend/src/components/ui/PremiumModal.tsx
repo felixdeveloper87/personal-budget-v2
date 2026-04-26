@@ -9,7 +9,7 @@ import {
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
-import { safeAreaStyles, safariStyles, getResponsiveStyles } from './ui'
+import { safariStyles, getResponsiveStyles } from './ui'
 
 export interface PremiumModalProps extends Omit<ModalProps, 'children'> {
     children: ReactNode
@@ -32,6 +32,7 @@ export default function PremiumModal({
     ...props
 }: PremiumModalProps) {
     const responsiveStyles = getResponsiveStyles()
+    const { sx: contentSx, ...restContentProps } = contentProps ?? {}
 
     // Premium visual styles
     const overlayBg = useColorModeValue('rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.6)')
@@ -74,11 +75,10 @@ export default function PremiumModal({
                 my={{ base: 4, md: 0 }}
                 {...responsiveStyles.modal}
                 sx={{
-                    ...safeAreaStyles.container,
                     ...safariStyles.modal,
-                    ...contentProps?.sx
+                    ...(contentSx && typeof contentSx === 'object' ? contentSx : {}),
                 }}
-                {...contentProps}
+                {...restContentProps}
             >
                 {header && (
                     <Box
@@ -104,7 +104,12 @@ export default function PremiumModal({
                     <Box
                         position="relative"
                         zIndex={2}
-                        p={{ base: 4, md: 6 }}
+                        px={{ base: 4, md: 6 }}
+                        pt={{ base: 4, md: 6 }}
+                        pb={{
+                            base: 'max(1rem, env(safe-area-inset-bottom, 0px))',
+                            md: 6,
+                        }}
                         borderTop="1px solid"
                         borderColor={useColorModeValue('gray.100', 'whiteAlpha.100')}
                     >

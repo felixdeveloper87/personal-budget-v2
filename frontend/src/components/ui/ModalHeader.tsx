@@ -111,7 +111,10 @@ export default function ModalHeader({
       borderBottom="1px solid"
       borderColor={borderColor}
       px={{ base: 4, sm: 6 }}
-      pt={{ base: 'max(1rem, env(safe-area-inset-top, 0px))', sm: 5 }}
+      pt={{
+        base: 'max(1.5rem, env(safe-area-inset-top, 0px))',
+        sm: 5,
+      }}
       pb={4}
     >
       <HStack justify="space-between" align="center" spacing={3}>
