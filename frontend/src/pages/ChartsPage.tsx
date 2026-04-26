@@ -1,337 +1,247 @@
-import { Box, VStack, Card, CardBody, Text, Spinner, Center, useColorModeValue, Heading, HStack, Button, Image } from '@chakra-ui/react'
+import type { ReactNode } from 'react'
+import {
+  Badge,
+  Box,
+  Flex,
+  VStack,
+  useColorModeValue,
+} from '@chakra-ui/react'
+import {
+  BarChart3,
+  DollarSign,
+  LineChart,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import { useDashboardData } from '../hooks/useDashboardData'
+
 import PeriodNavigator from '../components/summary/PeriodNavigator'
-import { TransactionsChart, IncomeChart, ExpensesChart, BalanceChart } from '../components/charts/modal'
-import { getResponsiveStyles } from '../components/ui'
-import { RotateCcw } from 'lucide-react'
-import chartsImage from '../../assets/charts.png'
+import {
+  TransactionsChart,
+  IncomeChart,
+  ExpensesChart,
+  BalanceChart,
+} from '../components/charts/modal'
+import {
+  ChartsPageHeader,
+  ChartsPageSkeleton,
+} from '../components/charts/page'
+import {
+  SectionCard,
+  SectionHeader,
+  type SectionHeaderAccent,
+} from '../components/ui'
+
+interface ChartShellProps {
+  icon: LucideIcon
+  title: string
+  caption: string
+  accent: SectionHeaderAccent
+  badgeScheme: string
+  periodLabel: string
+  children: ReactNode
+}
+
+/**
+ * Local shell that wraps each chart in a clean SectionCard with a header
+ * (icon + title + period badge). Keeps the page declarative.
+ */
+function ChartShell({
+  icon,
+  title,
+  caption,
+  accent,
+  badgeScheme,
+  periodLabel,
+  children,
+}: ChartShellProps) {
+  return (
+    <SectionCard staticOnHover>
+      <Box p={{ base: 4, sm: 5, md: 6 }}>
+        <VStack spacing={{ base: 4, md: 5 }} align="stretch">
+          <SectionHeader
+            icon={icon}
+            title={title}
+            caption={caption}
+            accent={accent}
+            rightSlot={
+              <Badge
+                variant="subtle"
+                colorScheme={badgeScheme}
+                borderRadius="full"
+                px={2.5}
+                py={1}
+                fontSize="xs"
+                fontWeight={700}
+                textTransform="uppercase"
+                letterSpacing="0.04em"
+              >
+                {periodLabel}
+              </Badge>
+            }
+          />
+          {children}
+        </VStack>
+      </Box>
+    </SectionCard>
+  )
+}
 
 export default function ChartsPage() {
-  const { 
-    selectedDate, 
-    selectedPeriod, 
+  const {
+    selectedDate,
+    selectedPeriod,
     onPeriodChange,
     navigatePeriod,
     goToToday,
     formatLabel,
   } = usePeriodNavigator()
-  const { transactions, monthSummary, loading } = useDashboardData(selectedDate, selectedPeriod)
-  const periodData = usePeriodData(transactions, monthSummary, selectedPeriod, selectedDate)
-
-  const responsiveStyles = getResponsiveStyles()
-  const cardBg = useColorModeValue('white', '#0a0a0a')
-  const cardBgPattern = useColorModeValue(
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23000" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E',
-    'data:image/svg+xml,%3Csvg width="60" height="60" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M10 5 L20 5 M50 10 L55 10 M5 40 L15 40 M30 20 L45 20" stroke="%23fff" stroke-width="0.5" opacity="0.1" stroke-linecap="round"/%3E%3C/svg%3E'
+  const { transactions, monthSummary, loading } = useDashboardData(
+    selectedDate,
+    selectedPeriod,
   )
-  const cardBorderColor = useColorModeValue('gray.200', 'gray.800')
-  const bg = useColorModeValue('white', 'black')
-  const texturePatternLight = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23000" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
-  const texturePatternDark = 'data:image/svg+xml,%3Csvg width="6" height="6" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M 0 3 L 3 0 M 3 6 L 6 3 M 0 3 L 3 6" stroke="%23fff" stroke-width="0.6" opacity="0.15"/%3E%3C/svg%3E'
-  const texturePattern = useColorModeValue(texturePatternLight, texturePatternDark)
-  
-  // Modern divider styles
-  const dividerColor = useColorModeValue(
-    'linear-gradient(90deg, transparent 0%, rgba(226, 232, 240, 0.8) 20%, rgba(226, 232, 240, 0.8) 80%, transparent 100%)',
-    'linear-gradient(90deg, transparent 0%, rgba(75, 85, 99, 0.4) 20%, rgba(75, 85, 99, 0.4) 80%, transparent 100%)'
+  const periodData = usePeriodData(
+    transactions,
+    monthSummary,
+    selectedPeriod,
+    selectedDate,
   )
-  const dividerAccentColor = useColorModeValue('blue.300', 'blue.500')
 
-  if (loading) {
-    return (
-      <Box 
-        bg={bg}
-        backgroundImage={texturePattern}
-        minH="100vh"
-        px={{ base: 0.5, md: 1, lg: 1.5 }} 
-        py={{ base: 3, md: 6 }}
-      >
-        <Center py={20}>
-          <VStack spacing={4}>
-            <Spinner size="xl" />
-            <Text>Loading charts...</Text>
-          </VStack>
-        </Center>
-      </Box>
-    )
-  }
-
-  const { transactions: periodTransactions, balance, label } = periodData
+  const periodLabel = formatLabel()
+  const overviewBadgeBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.14)')
+  const overviewBadgeColor = useColorModeValue('blue.600', 'blue.300')
 
   return (
-    <Box 
-      bg={bg}
-      backgroundImage={texturePattern}
+    <Box
       minH="100vh"
-      px={{ base: 0.5, md: 1, lg: 1.5 }} 
-      py={{ base: 3, md: 6 }}
+      px={{ base: 2, md: 4, lg: 6 }}
+      py={{ base: 3, md: 5 }}
+      maxW="1600px"
+      mx="auto"
     >
-      <Box
-        w="full"
-        px={{ base: 1, sm: 2, md: 3, lg: 4 }}
-        sx={{
-          paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
-          paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
-        }}
-      >
-        <Card
-          bg={cardBg}
-          backgroundImage={cardBgPattern}
-          backdropFilter="blur(10px)"
-          border="1px solid"
-          borderColor={cardBorderColor}
-          borderRadius="2xl"
-          shadow={useColorModeValue('0 1px 3px rgba(0,0,0,0.05)', '0 1px 3px rgba(0,0,0,0.2)')}
-          overflow="hidden"
-          position="relative"
-          _hover={{
-            shadow: useColorModeValue('0 4px 12px rgba(0,0,0,0.08)', '0 4px 12px rgba(0,0,0,0.3)')
-          }}
-          transition="all 0.2s ease"
-        >
-          <CardBody p={{ base: 4, sm: 5, md: 6, lg: 6 }}>
-            <VStack spacing={responsiveStyles.addTransactionSection.card.spacing} align="stretch">
-              {/* Header */}
-              <HStack justify="space-between" align="center" w="full">
-                <HStack spacing={4} align="center" flex="1">
-                  <Box
-                    p={2}
-                    bg="transparent"
-                    borderRadius="xl"
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Image
-                      src={chartsImage}
-                      alt="Charts"
-                      boxSize={{ base: 8, sm: 10, md: 12 }}
-                      objectFit="contain"
-                    />
-                  </Box>
-                  <VStack spacing={0} align="start" flex="1">
-                    <Heading
-                      size="md"
-                      fontWeight="600"
-                      textAlign="left"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      letterSpacing="-0.015em"
-                      fontSize={{ base: 'md', sm: 'xl' }}
-                      color={useColorModeValue('gray.800', 'white')}
-                      lineHeight="1.2"
-                    >
-                      Charts & Analytics
-                    </Heading>
-                    <Text
-                      fontSize={{ base: 'xs', sm: 'sm' }}
-                      color={useColorModeValue('gray.600', 'gray.400')}
-                      fontWeight="400"
-                      textAlign="left"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      mt={{ base: 0.5, sm: 0 }}
-                      ml={{ base: 0, sm: 1 }}
-                      display={{ base: 'block', sm: 'inline' }}
-                    >
-                      • Visualize your financial data
-                    </Text>
-                  </VStack>
-                </HStack>
+      <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+        <ChartsPageHeader
+          periodLabel={periodLabel}
+          onGoToToday={goToToday}
+        />
 
-                {/* Today Button */}
-                <Button
-                  size="sm"
-                  leftIcon={<RotateCcw size={14} />}
-                  onClick={goToToday}
-                  display={{ base: 'none', sm: 'flex' }}
-                  borderRadius="xl"
-                  px={4}
-                  py={2}
-                  fontWeight="500"
-                  bg="transparent"
-                  color={useColorModeValue('blue.600', 'blue.300')}
-                  border="1px solid"
-                  borderColor={useColorModeValue('blue.200', 'blue.500')}
-                  boxShadow="sm"
-                  fontFamily="system-ui, -apple-system, sans-serif"
-                  backdropFilter="blur(10px)"
-                  _hover={{
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                    borderColor: useColorModeValue('blue.300', 'blue.400'),
-                    bg: useColorModeValue('blue.50', 'blue.900')
-                  }}
-                  _active={{
-                    transform: 'translateY(0)',
-                  }}
-                  transition="all 0.2s ease"
+        {loading ? (
+          <ChartsPageSkeleton />
+        ) : (
+          <>
+            <SectionCard>
+              <Flex
+                direction={{ base: 'column', xl: 'row' }}
+                align={{ base: 'stretch', xl: 'center' }}
+                justify="space-between"
+                gap={{ base: 3, md: 4 }}
+                p={{ base: 4, sm: 5 }}
+                w="full"
+              >
+                <Box
+                  flexShrink={0}
+                  maxW={{ xl: '320px' }}
+                  w={{ base: 'full', xl: 'auto' }}
                 >
-                  Today
-                </Button>
-              </HStack>
-
-              {/* Period Selector */}
-              <PeriodNavigator
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={onPeriodChange}
-                onNavigatePeriod={navigatePeriod}
-                onGoToToday={goToToday}
-                formatLabel={formatLabel}
-              />
-
-              {/* Modern Divider */}
-              <Box
-                h="1px"
-                w="100%"
-                bg={dividerColor}
-                my={6}
-                position="relative"
-                _before={{
-                  content: '""',
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  w: '40px',
-                  h: '1px',
-                  bg: dividerAccentColor,
-                  opacity: 0.6,
-                }}
-              />
-
-              {/* Charts Section */}
-              <VStack spacing={6} align="stretch">
-                {/* Transactions Chart */}
-                <Box>
-                  <Text 
-                    fontSize={{ base: "lg", sm: "xl" }} 
-                    fontWeight="600" 
-                    mb={4}
-                    color={useColorModeValue('gray.800', 'white')}
-                  >
-                    Transactions Overview
-                  </Text>
-                  <TransactionsChart 
-                    transactions={periodTransactions} 
-                    selectedPeriod={label} 
+                  <SectionHeader
+                    icon={LineChart}
+                    title="Period"
+                    caption="Browse charts by day, week, month or year"
+                    accent="blue"
+                    rightSlot={
+                      <Box
+                        px={2.5}
+                        py={1}
+                        borderRadius="full"
+                        bg={overviewBadgeBg}
+                        color={overviewBadgeColor}
+                        fontSize="xs"
+                        fontWeight={700}
+                        letterSpacing="0.04em"
+                        textTransform="uppercase"
+                      >
+                        {periodLabel}
+                      </Box>
+                    }
                   />
                 </Box>
 
-                {/* Modern Divider */}
-              <Box
-                h="1px"
-                w="100%"
-                bg={dividerColor}
-                my={6}
-                position="relative"
-                _before={{
-                  content: '""',
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  w: '40px',
-                  h: '1px',
-                  bg: dividerAccentColor,
-                  opacity: 0.6,
-                }}
-              />
-
-                {/* Income Chart */}
-                <Box>
-                  <Text 
-                    fontSize={{ base: "lg", sm: "xl" }} 
-                    fontWeight="600" 
-                    mb={4}
-                    color={useColorModeValue('gray.800', 'white')}
-                  >
-                    Income Analysis
-                  </Text>
-                  <IncomeChart 
-                    transactions={periodTransactions} 
-                    selectedPeriod={label} 
+                <Box flex={1} w="full">
+                  <PeriodNavigator
+                    selectedPeriod={selectedPeriod}
+                    onPeriodChange={onPeriodChange}
+                    onNavigatePeriod={navigatePeriod}
+                    onGoToToday={goToToday}
+                    formatLabel={formatLabel}
+                    isEmbedded
                   />
                 </Box>
+              </Flex>
+            </SectionCard>
 
-                {/* Modern Divider */}
-              <Box
-                h="1px"
-                w="100%"
-                bg={dividerColor}
-                my={6}
-                position="relative"
-                _before={{
-                  content: '""',
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  w: '40px',
-                  h: '1px',
-                  bg: dividerAccentColor,
-                  opacity: 0.6,
-                }}
+            <ChartShell
+              icon={BarChart3}
+              title="Transactions"
+              caption="Daily activity across income and expenses"
+              accent="blue"
+              badgeScheme="blue"
+              periodLabel={periodLabel}
+            >
+              <TransactionsChart
+                transactions={periodData.transactions}
+                selectedPeriod={periodData.label}
               />
+            </ChartShell>
 
-                {/* Expenses Chart */}
-                <Box>
-                  <Text 
-                    fontSize={{ base: "lg", sm: "xl" }} 
-                    fontWeight="600" 
-                    mb={4}
-                    color={useColorModeValue('gray.800', 'white')}
-                  >
-                    Expenses Analysis
-                  </Text>
-                  <ExpensesChart 
-                    transactions={periodTransactions} 
-                    selectedPeriod={label} 
-                  />
-                </Box>
-
-                {/* Modern Divider */}
-              <Box
-                h="1px"
-                w="100%"
-                bg={dividerColor}
-                my={6}
-                position="relative"
-                _before={{
-                  content: '""',
-                  position: 'absolute',
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  w: '40px',
-                  h: '1px',
-                  bg: dividerAccentColor,
-                  opacity: 0.6,
-                }}
+            <ChartShell
+              icon={TrendingUp}
+              title="Income"
+              caption="Where money is coming from"
+              accent="green"
+              badgeScheme="green"
+              periodLabel={periodLabel}
+            >
+              <IncomeChart
+                transactions={periodData.transactions}
+                selectedPeriod={periodData.label}
               />
+            </ChartShell>
 
-                {/* Balance Chart */}
-                <Box>
-                  <Text 
-                    fontSize={{ base: "lg", sm: "xl" }} 
-                    fontWeight="600" 
-                    mb={4}
-                    color={useColorModeValue('gray.800', 'white')}
-                  >
-                    Balance Overview
-                  </Text>
-                  <BalanceChart 
-                    transactions={periodTransactions} 
-                    selectedPeriod={label}
-                    currentBalance={balance}
-                  />
-                </Box>
-              </VStack>
-            </VStack>
-          </CardBody>
-        </Card>
-      </Box>
+            <ChartShell
+              icon={TrendingDown}
+              title="Expenses"
+              caption="Where money is going"
+              accent="red"
+              badgeScheme="red"
+              periodLabel={periodLabel}
+            >
+              <ExpensesChart
+                transactions={periodData.transactions}
+                selectedPeriod={periodData.label}
+              />
+            </ChartShell>
+
+            <ChartShell
+              icon={DollarSign}
+              title="Balance"
+              caption="How your balance evolves over time"
+              accent="violet"
+              badgeScheme="purple"
+              periodLabel={periodLabel}
+            >
+              <BalanceChart
+                transactions={periodData.transactions}
+                selectedPeriod={periodData.label}
+                currentBalance={periodData.balance}
+              />
+            </ChartShell>
+          </>
+        )}
+      </VStack>
     </Box>
   )
 }
-
