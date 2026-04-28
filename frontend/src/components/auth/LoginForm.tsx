@@ -12,6 +12,7 @@ import {
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import { EMAIL_REGEX } from './auth.constants'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -22,7 +23,7 @@ interface LoginErrors {
   password?: string
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 
 export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const [email, setEmail] = useState('')

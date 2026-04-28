@@ -3,7 +3,6 @@ import {
   Button,
   HStack,
   IconButton,
-  Kbd,
   Text,
   Tooltip,
   useColorModeValue,
@@ -26,9 +25,6 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
   const hoverBg = useColorModeValue('gray.50', 'whiteAlpha.200')
   const hoverBorder = useColorModeValue('blue.300', 'blue.400')
   const hoverColor = useColorModeValue('gray.900', 'white')
-  const hintBg = useColorModeValue('gray.100', 'whiteAlpha.200')
-  const hintBorder = useColorModeValue('gray.300', 'whiteAlpha.300')
-  const hintColor = useColorModeValue('gray.600', 'gray.300')
 
   if (variant === 'compact') {
     return (
@@ -95,17 +91,6 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
       >
         <HStack w="full" justify="space-between" spacing={3}>
           <Text fontSize="sm">Search transactions</Text>
-          <Kbd
-            fontSize="2xs"
-            fontWeight={700}
-            px={1.5}
-            py={0.5}
-            borderRadius="md"
-            bg={hintBg}
-            borderColor={hintBorder}
-            color={hintColor}
-          >
-          </Kbd>
         </HStack>
       </Button>
     </Box>

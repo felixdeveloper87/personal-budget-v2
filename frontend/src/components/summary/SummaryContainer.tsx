@@ -109,6 +109,7 @@ export default function SummaryContainer({
       <VStack spacing={{ base: 3, md: 4 }} align="stretch" w="full">
         <SummaryHeader
           selectedPeriod={selectedPeriod}
+          selectedDate={selectedDate}
           onPeriodChange={onPeriodChange}
           onNavigatePeriod={navigatePeriod}
           onGoToToday={goToToday}

@@ -16,7 +16,6 @@ export default function Layout({
 }: LayoutProps) {
   const handleOpenSettings = () => {
     // TODO: Implement settings modal
-    console.log('Settings clicked')
   }
 
   return (

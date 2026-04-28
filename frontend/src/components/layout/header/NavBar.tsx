@@ -193,8 +193,8 @@ function NavBarItem({
       ref={assignRef as unknown as React.Ref<HTMLDivElement>}
       flex={isMobile ? 1 : undefined}
       px={isMobile ? 2 : isIconOnly ? 2.5 : 3.5}
-      py={2}
-      minH={isMobile ? '44px' : '36px'}
+      py={isMobile ? 2.5 : 2}
+      minH={isMobile ? '48px' : '40px'}
       minW={isIconOnly ? '40px' : undefined}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"

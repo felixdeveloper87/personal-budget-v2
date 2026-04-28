@@ -114,6 +114,7 @@ export default function CategoriesPage() {
                 <Box flex={1} w="full">
                   <PeriodNavigator
                     selectedPeriod={selectedPeriod}
+                    selectedDate={selectedDate}
                     onPeriodChange={onPeriodChange}
                     onNavigatePeriod={navigatePeriod}
                     onGoToToday={goToToday}

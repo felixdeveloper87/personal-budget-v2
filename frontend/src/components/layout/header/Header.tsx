@@ -110,16 +110,16 @@ export default function Header({
           position="relative"
           zIndex={2}
           sx={{
-            paddingLeft: 'max(12px, env(safe-area-inset-left, 0px))',
-            paddingRight: 'max(12px, env(safe-area-inset-right, 0px))',
+            paddingLeft: 'max(16px, env(safe-area-inset-left, 0px))',
+            paddingRight: 'max(16px, env(safe-area-inset-right, 0px))',
           }}
         >
           {/* Top row: brand + (desktop nav) + actions */}
           <Flex
             align="center"
             justify="space-between"
-            gap={{ base: 2, md: 4, lg: 6 }}
-            h={{ base: '60px', md: '68px' }}
+            gap={{ base: 3, md: 4, lg: 6 }}
+            h={{ base: '72px', md: '80px' }}
             minW={0}
           >
             <Logo user={user} />
@@ -154,7 +154,7 @@ export default function Header({
           {/* Mobile primary nav (base..md): second row, full-width segmented bar.
               Always visible — no hamburger, no hidden buttons. */}
           {user && (
-            <Box display={{ base: 'block', md: 'none' }} pb={2.5} pt={0.5}>
+            <Box display={{ base: 'block', md: 'none' }} pb={3} pt={1}>
               <NavBar
                 variant="mobile"
                 currentPage={currentPage}

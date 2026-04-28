@@ -89,7 +89,7 @@ export default function Logo({ user, onClick }: LogoProps) {
         <Image
           src={logoImage}
           alt=""
-          boxSize={{ base: 6, md: 8 }}
+          boxSize={{ base: 7, md: 8 }}
           objectFit="contain"
           aria-hidden
           position="relative"

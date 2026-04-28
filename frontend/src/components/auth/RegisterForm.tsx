@@ -13,6 +13,7 @@ import {
 import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
@@ -24,9 +25,6 @@ interface RegisterErrors {
   password?: string
   confirmPassword?: string
 }
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const MIN_PASSWORD_LENGTH = 6
 
 export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [name, setName] = useState('')

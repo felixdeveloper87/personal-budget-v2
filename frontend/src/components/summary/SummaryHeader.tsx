@@ -6,6 +6,7 @@ import { SectionCard, SectionHeader } from '../ui'
 
 interface SummaryHeaderProps {
   selectedPeriod: PeriodType
+  selectedDate?: Date
   onPeriodChange: (period: PeriodType) => void
   onNavigatePeriod: (direction: 'prev' | 'next') => void
   onGoToToday: () => void
@@ -14,6 +15,7 @@ interface SummaryHeaderProps {
 
 export default function SummaryHeader({
   selectedPeriod,
+  selectedDate,
   onPeriodChange,
   onNavigatePeriod,
   onGoToToday,
@@ -41,6 +43,7 @@ export default function SummaryHeader({
         <VStack spacing={3} align="stretch" flex={1} w="full">
           <PeriodNavigator
             selectedPeriod={selectedPeriod}
+            selectedDate={selectedDate}
             onPeriodChange={onPeriodChange}
             onNavigatePeriod={onNavigatePeriod}
             onGoToToday={onGoToToday}

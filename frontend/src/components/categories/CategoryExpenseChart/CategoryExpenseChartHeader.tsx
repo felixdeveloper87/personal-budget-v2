@@ -21,6 +21,12 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
   isMobile,
 }) => {
   const buttonHoverBg = useColorModeValue('red.50', 'red.900')
+  const titleGradient = useColorModeValue(
+    'linear(to-r, gray.800, gray.600)',
+    'linear(to-r, white, gray.300)'
+  )
+  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
+  const buttonColor = useColorModeValue('red.600', 'red.300')
 
   const responsiveStyles = getResponsiveStyles()
 
@@ -55,16 +61,13 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
             lineHeight="1.2"
             fontFamily="system-ui, -apple-system, sans-serif"
             letterSpacing="-0.02em"
-            bgGradient={useColorModeValue(
-              'linear(to-r, gray.800, gray.600)',
-              'linear(to-r, white, gray.300)'
-            )}
+            bgGradient={titleGradient}
             bgClip="text"
           >
             {title}
           </Text>
           <Text
-            color={useColorModeValue('gray.500', 'gray.400')}
+            color={subtitleColor}
             fontWeight="600"
             fontSize={{ base: 'xs', sm: 'sm' }}
             lineHeight="1.2"
@@ -91,7 +94,7 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
       <Button
         size={{ base: 'xs', sm: 'sm' }}
         variant="ghost"
-        color={useColorModeValue('red.600', 'red.300')}
+        color={buttonColor}
         onClick={onViewAllClick}
         rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} />}
         borderRadius="xl"

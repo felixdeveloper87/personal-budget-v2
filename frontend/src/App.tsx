@@ -71,7 +71,6 @@ function AppContent() {
         <AuthModal 
           isOpen={showAuth} 
           onClose={() => setShowAuth(false)} 
-          onBackToLanding={() => setShowAuth(false)} 
         />
       </>
     )
@@ -84,7 +83,6 @@ function AppContent() {
       <AuthModal 
         isOpen={showAuth} 
         onClose={() => setShowAuth(false)} 
-        onBackToLanding={() => setShowAuth(false)} 
       />
     </>
   )

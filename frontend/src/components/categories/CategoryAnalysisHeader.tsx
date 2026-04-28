@@ -68,19 +68,19 @@ export default function CategoryAnalysisHeader({
     icon: typeof TrendingDown
     palette: TabPalette
   }> = [
-    {
-      key: 'expenses',
-      label: 'Expenses',
-      icon: TrendingDown,
-      palette: expensePalette,
-    },
-    {
-      key: 'incomes',
-      label: 'Incomes',
-      icon: TrendingUp,
-      palette: incomePalette,
-    },
-  ]
+      {
+        key: 'expenses',
+        label: 'Expenses',
+        icon: TrendingDown,
+        palette: expensePalette,
+      },
+      {
+        key: 'incomes',
+        label: 'Incomes',
+        icon: TrendingUp,
+        palette: incomePalette,
+      },
+    ]
 
   return (
     <Flex

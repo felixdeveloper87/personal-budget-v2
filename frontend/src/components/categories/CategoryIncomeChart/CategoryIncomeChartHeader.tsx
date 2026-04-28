@@ -21,6 +21,12 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
   isMobile,
 }) => {
   const buttonHoverBg = useColorModeValue('green.50', 'green.900')
+  const titleGradient = useColorModeValue(
+    'linear(to-r, gray.800, gray.600)',
+    'linear(to-r, white, gray.300)'
+  )
+  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
+  const buttonColor = useColorModeValue('green.600', 'green.300')
 
   const responsiveStyles = getResponsiveStyles()
 
@@ -54,16 +60,13 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
             lineHeight="1.2"
             fontFamily="system-ui, -apple-system, sans-serif"
             letterSpacing="-0.02em"
-            bgGradient={useColorModeValue(
-              'linear(to-r, gray.800, gray.600)',
-              'linear(to-r, white, gray.300)'
-            )}
+            bgGradient={titleGradient}
             bgClip="text"
           >
             {title}
           </Text>
           <Text
-            color={useColorModeValue('gray.500', 'gray.400')}
+            color={subtitleColor}
             fontWeight="600"
             fontSize={{ base: 'xs', sm: 'sm' }}
             lineHeight="1.2"
@@ -89,7 +92,7 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
       <Button
         size={{ base: 'xs', sm: 'sm' }}
         variant="ghost"
-        color={useColorModeValue('green.600', 'green.300')}
+        color={buttonColor}
         onClick={onViewAllClick}
         rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} />}
         borderRadius="xl"

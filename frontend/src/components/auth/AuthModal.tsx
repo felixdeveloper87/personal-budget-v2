@@ -39,8 +39,6 @@ const TABS: ReadonlyArray<AuthTabConfig> = [
 interface AuthModalProps {
   isOpen: boolean
   onClose: () => void
-  /** kept for backwards compatibility — close acts as "back to landing" */
-  onBackToLanding?: () => void
 }
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {

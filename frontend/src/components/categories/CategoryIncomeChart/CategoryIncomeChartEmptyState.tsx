@@ -17,7 +17,6 @@ export const CategoryIncomeChartEmptyState = React.memo<CategoryIncomeChartEmpty
 
   return (
     <Card
-      // backgroundImage={cardBgPattern}
       bg={cardBg}
       backdropFilter="blur(20px)"
       borderRadius="2xl"
