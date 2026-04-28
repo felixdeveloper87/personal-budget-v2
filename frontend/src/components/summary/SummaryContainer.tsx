@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { VStack, useDisclosure } from '@chakra-ui/react'
+import { Box, Divider, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import SummaryCardsGrid from './SummaryCardsGrid'
 import SummaryCardModal from '../charts/modal/SummaryCardModal'
-import SummaryHeader from './SummaryHeader'
+import PeriodNavigator from './PeriodNavigator'
+import { SectionCard } from '../ui'
 
 type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
@@ -88,6 +89,8 @@ export default function SummaryContainer({
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
 
+  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+
   const navigatePeriod =
     externalNavigatePeriod ??
     ((direction: 'prev' | 'next') =>
@@ -106,25 +109,36 @@ export default function SummaryContainer({
 
   return (
     <>
-      <VStack spacing={{ base: 3, md: 4 }} align="stretch" w="full">
-        <SummaryHeader
-          selectedPeriod={selectedPeriod}
-          selectedDate={selectedDate}
-          onPeriodChange={onPeriodChange}
-          onNavigatePeriod={navigatePeriod}
-          onGoToToday={goToToday}
-          formatLabel={formatLabel}
-        />
+      <SectionCard staticOnHover>
+        <VStack spacing={0} align="stretch" w="full">
+          {/* Period Navigator as the integrated header */}
+          <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
+            <PeriodNavigator
+              selectedPeriod={selectedPeriod}
+              selectedDate={selectedDate}
+              onPeriodChange={onPeriodChange}
+              onNavigatePeriod={navigatePeriod}
+              onGoToToday={goToToday}
+              formatLabel={formatLabel}
+              isEmbedded
+            />
+          </Box>
 
-        <SummaryCardsGrid
-          transactions={transactions}
-          income={income}
-          expense={expense}
-          balance={balance}
-          selectedPeriod={selectedPeriod}
-          onCardClick={handleCardClick}
-        />
-      </VStack>
+          <Divider borderColor={dividerColor} />
+
+          {/* Summary Cards */}
+          <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
+            <SummaryCardsGrid
+              transactions={transactions}
+              income={income}
+              expense={expense}
+              balance={balance}
+              selectedPeriod={selectedPeriod}
+              onCardClick={handleCardClick}
+            />
+          </Box>
+        </VStack>
+      </SectionCard>
 
       <SummaryCardModal
         isOpen={isOpen}

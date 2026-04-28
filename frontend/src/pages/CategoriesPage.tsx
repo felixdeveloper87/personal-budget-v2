@@ -1,11 +1,11 @@
 import {
   Box,
-  Flex,
+  Divider,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Layers, LineChart } from 'lucide-react'
+import { Layers } from 'lucide-react'
 
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
@@ -21,9 +21,9 @@ import { ChartsPageSkeleton } from '../components/charts/page'
 import { SectionCard, SectionHeader } from '../components/ui'
 
 /**
- * Dedicated page for the category breakdown that used to live inside the
- * Dashboard. Mirrors the visual contract of `ChartsPage` (period navigator
- * card + section card with header + content) so the user feels at home.
+ * Dedicated page for the category breakdown. The period navigator is
+ * integrated directly as the header of the category analysis card,
+ * giving users a single unified surface to work with.
  */
 export default function CategoriesPage() {
   const {
@@ -48,10 +48,9 @@ export default function CategoriesPage() {
   )
 
   const periodLabel = formatLabel()
-  const overviewBadgeBg = useColorModeValue('purple.50', 'rgba(139,92,246,0.14)')
-  const overviewBadgeColor = useColorModeValue('purple.600', 'purple.300')
   const pageBg = useColorModeValue('gray.50', '#060606')
   const emptyTextColor = useColorModeValue('gray.500', 'gray.400')
+  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
   const hasData = periodData.transactions.length > 0
 
@@ -73,59 +72,28 @@ export default function CategoriesPage() {
         {loading ? (
           <ChartsPageSkeleton />
         ) : (
-          <>
-            <SectionCard>
-              <Flex
-                direction={{ base: 'column', xl: 'row' }}
-                align={{ base: 'stretch', xl: 'center' }}
-                justify="space-between"
-                gap={{ base: 3, md: 4 }}
-                p={{ base: 4, sm: 5 }}
-                w="full"
+          <SectionCard staticOnHover>
+            <VStack spacing={0} align="stretch" w="full">
+              {/* Period Navigator as integrated header */}
+              <Box
+                px={{ base: 4, sm: 5 }}
+                pt={{ base: 4, sm: 5 }}
+                pb={{ base: 3, sm: 4 }}
               >
-                <Box
-                  flexShrink={0}
-                  maxW={{ xl: '320px' }}
-                  w={{ base: 'full', xl: 'auto' }}
-                >
-                  <SectionHeader
-                    icon={LineChart}
-                    title="Period"
-                    caption="Browse categories by day, week, month or year"
-                    accent="violet"
-                    rightSlot={
-                      <Box
-                        px={2.5}
-                        py={1}
-                        borderRadius="full"
-                        bg={overviewBadgeBg}
-                        color={overviewBadgeColor}
-                        fontSize="xs"
-                        fontWeight={700}
-                        letterSpacing="0.04em"
-                        textTransform="uppercase"
-                      >
-                        {periodLabel}
-                      </Box>
-                    }
-                  />
-                </Box>
+                <PeriodNavigator
+                  selectedPeriod={selectedPeriod}
+                  selectedDate={selectedDate}
+                  onPeriodChange={onPeriodChange}
+                  onNavigatePeriod={navigatePeriod}
+                  onGoToToday={goToToday}
+                  formatLabel={formatLabel}
+                  isEmbedded
+                />
+              </Box>
 
-                <Box flex={1} w="full">
-                  <PeriodNavigator
-                    selectedPeriod={selectedPeriod}
-                    selectedDate={selectedDate}
-                    onPeriodChange={onPeriodChange}
-                    onNavigatePeriod={navigatePeriod}
-                    onGoToToday={goToToday}
-                    formatLabel={formatLabel}
-                    isEmbedded
-                  />
-                </Box>
-              </Flex>
-            </SectionCard>
+              <Divider borderColor={dividerColor} />
 
-            <SectionCard staticOnHover>
+              {/* Category content */}
               <Box p={{ base: 4, sm: 5, md: 6 }}>
                 {hasData ? (
                   <VStack spacing={5} align="stretch">
@@ -155,8 +123,8 @@ export default function CategoriesPage() {
                   </VStack>
                 )}
               </Box>
-            </SectionCard>
-          </>
+            </VStack>
+          </SectionCard>
         )}
       </VStack>
     </Box>

@@ -13,7 +13,6 @@ import {
 import {
   BarChart3,
   DollarSign,
-  LineChart,
   TrendingDown,
   TrendingUp,
 } from 'lucide-react'
@@ -38,7 +37,6 @@ import {
 } from '../components/charts/page'
 import {
   SectionCard,
-  SectionHeader,
   type SectionHeaderAccent,
 } from '../components/ui'
 
@@ -247,8 +245,6 @@ export default function ChartsPage() {
   )
 
   const periodLabel = formatLabel()
-  const overviewBadgeBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.14)')
-  const overviewBadgeColor = useColorModeValue('blue.600', 'blue.300')
   const pageBg = useColorModeValue('gray.50', '#060606')
 
   return (
@@ -267,55 +263,19 @@ export default function ChartsPage() {
           <ChartsPageSkeleton />
         ) : (
           <>
-            <SectionCard>
-              <Flex
-                direction={{ base: 'column', xl: 'row' }}
-                align={{ base: 'stretch', xl: 'center' }}
-                justify="space-between"
-                gap={{ base: 3, md: 4 }}
-                p={{ base: 4, sm: 5 }}
-                w="full"
-              >
-                <Box
-                  flexShrink={0}
-                  maxW={{ xl: '320px' }}
-                  w={{ base: 'full', xl: 'auto' }}
-                >
-                  <SectionHeader
-                    icon={LineChart}
-                    title="Period"
-                    caption="Browse charts by day, week, month or year"
-                    accent="blue"
-                    rightSlot={
-                      <Box
-                        px={2.5}
-                        py={1}
-                        borderRadius="full"
-                        bg={overviewBadgeBg}
-                        color={overviewBadgeColor}
-                        fontSize="xs"
-                        fontWeight={700}
-                        letterSpacing="0.04em"
-                        textTransform="uppercase"
-                      >
-                        {periodLabel}
-                      </Box>
-                    }
-                  />
-                </Box>
-
-                <Box flex={1} w="full">
-                  <PeriodNavigator
-                    selectedPeriod={selectedPeriod}
-                    selectedDate={selectedDate}
-                    onPeriodChange={onPeriodChange}
-                    onNavigatePeriod={navigatePeriod}
-                    onGoToToday={goToToday}
-                    formatLabel={formatLabel}
-                    isEmbedded
-                  />
-                </Box>
-              </Flex>
+            {/* Period Navigator as a standalone integrated card */}
+            <SectionCard staticOnHover>
+              <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
+                <PeriodNavigator
+                  selectedPeriod={selectedPeriod}
+                  selectedDate={selectedDate}
+                  onPeriodChange={onPeriodChange}
+                  onNavigatePeriod={navigatePeriod}
+                  onGoToToday={goToToday}
+                  formatLabel={formatLabel}
+                  isEmbedded
+                />
+              </Box>
             </SectionCard>
 
             <ChartShell
