@@ -1,7 +1,7 @@
 import { Box, Text, HStack, Progress, useColorModeValue, VStack, Collapse, Icon, Table, Thead, Tbody, Tr, Th, Td, TableContainer } from '@chakra-ui/react'
 import React from 'react'
 import { CategoryExpenseItemProps } from './types'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from '../../ui/icons'
 import { formatTransactionDateTime } from '../../../utils/dateTime'
 
 export const CategoryExpenseItem = React.memo<CategoryExpenseItemProps>(({

@@ -5,7 +5,7 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Layers, TrendingDown, TrendingUp } from 'lucide-react'
+import { Layers, TrendingDown, TrendingUp } from '../ui/icons'
 import { SectionHeader } from '../ui'
 
 interface CategoryAnalysisHeaderProps {

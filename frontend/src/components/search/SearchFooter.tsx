@@ -1,5 +1,5 @@
 import { Button, HStack, Icon, useColorModeValue } from '@chakra-ui/react'
-import { ArrowRight, RotateCcw } from 'lucide-react'
+import { ArrowRight, RotateCcw } from '../ui/icons'
 
 interface SearchFooterProps {
   onClearAll: () => void

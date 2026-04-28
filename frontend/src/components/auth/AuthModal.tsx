@@ -10,7 +10,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Wallet, X } from 'lucide-react'
+import { Wallet, X } from '../ui/icons'
 import { PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
 import LoginForm from './LoginForm'

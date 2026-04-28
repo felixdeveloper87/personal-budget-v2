@@ -13,8 +13,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDownIcon, SettingsIcon } from '@chakra-ui/icons'
-import { LogOut, User } from 'lucide-react'
+import { ChevronDown, LogOut, Settings, User } from '../../ui/icons'
 import { GRADIENTS } from '../../../theme'
 
 interface UserMenuProps {
@@ -116,7 +115,7 @@ export default function UserMenu({ user, onOpenSettings, onLogout }: UserMenuPro
           >
             {displayName.split(' ')[0]}
           </Text>
-          <ChevronDownIcon color={subTextColor} />
+          <Icon as={ChevronDown} boxSize={3.5} color={subTextColor} />
         </HStack>
       </MenuButton>
 
@@ -206,7 +205,7 @@ export default function UserMenu({ user, onOpenSettings, onLogout }: UserMenuPro
           Profile
         </MenuItem>
         <MenuItem
-          icon={<SettingsIcon />}
+          icon={<Icon as={Settings} weight="bold" boxSize={4} />}
           onClick={onOpenSettings}
           color={textColor}
           fontWeight={500}

@@ -7,7 +7,7 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
-import { Pencil, TrendingDown, TrendingUp } from 'lucide-react'
+import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import { updateTransaction } from '../../api'
 import { Transaction } from '../../types'

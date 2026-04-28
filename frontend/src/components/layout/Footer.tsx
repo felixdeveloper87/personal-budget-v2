@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Wallet,
   type LucideIcon,
-} from 'lucide-react'
+} from '../ui/icons'
 import { BRAND } from './header/brand.config'
 import { LANDING_SECTIONS } from './header/navigation.config'
 

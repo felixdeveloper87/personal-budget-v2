@@ -3,7 +3,7 @@ import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp } from '../../ui/icons'
 import { useChartColors, useChartDimensions } from './hooks'
 import {
   ChartPlotShell,

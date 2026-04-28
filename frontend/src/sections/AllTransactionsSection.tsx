@@ -16,7 +16,7 @@ import {
   Button,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { List, Calendar, Filter, RefreshCw } from 'lucide-react'
+import { List, Calendar, Filter, RefreshCw } from '../components/ui/icons'
 import { getResponsiveStyles, sectionTitleStyles, sectionHeaderStyles } from '../components/ui'
 import { GRADIENTS } from '../theme'
 

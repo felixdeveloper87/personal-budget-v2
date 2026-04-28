@@ -10,7 +10,7 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'

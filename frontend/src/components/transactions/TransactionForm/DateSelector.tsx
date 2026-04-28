@@ -1,5 +1,5 @@
 import { Box, Text, Input, HStack, Icon, Button, VStack, Wrap, WrapItem } from '@chakra-ui/react'
-import { Calendar, Clock, CalendarCheck } from 'lucide-react'
+import { Calendar, Clock, CalendarCheck } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
 

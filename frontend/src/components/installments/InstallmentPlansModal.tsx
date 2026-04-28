@@ -11,7 +11,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDown, CreditCard } from 'lucide-react'
+import { ChevronDown, CreditCard } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'

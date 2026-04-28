@@ -1,5 +1,5 @@
 import { Box, Text, VStack, HStack, Card, CardBody, Flex, Icon } from '@chakra-ui/react'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3 } from '../../ui/icons'
 import { getTransactionModalHeaderStyles, animations } from '../../ui'
 import { useColorModeValue } from '@chakra-ui/react'
 import React from 'react'

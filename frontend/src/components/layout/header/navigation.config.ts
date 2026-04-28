@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   ReceiptText,
   type LucideIcon,
-} from 'lucide-react'
+} from '../../ui/icons'
 
 export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'charts'
 

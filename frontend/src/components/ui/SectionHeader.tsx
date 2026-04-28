@@ -7,7 +7,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from './icons'
 
 export type SectionHeaderAccent =
   | 'blue'
@@ -120,7 +120,7 @@ export default function SectionHeader({
           justifyContent="center"
           flexShrink={0}
         >
-          <Icon as={icon} boxSize={dense ? 3.5 : 4} strokeWidth={2.25} />
+          <Icon as={icon} boxSize={dense ? 3.5 : 4} weight="duotone" />
         </Box>
         <VStack align="flex-start" spacing={0} minW={0}>
           <Text

@@ -10,7 +10,7 @@ import {
   InputRightElement,
   useColorModeValue,
 } from '@chakra-ui/react'
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from '../ui/icons'
 
 export interface AuthFieldProps {
   label: string
@@ -82,7 +82,7 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
       </FormLabel>
       <InputGroup>
         <InputLeftElement pointerEvents="none" h="44px" color={iconColor}>
-          <Icon as={icon} boxSize={4} />
+          <Icon as={icon} boxSize={4} weight="bold" />
         </InputLeftElement>
         <Input
           ref={ref}

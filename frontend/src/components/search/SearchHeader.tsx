@@ -13,7 +13,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Search, X } from 'lucide-react'
+import { Search, X } from '../ui/icons'
 
 interface SearchHeaderProps {
   onClose: () => void

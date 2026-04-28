@@ -16,7 +16,7 @@ import {
   Heart,
   Zap,
   ShoppingBag,
-} from 'lucide-react'
+} from '../../ui/icons'
 
 // 🔹 Predefined categories for income transactions
 const incomeCategories = [

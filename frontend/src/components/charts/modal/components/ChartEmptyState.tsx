@@ -6,8 +6,8 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import type { LucideIcon } from 'lucide-react'
-import { BarChart3 } from 'lucide-react'
+import type { LucideIcon } from '../../../ui/icons'
+import { BarChart3 } from '../../../ui/icons'
 
 export interface ChartEmptyStateProps {
   title?: string

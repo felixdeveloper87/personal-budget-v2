@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2 } from '../../components/ui/icons'
 import DashboardPreview from './DashboardPreview'
 import { Eyebrow, GlowOrb, GridLines, fadeUp } from './shared'
 import { HERO_COPY } from './landing.config'
@@ -106,7 +106,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
                 <Button
                   size="lg"
                   onClick={onGetStarted}
-                  rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+                  rightIcon={<Icon as={ArrowRight} boxSize={4} weight="bold" />}
                   bg="linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
                   bgSize="200% 100%"
                   bgPosition="0% 50%"
@@ -148,7 +148,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
               <HStack spacing={5} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'flex-start' }}>
                 {HERO_COPY.bullets.map((b) => (
                   <HStack key={b} spacing={2}>
-                    <Icon as={CheckCircle2} boxSize={4} color="green.500" />
+                    <Icon as={CheckCircle2} boxSize={4} color="green.500" weight="duotone" />
                     <Text fontSize="sm" color={bulletColor} fontWeight={500}>
                       {b}
                     </Text>

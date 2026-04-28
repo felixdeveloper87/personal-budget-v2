@@ -7,7 +7,7 @@ import {
   Box,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { BarChart3, DollarSign, TrendingDown, TrendingUp } from 'lucide-react'
+import { BarChart3, DollarSign, TrendingDown, TrendingUp } from '../../ui/icons'
 import TransactionsChart from './TransactionsChart'
 import IncomeChart from './IncomeChart'
 import ExpensesChart from './ExpensesChart'

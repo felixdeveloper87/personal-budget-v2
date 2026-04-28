@@ -19,7 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   RotateCcw,
-} from 'lucide-react'
+} from '../ui/icons'
 import { PeriodType } from '../../types'
 
 /* -------------------------------------------------------------------------- */
@@ -228,7 +228,7 @@ export default function PeriodNavigator({
                   borderRadius="lg"
                   leftIcon={
                     !isMobile ? (
-                      <Icon as={PeriodIcon} boxSize={3.5} strokeWidth={2.25} />
+                      <Icon as={PeriodIcon} boxSize={3.5} weight="duotone" />
                     ) : undefined
                   }
                   onClick={() => onPeriodChange(type)}
@@ -269,7 +269,7 @@ export default function PeriodNavigator({
         >
           <IconButton
             aria-label="Previous period"
-            icon={<Icon as={ChevronLeft} boxSize={5} strokeWidth={2.5} />}
+            icon={<Icon as={ChevronLeft} boxSize={5} />}
             onClick={() => onNavigatePeriod('prev')}
             variant="ghost"
             size="sm"
@@ -322,7 +322,7 @@ export default function PeriodNavigator({
 
           <IconButton
             aria-label="Next period"
-            icon={<Icon as={ChevronRight} boxSize={5} strokeWidth={2.5} />}
+            icon={<Icon as={ChevronRight} boxSize={5} />}
             onClick={() => onNavigatePeriod('next')}
             variant="ghost"
             size="sm"
@@ -340,7 +340,7 @@ export default function PeriodNavigator({
             <Tooltip label="Jump to today" hasArrow placement="top" openDelay={200}>
               <IconButton
                 aria-label="Go to today"
-                icon={<Icon as={RotateCcw} boxSize={3.5} strokeWidth={2.5} />}
+                icon={<Icon as={RotateCcw} boxSize={3.5} weight="duotone" />}
                 onClick={onGoToToday}
                 variant="ghost"
                 size="sm"

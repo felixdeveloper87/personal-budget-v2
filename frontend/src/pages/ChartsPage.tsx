@@ -15,8 +15,8 @@ import {
   DollarSign,
   TrendingDown,
   TrendingUp,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+} from '../components/ui/icons'
+import type { LucideIcon } from '../components/ui/icons'
 
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'

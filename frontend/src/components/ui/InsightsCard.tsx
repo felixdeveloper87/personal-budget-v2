@@ -13,8 +13,8 @@ import {
   DollarSign,
   BarChart3,
   Lightbulb,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+} from './icons'
+import type { LucideIcon } from './icons'
 import { useTransactionInsights } from '../../hooks/useTransactionInsights'
 import { Transaction } from '../../types'
 

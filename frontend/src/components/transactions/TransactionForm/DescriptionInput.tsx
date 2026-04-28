@@ -1,5 +1,5 @@
 import { Box, Text, Textarea, HStack, Icon, VStack } from '@chakra-ui/react'
-import { FileText } from 'lucide-react'
+import { FileText } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
 interface DescriptionInputProps {

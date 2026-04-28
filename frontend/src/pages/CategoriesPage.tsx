@@ -5,7 +5,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Layers } from 'lucide-react'
+import { Layers } from '../components/ui/icons'
 
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'

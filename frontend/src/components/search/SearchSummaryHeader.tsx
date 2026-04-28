@@ -12,7 +12,7 @@ import {
   WrapItem,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Calendar, ListFilter, Search, TrendingDown, TrendingUp, X } from 'lucide-react'
+import { Calendar, ListFilter, Search, TrendingDown, TrendingUp, X } from '../ui/icons'
 import { formatTransactionDate } from '../../utils/dateTime'
 import { SearchSummaryHeaderProps } from '../../types'
 

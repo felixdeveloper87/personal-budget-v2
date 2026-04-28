@@ -7,8 +7,8 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import type { LucideIcon } from 'lucide-react'
-import { ArrowUpRight } from 'lucide-react'
+import type { LucideIcon } from '../ui/icons'
+import { ArrowUpRight } from '../ui/icons'
 
 interface SummaryCardProps {
   stat: {
@@ -106,7 +106,7 @@ export default function SummaryCard({ stat, onCardClick }: SummaryCardProps) {
               <Icon
                 as={IconComponent}
                 boxSize={{ base: 4, sm: 5 }}
-                strokeWidth={2.25}
+                weight="duotone"
               />
             </Flex>
             <Icon

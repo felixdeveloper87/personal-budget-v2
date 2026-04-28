@@ -3,11 +3,12 @@ import {
   Button,
   HStack,
   IconButton,
+  Icon,
   Text,
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { SearchIcon } from '@chakra-ui/icons'
+import { Search } from '../../ui/icons'
 
 interface SearchTriggerProps {
   onOpen: () => void
@@ -31,7 +32,7 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
       <Tooltip label="Search (Ctrl+K)" hasArrow openDelay={300}>
         <IconButton
           aria-label="Open search"
-          icon={<SearchIcon boxSize={4} />}
+          icon={<Icon as={Search} boxSize={4} weight="bold" />}
           onClick={onOpen}
           variant="ghost"
           h="40px"
@@ -64,7 +65,7 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
     <Box flexShrink={1} minW={0}>
       <Button
         onClick={onOpen}
-        leftIcon={<SearchIcon boxSize={4} />}
+        leftIcon={<Icon as={Search} boxSize={4} weight="bold" />}
         variant="ghost"
         h="40px"
         px={3.5}

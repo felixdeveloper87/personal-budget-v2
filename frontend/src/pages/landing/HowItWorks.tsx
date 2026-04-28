@@ -111,7 +111,7 @@ function StepCard({
             '0 10px 24px -12px rgba(0,0,0,0.6)',
           )}
         >
-          <Icon as={step.icon} boxSize={6} />
+          <Icon as={step.icon} boxSize={6} weight="duotone" />
         </Box>
         <Box
           aria-hidden

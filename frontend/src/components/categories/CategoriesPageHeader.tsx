@@ -7,7 +7,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { RotateCcw } from 'lucide-react'
+import { RotateCcw } from '../ui/icons'
 
 interface CategoriesPageHeaderProps {
   /** Pretty period label, e.g. `APR 2026`. */

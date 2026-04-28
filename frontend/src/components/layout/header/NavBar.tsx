@@ -227,6 +227,7 @@ function NavBarItem({
           boxSize={4}
           transition="transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)"
           transform={isActive ? 'scale(1.05)' : 'scale(1)'}
+          weight={isActive ? 'duotone' : 'regular'}
         />
         {showLabel && (
           <Text as="span" lineHeight="1" whiteSpace="nowrap">

@@ -10,7 +10,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from '../../components/ui/icons'
 import { SectionShell, fadeUp } from './shared'
 import { FEATURES, type LandingFeature } from './landing.config'
 
@@ -119,7 +119,7 @@ function HeroCard({ feature }: { feature: LandingFeature }) {
           border="1px solid"
           borderColor={`${feature.accent}33`}
         >
-          <Icon as={feature.icon} boxSize={6} />
+          <Icon as={feature.icon} boxSize={6} weight="duotone" />
         </Box>
 
         <Heading
@@ -223,7 +223,7 @@ function FeatureIconBadge({ icon, accent }: { icon: LucideIcon; accent: string }
       border="1px solid"
       borderColor={`${accent}33`}
     >
-      <Icon as={icon} boxSize={4.5} />
+      <Icon as={icon} boxSize={4.5} weight="duotone" />
     </Box>
   )
 }

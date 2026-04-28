@@ -1,5 +1,5 @@
 import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem, Input } from '@chakra-ui/react'
-import { CreditCard, Calendar, Calculator } from 'lucide-react'
+import { CreditCard, Calendar, Calculator } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
 

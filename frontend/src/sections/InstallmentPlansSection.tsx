@@ -11,7 +11,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { ChevronRight, CreditCard } from 'lucide-react'
+import { ChevronRight, CreditCard } from '../components/ui/icons'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { InstallmentPlansModal } from '../components/installments'

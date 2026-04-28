@@ -3,7 +3,7 @@ import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
 import { CategoryIncomeItemProps } from './types'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp } from '../../ui/icons'
 import { formatTransactionDateTime } from '../../../utils/dateTime'
 
 export const CategoryIncomeItem = React.memo<CategoryIncomeItemProps>(({

@@ -55,7 +55,7 @@ export default function TrustStrip() {
           >
             <HStack align="flex-start" spacing={4}>
               <Box p={2.5} borderRadius="lg" bg={iconBg} color={iconColor}>
-                <Icon as={item.icon} boxSize={5} />
+                <Icon as={item.icon} boxSize={5} weight="duotone" />
               </Box>
               <VStack align="flex-start" spacing={1.5} flex={1}>
                 <Heading as="h3" size="sm" color={titleColor} letterSpacing="-0.015em">

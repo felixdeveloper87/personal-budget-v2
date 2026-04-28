@@ -9,7 +9,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Minus, Plus } from 'lucide-react'
+import { Minus, Plus } from '../../components/ui/icons'
 import { SectionShell } from './shared'
 import { FAQS } from './landing.config'
 
@@ -65,7 +65,7 @@ export default function FAQ() {
                     transition="transform 0.25s ease"
                     transform={isExpanded ? 'rotate(180deg)' : 'rotate(0)'}
                   >
-                    <Icon as={isExpanded ? Minus : Plus} boxSize={4} />
+                    <Icon as={isExpanded ? Minus : Plus} boxSize={4} weight="bold" />
                   </Box>
                 </AccordionButton>
                 <AccordionPanel px={{ base: 5, md: 6 }} pb={5}>

@@ -9,7 +9,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+import { ArrowRight, CheckCircle2 } from '../../components/ui/icons'
 import { Eyebrow, GlowOrb, SectionShell, fadeUp } from './shared'
 import { FINAL_CTA } from './landing.config'
 
@@ -96,7 +96,7 @@ export default function FinalCTA({ onGetStarted }: FinalCTAProps) {
           <Button
             size="lg"
             onClick={onGetStarted}
-            rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+            rightIcon={<Icon as={ArrowRight} boxSize={4} weight="bold" />}
             bg="white"
             color="gray.900"
             fontWeight={700}
@@ -119,7 +119,7 @@ export default function FinalCTA({ onGetStarted }: FinalCTAProps) {
           <HStack spacing={5} pt={2} flexWrap="wrap" justify="center">
             {FINAL_CTA.bullets.map((b) => (
               <HStack key={b} spacing={2}>
-                <Icon as={CheckCircle2} boxSize={4} color="whiteAlpha.900" />
+                <Icon as={CheckCircle2} boxSize={4} color="whiteAlpha.900" weight="duotone" />
                 <Text fontSize="sm" color="whiteAlpha.800" fontWeight={500}>
                   {b}
                 </Text>

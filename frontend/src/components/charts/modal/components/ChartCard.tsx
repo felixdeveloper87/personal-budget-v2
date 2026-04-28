@@ -1,5 +1,5 @@
 import { Box, VStack, HStack, Text, Icon, useColorModeValue } from '@chakra-ui/react'
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from '../../../ui/icons'
 import { useThemeColors } from '../../../../hooks/useThemeColors'
 import { animations } from '../../../ui'
 

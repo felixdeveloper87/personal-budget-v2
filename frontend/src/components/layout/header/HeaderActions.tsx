@@ -1,5 +1,5 @@
-import { Button, HStack, useBreakpointValue } from '@chakra-ui/react'
-import { ArrowForwardIcon } from '@chakra-ui/icons'
+import { Button, HStack, Icon, useBreakpointValue } from '@chakra-ui/react'
+import { ArrowRight } from '../../ui/icons'
 import SearchTrigger from './SearchTrigger'
 import ThemeToggle from './ThemeToggle'
 import UserMenu from './UserMenu'
@@ -46,7 +46,7 @@ export default function HeaderActions({
         !user && (
           <Button
             onClick={onLogin}
-            rightIcon={<ArrowForwardIcon transition="transform 0.25s ease" />}
+            rightIcon={<Icon as={ArrowRight} weight="bold" transition="transform 0.25s ease" />}
             h="40px"
             px={{ base: 4, md: 5 }}
             borderRadius="xl"

@@ -7,7 +7,7 @@ import {
   Icon,
   Badge
 } from '@chakra-ui/react'
-import { Search } from 'lucide-react'
+import { Search } from '../ui/icons'
 import { memo, useMemo, useState, useCallback } from 'react'
 import CategoryResultCard from './CategoryResultCard'
 import { Transaction } from '../../types'

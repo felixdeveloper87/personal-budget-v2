@@ -21,7 +21,7 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
-import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Trash2 } from 'lucide-react'
+import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Trash2 } from '../ui/icons'
 import { InstallmentPlan } from '../../types'
 import { deleteInstallmentPlan } from '../../api'
 

@@ -11,8 +11,8 @@ import {
   WrapItem,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Calendar, Check, Tag, TrendingDown, TrendingUp, X } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Calendar, Check, Tag, TrendingDown, TrendingUp, X } from '../ui/icons'
+import type { LucideIcon } from '../ui/icons'
 import { SearchFiltersProps } from '../../types'
 
 interface QuickRange {

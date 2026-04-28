@@ -1,5 +1,5 @@
 import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge, Image } from '@chakra-ui/react'
-import { Eye } from 'lucide-react'
+import { Eye } from '../../ui/icons'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
 import trendingDownImage from '../../../../assets/trendingDown.png'

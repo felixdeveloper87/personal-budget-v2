@@ -1,5 +1,5 @@
 import { Box, useColorModeValue } from '@chakra-ui/react'
-import { Plus, Minus } from 'lucide-react'
+import { Plus, Minus } from '../ui/icons'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'

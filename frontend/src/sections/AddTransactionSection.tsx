@@ -8,7 +8,7 @@ import {
   VStack,
   useDisclosure,
 } from '@chakra-ui/react'
-import { Plus, Minus, Wallet } from 'lucide-react'
+import { Plus, Minus, Wallet } from '../components/ui/icons'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'

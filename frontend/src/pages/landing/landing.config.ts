@@ -16,7 +16,7 @@ import {
   Wallet,
   Zap,
   type LucideIcon,
-} from 'lucide-react'
+} from '../../components/ui/icons'
 import { BRAND, BRAND_PROMISES } from '../../components/layout/header/brand.config'
 
 export interface LandingFeature {

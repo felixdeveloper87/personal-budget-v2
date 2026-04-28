@@ -1,5 +1,5 @@
-import { IconButton, Tooltip, useColorMode, useColorModeValue } from '@chakra-ui/react'
-import { SunIcon, MoonIcon } from '@chakra-ui/icons'
+import { Icon, IconButton, Tooltip, useColorMode, useColorModeValue } from '@chakra-ui/react'
+import { Sun, Moon } from '../../ui/icons'
 
 interface ThemeToggleProps {
   size?: 'sm' | 'md'
@@ -24,8 +24,8 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
         aria-label="Toggle color mode"
         icon={
           isLight
-            ? <MoonIcon boxSize={size === 'sm' ? 4 : '18px'} />
-            : <SunIcon boxSize={size === 'sm' ? 4 : '18px'} />
+            ? <Icon as={Moon} weight="duotone" boxSize={size === 'sm' ? 4 : '18px'} />
+            : <Icon as={Sun} weight="duotone" boxSize={size === 'sm' ? 4 : '18px'} />
         }
         onClick={toggleColorMode}
         variant="ghost"

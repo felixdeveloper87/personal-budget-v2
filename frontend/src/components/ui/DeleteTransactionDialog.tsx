@@ -15,7 +15,7 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
-import { AlertTriangle, TrendingDown, TrendingUp } from 'lucide-react'
+import { AlertTriangle, TrendingDown, TrendingUp } from './icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { deleteTransaction } from '../../api'
 import { Transaction } from '../../types'

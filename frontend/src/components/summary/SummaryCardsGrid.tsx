@@ -1,6 +1,6 @@
 import { SimpleGrid } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import type { LucideIcon } from 'lucide-react'
+import type { LucideIcon } from '../ui/icons'
 import {
   BarChart3,
   TrendingUp,
@@ -10,7 +10,7 @@ import {
   CalendarRange,
   Calendar,
   CalendarClock,
-} from 'lucide-react'
+} from '../ui/icons'
 import { SUMMARY_CARD_COLORS } from '../../constants/summaryColors'
 import SummaryCard from './SummaryCard'
 import { PeriodType } from '../../types'

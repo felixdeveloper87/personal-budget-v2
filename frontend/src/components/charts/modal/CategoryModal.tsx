@@ -15,7 +15,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp } from '../../ui/icons'
 import { Transaction } from '../../../types'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { ModalHeader, PremiumModal } from '../../ui'

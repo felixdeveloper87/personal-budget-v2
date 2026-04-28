@@ -1,6 +1,6 @@
 import { Box, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import { ArrowDownRight, ArrowUpRight, Wallet } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, Wallet } from '../../components/ui/icons'
 import { PREVIEW_DATA } from './landing.config'
 
 /** Returns "April 2026"-style label for the user's current month/year. */
@@ -276,7 +276,7 @@ export default function DashboardPreview() {
                     bg={isIncome ? incomeBg : expenseBg}
                     color={isIncome ? incomeAccent : expenseAccent}
                   >
-                    <Icon as={t.icon} boxSize={3.5} />
+                    <Icon as={t.icon} boxSize={3.5} weight="duotone" />
                   </Box>
                   <Text flex={1} fontSize="xs" color={text} fontWeight={600} noOfLines={1}>
                     {t.label}
@@ -343,7 +343,7 @@ function BalancePill({
     >
       <HStack spacing={1.5}>
         <Box p={1} borderRadius="md" bg={bg} color={accent}>
-          <Icon as={icon} boxSize={3.5} />
+          <Icon as={icon} boxSize={3.5} weight="duotone" />
         </Box>
         <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
           {label}

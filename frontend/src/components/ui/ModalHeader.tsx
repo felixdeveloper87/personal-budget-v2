@@ -8,8 +8,8 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { X } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { X } from './icons'
+import type { LucideIcon } from './icons'
 
 export type ModalHeaderAccent = 'blue' | 'green' | 'red' | 'violet' | 'neutral'
 

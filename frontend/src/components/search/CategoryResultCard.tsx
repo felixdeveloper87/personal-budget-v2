@@ -15,7 +15,7 @@ import {
   Icon,
   Collapse
 } from '@chakra-ui/react'
-import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from 'lucide-react'
+import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from '../ui/icons'
 import { memo, useMemo } from 'react'
 import { formatDateBR } from '../../utils/dateTime'
 import { getTypeColor, getTableStyles, getResponsiveStyles } from '../ui'

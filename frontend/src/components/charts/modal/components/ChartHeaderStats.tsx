@@ -8,8 +8,8 @@ import {
   TrendingDown,
   TrendingUp,
   Wallet,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+} from '../../../ui/icons'
+import type { LucideIcon } from '../../../ui/icons'
 
 import type { Transaction } from '../../../../types'
 import { useChartColors } from '../hooks'

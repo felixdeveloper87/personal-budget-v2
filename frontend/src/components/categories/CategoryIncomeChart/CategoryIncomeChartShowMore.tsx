@@ -1,5 +1,5 @@
 // import { Box, Text, HStack, Icon, useColorModeValue } from '@chakra-ui/react'
-// import { Sparkles } from 'lucide-react'
+// import { Sparkles } from '../../ui/icons'
 // import { getGradients } from '../../ui'
 // import { useThemeColors } from '../../../hooks/useThemeColors'
 // import { getResponsiveStyles } from '../../ui'

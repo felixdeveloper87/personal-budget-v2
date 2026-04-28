@@ -9,7 +9,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { AlertCircle, RefreshCw } from 'lucide-react'
+import { AlertCircle, RefreshCw } from '../ui/icons'
 import { Transaction } from '../../types'
 import { searchTransactions } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'

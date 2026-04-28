@@ -14,8 +14,8 @@ import {
   Layers,
   MessageSquare,
   Sparkles,
-} from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+} from '../components/ui/icons'
+import type { LucideIcon } from '../components/ui/icons'
 
 import { SectionCard, SectionHeader } from '../components/ui'
 import type { AppPage } from '../components/layout/header/navigation.config'

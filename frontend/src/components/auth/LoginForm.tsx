@@ -9,7 +9,7 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
-import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
 import { EMAIL_REGEX } from './auth.constants'
