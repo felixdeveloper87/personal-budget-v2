@@ -10,9 +10,9 @@ import {
 } from '@chakra-ui/react'
 import {
   ArrowUpRight,
-  BarChart3,
-  Layers,
-  MessageSquare,
+  ChartLineUp as BarChart3,
+  BookOpen as Layers,
+  Lightbulb as MessageSquare,
   Sparkles,
 } from '../components/ui/icons'
 import type { LucideIcon } from '../components/ui/icons'
@@ -38,31 +38,31 @@ interface NudgeItem {
 
 const NUDGES: NudgeItem[] = [
   {
-    id: 'categories',
-    title: 'See your categories',
-    description: 'Discover where your money goes with a clean breakdown.',
-    icon: Layers,
-    accent: 'violet',
-    page: 'categories',
-    cta: 'Open',
-  },
-  {
-    id: 'charts',
-    title: 'Visualize your money',
-    description: 'Spot trends with day, week, month and year views.',
+    id: 'compound-interest',
+    title: 'The Magic of Time',
+    description: 'Understand how compound interest turns small savings into a fortune over years.',
     icon: BarChart3,
     accent: 'blue',
-    page: 'charts',
-    cta: 'Explore',
+    href: 'https://www.investopedia.com/terms/c/compoundinterest.asp',
+    cta: 'Learn more',
   },
   {
-    id: 'feedback',
-    title: 'Help shape what comes next',
-    description: 'Got an idea, a bug or feedback? We would love to hear it.',
+    id: 'budget-rule',
+    title: 'Rule 50/30/20',
+    description: '50% Needs, 30% Wants, 20% Savings. The simplest way to organize your budget.',
+    icon: Layers,
+    accent: 'violet',
+    href: 'https://www.investopedia.com/ask/answers/022916/what-502030-budget-rule.asp',
+    cta: 'Read tip',
+  },
+  {
+    id: 'emergency-fund',
+    title: 'Safety First',
+    description: 'Why a 6-month emergency fund is the most important asset you can own.',
     icon: MessageSquare,
     accent: 'amber',
-    href: 'mailto:hello@personalbudget.app?subject=Personal%20Budget%20feedback',
-    cta: 'Get in touch',
+    href: 'https://www.nerdwallet.com/article/banking/emergency-fund-why-it-matters',
+    cta: 'Get tips',
   },
 ]
 
@@ -204,7 +204,7 @@ function NudgeCard({ item, onPageChange }: NudgeCardProps) {
             justifyContent="center"
             flexShrink={0}
           >
-            <Icon as={item.icon} boxSize={4} strokeWidth={2.25} />
+            <Icon as={item.icon} boxSize={4} weight="duotone" />
           </Box>
 
           <VStack align="flex-start" spacing={1} flex={1}>
@@ -234,7 +234,7 @@ function NudgeCard({ item, onPageChange }: NudgeCardProps) {
             }}
           >
             <Text>{item.cta}</Text>
-            <Icon as={ArrowUpRight} boxSize={3.5} strokeWidth={2.5} />
+            <Icon as={ArrowUpRight} boxSize={3.5} weight="bold" />
           </HStack>
         </VStack>
       </Box>
@@ -263,7 +263,7 @@ export default function DiscoverSection({ onPageChange }: DiscoverSectionProps) 
           <SectionHeader
             icon={Sparkles}
             title="Discover more"
-            caption="Quick links to the rest of your dashboard — and a way to reach us."
+            caption="Finance tips, interesting facts and news to help you manage your money."
             accent="violet"
           />
 
