@@ -40,7 +40,10 @@ export default function InstallmentSelector({
       { label: '3x', value: 3, color: 'blue' },
       { label: '6x', value: 6, color: 'purple' },
       { label: '12x', value: 12, color: 'orange' },
-      { label: '24x', value: 24, color: 'teal' }
+      { label: '24x', value: 24, color: 'teal' },
+      { label: '36x', value: 36, color: 'pink' },
+      { label: '48x', value: 48, color: 'pink' },
+      { label: '60x', value: 60, color: 'pink' }
     ]
   }
 
@@ -157,7 +160,7 @@ export default function InstallmentSelector({
                 value={installments}
                 onChange={(_, val) => onInstallmentsChange(val || 1)}
                 min={2}
-                max={24}
+                max={60}
                 w="120px"
               >
                 <NumberInputField
