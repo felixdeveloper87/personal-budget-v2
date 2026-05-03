@@ -15,6 +15,7 @@ import {
   HStack,
   Icon,
   IconButton,
+  SimpleGrid,
   Text,
   useColorModeValue,
   useDisclosure,
@@ -114,6 +115,16 @@ export default function InstallmentPlanCard({
   const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
+  const amountPanelBg = useColorModeValue(
+    'linear-gradient(135deg, rgba(59,130,246,0.10), rgba(99,102,241,0.08))',
+    'linear-gradient(135deg, rgba(96,165,250,0.16), rgba(129,140,248,0.10))',
+  )
+  const activeStripe = useColorModeValue(
+    'linear-gradient(180deg, #2563eb, #7c3aed)',
+    'linear-gradient(180deg, #60a5fa, #a78bfa)',
+  )
+  const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
   const firstTransaction = plan.transactions[0]
 
@@ -158,6 +169,8 @@ export default function InstallmentPlanCard({
         borderColor={cardBorder}
         borderRadius="xl"
         boxShadow="0 1px 2px rgba(0,0,0,0.04)"
+        overflow="hidden"
+        position="relative"
         transition="border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease"
         _hover={{
           borderColor: cardHoverBorder,
@@ -165,7 +178,8 @@ export default function InstallmentPlanCard({
           transform: 'translateY(-1px)',
         }}
       >
-        <CardBody p={5}>
+        {!isPast && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />}
+        <CardBody p={5} pl={!isPast ? 6 : 5}>
           <VStack align="stretch" spacing={4}>
             <HStack justify="space-between" align="flex-start">
               <HStack spacing={3} minW={0} flex={1}>
@@ -209,6 +223,7 @@ export default function InstallmentPlanCard({
               />
             </HStack>
 
+            <Box bg={amountPanelBg} borderRadius="xl" p={4} border="1px solid" borderColor={metaBorder}>
             <HStack justify="space-between" align="flex-end">
               <VStack align="flex-start" spacing={0}>
                 <Text fontSize="xs" color={captionColor} fontWeight={500}>
@@ -227,6 +242,26 @@ export default function InstallmentPlanCard({
                 </Text>
               </VStack>
             </HStack>
+            </Box>
+
+            <SimpleGrid columns={2} spacing={2}>
+              <MetaTile
+                label="Installments"
+                value={`${plan.totalInstallments} months`}
+                bg={metaBg}
+                borderColor={metaBorder}
+                titleColor={titleColor}
+                captionColor={captionColor}
+              />
+              <MetaTile
+                label={isPast ? 'Status' : 'Progress'}
+                value={isPast ? 'Completed' : `${progressPct}% paid`}
+                bg={metaBg}
+                borderColor={metaBorder}
+                titleColor={titleColor}
+                captionColor={captionColor}
+              />
+            </SimpleGrid>
 
             {isPast ? (
               <HStack justify="space-between" align="center">
@@ -454,5 +489,34 @@ export default function InstallmentPlanCard({
         </AlertDialogOverlay>
       </AlertDialog>
     </>
+  )
+}
+
+interface MetaTileProps {
+  label: string
+  value: string
+  bg: string
+  borderColor: string
+  titleColor: string
+  captionColor: string
+}
+
+function MetaTile({
+  label,
+  value,
+  bg,
+  borderColor,
+  titleColor,
+  captionColor,
+}: MetaTileProps) {
+  return (
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={3}>
+      <Text fontSize="2xs" color={captionColor} fontWeight={700} textTransform="uppercase">
+        {label}
+      </Text>
+      <Text fontSize="xs" color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
+        {value}
+      </Text>
+    </Box>
   )
 }

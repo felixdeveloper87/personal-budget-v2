@@ -11,7 +11,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDown, CreditCard } from '../ui/icons'
+import { ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
@@ -22,6 +22,10 @@ interface InstallmentPlansModalProps {
   onClose: () => void
   plans: InstallmentPlan[]
   onPlanDeleted: () => void
+}
+
+function formatCurrency(value: number) {
+  return `£${value.toFixed(2)}`
 }
 
 export default function InstallmentPlansModal({
@@ -39,15 +43,34 @@ export default function InstallmentPlansModal({
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const sectionLabelColor = useColorModeValue('gray.500', 'gray.400')
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const statBg = useColorModeValue('white', 'whiteAlpha.50')
+  const statBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const heroBg = useColorModeValue(
+    'linear-gradient(135deg, #0b1220 0%, #4338ca 52%, #38bdf8 100%)',
+    'linear-gradient(135deg, #080b16 0%, #3730a3 52%, #0ea5e9 100%)',
+  )
 
-  const { activePlans, pastPlans } = useMemo(() => {
+  const { activePlans, pastPlans, activeTotal, remainingTotal, paidTotal } = useMemo(() => {
     const active: InstallmentPlan[] = []
     const past: InstallmentPlan[] = []
+    let activeAmount = 0
+    let remaining = 0
+    let paid = 0
+    const now = new Date()
+
     for (const plan of plans) {
       if (isInstallmentPlanCompleted(plan)) past.push(plan)
-      else active.push(plan)
+      else {
+        active.push(plan)
+        activeAmount += plan.totalAmount
+      }
+
+      for (const transaction of plan.transactions) {
+        if (new Date(transaction.date) < now) paid += transaction.amount
+        else remaining += transaction.amount
+      }
     }
-    return { activePlans: active, pastPlans: past }
+    return { activePlans: active, pastPlans: past, activeTotal: activeAmount, remainingTotal: remaining, paidTotal: paid }
   }, [plans])
 
   return (
@@ -106,7 +129,75 @@ export default function InstallmentPlansModal({
             </VStack>
           </VStack>
         ) : (
-          <VStack spacing={8} align="stretch">
+          <VStack spacing={6} align="stretch">
+            <Box
+              bg={heroBg}
+              color="white"
+              borderRadius="xl"
+              p={{ base: 5, md: 6 }}
+              boxShadow="0 18px 42px -24px rgba(67, 56, 202, 0.85)"
+            >
+              <HStack justify="space-between" align={{ base: 'flex-start', sm: 'center' }} spacing={4}>
+                <VStack align="flex-start" spacing={1} minW={0}>
+                  <HStack spacing={2}>
+                    <Box
+                      w={8}
+                      h={8}
+                      borderRadius="lg"
+                      bg="whiteAlpha.200"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                    >
+                      <CreditCard size={17} weight="duotone" />
+                    </Box>
+                    <Text fontSize="xs" fontWeight={800} textTransform="uppercase" color="whiteAlpha.800">
+                      Active installment balance
+                    </Text>
+                  </HStack>
+                  <Text fontSize={{ base: '3xl', md: '4xl' }} fontWeight={900} lineHeight="1">
+                    {formatCurrency(remainingTotal)}
+                  </Text>
+                  <Text fontSize="sm" color="whiteAlpha.800">
+                    Upcoming payments across all active plans.
+                  </Text>
+                </VStack>
+                <Badge bg="whiteAlpha.200" color="white" borderRadius="full" px={3} py={1}>
+                  {activePlans.length} active
+                </Badge>
+              </HStack>
+            </Box>
+
+            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+              <InstallmentStat
+                icon={Wallet}
+                label="Original active total"
+                value={formatCurrency(activeTotal)}
+                bg={statBg}
+                borderColor={statBorder}
+                titleColor={titleColor}
+                captionColor={sectionLabelColor}
+              />
+              <InstallmentStat
+                icon={CreditCard}
+                label="Remaining"
+                value={formatCurrency(remainingTotal)}
+                bg={statBg}
+                borderColor={statBorder}
+                titleColor={titleColor}
+                captionColor={sectionLabelColor}
+              />
+              <InstallmentStat
+                icon={CheckCircle2}
+                label="Already paid"
+                value={formatCurrency(paidTotal)}
+                bg={statBg}
+                borderColor={statBorder}
+                titleColor={titleColor}
+                captionColor={sectionLabelColor}
+              />
+            </SimpleGrid>
+
             <PlansSection
               label="Active"
               count={activePlans.length}
@@ -135,6 +226,57 @@ export default function InstallmentPlansModal({
         )}
       </Box>
     </PremiumModal>
+  )
+}
+
+interface InstallmentStatProps {
+  icon: typeof Wallet
+  label: string
+  value: string
+  bg: string
+  borderColor: string
+  titleColor: string
+  captionColor: string
+}
+
+function InstallmentStat({
+  icon,
+  label,
+  value,
+  bg,
+  borderColor,
+  titleColor,
+  captionColor,
+}: InstallmentStatProps) {
+  const chipBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.14)')
+  const chipFg = useColorModeValue('blue.700', 'blue.300')
+
+  return (
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={4}>
+      <HStack spacing={3} align="center">
+        <Box
+          w={9}
+          h={9}
+          borderRadius="lg"
+          bg={chipBg}
+          color={chipFg}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexShrink={0}
+        >
+          <Icon as={icon} boxSize={4} weight="duotone" />
+        </Box>
+        <VStack align="flex-start" spacing={0} minW={0}>
+          <Text fontSize="xs" color={captionColor} noOfLines={1}>
+            {label}
+          </Text>
+          <Text fontSize="lg" fontWeight={800} color={titleColor} lineHeight="1.15" noOfLines={1}>
+            {value}
+          </Text>
+        </VStack>
+      </HStack>
+    </Box>
   )
 }
 

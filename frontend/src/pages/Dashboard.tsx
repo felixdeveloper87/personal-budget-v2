@@ -8,6 +8,7 @@ import {
   AddTransactionSection,
   SummaryWithAnalysisSection,
   InstallmentPlansSection,
+  RecurringTransactionsSection,
   DiscoverSection,
 } from '../sections'
 import { DashboardHeader, DashboardSkeleton } from '../components/dashboard'
@@ -77,7 +78,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             <Box
               order={{ base: 2, lg: 1 }}
               display="grid"
-              gridTemplateColumns={{ base: '1fr', lg: '1fr 1fr' }}
+              gridTemplateColumns={{ base: '1fr', lg: 'repeat(3, minmax(0, 1fr))' }}
               gap={{ base: 3, md: 4 }}
               w="full"
             >
@@ -86,6 +87,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                 onRefresh={loadData}
               />
               <InstallmentPlansSection />
+              <RecurringTransactionsSection onRefresh={loadData} />
             </Box>
 
             <Box order={{ base: 3, lg: 3 }}>

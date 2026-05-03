@@ -144,7 +144,8 @@ public class TransactionController {
                         tx.getCategory(),
                         tx.getAmount(),
                         tx.getDateTime().toLocalDate(),
-                        tx.getInstallmentPlan() != null ? tx.getInstallmentPlan().getId() : null))
+                        tx.getInstallmentPlan() != null ? tx.getInstallmentPlan().getId() : null,
+                        tx.getRecurringTransaction() != null ? tx.getRecurringTransaction().getId() : null))
                 .toList();
     }
 }

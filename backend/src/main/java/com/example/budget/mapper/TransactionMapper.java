@@ -32,6 +32,8 @@ public class TransactionMapper {
 
         Long installmentPlanId =
                 (t.getInstallmentPlan() != null) ? t.getInstallmentPlan().getId() : null;
+        Long recurringTransactionId =
+                (t.getRecurringTransaction() != null) ? t.getRecurringTransaction().getId() : null;
 
         return new TransactionSearchDTO(
                 t.getId(),
@@ -40,7 +42,8 @@ public class TransactionMapper {
                 t.getCategory(),
                 t.getAmount(),
                 t.getDateTime().toLocalDate(),
-                installmentPlanId
+                installmentPlanId,
+                recurringTransactionId
         );
     }
 

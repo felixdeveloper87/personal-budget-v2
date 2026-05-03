@@ -1,7 +1,7 @@
+import { useRef } from 'react'
 import { Box, Text, Input, HStack, Icon, Button, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { Calendar, Clock, CalendarCheck } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../ui'
 
 interface DateSelectorProps {
   date: string
@@ -16,10 +16,23 @@ interface DateSelectorProps {
  */
 export default function DateSelector({ date, onChange }: DateSelectorProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
+  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
+  }
+
+  const openDatePicker = () => {
+    const input = inputRef.current
+    if (!input) return
+
+    if (typeof input.showPicker === 'function') {
+      input.showPicker()
+      return
+    }
+
+    input.focus()
+    input.click()
   }
 
   const getQuickDateOptions = () => {
@@ -55,13 +68,10 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
   const quickDateOptions = getQuickDateOptions()
 
   return (
-    <VStack spacing={4} align="stretch">
+    <VStack spacing={3} align="stretch">
       <Box>
-        <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-          Date
-        </Text>
+        {/* Omit overflow:hidden: it clips Phosphor stroke icons near rounded corners (mobile + desktop). */}
         <Box
-          position="relative"
           borderRadius="2xl"
           bg={colors.inputBg}
           border="2px solid"
@@ -77,89 +87,121 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
             transform: 'translateY(-2px)'
           }}
           transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          overflow="hidden"
         >
-          {/* Decorative gradient background */}
-          <Box
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            height="2px"
-            bg="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-            opacity={0.6}
-          />
-          
-          <HStack spacing={4} align="center" p={4}>
-            <Box
-              p={2}
-              borderRadius="xl"
-              bg={colors.accent}
-              color="white"
-              boxShadow="md"
+          <VStack align="stretch" spacing={0}>
+            <VStack
+              spacing={3}
+              px={{ base: 3, sm: 4 }}
+              py={{ base: 3, sm: 4 }}
+              align="stretch"
             >
-              <Icon
-                as={Calendar}
-                boxSize={5}
-              />
-            </Box>
-            
-            <Input
-              type="date"
-              value={date}
-              onChange={handleChange}
-              fontSize={{ base: 'lg', sm: 'xl' }}
-              fontWeight="bold"
-              border="none"
-              bg="transparent"
-              color={colors.text.primary}
-              h="auto"
-              p={0}
-              _focus={{
-                outline: 'none',
-                boxShadow: 'none'
-              }}
-              _hover={{
-                border: 'none'
-              }}
-              cursor="pointer"
-            />
-          </HStack>
-        </Box>
-      </Box>
+              <HStack justify="space-between" spacing={3} align="center">
+                <HStack spacing={2.5} minW={0} flex="1">
+                  <Box
+                    as="button"
+                    type="button"
+                    onClick={openDatePicker}
+                    w={{ base: 8, sm: 10 }}
+                    h={{ base: 8, sm: 10 }}
+                    borderRadius="xl"
+                    bg={colors.bgSecondary}
+                    color={colors.accent}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                    cursor="pointer"
+                    _hover={{ bg: colors.border }}
+                    _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
+                  >
+                    <Icon
+                      as={Calendar}
+                      boxSize={{ base: 4, sm: 5 }}
+                      sx={{ '& svg': { display: 'block' } }}
+                    />
+                  </Box>
+                  <Text
+                    fontSize={{ base: 'sm', sm: 'md' }}
+                    fontWeight="600"
+                    color={colors.text.secondary}
+                    lineHeight="1.1"
+                    noOfLines={1}
+                  >
+                    What date?
+                  </Text>
+                </HStack>
 
-      {/* Quick Date Buttons */}
-      <Box>
-        <Text fontWeight="500" mb={2} color={colors.text.secondary} fontSize={{ base: 'xs', sm: 'sm' }}>
-          Quick Select
-        </Text>
-        <Wrap spacing={responsiveStyles.categoryList.spacing}>
-          {quickDateOptions.map((option) => (
-            <WrapItem key={option.value}>
-              <Button
-                variant={date === option.value ? 'solid' : 'outline'}
-                colorScheme={date === option.value ? 'blue' : 'gray'}
-                leftIcon={<Icon as={option.icon} size={16} />}
-                onClick={() => onChange(option.value)}
-                {...responsiveStyles.buttons.category}
-                h={responsiveStyles.buttons.category.height}
-                fontWeight="bold"
-                borderWidth="2px"
-                borderRadius="xl"
-                _hover={{
-                  transform: 'translateY(-2px)',
-                  shadow: 'md',
-                }}
-                _active={{
-                  transform: 'translateY(0)',
-                }}
-                transition="all 0.2s"
-              >
-                {option.label}
-              </Button>
-            </WrapItem>
-          ))}
-        </Wrap>
+                <Box position="relative" flexShrink={0} minW={{ base: '96px', sm: '116px', md: '128px' }}>
+                  <Input
+                    ref={inputRef}
+                    type="date"
+                    value={date}
+                    onChange={handleChange}
+                    position="absolute"
+                    w="1px"
+                    h="1px"
+                    opacity={0}
+                    pointerEvents="none"
+                    aria-label="Transaction date"
+                  />
+                  <Text
+                    as="button"
+                    type="button"
+                    onClick={openDatePicker}
+                    display="block"
+                    w="full"
+                    fontSize={{ base: 'sm', sm: 'md' }}
+                    fontWeight="700"
+                    color={colors.text.primary}
+                    lineHeight="1.1"
+                    noOfLines={1}
+                    textDecoration="underline"
+                    textUnderlineOffset="3px"
+                    cursor="pointer"
+                    textAlign="right"
+                    _hover={{ color: colors.accent }}
+                    _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
+                  >
+                    {new Date(`${date}T00:00:00`).toLocaleDateString('en-GB')}
+                  </Text>
+                </Box>
+              </HStack>
+
+              <Wrap spacing={2} align="center">
+                {quickDateOptions.map((option) => (
+                  <WrapItem key={option.value}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onChange(option.value)}
+                      leftIcon={
+                        <Icon
+                          as={option.icon}
+                          boxSize={3.5}
+                          sx={{ '& svg': { display: 'block' } }}
+                        />
+                      }
+                      iconSpacing={{ base: 1.5, sm: 2 }}
+                      h={{ base: 7, sm: 8 }}
+                      px={{ base: 2, sm: 3 }}
+                      minW="unset"
+                      borderRadius="full"
+                      color={date === option.value ? colors.text.primary : colors.text.secondary}
+                      bg={date === option.value ? colors.bgSecondary : 'transparent'}
+                      fontSize={{ base: 'xs', sm: 'xs' }}
+                      fontWeight={date === option.value ? 600 : 500}
+                      opacity={date === option.value ? 1 : 0.78}
+                      _hover={{ bg: colors.bgSecondary, opacity: 1 }}
+                      _active={{ bg: colors.bgSecondary }}
+                      _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
+                    >
+                      {option.label}
+                    </Button>
+                  </WrapItem>
+                ))}
+              </Wrap>
+            </VStack>
+          </VStack>
+        </Box>
       </Box>
     </VStack>
   )

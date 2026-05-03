@@ -19,7 +19,9 @@ public class TransactionSearchDTO {
     private BigDecimal amount;
     private LocalDate date;
     private Long installmentPlanId;
+    private Long recurringTransactionId;
     private boolean isInstallment;
+    private boolean isRecurring;
 
     public TransactionSearchDTO(Long id, String description, TransactionType type,
             String category, BigDecimal amount, LocalDate date) {
@@ -30,11 +32,18 @@ public class TransactionSearchDTO {
         this.amount = amount;
         this.date = date;
         this.installmentPlanId = null;
+        this.recurringTransactionId = null;
         this.isInstallment = false;
+        this.isRecurring = false;
     }
 
     public TransactionSearchDTO(Long id, String description, TransactionType type,
             String category, BigDecimal amount, LocalDate date, Long installmentPlanId) {
+        this(id, description, type, category, amount, date, installmentPlanId, null);
+    }
+
+    public TransactionSearchDTO(Long id, String description, TransactionType type,
+            String category, BigDecimal amount, LocalDate date, Long installmentPlanId, Long recurringTransactionId) {
         this.id = id;
         this.description = description;
         this.type = type;
@@ -42,7 +51,9 @@ public class TransactionSearchDTO {
         this.amount = amount;
         this.date = date;
         this.installmentPlanId = installmentPlanId;
+        this.recurringTransactionId = recurringTransactionId;
         this.isInstallment = (installmentPlanId != null);
+        this.isRecurring = (recurringTransactionId != null);
     }
 
     public Long getId() {
@@ -102,11 +113,28 @@ public class TransactionSearchDTO {
         this.isInstallment = (installmentPlanId != null);
     }
 
+    public Long getRecurringTransactionId() {
+        return recurringTransactionId;
+    }
+
+    public void setRecurringTransactionId(Long recurringTransactionId) {
+        this.recurringTransactionId = recurringTransactionId;
+        this.isRecurring = (recurringTransactionId != null);
+    }
+
     public boolean isInstallment() {
         return isInstallment;
     }
 
     public void setInstallment(boolean installment) {
         isInstallment = installment;
+    }
+
+    public boolean isRecurring() {
+        return isRecurring;
+    }
+
+    public void setRecurring(boolean recurring) {
+        isRecurring = recurring;
     }
 }

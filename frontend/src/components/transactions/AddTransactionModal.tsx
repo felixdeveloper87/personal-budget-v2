@@ -1,8 +1,8 @@
 import { Box, useColorModeValue } from '@chakra-ui/react'
-import { Plus, Minus } from '../ui/icons'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
-import { ModalHeader, PremiumModal } from '../ui'
+import { PremiumModal } from '../ui'
+import TransactionModalHeader from './TransactionModalHeader'
 
 interface AddTransactionModalProps {
   isOpen: boolean
@@ -35,25 +35,17 @@ export default function AddTransactionModal({
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       header={
-        <ModalHeader
-          icon={type === 'INCOME' ? Plus : Minus}
-          title={type === 'INCOME' ? 'Add income' : 'Add expense'}
-          caption={
-            type === 'INCOME' ? 'Track money coming in' : 'Record your spending'
-          }
-          onClose={onClose}
-          accent={type === 'INCOME' ? 'green' : 'red'}
-        />
+        <TransactionModalHeader type={type} onClose={onClose} />
       }
       contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         <TransactionForm
           transactions={transactions}
           onCreated={handleTransactionCreated}
           onTransactionDeleted={onRefresh}
           initialType={type}
-          showRecentTransactions
+          showRecentTransactions={false}
           compact
         />
       </Box>

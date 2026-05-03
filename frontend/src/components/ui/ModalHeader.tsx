@@ -38,6 +38,7 @@ interface AccentTokens {
   bgDark: string
   fgLight: string
   fgDark: string
+  line: string
 }
 
 const ACCENT_TOKENS: Record<ModalHeaderAccent, AccentTokens> = {
@@ -46,30 +47,35 @@ const ACCENT_TOKENS: Record<ModalHeaderAccent, AccentTokens> = {
     bgDark: 'whiteAlpha.100',
     fgLight: 'blue.600',
     fgDark: 'blue.300',
+    line: 'linear-gradient(90deg, #06b6d4, #2563eb)',
   },
   green: {
     bgLight: 'green.50',
     bgDark: 'rgba(34,197,94,0.14)',
     fgLight: 'green.600',
     fgDark: 'green.300',
+    line: 'linear-gradient(90deg, #22c55e, #10b981)',
   },
   red: {
     bgLight: 'red.50',
     bgDark: 'rgba(239,68,68,0.14)',
     fgLight: 'red.600',
     fgDark: 'red.300',
+    line: 'linear-gradient(90deg, #fb7185, #ef4444)',
   },
   violet: {
     bgLight: 'purple.50',
     bgDark: 'rgba(139,92,246,0.14)',
     fgLight: 'purple.600',
     fgDark: 'purple.300',
+    line: 'linear-gradient(90deg, #8b5cf6, #6366f1)',
   },
   neutral: {
     bgLight: 'gray.100',
     bgDark: 'whiteAlpha.100',
     fgLight: 'gray.700',
     fgDark: 'gray.200',
+    line: 'linear-gradient(90deg, #64748b, #94a3b8)',
   },
 }
 
@@ -110,23 +116,26 @@ export default function ModalHeader({
       bg={surfaceBg}
       borderBottom="1px solid"
       borderColor={borderColor}
-      px={{ base: 4, sm: 6 }}
+      px={{ base: 3.5, sm: 6 }}
       pt={{
         // Always leave breathing room above the close button:
         //  - On Android / desktop / iOS Chrome (env() = 0) → 1.25rem
         //  - On iOS Safari with bottom URL bar (env() ≈ 50px) → 50px + 0.75rem
         // This keeps the X clear of the Dynamic Island / status bar.
-        base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
+        base: 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))',
         sm: 5,
       }}
-      pb={4}
+      pb={{ base: 3, sm: 4 }}
+      position="relative"
+      overflow="hidden"
     >
+      <Box position="absolute" top={0} left={0} right={0} h="3px" bg={tokens.line} />
       <HStack justify="space-between" align="center" spacing={3}>
         <HStack spacing={3} minW={0} flex={1}>
           <Box
-            w={9}
-            h={9}
-            borderRadius="lg"
+            w={{ base: 8, sm: 9 }}
+            h={{ base: 8, sm: 9 }}
+            borderRadius="xl"
             bg={chipBg}
             color={chipFg}
             display="flex"
@@ -134,12 +143,12 @@ export default function ModalHeader({
             justifyContent="center"
             flexShrink={0}
           >
-            <Icon as={icon} boxSize={4} strokeWidth={2.25} />
+            <Icon as={icon} boxSize={{ base: 3.5, sm: 4 }} weight="duotone" />
           </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
               fontWeight={700}
-              fontSize="md"
+              fontSize={{ base: 'sm', sm: 'md' }}
               color={titleColor}
               lineHeight="1.2"
               noOfLines={1}
@@ -147,7 +156,7 @@ export default function ModalHeader({
               {title}
             </Text>
             {caption && (
-              <Text fontSize="xs" color={captionColor} noOfLines={1}>
+              <Text fontSize={{ base: '2xs', sm: 'xs' }} color={captionColor} noOfLines={1}>
                 {caption}
               </Text>
             )}

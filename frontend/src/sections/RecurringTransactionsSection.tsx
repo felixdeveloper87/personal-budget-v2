@@ -1,0 +1,170 @@
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Badge,
+  Box,
+  Button,
+  HStack,
+  Icon,
+  Skeleton,
+  Text,
+  VStack,
+  useColorModeValue,
+  useDisclosure,
+} from '@chakra-ui/react'
+import { CalendarClock, ChevronRight } from '../components/ui/icons'
+import { listRecurringTransactions } from '../api'
+import { RecurringTransaction } from '../types'
+import { SectionCard, SectionHeader } from '../components/ui'
+import { RecurringTransactionsModal } from '../components/recurring'
+
+interface RecurringTransactionsSectionProps {
+  onRefresh?: () => void
+}
+
+export default function RecurringTransactionsSection({
+  onRefresh,
+}: RecurringTransactionsSectionProps) {
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [items, setItems] = useState<RecurringTransaction[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchItems = async () => {
+    try {
+      setLoading(true)
+      const data = await listRecurringTransactions()
+      setItems(data)
+    } catch (err) {
+      console.error('Error fetching recurring transactions:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchItems()
+  }, [])
+
+  const handleChanged = () => {
+    fetchItems()
+    onRefresh?.()
+  }
+
+  const { activeCount, cancelledCount } = useMemo(() => {
+    let active = 0
+    let cancelled = 0
+    for (const item of items) {
+      if (item.active) active++
+      else cancelled++
+    }
+    return { activeCount: active, cancelledCount: cancelled }
+  }, [items])
+
+  const ctaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ctaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ctaColor = useColorModeValue('gray.700', 'gray.200')
+  const ctaHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const mutedColor = useColorModeValue('gray.500', 'gray.400')
+  const emptyBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const emptyBadgeColor = useColorModeValue('gray.600', 'gray.300')
+
+  const caption =
+    activeCount === 0
+      ? cancelledCount === 0
+        ? 'No fixed expenses yet.'
+        : 'No active rules right now.'
+      : `${activeCount} active${cancelledCount > 0 ? ` · ${cancelledCount} cancelled` : ''}`
+
+  return (
+    <>
+      <SectionCard h="full">
+        <Box p={{ base: 4, sm: 5 }}>
+          {loading ? (
+            <VStack align="stretch" spacing={3}>
+              <Skeleton height="20px" width="48%" borderRadius="md" />
+              <Skeleton height="14px" width="70%" borderRadius="md" />
+              <Skeleton height="40px" width="100%" borderRadius="lg" />
+            </VStack>
+          ) : (
+            <VStack align="stretch" spacing={4}>
+              <SectionHeader
+                icon={CalendarClock}
+                title="Fixed payments"
+                caption={caption}
+                accent="blue"
+                rightSlot={
+                  activeCount > 0 ? (
+                    <Badge
+                      variant="subtle"
+                      colorScheme="teal"
+                      borderRadius="full"
+                      px={2.5}
+                      py={1}
+                      fontSize="xs"
+                      fontWeight={700}
+                    >
+                      {activeCount}
+                    </Badge>
+                  ) : cancelledCount > 0 ? (
+                    <Box
+                      px={2.5}
+                      py={1}
+                      borderRadius="full"
+                      bg={emptyBadgeBg}
+                      color={emptyBadgeColor}
+                      fontSize="xs"
+                      fontWeight={700}
+                    >
+                      {cancelledCount} off
+                    </Box>
+                  ) : null
+                }
+              />
+
+              <Button
+                onClick={onOpen}
+                variant="unstyled"
+                w="full"
+                h="44px"
+                px={4}
+                borderRadius="xl"
+                bg={ctaBg}
+                border="1px solid"
+                borderColor={ctaBorder}
+                color={ctaColor}
+                fontWeight={600}
+                fontSize="sm"
+                transition="background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease"
+                _hover={{
+                  bg: ctaHoverBg,
+                  borderColor: ctaHoverBorder,
+                  transform: 'translateX(1px)',
+                }}
+                _active={{ transform: 'scale(0.99)' }}
+                _focusVisible={{
+                  outline: '2px solid',
+                  outlineColor: 'teal.300',
+                  outlineOffset: '2px',
+                }}
+              >
+                <HStack justify="space-between" align="center" w="full" px={1}>
+                  <Text noOfLines={1} color={ctaColor}>
+                    {items.length === 0 ? 'View fixed payments' : 'Manage payments'}
+                  </Text>
+                  <Icon as={ChevronRight} boxSize={4} color={mutedColor} />
+                </HStack>
+              </Button>
+            </VStack>
+          )}
+        </Box>
+      </SectionCard>
+
+      <RecurringTransactionsModal
+        isOpen={isOpen}
+        onClose={onClose}
+        recurringTransactions={items}
+        onChanged={handleChanged}
+      />
+    </>
+  )
+}

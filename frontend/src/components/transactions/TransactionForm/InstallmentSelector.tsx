@@ -1,5 +1,5 @@
 import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem, Input } from '@chakra-ui/react'
-import { CreditCard, Calendar, Calculator } from '../../ui/icons'
+import { Calendar, Calculator } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
 
@@ -11,6 +11,7 @@ interface InstallmentSelectorProps {
   amount: number
   firstInstallmentDate: string
   onFirstInstallmentDateChange: (date: string) => void
+  showToggle?: boolean
 }
 
 /**
@@ -27,6 +28,7 @@ export default function InstallmentSelector({
   amount,
   firstInstallmentDate,
   onFirstInstallmentDateChange,
+  showToggle = true,
 }: InstallmentSelectorProps) {
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
@@ -50,69 +52,58 @@ export default function InstallmentSelector({
   const quickInstallmentOptions = getQuickInstallmentOptions()
 
   return (
-    <VStack spacing={4} align="stretch">
+    <VStack spacing={3} align="stretch">
       <Box>
         <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
           Installment Plan
         </Text>
         
-        {/* Enable/Disable Switch */}
-        <Box
-          position="relative"
-          borderRadius="2xl"
-          bg={colors.inputBg}
-          border="2px solid"
-          borderColor={colors.border}
-          _hover={{
-            borderColor: colors.accent,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg'
-          }}
-          _focusWithin={{
-            borderColor: colors.accent,
-            boxShadow: `0 0 0 3px ${colors.accent}20`,
-            transform: 'translateY(-2px)'
-          }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          overflow="hidden"
-        >
-          {/* Decorative gradient background */}
+        {showToggle ? (
           <Box
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            height="2px"
-            bg="linear-gradient(90deg, #3b82f6, #8b5cf6, #10b981, #f59e0b, #ef4444)"
-            opacity={0.6}
-          />
-          
-          <HStack justify="space-between" align="center" p={4}>
-            <HStack spacing={4}>
-              <Box
-                p={2}
-                borderRadius="xl"
-                bg={colors.accent}
-                color="white"
-                boxShadow="md"
-              >
-                <Icon
-                  as={CreditCard}
-                  boxSize={5}
-                />
-              </Box>
-              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="500" color={colors.text.primary}>
-                Split into installments
-              </Text>
+            borderRadius="2xl"
+            bg={colors.inputBg}
+            border="2px solid"
+            borderColor={colors.border}
+            _hover={{
+              borderColor: colors.accent,
+              transform: 'translateY(-2px)',
+              boxShadow: 'lg'
+            }}
+            _focusWithin={{
+              borderColor: colors.accent,
+              boxShadow: `0 0 0 3px ${colors.accent}20`,
+              transform: 'translateY(-2px)'
+            }}
+            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          >
+            <HStack justify="space-between" align="center" p={{ base: 3, sm: 3.5 }}>
+              <HStack spacing={3}>
+                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="500" color={colors.text.primary}>
+                  Split into installments
+                </Text>
+              </HStack>
+              <Switch
+                isChecked={enabled}
+                onChange={(e) => onEnabledChange(e.target.checked)}
+                colorScheme="blue"
+                size="lg"
+              />
             </HStack>
-            <Switch
-              isChecked={enabled}
-              onChange={(e) => onEnabledChange(e.target.checked)}
-              colorScheme="blue"
-              size="lg"
-            />
-          </HStack>
-        </Box>
+          </Box>
+        ) : (
+          <Box p={{ base: 3, sm: 3.5 }} borderRadius="2xl" bg={colors.inputBg} border="2px solid" borderColor={colors.border}>
+            <HStack spacing={3}>
+              <VStack align="flex-start" spacing={0}>
+                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="700" color={colors.text.primary}>
+                  Split into installments
+                </Text>
+                <Text fontSize="xs" color={colors.text.secondary}>
+                  Choose how many monthly payments to create.
+                </Text>
+              </VStack>
+            </HStack>
+          </Box>
+        )}
       </Box>
 
       {/* Installment Details */}
@@ -121,7 +112,7 @@ export default function InstallmentSelector({
           <Text fontWeight="500" mb={2} color={colors.text.secondary} fontSize={{ base: 'xs', sm: 'sm' }}>
             Quick Select
           </Text>
-          <Wrap spacing={responsiveStyles.categoryList.spacing} mb={4}>
+          <Wrap spacing={responsiveStyles.categoryList.spacing} mb={3}>
             {quickInstallmentOptions.map((option) => (
               <WrapItem key={option.value}>
                 <Button
@@ -148,7 +139,7 @@ export default function InstallmentSelector({
             ))}
           </Wrap>
 
-          <VStack spacing={3} align="stretch" p={4} bg={colors.bgSecondary} borderRadius="2xl" border="2px" borderColor={colors.border}>
+          <VStack spacing={3} align="stretch" p={{ base: 3, sm: 3.5 }} bg={colors.bgSecondary} borderRadius="2xl" border="2px" borderColor={colors.border}>
             <HStack justify="space-between" align="center">
               <HStack spacing={2}>
                 <Icon as={Calculator} boxSize={4} color={colors.accent} />
@@ -161,10 +152,11 @@ export default function InstallmentSelector({
                 onChange={(_, val) => onInstallmentsChange(val || 1)}
                 min={2}
                 max={60}
-                w="120px"
+                w={{ base: '108px', sm: '120px' }}
               >
                 <NumberInputField
                   textAlign="center"
+                  h={{ base: 9, sm: 10 }}
                   fontSize={{ base: 'sm', sm: 'md' }}
                   fontWeight="bold"
                   borderColor={colors.border}
@@ -191,7 +183,8 @@ export default function InstallmentSelector({
                 type="date"
                 value={firstInstallmentDate}
                 onChange={(e) => onFirstInstallmentDateChange(e.target.value)}
-                w="150px"
+                w={{ base: '132px', sm: '150px' }}
+                h={{ base: 9, sm: 10 }}
                 fontSize={{ base: 'sm', sm: 'md' }}
                 borderColor={colors.border}
                 _focus={{

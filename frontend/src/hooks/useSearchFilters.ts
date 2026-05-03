@@ -1,4 +1,8 @@
 import { useState, useEffect } from 'react'
+import {
+  getAllExpenseCategoryLabels,
+  getAllIncomeCategoryLabels,
+} from '../constants/transactionCategories'
 import { SearchFilters } from '../types'
 
 export const useSearchFilters = (isOpen: boolean) => {
@@ -12,14 +16,9 @@ export const useSearchFilters = (isOpen: boolean) => {
 
   const [showResults, setShowResults] = useState(false)
 
-  // Predefined categories
-  const incomeCategories = [
-    'Salary', 'Freelance', 'Investments', 'Business', 'Rental', 'Bonus', 'Refund', 'Others'
-  ]
-  
-  const expenseCategories = [
-    'Groceries', 'Rent', 'Transport', 'Entertainment', 'Health', 'Utilities', 'Shopping', 'Others'
-  ]
+  // Primary + Others-sub options (matches `transactionCategories.ts` / `CategorySelector`).
+  const incomeCategories = getAllIncomeCategoryLabels()
+  const expenseCategories = getAllExpenseCategoryLabels()
 
   // Reset filters when modal closes
   useEffect(() => {

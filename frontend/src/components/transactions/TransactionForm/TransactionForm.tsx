@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react'
 import { Box, VStack, Card, CardBody, useToast, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { createTransaction, createInstallmentPlan } from '../../../api'
+import { createTransaction, createInstallmentPlan, createRecurringTransaction } from '../../../api'
 import RecentTransactions from './RecentTransactions'
 import { Plus, Minus } from '../../ui/icons'
 import DateSelector from './DateSelector'
@@ -10,6 +10,9 @@ import AmountInput from './AmountInput'
 import CategorySelector from './CategorySelector'
 import DescriptionInput from './DescriptionInput'
 import InstallmentSelector from './InstallmentSelector'
+import RecurringSelector from './RecurringSelector'
+import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
+import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
 import { Transaction } from '../../../types'
 
 interface TransactionFormProps {
@@ -48,12 +51,18 @@ export default function TransactionForm({
   const [loading, setLoading] = useState(false)
 
   // 💳 Installment states
-  const [installmentEnabled, setInstallmentEnabled] = useState(false)
+  const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
+  const [incomeMode, setIncomeMode] = useState<IncomeMode>('single')
   const [installments, setInstallments] = useState(3)
   const [firstInstallmentDate, setFirstInstallmentDate] = useState(() => {
     const today = new Date()
     return today.toISOString().slice(0, 10)
   })
+  const [recurringStartDate, setRecurringStartDate] = useState(() => {
+    const today = new Date()
+    return today.toISOString().slice(0, 10)
+  })
+  const [recurringDayOfMonth, setRecurringDayOfMonth] = useState(new Date().getDate())
 
 
   /**
@@ -72,7 +81,41 @@ export default function TransactionForm({
       setLoading(true)
       try {
         // 💳 Create installment plan (only for EXPENSE)
-        if (installmentEnabled && type === 'EXPENSE' && installments > 1) {
+        if (expenseMode === 'fixed' && type === 'EXPENSE') {
+          await createRecurringTransaction({
+            type,
+            category,
+            description,
+            amount: Number(amount),
+            startDate: recurringStartDate,
+            dayOfMonth: recurringDayOfMonth,
+          })
+
+          toast({
+            title: 'Fixed expense created',
+            description: 'Due transactions will be generated automatically.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          })
+        } else if (incomeMode === 'fixed' && type === 'INCOME') {
+          await createRecurringTransaction({
+            type,
+            category,
+            description,
+            amount: Number(amount),
+            startDate: recurringStartDate,
+            dayOfMonth: recurringDayOfMonth,
+          })
+
+          toast({
+            title: 'Fixed income created',
+            description: 'Monthly income will be generated automatically.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          })
+        } else if (expenseMode === 'installment' && type === 'EXPENSE' && installments > 1) {
           // Use the selected first installment date
           const selectedDate = new Date(firstInstallmentDate)
           const now = new Date()
@@ -121,7 +164,8 @@ export default function TransactionForm({
         // Reset form
         setAmount(0)
         setDescription('')
-        setInstallmentEnabled(false)
+        setExpenseMode('single')
+        setIncomeMode('single')
         setInstallments(3)
 
         // Trigger parent refresh
@@ -144,8 +188,11 @@ export default function TransactionForm({
       category,
       description,
       amount,
-      installmentEnabled,
+      expenseMode,
+      incomeMode,
       installments,
+      recurringStartDate,
+      recurringDayOfMonth,
       user?.token,
       onCreated,
       toast,
@@ -161,25 +208,85 @@ export default function TransactionForm({
          * - Same logic, smaller spacing
          */
             <VStack
-              spacing={{ base: 6, sm: 5 }}
+              spacing={{ base: 4, sm: 5 }}
               align="stretch"
               w="full"
               aria-label="Add transaction form" // ♿ Accessibility
             >
-          <DateSelector date={date} onChange={setDate} />
+          {type === 'INCOME' && (
+            <IncomeModeSelector
+              value={incomeMode}
+              onChange={(mode) => {
+                setIncomeMode(mode)
+                if (mode === 'fixed') {
+                  setRecurringStartDate(date)
+                  const parsed = new Date(`${date}T00:00:00`)
+                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                }
+              }}
+            />
+          )}
+          {type === 'EXPENSE' && (
+            <ExpenseModeSelector
+              value={expenseMode}
+              onChange={(mode) => {
+                setExpenseMode(mode)
+                if (mode === 'fixed') {
+                  setRecurringStartDate(date)
+                  const parsed = new Date(`${date}T00:00:00`)
+                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                }
+                if (mode === 'installment') {
+                  setFirstInstallmentDate(date)
+                }
+              }}
+            />
+          )}
+          {((type === 'EXPENSE' && expenseMode === 'single') ||
+            (type === 'INCOME' && incomeMode === 'single')) && (
+            <DateSelector date={date} onChange={setDate} />
+          )}
           <CategorySelector type={type} category={category} onChange={setCategory} />
           <AmountInput amount={amount} onChange={setAmount} type={type} />
-          {/* Show installment selector only for EXPENSE */}
-          {type === 'EXPENSE' && (
-            <InstallmentSelector
-              enabled={installmentEnabled}
-              onEnabledChange={setInstallmentEnabled}
-              installments={installments}
-              onInstallmentsChange={setInstallments}
-              amount={amount}
-              firstInstallmentDate={firstInstallmentDate}
-              onFirstInstallmentDateChange={setFirstInstallmentDate}
-            />
+          {type === 'EXPENSE' && expenseMode === 'fixed' && (
+              <RecurringSelector
+                title="Fixed expense schedule"
+                startDate={recurringStartDate}
+                onStartDateChange={(nextDate) => {
+                  setRecurringStartDate(nextDate)
+                  const parsed = new Date(`${nextDate}T00:00:00`)
+                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                }}
+                dayOfMonth={recurringDayOfMonth}
+                onDayOfMonthChange={setRecurringDayOfMonth}
+                showSystemNote
+              />
+          )}
+          {type === 'INCOME' && incomeMode === 'fixed' && (
+              <RecurringSelector
+                title="Fixed income schedule"
+                startDate={recurringStartDate}
+                onStartDateChange={(nextDate) => {
+                  setRecurringStartDate(nextDate)
+                  const parsed = new Date(`${nextDate}T00:00:00`)
+                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                }}
+                dayOfMonth={recurringDayOfMonth}
+                onDayOfMonthChange={setRecurringDayOfMonth}
+                showSystemNote={false}
+              />
+          )}
+          {type === 'EXPENSE' && expenseMode === 'installment' && (
+              <InstallmentSelector
+                enabled
+                onEnabledChange={() => undefined}
+                installments={installments}
+                onInstallmentsChange={setInstallments}
+                amount={amount}
+                firstInstallmentDate={firstInstallmentDate}
+                onFirstInstallmentDateChange={setFirstInstallmentDate}
+                showToggle={false}
+              />
           )}
           <DescriptionInput
             value={description}
@@ -191,9 +298,9 @@ export default function TransactionForm({
           {compact && (
             <Button
               size="lg"
-              h={14}
+              h={{ base: 12, sm: 14 }}
               w="full"
-              fontSize="md"
+              fontSize={{ base: 'sm', sm: 'md' }}
               fontWeight={700}
               color="white"
               borderRadius="xl"
@@ -210,7 +317,17 @@ export default function TransactionForm({
               leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
               onClick={onSubmit}
               isLoading={loading}
-              loadingText={type === 'INCOME' ? 'Adding income…' : 'Adding expense…'}
+              loadingText={
+                type === 'INCOME' && incomeMode === 'fixed'
+                  ? 'Creating fixed income...'
+                  : expenseMode === 'fixed' && type === 'EXPENSE'
+                  ? 'Creating fixed expense...'
+                  : expenseMode === 'installment' && type === 'EXPENSE'
+                    ? 'Creating installment plan...'
+                  : type === 'INCOME'
+                    ? 'Adding income...'
+                    : 'Adding expense...'
+              }
               _hover={{
                 bgPosition: '100% 50%',
                 transform: 'translateY(-1px)',
@@ -221,7 +338,15 @@ export default function TransactionForm({
               _active={{ transform: 'translateY(0)' }}
               transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
             >
-              {type === 'INCOME' ? 'Add income' : 'Add expense'}
+              {type === 'INCOME' && incomeMode === 'fixed'
+                ? 'Create fixed income'
+                : expenseMode === 'fixed' && type === 'EXPENSE'
+                ? 'Create fixed expense'
+                : expenseMode === 'installment' && type === 'EXPENSE'
+                  ? 'Create installment plan'
+                : type === 'INCOME'
+                  ? 'Add income'
+                  : 'Add expense'}
             </Button>
           )}
         </VStack>
@@ -240,26 +365,86 @@ export default function TransactionForm({
           role="region" // ♿ Accessibility: marks card as a section
           aria-label="Transaction entry form"
         >
-          <CardBody p={{ base: 6, sm: 6, md: 8 }}>
+          <CardBody p={{ base: 4, sm: 6, md: 8 }}>
             <VStack
-              spacing={{ base: 6, sm: 5, md: 6 }}
+              spacing={{ base: 4, sm: 5, md: 6 }}
               align="stretch"
               w="full"
             >
-              <DateSelector date={date} onChange={setDate} />
+              {type === 'INCOME' && (
+                <IncomeModeSelector
+                  value={incomeMode}
+                  onChange={(mode) => {
+                    setIncomeMode(mode)
+                    if (mode === 'fixed') {
+                      setRecurringStartDate(date)
+                      const parsed = new Date(`${date}T00:00:00`)
+                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                    }
+                  }}
+                />
+              )}
+              {type === 'EXPENSE' && (
+                <ExpenseModeSelector
+                  value={expenseMode}
+                  onChange={(mode) => {
+                    setExpenseMode(mode)
+                    if (mode === 'fixed') {
+                      setRecurringStartDate(date)
+                      const parsed = new Date(`${date}T00:00:00`)
+                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                    }
+                    if (mode === 'installment') {
+                      setFirstInstallmentDate(date)
+                    }
+                  }}
+                />
+              )}
+              {((type === 'EXPENSE' && expenseMode === 'single') ||
+                (type === 'INCOME' && incomeMode === 'single')) && (
+                <DateSelector date={date} onChange={setDate} />
+              )}
               <CategorySelector type={type} category={category} onChange={setCategory} />
               <AmountInput amount={amount} onChange={setAmount} type={type} />
-              {/* Show installment selector only for EXPENSE */}
-              {type === 'EXPENSE' && (
-                <InstallmentSelector
-                  enabled={installmentEnabled}
-                  onEnabledChange={setInstallmentEnabled}
-                  installments={installments}
-                  onInstallmentsChange={setInstallments}
-                  amount={amount}
-                  firstInstallmentDate={firstInstallmentDate}
-                  onFirstInstallmentDateChange={setFirstInstallmentDate}
-                />
+              {type === 'EXPENSE' && expenseMode === 'fixed' && (
+                  <RecurringSelector
+                    title="Fixed expense schedule"
+                    startDate={recurringStartDate}
+                    onStartDateChange={(nextDate) => {
+                      setRecurringStartDate(nextDate)
+                      const parsed = new Date(`${nextDate}T00:00:00`)
+                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                    }}
+                    dayOfMonth={recurringDayOfMonth}
+                    onDayOfMonthChange={setRecurringDayOfMonth}
+                    showSystemNote
+                  />
+              )}
+              {type === 'INCOME' && incomeMode === 'fixed' && (
+                  <RecurringSelector
+                    title="Fixed income schedule"
+                    startDate={recurringStartDate}
+                    onStartDateChange={(nextDate) => {
+                      setRecurringStartDate(nextDate)
+                      const parsed = new Date(`${nextDate}T00:00:00`)
+                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                    }}
+                    dayOfMonth={recurringDayOfMonth}
+                    onDayOfMonthChange={setRecurringDayOfMonth}
+                    showSystemNote={false}
+                  />
+              )}
+              {type === 'EXPENSE' && expenseMode === 'installment' && (
+                  <InstallmentSelector
+                    enabled
+                    onEnabledChange={() => undefined}
+                    installments={installments}
+                    onInstallmentsChange={setInstallments}
+                    amount={amount}
+                    firstInstallmentDate={firstInstallmentDate}
+                    onFirstInstallmentDateChange={setFirstInstallmentDate}
+                    showToggle={false}
+                  />
               )}
               <DescriptionInput
                 value={description}

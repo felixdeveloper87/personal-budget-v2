@@ -1,6 +1,6 @@
-import { Box, Text, Input, HStack, useDisclosure, VStack, Wrap, WrapItem, Button, Icon } from '@chakra-ui/react'
+import { Box, Text, HStack, useDisclosure, VStack, Wrap, WrapItem, Button, Icon } from '@chakra-ui/react'
+import { Calculator } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../ui'
 import NumberPad from './NumberPad'
 
 interface AmountInputProps {
@@ -11,16 +11,14 @@ interface AmountInputProps {
 
 /**
  * 💰 AmountInput Component
- * - Displays a currency input with £ (pound sterling) symbol
- * - Changes color based on transaction type (green for income, red for expense)
- * - Handles number formatting and validation
+ * - Currency picker + quick amounts (matches DateSelector card pattern)
+ * - Opens number pad from the keypad icon or displayed value
  */
 export default function AmountInput({ amount, onChange, type }: AmountInputProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
-  const handleInputClick = () => {
+  const handleOpenPad = () => {
     onOpen()
   }
 
@@ -40,126 +38,163 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
       { label: '£20', value: 20, color: 'purple' },
       { label: '£50', value: 50, color: 'orange' },
       { label: '£100', value: 100, color: 'teal' },
-      { label: '£500', value: 500, color: 'pink' }
+      { label: '£500', value: 500, color: 'pink' },
     ]
   }
 
   const quickAmountOptions = getQuickAmountOptions()
+  const amountLabel =
+    amount !== 0 ? formatDisplayValue(amount) : '0.00'
+  const focusRing =
+    type === 'INCOME'
+      ? '0 0 0 2px rgba(74, 222, 128, 0.2)'
+      : '0 0 0 2px rgba(248, 113, 113, 0.2)'
 
   return (
     <>
-      <VStack spacing={4} align="stretch">
+      <VStack spacing={3} align="stretch">
         <Box>
-          <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-            Amount
-          </Text>
-        <Box
-        position="relative"
-        borderRadius="2xl"
-        bg={colors.inputBg}
-        border="2px solid"
-        borderColor={colors.border}
-        _hover={{
-          borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
-          transform: 'translateY(-2px)',
-          boxShadow: 'lg'
-        }}
-        _focusWithin={{
-          borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
-          boxShadow: `0 0 0 3px ${type === 'INCOME' ? '#4ade8020' : '#f8717120'}`,
-          transform: 'translateY(-2px)'
-        }}
-        transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-        overflow="hidden"
-      >
-        {/* Decorative gradient background */}
-        <Box
-          position="absolute"
-          top="0"
-          left="0"
-          right="0"
-          height="2px"
-          bg={type === 'INCOME' 
-            ? 'linear-gradient(90deg, #22c55e, #16a34a, #15803d)' 
-            : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)'
-          }
-          opacity={0.8}
-        />
-        
-        <HStack spacing={4} align="center" p={4}>
           <Box
-            p={2}
-            borderRadius="xl"
-            bg={type === 'INCOME' ? 'green.500' : 'red.500'}
-            color="white"
-            boxShadow="md"
-            fontWeight="bold"
-            fontSize={{ base: 'lg', sm: 'xl' }}
-          >
-            £
-          </Box>
-          
-          <Input
-            type="text"
-            value={formatDisplayValue(amount)}
-            onClick={handleInputClick}
-            placeholder="0.00"
-            fontSize={{ base: 'lg', sm: 'xl' }}
-            fontWeight="bold"
-            border="none"
-            bg="transparent"
-            color={colors.text.primary}
-            h="auto"
-            p={0}
-            _focus={{
-              outline: 'none',
-              boxShadow: 'none'
-            }}
+            borderRadius="2xl"
+            bg={colors.inputBg}
+            border="2px solid"
+            borderColor={colors.border}
             _hover={{
-              border: 'none'
+              borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
+              transform: 'translateY(-2px)',
+              boxShadow: 'lg',
             }}
-            cursor="pointer"
-            readOnly
-          />
-        </HStack>
-        </Box>
-        </Box>
+            _focusWithin={{
+              borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
+              boxShadow:
+                type === 'INCOME'
+                  ? '0 0 0 3px #4ade8020'
+                  : '0 0 0 3px #f8717120',
+              transform: 'translateY(-2px)',
+            }}
+            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          >
+            <VStack align="stretch" spacing={0}>
+              <VStack
+                spacing={3}
+                px={{ base: 3, sm: 4 }}
+                py={{ base: 3, sm: 4 }}
+                align="stretch"
+              >
+                <HStack justify="space-between" spacing={3} align="center">
+                  <HStack spacing={2.5} minW={0} flex="1">
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={handleOpenPad}
+                      w={{ base: 8, sm: 10 }}
+                      h={{ base: 8, sm: 10 }}
+                      borderRadius="xl"
+                      bg={colors.bgSecondary}
+                      color={
+                        type === 'INCOME' ? 'green.400' : 'red.400'
+                      }
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                      cursor="pointer"
+                      _hover={{ bg: colors.border }}
+                      _focusVisible={{ boxShadow: focusRing }}
+                    >
+                      <Icon
+                        as={Calculator}
+                        boxSize={{ base: 4, sm: 5 }}
+                        sx={{ '& svg': { display: 'block' } }}
+                      />
+                    </Box>
+                    <Text
+                      fontSize={{ base: 'sm', sm: 'md' }}
+                      fontWeight="600"
+                      color={colors.text.secondary}
+                      lineHeight="1.1"
+                      noOfLines={1}
+                    >
+                      How much?
+                    </Text>
+                  </HStack>
 
-        {/* Quick Amount Buttons */}
-        <Box>
-          <Text fontWeight="500" mb={2} color={colors.text.secondary} fontSize={{ base: 'xs', sm: 'sm' }}>
-            Quick Amount
-          </Text>
-          <Wrap spacing={responsiveStyles.categoryList.spacing}>
-            {quickAmountOptions.map((option) => (
-              <WrapItem key={option.value}>
-                <Button
-                  variant={amount === option.value ? 'solid' : 'outline'}
-                  colorScheme={amount === option.value ? 'blue' : 'gray'}
-                  onClick={() => onChange(option.value)}
-                  {...responsiveStyles.buttons.category}
-                  h={responsiveStyles.buttons.category.height}
-                  fontWeight="bold"
-                  borderWidth="2px"
-                  borderRadius="xl"
-                  _hover={{
-                    transform: 'translateY(-2px)',
-                    shadow: 'md',
-                  }}
-                  _active={{
-                    transform: 'translateY(0)',
-                  }}
-                  transition="all 0.2s"
-                >
-                  {option.label}
-                </Button>
-              </WrapItem>
-            ))}
-          </Wrap>
+                  <Box
+                    flexShrink={0}
+                    minW={{ base: '72px', sm: '88px', md: '104px' }}
+                  >
+                    <Text
+                      as="button"
+                      type="button"
+                      onClick={handleOpenPad}
+                      display="block"
+                      w="full"
+                      fontSize={{ base: 'sm', sm: 'lg' }}
+                      fontWeight="700"
+                      color={
+                        amount !== 0
+                          ? colors.text.primary
+                          : colors.text.secondary
+                      }
+                      lineHeight="1.1"
+                      noOfLines={1}
+                      textDecoration="underline"
+                      textUnderlineOffset="3px"
+                      cursor="pointer"
+                      textAlign="right"
+                      sx={{ fontVariantNumeric: 'tabular-nums' }}
+                      _hover={{
+                        color:
+                          type === 'INCOME' ? 'green.400' : 'red.400',
+                      }}
+                      _focusVisible={{ boxShadow: focusRing }}
+                    >
+                      £{amountLabel}
+                    </Text>
+                  </Box>
+                </HStack>
+
+                <Wrap spacing={2} align="center">
+                  {quickAmountOptions.map((option) => (
+                    <WrapItem key={option.value}>
+                      <Button
+                        variant="ghost"
+                        onClick={() => onChange(option.value)}
+                        h={{ base: 7, sm: 8 }}
+                        px={{ base: 2, sm: 3 }}
+                        minW="unset"
+                        borderRadius="full"
+                        color={
+                          amount === option.value
+                            ? colors.text.primary
+                            : colors.text.secondary
+                        }
+                        bg={
+                          amount === option.value
+                            ? colors.bgSecondary
+                            : 'transparent'
+                        }
+                        fontSize={{ base: 'xs', sm: 'xs' }}
+                        fontWeight={amount === option.value ? 600 : 500}
+                        opacity={amount === option.value ? 1 : 0.78}
+                        _hover={{
+                          bg: colors.bgSecondary,
+                          opacity: 1,
+                        }}
+                        _active={{ bg: colors.bgSecondary }}
+                        _focusVisible={{ boxShadow: focusRing }}
+                      >
+                        {option.label}
+                      </Button>
+                    </WrapItem>
+                  ))}
+                </Wrap>
+              </VStack>
+            </VStack>
+          </Box>
         </Box>
       </VStack>
 
-      {/* NumberPad Modal */}
       {isOpen && (
         <Box
           position="fixed"
@@ -185,7 +220,11 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
             borderColor={colors.border}
             shadow="2xl"
           >
-            <NumberPad value={amount} onValueChange={handleNumberPadChange} onDone={onClose} />
+            <NumberPad
+              value={amount}
+              onValueChange={handleNumberPadChange}
+              onDone={onClose}
+            />
           </Box>
         </Box>
       )}

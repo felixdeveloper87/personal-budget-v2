@@ -2,6 +2,7 @@ package com.example.budget;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Main entry point for the Personal Budget application.
@@ -10,6 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * personal financial transactions, installment plans, and user authentication.
  */
 @SpringBootApplication
+@EnableScheduling
 public class PersonalBudgetApplication {
     
     /**
@@ -21,4 +23,3 @@ public class PersonalBudgetApplication {
         SpringApplication.run(PersonalBudgetApplication.class, args);
     }
 }
-

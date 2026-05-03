@@ -22,7 +22,9 @@ export interface Transaction {
   amount: number
   userId?: number // opcional porque o backend não retorna no DTO de busca
   installmentPlanId?: number // ID do plano de parcelamento (se houver)
+  recurringTransactionId?: number // ID da recorrencia (se houver)
   isInstallment?: boolean // Indica se faz parte de um parcelamento
+  isRecurring?: boolean // Indica se foi gerada por uma recorrencia
   installmentNumber?: number // Número da parcela (1, 2, 3, etc.)
   isFutureInstallment?: boolean // Indica se é uma parcela futura calculada
 }
@@ -85,6 +87,30 @@ export interface CreateInstallmentPlanRequest {
   description: string
   startDate: string // yyyy-MM-dd
   startDateTime?: string // yyyy-MM-ddTHH:mm:ss.sssZ (opcional)
+}
+
+export interface RecurringTransaction {
+  id: number
+  type: TransactionType
+  category: string
+  description: string
+  amount: number
+  frequency: 'MONTHLY'
+  startDate: string
+  endDate?: string
+  nextRunDate: string
+  dayOfMonth: number
+  active: boolean
+}
+
+export interface CreateRecurringTransactionRequest {
+  type: TransactionType
+  category: string
+  description: string
+  amount: number
+  startDate: string
+  endDate?: string
+  dayOfMonth?: number
 }
 
 // Search component interfaces

@@ -1,4 +1,4 @@
-import { Box, Text, Textarea, HStack, Icon, VStack } from '@chakra-ui/react'
+import { Box, Text, Input, HStack, Icon, VStack } from '@chakra-ui/react'
 import { FileText } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
@@ -10,101 +10,107 @@ interface DescriptionInputProps {
 }
 
 /**
- * 📝 DescriptionInput Component
- * - Displays a textarea for transaction description
- * - Shows different placeholder based on transaction type
- * - Handles text input and validation
+ * 📝 DescriptionInput — Single-line note field (aligned with Date / Amount / Category cards)
  */
-export default function DescriptionInput({ value, onChange, type, loading = false }: DescriptionInputProps) {
+export default function DescriptionInput({
+  value,
+  onChange,
+  type,
+  loading = false,
+}: DescriptionInputProps) {
   const colors = useThemeColors()
+  const accentBorder = type === 'INCOME' ? 'green.400' : 'red.400'
+  const focusWithinShadow =
+    type === 'INCOME' ? '0 0 0 3px #4ade8020' : '0 0 0 3px #f8717120'
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
   }
 
-  const placeholder = type === 'INCOME' 
-    ? 'e.g., Salary payment, freelance work...' 
-    : 'e.g., Grocery shopping, rent payment...'
-
+  const placeholder =
+    type === 'INCOME'
+      ? 'e.g. bonus, tips'
+      : 'e.g. food, uber'
 
   return (
-    <VStack spacing={4} align="stretch">
+    <VStack spacing={3} align="stretch">
       <Box>
-        <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-          Description
-        </Text>
-        
         <Box
-          position="relative"
           borderRadius="2xl"
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
           _hover={{
-            borderColor: colors.accent,
+            borderColor: accentBorder,
             transform: 'translateY(-2px)',
-            boxShadow: 'lg'
+            boxShadow: 'lg',
           }}
           _focusWithin={{
-            borderColor: colors.accent,
-            boxShadow: `0 0 0 3px ${colors.accent}20`,
-            transform: 'translateY(-2px)'
+            borderColor: accentBorder,
+            boxShadow: focusWithinShadow,
+            transform: 'translateY(-2px)',
           }}
           transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          overflow="hidden"
         >
-          {/* Decorative gradient background */}
-          <Box
-            position="absolute"
-            top="0"
-            left="0"
-            right="0"
-            height="2px"
-            bg={type === 'INCOME' 
-              ? 'linear-gradient(90deg, #22c55e, #16a34a, #15803d)' 
-              : 'linear-gradient(90deg, #ef4444, #dc2626, #b91c1c)'
-            }
-            opacity={0.8}
-          />
-          
-          <HStack spacing={4} align="start" p={4}>
+          <HStack
+            spacing={{ base: 2, sm: 2.5 }}
+            align="center"
+            px={{ base: 3, sm: 4 }}
+            py={{ base: 3, sm: 4 }}
+            minH={{ base: '52px', sm: '56px' }}
+          >
             <Box
-              p={2}
+              role="presentation"
+              w={{ base: 8, sm: 10 }}
+              h={{ base: 8, sm: 10 }}
               borderRadius="xl"
-              bg={colors.accent}
-              color="white"
-              boxShadow="md"
-              mt={1}
+              bg={colors.bgSecondary}
+              color={accentBorder}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexShrink={0}
+              aria-hidden
             >
               <Icon
                 as={FileText}
-                boxSize={5}
+                boxSize={{ base: 4, sm: 5 }}
+                sx={{ '& svg': { display: 'block' } }}
               />
             </Box>
-            
-            <Textarea
+            <Text
+              fontSize={{ base: 'sm', sm: 'md' }}
+              fontWeight="600"
+              color={colors.text.secondary}
+              lineHeight="1.1"
+              flexShrink={0}
+              whiteSpace="nowrap"
+            >
+              Any details?
+            </Text>
+            <Input
+              type="text"
               value={value}
               onChange={handleChange}
               placeholder={placeholder}
-              fontSize={{ base: 'md', sm: 'lg' }}
-              fontWeight="500"
+              aria-label="Transaction description"
+              flex={1}
+              minW={0}
+              h="auto"
+              minH={0}
+              p={0}
               border="none"
               bg="transparent"
               color={colors.text.primary}
-              resize="vertical"
-              minH="100px"
+              fontSize={{ base: 'sm', sm: 'md' }}
+              fontWeight="500"
+              lineHeight="1.2"
               isDisabled={loading}
-              _focus={{
-                outline: 'none',
-                boxShadow: 'none'
+              sx={{
+                _placeholder: { color: colors.text.secondary, opacity: 0.75 },
               }}
-              _hover={{
-                border: 'none'
-              }}
-              _disabled={{
-                opacity: 0.6,
-                cursor: 'not-allowed',
-              }}
+              _focus={{ outline: 'none', boxShadow: 'none' }}
+              _disabled={{ opacity: 0.6, cursor: 'not-allowed' }}
             />
           </HStack>
         </Box>
@@ -112,5 +118,3 @@ export default function DescriptionInput({ value, onChange, type, loading = fals
     </VStack>
   )
 }
-
-

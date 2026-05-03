@@ -6,7 +6,9 @@ import {
   LoginRequest,
   RegisterRequest,
   InstallmentPlan,
-  CreateInstallmentPlanRequest
+  CreateInstallmentPlanRequest,
+  RecurringTransaction,
+  CreateRecurringTransactionRequest
 } from './types'
 
 // ----------------------------------------------------
@@ -153,6 +155,47 @@ export async function getInstallmentPlan(id: number): Promise<InstallmentPlan> {
 // Delete installment plan → DELETE /installment-plans/:id
 export async function deleteInstallmentPlan(id: number): Promise<void> {
   await api.delete(`/installment-plans/${id}`)
+}
+
+// ----------------------------------------------------
+// RECURRING TRANSACTION ENDPOINTS
+// ----------------------------------------------------
+
+// Get all recurring transactions -> GET /recurring-transactions
+export async function listRecurringTransactions(): Promise<RecurringTransaction[]> {
+  const { data } = await api.get<RecurringTransaction[]>('/recurring-transactions')
+  return data
+}
+
+// Create recurring transaction -> POST /recurring-transactions
+export async function createRecurringTransaction(
+  request: CreateRecurringTransactionRequest
+): Promise<RecurringTransaction> {
+  const { data } = await api.post<RecurringTransaction>('/recurring-transactions', request)
+  return data
+}
+
+// Generate due transactions manually -> POST /recurring-transactions/:id/generate-due
+export async function generateDueRecurringTransactions(id: number): Promise<RecurringTransaction> {
+  const { data } = await api.post<RecurringTransaction>(`/recurring-transactions/${id}/generate-due`)
+  return data
+}
+
+// Update recurring transaction amount -> PATCH /recurring-transactions/:id/amount
+export async function updateRecurringTransactionAmount(
+  id: number,
+  amount: number
+): Promise<RecurringTransaction> {
+  const { data } = await api.patch<RecurringTransaction>(`/recurring-transactions/${id}/amount`, {
+    amount,
+  })
+  return data
+}
+
+// Cancel recurring transaction -> DELETE /recurring-transactions/:id
+export async function cancelRecurringTransaction(id: number): Promise<RecurringTransaction> {
+  const { data } = await api.delete<RecurringTransaction>(`/recurring-transactions/${id}`)
+  return data
 }
 
 export default api

@@ -43,6 +43,11 @@ public class Transaction {
     @JsonIgnore
     private InstallmentPlan installmentPlan;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recurring_transaction_id")
+    @JsonIgnore
+    private RecurringTransaction recurringTransaction;
+
     @Column(name = "installment_number")
     private Integer installmentNumber;
 
@@ -126,6 +131,14 @@ public class Transaction {
 
     public void setInstallmentPlan(InstallmentPlan installmentPlan) {
         this.installmentPlan = installmentPlan;
+    }
+
+    public RecurringTransaction getRecurringTransaction() {
+        return recurringTransaction;
+    }
+
+    public void setRecurringTransaction(RecurringTransaction recurringTransaction) {
+        this.recurringTransaction = recurringTransaction;
     }
 
     public Integer getInstallmentNumber() {

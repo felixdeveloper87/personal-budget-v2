@@ -20,6 +20,7 @@ interface AddTransactionSectionProps {
 
 interface QuickActionConfig {
   label: string
+  caption: string
   type: 'INCOME' | 'EXPENSE'
   icon: typeof Plus
   /** CSS gradient applied to the button background. */
@@ -31,16 +32,18 @@ interface QuickActionConfig {
 const QUICK_ACTIONS: QuickActionConfig[] = [
   {
     label: 'Income',
+    caption: 'Pay in',
     type: 'INCOME',
     icon: Plus,
-    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    gradient: 'linear-gradient(135deg, #052e24 0%, #059669 55%, #34d399 100%)',
     shadow: 'rgba(16, 185, 129, 0.35)',
   },
   {
     label: 'Expense',
+    caption: 'Spend out',
     type: 'EXPENSE',
     icon: Minus,
-    gradient: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+    gradient: 'linear-gradient(135deg, #3b0712 0%, #dc2626 55%, #fb7185 100%)',
     shadow: 'rgba(239, 68, 68, 0.35)',
   },
 ]
@@ -74,26 +77,31 @@ export default function AddTransactionSection({
               accent="blue"
             />
 
-            <HStack spacing={3} w="full">
-              {QUICK_ACTIONS.map(({ label, type: t, icon, gradient, shadow }) => (
+            <HStack spacing={{ base: 2, sm: 3 }} w="full">
+              {QUICK_ACTIONS.map(({ label, caption, type: t, icon, gradient, shadow }) => (
                 <Button
                   key={t}
                   onClick={() => handleOpen(t)}
                   flex={1}
-                  h={{ base: '44px', sm: '48px' }}
+                  h={{ base: '58px', sm: '64px' }}
                   variant="unstyled"
                   position="relative"
-                  borderRadius="xl"
+                  borderRadius="2xl"
                   bg={gradient}
                   color="white"
-                  fontWeight={700}
-                  fontSize="sm"
-                  letterSpacing="0.02em"
-                  boxShadow={`0 4px 14px ${shadow}`}
-                  transition="transform 0.18s ease, box-shadow 0.18s ease"
+                  overflow="hidden"
+                  boxShadow={`0 12px 28px -16px ${shadow}`}
+                  transition="transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease"
+                  _before={{
+                    content: '""',
+                    position: 'absolute',
+                    inset: 0,
+                    bg: 'linear-gradient(135deg, rgba(255,255,255,0.22), transparent 48%)',
+                  }}
                   _hover={{
                     transform: 'translateY(-1px)',
-                    boxShadow: `0 8px 22px ${shadow}`,
+                    boxShadow: `0 18px 36px -18px ${shadow}`,
+                    filter: 'saturate(1.08)',
                   }}
                   _active={{ transform: 'scale(0.98)' }}
                   _focusVisible={{
@@ -103,14 +111,34 @@ export default function AddTransactionSection({
                   }}
                 >
                   <HStack
-                    justify="center"
+                    justify="space-between"
                     align="center"
-                    spacing={2}
+                    spacing={3}
                     h="full"
-                    px={3}
+                    px={{ base: 3, sm: 4 }}
+                    position="relative"
+                    zIndex={1}
                   >
-                    <Icon as={icon} boxSize={4} strokeWidth={2.75} />
-                    <Text fontWeight={700}>{label}</Text>
+                    <VStack align="flex-start" spacing={0} minW={0}>
+                      <Text fontWeight={800} fontSize={{ base: 'sm', sm: 'md' }} lineHeight="1.1">
+                        {label}
+                      </Text>
+                      <Text fontWeight={600} fontSize="2xs" color="whiteAlpha.800" noOfLines={1}>
+                        {caption}
+                      </Text>
+                    </VStack>
+                    <Box
+                      w={{ base: 8, sm: 9 }}
+                      h={{ base: 8, sm: 9 }}
+                      borderRadius="xl"
+                      bg="whiteAlpha.200"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                    >
+                      <Icon as={icon} boxSize={4} weight="bold" />
+                    </Box>
                   </HStack>
                 </Button>
               ))}

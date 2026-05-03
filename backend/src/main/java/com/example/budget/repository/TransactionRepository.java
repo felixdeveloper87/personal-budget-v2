@@ -29,6 +29,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      */
     List<Transaction> findByUser(User user);
 
+    boolean existsByRecurringTransactionIdAndDateTimeBetween(
+                    Long recurringTransactionId,
+                    LocalDateTime start,
+                    LocalDateTime end);
+
     /**
      * Calculates the sum of transaction amounts within a date range and type.
      * 
