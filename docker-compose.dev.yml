@@ -65,7 +65,9 @@ services:
 volumes:
   dbdata:
 
+# Sem nome fixo de rede Docker: assim o Compose cria algo como personal-budget-v2_app-network
+# e evita o aviso "incorrect label … (expected: app-network)" quando já existia
+# personal-budget-v2-network de outra versão/projeto Compose.
 networks:
   app-network:
-    name: personal-budget-v2-network
     driver: bridge
