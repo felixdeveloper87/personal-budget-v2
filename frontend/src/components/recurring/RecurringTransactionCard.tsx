@@ -33,7 +33,7 @@ import { RecurringTransaction } from '../../types'
 
 interface RecurringTransactionCardProps {
   recurringTransaction: RecurringTransaction
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
 }
 
 function formatDate(value?: string) {
@@ -93,7 +93,7 @@ export default function RecurringTransactionCard({
         status: 'success',
         duration: 2000,
       })
-      onChanged()
+      await Promise.resolve(onChanged())
     } catch (err: any) {
       toast({
         title: 'Error syncing fixed payment',
@@ -115,7 +115,7 @@ export default function RecurringTransactionCard({
         status: 'success',
         duration: 2000,
       })
-      onChanged()
+      await Promise.resolve(onChanged())
       onClose()
     } catch (err: any) {
       toast({
@@ -150,7 +150,7 @@ export default function RecurringTransactionCard({
         duration: 2500,
       })
       setIsEditingAmount(false)
-      onChanged()
+      await Promise.resolve(onChanged())
     } catch (err: any) {
       toast({
         title: 'Error updating amount',

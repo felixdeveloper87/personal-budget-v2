@@ -5,6 +5,7 @@ import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -112,4 +113,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Object[]> sumByCategoryBetweenAndUser(@Param("start") LocalDateTime start,
                     @Param("end") LocalDateTime end,
                     @Param("user") User user);
+
+    /**
+     * Removes generated installments for a recurring that are dated after today's calendar date
+     * (typically future months). Today's and earlier dated rows remain as historical debits/credits.
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Transaction t WHERE t.recurringTransaction.id = :recurringTransactionId "
+                    + "AND t.dateTime >= :fromInclusive")
+    void deleteGeneratedByRecurringFromDateInclusive(@Param("recurringTransactionId") Long recurringTransactionId,
+                    @Param("fromInclusive") LocalDateTime fromInclusive);
 }

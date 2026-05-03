@@ -18,7 +18,7 @@ interface RecurringTransactionsModalProps {
   isOpen: boolean
   onClose: () => void
   recurringTransactions: RecurringTransaction[]
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
 }
 
 function formatCurrency(value: number) {
@@ -286,7 +286,7 @@ interface RecurringGroupProps {
   title: string
   caption: string
   items: RecurringTransaction[]
-  onChanged: () => void
+  onChanged: () => void | Promise<void>
   emptyMessage?: string
   muted?: boolean
 }

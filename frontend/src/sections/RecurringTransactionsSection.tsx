@@ -18,7 +18,7 @@ import { SectionCard, SectionHeader } from '../components/ui'
 import { RecurringTransactionsModal } from '../components/recurring'
 
 interface RecurringTransactionsSectionProps {
-  onRefresh?: () => void
+  onRefresh?: () => void | Promise<void>
 }
 
 export default function RecurringTransactionsSection({
@@ -44,9 +44,11 @@ export default function RecurringTransactionsSection({
     fetchItems()
   }, [])
 
-  const handleChanged = () => {
-    fetchItems()
-    onRefresh?.()
+  const handleChanged = async () => {
+    await fetchItems()
+    if (onRefresh) {
+      await Promise.resolve(onRefresh())
+    }
   }
 
   const { activeCount, cancelledCount } = useMemo(() => {

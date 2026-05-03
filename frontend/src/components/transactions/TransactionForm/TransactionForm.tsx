@@ -15,6 +15,22 @@ import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
 import { Transaction } from '../../../types'
 
+/** Calendar date in local TZ (avoid UTC drift from `toISOString().slice`). */
+function toLocalYYYYMMDD(d = new Date()): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+/** Day-of-month part of `YYYY-MM-DD`, clamped — matches the transaction calendar date picker. */
+function dayOfMonthFromYMD(ymd: string): number {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd.trim())
+  if (!match) return new Date().getDate()
+  const day = parseInt(match[3], 10)
+  return Math.min(31, Math.max(1, day))
+}
+
 interface TransactionFormProps {
   onCreated: (t: Transaction) => void
   onTransactionDeleted?: () => void
@@ -43,7 +59,7 @@ export default function TransactionForm({
   const colors = useThemeColors()
 
   // 🗓️ Controlled form states
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
+  const [date, setDate] = useState(() => toLocalYYYYMMDD())
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>(initialType)
   const [category, setCategory] = useState(type === 'INCOME' ? 'Salary' : 'Groceries')
   const [description, setDescription] = useState('')
@@ -54,15 +70,22 @@ export default function TransactionForm({
   const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
   const [incomeMode, setIncomeMode] = useState<IncomeMode>('single')
   const [installments, setInstallments] = useState(3)
-  const [firstInstallmentDate, setFirstInstallmentDate] = useState(() => {
-    const today = new Date()
-    return today.toISOString().slice(0, 10)
-  })
-  const [recurringStartDate, setRecurringStartDate] = useState(() => {
-    const today = new Date()
-    return today.toISOString().slice(0, 10)
-  })
-  const [recurringDayOfMonth, setRecurringDayOfMonth] = useState(new Date().getDate())
+  const [firstInstallmentDate, setFirstInstallmentDate] = useState(() => toLocalYYYYMMDD())
+  const [recurringStartDate, setRecurringStartDate] = useState(() => toLocalYYYYMMDD())
+  const [recurringDayOfMonth, setRecurringDayOfMonth] = useState(() =>
+    dayOfMonthFromYMD(toLocalYYYYMMDD())
+  )
+
+  /** Keep recurring due-day default aligned with the transaction date while editing a single (one-off) row. */
+  const onTransactionDateChange = useCallback((nextDate: string) => {
+    setDate(nextDate)
+    if (
+      (type === 'EXPENSE' && expenseMode === 'single') ||
+      (type === 'INCOME' && incomeMode === 'single')
+    ) {
+      setRecurringDayOfMonth(dayOfMonthFromYMD(nextDate))
+    }
+  }, [type, expenseMode, incomeMode])
 
 
   /**
@@ -104,7 +127,7 @@ export default function TransactionForm({
             category,
             description,
             amount: Number(amount),
-            startDate: recurringStartDate,
+            startDate: toLocalYYYYMMDD(),
             dayOfMonth: recurringDayOfMonth,
           })
 
@@ -219,9 +242,7 @@ export default function TransactionForm({
               onChange={(mode) => {
                 setIncomeMode(mode)
                 if (mode === 'fixed') {
-                  setRecurringStartDate(date)
-                  const parsed = new Date(`${date}T00:00:00`)
-                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                  setRecurringDayOfMonth(dayOfMonthFromYMD(date))
                 }
               }}
             />
@@ -233,8 +254,7 @@ export default function TransactionForm({
                 setExpenseMode(mode)
                 if (mode === 'fixed') {
                   setRecurringStartDate(date)
-                  const parsed = new Date(`${date}T00:00:00`)
-                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                  setRecurringDayOfMonth(dayOfMonthFromYMD(date))
                 }
                 if (mode === 'installment') {
                   setFirstInstallmentDate(date)
@@ -242,21 +262,17 @@ export default function TransactionForm({
               }}
             />
           )}
+          <AmountInput amount={amount} onChange={setAmount} type={type} />
           {((type === 'EXPENSE' && expenseMode === 'single') ||
             (type === 'INCOME' && incomeMode === 'single')) && (
-            <DateSelector date={date} onChange={setDate} />
+            <DateSelector date={date} onChange={onTransactionDateChange} />
           )}
-          <CategorySelector type={type} category={category} onChange={setCategory} />
-          <AmountInput amount={amount} onChange={setAmount} type={type} />
           {type === 'EXPENSE' && expenseMode === 'fixed' && (
               <RecurringSelector
                 title="Fixed expense schedule"
+                type={type}
                 startDate={recurringStartDate}
-                onStartDateChange={(nextDate) => {
-                  setRecurringStartDate(nextDate)
-                  const parsed = new Date(`${nextDate}T00:00:00`)
-                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
-                }}
+                onStartDateChange={setRecurringStartDate}
                 dayOfMonth={recurringDayOfMonth}
                 onDayOfMonthChange={setRecurringDayOfMonth}
                 showSystemNote
@@ -265,12 +281,7 @@ export default function TransactionForm({
           {type === 'INCOME' && incomeMode === 'fixed' && (
               <RecurringSelector
                 title="Fixed income schedule"
-                startDate={recurringStartDate}
-                onStartDateChange={(nextDate) => {
-                  setRecurringStartDate(nextDate)
-                  const parsed = new Date(`${nextDate}T00:00:00`)
-                  if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
-                }}
+                type={type}
                 dayOfMonth={recurringDayOfMonth}
                 onDayOfMonthChange={setRecurringDayOfMonth}
                 showSystemNote={false}
@@ -288,6 +299,7 @@ export default function TransactionForm({
                 showToggle={false}
               />
           )}
+          <CategorySelector type={type} category={category} onChange={setCategory} />
           <DescriptionInput
             value={description}
             onChange={setDescription}
@@ -377,9 +389,7 @@ export default function TransactionForm({
                   onChange={(mode) => {
                     setIncomeMode(mode)
                     if (mode === 'fixed') {
-                      setRecurringStartDate(date)
-                      const parsed = new Date(`${date}T00:00:00`)
-                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                      setRecurringDayOfMonth(dayOfMonthFromYMD(date))
                     }
                   }}
                 />
@@ -391,8 +401,7 @@ export default function TransactionForm({
                     setExpenseMode(mode)
                     if (mode === 'fixed') {
                       setRecurringStartDate(date)
-                      const parsed = new Date(`${date}T00:00:00`)
-                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
+                      setRecurringDayOfMonth(dayOfMonthFromYMD(date))
                     }
                     if (mode === 'installment') {
                       setFirstInstallmentDate(date)
@@ -400,21 +409,17 @@ export default function TransactionForm({
                   }}
                 />
               )}
+              <AmountInput amount={amount} onChange={setAmount} type={type} />
               {((type === 'EXPENSE' && expenseMode === 'single') ||
                 (type === 'INCOME' && incomeMode === 'single')) && (
-                <DateSelector date={date} onChange={setDate} />
+                <DateSelector date={date} onChange={onTransactionDateChange} />
               )}
-              <CategorySelector type={type} category={category} onChange={setCategory} />
-              <AmountInput amount={amount} onChange={setAmount} type={type} />
               {type === 'EXPENSE' && expenseMode === 'fixed' && (
                   <RecurringSelector
                     title="Fixed expense schedule"
+                    type={type}
                     startDate={recurringStartDate}
-                    onStartDateChange={(nextDate) => {
-                      setRecurringStartDate(nextDate)
-                      const parsed = new Date(`${nextDate}T00:00:00`)
-                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
-                    }}
+                    onStartDateChange={setRecurringStartDate}
                     dayOfMonth={recurringDayOfMonth}
                     onDayOfMonthChange={setRecurringDayOfMonth}
                     showSystemNote
@@ -423,12 +428,7 @@ export default function TransactionForm({
               {type === 'INCOME' && incomeMode === 'fixed' && (
                   <RecurringSelector
                     title="Fixed income schedule"
-                    startDate={recurringStartDate}
-                    onStartDateChange={(nextDate) => {
-                      setRecurringStartDate(nextDate)
-                      const parsed = new Date(`${nextDate}T00:00:00`)
-                      if (!Number.isNaN(parsed.getTime())) setRecurringDayOfMonth(parsed.getDate())
-                    }}
+                    type={type}
                     dayOfMonth={recurringDayOfMonth}
                     onDayOfMonthChange={setRecurringDayOfMonth}
                     showSystemNote={false}
@@ -446,6 +446,7 @@ export default function TransactionForm({
                     showToggle={false}
                   />
               )}
+              <CategorySelector type={type} category={category} onChange={setCategory} />
               <DescriptionInput
                 value={description}
                 onChange={setDescription}

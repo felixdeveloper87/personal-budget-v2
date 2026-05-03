@@ -6,6 +6,14 @@ import { getMonthlySummary, listTransactions, searchTransactions } from '../api'
 import { convertMonthlySummary } from '../utils/summary'
 import { hasActiveFilters } from '../utils/filters'
 
+export interface LoadDashboardOptions {
+  /**
+   * When true, skips the global skeleton (`loading`): use after inline actions that should not
+   * unmount dashboard sections (e.g. cancel recurring from Fixed payments modal).
+   */
+  quiet?: boolean
+}
+
 export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [monthSummary, setMonthSummary] = useState<MonthlySummary | null>(null)
@@ -14,9 +22,10 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
   const { user } = useAuth()
   const { filters } = useSearch()
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (options?: LoadDashboardOptions) => {
     if (!user?.token) return
-    setLoading(true)
+    const quiet = options?.quiet === true
+    if (!quiet) setLoading(true)
     try {
       if (hasActiveFilters(filters)) {
         const filtered = await searchTransactions(filters ?? {})
@@ -35,7 +44,7 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
       setTransactions([])
       setMonthSummary(null)
     } finally {
-      setLoading(false)
+      if (!quiet) setLoading(false)
     }
   }, [user?.token, selectedDate, filters])
 

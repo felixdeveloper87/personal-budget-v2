@@ -86,14 +86,14 @@ export default function DescriptionInput({
               flexShrink={0}
               whiteSpace="nowrap"
             >
-              Any details?
+              Details
             </Text>
             <Input
               type="text"
               value={value}
               onChange={handleChange}
               placeholder={placeholder}
-              aria-label="Transaction description"
+              aria-label="Transaction details"
               flex={1}
               minW={0}
               h="auto"

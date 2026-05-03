@@ -38,16 +38,18 @@ export default function InstallmentPlansModal({
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
-  const emptyChipBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const emptyChipFg = useColorModeValue('blue.600', 'blue.300')
+  const panelBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const panelBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const iconBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const iconFg = useColorModeValue('teal.700', 'teal.300')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const sectionLabelColor = useColorModeValue('gray.500', 'gray.400')
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const statBg = useColorModeValue('white', 'whiteAlpha.50')
   const statBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const heroBg = useColorModeValue(
-    'linear-gradient(135deg, #0b1220 0%, #4338ca 52%, #38bdf8 100%)',
-    'linear-gradient(135deg, #080b16 0%, #3730a3 52%, #0ea5e9 100%)',
+    'linear-gradient(135deg, #071a2c 0%, #0f766e 48%, #22c55e 100%)',
+    'linear-gradient(135deg, #07111f 0%, #0f766e 52%, #16a34a 100%)',
   )
 
   const { activePlans, pastPlans, activeTotal, remainingTotal, paidTotal } = useMemo(() => {
@@ -77,25 +79,17 @@ export default function InstallmentPlansModal({
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
+      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '5xl' }}
       header={
         <ModalHeader
           icon={CreditCard}
           title="Installment plans"
-          caption="Track your ongoing payment plans"
+          caption="Spread a purchase across monthly installments"
           onClose={onClose}
           accent="blue"
           rightSlot={
             activePlans.length > 0 ? (
-              <Badge
-                colorScheme="blue"
-                variant="subtle"
-                px={3}
-                py={1}
-                borderRadius="full"
-                fontSize="xs"
-                fontWeight={600}
-              >
+              <Badge colorScheme="teal" variant="subtle" px={3} py={1} borderRadius="full">
                 {activePlans.length} active
               </Badge>
             ) : undefined
@@ -106,28 +100,36 @@ export default function InstallmentPlansModal({
     >
       <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
         {plans.length === 0 ? (
-          <VStack spacing={4} py={16} align="center" textAlign="center">
-            <Box
-              w={14}
-              h={14}
-              borderRadius="2xl"
-              bg={emptyChipBg}
-              color={emptyChipFg}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <CreditCard size={26} strokeWidth={2} />
-            </Box>
-            <VStack spacing={1} maxW="380px">
-              <Text fontSize="lg" fontWeight={700} color={titleColor}>
-                No installment plans yet
-              </Text>
-              <Text fontSize="sm" color={colors.text.secondary}>
-                Create installment expenses in the form to see them here.
-              </Text>
+          <Box
+            bg={panelBg}
+            border="1px solid"
+            borderColor={panelBorder}
+            borderRadius="xl"
+            p={{ base: 8, md: 12 }}
+          >
+            <VStack spacing={4} textAlign="center">
+              <Box
+                w={14}
+                h={14}
+                borderRadius="2xl"
+                bg={iconBg}
+                color={iconFg}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={CreditCard} boxSize={7} weight="duotone" />
+              </Box>
+              <VStack spacing={1}>
+                <Text fontWeight={800} color={titleColor} fontSize="lg">
+                  No installment plans yet
+                </Text>
+                <Text fontSize="sm" color={colors.text.secondary} maxW="420px">
+                  Create split payments from Expense · Installments when you add a transaction.
+                </Text>
+              </VStack>
             </VStack>
-          </VStack>
+          </Box>
         ) : (
           <VStack spacing={6} align="stretch">
             <Box
@@ -135,7 +137,8 @@ export default function InstallmentPlansModal({
               color="white"
               borderRadius="xl"
               p={{ base: 5, md: 6 }}
-              boxShadow="0 18px 42px -24px rgba(67, 56, 202, 0.85)"
+              boxShadow="0 18px 42px -24px rgba(15, 118, 110, 0.85)"
+              overflow="hidden"
             >
               <HStack justify="space-between" align={{ base: 'flex-start', sm: 'center' }} spacing={4}>
                 <VStack align="flex-start" spacing={1} minW={0}>
@@ -149,22 +152,29 @@ export default function InstallmentPlansModal({
                       alignItems="center"
                       justifyContent="center"
                     >
-                      <CreditCard size={17} weight="duotone" />
+                      <Icon as={CreditCard} boxSize={4} weight="duotone" />
                     </Box>
                     <Text fontSize="xs" fontWeight={800} textTransform="uppercase" color="whiteAlpha.800">
-                      Active installment balance
+                      Outstanding on active plans
                     </Text>
                   </HStack>
                   <Text fontSize={{ base: '3xl', md: '4xl' }} fontWeight={900} lineHeight="1">
                     {formatCurrency(remainingTotal)}
                   </Text>
                   <Text fontSize="sm" color="whiteAlpha.800">
-                    Upcoming payments across all active plans.
+                    Still due across installments that have not passed yet.
                   </Text>
                 </VStack>
-                <Badge bg="whiteAlpha.200" color="white" borderRadius="full" px={3} py={1}>
-                  {activePlans.length} active
-                </Badge>
+                <VStack align="flex-end" spacing={2} flexShrink={0}>
+                  <Badge bg="whiteAlpha.200" color="white" borderRadius="full" px={3} py={1}>
+                    {activePlans.length} active
+                  </Badge>
+                  {pastPlans.length > 0 && (
+                    <Badge bg="blackAlpha.200" color="whiteAlpha.900" borderRadius="full" px={3} py={1}>
+                      {pastPlans.length} in history
+                    </Badge>
+                  )}
+                </VStack>
               </HStack>
             </Box>
 
@@ -200,6 +210,7 @@ export default function InstallmentPlansModal({
 
             <PlansSection
               label="Active"
+              caption={`${activePlans.length} active installment ${activePlans.length === 1 ? 'plan' : 'plans'}`}
               count={activePlans.length}
               emptyMessage="No active plans right now."
               plans={activePlans}
@@ -212,6 +223,7 @@ export default function InstallmentPlansModal({
             {pastPlans.length > 0 && (
               <PlansSection
                 label="History"
+                caption={`${pastPlans.length} completed ${pastPlans.length === 1 ? 'plan' : 'plans'} · archived`}
                 count={pastPlans.length}
                 plans={pastPlans}
                 variant="past"
@@ -248,8 +260,8 @@ function InstallmentStat({
   titleColor,
   captionColor,
 }: InstallmentStatProps) {
-  const chipBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.14)')
-  const chipFg = useColorModeValue('blue.700', 'blue.300')
+  const chipBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const chipFg = useColorModeValue('teal.700', 'teal.300')
 
   return (
     <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={4}>
@@ -282,6 +294,7 @@ function InstallmentStat({
 
 interface PlansSectionProps {
   label: string
+  caption: string
   count: number
   plans: InstallmentPlan[]
   variant: 'active' | 'past'
@@ -297,6 +310,7 @@ interface PlansSectionProps {
 
 function PlansSection({
   label,
+  caption,
   count,
   plans,
   variant,
@@ -309,25 +323,27 @@ function PlansSection({
 }: PlansSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const chevronMuted = useColorModeValue('gray.400', 'gray.500')
+  const titleRowColor = useColorModeValue('gray.900', 'gray.50')
+  const emptyMessageBg = useColorModeValue('white', 'whiteAlpha.50')
   const panelId = `installment-section-${label.toLowerCase().replace(/\s+/g, '-')}`
 
   const isExpanded = collapsible ? expanded : true
 
-  const headerContent = (
-    <HStack spacing={3} align="center" flex={1} minW={0}>
-      <Text
-        fontSize="xs"
-        fontWeight={700}
-        color={labelColor}
-        textTransform="uppercase"
-        letterSpacing="0.06em"
-      >
+  const headerBody = (
+    <VStack align="flex-start" spacing={0}>
+      <Text fontSize="xs" fontWeight={800} color={titleRowColor} textTransform="uppercase">
         {label}
       </Text>
-      <Text fontSize="xs" color={labelColor} fontWeight={500}>
-        {count}
+      <Text fontSize="xs" color={labelColor}>
+        {caption}
       </Text>
-    </HStack>
+    </VStack>
+  )
+
+  const countBadge = (
+    <Badge borderRadius="full" px={2.5} py={1} colorScheme={variant === 'active' ? 'teal' : 'gray'}>
+      {count}
+    </Badge>
   )
 
   return (
@@ -347,8 +363,9 @@ function PlansSection({
               type="button"
               flex={1}
               minW={0}
-              spacing={0}
+              spacing={2}
               align="center"
+              justify="space-between"
               onClick={() => setExpanded((e) => !e)}
               aria-expanded={isExpanded}
               aria-controls={panelId}
@@ -359,12 +376,15 @@ function PlansSection({
               textAlign="left"
               _focusVisible={{
                 outline: '2px solid',
-                outlineColor: 'blue.400',
+                outlineColor: 'teal.300',
                 outlineOffset: '2px',
                 borderRadius: 'md',
               }}
             >
-              {headerContent}
+              <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+                {headerBody}
+                {countBadge}
+              </HStack>
             </HStack>
             <IconButton
               aria-label={isExpanded ? `Hide ${label}` : `Show ${label}`}
@@ -385,7 +405,10 @@ function PlansSection({
             />
           </>
         ) : (
-          headerContent
+          <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+            {headerBody}
+            {countBadge}
+          </HStack>
         )}
       </HStack>
 
@@ -393,9 +416,11 @@ function PlansSection({
         <Box id={panelId} role="region">
           {plans.length === 0 ? (
             emptyMessage && (
-              <Text fontSize="sm" color={labelColor} py={2}>
-                {emptyMessage}
-              </Text>
+              <Box bg={emptyMessageBg} borderRadius="xl" p={4}>
+                <Text fontSize="sm" color={labelColor}>
+                  {emptyMessage}
+                </Text>
+              </Box>
             )
           ) : (
             <SimpleGrid

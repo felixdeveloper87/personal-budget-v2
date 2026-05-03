@@ -83,8 +83,8 @@ export default function InstallmentPlansSection() {
         <Box p={{ base: 4, sm: 5 }}>
           {loading ? (
             <VStack align="stretch" spacing={3}>
-              <Skeleton height="20px" width="40%" borderRadius="md" />
-              <Skeleton height="14px" width="65%" borderRadius="md" />
+              <Skeleton height="20px" width="48%" borderRadius="md" />
+              <Skeleton height="14px" width="70%" borderRadius="md" />
               <Skeleton height="40px" width="100%" borderRadius="lg" />
             </VStack>
           ) : (
@@ -93,12 +93,12 @@ export default function InstallmentPlansSection() {
                 icon={CreditCard}
                 title="Installments"
                 caption={caption}
-                accent="violet"
+                accent="blue"
                 rightSlot={
                   activeCount > 0 ? (
                     <Badge
                       variant="subtle"
-                      colorScheme="purple"
+                      colorScheme="teal"
                       borderRadius="full"
                       px={2.5}
                       py={1}
@@ -145,15 +145,15 @@ export default function InstallmentPlansSection() {
                 _active={{ transform: 'scale(0.99)' }}
                 _focusVisible={{
                   outline: '2px solid',
-                  outlineColor: 'purple.300',
+                  outlineColor: 'teal.300',
                   outlineOffset: '2px',
                 }}
               >
                 <HStack justify="space-between" align="center" w="full" px={1}>
                   <Text noOfLines={1} color={ctaColor}>
                     {plans.length === 0
-                      ? 'Create your first plan'
-                      : 'View all plans'}
+                      ? 'View installment plans'
+                      : 'Manage plans'}
                   </Text>
                   <Icon
                     as={ChevronRight}

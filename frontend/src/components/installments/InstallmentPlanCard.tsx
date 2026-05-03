@@ -82,8 +82,8 @@ export default function InstallmentPlanCard({
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
 
-  const accentBgActive = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const accentFgActive = useColorModeValue('blue.600', 'blue.300')
+  const accentBgActive = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const accentFgActive = useColorModeValue('teal.700', 'teal.300')
   const accentBgPast = useColorModeValue('gray.100', 'whiteAlpha.100')
   const accentFgPast = useColorModeValue('gray.600', 'gray.400')
 
@@ -116,12 +116,12 @@ export default function InstallmentPlanCard({
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
   const amountPanelBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(59,130,246,0.10), rgba(99,102,241,0.08))',
-    'linear-gradient(135deg, rgba(96,165,250,0.16), rgba(129,140,248,0.10))',
+    'linear-gradient(135deg, rgba(20,184,166,0.10), rgba(37,99,235,0.08))',
+    'linear-gradient(135deg, rgba(45,212,191,0.16), rgba(96,165,250,0.10))',
   )
   const activeStripe = useColorModeValue(
-    'linear-gradient(180deg, #2563eb, #7c3aed)',
-    'linear-gradient(180deg, #60a5fa, #a78bfa)',
+    'linear-gradient(180deg, #14b8a6, #2563eb)',
+    'linear-gradient(180deg, #2dd4bf, #60a5fa)',
   )
   const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -194,7 +194,7 @@ export default function InstallmentPlanCard({
                   justifyContent="center"
                   flexShrink={0}
                 >
-                  <Icon as={CreditCard} boxSize={4} strokeWidth={2.25} />
+                  <Icon as={CreditCard} boxSize={4} weight="duotone" />
                 </Box>
                 <VStack align="flex-start" spacing={0} minW={0}>
                   <Text
@@ -300,7 +300,7 @@ export default function InstallmentPlanCard({
                   <Box
                     h="full"
                     w={`${progressPct}%`}
-                    bg="linear-gradient(90deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
+                    bg="linear-gradient(90deg, #14b8a6 0%, #2563eb 55%, #0d9488 100%)"
                     borderRadius="full"
                     transition="width 0.4s ease"
                   />

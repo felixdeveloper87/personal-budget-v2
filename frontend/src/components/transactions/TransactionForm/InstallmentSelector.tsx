@@ -1,7 +1,23 @@
-import { Box, Text, Switch, HStack, VStack, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, Icon, Button, Wrap, WrapItem, Input } from '@chakra-ui/react'
-import { Calendar, Calculator } from '../../ui/icons'
+import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  Icon,
+  HStack,
+  Input,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
+  Switch,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import type { ReactNode } from 'react'
+import { Calculator, CreditCard } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { getResponsiveStyles } from '../../ui'
 
 interface InstallmentSelectorProps {
   enabled: boolean
@@ -14,11 +30,44 @@ interface InstallmentSelectorProps {
   showToggle?: boolean
 }
 
+function FieldRow({
+  label,
+  children,
+  colors,
+}: {
+  label: string
+  children: ReactNode
+  colors: ReturnType<typeof useThemeColors>
+}) {
+  return (
+    <Flex
+      align="center"
+      gap={{ base: 3, sm: 4 }}
+      w="full"
+      minW={0}
+      direction={{ base: 'column', sm: 'row' }}
+    >
+      <Text
+        w={{ base: 'full', sm: '5.75rem' }}
+        flexShrink={0}
+        fontSize="xs"
+        fontWeight="600"
+        color={colors.text.secondary}
+        letterSpacing="-0.01em"
+      >
+        {label}
+      </Text>
+      <Flex flex={1} minW={0} w="full" justify="flex-end">
+        <Box w="full" maxW={{ base: '100%', sm: '220px', md: '244px' }}>
+          {children}
+        </Box>
+      </Flex>
+    </Flex>
+  )
+}
+
 /**
- * 💳 InstallmentSelector Component
- * - Allows users to enable/disable installment plans for expenses
- * - Shows installment calculation and total amount
- * - Only available for EXPENSE transactions
+ * Installment Plan — matches Add expense modal card pattern (Recurring / Amount / Date).
  */
 export default function InstallmentSelector({
   enabled,
@@ -31,192 +80,252 @@ export default function InstallmentSelector({
   showToggle = true,
 }: InstallmentSelectorProps) {
   const colors = useThemeColors()
-  const responsiveStyles = getResponsiveStyles()
+  const accentBorder = 'red.400'
+  const focusWithinShadow = '0 0 0 3px #f8717120'
+  const focusRing = '0 0 0 2px rgba(248, 113, 113, 0.2)'
 
-  const installmentAmount = amount / installments
-  const totalAmount = amount
-
-  const getQuickInstallmentOptions = () => {
-    return [
-      { label: '2x', value: 2, color: 'green' },
-      { label: '3x', value: 3, color: 'blue' },
-      { label: '6x', value: 6, color: 'purple' },
-      { label: '12x', value: 12, color: 'orange' },
-      { label: '24x', value: 24, color: 'teal' },
-      { label: '36x', value: 36, color: 'pink' },
-      { label: '48x', value: 48, color: 'pink' },
-      { label: '60x', value: 60, color: 'pink' }
-    ]
+  const fieldShell = {
+    h: { base: 9, sm: 10 },
+    bg: colors.bgSecondary,
+    borderColor: colors.border,
+    borderRadius: 'lg',
+    _focusVisible: {
+      borderColor: accentBorder,
+      boxShadow: focusRing,
+    },
   }
 
-  const quickInstallmentOptions = getQuickInstallmentOptions()
+  const installmentAmount = installments >= 2 ? amount / installments : amount
+  const totalAmount = amount
+
+  const quickInstallmentOptions = [
+    { label: '2x', value: 2 },
+    { label: '3x', value: 3 },
+    { label: '6x', value: 6 },
+    { label: '12x', value: 12 },
+    { label: '24x', value: 24 },
+    { label: '36x', value: 36 },
+    { label: '48x', value: 48 },
+    { label: '60x', value: 60 },
+  ]
+
+  const contentVisible = enabled || !showToggle
 
   return (
     <VStack spacing={3} align="stretch">
       <Box>
-        <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-          Installment Plan
-        </Text>
-        
-        {showToggle ? (
-          <Box
-            borderRadius="2xl"
-            bg={colors.inputBg}
-            border="2px solid"
-            borderColor={colors.border}
-            _hover={{
-              borderColor: colors.accent,
-              transform: 'translateY(-2px)',
-              boxShadow: 'lg'
-            }}
-            _focusWithin={{
-              borderColor: colors.accent,
-              boxShadow: `0 0 0 3px ${colors.accent}20`,
-              transform: 'translateY(-2px)'
-            }}
-            transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-          >
-            <HStack justify="space-between" align="center" p={{ base: 3, sm: 3.5 }}>
-              <HStack spacing={3}>
-                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="500" color={colors.text.primary}>
-                  Split into installments
-                </Text>
-              </HStack>
-              <Switch
-                isChecked={enabled}
-                onChange={(e) => onEnabledChange(e.target.checked)}
-                colorScheme="blue"
-                size="lg"
-              />
-            </HStack>
-          </Box>
-        ) : (
-          <Box p={{ base: 3, sm: 3.5 }} borderRadius="2xl" bg={colors.inputBg} border="2px solid" borderColor={colors.border}>
-            <HStack spacing={3}>
-              <VStack align="flex-start" spacing={0}>
-                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="700" color={colors.text.primary}>
-                  Split into installments
-                </Text>
-                <Text fontSize="xs" color={colors.text.secondary}>
-                  Choose how many monthly payments to create.
-                </Text>
-              </VStack>
-            </HStack>
-          </Box>
-        )}
-      </Box>
-
-      {/* Installment Details */}
-      {enabled && (
-        <Box>
-          <Text fontWeight="500" mb={2} color={colors.text.secondary} fontSize={{ base: 'xs', sm: 'sm' }}>
-            Quick Select
-          </Text>
-          <Wrap spacing={responsiveStyles.categoryList.spacing} mb={3}>
-            {quickInstallmentOptions.map((option) => (
-              <WrapItem key={option.value}>
-                <Button
-                  variant={installments === option.value ? 'solid' : 'outline'}
-                  colorScheme={installments === option.value ? 'blue' : 'gray'}
-                  onClick={() => onInstallmentsChange(option.value)}
-                  {...responsiveStyles.buttons.category}
-                  h={responsiveStyles.buttons.category.height}
-                  fontWeight="bold"
-                  borderWidth="2px"
-                  borderRadius="xl"
-                  _hover={{
-                    transform: 'translateY(-2px)',
-                    shadow: 'md',
-                  }}
-                  _active={{
-                    transform: 'translateY(0)',
-                  }}
-                  transition="all 0.2s"
+        <Box
+          borderRadius="2xl"
+          bg={colors.inputBg}
+          border="2px solid"
+          borderColor={colors.border}
+          _hover={{
+            borderColor: accentBorder,
+            transform: 'translateY(-2px)',
+            boxShadow: 'lg',
+          }}
+          _focusWithin={{
+            borderColor: accentBorder,
+            boxShadow: focusWithinShadow,
+            transform: 'translateY(-2px)',
+          }}
+          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+        >
+          <VStack align="stretch" spacing={0} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 3.5 }}>
+            <HStack justify="space-between" align="flex-start" spacing={3}>
+              <Flex align="flex-start" gap={3} minW={0} flex={1}>
+                <Box
+                  role="presentation"
+                  w={9}
+                  h={9}
+                  borderRadius="lg"
+                  bg={colors.bgSecondary}
+                  color={accentBorder}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                  mt={0.5}
+                  aria-hidden
                 >
-                  {option.label}
-                </Button>
-              </WrapItem>
-            ))}
-          </Wrap>
-
-          <VStack spacing={3} align="stretch" p={{ base: 3, sm: 3.5 }} bg={colors.bgSecondary} borderRadius="2xl" border="2px" borderColor={colors.border}>
-            <HStack justify="space-between" align="center">
-              <HStack spacing={2}>
-                <Icon as={Calculator} boxSize={4} color={colors.accent} />
-                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="500" color={colors.text.primary}>
-                  Number of installments:
-                </Text>
-              </HStack>
-              <NumberInput
-                value={installments}
-                onChange={(_, val) => onInstallmentsChange(val || 1)}
-                min={2}
-                max={60}
-                w={{ base: '108px', sm: '120px' }}
-              >
-                <NumberInputField
-                  textAlign="center"
-                  h={{ base: 9, sm: 10 }}
-                  fontSize={{ base: 'sm', sm: 'md' }}
-                  fontWeight="bold"
-                  borderColor={colors.border}
-                  _focus={{
-                    borderColor: colors.accent,
-                    boxShadow: `0 0 0 1px ${colors.accent}`,
-                  }}
+                  <Icon
+                    as={CreditCard}
+                    boxSize={5}
+                    sx={{ '& svg': { display: 'block' } }}
+                  />
+                </Box>
+                <VStack align="flex-start" spacing={1} minW={0} flex={1}>
+                  <Text
+                    fontSize={{ base: 'sm', md: 'md' }}
+                    fontWeight="600"
+                    color={colors.text.secondary}
+                    lineHeight="1.25"
+                  >
+                    Installment plan
+                  </Text>
+                  <Text fontSize="xs" color={colors.text.secondary} lineHeight="1.4">
+                    {showToggle && !enabled
+                      ? 'Split this expense into monthly charges with a chosen start date.'
+                      : 'Choose how many months and when the first charge lands.'}
+                  </Text>
+                </VStack>
+              </Flex>
+              {showToggle && (
+                <Switch
+                  isChecked={enabled}
+                  onChange={(e) => onEnabledChange(e.target.checked)}
+                  colorScheme="red"
+                  size="lg"
+                  flexShrink={0}
+                  mt={1}
+                  aria-label="Split into installments"
                 />
-                <NumberInputStepper>
-                  <NumberIncrementStepper />
-                  <NumberDecrementStepper />
-                </NumberInputStepper>
-              </NumberInput>
+              )}
             </HStack>
 
-            <HStack justify="space-between" align="center">
-              <HStack spacing={2}>
-                <Icon as={Calendar} boxSize={4} color={colors.accent} />
-                <Text fontSize={{ base: 'sm', sm: 'md' }} color={colors.text.secondary}>
-                  First installment date:
+            {contentVisible && (
+              <>
+                <Divider borderColor={colors.border} mt={4} mb={4} />
+
+                <Text fontSize="xs" fontWeight={600} color={colors.text.secondary} mb={2}>
+                  Quick select
                 </Text>
-              </HStack>
-              <Input
-                type="date"
-                value={firstInstallmentDate}
-                onChange={(e) => onFirstInstallmentDateChange(e.target.value)}
-                w={{ base: '132px', sm: '150px' }}
-                h={{ base: 9, sm: 10 }}
-                fontSize={{ base: 'sm', sm: 'md' }}
-                borderColor={colors.border}
-                _focus={{
-                  borderColor: colors.accent,
-                  boxShadow: `0 0 0 1px ${colors.accent}`,
-                }}
-                bg={colors.inputBg}
-              />
-            </HStack>
 
-            <HStack justify="space-between" align="center">
-              <Text fontSize={{ base: 'sm', sm: 'md' }} color={colors.text.secondary}>
-                Amount per installment:
-              </Text>
-              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="bold" color={colors.accent}>
-                £{installmentAmount.toFixed(2)}
-              </Text>
-            </HStack>
+                <Box
+                  w="full"
+                  mb={4}
+                  overflowX="auto"
+                  overflowY="hidden"
+                  py={1}
+                  sx={{
+                    WebkitOverflowScrolling: 'touch',
+                    scrollbarWidth: 'thin',
+                    '&::-webkit-scrollbar': { h: '6px' },
+                    '&::-webkit-scrollbar-thumb': {
+                      bg: colors.border,
+                      borderRadius: 'full',
+                    },
+                  }}
+                >
+                  <Flex
+                    as="div"
+                    role="group"
+                    aria-label="Installment duration quick select"
+                    gap={1}
+                    flexWrap="nowrap"
+                    w="max-content"
+                  >
+                    {quickInstallmentOptions.map((option) => (
+                      <Button
+                        key={option.value}
+                        variant="ghost"
+                        onClick={() => onInstallmentsChange(option.value)}
+                        h={{ base: 7, sm: 8 }}
+                        px={{ base: 2, sm: 2.5 }}
+                        minW="unset"
+                        flexShrink={0}
+                        borderRadius="full"
+                        color={
+                          installments === option.value
+                            ? colors.text.primary
+                            : colors.text.secondary
+                        }
+                        bg={
+                          installments === option.value
+                            ? colors.bgSecondary
+                            : 'transparent'
+                        }
+                        fontSize={{ base: 'xs', sm: 'xs' }}
+                        fontWeight={installments === option.value ? 600 : 500}
+                        opacity={installments === option.value ? 1 : 0.78}
+                        _hover={{ bg: colors.bgSecondary, opacity: 1 }}
+                        _active={{ bg: colors.bgSecondary }}
+                        _focusVisible={{ boxShadow: focusRing }}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </Flex>
+                </Box>
 
-            <HStack justify="space-between" align="center">
-              <Text fontSize={{ base: 'sm', sm: 'md' }} color={colors.text.secondary}>
-                Total amount:
-              </Text>
-              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="bold" color={colors.text.primary}>
-                £{totalAmount.toFixed(2)}
-              </Text>
-            </HStack>
+                <VStack align="stretch" spacing={4} w="full">
+                  <FieldRow label="Count" colors={colors}>
+                    <NumberInput
+                      value={installments}
+                      onChange={(_, val) => onInstallmentsChange(val || 2)}
+                      min={2}
+                      max={60}
+                      w="full"
+                      size="sm"
+                    >
+                      <NumberInputField
+                        textAlign="center"
+                        fontWeight="bold"
+                        fontSize={{ base: 'sm', sm: 'sm' }}
+                        {...fieldShell}
+                      />
+                      <NumberInputStepper borderColor={colors.border}>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FieldRow>
+
+                  <FieldRow label="First payment" colors={colors}>
+                    <Input
+                      type="date"
+                      value={firstInstallmentDate}
+                      onChange={(e) => onFirstInstallmentDateChange(e.target.value)}
+                      w="full"
+                      fontSize={{ base: 'sm', sm: 'sm' }}
+                      fontWeight={600}
+                      sx={{ '&::-webkit-calendar-picker-indicator': { cursor: 'pointer' } }}
+                      {...fieldShell}
+                    />
+                  </FieldRow>
+
+                  <Divider borderColor={colors.border} />
+
+                  <Flex
+                    justify="space-between"
+                    align="center"
+                    wrap="wrap"
+                    gap={2}
+                    px={{ base: 0, sm: 1 }}
+                  >
+                    <HStack spacing={2} color={colors.text.secondary}>
+                      <Icon
+                        as={Calculator}
+                        boxSize={4}
+                        color={accentBorder}
+                      />
+                      <Text fontSize="xs" fontWeight={600}>
+                        Per month
+                      </Text>
+                    </HStack>
+                    <Text fontSize="sm" fontWeight={800} color={colors.text.primary}>
+                      £{installmentAmount.toFixed(2)}
+                    </Text>
+                  </Flex>
+                  <HStack justify="space-between" px={{ base: 0, sm: 1 }}>
+                    <Text fontSize="xs" color={colors.text.secondary}>
+                      Total financed
+                    </Text>
+                    <Text fontSize="xs" fontWeight={700} color={colors.text.primary}>
+                      £{totalAmount.toFixed(2)}
+                    </Text>
+                  </HStack>
+                </VStack>
+
+                <Text fontSize="2xs" color={colors.text.secondary} lineHeight="1.45" mt={5} pt={1}>
+                  One transaction per installment with the amounts above. You can review plans under
+                  Installments on the dashboard.
+                </Text>
+              </>
+            )}
           </VStack>
         </Box>
-      )}
+      </Box>
     </VStack>
   )
 }
-
-

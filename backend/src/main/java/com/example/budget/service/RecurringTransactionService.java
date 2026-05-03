@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -57,9 +58,21 @@ public class RecurringTransactionService {
         return recurringTransactionMapper.toDTO(recurringTransaction);
     }
 
+    /**
+     * Deactivates a recurring obligation and deletes any generated postings dated after today's
+     * calendar day in the server's default timezone. Today's and older postings remain in history
+     * and stay in monthly summaries for their months.
+     */
     @Transactional
     public RecurringTransactionDTO cancel(Long id, User user) {
         RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
+
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDateTime firstMomentAfterTodayCalendar = today.plusDays(1).atStartOfDay();
+        transactionRepository.deleteGeneratedByRecurringFromDateInclusive(
+                recurringTransaction.getId(),
+                firstMomentAfterTodayCalendar);
+
         recurringTransaction.setActive(false);
         return recurringTransactionMapper.toDTO(recurringTransactionRepository.save(recurringTransaction));
     }
@@ -86,11 +99,37 @@ public class RecurringTransactionService {
                 .forEach(recurringTransaction -> generateTransactionsForMonth(recurringTransaction, currentMonth));
     }
 
-    private void generateTransactionsForMonth(RecurringTransaction recurringTransaction, YearMonth month) {
-        LocalDate dueDate = dateInMonth(month, recurringTransaction.getDayOfMonth());
+    /**
+     * Resolves which calendar date in {@code month} should receive one generated installment.
+     * <p>In the user's first billed month only, if the nominal day-of-month (e.g. 3) sits before the
+     * contractual {@code startDate} (e.g. 10 May), use {@code startDate} so that scheduled installment date
+     * still exists dated in that month — it then appears in the monthly summary even before that day arrives.
+     */
+    private LocalDate resolveDueDateInMonth(RecurringTransaction recurringTransaction, YearMonth month) {
+        LocalDate startDate = recurringTransaction.getStartDate();
+        YearMonth startMonth = YearMonth.from(startDate);
+        LocalDate nominal = dateInMonth(month, recurringTransaction.getDayOfMonth());
 
-        if (dueDate.isBefore(recurringTransaction.getStartDate())) {
-            recurringTransaction.setNextRunDate(nextMonthlyDate(dueDate, recurringTransaction.getDayOfMonth()));
+        if (month.isBefore(startMonth)) {
+            return null;
+        }
+
+        LocalDate effective = nominal;
+        if (month.equals(startMonth) && nominal.isBefore(startDate)) {
+            effective = startDate;
+        }
+
+        if (effective.isBefore(startDate)) {
+            return null;
+        }
+
+        return effective;
+    }
+
+    private void generateTransactionsForMonth(RecurringTransaction recurringTransaction, YearMonth month) {
+        LocalDate dueDate = resolveDueDateInMonth(recurringTransaction, month);
+
+        if (dueDate == null) {
             return;
         }
 
