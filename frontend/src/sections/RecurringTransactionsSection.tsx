@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Badge,
   Box,
@@ -13,6 +13,7 @@ import {
 } from '@chakra-ui/react'
 import { CalendarClock, ChevronRight } from '../components/ui/icons'
 import { listRecurringTransactions } from '../api'
+import { useAuth } from '../contexts/AuthContext'
 import { RecurringTransaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'
 import { RecurringTransactionsModal } from '../components/recurring'
@@ -24,11 +25,13 @@ interface RecurringTransactionsSectionProps {
 export default function RecurringTransactionsSection({
   onRefresh,
 }: RecurringTransactionsSectionProps) {
+  const { user, loading: authLoading } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
+    if (!user?.token) return
     try {
       setLoading(true)
       const data = await listRecurringTransactions()
@@ -38,11 +41,15 @@ export default function RecurringTransactionsSection({
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.token])
 
   useEffect(() => {
-    fetchItems()
-  }, [])
+    if (authLoading || !user?.token) {
+      setLoading(false)
+      return
+    }
+    void fetchItems()
+  }, [authLoading, user?.token, fetchItems])
 
   const handleChanged = async () => {
     await fetchItems()

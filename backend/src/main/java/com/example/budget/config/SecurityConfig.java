@@ -106,6 +106,7 @@ public class SecurityConfig {
      * - /api/transactions/** - Transaction management
      * - /api/summary/** - Summary and reports
      * - /api/installment-plans/** - Installment plan management
+     * - /api/recurring-transactions/** - Fixed (recurring) transaction management
      * - All other requests require authentication
      * 
      * @param http HttpSecurity builder for configuring security
@@ -135,7 +136,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/transactions/**").authenticated()
                 .requestMatchers("/api/summary/**").authenticated()
                 .requestMatchers("/api/installment-plans/**").authenticated()
-                
+                .requestMatchers("/api/recurring-transactions/**").authenticated()
+
                 // All other requests require authentication
                 .anyRequest().authenticated()
             )

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Badge,
   Box,
@@ -14,6 +14,7 @@ import {
 import { ChevronRight, CreditCard } from '../components/ui/icons'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
+import { useAuth } from '../contexts/AuthContext'
 import { InstallmentPlansModal } from '../components/installments'
 import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 import { SectionCard, SectionHeader } from '../components/ui'
@@ -24,12 +25,14 @@ import { SectionCard, SectionHeader } from '../components/ui'
  * shortcut to the full plans modal.
  */
 export default function InstallmentPlansSection() {
+  const { user, loading: authLoading } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchPlans = async () => {
+  const fetchPlans = useCallback(async () => {
+    if (!user?.token) return
     try {
       setLoading(true)
       const data = await listInstallmentPlans()
@@ -39,11 +42,15 @@ export default function InstallmentPlansSection() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.token])
 
   useEffect(() => {
-    fetchPlans()
-  }, [])
+    if (authLoading || !user?.token) {
+      setLoading(false)
+      return
+    }
+    void fetchPlans()
+  }, [authLoading, user?.token, fetchPlans])
 
   const handlePlanDeleted = () => {
     fetchPlans()

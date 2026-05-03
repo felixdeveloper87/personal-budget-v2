@@ -1,15 +1,17 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Badge,
   Box,
+  Collapse,
   HStack,
   Icon,
+  IconButton,
   SimpleGrid,
   Text,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { CalendarClock, Repeat, Wallet } from '../ui/icons'
+import { CalendarClock, ChevronDown, Repeat, Wallet } from '../ui/icons'
 import { ModalHeader, PremiumModal } from '../ui'
 import { RecurringTransaction } from '../../types'
 import RecurringTransactionCard from './RecurringTransactionCard'
@@ -222,6 +224,8 @@ export default function RecurringTransactionsModal({
                 items={cancelledItems}
                 onChanged={onChanged}
                 muted
+                collapsible
+                defaultExpanded={false}
               />
             )}
           </VStack>
@@ -289,6 +293,8 @@ interface RecurringGroupProps {
   onChanged: () => void | Promise<void>
   emptyMessage?: string
   muted?: boolean
+  collapsible?: boolean
+  defaultExpanded?: boolean
 }
 
 function RecurringGroup({
@@ -298,53 +304,128 @@ function RecurringGroup({
   onChanged,
   emptyMessage,
   muted,
+  collapsible = false,
+  defaultExpanded = true,
 }: RecurringGroupProps) {
+  const [expanded, setExpanded] = useState(defaultExpanded)
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const emptyBg = useColorModeValue('white', 'whiteAlpha.50')
+  const chevronMuted = useColorModeValue('gray.400', 'gray.500')
+
+  const isExpanded = collapsible ? expanded : true
+  const panelId = `fixed-recurring-section-${title.toLowerCase().replace(/\s+/g, '-')}`
+
+  const headerBody = (
+    <VStack align="flex-start" spacing={0}>
+      <Text fontSize="xs" fontWeight={800} color={titleColor} textTransform="uppercase">
+        {title}
+      </Text>
+      <Text fontSize="xs" color={captionColor}>
+        {caption}
+      </Text>
+    </VStack>
+  )
+
+  const countBadge = (
+    <Badge borderRadius="full" px={2.5} py={1} colorScheme={muted ? 'gray' : 'teal'}>
+      {items.length}
+    </Badge>
+  )
+
+  const body =
+    items.length === 0 ? (
+      emptyMessage && (
+        <Box bg={emptyBg} borderRadius="xl" p={4}>
+          <Text fontSize="sm" color={captionColor}>
+            {emptyMessage}
+          </Text>
+        </Box>
+      )
+    ) : (
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 5 }}>
+        {items.map((item) => (
+          <RecurringTransactionCard
+            key={item.id}
+            recurringTransaction={item}
+            onChanged={onChanged}
+          />
+        ))}
+      </SimpleGrid>
+    )
 
   return (
     <Box opacity={muted ? 0.82 : 1}>
       <HStack
-        justify="space-between"
+        spacing={2}
+        align="center"
         mb={3}
         pb={2}
         borderBottom="1px solid"
         borderColor={dividerColor}
       >
-        <VStack align="flex-start" spacing={0}>
-          <Text fontSize="xs" fontWeight={800} color={titleColor} textTransform="uppercase">
-            {title}
-          </Text>
-          <Text fontSize="xs" color={captionColor}>
-            {caption}
-          </Text>
-        </VStack>
-        <Badge borderRadius="full" px={2.5} py={1} colorScheme={muted ? 'gray' : 'teal'}>
-          {items.length}
-        </Badge>
+        {collapsible ? (
+          <>
+            <HStack
+              as="button"
+              type="button"
+              flex={1}
+              minW={0}
+              spacing={2}
+              align="center"
+              justify="space-between"
+              onClick={() => setExpanded((e) => !e)}
+              aria-expanded={isExpanded}
+              aria-controls={panelId}
+              cursor="pointer"
+              bg="transparent"
+              border="none"
+              p={0}
+              textAlign="left"
+              _focusVisible={{
+                outline: '2px solid',
+                outlineColor: 'teal.300',
+                outlineOffset: '2px',
+                borderRadius: 'md',
+              }}
+            >
+              <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+                {headerBody}
+                {countBadge}
+              </HStack>
+            </HStack>
+            <IconButton
+              aria-label={isExpanded ? `Hide ${title}` : `Show ${title}`}
+              icon={
+                <Icon
+                  as={ChevronDown}
+                  boxSize={5}
+                  transition="transform 0.2s ease"
+                  transform={isExpanded ? 'rotate(180deg)' : undefined}
+                />
+              }
+              variant="ghost"
+              size="sm"
+              color={chevronMuted}
+              onClick={() => setExpanded((e) => !e)}
+              aria-expanded={isExpanded}
+              aria-controls={panelId}
+            />
+          </>
+        ) : (
+          <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+            {headerBody}
+            {countBadge}
+          </HStack>
+        )}
       </HStack>
 
-      {items.length === 0 ? (
-        emptyMessage && (
-          <Box bg={emptyBg} borderRadius="xl" p={4}>
-            <Text fontSize="sm" color={captionColor}>
-              {emptyMessage}
-            </Text>
-          </Box>
-        )
-      ) : (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 5 }}>
-          {items.map((item) => (
-            <RecurringTransactionCard
-              key={item.id}
-              recurringTransaction={item}
-              onChanged={onChanged}
-            />
-          ))}
-        </SimpleGrid>
-      )}
+      <Collapse in={isExpanded} animateOpacity>
+        <Box id={panelId} role="region">
+          {body}
+        </Box>
+      </Collapse>
     </Box>
   )
 }
