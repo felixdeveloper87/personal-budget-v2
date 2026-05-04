@@ -31,6 +31,12 @@ function dayOfMonthFromYMD(ymd: string): number {
   return Math.min(31, Math.max(1, day))
 }
 
+/** For Java `LocalDateTime` JSON — no `Z` suffix (ISO instant strings often break Jackson `LocalDateTime`). */
+function toLocalIsoDateTime(d: Date): string {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
+}
+
 interface TransactionFormProps {
   onCreated: (t: Transaction) => void
   onTransactionDeleted?: () => void
@@ -139,18 +145,23 @@ export default function TransactionForm({
             isClosable: true,
           })
         } else if (expenseMode === 'installment' && type === 'EXPENSE' && installments > 1) {
-          // Use the selected first installment date
-          const selectedDate = new Date(firstInstallmentDate)
+          const parts = firstInstallmentDate.split('-').map(Number)
+          const yy = parts[0] ?? new Date().getFullYear()
+          const mm = parts[1] ?? 1
+          const dd = parts[2] ?? 1
+          const start = new Date(yy, mm - 1, dd)
           const now = new Date()
-          selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
-          
+          start.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds())
+
+          const perInstallment = Number((Number(amount) / installments).toFixed(2))
+
           await createInstallmentPlan({
             totalInstallments: installments,
-            installmentValue: Number(amount) / installments,
+            installmentValue: perInstallment,
             category,
             description,
-            startDate: firstInstallmentDate, // Use the selected date
-            startDateTime: selectedDate.toISOString(), // Add full datetime
+            startDate: firstInstallmentDate,
+            startDateTime: toLocalIsoDateTime(start),
           })
 
           toast({

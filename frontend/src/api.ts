@@ -11,6 +11,21 @@ import {
   CreateRecurringTransactionRequest
 } from './types'
 
+function mapAuthToUser(payload: Record<string, unknown>): User {
+  const userId =
+    typeof payload.userId === 'number'
+      ? payload.userId
+      : typeof payload.id === 'number'
+        ? payload.id
+        : 0
+  return {
+    id: userId,
+    name: String(payload.name ?? ''),
+    email: String(payload.email ?? ''),
+    token: String(payload.token ?? ''),
+  }
+}
+
 // ----------------------------------------------------
 // 🌐 Create main Axios instance
 // ----------------------------------------------------
@@ -67,14 +82,14 @@ api.interceptors.response.use(
 
 // Login → POST /auth/login
 export async function login(credentials: LoginRequest): Promise<User> {
-  const { data } = await api.post<User>('/auth/login', credentials)
-  return data
+  const { data } = await api.post<Record<string, unknown>>('/auth/login', credentials)
+  return mapAuthToUser(data)
 }
 
 // Register → POST /auth/register
 export async function register(payload: RegisterRequest): Promise<User> {
-  const { data } = await api.post<User>('/auth/register', payload)
-  return data
+  const { data } = await api.post<Record<string, unknown>>('/auth/register', payload)
+  return mapAuthToUser(data)
 }
 
 // ----------------------------------------------------

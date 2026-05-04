@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 
 /**
@@ -25,11 +29,22 @@ public class JwtUtil {
 
     /**
      * Gets the signing key for JWT tokens.
-     * 
+     * <p>JJWT rejects HS512 keys shorter than 512 bits. Short {@code JWT_SECRET} values
+     * (common in local {@code .env}) are hashed with SHA-512 so login/register never blow up with
+     * {@code WeakKeyException}. Secrets that are already 64+ UTF-8 bytes are used as-is.
+     *
      * @return SecretKey for HMAC-SHA512 signing
      */
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        byte[] raw = secret.getBytes(StandardCharsets.UTF_8);
+        if (raw.length < 64) {
+            try {
+                raw = MessageDigest.getInstance("SHA-512").digest(raw);
+            } catch (NoSuchAlgorithmException e) {
+                throw new IllegalStateException("SHA-512 not available", e);
+            }
+        }
+        return Keys.hmacShaKeyFor(raw);
     }
 
     /**

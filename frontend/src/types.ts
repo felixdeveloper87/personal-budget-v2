@@ -86,7 +86,8 @@ export interface CreateInstallmentPlanRequest {
   category: string
   description: string
   startDate: string // yyyy-MM-dd
-  startDateTime?: string // yyyy-MM-ddTHH:mm:ss.sssZ (opcional)
+  /** Local wall-clock, no TZ — e.g. `2026-05-03T14:30:00` (Java LocalDateTime). Avoid `…Z`. */
+  startDateTime?: string
 }
 
 export interface RecurringTransaction {

@@ -9,6 +9,13 @@
 #   docker rm -f 440dc3d0ece2_personal-budget-v2-db-1    # nome que o erro mostrar
 #   # ou pelo ID curto/long: docker rm -f 440dc3d0ece2...
 #   docker compose -f docker-compose.dev.yml up -d --build
+#
+# Proxy do Vite: `localhost:3000/api/*` → serviço `backend:8080` na REDE Compose.
+# Se 500 no browser mas `curl localhost:8080/api/...` OK → frontend fora da mesma rede
+# (ex.: contentor não reciclado depois de mudar redes). Corre:
+#   docker compose -f docker-compose.dev.yml up -d --force-recreate frontend
+#   # ou ciclo limpo:
+#   docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d
 # =============================================================================
 services:
   # Legenda dos mesmos comandos:
