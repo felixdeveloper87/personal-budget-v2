@@ -179,13 +179,16 @@ export default function InstallmentPlanCard({
         }}
       >
         {!isPast && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />}
-        <CardBody p={5} pl={!isPast ? 6 : 5}>
-          <VStack align="stretch" spacing={4}>
+        <CardBody
+          p={{ base: 3, md: 5 }}
+          pl={!isPast ? { base: 4.5, md: 6 } : { base: 3, md: 5 }}
+        >
+          <VStack align="stretch" spacing={{ base: 2.5, md: 4 }}>
             <HStack justify="space-between" align="flex-start">
-              <HStack spacing={3} minW={0} flex={1}>
+              <HStack spacing={{ base: 2, md: 3 }} minW={0} flex={1}>
                 <Box
-                  w={9}
-                  h={9}
+                  w={{ base: 8, md: 9 }}
+                  h={{ base: 8, md: 9 }}
                   borderRadius="lg"
                   bg={accentBg}
                   color={accentFg}
@@ -194,12 +197,12 @@ export default function InstallmentPlanCard({
                   justifyContent="center"
                   flexShrink={0}
                 >
-                  <Icon as={CreditCard} boxSize={4} weight="duotone" />
+                  <Icon as={CreditCard} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
                 </Box>
                 <VStack align="flex-start" spacing={0} minW={0}>
                   <Text
                     fontWeight={700}
-                    fontSize="md"
+                    fontSize={{ base: 'sm', md: 'md' }}
                     color={titleColor}
                     lineHeight="1.2"
                     noOfLines={1}
@@ -223,28 +226,28 @@ export default function InstallmentPlanCard({
               />
             </HStack>
 
-            <Box bg={amountPanelBg} borderRadius="xl" p={4} border="1px solid" borderColor={metaBorder}>
+            <Box bg={amountPanelBg} borderRadius="xl" p={{ base: 3, md: 4 }} border="1px solid" borderColor={metaBorder}>
             <HStack justify="space-between" align="flex-end">
               <VStack align="flex-start" spacing={0}>
-                <Text fontSize="xs" color={captionColor} fontWeight={500}>
+                <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} fontWeight={500}>
                   Per installment
                 </Text>
-                <Text fontSize="xl" fontWeight={700} color={valueColor} lineHeight="1.1">
+                <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={700} color={valueColor} lineHeight="1.1">
                   £{plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
               <VStack align="flex-end" spacing={0}>
-                <Text fontSize="xs" color={captionColor} fontWeight={500}>
+                <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} fontWeight={500}>
                   Total
                 </Text>
-                <Text fontSize="md" fontWeight={600} color={titleColor} lineHeight="1.1">
+                <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight={600} color={titleColor} lineHeight="1.1">
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
             </HStack>
             </Box>
 
-            <SimpleGrid columns={2} spacing={2}>
+            <SimpleGrid columns={2} spacing={{ base: 1.5, md: 2 }}>
               <MetaTile
                 label="Installments"
                 value={`${plan.totalInstallments} months`}
@@ -296,7 +299,7 @@ export default function InstallmentPlanCard({
                     {progressPct}%
                   </Text>
                 </HStack>
-                <Box h="6px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
+                <Box h="5px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
                   <Box
                     h="full"
                     w={`${progressPct}%`}
@@ -334,7 +337,7 @@ export default function InstallmentPlanCard({
                 p={3}
                 bg={collapseBg}
                 borderRadius="lg"
-                maxH="320px"
+                maxH={{ base: '240px', md: '320px' }}
                 overflowY="auto"
                 border="1px solid"
                 borderColor={dividerColor}
@@ -510,11 +513,11 @@ function MetaTile({
   captionColor,
 }: MetaTileProps) {
   return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={3}>
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={{ base: 2, md: 3 }}>
       <Text fontSize="2xs" color={captionColor} fontWeight={700} textTransform="uppercase">
         {label}
       </Text>
-      <Text fontSize="xs" color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
+      <Text fontSize={{ base: '2xs', md: 'xs' }} color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
         {value}
       </Text>
     </Box>

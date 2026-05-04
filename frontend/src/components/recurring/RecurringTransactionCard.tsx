@@ -183,13 +183,16 @@ export default function RecurringTransactionCard({
         {recurringTransaction.active && (
           <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />
         )}
-        <CardBody p={5} pl={recurringTransaction.active ? 6 : 5}>
-          <VStack align="stretch" spacing={4}>
+        <CardBody
+          p={{ base: 3, md: 5 }}
+          pl={recurringTransaction.active ? { base: 4.5, md: 6 } : { base: 3, md: 5 }}
+        >
+          <VStack align="stretch" spacing={{ base: 2.5, md: 4 }}>
             <HStack justify="space-between" align="flex-start">
-              <HStack spacing={3} minW={0} flex={1}>
+              <HStack spacing={{ base: 2, md: 3 }} minW={0} flex={1}>
                 <Box
-                  w={9}
-                  h={9}
+                  w={{ base: 8, md: 9 }}
+                  h={{ base: 8, md: 9 }}
                   borderRadius="lg"
                   bg={accentBg}
                   color={accentFg}
@@ -198,10 +201,10 @@ export default function RecurringTransactionCard({
                   justifyContent="center"
                   flexShrink={0}
                 >
-                  <Icon as={typeIcon} boxSize={4} weight="duotone" />
+                  <Icon as={typeIcon} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
                 </Box>
                 <VStack align="flex-start" spacing={0} minW={0}>
-                  <Text fontWeight={700} fontSize="md" color={titleColor} noOfLines={1}>
+                  <Text fontWeight={700} fontSize={{ base: 'sm', md: 'md' }} color={titleColor} noOfLines={1}>
                     {recurringTransaction.description}
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1} fontWeight={600}>
@@ -220,7 +223,7 @@ export default function RecurringTransactionCard({
               </Badge>
             </HStack>
 
-            <Box bg={amountPanelBg} borderRadius="xl" p={4} border="1px solid" borderColor={metaBorder}>
+            <Box bg={amountPanelBg} borderRadius="xl" p={{ base: 3, md: 4 }} border="1px solid" borderColor={metaBorder}>
               <HStack justify="space-between" align="flex-start" mb={isEditingAmount ? 2 : 0}>
                 <Text fontSize="xs" color={captionColor} fontWeight={500}>
                   Fixed monthly amount
@@ -274,7 +277,7 @@ export default function RecurringTransactionCard({
                   </HStack>
                 ) : (
                   <HStack spacing={2}>
-                    <Text fontSize="2xl" fontWeight={800} color={accentFg} lineHeight="1.05">
+                    <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={accentFg} lineHeight="1.05">
                       £{recurringTransaction.amount.toFixed(2)}
                     </Text>
                   </HStack>
@@ -282,7 +285,7 @@ export default function RecurringTransactionCard({
               </VStack>
             </Box>
 
-            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={2}>
+            <SimpleGrid columns={{ base: 2, md: 2 }} spacing={{ base: 1.5, md: 2 }}>
               <MetaTile
                 label="Payment day"
                 value={`Day ${recurringTransaction.dayOfMonth}`}
@@ -308,10 +311,10 @@ export default function RecurringTransactionCard({
                 borderTop="1px solid"
                 borderColor={dividerColor}
                 bg={actionBg}
-                mx={-5}
-                mb={-5}
-                px={5}
-                pb={5}
+                mx={{ base: -3, md: -5 }}
+                mb={{ base: -3, md: -5 }}
+                px={{ base: 3, md: 5 }}
+                pb={{ base: 3, md: 5 }}
               >
                 <Button
                   size="sm"
@@ -418,11 +421,11 @@ function MetaTile({
   captionColor,
 }: MetaTileProps) {
   return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={3}>
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={{ base: 2, md: 3 }}>
       <Text fontSize="2xs" color={captionColor} fontWeight={700} textTransform="uppercase">
         {label}
       </Text>
-      <Text fontSize="xs" color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
+      <Text fontSize={{ base: '2xs', md: 'xs' }} color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
         {value}
       </Text>
     </Box>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Badge,
   Box,
@@ -7,6 +7,7 @@ import {
   Icon,
   IconButton,
   SimpleGrid,
+  Switch,
   Text,
   useColorModeValue,
   VStack,
@@ -35,6 +36,11 @@ export default function InstallmentPlansModal({
   onPlanDeleted,
 }: InstallmentPlansModalProps) {
   const colors = useThemeColors()
+  const [hideActiveList, setHideActiveList] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) setHideActiveList(false)
+  }, [isOpen])
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -98,7 +104,7 @@ export default function InstallmentPlansModal({
       }
       contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         {plans.length === 0 ? (
           <Box
             bg={panelBg}
@@ -136,7 +142,7 @@ export default function InstallmentPlansModal({
               bg={heroBg}
               color="white"
               borderRadius="xl"
-              p={{ base: 5, md: 6 }}
+              p={{ base: 4, md: 6 }}
               boxShadow="0 18px 42px -24px rgba(15, 118, 110, 0.85)"
               overflow="hidden"
             >
@@ -158,7 +164,7 @@ export default function InstallmentPlansModal({
                       Outstanding on active plans
                     </Text>
                   </HStack>
-                  <Text fontSize={{ base: '3xl', md: '4xl' }} fontWeight={900} lineHeight="1">
+                  <Text fontSize={{ base: '2xl', md: '4xl' }} fontWeight={900} lineHeight="1">
                     {formatCurrency(remainingTotal)}
                   </Text>
                   <Text fontSize="sm" color="whiteAlpha.800">
@@ -178,7 +184,7 @@ export default function InstallmentPlansModal({
               </HStack>
             </Box>
 
-            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={{ base: 2, md: 3 }}>
               <InstallmentStat
                 icon={Wallet}
                 label="Original active total"
@@ -218,6 +224,23 @@ export default function InstallmentPlansModal({
               onDeleted={onPlanDeleted}
               labelColor={sectionLabelColor}
               dividerColor={dividerColor}
+              showPlans={!hideActiveList}
+              headerActions={
+                activePlans.length > 0 ? (
+                  <HStack spacing={{ base: 1.5, sm: 2 }} flexShrink={0} align="center">
+                    <Text fontSize={{ base: '2xs', sm: 'xs' }} fontWeight={600} color={sectionLabelColor} display={{ base: 'none', sm: 'block' }}>
+                      Hide active
+                    </Text>
+                    <Switch
+                      size="sm"
+                      colorScheme="teal"
+                      isChecked={hideActiveList}
+                      onChange={(e) => setHideActiveList(e.target.checked)}
+                      aria-label="Hide active installment plans"
+                    />
+                  </HStack>
+                ) : undefined
+              }
             />
 
             {pastPlans.length > 0 && (
@@ -264,11 +287,11 @@ function InstallmentStat({
   const chipFg = useColorModeValue('teal.700', 'teal.300')
 
   return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={4}>
-      <HStack spacing={3} align="center">
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={{ base: 3, sm: 4 }}>
+      <HStack spacing={{ base: 2, md: 3 }} align="center">
         <Box
-          w={9}
-          h={9}
+          w={{ base: 8, md: 9 }}
+          h={{ base: 8, md: 9 }}
           borderRadius="lg"
           bg={chipBg}
           color={chipFg}
@@ -277,13 +300,13 @@ function InstallmentStat({
           justifyContent="center"
           flexShrink={0}
         >
-          <Icon as={icon} boxSize={4} weight="duotone" />
+          <Icon as={icon} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
         </Box>
         <VStack align="flex-start" spacing={0} minW={0}>
-          <Text fontSize="xs" color={captionColor} noOfLines={1}>
+          <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} noOfLines={1}>
             {label}
           </Text>
-          <Text fontSize="lg" fontWeight={800} color={titleColor} lineHeight="1.15" noOfLines={1}>
+          <Text fontSize={{ base: 'sm', md: 'lg' }} fontWeight={800} color={titleColor} lineHeight="1.15" noOfLines={1}>
             {value}
           </Text>
         </VStack>
@@ -306,6 +329,10 @@ interface PlansSectionProps {
   collapsible?: boolean
   /** Initial expanded state when `collapsible` is true. Defaults to `true`. */
   defaultExpanded?: boolean
+  /** When false with plans present, hides the card grid but keeps header (toggle target). Defaults to true. */
+  showPlans?: boolean
+  /** Extra controls on the header row (e.g. Hide active Switch). */
+  headerActions?: ReactNode
 }
 
 function PlansSection({
@@ -320,6 +347,8 @@ function PlansSection({
   dividerColor,
   collapsible = false,
   defaultExpanded = true,
+  showPlans = true,
+  headerActions,
 }: PlansSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const chevronMuted = useColorModeValue('gray.400', 'gray.500')
@@ -381,11 +410,12 @@ function PlansSection({
                 borderRadius: 'md',
               }}
             >
-              <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+              <HStack flex={1} minW={0} spacing={2} align="center">
                 {headerBody}
                 {countBadge}
               </HStack>
             </HStack>
+            {headerActions}
             <IconButton
               aria-label={isExpanded ? `Hide ${label}` : `Show ${label}`}
               icon={
@@ -405,9 +435,12 @@ function PlansSection({
             />
           </>
         ) : (
-          <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
-            {headerBody}
-            {countBadge}
+          <HStack flex={1} minW={0} justify="space-between" spacing={2} align="center">
+            <HStack minW={0} spacing={2} align="center" flex={1}>
+              {headerBody}
+              {countBadge}
+            </HStack>
+            {headerActions}
           </HStack>
         )}
       </HStack>
@@ -422,10 +455,10 @@ function PlansSection({
                 </Text>
               </Box>
             )
-          ) : (
+          ) : !showPlans ? null : (
             <SimpleGrid
               columns={{ base: 1, md: 2 }}
-              spacing={{ base: 4, md: 5 }}
+              spacing={{ base: 3, md: 5 }}
               w="full"
             >
               {plans.map((plan) => (

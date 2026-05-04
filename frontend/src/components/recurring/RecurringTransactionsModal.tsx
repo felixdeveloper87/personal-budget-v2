@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Badge,
   Box,
@@ -7,6 +7,7 @@ import {
   Icon,
   IconButton,
   SimpleGrid,
+  Switch,
   Text,
   useColorModeValue,
   VStack,
@@ -34,6 +35,12 @@ export default function RecurringTransactionsModal({
   onChanged,
 }: RecurringTransactionsModalProps) {
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const [hideActiveList, setHideActiveList] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) setHideActiveList(false)
+  }, [isOpen])
+
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
   const panelBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
   const panelBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -99,7 +106,7 @@ export default function RecurringTransactionsModal({
       }
       contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         {recurringTransactions.length === 0 ? (
           <Box
             bg={panelBg}
@@ -137,7 +144,7 @@ export default function RecurringTransactionsModal({
               bg={heroBg}
               color="white"
               borderRadius="xl"
-              p={{ base: 5, md: 6 }}
+              p={{ base: 4, md: 6 }}
               boxShadow="0 18px 42px -24px rgba(15, 118, 110, 0.85)"
               overflow="hidden"
             >
@@ -159,7 +166,7 @@ export default function RecurringTransactionsModal({
                       Fixed monthly commitments
                     </Text>
                   </HStack>
-                  <Text fontSize={{ base: '3xl', md: '4xl' }} fontWeight={900} lineHeight="1">
+                  <Text fontSize={{ base: '2xl', md: '4xl' }} fontWeight={900} lineHeight="1">
                     {formatCurrency(activeNet)}
                   </Text>
                   <Text fontSize="sm" color="whiteAlpha.800">
@@ -179,7 +186,7 @@ export default function RecurringTransactionsModal({
               </HStack>
             </Box>
 
-            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={{ base: 2, md: 3 }}>
               <SummaryStat
                 icon={Wallet}
                 label="Monthly fixed net"
@@ -215,6 +222,23 @@ export default function RecurringTransactionsModal({
               items={activeItems}
               onChanged={onChanged}
               emptyMessage="No active fixed expenses right now."
+              showItems={!hideActiveList}
+              headerActions={
+                activeItems.length > 0 ? (
+                  <HStack spacing={{ base: 1.5, sm: 2 }} flexShrink={0} align="center">
+                    <Text fontSize={{ base: '2xs', sm: 'xs' }} fontWeight={600} color={captionColor} display={{ base: 'none', sm: 'block' }}>
+                      Hide active
+                    </Text>
+                    <Switch
+                      size="sm"
+                      colorScheme="teal"
+                      isChecked={hideActiveList}
+                      onChange={(e) => setHideActiveList(e.target.checked)}
+                      aria-label="Hide active fixed payments"
+                    />
+                  </HStack>
+                ) : undefined
+              }
             />
 
             {cancelledItems.length > 0 && (
@@ -258,11 +282,11 @@ function SummaryStat({
   const chipFg = useColorModeValue('teal.700', 'teal.300')
 
   return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={4}>
-      <HStack spacing={3} align="center">
+    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={{ base: 3, sm: 4 }}>
+      <HStack spacing={{ base: 2, md: 3 }} align="center">
         <Box
-          w={9}
-          h={9}
+          w={{ base: 8, md: 9 }}
+          h={{ base: 8, md: 9 }}
           borderRadius="lg"
           bg={chipBg}
           color={chipFg}
@@ -271,13 +295,13 @@ function SummaryStat({
           justifyContent="center"
           flexShrink={0}
         >
-          <Icon as={icon} boxSize={4} weight="duotone" />
+          <Icon as={icon} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
         </Box>
         <VStack align="flex-start" spacing={0} minW={0}>
-          <Text fontSize="xs" color={captionColor} noOfLines={1}>
+          <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} noOfLines={1}>
             {label}
           </Text>
-          <Text fontSize="lg" fontWeight={800} color={titleColor} lineHeight="1.15" noOfLines={1}>
+          <Text fontSize={{ base: 'sm', md: 'lg' }} fontWeight={800} color={titleColor} lineHeight="1.15" noOfLines={1}>
             {value}
           </Text>
         </VStack>
@@ -295,6 +319,8 @@ interface RecurringGroupProps {
   muted?: boolean
   collapsible?: boolean
   defaultExpanded?: boolean
+  showItems?: boolean
+  headerActions?: ReactNode
 }
 
 function RecurringGroup({
@@ -306,6 +332,8 @@ function RecurringGroup({
   muted,
   collapsible = false,
   defaultExpanded = true,
+  showItems = true,
+  headerActions,
 }: RecurringGroupProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const titleColor = useColorModeValue('gray.900', 'gray.50')
@@ -343,8 +371,8 @@ function RecurringGroup({
           </Text>
         </Box>
       )
-    ) : (
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 4, md: 5 }}>
+    ) : !showItems ? null : (
+      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 3, md: 5 }}>
         {items.map((item) => (
           <RecurringTransactionCard
             key={item.id}
@@ -390,11 +418,12 @@ function RecurringGroup({
                 borderRadius: 'md',
               }}
             >
-              <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
+              <HStack flex={1} minW={0} spacing={2} align="center">
                 {headerBody}
                 {countBadge}
               </HStack>
             </HStack>
+            {headerActions}
             <IconButton
               aria-label={isExpanded ? `Hide ${title}` : `Show ${title}`}
               icon={
@@ -414,9 +443,12 @@ function RecurringGroup({
             />
           </>
         ) : (
-          <HStack flex={1} minW={0} justify="space-between" spacing={3} align="center">
-            {headerBody}
-            {countBadge}
+          <HStack flex={1} minW={0} justify="space-between" spacing={2} align="center">
+            <HStack minW={0} spacing={2} align="center" flex={1}>
+              {headerBody}
+              {countBadge}
+            </HStack>
+            {headerActions}
           </HStack>
         )}
       </HStack>
