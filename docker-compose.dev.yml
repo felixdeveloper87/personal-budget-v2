@@ -1,11 +1,21 @@
+# =============================================================================
+# NA VPS usa "docker compose" (duas palavras, plugin v2).
+# Evita docker-compose — hífen no meio (= v1 Python 1.29.x) → KeyError ContainerConfig.
+# BOM:   docker compose -f docker-compose.dev.yml up -d --build
+# MAU:  docker-compose -f docker-compose.dev.yml up -d --build   ← causa o erro
+# Instalar plugin: apt install docker-compose-plugin  →  docker compose version
+#
+# Se "container name ... is already in use": lixo após falhas do compose v1.
+#   docker rm -f 440dc3d0ece2_personal-budget-v2-db-1    # nome que o erro mostrar
+#   # ou pelo ID curto/long: docker rm -f 440dc3d0ece2...
+#   docker compose -f docker-compose.dev.yml up -d --build
+# =============================================================================
 services:
-  # Comandos úteis (use sempre "docker compose" v2, plugin do Docker):
+  # Legenda dos mesmos comandos:
   #   docker compose -f docker-compose.dev.yml up
   #   docker compose -f docker-compose.dev.yml up -d
   #   docker compose -f docker-compose.dev.yml up -d --build backend
   #   docker compose -f docker-compose.dev.yml down
-  # NÃO use o binário antigo docker-compose v1 (~1.29.x): em Docker Engine
-  # recente dá KeyError 'ContainerConfig' ao recriar contentores.
   db:
     image: postgres:16
     environment:
