@@ -1,13 +1,11 @@
 import {
   Box,
   HStack,
-  Icon,
-  IconButton,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { X } from '../ui/icons'
+import { AppCloseButton } from '../ui'
 
 interface TransactionModalHeaderProps {
   type: 'INCOME' | 'EXPENSE'
@@ -37,8 +35,6 @@ export default function TransactionModalHeader({
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
-  const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
 
   return (
     <Box
@@ -67,18 +63,7 @@ export default function TransactionModalHeader({
           >
             {copy.title}
           </Text>
-        <IconButton
-          aria-label="Close"
-          icon={<Icon as={X} boxSize={4} />}
-          onClick={onClose}
-          size="sm"
-          variant="ghost"
-          borderRadius="full"
-          color={closeIdleColor}
-          _hover={{ bg: closeHoverBg, color: titleColor }}
-          transition="background-color 0.15s ease, color 0.15s ease"
-          flexShrink={0}
-        />
+          <AppCloseButton onClick={onClose} />
         </HStack>
 
         <Text

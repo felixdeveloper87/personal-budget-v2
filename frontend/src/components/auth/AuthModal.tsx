@@ -4,14 +4,13 @@ import {
   Button,
   HStack,
   Icon,
-  IconButton,
   Skeleton,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Wallet, X } from '../ui/icons'
-import { PremiumModal } from '../ui'
+import { Wallet } from '../ui/icons'
+import { AppCloseButton, PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
 import LoginForm from './LoginForm'
 
@@ -57,8 +56,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     'linear-gradient(90deg, #3b82f6, #8b5cf6)',
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
   )
-  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
-  const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
   const logoBg = useColorModeValue(
     'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
     'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
@@ -112,16 +109,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </VStack>
         </HStack>
 
-        <IconButton
-          aria-label="Close"
-          icon={<Icon as={X} boxSize={4} />}
-          onClick={onClose}
-          size="sm"
-          variant="ghost"
-          color={closeIdleColor}
-          _hover={{ bg: closeHoverBg, color: titleColor }}
-          transition="background-color 0.15s ease, color 0.15s ease"
-        />
+        <AppCloseButton onClick={onClose} />
       </HStack>
 
       <Box role="tablist" aria-label="Authentication">

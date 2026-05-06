@@ -3,12 +3,11 @@ import {
   Box,
   HStack,
   Icon,
-  IconButton,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { X } from './icons'
+import AppCloseButton from './AppCloseButton'
 import type { LucideIcon } from './icons'
 
 export type ModalHeaderAccent = 'blue' | 'green' | 'red' | 'violet' | 'neutral'
@@ -105,8 +104,6 @@ export default function ModalHeader({
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
-  const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
 
   const chipBg = useColorModeValue(tokens.bgLight, tokens.bgDark)
   const chipFg = useColorModeValue(tokens.fgLight, tokens.fgDark)
@@ -170,17 +167,7 @@ export default function ModalHeader({
         )}
 
         {!hideClose && (
-          <IconButton
-            aria-label="Close"
-            icon={<Icon as={X} boxSize={4} />}
-            onClick={onClose}
-            size="sm"
-            variant="ghost"
-            color={closeIdleColor}
-            _hover={{ bg: closeHoverBg, color: titleColor }}
-            transition="background-color 0.15s ease, color 0.15s ease"
-            flexShrink={0}
-          />
+          <AppCloseButton onClick={onClose} />
         )}
       </HStack>
     </Box>

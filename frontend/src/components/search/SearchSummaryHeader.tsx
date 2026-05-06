@@ -3,7 +3,6 @@ import {
   Box,
   HStack,
   Icon,
-  IconButton,
   Tag,
   TagLabel,
   Text,
@@ -12,7 +11,8 @@ import {
   WrapItem,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Calendar, ListFilter, Search, TrendingDown, TrendingUp, X } from '../ui/icons'
+import { Calendar, ListFilter, Search, TrendingDown, TrendingUp } from '../ui/icons'
+import { AppCloseButton } from '../ui'
 import { formatTransactionDate } from '../../utils/dateTime'
 import { SearchSummaryHeaderProps } from '../../types'
 
@@ -31,8 +31,6 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
-  const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
   const accentBg = useColorModeValue('blue.50', 'whiteAlpha.100')
   const accentColor = useColorModeValue('blue.600', 'blue.300')
   const tagBg = useColorModeValue('gray.100', 'whiteAlpha.100')
@@ -105,16 +103,7 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
         </HStack>
 
         {onClose && (
-          <IconButton
-            aria-label="Close"
-            icon={<Icon as={X} boxSize={4} />}
-            onClick={onClose}
-            size="sm"
-            variant="ghost"
-            color={closeIdleColor}
-            _hover={{ bg: closeHoverBg, color: titleColor }}
-            transition="background-color 0.15s ease, color 0.15s ease"
-          />
+          <AppCloseButton onClick={onClose} />
         )}
       </HStack>
 

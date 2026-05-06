@@ -14,6 +14,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Search, X } from '../ui/icons'
+import { AppCloseButton } from '../ui'
 
 interface SearchHeaderProps {
   onClose: () => void
@@ -41,7 +42,6 @@ export default function SearchHeader({
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const closeIdleColor = useColorModeValue('gray.500', 'gray.400')
   const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
 
   const inputBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -109,16 +109,7 @@ export default function SearchHeader({
           </VStack>
         </HStack>
 
-        <IconButton
-          aria-label="Close"
-          icon={<Icon as={X} boxSize={4} />}
-          onClick={onClose}
-          size="sm"
-          variant="ghost"
-          color={closeIdleColor}
-          _hover={{ bg: closeHoverBg, color: titleColor }}
-          transition="background-color 0.15s ease, color 0.15s ease"
-        />
+        <AppCloseButton onClick={onClose} />
       </HStack>
 
       <InputGroup size="md">
