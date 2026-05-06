@@ -1,5 +1,5 @@
 import { Box, Button, Grid, Text, useColorModeValue } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getShimmerStyles } from '../../ui'
 
 interface NumberPadProps {
@@ -20,7 +20,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
     }
   }, [value])
 
-  const handleNumberClick = (num: string) => {
+  const handleNumberClick = useCallback((num: string) => {
     let newValue: string
     
     if (displayValue === '0.00' || displayValue === '0') {
@@ -39,22 +39,22 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
     
     setDisplayValue(newValue)
     onValueChange(parseFloat(newValue))
-  }
+  }, [displayValue, onValueChange])
 
-  const handleDecimal = () => {
+  const handleDecimal = useCallback(() => {
     if (!displayValue.includes('.')) {
       const newValue = displayValue + '.'
       setDisplayValue(newValue)
       onValueChange(parseFloat(newValue))
     }
-  }
+  }, [displayValue, onValueChange])
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setDisplayValue('0.00')
     onValueChange(0)
-  }
+  }, [onValueChange])
 
-  const handleBackspace = () => {
+  const handleBackspace = useCallback(() => {
     if (displayValue.length > 1 && displayValue !== '0.00') {
       let newValue = displayValue.slice(0, -1)
       
@@ -69,7 +69,51 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
       setDisplayValue('0.00')
       onValueChange(0)
     }
-  }
+  }, [displayValue, onValueChange])
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const { key } = event
+
+      if (/^\d$/.test(key)) {
+        event.preventDefault()
+        handleNumberClick(key)
+        return
+      }
+
+      if (key === '.' || key === ',') {
+        event.preventDefault()
+        handleDecimal()
+        return
+      }
+
+      if (key === 'Backspace') {
+        event.preventDefault()
+        handleBackspace()
+        return
+      }
+
+      if (key === 'Delete') {
+        event.preventDefault()
+        handleClear()
+        return
+      }
+
+      if (key === 'Enter') {
+        event.preventDefault()
+        onDone?.()
+        return
+      }
+
+      if (key === 'Escape') {
+        event.preventDefault()
+        onDone?.()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleBackspace, handleClear, handleDecimal, handleNumberClick, onDone])
 
   const formatDisplayValue = (val: string) => {
     if (val === '0' || val === '0.00') return '0.00'
