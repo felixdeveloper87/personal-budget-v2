@@ -1,6 +1,6 @@
-import { Box, Button, Grid, Text, useColorModeValue } from '@chakra-ui/react'
-import { useState, useEffect, useCallback } from 'react'
-import { getShimmerStyles } from '../../ui'
+import { Box, Button, Grid, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { useCallback, useEffect, useState } from 'react'
+import { Backspace, Check } from '../../ui/icons'
 
 interface NumberPadProps {
   value: number
@@ -8,45 +8,74 @@ interface NumberPadProps {
   onDone?: () => void
 }
 
+interface NumberKeyProps {
+  children: string
+  displayText: string
+  keyBg: string
+  keyBorder: string
+  keyHoverBg: string
+  onClick: () => void
+}
+
+function NumberKey({
+  children,
+  displayText,
+  keyBg,
+  keyBorder,
+  keyHoverBg,
+  onClick,
+}: NumberKeyProps) {
+  return (
+    <Button
+      h={{ base: '62px', sm: '56px' }}
+      borderRadius="2xl"
+      bg={keyBg}
+      border="1px solid"
+      borderColor={keyBorder}
+      color={displayText}
+      fontSize={{ base: '2xl', sm: 'xl' }}
+      fontWeight={700}
+      lineHeight="1"
+      onClick={onClick}
+      _hover={{ bg: keyHoverBg, transform: 'translateY(-1px)' }}
+      _active={{ transform: 'translateY(0)', bg: keyBg }}
+      transition="background 0.15s ease, transform 0.15s ease"
+    >
+      {children}
+    </Button>
+  )
+}
+
 export default function NumberPad({ value, onValueChange, onDone }: NumberPadProps) {
   const [displayValue, setDisplayValue] = useState<string>('0.00')
 
-  // Update display value when prop value changes
   useEffect(() => {
-    if (value === 0) {
-      setDisplayValue('0.00')
-    } else {
-      setDisplayValue(value.toString())
-    }
+    setDisplayValue(value === 0 ? '0.00' : value.toString())
   }, [value])
 
   const handleNumberClick = useCallback((num: string) => {
     let newValue: string
-    
+
     if (displayValue === '0.00' || displayValue === '0') {
       newValue = num
     } else if (displayValue.includes('.')) {
-      // If already has decimal, check if we can add more digits after decimal
       const parts = displayValue.split('.')
-      if (parts[1].length < 2) {
-        newValue = displayValue + num
-      } else {
-        return // Don't add more than 2 decimal places
-      }
+      if (parts[1].length >= 2) return
+      newValue = displayValue + num
     } else {
       newValue = displayValue + num
     }
-    
+
     setDisplayValue(newValue)
     onValueChange(parseFloat(newValue))
   }, [displayValue, onValueChange])
 
   const handleDecimal = useCallback(() => {
-    if (!displayValue.includes('.')) {
-      const newValue = displayValue + '.'
-      setDisplayValue(newValue)
-      onValueChange(parseFloat(newValue))
-    }
+    if (displayValue.includes('.')) return
+
+    const newValue = displayValue + '.'
+    setDisplayValue(newValue)
+    onValueChange(parseFloat(newValue))
   }, [displayValue, onValueChange])
 
   const handleClear = useCallback(() => {
@@ -56,19 +85,14 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
 
   const handleBackspace = useCallback(() => {
     if (displayValue.length > 1 && displayValue !== '0.00') {
-      let newValue = displayValue.slice(0, -1)
-      
-      // If we removed the decimal point, ensure we still have a valid number
-      if (newValue === '') {
-        newValue = '0'
-      }
-      
+      const newValue = displayValue.slice(0, -1) || '0'
       setDisplayValue(newValue)
       onValueChange(parseFloat(newValue))
-    } else {
-      setDisplayValue('0.00')
-      onValueChange(0)
+      return
     }
+
+    setDisplayValue('0.00')
+    onValueChange(0)
   }, [displayValue, onValueChange])
 
   useEffect(() => {
@@ -123,219 +147,143 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
     return val
   }
 
-  const displayBg = useColorModeValue('gray.50', '#1a1a1a')
-  const displayBorder = useColorModeValue('gray.200', 'gray.800')
-  const displayText = useColorModeValue('gray.800', 'white')
+  const currencySymbol =
+    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
+      .formatToParts(0)
+      .find((part) => part.type === 'currency')?.value ?? 'GBP'
+
+  const shellBg = useColorModeValue('white', 'gray.950')
+  const displayBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const displayBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
+  const displayText = useColorModeValue('gray.900', 'white')
+  const mutedText = useColorModeValue('gray.500', 'gray.400')
+  const keyBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const keyHoverBg = useColorModeValue('gray.100', 'whiteAlpha.200')
+  const keyBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
+  const actionBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const dangerColor = useColorModeValue('red.600', 'red.300')
+  const primaryGradient = useColorModeValue(
+    'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+    'linear-gradient(135deg, #34d399 0%, #10b981 100%)'
+  )
+
+  const numberKeyProps = {
+    displayText,
+    keyBg,
+    keyBorder,
+    keyHoverBg,
+  }
 
   return (
-    <Box w="full" maxW={{ base: "100%", sm: "320px" }} mx="auto">
-      {/* Animated top bar */}
-      <Box
-        height="4px"
-        borderRadius="2xl 2xl 0 0"
-        mb={4}
-        sx={getShimmerStyles()}
-      />
-      
-      {/* Display */}
-      <Box 
-        p={{ base: 6, sm: 4 }} 
-        bg={displayBg}
-        borderRadius="xl" 
-        mb={{ base: 6, sm: 4 }} 
-        textAlign="center"
-        border="2px solid"
-        borderColor={displayBorder}
-        minH={{ base: "80px", sm: "60px" }}
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <Text fontSize={{ base: "3xl", sm: "2xl" }} fontWeight="bold" color={displayText}>
-          £{formatDisplayValue(displayValue)}
-        </Text>
-      </Box>
+    <Box
+      w="full"
+      maxW={{ base: '100%', sm: '340px' }}
+      mx="auto"
+      bg={shellBg}
+      borderRadius="2xl"
+    >
+      <VStack spacing={4} align="stretch">
+        <Box
+          px={{ base: 5, sm: 4 }}
+          py={{ base: 5, sm: 4 }}
+          bg={displayBg}
+          borderRadius="2xl"
+          border="1px solid"
+          borderColor={displayBorder}
+          minH={{ base: '96px', sm: '84px' }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+        >
+          <HStack spacing={2} align="baseline" maxW="full">
+            <Text fontSize={{ base: '2xl', sm: 'xl' }} fontWeight={700} color={mutedText}>
+              {currencySymbol}
+            </Text>
+            <Text
+              fontSize={{ base: '4xl', sm: '3xl' }}
+              fontWeight={800}
+              color={displayText}
+              lineHeight="1"
+              noOfLines={1}
+              sx={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {formatDisplayValue(displayValue)}
+            </Text>
+          </HStack>
+        </Box>
 
-      {/* Number Pad */}
-      <Grid 
-        templateColumns="repeat(3, 1fr)" 
-        gap={{ base: 3, sm: 2 }} 
-        w="full"
-        maxW={{ base: "100%", sm: "240px" }}
-        mx="auto"
-      >
-        {/* Row 1 */}
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('1')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          1
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('2')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          2
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('3')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          3
-        </Button>
-        
-        {/* Row 2 */}
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('4')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          4
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('5')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          5
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('6')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          6
-        </Button>
-        
-        {/* Row 3 */}
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('7')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          7
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('8')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          8
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('9')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          9
-        </Button>
-        
-        {/* Row 4 */}
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={handleDecimal} 
-          colorScheme="blue"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          .
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={() => handleNumberClick('0')}
-          colorScheme="gray"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          0
-        </Button>
-        <Button 
-          size={{ base: "xl", sm: "lg" }}
-          h={{ base: "60px", sm: "48px" }}
-          onClick={handleBackspace} 
-          colorScheme="red"
-          variant="outline"
-          fontSize={{ base: "xl", sm: "lg" }}
-          fontWeight="bold"
-        >
-          ⌫
-        </Button>
-      </Grid>
+        <Grid templateColumns="repeat(3, 1fr)" gap={2.5} w="full">
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('1')}>1</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('2')}>2</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('3')}>3</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('4')}>4</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('5')}>5</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('6')}>6</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('7')}>7</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('8')}>8</NumberKey>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('9')}>9</NumberKey>
+          <Button
+            h={{ base: '62px', sm: '56px' }}
+            borderRadius="2xl"
+            bg={actionBg}
+            color={mutedText}
+            fontSize="lg"
+            fontWeight={700}
+            onClick={handleDecimal}
+            _hover={{ bg: keyHoverBg }}
+            _active={{ bg: actionBg }}
+          >
+            .
+          </Button>
+          <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('0')}>0</NumberKey>
+          <Button
+            h={{ base: '62px', sm: '56px' }}
+            borderRadius="2xl"
+            bg={actionBg}
+            color={dangerColor}
+            onClick={handleBackspace}
+            aria-label="Delete last digit"
+            _hover={{ bg: keyHoverBg }}
+            _active={{ bg: actionBg }}
+          >
+            <Icon as={Backspace} boxSize={6} />
+          </Button>
+        </Grid>
 
-      {/* Clear Button */}
-      <Button 
-        size={{ base: "lg", sm: "sm" }}
-        h={{ base: "50px", sm: "40px" }}
-        colorScheme="red" 
-        variant="outline" 
-        w="full" 
-        mt={{ base: 4, sm: 2 }}
-        onClick={handleClear}
-        fontSize={{ base: "lg", sm: "sm" }}
-        fontWeight="bold"
-      >
-        Clear
-      </Button>
+        <HStack spacing={2.5}>
+          <Button
+            h={{ base: '52px', sm: '46px' }}
+            flex="1"
+            borderRadius="xl"
+            bg={actionBg}
+            color={dangerColor}
+            fontWeight={700}
+            onClick={handleClear}
+            _hover={{ bg: keyHoverBg }}
+            _active={{ bg: actionBg }}
+          >
+            Clear
+          </Button>
 
-      {/* Done Button - only show if onDone is provided */}
-      {onDone && (
-        <Button 
-          size={{ base: "lg", sm: "sm" }}
-          h={{ base: "50px", sm: "40px" }}
-          colorScheme="green" 
-          variant="solid" 
-          w="full" 
-          mt={2}
-          onClick={onDone}
-          fontSize={{ base: "lg", sm: "sm" }}
-          fontWeight="bold"
-        >
-          Done
-        </Button>
-      )}
+          {onDone && (
+            <Button
+              h={{ base: '52px', sm: '46px' }}
+              flex="1.5"
+              borderRadius="xl"
+              color="white"
+              bg={primaryGradient}
+              leftIcon={<Icon as={Check} boxSize={5} />}
+              onClick={onDone}
+              fontWeight={800}
+              _hover={{ filter: 'brightness(1.03)', transform: 'translateY(-1px)' }}
+              _active={{ transform: 'translateY(0)' }}
+              transition="filter 0.15s ease, transform 0.15s ease"
+            >
+              Done
+            </Button>
+          )}
+        </HStack>
+      </VStack>
     </Box>
   )
 }
