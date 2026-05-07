@@ -10,6 +10,7 @@ import {
   RecurringTransaction,
   CreateRecurringTransactionRequest
 } from './types'
+import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 
 function mapAuthToUser(payload: Record<string, unknown>): User {
   const userId =
@@ -64,12 +65,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token invalid or expired → clear session and redirect
-      localStorage.removeItem('user')
-
-      // Prevent infinite redirect loop if already on auth page
-      if (!window.location.pathname.includes('/auth')) {
-        window.location.href = '/auth'
+      const url = String(error.config?.url ?? '')
+      // Wrong password on login returns 401 — must not wipe an existing session
+      const isPublicAuthAttempt =
+        url.includes('/auth/login') || url.includes('/auth/register')
+      if (!isPublicAuthAttempt) {
+        localStorage.removeItem('user')
+        window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT))
       }
     }
     return Promise.reject(error)

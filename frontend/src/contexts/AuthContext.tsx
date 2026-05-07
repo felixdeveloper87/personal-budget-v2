@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { User, LoginRequest, RegisterRequest } from '../types'
 import { login, register } from '../api'
+import { isJwtExpired, AUTH_SESSION_INVALID_EVENT } from '../utils/jwtExpiry'
 
 interface AuthContextType {
   user: User | null
@@ -24,17 +25,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // --- Restore user session from localStorage on mount ---
+  // --- Restore session; drop stale persisted user if JWT is expired ---
   useEffect(() => {
     const savedUser = localStorage.getItem('user')
     if (savedUser) {
       try {
-        setUser(JSON.parse(savedUser))
+        const parsed = JSON.parse(savedUser) as User
+        if (parsed?.token && isJwtExpired(parsed.token)) {
+          localStorage.removeItem('user')
+          setUser(null)
+        } else {
+          setUser(parsed)
+        }
       } catch {
         localStorage.removeItem('user')
       }
     }
     setLoading(false)
+  }, [])
+
+  // --- 401 from API clears localStorage; sync React state without relying on URLs ---
+  useEffect(() => {
+    const syncLogout = () => {
+      setUser(null)
+      localStorage.removeItem('user')
+      if (window.location.pathname !== '/') {
+        window.history.replaceState(null, '', '/')
+      }
+    }
+    window.addEventListener(AUTH_SESSION_INVALID_EVENT, syncLogout)
+    return () => window.removeEventListener(AUTH_SESSION_INVALID_EVENT, syncLogout)
   }, [])
 
   // --- Login handler (calls backend API + saves user locally) ---
