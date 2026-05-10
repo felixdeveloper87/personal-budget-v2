@@ -8,8 +8,14 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# Baixar dependências e compilar o projeto
-RUN mvn clean package -DskipTests
+# Testes no build por padrão (mvn verify = test + package). Build rápido local:
+#   docker build --build-arg SKIP_TESTS=true ./backend
+ARG SKIP_TESTS=false
+RUN if [ "$SKIP_TESTS" = "true" ]; then \
+      mvn clean package -DskipTests; \
+    else \
+      mvn clean verify; \
+    fi
 
 # Verificar se o JAR foi criado
 RUN ls -la target/
