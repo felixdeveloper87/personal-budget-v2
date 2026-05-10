@@ -1,5 +1,9 @@
 package com.example.budget.service;
 
+import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.cache.CachedInstallmentPlanList;
+import com.example.budget.cache.RedisCacheSafety;
+import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
 import com.example.budget.exception.AccessDeniedException;
@@ -10,9 +14,13 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.repository.InstallmentPlanRepository;
 import com.example.budget.repository.TransactionRepository;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -28,13 +36,23 @@ public class InstallmentPlanService {
     private final InstallmentPlanRepository installmentPlanRepository;
     private final TransactionRepository transactionRepository;
     private final InstallmentPlanMapper installmentPlanMapper;
+    private final CacheInvalidationService cacheInvalidation;
+    private final Cache installmentPlansListCache;
 
     public InstallmentPlanService(InstallmentPlanRepository installmentPlanRepository,
                                   TransactionRepository transactionRepository,
-                                  InstallmentPlanMapper installmentPlanMapper) {
+                                  InstallmentPlanMapper installmentPlanMapper,
+                                  CacheInvalidationService cacheInvalidation,
+                                  CacheManager cacheManager) {
         this.installmentPlanRepository = installmentPlanRepository;
         this.transactionRepository = transactionRepository;
         this.installmentPlanMapper = installmentPlanMapper;
+        this.cacheInvalidation = cacheInvalidation;
+        Cache plansCache = cacheManager.getCache(RedisCacheConfig.INSTALLMENT_PLANS_LIST_CACHE);
+        if (plansCache == null) {
+            throw new IllegalStateException("Cache '" + RedisCacheConfig.INSTALLMENT_PLANS_LIST_CACHE + "' is not configured");
+        }
+        this.installmentPlansListCache = plansCache;
     }
 
     /**
@@ -58,6 +76,11 @@ public class InstallmentPlanService {
         transactionRepository.saveAll(transactions);
         plan.setTransactions(transactions);
 
+        cacheInvalidation.evictInstallmentPlansList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        for (Transaction t : transactions) {
+            cacheInvalidation.evictMonthlySummary(user, t.getDateTime());
+        }
         return installmentPlanMapper.toDTO(plan);
     }
 
@@ -69,11 +92,21 @@ public class InstallmentPlanService {
      * @param user User to find plans for
      * @return List of InstallmentPlanDTO for the user
      */
+    @Transactional(readOnly = true)
     public List<InstallmentPlanDTO> findAllByUser(User user) {
-        List<InstallmentPlan> plans = installmentPlanRepository.findByUserOrderByIdDesc(user);
-        return plans.stream()
+        String key = String.valueOf(user.getId());
+        CachedInstallmentPlanList cached = RedisCacheSafety.get(installmentPlansListCache, key, CachedInstallmentPlanList.class);
+        if (cached != null && cached.getItems() != null && !cached.getItems().isEmpty()) {
+            if (cached.getItems().get(0) instanceof InstallmentPlanDTO) {
+                return new ArrayList<>(cached.getItems());
+            }
+            installmentPlansListCache.evict(key);
+        }
+        List<InstallmentPlanDTO> fromDb = installmentPlanRepository.findByUserOrderByIdDesc(user).stream()
                 .map(installmentPlanMapper::toDTO)
                 .toList();
+        RedisCacheSafety.put(installmentPlansListCache, key, CachedInstallmentPlanList.copyOf(fromDb));
+        return new ArrayList<>(fromDb);
     }
 
     /**
@@ -114,7 +147,13 @@ public class InstallmentPlanService {
 
         validateUserOwnership(plan, user);
 
+        List<Transaction> linked = new ArrayList<>(plan.getTransactions());
         installmentPlanRepository.delete(plan);
+        cacheInvalidation.evictInstallmentPlansList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        for (Transaction t : linked) {
+            cacheInvalidation.evictMonthlySummary(user, t.getDateTime());
+        }
     }
 
     /**

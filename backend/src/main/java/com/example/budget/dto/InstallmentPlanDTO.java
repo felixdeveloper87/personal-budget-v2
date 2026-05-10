@@ -33,20 +33,40 @@ public class InstallmentPlanDTO {
         return id;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public int getTotalInstallments() {
         return totalInstallments;
+    }
+
+    public void setTotalInstallments(int totalInstallments) {
+        this.totalInstallments = totalInstallments;
     }
 
     public BigDecimal getTotalAmount() {
         return totalAmount;
     }
 
+    public void setTotalAmount(BigDecimal totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
     public BigDecimal getInstallmentValue() {
         return installmentValue;
     }
 
+    public void setInstallmentValue(BigDecimal installmentValue) {
+        this.installmentValue = installmentValue;
+    }
+
     public List<InstallmentTransactionDTO> getTransactions() {
         return transactions;
+    }
+
+    public void setTransactions(List<InstallmentTransactionDTO> transactions) {
+        this.transactions = transactions;
     }
 
     /**
@@ -98,6 +118,30 @@ public class InstallmentPlanDTO {
 
         public int getInstallmentNumber() {
             return installmentNumber;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
+
+        public void setAmount(BigDecimal amount) {
+            this.amount = amount;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
+
+        public void setDate(LocalDate date) {
+            this.date = date;
+        }
+
+        public void setInstallmentNumber(int installmentNumber) {
+            this.installmentNumber = installmentNumber;
         }
     }
 }

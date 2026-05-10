@@ -1,5 +1,9 @@
 package com.example.budget.service;
 
+import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.cache.CachedTransactionList;
+import com.example.budget.cache.RedisCacheSafety;
+import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.MonthlySummary;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
@@ -8,8 +12,11 @@ import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.repository.TransactionRepository;
 
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -17,7 +24,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -29,9 +38,26 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionService {
     private final TransactionRepository repository;
+    private final Cache monthlySummaryCache;
+    private final Cache transactionsListCache;
+    private final CacheInvalidationService cacheInvalidation;
 
-    public TransactionService(TransactionRepository repository) {
+    public TransactionService(
+            TransactionRepository repository,
+            CacheManager cacheManager,
+            CacheInvalidationService cacheInvalidation) {
         this.repository = repository;
+        this.cacheInvalidation = cacheInvalidation;
+        Cache summary = cacheManager.getCache(RedisCacheConfig.MONTHLY_SUMMARY_CACHE);
+        if (summary == null) {
+            throw new IllegalStateException("Cache '" + RedisCacheConfig.MONTHLY_SUMMARY_CACHE + "' is not configured");
+        }
+        this.monthlySummaryCache = summary;
+        Cache txList = cacheManager.getCache(RedisCacheConfig.TRANSACTIONS_LIST_CACHE);
+        if (txList == null) {
+            throw new IllegalStateException("Cache '" + RedisCacheConfig.TRANSACTIONS_LIST_CACHE + "' is not configured");
+        }
+        this.transactionsListCache = txList;
     }
 
     /**
@@ -40,8 +66,20 @@ public class TransactionService {
      * @param user User to find transactions for
      * @return List of transactions belonging to the user
      */
+    @Transactional(readOnly = true)
     public List<Transaction> findAllByUser(User user) {
-        return repository.findByUser(user);
+        String key = String.valueOf(user.getId());
+        CachedTransactionList cached = RedisCacheSafety.get(transactionsListCache, key, CachedTransactionList.class);
+        if (cached != null && cached.getItems() != null && !cached.getItems().isEmpty()) {
+            List<Transaction> items = cached.getItems();
+            if (items.get(0) instanceof Transaction) {
+                return new ArrayList<>(items);
+            }
+            transactionsListCache.evict(key);
+        }
+        List<Transaction> fromDb = repository.findByUser(user);
+        RedisCacheSafety.put(transactionsListCache, key, CachedTransactionList.copyOf(fromDb));
+        return new ArrayList<>(fromDb);
     }
 
     /**
@@ -53,7 +91,10 @@ public class TransactionService {
      */
     public Transaction save(Transaction t, User user) {
         t.setUser(user);
-        return repository.save(t);
+        Transaction saved = repository.save(t);
+        cacheInvalidation.evictMonthlySummary(user, saved.getDateTime());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        return saved;
     }
 
     /**
@@ -77,13 +118,21 @@ public class TransactionService {
             throw new AccessDeniedException("Access denied: Transaction does not belong to user");
         }
 
+        LocalDateTime previousDateTime = transaction.getDateTime();
+
         transaction.setDateTime(updatedTx.getDateTime());
         transaction.setType(updatedTx.getType());
         transaction.setCategory(updatedTx.getCategory());
         transaction.setDescription(updatedTx.getDescription());
         transaction.setAmount(updatedTx.getAmount());
 
-        return repository.save(transaction);
+        Transaction saved = repository.save(transaction);
+        cacheInvalidation.evictMonthlySummary(user, previousDateTime);
+        if (!Objects.equals(previousDateTime, saved.getDateTime())) {
+            cacheInvalidation.evictMonthlySummary(user, saved.getDateTime());
+        }
+        cacheInvalidation.evictTransactionsList(user.getId());
+        return saved;
     }
 
     /**
@@ -104,6 +153,8 @@ public class TransactionService {
             throw new AccessDeniedException("Access denied: Transaction does not belong to user");
         }
 
+        cacheInvalidation.evictMonthlySummary(user, transaction.getDateTime());
+        cacheInvalidation.evictTransactionsList(user.getId());
         repository.deleteById(id);
     }
 
@@ -119,6 +170,12 @@ public class TransactionService {
      * @return MonthlySummary containing aggregated transaction data
      */
     public MonthlySummary monthlySummary(int year, int month, User user) {
+        String cacheKey = user.getId() + ":" + year + ":" + month;
+        MonthlySummary cached = RedisCacheSafety.get(monthlySummaryCache, cacheKey, MonthlySummary.class);
+        if (cached != null) {
+            return cached;
+        }
+
         YearMonth ym = YearMonth.of(year, month);
         LocalDateTime start = ym.atDay(1).atStartOfDay();
         LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59);
@@ -142,6 +199,7 @@ public class TransactionService {
         s.totalExpense = expense;
         s.balance = balance;
         s.byCategory = byCategory;
+        RedisCacheSafety.put(monthlySummaryCache, cacheKey, s);
         return s;
     }
 

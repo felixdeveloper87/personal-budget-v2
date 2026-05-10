@@ -1,5 +1,9 @@
 package com.example.budget.service;
 
+import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.cache.CachedRecurringList;
+import com.example.budget.cache.RedisCacheSafety;
+import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
@@ -11,6 +15,9 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
+
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,15 +34,25 @@ public class RecurringTransactionService {
     private final RecurringTransactionRepository recurringTransactionRepository;
     private final TransactionRepository transactionRepository;
     private final RecurringTransactionMapper recurringTransactionMapper;
+    private final CacheInvalidationService cacheInvalidation;
+    private final Cache recurringListCache;
 
     public RecurringTransactionService(
             RecurringTransactionRepository recurringTransactionRepository,
             TransactionRepository transactionRepository,
-            RecurringTransactionMapper recurringTransactionMapper
+            RecurringTransactionMapper recurringTransactionMapper,
+            CacheInvalidationService cacheInvalidation,
+            CacheManager cacheManager
     ) {
         this.recurringTransactionRepository = recurringTransactionRepository;
         this.transactionRepository = transactionRepository;
         this.recurringTransactionMapper = recurringTransactionMapper;
+        this.cacheInvalidation = cacheInvalidation;
+        Cache recurring = cacheManager.getCache(RedisCacheConfig.RECURRING_LIST_CACHE);
+        if (recurring == null) {
+            throw new IllegalStateException("Cache '" + RedisCacheConfig.RECURRING_LIST_CACHE + "' is not configured");
+        }
+        this.recurringListCache = recurring;
     }
 
     @Transactional
@@ -44,13 +62,26 @@ public class RecurringTransactionService {
         RecurringTransaction recurringTransaction = recurringTransactionMapper.toEntity(request, user);
         recurringTransaction = recurringTransactionRepository.save(recurringTransaction);
         generateTransactionsForMonth(recurringTransaction, YearMonth.now());
+        cacheInvalidation.evictRecurringList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
         return recurringTransactionMapper.toDTO(recurringTransaction);
     }
 
+    @Transactional(readOnly = true)
     public List<RecurringTransactionDTO> findAllByUser(User user) {
-        return recurringTransactionRepository.findByUserOrderByIdDesc(user).stream()
+        String key = String.valueOf(user.getId());
+        CachedRecurringList cached = RedisCacheSafety.get(recurringListCache, key, CachedRecurringList.class);
+        if (cached != null && cached.getItems() != null && !cached.getItems().isEmpty()) {
+            if (cached.getItems().get(0) instanceof RecurringTransactionDTO) {
+                return new ArrayList<>(cached.getItems());
+            }
+            recurringListCache.evict(key);
+        }
+        List<RecurringTransactionDTO> fromDb = recurringTransactionRepository.findByUserOrderByIdDesc(user).stream()
                 .map(recurringTransactionMapper::toDTO)
                 .toList();
+        RedisCacheSafety.put(recurringListCache, key, CachedRecurringList.copyOf(fromDb));
+        return new ArrayList<>(fromDb);
     }
 
     public RecurringTransactionDTO findById(Long id, User user) {
@@ -73,6 +104,10 @@ public class RecurringTransactionService {
                 recurringTransaction.getId(),
                 firstMomentAfterTodayCalendar);
 
+        cacheInvalidation.evictMonthlySummariesWideWindow(user.getId());
+        cacheInvalidation.evictRecurringList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+
         recurringTransaction.setActive(false);
         return recurringTransactionMapper.toDTO(recurringTransactionRepository.save(recurringTransaction));
     }
@@ -81,12 +116,16 @@ public class RecurringTransactionService {
     public RecurringTransactionDTO updateAmount(Long id, UpdateRecurringTransactionAmountRequest request, User user) {
         RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
         recurringTransaction.setAmount(request.getAmount());
-        return recurringTransactionMapper.toDTO(recurringTransactionRepository.save(recurringTransaction));
+        RecurringTransactionDTO dto = recurringTransactionMapper.toDTO(
+                recurringTransactionRepository.save(recurringTransaction));
+        cacheInvalidation.evictRecurringList(user.getId());
+        return dto;
     }
 
     @Transactional
     public RecurringTransactionDTO generateDueTransactions(Long id, User user) {
         RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
+        cacheInvalidation.evictRecurringList(user.getId());
         generateTransactionsForMonth(recurringTransaction, YearMonth.now());
         return recurringTransactionMapper.toDTO(recurringTransaction);
     }
@@ -171,6 +210,9 @@ public class RecurringTransactionService {
         transaction.setRecurringTransaction(recurringTransaction);
 
         transactionRepository.save(transaction);
+        cacheInvalidation.evictMonthlySummary(recurringTransaction.getUser(), transaction.getDateTime());
+        cacheInvalidation.evictTransactionsList(recurringTransaction.getUser().getId());
+        cacheInvalidation.evictRecurringList(recurringTransaction.getUser().getId());
     }
 
     private LocalDate nextMonthlyDate(LocalDate currentDate, int targetDayOfMonth) {

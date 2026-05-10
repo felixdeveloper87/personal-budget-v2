@@ -91,4 +91,48 @@ public class RecurringTransactionDTO {
     public boolean isActive() {
         return active;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setFrequency(RecurringFrequency frequency) {
+        this.frequency = frequency;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public void setNextRunDate(LocalDate nextRunDate) {
+        this.nextRunDate = nextRunDate;
+    }
+
+    public void setDayOfMonth(Integer dayOfMonth) {
+        this.dayOfMonth = dayOfMonth;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

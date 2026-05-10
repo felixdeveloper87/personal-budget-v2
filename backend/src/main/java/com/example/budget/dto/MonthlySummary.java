@@ -17,6 +17,9 @@ public class MonthlySummary {
     public BigDecimal balance;
     public List<CategoryAggregate> byCategory;
 
+    public MonthlySummary() {
+    }
+
     /**
      * Represents aggregated transaction data for a specific category.
      * Contains total income and total expenses for that category in the month.
@@ -25,6 +28,9 @@ public class MonthlySummary {
         public String category;
         public BigDecimal income;
         public BigDecimal expense;
+
+        public CategoryAggregate() {
+        }
 
         public CategoryAggregate(String category, BigDecimal income, BigDecimal expense) {
             this.category = category;

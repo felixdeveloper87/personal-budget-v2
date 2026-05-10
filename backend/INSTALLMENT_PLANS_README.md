@@ -116,12 +116,7 @@ Armazena informações gerais sobre o plano de parcelamento:
 
 ### 1. Migração do Banco de Dados
 
-Execute o script de migração:
-```bash
-psql -U postgres -d personalbudget -f backend/migration-installment-plans.sql
-```
-
-Ou, se estiver usando Hibernate com `spring.jpa.hibernate.ddl-auto=update`, as tabelas serão criadas automaticamente.
+O schema é aplicado pelo **Flyway** ao iniciar o backend (`src/main/resources/db/migration/`). Não é necessário rodar scripts SQL manuais.
 
 ### 2. Criar um Parcelamento (Frontend)
 
