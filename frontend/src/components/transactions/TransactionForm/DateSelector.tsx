@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { Box, Text, Input, HStack, Icon, Button, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { Calendar, Clock, CalendarCheck } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
@@ -16,23 +15,9 @@ interface DateSelectorProps {
  */
 export default function DateSelector({ date, onChange }: DateSelectorProps) {
   const colors = useThemeColors()
-  const inputRef = useRef<HTMLInputElement | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
-  }
-
-  const openDatePicker = () => {
-    const input = inputRef.current
-    if (!input) return
-
-    if (typeof input.showPicker === 'function') {
-      input.showPicker()
-      return
-    }
-
-    input.focus()
-    input.click()
   }
 
   const getQuickDateOptions = () => {
@@ -95,61 +80,78 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
               py={{ base: 3, sm: 4 }}
               align="stretch"
             >
-              <HStack justify="space-between" spacing={3} align="center">
-                <HStack spacing={2.5} minW={0} flex="1">
-                  <Box
-                    as="button"
-                    type="button"
-                    onClick={openDatePicker}
-                    w={{ base: 8, sm: 10 }}
-                    h={{ base: 8, sm: 10 }}
-                    borderRadius="xl"
-                    bg={colors.bgSecondary}
-                    color={colors.accent}
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="center"
-                    flexShrink={0}
-                    cursor="pointer"
-                    _hover={{ bg: colors.border }}
-                    _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
-                  >
-                    <Icon
-                      as={Calendar}
-                      boxSize={{ base: 4, sm: 5 }}
-                      sx={{ '& svg': { display: 'block' } }}
-                    />
-                  </Box>
-                  <Text
-                    fontSize={{ base: 'sm', sm: 'md' }}
-                    fontWeight="600"
-                    color={colors.text.secondary}
-                    lineHeight="1.1"
-                    noOfLines={1}
-                  >
-                    What date?
-                  </Text>
-                </HStack>
+              {/*
+                Mobile Safari/Android: programmatic input.showPicker() / input.click() on a 1px
+                input with pointer-events:none often does not open the native date UI. A full-row
+                invisible input receives the real tap and opens the picker reliably.
+              */}
+              <Box position="relative" minH={{ base: '44px', sm: '40px' }}>
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={handleChange}
+                  position="absolute"
+                  inset={0}
+                  w="100%"
+                  h="100%"
+                  opacity={0}
+                  zIndex={2}
+                  cursor="pointer"
+                  fontSize="16px"
+                  aria-label="Transaction date"
+                  sx={{
+                    '&::-webkit-calendar-picker-indicator': {
+                      position: 'absolute',
+                      inset: 0,
+                      w: '100%',
+                      h: '100%',
+                      opacity: 0,
+                      cursor: 'pointer',
+                    },
+                  }}
+                />
+                <HStack
+                  justify="space-between"
+                  spacing={3}
+                  align="center"
+                  position="relative"
+                  zIndex={1}
+                  pointerEvents="none"
+                  minH={{ base: '44px', sm: '40px' }}
+                >
+                  <HStack spacing={2.5} minW={0} flex="1">
+                    <Box
+                      w={{ base: 8, sm: 10 }}
+                      h={{ base: 8, sm: 10 }}
+                      borderRadius="xl"
+                      bg={colors.bgSecondary}
+                      color={colors.accent}
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      flexShrink={0}
+                    >
+                      <Icon
+                        as={Calendar}
+                        boxSize={{ base: 4, sm: 5 }}
+                        sx={{ '& svg': { display: 'block' } }}
+                      />
+                    </Box>
+                    <Text
+                      fontSize={{ base: 'sm', sm: 'md' }}
+                      fontWeight="600"
+                      color={colors.text.secondary}
+                      lineHeight="1.1"
+                      noOfLines={1}
+                    >
+                      What date?
+                    </Text>
+                  </HStack>
 
-                <Box position="relative" flexShrink={0} minW={{ base: '96px', sm: '116px', md: '128px' }}>
-                  <Input
-                    ref={inputRef}
-                    type="date"
-                    value={date}
-                    onChange={handleChange}
-                    position="absolute"
-                    w="1px"
-                    h="1px"
-                    opacity={0}
-                    pointerEvents="none"
-                    aria-label="Transaction date"
-                  />
                   <Text
-                    as="button"
-                    type="button"
-                    onClick={openDatePicker}
                     display="block"
-                    w="full"
+                    flexShrink={0}
+                    minW={{ base: '96px', sm: '116px', md: '128px' }}
                     fontSize={{ base: 'sm', sm: 'md' }}
                     fontWeight="700"
                     color={colors.text.primary}
@@ -157,15 +159,12 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
                     noOfLines={1}
                     textDecoration="underline"
                     textUnderlineOffset="3px"
-                    cursor="pointer"
                     textAlign="right"
-                    _hover={{ color: colors.accent }}
-                    _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
                   >
                     {new Date(`${date}T00:00:00`).toLocaleDateString('en-GB')}
                   </Text>
-                </Box>
-              </HStack>
+                </HStack>
+              </Box>
 
               <Wrap spacing={2} align="center">
                 {quickDateOptions.map((option) => (
