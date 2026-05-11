@@ -7,12 +7,15 @@ interface LayoutProps {
   children: React.ReactNode
   currentPage?: AppPage
   onPageChange?: (page: AppPage) => void
+  /** Set false for admin-only shell (no marketing footer). */
+  showFooter?: boolean
 }
 
 export default function Layout({
   children,
   currentPage = 'dashboard',
   onPageChange,
+  showFooter = true,
 }: LayoutProps) {
   const handleOpenSettings = () => {
     // TODO: Implement settings modal
@@ -30,7 +33,7 @@ export default function Layout({
         {children}
       </Box>
 
-      <Footer />
+      {showFooter ? <Footer /> : null}
     </Flex>
   )
 }

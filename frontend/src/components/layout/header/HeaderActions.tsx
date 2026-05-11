@@ -7,6 +7,8 @@ import { BRAND } from './brand.config'
 
 interface HeaderActionsProps {
   user?: any
+  /** Admin shell: hide transaction search */
+  hideSearch?: boolean
   onSearchOpen: () => void
   onLogin?: () => void
   onOpenSettings?: () => void
@@ -15,6 +17,7 @@ interface HeaderActionsProps {
 
 export default function HeaderActions({
   user,
+  hideSearch,
   onSearchOpen,
   onLogin,
   onOpenSettings,
@@ -30,7 +33,7 @@ export default function HeaderActions({
 
   return (
     <HStack spacing={2} flexShrink={0}>
-      {user && (
+      {user && !hideSearch && (
         showExpandedSearch ? (
           <SearchTrigger variant="expanded" onOpen={onSearchOpen} />
         ) : (

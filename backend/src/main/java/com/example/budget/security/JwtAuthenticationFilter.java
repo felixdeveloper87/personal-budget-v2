@@ -78,14 +78,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     User user = userRepository.findByEmail(email).orElse(null);
 
                     if (user != null) {
-                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                Collections.emptyList()
-                        );
-                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                        SecurityContextHolder.getContext().setAuthentication(authToken);
-                        logger.info("Authenticated user: {}", email);
+                        if (!user.isApproved()) {
+                            logger.debug("Skipping JWT auth for unapproved user: {}", email);
+                        } else {
+                            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    Collections.emptyList()
+                            );
+                            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                            SecurityContextHolder.getContext().setAuthentication(authToken);
+                            logger.info("Authenticated user: {}", email);
+                        }
                     }
 
                 }

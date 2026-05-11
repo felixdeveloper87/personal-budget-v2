@@ -84,16 +84,30 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
     setLoading(true)
     try {
-      await register({ name: name.trim(), email: email.trim(), password })
-      toast({
-        title: 'Account created',
-        description: "You're all set — welcome aboard.",
-        status: 'success',
-        duration: 2000,
-        isClosable: true,
-        position: 'top',
-        variant: 'subtle',
-      })
+      const outcome = await register({ name: name.trim(), email: email.trim(), password })
+      if (outcome.status === 'pending') {
+        toast({
+          title: 'Registration received',
+          description:
+            outcome.message ??
+            'An administrator must approve your account before you can sign in.',
+          status: 'info',
+          duration: 6000,
+          isClosable: true,
+          position: 'top',
+          variant: 'subtle',
+        })
+      } else {
+        toast({
+          title: 'Account created',
+          description: "You're all set — welcome aboard.",
+          status: 'success',
+          duration: 2000,
+          isClosable: true,
+          position: 'top',
+          variant: 'subtle',
+        })
+      }
     } catch (error: any) {
       const message = error?.message || 'Could not create your account'
       setErrors({ email: message })

@@ -3,6 +3,8 @@ package com.example.budget.service;
 import com.example.budget.dto.AuthResponse;
 import com.example.budget.dto.LoginRequest;
 import com.example.budget.dto.RegisterRequest;
+import com.example.budget.model.UserPlan;
+import com.example.budget.exception.AccountPendingApprovalException;
 import com.example.budget.exception.EmailAlreadyExistsException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.exception.InvalidCredentialsException;
@@ -38,11 +40,10 @@ public class AuthService {
     /**
      * Registers a new user account.
      * 
-     * Validates that the email is not already in use, creates the user with encoded password,
-     * and returns an authentication response with JWT token.
-     * 
+     * Creates a new user with pending approval; no JWT is issued until an administrator approves.
+     *
      * @param request Registration request containing user details
-     * @return AuthResponse with user information and JWT token
+     * @return AuthResponse with {@link AuthResponse#getPendingApproval()} true and no token
      * @throws EmailAlreadyExistsException if the email is already registered
      */
     public AuthResponse register(RegisterRequest request) {
@@ -51,10 +52,18 @@ public class AuthService {
         }
 
         User user = userMapper.toEntity(request);
+        user.setApproved(false);
+        user.setPlan(UserPlan.STANDARD);
+        user.setAdmin(false);
         User savedUser = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(savedUser.getEmail(), savedUser.getId());
-        return userMapper.toAuthResponse(savedUser, token);
+        AuthResponse response = new AuthResponse();
+        response.setPendingApproval(true);
+        response.setEmail(savedUser.getEmail());
+        response.setName(savedUser.getName());
+        response.setUserId(savedUser.getId());
+        response.setApprovalMessage("Your account will be activated after an administrator approves it.");
+        return response;
     }
 
     /**
@@ -65,6 +74,7 @@ public class AuthService {
      * @param request Login request containing email and password
      * @return AuthResponse with user information and JWT token
      * @throws InvalidCredentialsException if email or password is incorrect
+     * @throws AccountPendingApprovalException if the account has not been approved yet
      */
     public AuthResponse login(LoginRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
@@ -74,6 +84,10 @@ public class AuthService {
         }
 
         User user = userOpt.get();
+        if (!user.isApproved()) {
+            throw new AccountPendingApprovalException();
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
         return userMapper.toAuthResponse(user, token);

@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
 import ChartsPage from './pages/ChartsPage'
 import CategoriesPage from './pages/CategoriesPage'
+import AdminDashboardPage from './pages/AdminDashboardPage'
 import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
@@ -18,12 +19,25 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   transactions: () => <AllTransactionsPage />,
   categories: () => <CategoriesPage />,
   charts: () => <ChartsPage />,
+  admin: ({ onPageChange }) => <AdminDashboardPage onPageChange={onPageChange} />,
 }
 
 function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
   const [currentPage, setCurrentPage] = useState<AppPage>('dashboard')
+
+  useEffect(() => {
+    if (user?.admin) {
+      setCurrentPage('admin')
+    }
+  }, [user?.admin, user?.id])
+
+  useEffect(() => {
+    if (user && currentPage === 'admin' && !user.admin) {
+      setCurrentPage('dashboard')
+    }
+  }, [user, currentPage])
 
   // Reset showAuth quando o usuário faz logout ?(quando user se torna null)
   useEffect(() => {
@@ -55,6 +69,18 @@ function AppContent() {
 
   // Se usuário está logado, mostrar página atual
   if (user) {
+    if (user.admin) {
+      return (
+        <Layout
+          currentPage="admin"
+          onPageChange={setCurrentPage}
+          showFooter={false}
+        >
+          <AdminDashboardPage onPageChange={setCurrentPage} />
+        </Layout>
+      )
+    }
+
     const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>

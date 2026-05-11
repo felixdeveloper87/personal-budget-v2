@@ -3,10 +3,11 @@ import {
   Layers,
   LayoutDashboard,
   ReceiptText,
+  Shield,
   type LucideIcon,
 } from '../../ui/icons'
 
-export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'charts'
+export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'charts' | 'admin'
 
 export interface NavItem {
   id: AppPage
@@ -46,6 +47,14 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Visual breakdown by period',
   },
 ]
+
+export const ADMIN_NAV_ITEM: Readonly<NavItem> = {
+  id: 'admin',
+  label: 'Admin',
+  shortLabel: 'Admin',
+  icon: Shield,
+  description: 'User approvals and plans',
+}
 
 export const LANDING_SECTIONS = [
   { id: 'features', label: 'Features' },

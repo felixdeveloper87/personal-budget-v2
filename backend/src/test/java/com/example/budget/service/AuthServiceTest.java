@@ -3,11 +3,12 @@ package com.example.budget.service;
 import com.example.budget.dto.AuthResponse;
 import com.example.budget.dto.LoginRequest;
 import com.example.budget.dto.RegisterRequest;
+import com.example.budget.exception.AccountPendingApprovalException;
 import com.example.budget.exception.EmailAlreadyExistsException;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.exception.InvalidCredentialsException;
 import com.example.budget.mapper.UserMapper;
 import com.example.budget.model.User;
+import com.example.budget.model.UserPlan;
 import com.example.budget.repository.UserRepository;
 import com.example.budget.util.JwtUtil;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -55,7 +55,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void register_persistsAndReturnsToken() {
+    void register_persistsPendingAndDoesNotIssueJwt() {
         RegisterRequest request = new RegisterRequest("Alice", "a@b.com", "secret12");
         when(userRepository.existsByEmail("a@b.com")).thenReturn(false);
 
@@ -67,17 +67,20 @@ class AuthServiceTest {
         saved.setId(7L);
         saved.setName("Alice");
         saved.setEmail("a@b.com");
-        when(userRepository.save(mapped)).thenReturn(saved);
-
-        when(jwtUtil.generateToken("a@b.com", 7L)).thenReturn("jwt-token");
-        AuthResponse expected = new AuthResponse(7L, "Alice", "a@b.com", "jwt-token");
-        when(userMapper.toAuthResponse(saved, "jwt-token")).thenReturn(expected);
+        when(userRepository.save(mapped)).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
+            assertThat(u.isApproved()).isFalse();
+            assertThat(u.getPlan()).isEqualTo(UserPlan.STANDARD);
+            assertThat(u.isAdmin()).isFalse();
+            return saved;
+        });
 
         AuthResponse result = authService.register(request);
 
-        assertThat(result).isSameAs(expected);
-        verify(userRepository).save(mapped);
-        verify(jwtUtil).generateToken("a@b.com", 7L);
+        assertThat(result.getPendingApproval()).isTrue();
+        assertThat(result.getToken()).isNull();
+        assertThat(result.getEmail()).isEqualTo("a@b.com");
+        verify(jwtUtil, never()).generateToken(any(), any());
     }
 
     @Test
@@ -86,7 +89,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("x@y.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(InvalidCredentialsException.class);
+                .isInstanceOf(com.example.budget.exception.InvalidCredentialsException.class);
 
         verify(passwordEncoder, never()).matches(any(), any());
     }
@@ -101,7 +104,25 @@ class AuthServiceTest {
         when(passwordEncoder.matches("wrong", "encoded-hash")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.login(request))
-                .isInstanceOf(InvalidCredentialsException.class);
+                .isInstanceOf(com.example.budget.exception.InvalidCredentialsException.class);
+
+        verify(jwtUtil, never()).generateToken(any(), any());
+    }
+
+    @Test
+    void login_throwsWhenAccountNotApproved() {
+        LoginRequest request = new LoginRequest("x@y.com", "right");
+        User user = new User();
+        user.setId(2L);
+        user.setName("Bob");
+        user.setEmail("x@y.com");
+        user.setPassword("encoded-hash");
+        user.setApproved(false);
+        when(userRepository.findByEmail("x@y.com")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("right", "encoded-hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> authService.login(request))
+                .isInstanceOf(AccountPendingApprovalException.class);
 
         verify(jwtUtil, never()).generateToken(any(), any());
     }
@@ -114,11 +135,14 @@ class AuthServiceTest {
         user.setName("Bob");
         user.setEmail("x@y.com");
         user.setPassword("encoded-hash");
+        user.setApproved(true);
+        user.setPlan(UserPlan.STANDARD);
+        user.setAdmin(false);
         when(userRepository.findByEmail("x@y.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("right", "encoded-hash")).thenReturn(true);
         when(jwtUtil.generateToken("x@y.com", 2L)).thenReturn("token2");
 
-        AuthResponse expected = new AuthResponse(2L, "Bob", "x@y.com", "token2");
+        AuthResponse expected = new AuthResponse(2L, "Bob", "x@y.com", "token2", UserPlan.STANDARD, false);
         when(userMapper.toAuthResponse(user, "token2")).thenReturn(expected);
 
         assertThat(authService.login(request)).isSameAs(expected);

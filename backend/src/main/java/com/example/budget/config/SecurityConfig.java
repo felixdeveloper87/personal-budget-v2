@@ -137,6 +137,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/summary/**").authenticated()
                 .requestMatchers("/api/installment-plans/**").authenticated()
                 .requestMatchers("/api/recurring-transactions/**").authenticated()
+                .requestMatchers("/api/admin/**").authenticated()
 
                 // All other requests require authentication
                 .anyRequest().authenticated()

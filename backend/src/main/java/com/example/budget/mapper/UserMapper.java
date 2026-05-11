@@ -54,7 +54,9 @@ public class UserMapper {
             user.getId(),
             user.getName(),
             user.getEmail(),
-            token
+            token,
+            user.getPlan(),
+            user.isAdmin()
         );
     }
 }

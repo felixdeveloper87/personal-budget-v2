@@ -43,11 +43,26 @@ export interface MonthlySummary {
 }
 
 // Usuário autenticado (AuthResponse do backend)
+export type UserPlan = 'STANDARD' | 'PREMIUM'
+
 export interface User {
   id: number
   name: string
   email: string
   token: string
+  plan: UserPlan
+  /** Painel admin (definido no backend / banco). */
+  admin: boolean
+}
+
+export interface AdminUserRow {
+  id: number
+  email: string
+  name: string
+  createdAt: string
+  approved: boolean
+  admin: boolean
+  plan: UserPlan
 }
 
 // Auth Requests

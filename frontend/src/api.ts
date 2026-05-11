@@ -3,12 +3,14 @@ import {
   Transaction,
   MonthlySummary,
   User,
+  UserPlan,
   LoginRequest,
   RegisterRequest,
   InstallmentPlan,
   CreateInstallmentPlanRequest,
   RecurringTransaction,
-  CreateRecurringTransactionRequest
+  CreateRecurringTransactionRequest,
+  AdminUserRow,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 
@@ -19,13 +21,22 @@ function mapAuthToUser(payload: Record<string, unknown>): User {
       : typeof payload.id === 'number'
         ? payload.id
         : 0
+  const planRaw = payload.plan
+  const plan: UserPlan =
+    planRaw === 'PREMIUM' || planRaw === 'STANDARD' ? planRaw : 'STANDARD'
   return {
     id: userId,
     name: String(payload.name ?? ''),
     email: String(payload.email ?? ''),
     token: String(payload.token ?? ''),
+    plan,
+    admin: Boolean(payload.admin),
   }
 }
+
+export type RegisterOutcome =
+  | { status: 'pending'; message?: string }
+  | { status: 'active'; user: User }
 
 // ----------------------------------------------------
 // 🌐 Create main Axios instance
@@ -88,10 +99,39 @@ export async function login(credentials: LoginRequest): Promise<User> {
   return mapAuthToUser(data)
 }
 
-// Register → POST /auth/register
-export async function register(payload: RegisterRequest): Promise<User> {
+// Register → POST /auth/register (pendente de aprovação admin = sem token)
+export async function register(payload: RegisterRequest): Promise<RegisterOutcome> {
   const { data } = await api.post<Record<string, unknown>>('/auth/register', payload)
-  return mapAuthToUser(data)
+  if (data.pendingApproval === true) {
+    return {
+      status: 'pending',
+      message: typeof data.approvalMessage === 'string' ? data.approvalMessage : undefined,
+    }
+  }
+  return { status: 'active', user: mapAuthToUser(data) }
+}
+
+// ----------------------------------------------------
+// ADMIN
+// ----------------------------------------------------
+
+export async function listAdminUsers(): Promise<AdminUserRow[]> {
+  const { data } = await api.get<AdminUserRow[]>('/admin/users')
+  return data
+}
+
+export async function approveAdminUser(id: number): Promise<AdminUserRow> {
+  const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/approve`)
+  return data
+}
+
+export async function updateAdminUserPlan(id: number, plan: UserPlan): Promise<AdminUserRow> {
+  const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/plan`, { plan })
+  return data
+}
+
+export async function deleteAdminUser(id: number): Promise<void> {
+  await api.delete(`/admin/users/${id}`)
 }
 
 // ----------------------------------------------------

@@ -1,5 +1,5 @@
 import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
@@ -8,6 +8,7 @@ import LandingNav from './LandingNav'
 import Logo from './Logo'
 import NavBar from './NavBar'
 import type { AppPage } from './navigation.config'
+import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
 interface HeaderProps {
   onOpenSettings?: () => void
@@ -24,6 +25,11 @@ export default function Header({
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const { runSearch } = useSearch()
+  const navItems = useMemo(
+    () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
+    [user?.admin]
+  )
+  const isAdminOnly = Boolean(user?.admin)
   const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useDisclosure()
   const [isScrolled, setIsScrolled] = useState(false)
 
@@ -34,9 +40,9 @@ export default function Header({
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  // Cmd/Ctrl+K to open search
+  // Cmd/Ctrl+K to open search (not for admin-only accounts)
   useEffect(() => {
-    if (!user) return
+    if (!user || isAdminOnly) return
     const onKey = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toLowerCase().includes('mac')
       const mod = isMac ? e.metaKey : e.ctrlKey
@@ -47,7 +53,7 @@ export default function Header({
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [user, openSearch])
+  }, [user, isAdminOnly, openSearch])
 
   const bg = useColorModeValue(
     isScrolled ? 'rgba(255, 255, 255, 0.78)' : 'rgba(255, 255, 255, 0.62)',
@@ -133,6 +139,7 @@ export default function Header({
               >
                 <NavBar
                   variant="desktop"
+                  items={navItems}
                   currentPage={currentPage}
                   onPageChange={onPageChange}
                 />
@@ -144,6 +151,7 @@ export default function Header({
 
             <HeaderActions
               user={user}
+              hideSearch={isAdminOnly}
               onSearchOpen={openSearch}
               onLogin={onLogin}
               onOpenSettings={onOpenSettings}
@@ -157,6 +165,7 @@ export default function Header({
             <Box display={{ base: 'block', md: 'none' }} pb={3} pt={1}>
               <NavBar
                 variant="mobile"
+                items={navItems}
                 currentPage={currentPage}
                 onPageChange={onPageChange}
               />
@@ -180,7 +189,7 @@ export default function Header({
         />
       </Box>
 
-      {user && (
+      {user && !isAdminOnly && (
         <SearchModal
           isOpen={isSearchOpen}
           onClose={closeSearch}

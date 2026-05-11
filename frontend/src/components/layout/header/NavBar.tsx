@@ -14,6 +14,7 @@ import { NAV_ITEMS, type AppPage, type NavItem } from './navigation.config'
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
   currentPage: AppPage
   onPageChange?: (page: AppPage) => void
+  items?: ReadonlyArray<NavItem>
   /**
    * `desktop` — pill container, icon + full label, content-sized items.
    * `mobile`  — full-width segmented bar, icon + short label, equal columns.
@@ -30,6 +31,7 @@ interface IndicatorRect {
 export default function NavBar({
   currentPage,
   onPageChange,
+  items = NAV_ITEMS,
   variant = 'desktop',
   ...stackProps
 }: NavBarProps) {
@@ -59,12 +61,7 @@ export default function NavBar({
   )
 
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const itemRefs = useRef<Record<AppPage, HTMLButtonElement | null>>({
-    dashboard: null,
-    transactions: null,
-    categories: null,
-    charts: null,
-  })
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   const [indicator, setIndicator] = useState<IndicatorRect>({ left: 0, width: 0, ready: false })
 
@@ -136,7 +133,7 @@ export default function NavBar({
         pointerEvents="none"
       />
 
-      {NAV_ITEMS.map((item) => (
+      {items.map((item) => (
         <NavBarItem
           key={item.id}
           item={item}

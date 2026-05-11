@@ -8,13 +8,13 @@ import {
   useMemo,
 } from 'react'
 import { User, LoginRequest, RegisterRequest } from '../types'
-import { login, register } from '../api'
+import { login, register, type RegisterOutcome } from '../api'
 import { isJwtExpired, AUTH_SESSION_INVALID_EVENT } from '../utils/jwtExpiry'
 
 interface AuthContextType {
   user: User | null
   login: (credentials: LoginRequest) => Promise<void>
-  register: (data: RegisterRequest) => Promise<void>
+  register: (data: RegisterRequest) => Promise<RegisterOutcome>
   logout: () => void
   loading: boolean
 }
@@ -35,6 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem('user')
           setUser(null)
         } else {
+          if (parsed && parsed.plan !== 'PREMIUM' && parsed.plan !== 'STANDARD') {
+            parsed.plan = 'STANDARD'
+          }
+          if (parsed && typeof parsed.admin !== 'boolean') {
+            parsed.admin = false
+          }
           setUser(parsed)
         }
       } catch {
@@ -71,13 +77,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // --- Register handler (creates user + stores locally) ---
   const handleRegister = useCallback(async (data: RegisterRequest) => {
-    try {
-      const userData = await register(data)
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-    } catch (error: unknown) {
-      throw error
+    const outcome = await register(data)
+    if (outcome.status === 'active') {
+      setUser(outcome.user)
+      localStorage.setItem('user', JSON.stringify(outcome.user))
     }
+    return outcome
   }, [])
 
   // --- Logout: clear session + state ---

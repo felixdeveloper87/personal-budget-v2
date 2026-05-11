@@ -20,10 +20,17 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     /**
+     * Login rejected: account exists but is not approved yet.
+     */
+    @ExceptionHandler(AccountPendingApprovalException.class)
+    public ResponseEntity<Map<String, String>> handleAccountPending(AccountPendingApprovalException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    /**
      * Handles EntityNotFoundException when a requested entity is not found.
-     * 
-     * @param ex The exception containing the error message
-     * @return ResponseEntity with HTTP 404 NOT FOUND status and error message
      */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEntityNotFound(EntityNotFoundException ex) {

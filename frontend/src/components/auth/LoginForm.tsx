@@ -9,6 +9,7 @@ import {
   useColorModeValue,
   useToast,
 } from '@chakra-ui/react'
+import axios from 'axios'
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
@@ -78,8 +79,12 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         position: 'top',
         variant: 'subtle',
       })
-    } catch (error: any) {
-      const message = error?.message || 'Invalid email or password'
+    } catch (error: unknown) {
+      let message = 'Invalid email or password'
+      if (axios.isAxiosError(error)) {
+        const body = error.response?.data as { error?: string } | undefined
+        if (body?.error) message = body.error
+      }
       setErrors({ password: message })
       toast({
         title: 'Sign in failed',

@@ -32,6 +32,18 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    /** {@code false} until an administrator approves the account (new signups). */
+    @Column(nullable = false)
+    private boolean approved = false;
+
+    /** Application administrator; may access {@code /api/admin/**} endpoints. */
+    @Column(nullable = false)
+    private boolean admin = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserPlan plan = UserPlan.STANDARD;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
@@ -87,6 +99,30 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
+    }
+
+    public UserPlan getPlan() {
+        return plan;
+    }
+
+    public void setPlan(UserPlan plan) {
+        this.plan = plan;
     }
 
     public List<Transaction> getTransactions() {
