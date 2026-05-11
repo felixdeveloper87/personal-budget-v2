@@ -10,6 +10,7 @@ import com.example.budget.mapper.UserMapper;
 import com.example.budget.model.User;
 import com.example.budget.model.UserPlan;
 import com.example.budget.repository.UserRepository;
+import com.example.budget.security.GoogleIdentityVerifier;
 import com.example.budget.util.JwtUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,10 +21,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +42,8 @@ class AuthServiceTest {
     private PasswordEncoder passwordEncoder;
     @Mock
     private JwtUtil jwtUtil;
+    @Mock
+    private GoogleIdentityVerifier googleIdentityVerifier;
 
     @InjectMocks
     private AuthService authService;
@@ -165,5 +171,71 @@ class AuthServiceTest {
         when(userRepository.findById(3L)).thenReturn(Optional.of(user));
 
         assertThat(authService.getUserById(3L)).isSameAs(user);
+    }
+
+    @Test
+    void loginWithGoogle_newUser_pendingNoJwt() throws Exception {
+        when(googleIdentityVerifier.isEnabled()).thenReturn(true);
+        GoogleIdToken.Payload payload = mock(GoogleIdToken.Payload.class);
+        when(payload.getEmail()).thenReturn("new@gmail.com");
+        when(payload.getEmailVerified()).thenReturn(true);
+        when(payload.get("name")).thenReturn("New User");
+        when(googleIdentityVerifier.verify("id-token")).thenReturn(payload);
+        when(userRepository.findByEmailIgnoreCase("new@gmail.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(any())).thenReturn("hash");
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
+            User u = invocation.getArgument(0);
+            assertThat(u.isApproved()).isFalse();
+            u.setId(9L);
+            return u;
+        });
+
+        AuthResponse r = authService.loginWithGoogle("id-token");
+
+        assertThat(r.getPendingApproval()).isTrue();
+        assertThat(r.getToken()).isNull();
+        assertThat(r.getEmail()).isEqualTo("new@gmail.com");
+        assertThat(r.getUserId()).isEqualTo(9L);
+        verify(jwtUtil, never()).generateToken(any(), any());
+    }
+
+    @Test
+    void loginWithGoogle_existingApproved_issuesJwt() throws Exception {
+        when(googleIdentityVerifier.isEnabled()).thenReturn(true);
+        GoogleIdToken.Payload payload = mock(GoogleIdToken.Payload.class);
+        when(payload.getEmail()).thenReturn("ok@gmail.com");
+        when(payload.getEmailVerified()).thenReturn(true);
+        when(payload.get("name")).thenReturn("Ok");
+        when(googleIdentityVerifier.verify("t")).thenReturn(payload);
+        User user = new User();
+        user.setId(3L);
+        user.setEmail("ok@gmail.com");
+        user.setName("Ok");
+        user.setApproved(true);
+        user.setPlan(UserPlan.STANDARD);
+        user.setAdmin(false);
+        when(userRepository.findByEmailIgnoreCase("ok@gmail.com")).thenReturn(Optional.of(user));
+        when(jwtUtil.generateToken("ok@gmail.com", 3L)).thenReturn("jwt");
+        AuthResponse expected = new AuthResponse(3L, "Ok", "ok@gmail.com", "jwt", UserPlan.STANDARD, false);
+        when(userMapper.toAuthResponse(user, "jwt")).thenReturn(expected);
+
+        assertThat(authService.loginWithGoogle("t")).isSameAs(expected);
+    }
+
+    @Test
+    void loginWithGoogle_existingUnapproved_throws() throws Exception {
+        when(googleIdentityVerifier.isEnabled()).thenReturn(true);
+        GoogleIdToken.Payload payload = mock(GoogleIdToken.Payload.class);
+        when(payload.getEmail()).thenReturn("wait@gmail.com");
+        when(payload.getEmailVerified()).thenReturn(true);
+        when(googleIdentityVerifier.verify("t")).thenReturn(payload);
+        User user = new User();
+        user.setApproved(false);
+        when(userRepository.findByEmailIgnoreCase("wait@gmail.com")).thenReturn(Optional.of(user));
+
+        assertThatThrownBy(() -> authService.loginWithGoogle("t"))
+                .isInstanceOf(AccountPendingApprovalException.class);
+
+        verify(jwtUtil, never()).generateToken(any(), any());
     }
 }

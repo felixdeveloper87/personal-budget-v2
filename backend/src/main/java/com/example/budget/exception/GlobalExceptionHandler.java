@@ -29,6 +29,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    @ExceptionHandler(GoogleOAuthNotConfiguredException.class)
+    public ResponseEntity<Map<String, String>> handleGoogleOAuthNotConfigured(GoogleOAuthNotConfiguredException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+    }
+
     /**
      * Handles EntityNotFoundException when a requested entity is not found.
      */

@@ -13,6 +13,7 @@ import {
 import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'
 
 interface RegisterFormProps {
@@ -126,8 +127,10 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <Box as="form" onSubmit={handleSubmit} noValidate>
-      <VStack spacing={4} align="stretch">
+    <VStack spacing={4} align="stretch">
+      <GoogleSignInSection />
+      <Box as="form" onSubmit={handleSubmit} noValidate>
+        <VStack spacing={4} align="stretch">
         <AuthField
           ref={nameRef}
           label="Name"
@@ -264,7 +267,8 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             Sign in
           </Button>
         </Text>
-      </VStack>
-    </Box>
+        </VStack>
+      </Box>
+    </VStack>
   )
 }

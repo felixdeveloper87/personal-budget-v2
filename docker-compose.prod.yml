@@ -48,6 +48,7 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
     depends_on:
       db:
         condition: service_healthy

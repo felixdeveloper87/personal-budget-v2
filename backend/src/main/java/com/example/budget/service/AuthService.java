@@ -3,19 +3,25 @@ package com.example.budget.service;
 import com.example.budget.dto.AuthResponse;
 import com.example.budget.dto.LoginRequest;
 import com.example.budget.dto.RegisterRequest;
-import com.example.budget.model.UserPlan;
 import com.example.budget.exception.AccountPendingApprovalException;
 import com.example.budget.exception.EmailAlreadyExistsException;
 import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.exception.GoogleOAuthNotConfiguredException;
 import com.example.budget.exception.InvalidCredentialsException;
 import com.example.budget.mapper.UserMapper;
 import com.example.budget.model.User;
+import com.example.budget.model.UserPlan;
 import com.example.budget.repository.UserRepository;
+import com.example.budget.security.GoogleIdentityVerifier;
 import com.example.budget.util.JwtUtil;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for authentication operations.
@@ -29,12 +35,15 @@ public class AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final GoogleIdentityVerifier googleIdentityVerifier;
 
-    public AuthService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public AuthService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder,
+                       JwtUtil jwtUtil, GoogleIdentityVerifier googleIdentityVerifier) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.googleIdentityVerifier = googleIdentityVerifier;
     }
 
     /**
@@ -91,6 +100,57 @@ public class AuthService {
         String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
         return userMapper.toAuthResponse(user, token);
+    }
+
+    /**
+     * Sign-in or sign-up using a Google ID token (verified audience = Web client ID).
+     * New users are created pending approval, same as {@link #register(RegisterRequest)}.
+     */
+    public AuthResponse loginWithGoogle(String idToken) throws GeneralSecurityException, IOException {
+        if (!googleIdentityVerifier.isEnabled()) {
+            throw new GoogleOAuthNotConfiguredException();
+        }
+        GoogleIdToken.Payload payload = googleIdentityVerifier.verify(idToken);
+        if (payload == null) {
+            throw new IllegalArgumentException("Invalid or expired Google credential.");
+        }
+        String email = payload.getEmail();
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Google account has no email address.");
+        }
+        if (Boolean.FALSE.equals(payload.getEmailVerified())) {
+            throw new IllegalArgumentException("Google email must be verified.");
+        }
+        String rawName = (String) payload.get("name");
+        String name = (rawName != null && !rawName.isBlank()) ? rawName.trim() : email.substring(0, email.indexOf('@'));
+
+        String normalized = email.toLowerCase();
+        Optional<User> existing = userRepository.findByEmailIgnoreCase(normalized);
+        if (existing.isPresent()) {
+            User user = existing.get();
+            if (!user.isApproved()) {
+                throw new AccountPendingApprovalException();
+            }
+            String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+            return userMapper.toAuthResponse(user, token);
+        }
+
+        User user = new User();
+        user.setEmail(normalized);
+        user.setName(name);
+        user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+        user.setApproved(false);
+        user.setPlan(UserPlan.STANDARD);
+        user.setAdmin(false);
+        User saved = userRepository.save(user);
+
+        AuthResponse response = new AuthResponse();
+        response.setPendingApproval(true);
+        response.setEmail(saved.getEmail());
+        response.setName(saved.getName());
+        response.setUserId(saved.getId());
+        response.setApprovalMessage("Your account will be activated after an administrator approves it.");
+        return response;
     }
 
     /**

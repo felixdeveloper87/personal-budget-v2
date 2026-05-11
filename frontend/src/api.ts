@@ -79,7 +79,9 @@ api.interceptors.response.use(
       const url = String(error.config?.url ?? '')
       // Wrong password on login returns 401 — must not wipe an existing session
       const isPublicAuthAttempt =
-        url.includes('/auth/login') || url.includes('/auth/register')
+        url.includes('/auth/login') ||
+        url.includes('/auth/register') ||
+        url.includes('/auth/google')
       if (!isPublicAuthAttempt) {
         localStorage.removeItem('user')
         window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT))
@@ -97,6 +99,18 @@ api.interceptors.response.use(
 export async function login(credentials: LoginRequest): Promise<User> {
   const { data } = await api.post<Record<string, unknown>>('/auth/login', credentials)
   return mapAuthToUser(data)
+}
+
+/** Google GIS ID token → app JWT, or pending approval for new users (same as register). */
+export async function loginWithGoogle(idToken: string): Promise<RegisterOutcome> {
+  const { data } = await api.post<Record<string, unknown>>('/auth/google', { idToken })
+  if (data.pendingApproval === true) {
+    return {
+      status: 'pending',
+      message: typeof data.approvalMessage === 'string' ? data.approvalMessage : undefined,
+    }
+  }
+  return { status: 'active', user: mapAuthToUser(data) }
 }
 
 // Register → POST /auth/register (pendente de aprovação admin = sem token)

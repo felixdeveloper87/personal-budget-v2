@@ -6,15 +6,17 @@ import theme from './theme'
 import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
 
+const root = (
+  <ChakraProvider theme={theme}>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <AuthProvider>
+      <SearchProvider>
+        <App />
+      </SearchProvider>
+    </AuthProvider>
+  </ChakraProvider>
+)
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <ChakraProvider theme={theme}>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-      <AuthProvider>
-        <SearchProvider>
-          <App />
-        </SearchProvider>
-      </AuthProvider>
-    </ChakraProvider>
-  </React.StrictMode>
+  <React.StrictMode>{root}</React.StrictMode>
 )

@@ -13,6 +13,7 @@ import axios from 'axios'
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX } from './auth.constants'
 
 interface LoginFormProps {
@@ -101,8 +102,10 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   }
 
   return (
-    <Box as="form" onSubmit={handleSubmit} noValidate>
-      <VStack spacing={4} align="stretch">
+    <VStack spacing={4} align="stretch">
+      <GoogleSignInSection />
+      <Box as="form" onSubmit={handleSubmit} noValidate>
+        <VStack spacing={4} align="stretch">
         <AuthField
           ref={emailRef}
           label="Email"
@@ -188,7 +191,8 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             Create one
           </Button>
         </Text>
-      </VStack>
-    </Box>
+        </VStack>
+      </Box>
+    </VStack>
   )
 }
