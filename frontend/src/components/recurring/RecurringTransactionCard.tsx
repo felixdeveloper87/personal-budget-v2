@@ -20,7 +20,6 @@ import {
   Tooltip,
   useColorModeValue,
   useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react'
 import { AlertTriangle, CalendarClock, Check, Pencil, RefreshCw, Trash2, TrendingUp, TrendingDown } from '../ui/icons'
@@ -30,6 +29,7 @@ import {
   updateRecurringTransactionAmount,
 } from '../../api'
 import { RecurringTransaction } from '../../types'
+import { ToastService } from '../../services/toast'
 
 interface RecurringTransactionCardProps {
   recurringTransaction: RecurringTransaction
@@ -49,7 +49,6 @@ export default function RecurringTransactionCard({
   recurringTransaction,
   onChanged,
 }: RecurringTransactionCardProps) {
-  const toast = useToast()
   const [isCancelling, setIsCancelling] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [isSavingAmount, setIsSavingAmount] = useState(false)
@@ -88,18 +87,17 @@ export default function RecurringTransactionCard({
     setIsGenerating(true)
     try {
       await generateDueRecurringTransactions(recurringTransaction.id)
-      toast({
+      ToastService.success({
         title: 'Fixed payment synced',
-        status: 'success',
         duration: 2000,
+        dedupeKey: `recurring-synced:${recurringTransaction.id}`,
       })
       await Promise.resolve(onChanged())
-    } catch (err: any) {
-      toast({
-        title: 'Error syncing fixed payment',
-        description: err?.message || 'Please try again',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not sync fixed payment',
         duration: 3000,
+        dedupeKey: `recurring-sync-failed:${recurringTransaction.id}`,
       })
     } finally {
       setIsGenerating(false)
@@ -110,19 +108,18 @@ export default function RecurringTransactionCard({
     setIsCancelling(true)
     try {
       await cancelRecurringTransaction(recurringTransaction.id)
-      toast({
+      ToastService.success({
         title: 'Fixed payment cancelled',
-        status: 'success',
         duration: 2000,
+        dedupeKey: `recurring-cancelled:${recurringTransaction.id}`,
       })
       await Promise.resolve(onChanged())
       onClose()
-    } catch (err: any) {
-      toast({
-        title: 'Error cancelling fixed payment',
-        description: err?.message || 'Please try again',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not cancel fixed payment',
         duration: 3000,
+        dedupeKey: `recurring-cancel-failed:${recurringTransaction.id}`,
       })
     } finally {
       setIsCancelling(false)
@@ -132,10 +129,10 @@ export default function RecurringTransactionCard({
   const handleSaveAmount = async () => {
     const nextAmount = Number(draftAmount)
     if (nextAmount <= 0 || Number.isNaN(nextAmount)) {
-      toast({
+      ToastService.warning({
         title: 'Enter a valid amount',
-        status: 'warning',
         duration: 2500,
+        dedupeKey: `recurring-invalid-amount:${recurringTransaction.id}`,
       })
       return
     }
@@ -143,20 +140,19 @@ export default function RecurringTransactionCard({
     setIsSavingAmount(true)
     try {
       await updateRecurringTransactionAmount(recurringTransaction.id, nextAmount)
-      toast({
+      ToastService.success({
         title: 'Amount updated',
         description: 'Future transactions will use the new value.',
-        status: 'success',
         duration: 2500,
+        dedupeKey: `recurring-amount-updated:${recurringTransaction.id}`,
       })
       setIsEditingAmount(false)
       await Promise.resolve(onChanged())
-    } catch (err: any) {
-      toast({
-        title: 'Error updating amount',
-        description: err?.response?.data?.error || err?.message || 'Please try again',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not update amount',
         duration: 3000,
+        dedupeKey: `recurring-amount-update-failed:${recurringTransaction.id}`,
       })
     } finally {
       setIsSavingAmount(false)

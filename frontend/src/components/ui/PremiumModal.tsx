@@ -19,7 +19,7 @@ export interface PremiumModalProps extends Omit<ModalProps, 'children'> {
     contentProps?: any
 }
 
-const MotionModalContent = motion(ModalContent)
+const MotionModalContent = motion.create(ModalContent)
 
 export default function PremiumModal({
     isOpen,

@@ -1,5 +1,5 @@
 import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
 import ChartsPage from './pages/ChartsPage'
@@ -39,10 +39,8 @@ function AppContent() {
     }
   }, [user, currentPage])
 
-  // Reset showAuth quando o usuário faz logout ?(quando user se torna null)
   useEffect(() => {
     if (!user && !loading) {
-      console.log('User is null and not loading, resetting showAuth to false')
       setShowAuth(false)
     }
   }, [user, loading])
@@ -115,9 +113,5 @@ function AppContent() {
 }
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
-  )
+  return <AppContent />
 }

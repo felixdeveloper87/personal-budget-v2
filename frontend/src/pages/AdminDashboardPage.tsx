@@ -27,7 +27,6 @@ import {
   Tr,
   useColorModeValue,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { Shield, Trash2, X } from '../components/ui/icons'
 import { useAuth } from '../contexts/AuthContext'
@@ -39,6 +38,7 @@ import {
 } from '../api'
 import type { AdminUserRow, UserPlan } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
+import { ToastService } from '../services/toast'
 
 interface AdminDashboardPageProps {
   onPageChange?: (page: AppPage) => void
@@ -46,7 +46,6 @@ interface AdminDashboardPageProps {
 
 export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageProps) {
   const { user } = useAuth()
-  const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [rows, setRows] = useState<AdminUserRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -67,18 +66,16 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       setRows(data)
     } catch {
       setError('Could not load users.')
-      toast({
+      ToastService.error({
         title: 'Failed to load',
         description: 'Could not fetch user list.',
-        status: 'error',
         duration: 4000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: 'admin-users-load-failed',
       })
     } finally {
       setLoading(false)
     }
-  }, [toast, user?.admin])
+  }, [user?.admin])
 
   useEffect(() => {
     load()
@@ -107,23 +104,19 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     try {
       await deleteAdminUser(id)
       setRows((prev) => prev.filter((r) => r.id !== id))
-      toast({
+      ToastService.success({
         title: wasPending ? 'Registration rejected' : 'User deleted',
         description: wasPending
           ? 'That sign-up request was removed.'
           : 'The account and its data were removed.',
-        status: 'success',
         duration: 3500,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-user-deleted:${id}`,
       })
     } catch {
-      toast({
+      ToastService.error({
         title: wasPending ? 'Reject failed' : 'Delete failed',
-        status: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-user-delete-failed:${id}`,
       })
     } finally {
       closeRemoveDialog()
@@ -134,21 +127,17 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     try {
       const updated = await approveAdminUser(id)
       setRows((prev) => prev.map((r) => (r.id === id ? updated : r)))
-      toast({
+      ToastService.success({
         title: 'User approved',
         description: 'They can sign in now.',
-        status: 'success',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-user-approved:${id}`,
       })
     } catch {
-      toast({
+      ToastService.error({
         title: 'Approve failed',
-        status: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-user-approve-failed:${id}`,
       })
     }
   }
@@ -157,20 +146,16 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     try {
       const updated = await updateAdminUserPlan(id, plan)
       setRows((prev) => prev.map((r) => (r.id === id ? updated : r)))
-      toast({
+      ToastService.success({
         title: 'Plan updated',
-        status: 'success',
         duration: 2000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-plan-updated:${id}`,
       })
     } catch {
-      toast({
+      ToastService.error({
         title: 'Could not update plan',
-        status: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
+        dedupeKey: `admin-plan-update-failed:${id}`,
       })
     }
   }

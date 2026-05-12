@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { RecurringTransaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'
 import { RecurringTransactionsModal } from '../components/recurring'
+import { ToastService } from '../services/toast'
 
 interface RecurringTransactionsSectionProps {
   onRefresh?: () => void | Promise<void>
@@ -38,6 +39,10 @@ export default function RecurringTransactionsSection({
       setItems(data)
     } catch (err) {
       console.error('Error fetching recurring transactions:', err)
+      ToastService.apiError(err, {
+        title: 'Could not load fixed payments',
+        dedupeKey: 'recurring-load-failed',
+      })
     } finally {
       setLoading(false)
     }

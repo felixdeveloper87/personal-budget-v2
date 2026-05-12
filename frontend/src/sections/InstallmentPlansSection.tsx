@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { InstallmentPlansModal } from '../components/installments'
 import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 import { SectionCard, SectionHeader } from '../components/ui'
+import { ToastService } from '../services/toast'
 
 /**
  * 💳 InstallmentPlansSection
@@ -39,6 +40,10 @@ export default function InstallmentPlansSection() {
       setPlans(data)
     } catch (err) {
       console.error('Error fetching installment plans:', err)
+      ToastService.apiError(err, {
+        title: 'Could not load installment plans',
+        dedupeKey: 'installment-plans-load-failed',
+      })
     } finally {
       setLoading(false)
     }

@@ -5,6 +5,7 @@ import App from './App'
 import theme from './theme'
 import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
+import { AppToastContainer } from './services/toast'
 
 const root = (
   <ChakraProvider theme={theme}>
@@ -14,6 +15,7 @@ const root = (
         <App />
       </SearchProvider>
     </AuthProvider>
+    <AppToastContainer />
   </ChakraProvider>
 )
 

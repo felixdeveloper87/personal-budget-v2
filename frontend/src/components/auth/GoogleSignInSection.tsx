@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, Text, VStack, useToast, useColorModeValue } from '@chakra-ui/react'
+import { Box, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthContext'
+import { ToastService } from '../../services/toast'
 
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
 
@@ -37,7 +38,6 @@ function loadGisScript(): Promise<void> {
 export default function GoogleSignInSection() {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const { loginWithGoogle } = useAuth()
-  const toast = useToast()
   const [busy, setBusy] = useState(false)
   /** Ensures GIS runs only after the button mount is in the DOM. */
   const [buttonHost, setButtonHost] = useState<HTMLDivElement | null>(null)
@@ -52,25 +52,19 @@ export default function GoogleSignInSection() {
       try {
         const outcome = await loginWithGoogle(credential)
         if (outcome.status === 'pending') {
-          toast({
+          ToastService.info({
             title: 'Registration received',
             description:
               outcome.message ??
               'An administrator must approve your account before you can sign in.',
-            status: 'info',
             duration: 6000,
-            isClosable: true,
-            position: 'top',
-            variant: 'subtle',
+            dedupeKey: 'google-registration-pending',
           })
         } else {
-          toast({
+          ToastService.success({
             title: 'Signed in with Google',
-            status: 'success',
             duration: 2000,
-            isClosable: true,
-            position: 'top',
-            variant: 'subtle',
+            dedupeKey: 'google-login-success',
           })
         }
       } catch (error: unknown) {
@@ -82,20 +76,17 @@ export default function GoogleSignInSection() {
             message = 'Google sign-in is not enabled on the server.'
           }
         }
-        toast({
+        ToastService.error({
           title: 'Google sign-in failed',
           description: message,
-          status: 'error',
           duration: 4000,
-          isClosable: true,
-          position: 'top',
-          variant: 'subtle',
+          dedupeKey: 'google-login-failed',
         })
       } finally {
         setBusy(false)
       }
     },
-    [loginWithGoogle, toast]
+    [loginWithGoogle]
   )
 
   useEffect(() => {
@@ -125,13 +116,11 @@ export default function GoogleSignInSection() {
         })
       })
       .catch(() => {
-        toast({
+        ToastService.error({
           title: 'Google sign-in',
           description: 'Could not load Google script. Check your connection.',
-          status: 'error',
           duration: 4000,
-          isClosable: true,
-          position: 'top',
+          dedupeKey: 'google-script-load-failed',
         })
       })
 
@@ -139,7 +128,7 @@ export default function GoogleSignInSection() {
       cancelled = true
       buttonHost.innerHTML = ''
     }
-  }, [clientId, buttonHost, onCredential, toast])
+  }, [clientId, buttonHost, onCredential])
 
   if (!clientId) {
     return null

@@ -8,13 +8,13 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  useToast,
 } from '@chakra-ui/react'
 import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
 import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'
+import { ToastService, getApiErrorMessage } from '../../services/toast'
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void
@@ -43,7 +43,6 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const confirmRef = useRef<HTMLInputElement>(null)
 
   const { register } = useAuth()
-  const toast = useToast()
 
   const subtleText = useColorModeValue('gray.500', 'gray.400')
   const linkColor = useColorModeValue('blue.600', 'blue.300')
@@ -87,39 +86,30 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     try {
       const outcome = await register({ name: name.trim(), email: email.trim(), password })
       if (outcome.status === 'pending') {
-        toast({
+        ToastService.info({
           title: 'Registration received',
           description:
             outcome.message ??
             'An administrator must approve your account before you can sign in.',
-          status: 'info',
           duration: 6000,
-          isClosable: true,
-          position: 'top',
-          variant: 'subtle',
+          dedupeKey: 'registration-pending',
         })
       } else {
-        toast({
+        ToastService.success({
           title: 'Account created',
-          description: "You're all set — welcome aboard.",
-          status: 'success',
+          description: "You're all set. Welcome aboard.",
           duration: 2000,
-          isClosable: true,
-          position: 'top',
-          variant: 'subtle',
+          dedupeKey: 'registration-success',
         })
       }
-    } catch (error: any) {
-      const message = error?.message || 'Could not create your account'
+    } catch (error: unknown) {
+      const message = getApiErrorMessage(error).description
       setErrors({ email: message })
-      toast({
+      ToastService.error({
         title: 'Sign up failed',
         description: message,
-        status: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
-        variant: 'subtle',
+        dedupeKey: 'registration-failed',
       })
     } finally {
       setLoading(false)

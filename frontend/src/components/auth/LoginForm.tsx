@@ -7,14 +7,13 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  useToast,
 } from '@chakra-ui/react'
-import axios from 'axios'
 import { ArrowRight, Eye, EyeOff, Lock, Mail } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
 import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX } from './auth.constants'
+import { ToastService, getApiErrorMessage } from '../../services/toast'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -38,7 +37,6 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const passwordRef = useRef<HTMLInputElement>(null)
 
   const { login } = useAuth()
-  const toast = useToast()
 
   // Resolved once — no per-render color computation
   const subtleText = useColorModeValue('gray.500', 'gray.400')
@@ -72,29 +70,22 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     setLoading(true)
     try {
       await login({ email: email.trim(), password })
-      toast({
+      ToastService.success({
         title: 'Welcome back',
-        status: 'success',
         duration: 1800,
-        isClosable: true,
-        position: 'top',
-        variant: 'subtle',
+        dedupeKey: 'login-success',
       })
     } catch (error: unknown) {
-      let message = 'Invalid email or password'
-      if (axios.isAxiosError(error)) {
-        const body = error.response?.data as { error?: string } | undefined
-        if (body?.error) message = body.error
-      }
+      const apiMessage = getApiErrorMessage(error)
+      const message = apiMessage.dedupeKey === 'http-401'
+        ? 'Invalid email or password'
+        : apiMessage.description
       setErrors({ password: message })
-      toast({
+      ToastService.error({
         title: 'Sign in failed',
         description: message,
-        status: 'error',
         duration: 3000,
-        isClosable: true,
-        position: 'top',
-        variant: 'subtle',
+        dedupeKey: 'login-failed',
       })
     } finally {
       setLoading(false)

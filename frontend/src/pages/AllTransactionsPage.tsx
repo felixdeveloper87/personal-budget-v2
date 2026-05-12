@@ -7,6 +7,7 @@ import { useSearch } from '../contexts/SearchContext'
 import { listTransactions, searchTransactions, listInstallmentPlans } from '../api'
 import { Transaction, InstallmentPlan } from '../types'
 import { mergeTransactionsWithFutureInstallments } from '../utils/installments'
+import { ToastService } from '../services/toast'
 
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -36,6 +37,10 @@ export default function AllTransactionsPage() {
       setTransactions(allTransactions)
     } catch (err) {
       console.error(err)
+      ToastService.apiError(err, {
+        title: 'Could not load transactions',
+        dedupeKey: 'transactions-load-failed',
+      })
       setTransactions([])
       setInstallmentPlans([])
     } finally {

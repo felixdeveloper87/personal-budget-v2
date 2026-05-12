@@ -5,6 +5,7 @@ import { useSearch } from '../contexts/SearchContext'
 import { getMonthlySummary, listTransactions, searchTransactions } from '../api'
 import { convertMonthlySummary } from '../utils/summary'
 import { hasActiveFilters } from '../utils/filters'
+import { ToastService } from '../services/toast'
 
 export interface LoadDashboardOptions {
   /**
@@ -41,6 +42,10 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
       }
     } catch (err) {
       console.error(err)
+      ToastService.apiError(err, {
+        title: 'Could not load dashboard',
+        dedupeKey: 'dashboard-load-failed',
+      })
       setTransactions([])
       setMonthSummary(null)
     } finally {

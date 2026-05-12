@@ -13,6 +13,7 @@ import {
   AdminUserRow,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
+import { ToastService } from './services/toast'
 
 function mapAuthToUser(payload: Record<string, unknown>): User {
   const userId =
@@ -84,6 +85,11 @@ api.interceptors.response.use(
         url.includes('/auth/google')
       if (!isPublicAuthAttempt) {
         localStorage.removeItem('user')
+        ToastService.warning({
+          title: 'Session expired',
+          description: 'Please sign in again to continue.',
+          dedupeKey: 'session-expired',
+        })
         window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT))
       }
     }

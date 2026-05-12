@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react'
-import { Box, VStack, Card, CardBody, useToast, Button } from '@chakra-ui/react'
+import { Box, VStack, Card, CardBody, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { createTransaction, createInstallmentPlan, createRecurringTransaction } from '../../../api'
@@ -14,6 +14,7 @@ import RecurringSelector from './RecurringSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
 import { Transaction } from '../../../types'
+import { ToastService } from '../../../services/toast'
 
 /** Calendar date in local TZ (avoid UTC drift from `toISOString().slice`). */
 function toLocalYYYYMMDD(d = new Date()): string {
@@ -61,7 +62,6 @@ export default function TransactionForm({
   compact = false,
 }: TransactionFormProps) {
   const { user } = useAuth()
-  const toast = useToast()
   const colors = useThemeColors()
 
   // 🗓️ Controlled form states
@@ -120,12 +120,11 @@ export default function TransactionForm({
             dayOfMonth: recurringDayOfMonth,
           })
 
-          toast({
+          ToastService.success({
             title: 'Fixed expense created',
             description: 'Due transactions will be generated automatically.',
-            status: 'success',
             duration: 3000,
-            isClosable: true,
+            dedupeKey: 'fixed-expense-created',
           })
         } else if (incomeMode === 'fixed' && type === 'INCOME') {
           await createRecurringTransaction({
@@ -137,12 +136,11 @@ export default function TransactionForm({
             dayOfMonth: recurringDayOfMonth,
           })
 
-          toast({
+          ToastService.success({
             title: 'Fixed income created',
             description: 'Monthly income will be generated automatically.',
-            status: 'success',
             duration: 3000,
-            isClosable: true,
+            dedupeKey: 'fixed-income-created',
           })
         } else if (expenseMode === 'installment' && type === 'EXPENSE' && installments > 1) {
           const parts = firstInstallmentDate.split('-').map(Number)
@@ -164,12 +162,11 @@ export default function TransactionForm({
             startDateTime: toLocalIsoDateTime(start),
           })
 
-          toast({
-            title: '✅ Installment plan created!',
+          ToastService.success({
+            title: 'Installment plan created',
             description: `${installments}x of £${(Number(amount) / installments).toFixed(2)}`,
-            status: 'success',
             duration: 3000,
-            isClosable: true,
+            dedupeKey: 'installment-plan-created',
           })
         } else {
           // 💰 Create single transaction
@@ -187,11 +184,10 @@ export default function TransactionForm({
           const created = await createTransaction(tx)
           onCreated(created)
 
-          toast({
+          ToastService.success({
             title: 'Transaction saved',
-            status: 'success',
             duration: 2000,
-            isClosable: true,
+            dedupeKey: 'transaction-saved',
           })
         }
 
@@ -204,13 +200,11 @@ export default function TransactionForm({
 
         // Trigger parent refresh
         onCreated({} as Transaction)
-      } catch (err: any) {
-        toast({
-          title: 'Error saving',
-          description: err?.message || 'Please try again later.',
-          status: 'error',
+      } catch (err: unknown) {
+        ToastService.apiError(err, {
+          title: 'Could not save transaction',
           duration: 3000,
-          isClosable: true,
+          dedupeKey: 'transaction-save-failed',
         })
       } finally {
         setLoading(false)
@@ -229,7 +223,6 @@ export default function TransactionForm({
       recurringDayOfMonth,
       user?.token,
       onCreated,
-      toast,
     ]
   )
 

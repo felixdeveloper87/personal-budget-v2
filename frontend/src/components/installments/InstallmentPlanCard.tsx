@@ -19,12 +19,12 @@ import {
   Text,
   useColorModeValue,
   useDisclosure,
-  useToast,
   VStack,
 } from '@chakra-ui/react'
 import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Trash2 } from '../ui/icons'
 import { InstallmentPlan } from '../../types'
 import { deleteInstallmentPlan } from '../../api'
+import { ToastService } from '../../services/toast'
 
 interface InstallmentPlanCardProps {
   plan: InstallmentPlan
@@ -68,7 +68,6 @@ export default function InstallmentPlanCard({
   onDeleted,
   variant = 'active',
 }: InstallmentPlanCardProps) {
-  const toast = useToast()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -141,20 +140,19 @@ export default function InstallmentPlanCard({
     setIsDeleting(true)
     try {
       await deleteInstallmentPlan(plan.id)
-      toast({
+      ToastService.success({
         title: 'Installment plan deleted',
         description: 'All installments have been removed',
-        status: 'success',
         duration: 2000,
+        dedupeKey: `installment-plan-deleted:${plan.id}`,
       })
       onDeleted()
       onClose()
-    } catch (err: any) {
-      toast({
-        title: 'Error deleting',
-        description: err?.message || 'Please try again',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not delete installment plan',
         duration: 3000,
+        dedupeKey: `installment-plan-delete-failed:${plan.id}`,
       })
     } finally {
       setIsDeleting(false)

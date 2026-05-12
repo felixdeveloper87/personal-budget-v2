@@ -2,6 +2,7 @@ import { createContext, useContext, useState, ReactNode } from 'react'
 import { Transaction } from '../types'
 import { searchTransactions } from '../api'
 import { useAuth } from './AuthContext'
+import { ToastService } from '../services/toast'
 
 export interface SearchFilters {
   text?: string
@@ -37,6 +38,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       setResults(data)
     } catch (err) {
       console.error('Erro ao buscar transações', err)
+      ToastService.apiError(err, {
+        title: 'Could not run search',
+        dedupeKey: 'search-failed',
+      })
       setResults([])
     } finally {
       setIsSearching(false)

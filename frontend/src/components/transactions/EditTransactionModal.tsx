@@ -4,7 +4,6 @@ import {
   Button,
   Icon,
   useColorModeValue,
-  useToast,
   VStack,
 } from '@chakra-ui/react'
 import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
@@ -12,6 +11,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { updateTransaction } from '../../api'
 import { Transaction } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
+import { ToastService } from '../../services/toast'
 import DateSelector from './TransactionForm/DateSelector'
 import AmountInput from './TransactionForm/AmountInput'
 import CategorySelector from './TransactionForm/CategorySelector'
@@ -31,7 +31,6 @@ export default function EditTransactionModal({
   onTransactionUpdated,
 }: EditTransactionModalProps) {
   const { user } = useAuth()
-  const toast = useToast()
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -74,22 +73,19 @@ export default function EditTransactionModal({
 
       await updateTransaction(transaction.id, updatedTx)
 
-      toast({
+      ToastService.success({
         title: 'Transaction updated',
-        status: 'success',
         duration: 2000,
-        isClosable: true,
+        dedupeKey: `transaction-updated:${transaction.id}`,
       })
 
       onTransactionUpdated()
       onClose()
-    } catch (err: any) {
-      toast({
-        title: 'Error updating transaction',
-        description: err?.message || 'Please try again later.',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not update transaction',
         duration: 3000,
-        isClosable: true,
+        dedupeKey: `transaction-update-failed:${transaction.id}`,
       })
     } finally {
       setLoading(false)
@@ -103,7 +99,6 @@ export default function EditTransactionModal({
     user?.token,
     onClose,
     onTransactionUpdated,
-    toast,
     loading,
   ])
 

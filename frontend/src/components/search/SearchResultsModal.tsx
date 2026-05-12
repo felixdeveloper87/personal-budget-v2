@@ -17,6 +17,7 @@ import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
 import { PremiumModal } from '../ui'
+import { ToastService } from '../../services/toast'
 
 const SearchResultsModal = memo(function SearchResultsModal({
   isOpen,
@@ -53,6 +54,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
       setTransactions(results)
     } catch (err) {
       console.error('Search error:', err)
+      ToastService.apiError(err, {
+        title: 'Could not load search results',
+        dedupeKey: 'search-results-load-failed',
+      })
       setError('We could not load your transactions. Please try again.')
     } finally {
       setIsLoading(false)

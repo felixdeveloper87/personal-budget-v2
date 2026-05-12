@@ -12,13 +12,13 @@ import {
   Icon,
   Text,
   useColorModeValue,
-  useToast,
   VStack,
 } from '@chakra-ui/react'
 import { AlertTriangle, TrendingDown, TrendingUp } from './icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import { deleteTransaction } from '../../api'
 import { Transaction } from '../../types'
+import { ToastService } from '../../services/toast'
 
 interface DeleteTransactionDialogProps {
   transaction: Transaction | null
@@ -40,7 +40,6 @@ export default function DeleteTransactionDialog({
   onDeleted,
 }: DeleteTransactionDialogProps) {
   const colors = useThemeColors()
-  const toast = useToast()
   const [isDeleting, setIsDeleting] = useState(false)
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
@@ -57,22 +56,19 @@ export default function DeleteTransactionDialog({
     setIsDeleting(true)
     try {
       await deleteTransaction(transaction.id)
-      toast({
+      ToastService.success({
         title: 'Transaction deleted',
         description: `${transaction.description || 'Transaction'} has been removed`,
-        status: 'success',
         duration: 2000,
-        isClosable: true,
+        dedupeKey: `transaction-deleted:${transaction.id}`,
       })
       onDeleted()
       onClose()
-    } catch (err: any) {
-      toast({
-        title: 'Error deleting transaction',
-        description: err?.message || 'Please try again',
-        status: 'error',
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not delete transaction',
         duration: 3000,
-        isClosable: true,
+        dedupeKey: `transaction-delete-failed:${transaction.id}`,
       })
     } finally {
       setIsDeleting(false)
