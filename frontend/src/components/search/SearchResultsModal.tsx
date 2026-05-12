@@ -37,7 +37,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const spinnerEmpty = useColorModeValue('gray.200', 'whiteAlpha.200')
 
   const performSearch = useCallback(async () => {
-    if (!(user as any)?.userId) return
+    if (!user?.token) return
 
     setIsLoading(true)
     setError(null)
@@ -62,13 +62,13 @@ const SearchResultsModal = memo(function SearchResultsModal({
     } finally {
       setIsLoading(false)
     }
-  }, [(user as any)?.userId, searchFilters])
+  }, [user?.token, searchFilters])
 
   useEffect(() => {
-    if (isOpen && (user as any)?.userId) {
+    if (isOpen && user?.token) {
       performSearch()
     }
-  }, [isOpen, (user as any)?.userId, performSearch])
+  }, [isOpen, user?.token, performSearch])
 
   useEffect(() => {
     if (!isOpen) {
