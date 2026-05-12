@@ -1,6 +1,7 @@
 package com.example.budget.mapper;
 
 import com.example.budget.dto.CreateTransactionRequest;
+import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.TransactionSearchDTO;
 import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.model.Transaction;
@@ -41,10 +42,34 @@ public class TransactionMapper {
                 t.getType(),
                 t.getCategory(),
                 t.getAmount(),
-                t.getDateTime().toLocalDate(),
+                t.getPaymentDate(),
                 installmentPlanId,
                 recurringTransactionId
         );
+    }
+
+    public TransactionDTO toDTO(Transaction t) {
+        if (t == null) return null;
+
+        return new TransactionDTO(
+                t.getId(),
+                t.getDateTime(),
+                t.getTransactionDate(),
+                t.getPaymentDate(),
+                t.getType(),
+                t.getCategory(),
+                t.getDescription(),
+                t.getAmount(),
+                t.getPaymentMethod() != null ? t.getPaymentMethod().getId() : null,
+                t.getPaymentMethod() != null ? t.getPaymentMethod().getName() : null,
+                t.getInstallmentPlan() != null ? t.getInstallmentPlan().getId() : null,
+                t.getRecurringTransaction() != null ? t.getRecurringTransaction().getId() : null,
+                t.getInstallmentNumber()
+        );
+    }
+
+    public List<TransactionDTO> toDTOList(List<Transaction> list) {
+        return list.stream().map(this::toDTO).toList();
     }
 
     /**
@@ -69,6 +94,11 @@ public class TransactionMapper {
     public Transaction toEntity(CreateTransactionRequest req, User user) {
         Transaction t = new Transaction();
         t.setDateTime(req.getDateTime());
+        if (req.getTransactionDate() != null) {
+            t.setTransactionDate(req.getTransactionDate());
+        } else if (req.getDateTime() != null) {
+            t.setTransactionDate(req.getDateTime().toLocalDate());
+        }
         t.setType(req.getType());
         t.setCategory(req.getCategory());
         t.setDescription(req.getDescription());
@@ -88,6 +118,11 @@ public class TransactionMapper {
      */
     public void updateTransaction(Transaction t, UpdateTransactionRequest req) {
         t.setDateTime(req.getDateTime());
+        if (req.getTransactionDate() != null) {
+            t.setTransactionDate(req.getTransactionDate());
+        } else if (req.getDateTime() != null) {
+            t.setTransactionDate(req.getDateTime().toLocalDate());
+        }
         t.setType(req.getType());
         t.setCategory(req.getCategory());
         t.setDescription(req.getDescription());

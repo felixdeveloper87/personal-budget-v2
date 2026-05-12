@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -16,8 +17,9 @@ import java.time.LocalDateTime;
  */
 public class UpdateTransactionRequest {
 
-    @NotNull(message = "Date and time is required")
     private LocalDateTime dateTime;
+
+    private LocalDate transactionDate;
 
     @NotNull(message = "Type is required")
     private TransactionType type;
@@ -32,40 +34,82 @@ public class UpdateTransactionRequest {
     @Positive(message = "Amount must be positive")
     private BigDecimal amount;
 
+    private Long paymentMethodId;
+
     public UpdateTransactionRequest() {
     }
 
     public UpdateTransactionRequest(
             LocalDateTime dateTime,
+            LocalDate transactionDate,
             TransactionType type,
             String category,
             String description,
-            BigDecimal amount
+            BigDecimal amount,
+            Long paymentMethodId
     ) {
         this.dateTime = dateTime;
+        this.transactionDate = transactionDate;
         this.type = type;
         this.category = category;
         this.description = description;
         this.amount = amount;
+        this.paymentMethodId = paymentMethodId;
     }
 
     public LocalDateTime getDateTime() {
         return dateTime;
     }
 
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
+
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
+
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
+    }
+
     public TransactionType getType() {
         return type;
+    }
+
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     public String getCategory() {
         return category;
     }
 
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
     public String getDescription() {
         return description;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public BigDecimal getAmount() {
         return amount;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public Long getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(Long paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 }

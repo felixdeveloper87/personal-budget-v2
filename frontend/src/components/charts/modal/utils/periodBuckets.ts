@@ -57,6 +57,11 @@ function applyFilter(transactions: Transaction[], filter: PeriodFilter): Transac
   return transactions.filter((t) => t.type === filter)
 }
 
+function competenceDate(tx: Transaction): Date {
+  const source = tx.paymentDate || tx.transactionDate || tx.dateTime
+  return source.length === 10 ? new Date(`${source}T00:00:00`) : new Date(source)
+}
+
 function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
   const buckets: PeriodBucket[] = DAY_BLOCKS.map((b, i) => ({
     key: `h${i}`,
@@ -69,7 +74,7 @@ function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucke
   const d = selectedDate.getDate()
 
   for (const tx of txs) {
-    const txDate = new Date(tx.dateTime)
+    const txDate = competenceDate(tx)
     if (
       txDate.getFullYear() !== y ||
       txDate.getMonth() !== m ||
@@ -103,7 +108,7 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
   end.setDate(start.getDate() + 7)
 
   for (const tx of txs) {
-    const txDate = new Date(tx.dateTime)
+    const txDate = competenceDate(tx)
     if (txDate < start || txDate >= end) continue
     const dayOfWeek = txDate.getDay()
     const idx = dayOfWeek === 0 ? 6 : dayOfWeek - 1
@@ -133,7 +138,7 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
   })
 
   for (const tx of txs) {
-    const txDate = new Date(tx.dateTime)
+    const txDate = competenceDate(tx)
     if (txDate.getFullYear() !== year || txDate.getMonth() !== month) continue
     const idx = txDate.getDate() - 1
     if (idx >= 0 && idx < daysInMonth) buckets[idx].value += tx.amount
@@ -150,7 +155,7 @@ function bucketByMonthOfYear(txs: Transaction[], selectedDate: Date): PeriodBuck
     value: 0,
   }))
   for (const tx of txs) {
-    const txDate = new Date(tx.dateTime)
+    const txDate = competenceDate(tx)
     if (txDate.getFullYear() !== year) continue
     buckets[txDate.getMonth()].value += tx.amount
   }

@@ -4,6 +4,7 @@ import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.cache.CachedTransactionList;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.MonthlySummary;
+import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.Transaction;
@@ -21,6 +22,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +47,8 @@ class TransactionServiceTest {
     @Mock
     private CacheInvalidationService cacheInvalidation;
     @Mock
+    private PaymentMethodService paymentMethodService;
+    @Mock
     private Cache monthlySummaryCache;
     @Mock
     private Cache transactionsListCache;
@@ -60,7 +64,13 @@ class TransactionServiceTest {
         when(monthlySummaryCache.get(anyString(), eq(MonthlySummary.class))).thenReturn(null);
         when(transactionsListCache.get(anyString(), eq(CachedTransactionList.class))).thenReturn(null);
 
-        transactionService = new TransactionService(repository, cacheManager, cacheInvalidation);
+        transactionService = new TransactionService(
+                repository,
+                paymentMethodService,
+                new CreditCardBillingService(),
+                new TransactionMapper(),
+                cacheManager,
+                cacheInvalidation);
 
         owner = new User();
         owner.setId(10L);
@@ -85,13 +95,15 @@ class TransactionServiceTest {
         Transaction saved = new Transaction();
         saved.setId(5L);
         saved.setDateTime(LocalDateTime.of(2026, 4, 15, 12, 0));
+        saved.setTransactionDate(LocalDate.of(2026, 4, 15));
+        saved.setPaymentDate(LocalDate.of(2026, 4, 15));
         when(repository.save(any(Transaction.class))).thenReturn(saved);
 
         Transaction result = transactionService.save(input, owner);
 
         assertThat(result).isSameAs(saved);
         assertThat(input.getUser()).isSameAs(owner);
-        verify(cacheInvalidation).evictMonthlySummary(owner, saved.getDateTime());
+        verify(cacheInvalidation).evictMonthlySummary(owner, saved.getPaymentDate());
         verify(cacheInvalidation).evictTransactionsList(10L);
     }
 
@@ -120,11 +132,14 @@ class TransactionServiceTest {
         Transaction existing = new Transaction();
         existing.setUser(owner);
         existing.setDateTime(LocalDateTime.of(2026, 3, 1, 10, 0));
+        existing.setTransactionDate(LocalDate.of(2026, 3, 1));
+        existing.setPaymentDate(LocalDate.of(2026, 3, 1));
         when(repository.findById(2L)).thenReturn(Optional.of(existing));
 
         Transaction patch = new Transaction();
         LocalDateTime newDt = LocalDateTime.of(2026, 5, 1, 15, 30);
         patch.setDateTime(newDt);
+        patch.setTransactionDate(LocalDate.of(2026, 5, 1));
         patch.setType(TransactionType.INCOME);
         patch.setCategory("Salary");
         patch.setDescription("Pay");
@@ -133,13 +148,15 @@ class TransactionServiceTest {
         Transaction saved = new Transaction();
         saved.setUser(owner);
         saved.setDateTime(newDt);
+        saved.setTransactionDate(LocalDate.of(2026, 5, 1));
+        saved.setPaymentDate(LocalDate.of(2026, 5, 1));
         when(repository.save(existing)).thenReturn(saved);
 
         Transaction result = transactionService.update(2L, patch, owner);
 
         assertThat(result.getDateTime()).isEqualTo(newDt);
-        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDateTime.of(2026, 3, 1, 10, 0));
-        verify(cacheInvalidation).evictMonthlySummary(owner, newDt);
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 3, 1));
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 5, 1));
         verify(cacheInvalidation).evictTransactionsList(10L);
     }
 
@@ -160,11 +177,12 @@ class TransactionServiceTest {
         Transaction existing = new Transaction();
         existing.setUser(owner);
         existing.setDateTime(LocalDateTime.of(2026, 2, 10, 8, 0));
+        existing.setPaymentDate(LocalDate.of(2026, 2, 10));
         when(repository.findById(4L)).thenReturn(Optional.of(existing));
 
         transactionService.delete(4L, owner);
 
-        verify(cacheInvalidation).evictMonthlySummary(owner, existing.getDateTime());
+        verify(cacheInvalidation).evictMonthlySummary(owner, existing.getPaymentDate());
         verify(cacheInvalidation).evictTransactionsList(10L);
         verify(repository).deleteById(4L);
     }
@@ -179,19 +197,19 @@ class TransactionServiceTest {
         MonthlySummary result = transactionService.monthlySummary(2026, 4, owner);
 
         assertThat(result).isSameAs(cached);
-        verify(repository, never()).sumByDateTimeBetweenAndTypeAndUser(
+        verify(repository, never()).sumByPaymentDateBetweenAndTypeAndUser(
                 any(), any(), any(), any());
     }
 
     @Test
     void monthlySummary_computesWhenCacheMiss() {
-        LocalDateTime start = LocalDateTime.of(2026, 6, 1, 0, 0);
-        LocalDateTime end = LocalDateTime.of(2026, 6, 30, 23, 59, 59);
+        LocalDate start = LocalDate.of(2026, 6, 1);
+        LocalDate end = LocalDate.of(2026, 6, 30);
 
-        when(repository.sumByDateTimeBetweenAndTypeAndUser(
+        when(repository.sumByPaymentDateBetweenAndTypeAndUser(
                 eq(start), eq(end), eq(TransactionType.INCOME), eq(owner)))
                 .thenReturn(new BigDecimal("300"));
-        when(repository.sumByDateTimeBetweenAndTypeAndUser(
+        when(repository.sumByPaymentDateBetweenAndTypeAndUser(
                 eq(start), eq(end), eq(TransactionType.EXPENSE), eq(owner)))
                 .thenReturn(new BigDecimal("120"));
         when(repository.sumByCategoryBetweenAndUser(eq(start), eq(end), eq(owner)))

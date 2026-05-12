@@ -18,11 +18,12 @@ import { GRADIENTS } from '../../../theme'
 
 interface UserMenuProps {
   user: any
+  onOpenProfile?: () => void
   onOpenSettings?: () => void
   onLogout: () => void
 }
 
-export default function UserMenu({ user, onOpenSettings, onLogout }: UserMenuProps) {
+export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout }: UserMenuProps) {
   const triggerBg = useColorModeValue('white', 'whiteAlpha.100')
   const triggerBorder = useColorModeValue('gray.200', 'whiteAlpha.300')
   const triggerHoverBorder = useColorModeValue('blue.300', 'blue.400')
@@ -194,6 +195,7 @@ export default function UserMenu({ user, onOpenSettings, onLogout }: UserMenuPro
 
         <MenuItem
           icon={<Icon as={User} boxSize={4} />}
+          onClick={onOpenProfile}
           color={textColor}
           fontWeight={500}
           fontSize="sm"

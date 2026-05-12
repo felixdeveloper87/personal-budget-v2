@@ -11,6 +11,8 @@ import {
   RecurringTransaction,
   CreateRecurringTransactionRequest,
   AdminUserRow,
+  PaymentMethod,
+  PaymentMethodRequest,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -179,6 +181,28 @@ export async function updateTransaction(id: number, tx: Transaction): Promise<Tr
 // Delete a transaction → DELETE /transactions/:id
 export async function deleteTransaction(id: number): Promise<void> {
   await api.delete(`/transactions/${id}`)
+}
+
+export async function listPaymentMethods(): Promise<PaymentMethod[]> {
+  const { data } = await api.get<PaymentMethod[]>('/payment-methods')
+  return data
+}
+
+export async function createPaymentMethod(request: PaymentMethodRequest): Promise<PaymentMethod> {
+  const { data } = await api.post<PaymentMethod>('/payment-methods', request)
+  return data
+}
+
+export async function updatePaymentMethod(
+  id: number,
+  request: PaymentMethodRequest
+): Promise<PaymentMethod> {
+  const { data } = await api.put<PaymentMethod>(`/payment-methods/${id}`, request)
+  return data
+}
+
+export async function deletePaymentMethod(id: number): Promise<void> {
+  await api.delete(`/payment-methods/${id}`)
 }
 
 // Get monthly summary → GET /summary/month?year=&month=

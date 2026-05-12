@@ -1,7 +1,9 @@
-import { Box, Flex } from '@chakra-ui/react'
+import { Box, Flex, useDisclosure } from '@chakra-ui/react'
 import Header from './header/Header'
 import Footer from './Footer'
 import type { AppPage } from './header/navigation.config'
+import { useAuth } from '../../contexts/AuthContext'
+import { UserProfileModal } from '../user'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -17,6 +19,9 @@ export default function Layout({
   onPageChange,
   showFooter = true,
 }: LayoutProps) {
+  const { user } = useAuth()
+  const profileModal = useDisclosure()
+
   const handleOpenSettings = () => {
     // TODO: Implement settings modal
   }
@@ -24,6 +29,7 @@ export default function Layout({
   return (
     <Flex direction="column" minH="100vh">
       <Header
+        onOpenProfile={profileModal.onOpen}
         onOpenSettings={handleOpenSettings}
         currentPage={currentPage}
         onPageChange={onPageChange}
@@ -34,6 +40,12 @@ export default function Layout({
       </Box>
 
       {showFooter ? <Footer /> : null}
+
+      <UserProfileModal
+        isOpen={profileModal.isOpen}
+        onClose={profileModal.onClose}
+        user={user}
+      />
     </Flex>
   )
 }

@@ -11,6 +11,7 @@ interface HeaderActionsProps {
   hideSearch?: boolean
   onSearchOpen: () => void
   onLogin?: () => void
+  onOpenProfile?: () => void
   onOpenSettings?: () => void
   onLogout?: () => void
 }
@@ -20,6 +21,7 @@ export default function HeaderActions({
   hideSearch,
   onSearchOpen,
   onLogin,
+  onOpenProfile,
   onOpenSettings,
   onLogout,
 }: HeaderActionsProps) {
@@ -44,7 +46,12 @@ export default function HeaderActions({
       <ThemeToggle />
 
       {user && onLogout ? (
-        <UserMenu user={user} onOpenSettings={onOpenSettings} onLogout={onLogout} />
+        <UserMenu
+          user={user}
+          onOpenProfile={onOpenProfile}
+          onOpenSettings={onOpenSettings}
+          onLogout={onLogout}
+        />
       ) : (
         !user && (
           <Button

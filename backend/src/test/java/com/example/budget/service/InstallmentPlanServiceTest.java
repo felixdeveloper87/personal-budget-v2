@@ -106,7 +106,7 @@ class InstallmentPlanServiceTest {
 
         verify(cacheInvalidation).evictInstallmentPlansList(20L);
         verify(cacheInvalidation).evictTransactionsList(20L);
-        verify(cacheInvalidation, times(3)).evictMonthlySummary(eq(owner), any(LocalDateTime.class));
+        verify(cacheInvalidation, times(3)).evictMonthlySummary(eq(owner), any(LocalDate.class));
     }
 
     @Test
@@ -147,6 +147,7 @@ class InstallmentPlanServiceTest {
     void delete_removesPlanAndEvictsPerTransaction() {
         Transaction t1 = new Transaction();
         t1.setDateTime(LocalDateTime.of(2026, 4, 1, 12, 0));
+        t1.setPaymentDate(LocalDate.of(2026, 4, 1));
         InstallmentPlan plan = new InstallmentPlan(1, BigDecimal.TEN, BigDecimal.TEN, owner);
         ReflectionTestUtils.setField(plan, "id", 12L);
         plan.setTransactions(new ArrayList<>(List.of(t1)));
@@ -158,6 +159,6 @@ class InstallmentPlanServiceTest {
         verify(installmentPlanRepository).delete(plan);
         verify(cacheInvalidation).evictInstallmentPlansList(20L);
         verify(cacheInvalidation).evictTransactionsList(20L);
-        verify(cacheInvalidation).evictMonthlySummary(owner, t1.getDateTime());
+        verify(cacheInvalidation).evictMonthlySummary(owner, t1.getPaymentDate());
     }
 }

@@ -71,7 +71,10 @@ export function usePeriodData(
 
     // ✅ Filtro ajustado: trabalha apenas com "tx.dateTime"
     const periodTransactions = transactions.filter(tx => {
-      const txDate = new Date(tx.dateTime)
+      const dateSource = tx.paymentDate || tx.transactionDate || tx.dateTime
+      const txDate = dateSource.length === 10
+        ? new Date(`${dateSource}T00:00:00`)
+        : new Date(dateSource)
       return txDate >= startDate && txDate <= endDate
     })
     

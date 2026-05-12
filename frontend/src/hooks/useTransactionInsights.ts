@@ -21,6 +21,11 @@ interface TransactionInsights {
   insights: string[]
 }
 
+function competenceDate(transaction: Transaction): Date {
+  const source = transaction.paymentDate || transaction.transactionDate || transaction.dateTime
+  return source.length === 10 ? new Date(`${source}T00:00:00`) : new Date(source)
+}
+
 export function useTransactionInsights(transactions: Transaction[], selectedPeriod: string) {
   return useMemo(() => {
     if (!transactions || transactions.length === 0) {
@@ -59,7 +64,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
     // Analysis by day of week
     const dayCounts: { [key: string]: number } = {}
     transactions.forEach(t => {
-      const day = new Date(t.dateTime).toLocaleDateString('en-US', { weekday: 'long' })
+      const day = competenceDate(t).toLocaleDateString('en-US', { weekday: 'long' })
       dayCounts[day] = (dayCounts[day] || 0) + 1
     })
     const mostActiveDay = Object.entries(dayCounts).reduce((a, b) => 
@@ -68,7 +73,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
     // Analysis by month
     const monthCounts: { [key: string]: number } = {}
     transactions.forEach(t => {
-      const month = new Date(t.dateTime).toLocaleDateString('en-US', { month: 'long' })
+      const month = competenceDate(t).toLocaleDateString('en-US', { month: 'long' })
       monthCounts[month] = (monthCounts[month] || 0) + 1
     })
     const mostActiveMonth = Object.entries(monthCounts).reduce((a, b) => 
@@ -91,7 +96,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
 
     // Transaction trend (comparing first and second half of period)
     const sortedTransactions = [...transactions].sort((a, b) => 
-      new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
+      competenceDate(a).getTime() - competenceDate(b).getTime())
     const midPoint = Math.floor(sortedTransactions.length / 2)
     const firstHalf = sortedTransactions.slice(0, midPoint)
     const secondHalf = sortedTransactions.slice(midPoint)
@@ -125,7 +130,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
 
     if (highestTransaction) {
       const type = highestTransaction.type === 'INCOME' ? 'received' : 'spent'
-      const date = new Date(highestTransaction.dateTime).toLocaleDateString('en-US')
+      const date = competenceDate(highestTransaction).toLocaleDateString('en-US')
       insights.push(`On ${date} you ${type} £${highestTransaction.amount.toFixed(2)}`)
     }
 
@@ -154,7 +159,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       // Get unique days that had income transactions
       const incomeDays = new Set(
         incomeTransactions.map(t => 
-          new Date(t.dateTime).toLocaleDateString('en-US')
+          competenceDate(t).toLocaleDateString('en-US')
         )
       )
       
@@ -168,7 +173,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
       // Get unique days that had expense transactions
       const expenseDays = new Set(
         expenseTransactions.map(t => 
-          new Date(t.dateTime).toLocaleDateString('en-US')
+          competenceDate(t).toLocaleDateString('en-US')
         )
       )
       
@@ -181,7 +186,7 @@ export function useTransactionInsights(transactions: Transaction[], selectedPeri
     
     // Calculate balance volatility (simplified)
     const balanceData = transactions
-      .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime())
+      .sort((a, b) => competenceDate(a).getTime() - competenceDate(b).getTime())
       .reduce((acc, transaction, index) => {
         const newBalance = acc.length > 0 ? acc[acc.length - 1].balance + (transaction.type === 'INCOME' ? transaction.amount : -transaction.amount) : transaction.amount
         acc.push({ balance: newBalance })

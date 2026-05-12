@@ -8,14 +8,16 @@ import {
 } from '@chakra-ui/react'
 import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
-import { updateTransaction } from '../../api'
-import { Transaction } from '../../types'
+import { listPaymentMethods, updateTransaction } from '../../api'
+import { PaymentMethod, Transaction } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import { ToastService } from '../../services/toast'
+import { toLocalIsoDateTimeFromYMD } from '../../utils/dateTime'
 import DateSelector from './TransactionForm/DateSelector'
 import AmountInput from './TransactionForm/AmountInput'
 import CategorySelector from './TransactionForm/CategorySelector'
 import DescriptionInput from './TransactionForm/DescriptionInput'
+import PaymentMethodSelector from './TransactionForm/PaymentMethodSelector'
 
 interface EditTransactionModalProps {
   isOpen: boolean
@@ -43,32 +45,55 @@ export default function EditTransactionModal({
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
+  const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null)
 
   useEffect(() => {
     if (transaction) {
-      const txDate = new Date(transaction.dateTime)
-      setDate(txDate.toISOString().slice(0, 10))
+      setDate(transaction.transactionDate || transaction.dateTime.slice(0, 10))
       setCategory(transaction.category || '')
       setDescription(transaction.description || '')
       setAmount(transaction.amount || 0)
+      setPaymentMethodId(transaction.paymentMethodId ?? null)
     }
   }, [transaction])
+
+  useEffect(() => {
+    if (!user?.token || !isOpen) return
+    let active = true
+    setPaymentMethodsLoading(true)
+    listPaymentMethods()
+      .then((methods) => {
+        if (active) setPaymentMethods(methods)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load payment methods',
+          dedupeKey: 'edit-payment-methods-load-failed',
+        })
+      })
+      .finally(() => {
+        if (active) setPaymentMethodsLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [user?.token, isOpen])
 
   const handleSubmit = useCallback(async () => {
     if (!user?.token || !transaction?.id || loading) return
 
     setLoading(true)
     try {
-      const now = new Date()
-      const selectedDate = new Date(date)
-      selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
-
       const updatedTx: Transaction = {
         ...transaction,
-        dateTime: selectedDate.toISOString(),
+        dateTime: toLocalIsoDateTimeFromYMD(date),
+        transactionDate: date,
         category,
         description,
         amount: Number(amount),
+        paymentMethodId,
       }
 
       await updateTransaction(transaction.id, updatedTx)
@@ -95,6 +120,7 @@ export default function EditTransactionModal({
     category,
     description,
     amount,
+    paymentMethodId,
     transaction,
     user?.token,
     onClose,
@@ -123,6 +149,14 @@ export default function EditTransactionModal({
       <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
         <VStack spacing={6} align="stretch" w="full">
           <DateSelector date={date} onChange={setDate} />
+          {type === 'EXPENSE' && (
+            <PaymentMethodSelector
+              value={paymentMethodId}
+              onChange={setPaymentMethodId}
+              paymentMethods={paymentMethods}
+              loading={paymentMethodsLoading}
+            />
+          )}
           <CategorySelector type={type} category={category} onChange={setCategory} />
           <AmountInput amount={amount} onChange={setAmount} type={type} />
           <DescriptionInput

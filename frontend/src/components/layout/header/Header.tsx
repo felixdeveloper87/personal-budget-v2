@@ -11,6 +11,7 @@ import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
 interface HeaderProps {
+  onOpenProfile?: () => void
   onOpenSettings?: () => void
   onLogin?: () => void
   currentPage?: AppPage
@@ -18,6 +19,7 @@ interface HeaderProps {
 }
 
 export default function Header({
+  onOpenProfile,
   onOpenSettings,
   onLogin,
   currentPage = 'dashboard',
@@ -154,6 +156,7 @@ export default function Header({
               hideSearch={isAdminOnly}
               onSearchOpen={openSearch}
               onLogin={onLogin}
+              onOpenProfile={onOpenProfile}
               onOpenSettings={onOpenSettings}
               onLogout={logout}
             />

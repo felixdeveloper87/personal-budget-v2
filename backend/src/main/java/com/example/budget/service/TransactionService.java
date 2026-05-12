@@ -5,8 +5,12 @@ import com.example.budget.cache.CachedTransactionList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.MonthlySummary;
+import com.example.budget.dto.CreateTransactionRequest;
+import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.mapper.TransactionMapper;
+import com.example.budget.model.PaymentMethod;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
@@ -38,15 +42,24 @@ import java.util.stream.Collectors;
 @Service
 public class TransactionService {
     private final TransactionRepository repository;
+    private final PaymentMethodService paymentMethodService;
+    private final CreditCardBillingService creditCardBillingService;
+    private final TransactionMapper transactionMapper;
     private final Cache monthlySummaryCache;
     private final Cache transactionsListCache;
     private final CacheInvalidationService cacheInvalidation;
 
     public TransactionService(
             TransactionRepository repository,
+            PaymentMethodService paymentMethodService,
+            CreditCardBillingService creditCardBillingService,
+            TransactionMapper transactionMapper,
             CacheManager cacheManager,
             CacheInvalidationService cacheInvalidation) {
         this.repository = repository;
+        this.paymentMethodService = paymentMethodService;
+        this.creditCardBillingService = creditCardBillingService;
+        this.transactionMapper = transactionMapper;
         this.cacheInvalidation = cacheInvalidation;
         Cache summary = cacheManager.getCache(RedisCacheConfig.MONTHLY_SUMMARY_CACHE);
         if (summary == null) {
@@ -91,8 +104,20 @@ public class TransactionService {
      */
     public Transaction save(Transaction t, User user) {
         t.setUser(user);
+        prepareDates(t, t.getPaymentMethod());
         Transaction saved = repository.save(t);
-        cacheInvalidation.evictMonthlySummary(user, saved.getDateTime());
+        cacheInvalidation.evictMonthlySummary(user, saved.getPaymentDate());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        return saved;
+    }
+
+    public Transaction create(CreateTransactionRequest request, User user) {
+        PaymentMethod paymentMethod = paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user);
+        Transaction transaction = transactionMapper.toEntity(request, user);
+        transaction.setPaymentMethod(paymentMethod);
+        prepareDates(transaction, paymentMethod);
+        Transaction saved = repository.save(transaction);
+        cacheInvalidation.evictMonthlySummary(user, saved.getPaymentDate());
         cacheInvalidation.evictTransactionsList(user.getId());
         return saved;
     }
@@ -118,18 +143,45 @@ public class TransactionService {
             throw new AccessDeniedException("Access denied: Transaction does not belong to user");
         }
 
-        LocalDateTime previousDateTime = transaction.getDateTime();
+        LocalDate previousPaymentDate = transaction.getPaymentDate();
 
         transaction.setDateTime(updatedTx.getDateTime());
+        transaction.setTransactionDate(updatedTx.getTransactionDate());
         transaction.setType(updatedTx.getType());
         transaction.setCategory(updatedTx.getCategory());
         transaction.setDescription(updatedTx.getDescription());
         transaction.setAmount(updatedTx.getAmount());
+        transaction.setPaymentMethod(updatedTx.getPaymentMethod());
+        prepareDates(transaction, updatedTx.getPaymentMethod());
 
         Transaction saved = repository.save(transaction);
-        cacheInvalidation.evictMonthlySummary(user, previousDateTime);
-        if (!Objects.equals(previousDateTime, saved.getDateTime())) {
-            cacheInvalidation.evictMonthlySummary(user, saved.getDateTime());
+        cacheInvalidation.evictMonthlySummary(user, previousPaymentDate);
+        if (!Objects.equals(previousPaymentDate, saved.getPaymentDate())) {
+            cacheInvalidation.evictMonthlySummary(user, saved.getPaymentDate());
+        }
+        cacheInvalidation.evictTransactionsList(user.getId());
+        return saved;
+    }
+
+    public Transaction update(Long id, UpdateTransactionRequest request, User user) {
+        Transaction transaction = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction", id));
+
+        if (!transaction.getUser().getId().equals(user.getId())) {
+            throw new AccessDeniedException("Access denied: Transaction does not belong to user");
+        }
+
+        LocalDate previousPaymentDate = transaction.getPaymentDate();
+        PaymentMethod paymentMethod = paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user);
+
+        transactionMapper.updateTransaction(transaction, request);
+        transaction.setPaymentMethod(paymentMethod);
+        prepareDates(transaction, paymentMethod);
+
+        Transaction saved = repository.save(transaction);
+        cacheInvalidation.evictMonthlySummary(user, previousPaymentDate);
+        if (!Objects.equals(previousPaymentDate, saved.getPaymentDate())) {
+            cacheInvalidation.evictMonthlySummary(user, saved.getPaymentDate());
         }
         cacheInvalidation.evictTransactionsList(user.getId());
         return saved;
@@ -153,7 +205,7 @@ public class TransactionService {
             throw new AccessDeniedException("Access denied: Transaction does not belong to user");
         }
 
-        cacheInvalidation.evictMonthlySummary(user, transaction.getDateTime());
+        cacheInvalidation.evictMonthlySummary(user, transaction.getPaymentDate());
         cacheInvalidation.evictTransactionsList(user.getId());
         repository.deleteById(id);
     }
@@ -177,11 +229,11 @@ public class TransactionService {
         }
 
         YearMonth ym = YearMonth.of(year, month);
-        LocalDateTime start = ym.atDay(1).atStartOfDay();
-        LocalDateTime end = ym.atEndOfMonth().atTime(23, 59, 59);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
 
-        BigDecimal income = repository.sumByDateTimeBetweenAndTypeAndUser(start, end, TransactionType.INCOME, user);
-        BigDecimal expense = repository.sumByDateTimeBetweenAndTypeAndUser(start, end, TransactionType.EXPENSE, user);
+        BigDecimal income = repository.sumByPaymentDateBetweenAndTypeAndUser(start, end, TransactionType.INCOME, user);
+        BigDecimal expense = repository.sumByPaymentDateBetweenAndTypeAndUser(start, end, TransactionType.EXPENSE, user);
         BigDecimal balance = income.subtract(expense);
 
         List<MonthlySummary.CategoryAggregate> byCategory = repository.sumByCategoryBetweenAndUser(start, end, user)
@@ -270,13 +322,31 @@ public class TransactionService {
         }
 
         if (start != null) {
-            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("dateTime"), start));
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("paymentDate"), start.toLocalDate()));
         }
 
         if (end != null) {
-            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("dateTime"), end));
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("paymentDate"), end.toLocalDate()));
         }
 
         return repository.findAll(spec);
+    }
+
+    private void prepareDates(Transaction transaction, PaymentMethod paymentMethod) {
+        if (transaction.getDateTime() == null && transaction.getTransactionDate() == null) {
+            transaction.setDateTime(LocalDateTime.now());
+        }
+        if (transaction.getDateTime() == null && transaction.getTransactionDate() != null) {
+            transaction.setDateTime(transaction.getTransactionDate().atTime(12, 0));
+        }
+        if (transaction.getDateTime() == null) {
+            transaction.setDateTime(LocalDateTime.now());
+        }
+        if (transaction.getTransactionDate() == null) {
+            transaction.setTransactionDate(transaction.getDateTime().toLocalDate());
+        }
+        transaction.setPaymentDate(creditCardBillingService.resolvePaymentDate(
+                transaction.getTransactionDate(),
+                paymentMethod));
     }
 }

@@ -21,7 +21,7 @@ import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
 import { useMemo, useState } from 'react'
-import { formatTransactionDateTime } from '../../utils/dateTime'
+import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
@@ -40,7 +40,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
   // Memoize sorted transactions to prevent recalculation on every render
    const sortedTransactions = useMemo(() => 
     transactions
-      .sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime()),
+      .sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime()),
     [transactions]
   )
 
@@ -85,6 +85,11 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                     <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
                       {formatTransactionDateTime(tx.dateTime).time}
                     </Text>
+                    {tx.paymentDate && tx.paymentDate !== (tx.transactionDate || tx.dateTime.slice(0, 10)) && (
+                      <Text fontSize={{ base: "2xs", md: "xs" }} color="blue.500">
+                        Paid {formatDateBR(tx.paymentDate)}
+                      </Text>
+                    )}
                   </VStack>
                 </Td>
                 <Td>
@@ -112,6 +117,11 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                     >
                       {normalizeInstallmentDescription(tx.description || '-')}
                     </Text>
+                    {tx.paymentMethodName && (
+                      <Badge colorScheme="blue" variant="subtle" fontSize="2xs">
+                        {tx.paymentMethodName}
+                      </Badge>
+                    )}
                     {tx.isInstallment && (
                       <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
                         <span>

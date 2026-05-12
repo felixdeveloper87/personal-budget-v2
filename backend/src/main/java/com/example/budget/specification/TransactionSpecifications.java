@@ -95,7 +95,7 @@ public final class TransactionSpecifications {
     public static Specification<Transaction> dateFrom(LocalDateTime start) {
         return (start == null)
                 ? null
-                : (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("dateTime"), start);
+                : (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("paymentDate"), start.toLocalDate());
     }
 
     /**
@@ -109,7 +109,7 @@ public final class TransactionSpecifications {
     public static Specification<Transaction> dateTo(LocalDateTime end) {
         return (end == null)
                 ? null
-                : (root, query, cb) -> cb.lessThanOrEqualTo(root.get("dateTime"), end);
+                : (root, query, cb) -> cb.lessThanOrEqualTo(root.get("paymentDate"), end.toLocalDate());
     }
 
     /**

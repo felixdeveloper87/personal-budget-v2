@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,10 +46,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      */
     @Query("SELECT COALESCE(SUM(t.amount), 0) " +
                     "FROM Transaction t " +
-                    "WHERE t.dateTime BETWEEN :start AND :end " +
+                    "WHERE t.paymentDate BETWEEN :start AND :end " +
                     "AND t.type = :type")
-    BigDecimal sumByDateTimeBetweenAndType(@Param("start") LocalDateTime start,
-                    @Param("end") LocalDateTime end,
+    BigDecimal sumByPaymentDateBetweenAndType(@Param("start") LocalDate start,
+                    @Param("end") LocalDate end,
                     @Param("type") TransactionType type);
 
     /**
@@ -62,10 +63,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      */
     @Query("SELECT COALESCE(SUM(t.amount), 0) " +
                     "FROM Transaction t " +
-                    "WHERE t.dateTime BETWEEN :start AND :end " +
+                    "WHERE t.paymentDate BETWEEN :start AND :end " +
                     "AND t.type = :type AND t.user = :user")
-    BigDecimal sumByDateTimeBetweenAndTypeAndUser(@Param("start") LocalDateTime start,
-                    @Param("end") LocalDateTime end,
+    BigDecimal sumByPaymentDateBetweenAndTypeAndUser(@Param("start") LocalDate start,
+                    @Param("end") LocalDate end,
                     @Param("type") TransactionType type,
                     @Param("user") User user);
 
@@ -85,10 +86,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     "COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE 0 END), 0), " +
                     "COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) " +
                     "FROM Transaction t " +
-                    "WHERE t.dateTime BETWEEN :start AND :end " +
+                    "WHERE t.paymentDate BETWEEN :start AND :end " +
                     "GROUP BY t.category")
-    List<Object[]> sumByCategoryBetween(@Param("start") LocalDateTime start,
-                    @Param("end") LocalDateTime end);
+    List<Object[]> sumByCategoryBetween(@Param("start") LocalDate start,
+                    @Param("end") LocalDate end);
 
     /**
      * Aggregates transaction amounts by category within a date range for a specific user.
@@ -107,11 +108,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     "COALESCE(SUM(CASE WHEN t.type = 'INCOME' THEN t.amount ELSE 0 END), 0), " +
                     "COALESCE(SUM(CASE WHEN t.type = 'EXPENSE' THEN t.amount ELSE 0 END), 0) " +
                     "FROM Transaction t " +
-                    "WHERE t.dateTime BETWEEN :start AND :end " +
+                    "WHERE t.paymentDate BETWEEN :start AND :end " +
                     "AND t.user = :user " +
                     "GROUP BY t.category")
-    List<Object[]> sumByCategoryBetweenAndUser(@Param("start") LocalDateTime start,
-                    @Param("end") LocalDateTime end,
+    List<Object[]> sumByCategoryBetweenAndUser(@Param("start") LocalDate start,
+                    @Param("end") LocalDate end,
                     @Param("user") User user);
 
     /**

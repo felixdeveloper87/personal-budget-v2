@@ -6,6 +6,7 @@ import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 
@@ -35,6 +36,13 @@ public class CacheInvalidationService {
             return;
         }
         monthlySummaryCache.evict(monthlyKey(user.getId(), YearMonth.from(transactionDateTime)));
+    }
+
+    public void evictMonthlySummary(User user, LocalDate paymentDate) {
+        if (user == null || paymentDate == null) {
+            return;
+        }
+        monthlySummaryCache.evict(monthlyKey(user.getId(), YearMonth.from(paymentDate)));
     }
 
     /**

@@ -94,7 +94,10 @@ public class InstallmentPlanMapper {
             transaction.setDescription(String.format("%s (Installment %d/%d)", 
                     request.getDescription(), i, request.getTotalInstallments()));
             transaction.setAmount(request.getInstallmentValue());
-            transaction.setDateTime(baseDateTime.plusMonths(i - 1));
+            LocalDateTime installmentDateTime = baseDateTime.plusMonths(i - 1);
+            transaction.setDateTime(installmentDateTime);
+            transaction.setTransactionDate(installmentDateTime.toLocalDate());
+            transaction.setPaymentDate(installmentDateTime.toLocalDate());
             transaction.setUser(plan.getUser());
             transaction.setInstallmentPlan(plan);
             transaction.setInstallmentNumber(i);

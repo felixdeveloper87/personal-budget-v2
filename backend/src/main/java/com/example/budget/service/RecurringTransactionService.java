@@ -202,6 +202,8 @@ public class RecurringTransactionService {
 
         Transaction transaction = new Transaction();
         transaction.setDateTime(dueDate.atTime(12, 0));
+        transaction.setTransactionDate(dueDate);
+        transaction.setPaymentDate(dueDate);
         transaction.setType(recurringTransaction.getType());
         transaction.setCategory(recurringTransaction.getCategory());
         transaction.setDescription(recurringTransaction.getDescription());
@@ -210,7 +212,7 @@ public class RecurringTransactionService {
         transaction.setRecurringTransaction(recurringTransaction);
 
         transactionRepository.save(transaction);
-        cacheInvalidation.evictMonthlySummary(recurringTransaction.getUser(), transaction.getDateTime());
+        cacheInvalidation.evictMonthlySummary(recurringTransaction.getUser(), transaction.getPaymentDate());
         cacheInvalidation.evictTransactionsList(recurringTransaction.getUser().getId());
         cacheInvalidation.evictRecurringList(recurringTransaction.getUser().getId());
     }

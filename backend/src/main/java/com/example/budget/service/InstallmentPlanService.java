@@ -79,7 +79,7 @@ public class InstallmentPlanService {
         cacheInvalidation.evictInstallmentPlansList(user.getId());
         cacheInvalidation.evictTransactionsList(user.getId());
         for (Transaction t : transactions) {
-            cacheInvalidation.evictMonthlySummary(user, t.getDateTime());
+            cacheInvalidation.evictMonthlySummary(user, t.getPaymentDate());
         }
         return installmentPlanMapper.toDTO(plan);
     }
@@ -152,7 +152,7 @@ public class InstallmentPlanService {
         cacheInvalidation.evictInstallmentPlansList(user.getId());
         cacheInvalidation.evictTransactionsList(user.getId());
         for (Transaction t : linked) {
-            cacheInvalidation.evictMonthlySummary(user, t.getDateTime());
+            cacheInvalidation.evictMonthlySummary(user, t.getPaymentDate());
         }
     }
 
@@ -169,4 +169,3 @@ public class InstallmentPlanService {
         }
     }
 }
-

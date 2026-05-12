@@ -1,4 +1,5 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
+export type PaymentMethodType = 'CASH' | 'DEBIT_CARD' | 'CREDIT_CARD' | 'BANK_TRANSFER'
 
 // Period types for navigation
 export type PeriodType = 'day' | 'week' | 'month' | 'year'
@@ -16,10 +17,14 @@ export interface SearchFilters {
 export interface Transaction {
   id?: number // opcional apenas na criação
   dateTime: string // ISO date (yyyy-MM-dd)
+  transactionDate?: string // yyyy-MM-dd: real purchase date
+  paymentDate?: string // yyyy-MM-dd: financial/budget impact date
   type: TransactionType
   category: string
   description: string
   amount: number
+  paymentMethodId?: number | null
+  paymentMethodName?: string | null
   userId?: number // opcional porque o backend não retorna no DTO de busca
   installmentPlanId?: number // ID do plano de parcelamento (se houver)
   recurringTransactionId?: number // ID da recorrencia (se houver)
@@ -31,6 +36,27 @@ export interface Transaction {
 
 // DTO do /transactions/search (não retorna userId)
 export type TransactionSearch = Omit<Transaction, 'userId'>
+
+export interface PaymentMethod {
+  id: number
+  name: string
+  type: PaymentMethodType
+  issuer?: string | null
+  active: boolean
+  statementClosingDay?: number | null
+  paymentDay?: number | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface PaymentMethodRequest {
+  name: string
+  type: PaymentMethodType
+  issuer?: string | null
+  active: boolean
+  statementClosingDay?: number | null
+  paymentDay?: number | null
+}
 
 // Resumo mensal
 export interface MonthlySummary {

@@ -1,10 +1,16 @@
 package com.example.budget.controller;
 
+import com.example.budget.dto.CreateTransactionRequest;
 import com.example.budget.dto.MonthlySummary;
+import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.TransactionSearchDTO;
+import com.example.budget.dto.UpdateTransactionRequest;
+import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.service.TransactionService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,9 +28,11 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService service;
+    private final TransactionMapper mapper;
 
-    public TransactionController(TransactionService service) {
+    public TransactionController(TransactionService service, TransactionMapper mapper) {
         this.service = service;
+        this.mapper = mapper;
     }
 
     /**
@@ -34,9 +42,9 @@ public class TransactionController {
      * @return List of all transactions belonging to the authenticated user
      */
     @GetMapping("/transactions")
-    public List<Transaction> all(Authentication authentication) {
+    public List<TransactionDTO> all(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return service.findAllByUser(user);
+        return mapper.toDTOList(service.findAllByUser(user));
     }
 
     /**
@@ -47,9 +55,10 @@ public class TransactionController {
      * @return Created transaction with generated ID
      */
     @PostMapping("/transactions")
-    public Transaction create(@RequestBody Transaction tx, Authentication authentication) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public TransactionDTO create(@Valid @RequestBody CreateTransactionRequest tx, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return service.save(tx, user);
+        return mapper.toDTO(service.create(tx, user));
     }
 
     /**
@@ -64,9 +73,13 @@ public class TransactionController {
      * @return Updated transaction
      */
     @PutMapping("/transactions/{id}")
-    public Transaction update(@PathVariable("id") Long id, @RequestBody Transaction tx, Authentication authentication) {
+    public TransactionDTO update(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody UpdateTransactionRequest tx,
+            Authentication authentication
+    ) {
         User user = (User) authentication.getPrincipal();
-        return service.update(id, tx, user);
+        return mapper.toDTO(service.update(id, tx, user));
     }
 
     /**
@@ -143,7 +156,7 @@ public class TransactionController {
                         tx.getType(),
                         tx.getCategory(),
                         tx.getAmount(),
-                        tx.getDateTime().toLocalDate(),
+                        tx.getPaymentDate(),
                         tx.getInstallmentPlan() != null ? tx.getInstallmentPlan().getId() : null,
                         tx.getRecurringTransaction() != null ? tx.getRecurringTransaction().getId() : null))
                 .toList();

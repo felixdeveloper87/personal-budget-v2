@@ -3,6 +3,7 @@ package com.example.budget.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -23,6 +24,12 @@ public class Transaction {
     @Column(name = "date_time")
     private LocalDateTime dateTime;
 
+    @Column(name = "transaction_date", nullable = false)
+    private LocalDate transactionDate;
+
+    @Column(name = "payment_date", nullable = false)
+    private LocalDate paymentDate;
+
     @Enumerated(EnumType.STRING)
     private TransactionType type;
 
@@ -37,6 +44,10 @@ public class Transaction {
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "installment_plan_id")
@@ -55,6 +66,12 @@ public class Transaction {
     protected void onCreate() {
         if (this.dateTime == null) {
             this.dateTime = LocalDateTime.now();
+        }
+        if (this.transactionDate == null) {
+            this.transactionDate = this.dateTime.toLocalDate();
+        }
+        if (this.paymentDate == null) {
+            this.paymentDate = this.transactionDate;
         }
     }
 
@@ -83,6 +100,22 @@ public class Transaction {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public LocalDate getTransactionDate() {
+        return transactionDate;
+    }
+
+    public void setTransactionDate(LocalDate transactionDate) {
+        this.transactionDate = transactionDate;
+    }
+
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public TransactionType getType() {
@@ -123,6 +156,14 @@ public class Transaction {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public InstallmentPlan getInstallmentPlan() {

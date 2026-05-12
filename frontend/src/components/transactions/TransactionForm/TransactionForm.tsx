@@ -1,8 +1,8 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { Box, VStack, Card, CardBody, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { createTransaction, createInstallmentPlan, createRecurringTransaction } from '../../../api'
+import { createTransaction, createInstallmentPlan, createRecurringTransaction, listPaymentMethods } from '../../../api'
 import RecentTransactions from './RecentTransactions'
 import { Plus, Minus } from '../../ui/icons'
 import DateSelector from './DateSelector'
@@ -11,10 +11,12 @@ import CategorySelector from './CategorySelector'
 import DescriptionInput from './DescriptionInput'
 import InstallmentSelector from './InstallmentSelector'
 import RecurringSelector from './RecurringSelector'
+import PaymentMethodSelector from './PaymentMethodSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
-import { Transaction } from '../../../types'
+import { PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
+import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
 
 /** Calendar date in local TZ (avoid UTC drift from `toISOString().slice`). */
 function toLocalYYYYMMDD(d = new Date()): string {
@@ -30,12 +32,6 @@ function dayOfMonthFromYMD(ymd: string): number {
   if (!match) return new Date().getDate()
   const day = parseInt(match[3], 10)
   return Math.min(31, Math.max(1, day))
-}
-
-/** For Java `LocalDateTime` JSON — no `Z` suffix (ISO instant strings often break Jackson `LocalDateTime`). */
-function toLocalIsoDateTime(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
 
 interface TransactionFormProps {
@@ -71,6 +67,9 @@ export default function TransactionForm({
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
+  const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null)
 
   // 💳 Installment states
   const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
@@ -81,6 +80,28 @@ export default function TransactionForm({
   const [recurringDayOfMonth, setRecurringDayOfMonth] = useState(() =>
     dayOfMonthFromYMD(toLocalYYYYMMDD())
   )
+
+  useEffect(() => {
+    if (!user?.token) return
+    let active = true
+    setPaymentMethodsLoading(true)
+    listPaymentMethods()
+      .then((methods) => {
+        if (active) setPaymentMethods(methods)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load payment methods',
+          dedupeKey: 'payment-methods-load-failed',
+        })
+      })
+      .finally(() => {
+        if (active) setPaymentMethodsLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [user?.token])
 
   /** Keep recurring due-day default aligned with the transaction date while editing a single (one-off) row. */
   const onTransactionDateChange = useCallback((nextDate: string) => {
@@ -159,7 +180,7 @@ export default function TransactionForm({
             category,
             description,
             startDate: firstInstallmentDate,
-            startDateTime: toLocalIsoDateTime(start),
+            startDateTime: toLocalIsoDateTimeFromYMD(firstInstallmentDate, start),
           })
 
           ToastService.success({
@@ -170,16 +191,14 @@ export default function TransactionForm({
           })
         } else {
           // 💰 Create single transaction
-          const now = new Date()
-          const selectedDate = new Date(date)
-          selectedDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), 0)
-
           const tx: Transaction = {
-            dateTime: selectedDate.toISOString(),
+            dateTime: toLocalIsoDateTimeFromYMD(date),
+            transactionDate: date,
             type,
             category,
             description,
             amount: Number(amount),
+            paymentMethodId,
           }
           const created = await createTransaction(tx)
           onCreated(created)
@@ -197,6 +216,7 @@ export default function TransactionForm({
         setExpenseMode('single')
         setIncomeMode('single')
         setInstallments(3)
+        setPaymentMethodId(null)
 
         // Trigger parent refresh
         onCreated({} as Transaction)
@@ -221,6 +241,7 @@ export default function TransactionForm({
       installments,
       recurringStartDate,
       recurringDayOfMonth,
+      paymentMethodId,
       user?.token,
       onCreated,
     ]
@@ -267,6 +288,14 @@ export default function TransactionForm({
             />
           )}
           <AmountInput amount={amount} onChange={setAmount} type={type} />
+          {type === 'EXPENSE' && (
+            <PaymentMethodSelector
+              value={paymentMethodId}
+              onChange={setPaymentMethodId}
+              paymentMethods={paymentMethods}
+              loading={paymentMethodsLoading}
+            />
+          )}
           {((type === 'EXPENSE' && expenseMode === 'single') ||
             (type === 'INCOME' && incomeMode === 'single')) && (
             <DateSelector date={date} onChange={onTransactionDateChange} />
@@ -414,6 +443,14 @@ export default function TransactionForm({
                 />
               )}
               <AmountInput amount={amount} onChange={setAmount} type={type} />
+              {type === 'EXPENSE' && (
+                <PaymentMethodSelector
+                  value={paymentMethodId}
+                  onChange={setPaymentMethodId}
+                  paymentMethods={paymentMethods}
+                  loading={paymentMethodsLoading}
+                />
+              )}
               {((type === 'EXPENSE' && expenseMode === 'single') ||
                 (type === 'INCOME' && incomeMode === 'single')) && (
                 <DateSelector date={date} onChange={onTransactionDateChange} />

@@ -24,7 +24,7 @@ import { DeleteIcon, ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
 import { useMemo, useState } from 'react'
-import { formatTransactionDateTime } from '../../utils/dateTime'
+import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
@@ -52,7 +52,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     const groups: Record<string, MonthGroup> = {}
 
     transactions.forEach(transaction => {
-      const date = new Date(transaction.dateTime)
+      const date = new Date(transaction.paymentDate || transaction.dateTime)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       const monthName = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
       
@@ -80,7 +80,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     // Calculate net amount and sort transactions within each group
     Object.values(groups).forEach(group => {
       group.netAmount = group.totalIncome - group.totalExpense
-      group.transactions.sort((a, b) => new Date(b.dateTime).getTime() - new Date(a.dateTime).getTime())
+      group.transactions.sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime())
     })
 
     // Sort groups by month (newest first)
@@ -244,6 +244,11 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                                 <Text fontSize="xs" color="gray.500">
                                   {formatTransactionDateTime(tx.dateTime).time}
                                 </Text>
+                                {tx.paymentDate && tx.paymentDate !== (tx.transactionDate || tx.dateTime.slice(0, 10)) && (
+                                  <Text fontSize="xs" color="blue.500">
+                                    Paid {formatDateBR(tx.paymentDate)}
+                                  </Text>
+                                )}
                               </VStack>
                             </Td>
                             <Td>
@@ -271,6 +276,11 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                                 >
                                   {normalizeInstallmentDescription(tx.description || '-')}
                                 </Text>
+                                {tx.paymentMethodName && (
+                                  <Badge colorScheme="blue" variant="subtle" fontSize="2xs">
+                                    {tx.paymentMethodName}
+                                  </Badge>
+                                )}
                                 {tx.isInstallment && (
                                   <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
                                     <span>
