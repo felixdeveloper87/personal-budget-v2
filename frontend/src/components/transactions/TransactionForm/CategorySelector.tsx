@@ -54,7 +54,7 @@ const incomeCategories: ReadonlyArray<{ name: string; icon: LucideIcon }> = [
 
 const expenseCategories: ReadonlyArray<{ name: string; icon: LucideIcon }> = [
   { name: 'Groceries', icon: ShoppingCart },
-  { name: 'Housing', icon: Home },
+  { name: 'Rent', icon: Home },
   { name: 'Utilities', icon: Zap },
   { name: 'Transport', icon: Car },
   { name: 'Health', icon: Heart },

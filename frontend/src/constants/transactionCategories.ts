@@ -23,7 +23,7 @@ export const TRANSACTION_INCOME_OTHER_OPTIONS = [
 
 export const TRANSACTION_EXPENSE_PRIMARY = [
   'Groceries',
-  'Housing',
+  'Rent',
   'Utilities',
   'Transport',
   'Health',
