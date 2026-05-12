@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Box,
   Button,
@@ -14,6 +14,12 @@ import {
 import { Calendar, Check, Tag, TrendingDown, TrendingUp, X } from '../ui/icons'
 import type { LucideIcon } from '../ui/icons'
 import { SearchFiltersProps } from '../../types'
+import {
+  TRANSACTION_EXPENSE_OTHER_OPTIONS,
+  TRANSACTION_EXPENSE_PRIMARY,
+  TRANSACTION_INCOME_OTHER_OPTIONS,
+  TRANSACTION_INCOME_PRIMARY,
+} from '../../constants/transactionCategories'
 
 interface QuickRange {
   id: string
@@ -63,6 +69,28 @@ export default function SearchFilters({
   onTypeChange,
   availableCategories,
 }: SearchFiltersProps) {
+  void availableCategories
+
+  const [othersOpen, setOthersOpen] = useState(false)
+
+  const primaryCategories =
+    filters.type === 'income' ? TRANSACTION_INCOME_PRIMARY : TRANSACTION_EXPENSE_PRIMARY
+  const otherCategories =
+    filters.type === 'income'
+      ? TRANSACTION_INCOME_OTHER_OPTIONS
+      : TRANSACTION_EXPENSE_OTHER_OPTIONS
+  const otherCategorySet = useMemo(() => new Set<string>(otherCategories), [otherCategories])
+
+  useEffect(() => {
+    setOthersOpen(false)
+  }, [filters.type])
+
+  useEffect(() => {
+    if (filters.category && otherCategorySet.has(filters.category)) {
+      setOthersOpen(true)
+    }
+  }, [filters.category, otherCategorySet])
+
   // Generic tokens — resolved once at the top.
   const labelColor = useColorModeValue('gray.700', 'gray.300')
   const subLabelColor = useColorModeValue('gray.500', 'gray.500')
@@ -282,8 +310,11 @@ export default function SearchFilters({
             )}
           </HStack>
           <Wrap spacing={2}>
-            {availableCategories.map((cat) => {
+            {primaryCategories.map((cat) => {
               const isActive = filters.category === cat
+              const isOthers = cat === 'Others'
+              const isOthersActive =
+                isOthers && (isActive || othersOpen || otherCategorySet.has(filters.category))
               return (
                 <WrapItem key={cat}>
                   <Button
@@ -294,13 +325,24 @@ export default function SearchFilters({
                     fontWeight={600}
                     borderRadius="full"
                     border="1px solid"
-                    color={isActive ? activeChipColor : idleChipColor}
-                    bg={isActive ? activeChipBg : idleChipBg}
-                    borderColor={isActive ? activeChipBorder : idleChipBorder}
-                    onClick={() => onUpdateFilter('category', isActive ? '' : cat)}
-                    aria-pressed={isActive}
+                    color={isActive || isOthersActive ? activeChipColor : idleChipColor}
+                    bg={isActive || isOthersActive ? activeChipBg : idleChipBg}
+                    borderColor={isActive || isOthersActive ? activeChipBorder : idleChipBorder}
+                    onClick={() => {
+                      if (isOthers) {
+                        setOthersOpen((prev) => !prev)
+                        if (!filters.category || !otherCategorySet.has(filters.category)) {
+                          onUpdateFilter('category', isActive ? '' : cat)
+                        }
+                        return
+                      }
+                      setOthersOpen(false)
+                      onUpdateFilter('category', isActive ? '' : cat)
+                    }}
+                    aria-expanded={isOthers ? othersOpen : undefined}
+                    aria-pressed={isActive || isOthersActive}
                     transition="background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease"
-                    _hover={{ bg: isActive ? activeChipBg : idleChipHoverBg }}
+                    _hover={{ bg: isActive || isOthersActive ? activeChipBg : idleChipHoverBg }}
                     _focusVisible={{ boxShadow: `0 0 0 3px ${focusGlow}` }}
                   >
                     {cat}
@@ -309,6 +351,39 @@ export default function SearchFilters({
               )
             })}
           </Wrap>
+
+          {othersOpen && (
+            <Wrap spacing={2} mt={3}>
+              {otherCategories.map((cat) => {
+                const isActive = filters.category === cat
+                return (
+                  <WrapItem key={cat}>
+                    <Button
+                      variant="unstyled"
+                      h="34px"
+                      px={3.5}
+                      fontSize="xs"
+                      fontWeight={600}
+                      borderRadius="full"
+                      border="1px solid"
+                      color={isActive ? activeChipColor : idleChipColor}
+                      bg={isActive ? activeChipBg : idleChipBg}
+                      borderColor={isActive ? activeChipBorder : idleChipBorder}
+                      onClick={() => {
+                        onUpdateFilter('category', isActive ? 'Others' : cat)
+                      }}
+                      aria-pressed={isActive}
+                      transition="background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease"
+                      _hover={{ bg: isActive ? activeChipBg : idleChipHoverBg }}
+                      _focusVisible={{ boxShadow: `0 0 0 3px ${focusGlow}` }}
+                    >
+                      {cat}
+                    </Button>
+                  </WrapItem>
+                )
+              })}
+            </Wrap>
+          )}
         </Box>
       )}
 
