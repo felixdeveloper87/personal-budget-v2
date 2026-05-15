@@ -4,7 +4,6 @@ import {
   GridItem,
   HStack,
   Heading,
-  Icon,
   Text,
   VStack,
   useColorModeValue,
@@ -119,7 +118,7 @@ function HeroCard({ feature }: { feature: LandingFeature }) {
           border="1px solid"
           borderColor={`${feature.accent}33`}
         >
-          <Icon as={feature.icon} boxSize={6} weight="duotone" />
+          <feature.icon size={24} weight="duotone" />
         </Box>
 
         <Heading
@@ -214,6 +213,8 @@ function FeatureCard({ feature }: { feature: LandingFeature }) {
 }
 
 function FeatureIconBadge({ icon, accent }: { icon: LucideIcon; accent: string }) {
+  const FeatureIcon = icon
+
   return (
     <Box
       p={2}
@@ -223,7 +224,7 @@ function FeatureIconBadge({ icon, accent }: { icon: LucideIcon; accent: string }
       border="1px solid"
       borderColor={`${accent}33`}
     >
-      <Icon as={icon} boxSize={4.5} weight="duotone" />
+      <FeatureIcon size={18} weight="duotone" />
     </Box>
   )
 }
