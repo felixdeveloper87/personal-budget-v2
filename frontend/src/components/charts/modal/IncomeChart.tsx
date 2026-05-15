@@ -1,8 +1,7 @@
 import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { VStack, Text, HStack, Box, Badge } from '@chakra-ui/react'
+import { VStack, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
-import { useThemeColors } from '../../../hooks/useThemeColors'
 import { TrendingUp } from '../../ui/icons'
 import { useChartColors, useChartDimensions } from './hooks'
 import {
@@ -10,17 +9,13 @@ import {
   ChartEmptyState,
   PeriodBucketBarChart,
 } from './components'
-import { processTransactionsByCategory, calculateTotals } from './utils'
+import CategoryTransactionDropdown from './components/CategoryTransactionDropdown'
+import { processCategoriesWithTransactions, calculateTotals } from './utils'
 
 export interface IncomeChartProps {
   transactions: any[]
   selectedPeriod: string
   showPeriodBadge?: boolean
-  /**
-   * When `periodType` and `selectedDate` are provided, a compact period
-   * bucket bar chart of incoming money for the active range is rendered
-   * above the category distribution chart.
-   */
   periodType?: PeriodType
   selectedDate?: Date
 }
@@ -32,7 +27,6 @@ export default function IncomeChart({
   periodType,
   selectedDate,
 }: IncomeChartProps) {
-  const colors = useThemeColors()
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
 
@@ -41,8 +35,8 @@ export default function IncomeChart({
     [transactions],
   )
 
-  const categoryData = useMemo(
-    () => processTransactionsByCategory(incomeTransactions),
+  const { sortedCategories: categoryData } = useMemo(
+    () => processCategoriesWithTransactions(incomeTransactions),
     [incomeTransactions],
   )
 
@@ -55,7 +49,8 @@ export default function IncomeChart({
     () =>
       categoryData.map((item, index) => ({
         name: item.category,
-        value: item.amount,
+        value: item.total,
+        transactions: item.transactions,
         color: `hsl(${(index * 137.5) % 360}, 58%, 52%)`,
       })),
     [categoryData],
@@ -118,55 +113,18 @@ export default function IncomeChart({
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalIncome) * 100).toFixed(1)
               return (
-                <HStack
+                <CategoryTransactionDropdown
                   key={`legend-${index}`}
-                  justify="space-between"
-                  align="center"
-                  p={3}
-                  borderRadius="lg"
-                  border="1px solid"
+                  category={entry.name}
+                  amount={entry.value}
+                  percentage={percentage}
+                  color={entry.color}
+                  transactions={entry.transactions}
                   borderColor={chartColors.borderColor}
-                  transition="background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease"
-                  _hover={{
-                    bg: chartColors.legendHoverBg,
-                    transform: 'translateX(2px)',
-                    borderColor: entry.color,
-                  }}
-                >
-                  <HStack spacing={3} align="center" minW={0} flex={1}>
-                    <Box
-                      w={3.5}
-                      h={3.5}
-                      borderRadius="sm"
-                      bg={entry.color}
-                      flexShrink={0}
-                    />
-                    <Text
-                      fontSize="sm"
-                      fontWeight={600}
-                      color={colors.text.primary}
-                      isTruncated
-                    >
-                      {entry.name}
-                    </Text>
-                  </HStack>
-                  <HStack spacing={3} align="center" flexShrink={0}>
-                    <Text fontSize="sm" fontWeight={700} color={colors.text.primary}>
-                      £{entry.value.toFixed(2)}
-                    </Text>
-                    <Badge
-                      px={2}
-                      py={0.5}
-                      borderRadius="full"
-                      bg={chartColors.grayBadgeBg}
-                      color={colors.text.primary}
-                      fontSize="xs"
-                      fontWeight={600}
-                    >
-                      {percentage}%
-                    </Badge>
-                  </HStack>
-                </HStack>
+                  hoverBg={chartColors.legendHoverBg}
+                  badgeBg={chartColors.grayBadgeBg}
+                  accentScheme="green"
+                />
               )
             })}
           </VStack>
