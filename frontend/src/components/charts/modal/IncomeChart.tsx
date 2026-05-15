@@ -9,7 +9,7 @@ import {
   ChartEmptyState,
   PeriodBucketBarChart,
 } from './components'
-import CategoryTransactionDropdown from './components/CategoryTransactionDropdown'
+import CategoryTransactionDropdown from '../../categories/CategoryTransactionDropdown'
 import { processCategoriesWithTransactions, calculateTotals } from './utils'
 
 export interface IncomeChartProps {
