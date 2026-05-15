@@ -36,6 +36,10 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     LocalDateTime start,
                     LocalDateTime end);
 
+    List<Transaction> findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
+                    Long recurringTransactionId,
+                    LocalDateTime fromInclusive);
+
     /**
      * Calculates the sum of transaction amounts within a date range and type.
      * 

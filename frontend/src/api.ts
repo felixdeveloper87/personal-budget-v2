@@ -8,8 +8,10 @@ import {
   RegisterRequest,
   InstallmentPlan,
   CreateInstallmentPlanRequest,
+  UpdateInstallmentPlanRequest,
   RecurringTransaction,
   CreateRecurringTransactionRequest,
+  UpdateRecurringTransactionRequest,
   AdminUserRow,
   PaymentMethod,
   PaymentMethodRequest,
@@ -253,6 +255,15 @@ export async function getInstallmentPlan(id: number): Promise<InstallmentPlan> {
   return data
 }
 
+// Update installment plan -> PUT /installment-plans/:id
+export async function updateInstallmentPlan(
+  id: number,
+  request: UpdateInstallmentPlanRequest
+): Promise<InstallmentPlan> {
+  const { data } = await api.put<InstallmentPlan>(`/installment-plans/${id}`, request)
+  return data
+}
+
 // Delete installment plan → DELETE /installment-plans/:id
 export async function deleteInstallmentPlan(id: number): Promise<void> {
   await api.delete(`/installment-plans/${id}`)
@@ -290,6 +301,15 @@ export async function updateRecurringTransactionAmount(
   const { data } = await api.patch<RecurringTransaction>(`/recurring-transactions/${id}/amount`, {
     amount,
   })
+  return data
+}
+
+// Update recurring transaction -> PUT /recurring-transactions/:id
+export async function updateRecurringTransaction(
+  id: number,
+  request: UpdateRecurringTransactionRequest
+): Promise<RecurringTransaction> {
+  const { data } = await api.put<RecurringTransaction>(`/recurring-transactions/${id}`, request)
   return data
 }
 

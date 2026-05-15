@@ -131,6 +131,13 @@ export interface CreateInstallmentPlanRequest {
   startDateTime?: string
 }
 
+export interface UpdateInstallmentPlanRequest {
+  installmentValue?: number
+  totalAmount?: number
+  startDate: string
+  startDateTime?: string
+}
+
 export interface RecurringTransaction {
   id: number
   type: TransactionType
@@ -153,6 +160,12 @@ export interface CreateRecurringTransactionRequest {
   startDate: string
   endDate?: string
   dayOfMonth?: number
+}
+
+export interface UpdateRecurringTransactionRequest {
+  amount: number
+  startDate: string
+  dayOfMonth: number
 }
 
 // Search component interfaces

@@ -5,6 +5,7 @@ import com.example.budget.cache.CachedInstallmentPlanList;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
+import com.example.budget.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.InstallmentPlanMapper;
@@ -140,6 +141,106 @@ class InstallmentPlanServiceTest {
         when(installmentPlanRepository.findById(9L)).thenReturn(Optional.of(plan));
 
         assertThatThrownBy(() -> installmentPlanService.findById(9L, owner))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    @Test
+    void update_recalculatesInstallmentValuesDatesAndEvictsCaches() {
+        Transaction t1 = new Transaction();
+        t1.setInstallmentNumber(1);
+        t1.setDateTime(LocalDateTime.of(2026, 1, 5, 12, 0));
+        t1.setTransactionDate(LocalDate.of(2026, 1, 5));
+        t1.setPaymentDate(LocalDate.of(2026, 1, 5));
+        t1.setAmount(new BigDecimal("100.00"));
+
+        Transaction t2 = new Transaction();
+        t2.setInstallmentNumber(2);
+        t2.setDateTime(LocalDateTime.of(2026, 2, 5, 12, 0));
+        t2.setTransactionDate(LocalDate.of(2026, 2, 5));
+        t2.setPaymentDate(LocalDate.of(2026, 2, 5));
+        t2.setAmount(new BigDecimal("100.00"));
+
+        InstallmentPlan plan = new InstallmentPlan(2, new BigDecimal("200.00"), new BigDecimal("100.00"), owner);
+        ReflectionTestUtils.setField(plan, "id", 22L);
+        plan.setTransactions(new ArrayList<>(List.of(t1, t2)));
+
+        when(installmentPlanRepository.findById(22L)).thenReturn(Optional.of(plan));
+        when(installmentPlanRepository.save(plan)).thenReturn(plan);
+
+        UpdateInstallmentPlanRequest request = new UpdateInstallmentPlanRequest(
+                new BigDecimal("125.50"),
+                LocalDate.of(2026, 3, 10),
+                null);
+
+        InstallmentPlanDTO dto = installmentPlanService.update(22L, request, owner);
+
+        assertThat(dto.getInstallmentValue()).isEqualByComparingTo("125.50");
+        assertThat(dto.getTotalAmount()).isEqualByComparingTo("251.00");
+        assertThat(t1.getAmount()).isEqualByComparingTo("125.50");
+        assertThat(t1.getPaymentDate()).isEqualTo(LocalDate.of(2026, 3, 10));
+        assertThat(t2.getPaymentDate()).isEqualTo(LocalDate.of(2026, 4, 10));
+
+        verify(cacheInvalidation).evictInstallmentPlansList(20L);
+        verify(cacheInvalidation).evictTransactionsList(20L);
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 1, 5));
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 2, 5));
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 3, 10));
+        verify(cacheInvalidation).evictMonthlySummary(owner, LocalDate.of(2026, 4, 10));
+    }
+
+    @Test
+    void update_withTotalAmountRecalculatesInstallmentValueAndLastInstallmentRounding() {
+        Transaction t1 = new Transaction();
+        t1.setInstallmentNumber(1);
+        t1.setPaymentDate(LocalDate.of(2026, 1, 1));
+
+        Transaction t2 = new Transaction();
+        t2.setInstallmentNumber(2);
+        t2.setPaymentDate(LocalDate.of(2026, 2, 1));
+
+        Transaction t3 = new Transaction();
+        t3.setInstallmentNumber(3);
+        t3.setPaymentDate(LocalDate.of(2026, 3, 1));
+
+        InstallmentPlan plan = new InstallmentPlan(3, new BigDecimal("90.00"), new BigDecimal("30.00"), owner);
+        ReflectionTestUtils.setField(plan, "id", 24L);
+        plan.setTransactions(new ArrayList<>(List.of(t1, t2, t3)));
+
+        when(installmentPlanRepository.findById(24L)).thenReturn(Optional.of(plan));
+        when(installmentPlanRepository.save(plan)).thenReturn(plan);
+
+        UpdateInstallmentPlanRequest request = new UpdateInstallmentPlanRequest(
+                null,
+                new BigDecimal("100.00"),
+                LocalDate.of(2026, 5, 1),
+                null);
+
+        InstallmentPlanDTO dto = installmentPlanService.update(24L, request, owner);
+
+        assertThat(dto.getTotalAmount()).isEqualByComparingTo("100.00");
+        assertThat(dto.getInstallmentValue()).isEqualByComparingTo("33.33");
+        assertThat(t1.getAmount()).isEqualByComparingTo("33.33");
+        assertThat(t2.getAmount()).isEqualByComparingTo("33.33");
+        assertThat(t3.getAmount()).isEqualByComparingTo("33.34");
+        assertThat(t1.getPaymentDate()).isEqualTo(LocalDate.of(2026, 5, 1));
+        assertThat(t2.getPaymentDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(t3.getPaymentDate()).isEqualTo(LocalDate.of(2026, 7, 1));
+    }
+
+    @Test
+    void update_throwsWhenNotOwner() {
+        User other = new User();
+        other.setId(99L);
+        InstallmentPlan plan = new InstallmentPlan(1, BigDecimal.TEN, BigDecimal.TEN, other);
+        ReflectionTestUtils.setField(plan, "id", 23L);
+        when(installmentPlanRepository.findById(23L)).thenReturn(Optional.of(plan));
+
+        UpdateInstallmentPlanRequest request = new UpdateInstallmentPlanRequest(
+                BigDecimal.ONE,
+                LocalDate.of(2026, 1, 1),
+                null);
+
+        assertThatThrownBy(() -> installmentPlanService.update(23L, request, owner))
                 .isInstanceOf(AccessDeniedException.class);
     }
 

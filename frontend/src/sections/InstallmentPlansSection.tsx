@@ -20,12 +20,16 @@ import { isInstallmentPlanCompleted } from '../components/installments/Installme
 import { SectionCard, SectionHeader } from '../components/ui'
 import { ToastService } from '../services/toast'
 
+interface InstallmentPlansSectionProps {
+  onRefresh?: () => void | Promise<void>
+}
+
 /**
  * 💳 InstallmentPlansSection
  * Compact dashboard card showing the count of active vs past plans and a
  * shortcut to the full plans modal.
  */
-export default function InstallmentPlansSection() {
+export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansSectionProps) {
   const { user, loading: authLoading } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -57,8 +61,11 @@ export default function InstallmentPlansSection() {
     void fetchPlans()
   }, [authLoading, user?.token, fetchPlans])
 
-  const handlePlanDeleted = () => {
-    fetchPlans()
+  const handlePlanChanged = async () => {
+    await fetchPlans()
+    if (onRefresh) {
+      await Promise.resolve(onRefresh())
+    }
   }
 
   const { activeCount, pastCount } = useMemo(() => {
@@ -183,7 +190,7 @@ export default function InstallmentPlansSection() {
         isOpen={isOpen}
         onClose={onClose}
         plans={plans}
-        onPlanDeleted={handlePlanDeleted}
+        onPlanDeleted={handlePlanChanged}
       />
     </>
   )

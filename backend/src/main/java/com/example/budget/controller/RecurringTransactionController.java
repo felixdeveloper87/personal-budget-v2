@@ -3,6 +3,7 @@ package com.example.budget.controller;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
+import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.model.User;
 import com.example.budget.service.RecurringTransactionService;
 import jakarta.validation.Valid;
@@ -65,6 +66,16 @@ public class RecurringTransactionController {
     ) {
         User user = (User) authentication.getPrincipal();
         return recurringTransactionService.updateAmount(id, request, user);
+    }
+
+    @PutMapping("/{id}")
+    public RecurringTransactionDTO update(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateRecurringTransactionRequest request,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+        return recurringTransactionService.update(id, request, user);
     }
 
     @DeleteMapping("/{id}")

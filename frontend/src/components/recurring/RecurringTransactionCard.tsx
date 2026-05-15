@@ -11,6 +11,8 @@ import {
   Button,
   Card,
   CardBody,
+  FormControl,
+  FormLabel,
   HStack,
   Icon,
   IconButton,
@@ -26,7 +28,7 @@ import { AlertTriangle, CalendarClock, Check, Pencil, RefreshCw, Trash2, Trendin
 import {
   cancelRecurringTransaction,
   generateDueRecurringTransactions,
-  updateRecurringTransactionAmount,
+  updateRecurringTransaction,
 } from '../../api'
 import { RecurringTransaction } from '../../types'
 import { ToastService } from '../../services/toast'
@@ -54,6 +56,8 @@ export default function RecurringTransactionCard({
   const [isSavingAmount, setIsSavingAmount] = useState(false)
   const [isEditingAmount, setIsEditingAmount] = useState(false)
   const [draftAmount, setDraftAmount] = useState(String(recurringTransaction.amount))
+  const [draftStartDate, setDraftStartDate] = useState(recurringTransaction.startDate)
+  const [draftDayOfMonth, setDraftDayOfMonth] = useState(String(recurringTransaction.dayOfMonth))
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
@@ -81,7 +85,9 @@ export default function RecurringTransactionCard({
 
   useEffect(() => {
     setDraftAmount(String(recurringTransaction.amount))
-  }, [recurringTransaction.amount])
+    setDraftStartDate(recurringTransaction.startDate)
+    setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
+  }, [recurringTransaction])
 
   const handleGenerateDue = async () => {
     setIsGenerating(true)
@@ -128,9 +134,17 @@ export default function RecurringTransactionCard({
 
   const handleSaveAmount = async () => {
     const nextAmount = Number(draftAmount)
-    if (nextAmount <= 0 || Number.isNaN(nextAmount)) {
+    const nextDayOfMonth = Number(draftDayOfMonth)
+    if (
+      nextAmount <= 0 ||
+      Number.isNaN(nextAmount) ||
+      !draftStartDate ||
+      nextDayOfMonth < 1 ||
+      nextDayOfMonth > 31 ||
+      Number.isNaN(nextDayOfMonth)
+    ) {
       ToastService.warning({
-        title: 'Enter a valid amount',
+        title: 'Enter a valid amount and date',
         duration: 2500,
         dedupeKey: `recurring-invalid-amount:${recurringTransaction.id}`,
       })
@@ -139,10 +153,14 @@ export default function RecurringTransactionCard({
 
     setIsSavingAmount(true)
     try {
-      await updateRecurringTransactionAmount(recurringTransaction.id, nextAmount)
+      await updateRecurringTransaction(recurringTransaction.id, {
+        amount: nextAmount,
+        startDate: draftStartDate,
+        dayOfMonth: nextDayOfMonth,
+      })
       ToastService.success({
-        title: 'Amount updated',
-        description: 'Future transactions will use the new value.',
+        title: 'Fixed payment updated',
+        description: 'Future transactions were recalculated.',
         duration: 2500,
         dedupeKey: `recurring-amount-updated:${recurringTransaction.id}`,
       })
@@ -225,9 +243,9 @@ export default function RecurringTransactionCard({
                   Fixed monthly amount
                 </Text>
                 {!isEditingAmount && recurringTransaction.active && (
-                  <Tooltip label="Edit amount">
+                  <Tooltip label="Edit fixed payment">
                     <IconButton
-                      aria-label="Edit recurring amount"
+                      aria-label="Edit fixed payment"
                       icon={<Icon as={Pencil} boxSize={3.5} />}
                       size="xs"
                       variant="ghost"
@@ -240,37 +258,72 @@ export default function RecurringTransactionCard({
 
               <VStack align="stretch" spacing={2}>
                 {isEditingAmount ? (
-                  <HStack spacing={2} flexWrap="wrap">
-                    <Input
-                      value={draftAmount}
-                      onChange={(event) => setDraftAmount(event.target.value)}
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      size="sm"
-                      w="120px"
-                      fontWeight={700}
-                    />
-                    <Button
-                      size="sm"
-                      colorScheme="teal"
-                      onClick={handleSaveAmount}
-                      isLoading={isSavingAmount}
-                      leftIcon={<Icon as={Check} boxSize={3.5} />}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => {
-                        setDraftAmount(String(recurringTransaction.amount))
-                        setIsEditingAmount(false)
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </HStack>
+                  <VStack align="stretch" spacing={3}>
+                    <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+                      <FormControl>
+                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
+                          Amount
+                        </FormLabel>
+                        <Input
+                          value={draftAmount}
+                          onChange={(event) => setDraftAmount(event.target.value)}
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          size="sm"
+                          fontWeight={700}
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
+                          Start date
+                        </FormLabel>
+                        <Input
+                          value={draftStartDate}
+                          onChange={(event) => setDraftStartDate(event.target.value)}
+                          type="date"
+                          size="sm"
+                        />
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
+                          Payment day
+                        </FormLabel>
+                        <Input
+                          value={draftDayOfMonth}
+                          onChange={(event) => setDraftDayOfMonth(event.target.value)}
+                          type="number"
+                          min={1}
+                          max={31}
+                          step={1}
+                          size="sm"
+                        />
+                      </FormControl>
+                    </SimpleGrid>
+                    <HStack spacing={2} flexWrap="wrap">
+                      <Button
+                        size="sm"
+                        colorScheme="teal"
+                        onClick={handleSaveAmount}
+                        isLoading={isSavingAmount}
+                        leftIcon={<Icon as={Check} boxSize={3.5} />}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          setDraftAmount(String(recurringTransaction.amount))
+                          setDraftStartDate(recurringTransaction.startDate)
+                          setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
+                          setIsEditingAmount(false)
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </HStack>
+                  </VStack>
                 ) : (
                   <HStack spacing={2}>
                     <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={accentFg} lineHeight="1.05">

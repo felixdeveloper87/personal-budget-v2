@@ -6,10 +6,12 @@ import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
+import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.RecurringTransactionMapper;
 import com.example.budget.model.RecurringTransaction;
+import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.repository.RecurringTransactionRepository;
@@ -27,6 +29,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -127,6 +131,64 @@ class RecurringTransactionServiceTest {
 
         assertThat(dto.getAmount()).isEqualByComparingTo("999.00");
         verify(cacheInvalidation).evictRecurringList(30L);
+    }
+
+    @Test
+    void update_recalculatesRuleFutureTransactionsAndEvictsCaches() {
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        RecurringTransaction recurring = sampleRecurring(owner);
+        ReflectionTestUtils.setField(recurring, "id", 72L);
+
+        Transaction future = new Transaction();
+        future.setUser(owner);
+        future.setDateTime(today.plusDays(3).atTime(12, 0));
+        future.setTransactionDate(today.plusDays(3));
+        future.setPaymentDate(today.plusDays(3));
+        future.setAmount(new BigDecimal("500.00"));
+        future.setRecurringTransaction(recurring);
+
+        when(recurringTransactionRepository.findById(72L)).thenReturn(Optional.of(recurring));
+        when(transactionRepository.findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
+                eq(72L),
+                any(LocalDateTime.class))).thenReturn(List.of(future));
+        when(recurringTransactionRepository.save(recurring)).thenReturn(recurring);
+
+        UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
+                new BigDecimal("700.00"),
+                today,
+                today.getDayOfMonth());
+
+        RecurringTransactionDTO dto = recurringTransactionService.update(72L, request, owner);
+
+        assertThat(dto.getAmount()).isEqualByComparingTo("700.00");
+        assertThat(dto.getStartDate()).isEqualTo(today);
+        assertThat(dto.getDayOfMonth()).isEqualTo(today.getDayOfMonth());
+        assertThat(dto.getNextRunDate()).isEqualTo(today);
+        assertThat(future.getAmount()).isEqualByComparingTo("700.00");
+        assertThat(future.getPaymentDate()).isEqualTo(today);
+
+        verify(transactionRepository).saveAll(List.of(future));
+        verify(cacheInvalidation).evictMonthlySummary(owner, today.plusDays(3));
+        verify(cacheInvalidation).evictMonthlySummary(owner, today);
+        verify(cacheInvalidation).evictRecurringList(30L);
+        verify(cacheInvalidation).evictTransactionsList(30L);
+    }
+
+    @Test
+    void update_throwsWhenNotOwner() {
+        User other = new User();
+        other.setId(99L);
+        RecurringTransaction recurring = sampleRecurring(other);
+        ReflectionTestUtils.setField(recurring, "id", 73L);
+        when(recurringTransactionRepository.findById(73L)).thenReturn(Optional.of(recurring));
+
+        UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
+                new BigDecimal("700.00"),
+                LocalDate.of(2026, 7, 1),
+                1);
+
+        assertThatThrownBy(() -> recurringTransactionService.update(73L, request, owner))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

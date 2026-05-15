@@ -2,6 +2,7 @@ package com.example.budget.controller;
 
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
+import com.example.budget.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.model.User;
 import com.example.budget.service.InstallmentPlanService;
 import jakarta.validation.Valid;
@@ -79,6 +80,15 @@ public class InstallmentPlanController {
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return installmentPlanService.findById(id, user);
+    }
+
+    @PutMapping("/{id}")
+    public InstallmentPlanDTO updateInstallmentPlan(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateInstallmentPlanRequest request,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.update(id, request, user);
     }
 
     /**

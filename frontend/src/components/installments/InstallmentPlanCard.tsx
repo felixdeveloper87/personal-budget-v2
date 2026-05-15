@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogBody,
@@ -12,18 +12,28 @@ import {
   Card,
   CardBody,
   Collapse,
+  FormControl,
+  FormLabel,
   HStack,
   Icon,
   IconButton,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   SimpleGrid,
   Text,
+  Tooltip,
   useColorModeValue,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react'
-import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Trash2 } from '../ui/icons'
+import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Pencil, Trash2 } from '../ui/icons'
 import { InstallmentPlan } from '../../types'
-import { deleteInstallmentPlan } from '../../api'
+import { deleteInstallmentPlan, updateInstallmentPlan } from '../../api'
 import { ToastService } from '../../services/toast'
 
 interface InstallmentPlanCardProps {
@@ -48,6 +58,12 @@ export function isInstallmentPlanCompleted(plan: InstallmentPlan): boolean {
   return plan.transactions.every((t) => new Date(t.date).getTime() < now)
 }
 
+function getPlanStartDate(plan: InstallmentPlan): string {
+  return plan.transactions
+    .slice()
+    .sort((a, b) => a.installmentNumber - b.installmentNumber)[0]?.date || new Date().toISOString().slice(0, 10)
+}
+
 interface InstallmentRowTokens {
   paidBg: string
   paidBorder: string
@@ -70,7 +86,12 @@ export default function InstallmentPlanCard({
 }: InstallmentPlanCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isSavingPlan, setIsSavingPlan] = useState(false)
+  const [draftInstallmentValue, setDraftInstallmentValue] = useState(String(plan.installmentValue))
+  const [draftTotalAmount, setDraftTotalAmount] = useState(String(plan.totalAmount))
+  const [draftStartDate, setDraftStartDate] = useState(getPlanStartDate(plan))
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const editDisclosure = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
   const isPast = variant === 'past'
@@ -125,6 +146,12 @@ export default function InstallmentPlanCard({
   const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
+  useEffect(() => {
+    setDraftInstallmentValue(String(plan.installmentValue))
+    setDraftTotalAmount(String(plan.totalAmount))
+    setDraftStartDate(getPlanStartDate(plan))
+  }, [plan])
+
   const firstTransaction = plan.transactions[0]
 
   const paidCount = useMemo(() => {
@@ -156,6 +183,60 @@ export default function InstallmentPlanCard({
       })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  const handleSavePlan = async () => {
+    const nextValue = Number(draftInstallmentValue)
+    const nextTotal = Number(draftTotalAmount)
+    if (nextTotal <= 0 || Number.isNaN(nextTotal) || nextValue <= 0 || Number.isNaN(nextValue) || !draftStartDate) {
+      ToastService.warning({
+        title: 'Enter a valid total, installment amount and date',
+        duration: 2500,
+        dedupeKey: `installment-plan-invalid:${plan.id}`,
+      })
+      return
+    }
+
+    setIsSavingPlan(true)
+    try {
+      await updateInstallmentPlan(plan.id, {
+        installmentValue: nextValue,
+        totalAmount: nextTotal,
+        startDate: draftStartDate,
+      })
+      ToastService.success({
+        title: 'Installment plan updated',
+        description: 'Installments were recalculated.',
+        duration: 2500,
+        dedupeKey: `installment-plan-updated:${plan.id}`,
+      })
+      editDisclosure.onClose()
+      onDeleted()
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: 'Could not update installment plan',
+        duration: 3000,
+        dedupeKey: `installment-plan-update-failed:${plan.id}`,
+      })
+    } finally {
+      setIsSavingPlan(false)
+    }
+  }
+
+  const handleInstallmentValueChange = (value: string) => {
+    setDraftInstallmentValue(value)
+    const numericValue = Number(value)
+    if (numericValue > 0 && !Number.isNaN(numericValue)) {
+      setDraftTotalAmount((numericValue * plan.totalInstallments).toFixed(2))
+    }
+  }
+
+  const handleTotalAmountChange = (value: string) => {
+    setDraftTotalAmount(value)
+    const numericValue = Number(value)
+    if (numericValue > 0 && !Number.isNaN(numericValue) && plan.totalInstallments > 0) {
+      setDraftInstallmentValue((numericValue / plan.totalInstallments).toFixed(2))
     }
   }
 
@@ -212,16 +293,28 @@ export default function InstallmentPlanCard({
                   </Text>
                 </VStack>
               </HStack>
-              <IconButton
-                aria-label="Delete installment plan"
-                icon={<Icon as={Trash2} boxSize={4} />}
-                size="sm"
-                variant="ghost"
-                color={captionColor}
-                _hover={{ bg: deleteHoverBg, color: 'red.500' }}
-                onClick={onOpen}
-                transition="background-color 0.15s ease, color 0.15s ease"
-              />
+              <HStack spacing={1}>
+                <Tooltip label="Edit installment plan">
+                  <IconButton
+                    aria-label="Edit installment plan"
+                    icon={<Icon as={Pencil} boxSize={3.5} />}
+                    size="sm"
+                    variant="ghost"
+                    color={captionColor}
+                    onClick={editDisclosure.onOpen}
+                  />
+                </Tooltip>
+                <IconButton
+                  aria-label="Delete installment plan"
+                  icon={<Icon as={Trash2} boxSize={4} />}
+                  size="sm"
+                  variant="ghost"
+                  color={captionColor}
+                  _hover={{ bg: deleteHoverBg, color: 'red.500' }}
+                  onClick={onOpen}
+                  transition="background-color 0.15s ease, color 0.15s ease"
+                />
+              </HStack>
             </HStack>
 
             <Box bg={amountPanelBg} borderRadius="xl" p={{ base: 3, md: 4 }} border="1px solid" borderColor={metaBorder}>
@@ -398,6 +491,86 @@ export default function InstallmentPlanCard({
           </VStack>
         </CardBody>
       </Card>
+
+      <Modal isOpen={editDisclosure.isOpen} onClose={editDisclosure.onClose} isCentered>
+        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
+        <ModalContent bg={dialogBg} borderRadius="xl" mx={4}>
+          <ModalHeader px={6} pt={5} pb={3}>
+            <HStack spacing={3}>
+              <Box
+                w={9}
+                h={9}
+                borderRadius="lg"
+                bg={accentBg}
+                color={accentFg}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Icon as={Pencil} boxSize={4} />
+              </Box>
+              <VStack align="flex-start" spacing={0}>
+                <Text fontWeight={700} fontSize="md" color={titleColor}>
+                  Edit installment plan
+                </Text>
+                <Text fontSize="xs" color={captionColor}>
+                  Recalculate all installments.
+                </Text>
+              </VStack>
+            </HStack>
+          </ModalHeader>
+          <ModalBody px={6} pb={4}>
+            <VStack align="stretch" spacing={4}>
+              <FormControl>
+                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
+                  First installment date
+                </FormLabel>
+                <Input
+                  type="date"
+                  value={draftStartDate}
+                  onChange={(event) => setDraftStartDate(event.target.value)}
+                  size="sm"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
+                  Purchase total
+                </FormLabel>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={draftTotalAmount}
+                  onChange={(event) => handleTotalAmountChange(event.target.value)}
+                  size="sm"
+                />
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
+                  Amount per installment
+                </FormLabel>
+                <Input
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={draftInstallmentValue}
+                  onChange={(event) => handleInstallmentValueChange(event.target.value)}
+                  size="sm"
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
+            <Button variant="ghost" fontSize="sm" color={captionColor} onClick={editDisclosure.onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="teal" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan}>
+              Save changes
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
 
       {/* Destructive confirmation */}
       <AlertDialog

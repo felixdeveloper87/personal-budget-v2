@@ -41,6 +41,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     [loadData]
   )
 
+  const refreshAfterInstallmentPlanChange = useCallback(
+    () => loadData({ quiet: true }),
+    [loadData]
+  )
+
   const periodData = usePeriodData(
     transactions,
     monthSummary,
@@ -92,7 +97,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                 transactions={transactions}
                 onRefresh={loadData}
               />
-              <InstallmentPlansSection />
+              <InstallmentPlansSection onRefresh={refreshAfterInstallmentPlanChange} />
               <RecurringTransactionsSection onRefresh={refreshAfterFixedPaymentChange} />
             </Box>
 

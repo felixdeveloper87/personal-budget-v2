@@ -7,6 +7,7 @@ import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
+import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.RecurringTransactionMapper;
@@ -123,6 +124,54 @@ public class RecurringTransactionService {
     }
 
     @Transactional
+    public RecurringTransactionDTO update(Long id, UpdateRecurringTransactionRequest request, User user) {
+        RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        LocalDateTime firstMomentOfToday = today.atStartOfDay();
+
+        List<Transaction> futureGenerated = transactionRepository
+                .findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
+                        recurringTransaction.getId(),
+                        firstMomentOfToday);
+
+        recurringTransaction.setAmount(request.getAmount());
+        recurringTransaction.setStartDate(request.getStartDate());
+        recurringTransaction.setEndDate(null);
+        recurringTransaction.setDayOfMonth(request.getDayOfMonth());
+        recurringTransaction.setNextRunDate(firstFutureDueDate(request.getStartDate(), request.getDayOfMonth(), today));
+        recurringTransaction.setActive(true);
+
+        LocalDate nextDueDate = recurringTransaction.getNextRunDate();
+        List<Transaction> updatedTransactions = new ArrayList<>();
+        for (Transaction transaction : futureGenerated) {
+            cacheInvalidation.evictMonthlySummary(user, transaction.getPaymentDate());
+
+            LocalDateTime nextDateTime = nextDueDate.atTime(12, 0);
+            transaction.setDateTime(nextDateTime);
+            transaction.setTransactionDate(nextDueDate);
+            transaction.setPaymentDate(nextDueDate);
+            transaction.setAmount(request.getAmount());
+            transaction.setType(recurringTransaction.getType());
+            transaction.setCategory(recurringTransaction.getCategory());
+            transaction.setDescription(recurringTransaction.getDescription());
+            updatedTransactions.add(transaction);
+            cacheInvalidation.evictMonthlySummary(user, nextDueDate);
+
+            nextDueDate = nextMonthlyDate(nextDueDate, request.getDayOfMonth());
+        }
+
+        if (!updatedTransactions.isEmpty()) {
+            transactionRepository.saveAll(updatedTransactions);
+        }
+
+        RecurringTransactionDTO dto = recurringTransactionMapper.toDTO(
+                recurringTransactionRepository.save(recurringTransaction));
+        cacheInvalidation.evictRecurringList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        return dto;
+    }
+
+    @Transactional
     public RecurringTransactionDTO generateDueTransactions(Long id, User user) {
         RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
         cacheInvalidation.evictRecurringList(user.getId());
@@ -221,6 +270,22 @@ public class RecurringTransactionService {
         LocalDate nextMonth = currentDate.plusMonths(1).withDayOfMonth(1);
         int day = Math.min(targetDayOfMonth, nextMonth.lengthOfMonth());
         return nextMonth.withDayOfMonth(day);
+    }
+
+    private LocalDate firstFutureDueDate(LocalDate startDate, int dayOfMonth, LocalDate today) {
+        LocalDate dueDate = firstRunDate(startDate, dayOfMonth);
+        while (dueDate.isBefore(today)) {
+            dueDate = nextMonthlyDate(dueDate, dayOfMonth);
+        }
+        return dueDate;
+    }
+
+    private LocalDate firstRunDate(LocalDate startDate, int dayOfMonth) {
+        LocalDate firstRunMonth = dateInMonth(YearMonth.from(startDate), dayOfMonth);
+        if (!firstRunMonth.isBefore(startDate)) {
+            return firstRunMonth;
+        }
+        return dateInMonth(YearMonth.from(startDate.plusMonths(1)), dayOfMonth);
     }
 
     private LocalDate dateInMonth(YearMonth month, int targetDayOfMonth) {

@@ -6,6 +6,7 @@ import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
+import com.example.budget.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.InstallmentPlanMapper;
@@ -21,7 +22,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service for installment plan operations.
@@ -129,6 +136,52 @@ public class InstallmentPlanService {
         return installmentPlanMapper.toDTO(plan);
     }
 
+    @Transactional
+    public InstallmentPlanDTO update(Long id, UpdateInstallmentPlanRequest request, User user) {
+        InstallmentPlan plan = installmentPlanRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("InstallmentPlan", id));
+
+        validateUserOwnership(plan, user);
+
+        List<LocalDate> previousPaymentDates = plan.getTransactions().stream()
+                .map(Transaction::getPaymentDate)
+                .filter(Objects::nonNull)
+                .toList();
+
+        BigDecimal installmentValue = resolveInstallmentValue(request, plan.getTotalInstallments());
+        BigDecimal totalAmount = request.getTotalAmount() != null
+                ? request.getTotalAmount()
+                : installmentValue.multiply(BigDecimal.valueOf(plan.getTotalInstallments()));
+
+        plan.setInstallmentValue(installmentValue);
+        plan.setTotalAmount(totalAmount);
+
+        LocalDateTime baseDateTime = determineBaseDateTime(request);
+        List<Transaction> transactions = plan.getTransactions().stream()
+                .sorted(Comparator.comparing(
+                        tx -> tx.getInstallmentNumber() != null ? tx.getInstallmentNumber() : Integer.MAX_VALUE))
+                .toList();
+
+        for (int index = 0; index < transactions.size(); index++) {
+            Transaction transaction = transactions.get(index);
+            LocalDateTime installmentDateTime = baseDateTime.plusMonths(index);
+            transaction.setAmount(resolveTransactionAmount(index, transactions.size(), installmentValue, totalAmount, request.getTotalAmount() != null));
+            transaction.setDateTime(installmentDateTime);
+            transaction.setTransactionDate(installmentDateTime.toLocalDate());
+            transaction.setPaymentDate(installmentDateTime.toLocalDate());
+        }
+
+        InstallmentPlan saved = installmentPlanRepository.save(plan);
+        cacheInvalidation.evictInstallmentPlansList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        previousPaymentDates.forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        saved.getTransactions().stream()
+                .map(Transaction::getPaymentDate)
+                .filter(Objects::nonNull)
+                .forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        return installmentPlanMapper.toDTO(saved);
+    }
+
     /**
      * Deletes an installment plan and all associated transactions.
      * 
@@ -167,5 +220,35 @@ public class InstallmentPlanService {
         if (!plan.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("Access denied: Installment plan does not belong to user");
         }
+    }
+
+    private LocalDateTime determineBaseDateTime(UpdateInstallmentPlanRequest request) {
+        if (request.getStartDateTime() != null) {
+            return request.getStartDateTime();
+        }
+        LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
+        return startDate.atTime(12, 0);
+    }
+
+    private BigDecimal resolveInstallmentValue(UpdateInstallmentPlanRequest request, int totalInstallments) {
+        if (request.getTotalAmount() != null) {
+            return request.getTotalAmount().divide(BigDecimal.valueOf(totalInstallments), 2, RoundingMode.HALF_UP);
+        }
+        if (request.getInstallmentValue() != null) {
+            return request.getInstallmentValue();
+        }
+        throw new IllegalArgumentException("Either installment value or total amount is required");
+    }
+
+    private BigDecimal resolveTransactionAmount(
+            int index,
+            int transactionCount,
+            BigDecimal installmentValue,
+            BigDecimal totalAmount,
+            boolean totalAmountWasProvided) {
+        if (!totalAmountWasProvided || index < transactionCount - 1) {
+            return installmentValue;
+        }
+        return totalAmount.subtract(installmentValue.multiply(BigDecimal.valueOf(transactionCount - 1)));
     }
 }
