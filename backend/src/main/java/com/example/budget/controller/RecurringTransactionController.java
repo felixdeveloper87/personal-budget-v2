@@ -49,15 +49,6 @@ public class RecurringTransactionController {
         return recurringTransactionService.findById(id, user);
     }
 
-    @PostMapping("/{id}/generate-due")
-    public RecurringTransactionDTO generateDue(
-            @PathVariable Long id,
-            Authentication authentication
-    ) {
-        User user = (User) authentication.getPrincipal();
-        return recurringTransactionService.generateDueTransactions(id, user);
-    }
-
     @PatchMapping("/{id}/amount")
     public RecurringTransactionDTO updateAmount(
             @PathVariable Long id,

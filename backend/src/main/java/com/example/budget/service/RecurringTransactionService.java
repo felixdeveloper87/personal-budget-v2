@@ -171,14 +171,6 @@ public class RecurringTransactionService {
         return dto;
     }
 
-    @Transactional
-    public RecurringTransactionDTO generateDueTransactions(Long id, User user) {
-        RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
-        cacheInvalidation.evictRecurringList(user.getId());
-        generateTransactionsForMonth(recurringTransaction, YearMonth.now());
-        return recurringTransactionMapper.toDTO(recurringTransaction);
-    }
-
     @Scheduled(cron = "0 15 0 1 * *")
     @Transactional
     public void generateDueTransactionsForAllUsers() {

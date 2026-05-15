@@ -287,12 +287,6 @@ export async function createRecurringTransaction(
   return data
 }
 
-// Generate due transactions manually -> POST /recurring-transactions/:id/generate-due
-export async function generateDueRecurringTransactions(id: number): Promise<RecurringTransaction> {
-  const { data } = await api.post<RecurringTransaction>(`/recurring-transactions/${id}/generate-due`)
-  return data
-}
-
 // Update recurring transaction amount -> PATCH /recurring-transactions/:id/amount
 export async function updateRecurringTransactionAmount(
   id: number,

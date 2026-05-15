@@ -24,10 +24,9 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react'
-import { AlertTriangle, CalendarClock, Check, Pencil, RefreshCw, Trash2, TrendingUp, TrendingDown } from '../ui/icons'
+import { AlertTriangle, CalendarClock, Check, Pencil, Trash2, TrendingUp, TrendingDown } from '../ui/icons'
 import {
   cancelRecurringTransaction,
-  generateDueRecurringTransactions,
   updateRecurringTransaction,
 } from '../../api'
 import { RecurringTransaction } from '../../types'
@@ -52,7 +51,6 @@ export default function RecurringTransactionCard({
   onChanged,
 }: RecurringTransactionCardProps) {
   const [isCancelling, setIsCancelling] = useState(false)
-  const [isGenerating, setIsGenerating] = useState(false)
   const [isSavingAmount, setIsSavingAmount] = useState(false)
   const [isEditingAmount, setIsEditingAmount] = useState(false)
   const [draftAmount, setDraftAmount] = useState(String(recurringTransaction.amount))
@@ -75,7 +73,6 @@ export default function RecurringTransactionCard({
   const warningChipFg = useColorModeValue('red.600', 'red.300')
   const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const actionBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const activeStripe = useColorModeValue('linear-gradient(180deg, #14b8a6, #2563eb)', 'linear-gradient(180deg, #2dd4bf, #60a5fa)')
   const amountPanelBg = useColorModeValue(
     'linear-gradient(135deg, rgba(20,184,166,0.10), rgba(37,99,235,0.08))',
@@ -88,27 +85,6 @@ export default function RecurringTransactionCard({
     setDraftStartDate(recurringTransaction.startDate)
     setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
   }, [recurringTransaction])
-
-  const handleGenerateDue = async () => {
-    setIsGenerating(true)
-    try {
-      await generateDueRecurringTransactions(recurringTransaction.id)
-      ToastService.success({
-        title: 'Fixed payment synced',
-        duration: 2000,
-        dedupeKey: `recurring-synced:${recurringTransaction.id}`,
-      })
-      await Promise.resolve(onChanged())
-    } catch (err: unknown) {
-      ToastService.apiError(err, {
-        title: 'Could not sync fixed payment',
-        duration: 3000,
-        dedupeKey: `recurring-sync-failed:${recurringTransaction.id}`,
-      })
-    } finally {
-      setIsGenerating(false)
-    }
-  }
 
   const handleCancel = async () => {
     setIsCancelling(true)
@@ -243,16 +219,29 @@ export default function RecurringTransactionCard({
                   Fixed monthly amount
                 </Text>
                 {!isEditingAmount && recurringTransaction.active && (
-                  <Tooltip label="Edit fixed payment">
-                    <IconButton
-                      aria-label="Edit fixed payment"
-                      icon={<Icon as={Pencil} boxSize={3.5} />}
-                      size="xs"
-                      variant="ghost"
-                      color={captionColor}
-                      onClick={() => setIsEditingAmount(true)}
-                    />
-                  </Tooltip>
+                  <HStack spacing={1}>
+                    <Tooltip label="Edit fixed payment">
+                      <IconButton
+                        aria-label="Edit fixed payment"
+                        icon={<Icon as={Pencil} boxSize={3.5} />}
+                        size="xs"
+                        variant="ghost"
+                        color={captionColor}
+                        onClick={() => setIsEditingAmount(true)}
+                      />
+                    </Tooltip>
+                    <Tooltip label="Cancel future transactions">
+                      <IconButton
+                        aria-label="Cancel fixed payment"
+                        icon={<Icon as={Trash2} boxSize={3.5} />}
+                        size="xs"
+                        variant="ghost"
+                        color={captionColor}
+                        _hover={{ bg: deleteHoverBg, color: 'red.500' }}
+                        onClick={onOpen}
+                      />
+                    </Tooltip>
+                  </HStack>
                 )}
               </HStack>
 
@@ -352,47 +341,6 @@ export default function RecurringTransactionCard({
                 captionColor={captionColor}
               />
             </SimpleGrid>
-
-            {recurringTransaction.active && (
-              <HStack
-                spacing={2}
-                pt={3}
-                borderTop="1px solid"
-                borderColor={dividerColor}
-                bg={actionBg}
-                mx={{ base: -3, md: -5 }}
-                mb={{ base: -3, md: -5 }}
-                px={{ base: 3, md: 5 }}
-                pb={{ base: 3, md: 5 }}
-              >
-                <Button
-                  size="sm"
-                  flex={1}
-                  variant="ghost"
-                  fontSize="xs"
-                  fontWeight={700}
-                  color={accentFg}
-                  leftIcon={<Icon as={RefreshCw} boxSize={3.5} />}
-                  onClick={handleGenerateDue}
-                  isLoading={isGenerating}
-                  loadingText="Checking..."
-                  _hover={{ bg: accentBg }}
-                >
-                  Sync month
-                </Button>
-                <Tooltip label="Cancel future transactions">
-                  <IconButton
-                    aria-label="Cancel fixed payment"
-                    icon={<Icon as={Trash2} boxSize={4} />}
-                    size="sm"
-                    variant="ghost"
-                    color={captionColor}
-                    _hover={{ bg: deleteHoverBg, color: 'red.500' }}
-                    onClick={onOpen}
-                  />
-                </Tooltip>
-              </HStack>
-            )}
           </VStack>
         </CardBody>
       </Card>
