@@ -11,6 +11,7 @@ export type {
   SectionHeaderProps,
   SectionHeaderAccent,
 } from './SectionHeader'
+export { default as PageSkeleton } from './PageSkeleton'
 
 // UI Utilities - General UI utilities and responsive styles
 export * from './ui'

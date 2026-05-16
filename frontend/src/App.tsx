@@ -2,9 +2,9 @@ import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
 import AllTransactionsPage from './pages/AllTransactionsPage'
-import ChartsPage from './pages/ChartsPage'
 import CategoriesPage from './pages/CategoriesPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
+import ReportsPage from './pages/ReportsPage'
 import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
 import { useState, useEffect } from 'react'
@@ -18,7 +18,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
   transactions: () => <AllTransactionsPage />,
   categories: () => <CategoriesPage />,
-  charts: () => <ChartsPage />,
+  reports: () => <ReportsPage />,
   admin: ({ onPageChange }) => <AdminDashboardPage onPageChange={onPageChange} />,
 }
 

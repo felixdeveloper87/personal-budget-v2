@@ -15,6 +15,8 @@ import {
   AdminUserRow,
   PaymentMethod,
   PaymentMethodRequest,
+  PeriodType,
+  ReportResponse,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -252,6 +254,28 @@ export async function createInstallmentPlan(
 // Get installment plan by ID → GET /installment-plans/:id
 export async function getInstallmentPlan(id: number): Promise<InstallmentPlan> {
   const { data } = await api.get<InstallmentPlan>(`/installment-plans/${id}`)
+  return data
+}
+
+function toDateParam(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export async function getReport(period: PeriodType, date: Date): Promise<ReportResponse> {
+  const { data } = await api.get<ReportResponse>('/reports', {
+    params: { period, date: toDateParam(date) },
+  })
+  return data
+}
+
+export async function downloadReportPdf(period: PeriodType, date: Date): Promise<Blob> {
+  const { data } = await api.get<Blob>('/reports/pdf', {
+    params: { period, date: toDateParam(date) },
+    responseType: 'blob',
+  })
   return data
 }
 

@@ -18,8 +18,7 @@ interface CategoriesPageHeaderProps {
 
 /**
  * Page header for the Categories page. Mirrors the visual contract of
- * `DashboardHeader` and `ChartsPageHeader` so navigating between them
- * feels seamless.
+ * `DashboardHeader` so navigating between them feels seamless.
  */
 export default function CategoriesPageHeader({
   periodLabel,

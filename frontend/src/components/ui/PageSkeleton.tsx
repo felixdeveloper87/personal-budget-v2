@@ -34,11 +34,7 @@ function SkeletonShell({ height }: SkeletonShellProps) {
   )
 }
 
-/**
- * Calm skeleton displayed while charts load. Replaces the centred spinner
- * that used to flash on every refresh.
- */
-export default function ChartsPageSkeleton() {
+export default function PageSkeleton() {
   return (
     <VStack spacing={{ base: 3, md: 4 }} align="stretch" w="full">
       <SkeletonShell height="120px" />

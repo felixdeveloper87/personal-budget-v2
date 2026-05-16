@@ -68,6 +68,67 @@ export interface MonthlySummary {
   byCategory: { category: string; income: number; expense: number }[]
 }
 
+export interface ReportCategoryBreakdown {
+  category: string
+  amount: number
+  percentage: number
+  transactionCount: number
+}
+
+export interface ReportPaymentMethodBreakdown {
+  name: string
+  amount: number
+  percentage: number
+  transactionCount: number
+}
+
+export interface ReportTimeBucket {
+  label: string
+  startDate: string
+  endDate: string
+  income: number
+  expense: number
+  balance: number
+  transactionCount: number
+}
+
+export interface ReportTransactionItem {
+  id: number
+  paymentDate: string
+  type: TransactionType
+  category: string
+  description: string
+  amount: number
+  paymentMethodName?: string | null
+  installment: boolean
+  recurring: boolean
+}
+
+export interface ReportResponse {
+  period: PeriodType
+  periodLabel: string
+  referenceDate: string
+  startDate: string
+  endDate: string
+  generatedAt: string
+  totalIncome: number
+  totalExpense: number
+  balance: number
+  averageExpense: number
+  installmentExpenseTotal: number
+  recurringExpenseTotal: number
+  transactionCount: number
+  incomeCount: number
+  expenseCount: number
+  insights: string[]
+  incomeCategories: ReportCategoryBreakdown[]
+  expenseCategories: ReportCategoryBreakdown[]
+  paymentMethods: ReportPaymentMethodBreakdown[]
+  buckets: ReportTimeBucket[]
+  topIncome: ReportTransactionItem[]
+  topExpenses: ReportTransactionItem[]
+}
+
 // Usuário autenticado (AuthResponse do backend)
 export type UserPlan = 'STANDARD' | 'PREMIUM'
 

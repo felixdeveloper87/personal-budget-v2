@@ -8,7 +8,7 @@
 - Axios for API calls (JWT attached via context)
 
 ## App structure
-- `src/pages`: `LandingPage`, `Dashboard`, `AllTransactionsPage`, `ChartsPage`
+- `src/pages`: `LandingPage`, `Dashboard`, `AllTransactionsPage`, `CategoriesPage`, `ReportsPage`
 - `src/components`: modular UI (auth modals, layout, summary cards, charts modal, search modal, transaction form, installment plans)
 - `src/sections`: page-level compositions (summary, analysis, transactions, installment plans)
 - `src/contexts`: `AuthContext`, `SearchContext`

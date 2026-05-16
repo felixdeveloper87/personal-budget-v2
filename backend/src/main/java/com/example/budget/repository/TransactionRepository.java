@@ -31,6 +31,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      */
     List<Transaction> findByUser(User user);
 
+    @Query("SELECT t FROM Transaction t " +
+                    "LEFT JOIN FETCH t.paymentMethod " +
+                    "LEFT JOIN FETCH t.installmentPlan " +
+                    "LEFT JOIN FETCH t.recurringTransaction " +
+                    "WHERE t.user = :user AND t.paymentDate BETWEEN :start AND :end " +
+                    "ORDER BY t.paymentDate ASC, t.id ASC")
+    List<Transaction> findReportTransactions(@Param("user") User user,
+                    @Param("start") LocalDate start,
+                    @Param("end") LocalDate end);
+
     boolean existsByRecurringTransactionIdAndDateTimeBetween(
                     Long recurringTransactionId,
                     LocalDateTime start,

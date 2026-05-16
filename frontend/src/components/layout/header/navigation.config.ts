@@ -1,5 +1,5 @@
 import {
-  ChartColumn,
+  FileText,
   Layers,
   LayoutDashboard,
   ReceiptText,
@@ -7,7 +7,7 @@ import {
   type LucideIcon,
 } from '../../ui/icons'
 
-export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'charts' | 'admin'
+export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'reports' | 'admin'
 
 export interface NavItem {
   id: AppPage
@@ -40,11 +40,11 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Breakdown by category',
   },
   {
-    id: 'charts',
-    label: 'Charts',
-    shortLabel: 'Insights',
-    icon: ChartColumn,
-    description: 'Visual breakdown by period',
+    id: 'reports',
+    label: 'Reports',
+    shortLabel: 'Reports',
+    icon: FileText,
+    description: 'Export financial reports',
   },
 ]
 

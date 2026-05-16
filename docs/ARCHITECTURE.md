@@ -24,7 +24,7 @@ docker-*    # Docker/Compose scripts for dev/prod
 ## Notable modules
 - Backend controllers: `AuthController`, `TransactionController`, `InstallmentPlanController`, `HealthController`.
 - Backend services: auth, transactions (CRUD, search, summaries), installment plans (plan creation + transaction generation).
-- Frontend pages: `Dashboard`, `AllTransactionsPage`, `ChartsPage`, `LandingPage`.
+- Frontend pages: `Dashboard`, `AllTransactionsPage`, `CategoriesPage`, `ReportsPage`, `LandingPage`.
 - Frontend components: transaction form/modal, search modal, charts modal, summary cards, installment plans, layout header/nav.
 
 ## Observability and tooling

@@ -17,8 +17,7 @@ import {
   CategoryAnalysisHeader,
   CategoryAnalysisTabs,
 } from '../components/categories'
-import { ChartsPageSkeleton } from '../components/charts/page'
-import { SectionCard, SectionHeader } from '../components/ui'
+import { PageSkeleton, SectionCard, SectionHeader } from '../components/ui'
 
 /**
  * Dedicated page for the category breakdown. The period navigator is
@@ -70,7 +69,7 @@ export default function CategoriesPage() {
         />
 
         {loading ? (
-          <ChartsPageSkeleton />
+          <PageSkeleton />
         ) : (
           <SectionCard staticOnHover>
             <VStack spacing={0} align="stretch" w="full">

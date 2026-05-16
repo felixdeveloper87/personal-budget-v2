@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Copiar arquivos de dependências primeiro (para cache do Docker)
 COPY pom.xml .
+RUN mvn dependency:go-offline
 COPY src ./src
 
 # Testes no build por padrão (mvn verify = test + package). Build rápido local:
@@ -45,13 +46,6 @@ USER appuser
 
 # Expor porta
 EXPOSE 8080
-
-# Configurar variáveis de ambiente
-ENV DB_HOST=db
-ENV DB_PORT=5432
-ENV DB_NAME=personalbudget
-ENV DB_USER=postgres
-ENV DB_PASSWORD=postgres
 
 # Comando para iniciar a aplicação
 CMD ["java", "-jar", "app.jar"]

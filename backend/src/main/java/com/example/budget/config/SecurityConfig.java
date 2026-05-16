@@ -135,6 +135,7 @@ public class SecurityConfig {
                 // Protected endpoints (require authentication)
                 .requestMatchers("/api/transactions/**").authenticated()
                 .requestMatchers("/api/summary/**").authenticated()
+                .requestMatchers("/api/reports/**").authenticated()
                 .requestMatchers("/api/installment-plans/**").authenticated()
                 .requestMatchers("/api/recurring-transactions/**").authenticated()
                 .requestMatchers("/api/admin/**").authenticated()
