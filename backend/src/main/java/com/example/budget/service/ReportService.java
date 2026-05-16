@@ -52,7 +52,14 @@ public class ReportService {
         LocalDate date = referenceDate != null ? referenceDate : LocalDate.now();
         PeriodRange range = period.range(date);
         List<Transaction> transactions = transactionRepository.findReportTransactions(user, range.start(), range.end());
+        return buildReport(period, date, range, transactions);
+    }
 
+    private ReportResponse buildReport(
+            ReportPeriod period,
+            LocalDate date,
+            PeriodRange range,
+            List<Transaction> transactions) {
         BigDecimal totalIncome = sum(transactions, TransactionType.INCOME);
         BigDecimal totalExpense = sum(transactions, TransactionType.EXPENSE);
         int incomeCount = count(transactions, TransactionType.INCOME);
@@ -88,9 +95,13 @@ public class ReportService {
 
     @Transactional(readOnly = true)
     public byte[] generatePdf(String periodParam, LocalDate referenceDate, User user) {
-        ReportResponse report = generateReport(periodParam, referenceDate, user);
+        ReportPeriod period = ReportPeriod.from(periodParam);
+        LocalDate date = referenceDate != null ? referenceDate : LocalDate.now();
+        PeriodRange range = period.range(date);
+        List<Transaction> transactions = transactionRepository.findReportTransactions(user, range.start(), range.end());
+        ReportResponse report = buildReport(period, date, range, transactions);
         try {
-            return new PdfReportWriter().write(report, user);
+            return new PdfReportWriter().write(report, user, transactions);
         } catch (IOException ex) {
             throw new IllegalStateException("Could not generate report PDF", ex);
         }
@@ -374,12 +385,14 @@ public class ReportService {
         private PDPageContentStream content;
         private ReportResponse report;
         private User user;
+        private List<Transaction> movementTransactions;
         private float y;
         private int pageNumber;
 
-        byte[] write(ReportResponse report, User user) throws IOException {
+        byte[] write(ReportResponse report, User user, List<Transaction> movementTransactions) throws IOException {
             this.report = report;
             this.user = user;
+            this.movementTransactions = movementTransactions == null ? List.of() : movementTransactions;
             try (PDDocument doc = new PDDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
                 document = doc;
                 layout.newPage();
@@ -631,19 +644,23 @@ public class ReportService {
             layout.sectionTitle("Period movement");
             renderMovementHeader();
             int index = 0;
-            boolean hasMovement = false;
-            for (ReportResponse.TimeBucket bucket : report.getBuckets()) {
-                if (bucket.getIncome().signum() > 0) {
-                    renderMovementRow(index++, bucket.getLabel(), "Income", money(bucket.getIncome()), theme.success());
-                    hasMovement = true;
-                }
-                if (bucket.getExpense().signum() > 0) {
-                    renderMovementRow(index++, bucket.getLabel(), "Expense", money(bucket.getExpense()),
-                            theme.danger());
-                    hasMovement = true;
-                }
+            List<Transaction> rows = movementTransactions.stream()
+                    .sorted(Comparator
+                            .comparing(Transaction::getPaymentDate)
+                            .thenComparing(Transaction::getId, Comparator.nullsLast(Comparator.naturalOrder())))
+                    .toList();
+            for (Transaction transaction : rows) {
+                int[] accent = transaction.getType() == TransactionType.INCOME ? theme.success() : theme.danger();
+                String type = transaction.getType() == TransactionType.INCOME ? "Income" : "Expense";
+                renderMovementRow(
+                        index++,
+                        formatDate(transaction.getPaymentDate()),
+                        type,
+                        blankToDefault(transaction.getCategory(), "Uncategorised"),
+                        money(transaction.getAmount()),
+                        accent);
             }
-            if (!hasMovement) {
+            if (rows.isEmpty()) {
                 theme.mutedText();
                 text.draw("No income or expense movement in this period.", MARGIN, y, PDType1Font.HELVETICA, 9);
                 y -= 24;
@@ -657,12 +674,13 @@ public class ReportService {
             theme.stroke(MARGIN, y - 16, CONTENT_WIDTH, 22, theme.border());
             theme.mutedText();
             text.draw("DATE", MARGIN + 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
-            text.draw("TRANSACTION", MARGIN + 190, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("TRANSACTION", MARGIN + 136, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("CATEGORY", MARGIN + 248, y - 8, PDType1Font.HELVETICA_BOLD, 7);
             text.drawRight("AMOUNT", MARGIN + CONTENT_WIDTH - 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
             y -= 24;
         }
 
-        private void renderMovementRow(int index, String date, String type, String amount, int[] accent)
+        private void renderMovementRow(int index, String date, String type, String category, String amount, int[] accent)
                 throws IOException {
             float rowHeight = 24;
             if (y - rowHeight < FOOTER_SAFE_TOP) {
@@ -674,9 +692,12 @@ public class ReportService {
                 theme.fill(MARGIN, y - 13, CONTENT_WIDTH, rowHeight, theme.zebra());
             }
             theme.secondaryText();
-            text.drawFitted(date, MARGIN + 8, y, 150, PDType1Font.HELVETICA, 8.5f);
+            text.drawFitted(date, MARGIN + 8, y, 110, PDType1Font.HELVETICA, 8.5f);
             theme.color(accent);
-            text.draw(type, MARGIN + 190, y, PDType1Font.HELVETICA_BOLD, 8.5f);
+            text.draw(type, MARGIN + 136, y, PDType1Font.HELVETICA_BOLD, 8.5f);
+            theme.secondaryText();
+            text.drawFitted(category, MARGIN + 248, y, 170, PDType1Font.HELVETICA, 8.5f);
+            theme.color(accent);
             text.drawRight(amount, MARGIN + CONTENT_WIDTH - 8, y, PDType1Font.HELVETICA_BOLD, 8.5f);
             y -= rowHeight;
             theme.line(MARGIN, y + 7, MARGIN + CONTENT_WIDTH, y + 7, theme.subtleBorder());
