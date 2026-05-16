@@ -657,6 +657,7 @@ public class ReportService {
                         formatDate(transaction.getPaymentDate()),
                         type,
                         blankToDefault(transaction.getCategory(), "Uncategorised"),
+                        shortDescription(transaction.getDescription()),
                         money(transaction.getAmount()),
                         accent);
             }
@@ -674,13 +675,21 @@ public class ReportService {
             theme.stroke(MARGIN, y - 16, CONTENT_WIDTH, 22, theme.border());
             theme.mutedText();
             text.draw("DATE", MARGIN + 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
-            text.draw("TRANSACTION", MARGIN + 136, y - 8, PDType1Font.HELVETICA_BOLD, 7);
-            text.draw("CATEGORY", MARGIN + 248, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("TRANSACTION", MARGIN + 124, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("CATEGORY", MARGIN + 214, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("DESCRIPTION", MARGIN + 360, y - 8, PDType1Font.HELVETICA_BOLD, 7);
             text.drawRight("AMOUNT", MARGIN + CONTENT_WIDTH - 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
             y -= 24;
         }
 
-        private void renderMovementRow(int index, String date, String type, String category, String amount, int[] accent)
+        private void renderMovementRow(
+                int index,
+                String date,
+                String type,
+                String category,
+                String description,
+                String amount,
+                int[] accent)
                 throws IOException {
             float rowHeight = 24;
             if (y - rowHeight < FOOTER_SAFE_TOP) {
@@ -692,15 +701,21 @@ public class ReportService {
                 theme.fill(MARGIN, y - 13, CONTENT_WIDTH, rowHeight, theme.zebra());
             }
             theme.secondaryText();
-            text.drawFitted(date, MARGIN + 8, y, 110, PDType1Font.HELVETICA, 8.5f);
+            text.drawFitted(date, MARGIN + 8, y, 72, PDType1Font.HELVETICA, 8.5f);
             theme.color(accent);
-            text.draw(type, MARGIN + 136, y, PDType1Font.HELVETICA_BOLD, 8.5f);
+            text.draw(type, MARGIN + 124, y, PDType1Font.HELVETICA_BOLD, 8.5f);
             theme.secondaryText();
-            text.drawFitted(category, MARGIN + 248, y, 170, PDType1Font.HELVETICA, 8.5f);
+            text.drawFitted(category, MARGIN + 214, y, 132, PDType1Font.HELVETICA, 8.5f);
+            text.drawFitted(description, MARGIN + 360, y, 78, PDType1Font.HELVETICA, 8.5f);
             theme.color(accent);
             text.drawRight(amount, MARGIN + CONTENT_WIDTH - 8, y, PDType1Font.HELVETICA_BOLD, 8.5f);
             y -= rowHeight;
             theme.line(MARGIN, y + 7, MARGIN + CONTENT_WIDTH, y + 7, theme.subtleBorder());
+        }
+
+        private String shortDescription(String description) {
+            String value = blankToDefault(description, "-");
+            return value.length() <= 10 ? value : value.substring(0, 10);
         }
 
         private class PdfLayout {
