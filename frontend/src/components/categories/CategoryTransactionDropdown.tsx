@@ -45,7 +45,6 @@ export default function CategoryTransactionDropdown({
   transactions,
   accentScheme,
   borderColor,
-  hoverBg,
   badgeBg,
   amountColor,
   showProgress = false,
@@ -57,13 +56,18 @@ export default function CategoryTransactionDropdown({
   const [internalExpanded, setInternalExpanded] = useState(false)
   const [visibleCount, setVisibleCount] = useState(initialVisibleCount)
 
+  const surfaceBg = useColorModeValue('white', 'whiteAlpha.50')
   const fallbackBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
-  const fallbackHoverBg = useColorModeValue(`${color}14`, `${color}20`)
-  const fallbackBadgeBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
-  const rowBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const activeBorder = useColorModeValue('gray.300', 'whiteAlpha.300')
+  const neutralHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const fallbackBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const rowBg = useColorModeValue('white', 'whiteAlpha.50')
   const rowBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const rowHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const progressBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const accentTint = useColorModeValue(`${color}14`, `${color}24`)
+  const actionColor = useColorModeValue('gray.700', 'gray.200')
 
   const expanded = isExpanded ?? internalExpanded
   const percentageValue = typeof percentage === 'number' ? percentage : Number(percentage)
@@ -98,12 +102,14 @@ export default function CategoryTransactionDropdown({
     <Box
       borderRadius="lg"
       border="1px solid"
-      borderColor={expanded ? color : borderColor ?? fallbackBorder}
-      transition="background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease"
+      borderColor={expanded ? activeBorder : borderColor ?? fallbackBorder}
+      bg={surfaceBg}
+      data-accent-scheme={accentScheme}
+      boxShadow={expanded ? `inset 3px 0 0 ${color}` : 'none'}
+      transition="background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease"
       _hover={{
-        bg: hoverBg ?? fallbackHoverBg,
-        transform: 'translateX(2px)',
-        borderColor: color,
+        bg: neutralHoverBg,
+        borderColor: activeBorder,
       }}
       overflow="hidden"
     >
@@ -122,7 +128,15 @@ export default function CategoryTransactionDropdown({
       >
         <HStack justify="space-between" align="center" gap={3}>
           <HStack spacing={3} align="center" minW={0} flex={1}>
-            <Box w={3.5} h={3.5} borderRadius={showProgress ? 'full' : 'sm'} bg={color} flexShrink={0} />
+            <Box
+              w={3.5}
+              h={3.5}
+              borderRadius={showProgress ? 'full' : 'sm'}
+              bg={accentTint}
+              border="1px solid"
+              borderColor={color}
+              flexShrink={0}
+            />
             <VStack align="flex-start" spacing={0} minW={0}>
               <Text fontSize="sm" fontWeight={600} color={colors.text.primary} isTruncated>
                 {category}
@@ -142,9 +156,11 @@ export default function CategoryTransactionDropdown({
               py={0.5}
               borderRadius="full"
               bg={badgeBg ?? fallbackBadgeBg}
-              color={colors.text.primary}
+              color={mutedColor}
               fontSize="xs"
               fontWeight={600}
+              textTransform="none"
+              letterSpacing="0"
             >
               {percentageLabel}%
             </Badge>
@@ -161,7 +177,7 @@ export default function CategoryTransactionDropdown({
             mt={3}
             sx={{
               '& > div': {
-                background: color,
+                background: `linear-gradient(90deg, ${color} 0%, ${color}B3 100%)`,
                 borderRadius: 'full',
               },
             }}
@@ -183,6 +199,7 @@ export default function CategoryTransactionDropdown({
               border="1px solid"
               borderColor={rowBorder}
               borderRadius="md"
+              _hover={{ bg: rowHoverBg }}
             >
               <VStack align="flex-start" spacing={0} minW={0} flex={1}>
                 <Text fontSize="xs" fontWeight={700} color={colors.text.primary} noOfLines={1}>
@@ -206,10 +223,11 @@ export default function CategoryTransactionDropdown({
             <Button
               size="sm"
               variant="ghost"
-              colorScheme={accentScheme}
+              color={actionColor}
               fontSize="xs"
               fontWeight={700}
               onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+              _hover={{ bg: neutralHoverBg }}
             >
               Show {Math.min(PAGE_SIZE, remainingCount)} more
             </Button>

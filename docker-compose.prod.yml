@@ -1,3 +1,8 @@
+#========================================================================
+# File: docker-compose.prod.yml
+# Docker Compose para ambiente de produção
+#========================================================================
+
 services:
   # Banco de dados PostgreSQL
 
@@ -44,8 +49,7 @@ services:
       - DB_NAME=${DB_NAME:-personalbudget}
       - DB_USER=${DB_USER:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890}
-      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+      - JWT_SECRET=${JWT_SECRET}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
