@@ -389,8 +389,6 @@ public class ReportService {
                 renderBreakdownPanels();
                 renderPaymentMethodPanel();
                 renderMovementTable();
-                renderTransactionTable("Largest expenses", report.getTopExpenses());
-                renderTransactionTable("Largest income", report.getTopIncome());
                 layout.closePage();
                 document.save(output);
                 return output.toByteArray();
@@ -529,7 +527,7 @@ public class ReportService {
         }
 
         private void renderBreakdownPanels() throws IOException {
-            float panelHeight = 194;
+            float panelHeight = 224;
             layout.ensure(panelHeight + 42);
             layout.sectionTitle("Category breakdown");
             float gap = 18;
@@ -558,7 +556,7 @@ public class ReportService {
                 text.draw("No data for this period.", x + 14, top - 44, PDType1Font.HELVETICA, 9);
                 return;
             }
-            float rowY = top - 44;
+            float rowY = top - 42;
             for (ReportResponse.CategoryBreakdown item : items.stream().limit(5).toList()) {
                 renderProgressBreakdownRow(
                         x + 14,
@@ -569,15 +567,15 @@ public class ReportService {
                         item.getPercentage(),
                         item.getTransactionCount() + " records",
                         accent);
-                rowY -= 29;
+                rowY -= 34;
             }
         }
 
         private void renderPaymentMethodPanel() throws IOException {
-            layout.ensure(166);
+            layout.ensure(202);
             layout.sectionTitle("Payment breakdown");
             float top = y;
-            float height = 144;
+            float height = 180;
             layout.card(MARGIN, top - height, CONTENT_WIDTH, height, theme.white(), theme.border());
             if (report.getPaymentMethods().isEmpty()) {
                 theme.mutedText();
@@ -590,8 +588,8 @@ public class ReportService {
             float leftX = MARGIN + 14;
             float rightX = MARGIN + CONTENT_WIDTH / 2 + 10;
             float colWidth = CONTENT_WIDTH / 2 - 28;
-            float rowYLeft = top - 31;
-            float rowYRight = top - 31;
+            float rowYLeft = top - 32;
+            float rowYRight = top - 32;
             List<ReportResponse.PaymentMethodBreakdown> methods = report.getPaymentMethods().stream().limit(8).toList();
             for (int i = 0; i < methods.size(); i++) {
                 ReportResponse.PaymentMethodBreakdown method = methods.get(i);
@@ -599,12 +597,12 @@ public class ReportService {
                     renderProgressBreakdownRow(leftX, rowYLeft, colWidth, paymentMethodName(method),
                             money(method.getAmount()),
                             method.getPercentage(), method.getTransactionCount() + " payments", theme.primary());
-                    rowYLeft -= 29;
+                    rowYLeft -= 34;
                 } else {
                     renderProgressBreakdownRow(rightX, rowYRight, colWidth, paymentMethodName(method),
                             money(method.getAmount()),
                             method.getPercentage(), method.getTransactionCount() + " payments", theme.purple());
-                    rowYRight -= 29;
+                    rowYRight -= 34;
                 }
             }
             y = top - height - 22;
@@ -623,60 +621,65 @@ public class ReportService {
             text.drawFitted(label, x, baseline, width - 92, PDType1Font.HELVETICA_BOLD, 8.5f);
             theme.heading();
             text.drawRight(percentage + "%", x + width, baseline, PDType1Font.HELVETICA_BOLD, 8);
-            layout.progressBar(x, baseline - 13, width, 5, percentage, accent);
+            layout.progressBar(x, baseline - 15, width, 5, percentage, accent);
             theme.mutedText();
-            text.drawFitted(amount + " | " + detail, x, baseline - 24, width, PDType1Font.HELVETICA, 7.8f);
+            text.drawFitted(amount + " | " + detail, x, baseline - 27, width, PDType1Font.HELVETICA, 7.6f);
         }
 
         private void renderMovementTable() throws IOException {
             layout.ensure(112);
             layout.sectionTitle("Period movement");
-            PdfTable table = new PdfTable(List.of(
-                    new TableColumn("Period", 0.16f, false),
-                    new TableColumn("Income", 0.23f, true),
-                    new TableColumn("Expenses", 0.23f, true),
-                    new TableColumn("Balance", 0.23f, true),
-                    new TableColumn("Count", 0.15f, true)));
-            table.header();
+            renderMovementHeader();
             int index = 0;
+            boolean hasMovement = false;
             for (ReportResponse.TimeBucket bucket : report.getBuckets()) {
-                table.row(index++, List.of(
-                        bucket.getLabel(),
-                        money(bucket.getIncome()),
-                        money(bucket.getExpense()),
-                        money(bucket.getBalance()),
-                        String.valueOf(bucket.getTransactionCount())));
+                if (bucket.getIncome().signum() > 0) {
+                    renderMovementRow(index++, bucket.getLabel(), "Income", money(bucket.getIncome()), theme.success());
+                    hasMovement = true;
+                }
+                if (bucket.getExpense().signum() > 0) {
+                    renderMovementRow(index++, bucket.getLabel(), "Expense", money(bucket.getExpense()),
+                            theme.danger());
+                    hasMovement = true;
+                }
+            }
+            if (!hasMovement) {
+                theme.mutedText();
+                text.draw("No income or expense movement in this period.", MARGIN, y, PDType1Font.HELVETICA, 9);
+                y -= 24;
             }
             y -= 16;
         }
 
-        private void renderTransactionTable(String title, List<ReportResponse.ReportTransactionItem> transactions)
+        private void renderMovementHeader() throws IOException {
+            layout.ensure(48);
+            theme.fill(MARGIN, y - 16, CONTENT_WIDTH, 22, theme.offWhite());
+            theme.stroke(MARGIN, y - 16, CONTENT_WIDTH, 22, theme.border());
+            theme.mutedText();
+            text.draw("DATE", MARGIN + 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.draw("TRANSACTION", MARGIN + 190, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            text.drawRight("AMOUNT", MARGIN + CONTENT_WIDTH - 8, y - 8, PDType1Font.HELVETICA_BOLD, 7);
+            y -= 24;
+        }
+
+        private void renderMovementRow(int index, String date, String type, String amount, int[] accent)
                 throws IOException {
-            layout.ensure(112);
-            layout.sectionTitle(title);
-            if (transactions.isEmpty()) {
-                theme.mutedText();
-                text.draw("No transactions for this section.", MARGIN, y, PDType1Font.HELVETICA, 9);
-                y -= 24;
-                return;
+            float rowHeight = 24;
+            if (y - rowHeight < FOOTER_SAFE_TOP) {
+                layout.newPage();
+                layout.sectionTitle("Period movement");
+                renderMovementHeader();
             }
-            PdfTable table = new PdfTable(List.of(
-                    new TableColumn("Date", 0.15f, false),
-                    new TableColumn("Description", 0.35f, false),
-                    new TableColumn("Category", 0.18f, false),
-                    new TableColumn("Method", 0.16f, false),
-                    new TableColumn("Amount", 0.16f, true)));
-            table.header();
-            int index = 0;
-            for (ReportResponse.ReportTransactionItem tx : transactions.stream().limit(8).toList()) {
-                table.row(index++, List.of(
-                        formatDate(tx.getPaymentDate()),
-                        blankToDefault(tx.getDescription(), "No description"),
-                        blankToDefault(tx.getCategory(), "Uncategorised"),
-                        blankToDefault(tx.getPaymentMethodName(), "-"),
-                        money(tx.getAmount())));
+            if (index % 2 == 1) {
+                theme.fill(MARGIN, y - 13, CONTENT_WIDTH, rowHeight, theme.zebra());
             }
-            y -= 16;
+            theme.secondaryText();
+            text.drawFitted(date, MARGIN + 8, y, 150, PDType1Font.HELVETICA, 8.5f);
+            theme.color(accent);
+            text.draw(type, MARGIN + 190, y, PDType1Font.HELVETICA_BOLD, 8.5f);
+            text.drawRight(amount, MARGIN + CONTENT_WIDTH - 8, y, PDType1Font.HELVETICA_BOLD, 8.5f);
+            y -= rowHeight;
+            theme.line(MARGIN, y + 7, MARGIN + CONTENT_WIDTH, y + 7, theme.subtleBorder());
         }
 
         private class PdfLayout {
