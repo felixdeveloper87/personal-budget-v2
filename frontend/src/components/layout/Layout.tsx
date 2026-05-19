@@ -89,6 +89,7 @@ export default function Layout({
       <Flex
         direction="column"
         flex={1}
+        minW={0}
         ml={showSidebar ? `${sidebarWidth}px` : 0}
         transition="margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
         minH="100vh"

@@ -69,7 +69,10 @@ export default function NavBar({
     const el = itemRefs.current[currentPage]
     if (!el) return
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
-  }, [currentPage])
+    if (isMobile) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+  }, [currentPage, isMobile])
 
   useLayoutEffect(() => {
     measure()
@@ -96,7 +99,10 @@ export default function NavBar({
       borderColor={trackBorder}
       backdropFilter="blur(8px)"
       flexShrink={0}
-      w={isMobile ? '100%' : 'auto'}
+      w={isMobile ? 'full' : 'auto'}
+      maxW={isMobile ? '380px' : 'none'}
+      mx="auto"
+      overflow="hidden"
       position="relative"
       {...stackProps}
     >
@@ -189,15 +195,16 @@ function NavBarItem({
       onClick={() => onSelect?.(item.id)}
       ref={assignRef as unknown as React.Ref<HTMLDivElement>}
       flex={isMobile ? 1 : undefined}
-      px={isMobile ? 2 : isIconOnly ? 2.5 : 3.5}
+      flexShrink={isMobile ? 1 : undefined}
+      px={isMobile ? 1.5 : isIconOnly ? 2.5 : 3.5}
       py={isMobile ? 2.5 : 2}
-      minH={isMobile ? '48px' : '40px'}
-      minW={isIconOnly ? '40px' : undefined}
+      minH={isMobile ? '44px' : '40px'}
+      minW={0}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"
       color={isActive ? activeColor : inactiveColor}
       fontWeight={isActive ? 700 : 600}
-      fontSize={isMobile ? 'xs' : 'sm'}
+      fontSize={isMobile ? '2xs' : 'sm'}
       letterSpacing="0.005em"
       position="relative"
       zIndex={1}
@@ -214,7 +221,7 @@ function NavBarItem({
       }}
     >
       <HStack
-        spacing={showLabel ? (isMobile ? 1.5 : 2) : 0}
+        spacing={showLabel ? (isMobile ? 1 : 2) : 0}
         justify="center"
         align="center"
         h="full"

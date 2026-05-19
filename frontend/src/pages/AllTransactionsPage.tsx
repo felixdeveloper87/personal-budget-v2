@@ -84,6 +84,7 @@ export default function AllTransactionsPage() {
       py={{ base: 3, md: 5 }}
       maxW="1400px"
       mx="auto"
+      minW={0}
     >
       <AllTransactionsSection
         transactions={transactions}
