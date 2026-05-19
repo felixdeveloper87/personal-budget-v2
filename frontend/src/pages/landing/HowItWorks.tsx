@@ -38,7 +38,7 @@ export default function HowItWorks() {
       backgroundImage={bgImg}
       backgroundSize="cover"
       backgroundPosition="center"
-      backgroundAttachment="fixed"
+      backgroundAttachment={{ base: 'scroll', md: 'fixed' }}
       _before={{
         content: '""',
         position: 'absolute',
