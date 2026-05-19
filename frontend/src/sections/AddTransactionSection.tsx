@@ -35,8 +35,8 @@ const QUICK_ACTIONS: QuickActionConfig[] = [
     type: 'INCOME',
     icon: Plus,
     trendIcon: TrendingUp,
-    gradient: 'linear-gradient(135deg, #047857 0%, #10b981 60%, #34d399 100%)', // Emerald/Teal gradient
-    glowColor: 'rgba(16, 185, 129, 0.45)',
+    gradient: 'linear-gradient(135deg, #052e24 0%, #059669 55%, #34d399 100%)',
+    glowColor: 'rgba(16, 185, 129, 0.35)',
   },
   {
     label: 'Expense',
@@ -44,8 +44,8 @@ const QUICK_ACTIONS: QuickActionConfig[] = [
     type: 'EXPENSE',
     icon: Minus,
     trendIcon: TrendingDown,
-    gradient: 'linear-gradient(135deg, #be123c 0%, #f43f5e 60%, #fb7185 100%)', // Rose/Crimson gradient
-    glowColor: 'rgba(244, 63, 94, 0.45)',
+    gradient: 'linear-gradient(135deg, #3b0712 0%, #dc2626 55%, #fb7185 100%)',
+    glowColor: 'rgba(239, 68, 68, 0.35)',
   },
 ]
 
@@ -93,9 +93,9 @@ export default function AddTransactionSection({
                     role="group"
                     overflow="hidden"
                     boxShadow={`0 10px 25px -10px ${action.glowColor}`}
-                    transition="all 0.35s cubic-bezier(0.16, 1, 0.3, 1)"
+                    transition="all 0.3s ease"
                     
-                    // Premium shine reflection sweeps across on hover
+                    // Subtle shine reflection on hover
                     _before={{
                       content: '""',
                       position: 'absolute',
@@ -103,42 +103,25 @@ export default function AddTransactionSection({
                       left: '-100%',
                       width: '40%',
                       height: '100%',
-                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent)',
+                      background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent)',
                       transform: 'skewX(-25deg)',
                       transition: 'all 0.65s cubic-bezier(0.16, 1, 0.3, 1)',
                       zIndex: 1,
                     }}
                     
                     _hover={{
-                      transform: 'translateY(-3px) scale(1.015)',
-                      boxShadow: `0 16px 32px -8px ${action.glowColor}`,
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 14px 28px -8px ${action.glowColor}`,
                       _before: {
                         left: '160%',
                       }
                     }}
-                    _active={{ transform: 'translateY(-1px) scale(0.985)' }}
+                    _active={{ transform: 'scale(0.98)' }}
                     _focusVisible={{
                       outline: 'none',
-                      boxShadow: `0 0 0 3px rgba(255, 255, 255, 0.4), 0 10px 25px -10px ${action.glowColor}`,
+                      boxShadow: `0 0 0 3px rgba(255, 255, 255, 0.4)`,
                     }}
                   >
-                    {/* Floating background decorative trend icon */}
-                    <Box
-                      position="absolute"
-                      left="12%"
-                      top="15%"
-                      opacity={0.08}
-                      transition="all 0.35s cubic-bezier(0.16, 1, 0.3, 1)"
-                      _groupHover={{
-                        opacity: 0.16,
-                        transform: 'scale(1.2) rotate(5deg)',
-                      }}
-                      pointerEvents="none"
-                      zIndex={0}
-                    >
-                      <Icon as={action.trendIcon} boxSize="60px" weight="bold" />
-                    </Box>
-
                     {/* Content Layer */}
                     <HStack
                       justify="space-between"
@@ -153,8 +136,7 @@ export default function AddTransactionSection({
                         <Text
                           fontWeight={800}
                           fontSize={{ base: 'md', sm: 'lg' }}
-                          lineHeight="1.15"
-                          letterSpacing="-0.01em"
+                          lineHeight="1.1"
                         >
                           {action.label}
                         </Text>
@@ -168,31 +150,26 @@ export default function AddTransactionSection({
                         </Text>
                       </VStack>
 
-                      {/* Icon Circle Container */}
+                      {/* Icon Container: Clean & Subtle */}
                       <Box
-                        w={{ base: 9, sm: 10 }}
-                        h={{ base: 9, sm: 10 }}
-                        borderRadius="full"
+                        w={{ base: 8, sm: 9 }}
+                        h={{ base: 8, sm: 9 }}
+                        borderRadius="xl"
                         bg="whiteAlpha.200"
-                        border="1px solid"
-                        borderColor="whiteAlpha.35"
                         display="flex"
                         alignItems="center"
                         justifyContent="center"
                         flexShrink={0}
-                        transition="all 0.35s cubic-bezier(0.16, 1, 0.3, 1)"
+                        transition="all 0.3s ease"
                         _groupHover={{
-                          borderColor: 'whiteAlpha.600',
                           bg: 'whiteAlpha.300',
-                          transform: 'rotate(90deg)',
+                          transform: 'scale(1.05)',
                         }}
                       >
                         <Icon 
                           as={action.icon} 
                           boxSize={4} 
                           weight="bold" 
-                          transition="transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)"
-                          _groupHover={{ transform: 'scale(1.15)' }}
                         />
                       </Box>
                     </HStack>
