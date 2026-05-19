@@ -108,6 +108,12 @@ export default function CategoriesPage() {
   const statLabelColor = useColorModeValue('gray.500', 'gray.400')
   const statCardBg = useColorModeValue('white', 'rgba(255, 255, 255, 0.03)')
   const statCardBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
+  const redAccent = useColorModeValue('red.500', 'red.300')
+  const greenAccent = useColorModeValue('green.500', 'green.300')
+  const cardShadow = useColorModeValue(
+    '0 4px 16px -4px rgba(15, 23, 42, 0.06)',
+    '0 4px 16px -4px rgba(0, 0, 0, 0.4)',
+  )
 
   const fmt = (n: number) =>
     `£${n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -128,10 +134,7 @@ export default function CategoriesPage() {
           border="1px solid"
           borderColor={border}
           overflow="hidden"
-          boxShadow={useColorModeValue(
-            '0 4px 16px -4px rgba(15, 23, 42, 0.06)',
-            '0 4px 16px -4px rgba(0, 0, 0, 0.4)',
-          )}
+          boxShadow={cardShadow}
         >
           {/* ─── Header ─── */}
           <Box
@@ -266,7 +269,7 @@ export default function CategoriesPage() {
                 <MiniStatCard
                   label="Expense categories"
                   value={String(expenseCategories)}
-                  accent={useColorModeValue('red.500', 'red.300')}
+                  accent={redAccent}
                   bg={statCardBg}
                   border={statCardBorder}
                   valueColor={statValueColor}
@@ -275,7 +278,7 @@ export default function CategoriesPage() {
                 <MiniStatCard
                   label="Total expenses"
                   value={fmt(expenseTotal)}
-                  accent={useColorModeValue('red.500', 'red.300')}
+                  accent={redAccent}
                   bg={statCardBg}
                   border={statCardBorder}
                   valueColor={statValueColor}
@@ -284,7 +287,7 @@ export default function CategoriesPage() {
                 <MiniStatCard
                   label="Income categories"
                   value={String(incomeCategories)}
-                  accent={useColorModeValue('green.500', 'green.300')}
+                  accent={greenAccent}
                   bg={statCardBg}
                   border={statCardBorder}
                   valueColor={statValueColor}
@@ -293,7 +296,7 @@ export default function CategoriesPage() {
                 <MiniStatCard
                   label="Total income"
                   value={fmt(incomeTotal)}
-                  accent={useColorModeValue('green.500', 'green.300')}
+                  accent={greenAccent}
                   bg={statCardBg}
                   border={statCardBorder}
                   valueColor={statValueColor}
