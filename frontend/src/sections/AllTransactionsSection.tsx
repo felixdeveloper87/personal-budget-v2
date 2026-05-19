@@ -79,6 +79,12 @@ export default function AllTransactionsSection({
   const countColor = useColorModeValue('blue.700', 'blue.300')
   const countBorder = useColorModeValue('blue.100', 'rgba(59, 130, 246, 0.25)')
 
+  const cardShadow = useColorModeValue(
+    '0 4px 16px -4px rgba(15, 23, 42, 0.06)',
+    '0 4px 16px -4px rgba(0, 0, 0, 0.4)',
+  )
+  const tabHoverColor = useColorModeValue('gray.900', 'white')
+
   return (
     <Box
       w="full"
@@ -87,10 +93,7 @@ export default function AllTransactionsSection({
       border="1px solid"
       borderColor={border}
       overflow="hidden"
-      boxShadow={useColorModeValue(
-        '0 4px 16px -4px rgba(15, 23, 42, 0.06)',
-        '0 4px 16px -4px rgba(0, 0, 0, 0.4)',
-      )}
+      boxShadow={cardShadow}
     >
       {/* ─── Header ─── */}
       <Box
@@ -211,6 +214,7 @@ export default function AllTransactionsSection({
                 activeShadow={tabActiveShadow}
                 activeColor={tabActiveText}
                 inactiveColor={tabInactiveText}
+                hoverColor={tabHoverColor}
               />
               <ViewToggleButton
                 icon={Calendar}
@@ -221,6 +225,7 @@ export default function AllTransactionsSection({
                 activeShadow={tabActiveShadow}
                 activeColor={tabActiveText}
                 inactiveColor={tabInactiveText}
+                hoverColor={tabHoverColor}
               />
             </HStack>
 
@@ -287,6 +292,7 @@ interface ViewToggleButtonProps {
   activeShadow: string
   activeColor: string
   inactiveColor: string
+  hoverColor: string
 }
 
 function ViewToggleButton({
@@ -298,6 +304,7 @@ function ViewToggleButton({
   activeShadow,
   activeColor,
   inactiveColor,
+  hoverColor,
 }: ViewToggleButtonProps) {
   return (
     <Box
@@ -320,7 +327,7 @@ function ViewToggleButton({
       cursor="pointer"
       transition="all 0.2s ease"
       _hover={{
-        color: isActive ? activeColor : useColorModeValue('gray.900', 'white'),
+        color: isActive ? activeColor : hoverColor,
       }}
     >
       <Icon as={IconComponent} boxSize={4} weight={isActive ? 'duotone' : 'regular'} />
