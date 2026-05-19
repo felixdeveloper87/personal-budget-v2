@@ -1,4 +1,4 @@
-import { Box, VStack, Spinner, Text } from '@chakra-ui/react'
+import { Box, VStack, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
 import AllTransactionsSection from '../sections/AllTransactionsSection'
 import { useState, useEffect } from 'react'
 import { hasActiveFilters } from '../utils/filters'
@@ -15,6 +15,9 @@ export default function AllTransactionsPage() {
   const [loading, setLoading] = useState(false)
   const { user } = useAuth()
   const { filters } = useSearch()
+
+  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
+  const textColor = useColorModeValue('gray.500', 'gray.400')
 
   const loadData = async () => {
     if (!user?.token) return
@@ -54,17 +57,34 @@ export default function AllTransactionsPage() {
 
   if (loading) {
     return (
-      <Box px={{ base: 4, md: 8, lg: 12 }} py={{ base: 4, md: 8 }}>
-        <VStack py={20}>
-          <Spinner size="xl" />
-          <Text>Loading transactions...</Text>
+      <Box
+        px={{ base: 2, md: 4, lg: 6 }}
+        py={{ base: 4, md: 8 }}
+        maxW="1400px"
+        mx="auto"
+      >
+        <VStack py={20} spacing={4}>
+          <Spinner
+            size="xl"
+            color={spinnerColor}
+            thickness="3px"
+            speed="0.8s"
+          />
+          <Text fontSize="sm" fontWeight={500} color={textColor}>
+            Loading transactions...
+          </Text>
         </VStack>
       </Box>
     )
   }
 
   return (
-    <Box>
+    <Box
+      px={{ base: 2, md: 4, lg: 6 }}
+      py={{ base: 3, md: 5 }}
+      maxW="1400px"
+      mx="auto"
+    >
       <AllTransactionsSection
         transactions={transactions}
         hasFilters={hasActiveFilters(filters)}

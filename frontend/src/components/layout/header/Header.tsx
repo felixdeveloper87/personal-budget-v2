@@ -16,6 +16,8 @@ interface HeaderProps {
   onLogin?: () => void
   currentPage?: AppPage
   onPageChange?: (page: AppPage) => void
+  /** When true the desktop NavBar is hidden (sidebar handles navigation). */
+  hasSidebar?: boolean
 }
 
 export default function Header({
@@ -24,6 +26,7 @@ export default function Header({
   onLogin,
   currentPage = 'dashboard',
   onPageChange,
+  hasSidebar = false,
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const { runSearch } = useSearch()
@@ -132,8 +135,8 @@ export default function Header({
           >
             <Logo user={user} />
 
-            {/* Desktop primary nav (md+). Mobile uses the second row below. */}
-            {user && (
+            {/* Desktop primary nav (md+). Hidden when sidebar is active. */}
+            {user && !hasSidebar && (
               <Box
                 display={{ base: 'none', md: 'block' }}
                 flexShrink={0}

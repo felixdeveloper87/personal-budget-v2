@@ -75,6 +75,8 @@ import {
   Smiley as Smile,
   DeviceMobile as Smartphone,
   Sparkle as Sparkles,
+  Sidebar as SidebarSimple,
+  CaretDoubleLeft,
   Sun,
   Tag,
   Trash as Trash2,
@@ -174,5 +176,7 @@ export {
   User,
   Wallet,
   X,
-  Zap
+  Zap,
+  SidebarSimple,
+  CaretDoubleLeft
 }
