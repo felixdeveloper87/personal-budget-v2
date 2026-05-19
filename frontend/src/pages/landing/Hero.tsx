@@ -26,7 +26,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
     'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
     'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
   )
-  const bgImg = useColorModeValue('url(/hero_bg_premium_light.png)', 'url(/hero_bg_premium.png)')
+  const bgImg = useColorModeValue('url(/hero_bg_premium_light.webp)', 'url(/hero_bg_premium.webp)')
   const overlayBg = useColorModeValue('rgba(255, 255, 255, 0.85)', 'rgba(10, 12, 16, 0.75)')
 
   const titleColor = useColorModeValue('gray.900', 'whiteAlpha.900')

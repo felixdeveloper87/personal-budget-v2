@@ -18,7 +18,7 @@ export default function FAQ() {
     'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
     'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
   )
-  const bgImg = useColorModeValue('url(/hero_bg_premium_light.png)', 'url(/hero_bg_premium.png)')
+  const bgImg = useColorModeValue('url(/hero_bg_premium_light.webp)', 'url(/hero_bg_premium.webp)')
   const overlayBg = useColorModeValue(
     'linear-gradient(180deg, #ffffff 0%, #ffffff 240px, rgba(255, 255, 255, 0.85) 100%)',
     'linear-gradient(180deg, #0a0c10 0%, #0a0c10 240px, rgba(10, 12, 16, 0.75) 100%)'
