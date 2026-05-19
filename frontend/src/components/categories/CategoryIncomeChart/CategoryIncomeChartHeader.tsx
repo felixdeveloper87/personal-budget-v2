@@ -1,8 +1,7 @@
-import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge, Image } from '@chakra-ui/react'
-import { Eye } from '../../ui/icons'
+import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge } from '@chakra-ui/react'
+import { Eye, TrendingUp } from '../../ui/icons'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
-import trendingUpImage from '../../../../assets/trendingUp.png'
 
 interface CategoryIncomeChartHeaderProps {
   title: string
@@ -45,13 +44,9 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
           display="flex"
           alignItems="center"
           justifyContent="center"
+          color={useColorModeValue('green.600', 'green.400')}
         >
-          <Image
-            src={trendingUpImage}
-            alt="Income"
-            boxSize={{ base: 5, sm: 6, md: 10 }}
-            objectFit="contain"
-          />
+          <TrendingUp size="24px" />
         </Box>
         <VStack align="start" spacing={0.5}>
           <Text
@@ -94,7 +89,7 @@ export const CategoryIncomeChartHeader = React.memo<CategoryIncomeChartHeaderPro
         variant="ghost"
         color={buttonColor}
         onClick={onViewAllClick}
-        rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} />}
+        rightIcon={<Eye size="16px" />}
         borderRadius="xl"
         _hover={{
           bg: buttonHoverBg,

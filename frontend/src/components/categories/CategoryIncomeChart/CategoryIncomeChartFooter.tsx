@@ -1,5 +1,5 @@
-import { Box, Text, HStack, Image, useColorModeValue } from '@chakra-ui/react'
-import trendingUpImage from '../../../../assets/trendingUp.png'
+import { Box, Text, HStack, Icon, useColorModeValue } from '@chakra-ui/react'
+import { TrendingUp } from '../../ui/icons'
 import React from 'react'
 
 interface CategoryIncomeChartFooterProps {
@@ -50,13 +50,9 @@ export const CategoryIncomeChartFooter = React.memo<CategoryIncomeChartFooterPro
             display="flex"
             alignItems="center"
             justifyContent="center"
+            color={useColorModeValue('green.600', 'green.400')}
           >
-            <Image
-              src={trendingUpImage}
-              alt="Income"
-              boxSize={{ base: 5, sm: 6 }}
-              objectFit="contain"
-            />
+            <TrendingUp size="20px" />
           </Box>
           <Box>
             <Text

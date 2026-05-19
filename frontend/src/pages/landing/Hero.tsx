@@ -26,6 +26,9 @@ export default function Hero({ onGetStarted }: HeroProps) {
     'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
     'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
   )
+  const bgImg = useColorModeValue('url(/hero_bg_premium_light.png)', 'url(/hero_bg_premium.png)')
+  const overlayBg = useColorModeValue('rgba(255, 255, 255, 0.85)', 'rgba(10, 12, 16, 0.75)')
+
   const titleColor = useColorModeValue('gray.900', 'whiteAlpha.900')
   const subColor = useColorModeValue('gray.600', 'gray.400')
   const bulletColor = useColorModeValue('gray.500', 'gray.400')
@@ -38,24 +41,62 @@ export default function Hero({ onGetStarted }: HeroProps) {
       position="relative"
       overflow="hidden"
       bg={bg}
+      backgroundImage={bgImg}
+      backgroundSize="cover"
+      backgroundPosition="center"
+      backgroundAttachment="fixed"
       pt={{ base: 14, md: 24, lg: 28 }}
       pb={{ base: 16, md: 24, lg: 28 }}
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        bg: overlayBg,
+        zIndex: 0
+      }}
     >
       <GridLines />
-      <GlowOrb
-        color={useColorModeValue('rgba(59,130,246,0.45)', 'rgba(59,130,246,0.55)')}
-        size="640px"
-        intensity={useColorModeValue(0.5, 0.55)}
+      <MotionBox
+        animate={{ 
+          scale: [1, 1.1, 1], 
+          opacity: [0.5, 0.8, 0.5],
+          y: [0, -20, 0]
+        }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        position="absolute"
         top="-180px"
         left="-200px"
-      />
-      <GlowOrb
-        color={useColorModeValue('rgba(139,92,246,0.4)', 'rgba(139,92,246,0.55)')}
-        size="560px"
-        intensity={useColorModeValue(0.4, 0.5)}
+        zIndex={0}
+      >
+        <GlowOrb
+          color={useColorModeValue('rgba(59,130,246,0.45)', 'rgba(59,130,246,0.55)')}
+          size="640px"
+          intensity={1}
+          position="relative"
+        />
+      </MotionBox>
+      <MotionBox
+        animate={{ 
+          scale: [1, 1.15, 1], 
+          opacity: [0.4, 0.7, 0.4],
+          y: [0, 20, 0]
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
+        position="absolute"
         top="40%"
         right="-160px"
-      />
+        zIndex={0}
+      >
+        <GlowOrb
+          color={useColorModeValue('rgba(139,92,246,0.4)', 'rgba(139,92,246,0.55)')}
+          size="560px"
+          intensity={1}
+          position="relative"
+        />
+      </MotionBox>
 
       <Container
         maxW={{ base: '100%', xl: '1200px', '2xl': '1320px' }}
@@ -140,6 +181,8 @@ export default function Hero({ onGetStarted }: HeroProps) {
                   }}
                   _hover={{ bg: secondaryBtnHoverBg, transform: 'translateY(-2px)' }}
                   transition="all 0.2s ease"
+                  bg={useColorModeValue('white', 'transparent')}
+                  backdropFilter="blur(10px)"
                 >
                   {HERO_COPY.secondaryCta}
                 </Button>
@@ -169,7 +212,15 @@ export default function Hero({ onGetStarted }: HeroProps) {
             viewport={{ once: true, margin: '-80px' }}
             transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1], delay: 0.1 }}
           >
-            <DashboardPreview />
+            <MotionBox
+              animate={{ y: [0, -15, 0] }}
+              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+              w="full"
+              display="flex"
+              justifyContent={{ base: 'center', lg: 'flex-end' }}
+            >
+              <DashboardPreview />
+            </MotionBox>
           </MotionBox>
         </Flex>
       </Container>

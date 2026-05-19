@@ -1,8 +1,7 @@
 import { Box, Text, VStack, HStack, Button, Icon, Flex, useColorModeValue, Badge, Image } from '@chakra-ui/react'
-import { Eye } from '../../ui/icons'
+import { Eye, TrendingDown } from '../../ui/icons'
 import { getResponsiveStyles } from '../../ui'
 import React from 'react'
-import trendingDownImage from '../../../../assets/trendingDown.png'
 
 interface CategoryExpenseChartHeaderProps {
   title: string
@@ -45,13 +44,9 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
           display="flex"
           alignItems="center"
           justifyContent="center"
+          color={useColorModeValue('red.600', 'red.400')}
         >
-          <Image
-            src={trendingDownImage}
-            alt="Expenses"
-            boxSize={{ base: 8, sm: 6, md: 10 }}
-            objectFit="contain"
-          />
+          <TrendingDown size="24px" />
         </Box>
 
         <VStack align="start" spacing={0.5}>
@@ -96,7 +91,7 @@ export const CategoryExpenseChartHeader = React.memo<CategoryExpenseChartHeaderP
         variant="ghost"
         color={buttonColor}
         onClick={onViewAllClick}
-        rightIcon={<Icon as={Eye} boxSize={{ base: 3, sm: 4 }} />}
+        rightIcon={<Eye size="16px" />}
         borderRadius="xl"
         _hover={{
           bg: buttonHoverBg,
