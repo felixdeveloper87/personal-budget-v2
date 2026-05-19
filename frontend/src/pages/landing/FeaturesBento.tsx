@@ -23,6 +23,7 @@ export default function FeaturesBento() {
     <SectionShell
       id="features"
       bg={useColorModeValue('white', 'black')}
+      pt={{ base: 4, md: 6, lg: 8 }}
       eyebrow="What's inside"
       title={
         <>
@@ -110,27 +111,30 @@ function HeroCard({ feature }: { feature: LandingFeature }) {
       />
 
       <VStack align="flex-start" spacing={4} h="full" position="relative" zIndex={1}>
-        <Box
-          p={3}
-          borderRadius="xl"
-          bg={`${feature.accent}1F`}
-          color={feature.accent}
-          border="1px solid"
-          borderColor={`${feature.accent}33`}
-        >
-          <feature.icon size={24} weight="duotone" />
-        </Box>
+        <HStack spacing={4} align="center" w="full">
+          <Box
+            p={3}
+            borderRadius="xl"
+            bg={`${feature.accent}1F`}
+            color={feature.accent}
+            border="1px solid"
+            borderColor={`${feature.accent}33`}
+            flexShrink={0}
+          >
+            <feature.icon size={24} weight="duotone" />
+          </Box>
 
-        <Heading
-          as="h3"
-          size="xl"
-          color={titleColor}
-          lineHeight={1.05}
-          letterSpacing="-0.025em"
-          maxW="420px"
-        >
-          {feature.title}
-        </Heading>
+          <Heading
+            as="h3"
+            size="xl"
+            color={titleColor}
+            lineHeight={1.1}
+            letterSpacing="-0.025em"
+            maxW="420px"
+          >
+            {feature.title}
+          </Heading>
+        </HStack>
 
         <Text fontSize={{ base: 'md', md: 'lg' }} color={subText} maxW="480px" lineHeight={1.55}>
           {feature.description}
@@ -200,10 +204,14 @@ function FeatureCard({ feature }: { feature: LandingFeature }) {
       }}
     >
       <VStack align="flex-start" spacing={3} h="full">
-        <FeatureIconBadge icon={feature.icon} accent={feature.accent} />
-        <Heading as="h3" size="sm" color={titleColor} letterSpacing="-0.015em" lineHeight={1.2}>
-          {feature.title}
-        </Heading>
+        <HStack spacing={3} align="center" w="full">
+          <Box flexShrink={0}>
+            <FeatureIconBadge icon={feature.icon} accent={feature.accent} />
+          </Box>
+          <Heading as="h3" size="sm" color={titleColor} letterSpacing="-0.015em" lineHeight={1.2}>
+            {feature.title}
+          </Heading>
+        </HStack>
         <Text fontSize="sm" color={subText} lineHeight={1.5}>
           {feature.description}
         </Text>

@@ -46,7 +46,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
       backgroundPosition="center"
       backgroundAttachment="fixed"
       pt={{ base: 14, md: 24, lg: 28 }}
-      pb={{ base: 16, md: 24, lg: 28 }}
+      pb={{ base: 12, md: 16, lg: 20 }}
       _before={{
         content: '""',
         position: 'absolute',

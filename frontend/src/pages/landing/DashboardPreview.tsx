@@ -1,4 +1,4 @@
-import { Box, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Flex, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import { ArrowDownRight, ArrowUpRight, Wallet } from '../../components/ui/icons'
 import { PREVIEW_DATA } from './landing.config'
@@ -22,14 +22,6 @@ function useTimeOfDayGreeting(): string {
   }, [])
 }
 
-/**
- * DashboardPreview
- * A CSS-only, no-dependency mockup of the product UI.
- * - Three balance pills (Income / Expenses / Balance)
- * - A 7-bar weekly chart with animated reveal
- * - A short list of recent transactions
- * Used inside the Hero on lg+ screens, and as a standalone visual on smaller ones.
- */
 export default function DashboardPreview() {
   const { totals, recent, bars } = PREVIEW_DATA
   const monthLabel = useCurrentMonthLabel()
@@ -65,6 +57,13 @@ export default function DashboardPreview() {
 
   const fmt = (n: number) => `${totals.currency}${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
 
+  // Card background styling similar to redesigned SummaryCard
+  const cardBg = useColorModeValue(
+    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+    'linear-gradient(135deg, rgba(25, 27, 34, 0.65) 0%, rgba(12, 13, 17, 0.78) 100%)'
+  )
+  const cardBorder = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
+
   return (
     <Box
       role="img"
@@ -76,10 +75,10 @@ export default function DashboardPreview() {
       bg={surface}
       border="1px solid"
       borderColor={surfaceBorder}
-      backdropFilter="saturate(180%) blur(18px)"
+      backdropFilter="saturate(180%) blur(24px)"
       boxShadow={useColorModeValue(
         '0 30px 60px -20px rgba(15, 23, 42, 0.25), 0 18px 40px -25px rgba(15, 23, 42, 0.15)',
-        '0 30px 60px -20px rgba(0, 0, 0, 0.6), 0 18px 40px -25px rgba(0, 0, 0, 0.5)',
+        '0 30px 60px -20px rgba(0, 0, 0, 0.65), 0 18px 40px -25px rgba(0, 0, 0, 0.55)',
       )}
       overflow="hidden"
       sx={{
@@ -92,57 +91,75 @@ export default function DashboardPreview() {
         },
       }}
     >
-      {/* macOS-style window chrome */}
-      <HStack px={4} py={3} bg={chromeBg} borderBottom="1px solid" borderColor={surfaceBorder} spacing={2}>
-        <Box w={3} h={3} borderRadius="full" bg="#ff5f57" />
-        <Box w={3} h={3} borderRadius="full" bg="#febc2e" />
-        <Box w={3} h={3} borderRadius="full" bg="#28c840" />
-        <Box flex={1} />
+      {/* macOS-style window chrome - Centered and sleeker */}
+      <HStack
+        px={4}
+        py={3}
+        bg={chromeBg}
+        borderBottom="1px solid"
+        borderColor={surfaceBorder}
+        spacing={2}
+        position="relative"
+        justify="center"
+      >
+        {/* macOS Dots (Absolute Left) */}
+        <HStack spacing={1.5} position="absolute" left={4}>
+          <Box w={2.5} h={2.5} borderRadius="full" bg="#ff5f57" />
+          <Box w={2.5} h={2.5} borderRadius="full" bg="#febc2e" />
+          <Box w={2.5} h={2.5} borderRadius="full" bg="#28c840" />
+        </HStack>
+
+        {/* Center Address Bar */}
         <Box
-          px={3}
-          py={1}
-          borderRadius="md"
+          px={4}
+          py={0.75}
+          borderRadius="lg"
           bg={innerSurface}
           border="1px solid"
           borderColor={innerBorder}
           fontSize="2xs"
           color={subText}
           fontFamily="mono"
+          w="260px"
+          textAlign="center"
+          letterSpacing="-0.2px"
         >
           personal-budget.app/dashboard
         </Box>
       </HStack>
 
       <VStack p={{ base: 4, md: 5 }} spacing={4} align="stretch">
-        {/* Header row */}
-        <HStack justify="space-between" align="flex-start">
-          <VStack spacing={0} align="flex-start">
-            <Text fontSize="xs" color={subText} fontWeight={600} letterSpacing="0.08em" textTransform="uppercase">
+        {/* Header row - cleaner and smaller typography */}
+        <HStack justify="space-between" align="center">
+          <VStack spacing={0.5} align="flex-start">
+            <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
               {monthLabel}
             </Text>
-            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={800} color={text} letterSpacing="-0.02em">
+            <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight={800} color={text} letterSpacing="-0.02em">
               {greeting}, friend
             </Text>
           </VStack>
           <HStack
-            spacing={1}
-            px={2}
-            py={1}
+            spacing={0.5}
+            p={0.5}
             borderRadius="full"
-            bg={innerSurface}
+            bg={useColorModeValue('rgba(0,0,0,0.03)', 'rgba(255,255,255,0.03)')}
             border="1px solid"
             borderColor={innerBorder}
           >
             {(['Day', 'Week', 'Month', 'Year'] as const).map((p, i) => (
               <Box
                 key={p}
-                px={2}
-                py={0.5}
+                px={2.5}
+                py={0.75}
                 borderRadius="full"
                 fontSize="2xs"
                 fontWeight={700}
-                bg={i === 2 ? balanceBg : 'transparent'}
-                color={i === 2 ? balanceAccent : subText}
+                cursor="pointer"
+                bg={i === 2 ? useColorModeValue('white', 'whiteAlpha.100') : 'transparent'}
+                color={i === 2 ? text : subText}
+                boxShadow={i === 2 ? 'sm' : 'none'}
+                transition="all 0.2s ease"
               >
                 {p}
               </Box>
@@ -150,7 +167,7 @@ export default function DashboardPreview() {
           </HStack>
         </HStack>
 
-        {/* Three pills */}
+        {/* Three Pills matching new SummaryCard design */}
         <HStack spacing={3} align="stretch">
           <BalancePill
             label="Income"
@@ -159,8 +176,6 @@ export default function DashboardPreview() {
             icon={ArrowUpRight}
             accent={incomeAccent}
             bg={incomeBg}
-            innerSurface={innerSurface}
-            innerBorder={innerBorder}
             text={text}
             subText={subText}
           />
@@ -171,8 +186,6 @@ export default function DashboardPreview() {
             icon={ArrowDownRight}
             accent={expenseAccent}
             bg={expenseBg}
-            innerSurface={innerSurface}
-            innerBorder={innerBorder}
             text={text}
             subText={subText}
           />
@@ -183,28 +196,27 @@ export default function DashboardPreview() {
             icon={Wallet}
             accent={balanceAccent}
             bg={balanceBg}
-            innerSurface={innerSurface}
-            innerBorder={innerBorder}
             text={text}
             subText={subText}
-            highlight
           />
         </HStack>
 
-        {/* Mini chart + recent list */}
+        {/* Mini chart (KEPT AS REQUESTED) + recent list */}
         <HStack spacing={3} align="stretch">
-          {/* Chart */}
+          {/* Chart - Styled visually to match cards */}
           <Box
             flex={{ base: 'none', md: 1 }}
             display={{ base: 'none', md: 'block' }}
             p={4}
             borderRadius="xl"
-            bg={innerSurface}
+            bg={cardBg}
             border="1px solid"
-            borderColor={innerBorder}
+            borderColor={cardBorder}
+            position="relative"
+            overflow="hidden"
           >
             <HStack justify="space-between" mb={3}>
-              <Text fontSize="xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
+              <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
                 This week
               </Text>
               <Text fontSize="xs" color={text} fontWeight={700}>
@@ -237,46 +249,58 @@ export default function DashboardPreview() {
             </HStack>
           </Box>
 
-          {/* Recent transactions */}
+          {/* Recent transactions - Redesigned, cleaner, circular icons, fixed size */}
           <VStack
             flex={1}
-            p={3}
-            spacing={1.5}
+            p={4}
+            spacing={2}
             align="stretch"
             borderRadius="xl"
-            bg={innerSurface}
+            bg={cardBg}
             border="1px solid"
-            borderColor={innerBorder}
+            borderColor={cardBorder}
+            position="relative"
+            overflow="hidden"
           >
             <Text
               px={1}
-              fontSize="xs"
+              fontSize="2xs"
               color={subText}
               fontWeight={700}
               letterSpacing="0.08em"
               textTransform="uppercase"
+              mb={1}
             >
               Recent
             </Text>
             {recent.map((t) => {
               const isIncome = t.kind === 'income'
+              const IconComponent = t.icon
+              const accentColor = isIncome ? incomeAccent : expenseAccent
+              const iconBg = isIncome ? incomeBg : expenseBg
+
               return (
                 <HStack
                   key={t.id}
                   spacing={3}
-                  px={2}
-                  py={1.5}
+                  px={1.5}
+                  py={1}
                   borderRadius="lg"
-                  _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}
                   transition="background 0.2s ease"
                 >
                   <Box
+                    w={7}
+                    h={7}
+                    borderRadius="full"
+                    bg={iconBg}
+                    color={accentColor}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
                     p={1.5}
-                    borderRadius="md"
-                    bg={isIncome ? incomeBg : expenseBg}
-                    color={isIncome ? incomeAccent : expenseAccent}
                   >
-                    <Icon as={t.icon} boxSize={3.5} weight="duotone" />
+                    <IconComponent size="100%" weight="duotone" />
                   </Box>
                   <Text flex={1} fontSize="xs" color={text} fontWeight={600} noOfLines={1}>
                     {t.label}
@@ -284,7 +308,7 @@ export default function DashboardPreview() {
                   <Text
                     fontSize="xs"
                     fontWeight={800}
-                    color={isIncome ? incomeAccent : expenseAccent}
+                    color={accentColor}
                   >
                     {isIncome ? '+' : '−'}
                     {fmt(t.amount)}
@@ -308,53 +332,93 @@ interface BalancePillProps {
   icon: any
   accent: string
   bg: string
-  innerSurface: string
-  innerBorder: string
   text: string
   subText: string
-  highlight?: boolean
 }
 
 function BalancePill({
   label,
   value,
   delta,
-  icon,
+  icon: IconComponent,
   accent,
   bg,
-  innerSurface,
-  innerBorder,
   text,
   subText,
-  highlight,
 }: BalancePillProps) {
+  const cardBg = useColorModeValue(
+    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+    'linear-gradient(135deg, rgba(25, 27, 34, 0.65) 0%, rgba(12, 13, 17, 0.78) 100%)'
+  )
+  const cardBorder = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
+  const iconBoxBg = useColorModeValue(`${accent}10`, `${accent}18`)
+
   return (
     <VStack
       flex={1}
       align="flex-start"
-      spacing={1}
-      p={3}
+      spacing={1.5}
+      p={{ base: 3, md: 4 }}
       borderRadius="xl"
-      bg={highlight ? bg : innerSurface}
+      bg={cardBg}
       border="1px solid"
-      borderColor={highlight ? 'transparent' : innerBorder}
+      borderColor={cardBorder}
       position="relative"
       overflow="hidden"
+      boxShadow="sm"
     >
-      <HStack spacing={1.5}>
-        <Box p={1} borderRadius="md" bg={bg} color={accent}>
-          <Icon as={icon} boxSize={3.5} weight="duotone" />
-        </Box>
+      {/* Soft color glow in the corner */}
+      <Box
+        position="absolute"
+        top="-30px"
+        left="-30px"
+        w="95px"
+        h="95px"
+        borderRadius="full"
+        bg={accent}
+        opacity={useColorModeValue(0.03, 0.06)}
+        filter="blur(20px)"
+        pointerEvents="none"
+      />
+
+      <HStack spacing={1.5} align="center">
+        <Flex
+          w={{ base: 6, md: 7 }}
+          h={{ base: 6, md: 7 }}
+          align="center"
+          justify="center"
+          borderRadius="lg"
+          bg={iconBoxBg}
+          color={accent}
+          flexShrink={0}
+          p={1}
+        >
+          <IconComponent size="100%" weight="duotone" />
+        </Flex>
         <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
           {label}
         </Text>
       </HStack>
-      <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight={800} color={text} letterSpacing="-0.02em" lineHeight={1}>
-        {value}
-      </Text>
-      <Text fontSize="2xs" color={accent} fontWeight={700}>
-        {delta}
-      </Text>
+
+      <VStack align="flex-start" spacing={0} w="full">
+        <Text fontSize={{ base: 'md', md: 'xl' }} fontWeight={800} color={text} letterSpacing="-0.03em" lineHeight={1.1}>
+          {value}
+        </Text>
+        <Text fontSize="2xs" color={accent} fontWeight={700} mt={0.5}>
+          {delta}
+        </Text>
+      </VStack>
+
+      {/* Sleek bottom indicator line */}
+      <Box
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        h="2px"
+        bg={accent}
+        opacity={0.35}
+      />
     </VStack>
   )
 }

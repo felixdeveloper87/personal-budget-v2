@@ -74,7 +74,7 @@ export function SectionShell({
       as="section"
       id={id}
       position="relative"
-      py={{ base: 16, md: 24, lg: 28 }}
+      py={{ base: 12, md: 16, lg: 20 }}
       {...rest}
     >
       <Container

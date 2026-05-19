@@ -15,7 +15,16 @@ import { STEPS } from './landing.config'
 const MotionGridItem = motion.create(GridItem)
 
 export default function HowItWorks() {
-  const bg = useColorModeValue('gray.50', '#0a0c10')
+  const bg = useColorModeValue(
+    'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
+    'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
+  )
+  const bgImg = useColorModeValue('url(/hero_bg_premium_light.png)', 'url(/hero_bg_premium.png)')
+  const overlayBg = useColorModeValue(
+    'linear-gradient(180deg, #ffffff 0%, #ffffff 260px, rgba(255, 255, 255, 0.85) 100%)',
+    'linear-gradient(180deg, #0a0c10 0%, #0a0c10 260px, rgba(10, 12, 16, 0.75) 100%)'
+  )
+
   const lineColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const lineActive = useColorModeValue(
     'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',
@@ -26,11 +35,25 @@ export default function HowItWorks() {
     <SectionShell
       id="how-it-works"
       bg={bg}
+      backgroundImage={bgImg}
+      backgroundSize="cover"
+      backgroundPosition="center"
+      backgroundAttachment="fixed"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        bg: overlayBg,
+        zIndex: 0
+      }}
       eyebrow="How it works"
       title="Four steps. Most people skip three."
       subtitle="The shortest path between signing up and knowing where your money went last month."
     >
-      <Box position="relative">
+      <Box position="relative" zIndex={1}>
         {/* Connector line — desktop only */}
         <Box
           aria-hidden

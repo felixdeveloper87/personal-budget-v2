@@ -14,7 +14,16 @@ import { SectionShell } from './shared'
 import { FAQS } from './landing.config'
 
 export default function FAQ() {
-  const bg = useColorModeValue('gray.50', '#0a0c10')
+  const bg = useColorModeValue(
+    'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
+    'linear-gradient(180deg, #0a0c10 0%, #06080b 70%)',
+  )
+  const bgImg = useColorModeValue('url(/hero_bg_premium_light.png)', 'url(/hero_bg_premium.png)')
+  const overlayBg = useColorModeValue(
+    'linear-gradient(180deg, #ffffff 0%, #ffffff 240px, rgba(255, 255, 255, 0.85) 100%)',
+    'linear-gradient(180deg, #0a0c10 0%, #0a0c10 240px, rgba(10, 12, 16, 0.75) 100%)'
+  )
+
   const cardBg = useColorModeValue('white', 'rgba(255,255,255,0.03)')
   const cardBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
   const text = useColorModeValue('gray.900', 'whiteAlpha.900')
@@ -26,6 +35,20 @@ export default function FAQ() {
     <SectionShell
       id="faq"
       bg={bg}
+      backgroundImage={bgImg}
+      backgroundSize="cover"
+      backgroundPosition="center"
+      backgroundAttachment="fixed"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        bg: overlayBg,
+        zIndex: 0
+      }}
       eyebrow="FAQ"
       title="The honest answers."
       subtitle="If something here surprises you, that's on us."

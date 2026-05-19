@@ -171,7 +171,7 @@ export const TRUST: ReadonlyArray<LandingTrustItem> = [
     id: 'free',
     icon: Wallet,
     title: 'Free, with no asterisk',
-    description: 'No premium tier, no upsell, no “unlock for $9/mo”.',
+    description: 'No premium tier, no upsell, no “unlock for £9/mo”.',
   },
   {
     id: 'cross',
@@ -234,7 +234,7 @@ export const PREVIEW_DATA = {
     income: 4280,
     expenses: 1950,
     balance: 2330,
-    currency: '$',
+    currency: '£',
   },
   recent: [
     { id: 1, label: 'Salary · April', amount: 3200, kind: 'income' as const, icon: Sparkles },
