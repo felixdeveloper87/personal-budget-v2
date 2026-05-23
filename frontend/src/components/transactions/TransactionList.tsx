@@ -16,16 +16,20 @@ import {
   Icon,
   Tooltip,
   useColorModeValue,
+  Flex,
+  Select,
+  Button,
 } from '@chakra-ui/react'
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
 import EditTransactionModal from './EditTransactionModal'
+import { ChevronLeft, ChevronRight } from '../ui/icons'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -37,14 +41,70 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(15)
+
+  // Reset to first page when the total number of transactions changes (e.g. filter applied)
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [transactions.length])
+
   // Memoize sorted transactions to prevent recalculation on every render
-   const sortedTransactions = useMemo(() => 
-    transactions
-      .sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime()),
+  const sortedTransactions = useMemo(() => 
+    [...transactions].sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime()),
     [transactions]
   )
 
-  if (sortedTransactions.length === 0) {
+  const totalItems = sortedTransactions.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  const activePage = Math.min(currentPage, totalPages || 1)
+
+  const paginatedTransactions = useMemo(() => {
+    const startIndex = (activePage - 1) * pageSize
+    return sortedTransactions.slice(startIndex, startIndex + pageSize)
+  }, [sortedTransactions, activePage, pageSize])
+
+  const handlePageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageSize(Number(e.target.value))
+    setCurrentPage(1)
+  }
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = []
+    const range = 1
+    
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 ||
+        i === totalPages ||
+        (i >= activePage - range && i <= activePage + range)
+      ) {
+        pages.push(i)
+      } else if (
+        i === activePage - range - 1 ||
+        i === activePage + range + 1
+      ) {
+        pages.push('...')
+      }
+    }
+    
+    return pages.filter((item, index) => {
+      if (item === '...' && pages[index - 1] === '...') {
+        return false
+      }
+      return true
+    })
+  }
+
+  const paginationBg = useColorModeValue('white', 'rgba(18, 18, 22, 0.4)')
+  const paginationBorderColor = useColorModeValue('gray.100', 'rgba(255, 255, 255, 0.05)')
+  const pageBtnBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const pageBtnHover = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const pageActiveBg = useColorModeValue('blue.500', 'blue.500')
+  const pageActiveColor = 'white'
+
+  if (totalItems === 0) {
     return (
       <Box p={6} textAlign="center">
         <Text color="gray.500">No transactions found</Text>
@@ -75,7 +135,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
             </Tr>
           </Thead>
           <Tbody>
-            {sortedTransactions.map((tx) => (
+            {paginatedTransactions.map((tx) => (
               <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}>
                 <Td>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
@@ -176,7 +236,115 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
           </Tbody>
         </Table>
       </TableContainer>
-      
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <Flex
+          justify="space-between"
+          align="center"
+          mt={6}
+          pt={4}
+          borderTop="1px solid"
+          borderColor={paginationBorderColor}
+          flexDirection={{ base: 'column', md: 'row' }}
+          gap={{ base: 4, md: 0 }}
+        >
+          {/* Items per page selector */}
+          <HStack spacing={2}>
+            <Text fontSize="xs" fontWeight="500" color="gray.500">
+              Show
+            </Text>
+            <Select
+              size="xs"
+              w="75px"
+              borderRadius="md"
+              value={pageSize}
+              onChange={handlePageSizeChange}
+              bg={paginationBg}
+              borderColor={paginationBorderColor}
+              fontSize="xs"
+              fontWeight="600"
+            >
+              <option value={10}>10</option>
+              <option value={15}>15</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </Select>
+            <Text fontSize="xs" fontWeight="500" color="gray.500">
+              per page
+            </Text>
+          </HStack>
+
+          {/* Page Info */}
+          <Text fontSize="xs" fontWeight="500" color="gray.500">
+            Showing {Math.min((activePage - 1) * pageSize + 1, totalItems)} to{' '}
+            {Math.min(activePage * pageSize, totalItems)} of {totalItems} entries
+          </Text>
+
+          {/* Navigation Controls */}
+          <HStack spacing={1}>
+            <IconButton
+              aria-label="Previous page"
+              icon={<Icon as={ChevronLeft} boxSize={4} />}
+              size="sm"
+              variant="outline"
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              isDisabled={activePage === 1}
+              borderRadius="lg"
+              bg={pageBtnBg}
+              borderColor={paginationBorderColor}
+              _hover={{ bg: pageBtnHover }}
+            />
+
+            {getPageNumbers().map((page, index) => {
+              if (page === '...') {
+                return (
+                  <Text key={`ellipsis-${index}`} px={2} fontSize="sm" color="gray.500">
+                    ...
+                  </Text>
+                )
+              }
+              const isPageActive = page === activePage
+              return (
+                <Button
+                  key={`page-${page}`}
+                  size="sm"
+                  variant={isPageActive ? 'solid' : 'outline'}
+                  colorScheme={isPageActive ? 'blue' : 'gray'}
+                  onClick={() => setCurrentPage(page as number)}
+                  borderRadius="lg"
+                  fontSize="xs"
+                  fontWeight="bold"
+                  h="32px"
+                  w="32px"
+                  p={0}
+                  bg={isPageActive ? pageActiveBg : pageBtnBg}
+                  color={isPageActive ? pageActiveColor : undefined}
+                  borderColor={paginationBorderColor}
+                  _hover={isPageActive ? undefined : { bg: pageBtnHover }}
+                >
+                  {page}
+                </Button>
+              )
+            })}
+
+            <IconButton
+              aria-label="Next page"
+              icon={<Icon as={ChevronRight} boxSize={4} />}
+              size="sm"
+              variant="outline"
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              isDisabled={activePage === totalPages}
+              borderRadius="lg"
+              bg={pageBtnBg}
+              borderColor={paginationBorderColor}
+              _hover={{ bg: pageBtnHover }}
+            />
+          </HStack>
+        </Flex>
+      )}
+
       {/* Delete Transaction Dialog */}
       <DeleteTransactionDialog
         transaction={transactionToDelete}

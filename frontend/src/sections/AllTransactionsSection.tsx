@@ -25,7 +25,7 @@ export default function AllTransactionsSection({
   hasFilters,
   onRefresh,
 }: AllTransactionsSectionProps) {
-  const [groupByMonth, setGroupByMonth] = useState(false)
+  const [groupByMonth, setGroupByMonth] = useState(true)
 
   /* ── Surface tokens ── */
   const surface = useColorModeValue(
