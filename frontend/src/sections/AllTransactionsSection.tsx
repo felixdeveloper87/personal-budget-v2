@@ -1,8 +1,9 @@
 import { TransactionList, TransactionListGrouped } from '../components'
 import { Transaction } from '../types'
-import { useState } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import {
   Box,
+  Button,
   Flex,
   HStack,
   Heading,
@@ -26,6 +27,17 @@ export default function AllTransactionsSection({
   onRefresh,
 }: AllTransactionsSectionProps) {
   const [groupByMonth, setGroupByMonth] = useState(true)
+  const groupedListRef = useRef<{ goToCurrentMonth: () => void } | null>(null)
+
+  const hasCurrentMonth = useMemo(() => {
+    const now = new Date()
+    const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+    return transactions.some(t => {
+      const date = new Date(t.paymentDate || t.dateTime)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+      return monthKey === currentMonthKey
+    })
+  }, [transactions])
 
   /* ── Surface tokens ── */
   const surface = useColorModeValue(
@@ -194,8 +206,21 @@ export default function AllTransactionsSection({
             </VStack>
           </HStack>
 
-          {/* Right: View toggle + Refresh */}
-          <HStack spacing={2}>
+          {/* Right: View toggle */}
+          <HStack spacing={4} align="center">
+            {groupByMonth && hasCurrentMonth && (
+              <Button
+                size="sm"
+                variant="link"
+                colorScheme="blue"
+                onClick={() => groupedListRef.current?.goToCurrentMonth()}
+                fontSize="xs"
+                fontWeight="700"
+                _hover={{ textDecoration: 'none', color: 'blue.400' }}
+              >
+                Jump to Current Month
+              </Button>
+            )}
             {/* View toggle — segmented control */}
             <HStack
               spacing={0.5}
@@ -228,33 +253,6 @@ export default function AllTransactionsSection({
                 hoverColor={tabHoverColor}
               />
             </HStack>
-
-            {/* Refresh */}
-            <IconButton
-              aria-label="Refresh transactions"
-              icon={<Icon as={RefreshCw} boxSize={4} weight="bold" />}
-              size="sm"
-              variant="ghost"
-              h="36px"
-              w="36px"
-              minW="36px"
-              borderRadius="xl"
-              bg={refreshBg}
-              color={refreshColor}
-              border="1px solid"
-              borderColor={refreshBorder}
-              transition="all 0.2s ease"
-              _hover={{
-                bg: refreshHoverBg,
-                color: refreshHoverColor,
-                transform: 'translateY(-1px)',
-                boxShadow: 'sm',
-                '& > svg': { transform: 'rotate(45deg)' },
-              }}
-              _active={{ transform: 'translateY(0)' }}
-              sx={{ '& > svg': { transition: 'transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)' } }}
-              onClick={onRefresh}
-            />
           </HStack>
         </Flex>
       </Box>
@@ -265,6 +263,7 @@ export default function AllTransactionsSection({
           <EmptyState />
         ) : groupByMonth ? (
           <TransactionListGrouped
+            ref={groupedListRef}
             transactions={transactions}
             onTransactionDeleted={onRefresh}
           />

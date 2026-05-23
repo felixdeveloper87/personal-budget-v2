@@ -23,7 +23,7 @@ import {
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
@@ -46,11 +46,20 @@ interface MonthGroup {
   netAmount: number
 }
 
-export default function TransactionListGrouped({ transactions, onTransactionDeleted }: TransactionListGroupedProps) {
-  const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
-  const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
-  const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+export interface TransactionListGroupedRef {
+  goToCurrentMonth: () => void
+}
+
+const TransactionListGrouped = forwardRef<TransactionListGroupedRef, TransactionListGroupedProps>(
+  ({ transactions, onTransactionDeleted }, ref) => {
+    const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
+    const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
+    const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
+    useImperativeHandle(ref, () => ({
+      goToCurrentMonth
+    }))
 
   const monthGroups = useMemo(() => {
     const groups: Record<string, MonthGroup> = {}
@@ -186,18 +195,6 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     }))
   }
 
-  const expandAll = () => {
-    const allExpanded: Record<string, boolean> = {}
-    monthGroups.forEach(group => {
-      allExpanded[group.monthKey] = true
-    })
-    setExpandedMonths(allExpanded)
-  }
-
-  const collapseAll = () => {
-    setExpandedMonths({})
-  }
-
   const borderColor = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
   const headerBg = useColorModeValue('transparent', 'transparent')
   const textColor = useColorModeValue('gray.900', 'whiteAlpha.900')
@@ -220,52 +217,6 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
 
   return (
     <Box>
-      {/* Top Action Buttons */}
-      <HStack justify="space-between" mb={5} align="center">
-        <Box>
-          {currentMonthIndex !== -1 && (
-            <Button
-              size="sm"
-              variant="link"
-              colorScheme="blue"
-              onClick={goToCurrentMonth}
-              fontSize="xs"
-              fontWeight="700"
-              _hover={{ textDecoration: 'none', color: 'blue.400' }}
-            >
-              Jump to Current Month
-            </Button>
-          )}
-        </Box>
-        <HStack spacing={2}>
-          <Button
-            size="sm"
-            variant="ghost"
-            leftIcon={<Icon as={ChevronDown} boxSize={4} weight="bold" />}
-            onClick={expandAll}
-            borderRadius="lg"
-            fontSize="xs"
-            fontWeight="700"
-            color={useColorModeValue('gray.600', 'gray.400')}
-            _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
-          >
-            Expand All
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            leftIcon={<Icon as={ChevronUp} boxSize={4} weight="bold" />}
-            onClick={collapseAll}
-            borderRadius="lg"
-            fontSize="xs"
-            fontWeight="700"
-            color={useColorModeValue('gray.600', 'gray.400')}
-            _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
-          >
-            Collapse All
-          </Button>
-        </HStack>
-      </HStack>
 
       <VStack spacing={4} align="stretch">
         {paginatedMonthGroups.map((group) => {
@@ -749,3 +700,6 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     </Box>
   )
 }
+)
+
+export default TransactionListGrouped
