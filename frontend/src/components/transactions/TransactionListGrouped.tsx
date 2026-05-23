@@ -182,6 +182,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
 
   return (
     <Box>
+      {/* Top Action Buttons */}
       <HStack justify="flex-end" mb={5} spacing={2}>
         <Button
           size="sm"
@@ -192,7 +193,7 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
           fontSize="xs"
           fontWeight="700"
           color={useColorModeValue('gray.600', 'gray.400')}
-          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100') }}
+          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
         >
           Expand All
         </Button>
@@ -205,16 +206,17 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
           fontSize="xs"
           fontWeight="700"
           color={useColorModeValue('gray.600', 'gray.400')}
-          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100') }}
+          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
         >
           Collapse All
         </Button>
       </HStack>
 
-      <VStack spacing={{ base: 3, md: 4 }} align="stretch">
+      <VStack spacing={4} align="stretch">
         {paginatedMonthGroups.map((group) => {
           const isExpanded = expandedMonths[group.monthKey] || false
           const transactionCount = group.transactions.length
+          const [mName, mYear] = group.monthName.split(' ')
 
           return (
             <Box
@@ -223,16 +225,16 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
               borderColor={borderColor}
               borderRadius="xl"
               overflow="hidden"
-              bg={useColorModeValue('white', 'rgba(23, 23, 28, 0.45)')}
-              boxShadow={useColorModeValue('0 2px 8px -2px rgba(15,23,42,0.04)', 'none')}
-              transition="all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
+              bg={useColorModeValue('white', 'linear-gradient(135deg, rgba(23, 23, 28, 0.7) 0%, rgba(15, 15, 20, 0.4) 100%)')}
+              boxShadow={useColorModeValue('0 4px 18px -4px rgba(15, 23, 42, 0.05)', '0 4px 20px -8px rgba(0, 0, 0, 0.3)')}
+              transition="all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
               _hover={{
                 transform: 'translateY(-1px)',
                 boxShadow: useColorModeValue(
-                  '0 12px 20px -10px rgba(15, 23, 42, 0.08)',
-                  '0 12px 24px -10px rgba(0, 0, 0, 0.5)'
+                  '0 12px 24px -10px rgba(15, 23, 42, 0.1)',
+                  '0 12px 30px -10px rgba(0, 0, 0, 0.6)'
                 ),
-                borderColor: useColorModeValue('gray.300', 'rgba(59, 130, 246, 0.25)'),
+                borderColor: useColorModeValue('gray.300', 'rgba(59, 130, 246, 0.2)'),
               }}
             >
               {/* Month Header */}
@@ -242,122 +244,138 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                 cursor="pointer"
                 onClick={() => toggleMonth(group.monthKey)}
                 transition="background-color 0.2s ease"
-                _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}
+                _hover={{ bg: useColorModeValue('gray.50/50', 'whiteAlpha.50') }}
               >
                 <HStack justify="space-between" align="center" wrap="nowrap" overflow="hidden">
-                  <HStack spacing={{ base: 2, md: 4 }} align="center" minW={0} flex={1}>
-                    <Text 
-                      fontSize={{ base: "md", md: "lg" }} 
-                      fontWeight="bold" 
-                      color={textColor}
-                      letterSpacing="-0.02em"
-                      noOfLines={1}
-                      minW={0}
-                    >
-                      {group.monthName}
-                    </Text>
-                    <Badge 
-                      colorScheme="blue" 
-                      variant="subtle" 
-                      fontSize="xs"
-                      px={2.5}
-                      py={0.5}
-                      borderRadius="full"
-                      fontWeight={700}
-                      bg={useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')}
-                      color={useColorModeValue('blue.600', 'blue.300')}
-                      border="1px solid"
-                      borderColor={useColorModeValue('blue.100', 'rgba(59, 130, 246, 0.2)')}
-                      minW="20px"
-                      textAlign="center"
-                      flexShrink={0}
-                    >
-                      {transactionCount}
-                    </Badge>
-                  </HStack>
+                  {/* Left: split Month and Year with badge & compact mobile stats */}
+                  <VStack spacing={1} align="start" minW={0} flex={1}>
+                    <HStack spacing={2} align="center" minW={0} w="full">
+                      <Text 
+                        fontSize={{ base: "md", md: "lg" }} 
+                        fontWeight="700" 
+                        color={textColor}
+                        letterSpacing="-0.02em"
+                        noOfLines={1}
+                        minW={0}
+                      >
+                        {mName}{' '}
+                        <Text as="span" fontWeight="500" color="gray.500">
+                          {mYear}
+                        </Text>
+                      </Text>
+                      <Text fontSize="xs" color="gray.500" fontWeight="500" flexShrink={0}>
+                        • {transactionCount} {transactionCount === 1 ? 'transaction' : 'transactions'}
+                      </Text>
+                    </HStack>
 
+                    {/* Mobile summary - Compact inline metrics (visible only on base) */}
+                    <HStack 
+                      spacing={2.5} 
+                      display={{ base: "flex", sm: "none" }} 
+                      fontSize="2xs" 
+                      fontWeight="600"
+                      color="gray.500"
+                      align="center"
+                    >
+                      <Text color={useColorModeValue('green.600', 'green.400')}>
+                        In: £{group.totalIncome.toFixed(0)}
+                      </Text>
+                      <Text opacity={0.3} fontSize="xs">•</Text>
+                      <Text color={useColorModeValue('red.600', 'red.400')}>
+                        Out: £{group.totalExpense.toFixed(0)}
+                      </Text>
+                      <Text opacity={0.3} fontSize="xs">•</Text>
+                      <Text color={group.netAmount >= 0 ? 'green.500' : 'red.500'} fontWeight="700">
+                        Net: {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(0)}
+                      </Text>
+                    </HStack>
+                  </VStack>
+
+                  {/* Right: Metrics Grid + Chevron */}
                   <HStack spacing={{ base: 4, md: 8 }} align="center" flexShrink={0}>
                     {/* Financial Indicators Grid - Desktop */}
                     <HStack spacing={{ base: 4, md: 6 }} align="center" display={{ base: "none", sm: "flex" }}>
-                      {/* Income */}
-                      <VStack spacing={0.5} align="start" w={{ sm: "100px", md: "130px" }} flexShrink={0}>
-                        <Text fontSize="2xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em">
-                          Income
-                        </Text>
-                        <HStack spacing={1}>
-                          <Icon as={TrendingUp} color="green.400" weight="bold" boxSize={3.5} />
-                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('green.600', 'green.400')}>
+                      {/* Income Column */}
+                      <HStack spacing={2.5} align="center" w={{ sm: "110px", md: "140px" }} flexShrink={0}>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          w="26px"
+                          h="26px"
+                          borderRadius="lg"
+                          bg={useColorModeValue('green.50', 'rgba(74, 222, 128, 0.1)')}
+                          color={useColorModeValue('green.600', 'green.400')}
+                          flexShrink={0}
+                        >
+                          <Icon as={TrendingUp} weight="bold" boxSize={3.5} />
+                        </Box>
+                        <VStack spacing={0} align="start">
+                          <Text fontSize="3xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
+                            Income
+                          </Text>
+                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'whiteAlpha.900')}>
                             £{group.totalIncome.toFixed(2)}
                           </Text>
-                        </HStack>
-                      </VStack>
+                        </VStack>
+                      </HStack>
 
-                      {/* Expense */}
-                      <VStack spacing={0.5} align="start" w={{ sm: "100px", md: "130px" }} flexShrink={0}>
-                        <Text fontSize="2xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em">
-                          Expense
-                        </Text>
-                        <HStack spacing={1}>
-                          <Icon as={TrendingDown} color="red.400" weight="bold" boxSize={3.5} />
-                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('red.600', 'red.400')}>
+                      {/* Expense Column */}
+                      <HStack spacing={2.5} align="center" w={{ sm: "110px", md: "140px" }} flexShrink={0}>
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          w="26px"
+                          h="26px"
+                          borderRadius="lg"
+                          bg={useColorModeValue('red.50', 'rgba(248, 113, 113, 0.1)')}
+                          color={useColorModeValue('red.600', 'red.400')}
+                          flexShrink={0}
+                        >
+                          <Icon as={TrendingDown} weight="bold" boxSize={3.5} />
+                        </Box>
+                        <VStack spacing={0} align="start">
+                          <Text fontSize="3xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
+                            Expense
+                          </Text>
+                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'whiteAlpha.900')}>
                             £{group.totalExpense.toFixed(2)}
                           </Text>
-                        </HStack>
-                      </VStack>
+                        </VStack>
+                      </HStack>
 
-                      {/* Net */}
-                      <VStack spacing={0.5} align="start" w={{ sm: "110px", md: "140px" }} flexShrink={0}>
-                        <Text fontSize="2xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em">
-                          Net
-                        </Text>
-                        <Box
-                          px={2.5}
-                          py={0.5}
-                          borderRadius="lg"
-                          bg={group.netAmount >= 0 
-                            ? useColorModeValue('green.50', 'rgba(74, 222, 128, 0.08)') 
-                            : useColorModeValue('red.50', 'rgba(248, 113, 113, 0.08)')}
-                          border="1px solid"
-                          borderColor={group.netAmount >= 0 
-                            ? useColorModeValue('green.100', 'rgba(74, 222, 128, 0.15)') 
-                            : useColorModeValue('red.100', 'rgba(248, 113, 113, 0.15)')}
-                        >
-                          <Text 
-                            fontSize="xs" 
-                            fontWeight="800" 
-                            color={group.netAmount >= 0 
-                              ? useColorModeValue('green.700', 'green.300') 
-                              : useColorModeValue('red.700', 'red.300')}
-                          >
-                            {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(2)}
-                          </Text>
-                        </Box>
-                      </VStack>
-                    </HStack>
-
-                    {/* Mobile summary - Net Balance Only */}
-                    <Box 
-                      display={{ base: "block", sm: "none" }}
-                      px={2.5}
-                      py={1}
-                      borderRadius="lg"
-                      bg={group.netAmount >= 0 
-                        ? useColorModeValue('green.50', 'rgba(74, 222, 128, 0.08)') 
-                        : useColorModeValue('red.50', 'rgba(248, 113, 113, 0.08)')}
-                      border="1px solid"
-                      borderColor={group.netAmount >= 0 
-                        ? useColorModeValue('green.100', 'rgba(74, 222, 128, 0.15)') 
-                        : useColorModeValue('red.100', 'rgba(248, 113, 113, 0.15)')}
-                    >
-                      <Text 
-                        fontSize="xs" 
-                        fontWeight="800"
-                        color={group.netAmount >= 0 ? 'green.400' : 'red.400'}
-                        whiteSpace="nowrap"
+                      {/* Net Balance Column */}
+                      <Box
+                        px={3.5}
+                        py={1.5}
+                        borderRadius="xl"
+                        bg={group.netAmount >= 0 
+                          ? useColorModeValue('green.50', 'rgba(74, 222, 128, 0.08)') 
+                          : useColorModeValue('red.50', 'rgba(248, 113, 113, 0.08)')}
+                        border="1px solid"
+                        borderColor={group.netAmount >= 0 
+                          ? useColorModeValue('green.100', 'rgba(74, 222, 128, 0.15)') 
+                          : useColorModeValue('red.100', 'rgba(248, 113, 113, 0.15)')}
+                        w={{ sm: "115px", md: "145px" }}
+                        flexShrink={0}
+                        textAlign="center"
                       >
-                        £{group.netAmount.toFixed(2)}
-                      </Text>
-                    </Box>
+                        <Text fontSize="3xs" fontWeight="700" color={group.netAmount >= 0 ? 'green.500' : 'red.500'} textTransform="uppercase" letterSpacing="0.05em" mb={0.5} lineHeight={1}>
+                          Net Balance
+                        </Text>
+                        <Text 
+                          fontSize="sm" 
+                          fontWeight="800" 
+                          color={group.netAmount >= 0 
+                            ? useColorModeValue('green.700', 'green.300') 
+                            : useColorModeValue('red.700', 'red.300')}
+                          lineHeight={1.1}
+                        >
+                          {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(2)}
+                        </Text>
+                      </Box>
+                    </HStack>
 
                     {/* Expand/Collapse Chevron wrapper */}
                     <Box
@@ -402,12 +420,12 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                     >
                       <Thead>
                         <Tr>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase">Date & Time</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase">Type</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase">Category</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase">Description</Th>
-                          <Th isNumeric fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase">Amount</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" w="80px">Actions</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Date & Time</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Type</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Category</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Description</Th>
+                          <Th isNumeric fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Amount</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w="80px">Actions</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -415,10 +433,10 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                           <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}>
                             <Td>
                               <VStack spacing={1} align="start">
-                                <Text fontSize="sm" fontWeight="medium">
+                                <Text fontSize="sm" fontWeight="600" color={textColor}>
                                   {formatTransactionDateTime(tx.dateTime).date}
                                 </Text>
-                                <Text fontSize="xs" color="gray.500">
+                                <Text fontSize="xs" color="gray.500" fontWeight="500">
                                   {formatTransactionDateTime(tx.dateTime).time}
                                 </Text>
                                 {tx.paymentDate && tx.paymentDate !== (tx.transactionDate || tx.dateTime.slice(0, 10)) && (
@@ -524,8 +542,8 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
         <Flex
           justify="space-between"
           align="center"
-          mt={6}
-          pt={4}
+          mt={8}
+          pt={5}
           borderTop="1px solid"
           borderColor={paginationBorderColor}
           flexDirection={{ base: 'column', md: 'row' }}
@@ -539,13 +557,14 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
             <Select
               size="xs"
               w="110px"
-              borderRadius="md"
+              borderRadius="lg"
               value={pageSize}
               onChange={handlePageSizeChange}
               bg={paginationBg}
               borderColor={paginationBorderColor}
               fontSize="xs"
               fontWeight="600"
+              _focus={{ borderColor: 'blue.500', boxShadow: 'none' }}
             >
               <option value={3}>3 months</option>
               <option value={6}>6 months</option>
