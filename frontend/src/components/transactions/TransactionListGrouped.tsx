@@ -450,18 +450,18 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                     >
                       <Thead>
                         <Tr>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Date & Time</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Type</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Type</Th>
                           <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Category</Th>
                           <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Description</Th>
                           <Th isNumeric fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Amount</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w="80px">Actions</Th>
+                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w={{ base: "60px", md: "80px" }}>Actions</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         {group.transactions.map((tx) => (
                           <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}>
-                            <Td>
+                            <Td display={{ base: 'none', md: 'table-cell' }}>
                               <VStack spacing={1} align="start">
                                 <Text fontSize="sm" fontWeight="600" color={textColor}>
                                   {formatTransactionDateTime(tx.dateTime).date}
@@ -476,7 +476,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                 )}
                               </VStack>
                             </Td>
-                            <Td>
+                            <Td display={{ base: 'none', md: 'table-cell' }}>
                               <Badge
                                 colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
                                 variant="subtle"
@@ -486,25 +486,24 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                               </Badge>
                             </Td>
                             <Td>
-                              <Text fontSize="sm" fontWeight="medium">
+                              <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
                                 {tx.category}
                               </Text>
                             </Td>
                             <Td>
-                              <HStack spacing={2}>
-                                <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 15}>
+                              <HStack spacing={{ base: 1, md: 2 }}>
+                                <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 25}>
                                   <Text 
-                                    fontSize="sm" 
-                                    color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
-                                    noOfLines={1} 
-                                    maxW={{ base: "100px", sm: "160px", md: "300px", lg: "450px", xl: "600px" }}
+                                    fontSize={{ base: "xs", md: "sm" }} 
+                                    color={tx.isFutureInstallment ? "gray.500" : secondaryTextColor} 
+                                    noOfLines={1}
                                     fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                                   >
                                     {normalizeInstallmentDescription(tx.description || '-')}
                                   </Text>
                                 </Tooltip>
                                 {tx.paymentMethodName && (
-                                  <Badge colorScheme="blue" variant="subtle" fontSize="2xs">
+                                  <Badge colorScheme="blue" variant="subtle" fontSize="2xs" display={{ base: 'none', sm: 'inline-flex' }}>
                                     {tx.paymentMethodName}
                                   </Badge>
                                 )}
@@ -514,7 +513,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                       <Icon 
                                         as={FiCreditCard} 
                                         color={tx.isFutureInstallment ? "gray.400" : "purple.500"} 
-                                        fontSize="sm" 
+                                        fontSize={{ base: "xs", md: "sm" }} 
                                       />
                                     </span>
                                   </Tooltip>
@@ -523,10 +522,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             </Td>
                             <Td isNumeric>
                               <Text 
-                                fontSize="sm" 
+                                fontSize={{ base: "xs", md: "sm" }} 
                                 fontWeight="semibold"
                                 color={tx.isFutureInstallment ? "gray.500" : (tx.type === 'INCOME' ? 'green.600' : 'red.600')}
                                 fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
+                                whiteSpace="nowrap"
                               >
                                 £{tx.amount.toFixed(2)}
                                 {tx.isFutureInstallment && " (future)"}
@@ -534,11 +534,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             </Td>
                             <Td>
                               {tx.id && !tx.isFutureInstallment && (
-                                <HStack spacing={1}>
+                                <HStack spacing={0}>
                                   <IconButton
                                     aria-label="Edit transaction"
                                     icon={<EditIcon />}
-                                    size="sm"
+                                    size={{ base: "xs", md: "sm" }}
                                     colorScheme="blue"
                                     variant="ghost"
                                     onClick={() => {
@@ -549,7 +549,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                   <IconButton
                                     aria-label="Delete transaction"
                                     icon={<DeleteIcon />}
-                                    size="sm"
+                                    size={{ base: "xs", md: "sm" }}
                                     colorScheme="red"
                                     variant="ghost"
                                     onClick={() => openDeleteDialog(tx)}

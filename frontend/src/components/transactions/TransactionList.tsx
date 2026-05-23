@@ -126,8 +126,8 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
         >
           <Thead>
             <Tr>
-              <Th fontSize={{ base: "xs", md: "sm" }}>Date & Time</Th>
-              <Th fontSize={{ base: "xs", md: "sm" }}>Type</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>Type</Th>
               <Th fontSize={{ base: "xs", md: "sm" }}>Category</Th>
               <Th fontSize={{ base: "xs", md: "sm" }}>Description</Th>
               <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>Amount</Th>
@@ -137,7 +137,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
           <Tbody>
             {paginatedTransactions.map((tx) => (
               <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}>
-                <Td>
+                <Td display={{ base: 'none', md: 'table-cell' }}>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
                     <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
                       {formatTransactionDateTime(tx.dateTime).date}
@@ -152,7 +152,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                     )}
                   </VStack>
                 </Td>
-                <Td>
+                <Td display={{ base: 'none', md: 'table-cell' }}>
                   <Badge
                     colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
                     variant="subtle"
@@ -168,19 +168,18 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 </Td>
                 <Td>
                   <HStack spacing={{ base: 1, md: 2 }}>
-                    <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 15}>
+                    <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 25}>
                       <Text 
                         fontSize={{ base: "xs", md: "sm" }} 
                         color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
-                        noOfLines={1} 
-                        maxW={{ base: "100px", sm: "160px", md: "300px", lg: "450px", xl: "600px" }}
+                        noOfLines={1}
                         fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                       >
                         {normalizeInstallmentDescription(tx.description || '-')}
                       </Text>
                     </Tooltip>
                     {tx.paymentMethodName && (
-                      <Badge colorScheme="blue" variant="subtle" fontSize="2xs">
+                      <Badge colorScheme="blue" variant="subtle" fontSize="2xs" display={{ base: 'none', sm: 'inline-flex' }}>
                         {tx.paymentMethodName}
                       </Badge>
                     )}
@@ -203,6 +202,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                     fontWeight="semibold"
                     color={tx.isFutureInstallment ? "gray.500" : (tx.type === 'INCOME' ? 'green.600' : 'red.600')}
                     fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
+                    whiteSpace="nowrap"
                   >
                     £{tx.amount.toFixed(2)}
                     {tx.isFutureInstallment && " (future)"}
@@ -210,7 +210,7 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 </Td>
                 <Td>
                   {tx.id && !tx.isFutureInstallment && (
-                    <HStack spacing={1}>
+                    <HStack spacing={0}>
                       <IconButton
                         aria-label="Edit transaction"
                         icon={<EditIcon />}
