@@ -160,14 +160,6 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                   >
                     {tx.type}
                   </Badge>
-                <Td>
-                  <Badge
-                    colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
-                    variant="subtle"
-                    fontSize={{ base: "2xs", md: "xs" }}
-                  >
-                    {tx.type}
-                  </Badge>
                 </Td>
                 <Td>
                   <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
