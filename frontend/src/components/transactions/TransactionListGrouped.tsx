@@ -52,15 +52,6 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1)
-  const [pageSize, setPageSize] = useState(6) // Default to showing 6 months per page
-
-  // Reset page when number of transactions changes (e.g. filters applied)
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [transactions.length])
-
   const monthGroups = useMemo(() => {
     const groups: Record<string, MonthGroup> = {}
 
@@ -99,6 +90,53 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
     // Sort groups by month (newest first)
     return Object.values(groups).sort((a, b) => b.monthKey.localeCompare(a.monthKey))
   }, [transactions])
+
+  // Find current month key and index
+  const currentMonthKey = useMemo(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  }, [])
+
+  const currentMonthIndex = useMemo(() => {
+    return monthGroups.findIndex(g => g.monthKey === currentMonthKey)
+  }, [monthGroups, currentMonthKey])
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(6) // Default to showing 6 months per page
+
+  // Automatically default page to the page containing the current month
+  const [hasInitializedPage, setHasInitializedPage] = useState(false)
+  useEffect(() => {
+    if (monthGroups.length > 0 && !hasInitializedPage) {
+      if (currentMonthIndex !== -1) {
+        const targetPage = Math.ceil((currentMonthIndex + 1) / pageSize)
+        setCurrentPage(targetPage)
+      } else {
+        setCurrentPage(1)
+      }
+      setHasInitializedPage(true)
+    }
+  }, [monthGroups, currentMonthIndex, pageSize, hasInitializedPage])
+
+  // Reset initialization flag when transactions completely change
+  useEffect(() => {
+    setHasInitializedPage(false)
+  }, [transactions.length])
+
+  // Scroll to current month helper
+  const goToCurrentMonth = () => {
+    if (currentMonthIndex !== -1) {
+      const targetPage = Math.ceil((currentMonthIndex + 1) / pageSize)
+      setCurrentPage(targetPage)
+      setTimeout(() => {
+        const element = document.getElementById(`month-card-${currentMonthKey}`)
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        }
+      }, 100)
+    }
+  }
 
   const totalItems = monthGroups.length
   const totalPages = Math.ceil(totalItems / pageSize)
@@ -183,33 +221,50 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
   return (
     <Box>
       {/* Top Action Buttons */}
-      <HStack justify="flex-end" mb={5} spacing={2}>
-        <Button
-          size="sm"
-          variant="ghost"
-          leftIcon={<Icon as={ChevronDown} boxSize={4} weight="bold" />}
-          onClick={expandAll}
-          borderRadius="lg"
-          fontSize="xs"
-          fontWeight="700"
-          color={useColorModeValue('gray.600', 'gray.400')}
-          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
-        >
-          Expand All
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          leftIcon={<Icon as={ChevronUp} boxSize={4} weight="bold" />}
-          onClick={collapseAll}
-          borderRadius="lg"
-          fontSize="xs"
-          fontWeight="700"
-          color={useColorModeValue('gray.600', 'gray.400')}
-          _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
-        >
-          Collapse All
-        </Button>
+      <HStack justify="space-between" mb={5} align="center">
+        <Box>
+          {currentMonthIndex !== -1 && (
+            <Button
+              size="sm"
+              variant="link"
+              colorScheme="blue"
+              onClick={goToCurrentMonth}
+              fontSize="xs"
+              fontWeight="700"
+              _hover={{ textDecoration: 'none', color: 'blue.400' }}
+            >
+              Jump to Current Month
+            </Button>
+          )}
+        </Box>
+        <HStack spacing={2}>
+          <Button
+            size="sm"
+            variant="ghost"
+            leftIcon={<Icon as={ChevronDown} boxSize={4} weight="bold" />}
+            onClick={expandAll}
+            borderRadius="lg"
+            fontSize="xs"
+            fontWeight="700"
+            color={useColorModeValue('gray.600', 'gray.400')}
+            _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
+          >
+            Expand All
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            leftIcon={<Icon as={ChevronUp} boxSize={4} weight="bold" />}
+            onClick={collapseAll}
+            borderRadius="lg"
+            fontSize="xs"
+            fontWeight="700"
+            color={useColorModeValue('gray.600', 'gray.400')}
+            _hover={{ bg: useColorModeValue('blackAlpha.50', 'whiteAlpha.100'), color: useColorModeValue('gray.900', 'white') }}
+          >
+            Collapse All
+          </Button>
+        </HStack>
       </HStack>
 
       <VStack spacing={4} align="stretch">
@@ -217,24 +272,29 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
           const isExpanded = expandedMonths[group.monthKey] || false
           const transactionCount = group.transactions.length
           const [mName, mYear] = group.monthName.split(' ')
+          const isCurrentMonth = group.monthKey === currentMonthKey
 
           return (
             <Box
               key={group.monthKey}
+              id={`month-card-${group.monthKey}`}
               border="1px solid"
-              borderColor={borderColor}
+              borderColor={isCurrentMonth 
+                ? useColorModeValue('blue.400', 'rgba(59, 130, 246, 0.4)') 
+                : borderColor}
               borderRadius="xl"
               overflow="hidden"
               bg={useColorModeValue('white', 'linear-gradient(135deg, rgba(23, 23, 28, 0.7) 0%, rgba(15, 15, 20, 0.4) 100%)')}
-              boxShadow={useColorModeValue('0 4px 18px -4px rgba(15, 23, 42, 0.05)', '0 4px 20px -8px rgba(0, 0, 0, 0.3)')}
+              boxShadow={isCurrentMonth
+                ? useColorModeValue('0 4px 20px -2px rgba(59, 130, 246, 0.12)', '0 4px 20px -8px rgba(59, 130, 246, 0.35)')
+                : useColorModeValue('0 4px 18px -4px rgba(15, 23, 42, 0.05)', '0 4px 20px -8px rgba(0, 0, 0, 0.3)')}
               transition="all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
               _hover={{
                 transform: 'translateY(-1px)',
-                boxShadow: useColorModeValue(
-                  '0 12px 24px -10px rgba(15, 23, 42, 0.1)',
-                  '0 12px 30px -10px rgba(0, 0, 0, 0.6)'
-                ),
-                borderColor: useColorModeValue('gray.300', 'rgba(59, 130, 246, 0.2)'),
+                boxShadow: isCurrentMonth
+                  ? useColorModeValue('0 12px 24px -10px rgba(59, 130, 246, 0.25)', '0 12px 30px -10px rgba(59, 130, 246, 0.6)')
+                  : useColorModeValue('0 12px 24px -10px rgba(15, 23, 42, 0.1)', '0 12px 30px -10px rgba(0, 0, 0, 0.6)'),
+                borderColor: useColorModeValue('blue.500', 'rgba(59, 130, 246, 0.6)'),
               }}
             >
               {/* Month Header */}
@@ -266,6 +326,25 @@ export default function TransactionListGrouped({ transactions, onTransactionDele
                       <Text fontSize="xs" color="gray.500" fontWeight="500" flexShrink={0}>
                         • {transactionCount} {transactionCount === 1 ? 'transaction' : 'transactions'}
                       </Text>
+                      {isCurrentMonth && (
+                        <Badge
+                          colorScheme="blue"
+                          variant="subtle"
+                          fontSize="3xs"
+                          px={2}
+                          py={0.2}
+                          borderRadius="full"
+                          fontWeight="700"
+                          textTransform="uppercase"
+                          letterSpacing="0.05em"
+                          bg={useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')}
+                          color={useColorModeValue('blue.600', 'blue.300')}
+                          border="1px solid"
+                          borderColor={useColorModeValue('blue.100', 'rgba(59, 130, 246, 0.25)')}
+                        >
+                          Current
+                        </Badge>
+                      )}
                     </HStack>
 
                     {/* Mobile summary - Compact inline metrics (visible only on base) */}
