@@ -34,7 +34,7 @@ interface CategoryTransactionDropdownProps {
 const PAGE_SIZE = 5
 
 function transactionDate(transaction: any): Date {
-  return new Date(transaction.paymentDate || transaction.transactionDate || transaction.dateTime)
+  return new Date(transaction.transactionDate || transaction.paymentDate || transaction.dateTime)
 }
 
 export default function CategoryTransactionDropdown({
