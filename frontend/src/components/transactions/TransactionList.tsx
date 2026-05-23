@@ -160,6 +160,14 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                   >
                     {tx.type}
                   </Badge>
+                <Td>
+                  <Badge
+                    colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
+                    variant="subtle"
+                    fontSize={{ base: "2xs", md: "xs" }}
+                  >
+                    {tx.type}
+                  </Badge>
                 </Td>
                 <Td>
                   <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
@@ -168,15 +176,17 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 </Td>
                 <Td>
                   <HStack spacing={{ base: 1, md: 2 }}>
-                    <Text 
-                      fontSize={{ base: "xs", md: "sm" }} 
-                      color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
-                      noOfLines={1} 
-                      maxW="200px"
-                      fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
-                    >
-                      {normalizeInstallmentDescription(tx.description || '-')}
-                    </Text>
+                    <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 15}>
+                      <Text 
+                        fontSize={{ base: "xs", md: "sm" }} 
+                        color={tx.isFutureInstallment ? "gray.500" : "gray.600"} 
+                        noOfLines={1} 
+                        maxW={{ base: "100px", sm: "160px", md: "300px", lg: "450px", xl: "600px" }}
+                        fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
+                      >
+                        {normalizeInstallmentDescription(tx.description || '-')}
+                      </Text>
+                    </Tooltip>
                     {tx.paymentMethodName && (
                       <Badge colorScheme="blue" variant="subtle" fontSize="2xs">
                         {tx.paymentMethodName}
