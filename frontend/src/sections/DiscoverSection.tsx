@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
 import {
+  Badge,
   Box,
   Grid,
   GridItem,
@@ -50,7 +51,7 @@ function CarouselDots({
           h="6px"
           borderRadius="full"
           bg={index === activeIndex ? activeColor : inactiveColor}
-          transition="all 0.2s ease"
+          transition="background 0.2s ease, width 0.2s ease"
         />
       ))}
     </HStack>
@@ -64,18 +65,14 @@ export default function DiscoverSection({
   expense,
   balance,
 }: DiscoverSectionProps) {
-  const cards = useDiscoverCards({
-    transactions,
-    selectedPeriod,
-    income,
-    expense,
-    balance,
-  })
+  const cards = useDiscoverCards({ transactions, selectedPeriod, income, expense, balance })
   const insights = useTransactionInsights(transactions, selectedPeriod)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [activeModal, setActiveModal] = useState<DiscoverModalId | null>(null)
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const countBg = useColorModeValue('purple.50', 'rgba(139,92,246,0.16)')
+  const countColor = useColorModeValue('purple.700', 'purple.200')
 
   const context: DiscoverInsightsContext = {
     totalIncome: income,
@@ -103,10 +100,13 @@ export default function DiscoverSection({
 
   const handleScroll = useCallback(() => {
     const el = scrollRef.current
-    if (!el || cards.length === 0) return
+    const firstCard = el?.firstElementChild as HTMLElement | null
+    if (!el || !firstCard || cards.length === 0) return
 
-    const cardWidth = el.scrollWidth / cards.length
-    const index = Math.round(el.scrollLeft / cardWidth)
+    const styles = window.getComputedStyle(el)
+    const gap = Number.parseFloat(styles.columnGap || styles.gap || '0') || 0
+    const cardWidth = firstCard.getBoundingClientRect().width + gap
+    const index = cardWidth > 0 ? Math.round(el.scrollLeft / cardWidth) : 0
     setActiveSlide(Math.min(Math.max(index, 0), cards.length - 1))
   }, [cards.length])
 
@@ -120,8 +120,23 @@ export default function DiscoverSection({
             <SectionHeader
               icon={Sparkles}
               title="For you"
-              caption="Personalised tips based on your activity — everything stays in the app."
+              caption="Personalised insights from your activity this period."
               accent="violet"
+              rightSlot={
+                <Badge
+                  px={2.5}
+                  py={1}
+                  borderRadius="full"
+                  bg={countBg}
+                  color={countColor}
+                  fontSize="2xs"
+                  fontWeight={700}
+                  textTransform="none"
+                  letterSpacing="0"
+                >
+                  {cards.length} {cards.length === 1 ? 'insight' : 'insights'}
+                </Badge>
+              }
             />
 
             <Box display={{ base: 'block', md: 'none' }}>
@@ -143,11 +158,7 @@ export default function DiscoverSection({
                 }}
               >
                 {cards.map((item) => (
-                  <Box
-                    key={item.id}
-                    flex="0 0 86%"
-                    scrollSnapAlign="center"
-                  >
+                  <Box key={item.id} flex="0 0 86%" scrollSnapAlign="center">
                     <DiscoverCard
                       item={item}
                       onClick={() => handleCardClick(item)}
@@ -162,22 +173,23 @@ export default function DiscoverSection({
 
             <Grid
               display={{ base: 'none', md: 'grid' }}
-              templateColumns={{ md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }}
+              templateColumns={{
+                md: 'repeat(2, minmax(0, 1fr))',
+                lg: 'repeat(3, minmax(0, 1fr))',
+              }}
               gap={{ md: 4 }}
+              alignItems="stretch"
             >
               {cards.map((item, index) => (
                 <GridItem
                   key={item.id}
-                  colSpan={
-                    item.featured && index === 0
-                      ? { md: 2, lg: 2 }
-                      : 1
-                  }
+                  colSpan={item.featured && index === 0 ? { md: 2, lg: 2 } : 1}
                 >
                   <DiscoverCard
                     item={item}
                     onClick={() => handleCardClick(item)}
                     featured={item.featured && index === 0}
+                    compact={!item.featured}
                   />
                 </GridItem>
               ))}

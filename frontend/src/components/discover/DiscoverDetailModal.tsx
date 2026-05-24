@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react'
 import {
   Box,
   Button,
   HStack,
+  Icon,
   Progress,
   SimpleGrid,
   Text,
@@ -11,6 +13,7 @@ import {
 import {
   AlertTriangle,
   BarChart3,
+  Check,
   Layers,
   Lightbulb,
   PieChart,
@@ -34,9 +37,211 @@ interface DiscoverDetailModalProps {
   context: DiscoverInsightsContext
 }
 
+type PanelTone = 'neutral' | 'blue' | 'green' | 'red' | 'violet' | 'amber'
+
+interface PanelTokens {
+  bgLight: string
+  bgDark: string
+  borderLight: string
+  borderDark: string
+  fgLight: string
+  fgDark: string
+  chipBgLight: string
+  chipBgDark: string
+}
+
+const PANEL_TOKENS: Record<PanelTone, PanelTokens> = {
+  neutral: {
+    bgLight: 'gray.50',
+    bgDark: 'whiteAlpha.50',
+    borderLight: 'blackAlpha.100',
+    borderDark: 'whiteAlpha.100',
+    fgLight: 'gray.700',
+    fgDark: 'gray.200',
+    chipBgLight: 'white',
+    chipBgDark: 'whiteAlpha.100',
+  },
+  blue: {
+    bgLight: 'blue.50',
+    bgDark: 'rgba(59,130,246,0.10)',
+    borderLight: 'blue.100',
+    borderDark: 'rgba(59,130,246,0.24)',
+    fgLight: 'blue.700',
+    fgDark: 'blue.200',
+    chipBgLight: 'white',
+    chipBgDark: 'rgba(59,130,246,0.16)',
+  },
+  green: {
+    bgLight: 'green.50',
+    bgDark: 'rgba(34,197,94,0.10)',
+    borderLight: 'green.100',
+    borderDark: 'rgba(34,197,94,0.24)',
+    fgLight: 'green.700',
+    fgDark: 'green.200',
+    chipBgLight: 'white',
+    chipBgDark: 'rgba(34,197,94,0.16)',
+  },
+  red: {
+    bgLight: 'red.50',
+    bgDark: 'rgba(239,68,68,0.10)',
+    borderLight: 'red.100',
+    borderDark: 'rgba(239,68,68,0.24)',
+    fgLight: 'red.700',
+    fgDark: 'red.200',
+    chipBgLight: 'white',
+    chipBgDark: 'rgba(239,68,68,0.16)',
+  },
+  violet: {
+    bgLight: 'purple.50',
+    bgDark: 'rgba(139,92,246,0.10)',
+    borderLight: 'purple.100',
+    borderDark: 'rgba(139,92,246,0.24)',
+    fgLight: 'purple.700',
+    fgDark: 'purple.200',
+    chipBgLight: 'white',
+    chipBgDark: 'rgba(139,92,246,0.16)',
+  },
+  amber: {
+    bgLight: 'orange.50',
+    bgDark: 'rgba(249,115,22,0.10)',
+    borderLight: 'orange.100',
+    borderDark: 'rgba(249,115,22,0.24)',
+    fgLight: 'orange.700',
+    fgDark: 'orange.200',
+    chipBgLight: 'white',
+    chipBgDark: 'rgba(249,115,22,0.16)',
+  },
+}
+
+const moneyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+})
+
 function formatMoney(value: number) {
-  const prefix = value < 0 ? '-£' : '£'
-  return `${prefix}${Math.abs(value).toFixed(2)}`
+  return moneyFormatter.format(value)
+}
+
+function SurfacePanel({
+  children,
+  tone = 'neutral',
+  compact,
+}: {
+  children: ReactNode
+  tone?: PanelTone
+  compact?: boolean
+}) {
+  const tokens = PANEL_TOKENS[tone]
+  const bg = useColorModeValue(tokens.bgLight, tokens.bgDark)
+  const borderColor = useColorModeValue(tokens.borderLight, tokens.borderDark)
+
+  return (
+    <Box
+      p={compact ? 3 : 4}
+      borderRadius="xl"
+      border="1px solid"
+      borderColor={borderColor}
+      bg={bg}
+    >
+      {children}
+    </Box>
+  )
+}
+
+function HeroMetric({
+  label,
+  value,
+  detail,
+  tone = 'blue',
+}: {
+  label: string
+  value: string
+  detail: string
+  tone?: PanelTone
+}) {
+  const tokens = PANEL_TOKENS[tone]
+  const labelColor = useColorModeValue('gray.500', 'gray.400')
+  const valueColor = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const detailColor = useColorModeValue('gray.600', 'gray.300')
+
+  return (
+    <SurfacePanel tone={tone}>
+      <VStack align="stretch" spacing={1.5}>
+        <Text fontSize="xs" fontWeight={700} color={labelColor} textTransform="uppercase">
+          {label}
+        </Text>
+        <Text fontSize={{ base: '2xl', sm: '3xl' }} fontWeight={800} color={valueColor}>
+          {value}
+        </Text>
+        <Text fontSize="sm" color={detailColor} lineHeight="1.5">
+          {detail}
+        </Text>
+      </VStack>
+    </SurfacePanel>
+  )
+}
+
+function MetricCard({
+  label,
+  value,
+  tone = 'neutral',
+}: {
+  label: string
+  value: string
+  tone?: PanelTone
+}) {
+  const tokens = PANEL_TOKENS[tone]
+  const labelColor = useColorModeValue('gray.500', 'gray.400')
+  const valueColor = useColorModeValue(tokens.fgLight, tokens.fgDark)
+
+  return (
+    <SurfacePanel tone={tone} compact>
+      <VStack align="flex-start" spacing={1}>
+        <Text fontSize="2xs" fontWeight={700} color={labelColor} textTransform="uppercase">
+          {label}
+        </Text>
+        <Text fontSize="sm" fontWeight={800} color={valueColor} noOfLines={1}>
+          {value}
+        </Text>
+      </VStack>
+    </SurfacePanel>
+  )
+}
+
+function Callout({
+  children,
+  tone = 'blue',
+}: {
+  children: ReactNode
+  tone?: PanelTone
+}) {
+  const tokens = PANEL_TOKENS[tone]
+  const chipBg = useColorModeValue(tokens.chipBgLight, tokens.chipBgDark)
+  const chipFg = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const bodyColor = useColorModeValue('gray.600', 'gray.300')
+
+  return (
+    <SurfacePanel tone={tone} compact>
+      <HStack align="flex-start" spacing={3}>
+        <Box
+          w={8}
+          h={8}
+          borderRadius="lg"
+          bg={chipBg}
+          color={chipFg}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          flexShrink={0}
+        >
+          <Icon as={Lightbulb} boxSize={4} weight="duotone" />
+        </Box>
+        <Text fontSize="sm" color={bodyColor} lineHeight="1.55">
+          {children}
+        </Text>
+      </HStack>
+    </SurfacePanel>
+  )
 }
 
 function StatRow({
@@ -52,11 +257,11 @@ function StatRow({
   const valueColor = useColorModeValue('gray.900', 'gray.50')
 
   return (
-    <HStack justify="space-between" w="full">
-      <Text fontSize="sm" color={labelColor}>
+    <HStack justify="space-between" w="full" spacing={3}>
+      <Text fontSize="sm" color={labelColor} minW={0}>
         {label}
       </Text>
-      <Text fontSize="sm" fontWeight={700} color={accent ?? valueColor}>
+      <Text fontSize="sm" fontWeight={700} color={accent ?? valueColor} textAlign="right">
         {value}
       </Text>
     </HStack>
@@ -84,7 +289,7 @@ function SplitBar({
           {label}
         </Text>
         <Text fontSize="xs" color={muted}>
-          You: {actual.toFixed(0)}% · Target: {target}%
+          You: {actual.toFixed(0)}% / Target: {target}%
         </Text>
       </HStack>
       <Box position="relative" h="8px" borderRadius="full" bg={track} overflow="hidden">
@@ -115,14 +320,14 @@ function SplitBar({
 }
 
 function SavingsRateContent({ context }: { context: DiscoverInsightsContext }) {
-  const bodyColor = useColorModeValue('gray.600', 'gray.300')
   const positive = useColorModeValue('green.500', 'green.300')
   const negative = useColorModeValue('red.500', 'red.300')
   const rateColor = context.savingsRate >= 0 ? positive : negative
+  const heroTone: PanelTone = context.savingsRate >= 20 ? 'green' : context.savingsRate >= 0 ? 'blue' : 'red'
 
   const tip =
     context.savingsRate >= 30
-      ? 'Excellent — many experts suggest aiming for 20%+. You are ahead of the curve.'
+      ? 'Excellent: many experts suggest aiming for 20%+. You are ahead of the curve.'
       : context.savingsRate >= 20
         ? 'Solid progress. Keeping this rate consistently builds long-term wealth.'
         : context.savingsRate >= 0
@@ -131,16 +336,14 @@ function SavingsRateContent({ context }: { context: DiscoverInsightsContext }) {
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        Your savings rate shows how much of your income remains after expenses in this period.
-      </Text>
+      <HeroMetric
+        label="Savings rate"
+        value={`${context.savingsRate.toFixed(1)}%`}
+        detail="The share of income left after expenses in this period."
+        tone={heroTone}
+      />
 
-      <Box
-        p={4}
-        borderRadius="xl"
-        border="1px solid"
-        borderColor={useColorModeValue('blackAlpha.100', 'whiteAlpha.100')}
-      >
+      <SurfacePanel>
         <VStack align="stretch" spacing={3}>
           <StatRow label="Income" value={formatMoney(context.totalIncome)} />
           <StatRow label="Expenses" value={formatMoney(context.totalExpense)} />
@@ -155,41 +358,43 @@ function SavingsRateContent({ context }: { context: DiscoverInsightsContext }) {
             accent={rateColor}
           />
         </VStack>
-      </Box>
+      </SurfacePanel>
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        {tip}
-      </Text>
+      <Callout tone={heroTone}>{tip}</Callout>
     </VStack>
   )
 }
 
 function BudgetSplitContent({ context }: { context: DiscoverInsightsContext }) {
-  const bodyColor = useColorModeValue('gray.600', 'gray.300')
   const savingsActual = context.totalIncome > 0
     ? Math.max(0, ((context.totalIncome - context.totalExpense) / context.totalIncome) * 100)
     : 0
   const spendingActual = context.totalIncome > 0
     ? Math.min(100, (context.totalExpense / context.totalIncome) * 100)
     : 0
+  const heroTone: PanelTone = savingsActual >= 20 ? 'green' : 'violet'
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        The 50/30/20 rule splits take-home pay into needs (50%), wants (30%) and savings (20%).
-        Below is how your current period compares — savings vs spending.
-      </Text>
+      <HeroMetric
+        label="50/30/20 snapshot"
+        value={context.totalIncome > 0 ? `${savingsActual.toFixed(0)}% saved` : 'Add income'}
+        detail="A simple framework: 50% needs, 30% wants, 20% savings."
+        tone={heroTone}
+      />
 
-      <VStack align="stretch" spacing={4}>
-        <SplitBar label="Spending" actual={spendingActual} target={80} color="#8b5cf6" />
-        <SplitBar label="Savings" actual={savingsActual} target={20} color="#22c55e" />
-      </VStack>
+      <SurfacePanel tone="violet">
+        <VStack align="stretch" spacing={4}>
+          <SplitBar label="Spending" actual={spendingActual} target={80} color="#8b5cf6" />
+          <SplitBar label="Savings" actual={savingsActual} target={20} color="#22c55e" />
+        </VStack>
+      </SurfacePanel>
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone={heroTone}>
         {context.totalIncome > 0
           ? `You are directing ${savingsActual.toFixed(0)}% toward savings this period. Small shifts in recurring expenses often move the needle fastest.`
           : 'Add income transactions to see how your split compares to the 50/30/20 framework.'}
-      </Text>
+      </Callout>
     </VStack>
   )
 }
@@ -200,20 +405,19 @@ function EmergencyFundContent({ context }: { context: DiscoverInsightsContext })
   const monthsCovered = monthlyEstimate > 0 ? context.netBalance / monthlyEstimate : 0
   const targetMonths = 6
   const progress = Math.min(100, Math.max(0, (monthsCovered / targetMonths) * 100))
+  const coveredLabel = monthlyEstimate > 0 ? `${Math.max(0, monthsCovered).toFixed(1)} months` : 'No expenses yet'
+  const heroTone: PanelTone = progress >= 100 ? 'green' : context.netBalance < 0 ? 'red' : 'amber'
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        An emergency fund covers unexpected costs — job changes, repairs, medical bills — without
-        going into debt. A common target is 3–6 months of essential expenses.
-      </Text>
+      <HeroMetric
+        label="Coverage"
+        value={coveredLabel}
+        detail="A common emergency fund target is 3-6 months of essential expenses."
+        tone={heroTone}
+      />
 
-      <Box
-        p={4}
-        borderRadius="xl"
-        border="1px solid"
-        borderColor={useColorModeValue('blackAlpha.100', 'whiteAlpha.100')}
-      >
+      <SurfacePanel>
         <VStack align="stretch" spacing={3}>
           <StatRow
             label="Estimated monthly expenses"
@@ -225,41 +429,42 @@ function EmergencyFundContent({ context }: { context: DiscoverInsightsContext })
           />
           <StatRow
             label="Months covered"
-            value={monthlyEstimate > 0 ? `${Math.max(0, monthsCovered).toFixed(1)} months` : '—'}
+            value={coveredLabel}
           />
           <StatRow label="Target" value={`${targetMonths} months`} />
         </VStack>
-      </Box>
+      </SurfacePanel>
 
-      <VStack align="stretch" spacing={2}>
-        <HStack justify="space-between">
-          <Text fontSize="sm" fontWeight={600}>
-            Progress toward 6-month buffer
-          </Text>
-          <Text fontSize="xs" color={bodyColor}>
-            {progress.toFixed(0)}%
-          </Text>
-        </HStack>
-        <Progress
-          value={progress}
-          size="sm"
-          borderRadius="full"
-          colorScheme={progress >= 100 ? 'green' : 'orange'}
-        />
-      </VStack>
+      <SurfacePanel tone={heroTone} compact>
+        <VStack align="stretch" spacing={2}>
+          <HStack justify="space-between">
+            <Text fontSize="sm" fontWeight={600}>
+              Progress toward 6-month buffer
+            </Text>
+            <Text fontSize="xs" color={bodyColor}>
+              {progress.toFixed(0)}%
+            </Text>
+          </HStack>
+          <Progress
+            value={progress}
+            size="sm"
+            borderRadius="full"
+            colorScheme={progress >= 100 ? 'green' : 'orange'}
+          />
+        </VStack>
+      </SurfacePanel>
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone={heroTone}>
         {monthsCovered >= targetMonths
           ? 'You may already have a healthy buffer. Keep it in an easy-to-access account separate from daily spending.'
-          : 'Start small — even one month of coverage reduces stress. Automate a fixed transfer each payday.'}
-      </Text>
+          : 'Start small: even one month of coverage reduces stress. Automate a fixed transfer each payday.'}
+      </Callout>
     </VStack>
   )
 }
 
 function CompoundInterestContent({ context }: { context: DiscoverInsightsContext }) {
   const bodyColor = useColorModeValue('gray.600', 'gray.300')
-  const highlight = useColorModeValue('blue.600', 'blue.300')
 
   const monthlySaving = context.totalIncome > 0
     ? Math.max(50, (context.totalIncome - context.totalExpense) / 12)
@@ -279,50 +484,35 @@ function CompoundInterestContent({ context }: { context: DiscoverInsightsContext
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        Compound interest means you earn returns on your returns. Consistency matters more than
-        timing the market — even modest monthly amounts grow significantly over time.
-      </Text>
+      <HeroMetric
+        label="Monthly habit"
+        value={`${formatMoney(monthlySaving)} / mo`}
+        detail="Compound interest earns returns on previous returns, so consistency matters."
+        tone="blue"
+      />
 
-      <Box
-        p={4}
-        borderRadius="xl"
-        border="1px solid"
-        borderColor={useColorModeValue('blackAlpha.100', 'whiteAlpha.100')}
-      >
+      <SurfacePanel>
         <Text fontSize="sm" color={bodyColor} mb={3}>
-          If you saved{' '}
-          <Text as="span" fontWeight={700} color={highlight}>
-            {formatMoney(monthlySaving)}
-          </Text>{' '}
-          per month at 5% annual return:
+          If you saved this amount every month at 5% annual return:
         </Text>
 
-        <SimpleGrid columns={3} spacing={3}>
+        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
           {projections.map(({ year, futureValue }) => (
-            <VStack
+            <MetricCard
               key={year}
-              spacing={0.5}
-              p={3}
-              borderRadius="lg"
-              bg={useColorModeValue('gray.50', 'whiteAlpha.50')}
-            >
-              <Text fontSize="2xs" color={bodyColor} fontWeight={600}>
-                {year} yrs
-              </Text>
-              <Text fontSize="sm" fontWeight={700}>
-                {formatMoney(futureValue)}
-              </Text>
-            </VStack>
+              label={`${year} years`}
+              value={formatMoney(futureValue)}
+              tone={year === 20 ? 'blue' : 'neutral'}
+            />
           ))}
         </SimpleGrid>
-      </Box>
+      </SurfacePanel>
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone="blue">
         {context.totalIncome > 0
           ? 'Projection uses your current savings pace as a starting point. Increase the monthly amount as your income grows.'
           : 'Add transactions to personalise the monthly amount, or start with any figure you can sustain.'}
-      </Text>
+      </Callout>
     </VStack>
   )
 }
@@ -330,19 +520,20 @@ function CompoundInterestContent({ context }: { context: DiscoverInsightsContext
 function SpendingAlertContent({ context }: { context: DiscoverInsightsContext }) {
   const bodyColor = useColorModeValue('gray.600', 'gray.300')
   const negative = useColorModeValue('red.500', 'red.300')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const rowBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const overspend = Math.abs(context.netBalance)
   const topExpenses = getTopExpenses(context.transactions)
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        Your expenses are higher than your income this period. Here is a quick snapshot to help
-        you spot where the gap comes from.
-      </Text>
+      <HeroMetric
+        label="Gap to close"
+        value={formatMoney(overspend)}
+        detail="Expenses are higher than income this period."
+        tone="red"
+      />
 
-      <Box p={4} borderRadius="xl" border="1px solid" borderColor={borderColor}>
+      <SurfacePanel>
         <VStack align="stretch" spacing={3}>
           <StatRow label="Income" value={formatMoney(context.totalIncome)} />
           <StatRow label="Expenses" value={formatMoney(context.totalExpense)} />
@@ -352,52 +543,53 @@ function SpendingAlertContent({ context }: { context: DiscoverInsightsContext })
             accent={negative}
           />
         </VStack>
-      </Box>
+      </SurfacePanel>
 
       {topExpenses.length > 0 && (
-        <VStack align="stretch" spacing={2}>
-          <Text fontSize="sm" fontWeight={600}>
-            Largest expenses this period
-          </Text>
-          {topExpenses.map((tx) => (
-            <HStack
-              key={tx.id ?? `${tx.description}-${tx.dateTime}`}
-              justify="space-between"
-              p={3}
-              borderRadius="lg"
-              bg={rowBg}
-            >
-              <VStack align="flex-start" spacing={0} minW={0} flex={1}>
-                <Text fontSize="sm" fontWeight={600} noOfLines={1}>
-                  {tx.description || tx.category}
+        <SurfacePanel tone="red">
+          <VStack align="stretch" spacing={2}>
+            <Text fontSize="sm" fontWeight={600}>
+              Largest expenses this period
+            </Text>
+            {topExpenses.map((tx) => (
+              <HStack
+                key={tx.id ?? `${tx.description}-${tx.dateTime}`}
+                justify="space-between"
+                p={3}
+                borderRadius="lg"
+                bg={rowBg}
+              >
+                <VStack align="flex-start" spacing={0} minW={0} flex={1}>
+                  <Text fontSize="sm" fontWeight={600} noOfLines={1}>
+                    {tx.description || tx.category}
+                  </Text>
+                  <Text fontSize="xs" color={bodyColor} noOfLines={1}>
+                    {tx.category} /{' '}
+                    {competenceDate(tx).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'short',
+                    })}
+                  </Text>
+                </VStack>
+                <Text fontSize="sm" fontWeight={700} color={negative} flexShrink={0}>
+                  {formatMoney(tx.amount)}
                 </Text>
-                <Text fontSize="xs" color={bodyColor} noOfLines={1}>
-                  {tx.category} ·{' '}
-                  {competenceDate(tx).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </Text>
-              </VStack>
-              <Text fontSize="sm" fontWeight={700} color={negative} flexShrink={0}>
-                {formatMoney(tx.amount)}
-              </Text>
-            </HStack>
-          ))}
-        </VStack>
+              </HStack>
+            ))}
+          </VStack>
+        </SurfacePanel>
       )}
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone="red">
         Start by reviewing recurring bills and discretionary categories above. Pausing one
         non-essential expense often closes a small gap quickly.
-      </Text>
+      </Callout>
     </VStack>
   )
 }
 
 function CategoryBreakdownContent({ context }: { context: DiscoverInsightsContext }) {
   const bodyColor = useColorModeValue('gray.600', 'gray.300')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const rowBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const highlight = useColorModeValue('purple.600', 'purple.300')
   const barColor = useColorModeValue('purple.300', 'purple.400')
@@ -406,14 +598,19 @@ function CategoryBreakdownContent({ context }: { context: DiscoverInsightsContex
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        {top
-          ? `${top.name} leads your spending with ${formatMoney(top.total)} (${top.percentage.toFixed(0)}% of expenses).`
-          : 'Add expense transactions to see how your spending splits across categories.'}
-      </Text>
+      <HeroMetric
+        label="Top category"
+        value={top?.name ?? 'No data yet'}
+        detail={
+          top
+            ? `${formatMoney(top.total)} / ${top.percentage.toFixed(0)}% of expenses.`
+            : 'Add expense transactions to see how spending splits across categories.'
+        }
+        tone="violet"
+      />
 
       {breakdown.length > 0 && (
-        <Box p={4} borderRadius="xl" border="1px solid" borderColor={borderColor}>
+        <SurfacePanel>
           <VStack align="stretch" spacing={3}>
             {breakdown.slice(0, 6).map((row, index) => (
               <VStack key={row.name} align="stretch" spacing={1.5}>
@@ -426,7 +623,7 @@ function CategoryBreakdownContent({ context }: { context: DiscoverInsightsContex
                     {row.name}
                   </Text>
                   <Text fontSize="xs" color={bodyColor}>
-                    {row.count} tx · {row.percentage.toFixed(0)}%
+                    {row.count} tx / {row.percentage.toFixed(0)}%
                   </Text>
                 </HStack>
                 <Box
@@ -448,20 +645,19 @@ function CategoryBreakdownContent({ context }: { context: DiscoverInsightsContex
               </VStack>
             ))}
           </VStack>
-        </Box>
+        </SurfacePanel>
       )}
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone="violet">
         Categories that keep showing up at the top are usually the best place to look for savings
-        — even a 10% trim can free up meaningful room in your budget.
-      </Text>
+        - even a 10% trim can free up meaningful room in your budget.
+      </Callout>
     </VStack>
   )
 }
 
 function GettingStartedContent({ context }: { context: DiscoverInsightsContext }) {
   const bodyColor = useColorModeValue('gray.600', 'gray.300')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const stepBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const incomeCount = context.transactions.filter((tx) => tx.type === 'INCOME').length
   const expenseCount = context.transactions.filter((tx) => tx.type === 'EXPENSE').length
@@ -469,7 +665,7 @@ function GettingStartedContent({ context }: { context: DiscoverInsightsContext }
   const steps = [
     {
       title: 'Log your income',
-      detail: 'Salary, freelance payments, refunds — anything that adds to your balance.',
+      detail: 'Salary, freelance payments, refunds - anything that adds to your balance.',
       done: incomeCount > 0,
     },
     {
@@ -483,16 +679,18 @@ function GettingStartedContent({ context }: { context: DiscoverInsightsContext }
       done: context.totalTransactions >= 5,
     },
   ]
+  const completedSteps = steps.filter((step) => step.done).length
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        You have {context.totalTransactions} transaction
-        {context.totalTransactions === 1 ? '' : 's'} so far. A few more entries unlock richer
-        insights across this section.
-      </Text>
+      <HeroMetric
+        label="Progress"
+        value={`${completedSteps}/${steps.length} steps`}
+        detail={`${context.totalTransactions} transaction${context.totalTransactions === 1 ? '' : 's'} logged so far.`}
+        tone={completedSteps === steps.length ? 'green' : 'blue'}
+      />
 
-      <Box p={4} borderRadius="xl" border="1px solid" borderColor={borderColor}>
+      <SurfacePanel>
         <VStack align="stretch" spacing={3}>
           {steps.map((step, index) => (
             <HStack
@@ -516,7 +714,7 @@ function GettingStartedContent({ context }: { context: DiscoverInsightsContext }
                 fontWeight={700}
                 flexShrink={0}
               >
-                {step.done ? '✓' : index + 1}
+                {step.done ? <Icon as={Check} boxSize={3.5} weight="bold" /> : index + 1}
               </Box>
               <VStack align="flex-start" spacing={0.5}>
                 <Text fontSize="sm" fontWeight={600}>
@@ -529,30 +727,31 @@ function GettingStartedContent({ context }: { context: DiscoverInsightsContext }
             </HStack>
           ))}
         </VStack>
-      </Box>
+      </SurfacePanel>
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        Use the Add transaction panel above to get started — income and expenses can be logged in
+      <Callout tone="blue">
+        Use the Add transaction panel above to get started - income and expenses can be logged in
         under a minute each.
-      </Text>
+      </Callout>
     </VStack>
   )
 }
 
 function CategoryGuideContent({ context }: { context: DiscoverInsightsContext }) {
   const bodyColor = useColorModeValue('gray.600', 'gray.300')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const rowBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const breakdown = buildCategoryBreakdown(context.transactions)
 
   return (
     <VStack align="stretch" spacing={5} p={{ base: 4, md: 6 }}>
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-        Categories turn a list of transactions into a clear picture of where money goes. Group
-        similar expenses together and patterns become obvious within a week.
-      </Text>
+      <HeroMetric
+        label="Category clarity"
+        value={breakdown.length > 0 ? `${breakdown.length} active` : 'Start simple'}
+        detail="Categories turn a list of transactions into a clear picture of where money goes."
+        tone="violet"
+      />
 
-      <Box p={4} borderRadius="xl" border="1px solid" borderColor={borderColor}>
+      <SurfacePanel tone="violet">
         <Text fontSize="sm" fontWeight={600} mb={3}>
           Good categories to start with
         </Text>
@@ -563,35 +762,37 @@ function CategoryGuideContent({ context }: { context: DiscoverInsightsContext })
             </HStack>
           ))}
         </SimpleGrid>
-      </Box>
+      </SurfacePanel>
 
       {breakdown.length > 0 ? (
-        <VStack align="stretch" spacing={2}>
-          <Text fontSize="sm" fontWeight={600}>
-            Your categories so far
-          </Text>
-          {breakdown.slice(0, 5).map((row) => (
-            <HStack key={row.name} justify="space-between" p={3} borderRadius="lg" bg={rowBg}>
-              <Text fontSize="sm" fontWeight={600}>
-                {row.name}
-              </Text>
-              <Text fontSize="xs" color={bodyColor}>
-                {row.count} tx · {formatMoney(row.total)}
-              </Text>
-            </HStack>
-          ))}
-        </VStack>
+        <SurfacePanel>
+          <VStack align="stretch" spacing={2}>
+            <Text fontSize="sm" fontWeight={600}>
+              Your categories so far
+            </Text>
+            {breakdown.slice(0, 5).map((row) => (
+              <HStack key={row.name} justify="space-between" p={3} borderRadius="lg" bg={rowBg}>
+                <Text fontSize="sm" fontWeight={600}>
+                  {row.name}
+                </Text>
+                <Text fontSize="xs" color={bodyColor}>
+                  {row.count} tx / {formatMoney(row.total)}
+                </Text>
+              </HStack>
+            ))}
+          </VStack>
+        </SurfacePanel>
       ) : (
-        <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
-          As you add expenses, your categories will appear here automatically — no extra setup
+        <Callout tone="violet">
+          As you add expenses, your categories will appear here automatically - no extra setup
           required.
-        </Text>
+        </Callout>
       )}
 
-      <Text fontSize="sm" color={bodyColor} lineHeight="1.6">
+      <Callout tone="violet">
         Keep names short and consistent. &quot;Food&quot; and &quot;Groceries&quot; as separate
-        labels split the same habit — pick one and stick with it.
-      </Text>
+        labels split the same habit - pick one and stick with it.
+      </Callout>
     </VStack>
   )
 }
@@ -686,6 +887,11 @@ export default function DiscoverDetailModal({
   if (!modalId) return null
 
   const meta = MODAL_META[modalId]
+  const footerColorScheme = meta.accent === 'violet'
+    ? 'purple'
+    : meta.accent === 'neutral'
+      ? 'gray'
+      : meta.accent
 
   return (
     <PremiumModal
@@ -702,7 +908,13 @@ export default function DiscoverDetailModal({
         />
       }
       footer={
-        <Button w="full" onClick={onClose} size="md" borderRadius="xl">
+        <Button
+          w="full"
+          onClick={onClose}
+          size="md"
+          borderRadius="xl"
+          colorScheme={footerColorScheme}
+        >
           Got it
         </Button>
       }

@@ -15,10 +15,15 @@ interface AccentTokens {
   chipBgDark: string
   chipFgLight: string
   chipFgDark: string
+  surfaceLight: string
+  surfaceDark: string
+  hoverSurfaceLight: string
+  hoverSurfaceDark: string
   hoverBorderLight: string
   hoverBorderDark: string
-  glowLight: string
-  glowDark: string
+  focusRingLight: string
+  focusRingDark: string
+  accentLine: string
 }
 
 const ACCENTS: Record<DiscoverAccent, AccentTokens> = {
@@ -27,50 +32,75 @@ const ACCENTS: Record<DiscoverAccent, AccentTokens> = {
     chipBgDark: 'rgba(139,92,246,0.16)',
     chipFgLight: 'purple.600',
     chipFgDark: 'purple.300',
+    surfaceLight: 'linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)',
+    surfaceDark: 'linear-gradient(135deg, rgba(139,92,246,0.12) 0%, rgba(15,15,15,0.96) 58%)',
+    hoverSurfaceLight: 'linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%)',
+    hoverSurfaceDark: 'linear-gradient(135deg, rgba(139,92,246,0.16) 0%, rgba(18,18,18,0.98) 58%)',
     hoverBorderLight: 'purple.200',
     hoverBorderDark: 'rgba(139,92,246,0.45)',
-    glowLight: 'rgba(139,92,246,0.10)',
-    glowDark: 'rgba(139,92,246,0.18)',
+    focusRingLight: 'rgba(139,92,246,0.18)',
+    focusRingDark: 'rgba(139,92,246,0.28)',
+    accentLine: 'linear-gradient(90deg, #8b5cf6, #6366f1)',
   },
   blue: {
     chipBgLight: 'blue.50',
     chipBgDark: 'rgba(59,130,246,0.16)',
     chipFgLight: 'blue.600',
     chipFgDark: 'blue.300',
+    surfaceLight: 'linear-gradient(135deg, #ffffff 0%, #eff6ff 100%)',
+    surfaceDark: 'linear-gradient(135deg, rgba(59,130,246,0.12) 0%, rgba(15,15,15,0.96) 58%)',
+    hoverSurfaceLight: 'linear-gradient(135deg, #ffffff 0%, #e0f2fe 100%)',
+    hoverSurfaceDark: 'linear-gradient(135deg, rgba(59,130,246,0.16) 0%, rgba(18,18,18,0.98) 58%)',
     hoverBorderLight: 'blue.200',
     hoverBorderDark: 'rgba(59,130,246,0.45)',
-    glowLight: 'rgba(59,130,246,0.10)',
-    glowDark: 'rgba(59,130,246,0.18)',
+    focusRingLight: 'rgba(59,130,246,0.18)',
+    focusRingDark: 'rgba(59,130,246,0.28)',
+    accentLine: 'linear-gradient(90deg, #06b6d4, #2563eb)',
   },
   amber: {
     chipBgLight: 'orange.50',
     chipBgDark: 'rgba(249,115,22,0.16)',
     chipFgLight: 'orange.600',
     chipFgDark: 'orange.300',
+    surfaceLight: 'linear-gradient(135deg, #ffffff 0%, #fff7ed 100%)',
+    surfaceDark: 'linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(15,15,15,0.96) 58%)',
+    hoverSurfaceLight: 'linear-gradient(135deg, #ffffff 0%, #ffedd5 100%)',
+    hoverSurfaceDark: 'linear-gradient(135deg, rgba(249,115,22,0.16) 0%, rgba(18,18,18,0.98) 58%)',
     hoverBorderLight: 'orange.200',
     hoverBorderDark: 'rgba(249,115,22,0.45)',
-    glowLight: 'rgba(249,115,22,0.10)',
-    glowDark: 'rgba(249,115,22,0.18)',
+    focusRingLight: 'rgba(249,115,22,0.18)',
+    focusRingDark: 'rgba(249,115,22,0.28)',
+    accentLine: 'linear-gradient(90deg, #f97316, #f59e0b)',
   },
   green: {
     chipBgLight: 'green.50',
     chipBgDark: 'rgba(34,197,94,0.16)',
     chipFgLight: 'green.600',
     chipFgDark: 'green.300',
+    surfaceLight: 'linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%)',
+    surfaceDark: 'linear-gradient(135deg, rgba(34,197,94,0.12) 0%, rgba(15,15,15,0.96) 58%)',
+    hoverSurfaceLight: 'linear-gradient(135deg, #ffffff 0%, #dcfce7 100%)',
+    hoverSurfaceDark: 'linear-gradient(135deg, rgba(34,197,94,0.16) 0%, rgba(18,18,18,0.98) 58%)',
     hoverBorderLight: 'green.200',
     hoverBorderDark: 'rgba(34,197,94,0.45)',
-    glowLight: 'rgba(34,197,94,0.10)',
-    glowDark: 'rgba(34,197,94,0.18)',
+    focusRingLight: 'rgba(34,197,94,0.18)',
+    focusRingDark: 'rgba(34,197,94,0.28)',
+    accentLine: 'linear-gradient(90deg, #22c55e, #10b981)',
   },
   red: {
     chipBgLight: 'red.50',
     chipBgDark: 'rgba(239,68,68,0.16)',
     chipFgLight: 'red.600',
     chipFgDark: 'red.300',
+    surfaceLight: 'linear-gradient(135deg, #ffffff 0%, #fff1f2 100%)',
+    surfaceDark: 'linear-gradient(135deg, rgba(239,68,68,0.12) 0%, rgba(15,15,15,0.96) 58%)',
+    hoverSurfaceLight: 'linear-gradient(135deg, #ffffff 0%, #ffe4e6 100%)',
+    hoverSurfaceDark: 'linear-gradient(135deg, rgba(239,68,68,0.16) 0%, rgba(18,18,18,0.98) 58%)',
     hoverBorderLight: 'red.200',
     hoverBorderDark: 'rgba(239,68,68,0.45)',
-    glowLight: 'rgba(239,68,68,0.10)',
-    glowDark: 'rgba(239,68,68,0.18)',
+    focusRingLight: 'rgba(239,68,68,0.18)',
+    focusRingDark: 'rgba(239,68,68,0.28)',
+    accentLine: 'linear-gradient(90deg, #fb7185, #ef4444)',
   },
 }
 
@@ -88,7 +118,8 @@ export default function DiscoverCard({
   compact,
 }: DiscoverCardProps) {
   const tokens = ACCENTS[item.accent]
-  const cardBg = useColorModeValue('white', 'gray.800')
+  const cardBg = useColorModeValue(tokens.surfaceLight, tokens.surfaceDark)
+  const hoverBg = useColorModeValue(tokens.hoverSurfaceLight, tokens.hoverSurfaceDark)
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const hoverBorderColor = useColorModeValue(
     tokens.hoverBorderLight,
@@ -99,9 +130,17 @@ export default function DiscoverCard({
   const ctaColor = useColorModeValue('gray.600', 'gray.300')
   const chipBg = useColorModeValue(tokens.chipBgLight, tokens.chipBgDark)
   const chipFg = useColorModeValue(tokens.chipFgLight, tokens.chipFgDark)
-  const glowColor = useColorModeValue(tokens.glowLight, tokens.glowDark)
+  const focusRing = useColorModeValue(tokens.focusRingLight, tokens.focusRingDark)
   const badgeBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
   const badgeColor = useColorModeValue('gray.600', 'gray.300')
+  const shadow = useColorModeValue(
+    '0 1px 2px rgba(15,23,42,0.05)',
+    '0 1px 0 rgba(255,255,255,0.04)',
+  )
+  const hoverShadow = useColorModeValue(
+    '0 14px 34px -24px rgba(15,23,42,0.45)',
+    '0 16px 36px -24px rgba(0,0,0,0.85)',
+  )
 
   return (
     <Box
@@ -116,6 +155,8 @@ export default function DiscoverCard({
       cursor="pointer"
       _focusVisible={{
         outline: 'none',
+        boxShadow: `0 0 0 3px ${focusRing}`,
+        borderRadius: 'lg',
       }}
     >
       <Box
@@ -123,44 +164,37 @@ export default function DiscoverCard({
         h="full"
         minH={compact ? '148px' : featured ? { md: '180px' } : undefined}
         p={{ base: 4, md: featured ? 6 : 5 }}
-        borderRadius="xl"
+        borderRadius="lg"
         bg={cardBg}
         border="1px solid"
         borderColor={borderColor}
+        boxShadow={shadow}
         overflow="hidden"
-        transition="border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease"
+        transition="background 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease"
         _groupHover={{
+          bg: hoverBg,
           borderColor: hoverBorderColor,
           transform: 'translateY(-2px)',
-          boxShadow: `0 12px 32px -16px ${glowColor}`,
-        }}
-        _focusWithin={{
-          borderColor: hoverBorderColor,
-          boxShadow: `0 0 0 3px ${glowColor}`,
+          boxShadow: hoverShadow,
         }}
       >
         <Box
           position="absolute"
-          top="-30%"
-          right="-20%"
-          w={featured ? '200px' : '160px'}
-          h={featured ? '200px' : '160px'}
-          borderRadius="full"
-          bg={glowColor}
-          filter="blur(40px)"
-          opacity={featured ? 0.35 : 0}
-          transition="opacity 0.25s ease"
-          _groupHover={{ opacity: 1 }}
+          top={0}
+          left={0}
+          right={0}
+          h="3px"
+          bg={tokens.accentLine}
           pointerEvents="none"
           aria-hidden
         />
 
-        <VStack align="flex-start" spacing={3} position="relative" h="full">
+        <VStack align="flex-start" spacing={3} position="relative" h="full" pt={1}>
           <HStack w="full" justify="space-between" align="flex-start">
             <Box
               w={featured ? 10 : 9}
               h={featured ? 10 : 9}
-              borderRadius="lg"
+              borderRadius="md"
               bg={chipBg}
               color={chipFg}
               display="flex"
@@ -181,7 +215,7 @@ export default function DiscoverCard({
                 fontSize="2xs"
                 fontWeight={600}
                 textTransform="none"
-                letterSpacing="0.01em"
+                letterSpacing="0"
                 maxW="55%"
                 noOfLines={1}
               >
@@ -214,7 +248,7 @@ export default function DiscoverCard({
             color={ctaColor}
             fontSize="xs"
             fontWeight={600}
-            letterSpacing="0.02em"
+            letterSpacing="0"
             transition="color 0.2s ease, transform 0.2s ease"
             _groupHover={{
               color: chipFg,

@@ -21,8 +21,13 @@ interface UseDiscoverCardsArgs {
   balance: number
 }
 
+const moneyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+})
+
 function formatMoney(value: number) {
-  return `£${Math.abs(value).toFixed(2)}`
+  return moneyFormatter.format(Math.abs(value))
 }
 
 function pickTopCards(candidates: DiscoverCardItem[], limit = 3): DiscoverCardItem[] {
@@ -79,7 +84,7 @@ export function useDiscoverCards({
         title: 'Your savings rate',
         description:
           rate >= 20
-            ? `You're saving ${rate.toFixed(0)}% of income this period — ${rate >= 30 ? 'excellent progress' : 'solid work'}.`
+            ? `You're saving ${rate.toFixed(0)}% of income this period - ${rate >= 30 ? 'excellent progress' : 'solid work'}.`
             : rate >= 0
               ? `You're saving ${rate.toFixed(0)}% of income. See how to push toward 20%+.`
               : `Expenses exceed income by ${formatMoney(Math.abs(balance))}. See the breakdown.`,
@@ -188,7 +193,7 @@ export function useDiscoverCards({
     candidates.push({
       id: 'budget-rule-edu',
       title: 'Rule 50/30/20',
-      description: '50% needs, 30% wants, 20% savings — the simplest framework to organise your money.',
+      description: '50% needs, 30% wants, 20% savings - the simplest framework to organise your money.',
       icon: Lightbulb,
       accent: 'amber',
       cta: 'Learn the rule',
