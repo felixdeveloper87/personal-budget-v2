@@ -102,7 +102,13 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             </Box>
 
             <Box order={{ base: 3, lg: 3 }}>
-              <DiscoverSection onPageChange={onPageChange} />
+              <DiscoverSection
+                transactions={periodData.transactions}
+                selectedPeriod={selectedPeriod}
+                income={periodData.income}
+                expense={periodData.expense}
+                balance={periodData.balance}
+              />
             </Box>
           </VStack>
         )}

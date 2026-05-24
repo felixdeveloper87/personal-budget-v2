@@ -1,286 +1,197 @@
+import { useCallback, useRef, useState } from 'react'
 import {
   Box,
+  Grid,
+  GridItem,
   HStack,
-  Icon,
-  Link,
-  SimpleGrid,
-  Text,
   VStack,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react'
-import {
-  ArrowUpRight,
-  ChartLineUp as BarChart3,
-  BookOpen as Layers,
-  Lightbulb as MessageSquare,
-  Sparkles,
-} from '../components/ui/icons'
-import type { LucideIcon } from '../components/ui/icons'
-
+import { Sparkles } from '../components/ui/icons'
 import { SectionCard, SectionHeader } from '../components/ui'
-import type { AppPage } from '../components/layout/header/navigation.config'
-
-type Accent = 'violet' | 'blue' | 'amber'
-
-interface NudgeItem {
-  id: string
-  title: string
-  description: string
-  icon: LucideIcon
-  accent: Accent
-  /** Internal navigation target. Mutually exclusive with `href`. */
-  page?: AppPage
-  /** External link (mailto:, https:, …). Mutually exclusive with `page`. */
-  href?: string
-  /** CTA label shown next to the arrow. */
-  cta: string
-}
-
-const NUDGES: NudgeItem[] = [
-  {
-    id: 'compound-interest',
-    title: 'The Magic of Time',
-    description: 'Understand how compound interest turns small savings into a fortune over years.',
-    icon: BarChart3,
-    accent: 'blue',
-    href: 'https://www.investopedia.com/terms/c/compoundinterest.asp',
-    cta: 'Learn more',
-  },
-  {
-    id: 'budget-rule',
-    title: 'Rule 50/30/20',
-    description: '50% Needs, 30% Wants, 20% Savings. The simplest way to organize your budget.',
-    icon: Layers,
-    accent: 'violet',
-    href: 'https://www.investopedia.com/ask/answers/022916/what-502030-budget-rule.asp',
-    cta: 'Read tip',
-  },
-  {
-    id: 'emergency-fund',
-    title: 'Safety First',
-    description: 'Why a 6-month emergency fund is the most important asset you can own.',
-    icon: MessageSquare,
-    accent: 'amber',
-    href: 'https://www.nerdwallet.com/article/banking/emergency-fund-why-it-matters',
-    cta: 'Get tips',
-  },
-]
-
-interface AccentTokens {
-  chipBgLight: string
-  chipBgDark: string
-  chipFgLight: string
-  chipFgDark: string
-  hoverBorderLight: string
-  hoverBorderDark: string
-  glowLight: string
-  glowDark: string
-}
-
-const ACCENTS: Record<Accent, AccentTokens> = {
-  violet: {
-    chipBgLight: 'purple.50',
-    chipBgDark: 'rgba(139,92,246,0.16)',
-    chipFgLight: 'purple.600',
-    chipFgDark: 'purple.300',
-    hoverBorderLight: 'purple.200',
-    hoverBorderDark: 'rgba(139,92,246,0.45)',
-    glowLight: 'rgba(139,92,246,0.10)',
-    glowDark: 'rgba(139,92,246,0.18)',
-  },
-  blue: {
-    chipBgLight: 'blue.50',
-    chipBgDark: 'rgba(59,130,246,0.16)',
-    chipFgLight: 'blue.600',
-    chipFgDark: 'blue.300',
-    hoverBorderLight: 'blue.200',
-    hoverBorderDark: 'rgba(59,130,246,0.45)',
-    glowLight: 'rgba(59,130,246,0.10)',
-    glowDark: 'rgba(59,130,246,0.18)',
-  },
-  amber: {
-    chipBgLight: 'orange.50',
-    chipBgDark: 'rgba(249,115,22,0.16)',
-    chipFgLight: 'orange.600',
-    chipFgDark: 'orange.300',
-    hoverBorderLight: 'orange.200',
-    hoverBorderDark: 'rgba(249,115,22,0.45)',
-    glowLight: 'rgba(249,115,22,0.10)',
-    glowDark: 'rgba(249,115,22,0.18)',
-  },
-}
-
-interface NudgeCardProps {
-  item: NudgeItem
-  onPageChange?: (page: AppPage) => void
-}
-
-function NudgeCard({ item, onPageChange }: NudgeCardProps) {
-  const tokens = ACCENTS[item.accent]
-  const cardBg = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const hoverBorderColor = useColorModeValue(
-    tokens.hoverBorderLight,
-    tokens.hoverBorderDark,
-  )
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const descriptionColor = useColorModeValue('gray.500', 'gray.400')
-  const ctaColor = useColorModeValue('gray.600', 'gray.300')
-  const chipBg = useColorModeValue(tokens.chipBgLight, tokens.chipBgDark)
-  const chipFg = useColorModeValue(tokens.chipFgLight, tokens.chipFgDark)
-  const glowColor = useColorModeValue(tokens.glowLight, tokens.glowDark)
-
-  const isInternal = Boolean(item.page)
-
-  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (isInternal && item.page && onPageChange) {
-      event.preventDefault()
-      onPageChange(item.page)
-    }
-  }
-
-  return (
-    <Link
-      href={isInternal ? '#' : item.href}
-      onClick={handleClick}
-      isExternal={!isInternal}
-      role="group"
-      _hover={{ textDecoration: 'none' }}
-      _focusVisible={{ outline: 'none' }}
-      display="block"
-      h="full"
-    >
-      <Box
-        position="relative"
-        h="full"
-        p={{ base: 4, md: 5 }}
-        borderRadius="xl"
-        bg={cardBg}
-        border="1px solid"
-        borderColor={borderColor}
-        overflow="hidden"
-        transition="border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease"
-        _groupHover={{
-          borderColor: hoverBorderColor,
-          transform: 'translateY(-2px)',
-          boxShadow: `0 12px 32px -16px ${glowColor}`,
-        }}
-        _focusWithin={{
-          borderColor: hoverBorderColor,
-          boxShadow: `0 0 0 3px ${glowColor}`,
-        }}
-      >
-        {/* Subtle radial glow that lifts on hover */}
-        <Box
-          position="absolute"
-          top="-30%"
-          right="-20%"
-          w="160px"
-          h="160px"
-          borderRadius="full"
-          bg={glowColor}
-          filter="blur(40px)"
-          opacity={0}
-          transition="opacity 0.25s ease"
-          _groupHover={{ opacity: 1 }}
-          pointerEvents="none"
-          aria-hidden
-        />
-
-        <VStack
-          align="flex-start"
-          spacing={3}
-          position="relative"
-          h="full"
-        >
-          <Box
-            w={9}
-            h={9}
-            borderRadius="lg"
-            bg={chipBg}
-            color={chipFg}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexShrink={0}
-          >
-            <Icon as={item.icon} boxSize={4} weight="duotone" />
-          </Box>
-
-          <VStack align="flex-start" spacing={1} flex={1}>
-            <Text
-              fontWeight={700}
-              fontSize="md"
-              color={titleColor}
-              lineHeight="1.25"
-            >
-              {item.title}
-            </Text>
-            <Text fontSize="sm" color={descriptionColor} lineHeight="1.45">
-              {item.description}
-            </Text>
-          </VStack>
-
-          <HStack
-            spacing={1}
-            color={ctaColor}
-            fontSize="xs"
-            fontWeight={600}
-            letterSpacing="0.02em"
-            transition="color 0.2s ease, transform 0.2s ease"
-            _groupHover={{
-              color: chipFg,
-              transform: 'translateX(2px)',
-            }}
-          >
-            <Text>{item.cta}</Text>
-            <Icon as={ArrowUpRight} boxSize={3.5} weight="bold" />
-          </HStack>
-        </VStack>
-      </Box>
-    </Link>
-  )
-}
+import {
+  DiscoverCard,
+  DiscoverDetailModal,
+  type DiscoverCardItem,
+  type DiscoverInsightsContext,
+  type DiscoverModalId,
+} from '../components/discover'
+import { useDiscoverCards } from '../hooks/useDiscoverCards'
+import { useTransactionInsights } from '../hooks/useTransactionInsights'
+import type { Transaction, PeriodType } from '../types'
 
 export interface DiscoverSectionProps {
-  /**
-   * Optional handler used to switch between in-app pages without a real
-   * router. When omitted, internal nudges fall back to noop links.
-   */
-  onPageChange?: (page: AppPage) => void
+  transactions: Transaction[]
+  selectedPeriod: PeriodType
+  income: number
+  expense: number
+  balance: number
 }
 
-/**
- * Lightweight "explore the rest of the app + stay in touch" strip rendered
- * on the dashboard. Replaces the now-decoupled Category Analytics block
- * with quick links to the dedicated pages plus a contact CTA.
- */
-export default function DiscoverSection({ onPageChange }: DiscoverSectionProps) {
-  return (
-    <SectionCard staticOnHover>
-      <Box p={{ base: 4, sm: 5, md: 6 }}>
-        <VStack spacing={{ base: 4, md: 5 }} align="stretch">
-          <SectionHeader
-            icon={Sparkles}
-            title="Discover more"
-            caption="Finance tips, interesting facts and news to help you manage your money."
-            accent="violet"
-          />
+function CarouselDots({
+  count,
+  activeIndex,
+}: {
+  count: number
+  activeIndex: number
+}) {
+  const activeColor = useColorModeValue('purple.500', 'purple.300')
+  const inactiveColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
 
-          <SimpleGrid
-            columns={{ base: 1, md: 3 }}
-            spacing={{ base: 3, md: 4 }}
-          >
-            {NUDGES.map((item) => (
-              <NudgeCard
-                key={item.id}
-                item={item}
-                onPageChange={onPageChange}
-              />
-            ))}
-          </SimpleGrid>
-        </VStack>
-      </Box>
-    </SectionCard>
+  if (count <= 1) return null
+
+  return (
+    <HStack justify="center" spacing={1.5} pt={1}>
+      {Array.from({ length: count }).map((_, index) => (
+        <Box
+          key={index}
+          w={index === activeIndex ? '18px' : '6px'}
+          h="6px"
+          borderRadius="full"
+          bg={index === activeIndex ? activeColor : inactiveColor}
+          transition="all 0.2s ease"
+        />
+      ))}
+    </HStack>
+  )
+}
+
+export default function DiscoverSection({
+  transactions,
+  selectedPeriod,
+  income,
+  expense,
+  balance,
+}: DiscoverSectionProps) {
+  const cards = useDiscoverCards({
+    transactions,
+    selectedPeriod,
+    income,
+    expense,
+    balance,
+  })
+  const insights = useTransactionInsights(transactions, selectedPeriod)
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const [activeModal, setActiveModal] = useState<DiscoverModalId | null>(null)
+  const [activeSlide, setActiveSlide] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const context: DiscoverInsightsContext = {
+    totalIncome: income,
+    totalExpense: expense,
+    netBalance: balance,
+    savingsRate: insights.savingsRate,
+    mostUsedCategory: insights.mostUsedCategory,
+    totalTransactions: insights.totalTransactions,
+    averageExpensePerDay: insights.averageExpensePerDay,
+    transactions,
+  }
+
+  const handleCardClick = useCallback(
+    (item: DiscoverCardItem) => {
+      setActiveModal(item.modalId)
+      onOpen()
+    },
+    [onOpen],
+  )
+
+  const handleModalClose = useCallback(() => {
+    onClose()
+    setActiveModal(null)
+  }, [onClose])
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current
+    if (!el || cards.length === 0) return
+
+    const cardWidth = el.scrollWidth / cards.length
+    const index = Math.round(el.scrollLeft / cardWidth)
+    setActiveSlide(Math.min(Math.max(index, 0), cards.length - 1))
+  }, [cards.length])
+
+  if (cards.length === 0) return null
+
+  return (
+    <>
+      <SectionCard staticOnHover>
+        <Box p={{ base: 4, sm: 5, md: 6 }}>
+          <VStack spacing={{ base: 4, md: 5 }} align="stretch">
+            <SectionHeader
+              icon={Sparkles}
+              title="For you"
+              caption="Personalised tips based on your activity — everything stays in the app."
+              accent="violet"
+            />
+
+            <Box display={{ base: 'block', md: 'none' }}>
+              <Box
+                ref={scrollRef}
+                onScroll={handleScroll}
+                overflowX="auto"
+                overflowY="hidden"
+                display="flex"
+                gap={3}
+                mx={-4}
+                px={4}
+                pb={1}
+                scrollSnapType="x mandatory"
+                sx={{
+                  WebkitOverflowScrolling: 'touch',
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                }}
+              >
+                {cards.map((item) => (
+                  <Box
+                    key={item.id}
+                    flex="0 0 86%"
+                    scrollSnapAlign="center"
+                  >
+                    <DiscoverCard
+                      item={item}
+                      onClick={() => handleCardClick(item)}
+                      featured={item.featured}
+                      compact
+                    />
+                  </Box>
+                ))}
+              </Box>
+              <CarouselDots count={cards.length} activeIndex={activeSlide} />
+            </Box>
+
+            <Grid
+              display={{ base: 'none', md: 'grid' }}
+              templateColumns={{ md: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }}
+              gap={{ md: 4 }}
+            >
+              {cards.map((item, index) => (
+                <GridItem
+                  key={item.id}
+                  colSpan={
+                    item.featured && index === 0
+                      ? { md: 2, lg: 2 }
+                      : 1
+                  }
+                >
+                  <DiscoverCard
+                    item={item}
+                    onClick={() => handleCardClick(item)}
+                    featured={item.featured && index === 0}
+                  />
+                </GridItem>
+              ))}
+            </Grid>
+          </VStack>
+        </Box>
+      </SectionCard>
+
+      <DiscoverDetailModal
+        modalId={activeModal}
+        isOpen={isOpen}
+        onClose={handleModalClose}
+        context={context}
+      />
+    </>
   )
 }
