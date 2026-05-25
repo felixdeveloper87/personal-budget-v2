@@ -6,7 +6,6 @@ import {
   Icon,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Text,
@@ -14,7 +13,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { ChevronDown, LogOut, Settings, User } from '../../ui/icons'
-import { GRADIENTS } from '../../../theme'
+import type { UserPlan } from '../../../types'
 
 interface UserMenuProps {
   user: any
@@ -23,16 +22,39 @@ interface UserMenuProps {
   onLogout: () => void
 }
 
+const PLAN_LABEL: Record<UserPlan, string> = {
+  STANDARD: 'Standard',
+  PREMIUM: 'Premium',
+}
+
 export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout }: UserMenuProps) {
-  const triggerBg = useColorModeValue('white', 'whiteAlpha.100')
-  const triggerBorder = useColorModeValue('gray.200', 'whiteAlpha.300')
+  const plan: UserPlan = user?.plan ?? 'STANDARD'
+
+  const triggerBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const triggerBorder = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const triggerShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
+    'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
+  )
+  const triggerHoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
   const triggerHoverBorder = useColorModeValue('blue.300', 'blue.400')
-  const textColor = useColorModeValue('gray.800', 'white')
-  const subTextColor = useColorModeValue('gray.600', 'gray.400')
-  const cardBg = useColorModeValue(GRADIENTS.cardLight, GRADIENTS.cardDark)
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const itemHoverBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const logoutHoverBg = useColorModeValue('red.50', 'red.900')
+
+  const textColor = useColorModeValue('gray.800', 'gray.100')
+  const subTextColor = useColorModeValue('gray.500', 'gray.400')
+  const menuListBg = useColorModeValue(
+    'rgba(255, 255, 255, 0.85)',
+    'rgba(15, 15, 17, 0.85)'
+  )
+  const borderColor = useColorModeValue('rgba(226, 232, 240, 0.8)', 'rgba(255, 255, 255, 0.08)')
+  const itemHoverBg = useColorModeValue('rgba(59, 130, 246, 0.05)', 'rgba(255, 255, 255, 0.05)')
+  const itemHoverColor = useColorModeValue('blue.600', 'blue.300')
+  const logoutHoverBg = useColorModeValue('rgba(239, 68, 68, 0.06)', 'rgba(248, 113, 113, 0.08)')
+  const sectionLabelColor = useColorModeValue('gray.400', 'gray.500')
+  
+  const headerBg = useColorModeValue(
+    'rgba(248, 250, 252, 0.65)',
+    'rgba(255, 255, 255, 0.015)'
+  )
   const accentBar = useColorModeValue(
     'linear-gradient(90deg, #3b82f6, #8b5cf6)',
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
@@ -43,9 +65,19 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
   )
   const statusDotBg = useColorModeValue('green.400', 'green.300')
   const statusDotRing = useColorModeValue('white', 'gray.900')
-  const badgeBg = useColorModeValue('green.100', 'green.900')
-  const badgeColor = useColorModeValue('green.700', 'green.300')
-  const badgeBorder = useColorModeValue('green.200', 'green.700')
+
+  const planBadgeBg = useColorModeValue(
+    plan === 'PREMIUM' ? 'rgba(245, 158, 11, 0.08)' : 'rgba(100, 116, 139, 0.06)',
+    plan === 'PREMIUM' ? 'rgba(251, 191, 36, 0.12)' : 'rgba(255, 255, 255, 0.06)'
+  )
+  const planBadgeColor = useColorModeValue(
+    plan === 'PREMIUM' ? 'orange.600' : 'gray.600',
+    plan === 'PREMIUM' ? 'yellow.300' : 'gray.400'
+  )
+  const planBadgeBorder = useColorModeValue(
+    plan === 'PREMIUM' ? '1px solid rgba(245, 158, 11, 0.15)' : '1px solid rgba(100, 116, 139, 0.12)',
+    plan === 'PREMIUM' ? '1px solid rgba(251, 191, 36, 0.2)' : '1px solid rgba(255, 255, 255, 0.08)'
+  )
 
   const displayName = user?.name || 'Budget User'
   const displayEmail = user?.email || ''
@@ -63,14 +95,16 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
         bg={triggerBg}
         border="1px solid"
         borderColor={triggerBorder}
-        boxShadow="0 1px 2px rgba(15, 23, 42, 0.04)"
+        backdropFilter="blur(10px)"
+        boxShadow={triggerShadow}
         display="inline-flex"
         alignItems="center"
         transition="all 0.2s ease"
         _hover={{
+          bg: triggerHoverBg,
           borderColor: triggerHoverBorder,
           transform: 'translateY(-1px)',
-          boxShadow: '0 6px 16px rgba(37, 99, 235, 0.18)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 6px 16px rgba(37, 99, 235, 0.18)',
         }}
         _focusVisible={{
           outline: 'none',
@@ -80,18 +114,12 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
         <HStack spacing={1.5}>
           <Box
             position="relative"
-            p="2px"
+            p="1.5px"
             borderRadius="full"
             background={avatarRing}
             boxShadow="0 0 0 2px rgba(255,255,255,0.6) inset"
           >
-            <Avatar
-              size="xs"
-              name={displayName}
-              bg="blue.500"
-              color="white"
-              fontWeight={700}
-            />
+            <Avatar size="xs" name={displayName} bg="blue.500" color="white" fontWeight={700} />
             <Box
               aria-hidden
               position="absolute"
@@ -109,45 +137,49 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
             display={{ base: 'none', md: 'block' }}
             fontSize="sm"
             fontWeight={600}
-            color={textColor}
-            maxW="120px"
+            color={useColorModeValue('gray.700', 'gray.200')}
+            maxW="100px"
             isTruncated
-            pr={1}
           >
             {displayName.split(' ')[0]}
           </Text>
-          <Icon as={ChevronDown} boxSize={3.5} color={subTextColor} />
+          <Icon as={ChevronDown} boxSize={3.5} color={subTextColor} transition="transform 0.2s ease"
+            sx={{ '[aria-expanded=true] &': { transform: 'rotate(180deg)' } }}
+          />
         </HStack>
       </MenuButton>
 
       <MenuList
         zIndex={9999}
-        minW="280px"
-        bg={cardBg}
-        backdropFilter="blur(14px)"
+        minW="260px"
+        bg={menuListBg}
+        backdropFilter="blur(20px)"
         border="1px solid"
         borderColor={borderColor}
         borderRadius="2xl"
-        shadow="2xl"
+        shadow="0 20px 48px rgba(0,0,0,0.16), 0 4px 12px rgba(0,0,0,0.08)"
         overflow="hidden"
         p={0}
       >
-        <Box height="3px" background={accentBar} />
+        {/* Accent top bar */}
+        <Box h="2.5px" background={accentBar} />
 
-        <Box px={4} py={3.5}>
+        {/* User card header */}
+        <Box px={4} py={3.5} background={headerBg}>
           <HStack spacing={3} align="center">
             <Box
               position="relative"
-              p="2px"
+              p="1.5px"
               borderRadius="full"
               background={avatarRing}
+              flexShrink={0}
             >
               <Avatar size="md" name={displayName} bg="blue.500" color="white" fontWeight={700} />
               <Box
                 aria-hidden
                 position="absolute"
-                bottom="2px"
-                right="2px"
+                bottom="1px"
+                right="1px"
                 w="12px"
                 h="12px"
                 borderRadius="full"
@@ -157,84 +189,175 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
               />
             </Box>
             <VStack spacing={0.5} align="start" flex={1} minW={0}>
-              <Text
-                fontSize="sm"
-                fontWeight={700}
-                color={textColor}
-                letterSpacing="-0.01em"
-                noOfLines={1}
-                w="full"
-              >
-                {displayName}
-              </Text>
+              <HStack spacing={1.5} flexWrap="nowrap">
+                <Text
+                  fontSize="sm"
+                  fontWeight={700}
+                  color={textColor}
+                  letterSpacing="-0.01em"
+                  noOfLines={1}
+                >
+                  {displayName}
+                </Text>
+                <Badge
+                  fontSize="2xs"
+                  fontWeight={700}
+                  px={2}
+                  py={0.5}
+                  borderRadius="full"
+                  bg={planBadgeBg}
+                  color={planBadgeColor}
+                  border={planBadgeBorder}
+                  textTransform="none"
+                  letterSpacing="0.02em"
+                  flexShrink={0}
+                >
+                  {PLAN_LABEL[plan]}
+                </Badge>
+              </HStack>
               {displayEmail && (
                 <Text fontSize="xs" color={subTextColor} noOfLines={1} w="full">
                   {displayEmail}
                 </Text>
               )}
-              <Badge
-                mt={1}
-                fontSize="2xs"
-                fontWeight={700}
-                px={2}
-                py={0.5}
-                borderRadius="full"
-                bg={badgeBg}
-                color={badgeColor}
-                border="1px solid"
-                borderColor={badgeBorder}
-                textTransform="none"
-              >
-                Active
-              </Badge>
             </VStack>
           </HStack>
         </Box>
 
-        <MenuDivider m={0} borderColor={borderColor} />
+        <Box h="1px" bg={borderColor} />
 
-        <MenuItem
-          icon={<Icon as={User} boxSize={4} />}
-          onClick={onOpenProfile}
-          color={textColor}
-          fontWeight={500}
-          fontSize="sm"
-          px={4}
-          py={3}
-          _hover={{ bg: itemHoverBg, color: 'blue.500' }}
-          _focus={{ bg: itemHoverBg, color: 'blue.500' }}
-        >
-          Profile
-        </MenuItem>
-        <MenuItem
-          icon={<Icon as={Settings} weight="bold" boxSize={4} />}
-          onClick={onOpenSettings}
-          color={textColor}
-          fontWeight={500}
-          fontSize="sm"
-          px={4}
-          py={3}
-          _hover={{ bg: itemHoverBg, color: 'blue.500' }}
-          _focus={{ bg: itemHoverBg, color: 'blue.500' }}
-        >
-          Settings
-        </MenuItem>
+        {/* Account section */}
+        <Box p={1.5}>
+          <Text
+            fontSize="2xs"
+            fontWeight={700}
+            color={sectionLabelColor}
+            letterSpacing="0.08em"
+            textTransform="uppercase"
+            px={3}
+            pt={2}
+            pb={1.5}
+          >
+            Account
+          </Text>
+          <MenuItem
+            onClick={onOpenProfile}
+            bg="transparent"
+            color={textColor}
+            fontWeight={500}
+            fontSize="sm"
+            px={3}
+            py={2.5}
+            borderRadius="xl"
+            _hover={{
+              bg: itemHoverBg,
+              color: itemHoverColor,
+            }}
+            _focus={{
+              bg: itemHoverBg,
+              color: itemHoverColor,
+            }}
+            _active={{ bg: 'transparent' }}
+            transition="all 0.15s cubic-bezier(0.16, 1, 0.3, 1)"
+            sx={{
+              '&:hover .menu-icon': {
+                transform: 'translateX(2px)',
+                color: itemHoverColor,
+              },
+            }}
+          >
+            <HStack spacing={3} w="full">
+              <Icon
+                as={User}
+                boxSize={4}
+                color={subTextColor}
+                className="menu-icon"
+                transition="all 0.15s ease"
+              />
+              <Text>Profile</Text>
+            </HStack>
+          </MenuItem>
+          <MenuItem
+            onClick={onOpenSettings}
+            bg="transparent"
+            color={textColor}
+            fontWeight={500}
+            fontSize="sm"
+            px={3}
+            py={2.5}
+            borderRadius="xl"
+            _hover={{
+              bg: itemHoverBg,
+              color: itemHoverColor,
+            }}
+            _focus={{
+              bg: itemHoverBg,
+              color: itemHoverColor,
+            }}
+            _active={{ bg: 'transparent' }}
+            transition="all 0.15s cubic-bezier(0.16, 1, 0.3, 1)"
+            sx={{
+              '&:hover .menu-icon': {
+                transform: 'translateX(2px)',
+                color: itemHoverColor,
+              },
+            }}
+          >
+            <HStack spacing={3} w="full">
+              <Icon
+                as={Settings}
+                boxSize={4}
+                color={subTextColor}
+                className="menu-icon"
+                transition="all 0.15s ease"
+              />
+              <Text>Settings</Text>
+            </HStack>
+          </MenuItem>
+        </Box>
 
-        <MenuDivider m={0} borderColor={borderColor} />
+        <Box h="1px" bg={borderColor} mx={3} />
 
-        <MenuItem
-          icon={<Icon as={LogOut} boxSize={4} />}
-          onClick={onLogout}
-          color="red.500"
-          fontWeight={600}
-          fontSize="sm"
-          px={4}
-          py={3}
-          _hover={{ bg: logoutHoverBg, color: 'red.600' }}
-          _focus={{ bg: logoutHoverBg, color: 'red.600' }}
-        >
-          Sign Out
-        </MenuItem>
+        {/* Session section */}
+        <Box p={1.5}>
+          <MenuItem
+            onClick={onLogout}
+            bg="transparent"
+            color={useColorModeValue('red.500', 'red.400')}
+            fontWeight={600}
+            fontSize="sm"
+            px={3}
+            py={2.5}
+            borderRadius="xl"
+            _hover={{
+              bg: logoutHoverBg,
+              color: useColorModeValue('red.600', 'red.300'),
+            }}
+            _focus={{
+              bg: logoutHoverBg,
+              color: useColorModeValue('red.600', 'red.300'),
+            }}
+            _active={{ bg: 'transparent' }}
+            transition="all 0.15s cubic-bezier(0.16, 1, 0.3, 1)"
+            sx={{
+              '&:hover .menu-icon': {
+                transform: 'translateX(2px)',
+                color: useColorModeValue('red.600', 'red.300'),
+              },
+            }}
+          >
+            <HStack spacing={3} w="full">
+              <Icon
+                as={LogOut}
+                boxSize={4}
+                color={useColorModeValue('red.500', 'red.400')}
+                className="menu-icon"
+                transition="all 0.15s ease"
+              />
+              <Text>Sign Out</Text>
+            </HStack>
+          </MenuItem>
+        </Box>
       </MenuList>
     </Menu>
   )

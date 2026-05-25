@@ -41,19 +41,23 @@ export default function NavBar({
   const isTabletRange = useBreakpointValue({ base: false, md: true, lg: false }) ?? false
   const isIconOnly = !isMobile && isTabletRange
 
-  const trackBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
-  const trackBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const trackBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const trackBorder = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const trackShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 6px rgba(15,23,42,0.04)',
+    'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 6px rgba(0,0,0,0.2)',
+  )
   const inactiveColor = useColorModeValue('gray.600', 'gray.300')
   const hoverColor = useColorModeValue('gray.900', 'white')
   const activeColor = useColorModeValue('blue.700', 'blue.100')
-  const indicatorBg = useColorModeValue('white', 'whiteAlpha.300')
+  const indicatorBg = useColorModeValue('white', 'rgba(255,255,255,0.14)')
   const indicatorShadow = useColorModeValue(
-    '0 1px 2px rgba(15, 23, 42, 0.06), 0 6px 16px rgba(37, 99, 235, 0.18)',
-    '0 1px 2px rgba(0,0,0,0.4), 0 6px 18px rgba(96, 165, 250, 0.22)',
+    '0 1px 4px rgba(15, 23, 42, 0.08), 0 6px 18px rgba(37, 99, 235, 0.20)',
+    '0 1px 4px rgba(0,0,0,0.5), 0 6px 20px rgba(96, 165, 250, 0.25)',
   )
   const indicatorRing = useColorModeValue(
-    'inset 0 0 0 1px rgba(37, 99, 235, 0.18)',
-    'inset 0 0 0 1px rgba(96, 165, 250, 0.30)',
+    'inset 0 0 0 1px rgba(37, 99, 235, 0.20)',
+    'inset 0 0 0 1px rgba(96, 165, 250, 0.35)',
   )
   const accentBar = useColorModeValue(
     'linear-gradient(90deg, #2563eb, #7c3aed)',
@@ -97,7 +101,8 @@ export default function NavBar({
       bg={trackBg}
       border="1px solid"
       borderColor={trackBorder}
-      backdropFilter="blur(8px)"
+      backdropFilter="blur(12px)"
+      boxShadow={trackShadow}
       flexShrink={0}
       w={isMobile ? 'full' : 'auto'}
       maxW={isMobile ? '380px' : 'none'}

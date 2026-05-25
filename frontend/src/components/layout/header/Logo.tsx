@@ -1,4 +1,4 @@
-import { Badge, Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { BRAND } from './brand.config'
 
 interface LogoProps {
@@ -292,9 +292,6 @@ export default function Logo({ user, onClick }: LogoProps) {
     'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)',
   )
-  const badgeBg = useColorModeValue('blue.50', 'whiteAlpha.200')
-  const badgeColor = useColorModeValue('blue.700', 'blue.100')
-  const badgeBorder = useColorModeValue('blue.200', 'whiteAlpha.300')
 
   const handleClick = () => {
     if (onClick) return onClick()
@@ -404,26 +401,6 @@ export default function Logo({ user, onClick }: LogoProps) {
             {BRAND.nameSecond}
           </Text>
 
-          {!user && (
-            <Badge
-              fontSize="2xs"
-              fontWeight={700}
-              px={1.5}
-              py={0.5}
-              ml={1}
-              rounded="full"
-              textTransform="none"
-              letterSpacing="0.02em"
-              bg={badgeBg}
-              color={badgeColor}
-              border="1px solid"
-              borderColor={badgeBorder}
-              display={{ base: 'none', md: 'inline-flex' }}
-              flexShrink={0}
-            >
-              Free
-            </Badge>
-          )}
         </HStack>
 
         <Text

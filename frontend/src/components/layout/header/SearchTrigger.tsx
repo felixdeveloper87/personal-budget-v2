@@ -20,12 +20,39 @@ interface SearchTriggerProps {
 }
 
 export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
-  const bg = useColorModeValue('white', 'whiteAlpha.100')
-  const border = useColorModeValue('gray.200', 'whiteAlpha.300')
-  const color = useColorModeValue('gray.600', 'gray.200')
-  const hoverBg = useColorModeValue('gray.50', 'whiteAlpha.200')
+  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const border = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const color = useColorModeValue('gray.500', 'gray.400')
+  const shadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
+    'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
+  )
+  const hoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
   const hoverBorder = useColorModeValue('blue.300', 'blue.400')
   const hoverColor = useColorModeValue('gray.900', 'white')
+  const hoverShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 12px rgba(37,99,235,0.12)',
+    'inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.3)',
+  )
+  const kbdBg = useColorModeValue('rgba(226,232,240,0.7)', 'rgba(255,255,255,0.06)')
+  const kbdBorder = useColorModeValue('rgba(203,213,225,0.8)', 'rgba(255,255,255,0.10)')
+  const kbdColor = useColorModeValue('gray.500', 'gray.500')
+
+  const isMac = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
+  const shortcut = isMac ? '⌘K' : 'Ctrl K'
+
+  const glassProps = {
+    bg,
+    border: '1px solid' as const,
+    borderColor: border,
+    backdropFilter: 'blur(10px)',
+    boxShadow: shadow,
+    color,
+    transition: 'all 0.2s ease',
+    _hover: { bg: hoverBg, borderColor: hoverBorder, color: hoverColor, transform: 'translateY(-1px)', boxShadow: hoverShadow },
+    _active: { transform: 'translateY(0)' },
+    _focusVisible: { outline: 'none', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)' },
+  }
 
   if (variant === 'compact') {
     return (
@@ -39,23 +66,7 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
           w="40px"
           minW="40px"
           borderRadius="xl"
-          border="1px solid"
-          borderColor={border}
-          bg={bg}
-          color={color}
-          boxShadow="0 1px 2px rgba(15, 23, 42, 0.04)"
-          transition="all 0.2s ease"
-          _hover={{
-            bg: hoverBg,
-            borderColor: hoverBorder,
-            color: hoverColor,
-            transform: 'translateY(-1px)',
-          }}
-          _active={{ transform: 'translateY(0)' }}
-          _focusVisible={{
-            outline: 'none',
-            boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
-          }}
+          {...glassProps}
         />
       </Tooltip>
     )
@@ -65,33 +76,34 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
     <Box flexShrink={1} minW={0}>
       <Button
         onClick={onOpen}
-        leftIcon={<Icon as={Search} boxSize={4} weight="bold" />}
+        leftIcon={<Icon as={Search} boxSize={3.5} weight="bold" />}
         variant="ghost"
         h="40px"
         px={3.5}
-        bg={bg}
-        border="1px solid"
-        borderColor={border}
         borderRadius="xl"
-        color={color}
         fontWeight={500}
+        fontSize="sm"
         w={{ lg: '220px', xl: '260px' }}
         justifyContent="flex-start"
-        transition="all 0.2s ease"
-        _hover={{
-          bg: hoverBg,
-          borderColor: hoverBorder,
-          color: hoverColor,
-          transform: 'translateY(-1px)',
-        }}
-        _active={{ transform: 'translateY(0)' }}
-        _focusVisible={{
-          outline: 'none',
-          boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
-        }}
+        {...glassProps}
       >
         <HStack w="full" justify="space-between" spacing={3}>
-          <Text fontSize="sm">Search transactions</Text>
+          <Text fontSize="sm" color={color}>Search transactions</Text>
+          <Box
+            display="inline-flex"
+            alignItems="center"
+            px={1.5}
+            py={0.5}
+            borderRadius="md"
+            bg={kbdBg}
+            border="1px solid"
+            borderColor={kbdBorder}
+            flexShrink={0}
+          >
+            <Text fontSize="2xs" fontWeight={600} color={kbdColor} letterSpacing="0.03em">
+              {shortcut}
+            </Text>
+          </Box>
         </HStack>
       </Button>
     </Box>

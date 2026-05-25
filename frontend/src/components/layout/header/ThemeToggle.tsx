@@ -9,10 +9,14 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const isLight = colorMode === 'light'
 
-  const bg = useColorModeValue('white', 'whiteAlpha.100')
-  const border = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const color = useColorModeValue('gray.700', 'yellow.300')
-  const hoverBg = useColorModeValue('gray.50', 'whiteAlpha.200')
+  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const border = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const shadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
+    'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
+  )
+  const color = useColorModeValue('gray.600', 'yellow.300')
+  const hoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
   const hoverBorder = useColorModeValue('blue.300', 'yellow.400')
   const hoverColor = useColorModeValue('blue.600', 'yellow.200')
 
@@ -37,7 +41,8 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
         borderColor={border}
         bg={bg}
         color={color}
-        boxShadow="0 1px 2px rgba(15, 23, 42, 0.04)"
+        backdropFilter="blur(10px)"
+        boxShadow={shadow}
         transition="background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease"
         sx={{
           '& > svg': {
@@ -55,6 +60,7 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
           borderColor: hoverBorder,
           color: hoverColor,
           transform: 'translateY(-1px)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 12px rgba(37,99,235,0.10)',
         }}
         _active={{ transform: 'translateY(0)' }}
         _focusVisible={{

@@ -1,7 +1,7 @@
 import { Box, Flex, useBreakpointValue, useDisclosure } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { UserProfileModal } from '../user'
+import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
 import Header from './header/Header'
 import Sidebar, { SIDEBAR_COLLAPSED_W, SIDEBAR_EXPANDED_W } from './Sidebar'
@@ -54,11 +54,8 @@ export default function Layout({
 }: LayoutProps) {
   const { user } = useAuth()
   const profileModal = useDisclosure()
+  const settingsModal = useDisclosure()
   const { isCollapsed, toggle } = useSidebarCollapse()
-
-  const handleOpenSettings = () => {
-    // TODO: Implement settings modal
-  }
 
   // Show sidebar for logged-in non-admin users on md+ screens
   const isDesktopOrTablet = useBreakpointValue({ base: false, md: true }) ?? false
@@ -96,7 +93,7 @@ export default function Layout({
       >
         <Header
           onOpenProfile={profileModal.onOpen}
-          onOpenSettings={handleOpenSettings}
+          onOpenSettings={settingsModal.onOpen}
           currentPage={currentPage}
           onPageChange={onPageChange}
           hasSidebar={showSidebar}
@@ -112,6 +109,10 @@ export default function Layout({
           isOpen={profileModal.isOpen}
           onClose={profileModal.onClose}
           user={user}
+        />
+        <UserSettingsModal
+          isOpen={settingsModal.isOpen}
+          onClose={settingsModal.onClose}
         />
       </Flex>
     </Flex>
