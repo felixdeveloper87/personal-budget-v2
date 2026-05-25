@@ -34,6 +34,7 @@ const BANK_REGISTRY = [
   { keys: ['bank of scotland'], meta: { abbr: 'BOS',  bg: '#006747', text: '#fff', domain: 'bankofscotland.co.uk' } },
   { keys: ['royal bank', 'rbs'],meta: { abbr: 'RBS',  bg: '#002060', text: '#fff', domain: 'rbs.co.uk' } },
   { keys: ['clydesdale'],       meta: { abbr: 'CB',   bg: '#003087', text: '#fff', domain: 'virginmoney.com' } },
+  { keys: ['vanquis'],          meta: { abbr: 'VQ',   bg: '#4B0082', text: '#fff', domain: 'vanquis.co.uk' } },
 ]
 
 export function getBankMeta(issuer?: string | null): BankMeta | null {
@@ -55,7 +56,7 @@ export const UK_BANKS = [
   'Barclays', 'Santander', 'Halifax', 'TSB', 'Starling Bank',
   'Chase', 'First Direct', 'Nationwide', 'Virgin Money', 'Co-op Bank',
   'American Express', 'Visa', 'Mastercard', 'Tesco Bank', 'Post Office',
-  'Bank of Scotland', 'Royal Bank of Scotland', 'Clydesdale Bank',
+  'Bank of Scotland', 'Royal Bank of Scotland', 'Clydesdale Bank', 'Vanquis',
 ]
 
 interface BankLogoProps {
