@@ -1,4 +1,4 @@
-import { TransactionList, TransactionListGrouped } from '../components'
+import { TransactionList, TransactionListGrouped, ImportCsvModal } from '../components'
 import { Transaction } from '../types'
 import { useState, useRef, useMemo } from 'react'
 import {
@@ -8,12 +8,15 @@ import {
   HStack,
   Heading,
   Icon,
-  IconButton,
   Text,
   VStack,
   useColorModeValue,
+  useDisclosure,
 } from '@chakra-ui/react'
-import { Calendar, Filter, List, ReceiptText, RefreshCw } from '../components/ui/icons'
+import { Calendar, Download, Filter, List, ReceiptText, Upload } from '../components/ui/icons'
+import { downloadBlob } from '../utils/csv'
+import { exportTransactionsCsv } from '../api'
+import { ToastService } from '../services/toast'
 
 interface AllTransactionsSectionProps {
   transactions: Transaction[]
@@ -28,6 +31,25 @@ export default function AllTransactionsSection({
 }: AllTransactionsSectionProps) {
   const [groupByMonth, setGroupByMonth] = useState(true)
   const groupedListRef = useRef<{ goToCurrentMonth: () => void } | null>(null)
+  const importModal = useDisclosure()
+  const [exporting, setExporting] = useState(false)
+
+  const handleExport = async () => {
+    if (transactions.length === 0) {
+      ToastService.info({ title: 'Nothing to export', dedupeKey: 'csv-export-empty' })
+      return
+    }
+    setExporting(true)
+    try {
+      const blob = await exportTransactionsCsv()
+      const stamp = new Date().toISOString().slice(0, 10)
+      downloadBlob(`transactions-${stamp}.csv`, blob)
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const hasCurrentMonth = useMemo(() => {
     const now = new Date()
@@ -98,6 +120,7 @@ export default function AllTransactionsSection({
   const tabHoverColor = useColorModeValue('gray.900', 'white')
 
   return (
+    <>
     <Box
       w="full"
       borderRadius="2xl"
@@ -206,8 +229,8 @@ export default function AllTransactionsSection({
             </VStack>
           </HStack>
 
-          {/* Right: View toggle */}
-          <HStack spacing={4} align="center">
+          {/* Right: actions + view toggle */}
+          <HStack spacing={{ base: 2, md: 3 }} align="center">
             {groupByMonth && hasCurrentMonth && (
               <Button
                 size="sm"
@@ -217,10 +240,45 @@ export default function AllTransactionsSection({
                 fontSize="xs"
                 fontWeight="700"
                 _hover={{ textDecoration: 'none', color: 'blue.400' }}
+                display={{ base: 'none', lg: 'inline-flex' }}
               >
                 Jump to Current Month
               </Button>
             )}
+
+            {/* Export / Import */}
+            <HStack spacing={1.5}>
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<Icon as={Download} boxSize={4} />}
+                onClick={handleExport}
+                isLoading={exporting}
+                bg={refreshBg}
+                borderColor={refreshBorder}
+                color={refreshColor}
+                fontWeight={700}
+                _hover={{ bg: refreshHoverBg, color: refreshHoverColor }}
+                iconSpacing={{ base: 0, md: 2 }}
+              >
+                <Box as="span" display={{ base: 'none', md: 'inline' }}>Export</Box>
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                leftIcon={<Icon as={Upload} boxSize={4} />}
+                onClick={importModal.onOpen}
+                bg={refreshBg}
+                borderColor={refreshBorder}
+                color={refreshColor}
+                fontWeight={700}
+                _hover={{ bg: refreshHoverBg, color: refreshHoverColor }}
+                iconSpacing={{ base: 0, md: 2 }}
+              >
+                <Box as="span" display={{ base: 'none', md: 'inline' }}>Import</Box>
+              </Button>
+            </HStack>
+
             {/* View toggle — segmented control */}
             <HStack
               spacing={0.5}
@@ -275,6 +333,13 @@ export default function AllTransactionsSection({
         )}
       </Box>
     </Box>
+
+    <ImportCsvModal
+      isOpen={importModal.isOpen}
+      onClose={importModal.onClose}
+      onImported={onRefresh}
+    />
+    </>
   )
 }
 

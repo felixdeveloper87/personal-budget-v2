@@ -187,6 +187,35 @@ export async function deleteTransaction(id: number): Promise<void> {
   await api.delete(`/transactions/${id}`)
 }
 
+// A single parsed CSV row sent to the bulk-import endpoint.
+export interface ImportTransactionRow {
+  line?: number
+  date: string // yyyy-MM-dd
+  type: 'INCOME' | 'EXPENSE'
+  category: string
+  description: string
+  amount: number
+  paymentMethodName?: string
+}
+
+export interface ImportResult {
+  imported: number
+  failed: number
+  errors: { line: number; message: string }[]
+}
+
+// Bulk-import transactions → POST /transactions/import
+export async function importTransactions(rows: ImportTransactionRow[]): Promise<ImportResult> {
+  const { data } = await api.post<ImportResult>('/transactions/import', { rows })
+  return data
+}
+
+// Export all transactions as CSV → GET /transactions/export
+export async function exportTransactionsCsv(): Promise<Blob> {
+  const { data } = await api.get<Blob>('/transactions/export', { responseType: 'blob' })
+  return data
+}
+
 export async function listPaymentMethods(): Promise<PaymentMethod[]> {
   const { data } = await api.get<PaymentMethod[]>('/payment-methods')
   return data

@@ -10,7 +10,13 @@
       "Bash(Invoke-WebRequest -Uri \"https://logo.clearbit.com/monzo.com\" -Method Head -UseBasicParsing)",
       "Bash(Select-Object StatusCode, StatusDescription)",
       "PowerShell(Invoke-WebRequest -Uri \"https://www.google.com/s2/favicons?domain=monzo.com&sz=128\" -Method Head -UseBasicParsing)",
-      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://www.google.com/s2/favicons?domain=monzo.com&sz=128\" -UseBasicParsing; \"Status: $\\($r.StatusCode\\) | Content-Type: $\\($r.Headers['Content-Type']\\) | Size: $\\($r.RawContentLength\\) bytes\" } catch { \"Error: $_\" })"
+      "PowerShell(try { $r = Invoke-WebRequest -Uri \"https://www.google.com/s2/favicons?domain=monzo.com&sz=128\" -UseBasicParsing; \"Status: $\\($r.StatusCode\\) | Content-Type: $\\($r.Headers['Content-Type']\\) | Size: $\\($r.RawContentLength\\) bytes\" } catch { \"Error: $_\" })",
+      "Bash(Get-ChildItem -Recurse -Directory)",
+      "Bash(Select-Object -First 20)",
+      "Bash(Select-Object -First 30)",
+      "Bash(xargs grep -l \"import\\\\|export\\\\|csv\\\\|CSV\")",
+      "Bash(./mvnw -q compile)",
+      "Bash(mvn -q compile)"
     ]
   }
 }

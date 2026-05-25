@@ -6,6 +6,8 @@ import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.MonthlySummary;
 import com.example.budget.dto.CreateTransactionRequest;
+import com.example.budget.dto.ImportResultDTO;
+import com.example.budget.dto.ImportTransactionRow;
 import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
@@ -29,7 +31,9 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -123,8 +127,126 @@ public class TransactionService {
     }
 
     /**
+     * Bulk-imports transactions from parsed CSV rows.
+     *
+     * Each row is validated independently: a row missing a date, type or amount is skipped
+     * and reported in the result rather than aborting the whole import. Valid rows are saved
+     * together in a single transaction. The payment method is matched by name (case-insensitive)
+     * against the user's existing methods; an unmatched name simply leaves the transaction
+     * without a payment method.
+     *
+     * @param rows parsed rows from the client
+     * @param user owner of the imported transactions
+     * @return summary of how many rows were imported, skipped, and why
+     */
+    @Transactional
+    public ImportResultDTO importTransactions(List<ImportTransactionRow> rows, User user) {
+        Map<String, PaymentMethod> methodsByName = new HashMap<>();
+        for (PaymentMethod m : paymentMethodService.findEntitiesByUser(user)) {
+            if (StringUtils.hasText(m.getName())) {
+                methodsByName.putIfAbsent(m.getName().trim().toLowerCase(), m);
+            }
+        }
+
+        List<Transaction> toSave = new ArrayList<>();
+        List<ImportResultDTO.RowError> errors = new ArrayList<>();
+
+        int index = 0;
+        for (ImportTransactionRow row : rows) {
+            index++;
+            Integer line = row.getLine() != null ? row.getLine() : index;
+            try {
+                if (row.getDate() == null) {
+                    throw new IllegalArgumentException("Date is required (YYYY-MM-DD).");
+                }
+                if (row.getType() == null) {
+                    throw new IllegalArgumentException("Type is required (INCOME or EXPENSE).");
+                }
+                if (row.getAmount() == null) {
+                    throw new IllegalArgumentException("Amount is required.");
+                }
+
+                PaymentMethod paymentMethod = null;
+                if (StringUtils.hasText(row.getPaymentMethodName())) {
+                    paymentMethod = methodsByName.get(row.getPaymentMethodName().trim().toLowerCase());
+                }
+
+                Transaction t = new Transaction();
+                t.setUser(user);
+                t.setTransactionDate(row.getDate());
+                t.setDateTime(row.getDate().atTime(12, 0));
+                t.setType(row.getType());
+                t.setCategory(StringUtils.hasText(row.getCategory()) ? row.getCategory().trim() : "Others");
+                t.setDescription(row.getDescription() != null ? row.getDescription().trim() : "");
+                t.setAmount(row.getAmount().abs());
+                t.setPaymentMethod(paymentMethod);
+                prepareDates(t, paymentMethod);
+
+                toSave.add(t);
+            } catch (Exception e) {
+                errors.add(new ImportResultDTO.RowError(line, e.getMessage()));
+            }
+        }
+
+        if (!toSave.isEmpty()) {
+            repository.saveAll(toSave);
+            cacheInvalidation.evictTransactionsList(user.getId());
+            toSave.stream()
+                    .map(Transaction::getPaymentDate)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        }
+
+        return new ImportResultDTO(toSave.size(), errors.size(), errors);
+    }
+
+    /**
+     * Serializes all of a user's transactions to CSV.
+     *
+     * Columns match the import format so an exported file round-trips back through the importer.
+     * Uses {@code transactionDate} (the real purchase date) so re-importing a credit-card
+     * transaction does not double-shift its payment date through the billing-cycle logic.
+     *
+     * @param user owner of the transactions
+     * @return CSV text (CRLF line endings, header row included)
+     */
+    @Transactional(readOnly = true)
+    public String exportCsv(User user) {
+        List<Transaction> transactions = repository.findByUser(user);
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Date,Type,Category,Description,Amount,Payment Method\r\n");
+
+        for (Transaction t : transactions) {
+            LocalDate date = t.getTransactionDate() != null
+                    ? t.getTransactionDate()
+                    : t.getPaymentDate();
+
+            sb.append(csvCell(date != null ? date.toString() : "")).append(',')
+                    .append(t.getType() != null ? t.getType().name() : "").append(',')
+                    .append(csvCell(t.getCategory() != null ? t.getCategory() : "")).append(',')
+                    .append(csvCell(t.getDescription() != null ? t.getDescription() : "")).append(',')
+                    .append(t.getAmount() != null ? t.getAmount().toPlainString() : "0").append(',')
+                    .append(csvCell(t.getPaymentMethod() != null ? t.getPaymentMethod().getName() : ""))
+                    .append("\r\n");
+        }
+
+        return sb.toString();
+    }
+
+    /** Quote a CSV cell only when it contains a comma, quote, or newline. */
+    private String csvCell(String value) {
+        if (value.indexOf(',') >= 0 || value.indexOf('"') >= 0
+                || value.indexOf('\n') >= 0 || value.indexOf('\r') >= 0) {
+            return '"' + value.replace("\"", "\"\"") + '"';
+        }
+        return value;
+    }
+
+    /**
      * Updates an existing transaction.
-     * 
+     *
      * Only the owner of the transaction can update it. Updates all mutable fields
      * while preserving protected fields like user and installment plan.
      * 

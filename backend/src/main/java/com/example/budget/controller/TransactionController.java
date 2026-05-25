@@ -1,6 +1,8 @@
 package com.example.budget.controller;
 
 import com.example.budget.dto.CreateTransactionRequest;
+import com.example.budget.dto.ImportResultDTO;
+import com.example.budget.dto.ImportTransactionsRequest;
 import com.example.budget.dto.MonthlySummary;
 import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.TransactionSearchDTO;
@@ -10,10 +12,16 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import com.example.budget.service.TransactionService;
 import jakarta.validation.Valid;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -59,6 +67,45 @@ public class TransactionController {
     public TransactionDTO create(@Valid @RequestBody CreateTransactionRequest tx, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return mapper.toDTO(service.create(tx, user));
+    }
+
+    /**
+     * Bulk-imports transactions from parsed CSV rows.
+     *
+     * Invalid rows are skipped and reported in the response rather than failing the request,
+     * so a partial import still succeeds. Returns a summary of imported/failed counts.
+     *
+     * @param request parsed rows to import
+     * @param authentication authenticated user
+     * @return import summary (imported count, failed count, per-row errors)
+     */
+    @PostMapping("/transactions/import")
+    public ImportResultDTO importTransactions(
+            @Valid @RequestBody ImportTransactionsRequest request,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return service.importTransactions(request.getRows(), user);
+    }
+
+    /**
+     * Exports all of the authenticated user's transactions as a CSV attachment.
+     *
+     * @param authentication authenticated user
+     * @return CSV file download
+     */
+    @GetMapping(value = "/transactions/export", produces = "text/csv")
+    public ResponseEntity<byte[]> exportCsv(Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        byte[] csv = service.exportCsv(user).getBytes(StandardCharsets.UTF_8);
+        String filename = "transactions-" + LocalDate.now() + ".csv";
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("text/csv"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment()
+                        .filename(filename)
+                        .build()
+                        .toString())
+                .body(csv);
     }
 
     /**

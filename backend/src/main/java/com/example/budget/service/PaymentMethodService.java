@@ -31,6 +31,12 @@ public class PaymentMethodService {
                 .toList();
     }
 
+    /** Returns the user's payment method entities (used for bulk operations like CSV import). */
+    @Transactional(readOnly = true)
+    public List<PaymentMethod> findEntitiesByUser(User user) {
+        return repository.findByUserOrderByActiveDescNameAsc(user);
+    }
+
     @Transactional(readOnly = true)
     public PaymentMethod getOwnedPaymentMethod(Long id, User user) {
         if (id == null) {

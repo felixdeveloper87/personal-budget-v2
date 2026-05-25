@@ -14,6 +14,9 @@ import {
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { ModalHeader, PremiumModal } from '../ui'
+import { exportTransactionsCsv } from '../../api'
+import { downloadBlob } from '../../utils/csv'
+import { ToastService } from '../../services/toast'
 import {
   AlertTriangle,
   Bell,
@@ -40,6 +43,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
   const [budgetAlerts, setBudgetAlerts] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -57,6 +61,20 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const themeInactiveBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
   const dangerBg = useColorModeValue('red.50', 'rgba(220,38,38,0.05)')
   const dangerBorder = useColorModeValue('red.100', 'rgba(220,38,38,0.15)')
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const blob = await exportTransactionsCsv()
+      const stamp = new Date().toISOString().slice(0, 10)
+      downloadBlob(`transactions-${stamp}.csv`, blob)
+      ToastService.success({ title: 'Export ready', dedupeKey: 'csv-export-done' })
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
+    } finally {
+      setExporting(false)
+    }
+  }
 
   const showComingSoon = () => {
     toast({
@@ -335,7 +353,9 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   variant="outline"
                   leftIcon={<Icon as={Download} boxSize={3.5} />}
                   borderRadius="lg"
-                  onClick={showComingSoon}
+                  onClick={handleExport}
+                  isLoading={exporting}
+                  loadingText="Exporting"
                 >
                   Export
                 </Button>
