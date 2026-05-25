@@ -1,5 +1,6 @@
-import { Box, FormControl, FormLabel, HStack, Select, Text, useColorModeValue } from '@chakra-ui/react'
+import { Box, FormControl, FormLabel, HStack, Icon, Select, Text, useColorModeValue } from '@chakra-ui/react'
 import { CreditCard, Wallet } from '../../ui/icons'
+import { BankLogo, getBankMeta } from '../../ui'
 import { PaymentMethod } from '../../../types'
 
 interface PaymentMethodSelectorProps {
@@ -17,8 +18,11 @@ export default function PaymentMethodSelector({
 }: PaymentMethodSelectorProps) {
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const activeMethods = paymentMethods.filter((method) => method.active)
-  const selected = activeMethods.find((method) => method.id === value)
+  const iconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const activeMethods = paymentMethods.filter((m) => m.active)
+  const selected = activeMethods.find((m) => m.id === value)
+
+  const hasBankLogo = getBankMeta(selected?.issuer) !== null
 
   return (
     <FormControl>
@@ -32,10 +36,28 @@ export default function PaymentMethodSelector({
         p={3}
       >
         <HStack spacing={3}>
-          {selected?.type === 'CREDIT_CARD' ? <CreditCard size={20} /> : <Wallet size={20} />}
+          {/* Logo or fallback icon for selected method */}
+          {hasBankLogo ? (
+            <BankLogo issuer={selected?.issuer} size={28} borderRadius="7px" />
+          ) : (
+            <Box
+              p={1}
+              borderRadius="md"
+              bg={iconBg}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexShrink={0}
+            >
+              <Icon
+                as={selected?.type === 'CREDIT_CARD' ? CreditCard : Wallet}
+                boxSize={4}
+              />
+            </Box>
+          )}
           <Select
             value={value ?? ''}
-            onChange={(event) => onChange(event.target.value ? Number(event.target.value) : null)}
+            onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
             placeholder={loading ? 'Loading payment methods...' : 'No payment method'}
             isDisabled={loading}
             size="sm"
@@ -43,14 +65,14 @@ export default function PaymentMethodSelector({
           >
             {activeMethods.map((method) => (
               <option key={method.id} value={method.id}>
-                {method.name}{method.issuer ? ` - ${method.issuer}` : ''}
+                {method.name}{method.issuer ? ` · ${method.issuer}` : ''}
               </option>
             ))}
           </Select>
         </HStack>
         {selected?.type === 'CREDIT_CARD' && (
           <Text mt={2} fontSize="xs" color={captionColor}>
-            Closes on day {selected.statementClosingDay}; paid on day {selected.paymentDay}.
+            Closes on day {selected.statementClosingDay} · paid on day {selected.paymentDay}
           </Text>
         )}
       </Box>

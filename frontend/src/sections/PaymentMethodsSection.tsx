@@ -22,7 +22,7 @@ import {
 import { createPaymentMethod, deletePaymentMethod, listPaymentMethods, updatePaymentMethod } from '../api'
 import { PaymentMethod, PaymentMethodRequest, PaymentMethodType } from '../types'
 import { Check, ChevronDown, CreditCard, Pencil, Plus, Trash2, Wallet } from '../components/ui/icons'
-import { SectionCard, SectionHeader } from '../components/ui'
+import { BankLogo, getBankMeta, SectionCard, SectionHeader, UK_BANKS } from '../components/ui'
 import { ToastService } from '../services/toast'
 
 const TYPE_LABELS: Record<PaymentMethodType, string> = {
@@ -190,6 +190,11 @@ export default function PaymentMethodsSection() {
 
   return (
     <SectionCard staticOnHover>
+      {/* Shared datalist for both add and edit issuer inputs */}
+      <datalist id="uk-banks-list">
+        {UK_BANKS.map((b) => <option key={b} value={b} />)}
+      </datalist>
+
       <Box p={{ base: 4, sm: 5, md: 6 }}>
         <VStack spacing={4} align="stretch">
           <SectionHeader
@@ -233,16 +238,20 @@ export default function PaymentMethodsSection() {
                     _hover={{ bg: methodHoverBg }}
                   >
                     <HStack spacing={3} minW={0}>
-                      <Box
-                        p={1.5}
-                        borderRadius="lg"
-                        bg={iconBoxBg}
-                        border="1px solid"
-                        borderColor={borderColor}
-                        flexShrink={0}
-                      >
-                        <Icon as={TYPE_ICONS[method.type]} boxSize={3.5} color={mutedColor} />
-                      </Box>
+                      {getBankMeta(method.issuer) ? (
+                        <BankLogo issuer={method.issuer} size={30} borderRadius="8px" />
+                      ) : (
+                        <Box
+                          p={1.5}
+                          borderRadius="lg"
+                          bg={iconBoxBg}
+                          border="1px solid"
+                          borderColor={borderColor}
+                          flexShrink={0}
+                        >
+                          <Icon as={TYPE_ICONS[method.type]} boxSize={3.5} color={mutedColor} />
+                        </Box>
+                      )}
                       <Box minW={0}>
                         <Text fontSize="sm" fontWeight={700} noOfLines={1}>{method.name}</Text>
                         <Text fontSize="xs" color={mutedColor} noOfLines={1}>
@@ -310,6 +319,7 @@ export default function PaymentMethodsSection() {
                           <FormControl>
                             <FormLabel fontSize="xs">Issuer</FormLabel>
                             <Input
+                              list="uk-banks-list"
                               size="sm"
                               value={editState.issuer}
                               onChange={(e) => patch({ issuer: e.target.value })}
@@ -423,7 +433,7 @@ export default function PaymentMethodsSection() {
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="xs">Issuer</FormLabel>
-                      <Input size="sm" value={issuer} onChange={(e) => setIssuer(e.target.value)} placeholder="NatWest" />
+                      <Input list="uk-banks-list" size="sm" value={issuer} onChange={(e) => setIssuer(e.target.value)} placeholder="NatWest" />
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="xs">Type</FormLabel>

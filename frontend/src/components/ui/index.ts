@@ -12,6 +12,7 @@ export type {
   SectionHeaderAccent,
 } from './SectionHeader'
 export { default as PageSkeleton } from './PageSkeleton'
+export { default as BankLogo, getBankMeta, UK_BANKS } from './BankLogo'
 
 // UI Utilities - General UI utilities and responsive styles
 export * from './ui'
