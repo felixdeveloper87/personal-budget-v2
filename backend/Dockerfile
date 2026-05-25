@@ -13,7 +13,7 @@ COPY src ./src
 #   docker build --build-arg SKIP_TESTS=true ./backend
 ARG SKIP_TESTS=false
 RUN if [ "$SKIP_TESTS" = "true" ]; then \
-      mvn clean package -DskipTests; \
+      mvn clean package -Dmaven.test.skip=true; \
     else \
       mvn clean verify; \
     fi
