@@ -22,7 +22,7 @@ import {
 import { createPaymentMethod, deletePaymentMethod, listPaymentMethods, updatePaymentMethod } from '../api'
 import { PaymentMethod, PaymentMethodRequest, PaymentMethodType } from '../types'
 import { Check, ChevronDown, CreditCard, Pencil, Plus, Trash2, Wallet } from '../components/ui/icons'
-import { BankLogo, getBankMeta, SectionCard, SectionHeader, UK_BANKS } from '../components/ui'
+import { BankCombobox, BankLogo, getBankMeta, SectionCard, SectionHeader } from '../components/ui'
 import { ToastService } from '../services/toast'
 
 const TYPE_LABELS: Record<PaymentMethodType, string> = {
@@ -190,11 +190,6 @@ export default function PaymentMethodsSection() {
 
   return (
     <SectionCard staticOnHover>
-      {/* Shared datalist for both add and edit issuer inputs */}
-      <datalist id="uk-banks-list">
-        {UK_BANKS.map((b) => <option key={b} value={b} />)}
-      </datalist>
-
       <Box p={{ base: 4, sm: 5, md: 6 }}>
         <VStack spacing={4} align="stretch">
           <SectionHeader
@@ -318,12 +313,9 @@ export default function PaymentMethodsSection() {
                           </FormControl>
                           <FormControl>
                             <FormLabel fontSize="xs">Issuer</FormLabel>
-                            <Input
-                              list="uk-banks-list"
-                              size="sm"
+                            <BankCombobox
                               value={editState.issuer}
-                              onChange={(e) => patch({ issuer: e.target.value })}
-                              placeholder="e.g. NatWest"
+                              onChange={(v) => patch({ issuer: v })}
                             />
                           </FormControl>
                           <FormControl>
@@ -433,7 +425,7 @@ export default function PaymentMethodsSection() {
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="xs">Issuer</FormLabel>
-                      <Input list="uk-banks-list" size="sm" value={issuer} onChange={(e) => setIssuer(e.target.value)} placeholder="NatWest" />
+                      <BankCombobox value={issuer} onChange={setIssuer} />
                     </FormControl>
                     <FormControl>
                       <FormLabel fontSize="xs">Type</FormLabel>

@@ -16,7 +16,8 @@
       "Bash(Select-Object -First 30)",
       "Bash(xargs grep -l \"import\\\\|export\\\\|csv\\\\|CSV\")",
       "Bash(./mvnw -q compile)",
-      "Bash(mvn -q compile)"
+      "Bash(mvn -q compile)",
+      "Bash(xargs grep -l \"bank\" -i)"
     ]
   }
 }

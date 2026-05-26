@@ -13,6 +13,7 @@ export type {
 } from './SectionHeader'
 export { default as PageSkeleton } from './PageSkeleton'
 export { default as BankLogo, getBankMeta, UK_BANKS } from './BankLogo'
+export { default as BankCombobox } from './BankCombobox'
 
 // UI Utilities - General UI utilities and responsive styles
 export * from './ui'
