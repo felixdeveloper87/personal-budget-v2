@@ -1,36 +1,36 @@
 # Personal Budget v2
 
-Personal Budget v2 e uma aplicacao full-stack para controle financeiro pessoal. O projeto combina dashboard, lancamento de receitas e despesas, parcelamentos, pagamentos recorrentes, metodos de pagamento, relatorios e administracao de usuarios em uma interface responsiva.
+Personal Budget v2 is a full-stack personal finance management app. It brings together a dashboard, income and expense tracking, instalment plans, recurring payments, payment methods, reports and user administration in a responsive interface.
 
-Live demo: https://personalbudget.co.uk
+Live site: https://personalbudget.co.uk
 
-## Visao Geral
+## Overview
 
-- Frontend em React 18, TypeScript e Vite, com Chakra UI, Recharts, Framer Motion e icones Lucide/Phosphor.
-- Backend em Spring Boot 3.3, Java 17, Spring Security, JWT, Spring Data JPA, Flyway e PostgreSQL.
-- Cache com Redis para listas e resumos financeiros.
-- Deploy containerizado com Docker, Docker Compose e Nginx.
-- Autenticacao por email/senha e Google Sign-In, com fluxo de aprovacao por administrador.
+- Frontend built with React 18, TypeScript and Vite, using Chakra UI, Recharts, Framer Motion and Lucide/Phosphor icons.
+- Backend built with Spring Boot 3.3, Java 17, Spring Security, JWT, Spring Data JPA, Flyway and PostgreSQL.
+- Redis cache for user lists, instalment plans, recurring transactions and financial summaries.
+- Containerised deployment with Docker, Docker Compose and Nginx.
+- Email/password and Google Sign-In authentication, with administrator approval for new accounts.
 
-## Principais Funcionalidades
+## Key Features
 
-- Dashboard financeiro com resumo de receitas, despesas, saldo e navegacao por dia, semana, mes e ano.
-- Cadastro, edicao, exclusao e busca de transacoes por texto, tipo, categoria e periodo.
-- Lancamento rapido de receita ou despesa com formulario otimizado, number pad e categorias.
-- Controle de parcelamentos com geracao automatica de parcelas mensais e historico de planos.
-- Pagamentos fixos/recorrentes com geracao agendada de transacoes e cancelamento preservando historico.
-- Metodos de pagamento por usuario: dinheiro, debito, credito e transferencia bancaria.
-- Calculo de data de impacto financeiro para cartao de credito usando dia de fechamento e dia de pagamento.
-- Importacao de transacoes por CSV com validacao por linha, preview e download de template.
-- Exportacao de transacoes em CSV.
-- Relatorios por dia, semana, mes ou ano com KPIs, insights, categorias, metodos de pagamento e exportacao PDF.
-- Analise por categorias para receitas e despesas, com graficos e breakdowns.
-- Secao Discover com insights financeiros, alertas e cards de analise.
-- Painel administrativo para aprovar cadastros, rejeitar/remover usuarios e alternar planos Standard/Premium.
-- Tema claro/escuro, layout responsivo, landing page e modais premium.
-- Health check em `/health` e documentacao OpenAPI via Springdoc quando habilitada.
+- Financial dashboard with income, expense, balance and period navigation for day, week, month and year views.
+- Transaction creation, editing, deletion and search by text, type, category and period.
+- Fast income and expense entry with an optimised form, number pad and reusable categories.
+- Instalment plan management with automatic monthly transaction generation and plan history.
+- Fixed and recurring payments with scheduled transaction generation and cancellation that preserves history.
+- User-owned payment methods: cash, debit card, credit card and bank transfer.
+- Credit card billing logic using statement closing day and payment day to calculate the financial impact date.
+- CSV transaction import with per-row validation, preview and downloadable template.
+- CSV export for all user transactions.
+- Reports by day, week, month or year, including KPIs, insights, categories, payment methods and PDF export.
+- Category analysis for income and expenses, with charts and breakdowns.
+- Discover section with financial insights, alerts and analysis cards.
+- Admin panel for approving registrations, rejecting/removing users and switching Standard/Premium plans.
+- Light/dark theme, responsive layout, landing page and polished modal workflows.
+- Health check at `/health` and Springdoc OpenAPI documentation when enabled at runtime.
 
-## Stack Tecnica
+## Technology Stack
 
 ### Frontend
 
@@ -41,7 +41,7 @@ Live demo: https://personalbudget.co.uk
 - Framer Motion
 - Axios
 - Zod
-- Lucide React, Phosphor Icons e React Icons
+- Lucide React, Phosphor Icons and React Icons
 
 ### Backend
 
@@ -54,55 +54,55 @@ Live demo: https://personalbudget.co.uk
 - Flyway
 - Redis + Spring Cache
 - Springdoc OpenAPI
-- Google API Client para Google Sign-In
-- Apache PDFBox para geracao de PDF
+- Google API Client for Google Sign-In
+- Apache PDFBox for PDF generation
 - JUnit/Spring Boot Test
 
-### Infra e Deploy
+### Infrastructure and Deployment
 
-- Docker e Docker Compose
-- Nginx para servir o frontend e fazer proxy de `/api`
-- Vercel config para frontend
-- Scripts auxiliares para VPS, Nginx e SSL
+- Docker and Docker Compose
+- Nginx for serving the frontend and proxying `/api`
+- Vercel configuration for the frontend
+- Helper scripts for VPS, Nginx and SSL setup
 
-## Arquitetura
+## Architecture
 
 ```text
 frontend/                 React + TypeScript + Vite
-  src/pages/              Dashboard, transacoes, categorias, relatorios, admin e landing
-  src/components/         UI, layout, auth, transacoes, charts, search e user
-  src/sections/           Blocos principais do dashboard
-  src/hooks/              Dados, filtros, periodo, insights e categorias
-  src/contexts/           AuthContext e SearchContext
+  src/pages/              Dashboard, transactions, categories, reports, admin and landing
+  src/components/         UI, layout, auth, transactions, charts, search and user components
+  src/sections/           Main dashboard sections
+  src/hooks/              Data loading, filters, period navigation, insights and categories
+  src/contexts/           AuthContext and SearchContext
 
-backend/                  API Spring Boot
+backend/                  Spring Boot API
   src/main/java/.../controller
   src/main/java/.../service
   src/main/java/.../repository
   src/main/java/.../model
   src/main/resources/db/migration
 
-docs/                     Documentacao tecnica complementar
-docker-compose*.yml       Ambientes local, dev e producao
+docs/                     Additional technical documentation
+docker-compose*.yml       Local, development and production environments
 ```
 
-Fluxo resumido:
+High-level flow:
 
-1. O usuario acessa a landing page ou autentica pelo modal.
-2. O frontend armazena o JWT e envia `Authorization: Bearer <token>` nas chamadas Axios.
-3. O backend valida o token, isola dados por usuario e persiste em PostgreSQL.
-4. Flyway mantem o schema versionado e Redis acelera listas/resumos.
-5. Nginx serve o build do frontend e encaminha `/api` para o backend em ambiente Docker.
+1. The user opens the landing page or authenticates through the auth modal.
+2. The frontend stores the JWT and sends `Authorization: Bearer <token>` with Axios requests.
+3. The backend validates the token, scopes data to the authenticated user and persists it in PostgreSQL.
+4. Flyway keeps the schema versioned and Redis speeds up lists and summaries.
+5. Nginx serves the frontend build and forwards `/api` requests to the backend in Docker environments.
 
-## Como Rodar com Docker
+## Getting Started with Docker
 
-Crie um arquivo `.env` a partir do exemplo:
+Create a local `.env` file from the example:
 
 ```bash
 cp env.example .env
 ```
 
-Preencha pelo menos:
+Set at least:
 
 ```env
 DB_NAME=personalbudget
@@ -116,41 +116,41 @@ REDIS_HOST=redis
 REDIS_PORT=6379
 ```
 
-Suba o ambiente de desenvolvimento:
+Start the development environment:
 
 ```bash
 docker compose -f docker-compose.dev.yml up -d --build
 ```
 
-Servicos principais:
+Main services:
 
 - Frontend: http://localhost:3000
 - Backend: http://localhost:8080
 - PostgreSQL: `localhost:5432`
 - Redis: `localhost:6379`
 
-Para parar:
+Stop the stack:
 
 ```bash
 docker compose -f docker-compose.dev.yml down
 ```
 
-## Desenvolvimento Local
+## Local Development
 
 ### Backend
 
-Requisitos: Java 17, Maven, PostgreSQL e Redis.
+Requirements: Java 17, Maven, PostgreSQL and Redis.
 
 ```bash
 cd backend
 mvn spring-boot:run
 ```
 
-O backend usa as variaveis `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `REDIS_HOST`, `REDIS_PORT` e `GOOGLE_OAUTH_CLIENT_ID`.
+The backend reads `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `REDIS_HOST`, `REDIS_PORT` and `GOOGLE_OAUTH_CLIENT_ID`.
 
 ### Frontend
 
-Requisitos: Node.js 18+ e npm.
+Requirements: Node.js 18+ and npm.
 
 ```bash
 cd frontend
@@ -158,13 +158,13 @@ npm install
 npm run dev
 ```
 
-Por padrao, o frontend usa `/api` e o Vite faz proxy para o backend. Se apontar diretamente para uma API externa, use `VITE_API_URL` incluindo o prefixo `/api`, por exemplo:
+By default, the frontend uses `/api` and Vite proxies requests to the backend. If you point it directly at an external API, set `VITE_API_URL` with the `/api` prefix, for example:
 
 ```env
 VITE_API_URL=http://localhost:8080/api
 ```
 
-## Scripts Uteis
+## Useful Scripts
 
 Frontend:
 
@@ -189,9 +189,9 @@ docker compose -f docker-compose.dev.yml up -d --build
 docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-## API Principal
+## Main API
 
-Todas as rotas abaixo exigem JWT, exceto `/api/auth/**` e `/health`.
+All routes below require a JWT, except `/api/auth/**` and `/health`.
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
@@ -225,13 +225,13 @@ Todas as rotas abaixo exigem JWT, exceto `/api/auth/**` e `/health`.
 - `DELETE /api/admin/users/{id}`
 - `GET /health`
 
-Mais detalhes em [docs/API.md](docs/API.md).
+See [docs/API.md](docs/API.md) for more detail.
 
-## Banco de Dados
+## Database
 
-O schema e versionado com Flyway em `backend/src/main/resources/db/migration`.
+The schema is versioned with Flyway in `backend/src/main/resources/db/migration`.
 
-Entidades principais:
+Main entities:
 
 - `users`
 - `transactions`
@@ -239,35 +239,35 @@ Entidades principais:
 - `recurring_transactions`
 - `payment_methods`
 
-O modelo separa `transaction_date` da `payment_date`, permitindo que compras no cartao impactem o orcamento na data correta da fatura.
+The model separates `transaction_date` from `payment_date`, allowing credit card purchases to affect the budget on the correct statement/payment date.
 
-## Testes
+## Tests
 
-O backend possui testes de servico para autenticacao, transacoes, parcelamentos, pagamentos recorrentes, relatorios e calculo de fatura de cartao:
+The backend includes service tests for authentication, transactions, instalment plans, recurring payments, reports and credit card billing calculations:
 
 ```bash
 cd backend
 mvn test
 ```
 
-O Dockerfile do backend executa `mvn clean verify` por padrao durante o build. Para builds locais mais rapidos:
+The backend Dockerfile runs `mvn clean verify` by default during the build. For faster local image builds:
 
 ```bash
 docker build --build-arg SKIP_TESTS=true ./backend
 ```
 
-## Documentacao Complementar
+## Additional Documentation
 
-- [Arquitetura](docs/ARCHITECTURE.md)
+- [Architecture](docs/ARCHITECTURE.md)
 - [Backend](docs/BACKEND.md)
 - [Frontend](docs/FRONTEND.md)
 - [API](docs/API.md)
-- [Deploy](docs/DEPLOYMENT.md)
+- [Deployment](docs/DEPLOYMENT.md)
 - [Docker](DOCKER_README.md)
-- [Deploy README](README_DEPLOY.md)
+- [Deployment README](README_DEPLOY.md)
 - [Vercel](VERCEL_CONFIG.md)
 - [VPS](VPS_SETUP.md)
-- [Parcelamentos](backend/INSTALLMENT_PLANS_README.md)
+- [Instalment Plans](backend/INSTALLMENT_PLANS_README.md)
 - [Performance](backend/PERFORMANCE_ANALYSIS.md)
 - [Profiles](backend/PROFILES_README.md)
 - [PostgreSQL](backend/POSTGRESQL_SETUP.md)
@@ -280,6 +280,6 @@ docker build --build-arg SKIP_TESTS=true ./backend
 
 ![Dashboard dark](dashboard_V1_dark.jpg)
 
-## Licenca
+## Licence
 
-MIT - veja [LICENSE](LICENSE).
+MIT - see [LICENSE](LICENSE).
