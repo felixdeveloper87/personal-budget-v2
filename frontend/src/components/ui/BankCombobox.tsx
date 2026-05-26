@@ -1,5 +1,4 @@
-import { Input } from '@chakra-ui/react'
-import { useId } from 'react'
+import { Select } from '@chakra-ui/react'
 import { UK_BANKS } from './BankLogo'
 
 interface BankComboboxProps {
@@ -9,26 +8,20 @@ interface BankComboboxProps {
   placeholder?: string
 }
 
-export default function BankCombobox({ value, onChange, size = 'sm', placeholder = 'e.g. NatWest' }: BankComboboxProps) {
-  const listId = useId()
+export default function BankCombobox({ value, onChange, size = 'sm', placeholder = 'Select bank' }: BankComboboxProps) {
+  const hasCustomValue = value.trim() !== '' && !UK_BANKS.includes(value)
 
   return (
-    <>
-      <Input
-        size={size}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete="off"
-        autoCorrect="off"
-        spellCheck={false}
-        list={listId}
-      />
-      <datalist id={listId}>
-        {UK_BANKS.map((bank) => (
-          <option key={bank} value={bank} />
-        ))}
-      </datalist>
-    </>
+    <Select
+      size={size}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+    >
+      {hasCustomValue && <option value={value}>{value}</option>}
+      {UK_BANKS.map((bank) => (
+        <option key={bank} value={bank}>{bank}</option>
+      ))}
+    </Select>
   )
 }
