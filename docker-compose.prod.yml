@@ -53,6 +53,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:+UseG1GC
     depends_on:
       db:
         condition: service_healthy
