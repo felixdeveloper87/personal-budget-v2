@@ -25,7 +25,7 @@ export interface ForecastEvent {
   amount: number
   category: string
   description: string
-  source: 'planned' | 'recurring' | 'installment'
+  source: 'planned' | 'recurring' | 'installment' | 'predicted-income'
 }
 
 export interface CashflowForecast {
@@ -34,7 +34,9 @@ export interface CashflowForecast {
   currentBalance: number
   projectedBalance: number
   projectedChange: number
+  upcomingIncomeTotal: number
   upcomingExpenseTotal: number
+  predictedIncomeTotal: number
   nextIncome: ForecastEvent | null
   upcomingEvents: ForecastEvent[]
   riskDay: ForecastPoint | null
@@ -133,10 +135,6 @@ function isWithin(date: Date, start: Date, end: Date): boolean {
   return date >= start && date <= end
 }
 
-function eventImpact(event: Pick<ForecastEvent, 'type' | 'amount'>): number {
-  return event.type === 'INCOME' ? event.amount : -event.amount
-}
-
 function transactionToEvent(transaction: Transaction, source: ForecastEvent['source']): ForecastEvent {
   const date = transactionDate(transaction)
 
@@ -165,6 +163,21 @@ function recurringToEvent(
     category: recurring.category || 'Fixed payment',
     description: recurring.description || recurring.category || 'Fixed payment',
     source: 'recurring',
+  }
+}
+
+function predictedIncomeToEvent(transaction: Transaction, eventDate: Date): ForecastEvent {
+  return {
+    id: `predicted-income-${transaction.id ?? transaction.description}-${dateKey(eventDate)}`,
+    date: dateKey(eventDate),
+    label: formatDay(eventDate),
+    type: 'INCOME',
+    amount: transaction.amount,
+    category: transaction.category || 'Income',
+    description: transaction.description
+      ? `${transaction.description} estimate`
+      : 'Income estimate',
+    source: 'predicted-income',
   }
 }
 
@@ -231,6 +244,53 @@ function buildFutureInstallmentEvents(
     .map((transaction) => transactionToEvent(transaction, 'installment'))
 }
 
+function buildPreviousMonthIncomeEvents(
+  transactions: Transaction[],
+  existingFutureEvents: ForecastEvent[],
+  anchorDate: Date,
+  periodStart: Date,
+  periodEnd: Date,
+  periodType: PeriodType,
+): ForecastEvent[] {
+  if (periodType !== 'month') return []
+
+  const hasFutureIncome = existingFutureEvents.some((event) => event.type === 'INCOME')
+  if (hasFutureIncome) return []
+
+  const previousMonthStart = startOfDay(
+    new Date(periodStart.getFullYear(), periodStart.getMonth() - 1, 1),
+  )
+  const previousMonthEnd = endOfDay(
+    new Date(periodStart.getFullYear(), periodStart.getMonth(), 0),
+  )
+  const daysInTargetMonth = new Date(
+    periodStart.getFullYear(),
+    periodStart.getMonth() + 1,
+    0,
+  ).getDate()
+
+  return transactions
+    .filter((transaction) => {
+      if (transaction.type !== 'INCOME') return false
+      const date = transactionDate(transaction)
+      return isWithin(date, previousMonthStart, previousMonthEnd)
+    })
+    .map((transaction) => {
+      const previousDate = transactionDate(transaction)
+      const targetDay = Math.min(previousDate.getDate(), daysInTargetMonth)
+      const eventDate = startOfDay(
+        new Date(periodStart.getFullYear(), periodStart.getMonth(), targetDay),
+      )
+
+      if (eventDate <= anchorDate || !isWithin(eventDate, periodStart, periodEnd)) {
+        return null
+      }
+
+      return predictedIncomeToEvent(transaction, eventDate)
+    })
+    .filter((event): event is ForecastEvent => event !== null)
+}
+
 export function useCashflowForecast(
   transactions: Transaction[],
   recurringTransactions: RecurringTransaction[],
@@ -249,12 +309,6 @@ export function useCashflowForecast(
       : selectedMonthIsFuture
         ? new Date(periodStart.getTime() - 1)
         : today
-
-    const openingBalance = transactions.reduce((sum, transaction) => {
-      const date = transactionDate(transaction)
-      if (date >= periodStart) return sum
-      return sum + (transaction.type === 'INCOME' ? transaction.amount : -transaction.amount)
-    }, 0)
 
     const actualEvents = transactions
       .filter((transaction) => {
@@ -285,15 +339,29 @@ export function useCashflowForecast(
       periodEnd,
     )
 
-    const allEvents = [
-      ...actualEvents,
+    const knownFutureEvents = [
       ...plannedFutureEvents,
       ...recurringEvents,
       ...installmentEvents,
+    ]
+
+    const predictedIncomeEvents = buildPreviousMonthIncomeEvents(
+      transactions,
+      knownFutureEvents,
+      anchorDate,
+      periodStart,
+      periodEnd,
+      periodType,
+    )
+
+    const allEvents = [
+      ...actualEvents,
+      ...knownFutureEvents,
+      ...predictedIncomeEvents,
     ].sort((a, b) => a.date.localeCompare(b.date))
 
     const points: ForecastPoint[] = []
-    let runningBalance = openingBalance
+    let runningBalance = 0
     const day = new Date(periodStart)
 
     while (day <= periodEnd) {
@@ -321,7 +389,7 @@ export function useCashflowForecast(
     }
 
     const currentPoint = [...points].reverse().find((point) => point.date <= dateKey(anchorDate))
-    const currentBalance = currentPoint?.balance ?? openingBalance
+    const currentBalance = currentPoint?.balance ?? 0
     const projectedBalance = points[points.length - 1]?.balance ?? currentBalance
 
     const upcomingEvents = allEvents
@@ -340,9 +408,13 @@ export function useCashflowForecast(
       currentBalance,
       projectedBalance,
       projectedChange: projectedBalance - currentBalance,
+      upcomingIncomeTotal: upcomingEvents
+        .filter((event) => event.type === 'INCOME')
+        .reduce((sum, event) => sum + event.amount, 0),
       upcomingExpenseTotal: upcomingEvents
         .filter((event) => event.type === 'EXPENSE')
         .reduce((sum, event) => sum + event.amount, 0),
+      predictedIncomeTotal: predictedIncomeEvents.reduce((sum, event) => sum + event.amount, 0),
       nextIncome: upcomingEvents.find((event) => event.type === 'INCOME') ?? null,
       upcomingEvents: upcomingEvents.slice(0, 5),
       riskDay,

@@ -28,7 +28,6 @@ import { ToastService } from '../../../services/toast'
 import {
   AlertTriangle,
   CalendarClock,
-  TrendingDown,
   TrendingUp,
   Wallet,
 } from '../../ui/icons'
@@ -53,6 +52,7 @@ function formatMoney(value: number): string {
 function sourceLabel(source: ForecastEvent['source']): string {
   if (source === 'recurring') return 'Fixed'
   if (source === 'installment') return 'Installment'
+  if (source === 'predicted-income') return 'Estimate'
   return 'Planned'
 }
 
@@ -169,7 +169,11 @@ export default function CashflowForecastPanel({
   return (
     <ChartPlotShell
       title="Cashflow forecast"
-      caption={`Future days in ${forecast.monthLabel}`}
+      caption={
+        forecast.predictedIncomeTotal > 0
+          ? `Future days in ${forecast.monthLabel} with previous-month income estimates`
+          : `Future days in ${forecast.monthLabel}`
+      }
       showPeriodBadge={false}
     >
       {loading ? (
@@ -187,10 +191,10 @@ export default function CashflowForecastPanel({
               color={forecast.projectedBalance >= 0 ? positiveColor : negativeColor}
             />
             <ForecastMetric
-              icon={forecast.projectedChange >= 0 ? TrendingUp : TrendingDown}
-              label="From current"
-              value={`${forecast.projectedChange >= 0 ? '+' : ''}${formatMoney(forecast.projectedChange)}`}
-              color={forecast.projectedChange >= 0 ? positiveColor : negativeColor}
+              icon={TrendingUp}
+              label="Upcoming income"
+              value={formatMoney(forecast.upcomingIncomeTotal)}
+              color={positiveColor}
             />
             <ForecastMetric
               icon={CalendarClock}
@@ -223,7 +227,7 @@ export default function CashflowForecastPanel({
                   axisLine={false}
                   tickLine={false}
                   width={48}
-                  tickFormatter={(value) => `£${Number(value).toFixed(0)}`}
+                  tickFormatter={(value) => `\u00a3${Number(value).toFixed(0)}`}
                 />
                 <Tooltip
                   cursor={{ stroke: lineColor, strokeWidth: 1, strokeDasharray: '4 4' }}
@@ -321,7 +325,9 @@ export default function CashflowForecastPanel({
                             ? 'purple'
                             : event.source === 'recurring'
                               ? 'blue'
-                              : 'gray'
+                              : event.source === 'predicted-income'
+                                ? 'green'
+                                : 'gray'
                         }
                         variant="subtle"
                         borderRadius="full"
