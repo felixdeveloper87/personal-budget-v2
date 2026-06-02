@@ -73,6 +73,9 @@ bin/
 # Claude local config
 .claude/
 
+# Codex local notes
+CODEX_NOTES.md
+
 # Mac
 .DS_Store
 

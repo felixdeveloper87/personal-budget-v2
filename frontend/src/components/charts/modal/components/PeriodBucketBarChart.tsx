@@ -105,6 +105,8 @@ export default function PeriodBucketBarChart({
     [buckets],
   )
 
+  const isStackedByType = filter === 'ALL'
+
   // `useId` keeps the SVG `<linearGradient>` id unique across multiple
   // charts on the page (e.g. one per period section). Without this, two
   // charts with the same accent would share a gradient by id collision.
@@ -122,6 +124,9 @@ export default function PeriodBucketBarChart({
   const valueColor = useColorModeValue('gray.900', 'gray.50')
   const tickColor = useColorModeValue('#94a3b8', '#64748b')
   const trackFill = useColorModeValue(palette.trackLight, palette.trackDark)
+  const stackedTrackFill = useColorModeValue('rgba(148, 163, 184, 0.14)', 'rgba(148, 163, 184, 0.16)')
+  const incomeFill = useColorModeValue('#10b981', '#22c55e')
+  const expenseFill = useColorModeValue('#ef4444', '#f87171')
   const tooltipBg = useColorModeValue('#ffffff', '#0a0a0a')
   const tooltipBorder = useColorModeValue('rgba(0,0,0,0.08)', 'rgba(255,255,255,0.08)')
   const tooltipText = useColorModeValue('#0f172a', '#f8fafc')
@@ -199,22 +204,44 @@ export default function PeriodBucketBarChart({
                 (payload?.[0]?.payload as { tooltip?: string } | undefined)
                   ?.tooltip ?? ''
               }
-              formatter={(value: number | string) => [
+              formatter={(value: number | string, name: string) => [
                 `${currency}${Number(value).toLocaleString('en-GB', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}`,
-                '',
+                isStackedByType ? name : '',
               ]}
               separator=""
             />
-            <Bar
-              dataKey="value"
-              fill={`url(#${gradientId})`}
-              radius={[6, 6, 4, 4]}
-              maxBarSize={32}
-              background={{ fill: trackFill, radius: 6 }}
-            />
+            {isStackedByType ? (
+              <>
+                <Bar
+                  dataKey="expense"
+                  name="Expense"
+                  stackId="type"
+                  fill={expenseFill}
+                  radius={[0, 0, 4, 4]}
+                  maxBarSize={32}
+                  background={{ fill: stackedTrackFill, radius: 6 }}
+                />
+                <Bar
+                  dataKey="income"
+                  name="Income"
+                  stackId="type"
+                  fill={incomeFill}
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={32}
+                />
+              </>
+            ) : (
+              <Bar
+                dataKey="value"
+                fill={`url(#${gradientId})`}
+                radius={[6, 6, 4, 4]}
+                maxBarSize={32}
+                background={{ fill: trackFill, radius: 6 }}
+              />
+            )}
           </BarChart>
         </ResponsiveContainer>
       </Box>

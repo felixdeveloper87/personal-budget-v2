@@ -14,6 +14,8 @@ export interface PeriodBucket {
   label: string
   tooltip: string
   value: number
+  income: number
+  expense: number
 }
 
 export type PeriodFilter = 'INCOME' | 'EXPENSE' | 'ALL'
@@ -62,12 +64,24 @@ function competenceDate(tx: Transaction): Date {
   return source.length === 10 ? new Date(`${source}T00:00:00`) : new Date(source)
 }
 
+function addTransactionToBucket(bucket: PeriodBucket, transaction: Transaction): void {
+  bucket.value += transaction.amount
+
+  if (transaction.type === 'INCOME') {
+    bucket.income += transaction.amount
+  } else {
+    bucket.expense += transaction.amount
+  }
+}
+
 function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
   const buckets: PeriodBucket[] = DAY_BLOCKS.map((b, i) => ({
     key: `h${i}`,
     label: b.label,
     tooltip: b.tooltip,
     value: 0,
+    income: 0,
+    expense: 0,
   }))
   const y = selectedDate.getFullYear()
   const m = selectedDate.getMonth()
@@ -84,7 +98,7 @@ function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucke
     }
     const hour = txDate.getHours()
     const idx = DAY_BLOCKS.findIndex((b) => hour >= b.start && hour < b.end)
-    if (idx >= 0) buckets[idx].value += tx.amount
+    if (idx >= 0) addTransactionToBucket(buckets[idx], tx)
   }
   return buckets
 }
@@ -95,6 +109,8 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
     label: w.short,
     tooltip: w.long,
     value: 0,
+    income: 0,
+    expense: 0,
   }))
 
   // Monday-first week: shift selectedDate to start of its ISO week.
@@ -112,7 +128,7 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
     if (txDate < start || txDate >= end) continue
     const dayOfWeek = txDate.getDay()
     const idx = dayOfWeek === 0 ? 6 : dayOfWeek - 1
-    buckets[idx].value += tx.amount
+    addTransactionToBucket(buckets[idx], tx)
   }
   return buckets
 }
@@ -134,6 +150,8 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
       label: showLabel ? String(day) : '',
       tooltip: `${monthName} ${day}`,
       value: 0,
+      income: 0,
+      expense: 0,
     }
   })
 
@@ -141,7 +159,7 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
     const txDate = competenceDate(tx)
     if (txDate.getFullYear() !== year || txDate.getMonth() !== month) continue
     const idx = txDate.getDate() - 1
-    if (idx >= 0 && idx < daysInMonth) buckets[idx].value += tx.amount
+    if (idx >= 0 && idx < daysInMonth) addTransactionToBucket(buckets[idx], tx)
   }
   return buckets
 }
@@ -153,11 +171,13 @@ function bucketByMonthOfYear(txs: Transaction[], selectedDate: Date): PeriodBuck
     label: m.short,
     tooltip: `${m.long} ${year}`,
     value: 0,
+    income: 0,
+    expense: 0,
   }))
   for (const tx of txs) {
     const txDate = competenceDate(tx)
     if (txDate.getFullYear() !== year) continue
-    buckets[txDate.getMonth()].value += tx.amount
+    addTransactionToBucket(buckets[txDate.getMonth()], tx)
   }
   return buckets
 }
