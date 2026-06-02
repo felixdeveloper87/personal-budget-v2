@@ -6,6 +6,7 @@ import { useChartColors } from './hooks'
 import {
   ChartPlotShell,
   ChartEmptyState,
+  IncomeInsights,
   PeriodBucketBarChart,
 } from './components'
 import CategoryTransactionDropdown from '../../categories/CategoryTransactionDropdown'
@@ -75,6 +76,8 @@ export default function IncomeChart({
           accent="green"
         />
       )}
+
+      <IncomeInsights transactions={incomeTransactions} />
 
       <ChartPlotShell
         title="Income distribution"

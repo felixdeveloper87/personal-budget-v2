@@ -165,6 +165,7 @@ export default function SummaryCardModal({
                     currentBalance={currentBalance}
                     selectedDate={selectedDate}
                     periodType={periodType}
+                    transactions={transactions}
                   />
                 )}
               </Box>

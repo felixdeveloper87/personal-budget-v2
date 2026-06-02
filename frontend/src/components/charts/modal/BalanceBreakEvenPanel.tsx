@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, Button, Divider, HStack, Icon, SimpleGrid, Stack, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
-import type { PeriodType } from '../../../types'
+import type { PeriodType, Transaction } from '../../../types'
 import { Calculator, Wallet } from '../../ui/icons'
 import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
@@ -9,6 +9,7 @@ interface BalanceBreakEvenPanelProps {
   currentBalance: number
   selectedDate?: Date
   periodType?: PeriodType
+  transactions?: Transaction[]
 }
 
 const moneyFormatter = new Intl.NumberFormat('en-GB', {
@@ -98,6 +99,7 @@ export default function BalanceBreakEvenPanel({
   currentBalance,
   selectedDate = new Date(),
   periodType = 'month',
+  transactions = [],
 }: BalanceBreakEvenPanelProps) {
   const [savingsTarget, setSavingsTarget] = useState(0)
   const { isOpen: isNumberPadOpen, onOpen: openNumberPad, onClose: closeNumberPad } = useDisclosure()
@@ -110,6 +112,13 @@ export default function BalanceBreakEvenPanel({
     ? countTuesdays(remainingRange.start, remainingRange.end)
     : 0
   const earningDays = Math.max(0, remainingDays - daysOff)
+  const isPastPeriod = remainingDays === 0
+
+  const { totalIncome, totalExpenses } = useMemo(() => ({
+    totalIncome: transactions.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0),
+    totalExpenses: transactions.filter(t => t.type === 'EXPENSE').reduce((s, t) => s + t.amount, 0),
+  }), [transactions])
+
   const neededToBreakEven = Math.max(0, -currentBalance)
   const dailyTarget = earningDays > 0 ? neededToBreakEven / earningDays : neededToBreakEven
   const neededForSavingsGoal = Math.max(0, savingsTarget - currentBalance)
@@ -145,6 +154,20 @@ export default function BalanceBreakEvenPanel({
   const savingsGoalCaption = savingsTarget > 0
     ? `To finish this period with ${formatMoney(savingsTarget)} left, earn ${formatMoney(dailySavingsTarget)} per earning day.`
     : 'Set a target surplus to calculate the daily earning goal.'
+
+  if (isPastPeriod) {
+    return (
+      <ChartPlotShell title="Period summary" caption="Closed period — no remaining days" showPeriodBadge={false}>
+        <VStack align="stretch" spacing={0}>
+          <StatRow label="Total income" value={formatMoney(totalIncome)} color={greenColor} />
+          <Divider borderColor={borderColor} />
+          <StatRow label="Total expenses" value={formatMoney(totalExpenses)} color={redColor} />
+          <Divider borderColor={borderColor} />
+          <StatRow label="Closing balance" value={formatMoney(currentBalance)} color={balanceColor} />
+        </VStack>
+      </ChartPlotShell>
+    )
+  }
 
   return (
     <ChartPlotShell
@@ -220,7 +243,7 @@ export default function BalanceBreakEvenPanel({
           {caption}
         </Text>
 
-        <Box
+        {remainingDays > 0 && <Box
           border="1px solid"
           borderColor={borderColor}
           borderRadius={{ base: 'xl', sm: '2xl' }}
@@ -342,7 +365,7 @@ export default function BalanceBreakEvenPanel({
               </Stack>
             </Box>
           </VStack>
-        </Box>
+        </Box>}
       </VStack>
 
       {isNumberPadOpen && (
