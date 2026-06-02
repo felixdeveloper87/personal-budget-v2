@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Box, Button, HStack, Icon, Input, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Button, HStack, Icon, SimpleGrid, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import type { PeriodType } from '../../../types'
 import { Calculator, CalendarDays, Wallet } from '../../ui/icons'
 import type { LucideIcon } from '../../ui/icons'
+import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
 
 interface BalanceBreakEvenPanelProps {
@@ -99,7 +100,8 @@ export default function BalanceBreakEvenPanel({
   selectedDate = new Date(),
   periodType = 'month',
 }: BalanceBreakEvenPanelProps) {
-  const [savingsTargetInput, setSavingsTargetInput] = useState('')
+  const [savingsTarget, setSavingsTarget] = useState(0)
+  const { isOpen: isNumberPadOpen, onOpen: openNumberPad, onClose: closeNumberPad } = useDisclosure()
 
   const remainingRange = getRemainingRange(selectedDate, periodType)
   const remainingDays = remainingRange
@@ -111,7 +113,6 @@ export default function BalanceBreakEvenPanel({
   const earningDays = Math.max(0, remainingDays - daysOff)
   const neededToBreakEven = Math.max(0, -currentBalance)
   const dailyTarget = earningDays > 0 ? neededToBreakEven / earningDays : neededToBreakEven
-  const savingsTarget = Math.max(0, Number(savingsTargetInput) || 0)
   const neededForSavingsGoal = Math.max(0, savingsTarget - currentBalance)
   const dailySavingsTarget = earningDays > 0 ? neededForSavingsGoal / earningDays : neededForSavingsGoal
 
@@ -122,6 +123,7 @@ export default function BalanceBreakEvenPanel({
   const inputBg = useColorModeValue('white', 'whiteAlpha.50')
   const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
   const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
+  const overlayBg = useColorModeValue('blackAlpha.500', 'blackAlpha.700')
   const orangeColor = useColorModeValue('orange.600', 'orange.300')
   const greenColor = useColorModeValue('green.600', 'green.300')
   const redColor = useColorModeValue('red.600', 'red.300')
@@ -217,7 +219,7 @@ export default function BalanceBreakEvenPanel({
                     bg={isActive ? activeButtonBg : inputBg}
                     color={isActive ? purpleColor : titleColor}
                     fontWeight={800}
-                    onClick={() => setSavingsTargetInput(String(value))}
+                    onClick={() => setSavingsTarget(value)}
                   >
                     {formatMoney(value)}
                   </Button>
@@ -225,19 +227,27 @@ export default function BalanceBreakEvenPanel({
               })}
             </SimpleGrid>
 
-            <Input
-              type="number"
-              min={0}
-              step="1"
-              inputMode="decimal"
-              value={savingsTargetInput}
-              onChange={(event) => setSavingsTargetInput(event.target.value)}
-              placeholder="Custom surplus amount"
+            <Button
+              type="button"
+              h="48px"
+              justifyContent="space-between"
               bg={inputBg}
+              color={savingsTarget > 0 ? titleColor : mutedColor}
+              border="1px solid"
               borderColor={borderColor}
               borderRadius="lg"
-              fontWeight={700}
-            />
+              fontWeight={800}
+              onClick={openNumberPad}
+              _hover={{ borderColor: activeButtonBorder, bg: inputBg }}
+              _active={{ bg: inputBg }}
+            >
+              <Text as="span" fontSize="sm">
+                Custom surplus
+              </Text>
+              <Text as="span" fontSize="sm" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Tap to enter'}
+              </Text>
+            </Button>
 
             <Box border="1px solid" borderColor={borderColor} borderRadius="lg" bg={inputBg} px={3.5} py={3}>
               <VStack align="stretch" spacing={1}>
@@ -257,6 +267,37 @@ export default function BalanceBreakEvenPanel({
           </VStack>
         </Box>
       </VStack>
+
+      {isNumberPadOpen && (
+        <Box
+          position="fixed"
+          inset="0"
+          bg={overlayBg}
+          backdropFilter="blur(10px)"
+          zIndex={2000}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          p={4}
+        >
+          <Box
+            bg={panelBg}
+            borderRadius="2xl"
+            p={{ base: 4, sm: 6 }}
+            maxW="400px"
+            w="full"
+            border="1px solid"
+            borderColor={borderColor}
+            shadow="2xl"
+          >
+            <NumberPad
+              value={savingsTarget}
+              onValueChange={setSavingsTarget}
+              onDone={closeNumberPad}
+            />
+          </Box>
+        </Box>
+      )}
     </ChartPlotShell>
   )
 }
