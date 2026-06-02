@@ -13,7 +13,6 @@ import IncomeChart from './IncomeChart'
 import ExpensesChart from './ExpensesChart'
 import BalanceChart from './BalanceChart'
 import { SummaryCardType } from '../../../constants/summaryColors'
-import InsightsCard from '../../ui/InsightsCard'
 import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
 import { ChartHeaderStats, ChartLoadingState } from './components'
 import type { ChartHeaderStatsVariant } from './components'
@@ -171,13 +170,6 @@ export default function SummaryCardModal({
               </Box>
             </AnimatePresence>
 
-            <Box mt={4}>
-              <InsightsCard
-                transactions={transactions}
-                selectedPeriod={selectedPeriod}
-                cardType={selectedCard || 'transactions'}
-              />
-            </Box>
           </>
         )}
       </Box>
