@@ -1,9 +1,8 @@
-import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
 import { TrendingUp } from '../../ui/icons'
-import { useChartColors, useChartDimensions } from './hooks'
+import { useChartColors } from './hooks'
 import {
   ChartPlotShell,
   ChartEmptyState,
@@ -28,7 +27,6 @@ export default function IncomeChart({
   selectedDate,
 }: IncomeChartProps) {
   const chartColors = useChartColors()
-  const { smallChartHeight, pieOuterRadius } = useChartDimensions()
 
   const incomeTransactions = useMemo(
     () => transactions.filter((t) => t.type === 'INCOME'),
@@ -86,29 +84,7 @@ export default function IncomeChart({
         badgeBg={chartColors.greenBadgeBg}
         badgeColor={chartColors.greenBadgeColor}
       >
-        <ResponsiveContainer width="100%" height={smallChartHeight}>
-          <PieChart>
-            <Pie
-              data={pieData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              outerRadius={pieOuterRadius}
-              innerRadius={Math.round(pieOuterRadius * 0.52)}
-              paddingAngle={2}
-              cornerRadius={4}
-              dataKey="value"
-              stroke={chartColors.cardBg}
-              strokeWidth={2}
-            >
-              {pieData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-
-        <Box mt={4}>
+        <Box>
           <VStack spacing={2} align="stretch">
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalIncome) * 100).toFixed(1)
