@@ -16,14 +16,15 @@ import { SummaryCardType } from '../../../constants/summaryColors'
 import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
 import { ChartHeaderStats, ChartLoadingState } from './components'
 import type { ChartHeaderStatsVariant } from './components'
-import type { PeriodType } from '../../../types'
+import type { PeriodType, Transaction } from '../../../types'
 
 interface SummaryCardModalProps {
   isOpen: boolean
   onClose: () => void
   selectedCard: SummaryCardType | null | undefined
   cardLabel?: string
-  transactions?: any[]
+  transactions?: Transaction[]
+  allTransactions?: Transaction[]
   selectedPeriod?: string
   currentBalance?: number
   /**
@@ -67,6 +68,7 @@ export default function SummaryCardModal({
   onClose,
   selectedCard,
   transactions = [],
+  allTransactions,
   selectedPeriod = 'Current Period',
   currentBalance = 0,
   periodType,
@@ -122,7 +124,7 @@ export default function SummaryCardModal({
       contentProps={{ bg: surfaceBg }}
     >
       <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
-        {!transactions.length ? (
+        {!transactions.length && selectedCard !== 'balance' ? (
           <ChartLoadingState message="Loading chart data..." />
         ) : (
           <>
@@ -163,8 +165,11 @@ export default function SummaryCardModal({
                 {selectedCard === 'balance' && (
                   <BalanceChart
                     transactions={transactions}
+                    forecastTransactions={allTransactions ?? transactions}
                     selectedPeriod={selectedPeriod}
                     currentBalance={currentBalance}
+                    periodType={periodType}
+                    selectedDate={selectedDate}
                   />
                 )}
               </Box>
