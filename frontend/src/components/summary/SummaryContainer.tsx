@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Box, Divider, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
-import { PeriodType, Transaction } from '../../types'
+import { PeriodType } from '../../types'
 import SummaryCardsGrid from './SummaryCardsGrid'
 import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import PeriodNavigator from './PeriodNavigator'
@@ -11,7 +11,6 @@ type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
 interface SummaryContainerProps {
   periodData: PeriodData
-  allTransactions: Transaction[]
   selectedPeriod: PeriodType
   selectedDate: Date
   onDateChange: (date: Date) => void
@@ -78,7 +77,6 @@ const fallbackNavigatePeriod = (
 
 export default function SummaryContainer({
   periodData,
-  allTransactions,
   selectedPeriod,
   selectedDate,
   onDateChange,
@@ -148,7 +146,6 @@ export default function SummaryContainer({
         selectedCard={selectedCard}
         cardLabel={selectedCard || 'transactions'}
         transactions={transactions}
-        allTransactions={allTransactions}
         selectedPeriod={label}
         currentBalance={balance}
         periodType={selectedPeriod}

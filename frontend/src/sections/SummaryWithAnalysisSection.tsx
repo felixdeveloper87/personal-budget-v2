@@ -1,11 +1,10 @@
 import { Box } from '@chakra-ui/react'
 import { PeriodData } from '../hooks/usePeriodData'
-import { PeriodType, Transaction } from '../types'
+import { PeriodType } from '../types'
 import { SummaryContainer } from '../components/summary'
 
 interface SummaryWithAnalysisSectionProps {
   periodData: PeriodData
-  allTransactions: Transaction[]
   selectedPeriod: PeriodType
   selectedDate: Date
   onDateChange: (date: Date) => void
@@ -17,7 +16,6 @@ interface SummaryWithAnalysisSectionProps {
 
 export default function SummaryWithAnalysisSection({
   periodData,
-  allTransactions,
   selectedPeriod,
   selectedDate,
   onDateChange,
@@ -29,7 +27,6 @@ export default function SummaryWithAnalysisSection({
   return (
     <SummaryContainer
       periodData={periodData}
-      allTransactions={allTransactions}
       selectedPeriod={selectedPeriod}
       selectedDate={selectedDate}
       onDateChange={onDateChange}

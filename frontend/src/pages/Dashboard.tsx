@@ -75,7 +75,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               <Box order={{ base: 1, lg: 2 }}>
                 <SummaryWithAnalysisSection
                   periodData={periodData}
-                  allTransactions={transactions}
                   selectedPeriod={selectedPeriod}
                   selectedDate={selectedDate}
                   onDateChange={onDateChange}
