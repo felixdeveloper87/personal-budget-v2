@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Box, Button, HStack, Icon, SimpleGrid, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Button, Divider, HStack, Icon, SimpleGrid, Stack, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import type { PeriodType } from '../../../types'
-import { Calculator, CalendarDays, Wallet } from '../../ui/icons'
-import type { LucideIcon } from '../../ui/icons'
+import { Calculator, Wallet } from '../../ui/icons'
 import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
 
@@ -121,8 +120,12 @@ export default function BalanceBreakEvenPanel({
   const panelBg = useColorModeValue('#ffffff', '#0a0a0a')
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const inputBg = useColorModeValue('white', 'whiteAlpha.50')
+  const heroBg = useColorModeValue('linear-gradient(135deg, #fff7ed 0%, #ffffff 62%, #f5f3ff 100%)', 'linear-gradient(135deg, rgba(154,52,18,0.26) 0%, rgba(17,17,17,0.96) 58%, rgba(88,28,135,0.28) 100%)')
+  const savingsBg = useColorModeValue('linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)', 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(88,28,135,0.16) 100%)')
+  const resultBg = useColorModeValue('purple.50', 'rgba(126,34,206,0.18)')
   const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
   const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
+  const targetIconBg = useColorModeValue('orange.50', 'whiteAlpha.100')
   const overlayBg = useColorModeValue('blackAlpha.500', 'blackAlpha.700')
   const orangeColor = useColorModeValue('orange.600', 'orange.300')
   const greenColor = useColorModeValue('green.600', 'green.300')
@@ -131,9 +134,9 @@ export default function BalanceBreakEvenPanel({
   const targetColor = neededToBreakEven > 0 ? orangeColor : greenColor
   const balanceColor = currentBalance >= 0 ? greenColor : redColor
 
-  const headline = neededToBreakEven > 0
-    ? `${formatMoney(dailyTarget)} per earning day to reach zero.`
-    : `You are ${formatMoney(currentBalance)} above zero for this period.`
+  const heroSubtitle = neededToBreakEven > 0
+    ? 'to clear this period · Tuesdays off excluded'
+    : "you're already above zero this period"
 
   const caption = remainingDays > 0
     ? `${earningDays} earning day${earningDays === 1 ? '' : 's'} left from today after excluding ${daysOff} Tuesday${daysOff === 1 ? '' : 's'} off.`
@@ -149,63 +152,114 @@ export default function BalanceBreakEvenPanel({
       caption="Daily earning target for the selected period"
       showPeriodBadge={false}
     >
-      <VStack align="stretch" spacing={4}>
-        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={3}>
-          <MetricTile
-            icon={Calculator}
-            label="Daily target"
-            value={formatMoney(dailyTarget)}
-            color={targetColor}
-          />
-          <MetricTile
-            icon={Wallet}
-            label="Needed to zero"
-            value={formatMoney(neededToBreakEven)}
-            color={targetColor}
-          />
-          <MetricTile
-            icon={CalendarDays}
-            label="Earning days left"
-            value={earningDays.toString()}
-            color={titleColor}
-          />
-        </SimpleGrid>
-
-        <Box
-          border="1px solid"
-          borderColor={borderColor}
-          borderRadius="xl"
-          bg={panelBg}
-          p={{ base: 3.5, sm: 4 }}
-        >
-          <VStack align="stretch" spacing={1}>
-            <Text fontSize="sm" fontWeight={800} color={titleColor}>
-              {headline}
-            </Text>
-            <Text fontSize="xs" color={mutedColor}>
-              {caption} Current period balance: <Text as="span" fontWeight={800} color={balanceColor}>{formatMoney(currentBalance)}</Text>.
-            </Text>
-          </VStack>
-        </Box>
-
-        <Box
-          border="1px solid"
-          borderColor={borderColor}
-          borderRadius="xl"
-          bg={panelBg}
-          p={{ base: 3.5, sm: 4 }}
-        >
-          <VStack align="stretch" spacing={3.5}>
-            <VStack align="stretch" spacing={1}>
-              <Text fontSize="sm" fontWeight={800} color={titleColor}>
-                Savings goal
+      <VStack align="stretch" spacing={{ base: 4, sm: 5 }}>
+        <SimpleGrid columns={{ base: 1, md: 5 }} spacing={{ base: 3, sm: 4 }}>
+          <Box
+            gridColumn={{ base: 'auto', md: 'span 2' }}
+            borderRadius="2xl"
+            bg={heroBg}
+            border="1px solid"
+            borderColor={borderColor}
+            p={{ base: 5, sm: 6 }}
+            display="flex"
+            flexDirection="column"
+            justifyContent="space-between"
+            gap={{ base: 5, sm: 6 }}
+          >
+            <HStack spacing={2.5}>
+              <Box
+                w={{ base: 8, sm: 9 }}
+                h={{ base: 8, sm: 9 }}
+                borderRadius="xl"
+                bg={targetIconBg}
+                color={targetColor}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Icon as={Calculator} boxSize={{ base: 4, sm: 5 }} />
+              </Box>
+              <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+                Break-even pace
               </Text>
-              <Text fontSize="xs" color={mutedColor}>
-                Choose how much money you want left at the end of this selected period.
+            </HStack>
+
+            <VStack align="stretch" spacing={1.5}>
+              <HStack align="baseline" spacing={1.5}>
+                <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {formatMoney(dailyTarget)}
+                </Text>
+                <Text fontSize="sm" fontWeight={600} color={mutedColor}>
+                  / day
+                </Text>
+              </HStack>
+              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.4">
+                {heroSubtitle}
               </Text>
             </VStack>
+          </Box>
 
-            <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
+          <Box
+            gridColumn={{ base: 'auto', md: 'span 3' }}
+            borderRadius="2xl"
+            bg={panelBg}
+            border="1px solid"
+            borderColor={borderColor}
+            px={{ base: 4, sm: 5 }}
+          >
+            <StatRow label="Needed to zero" value={formatMoney(neededToBreakEven)} color={targetColor} />
+            <Divider borderColor={borderColor} />
+            <StatRow label="Earning days left" value={earningDays.toString()} color={titleColor} />
+            <Divider borderColor={borderColor} />
+            <StatRow label="Current balance" value={formatMoney(currentBalance)} color={balanceColor} />
+          </Box>
+        </SimpleGrid>
+
+        <Text px={1} fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
+          {caption}
+        </Text>
+
+        <Box
+          border="1px solid"
+          borderColor={borderColor}
+          borderRadius={{ base: 'xl', sm: '2xl' }}
+          bg={savingsBg}
+          p={{ base: 3.5, sm: 5 }}
+        >
+          <VStack align="stretch" spacing={{ base: 3, sm: 4 }}>
+            <HStack justify="space-between" align="flex-start" spacing={2.5}>
+              <HStack spacing={3} minW={0}>
+                <Box
+                  w={{ base: 8, sm: 9 }}
+                  h={{ base: 8, sm: 9 }}
+                  borderRadius={{ base: 'lg', sm: 'xl' }}
+                  bg={activeButtonBg}
+                  color={purpleColor}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  <Icon as={Wallet} boxSize={{ base: 4, sm: 5 }} />
+                </Box>
+                <VStack align="stretch" spacing={0.5} minW={0}>
+                  <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={titleColor}>
+                    Savings goal
+                  </Text>
+                  <Text fontSize={{ base: '11px', sm: 'xs' }} color={mutedColor} noOfLines={2} lineHeight="1.3">
+                    Set the surplus you want after this period's balance reaches zero.
+                  </Text>
+                </VStack>
+              </HStack>
+              {savingsTarget > 0 && (
+                <Text flexShrink={0} fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={purpleColor} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {formatMoney(savingsTarget)}
+                </Text>
+              )}
+            </HStack>
+
+            <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={{ base: 1.5, sm: 2 }}>
               {SAVINGS_TARGET_OPTIONS.map((value) => {
                 const isActive = savingsTarget === value
 
@@ -213,13 +267,17 @@ export default function BalanceBreakEvenPanel({
                   <Button
                     key={value}
                     size="sm"
-                    borderRadius="lg"
+                    h={{ base: '34px', sm: '38px' }}
+                    borderRadius="full"
                     border="1px solid"
                     borderColor={isActive ? activeButtonBorder : borderColor}
                     bg={isActive ? activeButtonBg : inputBg}
                     color={isActive ? purpleColor : titleColor}
-                    fontWeight={800}
+                    boxShadow={isActive ? '0 8px 18px rgba(124, 58, 237, 0.16)' : 'none'}
+                    fontWeight={700}
+                    fontSize={{ base: 'xs', sm: 'sm' }}
                     onClick={() => setSavingsTarget(value)}
+                    _hover={{ borderColor: activeButtonBorder, bg: isActive ? activeButtonBg : panelBg }}
                   >
                     {formatMoney(value)}
                   </Button>
@@ -229,40 +287,59 @@ export default function BalanceBreakEvenPanel({
 
             <Button
               type="button"
-              h="48px"
+              h={{ base: '46px', sm: '52px' }}
               justifyContent="space-between"
               bg={inputBg}
               color={savingsTarget > 0 ? titleColor : mutedColor}
               border="1px solid"
               borderColor={borderColor}
-              borderRadius="lg"
-              fontWeight={800}
+              borderRadius={{ base: 'lg', sm: 'xl' }}
+              fontWeight={600}
+              px={{ base: 3, sm: 4 }}
               onClick={openNumberPad}
               _hover={{ borderColor: activeButtonBorder, bg: inputBg }}
               _active={{ bg: inputBg }}
+              rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
             >
-              <Text as="span" fontSize="sm">
+              <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }}>
                 Custom surplus
               </Text>
-              <Text as="span" fontSize="sm" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+              <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }} sx={{ fontVariantNumeric: 'tabular-nums' }}>
                 {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Tap to enter'}
               </Text>
             </Button>
 
-            <Box border="1px solid" borderColor={borderColor} borderRadius="lg" bg={inputBg} px={3.5} py={3}>
-              <VStack align="stretch" spacing={1}>
-                <Text fontSize="sm" fontWeight={900} color={savingsTarget > 0 ? purpleColor : mutedColor}>
-                  {savingsTarget > 0 ? `${formatMoney(dailySavingsTarget)} per earning day` : 'No savings target set'}
-                </Text>
-                <Text fontSize="xs" color={mutedColor}>
-                  {savingsGoalCaption}
-                  {savingsTarget > 0 && (
-                    <>
-                      {' '}Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.
-                    </>
-                  )}
-                </Text>
-              </VStack>
+            <Box
+              border="1px solid"
+              borderColor={savingsTarget > 0 ? activeButtonBorder : borderColor}
+              borderRadius="xl"
+              bg={savingsTarget > 0 ? resultBg : inputBg}
+              px={{ base: 3, sm: 4 }}
+              py={{ base: 3, sm: 4 }}
+            >
+              <Stack direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'center' }} justify="space-between" spacing={{ base: 2.5, sm: 4 }}>
+                <VStack align="stretch" spacing={1} minW={0}>
+                  <Text fontSize={{ base: '10px', sm: 'xs' }} fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+                    Target pace
+                  </Text>
+                  <Text fontSize={{ base: '11px', sm: 'xs' }} color={mutedColor} lineHeight="1.35">
+                    {savingsGoalCaption}
+                    {savingsTarget > 0 && (
+                      <>
+                        {' '}Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.
+                      </>
+                    )}
+                  </Text>
+                </VStack>
+                <VStack align={{ base: 'flex-start', sm: 'flex-end' }} spacing={0} flexShrink={0}>
+                  <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={savingsTarget > 0 ? purpleColor : mutedColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {savingsTarget > 0 ? formatMoney(dailySavingsTarget) : '--'}
+                  </Text>
+                  <Text fontSize={{ base: '11px', sm: 'xs' }} fontWeight={600} color={mutedColor}>
+                    per day
+                  </Text>
+                </VStack>
+              </Stack>
             </Box>
           </VStack>
         </Box>
@@ -283,7 +360,7 @@ export default function BalanceBreakEvenPanel({
           <Box
             bg={panelBg}
             borderRadius="2xl"
-            p={{ base: 4, sm: 6 }}
+            p={{ base: 3.5, sm: 6 }}
             maxW="400px"
             w="full"
             border="1px solid"
@@ -302,31 +379,23 @@ export default function BalanceBreakEvenPanel({
   )
 }
 
-interface MetricTileProps {
-  icon: LucideIcon
+interface StatRowProps {
   label: string
   value: string
   color: string
 }
 
-function MetricTile({ icon, label, value, color }: MetricTileProps) {
-  const bg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const border = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+function StatRow({ label, value, color }: StatRowProps) {
   const labelColor = useColorModeValue('gray.500', 'gray.400')
 
   return (
-    <Box border="1px solid" borderColor={border} borderRadius="xl" bg={bg} px={3.5} py={3}>
-      <HStack spacing={2.5} align="center">
-        <Icon as={icon} boxSize={4} color={color} flexShrink={0} />
-        <VStack align="stretch" spacing={0} minW={0}>
-          <Text fontSize="xs" color={labelColor} fontWeight={700} noOfLines={1}>
-            {label}
-          </Text>
-          <Text fontSize={{ base: 'lg', md: 'xl' }} color={color} fontWeight={900} lineHeight="1.05" noOfLines={1}>
-            {value}
-          </Text>
-        </VStack>
-      </HStack>
-    </Box>
+    <HStack justify="space-between" align="center" py={{ base: 3, sm: 3.5 }}>
+      <Text fontSize="sm" color={labelColor} fontWeight={600}>
+        {label}
+      </Text>
+      <Text fontSize={{ base: 'lg', sm: 'xl' }} color={color} fontWeight={700} lineHeight="1" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </Text>
+    </HStack>
   )
 }
