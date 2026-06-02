@@ -11,6 +11,7 @@ import { BarChart3, DollarSign, TrendingDown, TrendingUp } from '../../ui/icons'
 import TransactionsChart from './TransactionsChart'
 import IncomeChart from './IncomeChart'
 import ExpensesChart from './ExpensesChart'
+import BalanceBreakEvenPanel from './BalanceBreakEvenPanel'
 import { SummaryCardType } from '../../../constants/summaryColors'
 import { ModalHeader, ModalHeaderAccent, PremiumModal } from '../../ui'
 import { ChartHeaderStats, ChartLoadingState } from './components'
@@ -121,7 +122,7 @@ export default function SummaryCardModal({
       contentProps={{ bg: surfaceBg }}
     >
       <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 5, md: 6 }} overflowY="auto">
-        {!transactions.length ? (
+        {!transactions.length && selectedCard !== 'balance' ? (
           <ChartLoadingState message="Loading chart data..." />
         ) : (
           <>
@@ -157,6 +158,13 @@ export default function SummaryCardModal({
                     selectedPeriod={selectedPeriod}
                     periodType={periodType}
                     selectedDate={selectedDate}
+                  />
+                )}
+                {selectedCard === 'balance' && (
+                  <BalanceBreakEvenPanel
+                    currentBalance={currentBalance}
+                    selectedDate={selectedDate}
+                    periodType={periodType}
                   />
                 )}
               </Box>
