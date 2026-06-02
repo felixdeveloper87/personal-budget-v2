@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Badge,
   Box,
@@ -21,6 +21,10 @@ import {
 import type { LucideIcon } from '../../ui/icons'
 import { ChartEmptyState, ChartPlotShell, PeriodBucketBarChart } from './components'
 import { processCategoriesWithTransactions } from './utils'
+import {
+  bucketTransactionsByPeriod,
+  type PeriodBucket,
+} from './utils/periodBuckets'
 
 export interface TransactionsChartProps {
   transactions: Transaction[]
@@ -115,17 +119,45 @@ export default function TransactionsChart({
     [transactions],
   )
 
-  const topExpenses = useMemo(
-    () =>
-      [...expenseTransactions]
-        .sort((a, b) => b.amount - a.amount)
-        .slice(0, 5),
-    [expenseTransactions],
-  )
-
   const { sortedCategories: expenseCategories, total: totalExpenses } = useMemo(
     () => processCategoriesWithTransactions(expenseTransactions),
     [expenseTransactions],
+  )
+
+  const periodBuckets = useMemo(
+    () =>
+      periodType && selectedDate
+        ? bucketTransactionsByPeriod(transactions, periodType, selectedDate, 'ALL')
+        : [],
+    [transactions, periodType, selectedDate],
+  )
+
+  const [selectedBucketKey, setSelectedBucketKey] = useState<string | null>(null)
+
+  useEffect(() => {
+    const currentBucket = periodBuckets.find((bucket) => bucket.key === selectedBucketKey)
+    if (currentBucket) return
+
+    const [largestBucket] = [...periodBuckets]
+      .filter((bucket) => bucket.transactions.length > 0)
+      .sort((a, b) => b.value - a.value)
+
+    setSelectedBucketKey(largestBucket?.key ?? null)
+  }, [periodBuckets, selectedBucketKey])
+
+  const selectedBucket = useMemo(
+    () => periodBuckets.find((bucket) => bucket.key === selectedBucketKey) ?? null,
+    [periodBuckets, selectedBucketKey],
+  )
+
+  const selectedBucketTransactions = useMemo(
+    () =>
+      selectedBucket
+        ? [...selectedBucket.transactions].sort(
+            (a, b) => transactionDate(b).getTime() - transactionDate(a).getTime(),
+          )
+        : [],
+    [selectedBucket],
   )
 
   const behaviorInsights = useMemo<BehaviorInsight[]>(() => {
@@ -212,7 +244,6 @@ export default function TransactionsChart({
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const rowHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const emptyBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
 
   if (transactions.length === 0) {
     return (
@@ -240,41 +271,26 @@ export default function TransactionsChart({
         selectedDate={selectedDate}
         filter="ALL"
         accent="violet"
+        onBucketClick={(bucket: PeriodBucket) => setSelectedBucketKey(bucket.key)}
       />
 
-      {expenseTransactions.length === 0 ? (
-        <ChartPlotShell
-          title="Expense signals"
-          caption="Outliers and category patterns appear here when this period has outgoing transactions."
-          selectedPeriod={selectedPeriod}
-          showPeriodBadge={showPeriodBadge}
-          badgeBg="purple.50"
-          badgeColor="purple.600"
-        >
-          <Box
-            border="1px dashed"
-            borderColor={emptyBorder}
-            borderRadius="xl"
-            p={5}
-            textAlign="center"
-          >
-            <Text fontSize="sm" fontWeight={700} color={textColor}>
-              No expense outliers in this period
-            </Text>
-            <Text mt={1} fontSize="xs" color={mutedColor}>
-              The chart above is currently driven by income activity.
-            </Text>
-          </Box>
-        </ChartPlotShell>
-      ) : (
-        <>
-          <ChartPlotShell
-            title="Top Outliers"
-            caption="Largest outgoing transactions shaping the spikes"
-            showPeriodBadge={false}
-          >
-            <VStack spacing={2.5} align="stretch">
-              {topExpenses.map((transaction, index) => (
+      <ChartPlotShell
+        title={selectedBucket ? selectedBucket.tooltip : 'Selected transactions'}
+        caption={
+          selectedBucket
+            ? `${selectedBucket.transactions.length} transaction${
+                selectedBucket.transactions.length === 1 ? '' : 's'
+              } - Income ${formatMoney(selectedBucket.income)} / Expense ${formatMoney(selectedBucket.expense)}`
+            : 'Click a bar to inspect its transactions'
+        }
+        selectedPeriod={selectedPeriod}
+        showPeriodBadge={showPeriodBadge}
+        badgeBg="purple.50"
+        badgeColor="purple.600"
+      >
+        {selectedBucketTransactions.length > 0 ? (
+          <VStack spacing={2.5} align="stretch">
+            {selectedBucketTransactions.map((transaction, index) => (
                 <HStack
                   key={transaction.id ?? `${transaction.description}-${index}`}
                   spacing={3}
@@ -292,8 +308,8 @@ export default function TransactionsChart({
                     borderRadius="lg"
                     display="grid"
                     placeItems="center"
-                    bg="red.50"
-                    color="red.600"
+                    bg={transaction.type === 'INCOME' ? 'green.50' : 'red.50'}
+                    color={transaction.type === 'INCOME' ? 'green.600' : 'red.600'}
                     fontSize="sm"
                     fontWeight={800}
                     flexShrink={0}
@@ -313,7 +329,7 @@ export default function TransactionsChart({
                       </Text>
                       <Badge
                         flexShrink={0}
-                        colorScheme="red"
+                        colorScheme={transaction.type === 'INCOME' ? 'green' : 'red'}
                         variant="subtle"
                         borderRadius="full"
                         textTransform="none"
@@ -331,18 +347,34 @@ export default function TransactionsChart({
                   </VStack>
 
                   <Text
-                    color="red.500"
+                    color={transaction.type === 'INCOME' ? 'green.500' : 'red.500'}
                     fontSize="sm"
                     fontWeight={800}
                     whiteSpace="nowrap"
                   >
+                    {transaction.type === 'INCOME' ? '+' : '-'}
                     {formatMoney(transaction.amount)}
                   </Text>
                 </HStack>
-              ))}
-            </VStack>
-          </ChartPlotShell>
+            ))}
+          </VStack>
+        ) : (
+          <Box borderRadius="xl" border="1px dashed" borderColor={borderColor} p={5} textAlign="center">
+            <Text fontSize="sm" fontWeight={700} color={textColor}>
+              {selectedBucket
+                ? `No transactions in ${selectedBucket.tooltip}`
+                : 'Click a bar to see its transactions'}
+            </Text>
+            <Text mt={1} fontSize="xs" color={mutedColor}>
+              {selectedBucket
+                ? 'Choose another bar to inspect the activity for that day.'
+                : 'Hover still shows totals; click opens the exact entries behind that bar.'}
+            </Text>
+          </Box>
+        )}
+      </ChartPlotShell>
 
+      {expenseTransactions.length > 0 && (
           <Box>
             <HStack spacing={2} mb={3}>
               <Icon as={Sparkles} boxSize={4} color="purple.500" />
@@ -406,7 +438,6 @@ export default function TransactionsChart({
               ))}
             </SimpleGrid>
           </Box>
-        </>
       )}
     </VStack>
   )

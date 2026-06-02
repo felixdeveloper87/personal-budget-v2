@@ -17,6 +17,7 @@ import type { PeriodType, Transaction } from '../../../../types'
 import {
   bucketTransactionsByPeriod,
   getPeriodHeadline,
+  type PeriodBucket,
   type PeriodFilter,
 } from '../utils/periodBuckets'
 
@@ -72,6 +73,7 @@ export interface PeriodBucketBarChartProps {
   /** Bar plot height in pixels. Default 140. */
   height?: number
   accent?: PeriodBucketAccent
+  onBucketClick?: (bucket: PeriodBucket) => void
 }
 
 /**
@@ -93,6 +95,7 @@ export default function PeriodBucketBarChart({
   currency = '£',
   height = 140,
   accent = 'violet',
+  onBucketClick,
 }: PeriodBucketBarChartProps) {
   const buckets = useMemo(
     () =>
@@ -132,6 +135,9 @@ export default function PeriodBucketBarChart({
   const tooltipText = useColorModeValue('#0f172a', '#f8fafc')
 
   const headline = title ?? getPeriodHeadline(periodType, selectedDate)
+  const handleBarClick = (bucket: PeriodBucket) => {
+    onBucketClick?.(bucket)
+  }
 
   return (
     <Box
@@ -223,6 +229,8 @@ export default function PeriodBucketBarChart({
                   radius={[0, 0, 4, 4]}
                   maxBarSize={32}
                   background={{ fill: stackedTrackFill, radius: 6 }}
+                  cursor={onBucketClick ? 'pointer' : undefined}
+                  onClick={handleBarClick}
                 />
                 <Bar
                   dataKey="income"
@@ -231,6 +239,8 @@ export default function PeriodBucketBarChart({
                   fill={incomeFill}
                   radius={[6, 6, 0, 0]}
                   maxBarSize={32}
+                  cursor={onBucketClick ? 'pointer' : undefined}
+                  onClick={handleBarClick}
                 />
               </>
             ) : (
@@ -240,6 +250,8 @@ export default function PeriodBucketBarChart({
                 radius={[6, 6, 4, 4]}
                 maxBarSize={32}
                 background={{ fill: trackFill, radius: 6 }}
+                cursor={onBucketClick ? 'pointer' : undefined}
+                onClick={handleBarClick}
               />
             )}
           </BarChart>

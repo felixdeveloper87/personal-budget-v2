@@ -16,6 +16,7 @@ export interface PeriodBucket {
   value: number
   income: number
   expense: number
+  transactions: Transaction[]
 }
 
 export type PeriodFilter = 'INCOME' | 'EXPENSE' | 'ALL'
@@ -66,6 +67,7 @@ function competenceDate(tx: Transaction): Date {
 
 function addTransactionToBucket(bucket: PeriodBucket, transaction: Transaction): void {
   bucket.value += transaction.amount
+  bucket.transactions.push(transaction)
 
   if (transaction.type === 'INCOME') {
     bucket.income += transaction.amount
@@ -82,6 +84,7 @@ function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucke
     value: 0,
     income: 0,
     expense: 0,
+    transactions: [],
   }))
   const y = selectedDate.getFullYear()
   const m = selectedDate.getMonth()
@@ -111,6 +114,7 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
     value: 0,
     income: 0,
     expense: 0,
+    transactions: [],
   }))
 
   // Monday-first week: shift selectedDate to start of its ISO week.
@@ -152,6 +156,7 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
       value: 0,
       income: 0,
       expense: 0,
+      transactions: [],
     }
   })
 
@@ -173,6 +178,7 @@ function bucketByMonthOfYear(txs: Transaction[], selectedDate: Date): PeriodBuck
     value: 0,
     income: 0,
     expense: 0,
+    transactions: [],
   }))
   for (const tx of txs) {
     const txDate = competenceDate(tx)
