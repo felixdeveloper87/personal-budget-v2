@@ -1,4 +1,5 @@
-import { Box, HStack, Icon, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { useState } from 'react'
+import { Box, Button, HStack, Icon, Input, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import type { PeriodType } from '../../../types'
 import { Calculator, CalendarDays, Wallet } from '../../ui/icons'
 import type { LucideIcon } from '../../ui/icons'
@@ -14,6 +15,8 @@ const moneyFormatter = new Intl.NumberFormat('en-GB', {
   style: 'currency',
   currency: 'GBP',
 })
+
+const SAVINGS_TARGET_OPTIONS = [100, 200, 500, 1000] as const
 
 function formatMoney(value: number): string {
   return moneyFormatter.format(value)
@@ -96,6 +99,8 @@ export default function BalanceBreakEvenPanel({
   selectedDate = new Date(),
   periodType = 'month',
 }: BalanceBreakEvenPanelProps) {
+  const [savingsTargetInput, setSavingsTargetInput] = useState('')
+
   const remainingRange = getRemainingRange(selectedDate, periodType)
   const remainingDays = remainingRange
     ? daysInclusive(remainingRange.start, remainingRange.end)
@@ -106,14 +111,21 @@ export default function BalanceBreakEvenPanel({
   const earningDays = Math.max(0, remainingDays - daysOff)
   const neededToBreakEven = Math.max(0, -currentBalance)
   const dailyTarget = earningDays > 0 ? neededToBreakEven / earningDays : neededToBreakEven
+  const savingsTarget = Math.max(0, Number(savingsTargetInput) || 0)
+  const neededForSavingsGoal = Math.max(0, savingsTarget - currentBalance)
+  const dailySavingsTarget = earningDays > 0 ? neededForSavingsGoal / earningDays : neededForSavingsGoal
 
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const panelBg = useColorModeValue('#ffffff', '#0a0a0a')
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const inputBg = useColorModeValue('white', 'whiteAlpha.50')
+  const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
+  const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
   const orangeColor = useColorModeValue('orange.600', 'orange.300')
   const greenColor = useColorModeValue('green.600', 'green.300')
   const redColor = useColorModeValue('red.600', 'red.300')
+  const purpleColor = useColorModeValue('purple.600', 'purple.300')
   const targetColor = neededToBreakEven > 0 ? orangeColor : greenColor
   const balanceColor = currentBalance >= 0 ? greenColor : redColor
 
@@ -124,6 +136,10 @@ export default function BalanceBreakEvenPanel({
   const caption = remainingDays > 0
     ? `${earningDays} earning day${earningDays === 1 ? '' : 's'} left from today after excluding ${daysOff} Tuesday${daysOff === 1 ? '' : 's'} off.`
     : 'No remaining days in this selected period.'
+
+  const savingsGoalCaption = savingsTarget > 0
+    ? `To finish this period with ${formatMoney(savingsTarget)} left, earn ${formatMoney(dailySavingsTarget)} per earning day.`
+    : 'Set a target surplus to calculate the daily earning goal.'
 
   return (
     <ChartPlotShell
@@ -167,6 +183,77 @@ export default function BalanceBreakEvenPanel({
             <Text fontSize="xs" color={mutedColor}>
               {caption} Current period balance: <Text as="span" fontWeight={800} color={balanceColor}>{formatMoney(currentBalance)}</Text>.
             </Text>
+          </VStack>
+        </Box>
+
+        <Box
+          border="1px solid"
+          borderColor={borderColor}
+          borderRadius="xl"
+          bg={panelBg}
+          p={{ base: 3.5, sm: 4 }}
+        >
+          <VStack align="stretch" spacing={3.5}>
+            <VStack align="stretch" spacing={1}>
+              <Text fontSize="sm" fontWeight={800} color={titleColor}>
+                Savings goal
+              </Text>
+              <Text fontSize="xs" color={mutedColor}>
+                Choose how much money you want left at the end of this selected period.
+              </Text>
+            </VStack>
+
+            <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
+              {SAVINGS_TARGET_OPTIONS.map((value) => {
+                const isActive = savingsTarget === value
+
+                return (
+                  <Button
+                    key={value}
+                    size="sm"
+                    borderRadius="lg"
+                    border="1px solid"
+                    borderColor={isActive ? activeButtonBorder : borderColor}
+                    bg={isActive ? activeButtonBg : inputBg}
+                    color={isActive ? purpleColor : titleColor}
+                    fontWeight={800}
+                    onClick={() => setSavingsTargetInput(String(value))}
+                  >
+                    {formatMoney(value)}
+                  </Button>
+                )
+              })}
+            </SimpleGrid>
+
+            <Input
+              type="number"
+              min={0}
+              step="1"
+              inputMode="decimal"
+              value={savingsTargetInput}
+              onChange={(event) => setSavingsTargetInput(event.target.value)}
+              placeholder="Custom surplus amount"
+              bg={inputBg}
+              borderColor={borderColor}
+              borderRadius="lg"
+              fontWeight={700}
+            />
+
+            <Box border="1px solid" borderColor={borderColor} borderRadius="lg" bg={inputBg} px={3.5} py={3}>
+              <VStack align="stretch" spacing={1}>
+                <Text fontSize="sm" fontWeight={900} color={savingsTarget > 0 ? purpleColor : mutedColor}>
+                  {savingsTarget > 0 ? `${formatMoney(dailySavingsTarget)} per earning day` : 'No savings target set'}
+                </Text>
+                <Text fontSize="xs" color={mutedColor}>
+                  {savingsGoalCaption}
+                  {savingsTarget > 0 && (
+                    <>
+                      {' '}Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.
+                    </>
+                  )}
+                </Text>
+              </VStack>
+            </Box>
           </VStack>
         </Box>
       </VStack>
