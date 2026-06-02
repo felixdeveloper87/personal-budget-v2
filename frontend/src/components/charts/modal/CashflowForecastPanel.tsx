@@ -52,7 +52,6 @@ function formatMoney(value: number): string {
 function sourceLabel(source: ForecastEvent['source']): string {
   if (source === 'recurring') return 'Fixed'
   if (source === 'installment') return 'Installment'
-  if (source === 'predicted-income') return 'Estimate'
   return 'Planned'
 }
 
@@ -169,11 +168,7 @@ export default function CashflowForecastPanel({
   return (
     <ChartPlotShell
       title="Cashflow forecast"
-      caption={
-        forecast.predictedIncomeTotal > 0
-          ? `Future days in ${forecast.monthLabel} with previous-month income estimates`
-          : `Future days in ${forecast.monthLabel}`
-      }
+      caption={`Future days in ${forecast.monthLabel}`}
       showPeriodBadge={false}
     >
       {loading ? (
@@ -278,83 +273,70 @@ export default function CashflowForecastPanel({
             </Text>
           </HStack>
 
-          {forecast.upcomingEvents.length > 0 && (
-            <VStack align="stretch" spacing={2}>
-              <Text
-                fontSize="xs"
-                fontWeight={800}
-                color={mutedColor}
-                textTransform="uppercase"
-                letterSpacing="0.08em"
-              >
-                Upcoming impacts
-              </Text>
-
-              {forecast.upcomingEvents.map((event) => (
-                <HStack
-                  key={event.id}
-                  spacing={3}
-                  bg={panelBg}
-                  border="1px solid"
-                  borderColor={borderColor}
-                  borderRadius="xl"
-                  p={3}
-                >
-                  <Box
-                    w="36px"
-                    h="36px"
-                    borderRadius="lg"
-                    display="grid"
-                    placeItems="center"
-                    bg={event.type === 'INCOME' ? 'green.50' : 'red.50'}
-                    color={event.type === 'INCOME' ? 'green.600' : 'red.600'}
+          <Box border="1px solid" borderColor={borderColor} borderRadius="xl" bg={panelBg} p={4}>
+            <VStack align="stretch" spacing={3}>
+              <HStack justify="space-between" align="flex-start" gap={3}>
+                <VStack align="stretch" spacing={0.5} minW={0}>
+                  <Text
                     fontSize="xs"
                     fontWeight={800}
-                    flexShrink={0}
+                    color={mutedColor}
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
                   >
-                    {event.label.split(' ')[0]}
-                  </Box>
-                  <VStack align="stretch" spacing={0.5} minW={0} flex={1}>
-                    <HStack spacing={2} minW={0}>
-                      <Text fontSize="sm" fontWeight={800} color={titleColor} noOfLines={1}>
-                        {event.description}
-                      </Text>
+                    Flexible income target
+                  </Text>
+                  <Text fontSize="sm" fontWeight={800} color={titleColor}>
+                    {forecast.incomeNeededToBreakEven > 0
+                      ? `${formatMoney(forecast.incomeNeededToBreakEven)} needed to finish this period at zero.`
+                      : 'Current forecast already finishes this period positive.'}
+                  </Text>
+                  <Text fontSize="xs" color={mutedColor}>
+                    For variable daily work, income is not guessed. Use this as the minimum target against the fixed/future expenses already known.
+                  </Text>
+                </VStack>
+
+                <Badge
+                  colorScheme={forecast.incomeNeededToBreakEven > 0 ? 'orange' : 'green'}
+                  variant="subtle"
+                  borderRadius="full"
+                  px={2.5}
+                  py={1}
+                  fontSize="xs"
+                  fontWeight={800}
+                  textTransform="none"
+                  letterSpacing="0"
+                  flexShrink={0}
+                >
+                  {forecast.remainingDays > 0
+                    ? `${formatMoney(forecast.dailyIncomeNeededToBreakEven)}/day`
+                    : formatMoney(forecast.incomeNeededToBreakEven)}
+                </Badge>
+              </HStack>
+
+              {forecast.upcomingEvents.length > 0 && (
+                <HStack spacing={2} flexWrap="wrap">
+                  {forecast.upcomingEvents
+                    .filter((event) => event.type === 'EXPENSE')
+                    .slice(0, 3)
+                    .map((event) => (
                       <Badge
-                        colorScheme={
-                          event.source === 'installment'
-                            ? 'purple'
-                            : event.source === 'recurring'
-                              ? 'blue'
-                              : event.source === 'predicted-income'
-                                ? 'green'
-                                : 'gray'
-                        }
+                        key={event.id}
+                        colorScheme={event.source === 'installment' ? 'purple' : 'blue'}
                         variant="subtle"
                         borderRadius="full"
+                        px={2.5}
+                        py={1}
                         textTransform="none"
                         letterSpacing="0"
-                        flexShrink={0}
                       >
-                        {sourceLabel(event.source)}
+                        {event.label}: {sourceLabel(event.source)} - {formatMoney(event.amount)}
                       </Badge>
-                    </HStack>
-                    <Text fontSize="xs" color={mutedColor} noOfLines={1}>
-                      {event.label} - {event.category}
-                    </Text>
-                  </VStack>
-                  <Text
-                    fontSize="sm"
-                    fontWeight={900}
-                    color={event.type === 'INCOME' ? positiveColor : negativeColor}
-                    whiteSpace="nowrap"
-                  >
-                    {event.type === 'INCOME' ? '+' : '-'}
-                    {formatMoney(event.amount)}
-                  </Text>
+                    ))}
                 </HStack>
-              ))}
+              )}
             </VStack>
-          )}
+          </Box>
         </VStack>
       )}
     </ChartPlotShell>
