@@ -26,7 +26,7 @@ import type { LucideIcon } from '../components/ui/icons'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import { SectionCard, SectionHeader } from '../components/ui'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
-import { downloadReportPdf, getReport } from '../api'
+import { getReport } from '../api'
 import type {
   PeriodType,
   ReportCategoryBreakdown,
@@ -219,13 +219,11 @@ function TransactionTable({
 function ReportsPageHeader({
   periodLabel,
   onGoToToday,
-  onDownload,
-  isDownloading,
+  onExport,
 }: {
   periodLabel: string
   onGoToToday: () => void
-  onDownload: () => void
-  isDownloading: boolean
+  onExport: () => void
 }) {
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
@@ -277,10 +275,9 @@ function ReportsPageHeader({
           borderRadius="lg"
           colorScheme="blue"
           leftIcon={<Icon as={FileText} boxSize={3.5} />}
-          onClick={onDownload}
-          isLoading={isDownloading}
+          onClick={onExport}
         >
-          PDF
+          Export PDF
         </Button>
       </HStack>
     </Flex>
@@ -298,7 +295,6 @@ export default function ReportsPage() {
   } = usePeriodNavigator()
   const [report, setReport] = useState<ReportResponse | null>(null)
   const [loading, setLoading] = useState(false)
-  const [downloading, setDownloading] = useState(false)
 
   const pageBg = useColorModeValue('gray.50', '#060606')
   const textColor = useColorModeValue('gray.700', 'gray.200')
@@ -329,26 +325,13 @@ export default function ReportsPage() {
     }
   }, [selectedPeriod, selectedDate])
 
-  const handleDownload = useCallback(async () => {
-    setDownloading(true)
-    try {
-      const blob = await downloadReportPdf(selectedPeriod, selectedDate)
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `personal-budget-${selectedPeriod}-${fileDate(selectedDate)}.pdf`
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      ToastService.apiError(err, {
-        title: 'Could not export PDF',
-        dedupeKey: 'report-pdf-failed',
-      })
-    } finally {
-      setDownloading(false)
-    }
+  const handleExport = useCallback(() => {
+    const params = new URLSearchParams({
+      period: selectedPeriod,
+      date: fileDate(selectedDate),
+      autoPrint: 'true',
+    })
+    window.open(`/reports/print?${params.toString()}`, '_blank', 'noopener,noreferrer')
   }, [selectedPeriod, selectedDate])
 
   const metrics = useMemo(() => {
@@ -400,8 +383,7 @@ export default function ReportsPage() {
         <ReportsPageHeader
           periodLabel={periodLabel}
           onGoToToday={goToToday}
-          onDownload={handleDownload}
-          isDownloading={downloading}
+          onExport={handleExport}
         />
 
         <SectionCard staticOnHover>
