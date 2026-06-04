@@ -5,5 +5,8 @@
   "framework": "vite",
   "env": {
     "VITE_API_URL": "http://91.98.88.120:8082/api"
-  }
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
