@@ -30,7 +30,12 @@ class ReportServiceTest {
 
     @BeforeEach
     void setUp() {
-        reportService = new ReportService(transactionRepository);
+        ReportMoneyFormatter moneyFormatter = new ReportMoneyFormatter();
+        ReportTransactionMapper transactionMapper = new ReportTransactionMapper();
+        ReportInsightService insightService = new ReportInsightService(moneyFormatter);
+        ReportCalculator reportCalculator = new ReportCalculator(transactionMapper, insightService);
+        ReportPdfService reportPdfService = new ReportPdfService(moneyFormatter);
+        reportService = new ReportService(transactionRepository, reportCalculator, reportPdfService);
         user = new User();
         user.setId(10L);
         user.setName("Leandro");
