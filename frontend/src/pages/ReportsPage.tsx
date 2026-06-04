@@ -30,6 +30,7 @@ import { getReport } from '../api'
 import type {
   PeriodType,
   ReportCategoryBreakdown,
+  ReportPaymentMethodBreakdown,
   ReportResponse,
   ReportTransactionItem,
 } from '../types'
@@ -159,6 +160,45 @@ function CategoryBars({
           </Box>
         ))
       )}
+    </VStack>
+  )
+}
+
+function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] }) {
+  const textColor = useColorModeValue('gray.700', 'gray.200')
+  const mutedColor = useColorModeValue('gray.500', 'gray.400')
+  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+
+  if (items.length === 0) return null
+
+  return (
+    <VStack align="stretch" spacing={3}>
+      <Text fontSize="sm" fontWeight={800} color={textColor}>
+        Payment methods
+      </Text>
+      {items.slice(0, 6).map((item) => (
+        <Box key={item.name}>
+          <HStack justify="space-between" spacing={3} mb={1}>
+            <Text fontSize="sm" color={textColor} fontWeight={600} noOfLines={1}>
+              {item.name}
+            </Text>
+            <HStack spacing={2} flexShrink={0}>
+              <Text fontSize="xs" color={textColor} fontWeight={700}>
+                {formatCurrency(item.amount)}
+              </Text>
+              <Text fontSize="xs" color={mutedColor}>
+                {item.percentage}%
+              </Text>
+            </HStack>
+          </HStack>
+          <Box h="8px" bg={trackBg} borderRadius="full" overflow="hidden">
+            <Box h="full" w={`${Math.min(item.percentage, 100)}%`} bg="blue.400" borderRadius="full" />
+          </Box>
+          <Text fontSize="xs" color={mutedColor} mt={0.5}>
+            {item.transactionCount} {item.transactionCount === 1 ? 'transaction' : 'transactions'}
+          </Text>
+        </Box>
+      ))}
     </VStack>
   )
 }
@@ -473,6 +513,14 @@ export default function ReportsPage() {
                     <CategoryBars title="Expense categories" items={report.expenseCategories} tone="red" />
                     <CategoryBars title="Income categories" items={report.incomeCategories} tone="green" />
                   </SimpleGrid>
+
+                  {report.paymentMethods.length > 0 && (
+                    <SectionCard bare>
+                      <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={5}>
+                        <PaymentMethodBars items={report.paymentMethods} />
+                      </SimpleGrid>
+                    </SectionCard>
+                  )}
 
                   <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={5}>
                     <TransactionTable title="Largest expenses" transactions={report.topExpenses} />
