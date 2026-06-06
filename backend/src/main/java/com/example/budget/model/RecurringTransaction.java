@@ -55,6 +55,14 @@ public class RecurringTransaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private FinancialAccount account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_method_id")
+    private PaymentMethod paymentMethod;
+
     @OneToMany(mappedBy = "recurringTransaction")
     private List<Transaction> transactions = new ArrayList<>();
 
@@ -151,6 +159,22 @@ public class RecurringTransaction {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public FinancialAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(FinancialAccount account) {
+        this.account = account;
+    }
+
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public List<Transaction> getTransactions() {

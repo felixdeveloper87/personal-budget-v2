@@ -1,7 +1,13 @@
 import {
   Box,
+  Flex,
   HStack,
   Icon,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
   Text,
   Tooltip,
   useBreakpointValue,
@@ -10,6 +16,7 @@ import {
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NAV_ITEMS, type AppPage, type NavItem } from './navigation.config'
+import { List } from '../../ui/icons'
 
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
   currentPage: AppPage
@@ -36,6 +43,9 @@ export default function NavBar({
   ...stackProps
 }: NavBarProps) {
   const isMobile = variant === 'mobile'
+  const visibleItems = isMobile && items.length > 4 ? items.slice(0, 4) : items
+  const overflowItems = isMobile && items.length > 4 ? items.slice(4) : []
+  const isOverflowActive = overflowItems.some((item) => item.id === currentPage)
   // Tablet range (md..lg, ~768–991px): collapse desktop nav to icon-only
   // so the top row never squeezes the Logo / Actions.
   const isTabletRange = useBreakpointValue({ base: false, md: true, lg: false }) ?? false
@@ -66,17 +76,18 @@ export default function NavBar({
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const moreRef = useRef<HTMLButtonElement | null>(null)
 
   const [indicator, setIndicator] = useState<IndicatorRect>({ left: 0, width: 0, ready: false })
 
   const measure = useCallback(() => {
-    const el = itemRefs.current[currentPage]
+    const el = itemRefs.current[currentPage] ?? (isOverflowActive ? moreRef.current : null)
     if (!el) return
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
     if (isMobile) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
     }
-  }, [currentPage, isMobile])
+  }, [currentPage, isMobile, isOverflowActive])
 
   useLayoutEffect(() => {
     measure()
@@ -144,7 +155,7 @@ export default function NavBar({
         pointerEvents="none"
       />
 
-      {items.map((item) => (
+      {visibleItems.map((item) => (
         <NavBarItem
           key={item.id}
           item={item}
@@ -160,6 +171,57 @@ export default function NavBar({
           }}
         />
       ))}
+
+      {overflowItems.length > 0 && (
+        <Menu placement="bottom-end" isLazy>
+          <MenuButton
+            ref={moreRef}
+            type="button"
+            role="tab"
+            aria-selected={isOverflowActive}
+            aria-label="More pages"
+            flex={1}
+            px={1.5}
+            py={2}
+            minH="52px"
+            minW={0}
+            borderRadius="xl"
+            bg="transparent"
+            color={isOverflowActive ? activeColor : inactiveColor}
+            fontWeight={isOverflowActive ? 700 : 600}
+            fontSize="2xs"
+            position="relative"
+            zIndex={1}
+            transition="color 0.2s ease, transform 0.15s ease"
+            _hover={{ color: isOverflowActive ? activeColor : hoverColor }}
+            _focusVisible={{
+              outline: 'none',
+              boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+            }}
+          >
+            <Flex direction="column" align="center" justify="center" gap={1}>
+              <Icon as={List} boxSize={4.5} weight={isOverflowActive ? 'duotone' : 'regular'} />
+              <Text as="span" lineHeight="1" whiteSpace="nowrap">More</Text>
+            </Flex>
+          </MenuButton>
+          <Portal>
+            <MenuList zIndex={2000} minW="220px" p={2} borderRadius="xl">
+              {overflowItems.map((item) => (
+                <MenuItem
+                  key={item.id}
+                  icon={<Icon as={item.icon} boxSize={4.5} />}
+                  borderRadius="lg"
+                  fontWeight={currentPage === item.id ? 700 : 500}
+                  color={currentPage === item.id ? activeColor : undefined}
+                  onClick={() => onPageChange?.(item.id)}
+                >
+                  {item.label}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Portal>
+        </Menu>
+      )}
     </HStack>
   )
 }
@@ -203,7 +265,7 @@ function NavBarItem({
       flexShrink={isMobile ? 1 : undefined}
       px={isMobile ? 1.5 : isIconOnly ? 2.5 : 3.5}
       py={isMobile ? 2.5 : 2}
-      minH={isMobile ? '44px' : '40px'}
+      minH={isMobile ? '52px' : '40px'}
       minW={0}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"
@@ -225,8 +287,9 @@ function NavBarItem({
         boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
       }}
     >
-      <HStack
-        spacing={showLabel ? (isMobile ? 1 : 2) : 0}
+      <Flex
+        direction={isMobile ? 'column' : 'row'}
+        gap={showLabel ? (isMobile ? 1 : 2) : 0}
         justify="center"
         align="center"
         h="full"
@@ -243,7 +306,7 @@ function NavBarItem({
             {isMobile ? item.shortLabel : item.label}
           </Text>
         )}
-      </HStack>
+      </Flex>
     </Box>
   )
 

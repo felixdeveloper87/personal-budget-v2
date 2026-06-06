@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -35,6 +36,12 @@ public class UpdateTransactionRequest {
     private BigDecimal amount;
 
     private Long paymentMethodId;
+
+    @NotNull(message = "Account is required")
+    private Long accountId;
+
+    @NotNull(message = "Status is required")
+    private TransactionStatus status = TransactionStatus.CLEARED;
 
     public UpdateTransactionRequest() {
     }
@@ -111,5 +118,21 @@ public class UpdateTransactionRequest {
 
     public void setPaymentMethodId(Long paymentMethodId) {
         this.paymentMethodId = paymentMethodId;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.budget.controller;
 
+import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
 import com.example.budget.dto.UpdateInstallmentPlanRequest;
@@ -89,6 +90,19 @@ public class InstallmentPlanController {
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return installmentPlanService.update(id, request, user);
+    }
+
+    /**
+     * Associates an installment plan with a balance account without recalculating
+     * its installments. The account is propagated to all generated transactions.
+     */
+    @PatchMapping("/{id}/account")
+    public InstallmentPlanDTO assignAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignAccountRequest request,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.assignAccount(id, request, user);
     }
 
     /**

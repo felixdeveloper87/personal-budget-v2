@@ -17,6 +17,17 @@ import {
   PaymentMethodRequest,
   PeriodType,
   ReportResponse,
+  FinancialAccount,
+  FinancialAccountRequest,
+  AccountSummary,
+  AccountTransfer,
+  AccountTransferRequest,
+  LegacyTransactionAssignmentRequest,
+  SavingsGoal,
+  SavingsGoalRequest,
+  CategoryBudget,
+  CategoryBudgetRequest,
+  CashFlowForecast,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -205,8 +216,14 @@ export interface ImportResult {
 }
 
 // Bulk-import transactions → POST /transactions/import
-export async function importTransactions(rows: ImportTransactionRow[]): Promise<ImportResult> {
-  const { data } = await api.post<ImportResult>('/transactions/import', { rows })
+export async function importTransactions(
+  rows: ImportTransactionRow[],
+  accountId?: number | null,
+): Promise<ImportResult> {
+  const { data } = await api.post<ImportResult>('/transactions/import', {
+    rows,
+    accountId: accountId ?? null,
+  })
   return data
 }
 
@@ -236,6 +253,61 @@ export async function updatePaymentMethod(
 
 export async function deletePaymentMethod(id: number): Promise<void> {
   await api.delete(`/payment-methods/${id}`)
+}
+
+export async function listAccounts(): Promise<FinancialAccount[]> {
+  const { data } = await api.get<FinancialAccount[]>('/accounts')
+  return data
+}
+
+// Permanently delete all of the current user's financial data → DELETE /user/data
+export async function deleteAllUserData(): Promise<void> {
+  await api.delete('/user/data')
+}
+
+export async function getAccountSummary(): Promise<AccountSummary> {
+  const { data } = await api.get<AccountSummary>('/accounts/summary')
+  return data
+}
+
+export async function createAccount(request: FinancialAccountRequest): Promise<FinancialAccount> {
+  const { data } = await api.post<FinancialAccount>('/accounts', request)
+  return data
+}
+
+export async function updateAccount(
+  id: number,
+  request: FinancialAccountRequest,
+): Promise<FinancialAccount> {
+  const { data } = await api.put<FinancialAccount>(`/accounts/${id}`, request)
+  return data
+}
+
+export async function archiveAccount(id: number): Promise<void> {
+  await api.delete(`/accounts/${id}`)
+}
+
+export async function listAccountTransfers(): Promise<AccountTransfer[]> {
+  const { data } = await api.get<AccountTransfer[]>('/accounts/transfers')
+  return data
+}
+
+export async function createAccountTransfer(
+  request: AccountTransferRequest,
+): Promise<AccountTransfer> {
+  const { data } = await api.post<AccountTransfer>('/accounts/transfers', request)
+  return data
+}
+
+export async function assignLegacyTransactions(
+  accountId: number,
+  request: LegacyTransactionAssignmentRequest,
+): Promise<number> {
+  const { data } = await api.post<{ assignedCount: number }>(
+    `/accounts/${accountId}/assign-legacy-transactions`,
+    request,
+  )
+  return data.assignedCount
 }
 
 // Get monthly summary → GET /summary/month?year=&month=
@@ -317,6 +389,15 @@ export async function updateInstallmentPlan(
   return data
 }
 
+// Associate an installment plan with a balance account → PATCH /installment-plans/:id/account
+export async function assignInstallmentPlanAccount(
+  id: number,
+  accountId: number,
+): Promise<InstallmentPlan> {
+  const { data } = await api.patch<InstallmentPlan>(`/installment-plans/${id}/account`, { accountId })
+  return data
+}
+
 // Delete installment plan → DELETE /installment-plans/:id
 export async function deleteInstallmentPlan(id: number): Promise<void> {
   await api.delete(`/installment-plans/${id}`)
@@ -360,9 +441,76 @@ export async function updateRecurringTransaction(
   return data
 }
 
+// Associate a recurring rule with a balance account -> PATCH /recurring-transactions/:id/account
+export async function assignRecurringTransactionAccount(
+  id: number,
+  accountId: number,
+): Promise<RecurringTransaction> {
+  const { data } = await api.patch<RecurringTransaction>(`/recurring-transactions/${id}/account`, { accountId })
+  return data
+}
+
 // Cancel recurring transaction -> DELETE /recurring-transactions/:id
 export async function cancelRecurringTransaction(id: number): Promise<RecurringTransaction> {
   const { data } = await api.delete<RecurringTransaction>(`/recurring-transactions/${id}`)
+  return data
+}
+
+export async function listSavingsGoals(): Promise<SavingsGoal[]> {
+  const { data } = await api.get<SavingsGoal[]>('/goals')
+  return data
+}
+
+export async function createSavingsGoal(request: SavingsGoalRequest): Promise<SavingsGoal> {
+  const { data } = await api.post<SavingsGoal>('/goals', request)
+  return data
+}
+
+export async function updateSavingsGoal(
+  id: number,
+  request: SavingsGoalRequest,
+): Promise<SavingsGoal> {
+  const { data } = await api.put<SavingsGoal>(`/goals/${id}`, request)
+  return data
+}
+
+export async function contributeToSavingsGoal(
+  id: number,
+  amount: number,
+  note?: string,
+): Promise<SavingsGoal> {
+  const { data } = await api.post<SavingsGoal>(`/goals/${id}/contributions`, {
+    amount,
+    contributionDate: toDateParam(new Date()),
+    note,
+  })
+  return data
+}
+
+export async function archiveSavingsGoal(id: number): Promise<void> {
+  await api.delete(`/goals/${id}`)
+}
+
+export async function listCategoryBudgets(date: Date): Promise<CategoryBudget[]> {
+  const { data } = await api.get<CategoryBudget[]>('/planning/budgets', {
+    params: { year: date.getFullYear(), month: date.getMonth() + 1 },
+  })
+  return data
+}
+
+export async function upsertCategoryBudget(
+  request: CategoryBudgetRequest,
+): Promise<CategoryBudget> {
+  const { data } = await api.put<CategoryBudget>('/planning/budgets', request)
+  return data
+}
+
+export async function deleteCategoryBudget(id: number): Promise<void> {
+  await api.delete(`/planning/budgets/${id}`)
+}
+
+export async function getCashFlowForecast(): Promise<CashFlowForecast> {
+  const { data } = await api.get<CashFlowForecast>('/planning/forecast')
   return data
 }
 

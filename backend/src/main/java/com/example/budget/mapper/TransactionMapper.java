@@ -62,6 +62,9 @@ public class TransactionMapper {
                 t.getAmount(),
                 t.getPaymentMethod() != null ? t.getPaymentMethod().getId() : null,
                 t.getPaymentMethod() != null ? t.getPaymentMethod().getName() : null,
+                t.getAccount() != null ? t.getAccount().getId() : null,
+                t.getAccount() != null ? t.getAccount().getName() : null,
+                t.getStatus(),
                 t.getInstallmentPlan() != null ? t.getInstallmentPlan().getId() : null,
                 t.getRecurringTransaction() != null ? t.getRecurringTransaction().getId() : null,
                 t.getInstallmentNumber()
@@ -103,6 +106,7 @@ public class TransactionMapper {
         t.setCategory(req.getCategory());
         t.setDescription(req.getDescription());
         t.setAmount(req.getAmount());
+        t.setStatus(req.getStatus());
         t.setUser(user);
         return t;
     }
@@ -127,5 +131,6 @@ public class TransactionMapper {
         t.setCategory(req.getCategory());
         t.setDescription(req.getDescription());
         t.setAmount(req.getAmount());
+        t.setStatus(req.getStatus());
     }
 }

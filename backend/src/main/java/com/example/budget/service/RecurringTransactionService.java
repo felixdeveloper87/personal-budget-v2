@@ -4,6 +4,7 @@ import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.cache.CachedRecurringList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
+import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
@@ -11,6 +12,7 @@ import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.RecurringTransactionMapper;
+import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
@@ -35,6 +37,9 @@ public class RecurringTransactionService {
     private final RecurringTransactionRepository recurringTransactionRepository;
     private final TransactionRepository transactionRepository;
     private final RecurringTransactionMapper recurringTransactionMapper;
+    private final FinancialAccountService financialAccountService;
+    private final PaymentMethodService paymentMethodService;
+    private final CreditCardBillingService creditCardBillingService;
     private final CacheInvalidationService cacheInvalidation;
     private final Cache recurringListCache;
 
@@ -42,12 +47,18 @@ public class RecurringTransactionService {
             RecurringTransactionRepository recurringTransactionRepository,
             TransactionRepository transactionRepository,
             RecurringTransactionMapper recurringTransactionMapper,
+            FinancialAccountService financialAccountService,
+            PaymentMethodService paymentMethodService,
+            CreditCardBillingService creditCardBillingService,
             CacheInvalidationService cacheInvalidation,
             CacheManager cacheManager
     ) {
         this.recurringTransactionRepository = recurringTransactionRepository;
         this.transactionRepository = transactionRepository;
         this.recurringTransactionMapper = recurringTransactionMapper;
+        this.financialAccountService = financialAccountService;
+        this.paymentMethodService = paymentMethodService;
+        this.creditCardBillingService = creditCardBillingService;
         this.cacheInvalidation = cacheInvalidation;
         Cache recurring = cacheManager.getCache(RedisCacheConfig.RECURRING_LIST_CACHE);
         if (recurring == null) {
@@ -61,6 +72,8 @@ public class RecurringTransactionService {
         validateDateRange(request.getStartDate(), request.getEndDate());
 
         RecurringTransaction recurringTransaction = recurringTransactionMapper.toEntity(request, user);
+        recurringTransaction.setAccount(financialAccountService.getOwnedAccount(request.getAccountId(), user));
+        recurringTransaction.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
         recurringTransaction = recurringTransactionRepository.save(recurringTransaction);
         generateTransactionsForMonth(recurringTransaction, YearMonth.now());
         cacheInvalidation.evictRecurringList(user.getId());
@@ -140,6 +153,8 @@ public class RecurringTransactionService {
         recurringTransaction.setDayOfMonth(request.getDayOfMonth());
         recurringTransaction.setNextRunDate(firstFutureDueDate(request.getStartDate(), request.getDayOfMonth(), today));
         recurringTransaction.setActive(true);
+        recurringTransaction.setAccount(financialAccountService.getOwnedAccount(request.getAccountId(), user));
+        recurringTransaction.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
 
         LocalDate nextDueDate = recurringTransaction.getNextRunDate();
         List<Transaction> updatedTransactions = new ArrayList<>();
@@ -149,13 +164,23 @@ public class RecurringTransactionService {
             LocalDateTime nextDateTime = nextDueDate.atTime(12, 0);
             transaction.setDateTime(nextDateTime);
             transaction.setTransactionDate(nextDueDate);
-            transaction.setPaymentDate(nextDueDate);
             transaction.setAmount(request.getAmount());
             transaction.setType(recurringTransaction.getType());
             transaction.setCategory(recurringTransaction.getCategory());
             transaction.setDescription(recurringTransaction.getDescription());
+            transaction.setAccount(recurringTransaction.getAccount());
+            transaction.setPaymentMethod(recurringTransaction.getPaymentMethod());
+            LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
+                    nextDueDate,
+                    recurringTransaction.getPaymentMethod());
+            transaction.setPaymentDate(paymentDate);
+            if (paymentDate.isAfter(today)) {
+                transaction.setStatus(com.example.budget.model.TransactionStatus.PLANNED);
+            } else if (transaction.getStatus() != com.example.budget.model.TransactionStatus.RECONCILED) {
+                transaction.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
+            }
             updatedTransactions.add(transaction);
-            cacheInvalidation.evictMonthlySummary(user, nextDueDate);
+            cacheInvalidation.evictMonthlySummary(user, paymentDate);
 
             nextDueDate = nextMonthlyDate(nextDueDate, request.getDayOfMonth());
         }
@@ -168,6 +193,41 @@ public class RecurringTransactionService {
                 recurringTransactionRepository.save(recurringTransaction));
         cacheInvalidation.evictRecurringList(user.getId());
         cacheInvalidation.evictTransactionsList(user.getId());
+        return dto;
+    }
+
+    /**
+     * Associates a recurring rule with a balance account without changing amounts,
+     * dates or the schedule. The account is propagated to every transaction the rule
+     * has generated (past and future) so the account history and cash flow stay complete.
+     */
+    @Transactional
+    public RecurringTransactionDTO assignAccount(Long id, AssignAccountRequest request, User user) {
+        RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
+
+        FinancialAccount account = financialAccountService.getOwnedAccount(request.getAccountId(), user);
+        if (account == null) {
+            throw new EntityNotFoundException("FinancialAccount", request.getAccountId());
+        }
+        if (!account.isActive()) {
+            throw new IllegalArgumentException("Cannot associate with an archived account");
+        }
+
+        recurringTransaction.setAccount(account);
+
+        List<Transaction> linked = transactionRepository.findByRecurringTransactionId(recurringTransaction.getId());
+        for (Transaction transaction : linked) {
+            transaction.setAccount(account);
+        }
+        if (!linked.isEmpty()) {
+            transactionRepository.saveAll(linked);
+        }
+
+        RecurringTransactionDTO dto = recurringTransactionMapper.toDTO(
+                recurringTransactionRepository.save(recurringTransaction));
+        cacheInvalidation.evictRecurringList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        cacheInvalidation.evictMonthlySummariesWideWindow(user.getId());
         return dto;
     }
 
@@ -244,13 +304,21 @@ public class RecurringTransactionService {
         Transaction transaction = new Transaction();
         transaction.setDateTime(dueDate.atTime(12, 0));
         transaction.setTransactionDate(dueDate);
-        transaction.setPaymentDate(dueDate);
+        LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
+                dueDate,
+                recurringTransaction.getPaymentMethod());
+        transaction.setPaymentDate(paymentDate);
         transaction.setType(recurringTransaction.getType());
         transaction.setCategory(recurringTransaction.getCategory());
         transaction.setDescription(recurringTransaction.getDescription());
         transaction.setAmount(recurringTransaction.getAmount());
         transaction.setUser(recurringTransaction.getUser());
         transaction.setRecurringTransaction(recurringTransaction);
+        transaction.setAccount(recurringTransaction.getAccount());
+        transaction.setPaymentMethod(recurringTransaction.getPaymentMethod());
+        transaction.setStatus(paymentDate.isAfter(LocalDate.now())
+                ? com.example.budget.model.TransactionStatus.PLANNED
+                : com.example.budget.model.TransactionStatus.CLEARED);
 
         transactionRepository.save(transaction);
         cacheInvalidation.evictMonthlySummary(recurringTransaction.getUser(), transaction.getPaymentDate());

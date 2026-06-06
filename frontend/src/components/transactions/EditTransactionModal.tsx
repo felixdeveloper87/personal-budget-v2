@@ -3,13 +3,14 @@ import {
   Box,
   Button,
   Icon,
+  Select,
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
 import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
-import { listPaymentMethods, updateTransaction } from '../../api'
-import { PaymentMethod, Transaction } from '../../types'
+import { listAccounts, listPaymentMethods, updateTransaction } from '../../api'
+import { FinancialAccount, PaymentMethod, Transaction, TransactionStatus } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import { ToastService } from '../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../utils/dateTime'
@@ -18,6 +19,7 @@ import AmountInput from './TransactionForm/AmountInput'
 import CategorySelector from './TransactionForm/CategorySelector'
 import DescriptionInput from './TransactionForm/DescriptionInput'
 import PaymentMethodSelector from './TransactionForm/PaymentMethodSelector'
+import AccountSelector from './TransactionForm/AccountSelector'
 
 interface EditTransactionModalProps {
   isOpen: boolean
@@ -48,6 +50,9 @@ export default function EditTransactionModal({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
   const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null)
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [accountId, setAccountId] = useState<number | null>(null)
+  const [status, setStatus] = useState<TransactionStatus>('CLEARED')
 
   useEffect(() => {
     if (transaction) {
@@ -56,6 +61,8 @@ export default function EditTransactionModal({
       setDescription(transaction.description || '')
       setAmount(transaction.amount || 0)
       setPaymentMethodId(transaction.paymentMethodId ?? null)
+      setAccountId(transaction.accountId ?? null)
+      setStatus(transaction.status ?? 'CLEARED')
     }
   }, [transaction])
 
@@ -63,9 +70,12 @@ export default function EditTransactionModal({
     if (!user?.token || !isOpen) return
     let active = true
     setPaymentMethodsLoading(true)
-    listPaymentMethods()
-      .then((methods) => {
-        if (active) setPaymentMethods(methods)
+    Promise.all([listPaymentMethods(), listAccounts()])
+      .then(([methods, accountItems]) => {
+        if (active) {
+          setPaymentMethods(methods)
+          setAccounts(accountItems)
+        }
       })
       .catch((err) => {
         ToastService.apiError(err, {
@@ -83,6 +93,13 @@ export default function EditTransactionModal({
 
   const handleSubmit = useCallback(async () => {
     if (!user?.token || !transaction?.id || loading) return
+    if (!accountId) {
+      ToastService.warning({
+        title: 'Select an account',
+        dedupeKey: 'edit-transaction-account-required',
+      })
+      return
+    }
 
     setLoading(true)
     try {
@@ -94,6 +111,8 @@ export default function EditTransactionModal({
         description,
         amount: Number(amount),
         paymentMethodId,
+        accountId,
+        status,
       }
 
       await updateTransaction(transaction.id, updatedTx)
@@ -121,6 +140,8 @@ export default function EditTransactionModal({
     description,
     amount,
     paymentMethodId,
+    accountId,
+    status,
     transaction,
     user?.token,
     onClose,
@@ -149,6 +170,12 @@ export default function EditTransactionModal({
       <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
         <VStack spacing={6} align="stretch" w="full">
           <DateSelector date={date} onChange={setDate} />
+          <AccountSelector
+            value={accountId}
+            onChange={setAccountId}
+            accounts={accounts}
+            loading={paymentMethodsLoading}
+          />
           {type === 'EXPENSE' && (
             <PaymentMethodSelector
               value={paymentMethodId}
@@ -165,6 +192,20 @@ export default function EditTransactionModal({
             type={type}
             loading={loading}
           />
+          <Box>
+            <Box as="label" display="block" fontSize="sm" fontWeight={700} mb={2}>
+              Status
+            </Box>
+            <Select
+              value={status}
+              onChange={(event) => setStatus(event.target.value as TransactionStatus)}
+            >
+              <option value="PLANNED">Planned</option>
+              <option value="PENDING">Pending</option>
+              <option value="CLEARED">Cleared</option>
+              <option value="RECONCILED">Reconciled</option>
+            </Select>
+          </Box>
 
           <Button
             size="lg"
@@ -189,6 +230,7 @@ export default function EditTransactionModal({
             leftIcon={<Icon as={isIncome ? TrendingUp : TrendingDown} boxSize={4} />}
             onClick={handleSubmit}
             isLoading={loading}
+            isDisabled={!accountId}
             loadingText="Updating…"
             _hover={{
               bgPosition: '100% 50%',

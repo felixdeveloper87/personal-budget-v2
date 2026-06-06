@@ -18,6 +18,10 @@ public class UpdateInstallmentPlanRequest {
 
     private LocalDateTime startDateTime;
 
+    private Long accountId;
+
+    private Long paymentMethodId;
+
     public UpdateInstallmentPlanRequest() {
     }
 
@@ -57,5 +61,21 @@ public class UpdateInstallmentPlanRequest {
 
     public LocalDateTime getStartDateTime() {
         return startDateTime;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public Long getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(Long paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 }

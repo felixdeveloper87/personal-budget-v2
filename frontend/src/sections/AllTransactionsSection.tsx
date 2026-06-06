@@ -14,8 +14,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { Calendar, Download, Filter, List, ReceiptText, Upload } from '../components/ui/icons'
-import { downloadBlob } from '../utils/csv'
-import { exportTransactionsCsv } from '../api'
+import { exportAllData } from '../utils/export'
 import { ToastService } from '../services/toast'
 
 interface AllTransactionsSectionProps {
@@ -41,9 +40,12 @@ export default function AllTransactionsSection({
     }
     setExporting(true)
     try {
-      const blob = await exportTransactionsCsv()
-      const stamp = new Date().toISOString().slice(0, 10)
-      downloadBlob(`transactions-${stamp}.csv`, blob)
+      await exportAllData()
+      ToastService.success({
+        title: 'Export ready',
+        description: 'Transactions, installments and fixed payments downloaded.',
+        dedupeKey: 'csv-export-done',
+      })
     } catch (err) {
       ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
     } finally {

@@ -4,12 +4,14 @@ import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.cache.CachedInstallmentPlanList;
 import com.example.budget.cache.RedisCacheSafety;
 import com.example.budget.config.RedisCacheConfig;
+import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateInstallmentPlanRequest;
 import com.example.budget.dto.InstallmentPlanDTO;
 import com.example.budget.dto.UpdateInstallmentPlanRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.InstallmentPlanMapper;
+import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.InstallmentPlan;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
@@ -43,17 +45,26 @@ public class InstallmentPlanService {
     private final InstallmentPlanRepository installmentPlanRepository;
     private final TransactionRepository transactionRepository;
     private final InstallmentPlanMapper installmentPlanMapper;
+    private final FinancialAccountService financialAccountService;
+    private final PaymentMethodService paymentMethodService;
+    private final CreditCardBillingService creditCardBillingService;
     private final CacheInvalidationService cacheInvalidation;
     private final Cache installmentPlansListCache;
 
     public InstallmentPlanService(InstallmentPlanRepository installmentPlanRepository,
                                   TransactionRepository transactionRepository,
                                   InstallmentPlanMapper installmentPlanMapper,
+                                  FinancialAccountService financialAccountService,
+                                  PaymentMethodService paymentMethodService,
+                                  CreditCardBillingService creditCardBillingService,
                                   CacheInvalidationService cacheInvalidation,
                                   CacheManager cacheManager) {
         this.installmentPlanRepository = installmentPlanRepository;
         this.transactionRepository = transactionRepository;
         this.installmentPlanMapper = installmentPlanMapper;
+        this.financialAccountService = financialAccountService;
+        this.paymentMethodService = paymentMethodService;
+        this.creditCardBillingService = creditCardBillingService;
         this.cacheInvalidation = cacheInvalidation;
         Cache plansCache = cacheManager.getCache(RedisCacheConfig.INSTALLMENT_PLANS_LIST_CACHE);
         if (plansCache == null) {
@@ -77,9 +88,14 @@ public class InstallmentPlanService {
     @Transactional
     public InstallmentPlanDTO createInstallmentPlan(CreateInstallmentPlanRequest request, User user) {
         InstallmentPlan plan = installmentPlanMapper.toEntity(request, user);
+        plan.setAccount(financialAccountService.getOwnedAccount(request.getAccountId(), user));
+        plan.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
         plan = installmentPlanRepository.save(plan);
 
         List<Transaction> transactions = installmentPlanMapper.createTransactionsFromPlan(plan, request);
+        for (Transaction transaction : transactions) {
+            applyPaymentSchedule(transaction, plan);
+        }
         transactionRepository.saveAll(transactions);
         plan.setTransactions(transactions);
 
@@ -155,6 +171,8 @@ public class InstallmentPlanService {
 
         plan.setInstallmentValue(installmentValue);
         plan.setTotalAmount(totalAmount);
+        plan.setAccount(financialAccountService.getOwnedAccount(request.getAccountId(), user));
+        plan.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
 
         LocalDateTime baseDateTime = determineBaseDateTime(request);
         List<Transaction> transactions = plan.getTransactions().stream()
@@ -168,13 +186,51 @@ public class InstallmentPlanService {
             transaction.setAmount(resolveTransactionAmount(index, transactions.size(), installmentValue, totalAmount, request.getTotalAmount() != null));
             transaction.setDateTime(installmentDateTime);
             transaction.setTransactionDate(installmentDateTime.toLocalDate());
-            transaction.setPaymentDate(installmentDateTime.toLocalDate());
+            transaction.setAccount(plan.getAccount());
+            transaction.setPaymentMethod(plan.getPaymentMethod());
+            applyPaymentSchedule(transaction, plan);
         }
 
         InstallmentPlan saved = installmentPlanRepository.save(plan);
         cacheInvalidation.evictInstallmentPlansList(user.getId());
         cacheInvalidation.evictTransactionsList(user.getId());
         previousPaymentDates.forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        saved.getTransactions().stream()
+                .map(Transaction::getPaymentDate)
+                .filter(Objects::nonNull)
+                .forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        return installmentPlanMapper.toDTO(saved);
+    }
+
+    /**
+     * Associates an installment plan with a balance account without recalculating
+     * amounts, dates or the payment schedule. The account is propagated to every
+     * transaction generated by the plan so the account history stays complete.
+     */
+    @Transactional
+    public InstallmentPlanDTO assignAccount(Long id, AssignAccountRequest request, User user) {
+        InstallmentPlan plan = installmentPlanRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("InstallmentPlan", id));
+        validateUserOwnership(plan, user);
+
+        FinancialAccount account = financialAccountService.getOwnedAccount(request.getAccountId(), user);
+        if (account == null) {
+            throw new EntityNotFoundException("FinancialAccount", request.getAccountId());
+        }
+        if (!account.isActive()) {
+            throw new IllegalArgumentException("Cannot associate with an archived account");
+        }
+
+        plan.setAccount(account);
+        for (Transaction transaction : plan.getTransactions()) {
+            transaction.setAccount(account);
+        }
+
+        InstallmentPlan saved = installmentPlanRepository.save(plan);
+        transactionRepository.saveAll(saved.getTransactions());
+
+        cacheInvalidation.evictInstallmentPlansList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
         saved.getTransactions().stream()
                 .map(Transaction::getPaymentDate)
                 .filter(Objects::nonNull)
@@ -250,5 +306,17 @@ public class InstallmentPlanService {
             return installmentValue;
         }
         return totalAmount.subtract(installmentValue.multiply(BigDecimal.valueOf(transactionCount - 1)));
+    }
+
+    private void applyPaymentSchedule(Transaction transaction, InstallmentPlan plan) {
+        LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
+                transaction.getTransactionDate(),
+                plan.getPaymentMethod());
+        transaction.setPaymentDate(paymentDate);
+        if (paymentDate.isAfter(LocalDate.now())) {
+            transaction.setStatus(com.example.budget.model.TransactionStatus.PLANNED);
+        } else if (transaction.getStatus() != com.example.budget.model.TransactionStatus.RECONCILED) {
+            transaction.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
+        }
     }
 }

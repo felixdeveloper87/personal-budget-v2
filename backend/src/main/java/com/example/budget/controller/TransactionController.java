@@ -84,7 +84,7 @@ public class TransactionController {
             @Valid @RequestBody ImportTransactionsRequest request,
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return service.importTransactions(request.getRows(), user);
+        return service.importTransactions(request.getRows(), request.getAccountId(), user);
     }
 
     /**

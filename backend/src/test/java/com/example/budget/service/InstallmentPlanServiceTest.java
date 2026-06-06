@@ -56,6 +56,10 @@ class InstallmentPlanServiceTest {
     private CacheManager cacheManager;
     @Mock
     private Cache installmentPlansListCache;
+    @Mock
+    private FinancialAccountService financialAccountService;
+    @Mock
+    private PaymentMethodService paymentMethodService;
 
     private final InstallmentPlanMapper installmentPlanMapper = new InstallmentPlanMapper();
 
@@ -72,6 +76,9 @@ class InstallmentPlanServiceTest {
                 installmentPlanRepository,
                 transactionRepository,
                 installmentPlanMapper,
+                financialAccountService,
+                paymentMethodService,
+                new CreditCardBillingService(),
                 cacheInvalidation,
                 cacheManager);
 

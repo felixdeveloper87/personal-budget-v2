@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,9 @@ public class TransactionDTO {
     private BigDecimal amount;
     private Long paymentMethodId;
     private String paymentMethodName;
+    private Long accountId;
+    private String accountName;
+    private TransactionStatus status;
     private Long installmentPlanId;
     private Long recurringTransactionId;
     private Integer installmentNumber;
@@ -31,6 +35,9 @@ public class TransactionDTO {
             BigDecimal amount,
             Long paymentMethodId,
             String paymentMethodName,
+            Long accountId,
+            String accountName,
+            TransactionStatus status,
             Long installmentPlanId,
             Long recurringTransactionId,
             Integer installmentNumber
@@ -45,6 +52,9 @@ public class TransactionDTO {
         this.amount = amount;
         this.paymentMethodId = paymentMethodId;
         this.paymentMethodName = paymentMethodName;
+        this.accountId = accountId;
+        this.accountName = accountName;
+        this.status = status;
         this.installmentPlanId = installmentPlanId;
         this.recurringTransactionId = recurringTransactionId;
         this.installmentNumber = installmentNumber;
@@ -60,6 +70,9 @@ public class TransactionDTO {
     public BigDecimal getAmount() { return amount; }
     public Long getPaymentMethodId() { return paymentMethodId; }
     public String getPaymentMethodName() { return paymentMethodName; }
+    public Long getAccountId() { return accountId; }
+    public String getAccountName() { return accountName; }
+    public TransactionStatus getStatus() { return status; }
     public Long getInstallmentPlanId() { return installmentPlanId; }
     public Long getRecurringTransactionId() { return recurringTransactionId; }
     public Integer getInstallmentNumber() { return installmentNumber; }

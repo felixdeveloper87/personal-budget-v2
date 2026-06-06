@@ -1,5 +1,6 @@
 package com.example.budget.controller;
 
+import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
@@ -67,6 +68,20 @@ public class RecurringTransactionController {
     ) {
         User user = (User) authentication.getPrincipal();
         return recurringTransactionService.update(id, request, user);
+    }
+
+    /**
+     * Associates a recurring rule with a balance account without recalculating its
+     * schedule. The account is propagated to all generated transactions.
+     */
+    @PatchMapping("/{id}/account")
+    public RecurringTransactionDTO assignAccount(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignAccountRequest request,
+            Authentication authentication
+    ) {
+        User user = (User) authentication.getPrincipal();
+        return recurringTransactionService.assignAccount(id, request, user);
     }
 
     @DeleteMapping("/{id}")

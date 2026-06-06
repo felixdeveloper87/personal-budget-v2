@@ -27,7 +27,7 @@ export default function PaymentMethodSelector({
   return (
     <FormControl>
       <FormLabel fontSize="sm" fontWeight={700}>
-        Payment method
+        Payment method (how you paid)
       </FormLabel>
       <Box
         border="1px solid"
@@ -73,6 +73,11 @@ export default function PaymentMethodSelector({
         {selected?.type === 'CREDIT_CARD' && (
           <Text mt={2} fontSize="xs" color={captionColor}>
             Closes on day {selected.statementClosingDay} · paid on day {selected.paymentDay}
+          </Text>
+        )}
+        {!selected && (
+          <Text mt={2} fontSize="xs" color={captionColor}>
+            Optional. The balance account above is still required.
           </Text>
         )}
       </Box>

@@ -18,6 +18,10 @@ public class RecurringTransactionDTO {
     private LocalDate nextRunDate;
     private Integer dayOfMonth;
     private boolean active;
+    private Long accountId;
+    private String accountName;
+    private Long paymentMethodId;
+    private String paymentMethodName;
 
     public RecurringTransactionDTO() {
     }
@@ -33,7 +37,11 @@ public class RecurringTransactionDTO {
             LocalDate endDate,
             LocalDate nextRunDate,
             Integer dayOfMonth,
-            boolean active
+            boolean active,
+            Long accountId,
+            String accountName,
+            Long paymentMethodId,
+            String paymentMethodName
     ) {
         this.id = id;
         this.type = type;
@@ -46,6 +54,10 @@ public class RecurringTransactionDTO {
         this.nextRunDate = nextRunDate;
         this.dayOfMonth = dayOfMonth;
         this.active = active;
+        this.accountId = accountId;
+        this.accountName = accountName;
+        this.paymentMethodId = paymentMethodId;
+        this.paymentMethodName = paymentMethodName;
     }
 
     public Long getId() {
@@ -91,6 +103,11 @@ public class RecurringTransactionDTO {
     public boolean isActive() {
         return active;
     }
+
+    public Long getAccountId() { return accountId; }
+    public String getAccountName() { return accountName; }
+    public Long getPaymentMethodId() { return paymentMethodId; }
+    public String getPaymentMethodName() { return paymentMethodName; }
 
     public void setId(Long id) {
         this.id = id;

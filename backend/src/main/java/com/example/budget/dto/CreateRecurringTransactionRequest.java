@@ -34,6 +34,11 @@ public class CreateRecurringTransactionRequest {
     @Max(value = 31, message = "Day of month must be between 1 and 31")
     private Integer dayOfMonth;
 
+    @NotNull(message = "Account is required")
+    private Long accountId;
+
+    private Long paymentMethodId;
+
     public CreateRecurringTransactionRequest() {
     }
 
@@ -91,5 +96,21 @@ public class CreateRecurringTransactionRequest {
 
     public void setDayOfMonth(Integer dayOfMonth) {
         this.dayOfMonth = dayOfMonth;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public Long getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(Long paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 }

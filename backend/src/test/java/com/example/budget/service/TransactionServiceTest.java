@@ -49,6 +49,8 @@ class TransactionServiceTest {
     @Mock
     private PaymentMethodService paymentMethodService;
     @Mock
+    private FinancialAccountService financialAccountService;
+    @Mock
     private Cache monthlySummaryCache;
     @Mock
     private Cache transactionsListCache;
@@ -67,6 +69,7 @@ class TransactionServiceTest {
         transactionService = new TransactionService(
                 repository,
                 paymentMethodService,
+                financialAccountService,
                 new CreditCardBillingService(),
                 new TransactionMapper(),
                 cacheManager,

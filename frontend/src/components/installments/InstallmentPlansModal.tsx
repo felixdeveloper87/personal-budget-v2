@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Badge,
   Box,
+  Button,
   Collapse,
   HStack,
   Icon,
@@ -10,13 +11,15 @@ import {
   Switch,
   Text,
   useColorModeValue,
+  useDisclosure,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
+import { ArrowRight, ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { InstallmentPlan } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
+import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean
@@ -81,7 +84,31 @@ export default function InstallmentPlansModal({
     return { activePlans: active, pastPlans: past, activeTotal: activeAmount, remainingTotal: remaining, paidTotal: paid }
   }, [plans])
 
+  const wizard = useDisclosure()
+  const assignmentItems = useMemo<AssignableItem[]>(
+    () =>
+      activePlans
+        .filter((plan) => !plan.accountId)
+        .map((plan) => {
+          const first = plan.transactions[0]
+          return {
+            id: plan.id,
+            title: first?.description?.replace(/ \(Parcela.*\)/, '') || 'Installment plan',
+            subtitle: first?.category,
+            amountLabel: `${formatCurrency(plan.installmentValue)} per installment`,
+            metaLabel: `${plan.totalInstallments} months`,
+          }
+        }),
+    [activePlans],
+  )
+
+  const bannerBg = useColorModeValue('orange.50', 'rgba(249,115,22,0.14)')
+  const bannerBorder = useColorModeValue('orange.200', 'rgba(249,115,22,0.35)')
+  const bannerTitle = useColorModeValue('orange.800', 'orange.200')
+  const bannerText = useColorModeValue('orange.700', 'orange.300')
+
   return (
+    <>
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
@@ -138,6 +165,51 @@ export default function InstallmentPlansModal({
           </Box>
         ) : (
           <VStack spacing={6} align="stretch">
+            {assignmentItems.length > 0 && (
+              <HStack
+                bg={bannerBg}
+                border="1px solid"
+                borderColor={bannerBorder}
+                borderRadius="xl"
+                p={{ base: 3, md: 4 }}
+                justify="space-between"
+                align={{ base: 'flex-start', sm: 'center' }}
+                spacing={4}
+                flexWrap="wrap"
+              >
+                <HStack spacing={3} align="flex-start" minW={0}>
+                  <Box
+                    w={9}
+                    h={9}
+                    borderRadius="lg"
+                    bg="whiteAlpha.500"
+                    color={bannerTitle}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                  >
+                    <Icon as={Wallet} boxSize={5} weight="duotone" />
+                  </Box>
+                  <VStack align="flex-start" spacing={0} minW={0}>
+                    <Text fontWeight={800} color={bannerTitle}>
+                      {assignmentItems.length} active plan{assignmentItems.length === 1 ? '' : 's'} without an account
+                    </Text>
+                    <Text fontSize="sm" color={bannerText}>
+                      Associate each one with a current account so its installments move the balance.
+                    </Text>
+                  </VStack>
+                </HStack>
+                <Button
+                  colorScheme="orange"
+                  rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+                  onClick={wizard.onOpen}
+                  flexShrink={0}
+                >
+                  Associate now
+                </Button>
+              </HStack>
+            )}
             <Box
               bg={heroBg}
               color="white"
@@ -261,6 +333,15 @@ export default function InstallmentPlansModal({
         )}
       </Box>
     </PremiumModal>
+
+    <AccountAssignmentWizard
+      isOpen={wizard.isOpen}
+      onClose={wizard.onClose}
+      kind="installment"
+      items={assignmentItems}
+      onAssigned={onPlanDeleted}
+    />
+    </>
   )
 }
 

@@ -24,6 +24,19 @@ export function downloadCsv(filename: string, content: string): void {
   downloadBlob(filename, new Blob(['﻿', content], { type: 'text/csv;charset=utf-8;' }))
 }
 
+type CsvValue = string | number | boolean | null | undefined
+
+/** Escape a single CSV cell, quoting when it contains commas, quotes or newlines. */
+function csvCell(value: CsvValue): string {
+  const s = value === null || value === undefined ? '' : String(value)
+  return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+}
+
+/** Build a CSV string (CRLF line endings) from a header row and data rows. */
+export function buildCsv(headers: string[], rows: CsvValue[][]): string {
+  return [headers.map(csvCell).join(','), ...rows.map((r) => r.map(csvCell).join(','))].join('\r\n')
+}
+
 /** Parse one CSV line into cells, honoring quoted fields with embedded commas/quotes. */
 function parseCsvLine(line: string): string[] {
   const cells: string[] = []

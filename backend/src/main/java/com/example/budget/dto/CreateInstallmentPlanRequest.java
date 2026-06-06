@@ -35,6 +35,11 @@ public class CreateInstallmentPlanRequest {
 
     private LocalDateTime startDateTime;
 
+    @NotNull(message = "Account is required")
+    private Long accountId;
+
+    private Long paymentMethodId;
+
     public CreateInstallmentPlanRequest() {
     }
 
@@ -76,6 +81,22 @@ public class CreateInstallmentPlanRequest {
 
     public LocalDateTime getStartDateTime() {
         return startDateTime;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public Long getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(Long paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 }
 

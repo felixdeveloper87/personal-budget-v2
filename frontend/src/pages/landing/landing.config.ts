@@ -206,7 +206,7 @@ export const FAQS: ReadonlyArray<LandingFaq> = [
   {
     question: 'Does it work on my phone?',
     answer:
-      'It’s designed for the phone first. The web app installs as a PWA and behaves like a native app on iOS and Android.',
+      'Yes. The responsive web interface is designed for phones, tablets and desktop browsers.',
   },
   {
     question: 'Will you add more features?',

@@ -194,10 +194,14 @@ export default function PaymentMethodsSection() {
         <VStack spacing={4} align="stretch">
           <SectionHeader
             icon={CreditCard}
-            title="Payment methods"
+            title="Cards & payment methods"
             caption={`${paymentMethods.length} method${paymentMethods.length !== 1 ? 's' : ''} · ${activeCards} active credit card${activeCards !== 1 ? 's' : ''}`}
             accent="blue"
           />
+          <Text fontSize="xs" color={mutedColor}>
+            Payment methods describe how you pay. Credit cards here store statement dates;
+            their balance or debt is tracked separately under Accounts.
+          </Text>
 
           {/* Methods list */}
           <VStack spacing={2} align="stretch">

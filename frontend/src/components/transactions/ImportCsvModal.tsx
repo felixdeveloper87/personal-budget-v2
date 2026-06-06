@@ -1,10 +1,13 @@
-import React, { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Box,
   Button,
   HStack,
   Icon,
   Progress,
+  FormControl,
+  FormLabel,
+  Select,
   Table,
   TableContainer,
   Tbody,
@@ -24,7 +27,8 @@ import {
   CSV_HEADERS,
   type CsvParseResult,
 } from '../../utils/csv'
-import { importTransactions } from '../../api'
+import { importTransactions, listAccounts } from '../../api'
+import { FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
 
 interface ImportCsvModalProps {
@@ -42,6 +46,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   const [result, setResult] = useState<CsvParseResult | null>(null)
   const [importing, setImporting] = useState(false)
   const [dragOver, setDragOver] = useState(false)
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [accountId, setAccountId] = useState<number | null>(null)
 
   const dropBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const dropActiveBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
@@ -59,6 +65,20 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   const linkColor = useColorModeValue('blue.600', 'blue.300')
   const cellColor = useColorModeValue('gray.700', 'gray.200')
 
+  useEffect(() => {
+    if (!isOpen) return
+    listAccounts()
+      .then((items) => {
+        setAccounts(items)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load accounts',
+          dedupeKey: 'csv-accounts-load-failed',
+        })
+      })
+  }, [isOpen])
+
   const reset = useCallback(() => {
     setFileName(null)
     setResult(null)
@@ -73,11 +93,31 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   }, [importing, reset, onClose])
 
   const readFile = useCallback((file: File) => {
-    setFileName(file.name)
     const reader = new FileReader()
     reader.onload = () => {
       const text = typeof reader.result === 'string' ? reader.result : ''
-      setResult(parseTransactionsCsv(text))
+      const firstLine = text.replace(/^﻿/, '').split(/\r\n|\n|\r/)[0] ?? ''
+      // Match whole header cells (not substrings) so "First Date"/"Total Amount" from the
+      // installments/fixed-payments exports are not mistaken for the transactions header.
+      const headerCells = firstLine.split(',').map((cell) => cell.trim().toLowerCase())
+      const looksLikeTransactions = headerCells.includes('date') && headerCells.includes('amount')
+      const parsed = parseTransactionsCsv(text)
+
+      // A transactions CSV always has Date + Amount headers. The installments and
+      // fixed-payments exports start with "Description" and can't be imported here.
+      if (!looksLikeTransactions && parsed.rows.length === 0) {
+        ToastService.error({
+          title: 'Wrong file format',
+          description: 'This looks like an installments or fixed-payments export. Import the transactions CSV (transactions-*.csv) instead.',
+          dedupeKey: 'csv-wrong-format',
+        })
+        setFileName(null)
+        setResult(null)
+        return
+      }
+
+      setFileName(file.name)
+      setResult(parsed)
     }
     reader.onerror = () => {
       ToastService.error({ title: 'Could not read file', dedupeKey: 'csv-read-failed' })
@@ -118,6 +158,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
           amount: r.amount,
           paymentMethodName: r.paymentMethodName || undefined,
         })),
+        accountId,
       )
 
       if (outcome.imported > 0) {
@@ -180,6 +221,23 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       }
     >
       <VStack align="stretch" spacing={4} px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }}>
+        <FormControl>
+          <FormLabel fontSize="sm">Import into account (optional)</FormLabel>
+          <Select
+            value={accountId ?? ''}
+            onChange={(event) => setAccountId(event.target.value ? Number(event.target.value) : null)}
+            placeholder="No account — associate later"
+          >
+            {accounts.filter((account) => account.active).map((account) => (
+              <option key={account.id} value={account.id}>{account.name}</option>
+            ))}
+          </Select>
+          <Text fontSize="xs" color={subColor} mt={1}>
+            Leave empty to import without an account. You can associate these transactions
+            to an account afterwards.
+          </Text>
+        </FormControl>
+
         {/* Drop zone */}
         <Box
           as="button"

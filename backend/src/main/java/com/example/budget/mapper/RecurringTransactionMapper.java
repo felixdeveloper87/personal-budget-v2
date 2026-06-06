@@ -46,7 +46,11 @@ public class RecurringTransactionMapper {
                 recurringTransaction.getEndDate(),
                 recurringTransaction.getNextRunDate(),
                 recurringTransaction.getDayOfMonth(),
-                recurringTransaction.isActive()
+                recurringTransaction.isActive(),
+                recurringTransaction.getAccount() != null ? recurringTransaction.getAccount().getId() : null,
+                recurringTransaction.getAccount() != null ? recurringTransaction.getAccount().getName() : null,
+                recurringTransaction.getPaymentMethod() != null ? recurringTransaction.getPaymentMethod().getId() : null,
+                recurringTransaction.getPaymentMethod() != null ? recurringTransaction.getPaymentMethod().getName() : null
         );
     }
 

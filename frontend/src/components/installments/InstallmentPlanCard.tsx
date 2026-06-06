@@ -24,6 +24,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Select,
   SimpleGrid,
   Text,
   Tooltip,
@@ -32,8 +33,13 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { AlertTriangle, Calendar, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Pencil, Trash2 } from '../ui/icons'
-import { InstallmentPlan } from '../../types'
-import { deleteInstallmentPlan, updateInstallmentPlan } from '../../api'
+import { FinancialAccount, InstallmentPlan, PaymentMethod } from '../../types'
+import {
+  deleteInstallmentPlan,
+  listAccounts,
+  listPaymentMethods,
+  updateInstallmentPlan,
+} from '../../api'
 import { ToastService } from '../../services/toast'
 
 interface InstallmentPlanCardProps {
@@ -90,6 +96,10 @@ export default function InstallmentPlanCard({
   const [draftInstallmentValue, setDraftInstallmentValue] = useState(String(plan.installmentValue))
   const [draftTotalAmount, setDraftTotalAmount] = useState(String(plan.totalAmount))
   const [draftStartDate, setDraftStartDate] = useState(getPlanStartDate(plan))
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [draftAccountId, setDraftAccountId] = useState<number | null>(plan.accountId ?? null)
+  const [draftPaymentMethodId, setDraftPaymentMethodId] = useState<number | null>(plan.paymentMethodId ?? null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const editDisclosure = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
@@ -150,7 +160,24 @@ export default function InstallmentPlanCard({
     setDraftInstallmentValue(String(plan.installmentValue))
     setDraftTotalAmount(String(plan.totalAmount))
     setDraftStartDate(getPlanStartDate(plan))
+    setDraftAccountId(plan.accountId ?? null)
+    setDraftPaymentMethodId(plan.paymentMethodId ?? null)
   }, [plan])
+
+  useEffect(() => {
+    if (!editDisclosure.isOpen) return
+    Promise.all([listAccounts(), listPaymentMethods()])
+      .then(([accountItems, methodItems]) => {
+        setAccounts(accountItems)
+        setPaymentMethods(methodItems)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load account options',
+          dedupeKey: `installment-options-load-failed:${plan.id}`,
+        })
+      })
+  }, [editDisclosure.isOpen, plan.id])
 
   const firstTransaction = plan.transactions[0]
 
@@ -189,7 +216,7 @@ export default function InstallmentPlanCard({
   const handleSavePlan = async () => {
     const nextValue = Number(draftInstallmentValue)
     const nextTotal = Number(draftTotalAmount)
-    if (nextTotal <= 0 || Number.isNaN(nextTotal) || nextValue <= 0 || Number.isNaN(nextValue) || !draftStartDate) {
+    if (nextTotal <= 0 || Number.isNaN(nextTotal) || nextValue <= 0 || Number.isNaN(nextValue) || !draftStartDate || !draftAccountId) {
       ToastService.warning({
         title: 'Enter a valid total, installment amount and date',
         duration: 2500,
@@ -204,6 +231,8 @@ export default function InstallmentPlanCard({
         installmentValue: nextValue,
         totalAmount: nextTotal,
         startDate: draftStartDate,
+        accountId: draftAccountId,
+        paymentMethodId: draftPaymentMethodId,
       })
       ToastService.success({
         title: 'Installment plan updated',
@@ -289,7 +318,7 @@ export default function InstallmentPlanCard({
                     {firstTransaction?.description?.replace(/ \(Parcela.*\)/, '') || 'Installment plan'}
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1}>
-                    {firstTransaction?.category}
+                    {firstTransaction?.category}{plan.accountName ? ` · ${plan.accountName}` : ' · Account not linked'}
                   </Text>
                 </VStack>
               </HStack>
@@ -524,6 +553,36 @@ export default function InstallmentPlanCard({
             <VStack align="stretch" spacing={4}>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
+                  Account
+                </FormLabel>
+                <Select
+                  size="sm"
+                  value={draftAccountId ?? ''}
+                  onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
+                  placeholder="Select account"
+                >
+                  {accounts.filter((account) => account.active).map((account) => (
+                    <option key={account.id} value={account.id}>{account.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
+                  Payment method
+                </FormLabel>
+                <Select
+                  size="sm"
+                  value={draftPaymentMethodId ?? ''}
+                  onChange={(event) => setDraftPaymentMethodId(event.target.value ? Number(event.target.value) : null)}
+                >
+                  <option value="">No payment method</option>
+                  {paymentMethods.filter((method) => method.active).map((method) => (
+                    <option key={method.id} value={method.id}>{method.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl>
+                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
                   First installment date
                 </FormLabel>
                 <Input
@@ -565,7 +624,7 @@ export default function InstallmentPlanCard({
             <Button variant="ghost" fontSize="sm" color={captionColor} onClick={editDisclosure.onClose}>
               Cancel
             </Button>
-            <Button colorScheme="teal" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan}>
+            <Button colorScheme="teal" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
               Save changes
             </Button>
           </ModalFooter>

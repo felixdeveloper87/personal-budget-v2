@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 public class TransactionService {
     private final TransactionRepository repository;
     private final PaymentMethodService paymentMethodService;
+    private final FinancialAccountService financialAccountService;
     private final CreditCardBillingService creditCardBillingService;
     private final TransactionMapper transactionMapper;
     private final Cache monthlySummaryCache;
@@ -56,12 +57,14 @@ public class TransactionService {
     public TransactionService(
             TransactionRepository repository,
             PaymentMethodService paymentMethodService,
+            FinancialAccountService financialAccountService,
             CreditCardBillingService creditCardBillingService,
             TransactionMapper transactionMapper,
             CacheManager cacheManager,
             CacheInvalidationService cacheInvalidation) {
         this.repository = repository;
         this.paymentMethodService = paymentMethodService;
+        this.financialAccountService = financialAccountService;
         this.creditCardBillingService = creditCardBillingService;
         this.transactionMapper = transactionMapper;
         this.cacheInvalidation = cacheInvalidation;
@@ -117,8 +120,10 @@ public class TransactionService {
 
     public Transaction create(CreateTransactionRequest request, User user) {
         PaymentMethod paymentMethod = paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user);
+        var account = financialAccountService.getOwnedAccount(request.getAccountId(), user);
         Transaction transaction = transactionMapper.toEntity(request, user);
         transaction.setPaymentMethod(paymentMethod);
+        transaction.setAccount(account);
         prepareDates(transaction, paymentMethod);
         Transaction saved = repository.save(transaction);
         cacheInvalidation.evictMonthlySummary(user, saved.getPaymentDate());
@@ -141,6 +146,12 @@ public class TransactionService {
      */
     @Transactional
     public ImportResultDTO importTransactions(List<ImportTransactionRow> rows, User user) {
+        return importTransactions(rows, null, user);
+    }
+
+    @Transactional
+    public ImportResultDTO importTransactions(List<ImportTransactionRow> rows, Long accountId, User user) {
+        var account = financialAccountService.getOwnedAccount(accountId, user);
         Map<String, PaymentMethod> methodsByName = new HashMap<>();
         for (PaymentMethod m : paymentMethodService.findEntitiesByUser(user)) {
             if (StringUtils.hasText(m.getName())) {
@@ -180,6 +191,8 @@ public class TransactionService {
                 t.setDescription(row.getDescription() != null ? row.getDescription().trim() : "");
                 t.setAmount(row.getAmount().abs());
                 t.setPaymentMethod(paymentMethod);
+                t.setAccount(account);
+                t.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
                 prepareDates(t, paymentMethod);
 
                 toSave.add(t);
@@ -295,9 +308,11 @@ public class TransactionService {
 
         LocalDate previousPaymentDate = transaction.getPaymentDate();
         PaymentMethod paymentMethod = paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user);
+        var account = financialAccountService.getOwnedAccount(request.getAccountId(), user);
 
         transactionMapper.updateTransaction(transaction, request);
         transaction.setPaymentMethod(paymentMethod);
+        transaction.setAccount(account);
         prepareDates(transaction, paymentMethod);
 
         Transaction saved = repository.save(transaction);

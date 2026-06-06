@@ -3,6 +3,9 @@ package com.example.budget.repository;
 import com.example.budget.model.InstallmentPlan;
 import com.example.budget.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -31,5 +34,9 @@ public interface InstallmentPlanRepository extends JpaRepository<InstallmentPlan
      * @return List of installment plans ordered by ID descending
      */
     List<InstallmentPlan> findByUserOrderByIdDesc(User user);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM InstallmentPlan p WHERE p.user = :user")
+    void deleteAllByUser(@Param("user") User user);
 }
 

@@ -2,7 +2,9 @@ package com.example.budget.repository;
 
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
+import com.example.budget.model.FinancialAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -31,6 +33,26 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      */
     List<Transaction> findByUser(User user);
 
+    long countByUserAndAccountIsNull(User user);
+
+    List<Transaction> findByUserAndAccountIsNull(User user);
+
+    List<Transaction> findByUserAndAccountAndPaymentDateBetween(
+                    User user, FinancialAccount account, LocalDate start, LocalDate end);
+
+    List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                    User user, LocalDate start, LocalDate end);
+
+    @Query("SELECT t FROM Transaction t " +
+                    "JOIN FETCH t.user " +
+                    "WHERE t.status = :status " +
+                    "AND t.paymentDate <= :date " +
+                    "AND t.account IS NOT NULL " +
+                    "AND (t.installmentPlan IS NOT NULL OR t.recurringTransaction IS NOT NULL)")
+    List<Transaction> findDueGeneratedTransactions(
+                    @Param("status") TransactionStatus status,
+                    @Param("date") LocalDate date);
+
     @Query("SELECT t FROM Transaction t " +
                     "LEFT JOIN FETCH t.paymentMethod " +
                     "LEFT JOIN FETCH t.installmentPlan " +
@@ -49,6 +71,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
                     Long recurringTransactionId,
                     LocalDateTime fromInclusive);
+
+    List<Transaction> findByRecurringTransactionId(Long recurringTransactionId);
 
     /**
      * Calculates the sum of transaction amounts within a date range and type.
@@ -138,4 +162,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     + "AND t.dateTime >= :fromInclusive")
     void deleteGeneratedByRecurringFromDateInclusive(@Param("recurringTransactionId") Long recurringTransactionId,
                     @Param("fromInclusive") LocalDateTime fromInclusive);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Transaction t WHERE t.user = :user")
+    void deleteAllByUser(@Param("user") User user);
 }

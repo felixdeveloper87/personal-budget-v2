@@ -165,8 +165,7 @@ export default function Header({
             />
           </Flex>
 
-          {/* Mobile primary nav (base..md): second row, full-width segmented bar.
-              Always visible — no hamburger, no hidden buttons. */}
+          {/* Mobile primary nav: four frequent destinations plus a More menu. */}
           {user && (
             <Box display={{ base: 'block', md: 'none' }} pb={3} pt={1}>
               <NavBar

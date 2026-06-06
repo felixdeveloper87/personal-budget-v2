@@ -15,6 +15,10 @@ public class InstallmentPlanDTO {
     private int totalInstallments;
     private BigDecimal totalAmount;
     private BigDecimal installmentValue;
+    private Long accountId;
+    private String accountName;
+    private Long paymentMethodId;
+    private String paymentMethodName;
     private List<InstallmentTransactionDTO> transactions;
 
     public InstallmentPlanDTO() {
@@ -22,10 +26,27 @@ public class InstallmentPlanDTO {
 
     public InstallmentPlanDTO(Long id, int totalInstallments, BigDecimal totalAmount, 
                               BigDecimal installmentValue, List<InstallmentTransactionDTO> transactions) {
+        this(id, totalInstallments, totalAmount, installmentValue, null, null, null, null, transactions);
+    }
+
+    public InstallmentPlanDTO(
+            Long id,
+            int totalInstallments,
+            BigDecimal totalAmount,
+            BigDecimal installmentValue,
+            Long accountId,
+            String accountName,
+            Long paymentMethodId,
+            String paymentMethodName,
+            List<InstallmentTransactionDTO> transactions) {
         this.id = id;
         this.totalInstallments = totalInstallments;
         this.totalAmount = totalAmount;
         this.installmentValue = installmentValue;
+        this.accountId = accountId;
+        this.accountName = accountName;
+        this.paymentMethodId = paymentMethodId;
+        this.paymentMethodName = paymentMethodName;
         this.transactions = transactions;
     }
 
@@ -60,6 +81,11 @@ public class InstallmentPlanDTO {
     public void setInstallmentValue(BigDecimal installmentValue) {
         this.installmentValue = installmentValue;
     }
+
+    public Long getAccountId() { return accountId; }
+    public String getAccountName() { return accountName; }
+    public Long getPaymentMethodId() { return paymentMethodId; }
+    public String getPaymentMethodName() { return paymentMethodName; }
 
     public List<InstallmentTransactionDTO> getTransactions() {
         return transactions;
@@ -145,4 +171,3 @@ public class InstallmentPlanDTO {
         }
     }
 }
-

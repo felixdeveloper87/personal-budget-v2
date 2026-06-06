@@ -57,6 +57,10 @@ class RecurringTransactionServiceTest {
     private CacheManager cacheManager;
     @Mock
     private Cache recurringListCache;
+    @Mock
+    private FinancialAccountService financialAccountService;
+    @Mock
+    private PaymentMethodService paymentMethodService;
 
     private final RecurringTransactionMapper recurringTransactionMapper = new RecurringTransactionMapper();
 
@@ -73,6 +77,9 @@ class RecurringTransactionServiceTest {
                 recurringTransactionRepository,
                 transactionRepository,
                 recurringTransactionMapper,
+                financialAccountService,
+                paymentMethodService,
+                new CreditCardBillingService(),
                 cacheInvalidation,
                 cacheManager);
 

@@ -12,6 +12,9 @@ public class ImportTransactionsRequest {
     @NotEmpty(message = "No rows to import")
     private List<ImportTransactionRow> rows;
 
+    /** Optional. When null, rows are imported without an account and can be associated later. */
+    private Long accountId;
+
     public ImportTransactionsRequest() {
     }
 
@@ -21,5 +24,13 @@ public class ImportTransactionsRequest {
 
     public void setRows(List<ImportTransactionRow> rows) {
         this.rows = rows;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
     }
 }

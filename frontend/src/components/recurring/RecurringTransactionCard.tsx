@@ -17,6 +17,7 @@ import {
   Icon,
   IconButton,
   Input,
+  Select,
   SimpleGrid,
   Text,
   Tooltip,
@@ -27,9 +28,11 @@ import {
 import { AlertTriangle, CalendarClock, Check, Pencil, Trash2, TrendingUp, TrendingDown } from '../ui/icons'
 import {
   cancelRecurringTransaction,
+  listAccounts,
+  listPaymentMethods,
   updateRecurringTransaction,
 } from '../../api'
-import { RecurringTransaction } from '../../types'
+import { FinancialAccount, PaymentMethod, RecurringTransaction } from '../../types'
 import { ToastService } from '../../services/toast'
 
 interface RecurringTransactionCardProps {
@@ -56,6 +59,10 @@ export default function RecurringTransactionCard({
   const [draftAmount, setDraftAmount] = useState(String(recurringTransaction.amount))
   const [draftStartDate, setDraftStartDate] = useState(recurringTransaction.startDate)
   const [draftDayOfMonth, setDraftDayOfMonth] = useState(String(recurringTransaction.dayOfMonth))
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [draftAccountId, setDraftAccountId] = useState<number | null>(recurringTransaction.accountId ?? null)
+  const [draftPaymentMethodId, setDraftPaymentMethodId] = useState<number | null>(recurringTransaction.paymentMethodId ?? null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
@@ -84,7 +91,24 @@ export default function RecurringTransactionCard({
     setDraftAmount(String(recurringTransaction.amount))
     setDraftStartDate(recurringTransaction.startDate)
     setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
+    setDraftAccountId(recurringTransaction.accountId ?? null)
+    setDraftPaymentMethodId(recurringTransaction.paymentMethodId ?? null)
   }, [recurringTransaction])
+
+  useEffect(() => {
+    if (!isEditingAmount) return
+    Promise.all([listAccounts(), listPaymentMethods()])
+      .then(([accountItems, methodItems]) => {
+        setAccounts(accountItems)
+        setPaymentMethods(methodItems)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load account options',
+          dedupeKey: `recurring-options-load-failed:${recurringTransaction.id}`,
+        })
+      })
+  }, [isEditingAmount, recurringTransaction.id])
 
   const handleCancel = async () => {
     setIsCancelling(true)
@@ -118,6 +142,7 @@ export default function RecurringTransactionCard({
       nextDayOfMonth < 1 ||
       nextDayOfMonth > 31 ||
       Number.isNaN(nextDayOfMonth)
+      || !draftAccountId
     ) {
       ToastService.warning({
         title: 'Enter a valid amount and date',
@@ -133,6 +158,8 @@ export default function RecurringTransactionCard({
         amount: nextAmount,
         startDate: draftStartDate,
         dayOfMonth: nextDayOfMonth,
+        accountId: draftAccountId,
+        paymentMethodId: draftPaymentMethodId,
       })
       ToastService.success({
         title: 'Fixed payment updated',
@@ -199,6 +226,7 @@ export default function RecurringTransactionCard({
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1} fontWeight={600}>
                     {recurringTransaction.category}
+                    {recurringTransaction.accountName ? ` · ${recurringTransaction.accountName}` : ' · Account not linked'}
                   </Text>
                 </VStack>
               </HStack>
@@ -289,12 +317,45 @@ export default function RecurringTransactionCard({
                         />
                       </FormControl>
                     </SimpleGrid>
+                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
+                      <FormControl>
+                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
+                          Account
+                        </FormLabel>
+                        <Select
+                          size="sm"
+                          value={draftAccountId ?? ''}
+                          onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
+                          placeholder="Select account"
+                        >
+                          {accounts.filter((account) => account.active).map((account) => (
+                            <option key={account.id} value={account.id}>{account.name}</option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl>
+                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
+                          Payment method
+                        </FormLabel>
+                        <Select
+                          size="sm"
+                          value={draftPaymentMethodId ?? ''}
+                          onChange={(event) => setDraftPaymentMethodId(event.target.value ? Number(event.target.value) : null)}
+                        >
+                          <option value="">No payment method</option>
+                          {paymentMethods.filter((method) => method.active).map((method) => (
+                            <option key={method.id} value={method.id}>{method.name}</option>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </SimpleGrid>
                     <HStack spacing={2} flexWrap="wrap">
                       <Button
                         size="sm"
                         colorScheme="teal"
                         onClick={handleSaveAmount}
                         isLoading={isSavingAmount}
+                        isDisabled={!draftAccountId}
                         leftIcon={<Icon as={Check} boxSize={3.5} />}
                       >
                         Save
@@ -306,6 +367,8 @@ export default function RecurringTransactionCard({
                           setDraftAmount(String(recurringTransaction.amount))
                           setDraftStartDate(recurringTransaction.startDate)
                           setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
+                          setDraftAccountId(recurringTransaction.accountId ?? null)
+                          setDraftPaymentMethodId(recurringTransaction.paymentMethodId ?? null)
                           setIsEditingAmount(false)
                         }}
                       >

@@ -4,10 +4,21 @@ import {
   LayoutDashboard,
   ReceiptText,
   Shield,
+  Wallet,
+  Sparkles,
+  CalendarDays,
   type LucideIcon,
 } from '../../ui/icons'
 
-export type AppPage = 'dashboard' | 'transactions' | 'categories' | 'reports' | 'admin'
+export type AppPage =
+  | 'dashboard'
+  | 'accounts'
+  | 'transactions'
+  | 'categories'
+  | 'goals'
+  | 'planning'
+  | 'reports'
+  | 'admin'
 
 export interface NavItem {
   id: AppPage
@@ -26,6 +37,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Overview of your finances',
   },
   {
+    id: 'accounts',
+    label: 'Accounts',
+    shortLabel: 'Accounts',
+    icon: Wallet,
+    description: 'Balances and transfers',
+  },
+  {
     id: 'transactions',
     label: 'Transactions',
     shortLabel: 'Activity',
@@ -38,6 +56,20 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Categories',
     icon: Layers,
     description: 'Breakdown by category',
+  },
+  {
+    id: 'goals',
+    label: 'Goals',
+    shortLabel: 'Goals',
+    icon: Sparkles,
+    description: 'Savings targets',
+  },
+  {
+    id: 'planning',
+    label: 'Planning',
+    shortLabel: 'Plan',
+    icon: CalendarDays,
+    description: 'Budgets and cash flow',
   },
   {
     id: 'reports',

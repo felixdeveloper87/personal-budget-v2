@@ -22,6 +22,10 @@ public class UpdateRecurringTransactionRequest {
     @Max(value = 31, message = "Day of month must be between 1 and 31")
     private Integer dayOfMonth;
 
+    private Long accountId;
+
+    private Long paymentMethodId;
+
     public UpdateRecurringTransactionRequest() {
     }
 
@@ -45,5 +49,21 @@ public class UpdateRecurringTransactionRequest {
 
     public Integer getDayOfMonth() {
         return dayOfMonth;
+    }
+
+    public Long getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Long accountId) {
+        this.accountId = accountId;
+    }
+
+    public Long getPaymentMethodId() {
+        return paymentMethodId;
+    }
+
+    public void setPaymentMethodId(Long paymentMethodId) {
+        this.paymentMethodId = paymentMethodId;
     }
 }

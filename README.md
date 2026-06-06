@@ -15,6 +15,12 @@ Live site: https://personalbudget.co.uk
 ## Key Features
 
 - Financial dashboard with income, expense, balance and period navigation for day, week, month and year views.
+- User-owned current, savings, cash and credit accounts with anchored balances and internal transfers.
+- Negative current-account balances and overdraft limits with usage and availability indicators.
+- Safe legacy transaction association: existing rows remain intact and unassigned until explicitly linked.
+- Savings goals with progress tracking and contributions.
+- Monthly category budgets with usage alerts.
+- 30/60/90-day cash-flow projections and a future payment calendar.
 - Transaction creation, editing, deletion and search by text, type, category and period.
 - Fast income and expense entry with an optimised form, number pad and reusable categories.
 - Instalment plan management with automatic monthly transaction generation and plan history.
@@ -208,6 +214,16 @@ All routes below require a JWT, except `/api/auth/**` and `/health`.
 - `POST /api/payment-methods`
 - `PUT /api/payment-methods/{id}`
 - `DELETE /api/payment-methods/{id}`
+- `GET /api/accounts/summary`
+- `POST /api/accounts`
+- `POST /api/accounts/transfers`
+- `POST /api/accounts/{id}/assign-legacy-transactions`
+- `GET /api/goals`
+- `POST /api/goals`
+- `POST /api/goals/{id}/contributions`
+- `GET /api/planning/budgets`
+- `PUT /api/planning/budgets`
+- `GET /api/planning/forecast`
 - `GET /api/installment-plans`
 - `POST /api/installment-plans`
 - `PUT /api/installment-plans/{id}`
@@ -238,6 +254,11 @@ Main entities:
 - `installment_plan`
 - `recurring_transactions`
 - `payment_methods`
+- `financial_accounts`
+- `account_transfers`
+- `savings_goals`
+- `savings_goal_contributions`
+- `category_budgets`
 
 The model separates `transaction_date` from `payment_date`, allowing credit card purchases to affect the budget on the correct statement/payment date.
 

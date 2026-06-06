@@ -50,6 +50,14 @@ public class Transaction {
     private PaymentMethod paymentMethod;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id")
+    private FinancialAccount account;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TransactionStatus status = TransactionStatus.CLEARED;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "installment_plan_id")
     @JsonIgnore
     private InstallmentPlan installmentPlan;
@@ -72,6 +80,9 @@ public class Transaction {
         }
         if (this.paymentDate == null) {
             this.paymentDate = this.transactionDate;
+        }
+        if (this.status == null) {
+            this.status = TransactionStatus.CLEARED;
         }
     }
 
@@ -164,6 +175,22 @@ public class Transaction {
 
     public void setPaymentMethod(PaymentMethod paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public FinancialAccount getAccount() {
+        return account;
+    }
+
+    public void setAccount(FinancialAccount account) {
+        this.account = account;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 
     public InstallmentPlan getInstallmentPlan() {

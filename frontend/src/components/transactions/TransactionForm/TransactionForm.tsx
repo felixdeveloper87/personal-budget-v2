@@ -2,7 +2,13 @@ import React, { useState, useCallback, useEffect } from 'react'
 import { Box, VStack, Card, CardBody, Button } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
-import { createTransaction, createInstallmentPlan, createRecurringTransaction, listPaymentMethods } from '../../../api'
+import {
+  createTransaction,
+  createInstallmentPlan,
+  createRecurringTransaction,
+  listAccounts,
+  listPaymentMethods,
+} from '../../../api'
 import RecentTransactions from './RecentTransactions'
 import { Plus, Minus } from '../../ui/icons'
 import DateSelector from './DateSelector'
@@ -12,9 +18,10 @@ import DescriptionInput from './DescriptionInput'
 import InstallmentSelector from './InstallmentSelector'
 import RecurringSelector from './RecurringSelector'
 import PaymentMethodSelector from './PaymentMethodSelector'
+import AccountSelector from './AccountSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
-import { PaymentMethod, Transaction } from '../../../types'
+import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
 
@@ -70,6 +77,9 @@ export default function TransactionForm({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [paymentMethodsLoading, setPaymentMethodsLoading] = useState(false)
   const [paymentMethodId, setPaymentMethodId] = useState<number | null>(null)
+  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [accountsLoading, setAccountsLoading] = useState(false)
+  const [accountId, setAccountId] = useState<number | null>(null)
 
   // 💳 Installment states
   const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
@@ -103,6 +113,30 @@ export default function TransactionForm({
     }
   }, [user?.token])
 
+  useEffect(() => {
+    if (!user?.token) return
+    let active = true
+    setAccountsLoading(true)
+    listAccounts()
+      .then((items) => {
+        if (!active) return
+        setAccounts(items)
+        setAccountId((current) => current ?? items.find((account) => account.active)?.id ?? null)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load accounts',
+          dedupeKey: 'accounts-load-failed',
+        })
+      })
+      .finally(() => {
+        if (active) setAccountsLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [user?.token])
+
   /** Keep recurring due-day default aligned with the transaction date while editing a single (one-off) row. */
   const onTransactionDateChange = useCallback((nextDate: string) => {
     setDate(nextDate)
@@ -127,6 +161,14 @@ export default function TransactionForm({
       if (!user?.token) return
 
       if (loading) return
+      if (!accountId) {
+        ToastService.warning({
+          title: 'Select an account',
+          description: 'Create an account from the Accounts page before adding transactions.',
+          dedupeKey: 'transaction-account-required',
+        })
+        return
+      }
 
       setLoading(true)
       try {
@@ -139,6 +181,8 @@ export default function TransactionForm({
             amount: Number(amount),
             startDate: recurringStartDate,
             dayOfMonth: recurringDayOfMonth,
+            accountId,
+            paymentMethodId,
           })
 
           ToastService.success({
@@ -155,6 +199,8 @@ export default function TransactionForm({
             amount: Number(amount),
             startDate: toLocalYYYYMMDD(),
             dayOfMonth: recurringDayOfMonth,
+            accountId,
+            paymentMethodId,
           })
 
           ToastService.success({
@@ -181,6 +227,8 @@ export default function TransactionForm({
             description,
             startDate: firstInstallmentDate,
             startDateTime: toLocalIsoDateTimeFromYMD(firstInstallmentDate, start),
+            accountId,
+            paymentMethodId,
           })
 
           ToastService.success({
@@ -199,6 +247,8 @@ export default function TransactionForm({
             description,
             amount: Number(amount),
             paymentMethodId,
+            accountId,
+            status: 'CLEARED',
           }
           const created = await createTransaction(tx)
           onCreated(created)
@@ -242,6 +292,7 @@ export default function TransactionForm({
       recurringStartDate,
       recurringDayOfMonth,
       paymentMethodId,
+      accountId,
       user?.token,
       onCreated,
     ]
@@ -288,6 +339,12 @@ export default function TransactionForm({
             />
           )}
           <AmountInput amount={amount} onChange={setAmount} type={type} />
+          <AccountSelector
+            value={accountId}
+            onChange={setAccountId}
+            accounts={accounts}
+            loading={accountsLoading}
+          />
           {type === 'EXPENSE' && (
             <PaymentMethodSelector
               value={paymentMethodId}
@@ -362,6 +419,7 @@ export default function TransactionForm({
               leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
               onClick={onSubmit}
               isLoading={loading}
+              isDisabled={!accountId}
               loadingText={
                 type === 'INCOME' && incomeMode === 'fixed'
                   ? 'Creating fixed income...'
@@ -443,6 +501,12 @@ export default function TransactionForm({
                 />
               )}
               <AmountInput amount={amount} onChange={setAmount} type={type} />
+              <AccountSelector
+                value={accountId}
+                onChange={setAccountId}
+                accounts={accounts}
+                loading={accountsLoading}
+              />
               {type === 'EXPENSE' && (
                 <PaymentMethodSelector
                   value={paymentMethodId}

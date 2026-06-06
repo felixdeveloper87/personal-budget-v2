@@ -1,21 +1,29 @@
 import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
   Box,
   Button,
   Divider,
   HStack,
   Icon,
+  Input,
   Select,
   Switch,
   Text,
   VStack,
   useColorMode,
   useColorModeValue,
+  useDisclosure,
   useToast,
 } from '@chakra-ui/react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ModalHeader, PremiumModal } from '../ui'
-import { exportTransactionsCsv } from '../../api'
-import { downloadBlob } from '../../utils/csv'
+import { deleteAllUserData } from '../../api'
+import { exportAllData } from '../../utils/export'
 import { ToastService } from '../../services/toast'
 import {
   AlertTriangle,
@@ -26,6 +34,7 @@ import {
   Settings,
   Shield,
   Sun,
+  Trash2,
 } from '../ui/icons'
 
 interface UserSettingsModalProps {
@@ -44,6 +53,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const [monthlySummary, setMonthlySummary] = useState(true)
   const [budgetAlerts, setBudgetAlerts] = useState(false)
   const [exporting, setExporting] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmText, setConfirmText] = useState('')
+  const deleteDialog = useDisclosure()
+  const cancelDeleteRef = useRef<HTMLButtonElement>(null)
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -65,14 +78,33 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const handleExport = async () => {
     setExporting(true)
     try {
-      const blob = await exportTransactionsCsv()
-      const stamp = new Date().toISOString().slice(0, 10)
-      downloadBlob(`transactions-${stamp}.csv`, blob)
-      ToastService.success({ title: 'Export ready', dedupeKey: 'csv-export-done' })
+      await exportAllData()
+      ToastService.success({
+        title: 'Export ready',
+        description: 'Transactions, installments and fixed payments downloaded.',
+        dedupeKey: 'csv-export-done',
+      })
     } catch (err) {
       ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
     } finally {
       setExporting(false)
+    }
+  }
+
+  const handleDeleteAll = async () => {
+    setDeleting(true)
+    try {
+      await deleteAllUserData()
+      ToastService.success({
+        title: 'All data deleted',
+        description: 'Your account was kept. Reloading…',
+        dedupeKey: 'user-data-deleted',
+      })
+      deleteDialog.onClose()
+      setTimeout(() => window.location.reload(), 800)
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Could not delete data', dedupeKey: 'user-data-delete-failed' })
+      setDeleting(false)
     }
   }
 
@@ -345,7 +377,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             >
               <SettingRow
                 label="Export my data"
-                description="Download all your transactions as CSV"
+                description="Download transactions, installments and fixed payments as CSV"
                 noBorder
               >
                 <Button
@@ -385,14 +417,76 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               colorScheme="red"
               variant="outline"
               borderRadius="lg"
-              onClick={showComingSoon}
+              leftIcon={<Icon as={Trash2} boxSize={3.5} />}
+              onClick={() => { setConfirmText(''); deleteDialog.onOpen() }}
             >
-              Close account
+              Delete all data
             </Button>
+            <Text fontSize="xs" color={mutedColor} mt={2}>
+              Removes all transactions, installments, fixed payments, accounts, payment
+              methods, goals and budgets. Your login is kept.
+            </Text>
           </Box>
 
         </VStack>
       </Box>
+
+      <AlertDialog
+        isOpen={deleteDialog.isOpen}
+        leastDestructiveRef={cancelDeleteRef}
+        onClose={deleteDialog.onClose}
+        isCentered
+        closeOnOverlayClick={!deleting}
+      >
+        <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
+          <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4}>
+            <AlertDialogHeader display="flex" alignItems="center" gap={3}>
+              <Box
+                w={9}
+                h={9}
+                borderRadius="lg"
+                bg={dangerBg}
+                color="red.500"
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Icon as={AlertTriangle} boxSize={4} />
+              </Box>
+              <Text fontWeight={800} color={textColor}>Delete all data</Text>
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              <Text fontSize="sm" color={mutedColor} mb={3}>
+                This permanently deletes every transaction, installment plan, fixed payment,
+                account, payment method, goal and budget. This cannot be undone.
+              </Text>
+              <Text fontSize="sm" color={textColor} fontWeight={600} mb={2}>
+                Type <Text as="span" color="red.500">DELETE</Text> to confirm:
+              </Text>
+              <Input
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="DELETE"
+                autoFocus
+              />
+            </AlertDialogBody>
+            <AlertDialogFooter gap={2}>
+              <Button ref={cancelDeleteRef} variant="ghost" onClick={deleteDialog.onClose} isDisabled={deleting}>
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleDeleteAll}
+                isLoading={deleting}
+                loadingText="Deleting…"
+                isDisabled={confirmText.trim().toUpperCase() !== 'DELETE'}
+              >
+                Delete everything
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </PremiumModal>
   )
 }

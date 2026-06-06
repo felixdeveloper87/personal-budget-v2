@@ -1,5 +1,7 @@
 export type TransactionType = 'INCOME' | 'EXPENSE'
 export type PaymentMethodType = 'CASH' | 'DEBIT_CARD' | 'CREDIT_CARD' | 'BANK_TRANSFER'
+export type TransactionStatus = 'PLANNED' | 'PENDING' | 'CLEARED' | 'RECONCILED'
+export type AccountType = 'CURRENT' | 'SAVINGS' | 'CASH' | 'CREDIT_CARD'
 
 // Period types for navigation
 export type PeriodType = 'day' | 'week' | 'month' | 'year'
@@ -25,6 +27,9 @@ export interface Transaction {
   amount: number
   paymentMethodId?: number | null
   paymentMethodName?: string | null
+  accountId?: number | null
+  accountName?: string | null
+  status?: TransactionStatus
   userId?: number // opcional porque o backend não retorna no DTO de busca
   installmentPlanId?: number // ID do plano de parcelamento (se houver)
   recurringTransactionId?: number // ID da recorrencia (se houver)
@@ -56,6 +61,68 @@ export interface PaymentMethodRequest {
   active: boolean
   statementClosingDay?: number | null
   paymentDay?: number | null
+}
+
+export interface FinancialAccount {
+  id: number
+  name: string
+  type: AccountType
+  institution?: string | null
+  currency: string
+  openingBalance: number
+  balanceAnchorAt: string
+  currentBalance: number
+  overdraftLimit: number
+  overdraftUsed: number
+  overdraftAvailable: number
+  overdraftPercentageUsed: number
+  active: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface FinancialAccountRequest {
+  name: string
+  type: AccountType
+  institution?: string | null
+  currency: string
+  openingBalance: number
+  overdraftLimit: number
+  active: boolean
+}
+
+export interface AccountSummary {
+  totalBalance: number
+  unassignedTransactionCount: number
+  accounts: FinancialAccount[]
+}
+
+export interface AccountTransfer {
+  id: number
+  fromAccountId: number
+  fromAccountName: string
+  toAccountId: number
+  toAccountName: string
+  amount: number
+  transferDate: string
+  description?: string | null
+  createdAt: string
+}
+
+export interface AccountTransferRequest {
+  fromAccountId: number
+  toAccountId: number
+  amount: number
+  transferDate: string
+  description?: string
+}
+
+export interface LegacyTransactionAssignmentRequest {
+  paymentMethodId?: number | null
+  installmentPlanId?: number | null
+  recurringTransactionId?: number | null
+  startDate?: string
+  endDate?: string
 }
 
 // Resumo mensal
@@ -170,6 +237,10 @@ export interface InstallmentPlan {
   totalInstallments: number
   totalAmount: number
   installmentValue: number
+  accountId?: number | null
+  accountName?: string | null
+  paymentMethodId?: number | null
+  paymentMethodName?: string | null
   transactions: InstallmentTransaction[]
 }
 
@@ -190,6 +261,8 @@ export interface CreateInstallmentPlanRequest {
   startDate: string // yyyy-MM-dd
   /** Local wall-clock, no TZ — e.g. `2026-05-03T14:30:00` (Java LocalDateTime). Avoid `…Z`. */
   startDateTime?: string
+  accountId: number
+  paymentMethodId?: number | null
 }
 
 export interface UpdateInstallmentPlanRequest {
@@ -197,6 +270,8 @@ export interface UpdateInstallmentPlanRequest {
   totalAmount?: number
   startDate: string
   startDateTime?: string
+  accountId?: number | null
+  paymentMethodId?: number | null
 }
 
 export interface RecurringTransaction {
@@ -211,6 +286,10 @@ export interface RecurringTransaction {
   nextRunDate: string
   dayOfMonth: number
   active: boolean
+  accountId?: number | null
+  accountName?: string | null
+  paymentMethodId?: number | null
+  paymentMethodName?: string | null
 }
 
 export interface CreateRecurringTransactionRequest {
@@ -221,12 +300,76 @@ export interface CreateRecurringTransactionRequest {
   startDate: string
   endDate?: string
   dayOfMonth?: number
+  accountId: number
+  paymentMethodId?: number | null
 }
 
 export interface UpdateRecurringTransactionRequest {
   amount: number
   startDate: string
   dayOfMonth: number
+  accountId?: number | null
+  paymentMethodId?: number | null
+}
+
+export interface SavingsGoal {
+  id: number
+  name: string
+  targetAmount: number
+  currentAmount: number
+  remainingAmount: number
+  progressPercentage: number
+  targetDate?: string | null
+  color: string
+  archived: boolean
+}
+
+export interface SavingsGoalRequest {
+  name: string
+  targetAmount: number
+  currentAmount: number
+  targetDate?: string | null
+  color: string
+}
+
+export interface CategoryBudget {
+  id: number
+  category: string
+  year: number
+  month: number
+  limitAmount: number
+  spentAmount: number
+  remainingAmount: number
+  percentageUsed: number
+  exceeded: boolean
+}
+
+export interface CategoryBudgetRequest {
+  category: string
+  year: number
+  month: number
+  limitAmount: number
+}
+
+export interface CashFlowEvent {
+  date: string
+  kind: 'TRANSACTION' | 'INSTALLMENT' | 'RECURRING' | 'TRANSFER' | 'BUDGET'
+  description: string
+  amount: number
+  accountId?: number | null
+  accountName?: string | null
+  category?: string | null
+}
+
+export interface CashFlowForecast {
+  currentTotalBalance: number
+  horizons: {
+    days: number
+    date: string
+    expectedBalance: number
+    negative: boolean
+  }[]
+  events: CashFlowEvent[]
 }
 
 // Search component interfaces

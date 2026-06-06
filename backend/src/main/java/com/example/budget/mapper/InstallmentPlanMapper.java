@@ -5,6 +5,7 @@ import com.example.budget.dto.InstallmentPlanDTO;
 import com.example.budget.model.InstallmentPlan;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
 
@@ -68,6 +69,10 @@ public class InstallmentPlanMapper {
                 plan.getTotalInstallments(),
                 plan.getTotalAmount(),
                 plan.getInstallmentValue(),
+                plan.getAccount() != null ? plan.getAccount().getId() : null,
+                plan.getAccount() != null ? plan.getAccount().getName() : null,
+                plan.getPaymentMethod() != null ? plan.getPaymentMethod().getId() : null,
+                plan.getPaymentMethod() != null ? plan.getPaymentMethod().getName() : null,
                 transactionDTOs
         );
     }
@@ -99,6 +104,11 @@ public class InstallmentPlanMapper {
             transaction.setTransactionDate(installmentDateTime.toLocalDate());
             transaction.setPaymentDate(installmentDateTime.toLocalDate());
             transaction.setUser(plan.getUser());
+            transaction.setAccount(plan.getAccount());
+            transaction.setPaymentMethod(plan.getPaymentMethod());
+            transaction.setStatus(installmentDateTime.toLocalDate().isAfter(LocalDate.now())
+                    ? TransactionStatus.PLANNED
+                    : TransactionStatus.CLEARED);
             transaction.setInstallmentPlan(plan);
             transaction.setInstallmentNumber(i);
 
