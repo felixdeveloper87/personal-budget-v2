@@ -1,6 +1,7 @@
 package com.example.budget.service;
 
 import com.example.budget.dto.AccountSummaryDTO;
+import com.example.budget.dto.CashFlowForecastDTO;
 import com.example.budget.model.AccountType;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.InstallmentPlan;
@@ -8,9 +9,9 @@ import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
-import com.example.budget.repository.AccountTransferRepository;
 import com.example.budget.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
+import com.example.budget.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,11 +34,11 @@ class CashFlowForecastServiceTest {
     @Mock
     private TransactionRepository transactionRepository;
     @Mock
-    private AccountTransferRepository transferRepository;
-    @Mock
     private RecurringTransactionRepository recurringRepository;
     @Mock
     private CreditCardBillingService creditCardBillingService;
+    @Mock
+    private UserRepository userRepository;
 
     private CashFlowForecastService service;
     private User user;
@@ -48,9 +49,9 @@ class CashFlowForecastServiceTest {
         service = new CashFlowForecastService(
                 accountService,
                 transactionRepository,
-                transferRepository,
                 recurringRepository,
-                creditCardBillingService);
+                creditCardBillingService,
+                userRepository);
         user = new User();
         user.setId(1L);
         account = new FinancialAccount();
@@ -60,84 +61,228 @@ class CashFlowForecastServiceTest {
         account.setType(AccountType.CURRENT);
         account.setCurrency("GBP");
 
-        when(accountService.summary(user))
-                .thenReturn(new AccountSummaryDTO(BigDecimal.ZERO, 0, List.of()));
-        when(transferRepository.findByUserAndTransferDateBetweenOrderByTransferDateAscIdAsc(
-                user, LocalDate.now().plusDays(1), LocalDate.now().plusDays(90)))
-                .thenReturn(List.of());
         when(recurringRepository.findByUserOrderByIdDesc(user)).thenReturn(List.of());
+        // Anchor balance the projection rolls forward from.
+        when(accountService.summary(user))
+                .thenReturn(new AccountSummaryDTO(new BigDecimal("1000.00"), 0, List.of()));
     }
 
     @Test
-    void forecastUsesPreviousMonthStandaloneTransactionsAndFutureInstallments() {
+    void forecastUsesRecentMonthlyAverageAndStopsEndedInstallments() {
         LocalDate today = LocalDate.now();
-        YearMonth previousMonth = YearMonth.from(today).minusMonths(1);
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+
         Transaction income = transaction(
-                "Salary adjustment", TransactionType.INCOME, "1000.00",
-                previousMonth.atDay(Math.min(10, previousMonth.lengthOfMonth())));
-        Transaction expense = transaction(
-                "Groceries", TransactionType.EXPENSE, "200.00",
-                previousMonth.atDay(Math.min(15, previousMonth.lengthOfMonth())));
-        Transaction oldInstallment = transaction(
-                "Old installment", TransactionType.EXPENSE, "50.00",
-                previousMonth.atDay(Math.min(20, previousMonth.lengthOfMonth())));
-        oldInstallment.setInstallmentPlan(new InstallmentPlan());
+                "Salary", TransactionType.INCOME, "3256.00",
+                previousMonth.atDay(10));
+        Transaction variableExpense = transaction(
+                "Variable spending", TransactionType.EXPENSE, "3076.00",
+                previousMonth.atDay(15));
+        // Installments and recurring rows are excluded from the recent average;
+        // they are projected separately on their own schedule.
+        Transaction previousInstallment = transaction(
+                "Previous installment", TransactionType.EXPENSE, "200.00",
+                previousMonth.atDay(20));
+        previousInstallment.setInstallmentPlan(new InstallmentPlan());
 
-        Transaction futureInstallment = transaction(
-                "Laptop installment", TransactionType.EXPENSE, "75.00", today.plusDays(20));
-        futureInstallment.setInstallmentPlan(new InstallmentPlan());
+        Transaction nextMonthInstallment = transaction(
+                "Laptop installment", TransactionType.EXPENSE, "200.00",
+                firstForecastMonth.atDay(10));
+        nextMonthInstallment.setInstallmentPlan(new InstallmentPlan());
+        Transaction secondMonthInstallment = transaction(
+                "Laptop installment", TransactionType.EXPENSE, "200.00",
+                firstForecastMonth.plusMonths(1).atDay(10));
+        secondMonthInstallment.setInstallmentPlan(new InstallmentPlan());
+        // A loose future transaction (no installment plan) must NOT be counted.
         Transaction futureLoose = transaction(
-                "Future loose transaction", TransactionType.EXPENSE, "999.00", today.plusDays(25));
+                "Future loose transaction", TransactionType.EXPENSE, "999.00",
+                firstForecastMonth.atDay(12));
 
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, previousMonth.atDay(1), previousMonth.atEndOfMonth()))
-                .thenReturn(List.of(income, expense, oldInstallment));
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of(income, variableExpense, previousInstallment));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, today.plusDays(1), today.plusDays(90)))
-                .thenReturn(List.of(futureInstallment, futureLoose));
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of(
+                        nextMonthInstallment,
+                        secondMonthInstallment,
+                        futureLoose));
 
         var result = service.forecast(user);
 
         assertThat(result.hasProjectionBasis()).isTrue();
-        assertThat(result.projectionBasisMonth()).isEqualTo(previousMonth.toString());
-        assertThat(result.projectedMonthlyIncome()).isEqualByComparingTo("1000.00");
-        assertThat(result.projectedMonthlyExpense()).isEqualByComparingTo("200.00");
-        assertThat(result.events()).anyMatch(event ->
-                event.kind().equals("INSTALLMENT")
-                        && event.description().equals("Laptop installment"));
-        assertThat(result.events().stream()
-                .filter(event -> event.kind().equals("ESTIMATE"))
-                .filter(event -> event.description().equals("Estimated monthly income")))
-                .hasSize(3);
-        assertThat(result.events().stream()
-                .filter(event -> event.kind().equals("ESTIMATE"))
-                .filter(event -> event.description().equals("Estimated variable spending")))
-                .hasSize(3);
-        assertThat(result.horizons().get(0).expectedBalance()).isEqualByComparingTo("725.00");
-        assertThat(result.horizons().get(1).expectedBalance()).isEqualByComparingTo("1525.00");
-        assertThat(result.horizons().get(2).expectedBalance()).isEqualByComparingTo("2325.00");
-        assertThat(result.events()).noneMatch(event ->
-                event.description().contains("Old installment")
-                        || event.description().contains("Future loose transaction"));
+        assertThat(result.projectionBasisMonths())
+                .containsExactly(previousMonth.toString());
+        assertThat(result.averageMonthlyIncome()).isEqualByComparingTo("3256.00");
+        assertThat(result.averageMonthlyVariableExpense()).isEqualByComparingTo("3076.00");
+        assertThat(result.months()).hasSize(12);
+
+        // The forecast starts on the next full month, never the current one.
+        var firstMonth = result.months().get(0);
+        assertThat(firstMonth.month()).isEqualTo(firstForecastMonth.toString());
+        assertThat(firstMonth.installmentExpense()).isEqualByComparingTo("200.00");
+        assertThat(firstMonth.netCashFlow()).isEqualByComparingTo("-20.00");
+        // committedGross = 200 (installment); estimatedGross = 3256 + 3076 = 6332.
+        // confidence = round(200 / 6532 * 100) = 3
+        assertThat(firstMonth.confidencePercent()).isEqualTo(3);
+        // Balance rolls forward from the £1000 anchor: 1000 - 20 = 980.
+        assertThat(result.currentTotalBalance()).isEqualByComparingTo("1000.00");
+        assertThat(firstMonth.projectedClosingBalance()).isEqualByComparingTo("980.00");
+
+        var secondMonth = result.months().get(1);
+        assertThat(secondMonth.installmentExpense()).isEqualByComparingTo("200.00");
+        assertThat(secondMonth.netCashFlow()).isEqualByComparingTo("-20.00");
+        assertThat(secondMonth.projectedClosingBalance()).isEqualByComparingTo("960.00");
+
+        var monthAfterInstallments = result.months().get(2);
+        assertThat(monthAfterInstallments.installmentExpense())
+                .isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(monthAfterInstallments.netCashFlow()).isEqualByComparingTo("180.00");
+        // confidence is 0 once nothing is committed for the month.
+        assertThat(monthAfterInstallments.confidencePercent()).isEqualTo(0);
+        assertThat(monthAfterInstallments.projectedClosingBalance()).isEqualByComparingTo("1140.00");
     }
 
     @Test
-    void forecastReportsMissingPreviousMonthBasis() {
+    void forecastStartsNextMonthWithFullMonthlyAverages() {
         LocalDate today = LocalDate.now();
-        YearMonth previousMonth = YearMonth.from(today).minusMonths(1);
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+        Transaction previousIncome = transaction(
+                "Salary", TransactionType.INCOME, "1000.00",
+                previousMonth.atDay(10));
+        Transaction previousExpense = transaction(
+                "Spending", TransactionType.EXPENSE, "200.00",
+                previousMonth.atDay(15));
+
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, previousMonth.atDay(1), previousMonth.atEndOfMonth()))
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of(previousIncome, previousExpense));
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+
+        var result = service.forecast(user);
+
+        var firstMonth = result.months().get(0);
+        assertThat(firstMonth.month()).isEqualTo(firstForecastMonth.toString());
+        // The current, partially-elapsed month is not estimated; every forecast
+        // month uses the full monthly average.
+        assertThat(firstMonth.estimatedIncome()).isEqualByComparingTo("1000.00");
+        assertThat(firstMonth.estimatedVariableExpense()).isEqualByComparingTo("200.00");
+        assertThat(firstMonth.netCashFlow()).isEqualByComparingTo("800.00");
+        assertThat(firstMonth.projectedClosingBalance()).isEqualByComparingTo("1800.00");
+        assertThat(result.months().get(1).netCashFlow()).isEqualByComparingTo("800.00");
+        assertThat(result.months().get(1).projectedClosingBalance()).isEqualByComparingTo("2600.00");
+    }
+
+    @Test
+    void forecastUsesPlannedMonthlyIncomeInsteadOfHistoryAverage() {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+        // Declared, predictable income (e.g. a gig-work target) overrides the
+        // history average so the forecast follows the plan.
+        user.setPlannedMonthlyIncome(new BigDecimal("2500.00"));
+
+        Transaction previousIncome = transaction(
+                "Salary", TransactionType.INCOME, "1000.00",
+                previousMonth.atDay(10));
+        Transaction previousExpense = transaction(
+                "Spending", TransactionType.EXPENSE, "200.00",
+                previousMonth.atDay(15));
+
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of(previousIncome, previousExpense));
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+
+        var result = service.forecast(user);
+
+        assertThat(result.hasIncomePlan()).isTrue();
+        assertThat(result.plannedMonthlyIncome()).isEqualByComparingTo("2500.00");
+        // History average is still reported for reference, untouched.
+        assertThat(result.averageMonthlyIncome()).isEqualByComparingTo("1000.00");
+
+        var firstMonth = result.months().get(0);
+        assertThat(firstMonth.estimatedIncome()).isEqualByComparingTo("2500.00");
+        assertThat(firstMonth.estimatedVariableExpense()).isEqualByComparingTo("200.00");
+        assertThat(firstMonth.netCashFlow()).isEqualByComparingTo("2300.00");
+        assertThat(firstMonth.projectedClosingBalance()).isEqualByComparingTo("3300.00");
+    }
+
+    @Test
+    void forecastFlagsMonthWhereProjectedBalanceGoesNegative() {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+        // No income, £300/month variable spending against a £1000 anchor: the
+        // balance runs out after a few months.
+        Transaction previousExpense = transaction(
+                "Spending", TransactionType.EXPENSE, "300.00",
+                previousMonth.atDay(15));
+
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of(previousExpense));
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+
+        var result = service.forecast(user);
+
+        // 1000 → 700 → 400 → 100 → -200 (index 3 is the first negative month).
+        assertThat(result.months().get(2).projectedClosingBalance()).isEqualByComparingTo("100.00");
+        assertThat(result.months().get(2).negative()).isFalse();
+        assertThat(result.months().get(3).projectedClosingBalance()).isEqualByComparingTo("-200.00");
+        assertThat(result.months().get(3).negative()).isTrue();
+    }
+
+    @Test
+    void forecastReportsMissingRecentBasisButKeepsTwelveMonths() {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
                 .thenReturn(List.of());
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, today.plusDays(1), today.plusDays(90)))
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of());
 
         var result = service.forecast(user);
 
         assertThat(result.hasProjectionBasis()).isFalse();
-        assertThat(result.projectedMonthlyIncome()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.projectedMonthlyExpense()).isEqualByComparingTo(BigDecimal.ZERO);
-        assertThat(result.events()).isEmpty();
+        assertThat(result.averageMonthlyIncome()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.averageMonthlyVariableExpense())
+                .isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(result.months()).hasSize(12);
+        assertThat(result.months())
+                .allMatch(month -> month.netCashFlow().compareTo(BigDecimal.ZERO) == 0);
+        assertThat(result.months())
+                .allMatch(month -> month.confidencePercent() == 0);
+        // With no flow, the balance just holds at the £1000 anchor.
+        assertThat(result.months())
+                .allMatch(month -> month.projectedClosingBalance().compareTo(new BigDecimal("1000.00")) == 0);
+        assertThat(result.months()).noneMatch(CashFlowForecastDTO.MonthForecast::negative);
     }
 
     private Transaction transaction(

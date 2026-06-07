@@ -28,15 +28,17 @@ import {
   deleteCategoryBudget,
   getCashFlowForecast,
   listCategoryBudgets,
+  updateIncomePlan,
   upsertCategoryBudget,
 } from '../api'
-import { CashFlowEvent, CashFlowForecast, CategoryBudget } from '../types'
+import { CashFlowForecast, CategoryBudget } from '../types'
 import { ToastService } from '../services/toast'
 
 const monthValue = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+const signedMoney = (value: number) => `${value >= 0 ? '+' : ''}${money(value)}`
 const monthLabel = (value?: string) => {
   if (!value) return 'the previous month'
   const [year, month] = value.split('-').map(Number)
@@ -53,6 +55,8 @@ export default function PlanningPage() {
   const [category, setCategory] = useState('')
   const [limitAmount, setLimitAmount] = useState(0)
   const [saving, setSaving] = useState(false)
+  const [incomePlan, setIncomePlan] = useState(0)
+  const [savingIncomePlan, setSavingIncomePlan] = useState(false)
 
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
@@ -70,6 +74,7 @@ export default function PlanningPage() {
       ])
       setBudgets(budgetItems)
       setForecast(forecastData)
+      setIncomePlan(forecastData.plannedMonthlyIncome ?? 0)
     } catch (err) {
       ToastService.apiError(err, { title: 'Could not load planning data', dedupeKey: 'planning-load-failed' })
     }
@@ -107,15 +112,33 @@ export default function PlanningPage() {
     }
   }
 
-  const groupedEvents = useMemo(() => {
-    const groups = new Map<string, CashFlowEvent[]>()
-    for (const event of forecast?.events ?? []) {
-      const current = groups.get(event.date) ?? []
-      current.push(event)
-      groups.set(event.date, current)
+  const saveIncomePlan = async () => {
+    setSavingIncomePlan(true)
+    try {
+      const forecastData = await updateIncomePlan(incomePlan > 0 ? incomePlan : null)
+      setForecast(forecastData)
+      setIncomePlan(forecastData.plannedMonthlyIncome ?? 0)
+      ToastService.success({
+        title: incomePlan > 0 ? 'Expected income saved' : 'Expected income cleared',
+        dedupeKey: 'income-plan-saved',
+      })
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Could not save expected income', dedupeKey: 'income-plan-save-failed' })
+    } finally {
+      setSavingIncomePlan(false)
     }
-    return Array.from(groups.entries()).slice(0, 45)
-  }, [forecast])
+  }
+
+  const firstNegativeMonth = forecast?.months.find((item) => item.negative)
+  // Projected balance at key horizons, rolled forward from the current account balance.
+  const horizons = forecast
+    ? [
+        { label: 'Balance in 3 months', month: forecast.months[2] },
+        { label: 'Balance in 6 months', month: forecast.months[5] },
+        { label: 'Balance in 12 months', month: forecast.months[11] },
+      ].filter((item) => item.month)
+    : []
+  const basisLabel = forecast?.projectionBasisMonths.map(monthLabel).join(', ')
 
   return (
     <Box maxW="1500px" mx="auto" px={{ base: 3, md: 6 }} py={{ base: 4, md: 7 }}>
@@ -125,11 +148,12 @@ export default function PlanningPage() {
           <Text color={muted} mt={1}>Category budgets, future balances and payment calendar.</Text>
         </Box>
 
-        {forecast?.horizons.some((item) => item.negative) && (
+        {firstNegativeMonth && (
           <Alert status="error" borderRadius="xl">
             <AlertIcon />
             <AlertDescription>
-              The projected total balance becomes negative within the next 90 days.
+              Your balance is projected to run out in {monthLabel(firstNegativeMonth.month)}
+              {' '}({money(firstNegativeMonth.projectedClosingBalance)}).
             </AlertDescription>
           </Alert>
         )}
@@ -144,30 +168,62 @@ export default function PlanningPage() {
             <Box>
               <Text fontWeight={800}>
                 {forecast.hasProjectionBasis
-                  ? `Forecast based on ${monthLabel(forecast.projectionBasisMonth)}`
-                  : `No standalone transaction history for ${monthLabel(forecast.projectionBasisMonth)}`}
+                  ? `Recent pattern from ${basisLabel}`
+                  : 'Not enough recent transaction history'}
               </Text>
               <AlertDescription fontSize="sm">
                 {forecast.hasProjectionBasis
-                  ? `${money(forecast.projectedMonthlyIncome)} income and ${money(forecast.projectedMonthlyExpense)} variable spending are repeated monthly. Scheduled installments and fixed payments use their actual future dates.`
-                  : 'The forecast currently includes only scheduled installments, fixed payments and transfers. Add income or expense transactions to build a monthly estimate.'}
+                  ? `Starting from your current balance of ${money(forecast.currentTotalBalance)}, rolled forward month by month. Committed items (fixed payments and installments) follow their real schedule. ${
+                      forecast.hasIncomePlan
+                        ? `Variable income uses your expected ${money(forecast.plannedMonthlyIncome ?? 0)}/month`
+                        : `Variable income is estimated from your average of ${money(forecast.averageMonthlyIncome)}/month`
+                    }; spending is estimated from your average of ${money(forecast.averageMonthlyVariableExpense)}/month.`
+                  : 'The forecast currently includes only scheduled fixed payments and installments. Add cleared income or expense transactions to build a recent monthly pattern.'}
               </AlertDescription>
             </Box>
           </Alert>
         )}
 
-        <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
-          <Card>
-            <CardBody>
-              <Stat><StatLabel>Current total</StatLabel><StatNumber>{money(forecast?.currentTotalBalance ?? 0)}</StatNumber></Stat>
-            </CardBody>
-          </Card>
-          {(forecast?.horizons ?? []).map((horizon) => (
-            <Card key={horizon.days} border="1px solid" borderColor={horizon.negative ? 'red.400' : borderColor}>
+        <Card>
+          <CardBody>
+            <VStack align="stretch" spacing={3}>
+              <Box>
+                <Heading size="md">Expected monthly income</Heading>
+                <Text fontSize="sm" color={muted} mt={1}>
+                  For predictable but variable earnings (e.g. gig work with a monthly target).
+                  When set, the forecast uses this instead of your past average. Leave 0 to estimate from history.
+                </Text>
+              </Box>
+              <HStack align="flex-end" spacing={3} flexWrap="wrap">
+                <FormControl maxW="240px">
+                  <FormLabel>Target per month</FormLabel>
+                  <NumberInput min={0} precision={2} value={incomePlan} onChange={(_, value) => setIncomePlan(value || 0)}>
+                    <NumberInputField />
+                  </NumberInput>
+                </FormControl>
+                <Button colorScheme="blue" onClick={saveIncomePlan} isLoading={savingIncomePlan}>
+                  {incomePlan > 0 ? 'Save expected income' : 'Clear expected income'}
+                </Button>
+                {forecast?.hasIncomePlan && (
+                  <Badge colorScheme="purple" alignSelf="center">
+                    Active: {money(forecast.plannedMonthlyIncome ?? 0)}/month
+                  </Badge>
+                )}
+              </HStack>
+            </VStack>
+          </CardBody>
+        </Card>
+
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+          {horizons.map(({ label, month }) => (
+            <Card key={label} border="1px solid" borderColor={month.projectedClosingBalance < 0 ? 'red.400' : borderColor}>
               <CardBody>
                 <Stat>
-                  <StatLabel>Expected in {horizon.days} days</StatLabel>
-                  <StatNumber color={horizon.negative ? 'red.500' : undefined}>{money(horizon.expectedBalance)}</StatNumber>
+                  <StatLabel>{label}</StatLabel>
+                  <StatNumber color={month.projectedClosingBalance < 0 ? 'red.500' : undefined}>
+                    {money(month.projectedClosingBalance)}
+                  </StatNumber>
+                  <Text fontSize="xs" color={muted} mt={1}>Projected balance by end of {monthLabel(month.month)}</Text>
                 </Stat>
               </CardBody>
             </Card>
@@ -232,30 +288,83 @@ export default function PlanningPage() {
 
           <Card>
             <CardBody>
-              <VStack align="stretch" spacing={4}>
-                <Heading size="md">Bills and cash-flow calendar</Heading>
-                <Text fontSize="sm" color={muted}>
-                  Includes future installments, fixed payments, transfers and estimates based on the previous month.
-                </Text>
-                {groupedEvents.length === 0 && <Text color={muted}>No projected movements in the next 90 days.</Text>}
-                {groupedEvents.map(([date, events]) => (
-                  <Box key={date} borderLeft="3px solid" borderColor="blue.400" pl={4} py={1}>
-                    <Text fontWeight={800}>{new Date(`${date}T12:00:00`).toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' })}</Text>
-                    <VStack align="stretch" spacing={1} mt={2}>
-                      {events.map((event, index) => (
-                        <HStack key={`${event.kind}-${event.description}-${index}`} justify="space-between">
-                          <Box minW={0}>
-                            <Text fontSize="sm" fontWeight={600} noOfLines={1}>{event.description}</Text>
-                            <Text fontSize="xs" color={muted}>{event.accountName || event.kind} - {event.category || 'Uncategorised'}</Text>
-                          </Box>
-                          <Text fontWeight={800} color={event.amount >= 0 ? 'green.500' : 'red.500'}>
-                            {money(event.amount)}
+              <VStack align="stretch" spacing={3}>
+                <Box>
+                  <Heading size="md">12-month cash-flow forecast</Heading>
+                  <Text fontSize="sm" color={muted} mt={1}>
+                    From next month onwards. Committed amounts are scheduled and certain; estimated amounts come from your recent average.
+                  </Text>
+                </Box>
+                {(forecast?.months ?? []).map((month) => {
+                  const confidence = month.confidencePercent
+                  const confidenceScheme =
+                    confidence >= 66 ? 'green' : confidence >= 33 ? 'orange' : 'gray'
+                  return (
+                    <Box
+                      key={month.month}
+                      p={3}
+                      border="1px solid"
+                      borderColor={month.negative ? 'red.400' : borderColor}
+                      borderRadius="xl"
+                    >
+                      <HStack justify="space-between" align="flex-start" spacing={4}>
+                        <Box>
+                          <Text fontWeight={800}>{monthLabel(month.month)}</Text>
+                          <Badge mt={1} colorScheme={confidenceScheme}>{confidence}% committed</Badge>
+                        </Box>
+                        <Box textAlign="right" flexShrink={0}>
+                          <Text fontWeight={900} fontSize="lg" color={month.negative ? 'red.500' : undefined}>
+                            {money(month.projectedClosingBalance)}
                           </Text>
-                        </HStack>
-                      ))}
-                    </VStack>
-                  </Box>
-                ))}
+                          <HStack justify="flex-end" spacing={2} mt={1}>
+                            <Text fontSize="xs" color={muted}>net</Text>
+                            <Badge colorScheme={month.netCashFlow >= 0 ? 'green' : 'red'}>
+                              {signedMoney(month.netCashFlow)}
+                            </Badge>
+                          </HStack>
+                        </Box>
+                      </HStack>
+
+                      <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3} mt={3}>
+                        <Box>
+                          <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
+                            🔒 Committed
+                          </Text>
+                          <Text fontWeight={700} color={month.committedNet < 0 ? 'red.500' : undefined}>
+                            {signedMoney(month.committedNet)}
+                          </Text>
+                          <Text fontSize="xs" color={muted}>
+                            In {money(month.fixedIncome)} · Fixed {money(month.fixedExpense)}
+                            {month.installmentExpense > 0 && ` · Installments ${money(month.installmentExpense)}`}
+                          </Text>
+                        </Box>
+                        <Box>
+                          <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
+                            {forecast?.hasIncomePlan ? '🎯 Planned + estimated' : '📊 Estimated'}
+                          </Text>
+                          <Text fontWeight={700} color={month.estimatedNet < 0 ? 'red.500' : undefined}>
+                            {signedMoney(month.estimatedNet)}
+                          </Text>
+                          <Text fontSize="xs" color={muted}>
+                            In {money(month.estimatedIncome)}
+                            {forecast?.hasIncomePlan ? ' (planned)' : ''} · Out {money(month.estimatedVariableExpense)}
+                          </Text>
+                        </Box>
+                      </SimpleGrid>
+
+                      <Progress
+                        mt={3}
+                        value={confidence}
+                        colorScheme={confidenceScheme}
+                        borderRadius="full"
+                        size="sm"
+                      />
+                    </Box>
+                  )
+                })}
+                {!forecast?.months.length && (
+                  <Text color={muted}>No forecast is available yet.</Text>
+                )}
               </VStack>
             </CardBody>
           </Card>

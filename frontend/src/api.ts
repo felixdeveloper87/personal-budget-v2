@@ -514,4 +514,13 @@ export async function getCashFlowForecast(): Promise<CashFlowForecast> {
   return data
 }
 
+export async function updateIncomePlan(
+  plannedMonthlyIncome: number | null,
+): Promise<CashFlowForecast> {
+  const { data } = await api.put<CashFlowForecast>('/planning/income-plan', {
+    plannedMonthlyIncome,
+  })
+  return data
+}
+
 export default api

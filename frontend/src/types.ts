@@ -351,29 +351,31 @@ export interface CategoryBudgetRequest {
   limitAmount: number
 }
 
-export interface CashFlowEvent {
-  date: string
-  kind: 'TRANSACTION' | 'INSTALLMENT' | 'RECURRING' | 'TRANSFER' | 'BUDGET' | 'ESTIMATE'
-  description: string
-  amount: number
-  accountId?: number | null
-  accountName?: string | null
-  category?: string | null
+export interface CashFlowForecastMonth {
+  month: string
+  monthEnd: string
+  fixedIncome: number
+  estimatedIncome: number
+  fixedExpense: number
+  installmentExpense: number
+  estimatedVariableExpense: number
+  committedNet: number
+  estimatedNet: number
+  netCashFlow: number
+  projectedClosingBalance: number
+  confidencePercent: number
+  negative: boolean
 }
 
 export interface CashFlowForecast {
   currentTotalBalance: number
-  projectionBasisMonth: string
+  projectionBasisMonths: string[]
   hasProjectionBasis: boolean
-  projectedMonthlyIncome: number
-  projectedMonthlyExpense: number
-  horizons: {
-    days: number
-    date: string
-    expectedBalance: number
-    negative: boolean
-  }[]
-  events: CashFlowEvent[]
+  averageMonthlyIncome: number
+  averageMonthlyVariableExpense: number
+  hasIncomePlan: boolean
+  plannedMonthlyIncome: number | null
+  months: CashFlowForecastMonth[]
 }
 
 // Search component interfaces

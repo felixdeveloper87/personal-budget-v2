@@ -2,6 +2,7 @@ package com.example.budget.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,6 +44,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UserPlan plan = UserPlan.STANDARD;
+
+    /**
+     * Optional global "expected monthly income" used by the cash-flow forecast as
+     * a predictable (but not fixed) income tier. {@code null} means no plan is set,
+     * so the forecast falls back to estimating income from recent history.
+     */
+    @Column(name = "planned_monthly_income")
+    private BigDecimal plannedMonthlyIncome;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -123,6 +132,14 @@ public class User {
 
     public void setPlan(UserPlan plan) {
         this.plan = plan;
+    }
+
+    public BigDecimal getPlannedMonthlyIncome() {
+        return plannedMonthlyIncome;
+    }
+
+    public void setPlannedMonthlyIncome(BigDecimal plannedMonthlyIncome) {
+        this.plannedMonthlyIncome = plannedMonthlyIncome;
     }
 
     public List<Transaction> getTransactions() {
