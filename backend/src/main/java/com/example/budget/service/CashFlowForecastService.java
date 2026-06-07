@@ -4,7 +4,6 @@ import com.example.budget.dto.CashFlowForecastDTO;
 import com.example.budget.dto.FinancialAccountDTO;
 import com.example.budget.model.*;
 import com.example.budget.repository.AccountTransferRepository;
-import com.example.budget.repository.CategoryBudgetRepository;
 import com.example.budget.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
@@ -19,11 +18,12 @@ import java.util.List;
 
 @Service
 public class CashFlowForecastService {
+    private static final List<Integer> FORECAST_HORIZONS = List.of(30, 60, 90);
+
     private final FinancialAccountService accountService;
     private final TransactionRepository transactionRepository;
     private final AccountTransferRepository transferRepository;
     private final RecurringTransactionRepository recurringRepository;
-    private final CategoryBudgetRepository budgetRepository;
     private final CreditCardBillingService creditCardBillingService;
 
     public CashFlowForecastService(
@@ -31,34 +31,49 @@ public class CashFlowForecastService {
             TransactionRepository transactionRepository,
             AccountTransferRepository transferRepository,
             RecurringTransactionRepository recurringRepository,
-            CategoryBudgetRepository budgetRepository,
             CreditCardBillingService creditCardBillingService) {
         this.accountService = accountService;
         this.transactionRepository = transactionRepository;
         this.transferRepository = transferRepository;
         this.recurringRepository = recurringRepository;
-        this.budgetRepository = budgetRepository;
         this.creditCardBillingService = creditCardBillingService;
     }
 
     @Transactional(readOnly = true)
     public CashFlowForecastDTO forecast(User user) {
         LocalDate today = LocalDate.now();
+        LocalDate start = today.plusDays(1);
         LocalDate end = today.plusDays(90);
+        YearMonth projectionBasisMonth = YearMonth.from(today).minusMonths(1);
         BigDecimal current = accountService.summary(user).accounts().stream()
                 .filter(FinancialAccountDTO::active)
                 .map(FinancialAccountDTO::currentBalance)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        List<Transaction> previousMonthTransactions = transactionRepository
+                .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                        user,
+                        projectionBasisMonth.atDay(1),
+                        projectionBasisMonth.atEndOfMonth());
+        List<Transaction> projectionBasis = previousMonthTransactions.stream()
+                .filter(this::isSettledStandaloneTransaction)
+                .toList();
+        BigDecimal projectedMonthlyIncome = sumByType(projectionBasis, TransactionType.INCOME);
+        BigDecimal projectedMonthlyExpense = sumByType(projectionBasis, TransactionType.EXPENSE);
+
         List<CashFlowForecastDTO.Event> events = new ArrayList<>();
-        addPersistedTransactions(events, user, today.plusDays(1), end);
-        addTransfers(events, user, today.plusDays(1), end);
-        addRecurring(events, user, today.plusDays(1), end);
-        addBudgetRemainders(events, user, today, end);
+        addPersistedInstallments(events, user, start, end);
+        addTransfers(events, user, start, end);
+        addRecurring(events, user, start, end);
+        addMonthlyEstimateEvents(
+                events,
+                today,
+                projectedMonthlyIncome,
+                projectedMonthlyExpense);
         events.sort(Comparator.comparing(CashFlowForecastDTO.Event::date)
                 .thenComparing(CashFlowForecastDTO.Event::description));
 
-        List<CashFlowForecastDTO.Horizon> horizons = List.of(30, 60, 90).stream()
+        List<CashFlowForecastDTO.Horizon> horizons = FORECAST_HORIZONS.stream()
                 .map(days -> {
                     LocalDate date = today.plusDays(days);
                     BigDecimal expected = current.add(events.stream()
@@ -69,28 +84,62 @@ public class CashFlowForecastService {
                             days, date, expected, expected.signum() < 0);
                 })
                 .toList();
-        return new CashFlowForecastDTO(current, horizons, events);
+        return new CashFlowForecastDTO(
+                current,
+                projectionBasisMonth.toString(),
+                !projectionBasis.isEmpty(),
+                projectedMonthlyIncome,
+                projectedMonthlyExpense,
+                horizons,
+                events);
     }
 
-    private void addPersistedTransactions(
+    private void addPersistedInstallments(
             List<CashFlowForecastDTO.Event> events, User user, LocalDate start, LocalDate end) {
         for (Transaction transaction : transactionRepository
                 .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, start, end)) {
-            if (transaction.getAccount() == null) continue;
+            if (transaction.getAccount() == null || transaction.getInstallmentPlan() == null) continue;
             BigDecimal signed = transaction.getType() == TransactionType.INCOME
                     ? transaction.getAmount()
                     : transaction.getAmount().negate();
-            String kind = transaction.getInstallmentPlan() != null
-                    ? "INSTALLMENT"
-                    : transaction.getRecurringTransaction() != null ? "RECURRING" : "TRANSACTION";
             events.add(new CashFlowForecastDTO.Event(
                     transaction.getPaymentDate(),
-                    kind,
+                    "INSTALLMENT",
                     transaction.getDescription(),
                     signed,
                     transaction.getAccount().getId(),
                     transaction.getAccount().getName(),
                     transaction.getCategory()));
+        }
+    }
+
+    private void addMonthlyEstimateEvents(
+            List<CashFlowForecastDTO.Event> events,
+            LocalDate today,
+            BigDecimal projectedMonthlyIncome,
+            BigDecimal projectedMonthlyExpense) {
+        for (Integer days : FORECAST_HORIZONS) {
+            LocalDate projectedDate = today.plusDays(days);
+            if (projectedMonthlyIncome.signum() > 0) {
+                events.add(new CashFlowForecastDTO.Event(
+                        projectedDate,
+                        "ESTIMATE",
+                        "Estimated monthly income",
+                        projectedMonthlyIncome,
+                        null,
+                        null,
+                        "Income estimate"));
+            }
+            if (projectedMonthlyExpense.signum() > 0) {
+                events.add(new CashFlowForecastDTO.Event(
+                        projectedDate,
+                        "ESTIMATE",
+                        "Estimated variable spending",
+                        projectedMonthlyExpense.negate(),
+                        null,
+                        null,
+                        "Expense estimate"));
+            }
         }
     }
 
@@ -140,35 +189,19 @@ public class CashFlowForecastService {
         }
     }
 
-    private void addBudgetRemainders(
-            List<CashFlowForecastDTO.Event> events, User user, LocalDate start, LocalDate end) {
-        YearMonth first = YearMonth.from(start);
-        YearMonth last = YearMonth.from(end);
-        for (YearMonth month = first; !month.isAfter(last); month = month.plusMonths(1)) {
-            LocalDate eventDate = month.atEndOfMonth();
-            if (eventDate.isBefore(start)) continue;
-            if (eventDate.isAfter(end)) eventDate = end;
+    private boolean isSettledStandaloneTransaction(Transaction transaction) {
+        return transaction.getAccount() != null
+                && transaction.getInstallmentPlan() == null
+                && transaction.getRecurringTransaction() == null
+                && transaction.getStatus() != null
+                && transaction.getStatus().affectsCurrentBalance();
+    }
 
-            for (CategoryBudget budget : budgetRepository
-                    .findByUserAndYearAndMonthOrderByCategoryAsc(
-                            user, month.getYear(), month.getMonthValue())) {
-                BigDecimal spentOrPlanned = transactionRepository
-                        .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                                user, month.atDay(1), month.atEndOfMonth())
-                        .stream()
-                        .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
-                        .filter(transaction -> budget.getCategory().equalsIgnoreCase(transaction.getCategory()))
-                        .map(Transaction::getAmount)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-                BigDecimal remaining = budget.getLimitAmount().subtract(spentOrPlanned);
-                if (remaining.signum() > 0) {
-                    events.add(new CashFlowForecastDTO.Event(
-                            eventDate, "BUDGET",
-                            "Remaining " + budget.getCategory() + " budget",
-                            remaining.negate(), null, null, budget.getCategory()));
-                }
-            }
-        }
+    private BigDecimal sumByType(List<Transaction> transactions, TransactionType type) {
+        return transactions.stream()
+                .filter(transaction -> transaction.getType() == type)
+                .map(Transaction::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private LocalDate nextMonthlyDate(LocalDate currentDate, int targetDay) {

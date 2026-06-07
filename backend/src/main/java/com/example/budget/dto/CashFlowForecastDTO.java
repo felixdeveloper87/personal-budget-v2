@@ -6,6 +6,10 @@ import java.util.List;
 
 public record CashFlowForecastDTO(
         BigDecimal currentTotalBalance,
+        String projectionBasisMonth,
+        boolean hasProjectionBasis,
+        BigDecimal projectedMonthlyIncome,
+        BigDecimal projectedMonthlyExpense,
         List<Horizon> horizons,
         List<Event> events
 ) {

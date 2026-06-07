@@ -353,7 +353,7 @@ export interface CategoryBudgetRequest {
 
 export interface CashFlowEvent {
   date: string
-  kind: 'TRANSACTION' | 'INSTALLMENT' | 'RECURRING' | 'TRANSFER' | 'BUDGET'
+  kind: 'TRANSACTION' | 'INSTALLMENT' | 'RECURRING' | 'TRANSFER' | 'BUDGET' | 'ESTIMATE'
   description: string
   amount: number
   accountId?: number | null
@@ -363,6 +363,10 @@ export interface CashFlowEvent {
 
 export interface CashFlowForecast {
   currentTotalBalance: number
+  projectionBasisMonth: string
+  hasProjectionBasis: boolean
+  projectedMonthlyIncome: number
+  projectedMonthlyExpense: number
   horizons: {
     days: number
     date: string

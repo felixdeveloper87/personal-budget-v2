@@ -37,6 +37,14 @@ const monthValue = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+const monthLabel = (value?: string) => {
+  if (!value) return 'the previous month'
+  const [year, month] = value.split('-').map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
 
 export default function PlanningPage() {
   const [selectedMonth, setSelectedMonth] = useState(monthValue(new Date()))
@@ -126,6 +134,28 @@ export default function PlanningPage() {
           </Alert>
         )}
 
+        {forecast && (
+          <Alert
+            status={forecast.hasProjectionBasis ? 'info' : 'warning'}
+            borderRadius="xl"
+            alignItems="flex-start"
+          >
+            <AlertIcon mt={0.5} />
+            <Box>
+              <Text fontWeight={800}>
+                {forecast.hasProjectionBasis
+                  ? `Forecast based on ${monthLabel(forecast.projectionBasisMonth)}`
+                  : `No standalone transaction history for ${monthLabel(forecast.projectionBasisMonth)}`}
+              </Text>
+              <AlertDescription fontSize="sm">
+                {forecast.hasProjectionBasis
+                  ? `${money(forecast.projectedMonthlyIncome)} income and ${money(forecast.projectedMonthlyExpense)} variable spending are repeated monthly. Scheduled installments and fixed payments use their actual future dates.`
+                  : 'The forecast currently includes only scheduled installments, fixed payments and transfers. Add income or expense transactions to build a monthly estimate.'}
+              </AlertDescription>
+            </Box>
+          </Alert>
+        )}
+
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
           <Card>
             <CardBody>
@@ -205,7 +235,7 @@ export default function PlanningPage() {
               <VStack align="stretch" spacing={4}>
                 <Heading size="md">Bills and cash-flow calendar</Heading>
                 <Text fontSize="sm" color={muted}>
-                  Includes future installments, fixed payments, transfers and remaining category budgets.
+                  Includes future installments, fixed payments, transfers and estimates based on the previous month.
                 </Text>
                 {groupedEvents.length === 0 && <Text color={muted}>No projected movements in the next 90 days.</Text>}
                 {groupedEvents.map(([date, events]) => (
