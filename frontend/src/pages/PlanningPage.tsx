@@ -46,8 +46,7 @@ export default function PlanningPage() {
   const [limitAmount, setLimitAmount] = useState(0)
   const [saving, setSaving] = useState(false)
 
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50')
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.150')
+  const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
 
   const selectedDate = useMemo(() => {
@@ -128,13 +127,13 @@ export default function PlanningPage() {
         )}
 
         <SimpleGrid columns={{ base: 1, md: 4 }} spacing={4}>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
+          <Card>
             <CardBody>
               <Stat><StatLabel>Current total</StatLabel><StatNumber>{money(forecast?.currentTotalBalance ?? 0)}</StatNumber></Stat>
             </CardBody>
           </Card>
           {(forecast?.horizons ?? []).map((horizon) => (
-            <Card key={horizon.days} bg={cardBg} border="1px solid" borderColor={horizon.negative ? 'red.400' : borderColor}>
+            <Card key={horizon.days} border="1px solid" borderColor={horizon.negative ? 'red.400' : borderColor}>
               <CardBody>
                 <Stat>
                   <StatLabel>Expected in {horizon.days} days</StatLabel>
@@ -146,7 +145,7 @@ export default function PlanningPage() {
         </SimpleGrid>
 
         <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={5}>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
+          <Card>
             <CardBody>
               <VStack align="stretch" spacing={4}>
                 <HStack justify="space-between">
@@ -201,7 +200,7 @@ export default function PlanningPage() {
             </CardBody>
           </Card>
 
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
+          <Card>
             <CardBody>
               <VStack align="stretch" spacing={4}>
                 <Heading size="md">Bills and cash-flow calendar</Heading>

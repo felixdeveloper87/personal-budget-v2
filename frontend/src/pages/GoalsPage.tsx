@@ -39,8 +39,6 @@ export default function GoalsPage() {
   const [saving, setSaving] = useState(false)
   const [contributions, setContributions] = useState<Record<number, number>>({})
 
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50')
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.150')
   const muted = useColorModeValue('gray.600', 'gray.400')
 
   const load = useCallback(async () => {
@@ -107,7 +105,7 @@ export default function GoalsPage() {
           <Text color={muted} mt={1}>Track dedicated targets without changing account balances.</Text>
         </Box>
 
-        <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
+        <Card>
           <CardBody>
             <VStack align="stretch" spacing={4}>
               <Heading size="md">Create a goal</Heading>
@@ -142,7 +140,7 @@ export default function GoalsPage() {
 
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={5}>
           {goals.filter((goal) => !goal.archived).map((goal) => (
-            <Card key={goal.id} bg={cardBg} border="1px solid" borderColor={borderColor}>
+            <Card key={goal.id}>
               <CardBody>
                 <VStack align="stretch" spacing={4}>
                   <HStack justify="space-between">

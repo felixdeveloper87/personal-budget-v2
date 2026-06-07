@@ -9,6 +9,8 @@ import {
   Button,
   Card,
   CardBody,
+  Divider,
+  Flex,
   FormControl,
   FormHelperText,
   FormLabel,
@@ -16,6 +18,8 @@ import {
   HStack,
   Icon,
   Input,
+  InputGroup,
+  InputLeftElement,
   NumberInput,
   NumberInputField,
   Progress,
@@ -30,22 +34,29 @@ import {
 } from '@chakra-ui/react'
 import {
   archiveAccount,
-  assignLegacyTransactions,
   createAccount,
   createAccountTransfer,
   getAccountSummary,
-  listPaymentMethods,
   updateAccount,
 } from '../api'
 import {
   AccountSummary,
   AccountType,
   FinancialAccount,
-  PaymentMethod,
 } from '../types'
 import { ToastService } from '../services/toast'
 import { BankCombobox, BankLogo, getBankMeta } from '../components/ui'
-import { CreditCard, Wallet } from '../components/ui/icons'
+import {
+  ArrowRight,
+  Building,
+  CreditCard,
+  DollarSign,
+  Pencil,
+  Plus,
+  Repeat,
+  Trash2,
+  Wallet,
+} from '../components/ui/icons'
 
 const ACCOUNT_LABELS: Record<AccountType, string> = {
   CURRENT: 'Current account',
@@ -62,18 +73,27 @@ const ACCOUNT_HELP: Record<AccountType, string> = {
 }
 
 const CREATABLE_ACCOUNT_TYPES: AccountType[] = ['CURRENT', 'SAVINGS', 'CASH']
+const ACCOUNT_NAME_SUFFIX: Record<AccountType, string> = {
+  CURRENT: 'Current',
+  SAVINGS: 'Savings',
+  CASH: 'Cash',
+  CREDIT_CARD: 'Credit',
+}
 
 const today = () => new Date().toISOString().slice(0, 10)
 const money = (value: number, currency = 'GBP') =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
+const accountName = (institution: string, type: AccountType) => {
+  const issuer = institution.trim()
+  if (type === 'CASH') return issuer ? `${issuer} Cash` : 'Cash'
+  return issuer ? `${issuer} ${ACCOUNT_NAME_SUFFIX[type]}` : ''
+}
 
 export default function AccountsPage() {
   const [summary, setSummary] = useState<AccountSummary | null>(null)
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  const [name, setName] = useState('')
   const [institution, setInstitution] = useState('')
   const [type, setType] = useState<AccountType>('CURRENT')
   const [openingBalance, setOpeningBalance] = useState('0')
@@ -86,29 +106,20 @@ export default function AccountsPage() {
   const [transferDate, setTransferDate] = useState(today())
   const [transferDescription, setTransferDescription] = useState('')
 
-  const [legacyAccountId, setLegacyAccountId] = useState<number | null>(null)
-  const [legacyPaymentMethodId, setLegacyPaymentMethodId] = useState<number | null>(null)
-  const [legacyStartDate, setLegacyStartDate] = useState('')
-  const [legacyEndDate, setLegacyEndDate] = useState('')
-
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50')
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.150')
+  const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
   const accountIconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-
+  const softBg = useColorModeValue('gray.50', 'rgba(255, 255, 255, 0.03)')
+  const blueSoftBg = useColorModeValue('blue.50', 'whiteAlpha.100')
+  const fieldBg = useColorModeValue('white', 'whiteAlpha.50')
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [accountSummary, methods] = await Promise.all([
-        getAccountSummary(),
-        listPaymentMethods(),
-      ])
+      const accountSummary = await getAccountSummary()
       setSummary(accountSummary)
-      setPaymentMethods(methods)
       const active = accountSummary.accounts.filter((account) => account.active)
       setFromAccountId((current) => current ?? active[0]?.id ?? null)
       setToAccountId((current) => current ?? active[1]?.id ?? null)
-      setLegacyAccountId((current) => current ?? active[0]?.id ?? null)
     } catch (err) {
       ToastService.apiError(err, {
         title: 'Could not load accounts',
@@ -125,9 +136,9 @@ export default function AccountsPage() {
     () => summary?.accounts.filter((account) => account.active) ?? [],
     [summary],
   )
+  const generatedAccountName = accountName(institution, type)
 
   const resetAccountForm = () => {
-    setName('')
     setInstitution('')
     setType('CURRENT')
     setOpeningBalance('0')
@@ -137,7 +148,6 @@ export default function AccountsPage() {
 
   const editAccount = (account: FinancialAccount) => {
     setEditingAccountId(account.id)
-    setName(account.name)
     setInstitution(account.institution ?? '')
     setType(account.type)
     setOpeningBalance(String(account.currentBalance))
@@ -145,7 +155,7 @@ export default function AccountsPage() {
   }
 
   const saveAccount = async () => {
-    if (!name.trim()) return
+    if (!generatedAccountName) return
     const parsedOpeningBalance = Number(openingBalance)
     if (openingBalance.trim() === '' || openingBalance === '-' || !Number.isFinite(parsedOpeningBalance)) {
       ToastService.error({
@@ -158,7 +168,7 @@ export default function AccountsPage() {
     setSaving(true)
     try {
       const request = {
-        name: name.trim(),
+        name: generatedAccountName,
         institution: institution.trim() || null,
         type,
         currency: 'GBP',
@@ -210,37 +220,6 @@ export default function AccountsPage() {
     }
   }
 
-  const associateLegacy = async () => {
-    if (!legacyAccountId) return
-    const account = activeAccounts.find((item) => item.id === legacyAccountId)
-    const hasFilter = Boolean(legacyPaymentMethodId || legacyStartDate || legacyEndDate)
-    const message = hasFilter
-      ? `Associate all matching unassigned transactions with ${account?.name ?? 'this account'}?`
-      : `No filter is selected. This will associate every unassigned transaction with ${account?.name ?? 'this account'}. Continue?`
-    if (!window.confirm(message)) return
-    setSaving(true)
-    try {
-      const count = await assignLegacyTransactions(legacyAccountId, {
-        paymentMethodId: legacyPaymentMethodId,
-        startDate: legacyStartDate || undefined,
-        endDate: legacyEndDate || undefined,
-      })
-      await load()
-      ToastService.success({
-        title: `${count} transaction${count === 1 ? '' : 's'} associated`,
-        description: 'No transaction values or dates were changed.',
-        dedupeKey: 'legacy-transactions-associated',
-      })
-    } catch (err) {
-      ToastService.apiError(err, {
-        title: 'Could not associate transactions',
-        dedupeKey: 'legacy-assignment-failed',
-      })
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const archive = async (account: FinancialAccount) => {
     try {
       await archiveAccount(account.id)
@@ -252,39 +231,70 @@ export default function AccountsPage() {
   }
 
   return (
-    <Box maxW="1500px" mx="auto" px={{ base: 3, md: 6 }} py={{ base: 4, md: 7 }}>
-      <VStack align="stretch" spacing={6}>
+    <Box w="full" px={{ base: 3, md: 6, lg: 8 }} py={{ base: 4, md: 7 }}>
+      <VStack align="stretch" spacing={7}>
         <Box>
-          <Heading size="lg">Accounts</Heading>
+          <Heading size="lg" letterSpacing="-0.025em">Accounts</Heading>
           <Text color={muted} mt={1}>
-            Accounts hold money or debt. Payment methods describe how a transaction was paid.
+            Manage balances, connected institutions and movement between your accounts.
           </Text>
         </Box>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              <Stat>
-                <StatLabel>Total balance across active accounts</StatLabel>
-                <StatNumber>{money(summary?.totalBalance ?? 0)}</StatNumber>
-              </Stat>
+        <Box>
+          <Card overflow="hidden" position="relative">
+            <Box
+              position="absolute"
+              inset={0}
+              bgGradient="linear(to-r, blue.50, transparent)"
+              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
+              pointerEvents="none"
+            />
+            <CardBody position="relative">
+              <HStack justify="space-between" align="center">
+                <Stat>
+                  <StatLabel color={muted} fontWeight={700}>Total balance</StatLabel>
+                  <StatNumber
+                    mt={1}
+                    fontSize={{ base: '2xl', md: '3xl' }}
+                    letterSpacing="-0.035em"
+                    color={(summary?.totalBalance ?? 0) < 0 ? 'red.500' : undefined}
+                  >
+                    {money(summary?.totalBalance ?? 0)}
+                  </StatNumber>
+                  <Text fontSize="xs" color={muted} mt={1}>Across all active accounts</Text>
+                </Stat>
+                <Flex
+                  w="48px"
+                  h="48px"
+                  align="center"
+                  justify="center"
+                  borderRadius="2xl"
+                  bg={blueSoftBg}
+                  color="blue.500"
+                  flexShrink={0}
+                >
+                  <Icon as={Wallet} boxSize={6} weight="duotone" />
+                </Flex>
+              </HStack>
             </CardBody>
           </Card>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              <Stat>
-                <StatLabel>Legacy transactions not associated</StatLabel>
-                <StatNumber>{summary?.unassignedTransactionCount ?? 0}</StatNumber>
-              </Stat>
-            </CardBody>
-          </Card>
-        </SimpleGrid>
+        </Box>
 
-        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={5}>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              <VStack align="stretch" spacing={4}>
-                <Heading size="md">Your accounts</Heading>
+        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={6} alignItems="start">
+          <Card>
+            <CardBody p={{ base: 4, md: 5 }}>
+              <VStack align="stretch" spacing={5}>
+                <HStack justify="space-between">
+                  <Box>
+                    <Heading size="md" letterSpacing="-0.02em">Your accounts</Heading>
+                    <Text fontSize="sm" color={muted} mt={1}>
+                      Live balances based on cleared account activity.
+                    </Text>
+                  </Box>
+                  <Badge colorScheme="blue" borderRadius="full" px={3} py={1}>
+                    {activeAccounts.length} active
+                  </Badge>
+                </HStack>
                 {activeAccounts.length === 0 && (
                   <Text color={muted}>{loading ? 'Loading...' : 'Create your first account below.'}</Text>
                 )}
@@ -295,7 +305,14 @@ export default function AccountsPage() {
                     p={4}
                     border="1px solid"
                     borderColor={borderColor}
-                    borderRadius="xl"
+                    borderRadius="2xl"
+                    bg={softBg}
+                    transition="transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
+                    _hover={{
+                      transform: 'translateY(-2px)',
+                      borderColor: 'blue.200',
+                      boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
+                    }}
                   >
                     <HStack justify="space-between" align="flex-start">
                       <HStack align="flex-start" spacing={3} minW={0}>
@@ -326,15 +343,27 @@ export default function AccountsPage() {
                         <Text
                           fontSize="xl"
                           fontWeight={900}
+                          letterSpacing="-0.025em"
                           color={account.currentBalance < 0 ? 'red.500' : undefined}
                         >
                           {money(account.currentBalance, account.currency)}
                         </Text>
                         <HStack>
-                          <Button size="xs" variant="ghost" onClick={() => editAccount(account)}>
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            leftIcon={<Icon as={Pencil} boxSize={3.5} />}
+                            onClick={() => editAccount(account)}
+                          >
                             Edit
                           </Button>
-                          <Button size="xs" variant="ghost" colorScheme="red" onClick={() => archive(account)}>
+                          <Button
+                            size="xs"
+                            variant="ghost"
+                            colorScheme="red"
+                            leftIcon={<Icon as={Trash2} boxSize={3.5} />}
+                            onClick={() => archive(account)}
+                          >
                             Archive
                           </Button>
                         </HStack>
@@ -386,28 +415,81 @@ export default function AccountsPage() {
             </CardBody>
           </Card>
 
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              <VStack align="stretch" spacing={4}>
-                <HStack justify="space-between">
-                  <Heading size="md">{editingAccountId ? 'Edit account' : 'Add account'}</Heading>
+          <Card
+            border="1px solid"
+            borderColor={editingAccountId ? 'blue.300' : borderColor}
+            overflow="hidden"
+          >
+            <Box
+              px={{ base: 4, md: 5 }}
+              py={4}
+              bgGradient="linear(to-r, blue.50, purple.50)"
+              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
+              borderBottom="1px solid"
+              borderColor={borderColor}
+            >
+              <HStack justify="space-between">
+                <HStack spacing={3}>
+                  <Flex
+                    w="42px"
+                    h="42px"
+                    align="center"
+                    justify="center"
+                    borderRadius="xl"
+                    bg="blue.500"
+                    color="white"
+                    boxShadow="0 8px 18px rgba(37, 99, 235, 0.22)"
+                  >
+                    <Icon as={editingAccountId ? Pencil : Plus} boxSize={5} weight="bold" />
+                  </Flex>
+                  <Box>
+                    <Heading size="md" letterSpacing="-0.02em">
+                      {editingAccountId ? 'Edit account' : 'Add a new account'}
+                    </Heading>
+                    <Text fontSize="sm" color={muted} mt={0.5}>
+                      {editingAccountId
+                        ? 'Update the account details and reconcile its balance.'
+                        : 'Connect the places where you keep or manage money.'}
+                    </Text>
+                  </Box>
+                </HStack>
                   {editingAccountId && (
                     <Button size="sm" variant="ghost" onClick={resetAccountForm}>Cancel</Button>
                   )}
-                </HStack>
-                <Alert status="info" borderRadius="lg">
-                  <AlertIcon />
-                  <AlertDescription fontSize="sm">
-                    Create current, savings or cash accounts here. Credit cards and Monzo Flex
-                    belong under Payment methods; choose here the account that pays their bill.
-                  </AlertDescription>
+              </HStack>
+            </Box>
+            <CardBody p={{ base: 4, md: 5 }}>
+              <VStack align="stretch" spacing={5}>
+                <Alert
+                  status="info"
+                  variant="left-accent"
+                  borderRadius="xl"
+                  bg={blueSoftBg}
+                  alignItems="flex-start"
+                >
+                  <AlertIcon mt={0.5} />
+                  <Box>
+                    <AlertTitle fontSize="sm">Balance accounts only</AlertTitle>
+                    <AlertDescription fontSize="sm" color={muted}>
+                      Credit cards belong under Payment methods. Add here the
+                      current, savings or cash account that settles those payments.
+                    </AlertDescription>
+                  </Box>
                 </Alert>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
-                  <FormControl isRequired>
-                    <FormLabel>Name</FormLabel>
-                    <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Monzo Current" />
-                  </FormControl>
-                  <FormControl>
+
+                <Box>
+                  <Text
+                    fontSize="xs"
+                    fontWeight={800}
+                    color={muted}
+                    textTransform="uppercase"
+                    letterSpacing="0.08em"
+                    mb={3}
+                  >
+                    Account details
+                  </Text>
+                  <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                  <FormControl isRequired={type !== 'CASH'}>
                     <FormLabel>Bank or issuer</FormLabel>
                     <HStack>
                       {getBankMeta(institution) && (
@@ -422,10 +504,16 @@ export default function AccountsPage() {
                         />
                       </Box>
                     </HStack>
+                    <FormHelperText>
+                      {type === 'CASH'
+                        ? 'Optional for physical cash.'
+                        : 'Used together with the account type to generate its name.'}
+                    </FormHelperText>
                   </FormControl>
                   <FormControl>
                     <FormLabel>Type</FormLabel>
                     <Select
+                      bg={fieldBg}
                       value={type}
                       onChange={(event) => {
                         const nextType = event.target.value as AccountType
@@ -442,20 +530,44 @@ export default function AccountsPage() {
                     </Select>
                     <FormHelperText>{ACCOUNT_HELP[type]}</FormHelperText>
                   </FormControl>
+                  <FormControl gridColumn={{ sm: '1 / -1' }}>
+                    <FormLabel>Account name</FormLabel>
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none">
+                        <Icon as={Wallet} color={muted} boxSize={4} />
+                      </InputLeftElement>
+                      <Input
+                        bg={softBg}
+                        value={generatedAccountName}
+                        placeholder="Select a bank or issuer"
+                        isReadOnly
+                        fontWeight={700}
+                      />
+                    </InputGroup>
+                    <FormHelperText>
+                      Generated automatically from the bank or issuer and account type.
+                    </FormHelperText>
+                  </FormControl>
                   <FormControl>
                     <FormLabel>Current balance</FormLabel>
-                    <Input
-                      type="text"
-                      inputMode="decimal"
-                      value={openingBalance}
-                      onChange={(event) => {
-                        const value = event.target.value.replace(',', '.')
-                        if (/^-?\d*(\.\d{0,2})?$/.test(value)) {
-                          setOpeningBalance(value)
-                        }
-                      }}
-                      placeholder="-250.00"
-                    />
+                    <InputGroup>
+                      <InputLeftElement pointerEvents="none" color={muted} fontWeight={700}>
+                        £
+                      </InputLeftElement>
+                      <Input
+                        bg={fieldBg}
+                        type="text"
+                        inputMode="decimal"
+                        value={openingBalance}
+                        onChange={(event) => {
+                          const value = event.target.value.replace(',', '.')
+                          if (/^-?\d*(\.\d{0,2})?$/.test(value)) {
+                            setOpeningBalance(value)
+                          }
+                        }}
+                        placeholder="-250.00"
+                      />
+                    </InputGroup>
                     <FormHelperText>
                       {editingAccountId
                         ? 'Updates the current balance without changing existing transactions or transfers.'
@@ -471,119 +583,229 @@ export default function AccountsPage() {
                         value={overdraftLimit}
                         onChange={(_, value) => setOverdraftLimit(Number.isNaN(value) ? 0 : value)}
                       >
-                        <NumberInputField />
+                        <NumberInputField bg={fieldBg} pl={8} />
                       </NumberInput>
                       <FormHelperText>Use 0 when the account has no overdraft facility.</FormHelperText>
                     </FormControl>
                   )}
-                </SimpleGrid>
-                <Button colorScheme="blue" onClick={saveAccount} isLoading={saving} isDisabled={!name.trim()}>
-                  {editingAccountId ? 'Save account' : 'Create account'}
+                  </SimpleGrid>
+                </Box>
+
+                <Divider />
+
+                <Button
+                  h="48px"
+                  bgGradient="linear(to-r, blue.500, purple.500)"
+                  color="white"
+                  leftIcon={<Icon as={editingAccountId ? Pencil : Plus} boxSize={4} />}
+                  onClick={saveAccount}
+                  isLoading={saving}
+                  isDisabled={!generatedAccountName}
+                  _hover={{
+                    bgGradient: 'linear(to-r, blue.600, purple.600)',
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 10px 22px rgba(37, 99, 235, 0.24)',
+                  }}
+                  _active={{ transform: 'translateY(0)' }}
+                >
+                  {editingAccountId ? 'Save account changes' : 'Create account'}
                 </Button>
               </VStack>
             </CardBody>
           </Card>
         </SimpleGrid>
 
-        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={5}>
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              <VStack align="stretch" spacing={4}>
-                <Heading size="md">Transfer between accounts</Heading>
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
-                  <FormControl>
-                    <FormLabel>From</FormLabel>
-                    <Select value={fromAccountId ?? ''} onChange={(event) => setFromAccountId(Number(event.target.value) || null)}>
-                      {activeAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
+        <Box>
+          <Card
+            border="1px solid"
+            borderColor={borderColor}
+            overflow="hidden"
+          >
+            <Box
+              px={{ base: 4, md: 5 }}
+              py={4}
+              bgGradient="linear(to-r, teal.50, blue.50)"
+              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
+              borderBottom="1px solid"
+              borderColor={borderColor}
+            >
+              <HStack spacing={3}>
+                <Flex
+                  w="42px"
+                  h="42px"
+                  align="center"
+                  justify="center"
+                  borderRadius="xl"
+                  bg="teal.500"
+                  color="white"
+                  boxShadow="0 8px 18px rgba(13, 148, 136, 0.22)"
+                >
+                  <Icon as={Repeat} boxSize={5} weight="bold" />
+                </Flex>
+                <Box>
+                  <Heading size="md" letterSpacing="-0.02em">Transfer money</Heading>
+                  <Text fontSize="sm" color={muted} mt={0.5}>
+                    Move funds without creating income or expense records.
+                  </Text>
+                </Box>
+              </HStack>
+            </Box>
+            <CardBody p={{ base: 4, md: 5 }}>
+              <VStack align="stretch" spacing={5}>
+                <Flex
+                  direction={{ base: 'column', sm: 'row' }}
+                  align={{ base: 'stretch', sm: 'center' }}
+                  gap={3}
+                >
+                  <Box
+                    flex={1}
+                    p={4}
+                    bg={softBg}
+                    border="1px solid"
+                    borderColor={borderColor}
+                    borderRadius="2xl"
+                  >
+                    <HStack spacing={2} mb={3}>
+                      <Icon as={Wallet} color="orange.500" boxSize={4} weight="duotone" />
+                      <Text
+                        fontSize="xs"
+                        fontWeight={800}
+                        color={muted}
+                        textTransform="uppercase"
+                        letterSpacing="0.06em"
+                      >
+                        From account
+                      </Text>
+                    </HStack>
+                    <Select
+                      bg={fieldBg}
+                      value={fromAccountId ?? ''}
+                      onChange={(event) => setFromAccountId(Number(event.target.value) || null)}
+                    >
+                      {activeAccounts.map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.name} - {money(account.currentBalance, account.currency)}
+                        </option>
+                      ))}
                     </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>To</FormLabel>
-                    <Select value={toAccountId ?? ''} onChange={(event) => setToAccountId(Number(event.target.value) || null)}>
-                      {activeAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
+                  </Box>
+
+                  <Flex
+                    w={{ base: '40px', sm: '44px' }}
+                    h={{ base: '40px', sm: '44px' }}
+                    align="center"
+                    justify="center"
+                    alignSelf="center"
+                    borderRadius="full"
+                    bg={blueSoftBg}
+                    color="blue.500"
+                    flexShrink={0}
+                    transform={{ base: 'rotate(90deg)', sm: 'none' }}
+                  >
+                    <Icon as={ArrowRight} boxSize={5} weight="bold" />
+                  </Flex>
+
+                  <Box
+                    flex={1}
+                    p={4}
+                    bg={softBg}
+                    border="1px solid"
+                    borderColor={borderColor}
+                    borderRadius="2xl"
+                  >
+                    <HStack spacing={2} mb={3}>
+                      <Icon as={Building} color="green.500" boxSize={4} weight="duotone" />
+                      <Text
+                        fontSize="xs"
+                        fontWeight={800}
+                        color={muted}
+                        textTransform="uppercase"
+                        letterSpacing="0.06em"
+                      >
+                        To account
+                      </Text>
+                    </HStack>
+                    <Select
+                      bg={fieldBg}
+                      value={toAccountId ?? ''}
+                      onChange={(event) => setToAccountId(Number(event.target.value) || null)}
+                    >
+                      {activeAccounts.map((account) => (
+                        <option key={account.id} value={account.id}>
+                          {account.name} - {money(account.currentBalance, account.currency)}
+                        </option>
+                      ))}
                     </Select>
-                  </FormControl>
-                  <FormControl>
+                  </Box>
+                </Flex>
+
+                {fromAccountId && toAccountId && fromAccountId === toAccountId && (
+                  <Alert status="warning" borderRadius="xl">
+                    <AlertIcon />
+                    <AlertDescription fontSize="sm">
+                      Choose two different accounts to record a transfer.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                  <FormControl position="relative">
                     <FormLabel>Amount</FormLabel>
-                    <NumberInput min={0} precision={2} value={transferAmount} onChange={(_, value) => setTransferAmount(value || 0)}>
-                      <NumberInputField />
+                    <NumberInput
+                      min={0}
+                      precision={2}
+                      value={transferAmount}
+                      onChange={(_, value) => setTransferAmount(value || 0)}
+                    >
+                      <NumberInputField bg={fieldBg} pl={9} />
                     </NumberInput>
+                    <Icon
+                      as={DollarSign}
+                      position="absolute"
+                      left={3}
+                      bottom="13px"
+                      color={muted}
+                      boxSize={4}
+                      pointerEvents="none"
+                    />
                   </FormControl>
                   <FormControl>
-                    <FormLabel>Date</FormLabel>
-                    <Input type="date" value={transferDate} onChange={(event) => setTransferDate(event.target.value)} />
+                    <FormLabel>Transfer date</FormLabel>
+                    <Input
+                      bg={fieldBg}
+                      type="date"
+                      value={transferDate}
+                      onChange={(event) => setTransferDate(event.target.value)}
+                    />
                   </FormControl>
                 </SimpleGrid>
-                <Input value={transferDescription} onChange={(event) => setTransferDescription(event.target.value)} placeholder="Optional note" />
+
+                <FormControl>
+                  <FormLabel>Reference <Text as="span" color={muted} fontWeight={400}>(optional)</Text></FormLabel>
+                  <Input
+                    bg={fieldBg}
+                    value={transferDescription}
+                    onChange={(event) => setTransferDescription(event.target.value)}
+                    placeholder="e.g. Monthly savings"
+                  />
+                </FormControl>
+
+                <Divider />
+
                 <Button
+                  h="48px"
                   colorScheme="teal"
+                  leftIcon={<Icon as={Repeat} boxSize={4} />}
                   onClick={transfer}
                   isLoading={saving}
                   isDisabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || transferAmount <= 0}
                 >
-                  Record transfer
+                  Transfer {transferAmount > 0 ? money(transferAmount) : 'money'}
                 </Button>
               </VStack>
             </CardBody>
           </Card>
-
-          <Card bg={cardBg} border="1px solid" borderColor={borderColor}>
-            <CardBody>
-              {(summary?.unassignedTransactionCount ?? 0) === 0 ? (
-                <VStack align="stretch" spacing={4}>
-                  <Heading size="md">Legacy transactions</Heading>
-                  <Alert status="success" variant="subtle" borderRadius="xl" alignItems="flex-start">
-                    <AlertIcon mt={1} />
-                    <Box>
-                      <AlertTitle>You're up to date</AlertTitle>
-                      <AlertDescription fontSize="sm">
-                        All existing transactions are associated with an account. Nothing is left to review.
-                      </AlertDescription>
-                    </Box>
-                  </Alert>
-                </VStack>
-              ) : (
-                <VStack align="stretch" spacing={4}>
-                  <Heading size="md">Associate legacy transactions</Heading>
-                  <Text fontSize="sm" color={muted}>
-                    Only unassigned transactions are changed. Values, dates, categories, installments and recurring links remain intact.
-                  </Text>
-                  <FormControl>
-                    <FormLabel>Target account</FormLabel>
-                    <Select value={legacyAccountId ?? ''} onChange={(event) => setLegacyAccountId(Number(event.target.value) || null)}>
-                      {activeAccounts.map((account) => <option key={account.id} value={account.id}>{account.name}</option>)}
-                    </Select>
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Payment method filter (optional)</FormLabel>
-                    <Select value={legacyPaymentMethodId ?? ''} onChange={(event) => setLegacyPaymentMethodId(Number(event.target.value) || null)}>
-                      <option value="">All payment methods</option>
-                      {paymentMethods.map((method) => <option key={method.id} value={method.id}>{method.name}</option>)}
-                    </Select>
-                  </FormControl>
-                  <SimpleGrid columns={2} spacing={3}>
-                    <FormControl>
-                      <FormLabel>From date</FormLabel>
-                      <Input type="date" value={legacyStartDate} onChange={(event) => setLegacyStartDate(event.target.value)} />
-                    </FormControl>
-                    <FormControl>
-                      <FormLabel>To date</FormLabel>
-                      <Input type="date" value={legacyEndDate} onChange={(event) => setLegacyEndDate(event.target.value)} />
-                    </FormControl>
-                  </SimpleGrid>
-                  <Button
-                    colorScheme="orange"
-                    onClick={associateLegacy}
-                    isLoading={saving}
-                    isDisabled={!legacyAccountId}
-                  >
-                    Associate matching transactions
-                  </Button>
-                </VStack>
-              )}
-            </CardBody>
-          </Card>
-        </SimpleGrid>
+        </Box>
       </VStack>
     </Box>
   )
