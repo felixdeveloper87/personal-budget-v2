@@ -139,6 +139,8 @@ export default function PlanningPage() {
       ].filter((item) => item.month)
     : []
   const basisLabel = forecast?.projectionBasisMonths.map(monthLabel).join(', ')
+  const basisCount = forecast?.projectionBasisMonths.length ?? 0
+  const variableLabel = basisCount > 0 ? `Variable (${basisCount}-mo avg)` : 'Variable'
 
   return (
     <Box maxW="1500px" mx="auto" px={{ base: 3, md: 6 }} py={{ base: 4, md: 7 }}>
@@ -292,7 +294,13 @@ export default function PlanningPage() {
                 <Box>
                   <Heading size="md">12-month cash-flow forecast</Heading>
                   <Text fontSize="sm" color={muted} mt={1}>
-                    From next month onwards. Committed amounts are scheduled and certain; estimated amounts come from your recent average.
+                    From next month onwards.{' '}
+                    <Text as="span" fontWeight={700}>Income</Text>{' = '}
+                    {forecast?.hasIncomePlan
+                      ? `recurring + your expected ${money(forecast.plannedMonthlyIncome ?? 0)}/month`
+                      : `recurring + average of your last ${basisCount || 3} months${basisLabel ? ` (${basisLabel})` : ''}`}.{' '}
+                    <Text as="span" fontWeight={700}>Expenses</Text>{' = '}
+                    installments + fixed + average of your last {basisCount || 3} months of one-off spending.
                   </Text>
                 </Box>
                 {(forecast?.months ?? []).map((month) => {
@@ -328,26 +336,24 @@ export default function PlanningPage() {
                       <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3} mt={3}>
                         <Box>
                           <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
-                            🔒 Committed
+                            Income
                           </Text>
-                          <Text fontWeight={700} color={month.committedNet < 0 ? 'red.500' : undefined}>
-                            {signedMoney(month.committedNet)}
+                          <Text fontWeight={700} color="green.500">
+                            {signedMoney(month.fixedIncome + month.estimatedIncome)}
                           </Text>
                           <Text fontSize="xs" color={muted}>
-                            In {money(month.fixedIncome)} · Fixed {money(month.fixedExpense)}
-                            {month.installmentExpense > 0 && ` · Installments ${money(month.installmentExpense)}`}
+                            Recurring {money(month.fixedIncome)} · {forecast?.hasIncomePlan ? 'Planned' : 'Estimated'} {money(month.estimatedIncome)}
                           </Text>
                         </Box>
                         <Box>
                           <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
-                            {forecast?.hasIncomePlan ? '🎯 Planned + estimated' : '📊 Estimated'}
+                            Expenses
                           </Text>
-                          <Text fontWeight={700} color={month.estimatedNet < 0 ? 'red.500' : undefined}>
-                            {signedMoney(month.estimatedNet)}
+                          <Text fontWeight={700} color="red.500">
+                            {signedMoney(-(month.installmentExpense + month.fixedExpense + month.estimatedVariableExpense))}
                           </Text>
                           <Text fontSize="xs" color={muted}>
-                            In {money(month.estimatedIncome)}
-                            {forecast?.hasIncomePlan ? ' (planned)' : ''} · Out {money(month.estimatedVariableExpense)}
+                            Installments {money(month.installmentExpense)} · Fixed {money(month.fixedExpense)} · {variableLabel} {money(month.estimatedVariableExpense)}
                           </Text>
                         </Box>
                       </SimpleGrid>
