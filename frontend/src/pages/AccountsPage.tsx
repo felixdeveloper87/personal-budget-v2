@@ -140,7 +140,7 @@ export default function AccountsPage() {
     setName(account.name)
     setInstitution(account.institution ?? '')
     setType(account.type)
-    setOpeningBalance(String(account.openingBalance))
+    setOpeningBalance(String(account.currentBalance))
     setOverdraftLimit(account.overdraftLimit)
   }
 
@@ -448,7 +448,6 @@ export default function AccountsPage() {
                       type="text"
                       inputMode="decimal"
                       value={openingBalance}
-                      isDisabled={editingAccountId !== null}
                       onChange={(event) => {
                         const value = event.target.value.replace(',', '.')
                         if (/^-?\d*(\.\d{0,2})?$/.test(value)) {
@@ -459,7 +458,7 @@ export default function AccountsPage() {
                     />
                     <FormHelperText>
                       {editingAccountId
-                        ? 'The anchored balance is kept unchanged while editing account details.'
+                        ? 'Updates the current balance without changing existing transactions or transfers.'
                         : 'Negative values are supported, for example -250 when using overdraft.'}
                     </FormHelperText>
                   </FormControl>

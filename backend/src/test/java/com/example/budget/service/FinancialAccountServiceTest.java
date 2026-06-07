@@ -1,6 +1,7 @@
 package com.example.budget.service;
 
 import com.example.budget.cache.CacheInvalidationService;
+import com.example.budget.dto.FinancialAccountRequest;
 import com.example.budget.dto.LegacyTransactionAssignmentRequest;
 import com.example.budget.model.*;
 import com.example.budget.repository.AccountTransferRepository;
@@ -123,6 +124,34 @@ class FinancialAccountServiceTest {
         assertThat(result.overdraftUsed()).isEqualByComparingTo("250.00");
         assertThat(result.overdraftAvailable()).isEqualByComparingTo("750.00");
         assertThat(result.overdraftPercentageUsed()).isEqualByComparingTo("25.00");
+    }
+
+    @Test
+    void updateRebalancesOpeningBalanceToMatchRequestedCurrentBalance() {
+        Transaction expense = transaction(TransactionType.EXPENSE, "100.00", TransactionStatus.CLEARED, 11);
+        LocalDateTime originalAnchor = account.getBalanceAnchorAt();
+        when(accountRepository.findById(10L)).thenReturn(java.util.Optional.of(account));
+        when(accountRepository.save(account)).thenReturn(account);
+        when(transactionRepository.findByUserAndAccountAndPaymentDateBetween(any(), any(), any(), any()))
+                .thenReturn(List.of(expense));
+        when(transferRepository.findByFromAccountAndTransferDateBetween(any(), any(), any()))
+                .thenReturn(List.of());
+        when(transferRepository.findByToAccountAndTransferDateBetween(any(), any(), any()))
+                .thenReturn(List.of());
+
+        FinancialAccountRequest request = new FinancialAccountRequest();
+        request.setName("Renamed current");
+        request.setType(AccountType.CURRENT);
+        request.setCurrency("GBP");
+        request.setOpeningBalance(new BigDecimal("1200.00"));
+        request.setOverdraftLimit(BigDecimal.ZERO);
+        request.setActive(true);
+
+        var result = service.update(10L, request, user);
+
+        assertThat(account.getOpeningBalance()).isEqualByComparingTo("1300.00");
+        assertThat(account.getBalanceAnchorAt()).isEqualTo(originalAnchor);
+        assertThat(result.currentBalance()).isEqualByComparingTo("1200.00");
     }
 
     private Transaction transaction(

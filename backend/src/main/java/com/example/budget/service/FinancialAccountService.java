@@ -73,7 +73,11 @@ public class FinancialAccountService {
     @Transactional
     public FinancialAccountDTO update(Long id, FinancialAccountRequest request, User user) {
         FinancialAccount account = getOwnedAccount(id, user);
+        BigDecimal currentBalance = currentBalance(account, user);
+        BigDecimal adjustedOpeningBalance = account.getOpeningBalance()
+                .add(request.getOpeningBalance().subtract(currentBalance));
         apply(account, request);
+        account.setOpeningBalance(adjustedOpeningBalance);
         return toDTO(accountRepository.save(account), user);
     }
 
