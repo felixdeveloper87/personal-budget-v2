@@ -15,15 +15,21 @@ import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 
 import PeriodNavigator from '../components/summary/PeriodNavigator'
-import { CategoryAnalysisTabs } from '../components/categories'
+import ExpensesChart from '../components/charts/modal/ExpensesChart'
+import IncomeChart from '../components/charts/modal/IncomeChart'
 import { PageSkeleton } from '../components/ui'
 import type { Transaction } from '../types'
+
+interface CategoriesPageProps {
+  /** Tab to open on first render — used when navigating from the home cards. */
+  initialTab?: 'expenses' | 'incomes'
+}
 
 /**
  * Dedicated page for the category breakdown — completely redesigned with
  * an integrated header, summary stats, and inline period navigation.
  */
-export default function CategoriesPage() {
+export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
   const {
     selectedDate,
     selectedPeriod,
@@ -34,7 +40,7 @@ export default function CategoriesPage() {
     formatLabel,
     activeTab,
     setActiveTab,
-  } = usePeriodNavigator()
+  } = usePeriodNavigator(initialTab)
   const { transactions, monthSummary, loading } = useDashboardData(
     selectedDate,
     selectedPeriod,
@@ -313,12 +319,23 @@ export default function CategoriesPage() {
             {loading ? (
               <PageSkeleton />
             ) : hasData ? (
-              <CategoryAnalysisTabs
-                transactions={periodData.transactions}
-                selectedPeriod={selectedPeriod}
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-              />
+              activeTab === 'expenses' ? (
+                <ExpensesChart
+                  transactions={periodData.transactions}
+                  selectedPeriod={formatLabel()}
+                  periodType={selectedPeriod}
+                  selectedDate={selectedDate}
+                  showPeriodBadge={false}
+                />
+              ) : (
+                <IncomeChart
+                  transactions={periodData.transactions}
+                  selectedPeriod={formatLabel()}
+                  periodType={selectedPeriod}
+                  selectedDate={selectedDate}
+                  showPeriodBadge={false}
+                />
+              )
             ) : (
               <EmptyState />
             )}

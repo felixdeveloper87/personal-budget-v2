@@ -18,6 +18,12 @@ interface SummaryContainerProps {
   navigatePeriod?: (direction: 'prev' | 'next') => void
   goToToday?: () => void
   formatLabel?: () => string
+  /**
+   * When provided, the Income/Expenses cards navigate to the Categories page
+   * (with the matching tab) instead of opening the breakdown modal.
+   * Transactions and Balance keep opening the modal.
+   */
+  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
 }
 
 const fallbackFormatLabel = (date: Date, period: PeriodType) => {
@@ -84,6 +90,7 @@ export default function SummaryContainer({
   navigatePeriod: externalNavigatePeriod,
   goToToday: externalGoToToday,
   formatLabel: externalFormatLabel,
+  onNavigateCategory,
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance, label } = periodData
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -103,6 +110,10 @@ export default function SummaryContainer({
     (() => fallbackFormatLabel(selectedDate, selectedPeriod))
 
   const handleCardClick = (cardId: string) => {
+    if (onNavigateCategory && (cardId === 'income' || cardId === 'expenses')) {
+      onNavigateCategory(cardId === 'income' ? 'incomes' : 'expenses')
+      return
+    }
     setSelectedCard(cardId as CardId)
     onOpen()
   }

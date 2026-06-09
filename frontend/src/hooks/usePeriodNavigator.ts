@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react'
 import { PeriodType } from '../types'
 
-export function usePeriodNavigator() {
+export function usePeriodNavigator(initialTab: 'expenses' | 'incomes' = 'expenses') {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
-  const [activeTab, setActiveTab] = useState<'expenses' | 'incomes'>('expenses')
+  const [activeTab, setActiveTab] = useState<'expenses' | 'incomes'>(initialTab)
 
   const onDateChange = useCallback((date: Date) => {
     setSelectedDate(date)

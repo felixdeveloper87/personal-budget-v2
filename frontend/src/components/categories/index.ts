@@ -1,7 +1,3 @@
-// Category Components - Category analysis and visualization components
-export { default as CategoriesPageHeader } from './CategoriesPageHeader'
-export { default as CategoryExpenseChart } from './CategoryExpenseChart'
-export { default as CategoryIncomeChart } from './CategoryIncomeChart'
-export { default as CategoryAnalysisTabs } from './CategoryAnalysisTabs'
-export { default as CategoryAnalysisHeader } from './CategoryAnalysisHeader'
-
+// Category Components
+// CategoryTransactionDropdown is imported directly where needed (modal charts).
+export {}

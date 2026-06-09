@@ -13,21 +13,25 @@ import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
 import { AuthModal, Layout } from './components'
 import LandingPage from './pages/LandingPage'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { AppPage } from './components/layout/header/navigation.config'
 
 interface PageRenderArgs {
   onPageChange: (page: AppPage) => void
+  onNavigateCategory: (tab: 'expenses' | 'incomes') => void
+  categoryTab?: 'expenses' | 'incomes'
 }
 
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
-  dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
+  dashboard: ({ onPageChange, onNavigateCategory }) => (
+    <Dashboard onPageChange={onPageChange} onNavigateCategory={onNavigateCategory} />
+  ),
   accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
   transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   installments: ({ onPageChange }) => <InstallmentsPage onPageChange={onPageChange} />,
   'fixed-payments': ({ onPageChange }) => <FixedPaymentsPage onPageChange={onPageChange} />,
   transactions: () => <AllTransactionsPage />,
-  categories: () => <CategoriesPage />,
+  categories: ({ categoryTab }) => <CategoriesPage initialTab={categoryTab} />,
   goals: () => <GoalsPage />,
   planning: () => <PlanningPage />,
   reports: () => <ReportsPage />,
@@ -38,6 +42,12 @@ function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
   const [currentPage, setCurrentPage] = useState<AppPage>('dashboard')
+  const [categoryTab, setCategoryTab] = useState<'expenses' | 'incomes'>()
+
+  const goToCategory = useCallback((tab: 'expenses' | 'incomes') => {
+    setCategoryTab(tab)
+    setCurrentPage('categories')
+  }, [])
 
   useEffect(() => {
     if (user?.admin) {
@@ -94,7 +104,11 @@ function AppContent() {
     const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
-        {renderPage({ onPageChange: setCurrentPage })}
+        {renderPage({
+          onPageChange: setCurrentPage,
+          onNavigateCategory: goToCategory,
+          categoryTab,
+        })}
       </Layout>
     )
   }

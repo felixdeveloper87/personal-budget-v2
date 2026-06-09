@@ -20,9 +20,14 @@ export interface DashboardProps {
    * to navigate to other pages without a router.
    */
   onPageChange?: (page: AppPage) => void
+  /**
+   * Navigate to the Categories page with a tab preselected — used by the
+   * Income/Expenses summary cards instead of opening the breakdown modal.
+   */
+  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
 }
 
-export default function Dashboard({ onPageChange }: DashboardProps) {
+export default function Dashboard({ onPageChange, onNavigateCategory }: DashboardProps) {
   const {
     selectedDate,
     selectedPeriod,
@@ -74,6 +79,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                   navigatePeriod={navigatePeriod}
                   goToToday={goToToday}
                   formatLabel={formatLabel}
+                  onNavigateCategory={onNavigateCategory}
                 />
               </Box>
             )}

@@ -12,6 +12,7 @@ interface SummaryWithAnalysisSectionProps {
   navigatePeriod: (direction: 'prev' | 'next') => void
   goToToday: () => void
   formatLabel: () => string
+  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
 }
 
 export default function SummaryWithAnalysisSection({
@@ -23,6 +24,7 @@ export default function SummaryWithAnalysisSection({
   navigatePeriod,
   goToToday,
   formatLabel,
+  onNavigateCategory,
 }: SummaryWithAnalysisSectionProps) {
   return (
     <SummaryContainer
@@ -34,6 +36,7 @@ export default function SummaryWithAnalysisSection({
       navigatePeriod={navigatePeriod}
       goToToday={goToToday}
       formatLabel={formatLabel}
+      onNavigateCategory={onNavigateCategory}
     />
   )
 }
