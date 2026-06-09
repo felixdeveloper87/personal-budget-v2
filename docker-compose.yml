@@ -58,6 +58,7 @@ services:
       args:
         VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
         VITE_API_URL: ${VITE_API_URL:-}
+        VITE_LOGO_DEV_TOKEN: ${VITE_LOGO_DEV_TOKEN:-}
     ports:
       - "3000:80"
     depends_on:
