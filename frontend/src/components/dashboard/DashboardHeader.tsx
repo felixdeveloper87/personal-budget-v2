@@ -115,7 +115,7 @@ export default function DashboardHeader({ income, expense }: DashboardHeaderProp
           fontWeight={500}
           noOfLines={1}
         >
-          Here&apos;s what&apos;s happening with your money today.
+          Monthly income and bills based on their payment dates.
         </Text>
       </VStack>
 

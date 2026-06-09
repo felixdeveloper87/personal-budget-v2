@@ -46,7 +46,7 @@ export default function TransactionsPage() {
             Transactions
           </Text>
           <Text color={captionColor} mt={1} fontSize="sm">
-            Activity and spending patterns for the selected period.
+            Daily activity based on purchase dates. Card payment dates appear separately.
           </Text>
         </Box>
 

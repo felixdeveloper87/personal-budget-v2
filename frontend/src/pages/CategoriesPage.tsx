@@ -201,9 +201,9 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                     fontSize="xs"
                     fontWeight={500}
                     color={subColor}
-                    display={{ base: 'none', sm: 'block' }}
+                    display="block"
                   >
-                    See where every pound goes, broken down by category
+                    Spending by purchase date; card payments may fall in another month
                   </Text>
                 </VStack>
               </HStack>
