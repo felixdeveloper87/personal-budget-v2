@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { Transaction, MonthlySummary } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { useSearch } from '../contexts/SearchContext'
@@ -58,30 +58,41 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
   const { user } = useAuth()
   const { filters } = useSearch()
 
+  // Identifies the most recent in-flight request so out-of-order responses
+  // (e.g. a background revalidation for a month you've already navigated away
+  // from) don't clobber the current view. Acts as a lightweight AbortController.
+  const requestIdRef = useRef(0)
+
   /** Hits the backend, refreshes the cache, and updates state. */
   const fetchFresh = useCallback(
     async (quiet: boolean) => {
       const token = user?.token
       if (!token) return
+      const requestId = ++requestIdRef.current
+      const isCurrent = () => requestId === requestIdRef.current
       if (!quiet) setLoading(true)
       try {
         if (hasActiveFilters(filters)) {
           // Search results are user-specific and not cached.
           const filtered = await searchTransactions(filters ?? {})
-          setTransactions(filtered)
-          setMonthSummary(null)
+          if (isCurrent()) {
+            setTransactions(filtered)
+            setMonthSummary(null)
+          }
         } else {
           const [transactionsData, summaryData] = await Promise.all([
             listTransactions(),
             getMonthlySummary(selectedDate),
           ])
-          const summary = convertMonthlySummary(summaryData)
-          cachedToken = token
-          cachedTransactions = transactionsData
-          cachedSummaries.set(summaryKey(selectedDate), summary)
-          cachedAt = Date.now()
-          setTransactions(transactionsData)
-          setMonthSummary(summary)
+          if (isCurrent()) {
+            const summary = convertMonthlySummary(summaryData)
+            cachedToken = token
+            cachedTransactions = transactionsData
+            cachedSummaries.set(summaryKey(selectedDate), summary)
+            cachedAt = Date.now()
+            setTransactions(transactionsData)
+            setMonthSummary(summary)
+          }
         }
       } catch (err) {
         console.error(err)
@@ -89,13 +100,15 @@ export function useDashboardData(selectedDate: Date, selectedPeriod?: string) {
           title: 'Could not load dashboard',
           dedupeKey: 'dashboard-load-failed',
         })
-        // Keep showing cached data on a background failure; only clear when we
-        // have nothing to fall back on.
-        if (!cachedTransactions || hasActiveFilters(filters)) {
+        // Keep showing cached data on a background failure; only clear when this
+        // is still the active request and we have nothing to fall back on.
+        if (isCurrent() && (!cachedTransactions || hasActiveFilters(filters))) {
           setTransactions([])
           setMonthSummary(null)
         }
       } finally {
+        // `loading` is always released so a superseded request can never strand
+        // the skeleton; only the latest request applies data above.
         if (!quiet) setLoading(false)
       }
     },
