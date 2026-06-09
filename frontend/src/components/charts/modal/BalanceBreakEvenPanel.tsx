@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Box, Button, Divider, HStack, Icon, SimpleGrid, Stack, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import type { PeriodType, Transaction } from '../../../types'
-import { Calculator, Wallet } from '../../ui/icons'
+import { Calculator, CheckCircle2, Wallet } from '../../ui/icons'
 import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
 
@@ -113,6 +113,7 @@ export default function BalanceBreakEvenPanel({
     : 0
   const earningDays = Math.max(0, remainingDays - daysOff)
   const isPastPeriod = remainingDays === 0
+  const isPositiveBalance = currentBalance > 0
 
   const { totalIncome, totalExpenses } = useMemo(() => ({
     totalIncome: transactions.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0),
@@ -121,7 +122,12 @@ export default function BalanceBreakEvenPanel({
 
   const neededToBreakEven = Math.max(0, -currentBalance)
   const dailyTarget = earningDays > 0 ? neededToBreakEven / earningDays : neededToBreakEven
-  const neededForSavingsGoal = Math.max(0, savingsTarget - currentBalance)
+  const savingsGoalBalance = isPositiveBalance
+    ? currentBalance + savingsTarget
+    : savingsTarget
+  const neededForSavingsGoal = isPositiveBalance
+    ? savingsTarget
+    : Math.max(0, savingsTarget - currentBalance)
   const dailySavingsTarget = earningDays > 0 ? neededForSavingsGoal / earningDays : neededForSavingsGoal
 
   const titleColor = useColorModeValue('gray.900', 'gray.50')
@@ -132,6 +138,9 @@ export default function BalanceBreakEvenPanel({
   const heroBg = useColorModeValue('linear-gradient(135deg, #fff7ed 0%, #ffffff 62%, #f5f3ff 100%)', 'linear-gradient(135deg, rgba(154,52,18,0.26) 0%, rgba(17,17,17,0.96) 58%, rgba(88,28,135,0.28) 100%)')
   const savingsBg = useColorModeValue('linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)', 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(88,28,135,0.16) 100%)')
   const resultBg = useColorModeValue('purple.50', 'rgba(126,34,206,0.18)')
+  const successBg = useColorModeValue('green.50', 'rgba(22,101,52,0.18)')
+  const successBorder = useColorModeValue('green.200', 'green.700')
+  const successIconBg = useColorModeValue('green.100', 'green.900')
   const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
   const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
   const targetIconBg = useColorModeValue('orange.50', 'whiteAlpha.100')
@@ -152,8 +161,12 @@ export default function BalanceBreakEvenPanel({
     : 'No remaining days in this selected period.'
 
   const savingsGoalCaption = savingsTarget > 0
-    ? `To finish this period with ${formatMoney(savingsTarget)} left, earn ${formatMoney(dailySavingsTarget)} per earning day.`
-    : 'Set a target surplus to calculate the daily earning goal.'
+    ? isPositiveBalance
+      ? `Save another ${formatMoney(savingsTarget)} to finish this period with ${formatMoney(savingsGoalBalance)}.`
+      : `To finish this period with ${formatMoney(savingsTarget)} left, earn ${formatMoney(dailySavingsTarget)} per earning day.`
+    : isPositiveBalance
+      ? 'Choose how much more you want to save this period.'
+      : 'Set a target surplus to calculate the daily earning goal.'
 
   if (isPastPeriod) {
     return (
@@ -171,77 +184,117 @@ export default function BalanceBreakEvenPanel({
 
   return (
     <ChartPlotShell
-      title="Break-even target"
-      caption="Daily earning target for the selected period"
+      title={isPositiveBalance ? 'Savings challenges' : 'Break-even target'}
+      caption={isPositiveBalance
+        ? 'Choose a challenge to save even more this month'
+        : 'Daily earning target for the selected period'}
       showPeriodBadge={false}
     >
       <VStack align="stretch" spacing={{ base: 4, sm: 5 }}>
-        <SimpleGrid columns={{ base: 1, md: 5 }} spacing={{ base: 3, sm: 4 }}>
-          <Box
-            gridColumn={{ base: 'auto', md: 'span 2' }}
-            borderRadius="2xl"
-            bg={heroBg}
+        {isPositiveBalance && (
+          <HStack
+            align="flex-start"
+            spacing={{ base: 3, sm: 4 }}
             border="1px solid"
-            borderColor={borderColor}
-            p={{ base: 5, sm: 6 }}
-            display="flex"
-            flexDirection="column"
-            justifyContent="space-between"
-            gap={{ base: 5, sm: 6 }}
+            borderColor={successBorder}
+            borderRadius={{ base: 'xl', sm: '2xl' }}
+            bg={successBg}
+            p={{ base: 4, sm: 5 }}
           >
-            <HStack spacing={2.5}>
-              <Box
-                w={{ base: 8, sm: 9 }}
-                h={{ base: 8, sm: 9 }}
-                borderRadius="xl"
-                bg={targetIconBg}
-                color={targetColor}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-              >
-                <Icon as={Calculator} boxSize={{ base: 4, sm: 5 }} />
-              </Box>
-              <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
-                Break-even pace
+            <Box
+              w={{ base: 9, sm: 11 }}
+              h={{ base: 9, sm: 11 }}
+              borderRadius="full"
+              bg={successIconBg}
+              color={greenColor}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexShrink={0}
+            >
+              <Icon as={CheckCircle2} boxSize={{ base: 5, sm: 6 }} weight="fill" />
+            </Box>
+            <VStack align="stretch" spacing={1}>
+              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={greenColor}>
+                Great work, you are above zero this month!
               </Text>
-            </HStack>
-
-            <VStack align="stretch" spacing={1.5}>
-              <HStack align="baseline" spacing={1.5}>
-                <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatMoney(dailyTarget)}
-                </Text>
-                <Text fontSize="sm" fontWeight={600} color={mutedColor}>
-                  / day
-                </Text>
-              </HStack>
-              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.4">
-                {heroSubtitle}
+              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
+                You already have a positive balance of {formatMoney(currentBalance)}. Keep the momentum going by choosing your next savings challenge.
               </Text>
             </VStack>
-          </Box>
+          </HStack>
+        )}
 
-          <Box
-            gridColumn={{ base: 'auto', md: 'span 3' }}
-            borderRadius="2xl"
-            bg={panelBg}
-            border="1px solid"
-            borderColor={borderColor}
-            px={{ base: 4, sm: 5 }}
-          >
-            <StatRow label="Needed to zero" value={formatMoney(neededToBreakEven)} color={targetColor} />
-            <Divider borderColor={borderColor} />
-            <StatRow label="Earning days left" value={earningDays.toString()} color={titleColor} />
-            <Divider borderColor={borderColor} />
-            <StatRow label="Current balance" value={formatMoney(currentBalance)} color={balanceColor} />
-          </Box>
-        </SimpleGrid>
+        {!isPositiveBalance && (
+          <>
+            <SimpleGrid columns={{ base: 1, md: 5 }} spacing={{ base: 3, sm: 4 }}>
+              <Box
+                gridColumn={{ base: 'auto', md: 'span 2' }}
+                borderRadius="2xl"
+                bg={heroBg}
+                border="1px solid"
+                borderColor={borderColor}
+                p={{ base: 5, sm: 6 }}
+                display="flex"
+                flexDirection="column"
+                justifyContent="space-between"
+                gap={{ base: 5, sm: 6 }}
+              >
+                <HStack spacing={2.5}>
+                  <Box
+                    w={{ base: 8, sm: 9 }}
+                    h={{ base: 8, sm: 9 }}
+                    borderRadius="xl"
+                    bg={targetIconBg}
+                    color={targetColor}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                  >
+                    <Icon as={Calculator} boxSize={{ base: 4, sm: 5 }} />
+                  </Box>
+                  <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+                    Break-even pace
+                  </Text>
+                </HStack>
 
-        <Text px={1} fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
-          {caption}
-        </Text>
+                <VStack align="stretch" spacing={1.5}>
+                  <HStack align="baseline" spacing={1.5}>
+                    <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {formatMoney(dailyTarget)}
+                    </Text>
+                    <Text fontSize="sm" fontWeight={600} color={mutedColor}>
+                      / day
+                    </Text>
+                  </HStack>
+                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.4">
+                    {heroSubtitle}
+                  </Text>
+                </VStack>
+              </Box>
+
+              <Box
+                gridColumn={{ base: 'auto', md: 'span 3' }}
+                borderRadius="2xl"
+                bg={panelBg}
+                border="1px solid"
+                borderColor={borderColor}
+                px={{ base: 4, sm: 5 }}
+              >
+                <StatRow label="Needed to zero" value={formatMoney(neededToBreakEven)} color={targetColor} />
+                <Divider borderColor={borderColor} />
+                <StatRow label="Earning days left" value={earningDays.toString()} color={titleColor} />
+                <Divider borderColor={borderColor} />
+                <StatRow label="Current balance" value={formatMoney(currentBalance)} color={balanceColor} />
+              </Box>
+            </SimpleGrid>
+
+            <Text px={1} fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
+              {caption}
+            </Text>
+          </>
+        )}
 
         {remainingDays > 0 && <Box
           border="1px solid"
@@ -268,16 +321,18 @@ export default function BalanceBreakEvenPanel({
                 </Box>
                 <VStack align="stretch" spacing={0.5} minW={0}>
                   <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={titleColor}>
-                    Savings goal
+                    {isPositiveBalance ? 'Save even more' : 'Savings goal'}
                   </Text>
                   <Text fontSize={{ base: '11px', sm: 'xs' }} color={mutedColor} noOfLines={2} lineHeight="1.3">
-                    Set the surplus you want after this period's balance reaches zero.
+                    {isPositiveBalance
+                      ? 'Pick an additional amount to save before the month ends.'
+                      : "Set the surplus you want after this period's balance reaches zero."}
                   </Text>
                 </VStack>
               </HStack>
               {savingsTarget > 0 && (
                 <Text flexShrink={0} fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={purpleColor} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatMoney(savingsTarget)}
+                  {isPositiveBalance ? '+' : ''}{formatMoney(savingsTarget)}
                 </Text>
               )}
             </HStack>
@@ -325,7 +380,7 @@ export default function BalanceBreakEvenPanel({
               rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
             >
               <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }}>
-                Custom surplus
+                {isPositiveBalance ? 'Custom challenge' : 'Custom surplus'}
               </Text>
               <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }} sx={{ fontVariantNumeric: 'tabular-nums' }}>
                 {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Tap to enter'}
@@ -349,7 +404,12 @@ export default function BalanceBreakEvenPanel({
                     {savingsGoalCaption}
                     {savingsTarget > 0 && (
                       <>
-                        {' '}Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.
+                        {' '}
+                        {isPositiveBalance ? (
+                          <>Based on <Text as="span" fontWeight={800} color={titleColor}>{earningDays}</Text> earning days left.</>
+                        ) : (
+                          <>Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.</>
+                        )}
                       </>
                     )}
                   </Text>

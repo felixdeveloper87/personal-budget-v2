@@ -1,9 +1,4 @@
 export { default as ChartCard } from './ChartCard'
-export { default as ChartHeaderStats } from './ChartHeaderStats'
-export type {
-  ChartHeaderStatsProps,
-  ChartHeaderStatsVariant,
-} from './ChartHeaderStats'
 export { default as ChartPlotShell } from './ChartPlotShell'
 export { default as ChartEmptyState } from './ChartEmptyState'
 export { default as IncomeInsights } from './IncomeInsights'

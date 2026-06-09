@@ -29,10 +29,7 @@ import { SavingsGoal } from '../types'
 import { ToastService } from '../services/toast'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
-import { ChartHeaderStats } from '../components/charts/modal/components'
 import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
-import { SectionCard, SectionHeader } from '../components/ui'
-import { Wallet } from '../components/ui/icons'
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
@@ -49,8 +46,7 @@ export default function GoalsPage() {
   const muted = useColorModeValue('gray.600', 'gray.400')
   const spinnerColor = useColorModeValue('blue.500', 'blue.300')
 
-  // Balance break-even fixed to the current month — goals only matter against
-  // where you stand now, so there's no period navigator here.
+  // Break-even target — fixed to the current month (goals are about now).
   const currentMonth = useMemo(() => new Date(), [])
   const {
     transactions: balanceTransactions,
@@ -128,37 +124,18 @@ export default function GoalsPage() {
           <Text color={muted} mt={1}>Track dedicated targets without changing account balances.</Text>
         </Box>
 
-        <SectionCard staticOnHover>
-          <Box p={{ base: 4, sm: 5 }}>
-            <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
-              <SectionHeader
-                icon={Wallet}
-                title="Balance"
-                caption="Where you stand this month"
-                accent="violet"
-              />
-              {balanceLoading ? (
-                <HStack justify="center" py={10}>
-                  <Spinner color={spinnerColor} thickness="3px" speed="0.8s" />
-                </HStack>
-              ) : (
-                <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
-                  <ChartHeaderStats
-                    transactions={periodData.transactions}
-                    variant="balance"
-                    currentBalance={periodData.balance}
-                  />
-                  <BalanceBreakEvenPanel
-                    currentBalance={periodData.balance}
-                    selectedDate={currentMonth}
-                    periodType="month"
-                    transactions={periodData.transactions}
-                  />
-                </VStack>
-              )}
-            </VStack>
-          </Box>
-        </SectionCard>
+        {balanceLoading ? (
+          <HStack justify="center" py={10}>
+            <Spinner color={spinnerColor} thickness="3px" speed="0.8s" />
+          </HStack>
+        ) : (
+          <BalanceBreakEvenPanel
+            currentBalance={periodData.balance}
+            selectedDate={currentMonth}
+            periodType="month"
+            transactions={periodData.transactions}
+          />
+        )}
 
         <Card>
           <CardBody>
