@@ -187,6 +187,16 @@ export default function InstallmentPlanCard({
     return plan.transactions.filter((t) => new Date(t.date) < now).length
   }, [plan.transactions])
 
+  const sortedTransactions = useMemo(
+    () =>
+      [...plan.transactions].sort(
+        (a, b) =>
+          a.installmentNumber - b.installmentNumber ||
+          new Date(a.date).getTime() - new Date(b.date).getTime(),
+      ),
+    [plan.transactions],
+  )
+
   const progressPct = plan.totalInstallments > 0
     ? Math.min(100, Math.round((paidCount / plan.totalInstallments) * 100))
     : 0
@@ -464,7 +474,7 @@ export default function InstallmentPlanCard({
                 border="1px solid"
                 borderColor={dividerColor}
               >
-                {plan.transactions.map((transaction) => {
+                {sortedTransactions.map((transaction) => {
                   const isPaid = new Date(transaction.date) < new Date()
                   const formattedDate = new Date(transaction.date).toLocaleDateString('en-GB', {
                     day: '2-digit',

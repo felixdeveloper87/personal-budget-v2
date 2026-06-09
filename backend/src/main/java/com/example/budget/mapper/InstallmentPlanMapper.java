@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -54,6 +55,11 @@ public class InstallmentPlanMapper {
         if (plan == null) return null;
 
         List<InstallmentPlanDTO.InstallmentTransactionDTO> transactionDTOs = plan.getTransactions().stream()
+                .sorted(Comparator
+                        .comparing((Transaction tx) -> tx.getInstallmentNumber() != null
+                                ? tx.getInstallmentNumber()
+                                : Integer.MAX_VALUE)
+                        .thenComparing(Transaction::getDateTime))
                 .map(tx -> new InstallmentPlanDTO.InstallmentTransactionDTO(
                         tx.getId(),
                         tx.getDescription(),
