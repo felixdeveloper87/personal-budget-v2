@@ -232,7 +232,7 @@ export default function AccountsPage() {
   }
 
   return (
-    <Box w="full" px={{ base: 3, md: 6, lg: 8 }} py={{ base: 4, md: 7 }}>
+    <Box w="full" maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={7}>
         <Box>
           <Heading size="lg" letterSpacing="-0.025em">Accounts</Heading>
