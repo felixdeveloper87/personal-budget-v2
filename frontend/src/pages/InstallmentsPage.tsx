@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardBody,
+  Collapse,
   HStack,
   Icon,
   SimpleGrid,
@@ -22,6 +23,8 @@ import InstallmentPlanCard, {
 import { SectionHeader } from '../components/ui'
 import {
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   CreditCard,
   Plus,
   Wallet,
@@ -43,6 +46,8 @@ export default function InstallmentsPage({
 }: InstallmentsPageProps) {
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeOpen, setActiveOpen] = useState(true)
+  const [completedOpen, setCompletedOpen] = useState(true)
 
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
@@ -150,27 +155,46 @@ export default function InstallmentsPage({
 
             <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
               <CardBody p={{ base: 4, md: 6 }}>
-                <VStack align="stretch" spacing={5}>
-                  <SectionHeader
-                    icon={CreditCard}
-                    title="Active plans"
-                    caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} in progress`}
-                    accent="blue"
-                  />
-                  {summary.active.length === 0 ? (
-                    <EmptyState text="No active installment plans." />
-                  ) : (
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
-                      {summary.active.map((plan) => (
-                        <InstallmentPlanCard
-                          key={plan.id}
-                          plan={plan}
-                          onDeleted={load}
-                          variant="active"
+                <VStack align="stretch" spacing={4}>
+                  <Box
+                    as="button"
+                    type="button"
+                    onClick={() => setActiveOpen((open) => !open)}
+                    w="full"
+                    textAlign="left"
+                    borderRadius="lg"
+                    aria-expanded={activeOpen}
+                  >
+                    <SectionHeader
+                      icon={CreditCard}
+                      title="Active plans"
+                      caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} in progress`}
+                      accent="blue"
+                      rightSlot={
+                        <Icon
+                          as={activeOpen ? ChevronUp : ChevronDown}
+                          boxSize={5}
+                          color={muted}
                         />
-                      ))}
-                    </SimpleGrid>
-                  )}
+                      }
+                    />
+                  </Box>
+                  <Collapse in={activeOpen} animateOpacity>
+                    {summary.active.length === 0 ? (
+                      <EmptyState text="No active installment plans." />
+                    ) : (
+                      <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
+                        {summary.active.map((plan) => (
+                          <InstallmentPlanCard
+                            key={plan.id}
+                            plan={plan}
+                            onDeleted={load}
+                            variant="active"
+                          />
+                        ))}
+                      </SimpleGrid>
+                    )}
+                  </Collapse>
                 </VStack>
               </CardBody>
             </Card>
@@ -178,28 +202,47 @@ export default function InstallmentsPage({
             {summary.completed.length > 0 && (
               <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
                 <CardBody p={{ base: 4, md: 6 }}>
-                  <VStack align="stretch" spacing={5}>
-                    <SectionHeader
-                      icon={CheckCircle2}
-                      title="Completed"
-                      caption={`${summary.completed.length} completed plan${summary.completed.length !== 1 ? 's' : ''}`}
-                      accent="neutral"
-                      rightSlot={
-                        <Badge colorScheme="gray" borderRadius="full">
-                          History
-                        </Badge>
-                      }
-                    />
-                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
-                      {summary.completed.map((plan) => (
-                        <InstallmentPlanCard
-                          key={plan.id}
-                          plan={plan}
-                          onDeleted={load}
-                          variant="past"
-                        />
-                      ))}
-                    </SimpleGrid>
+                  <VStack align="stretch" spacing={4}>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() => setCompletedOpen((open) => !open)}
+                      w="full"
+                      textAlign="left"
+                      borderRadius="lg"
+                      aria-expanded={completedOpen}
+                    >
+                      <SectionHeader
+                        icon={CheckCircle2}
+                        title="Completed"
+                        caption={`${summary.completed.length} completed plan${summary.completed.length !== 1 ? 's' : ''}`}
+                        accent="neutral"
+                        rightSlot={
+                          <HStack spacing={2}>
+                            <Badge colorScheme="gray" borderRadius="full">
+                              History
+                            </Badge>
+                            <Icon
+                              as={completedOpen ? ChevronUp : ChevronDown}
+                              boxSize={5}
+                              color={muted}
+                            />
+                          </HStack>
+                        }
+                      />
+                    </Box>
+                    <Collapse in={completedOpen} animateOpacity>
+                      <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
+                        {summary.completed.map((plan) => (
+                          <InstallmentPlanCard
+                            key={plan.id}
+                            plan={plan}
+                            onDeleted={load}
+                            variant="past"
+                          />
+                        ))}
+                      </SimpleGrid>
+                    </Collapse>
                   </VStack>
                 </CardBody>
               </Card>
