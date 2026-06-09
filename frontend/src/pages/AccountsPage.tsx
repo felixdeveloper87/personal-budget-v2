@@ -102,7 +102,7 @@ export default function AccountsPage() {
 
   const [fromAccountId, setFromAccountId] = useState<number | null>(null)
   const [toAccountId, setToAccountId] = useState<number | null>(null)
-  const [transferAmount, setTransferAmount] = useState(0)
+  const [transferAmount, setTransferAmount] = useState('')
   const [transferDate, setTransferDate] = useState(today())
   const [transferDescription, setTransferDescription] = useState('')
 
@@ -199,17 +199,18 @@ export default function AccountsPage() {
   }
 
   const transfer = async () => {
-    if (!fromAccountId || !toAccountId || transferAmount <= 0) return
+    const amount = parseFloat(transferAmount)
+    if (!fromAccountId || !toAccountId || !(amount > 0)) return
     setSaving(true)
     try {
       await createAccountTransfer({
         fromAccountId,
         toAccountId,
-        amount: transferAmount,
+        amount,
         transferDate,
         description: transferDescription.trim() || undefined,
       })
-      setTransferAmount(0)
+      setTransferAmount('')
       setTransferDescription('')
       await load()
       ToastService.success({ title: 'Transfer recorded', dedupeKey: 'account-transfer-created' })
@@ -755,7 +756,7 @@ export default function AccountsPage() {
                       min={0}
                       precision={2}
                       value={transferAmount}
-                      onChange={(_, value) => setTransferAmount(value || 0)}
+                      onChange={(valueString) => setTransferAmount(valueString)}
                     >
                       <NumberInputField bg={fieldBg} pl={9} />
                     </NumberInput>
@@ -798,9 +799,9 @@ export default function AccountsPage() {
                   leftIcon={<Icon as={Repeat} boxSize={4} />}
                   onClick={transfer}
                   isLoading={saving}
-                  isDisabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || transferAmount <= 0}
+                  isDisabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || !(parseFloat(transferAmount) > 0)}
                 >
-                  Transfer {transferAmount > 0 ? money(transferAmount) : 'money'}
+                  Transfer {parseFloat(transferAmount) > 0 ? money(parseFloat(transferAmount)) : 'money'}
                 </Button>
               </VStack>
             </CardBody>
