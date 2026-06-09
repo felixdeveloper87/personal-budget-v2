@@ -21,6 +21,7 @@ import PaymentMethodSelector from './PaymentMethodSelector'
 import AccountSelector from './AccountSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
+import QuickExpensePresets from './QuickExpensePresets'
 import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
@@ -147,6 +148,17 @@ export default function TransactionForm({
       setRecurringDayOfMonth(dayOfMonthFromYMD(nextDate))
     }
   }, [type, expenseMode, incomeMode])
+
+  const applyExpensePreset = useCallback(
+    ({ description: nextDescription, category: nextCategory }: {
+      description: string
+      category: string
+    }) => {
+      setDescription(nextDescription)
+      setCategory(nextCategory)
+    },
+    [],
+  )
 
 
   /**
@@ -390,6 +402,12 @@ export default function TransactionForm({
               />
           )}
           <CategorySelector type={type} category={category} onChange={setCategory} />
+          {type === 'EXPENSE' && (
+            <QuickExpensePresets
+              category={category}
+              onSelect={applyExpensePreset}
+            />
+          )}
           <DescriptionInput
             value={description}
             onChange={setDescription}
@@ -552,6 +570,12 @@ export default function TransactionForm({
                   />
               )}
               <CategorySelector type={type} category={category} onChange={setCategory} />
+              {type === 'EXPENSE' && (
+                <QuickExpensePresets
+                  category={category}
+                  onSelect={applyExpensePreset}
+                />
+              )}
               <DescriptionInput
                 value={description}
                 onChange={setDescription}
