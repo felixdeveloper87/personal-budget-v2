@@ -44,11 +44,11 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Overview of your finances',
   },
   {
-    id: 'accounts',
-    label: 'Accounts',
-    shortLabel: 'Accounts',
-    icon: Wallet,
-    description: 'Balances and cards',
+    id: 'transactions',
+    label: 'Transactions',
+    shortLabel: 'Activity',
+    icon: ReceiptText,
+    description: 'All income and expenses',
   },
   {
     id: 'categories',
@@ -56,6 +56,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Categories',
     icon: Layers,
     description: 'Breakdown by category',
+  },
+  {
+    id: 'accounts',
+    label: 'Accounts',
+    shortLabel: 'Accounts',
+    icon: Wallet,
+    description: 'Balances and cards',
   },
   {
     id: 'planning',
@@ -77,13 +84,6 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Fixed',
     icon: CalendarClock,
     description: 'Monthly payments and incomes',
-  },
-  {
-    id: 'transactions',
-    label: 'Transactions',
-    shortLabel: 'Activity',
-    icon: ReceiptText,
-    description: 'All income and expenses',
   },
   {
     id: 'transfers',
