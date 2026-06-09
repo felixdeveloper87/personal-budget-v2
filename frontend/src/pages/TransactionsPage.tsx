@@ -1,10 +1,11 @@
-import { Box, Divider, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Divider, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import TransactionsChart from '../components/charts/modal/TransactionsChart'
 import { SectionCard, PageSkeleton } from '../components/ui'
+import { AlertCircle } from '../components/ui/icons'
 
 /**
  * Transactions page — period-driven activity view (the content that used to
@@ -37,6 +38,9 @@ export default function TransactionsPage() {
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
+  const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
+  const infoColor = useColorModeValue('blue.600', 'blue.300')
 
   return (
     <Box px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }} maxW="1400px" mx="auto">
@@ -46,14 +50,33 @@ export default function TransactionsPage() {
             Transactions
           </Text>
           <Text color={captionColor} mt={1} fontSize="sm">
-            Daily activity based on purchase dates. Card payment dates appear separately.
+            Activity and spending patterns for the selected period.
           </Text>
         </Box>
 
         <SectionCard staticOnHover>
+          <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }}>
+            <HStack
+              spacing={2.5}
+              px={3}
+              py={2.5}
+              bg={infoBg}
+              border="1px solid"
+              borderColor={infoBorder}
+              borderRadius="lg"
+              color={infoColor}
+              align="flex-start"
+            >
+              <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
+              <Text fontSize="xs" lineHeight="1.45">
+                This view follows daily activity and purchase dates to reveal your spending behaviour. Card payment dates remain in the Home cash-flow overview.
+              </Text>
+            </HStack>
+          </Box>
+
           <Box
             px={{ base: 4, sm: 5 }}
-            pt={{ base: 4, sm: 5 }}
+            pt={3}
             pb={{ base: 3, sm: 4 }}
           >
             <PeriodNavigator

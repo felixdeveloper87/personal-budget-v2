@@ -8,7 +8,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Layers, TrendingDown, TrendingUp } from '../components/ui/icons'
+import { AlertCircle, Layers, TrendingDown, TrendingUp } from '../components/ui/icons'
 
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
@@ -68,6 +68,9 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
   const subColor = useColorModeValue('gray.500', 'gray.400')
   const iconBoxBg = useColorModeValue('purple.50', 'rgba(139, 92, 246, 0.12)')
   const iconBoxColor = useColorModeValue('purple.600', 'purple.300')
+  const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
+  const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
+  const infoColor = useColorModeValue('blue.600', 'blue.300')
   const accentGradient = useColorModeValue(
     'linear-gradient(135deg, #7c3aed, #2563eb)',
     'linear-gradient(135deg, #a78bfa, #60a5fa)',
@@ -201,9 +204,9 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                     fontSize="xs"
                     fontWeight={500}
                     color={subColor}
-                    display="block"
+                    display={{ base: 'none', sm: 'block' }}
                   >
-                    Spending by purchase date; card payments may fall in another month
+                    See where every pound goes, broken down by category
                   </Text>
                 </VStack>
               </HStack>
@@ -248,9 +251,29 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
           </Box>
 
           {/* ─── Period Navigator ─── */}
+          <Box px={{ base: 4, md: 6 }} pt={{ base: 3, md: 4 }}>
+            <HStack
+              spacing={2.5}
+              px={3}
+              py={2.5}
+              bg={infoBg}
+              border="1px solid"
+              borderColor={infoBorder}
+              borderRadius="lg"
+              color={infoColor}
+              align="flex-start"
+            >
+              <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
+              <Text fontSize="xs" lineHeight="1.45">
+                Categories follow daily activity and purchase dates to show spending behaviour. Card payments may appear in another month on the Home cash-flow overview.
+              </Text>
+            </HStack>
+          </Box>
+
           <Box
             px={{ base: 4, md: 6 }}
-            py={{ base: 3, md: 4 }}
+            pt={3}
+            pb={{ base: 3, md: 4 }}
             borderBottom="1px solid"
             borderBottomColor={headerBorder}
           >
