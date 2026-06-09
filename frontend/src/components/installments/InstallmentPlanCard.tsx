@@ -25,7 +25,6 @@ import {
   ModalHeader,
   ModalOverlay,
   Select,
-  SimpleGrid,
   Text,
   Tooltip,
   useColorModeValue,
@@ -146,10 +145,6 @@ export default function InstallmentPlanCard({
   const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
-  const amountPanelBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(20,184,166,0.10), rgba(37,99,235,0.08))',
-    'linear-gradient(135deg, rgba(45,212,191,0.16), rgba(96,165,250,0.10))',
-  )
   const activeStripe = useColorModeValue(
     'linear-gradient(180deg, #14b8a6, #2563eb)',
     'linear-gradient(180deg, #2dd4bf, #60a5fa)',
@@ -298,12 +293,12 @@ export default function InstallmentPlanCard({
       >
         {!isPast && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />}
         <CardBody
-          p={{ base: 3, md: 5 }}
-          pl={!isPast ? { base: 4.5, md: 6 } : { base: 3, md: 5 }}
+          p={{ base: 3, md: 3.5 }}
+          pl={!isPast ? { base: 3.5, md: 4 } : { base: 3, md: 3.5 }}
         >
-          <VStack align="stretch" spacing={{ base: 2.5, md: 4 }}>
-            <HStack justify="space-between" align="flex-start">
-              <HStack spacing={{ base: 2, md: 3 }} minW={0} flex={1}>
+          <VStack align="stretch" spacing={{ base: 2.5, md: 3 }}>
+            <HStack justify="space-between" align="center" spacing={2}>
+              <HStack spacing={2.5} minW={0} flex={1}>
                 <Box
                   w={{ base: 8, md: 9 }}
                   h={{ base: 8, md: 9 }}
@@ -315,14 +310,14 @@ export default function InstallmentPlanCard({
                   justifyContent="center"
                   flexShrink={0}
                 >
-                  <Icon as={CreditCard} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
+                  <Icon as={CreditCard} boxSize={4} weight="duotone" />
                 </Box>
                 <VStack align="flex-start" spacing={0} minW={0}>
                   <Text
                     fontWeight={700}
-                    fontSize={{ base: 'sm', md: 'md' }}
+                    fontSize="sm"
                     color={titleColor}
-                    lineHeight="1.2"
+                    lineHeight="1.25"
                     noOfLines={1}
                   >
                     {firstTransaction?.description
@@ -334,12 +329,12 @@ export default function InstallmentPlanCard({
                   </Text>
                 </VStack>
               </HStack>
-              <HStack spacing={1}>
+              <HStack spacing={0.5} flexShrink={0}>
                 <Tooltip label="Edit installment plan">
                   <IconButton
                     aria-label="Edit installment plan"
                     icon={<Icon as={Pencil} boxSize={3.5} />}
-                    size="sm"
+                    size="xs"
                     variant="ghost"
                     color={captionColor}
                     onClick={editDisclosure.onOpen}
@@ -347,8 +342,8 @@ export default function InstallmentPlanCard({
                 </Tooltip>
                 <IconButton
                   aria-label="Delete installment plan"
-                  icon={<Icon as={Trash2} boxSize={4} />}
-                  size="sm"
+                  icon={<Icon as={Trash2} boxSize={3.5} />}
+                  size="xs"
                   variant="ghost"
                   color={captionColor}
                   _hover={{ bg: deleteHoverBg, color: 'red.500' }}
@@ -358,45 +353,38 @@ export default function InstallmentPlanCard({
               </HStack>
             </HStack>
 
-            <Box bg={amountPanelBg} borderRadius="xl" p={{ base: 3, md: 4 }} border="1px solid" borderColor={metaBorder}>
-            <HStack justify="space-between" align="flex-end">
+            <HStack
+              justify="space-between"
+              align="center"
+              px={3}
+              py={2.5}
+              bg={metaBg}
+              borderRadius="lg"
+              border="1px solid"
+              borderColor={metaBorder}
+            >
               <VStack align="flex-start" spacing={0}>
-                <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} fontWeight={500}>
+                <Text fontSize="2xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Per installment
                 </Text>
-                <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={700} color={valueColor} lineHeight="1.1">
-                  £{plan.installmentValue.toFixed(2)}
-                </Text>
+                <HStack align="baseline" spacing={1}>
+                  <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={800} color={valueColor} lineHeight="1.1">
+                    £{plan.installmentValue.toFixed(2)}
+                  </Text>
+                  <Text fontSize="2xs" color={captionColor} fontWeight={600}>
+                    × {plan.totalInstallments}
+                  </Text>
+                </HStack>
               </VStack>
               <VStack align="flex-end" spacing={0}>
-                <Text fontSize={{ base: '2xs', md: 'xs' }} color={captionColor} fontWeight={500}>
+                <Text fontSize="2xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Total
                 </Text>
-                <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight={600} color={titleColor} lineHeight="1.1">
+                <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight={700} color={titleColor} lineHeight="1.1">
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
             </HStack>
-            </Box>
-
-            <SimpleGrid columns={2} spacing={{ base: 1.5, md: 2 }}>
-              <MetaTile
-                label="Installments"
-                value={`${plan.totalInstallments} months`}
-                bg={metaBg}
-                borderColor={metaBorder}
-                titleColor={titleColor}
-                captionColor={captionColor}
-              />
-              <MetaTile
-                label={isPast ? 'Status' : 'Progress'}
-                value={isPast ? 'Completed' : `${progressPct}% paid`}
-                bg={metaBg}
-                borderColor={metaBorder}
-                titleColor={titleColor}
-                captionColor={captionColor}
-              />
-            </SimpleGrid>
 
             {isPast ? (
               <HStack justify="space-between" align="center">
@@ -423,15 +411,15 @@ export default function InstallmentPlanCard({
               </HStack>
             ) : (
               <Box>
-                <HStack justify="space-between" mb={1.5}>
+                <HStack justify="space-between" mb={1}>
                   <Text fontSize="xs" fontWeight={600} color={captionColor}>
                     {paidCount} of {plan.totalInstallments} paid
                   </Text>
-                  <Text fontSize="xs" fontWeight={600} color={valueColor}>
+                  <Text fontSize="xs" fontWeight={700} color={valueColor}>
                     {progressPct}%
                   </Text>
                 </HStack>
-                <Box h="5px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
+                <Box h="4px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
                   <Box
                     h="full"
                     w={`${progressPct}%`}
@@ -444,9 +432,10 @@ export default function InstallmentPlanCard({
             )}
 
             <Button
-              size="sm"
+              size="xs"
               variant="ghost"
               w="full"
+              h="28px"
               fontSize="xs"
               fontWeight={600}
               color={accentFg}
@@ -737,31 +726,3 @@ export default function InstallmentPlanCard({
   )
 }
 
-interface MetaTileProps {
-  label: string
-  value: string
-  bg: string
-  borderColor: string
-  titleColor: string
-  captionColor: string
-}
-
-function MetaTile({
-  label,
-  value,
-  bg,
-  borderColor,
-  titleColor,
-  captionColor,
-}: MetaTileProps) {
-  return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={{ base: 2, md: 3 }}>
-      <Text fontSize="2xs" color={captionColor} fontWeight={700} textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontSize={{ base: '2xs', md: 'xs' }} color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
-        {value}
-      </Text>
-    </Box>
-  )
-}
