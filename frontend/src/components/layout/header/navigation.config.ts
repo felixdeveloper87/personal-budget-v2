@@ -3,6 +3,7 @@ import {
   Layers,
   LayoutDashboard,
   ReceiptText,
+  Repeat,
   Shield,
   Wallet,
   Sparkles,
@@ -13,6 +14,7 @@ import {
 export type AppPage =
   | 'dashboard'
   | 'accounts'
+  | 'transfers'
   | 'transactions'
   | 'categories'
   | 'goals'
@@ -31,7 +33,7 @@ export interface NavItem {
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
   {
     id: 'dashboard',
-    label: 'Dashboard',
+    label: 'Home',
     shortLabel: 'Home',
     icon: LayoutDashboard,
     description: 'Overview of your finances',
@@ -41,14 +43,7 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     label: 'Accounts',
     shortLabel: 'Accounts',
     icon: Wallet,
-    description: 'Balances and transfers',
-  },
-  {
-    id: 'transactions',
-    label: 'Transactions',
-    shortLabel: 'Activity',
-    icon: ReceiptText,
-    description: 'All income and expenses',
+    description: 'Balances and cards',
   },
   {
     id: 'categories',
@@ -58,18 +53,32 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Breakdown by category',
   },
   {
-    id: 'goals',
-    label: 'Goals',
-    shortLabel: 'Goals',
-    icon: Sparkles,
-    description: 'Savings targets',
-  },
-  {
     id: 'planning',
     label: 'Planning',
     shortLabel: 'Plan',
     icon: CalendarDays,
     description: 'Budgets and cash flow',
+  },
+  {
+    id: 'transactions',
+    label: 'Transactions',
+    shortLabel: 'Activity',
+    icon: ReceiptText,
+    description: 'All income and expenses',
+  },
+  {
+    id: 'transfers',
+    label: 'Transfers',
+    shortLabel: 'Transfers',
+    icon: Repeat,
+    description: 'Move money between accounts',
+  },
+  {
+    id: 'goals',
+    label: 'Goals',
+    shortLabel: 'Goals',
+    icon: Sparkles,
+    description: 'Savings targets',
   },
   {
     id: 'reports',

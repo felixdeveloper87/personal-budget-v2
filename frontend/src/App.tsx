@@ -6,6 +6,7 @@ import CategoriesPage from './pages/CategoriesPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import ReportsPage from './pages/ReportsPage'
 import AccountsPage from './pages/AccountsPage'
+import TransfersPage from './pages/TransfersPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
 import { AuthModal, Layout } from './components'
@@ -19,7 +20,8 @@ interface PageRenderArgs {
 
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
-  accounts: () => <AccountsPage />,
+  accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
+  transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   transactions: () => <AllTransactionsPage />,
   categories: () => <CategoriesPage />,
   goals: () => <GoalsPage />,

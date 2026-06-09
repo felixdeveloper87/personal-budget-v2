@@ -22,10 +22,6 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   NumberInput,
   NumberInputField,
   Progress,
@@ -41,7 +37,6 @@ import {
 import {
   archiveAccount,
   createAccount,
-  createAccountTransfer,
   getAccountSummary,
   updateAccount,
 } from '../api'
@@ -53,12 +48,9 @@ import {
 import { ToastService } from '../services/toast'
 import { BankCombobox, BankLogo, SectionHeader, getBankMeta } from '../components/ui'
 import PaymentMethodsSection from '../sections/PaymentMethodsSection'
+import type { AppPage } from '../components/layout/header/navigation.config'
 import {
-  ArrowRight,
-  Building,
-  ChevronDown,
   CreditCard,
-  DollarSign,
   Eye,
   EyeOff,
   Pencil,
@@ -83,6 +75,13 @@ const ACCOUNT_HELP: Record<AccountType, string> = {
 }
 
 const CREATABLE_ACCOUNT_TYPES: AccountType[] = ['CURRENT', 'SAVINGS', 'CASH']
+const ACCOUNT_TYPE_ORDER: AccountType[] = ['CURRENT', 'SAVINGS', 'CASH', 'CREDIT_CARD']
+const ACCOUNT_GROUP_LABELS: Record<AccountType, string> = {
+  CURRENT: 'Current accounts',
+  SAVINGS: 'Savings accounts',
+  CASH: 'Cash',
+  CREDIT_CARD: 'Legacy credit accounts',
+}
 const ACCOUNT_NAME_SUFFIX: Record<AccountType, string> = {
   CURRENT: 'Current',
   SAVINGS: 'Savings',
@@ -90,7 +89,6 @@ const ACCOUNT_NAME_SUFFIX: Record<AccountType, string> = {
   CREDIT_CARD: 'Credit',
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 const money = (value: number, currency = 'GBP') =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
@@ -100,68 +98,11 @@ const accountName = (institution: string, type: AccountType) => {
   return issuer ? `${issuer} ${ACCOUNT_NAME_SUFFIX[type]}` : ''
 }
 
-interface TransferAccountSelectProps {
-  accounts: FinancialAccount[]
-  value: number | null
-  onChange: (accountId: number) => void
-  formatBalance: (value: number, currency?: string) => string
+interface AccountsPageProps {
+  onPageChange?: (page: AppPage) => void
 }
 
-function TransferAccountSelect({
-  accounts,
-  value,
-  onChange,
-  formatBalance,
-}: TransferAccountSelectProps) {
-  const selected = accounts.find((account) => account.id === value)
-  const menuBg = useColorModeValue('white', 'gray.800')
-  const menuBorder = useColorModeValue('gray.200', 'gray.700')
-  const balanceColor = useColorModeValue('gray.500', 'gray.400')
-
-  return (
-    <Menu matchWidth>
-      <MenuButton
-        as={Button}
-        w="full"
-        h="40px"
-        px={3}
-        variant="outline"
-        bg={menuBg}
-        borderColor={menuBorder}
-        rightIcon={<Icon as={ChevronDown} boxSize={4} />}
-        textAlign="left"
-        fontWeight={600}
-      >
-        <HStack justify="space-between" minW={0} spacing={3}>
-          <Text fontSize="sm" noOfLines={1}>
-            {selected?.name ?? 'Select account'}
-          </Text>
-          {selected && (
-            <Text fontSize="xs" color={balanceColor} fontWeight={600} flexShrink={0}>
-              {formatBalance(selected.currentBalance, selected.currency)}
-            </Text>
-          )}
-        </HStack>
-      </MenuButton>
-      <MenuList minW="100%" bg={menuBg} borderColor={menuBorder} py={1}>
-        {accounts.map((account) => (
-          <MenuItem key={account.id} onClick={() => onChange(account.id)}>
-            <HStack justify="space-between" w="full" minW={0} spacing={3}>
-              <Text fontSize="sm" fontWeight={600} noOfLines={1}>
-                {account.name}
-              </Text>
-              <Text fontSize="xs" color={balanceColor} fontWeight={600} flexShrink={0}>
-                {formatBalance(account.currentBalance, account.currency)}
-              </Text>
-            </HStack>
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
-  )
-}
-
-export default function AccountsPage() {
+export default function AccountsPage({ onPageChange }: AccountsPageProps) {
   const [summary, setSummary] = useState<AccountSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -180,12 +121,6 @@ export default function AccountsPage() {
   const [overdraftLimit, setOverdraftLimit] = useState(0)
   const [editingAccountId, setEditingAccountId] = useState<number | null>(null)
 
-  const [fromAccountId, setFromAccountId] = useState<number | null>(null)
-  const [toAccountId, setToAccountId] = useState<number | null>(null)
-  const [transferAmount, setTransferAmount] = useState('')
-  const [transferDate, setTransferDate] = useState(today())
-  const [transferDescription, setTransferDescription] = useState('')
-
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
   const accountIconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
@@ -197,9 +132,6 @@ export default function AccountsPage() {
     try {
       const accountSummary = await getAccountSummary()
       setSummary(accountSummary)
-      const active = accountSummary.accounts.filter((account) => account.active)
-      setFromAccountId((current) => current ?? active[0]?.id ?? null)
-      setToAccountId((current) => current ?? active[1]?.id ?? null)
     } catch (err) {
       ToastService.apiError(err, {
         title: 'Could not load accounts',
@@ -215,6 +147,16 @@ export default function AccountsPage() {
   const activeAccounts = useMemo(
     () => summary?.accounts.filter((account) => account.active) ?? [],
     [summary],
+  )
+  const groupedAccounts = useMemo(
+    () =>
+      ACCOUNT_TYPE_ORDER.map((accountType) => ({
+        type: accountType,
+        accounts: activeAccounts
+          .filter((account) => account.type === accountType)
+          .sort((a, b) => a.name.localeCompare(b.name, 'en-GB')),
+      })).filter((group) => group.accounts.length > 0),
+    [activeAccounts],
   )
   const displayMoney = (value: number, currency = 'GBP') =>
     hideBalances ? '••••••' : money(value, currency)
@@ -294,29 +236,6 @@ export default function AccountsPage() {
     }
   }
 
-  const transfer = async () => {
-    const amount = parseFloat(transferAmount)
-    if (!fromAccountId || !toAccountId || !(amount > 0)) return
-    setSaving(true)
-    try {
-      await createAccountTransfer({
-        fromAccountId,
-        toAccountId,
-        amount,
-        transferDate,
-        description: transferDescription.trim() || undefined,
-      })
-      setTransferAmount('')
-      setTransferDescription('')
-      await load()
-      ToastService.success({ title: 'Transfer recorded', dedupeKey: 'account-transfer-created' })
-    } catch (err) {
-      ToastService.apiError(err, { title: 'Could not transfer', dedupeKey: 'account-transfer-failed' })
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const archive = async (account: FinancialAccount) => {
     try {
       await archiveAccount(account.id)
@@ -330,12 +249,27 @@ export default function AccountsPage() {
   return (
     <Box w="full" maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={7}>
-        <Box>
-          <Heading size="lg" letterSpacing="-0.025em">Accounts</Heading>
-          <Text color={muted} mt={1}>
-            Manage balances, connected institutions and movement between your accounts.
-          </Text>
-        </Box>
+        <Flex
+          justify="space-between"
+          align={{ base: 'stretch', sm: 'center' }}
+          direction={{ base: 'column', sm: 'row' }}
+          gap={3}
+        >
+          <Box>
+            <Heading size="lg" letterSpacing="-0.025em">Accounts</Heading>
+            <Text color={muted} mt={1}>
+              Manage balances, connected institutions and credit cards.
+            </Text>
+          </Box>
+          <Button
+            colorScheme="teal"
+            leftIcon={<Icon as={Repeat} boxSize={4} />}
+            onClick={() => onPageChange?.('transfers')}
+            alignSelf={{ base: 'stretch', sm: 'center' }}
+          >
+            Transfer money
+          </Button>
+        </Flex>
 
         <Box>
           <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
@@ -394,20 +328,37 @@ export default function AccountsPage() {
                     </Text>
                   </Box>
                 )}
-                <VStack spacing={2} align="stretch">
-                  {activeAccounts.map((account) => (
-                    <VStack
-                      key={account.id}
-                      align="stretch"
-                      spacing={2}
-                      p={3}
-                      bg={softBg}
-                      border="1px solid"
-                      borderColor={borderColor}
-                      borderRadius="xl"
-                      transition="all 0.15s ease"
-                      _hover={{ bg: fieldBg }}
-                    >
+                <VStack spacing={4} align="stretch">
+                  {groupedAccounts.map((group) => (
+                    <VStack key={group.type} spacing={2} align="stretch">
+                      <HStack justify="space-between" px={1}>
+                        <Text
+                          fontSize="2xs"
+                          fontWeight={800}
+                          color={muted}
+                          textTransform="uppercase"
+                          letterSpacing="0.08em"
+                        >
+                          {ACCOUNT_GROUP_LABELS[group.type]}
+                        </Text>
+                        <Text fontSize="2xs" color={muted}>
+                          {group.accounts.length}
+                        </Text>
+                      </HStack>
+
+                      {group.accounts.map((account) => (
+                        <VStack
+                          key={account.id}
+                          align="stretch"
+                          spacing={2}
+                          p={3}
+                          bg={softBg}
+                          border="1px solid"
+                          borderColor={borderColor}
+                          borderRadius="xl"
+                          transition="all 0.15s ease"
+                          _hover={{ bg: fieldBg }}
+                        >
                       <HStack justify="space-between">
                         <HStack spacing={3} minW={0}>
                           {getBankMeta(account.institution) ? (
@@ -491,6 +442,8 @@ export default function AccountsPage() {
                           />
                         </Box>
                       )}
+                        </VStack>
+                      ))}
                     </VStack>
                   ))}
                 </VStack>
@@ -720,167 +673,6 @@ export default function AccountsPage() {
               </Card>
             </Collapse>
           )}
-          <Card
-            border="1px solid"
-            borderColor={borderColor}
-            overflow="hidden"
-            boxShadow="sm"
-          >
-            <CardBody p={{ base: 4, md: 5 }}>
-              <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-                <Box>
-                  <SectionHeader
-                    icon={Repeat}
-                    title="Transfer money"
-                    caption="Move money between your accounts"
-                    accent="green"
-                  />
-                  <Text fontSize="xs" color={muted} mt={3}>
-                    Transfers do not create income or expense records.
-                  </Text>
-                </Box>
-
-                <VStack align="stretch" spacing={2}>
-                  <Box
-                    p={{ base: 3, md: 4 }}
-                    bg={softBg}
-                    border="1px solid"
-                    borderColor={borderColor}
-                    borderRadius="xl"
-                  >
-                    <HStack spacing={2} mb={2}>
-                      <Icon as={Wallet} color="orange.500" boxSize={4} weight="duotone" />
-                      <Text
-                        fontSize="xs"
-                        fontWeight={800}
-                        color={muted}
-                        textTransform="uppercase"
-                        letterSpacing="0.06em"
-                      >
-                        From account
-                      </Text>
-                    </HStack>
-                    <TransferAccountSelect
-                      accounts={activeAccounts}
-                      value={fromAccountId}
-                      onChange={setFromAccountId}
-                      formatBalance={displayMoney}
-                    />
-                  </Box>
-
-                  <Flex
-                    w="32px"
-                    h="32px"
-                    align="center"
-                    justify="center"
-                    alignSelf="center"
-                    borderRadius="full"
-                    bg={blueSoftBg}
-                    color="green.500"
-                    flexShrink={0}
-                    transform="rotate(90deg)"
-                  >
-                    <Icon as={ArrowRight} boxSize={4} weight="bold" />
-                  </Flex>
-
-                  <Box
-                    p={{ base: 3, md: 4 }}
-                    bg={softBg}
-                    border="1px solid"
-                    borderColor={borderColor}
-                    borderRadius="xl"
-                  >
-                    <HStack spacing={2} mb={2}>
-                      <Icon as={Building} color="green.500" boxSize={4} weight="duotone" />
-                      <Text
-                        fontSize="xs"
-                        fontWeight={800}
-                        color={muted}
-                        textTransform="uppercase"
-                        letterSpacing="0.06em"
-                      >
-                        To account
-                      </Text>
-                    </HStack>
-                    <TransferAccountSelect
-                      accounts={activeAccounts}
-                      value={toAccountId}
-                      onChange={setToAccountId}
-                      formatBalance={displayMoney}
-                    />
-                  </Box>
-                </VStack>
-
-                {fromAccountId && toAccountId && fromAccountId === toAccountId && (
-                  <Alert status="warning" borderRadius="xl">
-                    <AlertIcon />
-                    <AlertDescription fontSize="sm">
-                      Choose two different accounts to record a transfer.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <SimpleGrid columns={{ base: 1, md: 2, lg: 1, xl: 2 }} spacing={4}>
-                  <FormControl position="relative">
-                    <FormLabel>Amount</FormLabel>
-                    <NumberInput
-                      min={0}
-                      precision={2}
-                      value={transferAmount}
-                      onChange={(valueString) => setTransferAmount(valueString)}
-                    >
-                      <NumberInputField bg={fieldBg} pl={9} />
-                    </NumberInput>
-                    <Icon
-                      as={DollarSign}
-                      position="absolute"
-                      left={3}
-                      bottom="13px"
-                      color={muted}
-                      boxSize={4}
-                      pointerEvents="none"
-                    />
-                  </FormControl>
-                  <FormControl>
-                    <FormLabel>Transfer date</FormLabel>
-                    <Input
-                      bg={fieldBg}
-                      type="date"
-                      value={transferDate}
-                      onChange={(event) => setTransferDate(event.target.value)}
-                    />
-                  </FormControl>
-                </SimpleGrid>
-
-                <FormControl>
-                  <FormLabel>Reference <Text as="span" color={muted} fontWeight={400}>(optional)</Text></FormLabel>
-                  <Input
-                    bg={fieldBg}
-                    value={transferDescription}
-                    onChange={(event) => setTransferDescription(event.target.value)}
-                    placeholder="e.g. Monthly savings"
-                  />
-                </FormControl>
-
-                <Button
-                  h={{ base: '44px', md: '48px' }}
-                  colorScheme="teal"
-                  leftIcon={<Icon as={Repeat} boxSize={4} />}
-                  onClick={transfer}
-                  isLoading={saving}
-                  isDisabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || !(parseFloat(transferAmount) > 0)}
-                  borderRadius="xl"
-                  _hover={{
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 8px 18px rgba(13, 148, 136, 0.2)',
-                  }}
-                  _active={{ transform: 'translateY(0)' }}
-                >
-                  Transfer {parseFloat(transferAmount) > 0 ? money(parseFloat(transferAmount)) : 'money'}
-                </Button>
-              </VStack>
-            </CardBody>
-          </Card>
         </SimpleGrid>
       </VStack>
     </Box>
