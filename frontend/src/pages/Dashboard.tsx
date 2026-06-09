@@ -54,7 +54,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       mx="auto"
     >
       <VStack spacing={{ base: 3, md: 4 }} align="stretch">
-        <DashboardHeader />
+        <DashboardHeader
+          income={monthSummary?.totalIncome}
+          expense={monthSummary?.totalExpense}
+        />
 
         {loading ? (
           <DashboardSkeleton />

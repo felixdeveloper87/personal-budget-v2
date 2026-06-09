@@ -69,6 +69,18 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
     return { activeCount: active, pastCount: past }
   }, [plans])
 
+  const totalMonthly = useMemo(() => {
+    let monthly = 0
+    for (const plan of plans) {
+      if (!isInstallmentPlanCompleted(plan)) {
+        monthly += plan.installmentValue
+      }
+    }
+    return monthly
+  }, [plans])
+
+  const currencyFmt = useMemo(() => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }), [])
+
   const captionMutedColor = useColorModeValue('gray.500', 'gray.400')
   const ctaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const ctaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -77,6 +89,11 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
   const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
   const emptyBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const emptyBadgeColor = useColorModeValue('gray.600', 'gray.300')
+  const statsBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.10)')
+  const statsBorder = useColorModeValue('teal.100', 'rgba(20,184,166,0.22)')
+  const statsAmountColor = useColorModeValue('teal.700', 'teal.200')
+  const statsLabelColor = useColorModeValue('teal.600', 'teal.300')
+  const statsDivider = useColorModeValue('teal.100', 'rgba(20,184,166,0.2)')
 
   const caption =
     activeCount === 0
@@ -102,7 +119,7 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
                 icon={CreditCard}
                 title="Installments"
                 caption={caption}
-                accent="blue"
+                accent="teal"
                 rightSlot={
                   activeCount > 0 ? (
                     <Badge
@@ -131,6 +148,37 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
                   ) : null
                 }
               />
+
+              {activeCount > 0 && totalMonthly > 0 && (
+                <HStack
+                  spacing={0}
+                  bg={statsBg}
+                  border="1px solid"
+                  borderColor={statsBorder}
+                  borderRadius="xl"
+                  overflow="hidden"
+                >
+                  <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
+                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor} textTransform="uppercase" letterSpacing="0.05em">
+                      Monthly
+                    </Text>
+                    <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
+                      {currencyFmt.format(totalMonthly)}
+                      <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
+                    </Text>
+                  </VStack>
+                  <Box w="1px" h="full" bg={statsDivider} alignSelf="stretch" />
+                  <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
+                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor} textTransform="uppercase" letterSpacing="0.05em">
+                      Plans
+                    </Text>
+                    <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
+                      {activeCount}
+                      <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}> active</Text>
+                    </Text>
+                  </VStack>
+                </HStack>
+              )}
 
               <Button
                 onClick={() => onPageChange?.('installments')}

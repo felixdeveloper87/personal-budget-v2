@@ -12,6 +12,7 @@ import type { LucideIcon } from './icons'
 export type SectionHeaderAccent =
   | 'blue'
   | 'green'
+  | 'teal'
   | 'red'
   | 'violet'
   | 'pink'
@@ -37,6 +38,12 @@ const ACCENT_TOKENS: Record<SectionHeaderAccent, AccentTokens> = {
     bgDark: 'rgba(34,197,94,0.12)',
     fgLight: 'green.600',
     fgDark: 'green.300',
+  },
+  teal: {
+    bgLight: 'teal.50',
+    bgDark: 'rgba(20,184,166,0.12)',
+    fgLight: 'teal.600',
+    fgDark: 'teal.300',
   },
   red: {
     bgLight: 'red.50',
