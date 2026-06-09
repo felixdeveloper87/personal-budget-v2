@@ -328,6 +328,7 @@ export default function ReportsPage() {
   const {
     selectedDate,
     selectedPeriod,
+    onDateChange,
     onPeriodChange,
     navigatePeriod,
     goToToday,
@@ -432,6 +433,7 @@ export default function ReportsPage() {
               <PeriodNavigator
                 selectedPeriod={selectedPeriod as PeriodType}
                 selectedDate={selectedDate}
+                onDateChange={onDateChange}
                 onPeriodChange={onPeriodChange}
                 onNavigatePeriod={navigatePeriod}
                 onGoToToday={goToToday}

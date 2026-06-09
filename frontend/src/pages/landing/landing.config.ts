@@ -1,6 +1,7 @@
 import {
   BarChart3,
-  Calendar,
+  CalendarCheck,
+  ChartLineUp,
   CreditCard,
   Database,
   Eye,
@@ -14,7 +15,6 @@ import {
   Sparkles,
   TrendingUp,
   Wallet,
-  Zap,
   type LucideIcon,
 } from '../../components/ui/icons'
 import { BRAND, BRAND_PROMISES } from '../../components/layout/header/brand.config'
@@ -78,10 +78,19 @@ export const FEATURES: ReadonlyArray<LandingFeature> = [
     accent: '#3b82f6',
   },
   {
+    id: 'forecasting',
+    icon: ChartLineUp,
+    title: 'Cash flow forecasting',
+    description:
+      'See your projected balance months ahead. Set category budgets and watch the forecast adjust in real time.',
+    variant: 'card',
+    accent: '#6366f1',
+  },
+  {
     id: 'categories',
     icon: PieChart,
     title: 'Categories you control',
-    description: 'Build the taxonomy that fits your life. Group, rename, recolor.',
+    description: 'Build the taxonomy that fits your life. Group, rename, recolor — your way.',
     variant: 'card',
     accent: '#8b5cf6',
   },
@@ -95,21 +104,13 @@ export const FEATURES: ReadonlyArray<LandingFeature> = [
     accent: '#14b8a6',
   },
   {
-    id: 'quick-add',
-    icon: Zap,
-    title: 'Lightning-fast entry',
+    id: 'goals',
+    icon: CalendarCheck,
+    title: 'Savings goals',
     description:
-      'Number-pad input, smart category suggestions, two-tap logging. Recording a transaction takes less time than the receipt did.',
+      'Set a target, track your progress. Goals live alongside your accounts without touching your real balance.',
     variant: 'card',
-    accent: '#06b6d4',
-  },
-  {
-    id: 'periods',
-    icon: Calendar,
-    title: 'Day · Week · Month · Year',
-    description: 'Zoom in on a single day or out to a full year — same UI, same speed.',
-    variant: 'card',
-    accent: '#f97316',
+    accent: '#22c55e',
   },
   {
     id: 'search',
@@ -199,9 +200,9 @@ export const FAQS: ReadonlyArray<LandingFaq> = [
       'On the Personal Budget servers, encrypted in transit and bound to your account. You can export it as a structured file at any time.',
   },
   {
-    question: 'Can I import statements from my bank?',
+    question: 'Can I import transactions from a file?',
     answer:
-      'Not yet. Manual entry keeps the experience fast and private. CSV/OFX import is on the roadmap, with explicit user-side approval for each row.',
+      'Yes — you can import a CSV file directly from the Transactions page. Each row is previewed before anything is saved, so you stay in control.',
   },
   {
     question: 'Does it work on my phone?',

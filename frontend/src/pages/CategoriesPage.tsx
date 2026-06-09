@@ -27,6 +27,7 @@ export default function CategoriesPage() {
   const {
     selectedDate,
     selectedPeriod,
+    onDateChange,
     onPeriodChange,
     navigatePeriod,
     goToToday,
@@ -249,6 +250,7 @@ export default function CategoriesPage() {
             <PeriodNavigator
               selectedPeriod={selectedPeriod}
               selectedDate={selectedDate}
+              onDateChange={onDateChange}
               onPeriodChange={onPeriodChange}
               onNavigatePeriod={navigatePeriod}
               onGoToToday={goToToday}

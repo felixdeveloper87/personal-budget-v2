@@ -116,6 +116,7 @@ export default function SummaryContainer({
             <PeriodNavigator
               selectedPeriod={selectedPeriod}
               selectedDate={selectedDate}
+              onDateChange={onDateChange}
               onPeriodChange={onPeriodChange}
               onNavigatePeriod={navigatePeriod}
               onGoToToday={goToToday}

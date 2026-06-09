@@ -21,6 +21,7 @@ import {
   RotateCcw,
 } from '../ui/icons'
 import { PeriodType } from '../../types'
+import PeriodDatePicker from './PeriodDatePicker'
 
 /* -------------------------------------------------------------------------- */
 /* Types & config                                                              */
@@ -38,7 +39,8 @@ interface PeriodNavigatorProps {
    */
   isEmbedded?: boolean
   /** The currently-selected date — used to show a relative hint. */
-  selectedDate?: Date
+  selectedDate: Date
+  onDateChange: (date: Date) => void
 }
 
 interface PeriodOption {
@@ -144,6 +146,7 @@ export default function PeriodNavigator({
   formatLabel,
   isEmbedded = false,
   selectedDate,
+  onDateChange,
 }: PeriodNavigatorProps) {
   const isMobile = useBreakpointValue({ base: true, md: false })
 
@@ -186,10 +189,6 @@ export default function PeriodNavigator({
   const navBtnColor = useColorModeValue('gray.500', 'gray.400')
   const navBtnHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const navBtnHoverColor = useColorModeValue('blue.600', 'blue.300')
-
-  const labelColor = useColorModeValue('gray.900', 'gray.50')
-  const hintColor = useColorModeValue('blue.600', 'blue.300')
-  const hintBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
 
   const todayBtnColor = useColorModeValue('blue.600', 'blue.300')
   const todayBtnBorder = useColorModeValue('blue.200', 'rgba(59,130,246,0.35)')
@@ -282,43 +281,13 @@ export default function PeriodNavigator({
             transition="all 0.15s ease"
           />
 
-          {/* Center label area */}
-          <Flex
-            flex={1}
-            direction="column"
-            align="center"
-            justify="center"
-            gap={0}
-            minW={0}
-            userSelect="none"
-          >
-            <Text
-              fontSize={{ base: 'md', md: 'lg' }}
-              fontWeight={700}
-              color={labelColor}
-              letterSpacing="-0.01em"
-              lineHeight="1.3"
-              noOfLines={1}
-            >
-              {formatLabel()}
-            </Text>
-
-            {hint && (
-              <Text
-                fontSize="2xs"
-                fontWeight={600}
-                color={hintColor}
-                bg={hintBg}
-                px={2}
-                py={0.5}
-                borderRadius="full"
-                lineHeight="1.4"
-                mt={0.5}
-              >
-                {hint}
-              </Text>
-            )}
-          </Flex>
+          <PeriodDatePicker
+            selectedDate={selectedDate}
+            selectedPeriod={selectedPeriod}
+            onDateChange={onDateChange}
+            label={formatLabel()}
+            hint={hint}
+          />
 
           <IconButton
             aria-label="Next period"
