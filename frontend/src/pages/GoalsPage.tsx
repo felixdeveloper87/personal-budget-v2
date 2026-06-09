@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Badge,
   Box,
   Button,
   Card,
   CardBody,
-  Divider,
   FormControl,
   FormLabel,
   Heading,
@@ -30,11 +29,10 @@ import { SavingsGoal } from '../types'
 import { ToastService } from '../services/toast'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
-import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
-import PeriodNavigator from '../components/summary/PeriodNavigator'
 import { ChartHeaderStats } from '../components/charts/modal/components'
 import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
-import { SectionCard } from '../components/ui'
+import { SectionCard, SectionHeader } from '../components/ui'
+import { Wallet } from '../components/ui/icons'
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
@@ -49,30 +47,21 @@ export default function GoalsPage() {
   const [contributions, setContributions] = useState<Record<number, number>>({})
 
   const muted = useColorModeValue('gray.600', 'gray.400')
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const spinnerColor = useColorModeValue('blue.500', 'blue.300')
 
-  // Period-driven balance break-even — the content the home "Balance" card used
-  // to open in a modal now lives here.
-  const {
-    selectedDate,
-    selectedPeriod,
-    onDateChange,
-    onPeriodChange,
-    navigatePeriod,
-    goToToday,
-    formatLabel,
-  } = usePeriodNavigator()
+  // Balance break-even fixed to the current month — goals only matter against
+  // where you stand now, so there's no period navigator here.
+  const currentMonth = useMemo(() => new Date(), [])
   const {
     transactions: balanceTransactions,
     monthSummary,
     loading: balanceLoading,
-  } = useDashboardData(selectedDate, selectedPeriod)
+  } = useDashboardData(currentMonth, 'month')
   const periodData = usePeriodData(
     balanceTransactions,
     monthSummary,
-    selectedPeriod,
-    selectedDate,
+    'month',
+    currentMonth,
   )
 
   const load = useCallback(async () => {
@@ -140,23 +129,14 @@ export default function GoalsPage() {
         </Box>
 
         <SectionCard staticOnHover>
-          <VStack spacing={0} align="stretch" w="full">
-            <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
-              <PeriodNavigator
-                selectedPeriod={selectedPeriod}
-                selectedDate={selectedDate}
-                onDateChange={onDateChange}
-                onPeriodChange={onPeriodChange}
-                onNavigatePeriod={navigatePeriod}
-                onGoToToday={goToToday}
-                formatLabel={formatLabel}
-                isEmbedded
+          <Box p={{ base: 4, sm: 5 }}>
+            <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+              <SectionHeader
+                icon={Wallet}
+                title="Balance"
+                caption="Where you stand this month"
+                accent="violet"
               />
-            </Box>
-
-            <Divider borderColor={dividerColor} />
-
-            <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
               {balanceLoading ? (
                 <HStack justify="center" py={10}>
                   <Spinner color={spinnerColor} thickness="3px" speed="0.8s" />
@@ -170,14 +150,14 @@ export default function GoalsPage() {
                   />
                   <BalanceBreakEvenPanel
                     currentBalance={periodData.balance}
-                    selectedDate={selectedDate}
-                    periodType={selectedPeriod}
+                    selectedDate={currentMonth}
+                    periodType="month"
                     transactions={periodData.transactions}
                   />
                 </VStack>
               )}
-            </Box>
-          </VStack>
+            </VStack>
+          </Box>
         </SectionCard>
 
         <Card>
