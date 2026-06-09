@@ -200,24 +200,38 @@ export default function NavBar({
             }}
           >
             <Flex direction="column" align="center" justify="center" gap={1}>
-              <Icon as={List} boxSize={4.5} weight={isOverflowActive ? 'duotone' : 'regular'} />
+              <List
+                size={18}
+                weight={isOverflowActive ? 'duotone' : 'regular'}
+                aria-hidden
+              />
               <Text as="span" lineHeight="1" whiteSpace="nowrap">More</Text>
             </Flex>
           </MenuButton>
           <Portal>
             <MenuList zIndex={2000} minW="220px" p={2} borderRadius="xl">
-              {overflowItems.map((item) => (
-                <MenuItem
-                  key={item.id}
-                  icon={<Icon as={item.icon} boxSize={4.5} />}
-                  borderRadius="lg"
-                  fontWeight={currentPage === item.id ? 700 : 500}
-                  color={currentPage === item.id ? activeColor : undefined}
-                  onClick={() => onPageChange?.(item.id)}
-                >
-                  {item.label}
-                </MenuItem>
-              ))}
+              {overflowItems.map((item) => {
+                const ItemIcon = item.icon
+
+                return (
+                  <MenuItem
+                    key={item.id}
+                    icon={
+                      <ItemIcon
+                        size={18}
+                        weight={currentPage === item.id ? 'duotone' : 'regular'}
+                        aria-hidden
+                      />
+                    }
+                    borderRadius="lg"
+                    fontWeight={currentPage === item.id ? 700 : 500}
+                    color={currentPage === item.id ? activeColor : undefined}
+                    onClick={() => onPageChange?.(item.id)}
+                  >
+                    {item.label}
+                  </MenuItem>
+                )
+              })}
             </MenuList>
           </Portal>
         </Menu>
