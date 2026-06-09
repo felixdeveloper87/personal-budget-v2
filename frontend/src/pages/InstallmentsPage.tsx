@@ -160,7 +160,7 @@ export default function InstallmentsPage({
                   {summary.active.length === 0 ? (
                     <EmptyState text="No active installment plans." />
                   ) : (
-                    <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={4}>
+                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
                       {summary.active.map((plan) => (
                         <InstallmentPlanCard
                           key={plan.id}
@@ -190,7 +190,7 @@ export default function InstallmentsPage({
                         </Badge>
                       }
                     />
-                    <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={4}>
+                    <SimpleGrid columns={{ base: 1, md: 2, lg: 3, xl: 4 }} spacing={3}>
                       {summary.completed.map((plan) => (
                         <InstallmentPlanCard
                           key={plan.id}
