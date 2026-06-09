@@ -1,9 +1,10 @@
-import { Box, Divider, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Divider, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import SummaryCardsGrid from './SummaryCardsGrid'
 import PeriodNavigator from './PeriodNavigator'
 import { SectionCard } from '../ui'
+import { AlertCircle } from '../ui/icons'
 
 interface SummaryContainerProps {
   periodData: PeriodData
@@ -102,6 +103,10 @@ export default function SummaryContainer({
   const { transactions, income, expense, balance } = periodData
 
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
+  const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
+  const infoColor = useColorModeValue('blue.700', 'blue.200')
+  const infoMuted = useColorModeValue('blue.600', 'blue.300')
 
   const navigatePeriod =
     externalNavigatePeriod ??
@@ -150,14 +155,33 @@ export default function SummaryContainer({
 
         {/* Summary Cards */}
         <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
-          <SummaryCardsGrid
-            transactions={transactions}
-            income={income}
-            expense={expense}
-            balance={balance}
-            selectedPeriod={selectedPeriod}
-            onCardClick={handleCardClick}
-          />
+          <VStack align="stretch" spacing={3}>
+            <HStack
+              spacing={2.5}
+              px={3}
+              py={2.5}
+              bg={infoBg}
+              border="1px solid"
+              borderColor={infoBorder}
+              borderRadius="lg"
+              color={infoColor}
+              align="flex-start"
+            >
+              <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
+              <Text fontSize="xs" lineHeight="1.45" color={infoMuted}>
+                This overview follows payment dates, showing income received and bills due in the selected period. Purchase activity is shown separately in Transactions and Categories.
+              </Text>
+            </HStack>
+
+            <SummaryCardsGrid
+              transactions={transactions}
+              income={income}
+              expense={expense}
+              balance={balance}
+              selectedPeriod={selectedPeriod}
+              onCardClick={handleCardClick}
+            />
+          </VStack>
         </Box>
       </VStack>
     </SectionCard>
