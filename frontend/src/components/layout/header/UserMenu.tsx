@@ -12,13 +12,14 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDown, LogOut, Settings, User } from '../../ui/icons'
+import { ChevronDown, LogOut, ReceiptText, Settings, User } from '../../ui/icons'
 import type { UserPlan } from '../../../types'
 
 interface UserMenuProps {
   user: any
   onOpenProfile?: () => void
   onOpenSettings?: () => void
+  onOpenAllTransactions?: () => void
   onLogout: () => void
 }
 
@@ -27,7 +28,7 @@ const PLAN_LABEL: Record<UserPlan, string> = {
   PREMIUM: 'Premium',
 }
 
-export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout }: UserMenuProps) {
+export default function UserMenu({ user, onOpenProfile, onOpenSettings, onOpenAllTransactions, onLogout }: UserMenuProps) {
   const plan: UserPlan = user?.plan ?? 'STANDARD'
 
   const triggerBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
@@ -314,6 +315,45 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
               <Text>Settings</Text>
             </HStack>
           </MenuItem>
+          {onOpenAllTransactions && (
+            <MenuItem
+              onClick={onOpenAllTransactions}
+              bg="transparent"
+              color={textColor}
+              fontWeight={500}
+              fontSize="sm"
+              px={3}
+              py={2.5}
+              borderRadius="xl"
+              _hover={{
+                bg: itemHoverBg,
+                color: itemHoverColor,
+              }}
+              _focus={{
+                bg: itemHoverBg,
+                color: itemHoverColor,
+              }}
+              _active={{ bg: 'transparent' }}
+              transition="all 0.15s cubic-bezier(0.16, 1, 0.3, 1)"
+              sx={{
+                '&:hover .menu-icon': {
+                  transform: 'translateX(2px)',
+                  color: itemHoverColor,
+                },
+              }}
+            >
+              <HStack spacing={3} w="full">
+                <Icon
+                  as={ReceiptText}
+                  boxSize={4}
+                  color={subTextColor}
+                  className="menu-icon"
+                  transition="all 0.15s ease"
+                />
+                <Text>All transactions</Text>
+              </HStack>
+            </MenuItem>
+          )}
         </Box>
 
         <Box h="1px" bg={borderColor} mx={3} />

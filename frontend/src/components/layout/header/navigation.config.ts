@@ -20,6 +20,7 @@ export type AppPage =
   | 'installments'
   | 'fixed-payments'
   | 'transactions'
+  | 'all-transactions'
   | 'categories'
   | 'goals'
   | 'planning'

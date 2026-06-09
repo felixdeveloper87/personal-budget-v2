@@ -1,6 +1,7 @@
 import { Spinner, Center, VStack, Text } from '@chakra-ui/react'
 import { useAuth } from './contexts/AuthContext'
 import Dashboard from './pages/Dashboard'
+import TransactionsPage from './pages/TransactionsPage'
 import AllTransactionsPage from './pages/AllTransactionsPage'
 import CategoriesPage from './pages/CategoriesPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
@@ -30,7 +31,8 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   installments: ({ onPageChange }) => <InstallmentsPage onPageChange={onPageChange} />,
   'fixed-payments': ({ onPageChange }) => <FixedPaymentsPage onPageChange={onPageChange} />,
-  transactions: () => <AllTransactionsPage />,
+  transactions: () => <TransactionsPage />,
+  'all-transactions': () => <AllTransactionsPage />,
   categories: ({ categoryTab }) => <CategoriesPage initialTab={categoryTab} />,
   goals: () => <GoalsPage />,
   planning: () => <PlanningPage />,

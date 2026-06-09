@@ -13,6 +13,7 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 interface HeaderProps {
   onOpenProfile?: () => void
   onOpenSettings?: () => void
+  onOpenAllTransactions?: () => void
   onLogin?: () => void
   currentPage?: AppPage
   onPageChange?: (page: AppPage) => void
@@ -23,6 +24,7 @@ interface HeaderProps {
 export default function Header({
   onOpenProfile,
   onOpenSettings,
+  onOpenAllTransactions,
   onLogin,
   currentPage = 'dashboard',
   onPageChange,
@@ -168,6 +170,7 @@ export default function Header({
               onLogin={onLogin}
               onOpenProfile={onOpenProfile}
               onOpenSettings={onOpenSettings}
+              onOpenAllTransactions={onOpenAllTransactions}
               onLogout={logout}
             />
           </Flex>

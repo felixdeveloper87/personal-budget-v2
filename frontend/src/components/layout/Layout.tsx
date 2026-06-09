@@ -94,6 +94,7 @@ export default function Layout({
         <Header
           onOpenProfile={profileModal.onOpen}
           onOpenSettings={settingsModal.onOpen}
+          onOpenAllTransactions={() => onPageChange?.('all-transactions')}
           currentPage={currentPage}
           onPageChange={onPageChange}
           hasSidebar={showSidebar}

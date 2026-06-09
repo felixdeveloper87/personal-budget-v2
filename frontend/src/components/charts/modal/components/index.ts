@@ -4,7 +4,6 @@ export type {
   ChartHeaderStatsProps,
   ChartHeaderStatsVariant,
 } from './ChartHeaderStats'
-export { default as ChartLoadingState } from './ChartLoadingState'
 export { default as ChartPlotShell } from './ChartPlotShell'
 export { default as ChartEmptyState } from './ChartEmptyState'
 export { default as IncomeInsights } from './IncomeInsights'

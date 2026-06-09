@@ -80,6 +80,7 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
                   goToToday={goToToday}
                   formatLabel={formatLabel}
                   onNavigateCategory={onNavigateCategory}
+                  onViewTransactions={() => onPageChange?.('transactions')}
                 />
               </Box>
             )}
