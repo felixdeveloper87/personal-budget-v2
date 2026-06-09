@@ -9,19 +9,18 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  useDisclosure,
 } from '@chakra-ui/react'
 import { ChevronRight, CreditCard } from '../components/ui/icons'
 import { InstallmentPlan } from '../types'
 import { listInstallmentPlans } from '../api'
 import { useAuth } from '../contexts/AuthContext'
-import { InstallmentPlansModal } from '../components/installments'
 import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 import { SectionCard, SectionHeader } from '../components/ui'
 import { ToastService } from '../services/toast'
+import type { AppPage } from '../components/layout/header/navigation.config'
 
 interface InstallmentPlansSectionProps {
-  onRefresh?: () => void | Promise<void>
+  onPageChange?: (page: AppPage) => void
 }
 
 /**
@@ -29,9 +28,8 @@ interface InstallmentPlansSectionProps {
  * Compact dashboard card showing the count of active vs past plans and a
  * shortcut to the full plans modal.
  */
-export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansSectionProps) {
+export default function InstallmentPlansSection({ onPageChange }: InstallmentPlansSectionProps) {
   const { user, loading: authLoading } = useAuth()
-  const { isOpen, onOpen, onClose } = useDisclosure()
 
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
@@ -60,13 +58,6 @@ export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansS
     }
     void fetchPlans()
   }, [authLoading, user?.token, fetchPlans])
-
-  const handlePlanChanged = async () => {
-    await fetchPlans()
-    if (onRefresh) {
-      await Promise.resolve(onRefresh())
-    }
-  }
 
   const { activeCount, pastCount } = useMemo(() => {
     let active = 0
@@ -97,7 +88,6 @@ export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansS
         }`
 
   return (
-    <>
       <SectionCard h="full">
         <Box p={{ base: 4, sm: 5 }}>
           {loading ? (
@@ -143,7 +133,7 @@ export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansS
               />
 
               <Button
-                onClick={onOpen}
+                onClick={() => onPageChange?.('installments')}
                 variant="unstyled"
                 w="full"
                 h="44px"
@@ -185,13 +175,5 @@ export default function InstallmentPlansSection({ onRefresh }: InstallmentPlansS
           )}
         </Box>
       </SectionCard>
-
-      <InstallmentPlansModal
-        isOpen={isOpen}
-        onClose={onClose}
-        plans={plans}
-        onPlanDeleted={handlePlanChanged}
-      />
-    </>
   )
 }

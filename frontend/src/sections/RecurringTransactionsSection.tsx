@@ -9,25 +9,23 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  useDisclosure,
 } from '@chakra-ui/react'
 import { CalendarClock, ChevronRight } from '../components/ui/icons'
 import { listRecurringTransactions } from '../api'
 import { useAuth } from '../contexts/AuthContext'
 import { RecurringTransaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'
-import { RecurringTransactionsModal } from '../components/recurring'
 import { ToastService } from '../services/toast'
+import type { AppPage } from '../components/layout/header/navigation.config'
 
 interface RecurringTransactionsSectionProps {
-  onRefresh?: () => void | Promise<void>
+  onPageChange?: (page: AppPage) => void
 }
 
 export default function RecurringTransactionsSection({
-  onRefresh,
+  onPageChange,
 }: RecurringTransactionsSectionProps) {
   const { user, loading: authLoading } = useAuth()
-  const { isOpen, onOpen, onClose } = useDisclosure()
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -56,13 +54,6 @@ export default function RecurringTransactionsSection({
     void fetchItems()
   }, [authLoading, user?.token, fetchItems])
 
-  const handleChanged = async () => {
-    await fetchItems()
-    if (onRefresh) {
-      await Promise.resolve(onRefresh())
-    }
-  }
-
   const { activeCount, cancelledCount } = useMemo(() => {
     let active = 0
     let cancelled = 0
@@ -90,7 +81,6 @@ export default function RecurringTransactionsSection({
       : `${activeCount} active${cancelledCount > 0 ? ` · ${cancelledCount} cancelled` : ''}`
 
   return (
-    <>
       <SectionCard h="full">
         <Box p={{ base: 4, sm: 5 }}>
           {loading ? (
@@ -136,7 +126,7 @@ export default function RecurringTransactionsSection({
               />
 
               <Button
-                onClick={onOpen}
+                onClick={() => onPageChange?.('fixed-payments')}
                 variant="unstyled"
                 w="full"
                 h="44px"
@@ -172,13 +162,5 @@ export default function RecurringTransactionsSection({
           )}
         </Box>
       </SectionCard>
-
-      <RecurringTransactionsModal
-        isOpen={isOpen}
-        onClose={onClose}
-        recurringTransactions={items}
-        onChanged={handleChanged}
-      />
-    </>
   )
 }

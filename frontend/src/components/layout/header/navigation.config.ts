@@ -8,6 +8,8 @@ import {
   Wallet,
   Sparkles,
   CalendarDays,
+  CalendarClock,
+  CreditCard,
   type LucideIcon,
 } from '../../ui/icons'
 
@@ -15,6 +17,8 @@ export type AppPage =
   | 'dashboard'
   | 'accounts'
   | 'transfers'
+  | 'installments'
+  | 'fixed-payments'
   | 'transactions'
   | 'categories'
   | 'goals'
@@ -58,6 +62,20 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Plan',
     icon: CalendarDays,
     description: 'Budgets and cash flow',
+  },
+  {
+    id: 'installments',
+    label: 'Installments',
+    shortLabel: 'Installments',
+    icon: CreditCard,
+    description: 'Purchase plans and payments',
+  },
+  {
+    id: 'fixed-payments',
+    label: 'Fixed payments',
+    shortLabel: 'Fixed',
+    icon: CalendarClock,
+    description: 'Monthly payments and incomes',
   },
   {
     id: 'transactions',

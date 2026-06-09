@@ -1,4 +1,3 @@
-import { useCallback } from 'react'
 import { Box, VStack } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
@@ -35,16 +34,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   } = usePeriodNavigator()
   const { transactions, monthSummary, loading, loadData, filters } =
     useDashboardData(selectedDate, selectedPeriod)
-
-  const refreshAfterFixedPaymentChange = useCallback(
-    () => loadData({ quiet: true }),
-    [loadData]
-  )
-
-  const refreshAfterInstallmentPlanChange = useCallback(
-    () => loadData({ quiet: true }),
-    [loadData]
-  )
 
   const periodData = usePeriodData(
     transactions,
@@ -97,8 +86,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                 transactions={transactions}
                 onRefresh={loadData}
               />
-              <InstallmentPlansSection onRefresh={refreshAfterInstallmentPlanChange} />
-              <RecurringTransactionsSection onRefresh={refreshAfterFixedPaymentChange} />
+              <InstallmentPlansSection onPageChange={onPageChange} />
+              <RecurringTransactionsSection onPageChange={onPageChange} />
             </Box>
 
             <Box order={{ base: 3, lg: 3 }}>
