@@ -5,11 +5,8 @@ import {
   Button,
   Card,
   CardBody,
-  FormControl,
-  FormLabel,
   Heading,
   HStack,
-  Input,
   NumberInput,
   NumberInputField,
   Progress,
@@ -22,7 +19,6 @@ import {
 import {
   archiveSavingsGoal,
   contributeToSavingsGoal,
-  createSavingsGoal,
   listSavingsGoals,
 } from '../api'
 import { SavingsGoal } from '../types'
@@ -36,11 +32,6 @@ const money = (value: number) =>
 
 export default function GoalsPage() {
   const [goals, setGoals] = useState<SavingsGoal[]>([])
-  const [name, setName] = useState('')
-  const [targetAmount, setTargetAmount] = useState(0)
-  const [currentAmount, setCurrentAmount] = useState(0)
-  const [targetDate, setTargetDate] = useState('')
-  const [saving, setSaving] = useState(false)
   const [contributions, setContributions] = useState<Record<number, number>>({})
 
   const muted = useColorModeValue('gray.600', 'gray.400')
@@ -69,30 +60,6 @@ export default function GoalsPage() {
   }, [])
 
   useEffect(() => { void load() }, [load])
-
-  const create = async () => {
-    if (!name.trim() || targetAmount <= 0) return
-    setSaving(true)
-    try {
-      await createSavingsGoal({
-        name: name.trim(),
-        targetAmount,
-        currentAmount,
-        targetDate: targetDate || null,
-        color: '#2563eb',
-      })
-      setName('')
-      setTargetAmount(0)
-      setCurrentAmount(0)
-      setTargetDate('')
-      await load()
-      ToastService.success({ title: 'Savings goal created', dedupeKey: 'goal-created' })
-    } catch (err) {
-      ToastService.apiError(err, { title: 'Could not create goal', dedupeKey: 'goal-create-failed' })
-    } finally {
-      setSaving(false)
-    }
-  }
 
   const contribute = async (goal: SavingsGoal) => {
     const amount = contributions[goal.id] ?? 0
@@ -136,39 +103,6 @@ export default function GoalsPage() {
             transactions={periodData.transactions}
           />
         )}
-
-        <Card>
-          <CardBody>
-            <VStack align="stretch" spacing={4}>
-              <Heading size="md">Create a goal</Heading>
-              <SimpleGrid columns={{ base: 1, md: 4 }} spacing={3}>
-                <FormControl isRequired>
-                  <FormLabel>Name</FormLabel>
-                  <Input value={name} onChange={(event) => setName(event.target.value)} placeholder="Emergency fund" />
-                </FormControl>
-                <FormControl isRequired>
-                  <FormLabel>Target</FormLabel>
-                  <NumberInput min={0} precision={2} value={targetAmount} onChange={(_, value) => setTargetAmount(value || 0)}>
-                    <NumberInputField />
-                  </NumberInput>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Already saved</FormLabel>
-                  <NumberInput min={0} precision={2} value={currentAmount} onChange={(_, value) => setCurrentAmount(value || 0)}>
-                    <NumberInputField />
-                  </NumberInput>
-                </FormControl>
-                <FormControl>
-                  <FormLabel>Target date</FormLabel>
-                  <Input type="date" value={targetDate} onChange={(event) => setTargetDate(event.target.value)} />
-                </FormControl>
-              </SimpleGrid>
-              <Button colorScheme="blue" onClick={create} isLoading={saving} isDisabled={!name.trim() || targetAmount <= 0}>
-                Create goal
-              </Button>
-            </VStack>
-          </CardBody>
-        </Card>
 
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={5}>
           {goals.filter((goal) => !goal.archived).map((goal) => (

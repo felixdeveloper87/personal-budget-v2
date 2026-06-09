@@ -160,6 +160,9 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   }
 
   const firstNegativeMonth = forecast?.months.find((item) => item.negative)
+  const firstPositiveMonth = forecast?.months.find(
+    (item) => item.projectedClosingBalance > 0,
+  )
   // Projected balance at key horizons, rolled forward from the current account balance.
   const horizons = forecast
     ? [
@@ -258,6 +261,28 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
               Open break-even target
             </Button>
           </HStack>
+        )}
+
+        {!currentMonthLoading && currentMonthData.balance < 0 && forecast && (
+          <Alert
+            status={firstPositiveMonth ? 'success' : 'warning'}
+            borderRadius="xl"
+            alignItems="flex-start"
+          >
+            <AlertIcon mt={0.5} />
+            <Box>
+              <Text fontWeight={800}>
+                {firstPositiveMonth
+                  ? `Projected to return positive in ${monthLabel(firstPositiveMonth.month)}`
+                  : 'No positive balance projected in the next 12 months'}
+              </Text>
+              <AlertDescription fontSize="sm">
+                {firstPositiveMonth
+                  ? `Your projected closing balance reaches ${money(firstPositiveMonth.projectedClosingBalance)} by the end of that month.`
+                  : 'Review expected income, category budgets and recurring expenses to build a recovery path.'}
+              </AlertDescription>
+            </Box>
+          </Alert>
         )}
 
         {firstNegativeMonth && (
