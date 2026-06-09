@@ -9,6 +9,7 @@ import {
   Button,
   Card,
   CardBody,
+  Collapse,
   Divider,
   Flex,
   FormControl,
@@ -17,9 +18,14 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Input,
   InputGroup,
   InputLeftElement,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   NumberInput,
   NumberInputField,
   Progress,
@@ -45,12 +51,16 @@ import {
   FinancialAccount,
 } from '../types'
 import { ToastService } from '../services/toast'
-import { BankCombobox, BankLogo, getBankMeta } from '../components/ui'
+import { BankCombobox, BankLogo, SectionHeader, getBankMeta } from '../components/ui'
+import PaymentMethodsSection from '../sections/PaymentMethodsSection'
 import {
   ArrowRight,
   Building,
+  ChevronDown,
   CreditCard,
   DollarSign,
+  Eye,
+  EyeOff,
   Pencil,
   Plus,
   Repeat,
@@ -81,6 +91,7 @@ const ACCOUNT_NAME_SUFFIX: Record<AccountType, string> = {
 }
 
 const today = () => new Date().toISOString().slice(0, 10)
+const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 const money = (value: number, currency = 'GBP') =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
 const accountName = (institution: string, type: AccountType) => {
@@ -89,10 +100,79 @@ const accountName = (institution: string, type: AccountType) => {
   return issuer ? `${issuer} ${ACCOUNT_NAME_SUFFIX[type]}` : ''
 }
 
+interface TransferAccountSelectProps {
+  accounts: FinancialAccount[]
+  value: number | null
+  onChange: (accountId: number) => void
+  formatBalance: (value: number, currency?: string) => string
+}
+
+function TransferAccountSelect({
+  accounts,
+  value,
+  onChange,
+  formatBalance,
+}: TransferAccountSelectProps) {
+  const selected = accounts.find((account) => account.id === value)
+  const menuBg = useColorModeValue('white', 'gray.800')
+  const menuBorder = useColorModeValue('gray.200', 'gray.700')
+  const balanceColor = useColorModeValue('gray.500', 'gray.400')
+
+  return (
+    <Menu matchWidth>
+      <MenuButton
+        as={Button}
+        w="full"
+        h="40px"
+        px={3}
+        variant="outline"
+        bg={menuBg}
+        borderColor={menuBorder}
+        rightIcon={<Icon as={ChevronDown} boxSize={4} />}
+        textAlign="left"
+        fontWeight={600}
+      >
+        <HStack justify="space-between" minW={0} spacing={3}>
+          <Text fontSize="sm" noOfLines={1}>
+            {selected?.name ?? 'Select account'}
+          </Text>
+          {selected && (
+            <Text fontSize="xs" color={balanceColor} fontWeight={600} flexShrink={0}>
+              {formatBalance(selected.currentBalance, selected.currency)}
+            </Text>
+          )}
+        </HStack>
+      </MenuButton>
+      <MenuList minW="100%" bg={menuBg} borderColor={menuBorder} py={1}>
+        {accounts.map((account) => (
+          <MenuItem key={account.id} onClick={() => onChange(account.id)}>
+            <HStack justify="space-between" w="full" minW={0} spacing={3}>
+              <Text fontSize="sm" fontWeight={600} noOfLines={1}>
+                {account.name}
+              </Text>
+              <Text fontSize="xs" color={balanceColor} fontWeight={600} flexShrink={0}>
+                {formatBalance(account.currentBalance, account.currency)}
+              </Text>
+            </HStack>
+          </MenuItem>
+        ))}
+      </MenuList>
+    </Menu>
+  )
+}
+
 export default function AccountsPage() {
   const [summary, setSummary] = useState<AccountSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [hideBalances, setHideBalances] = useState(() => {
+    try {
+      return localStorage.getItem(BALANCE_VISIBILITY_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [showAccountForm, setShowAccountForm] = useState(false)
 
   const [institution, setInstitution] = useState('')
   const [type, setType] = useState<AccountType>('CURRENT')
@@ -136,7 +216,21 @@ export default function AccountsPage() {
     () => summary?.accounts.filter((account) => account.active) ?? [],
     [summary],
   )
+  const displayMoney = (value: number, currency = 'GBP') =>
+    hideBalances ? '••••••' : money(value, currency)
   const generatedAccountName = accountName(institution, type)
+
+  const toggleBalances = () => {
+    setHideBalances((current) => {
+      const next = !current
+      try {
+        localStorage.setItem(BALANCE_VISIBILITY_KEY, String(next))
+      } catch {
+        // Keep the preference for this session when storage is unavailable.
+      }
+      return next
+    })
+  }
 
   const resetAccountForm = () => {
     setInstitution('')
@@ -144,6 +238,7 @@ export default function AccountsPage() {
     setOpeningBalance('0')
     setOverdraftLimit(0)
     setEditingAccountId(null)
+    setShowAccountForm(false)
   }
 
   const editAccount = (account: FinancialAccount) => {
@@ -152,6 +247,7 @@ export default function AccountsPage() {
     setType(account.type)
     setOpeningBalance(String(account.currentBalance))
     setOverdraftLimit(account.overdraftLimit)
+    setShowAccountForm(true)
   }
 
   const saveAccount = async () => {
@@ -242,15 +338,8 @@ export default function AccountsPage() {
         </Box>
 
         <Box>
-          <Card overflow="hidden" position="relative">
-            <Box
-              position="absolute"
-              inset={0}
-              bgGradient="linear(to-r, blue.50, transparent)"
-              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
-              pointerEvents="none"
-            />
-            <CardBody position="relative">
+          <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
+            <CardBody>
               <HStack justify="space-between" align="center">
                 <Stat>
                   <StatLabel color={muted} fontWeight={700}>Total balance</StatLabel>
@@ -258,174 +347,190 @@ export default function AccountsPage() {
                     mt={1}
                     fontSize={{ base: '2xl', md: '3xl' }}
                     letterSpacing="-0.035em"
-                    color={(summary?.totalBalance ?? 0) < 0 ? 'red.500' : undefined}
+                    color={!hideBalances && (summary?.totalBalance ?? 0) < 0 ? 'red.500' : undefined}
                   >
-                    {money(summary?.totalBalance ?? 0)}
+                    {displayMoney(summary?.totalBalance ?? 0)}
                   </StatNumber>
                   <Text fontSize="xs" color={muted} mt={1}>Across all active accounts</Text>
                 </Stat>
-                <Flex
-                  w="48px"
-                  h="48px"
-                  align="center"
-                  justify="center"
-                  borderRadius="2xl"
-                  bg={blueSoftBg}
-                  color="blue.500"
-                  flexShrink={0}
-                >
-                  <Icon as={Wallet} boxSize={6} weight="duotone" />
-                </Flex>
+                <IconButton
+                  aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
+                  title={hideBalances ? 'Show balances' : 'Hide balances'}
+                  icon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={5} />}
+                  onClick={toggleBalances}
+                  variant="ghost"
+                  color={muted}
+                  borderRadius="full"
+                />
               </HStack>
             </CardBody>
           </Card>
         </Box>
 
-        <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={6} alignItems="start">
-          <Card>
+        <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6} alignItems="start">
+          <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
             <CardBody p={{ base: 4, md: 5 }}>
               <VStack align="stretch" spacing={5}>
-                <HStack justify="space-between">
-                  <Box>
-                    <Heading size="md" letterSpacing="-0.02em">Your accounts</Heading>
-                    <Text fontSize="sm" color={muted} mt={1}>
-                      Live balances based on cleared account activity.
+                <SectionHeader
+                  icon={Wallet}
+                  title="Your accounts"
+                  caption={`${activeAccounts.length} active account${activeAccounts.length !== 1 ? 's' : ''}`}
+                  accent="blue"
+                />
+                <Text fontSize="xs" color={muted}>
+                  Live balances based on cleared account activity.
+                </Text>
+                {activeAccounts.length === 0 && (
+                  <Box
+                    py={6}
+                    textAlign="center"
+                    border="1px dashed"
+                    borderColor={borderColor}
+                    borderRadius="xl"
+                  >
+                    <Icon as={Wallet} boxSize={6} color={muted} mb={2} />
+                    <Text fontSize="sm" color={muted}>
+                      {loading ? 'Loading...' : 'No accounts yet.'}
                     </Text>
                   </Box>
-                  <Badge colorScheme="blue" borderRadius="full" px={3} py={1}>
-                    {activeAccounts.length} active
-                  </Badge>
-                </HStack>
-                {activeAccounts.length === 0 && (
-                  <Text color={muted}>{loading ? 'Loading...' : 'Create your first account below.'}</Text>
                 )}
-                {activeAccounts.map((account) => (
-                  <VStack
-                    key={account.id}
-                    align="stretch"
-                    p={4}
-                    border="1px solid"
-                    borderColor={borderColor}
-                    borderRadius="2xl"
-                    bg={softBg}
-                    transition="transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease"
-                    _hover={{
-                      transform: 'translateY(-2px)',
-                      borderColor: 'blue.200',
-                      boxShadow: '0 10px 24px rgba(15, 23, 42, 0.06)',
-                    }}
-                  >
-                    <HStack justify="space-between" align="flex-start">
-                      <HStack align="flex-start" spacing={3} minW={0}>
-                        {getBankMeta(account.institution) ? (
-                          <BankLogo issuer={account.institution} size={38} borderRadius="10px" />
-                        ) : (
-                          <Box
-                            p={2}
-                            borderRadius="lg"
-                            bg={accountIconBg}
-                            flexShrink={0}
-                          >
-                            <Icon as={account.type === 'CREDIT_CARD' ? CreditCard : Wallet} boxSize={5} />
+                <VStack spacing={2} align="stretch">
+                  {activeAccounts.map((account) => (
+                    <VStack
+                      key={account.id}
+                      align="stretch"
+                      spacing={2}
+                      p={3}
+                      bg={softBg}
+                      border="1px solid"
+                      borderColor={borderColor}
+                      borderRadius="xl"
+                      transition="all 0.15s ease"
+                      _hover={{ bg: fieldBg }}
+                    >
+                      <HStack justify="space-between">
+                        <HStack spacing={3} minW={0}>
+                          {getBankMeta(account.institution) ? (
+                            <BankLogo issuer={account.institution} size={30} borderRadius="8px" />
+                          ) : (
+                            <Box
+                              p={1.5}
+                              borderRadius="lg"
+                              bg={accountIconBg}
+                              border="1px solid"
+                              borderColor={borderColor}
+                              flexShrink={0}
+                            >
+                              <Icon
+                                as={account.type === 'CREDIT_CARD' ? CreditCard : Wallet}
+                                boxSize={3.5}
+                                color={muted}
+                              />
+                            </Box>
+                          )}
+                          <Box minW={0}>
+                            <Text fontSize="sm" fontWeight={700} noOfLines={1}>
+                              {account.name}
+                            </Text>
+                            <Text fontSize="xs" color={muted} noOfLines={1}>
+                              {ACCOUNT_LABELS[account.type]}
+                              {account.institution ? ` - ${account.institution}` : ''}
+                            </Text>
                           </Box>
-                        )}
-                        <Box minW={0}>
-                          <HStack>
-                            <Text fontWeight={800} noOfLines={1}>{account.name}</Text>
-                            <Badge>{ACCOUNT_LABELS[account.type]}</Badge>
-                          </HStack>
-                          <Text fontSize="sm" color={muted}>{account.institution || 'No institution'}</Text>
-                          <Text fontSize="xs" color={muted}>
-                            Balance anchor: {new Date(account.balanceAnchorAt).toLocaleString('en-GB')}
+                        </HStack>
+
+                        <HStack spacing={1} flexShrink={0}>
+                          <Text
+                            fontSize="sm"
+                            fontWeight={800}
+                            mr={1}
+                            color={!hideBalances && account.currentBalance < 0 ? 'red.500' : undefined}
+                          >
+                            {displayMoney(account.currentBalance, account.currency)}
                           </Text>
-                        </Box>
-                      </HStack>
-                      <VStack align="flex-end" spacing={1}>
-                        <Text
-                          fontSize="xl"
-                          fontWeight={900}
-                          letterSpacing="-0.025em"
-                          color={account.currentBalance < 0 ? 'red.500' : undefined}
-                        >
-                          {money(account.currentBalance, account.currency)}
-                        </Text>
-                        <HStack>
-                          <Button
+                          <IconButton
+                            aria-label={`Edit ${account.name}`}
+                            icon={<Icon as={Pencil} boxSize={3.5} />}
                             size="xs"
                             variant="ghost"
-                            leftIcon={<Icon as={Pencil} boxSize={3.5} />}
                             onClick={() => editAccount(account)}
-                          >
-                            Edit
-                          </Button>
-                          <Button
+                          />
+                          <IconButton
+                            aria-label={`Archive ${account.name}`}
+                            icon={<Icon as={Trash2} boxSize={3.5} />}
                             size="xs"
                             variant="ghost"
                             colorScheme="red"
-                            leftIcon={<Icon as={Trash2} boxSize={3.5} />}
                             onClick={() => archive(account)}
-                          >
-                            Archive
-                          </Button>
+                          />
                         </HStack>
-                      </VStack>
-                    </HStack>
+                      </HStack>
 
-                    {account.type === 'CURRENT' && (
-                      <Box pt={2}>
-                        <HStack justify="space-between" mb={2}>
-                          <Text fontSize="sm" fontWeight={700}>
-                            Overdraft used: {money(account.overdraftUsed, account.currency)}
-                          </Text>
-                          <Badge
-                            colorScheme={
-                              account.overdraftUsed === 0
-                                ? 'green'
-                                : account.overdraftPercentageUsed >= 80
-                                  ? 'red'
-                                  : 'orange'
+                      {account.type === 'CURRENT' && account.overdraftLimit > 0 && (
+                        <Box pl="42px">
+                          <HStack justify="space-between" mb={1}>
+                            <Text fontSize="2xs" color={muted}>
+                              Overdraft remaining
+                            </Text>
+                            <Text fontSize="2xs" color={muted}>
+                              {hideBalances
+                                ? 'Hidden'
+                                : `${money(account.overdraftAvailable, account.currency)} of ${money(account.overdraftLimit, account.currency)}`}
+                            </Text>
+                          </HStack>
+                          <Progress
+                            value={
+                              hideBalances
+                                ? 0
+                                : Math.max(0, 100 - Math.min(100, account.overdraftPercentageUsed))
                             }
-                          >
-                            {account.overdraftLimit > 0
-                              ? `${account.overdraftPercentageUsed.toFixed(0)}%`
-                              : account.overdraftUsed > 0 ? 'No limit set' : 'Not in use'}
-                          </Badge>
-                        </HStack>
-                        <Progress
-                          value={Math.min(100, account.overdraftPercentageUsed)}
-                          colorScheme={
-                            account.overdraftUsed === 0
-                              ? 'green'
-                              : account.overdraftPercentageUsed >= 80
-                                ? 'red'
-                                : 'orange'
-                          }
-                          borderRadius="full"
-                          size="sm"
-                        />
-                        <Text fontSize="xs" color={muted} mt={2}>
-                          {account.overdraftLimit > 0
-                            ? `${money(account.overdraftAvailable, account.currency)} available from ${money(account.overdraftLimit, account.currency)}`
-                            : 'No overdraft facility configured'}
-                        </Text>
-                      </Box>
-                    )}
-                  </VStack>
-                ))}
+                            size="xs"
+                            borderRadius="full"
+                            colorScheme="green"
+                            opacity={0.7}
+                          />
+                        </Box>
+                      )}
+                    </VStack>
+                  ))}
+                </VStack>
+
+                <Button
+                  alignSelf="flex-start"
+                  variant="ghost"
+                  size="sm"
+                  h="auto"
+                  py={1.5}
+                  px={2}
+                  colorScheme="blue"
+                  leftIcon={<Icon as={Plus} boxSize={3.5} />}
+                  onClick={() => {
+                    if (showAccountForm || editingAccountId !== null) {
+                      resetAccountForm()
+                    } else {
+                      setShowAccountForm(true)
+                    }
+                  }}
+                >
+                  {showAccountForm || editingAccountId !== null ? 'Cancel' : 'Add new account'}
+                </Button>
               </VStack>
             </CardBody>
           </Card>
 
-          <Card
-            border="1px solid"
-            borderColor={editingAccountId ? 'blue.300' : borderColor}
-            overflow="hidden"
-          >
+          <PaymentMethodsSection creditCardsOnly />
+
+          {showAccountForm && (
+            <Collapse in animateOpacity>
+              <Card
+                border="1px solid"
+                borderColor={editingAccountId ? 'blue.300' : borderColor}
+                overflow="hidden"
+              >
             <Box
               px={{ base: 4, md: 5 }}
               py={4}
-              bgGradient="linear(to-r, blue.50, purple.50)"
-              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
+              bg={softBg}
               borderBottom="1px solid"
               borderColor={borderColor}
             >
@@ -437,9 +542,8 @@ export default function AccountsPage() {
                     align="center"
                     justify="center"
                     borderRadius="xl"
-                    bg="blue.500"
-                    color="white"
-                    boxShadow="0 8px 18px rgba(37, 99, 235, 0.22)"
+                    bg={blueSoftBg}
+                    color="blue.500"
                   >
                     <Icon as={editingAccountId ? Pencil : Plus} boxSize={5} weight="bold" />
                   </Flex>
@@ -613,60 +717,38 @@ export default function AccountsPage() {
                 </Button>
               </VStack>
             </CardBody>
-          </Card>
-        </SimpleGrid>
-
-        <Box>
+              </Card>
+            </Collapse>
+          )}
           <Card
             border="1px solid"
             borderColor={borderColor}
             overflow="hidden"
+            boxShadow="sm"
           >
-            <Box
-              px={{ base: 4, md: 5 }}
-              py={4}
-              bgGradient="linear(to-r, teal.50, blue.50)"
-              _dark={{ bgGradient: 'linear(to-r, whiteAlpha.100, transparent)' }}
-              borderBottom="1px solid"
-              borderColor={borderColor}
-            >
-              <HStack spacing={3}>
-                <Flex
-                  w="42px"
-                  h="42px"
-                  align="center"
-                  justify="center"
-                  borderRadius="xl"
-                  bg="teal.500"
-                  color="white"
-                  boxShadow="0 8px 18px rgba(13, 148, 136, 0.22)"
-                >
-                  <Icon as={Repeat} boxSize={5} weight="bold" />
-                </Flex>
+            <CardBody p={{ base: 4, md: 5 }}>
+              <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
                 <Box>
-                  <Heading size="md" letterSpacing="-0.02em">Transfer money</Heading>
-                  <Text fontSize="sm" color={muted} mt={0.5}>
-                    Move funds without creating income or expense records.
+                  <SectionHeader
+                    icon={Repeat}
+                    title="Transfer money"
+                    caption="Move money between your accounts"
+                    accent="green"
+                  />
+                  <Text fontSize="xs" color={muted} mt={3}>
+                    Transfers do not create income or expense records.
                   </Text>
                 </Box>
-              </HStack>
-            </Box>
-            <CardBody p={{ base: 4, md: 5 }}>
-              <VStack align="stretch" spacing={5}>
-                <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'stretch', sm: 'center' }}
-                  gap={3}
-                >
+
+                <VStack align="stretch" spacing={2}>
                   <Box
-                    flex={1}
-                    p={4}
+                    p={{ base: 3, md: 4 }}
                     bg={softBg}
                     border="1px solid"
                     borderColor={borderColor}
-                    borderRadius="2xl"
+                    borderRadius="xl"
                   >
-                    <HStack spacing={2} mb={3}>
+                    <HStack spacing={2} mb={2}>
                       <Icon as={Wallet} color="orange.500" boxSize={4} weight="duotone" />
                       <Text
                         fontSize="xs"
@@ -678,43 +760,37 @@ export default function AccountsPage() {
                         From account
                       </Text>
                     </HStack>
-                    <Select
-                      bg={fieldBg}
-                      value={fromAccountId ?? ''}
-                      onChange={(event) => setFromAccountId(Number(event.target.value) || null)}
-                    >
-                      {activeAccounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} - {money(account.currentBalance, account.currency)}
-                        </option>
-                      ))}
-                    </Select>
+                    <TransferAccountSelect
+                      accounts={activeAccounts}
+                      value={fromAccountId}
+                      onChange={setFromAccountId}
+                      formatBalance={displayMoney}
+                    />
                   </Box>
 
                   <Flex
-                    w={{ base: '40px', sm: '44px' }}
-                    h={{ base: '40px', sm: '44px' }}
+                    w="32px"
+                    h="32px"
                     align="center"
                     justify="center"
                     alignSelf="center"
                     borderRadius="full"
                     bg={blueSoftBg}
-                    color="blue.500"
+                    color="green.500"
                     flexShrink={0}
-                    transform={{ base: 'rotate(90deg)', sm: 'none' }}
+                    transform="rotate(90deg)"
                   >
-                    <Icon as={ArrowRight} boxSize={5} weight="bold" />
+                    <Icon as={ArrowRight} boxSize={4} weight="bold" />
                   </Flex>
 
                   <Box
-                    flex={1}
-                    p={4}
+                    p={{ base: 3, md: 4 }}
                     bg={softBg}
                     border="1px solid"
                     borderColor={borderColor}
-                    borderRadius="2xl"
+                    borderRadius="xl"
                   >
-                    <HStack spacing={2} mb={3}>
+                    <HStack spacing={2} mb={2}>
                       <Icon as={Building} color="green.500" boxSize={4} weight="duotone" />
                       <Text
                         fontSize="xs"
@@ -726,19 +802,14 @@ export default function AccountsPage() {
                         To account
                       </Text>
                     </HStack>
-                    <Select
-                      bg={fieldBg}
-                      value={toAccountId ?? ''}
-                      onChange={(event) => setToAccountId(Number(event.target.value) || null)}
-                    >
-                      {activeAccounts.map((account) => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} - {money(account.currentBalance, account.currency)}
-                        </option>
-                      ))}
-                    </Select>
+                    <TransferAccountSelect
+                      accounts={activeAccounts}
+                      value={toAccountId}
+                      onChange={setToAccountId}
+                      formatBalance={displayMoney}
+                    />
                   </Box>
-                </Flex>
+                </VStack>
 
                 {fromAccountId && toAccountId && fromAccountId === toAccountId && (
                   <Alert status="warning" borderRadius="xl">
@@ -749,7 +820,7 @@ export default function AccountsPage() {
                   </Alert>
                 )}
 
-                <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
+                <SimpleGrid columns={{ base: 1, md: 2, lg: 1, xl: 2 }} spacing={4}>
                   <FormControl position="relative">
                     <FormLabel>Amount</FormLabel>
                     <NumberInput
@@ -791,22 +862,26 @@ export default function AccountsPage() {
                   />
                 </FormControl>
 
-                <Divider />
-
                 <Button
-                  h="48px"
+                  h={{ base: '44px', md: '48px' }}
                   colorScheme="teal"
                   leftIcon={<Icon as={Repeat} boxSize={4} />}
                   onClick={transfer}
                   isLoading={saving}
                   isDisabled={!fromAccountId || !toAccountId || fromAccountId === toAccountId || !(parseFloat(transferAmount) > 0)}
+                  borderRadius="xl"
+                  _hover={{
+                    transform: 'translateY(-1px)',
+                    boxShadow: '0 8px 18px rgba(13, 148, 136, 0.2)',
+                  }}
+                  _active={{ transform: 'translateY(0)' }}
                 >
                   Transfer {parseFloat(transferAmount) > 0 ? money(parseFloat(transferAmount)) : 'money'}
                 </Button>
               </VStack>
             </CardBody>
           </Card>
-        </Box>
+        </SimpleGrid>
       </VStack>
     </Box>
   )
