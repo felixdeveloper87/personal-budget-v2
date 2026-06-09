@@ -1,6 +1,4 @@
-// Modal Chart Components - Charts specifically designed for modal displays
+// Modal Chart Components - period-driven charts reused across pages
 export { default as TransactionsChart } from './TransactionsChart'
 export { default as IncomeChart } from './IncomeChart'
 export { default as ExpensesChart } from './ExpensesChart'
-export { default as CategoryModal } from './CategoryModal'
-export { default as SummaryCardModal } from './SummaryCardModal'

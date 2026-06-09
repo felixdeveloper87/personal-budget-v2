@@ -14,6 +14,7 @@ interface SummaryWithAnalysisSectionProps {
   formatLabel: () => string
   onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
   onViewTransactions?: () => void
+  onViewBalance?: () => void
 }
 
 export default function SummaryWithAnalysisSection({
@@ -27,6 +28,7 @@ export default function SummaryWithAnalysisSection({
   formatLabel,
   onNavigateCategory,
   onViewTransactions,
+  onViewBalance,
 }: SummaryWithAnalysisSectionProps) {
   return (
     <SummaryContainer
@@ -40,6 +42,7 @@ export default function SummaryWithAnalysisSection({
       formatLabel={formatLabel}
       onNavigateCategory={onNavigateCategory}
       onViewTransactions={onViewTransactions}
+      onViewBalance={onViewBalance}
     />
   )
 }

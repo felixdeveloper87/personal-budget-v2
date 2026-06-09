@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   CardBody,
+  Divider,
   FormControl,
   FormLabel,
   Heading,
@@ -14,6 +15,7 @@ import {
   NumberInputField,
   Progress,
   SimpleGrid,
+  Spinner,
   Text,
   VStack,
   useColorModeValue,
@@ -26,6 +28,13 @@ import {
 } from '../api'
 import { SavingsGoal } from '../types'
 import { ToastService } from '../services/toast'
+import { useDashboardData } from '../hooks/useDashboardData'
+import { usePeriodData } from '../hooks/usePeriodData'
+import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
+import PeriodNavigator from '../components/summary/PeriodNavigator'
+import { ChartHeaderStats } from '../components/charts/modal/components'
+import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
+import { SectionCard } from '../components/ui'
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
@@ -40,6 +49,31 @@ export default function GoalsPage() {
   const [contributions, setContributions] = useState<Record<number, number>>({})
 
   const muted = useColorModeValue('gray.600', 'gray.400')
+  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
+
+  // Period-driven balance break-even — the content the home "Balance" card used
+  // to open in a modal now lives here.
+  const {
+    selectedDate,
+    selectedPeriod,
+    onDateChange,
+    onPeriodChange,
+    navigatePeriod,
+    goToToday,
+    formatLabel,
+  } = usePeriodNavigator()
+  const {
+    transactions: balanceTransactions,
+    monthSummary,
+    loading: balanceLoading,
+  } = useDashboardData(selectedDate, selectedPeriod)
+  const periodData = usePeriodData(
+    balanceTransactions,
+    monthSummary,
+    selectedPeriod,
+    selectedDate,
+  )
 
   const load = useCallback(async () => {
     try {
@@ -104,6 +138,47 @@ export default function GoalsPage() {
           <Heading size="lg">Savings goals</Heading>
           <Text color={muted} mt={1}>Track dedicated targets without changing account balances.</Text>
         </Box>
+
+        <SectionCard staticOnHover>
+          <VStack spacing={0} align="stretch" w="full">
+            <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
+              <PeriodNavigator
+                selectedPeriod={selectedPeriod}
+                selectedDate={selectedDate}
+                onDateChange={onDateChange}
+                onPeriodChange={onPeriodChange}
+                onNavigatePeriod={navigatePeriod}
+                onGoToToday={goToToday}
+                formatLabel={formatLabel}
+                isEmbedded
+              />
+            </Box>
+
+            <Divider borderColor={dividerColor} />
+
+            <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
+              {balanceLoading ? (
+                <HStack justify="center" py={10}>
+                  <Spinner color={spinnerColor} thickness="3px" speed="0.8s" />
+                </HStack>
+              ) : (
+                <VStack spacing={{ base: 4, sm: 5 }} align="stretch">
+                  <ChartHeaderStats
+                    transactions={periodData.transactions}
+                    variant="balance"
+                    currentBalance={periodData.balance}
+                  />
+                  <BalanceBreakEvenPanel
+                    currentBalance={periodData.balance}
+                    selectedDate={selectedDate}
+                    periodType={selectedPeriod}
+                    transactions={periodData.transactions}
+                  />
+                </VStack>
+              )}
+            </Box>
+          </VStack>
+        </SectionCard>
 
         <Card>
           <CardBody>

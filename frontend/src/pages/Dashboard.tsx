@@ -81,6 +81,7 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
                   formatLabel={formatLabel}
                   onNavigateCategory={onNavigateCategory}
                   onViewTransactions={() => onPageChange?.('transactions')}
+                  onViewBalance={() => onPageChange?.('goals')}
                 />
               </Box>
             )}

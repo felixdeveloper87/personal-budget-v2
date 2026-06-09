@@ -1,13 +1,9 @@
-import { useState } from 'react'
-import { Box, Divider, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Divider, VStack, useColorModeValue } from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import SummaryCardsGrid from './SummaryCardsGrid'
-import SummaryCardModal from '../charts/modal/SummaryCardModal'
 import PeriodNavigator from './PeriodNavigator'
 import { SectionCard } from '../ui'
-
-type CardId = 'transactions' | 'income' | 'expenses' | 'balance'
 
 interface SummaryContainerProps {
   periodData: PeriodData
@@ -24,10 +20,15 @@ interface SummaryContainerProps {
    */
   onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
   /**
-   * When provided, the Transactions card navigates to the Transactions page
-   * instead of opening the modal. Only the Balance card still opens the modal.
+   * When provided, the Transactions card navigates to the Transactions page.
    */
   onViewTransactions?: () => void
+  /**
+   * When provided, the Balance card navigates to the Goals page (which hosts
+   * the balance break-even content). With all four callbacks wired, the cards
+   * are pure CTAs and no modal is rendered.
+   */
+  onViewBalance?: () => void
 }
 
 const fallbackFormatLabel = (date: Date, period: PeriodType) => {
@@ -96,10 +97,9 @@ export default function SummaryContainer({
   formatLabel: externalFormatLabel,
   onNavigateCategory,
   onViewTransactions,
+  onViewBalance,
 }: SummaryContainerProps) {
-  const { transactions, income, expense, balance, label } = periodData
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const [selectedCard, setSelectedCard] = useState<CardId | null>(null)
+  const { transactions, income, expense, balance } = periodData
 
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
@@ -123,55 +123,43 @@ export default function SummaryContainer({
       onViewTransactions()
       return
     }
-    setSelectedCard(cardId as CardId)
-    onOpen()
+    if (onViewBalance && cardId === 'balance') {
+      onViewBalance()
+      return
+    }
   }
 
   return (
-    <>
-      <SectionCard staticOnHover>
-        <VStack spacing={0} align="stretch" w="full">
-          {/* Period Navigator as the integrated header */}
-          <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
-            <PeriodNavigator
-              selectedPeriod={selectedPeriod}
-              selectedDate={selectedDate}
-              onDateChange={onDateChange}
-              onPeriodChange={onPeriodChange}
-              onNavigatePeriod={navigatePeriod}
-              onGoToToday={goToToday}
-              formatLabel={formatLabel}
-              isEmbedded
-            />
-          </Box>
+    <SectionCard staticOnHover>
+      <VStack spacing={0} align="stretch" w="full">
+        {/* Period Navigator as the integrated header */}
+        <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
+          <PeriodNavigator
+            selectedPeriod={selectedPeriod}
+            selectedDate={selectedDate}
+            onDateChange={onDateChange}
+            onPeriodChange={onPeriodChange}
+            onNavigatePeriod={navigatePeriod}
+            onGoToToday={goToToday}
+            formatLabel={formatLabel}
+            isEmbedded
+          />
+        </Box>
 
-          <Divider borderColor={dividerColor} />
+        <Divider borderColor={dividerColor} />
 
-          {/* Summary Cards */}
-          <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
-            <SummaryCardsGrid
-              transactions={transactions}
-              income={income}
-              expense={expense}
-              balance={balance}
-              selectedPeriod={selectedPeriod}
-              onCardClick={handleCardClick}
-            />
-          </Box>
-        </VStack>
-      </SectionCard>
-
-      <SummaryCardModal
-        isOpen={isOpen}
-        onClose={onClose}
-        selectedCard={selectedCard}
-        cardLabel={selectedCard || 'transactions'}
-        transactions={transactions}
-        selectedPeriod={label}
-        currentBalance={balance}
-        periodType={selectedPeriod}
-        selectedDate={selectedDate}
-      />
-    </>
+        {/* Summary Cards */}
+        <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
+          <SummaryCardsGrid
+            transactions={transactions}
+            income={income}
+            expense={expense}
+            balance={balance}
+            selectedPeriod={selectedPeriod}
+            onCardClick={handleCardClick}
+          />
+        </Box>
+      </VStack>
+    </SectionCard>
   )
 }
