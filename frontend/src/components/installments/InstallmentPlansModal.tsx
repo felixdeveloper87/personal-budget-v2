@@ -20,6 +20,7 @@ import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPl
 import { InstallmentPlan } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
+import { getInstallmentPlanTitle } from '../../utils/installments'
 
 interface InstallmentPlansModalProps {
   isOpen: boolean
@@ -93,7 +94,9 @@ export default function InstallmentPlansModal({
           const first = plan.transactions[0]
           return {
             id: plan.id,
-            title: first?.description?.replace(/ \(Parcela.*\)/, '') || 'Installment plan',
+            title: first?.description
+              ? getInstallmentPlanTitle(first.description)
+              : 'Installment plan',
             subtitle: first?.category,
             amountLabel: `${formatCurrency(plan.installmentValue)} per installment`,
             metaLabel: `${plan.totalInstallments} months`,

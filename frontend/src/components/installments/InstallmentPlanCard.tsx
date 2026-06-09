@@ -41,6 +41,7 @@ import {
   updateInstallmentPlan,
 } from '../../api'
 import { ToastService } from '../../services/toast'
+import { getInstallmentPlanTitle } from '../../utils/installments'
 
 interface InstallmentPlanCardProps {
   plan: InstallmentPlan
@@ -315,7 +316,9 @@ export default function InstallmentPlanCard({
                     lineHeight="1.2"
                     noOfLines={1}
                   >
-                    {firstTransaction?.description?.replace(/ \(Parcela.*\)/, '') || 'Installment plan'}
+                    {firstTransaction?.description
+                      ? getInstallmentPlanTitle(firstTransaction.description)
+                      : 'Installment plan'}
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1}>
                     {firstTransaction?.category}{plan.accountName ? ` · ${plan.accountName}` : ' · Account not linked'}

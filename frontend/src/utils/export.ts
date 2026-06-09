@@ -4,6 +4,7 @@ import {
   listRecurringTransactions,
 } from '../api'
 import { buildCsv, downloadBlob, downloadCsv } from './csv'
+import { getInstallmentPlanTitle } from './installments'
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -28,7 +29,7 @@ export async function exportAllData(): Promise<void> {
     const first = sorted[0]
     const last = sorted[sorted.length - 1]
     return [
-      first?.description?.replace(/ \(Parcela.*\)/, '') ?? '',
+      first?.description ? getInstallmentPlanTitle(first.description) : '',
       first?.category ?? '',
       plan.installmentValue,
       plan.totalAmount,

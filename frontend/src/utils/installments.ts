@@ -8,6 +8,13 @@ export function normalizeInstallmentDescription(description: string): string {
   return description.replace(/\(Parcela (\d+\/\d+)\)/g, '(Installment $1)')
 }
 
+/** Removes the transaction-specific installment suffix from a plan title. */
+export function getInstallmentPlanTitle(description: string): string {
+  return description
+    .replace(/\s*\((?:Parcela|Installment)\s+\d+\/\d+\)\s*$/i, '')
+    .trim()
+}
+
 /**
  * Calculate future installments for installment plans
  * Takes the first installment date and calculates future installments with 1-month intervals
@@ -41,7 +48,7 @@ export function calculateFutureInstallments(
           dateTime: installmentDate.toISOString(),
           type: 'EXPENSE',
           category: firstInstallment.category,
-          description: `${firstInstallment.description.replace(/ \(Parcela \d+\/\d+\)| \(Installment \d+\/\d+\)/, '')} (Installment ${i + 1}/${totalInstallments})`,
+          description: `${getInstallmentPlanTitle(firstInstallment.description)} (Installment ${i + 1}/${totalInstallments})`,
           amount: plan.installmentValue,
           installmentPlanId: plan.id,
           installmentNumber: i + 1,
