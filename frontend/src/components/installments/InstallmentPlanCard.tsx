@@ -280,11 +280,10 @@ export default function InstallmentPlanCard({
         boxShadow="0 1px 2px rgba(0,0,0,0.04)"
         overflow="hidden"
         position="relative"
-        transition="border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease"
+        transition="border-color 0.18s ease, box-shadow 0.18s ease"
         _hover={{
           borderColor: cardHoverBorder,
-          boxShadow: '0 8px 20px -10px rgba(0,0,0,0.18)',
-          transform: 'translateY(-1px)',
+          boxShadow: '0 3px 10px -6px rgba(0,0,0,0.16)',
         }}
       >
         {!isPast && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />}
