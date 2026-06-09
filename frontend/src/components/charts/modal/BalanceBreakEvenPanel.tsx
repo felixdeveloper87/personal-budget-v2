@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Box, Button, Divider, HStack, Icon, SimpleGrid, Stack, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Button, Divider, HStack, Icon, SimpleGrid, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import type { PeriodType, Transaction } from '../../../types'
 import { Calculator, CheckCircle2, Wallet } from '../../ui/icons'
 import NumberPad from '../../transactions/TransactionForm/NumberPad'
@@ -18,6 +18,7 @@ const moneyFormatter = new Intl.NumberFormat('en-GB', {
 })
 
 const SAVINGS_TARGET_OPTIONS = [100, 200, 500, 1000] as const
+const MONTHLY_SAVINGS_MILESTONES = [100, 200, 500, 1000, 1200, 1500, 1700, 2000] as const
 
 function formatMoney(value: number): string {
   return moneyFormatter.format(value)
@@ -113,7 +114,16 @@ export default function BalanceBreakEvenPanel({
     : 0
   const earningDays = Math.max(0, remainingDays - daysOff)
   const isPastPeriod = remainingDays === 0
+  const isInDeficit = currentBalance < 0
   const isPositiveBalance = currentBalance > 0
+  const isBalanced = currentBalance === 0
+  const isBalancedOrBetter = currentBalance >= 0
+  const achievedMilestones = MONTHLY_SAVINGS_MILESTONES.filter(
+    milestone => currentBalance >= milestone,
+  )
+  const nextMilestone = MONTHLY_SAVINGS_MILESTONES.find(
+    milestone => currentBalance < milestone,
+  )
 
   const { totalIncome, totalExpenses } = useMemo(() => ({
     totalIncome: transactions.filter(t => t.type === 'INCOME').reduce((s, t) => s + t.amount, 0),
@@ -135,15 +145,15 @@ export default function BalanceBreakEvenPanel({
   const panelBg = useColorModeValue('#ffffff', '#0a0a0a')
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const inputBg = useColorModeValue('white', 'whiteAlpha.50')
-  const heroBg = useColorModeValue('linear-gradient(135deg, #fff7ed 0%, #ffffff 62%, #f5f3ff 100%)', 'linear-gradient(135deg, rgba(154,52,18,0.26) 0%, rgba(17,17,17,0.96) 58%, rgba(88,28,135,0.28) 100%)')
-  const savingsBg = useColorModeValue('linear-gradient(135deg, #ffffff 0%, #faf5ff 100%)', 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(88,28,135,0.16) 100%)')
+  const summaryBg = useColorModeValue('white', 'rgba(255,255,255,0.035)')
+  const accentBg = useColorModeValue('orange.50', 'rgba(194,65,12,0.14)')
+  const savingsBg = useColorModeValue('white', 'rgba(255,255,255,0.025)')
   const resultBg = useColorModeValue('purple.50', 'rgba(126,34,206,0.18)')
   const successBg = useColorModeValue('green.50', 'rgba(22,101,52,0.18)')
   const successBorder = useColorModeValue('green.200', 'green.700')
   const successIconBg = useColorModeValue('green.100', 'green.900')
   const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
   const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
-  const targetIconBg = useColorModeValue('orange.50', 'whiteAlpha.100')
   const overlayBg = useColorModeValue('blackAlpha.500', 'blackAlpha.700')
   const orangeColor = useColorModeValue('orange.600', 'orange.300')
   const greenColor = useColorModeValue('green.600', 'green.300')
@@ -184,248 +194,358 @@ export default function BalanceBreakEvenPanel({
 
   return (
     <ChartPlotShell
-      title={isPositiveBalance ? 'Savings challenges' : 'Break-even target'}
-      caption={isPositiveBalance
-        ? 'Choose a challenge to save even more this month'
+      title={isBalancedOrBetter ? 'Monthly savings progress' : 'Break-even target'}
+      caption={isBalancedOrBetter
+        ? isBalanced
+          ? 'Your monthly income and spending are now balanced'
+          : 'Track the savings milestones reached from this month\'s surplus'
         : 'Daily earning target for the selected period'}
       showPeriodBadge={false}
     >
-      <VStack align="stretch" spacing={{ base: 4, sm: 5 }}>
-        {isPositiveBalance && (
-          <HStack
-            align="flex-start"
-            spacing={{ base: 3, sm: 4 }}
+      <VStack align="stretch" spacing={3}>
+        {isBalancedOrBetter && (
+          <Box
             border="1px solid"
             borderColor={successBorder}
-            borderRadius={{ base: 'xl', sm: '2xl' }}
+            borderRadius="xl"
             bg={successBg}
             p={{ base: 4, sm: 5 }}
           >
-            <Box
-              w={{ base: 9, sm: 11 }}
-              h={{ base: 9, sm: 11 }}
-              borderRadius="full"
-              bg={successIconBg}
-              color={greenColor}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              flexShrink={0}
-            >
-              <Icon as={CheckCircle2} boxSize={{ base: 5, sm: 6 }} weight="fill" />
-            </Box>
-            <VStack align="stretch" spacing={1}>
-              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={greenColor}>
-                Great work, you are above zero this month!
-              </Text>
-              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
-                You already have a positive balance of {formatMoney(currentBalance)}. Keep the momentum going by choosing your next savings challenge.
-              </Text>
-            </VStack>
-          </HStack>
-        )}
-
-        {!isPositiveBalance && (
-          <>
-            <SimpleGrid columns={{ base: 1, md: 5 }} spacing={{ base: 3, sm: 4 }}>
-              <Box
-                gridColumn={{ base: 'auto', md: 'span 2' }}
-                borderRadius="2xl"
-                bg={heroBg}
-                border="1px solid"
-                borderColor={borderColor}
-                p={{ base: 5, sm: 6 }}
-                display="flex"
-                flexDirection="column"
-                justifyContent="space-between"
-                gap={{ base: 5, sm: 6 }}
-              >
-                <HStack spacing={2.5}>
+            <VStack align="stretch" spacing={4}>
+              <HStack justify="space-between" align="center" spacing={4}>
+                <HStack spacing={3} minW={0}>
                   <Box
-                    w={{ base: 8, sm: 9 }}
-                    h={{ base: 8, sm: 9 }}
-                    borderRadius="xl"
-                    bg={targetIconBg}
-                    color={targetColor}
+                    w={10}
+                    h={10}
+                    borderRadius="full"
+                    bg={successIconBg}
+                    color={greenColor}
                     display="flex"
                     alignItems="center"
                     justifyContent="center"
                     flexShrink={0}
                   >
-                    <Icon as={Calculator} boxSize={{ base: 4, sm: 5 }} />
+                    <Icon as={CheckCircle2} boxSize={5} weight="fill" />
                   </Box>
-                  <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
-                    Break-even pace
+                  <Box minW={0}>
+                    <Text fontSize="xs" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
+                      {isBalanced ? 'Monthly result' : 'Saved this month'}
+                    </Text>
+                    <Text fontSize={{ base: '2xl', sm: '3xl' }} fontWeight={900} color={greenColor} lineHeight="1.1" letterSpacing="-0.03em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {formatMoney(currentBalance)}
+                    </Text>
+                  </Box>
+                </HStack>
+                <Text display={{ base: 'none', sm: 'block' }} maxW="320px" textAlign="right" fontSize="xs" color={mutedColor}>
+                  {isBalanced
+                    ? 'Income now covers this month\'s spending.'
+                    : nextMilestone
+                    ? `${formatMoney(nextMilestone - currentBalance)} away from your next milestone.`
+                    : 'Every monthly savings milestone has been achieved.'}
+                </Text>
+              </HStack>
+
+              <Box>
+                <HStack justify="space-between" mb={2.5}>
+                  <Text fontSize="xs" fontWeight={800} color={titleColor}>
+                    Monthly milestones
+                  </Text>
+                  <Text fontSize="xs" fontWeight={700} color={greenColor}>
+                    {achievedMilestones.length} of {MONTHLY_SAVINGS_MILESTONES.length} achieved
                   </Text>
                 </HStack>
+                <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
+                  {MONTHLY_SAVINGS_MILESTONES.map((milestone) => {
+                    const achieved = currentBalance >= milestone
 
-                <VStack align="stretch" spacing={1.5}>
-                  <HStack align="baseline" spacing={1.5}>
-                    <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {formatMoney(dailyTarget)}
-                    </Text>
-                    <Text fontSize="sm" fontWeight={600} color={mutedColor}>
-                      / day
-                    </Text>
-                  </HStack>
-                  <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.4">
-                    {heroSubtitle}
-                  </Text>
-                </VStack>
+                    return (
+                      <HStack
+                        key={milestone}
+                        justify="space-between"
+                        minH="38px"
+                        px={3}
+                        py={2}
+                        border="1px solid"
+                        borderColor={achieved ? successBorder : borderColor}
+                        borderRadius="lg"
+                        bg={achieved ? successIconBg : inputBg}
+                        color={achieved ? greenColor : mutedColor}
+                      >
+                        <Text fontSize="xs" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {formatMoney(milestone)}
+                        </Text>
+                        {achieved && (
+                          <Icon as={CheckCircle2} boxSize={4} weight="fill" flexShrink={0} />
+                        )}
+                      </HStack>
+                    )
+                  })}
+                </SimpleGrid>
               </Box>
 
-              <Box
-                gridColumn={{ base: 'auto', md: 'span 3' }}
-                borderRadius="2xl"
-                bg={panelBg}
-                border="1px solid"
-                borderColor={borderColor}
-                px={{ base: 4, sm: 5 }}
+              <HStack
+                spacing={2}
+                px={3}
+                py={2.5}
+                borderRadius="lg"
+                bg={inputBg}
+                color={greenColor}
               >
-                <StatRow label="Needed to zero" value={formatMoney(neededToBreakEven)} color={targetColor} />
-                <Divider borderColor={borderColor} />
-                <StatRow label="Earning days left" value={earningDays.toString()} color={titleColor} />
-                <Divider borderColor={borderColor} />
-                <StatRow label="Current balance" value={formatMoney(currentBalance)} color={balanceColor} />
-              </Box>
-            </SimpleGrid>
-
-            <Text px={1} fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} lineHeight="1.5">
-              {caption}
-            </Text>
-          </>
+                <Icon as={CheckCircle2} boxSize={4} weight="fill" flexShrink={0} />
+                <Text fontSize="xs" fontWeight={700}>
+                  {isBalanced
+                    ? 'Monthly balance restored. You are ready to start building a surplus.'
+                    : achievedMilestones.length > 0
+                    ? `Excellent progress. You have already reached ${achievedMilestones.length} monthly savings ${achievedMilestones.length === 1 ? 'goal' : 'goals'}.`
+                    : `You are in surplus. Keep going to unlock your first ${formatMoney(MONTHLY_SAVINGS_MILESTONES[0])} milestone.`}
+                </Text>
+              </HStack>
+            </VStack>
+          </Box>
         )}
 
-        {remainingDays > 0 && <Box
-          border="1px solid"
-          borderColor={borderColor}
-          borderRadius={{ base: 'xl', sm: '2xl' }}
-          bg={savingsBg}
-          p={{ base: 3.5, sm: 5 }}
-        >
-          <VStack align="stretch" spacing={{ base: 3, sm: 4 }}>
-            <HStack justify="space-between" align="flex-start" spacing={2.5}>
-              <HStack spacing={3} minW={0}>
-                <Box
-                  w={{ base: 8, sm: 9 }}
-                  h={{ base: 8, sm: 9 }}
-                  borderRadius={{ base: 'lg', sm: 'xl' }}
-                  bg={activeButtonBg}
-                  color={purpleColor}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                >
-                  <Icon as={Wallet} boxSize={{ base: 4, sm: 5 }} />
-                </Box>
-                <VStack align="stretch" spacing={0.5} minW={0}>
-                  <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={titleColor}>
-                    {isPositiveBalance ? 'Save even more' : 'Savings goal'}
-                  </Text>
-                  <Text fontSize={{ base: '11px', sm: 'xs' }} color={mutedColor} noOfLines={2} lineHeight="1.3">
-                    {isPositiveBalance
-                      ? 'Pick an additional amount to save before the month ends.'
-                      : "Set the surplus you want after this period's balance reaches zero."}
-                  </Text>
-                </VStack>
-              </HStack>
-              {savingsTarget > 0 && (
-                <Text flexShrink={0} fontSize={{ base: 'sm', sm: 'md' }} fontWeight={700} color={purpleColor} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {isPositiveBalance ? '+' : ''}{formatMoney(savingsTarget)}
-                </Text>
-              )}
-            </HStack>
+        {isInDeficit && (
+          <Box
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius="xl"
+            bg={summaryBg}
+            overflow="hidden"
+          >
+            <SimpleGrid columns={{ base: 1, md: 12 }} spacing={0}>
+              <Box
+                gridColumn={{ base: 'auto', md: 'span 5' }}
+                bg={accentBg}
+                px={{ base: 4, sm: 5 }}
+                py={{ base: 4, sm: 5 }}
+              >
+                <HStack justify="space-between" align="flex-start" spacing={3}>
+                  <VStack align="stretch" spacing={1.5}>
+                    <Text fontSize="xs" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+                      Daily break-even pace
+                    </Text>
+                    <HStack align="baseline" spacing={1}>
+                      <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.035em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {formatMoney(dailyTarget)}
+                      </Text>
+                      <Text fontSize="xs" fontWeight={700} color={mutedColor}>
+                        / day
+                      </Text>
+                    </HStack>
+                    <Text fontSize="xs" color={mutedColor}>
+                      {earningDays} earning days remaining
+                    </Text>
+                  </VStack>
+                  <Box color={targetColor} pt={0.5}>
+                    <Icon as={Calculator} boxSize={5} />
+                  </Box>
+                </HStack>
+              </Box>
 
-            <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={{ base: 1.5, sm: 2 }}>
-              {SAVINGS_TARGET_OPTIONS.map((value) => {
-                const isActive = savingsTarget === value
-
-                return (
-                  <Button
-                    key={value}
-                    size="sm"
-                    h={{ base: '34px', sm: '38px' }}
-                    borderRadius="full"
-                    border="1px solid"
-                    borderColor={isActive ? activeButtonBorder : borderColor}
-                    bg={isActive ? activeButtonBg : inputBg}
-                    color={isActive ? purpleColor : titleColor}
-                    boxShadow={isActive ? '0 8px 18px rgba(124, 58, 237, 0.16)' : 'none'}
-                    fontWeight={700}
-                    fontSize={{ base: 'xs', sm: 'sm' }}
-                    onClick={() => setSavingsTarget(value)}
-                    _hover={{ borderColor: activeButtonBorder, bg: isActive ? activeButtonBg : panelBg }}
-                  >
-                    {formatMoney(value)}
-                  </Button>
-                )
-              })}
+              <SimpleGrid
+                gridColumn={{ base: 'auto', md: 'span 7' }}
+                columns={{ base: 1, sm: 3 }}
+                borderTop={{ base: '1px solid', md: '0' }}
+                borderLeft={{ base: '0', md: '1px solid' }}
+                borderColor={borderColor}
+              >
+                <CompactMetric
+                  label="Gap to zero"
+                  value={formatMoney(neededToBreakEven)}
+                  color={targetColor}
+                />
+                <CompactMetric
+                  label="Days left"
+                  value={earningDays.toString()}
+                  color={titleColor}
+                  withBorder
+                />
+                <CompactMetric
+                  label="Current balance"
+                  value={formatMoney(currentBalance)}
+                  color={balanceColor}
+                  withBorder
+                />
+              </SimpleGrid>
             </SimpleGrid>
-
-            <Button
-              type="button"
-              h={{ base: '46px', sm: '52px' }}
-              justifyContent="space-between"
-              bg={inputBg}
-              color={savingsTarget > 0 ? titleColor : mutedColor}
-              border="1px solid"
+            <Text
+              px={{ base: 4, sm: 5 }}
+              py={2.5}
+              borderTop="1px solid"
               borderColor={borderColor}
-              borderRadius={{ base: 'lg', sm: 'xl' }}
-              fontWeight={600}
-              px={{ base: 3, sm: 4 }}
-              onClick={openNumberPad}
-              _hover={{ borderColor: activeButtonBorder, bg: inputBg }}
-              _active={{ bg: inputBg }}
-              rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
+              fontSize="xs"
+              color={mutedColor}
             >
-              <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }}>
-                {isPositiveBalance ? 'Custom challenge' : 'Custom surplus'}
-              </Text>
-              <Text as="span" fontSize={{ base: 'xs', sm: 'sm' }} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Tap to enter'}
-              </Text>
-            </Button>
+              {caption}
+            </Text>
+          </Box>
+        )}
 
-            <Box
-              border="1px solid"
-              borderColor={savingsTarget > 0 ? activeButtonBorder : borderColor}
-              borderRadius="xl"
-              bg={savingsTarget > 0 ? resultBg : inputBg}
-              px={{ base: 3, sm: 4 }}
-              py={{ base: 3, sm: 4 }}
-            >
-              <Stack direction={{ base: 'column', sm: 'row' }} align={{ base: 'stretch', sm: 'center' }} justify="space-between" spacing={{ base: 2.5, sm: 4 }}>
-                <VStack align="stretch" spacing={1} minW={0}>
-                  <Text fontSize={{ base: '10px', sm: 'xs' }} fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
-                    Target pace
+        {isInDeficit && (
+          <Box
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius="xl"
+            bg={summaryBg}
+            p={{ base: 3.5, sm: 4 }}
+          >
+            <VStack align="stretch" spacing={3}>
+              <Box>
+                <Text fontSize="sm" fontWeight={800} color={titleColor}>
+                  Monthly savings goals
+                </Text>
+                <Text fontSize="xs" color={mutedColor} mt={0.5}>
+                  First close the {formatMoney(neededToBreakEven)} gap, then start unlocking these milestones.
+                </Text>
+              </Box>
+              <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
+                {MONTHLY_SAVINGS_MILESTONES.map((milestone) => (
+                  <HStack
+                    key={milestone}
+                    justify="space-between"
+                    minH="38px"
+                    px={3}
+                    py={2}
+                    border="1px solid"
+                    borderColor={borderColor}
+                    borderRadius="lg"
+                    bg={inputBg}
+                    color={mutedColor}
+                  >
+                    <Text fontSize="xs" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {formatMoney(milestone)}
+                    </Text>
+                  </HStack>
+                ))}
+              </SimpleGrid>
+            </VStack>
+          </Box>
+        )}
+
+        {remainingDays > 0 && isInDeficit && (
+          <Box
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius="xl"
+            bg={savingsBg}
+            p={{ base: 3.5, sm: 4 }}
+          >
+            <VStack align="stretch" spacing={3}>
+              <HStack justify="space-between" align="center" spacing={3}>
+                <HStack spacing={2.5} minW={0}>
+                  <Box
+                    w={8}
+                    h={8}
+                    borderRadius="lg"
+                    bg={activeButtonBg}
+                    color={purpleColor}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                  >
+                    <Icon as={Wallet} boxSize={4} />
+                  </Box>
+                  <Box minW={0}>
+                    <Text fontSize="sm" fontWeight={800} color={titleColor}>
+                      {isPositiveBalance ? 'Savings challenge' : 'Build a surplus'}
+                    </Text>
+                    <Text fontSize="xs" color={mutedColor} noOfLines={1}>
+                      {isPositiveBalance
+                        ? 'Add more to this month’s positive balance.'
+                        : 'Set what you want left after reaching zero.'}
+                    </Text>
+                  </Box>
+                </HStack>
+                {savingsTarget > 0 && (
+                  <Text flexShrink={0} fontSize="sm" fontWeight={800} color={purpleColor} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {isPositiveBalance ? '+' : ''}{formatMoney(savingsTarget)}
                   </Text>
-                  <Text fontSize={{ base: '11px', sm: 'xs' }} color={mutedColor} lineHeight="1.35">
-                    {savingsGoalCaption}
-                    {savingsTarget > 0 && (
-                      <>
-                        {' '}
-                        {isPositiveBalance ? (
-                          <>Based on <Text as="span" fontWeight={800} color={titleColor}>{earningDays}</Text> earning days left.</>
-                        ) : (
-                          <>Total still needed: <Text as="span" fontWeight={800} color={titleColor}>{formatMoney(neededForSavingsGoal)}</Text>.</>
-                        )}
-                      </>
-                    )}
+                )}
+              </HStack>
+
+              <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
+                {SAVINGS_TARGET_OPTIONS.map((value) => {
+                  const isActive = savingsTarget === value
+
+                  return (
+                    <Button
+                      key={value}
+                      size="sm"
+                      h="34px"
+                      borderRadius="lg"
+                      border="1px solid"
+                      borderColor={isActive ? activeButtonBorder : borderColor}
+                      bg={isActive ? activeButtonBg : inputBg}
+                      color={isActive ? purpleColor : titleColor}
+                      boxShadow="none"
+                      fontWeight={700}
+                      fontSize="xs"
+                      onClick={() => setSavingsTarget(value)}
+                      _hover={{ borderColor: activeButtonBorder, bg: activeButtonBg }}
+                    >
+                      {formatMoney(value)}
+                    </Button>
+                  )
+                })}
+              </SimpleGrid>
+
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
+                <Button
+                  type="button"
+                  h="48px"
+                  justifyContent="space-between"
+                  bg={inputBg}
+                  color={savingsTarget > 0 ? titleColor : mutedColor}
+                  border="1px solid"
+                  borderColor={borderColor}
+                  borderRadius="lg"
+                  fontWeight={600}
+                  px={3.5}
+                  onClick={openNumberPad}
+                  _hover={{ borderColor: activeButtonBorder, bg: inputBg }}
+                  _active={{ bg: inputBg }}
+                  rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
+                >
+                  <Text as="span" fontSize="xs">
+                    {isPositiveBalance ? 'Custom challenge' : 'Custom surplus'}
                   </Text>
-                </VStack>
-                <VStack align={{ base: 'flex-start', sm: 'flex-end' }} spacing={0} flexShrink={0}>
-                  <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={savingsTarget > 0 ? purpleColor : mutedColor} lineHeight="1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {savingsTarget > 0 ? formatMoney(dailySavingsTarget) : '--'}
+                  <Text as="span" fontSize="xs" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Enter amount'}
                   </Text>
-                  <Text fontSize={{ base: '11px', sm: 'xs' }} fontWeight={600} color={mutedColor}>
-                    per day
-                  </Text>
-                </VStack>
-              </Stack>
-            </Box>
-          </VStack>
-        </Box>}
+                </Button>
+
+                <HStack
+                  justify="space-between"
+                  minH="48px"
+                  border="1px solid"
+                  borderColor={savingsTarget > 0 ? activeButtonBorder : borderColor}
+                  borderRadius="lg"
+                  bg={savingsTarget > 0 ? resultBg : inputBg}
+                  px={3.5}
+                  spacing={3}
+                >
+                  <Box minW={0}>
+                    <Text fontSize="10px" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+                      Daily target
+                    </Text>
+                    <Text fontSize="xs" color={mutedColor} noOfLines={1}>
+                      {savingsGoalCaption}
+                    </Text>
+                  </Box>
+                  <Box textAlign="right" flexShrink={0}>
+                    <Text fontSize="lg" fontWeight={800} color={savingsTarget > 0 ? purpleColor : mutedColor} lineHeight="1" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {savingsTarget > 0 ? formatMoney(dailySavingsTarget) : '--'}
+                    </Text>
+                    <Text fontSize="10px" fontWeight={700} color={mutedColor}>
+                      per day
+                    </Text>
+                  </Box>
+                </HStack>
+              </SimpleGrid>
+            </VStack>
+          </Box>
+        )}
       </VStack>
 
       {isNumberPadOpen && (
@@ -459,6 +579,38 @@ export default function BalanceBreakEvenPanel({
         </Box>
       )}
     </ChartPlotShell>
+  )
+}
+
+interface CompactMetricProps {
+  label: string
+  value: string
+  color: string
+  withBorder?: boolean
+}
+
+function CompactMetric({ label, value, color, withBorder = false }: CompactMetricProps) {
+  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const labelColor = useColorModeValue('gray.500', 'gray.400')
+
+  return (
+    <VStack
+      align={{ base: 'stretch', sm: 'flex-start' }}
+      justify="center"
+      spacing={1}
+      px={4}
+      py={{ base: 3, sm: 4 }}
+      borderTop={{ base: withBorder ? '1px solid' : '0', sm: '0' }}
+      borderLeft={{ base: '0', sm: withBorder ? '1px solid' : '0' }}
+      borderColor={borderColor}
+    >
+      <Text fontSize="10px" fontWeight={800} color={labelColor} textTransform="uppercase" letterSpacing="0.05em">
+        {label}
+      </Text>
+      <Text fontSize={{ base: 'md', sm: 'lg' }} color={color} fontWeight={800} lineHeight="1" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </Text>
+    </VStack>
   )
 }
 

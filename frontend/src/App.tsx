@@ -35,7 +35,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   'all-transactions': () => <AllTransactionsPage />,
   categories: ({ categoryTab }) => <CategoriesPage initialTab={categoryTab} />,
   goals: () => <GoalsPage />,
-  planning: () => <PlanningPage />,
+  planning: ({ onPageChange }) => <PlanningPage onPageChange={onPageChange} />,
   reports: () => <ReportsPage />,
   admin: ({ onPageChange }) => <AdminDashboardPage onPageChange={onPageChange} />,
 }

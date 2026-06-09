@@ -12,6 +12,7 @@ import {
   FormLabel,
   Heading,
   HStack,
+  Icon,
   Input,
   NumberInput,
   NumberInputField,
@@ -33,6 +34,10 @@ import {
 } from '../api'
 import { CashFlowForecast, CategoryBudget } from '../types'
 import { ToastService } from '../services/toast'
+import { AlertTriangle, ArrowRight, CheckCircle2 } from '../components/ui/icons'
+import type { AppPage } from '../components/layout/header/navigation.config'
+import { useDashboardData } from '../hooks/useDashboardData'
+import { usePeriodData } from '../hooks/usePeriodData'
 
 const monthValue = (date: Date) =>
   `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
@@ -48,7 +53,11 @@ const monthLabel = (value?: string) => {
   })
 }
 
-export default function PlanningPage() {
+interface PlanningPageProps {
+  onPageChange?: (page: AppPage) => void
+}
+
+export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   const [selectedMonth, setSelectedMonth] = useState(monthValue(new Date()))
   const [budgets, setBudgets] = useState<CategoryBudget[]>([])
   const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
@@ -60,6 +69,27 @@ export default function PlanningPage() {
 
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
+  const successBg = useColorModeValue('green.50', 'rgba(22,101,52,0.18)')
+  const successBorder = useColorModeValue('green.200', 'green.700')
+  const successIconBg = useColorModeValue('green.100', 'green.900')
+  const successColor = useColorModeValue('green.600', 'green.300')
+  const deficitBg = useColorModeValue('red.50', 'rgba(153,27,27,0.18)')
+  const deficitBorder = useColorModeValue('red.200', 'red.700')
+  const deficitIconBg = useColorModeValue('red.100', 'red.900')
+  const deficitColor = useColorModeValue('red.600', 'red.300')
+
+  const currentMonth = useMemo(() => new Date(), [])
+  const {
+    transactions: currentMonthTransactions,
+    monthSummary: currentMonthSummary,
+    loading: currentMonthLoading,
+  } = useDashboardData(currentMonth, 'month')
+  const currentMonthData = usePeriodData(
+    currentMonthTransactions,
+    currentMonthSummary,
+    'month',
+    currentMonth,
+  )
 
   const selectedDate = useMemo(() => {
     const [year, month] = selectedMonth.split('-').map(Number)
@@ -149,6 +179,86 @@ export default function PlanningPage() {
           <Heading size="lg">Planning</Heading>
           <Text color={muted} mt={1}>Category budgets, future balances and payment calendar.</Text>
         </Box>
+
+        {!currentMonthLoading && currentMonthData.balance > 0 && (
+          <HStack
+            align="flex-start"
+            spacing={{ base: 3, sm: 4 }}
+            border="1px solid"
+            borderColor={successBorder}
+            borderRadius={{ base: 'xl', sm: '2xl' }}
+            bg={successBg}
+            p={{ base: 4, sm: 5 }}
+          >
+            <Box
+              w={{ base: 9, sm: 11 }}
+              h={{ base: 9, sm: 11 }}
+              borderRadius="full"
+              bg={successIconBg}
+              color={successColor}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              flexShrink={0}
+            >
+              <Icon as={CheckCircle2} boxSize={{ base: 5, sm: 6 }} weight="fill" />
+            </Box>
+            <VStack align="stretch" spacing={1}>
+              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={successColor}>
+                Great work, you are earning more than you are spending this month!
+              </Text>
+              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={muted} lineHeight="1.5">
+                Income is {money(currentMonthData.income)} and expenses are {money(currentMonthData.expense)}, leaving you {money(currentMonthData.balance)} ahead. Keep building on this positive result.
+              </Text>
+            </VStack>
+          </HStack>
+        )}
+
+        {!currentMonthLoading && currentMonthData.balance < 0 && (
+          <HStack
+            align={{ base: 'stretch', md: 'center' }}
+            justify="space-between"
+            spacing={{ base: 4, md: 6 }}
+            flexDirection={{ base: 'column', md: 'row' }}
+            border="1px solid"
+            borderColor={deficitBorder}
+            borderRadius={{ base: 'xl', sm: '2xl' }}
+            bg={deficitBg}
+            p={{ base: 4, sm: 5 }}
+          >
+            <HStack align="flex-start" spacing={{ base: 3, sm: 4 }}>
+              <Box
+                w={{ base: 9, sm: 11 }}
+                h={{ base: 9, sm: 11 }}
+                borderRadius="full"
+                bg={deficitIconBg}
+                color={deficitColor}
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                flexShrink={0}
+              >
+                <Icon as={AlertTriangle} boxSize={{ base: 5, sm: 6 }} weight="fill" />
+              </Box>
+              <VStack align="stretch" spacing={1}>
+                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={deficitColor}>
+                  You are running a monthly deficit
+                </Text>
+                <Text fontSize={{ base: 'xs', sm: 'sm' }} color={muted} lineHeight="1.5">
+                  Expenses are {money(currentMonthData.expense)} against {money(currentMonthData.income)} of income, leaving a {money(Math.abs(currentMonthData.balance))} gap. Use the break-even target to calculate the daily pace needed to recover.
+                </Text>
+              </VStack>
+            </HStack>
+            <Button
+              colorScheme="red"
+              flexShrink={0}
+              rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+              onClick={() => onPageChange?.('goals')}
+            >
+              Open break-even target
+            </Button>
+          </HStack>
+        )}
 
         {firstNegativeMonth && (
           <Alert status="error" borderRadius="xl">
