@@ -13,12 +13,6 @@ interface LandingPageProps {
   onGetStarted: () => void
 }
 
-/**
- * LandingPage
- * Composes the marketing experience from focused, single-responsibility
- * sections that live under `./landing/`. Keep this file thin: it only orders
- * the sections and wires the global page chrome (Header / Footer).
- */
 export default function LandingPage({ onGetStarted }: LandingPageProps) {
   const pageBg = useColorModeValue('white', 'black')
 

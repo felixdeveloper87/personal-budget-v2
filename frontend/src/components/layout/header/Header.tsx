@@ -60,18 +60,25 @@ export default function Header({
     return () => window.removeEventListener('keydown', onKey)
   }, [user, isAdminOnly, openSearch])
 
+  // On the landing page (no user), the header is transparent at the top so it
+  // visually merges with the hero. Once scrolled it transitions to frosted glass.
+  const isLanding = !user
+  const showGlass = isScrolled || !isLanding
+
   const bg = useColorModeValue(
-    isScrolled ? 'rgba(255, 255, 255, 0.78)' : 'rgba(255, 255, 255, 0.62)',
-    isScrolled ? 'rgba(10, 10, 12, 0.78)' : 'rgba(10, 10, 12, 0.55)',
+    showGlass ? (isScrolled ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.62)') : 'transparent',
+    showGlass ? (isScrolled ? 'rgba(10,10,12,0.78)'    : 'rgba(10,10,12,0.55)')    : 'transparent',
   )
-  const bgOverlay = useColorModeValue(
+  const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
-  const topHighlight = useColorModeValue(
+  const bgOverlay = showGlass ? bgOverlayVal : 'transparent'
+  const topHighlightVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))',
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
+  const topHighlight = showGlass ? topHighlightVal : 'transparent'
   const accentBorder = useColorModeValue(
     'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.18) 30%, rgba(124, 58, 237, 0.18) 70%, transparent 100%)',
     'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
@@ -90,8 +97,8 @@ export default function Header({
         zIndex={1000}
         bg={bg}
         boxShadow={shadow}
-        backdropFilter="saturate(180%) blur(20px)"
-        transition="background 0.3s ease, box-shadow 0.3s ease"
+        backdropFilter={showGlass ? 'saturate(180%) blur(20px)' : 'none'}
+        transition="background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease"
         sx={{
           // Top inner highlight (1px) — premium glass top edge
           '&::before': {
@@ -187,8 +194,8 @@ export default function Header({
           bottom={0}
           h="1px"
           background={accentBorder}
-          opacity={isScrolled ? 1 : 0.55}
-          transition="opacity 0.3s ease"
+          opacity={showGlass ? (isScrolled ? 1 : 0.55) : 0}
+          transition="opacity 0.35s ease"
           pointerEvents="none"
           zIndex={3}
         />

@@ -1,9 +1,27 @@
 import { Box, Flex, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ArrowDownRight, ArrowUpRight, Wallet } from '../../components/ui/icons'
 import { PREVIEW_DATA } from './landing.config'
 
-/** Returns "April 2026"-style label for the user's current month/year. */
+/** Counts from 0 to `target` with ease-out cubic on mount. */
+function useCountUp(target: number, duration = 1300, delay = 0): number {
+  const [value, setValue] = useState(0)
+  useEffect(() => {
+    const t = setTimeout(() => {
+      let start: number | null = null
+      const step = (ts: number) => {
+        if (!start) start = ts
+        const p = Math.min((ts - start) / duration, 1)
+        setValue(Math.round((1 - Math.pow(1 - p, 3)) * target))
+        if (p < 1) requestAnimationFrame(step)
+      }
+      requestAnimationFrame(step)
+    }, delay)
+    return () => clearTimeout(t)
+  }, [target, duration, delay])
+  return value
+}
+
 function useCurrentMonthLabel(): string {
   return useMemo(
     () => new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
@@ -11,13 +29,12 @@ function useCurrentMonthLabel(): string {
   )
 }
 
-/** Returns a context-aware greeting based on the user's current local hour. */
 function useTimeOfDayGreeting(): string {
   return useMemo(() => {
-    const hour = new Date().getHours()
-    if (hour < 5) return 'Good night'
-    if (hour < 12) return 'Good morning'
-    if (hour < 18) return 'Good afternoon'
+    const h = new Date().getHours()
+    if (h < 5) return 'Good night'
+    if (h < 12) return 'Good morning'
+    if (h < 18) return 'Good afternoon'
     return 'Good evening'
   }, [])
 }
@@ -27,42 +44,61 @@ export default function DashboardPreview() {
   const monthLabel = useCurrentMonthLabel()
   const greeting = useTimeOfDayGreeting()
 
+  // Animated counters — staggered start
+  const income   = useCountUp(totals.income,   1300, 150)
+  const expenses = useCountUp(totals.expenses, 1300, 300)
+  const balance  = useCountUp(totals.balance,  1300, 450)
+
   // Surfaces
-  const surface = useColorModeValue('rgba(255,255,255,0.92)', 'rgba(15,17,21,0.86)')
-  const surfaceBorder = useColorModeValue('rgba(15,23,42,0.08)', 'rgba(255,255,255,0.08)')
-  const innerSurface = useColorModeValue('white', 'rgba(255,255,255,0.04)')
-  const innerBorder = useColorModeValue('gray.100', 'whiteAlpha.200')
-  const subText = useColorModeValue('gray.500', 'gray.400')
-  const text = useColorModeValue('gray.900', 'whiteAlpha.900')
+  const surface       = useColorModeValue('rgba(255,255,255,0.92)', 'rgba(15,17,21,0.86)')
+  const surfaceBorder = useColorModeValue('rgba(15,23,42,0.08)',    'rgba(255,255,255,0.08)')
+  const innerSurface  = useColorModeValue('white',                  'rgba(255,255,255,0.04)')
+  const innerBorder   = useColorModeValue('gray.100',               'whiteAlpha.200')
+  const subText       = useColorModeValue('gray.500',               'gray.400')
+  const text          = useColorModeValue('gray.900',               'whiteAlpha.900')
 
-  // Brand colors
-  const incomeAccent = useColorModeValue('green.500', 'green.300')
-  const incomeBg = useColorModeValue('green.50', 'rgba(34,197,94,0.10)')
-  const expenseAccent = useColorModeValue('red.500', 'red.300')
-  const expenseBg = useColorModeValue('red.50', 'rgba(248,113,113,0.10)')
-  const balanceAccent = useColorModeValue('blue.600', 'blue.300')
-  const balanceBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.10)')
+  // Semantic colors
+  const incomeAccent  = useColorModeValue('green.500', 'green.300')
+  const incomeBg      = useColorModeValue('green.50',  'rgba(34,197,94,0.10)')
+  const expenseAccent = useColorModeValue('red.500',   'red.300')
+  const expenseBg     = useColorModeValue('red.50',    'rgba(248,113,113,0.10)')
+  const balanceAccent = useColorModeValue('blue.600',  'blue.300')
+  const balanceBg     = useColorModeValue('blue.50',   'rgba(59,130,246,0.10)')
 
+  // Chart bars
   const barFill = useColorModeValue(
-    'linear-gradient(180deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%)',
-    'linear-gradient(180deg, #60a5fa 0%, #818cf8 50%, #a78bfa 100%)',
+    'linear-gradient(180deg,#3b82f6 0%,#6366f1 50%,#8b5cf6 100%)',
+    'linear-gradient(180deg,#60a5fa 0%,#818cf8 50%,#a78bfa 100%)',
   )
-  const barTrack = useColorModeValue('gray.100', 'whiteAlpha.100')
-
-  // Window chrome
-  const chromeBg = useColorModeValue(
-    'linear-gradient(180deg, #f8fafc 0%, #ffffff 100%)',
-    'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
+  const barFillToday = useColorModeValue(
+    'linear-gradient(180deg,#06b6d4 0%,#3b82f6 60%,#6366f1 100%)',
+    'linear-gradient(180deg,#22d3ee 0%,#60a5fa 60%,#818cf8 100%)',
+  )
+  const barTrack      = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const barShadowToday = useColorModeValue(
+    '0 4px 14px rgba(59,130,246,0.45)',
+    '0 4px 14px rgba(96,165,250,0.38)',
   )
 
-  const fmt = (n: number) => `${totals.currency}${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
-
-  // Card background styling similar to redesigned SummaryCard
-  const cardBg = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, rgba(25, 27, 34, 0.65) 0%, rgba(12, 13, 17, 0.78) 100%)'
+  // Card surface
+  const chromeBg  = useColorModeValue(
+    'linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)',
+    'linear-gradient(180deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%)',
   )
-  const cardBorder = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
+  const cardBg     = useColorModeValue(
+    'linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)',
+    'linear-gradient(135deg,rgba(25,27,34,0.65) 0%,rgba(12,13,17,0.78) 100%)',
+  )
+  const cardBorder  = useColorModeValue('rgba(0,0,0,0.05)', 'rgba(255,255,255,0.04)')
+  const rowHoverBg  = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const tabActiveBg = useColorModeValue('white', 'whiteAlpha.100')
+  const tabPillBg   = useColorModeValue('rgba(0,0,0,0.03)', 'rgba(255,255,255,0.03)')
+
+  const cur = totals.currency
+  const fmt = (n: number) =>
+    `${cur}${Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`
+
+  const todayIdx = 3 // Thursday — highest bar
 
   return (
     <Box
@@ -77,24 +113,32 @@ export default function DashboardPreview() {
       borderColor={surfaceBorder}
       backdropFilter="saturate(180%) blur(24px)"
       boxShadow={useColorModeValue(
-        '0 30px 60px -20px rgba(15, 23, 42, 0.25), 0 18px 40px -25px rgba(15, 23, 42, 0.15)',
-        '0 30px 60px -20px rgba(0, 0, 0, 0.65), 0 18px 40px -25px rgba(0, 0, 0, 0.55)',
+        '0 30px 60px -20px rgba(15,23,42,0.25),0 18px 40px -25px rgba(15,23,42,0.15)',
+        '0 30px 60px -20px rgba(0,0,0,0.65),0 18px 40px -25px rgba(0,0,0,0.55)',
       )}
       overflow="hidden"
       sx={{
         '@keyframes growBar': {
           from: { transform: 'scaleY(0)' },
-          to: { transform: 'scaleY(1)' },
+          to:   { transform: 'scaleY(1)' },
+        },
+        '@keyframes fadeInRow': {
+          from: { opacity: 0, transform: 'translateX(-8px)' },
+          to:   { opacity: 1, transform: 'translateX(0)' },
+        },
+        '@keyframes livePulse': {
+          '0%,100%': { opacity: 1, transform: 'scale(1)' },
+          '50%':     { opacity: 0.35, transform: 'scale(0.7)' },
         },
         '@media (prefers-reduced-motion: reduce)': {
           '.preview-bar': { animation: 'none !important', transform: 'scaleY(1) !important' },
+          '.preview-row': { animation: 'none !important', opacity: '1 !important' },
         },
       }}
     >
-      {/* macOS-style window chrome - Centered and sleeker */}
+      {/* Window chrome */}
       <HStack
-        px={4}
-        py={3}
+        px={4} py={3}
         bg={chromeBg}
         borderBottom="1px solid"
         borderColor={surfaceBorder}
@@ -102,17 +146,13 @@ export default function DashboardPreview() {
         position="relative"
         justify="center"
       >
-        {/* macOS Dots (Absolute Left) */}
         <HStack spacing={1.5} position="absolute" left={4}>
           <Box w={2.5} h={2.5} borderRadius="full" bg="#ff5f57" />
           <Box w={2.5} h={2.5} borderRadius="full" bg="#febc2e" />
           <Box w={2.5} h={2.5} borderRadius="full" bg="#28c840" />
         </HStack>
-
-        {/* Center Address Bar */}
         <Box
-          px={4}
-          py={0.75}
+          px={4} py={0.75}
           borderRadius="lg"
           bg={innerSurface}
           border="1px solid"
@@ -129,34 +169,43 @@ export default function DashboardPreview() {
       </HStack>
 
       <VStack p={{ base: 4, md: 5 }} spacing={4} align="stretch">
-        {/* Header row - cleaner and smaller typography */}
+        {/* Header */}
         <HStack justify="space-between" align="center">
           <VStack spacing={0.5} align="flex-start">
             <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
               {monthLabel}
             </Text>
-            <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight={800} color={text} letterSpacing="-0.02em">
-              {greeting}, friend
-            </Text>
+            <HStack spacing={2} align="center">
+              <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight={800} color={text} letterSpacing="-0.02em">
+                {greeting}, friend
+              </Text>
+              {/* Live indicator */}
+              <Box
+                w={2} h={2}
+                borderRadius="full"
+                bg="green.400"
+                flexShrink={0}
+                sx={{ animation: 'livePulse 2.2s ease-in-out infinite' }}
+              />
+            </HStack>
           </VStack>
+
           <HStack
-            spacing={0.5}
-            p={0.5}
+            spacing={0.5} p={0.5}
             borderRadius="full"
-            bg={useColorModeValue('rgba(0,0,0,0.03)', 'rgba(255,255,255,0.03)')}
+            bg={tabPillBg}
             border="1px solid"
             borderColor={innerBorder}
           >
             {(['Day', 'Week', 'Month', 'Year'] as const).map((p, i) => (
               <Box
                 key={p}
-                px={2.5}
-                py={0.75}
+                px={2.5} py={0.75}
                 borderRadius="full"
                 fontSize="2xs"
                 fontWeight={700}
                 cursor="pointer"
-                bg={i === 2 ? useColorModeValue('white', 'whiteAlpha.100') : 'transparent'}
+                bg={i === 2 ? tabActiveBg : 'transparent'}
                 color={i === 2 ? text : subText}
                 boxShadow={i === 2 ? 'sm' : 'none'}
                 transition="all 0.2s ease"
@@ -167,11 +216,11 @@ export default function DashboardPreview() {
           </HStack>
         </HStack>
 
-        {/* Three Pills matching new SummaryCard design */}
+        {/* Balance pills — animated counters */}
         <HStack spacing={3} align="stretch">
           <BalancePill
             label="Income"
-            value={fmt(totals.income)}
+            value={`${cur}${income.toLocaleString()}`}
             delta="+12.4%"
             icon={ArrowUpRight}
             accent={incomeAccent}
@@ -181,7 +230,7 @@ export default function DashboardPreview() {
           />
           <BalancePill
             label="Expenses"
-            value={fmt(totals.expenses)}
+            value={`${cur}${expenses.toLocaleString()}`}
             delta="−4.2%"
             icon={ArrowDownRight}
             accent={expenseAccent}
@@ -191,7 +240,7 @@ export default function DashboardPreview() {
           />
           <BalancePill
             label="Balance"
-            value={fmt(totals.balance)}
+            value={`${cur}${balance.toLocaleString()}`}
             delta="On track"
             icon={Wallet}
             accent={balanceAccent}
@@ -201,9 +250,9 @@ export default function DashboardPreview() {
           />
         </HStack>
 
-        {/* Mini chart (KEPT AS REQUESTED) + recent list */}
+        {/* Chart + Recent */}
         <HStack spacing={3} align="stretch">
-          {/* Chart - Styled visually to match cards */}
+          {/* Bar chart */}
           <Box
             flex={{ base: 'none', md: 1 }}
             display={{ base: 'none', md: 'block' }}
@@ -219,37 +268,38 @@ export default function DashboardPreview() {
               <Text fontSize="2xs" color={subText} fontWeight={700} letterSpacing="0.08em" textTransform="uppercase">
                 This week
               </Text>
-              <Text fontSize="xs" color={text} fontWeight={700}>
-                {fmt(523.4)}
-              </Text>
+              <Text fontSize="xs" color={text} fontWeight={700}>{fmt(523.4)}</Text>
             </HStack>
+
             <HStack spacing={2} align="flex-end" h="92px">
-              {bars.map((b, i) => (
-                <VStack key={i} spacing={1} flex={1} align="center" h="full" justify="flex-end">
-                  <Box
-                    className="preview-bar"
-                    w="full"
-                    h={`${Math.max(8, b.value * 100)}%`}
-                    bg={barTrack}
-                    borderRadius="md"
-                    overflow="hidden"
-                    position="relative"
-                    transformOrigin="bottom"
-                    sx={{
-                      animation: `growBar 0.7s cubic-bezier(0.32, 0.72, 0, 1) ${i * 0.07}s both`,
-                    }}
-                  >
-                    <Box position="absolute" inset={0} background={barFill} />
-                  </Box>
-                  <Text fontSize="2xs" color={subText} fontWeight={700}>
-                    {b.label}
-                  </Text>
-                </VStack>
-              ))}
+              {bars.map((b, i) => {
+                const isToday = i === todayIdx
+                return (
+                  <VStack key={i} spacing={1} flex={1} align="center" h="full" justify="flex-end" position="relative">
+                    <Box
+                      className="preview-bar"
+                      w="full"
+                      h={`${Math.max(8, b.value * 100)}%`}
+                      bg={isToday ? 'transparent' : barTrack}
+                      borderRadius="md"
+                      overflow="hidden"
+                      position="relative"
+                      transformOrigin="bottom"
+                      boxShadow={isToday ? barShadowToday : 'none'}
+                      sx={{ animation: `growBar 0.7s cubic-bezier(0.32,0.72,0,1) ${i * 0.07}s both` }}
+                    >
+                      <Box position="absolute" inset={0} background={isToday ? barFillToday : barFill} />
+                    </Box>
+                    <Text fontSize="2xs" color={isToday ? text : subText} fontWeight={isToday ? 800 : 700}>
+                      {b.label}
+                    </Text>
+                  </VStack>
+                )
+              })}
             </HStack>
           </Box>
 
-          {/* Recent transactions - Redesigned, cleaner, circular icons, fixed size */}
+          {/* Recent transactions */}
           <VStack
             flex={1}
             p={4}
@@ -273,24 +323,26 @@ export default function DashboardPreview() {
             >
               Recent
             </Text>
-            {recent.map((t) => {
+            {recent.map((t, i) => {
               const isIncome = t.kind === 'income'
               const IconComponent = t.icon
               const accentColor = isIncome ? incomeAccent : expenseAccent
-              const iconBg = isIncome ? incomeBg : expenseBg
+              const iconBg      = isIncome ? incomeBg      : expenseBg
 
               return (
                 <HStack
                   key={t.id}
+                  className="preview-row"
                   spacing={3}
                   px={1.5}
                   py={1}
                   borderRadius="lg"
-                  transition="background 0.2s ease"
+                  transition="background 0.15s ease"
+                  _hover={{ bg: rowHoverBg }}
+                  sx={{ animation: `fadeInRow 0.45s ease ${0.35 + i * 0.09}s both` }}
                 >
                   <Box
-                    w={7}
-                    h={7}
+                    w={7} h={7}
                     borderRadius="full"
                     bg={iconBg}
                     color={accentColor}
@@ -305,13 +357,8 @@ export default function DashboardPreview() {
                   <Text flex={1} fontSize="xs" color={text} fontWeight={600} noOfLines={1}>
                     {t.label}
                   </Text>
-                  <Text
-                    fontSize="xs"
-                    fontWeight={800}
-                    color={accentColor}
-                  >
-                    {isIncome ? '+' : '−'}
-                    {fmt(t.amount)}
+                  <Text fontSize="xs" fontWeight={800} color={accentColor}>
+                    {isIncome ? '+' : '−'}{fmt(t.amount)}
                   </Text>
                 </HStack>
               )
@@ -336,22 +383,12 @@ interface BalancePillProps {
   subText: string
 }
 
-function BalancePill({
-  label,
-  value,
-  delta,
-  icon: IconComponent,
-  accent,
-  bg,
-  text,
-  subText,
-}: BalancePillProps) {
-  const cardBg = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, rgba(25, 27, 34, 0.65) 0%, rgba(12, 13, 17, 0.78) 100%)'
+function BalancePill({ label, value, delta, icon: IconComponent, accent, bg, text, subText }: BalancePillProps) {
+  const cardBg    = useColorModeValue(
+    'linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)',
+    'linear-gradient(135deg,rgba(25,27,34,0.65) 0%,rgba(12,13,17,0.78) 100%)',
   )
-  const cardBorder = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
-  const iconBoxBg = useColorModeValue(`${accent}10`, `${accent}18`)
+  const cardBorder = useColorModeValue('rgba(0,0,0,0.05)', 'rgba(255,255,255,0.04)')
 
   return (
     <VStack
@@ -367,7 +404,7 @@ function BalancePill({
       overflow="hidden"
       boxShadow="sm"
     >
-      {/* Soft color glow in the corner */}
+      {/* Corner glow */}
       <Box
         position="absolute"
         top="-30px"
@@ -376,7 +413,7 @@ function BalancePill({
         h="95px"
         borderRadius="full"
         bg={accent}
-        opacity={useColorModeValue(0.03, 0.06)}
+        opacity={useColorModeValue(0.04, 0.07)}
         filter="blur(20px)"
         pointerEvents="none"
       />
@@ -388,7 +425,7 @@ function BalancePill({
           align="center"
           justify="center"
           borderRadius="lg"
-          bg={iconBoxBg}
+          bg={bg}
           color={accent}
           flexShrink={0}
           p={1}
@@ -409,16 +446,8 @@ function BalancePill({
         </Text>
       </VStack>
 
-      {/* Sleek bottom indicator line */}
-      <Box
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        h="2px"
-        bg={accent}
-        opacity={0.35}
-      />
+      {/* Bottom accent line */}
+      <Box position="absolute" bottom={0} left={0} right={0} h="2px" bg={accent} opacity={0.35} />
     </VStack>
   )
 }
