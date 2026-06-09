@@ -426,7 +426,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                             <Text fontSize="2xs" color={muted}>
                               {hideBalances
                                 ? 'Hidden'
-                                : `${money(account.overdraftAvailable, account.currency)} of ${money(account.overdraftLimit, account.currency)}`}
+                                : `${money(account.overdraftAvailable, account.currency)} of ${money(account.overdraftLimit, account.currency)} · ${account.overdraftPercentageUsed.toFixed(0)}% used`}
                             </Text>
                           </HStack>
                           <Progress
