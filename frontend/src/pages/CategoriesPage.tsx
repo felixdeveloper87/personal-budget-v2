@@ -121,7 +121,7 @@ export default function CategoriesPage() {
   return (
     <Box
       px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 3, md: 5 }}
+      py={{ base: 4, md: 7 }}
       maxW="1400px"
       mx="auto"
     >

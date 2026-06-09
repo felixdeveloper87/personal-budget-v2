@@ -60,8 +60,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     <Box
       minH="100vh"
       px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 3, md: 5 }}
-      maxW="1600px"
+      py={{ base: 4, md: 7 }}
+      maxW="1400px"
       mx="auto"
     >
       <VStack spacing={{ base: 3, md: 4 }} align="stretch">
