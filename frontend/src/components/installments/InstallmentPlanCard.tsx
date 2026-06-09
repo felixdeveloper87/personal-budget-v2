@@ -112,8 +112,8 @@ export default function InstallmentPlanCard({
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
 
-  const accentBgActive = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
-  const accentFgActive = useColorModeValue('teal.700', 'teal.300')
+  const accentBgActive = useColorModeValue('blue.50', 'rgba(37,99,235,0.16)')
+  const accentFgActive = useColorModeValue('blue.700', 'blue.300')
   const accentBgPast = useColorModeValue('gray.100', 'whiteAlpha.100')
   const accentFgPast = useColorModeValue('gray.600', 'gray.400')
 
@@ -145,10 +145,8 @@ export default function InstallmentPlanCard({
   const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
-  const activeStripe = useColorModeValue(
-    'linear-gradient(180deg, #14b8a6, #2563eb)',
-    'linear-gradient(180deg, #2dd4bf, #60a5fa)',
-  )
+  const activeStripe = useColorModeValue('blue.600', 'blue.400')
+  const progressBar = useColorModeValue('blue.600', 'blue.400')
   const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
@@ -356,31 +354,26 @@ export default function InstallmentPlanCard({
             <HStack
               justify="space-between"
               align="center"
-              px={3}
-              py={2.5}
+              px={3.5}
+              py={3}
               bg={metaBg}
               borderRadius="lg"
               border="1px solid"
               borderColor={metaBorder}
             >
-              <VStack align="flex-start" spacing={0}>
-                <Text fontSize="2xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
+              <VStack align="flex-start" spacing={0.5}>
+                <Text fontSize="xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Per installment
                 </Text>
-                <HStack align="baseline" spacing={1}>
-                  <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={800} color={valueColor} lineHeight="1.1">
-                    £{plan.installmentValue.toFixed(2)}
-                  </Text>
-                  <Text fontSize="2xs" color={captionColor} fontWeight={600}>
-                    × {plan.totalInstallments}
-                  </Text>
-                </HStack>
+                <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={valueColor} lineHeight="1">
+                  £{plan.installmentValue.toFixed(2)}
+                </Text>
               </VStack>
-              <VStack align="flex-end" spacing={0}>
-                <Text fontSize="2xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
+              <VStack align="flex-end" spacing={0.5}>
+                <Text fontSize="xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Total
                 </Text>
-                <Text fontSize={{ base: 'sm', md: 'md' }} fontWeight={700} color={titleColor} lineHeight="1.1">
+                <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color={titleColor} lineHeight="1">
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
@@ -411,19 +404,19 @@ export default function InstallmentPlanCard({
               </HStack>
             ) : (
               <Box>
-                <HStack justify="space-between" mb={1}>
+                <HStack justify="space-between" mb={1.5}>
                   <Text fontSize="xs" fontWeight={600} color={captionColor}>
                     {paidCount} of {plan.totalInstallments} paid
                   </Text>
-                  <Text fontSize="xs" fontWeight={700} color={valueColor}>
+                  <Text fontSize="sm" fontWeight={800} color={valueColor}>
                     {progressPct}%
                   </Text>
                 </HStack>
-                <Box h="4px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
+                <Box h="6px" w="full" bg={dividerColor} borderRadius="full" overflow="hidden">
                   <Box
                     h="full"
                     w={`${progressPct}%`}
-                    bg="linear-gradient(90deg, #14b8a6 0%, #2563eb 55%, #0d9488 100%)"
+                    bg={progressBar}
                     borderRadius="full"
                     transition="width 0.4s ease"
                   />
@@ -625,7 +618,7 @@ export default function InstallmentPlanCard({
             <Button variant="ghost" fontSize="sm" color={captionColor} onClick={editDisclosure.onClose}>
               Cancel
             </Button>
-            <Button colorScheme="teal" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
+            <Button colorScheme="blue" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
               Save changes
             </Button>
           </ModalFooter>
@@ -703,18 +696,7 @@ export default function InstallmentPlanCard({
                 loadingText="Deleting…"
                 fontSize="sm"
                 fontWeight={700}
-                color="white"
-                bg="linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)"
-                bgSize="200% 100%"
-                bgPosition="0% 50%"
-                boxShadow="0 8px 24px -10px rgba(244, 63, 94, 0.55)"
-                _hover={{
-                  bgPosition: '100% 50%',
-                  transform: 'translateY(-1px)',
-                  boxShadow: '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
-                }}
-                _active={{ transform: 'translateY(0)' }}
-                transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
+                colorScheme="red"
               >
                 Delete
               </Button>
