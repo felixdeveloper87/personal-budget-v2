@@ -30,6 +30,11 @@ import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
 import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, TrendingUp, TrendingDown } from '../ui/icons'
 import EditTransactionModal from './EditTransactionModal'
+import {
+  getTransactionDate,
+  getTransactionDateSource,
+  hasDifferentPaymentDate,
+} from '../../utils/transactionDates'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
@@ -65,7 +70,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     const groups: Record<string, MonthGroup> = {}
 
     transactions.forEach(transaction => {
-      const date = new Date(transaction.paymentDate || transaction.dateTime)
+      const date = getTransactionDate(transaction, 'activity')
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       const monthName = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
       
@@ -93,7 +98,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     // Calculate net amount and sort transactions within each group
     Object.values(groups).forEach(group => {
       group.netAmount = group.totalIncome - group.totalExpense
-      group.transactions.sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime())
+      group.transactions.sort(
+        (a, b) =>
+          getTransactionDate(b, 'activity').getTime() -
+          getTransactionDate(a, 'activity').getTime(),
+      )
     })
 
     // Sort groups by month (newest first)
@@ -464,14 +473,14 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             <Td display={{ base: 'none', md: 'table-cell' }}>
                               <VStack spacing={1} align="start">
                                 <Text fontSize="sm" fontWeight="600" color={textColor}>
-                                  {formatTransactionDateTime(tx.dateTime).date}
+                                  {formatTransactionDateTime(getTransactionDateSource(tx, 'activity')).date}
                                 </Text>
                                 <Text fontSize="xs" color="gray.500" fontWeight="500">
                                   {formatTransactionDateTime(tx.dateTime).time}
                                 </Text>
-                                {tx.paymentDate && tx.paymentDate !== (tx.transactionDate || tx.dateTime.slice(0, 10)) && (
+                                {hasDifferentPaymentDate(tx) && tx.paymentDate && (
                                   <Text fontSize="xs" color="blue.500">
-                                    Paid {formatDateBR(tx.paymentDate)}
+                                    Payment {formatDateBR(tx.paymentDate)}
                                   </Text>
                                 )}
                               </VStack>

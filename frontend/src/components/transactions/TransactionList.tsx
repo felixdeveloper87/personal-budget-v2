@@ -30,6 +30,11 @@ import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
 import EditTransactionModal from './EditTransactionModal'
 import { ChevronLeft, ChevronRight } from '../ui/icons'
+import {
+  getTransactionDate,
+  getTransactionDateSource,
+  hasDifferentPaymentDate,
+} from '../../utils/transactionDates'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -52,7 +57,11 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
 
   // Memoize sorted transactions to prevent recalculation on every render
   const sortedTransactions = useMemo(() => 
-    [...transactions].sort((a, b) => new Date(b.paymentDate || b.dateTime).getTime() - new Date(a.paymentDate || a.dateTime).getTime()),
+    [...transactions].sort(
+      (a, b) =>
+        getTransactionDate(b, 'activity').getTime() -
+        getTransactionDate(a, 'activity').getTime(),
+    ),
     [transactions]
   )
 
@@ -140,14 +149,14 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                 <Td display={{ base: 'none', md: 'table-cell' }}>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
                     <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
-                      {formatTransactionDateTime(tx.dateTime).date}
+                      {formatTransactionDateTime(getTransactionDateSource(tx, 'activity')).date}
                     </Text>
                     <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
                       {formatTransactionDateTime(tx.dateTime).time}
                     </Text>
-                    {tx.paymentDate && tx.paymentDate !== (tx.transactionDate || tx.dateTime.slice(0, 10)) && (
+                    {hasDifferentPaymentDate(tx) && tx.paymentDate && (
                       <Text fontSize={{ base: "2xs", md: "xs" }} color="blue.500">
-                        Paid {formatDateBR(tx.paymentDate)}
+                        Payment {formatDateBR(tx.paymentDate)}
                       </Text>
                     )}
                   </VStack>

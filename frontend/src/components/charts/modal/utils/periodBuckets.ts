@@ -1,4 +1,8 @@
 import type { PeriodType, Transaction } from '../../../../types'
+import {
+  getTransactionDate,
+  type TransactionDateBasis,
+} from '../../../../utils/transactionDates'
 
 /**
  * A single bar slot in a period-bucket chart.
@@ -60,11 +64,6 @@ function applyFilter(transactions: Transaction[], filter: PeriodFilter): Transac
   return transactions.filter((t) => t.type === filter)
 }
 
-function competenceDate(tx: Transaction): Date {
-  const source = tx.paymentDate || tx.transactionDate || tx.dateTime
-  return source.length === 10 ? new Date(`${source}T00:00:00`) : new Date(source)
-}
-
 function addTransactionToBucket(bucket: PeriodBucket, transaction: Transaction): void {
   bucket.value += transaction.amount
   bucket.transactions.push(transaction)
@@ -76,7 +75,11 @@ function addTransactionToBucket(bucket: PeriodBucket, transaction: Transaction):
   }
 }
 
-function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
+function bucketByHourBlocks(
+  txs: Transaction[],
+  selectedDate: Date,
+  dateBasis: TransactionDateBasis,
+): PeriodBucket[] {
   const buckets: PeriodBucket[] = DAY_BLOCKS.map((b, i) => ({
     key: `h${i}`,
     label: b.label,
@@ -91,7 +94,7 @@ function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucke
   const d = selectedDate.getDate()
 
   for (const tx of txs) {
-    const txDate = competenceDate(tx)
+    const txDate = getTransactionDate(tx, dateBasis)
     if (
       txDate.getFullYear() !== y ||
       txDate.getMonth() !== m ||
@@ -106,7 +109,11 @@ function bucketByHourBlocks(txs: Transaction[], selectedDate: Date): PeriodBucke
   return buckets
 }
 
-function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
+function bucketByDayOfWeek(
+  txs: Transaction[],
+  selectedDate: Date,
+  dateBasis: TransactionDateBasis,
+): PeriodBucket[] {
   const buckets: PeriodBucket[] = WEEK_LABELS.map((w, i) => ({
     key: `d${i}`,
     label: w.short,
@@ -128,7 +135,7 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
   end.setDate(start.getDate() + 7)
 
   for (const tx of txs) {
-    const txDate = competenceDate(tx)
+    const txDate = getTransactionDate(tx, dateBasis)
     if (txDate < start || txDate >= end) continue
     const dayOfWeek = txDate.getDay()
     const idx = dayOfWeek === 0 ? 6 : dayOfWeek - 1
@@ -137,7 +144,11 @@ function bucketByDayOfWeek(txs: Transaction[], selectedDate: Date): PeriodBucket
   return buckets
 }
 
-function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
+function bucketByDayOfMonth(
+  txs: Transaction[],
+  selectedDate: Date,
+  dateBasis: TransactionDateBasis,
+): PeriodBucket[] {
   const year = selectedDate.getFullYear()
   const month = selectedDate.getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -161,7 +172,7 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
   })
 
   for (const tx of txs) {
-    const txDate = competenceDate(tx)
+    const txDate = getTransactionDate(tx, dateBasis)
     if (txDate.getFullYear() !== year || txDate.getMonth() !== month) continue
     const idx = txDate.getDate() - 1
     if (idx >= 0 && idx < daysInMonth) addTransactionToBucket(buckets[idx], tx)
@@ -169,7 +180,11 @@ function bucketByDayOfMonth(txs: Transaction[], selectedDate: Date): PeriodBucke
   return buckets
 }
 
-function bucketByMonthOfYear(txs: Transaction[], selectedDate: Date): PeriodBucket[] {
+function bucketByMonthOfYear(
+  txs: Transaction[],
+  selectedDate: Date,
+  dateBasis: TransactionDateBasis,
+): PeriodBucket[] {
   const year = selectedDate.getFullYear()
   const buckets: PeriodBucket[] = MONTH_LABELS.map((m, i) => ({
     key: `mo${i}`,
@@ -181,7 +196,7 @@ function bucketByMonthOfYear(txs: Transaction[], selectedDate: Date): PeriodBuck
     transactions: [],
   }))
   for (const tx of txs) {
-    const txDate = competenceDate(tx)
+    const txDate = getTransactionDate(tx, dateBasis)
     if (txDate.getFullYear() !== year) continue
     addTransactionToBucket(buckets[txDate.getMonth()], tx)
   }
@@ -207,17 +222,18 @@ export function bucketTransactionsByPeriod(
   periodType: PeriodType,
   selectedDate: Date,
   filter: PeriodFilter = 'ALL',
+  dateBasis: TransactionDateBasis = 'cash-flow',
 ): PeriodBucket[] {
   const filtered = applyFilter(transactions, filter)
   switch (periodType) {
     case 'day':
-      return bucketByHourBlocks(filtered, selectedDate)
+      return bucketByHourBlocks(filtered, selectedDate, dateBasis)
     case 'week':
-      return bucketByDayOfWeek(filtered, selectedDate)
+      return bucketByDayOfWeek(filtered, selectedDate, dateBasis)
     case 'month':
-      return bucketByDayOfMonth(filtered, selectedDate)
+      return bucketByDayOfMonth(filtered, selectedDate, dateBasis)
     case 'year':
-      return bucketByMonthOfYear(filtered, selectedDate)
+      return bucketByMonthOfYear(filtered, selectedDate, dateBasis)
     default:
       return []
   }

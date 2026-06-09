@@ -13,13 +13,19 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronUp } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
+import type { Transaction } from '../../types'
+import {
+  getTransactionDate,
+  hasDifferentPaymentDate,
+} from '../../utils/transactionDates'
+import { formatDateBR } from '../../utils/dateTime'
 
 interface CategoryTransactionDropdownProps {
   category: string
   amount: number
   percentage: number | string
   color: string
-  transactions: any[]
+  transactions: Transaction[]
   accentScheme: 'green' | 'red'
   borderColor?: string
   hoverBg?: string
@@ -32,10 +38,6 @@ interface CategoryTransactionDropdownProps {
 }
 
 const PAGE_SIZE = 5
-
-function transactionDate(transaction: any): Date {
-  return new Date(transaction.transactionDate || transaction.paymentDate || transaction.dateTime)
-}
 
 export default function CategoryTransactionDropdown({
   category,
@@ -77,7 +79,11 @@ export default function CategoryTransactionDropdown({
     () =>
       transactions
         .slice()
-        .sort((a, b) => transactionDate(b).getTime() - transactionDate(a).getTime()),
+        .sort(
+          (a, b) =>
+            getTransactionDate(b, 'activity').getTime() -
+            getTransactionDate(a, 'activity').getTime(),
+        ),
     [transactions],
   )
 
@@ -206,12 +212,17 @@ export default function CategoryTransactionDropdown({
                   {transaction.description || 'No description'}
                 </Text>
                 <Text fontSize="2xs" color={mutedColor}>
-                  {transactionDate(transaction).toLocaleDateString('en-GB', {
+                  {getTransactionDate(transaction, 'activity').toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric',
                   })}
                 </Text>
+                {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
+                  <Text fontSize="2xs" color={mutedColor}>
+                    Payment {formatDateBR(transaction.paymentDate)}
+                  </Text>
+                )}
               </VStack>
               <Text fontSize="xs" fontWeight={800} color={amountColor ?? colors.text.primary} flexShrink={0}>
                 £{Number(transaction.amount || 0).toFixed(2)}

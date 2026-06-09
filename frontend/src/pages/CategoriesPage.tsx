@@ -50,6 +50,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
     monthSummary,
     selectedPeriod,
     selectedDate,
+    'activity',
   )
 
   /* ── Surface tokens ── */
@@ -326,6 +327,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                   periodType={selectedPeriod}
                   selectedDate={selectedDate}
                   showPeriodBadge={false}
+                  dateBasis="activity"
                 />
               ) : (
                 <IncomeChart
@@ -334,6 +336,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                   periodType={selectedPeriod}
                   selectedDate={selectedDate}
                   showPeriodBadge={false}
+                  dateBasis="activity"
                 />
               )
             ) : (

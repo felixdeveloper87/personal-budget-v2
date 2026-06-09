@@ -49,6 +49,7 @@ export default function GoalsPage() {
     monthSummary,
     'month',
     currentMonth,
+    'cash-flow',
   )
 
   const load = useCallback(async () => {

@@ -31,6 +31,7 @@ export default function TransactionsPage() {
     monthSummary,
     selectedPeriod,
     selectedDate,
+    'activity',
   )
 
   const titleColor = useColorModeValue('gray.900', 'gray.50')

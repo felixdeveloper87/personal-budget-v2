@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Transaction, MonthlySummary } from '../types'
 import { PeriodType } from '../types'
+import { getTransactionDate, type TransactionDateBasis } from '../utils/transactionDates'
 
 export interface PeriodData {
   startDate: Date
@@ -16,7 +17,8 @@ export function usePeriodData(
   transactions: Transaction[],
   monthlySummary: MonthlySummary | null,
   selectedPeriod: PeriodType,
-  selectedDate: Date
+  selectedDate: Date,
+  dateBasis: TransactionDateBasis = 'cash-flow',
 ): PeriodData {
   return useMemo(() => {
     // Force recalculation by creating new date objects
@@ -71,10 +73,7 @@ export function usePeriodData(
 
     // ✅ Filtro ajustado: trabalha apenas com "tx.dateTime"
     const periodTransactions = transactions.filter(tx => {
-      const dateSource = tx.paymentDate || tx.transactionDate || tx.dateTime
-      const txDate = dateSource.length === 10
-        ? new Date(`${dateSource}T00:00:00`)
-        : new Date(dateSource)
+      const txDate = getTransactionDate(tx, dateBasis)
       return txDate >= startDate && txDate <= endDate
     })
     
@@ -99,5 +98,5 @@ export function usePeriodData(
       expense,
       balance
     }
-  }, [transactions, selectedPeriod, selectedDate])
+  }, [transactions, selectedPeriod, selectedDate, dateBasis])
 }

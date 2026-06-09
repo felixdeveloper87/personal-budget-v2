@@ -2,6 +2,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Box, useColorModeValue } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
+import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { TrendingDown } from '../../ui/icons'
 import { useChartColors, useChartDimensions } from './hooks'
 import {
@@ -18,6 +19,7 @@ export interface ExpensesChartProps {
   showPeriodBadge?: boolean
   periodType?: PeriodType
   selectedDate?: Date
+  dateBasis?: TransactionDateBasis
 }
 
 export default function ExpensesChart({
@@ -26,6 +28,7 @@ export default function ExpensesChart({
   showPeriodBadge = true,
   periodType,
   selectedDate,
+  dateBasis = 'cash-flow',
 }: ExpensesChartProps) {
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
@@ -80,6 +83,7 @@ export default function ExpensesChart({
           selectedDate={selectedDate}
           filter="EXPENSE"
           accent="red"
+          dateBasis={dateBasis}
         />
       )}
 

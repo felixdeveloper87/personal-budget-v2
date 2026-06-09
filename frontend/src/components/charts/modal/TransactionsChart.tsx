@@ -12,6 +12,11 @@ import {
 import type { PeriodType } from '../../../types'
 import type { Transaction } from '../../../types'
 import {
+  getTransactionDate,
+  hasDifferentPaymentDate,
+} from '../../../utils/transactionDates'
+import { formatDateBR } from '../../../utils/dateTime'
+import {
   CalendarDays,
   ReceiptText,
   Sparkles,
@@ -62,8 +67,7 @@ function formatMoney(value: number): string {
 }
 
 function transactionDate(transaction: Transaction): Date {
-  const source = transaction.paymentDate || transaction.transactionDate || transaction.dateTime
-  return source.length === 10 ? new Date(`${source}T00:00:00`) : new Date(source)
+  return getTransactionDate(transaction, 'activity')
 }
 
 function formatShortDate(transaction: Transaction): string {
@@ -127,7 +131,13 @@ export default function TransactionsChart({
   const periodBuckets = useMemo(
     () =>
       periodType && selectedDate
-        ? bucketTransactionsByPeriod(transactions, periodType, selectedDate, 'ALL')
+        ? bucketTransactionsByPeriod(
+            transactions,
+            periodType,
+            selectedDate,
+            'ALL',
+            'activity',
+          )
         : [],
     [transactions, periodType, selectedDate],
   )
@@ -271,6 +281,7 @@ export default function TransactionsChart({
         selectedDate={selectedDate}
         filter="ALL"
         accent="violet"
+        dateBasis="activity"
         onBucketClick={(bucket: PeriodBucket) => setSelectedBucketKey(bucket.key)}
       />
 
@@ -344,6 +355,11 @@ export default function TransactionsChart({
                         ? ` - ${transaction.paymentMethodName}`
                         : ''}
                     </Text>
+                    {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
+                      <Text fontSize="2xs" color={mutedColor} noOfLines={1}>
+                        Payment {formatDateBR(transaction.paymentDate)}
+                      </Text>
+                    )}
                   </VStack>
 
                   <Text

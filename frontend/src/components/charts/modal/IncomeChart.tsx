@@ -1,6 +1,7 @@
 import { VStack, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType } from '../../../types'
+import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { TrendingUp } from '../../ui/icons'
 import { useChartColors } from './hooks'
 import {
@@ -18,6 +19,7 @@ export interface IncomeChartProps {
   showPeriodBadge?: boolean
   periodType?: PeriodType
   selectedDate?: Date
+  dateBasis?: TransactionDateBasis
 }
 
 export default function IncomeChart({
@@ -26,6 +28,7 @@ export default function IncomeChart({
   showPeriodBadge = true,
   periodType,
   selectedDate,
+  dateBasis = 'cash-flow',
 }: IncomeChartProps) {
   const chartColors = useChartColors()
 
@@ -74,6 +77,7 @@ export default function IncomeChart({
           selectedDate={selectedDate}
           filter="INCOME"
           accent="green"
+          dateBasis={dateBasis}
         />
       )}
 

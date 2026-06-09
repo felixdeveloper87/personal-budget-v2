@@ -89,6 +89,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
     currentMonthSummary,
     'month',
     currentMonth,
+    'cash-flow',
   )
 
   const selectedDate = useMemo(() => {

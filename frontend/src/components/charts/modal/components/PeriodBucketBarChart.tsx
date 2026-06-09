@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 
 import type { PeriodType, Transaction } from '../../../../types'
+import type { TransactionDateBasis } from '../../../../utils/transactionDates'
 import {
   bucketTransactionsByPeriod,
   getPeriodHeadline,
@@ -73,6 +74,7 @@ export interface PeriodBucketBarChartProps {
   /** Bar plot height in pixels. Default 140. */
   height?: number
   accent?: PeriodBucketAccent
+  dateBasis?: TransactionDateBasis
   onBucketClick?: (bucket: PeriodBucket) => void
 }
 
@@ -95,12 +97,19 @@ export default function PeriodBucketBarChart({
   currency = '£',
   height = 140,
   accent = 'violet',
+  dateBasis = 'cash-flow',
   onBucketClick,
 }: PeriodBucketBarChartProps) {
   const buckets = useMemo(
     () =>
-      bucketTransactionsByPeriod(transactions, periodType, selectedDate, filter),
-    [transactions, periodType, selectedDate, filter],
+      bucketTransactionsByPeriod(
+        transactions,
+        periodType,
+        selectedDate,
+        filter,
+        dateBasis,
+      ),
+    [transactions, periodType, selectedDate, filter, dateBasis],
   )
 
   const total = useMemo(

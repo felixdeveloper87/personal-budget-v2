@@ -45,6 +45,7 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
     monthSummary,
     selectedPeriod,
     selectedDate,
+    'cash-flow',
   )
 
   const filtersActive = hasActiveFilters(filters)
