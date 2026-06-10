@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -157,6 +158,8 @@ public class ReportResponse {
         private String description;
         private BigDecimal amount;
         private String paymentMethodName;
+        private String accountName;
+        private TransactionStatus status;
         private boolean installment;
         private boolean recurring;
 
@@ -168,6 +171,8 @@ public class ReportResponse {
                 String description,
                 BigDecimal amount,
                 String paymentMethodName,
+                String accountName,
+                TransactionStatus status,
                 boolean installment,
                 boolean recurring) {
             this.id = id;
@@ -177,6 +182,8 @@ public class ReportResponse {
             this.description = description;
             this.amount = amount;
             this.paymentMethodName = paymentMethodName;
+            this.accountName = accountName;
+            this.status = status;
             this.installment = installment;
             this.recurring = recurring;
         }
@@ -188,6 +195,8 @@ public class ReportResponse {
         public String getDescription() { return description; }
         public BigDecimal getAmount() { return amount; }
         public String getPaymentMethodName() { return paymentMethodName; }
+        public String getAccountName() { return accountName; }
+        public TransactionStatus getStatus() { return status; }
         public boolean isInstallment() { return installment; }
         public boolean isRecurring() { return recurring; }
     }

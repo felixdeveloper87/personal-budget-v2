@@ -1,6 +1,8 @@
 // Presentation-only formatting helpers for the report views.
 // No business logic — all numbers come pre-computed from the backend.
 
+import type { ReportTransactionItem } from '../../types'
+
 const currencyFormatter = new Intl.NumberFormat('en-GB', {
   style: 'currency',
   currency: 'GBP',
@@ -41,4 +43,30 @@ export function formatDateTime(value?: string | null): string {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function localDateKey(date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function formatAccountMovement(transaction: ReportTransactionItem): string | null {
+  const scheduled =
+    transaction.status === 'PLANNED' ||
+    transaction.status === 'PENDING' ||
+    transaction.paymentDate > localDateKey()
+  const method = transaction.paymentMethodName
+    ? `${scheduled ? 'will be paid' : 'paid'} with ${transaction.paymentMethodName}`
+    : null
+
+  if (!transaction.accountName) return method
+
+  const accountLabel =
+    transaction.type === 'INCOME'
+      ? `${scheduled ? 'Will be paid' : 'Paid'} into ${transaction.accountName}`
+      : `${scheduled ? 'Will be debited' : 'Debited'} from ${transaction.accountName}`
+
+  return method ? `${accountLabel} - ${method}` : accountLabel
 }

@@ -97,6 +97,25 @@ export interface AccountSummary {
   accounts: FinancialAccount[]
 }
 
+export type AccountActivityKind = 'INCOME' | 'EXPENSE' | 'TRANSFER_IN' | 'TRANSFER_OUT'
+
+export interface AccountActivityItem {
+  id: number
+  date: string
+  kind: AccountActivityKind
+  description?: string | null
+  category?: string | null
+  amount: number
+  status?: TransactionStatus | null
+  paymentMethodName?: string | null
+}
+
+export interface AccountDetails {
+  account: FinancialAccount
+  recentActivity: AccountActivityItem[]
+  upcomingActivity: AccountActivityItem[]
+}
+
 export interface AccountTransfer {
   id: number
   fromAccountId: number
@@ -167,6 +186,8 @@ export interface ReportTransactionItem {
   description: string
   amount: number
   paymentMethodName?: string | null
+  accountName?: string | null
+  status?: TransactionStatus | null
   installment: boolean
   recurring: boolean
 }

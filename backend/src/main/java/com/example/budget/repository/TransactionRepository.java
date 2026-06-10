@@ -40,6 +40,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserAndAccountAndPaymentDateBetween(
                     User user, FinancialAccount account, LocalDate start, LocalDate end);
 
+    List<Transaction> findTop20ByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                    User user, FinancialAccount account, LocalDate date);
+
+    List<Transaction> findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
+                    User user, FinancialAccount account, LocalDate date);
+
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);
 
@@ -55,6 +61,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     @Query("SELECT t FROM Transaction t " +
                     "LEFT JOIN FETCH t.paymentMethod " +
+                    "LEFT JOIN FETCH t.account " +
                     "LEFT JOIN FETCH t.installmentPlan " +
                     "LEFT JOIN FETCH t.recurringTransaction " +
                     "WHERE t.user = :user AND t.paymentDate BETWEEN :start AND :end " +

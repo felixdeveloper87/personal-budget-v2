@@ -16,6 +16,7 @@ import {
   hasDifferentPaymentDate,
 } from '../../../utils/transactionDates'
 import { formatDateBR } from '../../../utils/dateTime'
+import { formatTransactionAccount } from '../../../utils/transactionAccount'
 import {
   CalendarDays,
   ReceiptText,
@@ -355,6 +356,11 @@ export default function TransactionsChart({
                         ? ` - ${transaction.paymentMethodName}`
                         : ''}
                     </Text>
+                    {formatTransactionAccount(transaction) && (
+                      <Text fontSize="2xs" color="teal.500" noOfLines={1}>
+                        {formatTransactionAccount(transaction)}
+                      </Text>
+                    )}
                     {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
                       <Text fontSize="2xs" color={mutedColor} noOfLines={1}>
                         Payment {formatDateBR(transaction.paymentDate)}

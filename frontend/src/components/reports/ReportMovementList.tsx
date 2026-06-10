@@ -1,12 +1,8 @@
 import { useMemo } from 'react'
 import { Badge, Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
-import { formatCurrency, formatDate } from './format'
+import { formatAccountMovement, formatCurrency, formatDate } from './format'
 import type { ReportResponse, ReportTransactionItem } from '../../types'
 
-/**
- * The report JSON exposes only the top income/expense movements (not the full
- * period ledger), so this list merges and date-sorts those two arrays.
- */
 function useTopMovements(report: ReportResponse): ReportTransactionItem[] {
   return useMemo(
     () =>
@@ -44,11 +40,12 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
         </Text>
       ) : (
         <VStack align="stretch" spacing={0}>
-          {movements.map((tx, index) => {
-            const isIncome = tx.type === 'INCOME'
+          {movements.map((transaction, index) => {
+            const isIncome = transaction.type === 'INCOME'
+            const accountMovement = formatAccountMovement(transaction)
             return (
               <Flex
-                key={tx.id}
+                key={transaction.id}
                 align="center"
                 justify="space-between"
                 gap={4}
@@ -67,23 +64,27 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
                   <VStack align="flex-start" spacing={0.5} minW={0}>
                     <HStack spacing={2} minW={0}>
                       <Text fontSize="sm" fontWeight={700} color="gray.800" noOfLines={1}>
-                        {tx.description?.trim() || tx.category}
+                        {transaction.description?.trim() || transaction.category}
                       </Text>
-                      {tx.installment ? (
+                      {transaction.installment ? (
                         <Badge colorScheme="purple" variant="subtle" fontSize="9px" borderRadius="md">
                           Installment
                         </Badge>
                       ) : null}
-                      {tx.recurring ? (
+                      {transaction.recurring ? (
                         <Badge colorScheme="blue" variant="subtle" fontSize="9px" borderRadius="md">
                           Recurring
                         </Badge>
                       ) : null}
                     </HStack>
                     <Text fontSize="xs" color="gray.500" noOfLines={1}>
-                      {formatDate(tx.paymentDate)} · {tx.category}
-                      {tx.paymentMethodName ? ` · ${tx.paymentMethodName}` : ''}
+                      {formatDate(transaction.paymentDate)} - {transaction.category}
                     </Text>
+                    {accountMovement ? (
+                      <Text fontSize="xs" color="blue.600" noOfLines={1}>
+                        {accountMovement}
+                      </Text>
+                    ) : null}
                   </VStack>
                 </HStack>
                 <Text
@@ -93,7 +94,7 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
                   color={isIncome ? 'green.600' : 'red.600'}
                 >
                   {isIncome ? '+' : '-'}
-                  {formatCurrency(tx.amount)}
+                  {formatCurrency(transaction.amount)}
                 </Text>
               </Flex>
             )

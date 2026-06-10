@@ -48,8 +48,10 @@ import {
 import { ToastService } from '../services/toast'
 import { BankCombobox, BankLogo, SectionHeader, getBankMeta } from '../components/ui'
 import PaymentMethodsSection from '../sections/PaymentMethodsSection'
+import AccountDetailsModal from '../components/accounts/AccountDetailsModal'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import {
+  Activity,
   CreditCard,
   Eye,
   EyeOff,
@@ -114,6 +116,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
     }
   })
   const [showAccountForm, setShowAccountForm] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<FinancialAccount | null>(null)
 
   const [institution, setInstitution] = useState('')
   const [type, setType] = useState<AccountType>('CURRENT')
@@ -400,6 +403,15 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                             {displayMoney(account.currentBalance, account.currency)}
                           </Text>
                           <IconButton
+                            aria-label={`View activity for ${account.name}`}
+                            title="View account activity"
+                            icon={<Icon as={Activity} boxSize={3.5} />}
+                            size="xs"
+                            variant="ghost"
+                            colorScheme="blue"
+                            onClick={() => setSelectedAccount(account)}
+                          />
+                          <IconButton
                             aria-label={`Edit ${account.name}`}
                             icon={<Icon as={Pencil} boxSize={3.5} />}
                             size="xs"
@@ -675,6 +687,12 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
           )}
         </SimpleGrid>
       </VStack>
+      <AccountDetailsModal
+        account={selectedAccount}
+        isOpen={selectedAccount !== null}
+        onClose={() => setSelectedAccount(null)}
+        hideBalances={hideBalances}
+      />
     </Box>
   )
 }

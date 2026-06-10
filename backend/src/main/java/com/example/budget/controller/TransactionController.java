@@ -5,7 +5,6 @@ import com.example.budget.dto.ImportResultDTO;
 import com.example.budget.dto.ImportTransactionsRequest;
 import com.example.budget.dto.MonthlySummary;
 import com.example.budget.dto.TransactionDTO;
-import com.example.budget.dto.TransactionSearchDTO;
 import com.example.budget.dto.UpdateTransactionRequest;
 import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.model.Transaction;
@@ -185,7 +184,7 @@ public class TransactionController {
      * @return List of TransactionSearchDTO matching the search criteria
      */
     @GetMapping("/transactions/search")
-    public List<TransactionSearchDTO> searchTransactions(
+    public List<TransactionDTO> searchTransactions(
             @RequestParam(required = false) String text,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String category,
@@ -196,16 +195,6 @@ public class TransactionController {
         User user = (User) authentication.getPrincipal();
         List<Transaction> results = service.searchTransactions(text, type, category, startDate, endDate, user);
 
-        return results.stream()
-                .map(tx -> new TransactionSearchDTO(
-                        tx.getId(),
-                        tx.getDescription(),
-                        tx.getType(),
-                        tx.getCategory(),
-                        tx.getAmount(),
-                        tx.getPaymentDate(),
-                        tx.getInstallmentPlan() != null ? tx.getInstallmentPlan().getId() : null,
-                        tx.getRecurringTransaction() != null ? tx.getRecurringTransaction().getId() : null))
-                .toList();
+        return mapper.toDTOList(results);
     }
 }

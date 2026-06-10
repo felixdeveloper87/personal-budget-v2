@@ -19,6 +19,7 @@ import {
   hasDifferentPaymentDate,
 } from '../../utils/transactionDates'
 import { formatDateBR } from '../../utils/dateTime'
+import { formatTransactionAccount } from '../../utils/transactionAccount'
 
 interface CategoryTransactionDropdownProps {
   category: string
@@ -218,6 +219,11 @@ export default function CategoryTransactionDropdown({
                     year: 'numeric',
                   })}
                 </Text>
+                {formatTransactionAccount(transaction) && (
+                  <Text fontSize="2xs" color="teal.500" noOfLines={1}>
+                    {formatTransactionAccount(transaction)}
+                  </Text>
+                )}
                 {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
                   <Text fontSize="2xs" color={mutedColor}>
                     Payment {formatDateBR(transaction.paymentDate)}

@@ -19,6 +19,8 @@ public class ReportTransactionMapper {
                 tx.getDescription(),
                 tx.getAmount(),
                 tx.getPaymentMethod() != null ? tx.getPaymentMethod().getName() : null,
+                tx.getAccount() != null ? tx.getAccount().getName() : null,
+                tx.getStatus(),
                 tx.getInstallmentPlan() != null,
                 tx.getRecurringTransaction() != null);
     }

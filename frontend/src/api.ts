@@ -20,6 +20,7 @@ import {
   FinancialAccount,
   FinancialAccountRequest,
   AccountSummary,
+  AccountDetails,
   AccountTransfer,
   AccountTransferRequest,
   LegacyTransactionAssignmentRequest,
@@ -267,6 +268,11 @@ export async function deleteAllUserData(): Promise<void> {
 
 export async function getAccountSummary(): Promise<AccountSummary> {
   const { data } = await api.get<AccountSummary>('/accounts/summary')
+  return data
+}
+
+export async function getAccountDetails(id: number): Promise<AccountDetails> {
+  const { data } = await api.get<AccountDetails>(`/accounts/${id}`)
   return data
 }
 

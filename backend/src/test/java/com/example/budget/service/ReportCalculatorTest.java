@@ -2,9 +2,11 @@ package com.example.budget.service;
 
 import com.example.budget.dto.ReportResponse;
 import com.example.budget.model.PaymentMethod;
+import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.PeriodRange;
 import com.example.budget.model.ReportPeriod;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -94,9 +96,15 @@ class ReportCalculatorTest {
         LocalDate date = LocalDate.of(2026, 5, 16);
         PeriodRange range = period.range(date);
 
+        Transaction rent = tx(2L, TransactionType.EXPENSE, "Rent", "1200.00", LocalDate.of(2026, 5, 2), "Bank");
+        FinancialAccount account = new FinancialAccount();
+        account.setName("Monzo Current");
+        rent.setAccount(account);
+        rent.setStatus(TransactionStatus.PLANNED);
+
         List<Transaction> transactions = List.of(
                 tx(1L, TransactionType.INCOME, "Salary", "3000.00", LocalDate.of(2026, 5, 1), null),
-                tx(2L, TransactionType.EXPENSE, "Rent", "1200.00", LocalDate.of(2026, 5, 2), "Bank"),
+                rent,
                 tx(3L, TransactionType.EXPENSE, "Food", "500.00", LocalDate.of(2026, 5, 3), "Debit"),
                 tx(4L, TransactionType.EXPENSE, "Food", "300.00", LocalDate.of(2026, 5, 4), "Debit"));
 
@@ -106,6 +114,8 @@ class ReportCalculatorTest {
                 .extracting(ReportResponse.ReportTransactionItem::getAmount)
                 .containsExactly(new BigDecimal("1200.00"), new BigDecimal("500.00"), new BigDecimal("300.00"));
         assertThat(report.getTopIncome()).hasSize(1);
+        assertThat(report.getTopExpenses().get(0).getAccountName()).isEqualTo("Monzo Current");
+        assertThat(report.getTopExpenses().get(0).getStatus()).isEqualTo(TransactionStatus.PLANNED);
         assertThat(report.getBuckets()).hasSize(31);
         assertThat(report.getInsights()).isNotEmpty();
     }

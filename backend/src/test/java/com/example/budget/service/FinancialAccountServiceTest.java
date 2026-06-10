@@ -154,6 +154,60 @@ class FinancialAccountServiceTest {
         assertThat(result.currentBalance()).isEqualByComparingTo("1200.00");
     }
 
+    @Test
+    void detailsCombinesRecentAndUpcomingAccountActivity() {
+        when(accountRepository.findById(10L)).thenReturn(java.util.Optional.of(account));
+
+        Transaction income = transaction(
+                TransactionType.INCOME, "100.00", TransactionStatus.CLEARED, 11);
+        ReflectionTestUtils.setField(income, "id", 21L);
+        income.setDescription("Daily income");
+        income.setCategory("Income");
+        income.setPaymentDate(LocalDate.now().minusDays(1));
+
+        Transaction upcomingExpense = transaction(
+                TransactionType.EXPENSE, "40.00", TransactionStatus.PLANNED, 12);
+        ReflectionTestUtils.setField(upcomingExpense, "id", 22L);
+        upcomingExpense.setDescription("Energy");
+        upcomingExpense.setCategory("Bills");
+        upcomingExpense.setPaymentDate(LocalDate.now().plusDays(2));
+
+        FinancialAccount savings = new FinancialAccount();
+        ReflectionTestUtils.setField(savings, "id", 11L);
+        savings.setName("Savings");
+        savings.setUser(user);
+
+        AccountTransfer transfer = new AccountTransfer();
+        ReflectionTestUtils.setField(transfer, "id", 31L);
+        transfer.setFromAccount(savings);
+        transfer.setToAccount(account);
+        transfer.setAmount(new BigDecimal("25.00"));
+        transfer.setTransferDate(LocalDate.now());
+
+        when(transactionRepository
+                .findTop20ByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                        user, account, LocalDate.now()))
+                .thenReturn(List.of(income));
+        when(transactionRepository
+                .findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
+                        user, account, LocalDate.now()))
+                .thenReturn(List.of(upcomingExpense));
+        when(transferRepository
+                .findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                        account, LocalDate.now()))
+                .thenReturn(List.of(transfer));
+
+        var result = service.details(10L, user);
+
+        assertThat(result.recentActivity())
+                .extracting(item -> item.kind())
+                .containsExactly("TRANSFER_IN", "INCOME");
+        assertThat(result.upcomingActivity())
+                .extracting(item -> item.kind())
+                .containsExactly("EXPENSE");
+        assertThat(result.upcomingActivity().get(0).status()).isEqualTo(TransactionStatus.PLANNED);
+    }
+
     private Transaction transaction(
             TransactionType type,
             String amount,

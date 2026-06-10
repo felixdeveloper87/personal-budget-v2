@@ -35,6 +35,7 @@ import type {
   ReportTransactionItem,
 } from '../types'
 import { ToastService } from '../services/toast'
+import { formatAccountMovement } from '../components/reports/format'
 
 const currencyFormatter = new Intl.NumberFormat('en-GB', {
   style: 'currency',
@@ -244,6 +245,11 @@ function TransactionTable({
                 <Text fontSize="xs" color={mutedColor} noOfLines={1}>
                   {formatDate(tx.paymentDate)} - {tx.category}
                 </Text>
+                {formatAccountMovement(tx) ? (
+                  <Text fontSize="xs" color="blue.500" noOfLines={1}>
+                    {formatAccountMovement(tx)}
+                  </Text>
+                ) : null}
               </VStack>
               <Text fontSize="sm" fontWeight={800} color={textColor} flexShrink={0}>
                 {formatCurrency(tx.amount)}

@@ -30,6 +30,11 @@ public class FinancialAccountController {
         return service.summary((User) authentication.getPrincipal());
     }
 
+    @GetMapping("/{id}")
+    public AccountDetailsDTO details(@PathVariable Long id, Authentication authentication) {
+        return service.details(id, (User) authentication.getPrincipal());
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public FinancialAccountDTO create(

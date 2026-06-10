@@ -35,6 +35,7 @@ import {
   getTransactionDateSource,
   hasDifferentPaymentDate,
 } from '../../utils/transactionDates'
+import { formatTransactionAccount } from '../../utils/transactionAccount'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
@@ -500,34 +501,41 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                               </Text>
                             </Td>
                             <Td>
-                              <HStack spacing={{ base: 1, md: 2 }}>
-                                <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 25}>
-                                  <Text 
-                                    fontSize={{ base: "xs", md: "sm" }} 
-                                    color={tx.isFutureInstallment ? "gray.500" : secondaryTextColor} 
-                                    noOfLines={1}
-                                    fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
-                                  >
-                                    {normalizeInstallmentDescription(tx.description || '-')}
-                                  </Text>
-                                </Tooltip>
-                                {tx.paymentMethodName && (
-                                  <Badge colorScheme="blue" variant="subtle" fontSize="2xs" display={{ base: 'none', sm: 'inline-flex' }}>
-                                    {tx.paymentMethodName}
-                                  </Badge>
-                                )}
-                                {tx.isInstallment && (
-                                  <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
-                                    <span>
-                                      <Icon 
-                                        as={FiCreditCard} 
-                                        color={tx.isFutureInstallment ? "gray.400" : "purple.500"} 
-                                        fontSize={{ base: "xs", md: "sm" }} 
-                                      />
-                                    </span>
+                              <VStack spacing={0.5} align="start">
+                                <HStack spacing={{ base: 1, md: 2 }}>
+                                  <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 25}>
+                                    <Text
+                                      fontSize={{ base: "xs", md: "sm" }}
+                                      color={tx.isFutureInstallment ? "gray.500" : secondaryTextColor}
+                                      noOfLines={1}
+                                      fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
+                                    >
+                                      {normalizeInstallmentDescription(tx.description || '-')}
+                                    </Text>
                                   </Tooltip>
+                                  {tx.paymentMethodName && (
+                                    <Badge colorScheme="blue" variant="subtle" fontSize="2xs" display={{ base: 'none', sm: 'inline-flex' }}>
+                                      {tx.paymentMethodName}
+                                    </Badge>
+                                  )}
+                                  {tx.isInstallment && (
+                                    <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
+                                      <span>
+                                        <Icon
+                                          as={FiCreditCard}
+                                          color={tx.isFutureInstallment ? "gray.400" : "purple.500"}
+                                          fontSize={{ base: "xs", md: "sm" }}
+                                        />
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                                </HStack>
+                                {formatTransactionAccount(tx) && (
+                                  <Text fontSize="2xs" color="teal.500" noOfLines={1}>
+                                    {formatTransactionAccount(tx)}
+                                  </Text>
                                 )}
-                              </HStack>
+                              </VStack>
                             </Td>
                             <Td isNumeric>
                               <Text 

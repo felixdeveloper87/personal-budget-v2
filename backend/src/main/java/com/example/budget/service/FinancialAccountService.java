@@ -17,7 +17,9 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class FinancialAccountService {
@@ -59,6 +61,58 @@ public class FinancialAccountService {
         return accountRepository.findByUserOrderByActiveDescNameAsc(user).stream()
                 .map(account -> toDTO(account, user))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public AccountDetailsDTO details(Long id, User user) {
+        FinancialAccount account = getOwnedAccount(id, user);
+        LocalDate today = LocalDate.now();
+
+        List<AccountActivityItemDTO> recent = Stream.concat(
+                        transactionRepository
+                                .findTop20ByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                                        user, account, today)
+                                .stream()
+                                .map(this::toActivity),
+                        Stream.concat(
+                                transferRepository
+                                        .findTop20ByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                                                account, today)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, false)),
+                                transferRepository
+                                        .findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                                                account, today)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, true))))
+                .sorted(Comparator.comparing(AccountActivityItemDTO::date).reversed()
+                        .thenComparing(AccountActivityItemDTO::id, Comparator.reverseOrder()))
+                .limit(10)
+                .toList();
+
+        List<AccountActivityItemDTO> upcoming = Stream.concat(
+                        transactionRepository
+                                .findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
+                                        user, account, today)
+                                .stream()
+                                .map(this::toActivity),
+                        Stream.concat(
+                                transferRepository
+                                        .findTop20ByFromAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(
+                                                account, today)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, false)),
+                                transferRepository
+                                        .findTop20ByToAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(
+                                                account, today)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, true))))
+                .sorted(Comparator.comparing(AccountActivityItemDTO::date)
+                        .thenComparing(AccountActivityItemDTO::id))
+                .limit(10)
+                .toList();
+
+        return new AccountDetailsDTO(toDTO(account, user), recent, upcoming);
     }
 
     @Transactional
@@ -273,5 +327,35 @@ public class FinancialAccountService {
                 transfer.getTransferDate(),
                 transfer.getDescription(),
                 transfer.getCreatedAt());
+    }
+
+    private AccountActivityItemDTO toActivity(Transaction transaction) {
+        return new AccountActivityItemDTO(
+                transaction.getId(),
+                transaction.getPaymentDate(),
+                transaction.getType().name(),
+                transaction.getDescription(),
+                transaction.getCategory(),
+                transaction.getAmount(),
+                transaction.getStatus(),
+                transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().getName() : null);
+    }
+
+    private AccountActivityItemDTO toTransferActivity(AccountTransfer transfer, boolean incoming) {
+        FinancialAccount otherAccount = incoming ? transfer.getFromAccount() : transfer.getToAccount();
+        String fallbackDescription = incoming
+                ? "Transfer from " + otherAccount.getName()
+                : "Transfer to " + otherAccount.getName();
+        return new AccountActivityItemDTO(
+                transfer.getId(),
+                transfer.getTransferDate(),
+                incoming ? "TRANSFER_IN" : "TRANSFER_OUT",
+                StringUtils.hasText(transfer.getDescription())
+                        ? transfer.getDescription()
+                        : fallbackDescription,
+                "Transfer",
+                transfer.getAmount(),
+                TransactionStatus.CLEARED,
+                null);
     }
 }

@@ -19,6 +19,14 @@ public interface AccountTransferRepository extends JpaRepository<AccountTransfer
             FinancialAccount account, LocalDate start, LocalDate end);
     List<AccountTransfer> findByToAccountAndTransferDateBetween(
             FinancialAccount account, LocalDate start, LocalDate end);
+    List<AccountTransfer> findTop20ByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+            FinancialAccount account, LocalDate date);
+    List<AccountTransfer> findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+            FinancialAccount account, LocalDate date);
+    List<AccountTransfer> findTop20ByFromAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(
+            FinancialAccount account, LocalDate date);
+    List<AccountTransfer> findTop20ByToAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(
+            FinancialAccount account, LocalDate date);
     boolean existsByFromAccountOrToAccount(FinancialAccount from, FinancialAccount to);
 
     @Modifying(clearAutomatically = true)

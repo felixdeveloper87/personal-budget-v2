@@ -7,6 +7,7 @@ import { DeleteTransactionDialog } from '../../ui'
 import { useDeleteTransaction } from '../../../hooks/useDeleteTransaction'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
+import { formatTransactionAccount } from '../../../utils/transactionAccount'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
@@ -98,6 +99,11 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                   {tx.description && (
                     <Text fontSize="xs" color={colors.text.secondary} noOfLines={1} maxW="200px">
                       {tx.description}
+                    </Text>
+                  )}
+                  {formatTransactionAccount(tx) && (
+                    <Text fontSize="xs" color="teal.500" noOfLines={1} maxW="240px">
+                      {formatTransactionAccount(tx)}
                     </Text>
                   )}
                   {/* Exibe data e horário */}
