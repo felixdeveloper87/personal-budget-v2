@@ -10,36 +10,15 @@ import {
 } from '@chakra-ui/react'
 import type { PeriodType } from '../../../types'
 import type { Transaction } from '../../../types'
+import { getTransactionDate } from '../../../utils/transactionDates'
 import {
-  getTransactionDate,
-  hasDifferentPaymentDate,
-} from '../../../utils/transactionDates'
-import { formatDateBR } from '../../../utils/dateTime'
-import { formatTransactionAccount } from '../../../utils/transactionAccount'
-import {
-  Briefcase,
-  Car,
   CalendarDays,
-  Coffee,
-  CreditCard,
-  Film,
-  Gift,
-  GraduationCap,
-  Heart,
-  Home,
-  Laptop,
-  ReceiptText,
-  ShieldCheck,
-  ShoppingBag,
-  ShoppingCart,
   Sparkles,
   Tag,
   TrendingUp,
-  Wallet,
-  Zap,
 } from '../../ui/icons'
 import type { LucideIcon } from '../../ui/icons'
-import { ChartEmptyState, ChartPlotShell, PeriodBucketBarChart } from './components'
+import { ActivityLedger, ChartEmptyState, PeriodBucketBarChart } from './components'
 import { processCategoriesWithTransactions } from './utils'
 import {
   bucketTransactionsByPeriod,
@@ -48,12 +27,6 @@ import {
 
 export interface TransactionsChartProps {
   transactions: Transaction[]
-  selectedPeriod: string
-  /**
-   * When false, period pills inside the plot are hidden (e.g. the Charts page
-   * already shows the range in the section header).
-   */
-  showPeriodBadge?: boolean
   /**
    * When `periodType` and `selectedDate` are provided, the compact period
    * bucket bar chart (today / this week / this month / this year) is
@@ -83,38 +56,6 @@ function formatMoney(value: number): string {
 
 function transactionDate(transaction: Transaction): Date {
   return getTransactionDate(transaction, 'activity')
-}
-
-function formatShortDate(transaction: Transaction): string {
-  return transactionDate(transaction).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-  })
-}
-
-const CATEGORY_ICONS: Record<string, LucideIcon> = {
-  salary: Briefcase,
-  freelance: Laptop,
-  investments: TrendingUp,
-  rental: Home,
-  bonus: Sparkles,
-  gifts: Gift,
-  groceries: ShoppingCart,
-  rent: Home,
-  housing: Home,
-  utilities: Zap,
-  transport: Car,
-  health: Heart,
-  'dining out': Coffee,
-  shopping: ShoppingBag,
-  subscriptions: CreditCard,
-  entertainment: Film,
-  insurance: ShieldCheck,
-  education: GraduationCap,
-}
-
-function categoryIcon(category?: string): LucideIcon {
-  return CATEGORY_ICONS[category?.trim().toLowerCase() ?? ''] ?? Wallet
 }
 
 function getCategoryGrowth(expenses: Transaction[]): { category: string; delta: number } | null {
@@ -153,8 +94,6 @@ function getCategoryGrowth(expenses: Transaction[]): { category: string; delta: 
 
 export default function TransactionsChart({
   transactions,
-  selectedPeriod,
-  showPeriodBadge = true,
   periodType,
   selectedDate,
 }: TransactionsChartProps) {
@@ -293,14 +232,10 @@ export default function TransactionsChart({
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const rowHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const ledgerBg = useColorModeValue('white', '#0d0d0d')
-  const ledgerBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
-  const categoryIconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const categoryIconColor = useColorModeValue('gray.700', 'gray.200')
-  const incomeDot = useColorModeValue('green.400', 'green.300')
-  const expenseDot = useColorModeValue('red.400', 'red.300')
-  const accountColor = useColorModeValue('gray.500', 'gray.400')
+  const insightHoverShadow = useColorModeValue(
+    '0 6px 20px -8px rgba(15,23,42,0.14)',
+    '0 6px 20px -8px rgba(0,0,0,0.6)',
+  )
 
   if (transactions.length === 0) {
     return (
@@ -332,143 +267,15 @@ export default function TransactionsChart({
         onBucketClick={(bucket: PeriodBucket) => setSelectedBucketKey(bucket.key)}
       />
 
-      <ChartPlotShell
-        title={selectedBucket ? selectedBucket.tooltip : 'Selected transactions'}
-        caption={
-          selectedBucket
-            ? `${selectedBucket.transactions.length} transaction${
-                selectedBucket.transactions.length === 1 ? '' : 's'
-              } - Income ${formatMoney(selectedBucket.income)} / Expense ${formatMoney(selectedBucket.expense)}`
-            : 'Click a bar to inspect its transactions'
-        }
-        selectedPeriod={selectedPeriod}
-        showPeriodBadge={showPeriodBadge}
-        badgeBg="purple.50"
-        badgeColor="purple.600"
-      >
-        {selectedBucketTransactions.length > 0 ? (
-          <Box
-            bg={ledgerBg}
-            border="1px solid"
-            borderColor={ledgerBorder}
-            borderRadius="2xl"
-            overflow="hidden"
-          >
-            {selectedBucketTransactions.map((transaction, index) => {
-              const isIncome = transaction.type === 'INCOME'
-              const CategoryIcon = categoryIcon(transaction.category)
-              const accountLabel = formatTransactionAccount(transaction)
-              const isScheduled =
-                transaction.isFutureInstallment ||
-                transaction.status === 'PLANNED' ||
-                transaction.status === 'PENDING'
-              return (
-                <HStack
-                  key={transaction.id ?? `${transaction.description}-${index}`}
-                  spacing={3}
-                  px={{ base: 3, sm: 4 }}
-                  py={{ base: 3, sm: 3.5 }}
-                  borderBottom={index < selectedBucketTransactions.length - 1 ? '1px solid' : undefined}
-                  borderColor={ledgerBorder}
-                  _hover={{ bg: rowHoverBg }}
-                  transition="background 0.15s ease"
-                  align="center"
-                >
-                  <Box
-                    w={10}
-                    h={10}
-                    borderRadius="xl"
-                    display="grid"
-                    placeItems="center"
-                    bg={categoryIconBg}
-                    color={categoryIconColor}
-                    flexShrink={0}
-                  >
-                    <CategoryIcon size={18} weight="duotone" aria-hidden />
-                  </Box>
-
-                  <VStack spacing={0.5} align="stretch" flex="1" minW={0}>
-                    <Text
-                      fontSize="sm"
-                      fontWeight={700}
-                      color={textColor}
-                      noOfLines={1}
-                    >
-                      {transaction.description || transaction.category || 'Transaction'}
-                    </Text>
-
-                    <HStack spacing={1.5} color={mutedColor} fontSize="xs" minW={0}>
-                      <Text noOfLines={1}>{transaction.category || 'Uncategorized'}</Text>
-                      <Text opacity={0.45}>·</Text>
-                      <Text flexShrink={0}>{formatShortDate(transaction)}</Text>
-                      {transaction.paymentMethodName ? (
-                        <>
-                          <Text opacity={0.45}>·</Text>
-                          <Text noOfLines={1}>{transaction.paymentMethodName}</Text>
-                        </>
-                      ) : null}
-                    </HStack>
-
-                    {accountLabel ? (
-                      <Text fontSize="2xs" color={accountColor} noOfLines={1} display={{ base: 'none', sm: 'block' }}>
-                        {accountLabel}
-                      </Text>
-                    ) : null}
-                  </VStack>
-
-                  <VStack spacing={0.5} align="flex-end" flexShrink={0}>
-                    <HStack spacing={1.5}>
-                      <Box
-                        w="6px"
-                        h="6px"
-                        borderRadius="full"
-                        bg={isIncome ? incomeDot : expenseDot}
-                        flexShrink={0}
-                        aria-label={isIncome ? 'Income' : 'Expense'}
-                      />
-                      <Text
-                        color={isIncome ? 'green.500' : textColor}
-                        fontSize="sm"
-                        fontWeight={700}
-                        whiteSpace="nowrap"
-                        letterSpacing="-0.01em"
-                      >
-                        {isIncome ? '+' : '-'}
-                        {formatMoney(transaction.amount)}
-                      </Text>
-                    </HStack>
-                    {isScheduled ? (
-                      <Text
-                        fontSize="2xs"
-                        color={mutedColor}
-                      >
-                        Scheduled
-                      </Text>
-                    ) : hasDifferentPaymentDate(transaction) && transaction.paymentDate ? (
-                      <Text fontSize="2xs" color={mutedColor}>
-                        Pays {formatDateBR(transaction.paymentDate)}
-                      </Text>
-                    ) : null}
-                  </VStack>
-                </HStack>
-              )
-            })}
-          </Box>
-        ) : (
-          <Box borderRadius="xl" border="1px dashed" borderColor={borderColor} p={5} textAlign="center">
-            <Text fontSize="sm" fontWeight={700} color={textColor}>
-              {selectedBucket
-                ? `No transactions in ${selectedBucket.tooltip}`
-                : 'Click a bar to see its transactions'}
-            </Text>
-            <Text mt={1} fontSize="xs" color={mutedColor}>
-              {selectedBucket
-                ? 'Choose another bar to inspect the activity for that day.'
-                : 'Hover still shows totals; click opens the exact entries behind that bar.'}
-            </Text>
-          </Box>
-        )}
-      </ChartPlotShell>
+      <ActivityLedger
+        key={selectedBucket?.key ?? 'none'}
+        transactions={selectedBucketTransactions}
+        title={selectedBucket?.tooltip ?? 'Selected period'}
+        income={selectedBucket?.income ?? 0}
+        expense={selectedBucket?.expense ?? 0}
+        hasSelection={Boolean(selectedBucket)}
+        dateBasis="activity"
+      />
 
       {expenseTransactions.length > 0 && (
           <Box>
@@ -496,21 +303,20 @@ export default function TransactionsChart({
                   p={4}
                   minH="138px"
                   boxShadow="0 1px 2px rgba(15,23,42,0.04)"
+                  transition="transform 0.18s ease, box-shadow 0.18s ease"
+                  _hover={{ transform: 'translateY(-2px)', boxShadow: insightHoverShadow }}
                 >
                   <VStack spacing={3} align="stretch" h="100%">
-                    <HStack justify="space-between" align="center">
-                      <Box
-                        w="34px"
-                        h="34px"
-                        borderRadius="lg"
-                        display="grid"
-                        placeItems="center"
-                        bg={`${insight.color}18`}
-                      >
-                        <Icon as={insight.icon} boxSize={4} color={insight.color} />
-                      </Box>
-                      <Icon as={ReceiptText} boxSize={4} color={mutedColor} opacity={0.65} />
-                    </HStack>
+                    <Box
+                      w="34px"
+                      h="34px"
+                      borderRadius="lg"
+                      display="grid"
+                      placeItems="center"
+                      bg={`${insight.color}18`}
+                    >
+                      <Icon as={insight.icon} boxSize={4} color={insight.color} />
+                    </Box>
 
                     <VStack spacing={1} align="stretch">
                       <Text

@@ -8,7 +8,6 @@ import {
   IconButton,
   Text,
   Tooltip,
-  useBreakpointValue,
   useColorModeValue,
 } from '@chakra-ui/react'
 import {
@@ -46,15 +45,14 @@ interface PeriodNavigatorProps {
 interface PeriodOption {
   type: PeriodType
   label: string
-  shortLabel: string
   icon: typeof Calendar
 }
 
 const PERIODS: PeriodOption[] = [
-  { type: 'day',   label: 'Day',   shortLabel: 'D', icon: Calendar },
-  { type: 'week',  label: 'Week',  shortLabel: 'W', icon: CalendarDays },
-  { type: 'month', label: 'Month', shortLabel: 'M', icon: CalendarRange },
-  { type: 'year',  label: 'Year',  shortLabel: 'Y', icon: Activity },
+  { type: 'day',   label: 'Day',   icon: Calendar },
+  { type: 'week',  label: 'Week',  icon: CalendarDays },
+  { type: 'month', label: 'Month', icon: CalendarRange },
+  { type: 'year',  label: 'Year',  icon: Activity },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -138,6 +136,16 @@ function isCurrentPeriod(date: Date | undefined, period: PeriodType): boolean {
 /* Component                                                                   */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Period toolbar:
+ *
+ *  - Desktop: `[ ◀ │ label ▸ │ ▶ ]  …gap…  [Today]  [Day│Week│Month│Year]`
+ *    (date capsule grows, segmented control keeps a fixed width)
+ *  - Mobile:  segmented control on top, date capsule + Today below.
+ *
+ * The segmented control has a single sliding "thumb" behind the active
+ * option (pure CSS — `left` is derived from the active index).
+ */
 export default function PeriodNavigator({
   selectedPeriod,
   onPeriodChange,
@@ -148,8 +156,6 @@ export default function PeriodNavigator({
   selectedDate,
   onDateChange,
 }: PeriodNavigatorProps) {
-  const isMobile = useBreakpointValue({ base: true, md: false })
-
   // Swipe support
   const touchStartX = useRef<number | null>(null)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -171,32 +177,34 @@ export default function PeriodNavigator({
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const surfaceBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
-  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.50')
-  const trackBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-
-  const inactivePillColor = useColorModeValue('gray.500', 'gray.400')
-  const activePillBg = useColorModeValue('white', 'whiteAlpha.200')
-  const activePillColor = useColorModeValue('blue.600', 'blue.300')
-  const activePillBorder = useColorModeValue(
-    'blue.200',
-    'rgba(59,130,246,0.35)',
+  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const thumbBg = useColorModeValue('white', 'rgba(255,255,255,0.12)')
+  const thumbBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const thumbShadow = useColorModeValue(
+    '0 1px 4px rgba(15,23,42,0.12)',
+    '0 1px 4px rgba(0,0,0,0.5)',
   )
-  const activePillShadow = useColorModeValue(
-    '0 1px 3px rgba(15,23,42,0.08)',
-    'none',
-  )
+  const segActiveColor = useColorModeValue('gray.900', 'gray.50')
+  const segInactiveColor = useColorModeValue('gray.500', 'gray.400')
 
+  const capsuleBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const capsuleDivider = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const navBtnColor = useColorModeValue('gray.500', 'gray.400')
-  const navBtnHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const navBtnHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
   const navBtnHoverColor = useColorModeValue('blue.600', 'blue.300')
 
   const todayBtnColor = useColorModeValue('blue.600', 'blue.300')
-  const todayBtnBorder = useColorModeValue('blue.200', 'rgba(59,130,246,0.35)')
-  const todayBtnHoverBg = useColorModeValue('blue.50', 'whiteAlpha.100')
+  const todayBtnBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
+  const todayBtnHoverBg = useColorModeValue('blue.100', 'rgba(59,130,246,0.22)')
 
   // ── Derived state ─────────────────────────────────────────────────────
   const isCurrent = isCurrentPeriod(selectedDate, selectedPeriod)
   const hint = getRelativeHint(selectedDate, selectedPeriod)
+  const activeIndex = Math.max(
+    0,
+    PERIODS.findIndex((period) => period.type === selectedPeriod),
+  )
+  const segCount = PERIODS.length
 
   return (
     <Box
@@ -207,125 +215,185 @@ export default function PeriodNavigator({
       borderRadius={isEmbedded ? 'none' : '2xl'}
       p={isEmbedded ? 0 : { base: 3, md: 4 }}
     >
-      <Flex direction="column" gap={3} w="full">
-        {/* ── Row 1: Period type pills ─────────────────────────────── */}
-        <Box
-          bg={trackBg}
-          p={1}
-          borderRadius="xl"
-          border="1px solid"
-          borderColor={trackBorder}
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        align={{ base: 'stretch', md: 'center' }}
+        gap={{ base: 2.5, md: 3 }}
+        w="full"
+      >
+        {/* ── Date capsule: ◀ │ label ▾ │ ▶  (+ Today) ─────────────── */}
+        <HStack
+          order={{ base: 2, md: 1 }}
+          flex={1}
+          minW={0}
+          spacing={2}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
-          <HStack spacing={1}>
-            {PERIODS.map(({ type, label, shortLabel, icon: PeriodIcon }) => {
+          <HStack
+            flex={1}
+            minW={0}
+            spacing={0}
+            h="42px"
+            border="1px solid"
+            borderColor={capsuleBorder}
+            borderRadius="xl"
+            overflow="hidden"
+            bg="transparent"
+          >
+            <IconButton
+              aria-label="Previous period"
+              icon={<Icon as={ChevronLeft} boxSize={4} />}
+              onClick={() => onNavigatePeriod('prev')}
+              variant="ghost"
+              h="full"
+              w="42px"
+              minW="42px"
+              borderRadius="none"
+              color={navBtnColor}
+              _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
+              transition="all 0.15s ease"
+            />
+
+            <Box w="1px" h="50%" bg={capsuleDivider} flexShrink={0} />
+
+            <PeriodDatePicker
+              selectedDate={selectedDate}
+              selectedPeriod={selectedPeriod}
+              onDateChange={onDateChange}
+              label={formatLabel()}
+              hint={hint}
+            />
+
+            <Box w="1px" h="50%" bg={capsuleDivider} flexShrink={0} />
+
+            <IconButton
+              aria-label="Next period"
+              icon={<Icon as={ChevronRight} boxSize={4} />}
+              onClick={() => onNavigatePeriod('next')}
+              variant="ghost"
+              h="full"
+              w="42px"
+              minW="42px"
+              borderRadius="none"
+              color={navBtnColor}
+              _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
+              transition="all 0.15s ease"
+            />
+          </HStack>
+
+          {/* Today — pill with label on desktop, icon-only on mobile */}
+          {!isCurrent && (
+            <>
+              <Button
+                display={{ base: 'none', md: 'inline-flex' }}
+                onClick={onGoToToday}
+                h="42px"
+                px={4}
+                borderRadius="xl"
+                fontSize="xs"
+                fontWeight={700}
+                color={todayBtnColor}
+                bg={todayBtnBg}
+                leftIcon={<Icon as={RotateCcw} boxSize={3.5} weight="duotone" />}
+                _hover={{ bg: todayBtnHoverBg }}
+                _active={{ transform: 'scale(0.97)' }}
+                transition="all 0.15s ease"
+                flexShrink={0}
+              >
+                Today
+              </Button>
+              <Tooltip label="Jump to today" hasArrow placement="top" openDelay={200}>
+                <IconButton
+                  display={{ base: 'inline-flex', md: 'none' }}
+                  aria-label="Go to today"
+                  icon={<Icon as={RotateCcw} boxSize={4} weight="duotone" />}
+                  onClick={onGoToToday}
+                  h="42px"
+                  w="42px"
+                  minW="42px"
+                  borderRadius="xl"
+                  color={todayBtnColor}
+                  bg={todayBtnBg}
+                  _hover={{ bg: todayBtnHoverBg }}
+                  transition="all 0.15s ease"
+                  flexShrink={0}
+                />
+              </Tooltip>
+            </>
+          )}
+        </HStack>
+
+        {/* ── Segmented period control with sliding thumb ──────────── */}
+        <Box
+          order={{ base: 1, md: 2 }}
+          position="relative"
+          bg={trackBg}
+          p="3px"
+          borderRadius="xl"
+          w={{ base: 'full', md: '380px' }}
+          flexShrink={0}
+        >
+          {/* Sliding thumb */}
+          <Box
+            position="absolute"
+            top="3px"
+            bottom="3px"
+            left={`calc(3px + ${activeIndex} * ((100% - 6px) / ${segCount}))`}
+            w={`calc((100% - 6px) / ${segCount})`}
+            bg={thumbBg}
+            border="1px solid"
+            borderColor={thumbBorder}
+            borderRadius="lg"
+            boxShadow={thumbShadow}
+            transition="left 0.25s cubic-bezier(0.4, 0, 0.2, 1)"
+            pointerEvents="none"
+          />
+
+          <HStack spacing={0} position="relative">
+            {PERIODS.map(({ type, label, icon: PeriodIcon }) => {
               const selected = selectedPeriod === type
               return (
                 <Button
                   key={type}
                   flex={1}
+                  minW={0}
                   h="34px"
+                  px={1}
+                  variant="ghost"
                   borderRadius="lg"
-                  leftIcon={
-                    !isMobile ? (
-                      <Icon as={PeriodIcon} boxSize={3.5} weight="duotone" />
-                    ) : undefined
-                  }
                   onClick={() => onPeriodChange(type)}
                   aria-pressed={selected}
-                  bg={selected ? activePillBg : 'transparent'}
-                  color={selected ? activePillColor : inactivePillColor}
-                  fontWeight={selected ? 600 : 500}
+                  bg="transparent"
+                  color={selected ? segActiveColor : segInactiveColor}
+                  fontWeight={selected ? 700 : 500}
                   fontSize="sm"
-                  border="1px solid"
-                  borderColor={selected ? activePillBorder : 'transparent'}
-                  boxShadow={selected ? activePillShadow : 'none'}
-                  transition="all 0.18s ease"
-                  _hover={
-                    selected
-                      ? undefined
-                      : { color: activePillColor, bg: 'transparent' }
-                  }
-                  _active={{ transform: 'scale(0.97)' }}
+                  _hover={{ bg: 'transparent', color: segActiveColor }}
+                  _active={{ bg: 'transparent' }}
                   _focusVisible={{
                     outline: '2px solid',
                     outlineColor: 'blue.300',
                     outlineOffset: '2px',
                   }}
+                  transition="color 0.18s ease, font-weight 0.18s ease"
                 >
-                  {isMobile ? shortLabel : label}
+                  <HStack spacing={1.5} justify="center" minW={0}>
+                    <Icon
+                      as={PeriodIcon}
+                      boxSize={3.5}
+                      weight="duotone"
+                      display={{ base: 'none', lg: 'inline-block' }}
+                      opacity={selected ? 1 : 0.7}
+                    />
+                    <Text as="span" noOfLines={1}>
+                      {label}
+                    </Text>
+                  </HStack>
                 </Button>
               )
             })}
           </HStack>
         </Box>
-
-        {/* ── Row 2: Navigation arrows + label + Today button ──────── */}
-        <HStack
-          spacing={2}
-          w="full"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <IconButton
-            aria-label="Previous period"
-            icon={<Icon as={ChevronLeft} boxSize={5} />}
-            onClick={() => onNavigatePeriod('prev')}
-            variant="ghost"
-            size="sm"
-            h="38px"
-            w="38px"
-            minW="38px"
-            borderRadius="lg"
-            color={navBtnColor}
-            _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
-            transition="all 0.15s ease"
-          />
-
-          <PeriodDatePicker
-            selectedDate={selectedDate}
-            selectedPeriod={selectedPeriod}
-            onDateChange={onDateChange}
-            label={formatLabel()}
-            hint={hint}
-          />
-
-          <IconButton
-            aria-label="Next period"
-            icon={<Icon as={ChevronRight} boxSize={5} />}
-            onClick={() => onNavigatePeriod('next')}
-            variant="ghost"
-            size="sm"
-            h="38px"
-            w="38px"
-            minW="38px"
-            borderRadius="lg"
-            color={navBtnColor}
-            _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
-            transition="all 0.15s ease"
-          />
-
-          {/* Today button — only visible when NOT on the current period */}
-          {!isCurrent && (
-            <Tooltip label="Jump to today" hasArrow placement="top" openDelay={200}>
-              <IconButton
-                aria-label="Go to today"
-                icon={<Icon as={RotateCcw} boxSize={3.5} weight="duotone" />}
-                onClick={onGoToToday}
-                variant="ghost"
-                size="sm"
-                h="34px"
-                w="34px"
-                minW="34px"
-                borderRadius="lg"
-                color={todayBtnColor}
-                border="1px solid"
-                borderColor={todayBtnBorder}
-                _hover={{ bg: todayBtnHoverBg }}
-                transition="all 0.15s ease"
-              />
-            </Tooltip>
-          )}
-        </HStack>
       </Flex>
     </Box>
   )

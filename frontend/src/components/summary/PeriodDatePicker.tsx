@@ -15,7 +15,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { ChevronLeft, ChevronRight } from '../ui/icons'
+import { ChevronDown, ChevronLeft, ChevronRight } from '../ui/icons'
 import { PeriodType } from '../../types'
 
 interface PeriodDatePickerProps {
@@ -260,22 +260,23 @@ export default function PeriodDatePicker({
       <PopoverTrigger>
         <Button
           flex={1}
-          h="auto"
+          h="full"
+          alignSelf="stretch"
           minW={0}
-          py={0}
+          px={2}
           variant="ghost"
-          borderRadius="lg"
+          borderRadius="none"
           aria-label={`Choose ${selectedPeriod}`}
           _hover={{ bg: hoverBg }}
           _focusVisible={{
             outline: '2px solid',
             outlineColor: 'blue.300',
-            outlineOffset: '2px',
+            outlineOffset: '-2px',
           }}
         >
-          <VStack spacing={0.5} minW={0}>
+          <HStack spacing={2} minW={0} justify="center" w="full">
             <Text
-              fontSize={{ base: 'md', md: 'lg' }}
+              fontSize={{ base: 'sm', md: 'md' }}
               fontWeight={700}
               color={labelColor}
               letterSpacing="-0.01em"
@@ -286,19 +287,23 @@ export default function PeriodDatePicker({
             </Text>
             {hint && (
               <Text
+                as="span"
                 fontSize="2xs"
-                fontWeight={600}
+                fontWeight={700}
                 color={hintColor}
                 bg={hintBg}
                 px={2}
                 py={0.5}
                 borderRadius="full"
                 lineHeight="1.4"
+                whiteSpace="nowrap"
+                flexShrink={0}
               >
                 {hint}
               </Text>
             )}
-          </VStack>
+            <Icon as={ChevronDown} boxSize={3} color={mutedColor} flexShrink={0} />
+          </HStack>
         </Button>
       </PopoverTrigger>
       <PopoverContent
