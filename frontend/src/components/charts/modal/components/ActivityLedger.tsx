@@ -69,51 +69,17 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   education: GraduationCap,
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  salary: '#059669',
-  freelance: '#0891b2',
-  investments: '#7c3aed',
-  rental: '#b45309',
-  bonus: '#db2777',
-  gifts: '#e11d48',
-  groceries: '#10b981',
-  rent: '#f59e0b',
-  housing: '#f59e0b',
-  utilities: '#eab308',
-  transport: '#3b82f6',
-  health: '#ec4899',
-  'dining out': '#f97316',
-  shopping: '#8b5cf6',
-  subscriptions: '#06b6d4',
-  entertainment: '#d946ef',
-  insurance: '#0ea5e9',
-  education: '#6366f1',
-}
-
-const FALLBACK_COLORS = [
-  '#3b82f6',
-  '#8b5cf6',
-  '#06b6d4',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#ec4899',
-  '#6366f1',
-]
-
 function categoryIcon(category?: string): LucideIcon {
   return CATEGORY_ICONS[category?.trim().toLowerCase() ?? ''] ?? Wallet
 }
 
-function categoryColor(category?: string): string {
-  const key = category?.trim().toLowerCase() ?? ''
-  if (CATEGORY_COLORS[key]) return CATEGORY_COLORS[key]
-  let hash = 0
-  for (let i = 0; i < key.length; i++) {
-    hash = (hash * 31 + key.charCodeAt(i)) | 0
-  }
-  return FALLBACK_COLORS[Math.abs(hash) % FALLBACK_COLORS.length]
-}
+/**
+ * Tile tints mirror the bar chart above the ledger: green means money in,
+ * red means money out. The category itself is conveyed by the icon shape —
+ * never by color, so direction stays unambiguous.
+ */
+const INCOME_TINT = '#10b981'
+const EXPENSE_TINT = '#ef4444'
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                     */
@@ -376,7 +342,7 @@ export default function ActivityLedger({
 
               const isIncome = transaction.type === 'INCOME'
               const CategoryIcon = categoryIcon(transaction.category)
-              const tint = categoryColor(transaction.category)
+              const tint = isIncome ? INCOME_TINT : EXPENSE_TINT
               const accountLabel = formatTransactionAccount(transaction)
               const isScheduled =
                 transaction.isFutureInstallment ||
