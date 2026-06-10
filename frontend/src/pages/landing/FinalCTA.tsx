@@ -105,6 +105,30 @@ export default function FinalCTA({ onGetStarted }: FinalCTAProps) {
             borderRadius="xl"
             boxShadow="0 20px 60px -15px rgba(0, 0, 0, 0.5)"
             transition="all 0.3s cubic-bezier(0.32, 0.72, 0, 1)"
+            overflow="hidden"
+            position="relative"
+            sx={{
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                width: '45%',
+                background:
+                  'linear-gradient(105deg, transparent 0%, rgba(79,70,229,0.14) 50%, transparent 100%)',
+                transform: 'translateX(-150%) skewX(-18deg)',
+                animation: 'finalCtaShine 4.5s ease-in-out 1.5s infinite',
+                pointerEvents: 'none',
+              },
+              '@keyframes finalCtaShine': {
+                '0%':        { transform: 'translateX(-150%) skewX(-18deg)' },
+                '35%, 100%': { transform: 'translateX(340%) skewX(-18deg)' },
+              },
+              '@media (prefers-reduced-motion: reduce)': {
+                '&::after': { animation: 'none', opacity: 0 },
+              },
+            }}
             _hover={{
               bg: 'white',
               transform: 'translateY(-2px)',

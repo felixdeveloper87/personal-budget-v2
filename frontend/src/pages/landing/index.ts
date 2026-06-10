@@ -1,6 +1,8 @@
 export { default as Hero } from './Hero'
+export { default as BenefitStrip } from './BenefitStrip'
 export { default as DashboardPreview } from './DashboardPreview'
 export { default as FeaturesBento } from './FeaturesBento'
+export { default as ProductDemo } from './ProductDemo'
 export { default as HowItWorks } from './HowItWorks'
 export { default as TrustStrip } from './TrustStrip'
 export { default as FAQ } from './FAQ'

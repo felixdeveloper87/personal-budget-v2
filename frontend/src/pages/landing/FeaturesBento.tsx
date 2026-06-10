@@ -25,9 +25,9 @@ export default function FeaturesBento() {
       id="features"
       bg={useColorModeValue('white', 'black')}
       pt={{ base: 4, md: 6, lg: 8 }}
-      eyebrow="What's inside"
-      title={<>A small toolkit, <br />ruthlessly polished.</>}
-      subtitle="No bloated feature list. Just the few things that turn raw transactions into a calm dashboard you actually open every day."
+      eyebrow="What it does for you"
+      title={<>Less guessing. <br />More knowing.</>}
+      subtitle="Understand where the money goes, see expenses before they land, and make the next decision with the real balance in front of you."
     >
       <Grid
         templateColumns={{ base: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' }}

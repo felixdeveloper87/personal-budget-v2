@@ -9,7 +9,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ArrowRight, CheckCircle2 } from '../../components/ui/icons'
 import DashboardPreview from './DashboardPreview'
 import { Eyebrow, GlowOrb, GridLines } from './shared'
@@ -23,7 +23,14 @@ interface HeroProps {
 
 const EASE = [0.32, 0.72, 0, 1] as const
 
-function slideUp(delay: number) {
+function slideUp(delay: number, reduce: boolean) {
+  if (reduce) {
+    return {
+      initial: { opacity: 0 },
+      animate: { opacity: 1 },
+      transition: { duration: 0.3, delay: Math.min(delay, 0.1) },
+    }
+  }
   return {
     initial: { opacity: 0, y: 22 },
     animate: { opacity: 1, y: 0 },
@@ -32,6 +39,7 @@ function slideUp(delay: number) {
 }
 
 export default function Hero({ onGetStarted }: HeroProps) {
+  const reduceMotion = Boolean(useReducedMotion())
 
   const bg = useColorModeValue(
     'linear-gradient(180deg, #f8fafc 0%, #ffffff 70%)',
@@ -72,7 +80,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
 
       {/* Floating orb — top left */}
       <MotionBox
-        animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5], y: [0, -20, 0] }}
+        animate={reduceMotion ? undefined : { scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5], y: [0, -20, 0] }}
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
         position="absolute"
         top="-180px"
@@ -89,7 +97,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
 
       {/* Floating orb — right */}
       <MotionBox
-        animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4], y: [0, 20, 0] }}
+        animate={reduceMotion ? undefined : { scale: [1, 1.15, 1], opacity: [0.4, 0.7, 0.4], y: [0, 20, 0] }}
         transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
         position="absolute"
         top="40%"
@@ -120,12 +128,12 @@ export default function Hero({ onGetStarted }: HeroProps) {
               textAlign={{ base: 'center', lg: 'left' }}
             >
               {/* Eyebrow */}
-              <MotionBox {...slideUp(0)}>
+              <MotionBox {...slideUp(0, reduceMotion)}>
                 <Eyebrow>{HERO_COPY.eyebrow}</Eyebrow>
               </MotionBox>
 
               {/* Headline */}
-              <MotionBox {...slideUp(0.1)}>
+              <MotionBox {...slideUp(0.1, reduceMotion)}>
                 <Box
                   as="h1"
                   fontSize={{ base: '4xl', sm: '5xl', md: '6xl', lg: '6xl', xl: '7xl' }}
@@ -152,6 +160,9 @@ export default function Hero({ onGetStarted }: HeroProps) {
                         '0%':   { backgroundPosition: '0% center' },
                         '100%': { backgroundPosition: '-200% center' },
                       },
+                      '@media (prefers-reduced-motion: reduce)': {
+                        animation: 'none',
+                      },
                     }}
                   >
                     {HERO_COPY.titleAccent}.
@@ -160,14 +171,14 @@ export default function Hero({ onGetStarted }: HeroProps) {
               </MotionBox>
 
               {/* Subtitle */}
-              <MotionBox {...slideUp(0.2)}>
+              <MotionBox {...slideUp(0.2, reduceMotion)}>
                 <Text fontSize={{ base: 'md', md: 'lg' }} color={subColor} maxW="540px" lineHeight={1.55}>
                   {HERO_COPY.subtitle}
                 </Text>
               </MotionBox>
 
               {/* CTAs */}
-              <MotionBox {...slideUp(0.3)}>
+              <MotionBox {...slideUp(0.3, reduceMotion)}>
                 <HStack spacing={3} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'flex-start' }}>
                   {/* Primary CTA with pulsing attention ring */}
                   <Box position="relative">
@@ -177,7 +188,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
                       borderRadius="xl"
                       border="1.5px solid"
                       borderColor={pulseColor}
-                      animate={{ opacity: [0.7, 0, 0.7], scale: [1, 1.06, 1] }}
+                      animate={reduceMotion ? undefined : { opacity: [0.7, 0, 0.7], scale: [1, 1.06, 1] }}
                       transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut', delay: 1.8 }}
                       pointerEvents="none"
                     />
@@ -195,6 +206,31 @@ export default function Hero({ onGetStarted }: HeroProps) {
                       borderRadius="xl"
                       boxShadow="0 10px 30px -10px rgba(79, 70, 229, 0.5)"
                       transition="all 0.3s cubic-bezier(0.32, 0.72, 0, 1)"
+                      overflow="hidden"
+                      position="relative"
+                      sx={{
+                        // Subtle shine sweeping across the CTA every few seconds
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          top: 0,
+                          bottom: 0,
+                          left: 0,
+                          width: '45%',
+                          background:
+                            'linear-gradient(105deg, transparent 0%, rgba(255,255,255,0.28) 50%, transparent 100%)',
+                          transform: 'translateX(-150%) skewX(-18deg)',
+                          animation: 'ctaShine 4.5s ease-in-out 2s infinite',
+                          pointerEvents: 'none',
+                        },
+                        '@keyframes ctaShine': {
+                          '0%':        { transform: 'translateX(-150%) skewX(-18deg)' },
+                          '35%, 100%': { transform: 'translateX(340%) skewX(-18deg)' },
+                        },
+                        '@media (prefers-reduced-motion: reduce)': {
+                          '&::after': { animation: 'none', opacity: 0 },
+                        },
+                      }}
                       _hover={{
                         bgPosition: '100% 50%',
                         transform: 'translateY(-2px)',
@@ -229,7 +265,7 @@ export default function Hero({ onGetStarted }: HeroProps) {
               </MotionBox>
 
               {/* Trust bullets */}
-              <MotionBox {...slideUp(0.45)}>
+              <MotionBox {...slideUp(0.45, reduceMotion)}>
                 <HStack spacing={5} pt={2} flexWrap="wrap" justify={{ base: 'center', lg: 'flex-start' }}>
                   {HERO_COPY.bullets.map((b) => (
                     <HStack key={b} spacing={2}>
@@ -250,12 +286,12 @@ export default function Hero({ onGetStarted }: HeroProps) {
             w="full"
             display="flex"
             justifyContent={{ base: 'center', lg: 'flex-end' }}
-            initial={{ opacity: 0, x: 40, scale: 0.96 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
+            initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 40, scale: 0.96 }}
+            animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.85, ease: EASE, delay: 0.15 }}
           >
             <MotionBox
-              animate={{ y: [0, -14, 0] }}
+              animate={reduceMotion ? undefined : { y: [0, -14, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
               w="full"
               display="flex"

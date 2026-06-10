@@ -6,8 +6,11 @@ import {
   Database,
   Eye,
   EyeOff,
+  Layers,
+  Lightbulb,
   Moon,
   PieChart,
+  ReceiptText as Receipt,
   Repeat,
   Search,
   Shield,
@@ -15,6 +18,7 @@ import {
   Sparkles,
   TrendingUp,
   Wallet,
+  Zap,
   type LucideIcon,
 } from '../../components/ui/icons'
 import { BRAND, BRAND_PROMISES } from '../../components/layout/header/brand.config'
@@ -49,6 +53,19 @@ export interface LandingFaq {
   answer: string
 }
 
+export interface LandingBenefit {
+  id: string
+  icon: LucideIcon
+  label: string
+}
+
+export interface LandingDemoStep {
+  id: string
+  icon: LucideIcon
+  title: string
+  description: string
+}
+
 /**
  * HERO copy — strings unique to the hero live here.
  * Tagline split, CTAs and bullets are derived from BRAND so changing the
@@ -71,7 +88,7 @@ export const FEATURES: ReadonlyArray<LandingFeature> = [
   {
     id: 'insights',
     icon: TrendingUp,
-    title: 'Insights that move first',
+    title: 'Know where your money goes',
     description:
       'Income, expenses and balance update the moment you log a transaction — and the charts redraw themselves.',
     variant: 'hero',
@@ -121,6 +138,67 @@ export const FEATURES: ReadonlyArray<LandingFeature> = [
     accent: '#ec4899',
   },
 ] as const
+
+/**
+ * Slim "immediate feedback" band right under the hero.
+ * Honest, verifiable claims only — these all map to real product behavior.
+ */
+export const BENEFIT_STRIP: ReadonlyArray<LandingBenefit> = [
+  { id: 'setup', icon: Zap, label: BRAND.promises.fastSetup },
+  { id: 'categories', icon: Layers, label: 'Categories you fully control' },
+  { id: 'devices', icon: Smartphone, label: 'Phone, tablet and desktop' },
+  { id: 'export', icon: Database, label: 'Export your data any time' },
+] as const
+
+/**
+ * Product demo — a tiny simulated journey: log → balance → budget → insight.
+ * Numbers are illustrative and consistent with each other (no fake stats).
+ */
+export const DEMO = {
+  eyebrow: 'See it in action',
+  title: 'One transaction. Everything follows.',
+  subtitle:
+    'You log the expense once — the balance, the budget and the insight take care of themselves. This is the whole loop, simulated.',
+  steps: [
+    {
+      id: 'log',
+      icon: Receipt,
+      title: 'Log a transaction',
+      description: 'Groceries, −£42.80. An amount, a category, one tap.',
+    },
+    {
+      id: 'balance',
+      icon: Wallet,
+      title: 'Your balance updates',
+      description: 'No refresh, no mental math — the new number is just there.',
+    },
+    {
+      id: 'budget',
+      icon: PieChart,
+      title: 'The budget recalculates',
+      description: 'Category progress moves the moment the expense lands.',
+    },
+    {
+      id: 'insight',
+      icon: Lightbulb,
+      title: 'You get the insight',
+      description: 'Still under budget — and you know it before month-end.',
+    },
+  ] as ReadonlyArray<LandingDemoStep>,
+  /** Figures used by the demo canvas — kept consistent across stages. */
+  figures: {
+    currency: '£',
+    txLabel: 'Groceries · Continente',
+    txAmount: -42.8,
+    balanceBefore: 2330,
+    balanceAfter: 2287.2,
+    budgetCategory: 'Groceries',
+    budgetTotal: 320,
+    budgetSpentBefore: 204.2,
+    budgetSpentAfter: 247,
+    insight: 'Groceries is on pace to finish £45 under budget this month.',
+  },
+} as const
 
 export const STEPS: ReadonlyArray<LandingStep> = [
   {

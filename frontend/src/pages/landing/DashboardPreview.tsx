@@ -7,6 +7,10 @@ import { PREVIEW_DATA } from './landing.config'
 function useCountUp(target: number, duration = 1300, delay = 0): number {
   const [value, setValue] = useState(0)
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setValue(target)
+      return
+    }
     const t = setTimeout(() => {
       let start: number | null = null
       const step = (ts: number) => {
@@ -185,7 +189,10 @@ export default function DashboardPreview() {
                 borderRadius="full"
                 bg="green.400"
                 flexShrink={0}
-                sx={{ animation: 'livePulse 2.2s ease-in-out infinite' }}
+                sx={{
+                  animation: 'livePulse 2.2s ease-in-out infinite',
+                  '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
+                }}
               />
             </HStack>
           </VStack>

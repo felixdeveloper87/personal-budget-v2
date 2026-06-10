@@ -118,6 +118,7 @@ export const ADMIN_NAV_ITEM: Readonly<NavItem> = {
 
 export const LANDING_SECTIONS = [
   { id: 'features', label: 'Features' },
+  { id: 'demo', label: 'See it work' },
   { id: 'how-it-works', label: 'How it works' },
   { id: 'faq', label: 'FAQ' },
 ] as const
