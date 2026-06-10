@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Badge,
   Box,
   HStack,
   Icon,
@@ -18,11 +17,26 @@ import {
 import { formatDateBR } from '../../../utils/dateTime'
 import { formatTransactionAccount } from '../../../utils/transactionAccount'
 import {
+  Briefcase,
+  Car,
   CalendarDays,
+  Coffee,
+  CreditCard,
+  Film,
+  Gift,
+  GraduationCap,
+  Heart,
+  Home,
+  Laptop,
   ReceiptText,
+  ShieldCheck,
+  ShoppingBag,
+  ShoppingCart,
   Sparkles,
   Tag,
   TrendingUp,
+  Wallet,
+  Zap,
 } from '../../ui/icons'
 import type { LucideIcon } from '../../ui/icons'
 import { ChartEmptyState, ChartPlotShell, PeriodBucketBarChart } from './components'
@@ -76,6 +90,31 @@ function formatShortDate(transaction: Transaction): string {
     day: '2-digit',
     month: 'short',
   })
+}
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  salary: Briefcase,
+  freelance: Laptop,
+  investments: TrendingUp,
+  rental: Home,
+  bonus: Sparkles,
+  gifts: Gift,
+  groceries: ShoppingCart,
+  rent: Home,
+  housing: Home,
+  utilities: Zap,
+  transport: Car,
+  health: Heart,
+  'dining out': Coffee,
+  shopping: ShoppingBag,
+  subscriptions: CreditCard,
+  entertainment: Film,
+  insurance: ShieldCheck,
+  education: GraduationCap,
+}
+
+function categoryIcon(category?: string): LucideIcon {
+  return CATEGORY_ICONS[category?.trim().toLowerCase() ?? ''] ?? Wallet
 }
 
 function getCategoryGrowth(expenses: Transaction[]): { category: string; delta: number } | null {
@@ -255,6 +294,13 @@ export default function TransactionsChart({
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const rowHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const ledgerBg = useColorModeValue('white', '#0d0d0d')
+  const ledgerBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
+  const categoryIconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const categoryIconColor = useColorModeValue('gray.700', 'gray.200')
+  const incomeDot = useColorModeValue('green.400', 'green.300')
+  const expenseDot = useColorModeValue('red.400', 'red.300')
+  const accountColor = useColorModeValue('gray.500', 'gray.400')
 
   if (transactions.length === 0) {
     return (
@@ -301,85 +347,113 @@ export default function TransactionsChart({
         badgeColor="purple.600"
       >
         {selectedBucketTransactions.length > 0 ? (
-          <VStack spacing={2.5} align="stretch">
-            {selectedBucketTransactions.map((transaction, index) => (
+          <Box
+            bg={ledgerBg}
+            border="1px solid"
+            borderColor={ledgerBorder}
+            borderRadius="2xl"
+            overflow="hidden"
+          >
+            {selectedBucketTransactions.map((transaction, index) => {
+              const isIncome = transaction.type === 'INCOME'
+              const CategoryIcon = categoryIcon(transaction.category)
+              const accountLabel = formatTransactionAccount(transaction)
+              const isScheduled =
+                transaction.isFutureInstallment ||
+                transaction.status === 'PLANNED' ||
+                transaction.status === 'PENDING'
+              return (
                 <HStack
                   key={transaction.id ?? `${transaction.description}-${index}`}
                   spacing={3}
-                  p={3}
-                  borderRadius="xl"
-                  bg={cardBg}
-                  border="1px solid"
-                  borderColor={borderColor}
+                  px={{ base: 3, sm: 4 }}
+                  py={{ base: 3, sm: 3.5 }}
+                  borderBottom={index < selectedBucketTransactions.length - 1 ? '1px solid' : undefined}
+                  borderColor={ledgerBorder}
                   _hover={{ bg: rowHoverBg }}
-                  transition="background 0.18s ease"
+                  transition="background 0.15s ease"
+                  align="center"
                 >
                   <Box
-                    w="34px"
-                    h="34px"
-                    borderRadius="lg"
+                    w={10}
+                    h={10}
+                    borderRadius="xl"
                     display="grid"
                     placeItems="center"
-                    bg={transaction.type === 'INCOME' ? 'green.50' : 'red.50'}
-                    color={transaction.type === 'INCOME' ? 'green.600' : 'red.600'}
-                    fontSize="sm"
-                    fontWeight={800}
+                    bg={categoryIconBg}
+                    color={categoryIconColor}
                     flexShrink={0}
                   >
-                    {index + 1}
+                    <CategoryIcon size={18} weight="duotone" aria-hidden />
                   </Box>
 
                   <VStack spacing={0.5} align="stretch" flex="1" minW={0}>
-                    <HStack spacing={2} minW={0}>
-                      <Text
-                        fontSize="sm"
-                        fontWeight={700}
-                        color={textColor}
-                        noOfLines={1}
-                      >
-                        {transaction.description || transaction.category}
-                      </Text>
-                      <Badge
-                        flexShrink={0}
-                        colorScheme={transaction.type === 'INCOME' ? 'green' : 'red'}
-                        variant="subtle"
-                        borderRadius="full"
-                        textTransform="none"
-                        letterSpacing="0"
-                      >
-                        {transaction.category || 'Uncategorized'}
-                      </Badge>
-                    </HStack>
-                    <Text fontSize="xs" color={mutedColor} noOfLines={1}>
-                      {formatShortDate(transaction)}
-                      {transaction.paymentMethodName
-                        ? ` - ${transaction.paymentMethodName}`
-                        : ''}
+                    <Text
+                      fontSize="sm"
+                      fontWeight={700}
+                      color={textColor}
+                      noOfLines={1}
+                    >
+                      {transaction.description || transaction.category || 'Transaction'}
                     </Text>
-                    {formatTransactionAccount(transaction) && (
-                      <Text fontSize="2xs" color="teal.500" noOfLines={1}>
-                        {formatTransactionAccount(transaction)}
+
+                    <HStack spacing={1.5} color={mutedColor} fontSize="xs" minW={0}>
+                      <Text noOfLines={1}>{transaction.category || 'Uncategorized'}</Text>
+                      <Text opacity={0.45}>·</Text>
+                      <Text flexShrink={0}>{formatShortDate(transaction)}</Text>
+                      {transaction.paymentMethodName ? (
+                        <>
+                          <Text opacity={0.45}>·</Text>
+                          <Text noOfLines={1}>{transaction.paymentMethodName}</Text>
+                        </>
+                      ) : null}
+                    </HStack>
+
+                    {accountLabel ? (
+                      <Text fontSize="2xs" color={accountColor} noOfLines={1} display={{ base: 'none', sm: 'block' }}>
+                        {accountLabel}
                       </Text>
-                    )}
-                    {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
-                      <Text fontSize="2xs" color={mutedColor} noOfLines={1}>
-                        Payment {formatDateBR(transaction.paymentDate)}
-                      </Text>
-                    )}
+                    ) : null}
                   </VStack>
 
-                  <Text
-                    color={transaction.type === 'INCOME' ? 'green.500' : 'red.500'}
-                    fontSize="sm"
-                    fontWeight={800}
-                    whiteSpace="nowrap"
-                  >
-                    {transaction.type === 'INCOME' ? '+' : '-'}
-                    {formatMoney(transaction.amount)}
-                  </Text>
+                  <VStack spacing={0.5} align="flex-end" flexShrink={0}>
+                    <HStack spacing={1.5}>
+                      <Box
+                        w="6px"
+                        h="6px"
+                        borderRadius="full"
+                        bg={isIncome ? incomeDot : expenseDot}
+                        flexShrink={0}
+                        aria-label={isIncome ? 'Income' : 'Expense'}
+                      />
+                      <Text
+                        color={isIncome ? 'green.500' : textColor}
+                        fontSize="sm"
+                        fontWeight={700}
+                        whiteSpace="nowrap"
+                        letterSpacing="-0.01em"
+                      >
+                        {isIncome ? '+' : '-'}
+                        {formatMoney(transaction.amount)}
+                      </Text>
+                    </HStack>
+                    {isScheduled ? (
+                      <Text
+                        fontSize="2xs"
+                        color={mutedColor}
+                      >
+                        Scheduled
+                      </Text>
+                    ) : hasDifferentPaymentDate(transaction) && transaction.paymentDate ? (
+                      <Text fontSize="2xs" color={mutedColor}>
+                        Pays {formatDateBR(transaction.paymentDate)}
+                      </Text>
+                    ) : null}
+                  </VStack>
                 </HStack>
-            ))}
-          </VStack>
+              )
+            })}
+          </Box>
         ) : (
           <Box borderRadius="xl" border="1px dashed" borderColor={borderColor} p={5} textAlign="center">
             <Text fontSize="sm" fontWeight={700} color={textColor}>
