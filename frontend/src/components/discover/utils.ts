@@ -12,6 +12,12 @@ export interface CategoryBreakdownRow {
   percentage: number
 }
 
+export interface CategoryComparisonRow extends CategoryBreakdownRow {
+  previous: number
+  change: number
+  changePercent: number
+}
+
 export function buildCategoryBreakdown(transactions: Transaction[]): CategoryBreakdownRow[] {
   const expenses = transactions.filter((tx) => tx.type === 'EXPENSE')
   const totalExpense = expenses.reduce((sum, tx) => sum + tx.amount, 0)
@@ -40,6 +46,29 @@ export function getTopExpenses(transactions: Transaction[], limit = 5): Transact
     .filter((tx) => tx.type === 'EXPENSE')
     .sort((a, b) => b.amount - a.amount)
     .slice(0, limit)
+}
+
+export function buildCategoryComparison(
+  currentTransactions: Transaction[],
+  previousTransactions: Transaction[],
+): CategoryComparisonRow[] {
+  const previousCategories = new Map(
+    buildCategoryBreakdown(previousTransactions).map((row) => [row.name, row.total]),
+  )
+
+  return buildCategoryBreakdown(currentTransactions)
+    .map((row) => {
+      const previous = previousCategories.get(row.name) ?? 0
+      const change = row.total - previous
+
+      return {
+        ...row,
+        previous,
+        change,
+        changePercent: previous > 0 ? (change / previous) * 100 : 100,
+      }
+    })
+    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
 }
 
 export const UPCOMING_WINDOW_DAYS = 7

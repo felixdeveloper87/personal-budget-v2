@@ -13,16 +13,15 @@ import type {
   DiscoverPreviousPeriod,
 } from '../components/discover/types'
 import {
-  buildCategoryBreakdown,
+  buildCategoryComparison,
   getTopExpenses,
-  getUpcomingPayments,
 } from '../components/discover/utils'
 import type { Transaction } from '../types'
 
 interface UseDiscoverCardsArgs {
   transactions: Transaction[]
-  allTransactions: Transaction[]
-  previousPeriod?: DiscoverPreviousPeriod
+  upcomingPayments: Transaction[]
+  previousPeriod: DiscoverPreviousPeriod
   income: number
   expense: number
   balance: number
@@ -41,12 +40,11 @@ function pickTopCards(candidates: DiscoverCardItem[], limit = 3): DiscoverCardIt
   return [...candidates]
     .sort((a, b) => b.priority - a.priority)
     .slice(0, limit)
-    .map((card, index) => ({ ...card, featured: index === 0 }))
 }
 
 export function useDiscoverCards({
   transactions,
-  allTransactions,
+  upcomingPayments,
   previousPeriod,
   income,
   expense,
@@ -54,7 +52,6 @@ export function useDiscoverCards({
 }: UseDiscoverCardsArgs): DiscoverCardItem[] {
   return useMemo(() => {
     const candidates: DiscoverCardItem[] = []
-    const upcomingPayments = getUpcomingPayments(allTransactions)
     const upcomingTotal = upcomingPayments.reduce((sum, tx) => sum + tx.amount, 0)
     const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0
 
@@ -107,7 +104,7 @@ export function useDiscoverCards({
       })
     }
 
-    if (previousPeriod && previousPeriod.expense > 0) {
+    if (previousPeriod.expense > 0) {
       const change = ((expense - previousPeriod.expense) / previousPeriod.expense) * 100
       const spendingIncreased = change > 0
 
@@ -144,39 +141,30 @@ export function useDiscoverCards({
       })
     }
 
-    if (previousPeriod) {
-      const currentCategories = buildCategoryBreakdown(transactions)
-      const previousCategories = new Map(
-        buildCategoryBreakdown(previousPeriod.transactions).map((row) => [row.name, row.total]),
-      )
-      const growingCategory = currentCategories
-        .map((row) => {
-          const previousTotal = previousCategories.get(row.name) ?? 0
-          const increase = row.total - previousTotal
-          const increasePercent = previousTotal > 0 ? (increase / previousTotal) * 100 : 100
-          return { ...row, increase, increasePercent }
-        })
-        .filter((row) => row.increase >= 25 && row.increasePercent >= 15)
-        .sort((a, b) => b.increase - a.increase)[0]
+    const growingCategory = buildCategoryComparison(
+      transactions,
+      previousPeriod.transactions,
+    )
+      .filter((row) => row.change >= 25 && row.changePercent >= 15)
+      .sort((a, b) => b.change - a.change)[0]
 
-      if (growingCategory) {
-        candidates.push({
-          id: 'growing-category',
-          title: 'Category on the rise',
-          description: `${growingCategory.name} increased most compared with ${previousPeriod.label}.`,
-          icon: PieChart,
-          accent: 'amber',
-          cta: 'Compare categories',
-          modalId: 'mom-comparison',
-          priority: 70,
-          value: formatMoney(growingCategory.total),
-          delta: {
-            label: `+${growingCategory.increasePercent.toFixed(0)}%`,
-            direction: 'up',
-            tone: 'negative',
-          },
-        })
-      }
+    if (growingCategory) {
+      candidates.push({
+        id: 'growing-category',
+        title: 'Category on the rise',
+        description: `${growingCategory.name} increased most compared with ${previousPeriod.label}.`,
+        icon: PieChart,
+        accent: 'amber',
+        cta: 'Compare categories',
+        modalId: 'mom-comparison',
+        priority: 70,
+        value: formatMoney(growingCategory.total),
+        delta: {
+          label: `+${growingCategory.changePercent.toFixed(0)}%`,
+          direction: 'up',
+          tone: 'negative',
+        },
+      })
     }
 
     if (transactions.length < 5) {
@@ -195,5 +183,5 @@ export function useDiscoverCards({
     }
 
     return pickTopCards(candidates)
-  }, [allTransactions, balance, expense, income, previousPeriod, transactions])
+  }, [balance, expense, income, previousPeriod, transactions, upcomingPayments])
 }

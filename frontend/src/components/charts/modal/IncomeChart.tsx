@@ -1,6 +1,6 @@
 import { VStack, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import type { PeriodType } from '../../../types'
+import type { PeriodType, Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { TrendingUp } from '../../ui/icons'
 import { useChartColors } from './hooks'
@@ -11,10 +11,10 @@ import {
   PeriodBucketBarChart,
 } from './components'
 import CategoryTransactionDropdown from '../../categories/CategoryTransactionDropdown'
-import { processCategoriesWithTransactions, calculateTotals } from './utils'
+import { processCategoriesWithTransactions } from './utils'
 
 export interface IncomeChartProps {
-  transactions: any[]
+  transactions: Transaction[]
   selectedPeriod: string
   showPeriodBadge?: boolean
   periodType?: PeriodType
@@ -37,13 +37,8 @@ export default function IncomeChart({
     [transactions],
   )
 
-  const { sortedCategories: categoryData } = useMemo(
+  const { sortedCategories: categoryData, total: totalIncome } = useMemo(
     () => processCategoriesWithTransactions(incomeTransactions),
-    [incomeTransactions],
-  )
-
-  const { total: totalIncome } = useMemo(
-    () => calculateTotals(incomeTransactions),
     [incomeTransactions],
   )
 

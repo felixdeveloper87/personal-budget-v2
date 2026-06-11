@@ -22,6 +22,7 @@ import type { ModalHeaderAccent } from '../ui/ModalHeader'
 import type { DiscoverInsightsContext, DiscoverModalId } from './types'
 import {
   buildCategoryBreakdown,
+  buildCategoryComparison,
   competenceDate,
   getTopExpenses,
 } from './utils'
@@ -211,7 +212,7 @@ function GettingStartedContent({ context }: { context: DiscoverInsightsContext }
 function UpcomingPaymentsContent({ context }: { context: DiscoverInsightsContext }) {
   const muted = useColorModeValue('gray.500', 'gray.400')
   const warning = useColorModeValue('orange.600', 'orange.300')
-  const payments = context.upcomingPayments ?? []
+  const payments = context.upcomingPayments
   const total = payments.reduce((sum, tx) => sum + tx.amount, 0)
 
   return (
@@ -248,27 +249,25 @@ function PeriodComparisonContent({ context }: { context: DiscoverInsightsContext
   const muted = useColorModeValue('gray.500', 'gray.400')
   const positive = useColorModeValue('green.600', 'green.300')
   const negative = useColorModeValue('red.600', 'red.300')
-  const currentRows = buildCategoryBreakdown(context.transactions)
-  const previousRows = new Map(
-    buildCategoryBreakdown(previous?.transactions ?? []).map((row) => [row.name, row.total]),
-  )
-  const rows = currentRows
-    .map((row) => ({
-      ...row,
-      previous: previousRows.get(row.name) ?? 0,
-      change: row.total - (previousRows.get(row.name) ?? 0),
-    }))
-    .sort((a, b) => Math.abs(b.change) - Math.abs(a.change))
-    .slice(0, 6)
-  const expenseChange = previous && previous.expense > 0
+  const rows = buildCategoryComparison(
+    context.transactions,
+    previous.transactions,
+  ).slice(0, 6)
+  const expenseChange = previous.expense > 0
     ? ((context.totalExpense - previous.expense) / previous.expense) * 100
     : 0
+  const comparisonLabel =
+    expenseChange === 0
+      ? `Spending is unchanged from ${previous.label}.`
+      : `Spending is ${Math.abs(expenseChange).toFixed(0)}% ${
+          expenseChange > 0 ? 'higher' : 'lower'
+        } than ${previous.label}.`
 
   return (
     <VStack align="stretch" spacing={4} p={{ base: 4, md: 6 }}>
       <SimpleGrid columns={2} spacing={3}>
         <Metric label="Current" value={formatMoney(context.totalExpense)} tone="negative" />
-        <Metric label={previous?.label ?? 'Previous'} value={formatMoney(previous?.expense ?? 0)} />
+        <Metric label={previous.label} value={formatMoney(previous.expense)} />
       </SimpleGrid>
       <Surface>
         <Text mb={3} fontSize="sm" fontWeight={700}>
@@ -290,14 +289,14 @@ function PeriodComparisonContent({ context }: { context: DiscoverInsightsContext
                 fontWeight={700}
                 color={row.change > 0 ? negative : row.change < 0 ? positive : muted}
               >
-                {row.change >= 0 ? '+' : ''}{formatMoney(row.change)}
+                {row.change >= 0 ? '+' : '-'}{formatMoney(Math.abs(row.change))}
               </Text>
             </HStack>
           ))}
         </VStack>
       </Surface>
       <Text fontSize="sm" color={expenseChange > 0 ? negative : positive} fontWeight={700}>
-        Spending is {Math.abs(expenseChange).toFixed(0)}% {expenseChange > 0 ? 'higher' : 'lower'} than {previous?.label ?? 'the previous period'}.
+        {comparisonLabel}
       </Text>
     </VStack>
   )

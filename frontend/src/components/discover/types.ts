@@ -1,7 +1,7 @@
-import type { LucideIcon } from '../ui/icons'
 import type { Transaction } from '../../types'
+import type { LucideIcon } from '../ui/icons'
 
-export type DiscoverAccent = 'neutral' | 'blue' | 'amber' | 'green' | 'red'
+export type DiscoverAccent = 'neutral' | 'amber' | 'green' | 'red'
 
 export type DiscoverModalId =
   | 'savings-rate'
@@ -26,19 +26,14 @@ export interface DiscoverCardItem {
   cta: string
   modalId: DiscoverModalId
   badge?: string
-  featured?: boolean
   priority: number
-  /** Concrete number shown prominently on the card, e.g. "£412.50". */
   value?: string
-  /** Period-over-period change shown next to the value. */
   delta?: DiscoverCardDelta
 }
 
 export interface DiscoverPreviousPeriod {
-  income: number
   expense: number
   transactions: Transaction[]
-  /** e.g. "last month", "last week" — adapts to the selected period. */
   label: string
 }
 
@@ -47,10 +42,8 @@ export interface DiscoverInsightsContext {
   totalExpense: number
   netBalance: number
   savingsRate: number
-  mostUsedCategory: string | null
   totalTransactions: number
-  averageExpensePerDay: number
   transactions: Transaction[]
-  previousPeriod?: DiscoverPreviousPeriod
-  upcomingPayments?: Transaction[]
+  previousPeriod: DiscoverPreviousPeriod
+  upcomingPayments: Transaction[]
 }

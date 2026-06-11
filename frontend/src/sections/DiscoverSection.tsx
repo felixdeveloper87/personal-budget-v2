@@ -17,11 +17,10 @@ import {
   type DiscoverCardItem,
   type DiscoverInsightsContext,
   type DiscoverModalId,
+  type DiscoverPreviousPeriod,
 } from '../components/discover'
-import type { DiscoverPreviousPeriod } from '../components/discover/types'
 import { getUpcomingPayments, previousPeriodLabel } from '../components/discover/utils'
 import { useDiscoverCards } from '../hooks/useDiscoverCards'
-import { useTransactionInsights } from '../hooks/useTransactionInsights'
 import type { PeriodData } from '../hooks/usePeriodData'
 import type { Transaction, PeriodType } from '../types'
 
@@ -68,7 +67,6 @@ export default function DiscoverSection({
 }: DiscoverSectionProps) {
   const previousPeriod = useMemo<DiscoverPreviousPeriod>(
     () => ({
-      income: previousPeriodData.income,
       expense: previousPeriodData.expense,
       transactions: previousPeriodData.transactions,
       label: previousPeriodLabel(selectedPeriod),
@@ -81,13 +79,12 @@ export default function DiscoverSection({
   )
   const cards = useDiscoverCards({
     transactions,
-    allTransactions,
+    upcomingPayments,
     previousPeriod,
     income,
     expense,
     balance,
   })
-  const insights = useTransactionInsights(transactions, selectedPeriod)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [activeModal, setActiveModal] = useState<DiscoverModalId | null>(null)
   const [activeSlide, setActiveSlide] = useState(0)
@@ -99,10 +96,8 @@ export default function DiscoverSection({
     totalIncome: income,
     totalExpense: expense,
     netBalance: balance,
-    savingsRate: insights.savingsRate,
-    mostUsedCategory: insights.mostUsedCategory,
-    totalTransactions: insights.totalTransactions,
-    averageExpensePerDay: insights.averageExpensePerDay,
+    savingsRate: income > 0 ? ((income - expense) / income) * 100 : 0,
+    totalTransactions: transactions.length,
     transactions,
     previousPeriod,
     upcomingPayments,
@@ -181,7 +176,7 @@ export default function DiscoverSection({
               >
                 {cards.map((item) => (
                   <Box key={item.id} flex="0 0 86%" scrollSnapAlign="center">
-                    <DiscoverCard item={item} onClick={() => handleCardClick(item)} compact />
+                    <DiscoverCard item={item} onClick={() => handleCardClick(item)} />
                   </Box>
                 ))}
               </Box>
@@ -196,7 +191,7 @@ export default function DiscoverSection({
             >
               {cards.map((item) => (
                 <GridItem key={item.id}>
-                  <DiscoverCard item={item} onClick={() => handleCardClick(item)} compact />
+                  <DiscoverCard item={item} onClick={() => handleCardClick(item)} />
                 </GridItem>
               ))}
             </Grid>

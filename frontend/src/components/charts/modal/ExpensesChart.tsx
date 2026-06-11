@@ -1,7 +1,7 @@
 import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Box, useColorModeValue } from '@chakra-ui/react'
 import { useMemo } from 'react'
-import type { PeriodType } from '../../../types'
+import type { PeriodType, Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { TrendingDown } from '../../ui/icons'
 import { useChartColors, useChartDimensions } from './hooks'
@@ -11,10 +11,10 @@ import {
   PeriodBucketBarChart,
 } from './components'
 import CategoryTransactionDropdown from '../../categories/CategoryTransactionDropdown'
-import { processCategoriesWithTransactions, calculateTotals } from './utils'
+import { processCategoriesWithTransactions } from './utils'
 
 export interface ExpensesChartProps {
-  transactions: any[]
+  transactions: Transaction[]
   selectedPeriod: string
   showPeriodBadge?: boolean
   periodType?: PeriodType
@@ -43,13 +43,8 @@ export default function ExpensesChart({
     [transactions],
   )
 
-  const { sortedCategories: categoryData } = useMemo(
+  const { sortedCategories: categoryData, total: totalExpenses } = useMemo(
     () => processCategoriesWithTransactions(expenseTransactions),
-    [expenseTransactions],
-  )
-
-  const { total: totalExpenses } = useMemo(
-    () => calculateTotals(expenseTransactions),
     [expenseTransactions],
   )
 

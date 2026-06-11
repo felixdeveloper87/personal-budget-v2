@@ -24,12 +24,6 @@ const ACCENTS: Record<DiscoverAccent, AccentTokens> = {
     chipFgLight: 'gray.700',
     chipFgDark: 'gray.200',
   },
-  blue: {
-    chipBgLight: 'blue.50',
-    chipBgDark: 'rgba(59,130,246,0.16)',
-    chipFgLight: 'blue.600',
-    chipFgDark: 'blue.300',
-  },
   amber: {
     chipBgLight: 'orange.50',
     chipBgDark: 'rgba(249,115,22,0.16)',
@@ -53,8 +47,6 @@ const ACCENTS: Record<DiscoverAccent, AccentTokens> = {
 export interface DiscoverCardProps {
   item: DiscoverCardItem
   onClick: () => void
-  featured?: boolean
-  compact?: boolean
 }
 
 export default function DiscoverCard({ item, onClick }: DiscoverCardProps) {
