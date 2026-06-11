@@ -8,33 +8,22 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import type { PeriodType } from '../../../types'
-import type { Transaction } from '../../../types'
-import { getTransactionDate } from '../../../utils/transactionDates'
+import type { PeriodType, Transaction } from '../../../types'
 import {
-  CalendarDays,
-  Sparkles,
-  Tag,
-  TrendingUp,
-} from '../../ui/icons'
+  getTransactionDate,
+  type TransactionDateBasis,
+} from '../../../utils/transactionDates'
+import { CalendarDays, Sparkles, Tag, TrendingUp } from '../../ui/icons'
 import type { LucideIcon } from '../../ui/icons'
 import { ActivityLedger, ChartEmptyState, PeriodBucketBarChart } from './components'
 import { processCategoriesWithTransactions } from './utils'
-import {
-  bucketTransactionsByPeriod,
-  type PeriodBucket,
-} from './utils/periodBuckets'
+import { bucketTransactionsByPeriod, type PeriodBucket } from './utils/periodBuckets'
 
 export interface TransactionsChartProps {
   transactions: Transaction[]
-  /**
-   * When `periodType` and `selectedDate` are provided, the compact period
-   * bucket bar chart (today / this week / this month / this year) is
-   * rendered. Without these props the chart has nothing to show — the
-   * summary KPIs are now hoisted into the section/modal header.
-   */
   periodType?: PeriodType
   selectedDate?: Date
+  dateBasis?: TransactionDateBasis
 }
 
 interface BehaviorInsight {
@@ -54,15 +43,18 @@ function formatMoney(value: number): string {
   return moneyFormatter.format(value)
 }
 
-function transactionDate(transaction: Transaction): Date {
-  return getTransactionDate(transaction, 'activity')
+function txDate(transaction: Transaction, basis: TransactionDateBasis): Date {
+  return getTransactionDate(transaction, basis)
 }
 
-function getCategoryGrowth(expenses: Transaction[]): { category: string; delta: number } | null {
+function getCategoryGrowth(
+  expenses: Transaction[],
+  basis: TransactionDateBasis,
+): { category: string; delta: number } | null {
   if (expenses.length < 2) return null
 
   const timestamps = expenses
-    .map((transaction) => transactionDate(transaction).getTime())
+    .map((t) => txDate(t, basis).getTime())
     .sort((a, b) => a - b)
   const first = timestamps[0]
   const last = timestamps[timestamps.length - 1]
@@ -71,21 +63,15 @@ function getCategoryGrowth(expenses: Transaction[]): { category: string; delta: 
   const midpoint = first + (last - first) / 2
   const totals: Record<string, { firstHalf: number; secondHalf: number }> = {}
 
-  expenses.forEach((transaction) => {
-    const category = transaction.category || 'Uncategorized'
-    if (!totals[category]) {
-      totals[category] = { firstHalf: 0, secondHalf: 0 }
-    }
-
-    const key = transactionDate(transaction).getTime() <= midpoint ? 'firstHalf' : 'secondHalf'
-    totals[category][key] += transaction.amount
-  })
+  for (const t of expenses) {
+    const category = t.category || 'Uncategorized'
+    if (!totals[category]) totals[category] = { firstHalf: 0, secondHalf: 0 }
+    const half = txDate(t, basis).getTime() <= midpoint ? 'firstHalf' : 'secondHalf'
+    totals[category][half] += t.amount
+  }
 
   const [growth] = Object.entries(totals)
-    .map(([category, total]) => ({
-      category,
-      delta: total.secondHalf - total.firstHalf,
-    }))
+    .map(([category, total]) => ({ category, delta: total.secondHalf - total.firstHalf }))
     .filter((item) => item.delta > 0)
     .sort((a, b) => b.delta - a.delta)
 
@@ -96,9 +82,10 @@ export default function TransactionsChart({
   transactions,
   periodType,
   selectedDate,
+  dateBasis = 'activity',
 }: TransactionsChartProps) {
   const expenseTransactions = useMemo(
-    () => transactions.filter((transaction) => transaction.type === 'EXPENSE'),
+    () => transactions.filter((t) => t.type === 'EXPENSE'),
     [transactions],
   )
 
@@ -110,32 +97,23 @@ export default function TransactionsChart({
   const periodBuckets = useMemo(
     () =>
       periodType && selectedDate
-        ? bucketTransactionsByPeriod(
-            transactions,
-            periodType,
-            selectedDate,
-            'ALL',
-            'activity',
-          )
+        ? bucketTransactionsByPeriod(transactions, periodType, selectedDate, 'ALL', dateBasis)
         : [],
-    [transactions, periodType, selectedDate],
+    [transactions, periodType, selectedDate, dateBasis],
   )
 
   const [selectedBucketKey, setSelectedBucketKey] = useState<string | null>(null)
 
   useEffect(() => {
-    const currentBucket = periodBuckets.find((bucket) => bucket.key === selectedBucketKey)
-    if (currentBucket) return
-
-    const [largestBucket] = [...periodBuckets]
-      .filter((bucket) => bucket.transactions.length > 0)
+    if (periodBuckets.find((b) => b.key === selectedBucketKey)) return
+    const [largest] = [...periodBuckets]
+      .filter((b) => b.transactions.length > 0)
       .sort((a, b) => b.value - a.value)
-
-    setSelectedBucketKey(largestBucket?.key ?? null)
+    setSelectedBucketKey(largest?.key ?? null)
   }, [periodBuckets, selectedBucketKey])
 
   const selectedBucket = useMemo(
-    () => periodBuckets.find((bucket) => bucket.key === selectedBucketKey) ?? null,
+    () => periodBuckets.find((b) => b.key === selectedBucketKey) ?? null,
     [periodBuckets, selectedBucketKey],
   )
 
@@ -143,22 +121,20 @@ export default function TransactionsChart({
     () =>
       selectedBucket
         ? [...selectedBucket.transactions].sort(
-            (a, b) => transactionDate(b).getTime() - transactionDate(a).getTime(),
+            (a, b) => txDate(b, dateBasis).getTime() - txDate(a, dateBasis).getTime(),
           )
         : [],
-    [selectedBucket],
+    [selectedBucket, dateBasis],
   )
 
   const behaviorInsights = useMemo<BehaviorInsight[]>(() => {
     if (expenseTransactions.length === 0) return []
 
     const weekdayTotals = expenseTransactions.reduce(
-      (acc, transaction) => {
-        const weekday = transactionDate(transaction).toLocaleDateString('en-GB', {
-          weekday: 'long',
-        })
+      (acc, t) => {
+        const weekday = txDate(t, dateBasis).toLocaleDateString('en-GB', { weekday: 'long' })
         if (!acc[weekday]) acc[weekday] = { total: 0, count: 0 }
-        acc[weekday].total += transaction.amount
+        acc[weekday].total += t.amount
         acc[weekday].count += 1
         return acc
       },
@@ -170,16 +146,11 @@ export default function TransactionsChart({
       .sort((a, b) => b.total - a.total)
 
     const [topCategoryByCount] = expenseCategories
-      .map((category) => ({
-        category: category.category,
-        count: category.transactions.length,
-        total: category.total,
-      }))
+      .map((c) => ({ category: c.category, count: c.transactions.length, total: c.total }))
       .sort((a, b) => b.count - a.count || b.total - a.total)
 
-    const growth = getCategoryGrowth(expenseTransactions)
+    const growth = getCategoryGrowth(expenseTransactions, dateBasis)
     const dominantCategory = expenseCategories[0]
-
     const insights: BehaviorInsight[] = []
 
     if (topWeekday) {
@@ -187,9 +158,7 @@ export default function TransactionsChart({
         icon: CalendarDays,
         eyebrow: 'Spending rhythm',
         title: `Most money leaves on ${topWeekday.weekday}`,
-        detail: `${formatMoney(topWeekday.total)} across ${topWeekday.count} expense${
-          topWeekday.count === 1 ? '' : 's'
-        }.`,
+        detail: `${formatMoney(topWeekday.total)} across ${topWeekday.count} expense${topWeekday.count === 1 ? '' : 's'}.`,
         color: '#2563eb',
       })
     }
@@ -198,9 +167,7 @@ export default function TransactionsChart({
       insights.push({
         icon: Tag,
         eyebrow: 'Repeated habit',
-        title: `${topCategoryByCount.category} appears ${topCategoryByCount.count} time${
-          topCategoryByCount.count === 1 ? '' : 's'
-        }`,
+        title: `${topCategoryByCount.category} appears ${topCategoryByCount.count} time${topCategoryByCount.count === 1 ? '' : 's'}`,
         detail: `${formatMoney(topCategoryByCount.total)} total in this category.`,
         color: '#059669',
       })
@@ -226,7 +193,7 @@ export default function TransactionsChart({
     }
 
     return insights
-  }, [expenseCategories, expenseTransactions, totalExpenses])
+  }, [expenseCategories, expenseTransactions, totalExpenses, dateBasis])
 
   const cardBg = useColorModeValue('#ffffff', '#0a0a0a')
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -263,83 +230,83 @@ export default function TransactionsChart({
         selectedDate={selectedDate}
         filter="ALL"
         accent="violet"
-        dateBasis="activity"
+        dateBasis={dateBasis}
         onBucketClick={(bucket: PeriodBucket) => setSelectedBucketKey(bucket.key)}
       />
 
       <ActivityLedger
-        key={selectedBucket?.key ?? 'none'}
+        key={`${selectedBucket?.key ?? 'none'}-${dateBasis}`}
         transactions={selectedBucketTransactions}
         title={selectedBucket?.tooltip ?? 'Selected period'}
         income={selectedBucket?.income ?? 0}
         expense={selectedBucket?.expense ?? 0}
         hasSelection={Boolean(selectedBucket)}
-        dateBasis="activity"
+        dateBasis={dateBasis}
       />
 
       {expenseTransactions.length > 0 && (
-          <Box>
-            <HStack spacing={2} mb={3}>
-              <Icon as={Sparkles} boxSize={4} color="purple.500" />
-              <Text
-                fontSize="xs"
-                fontWeight={800}
-                color={mutedColor}
-                textTransform="uppercase"
-                letterSpacing="0.08em"
+        <Box>
+          <HStack spacing={2} mb={3}>
+            <Icon as={Sparkles} boxSize={4} color="purple.500" />
+            <Text
+              fontSize="xs"
+              fontWeight={800}
+              color={mutedColor}
+              textTransform="uppercase"
+              letterSpacing="0.08em"
+            >
+              Behavioral Patterns
+            </Text>
+          </HStack>
+
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={3}>
+            {behaviorInsights.map((insight) => (
+              <Box
+                key={`${insight.eyebrow}-${insight.title}`}
+                bg={cardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="xl"
+                p={4}
+                minH="138px"
+                boxShadow="0 1px 2px rgba(15,23,42,0.04)"
+                transition="transform 0.18s ease, box-shadow 0.18s ease"
+                _hover={{ transform: 'translateY(-2px)', boxShadow: insightHoverShadow }}
               >
-                Behavioral Patterns
-              </Text>
-            </HStack>
+                <VStack spacing={3} align="stretch" h="100%">
+                  <Box
+                    w="34px"
+                    h="34px"
+                    borderRadius="lg"
+                    display="grid"
+                    placeItems="center"
+                    bg={`${insight.color}18`}
+                  >
+                    <Icon as={insight.icon} boxSize={4} color={insight.color} />
+                  </Box>
 
-            <SimpleGrid columns={{ base: 1, md: 3 }} spacing={3}>
-              {behaviorInsights.map((insight) => (
-                <Box
-                  key={`${insight.eyebrow}-${insight.title}`}
-                  bg={cardBg}
-                  border="1px solid"
-                  borderColor={borderColor}
-                  borderRadius="xl"
-                  p={4}
-                  minH="138px"
-                  boxShadow="0 1px 2px rgba(15,23,42,0.04)"
-                  transition="transform 0.18s ease, box-shadow 0.18s ease"
-                  _hover={{ transform: 'translateY(-2px)', boxShadow: insightHoverShadow }}
-                >
-                  <VStack spacing={3} align="stretch" h="100%">
-                    <Box
-                      w="34px"
-                      h="34px"
-                      borderRadius="lg"
-                      display="grid"
-                      placeItems="center"
-                      bg={`${insight.color}18`}
+                  <VStack spacing={1} align="stretch">
+                    <Text
+                      fontSize="2xs"
+                      fontWeight={800}
+                      color={mutedColor}
+                      textTransform="uppercase"
+                      letterSpacing="0.08em"
                     >
-                      <Icon as={insight.icon} boxSize={4} color={insight.color} />
-                    </Box>
-
-                    <VStack spacing={1} align="stretch">
-                      <Text
-                        fontSize="2xs"
-                        fontWeight={800}
-                        color={mutedColor}
-                        textTransform="uppercase"
-                        letterSpacing="0.08em"
-                      >
-                        {insight.eyebrow}
-                      </Text>
-                      <Text fontSize="sm" fontWeight={800} color={textColor} lineHeight="1.25">
-                        {insight.title}
-                      </Text>
-                      <Text fontSize="xs" color={mutedColor} lineHeight="1.45">
-                        {insight.detail}
-                      </Text>
-                    </VStack>
+                      {insight.eyebrow}
+                    </Text>
+                    <Text fontSize="sm" fontWeight={800} color={textColor} lineHeight="1.25">
+                      {insight.title}
+                    </Text>
+                    <Text fontSize="xs" color={mutedColor} lineHeight="1.45">
+                      {insight.detail}
+                    </Text>
                   </VStack>
-                </Box>
-              ))}
-            </SimpleGrid>
-          </Box>
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
+        </Box>
       )}
     </VStack>
   )
