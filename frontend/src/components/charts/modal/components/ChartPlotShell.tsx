@@ -3,8 +3,8 @@ import {
   Badge,
   Box,
   HStack,
+  Stack,
   Text,
-  VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
 
@@ -54,7 +54,12 @@ export default function ChartPlotShell({
         spacing={3}
         mb={compact ? 2 : 4}
       >
-        <VStack align="flex-start" spacing={0.5} minW={0}>
+        <Stack
+          align="flex-start"
+          spacing={compact ? 0 : 0.5}
+          minW={0}
+          direction={compact ? 'row' : 'column'}
+        >
           <Text
             fontSize="sm"
             fontWeight={700}
@@ -66,11 +71,18 @@ export default function ChartPlotShell({
             {title}
           </Text>
           {caption && (
-            <Text fontSize="xs" color={captionColor} fontWeight={500} noOfLines={2}>
+            <Text
+              fontSize="xs"
+              color={captionColor}
+              fontWeight={500}
+              noOfLines={compact ? 1 : 2}
+              ml={compact ? 2 : 0}
+              _before={compact ? { content: '"·"', mr: 2 } : undefined}
+            >
               {caption}
             </Text>
           )}
-        </VStack>
+        </Stack>
         {showPeriodBadge && selectedPeriod && badgeBg && badgeColor && (
           <Badge
             flexShrink={0}

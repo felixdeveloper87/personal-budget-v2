@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
-import { Box, HStack, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Divider, HStack, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import type { Transaction } from '../../../../types'
 import ChartPlotShell from './ChartPlotShell'
 
 interface IncomeInsightsProps {
   transactions: Transaction[]
+  compact?: boolean
 }
 
 const WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -28,7 +29,10 @@ function formatDayLabel(date: Date): string {
   return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
-export default function IncomeInsights({ transactions }: IncomeInsightsProps) {
+export default function IncomeInsights({
+  transactions,
+  compact = false,
+}: IncomeInsightsProps) {
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const cardBg = useColorModeValue('white', 'whiteAlpha.50')
@@ -81,37 +85,151 @@ export default function IncomeInsights({ transactions }: IncomeInsightsProps) {
 
   if (!insights) return null
 
+  if (compact) {
+    return (
+      <ChartPlotShell
+        title="Income insights"
+        caption="Patterns from this period"
+        showPeriodBadge={false}
+        compact
+      >
+        <VStack align="stretch" spacing={2}>
+          <HStack
+            bg={cardBg}
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius="lg"
+            px={3}
+            py={2}
+            spacing={3}
+            align="stretch"
+          >
+            <VStack align="flex-start" spacing={0} flex={1} minW={0}>
+              <Text fontSize="3xs" fontWeight={700} color={mutedColor} textTransform="uppercase">
+                Best weekday
+              </Text>
+              <HStack spacing={2}>
+                <Text fontSize="md" fontWeight={800} color={titleColor}>
+                  {insights.bestWeekday ?? '--'}
+                </Text>
+                <Text fontSize="2xs" color={greenColor} fontWeight={700}>
+                  {moneyFormatter.format(insights.bestWeekdayTotal)}
+                </Text>
+              </HStack>
+            </VStack>
+
+            <Divider orientation="vertical" h="36px" alignSelf="center" />
+
+            <VStack align="flex-start" spacing={0} flex={1} minW={0}>
+              <Text fontSize="3xs" fontWeight={700} color={mutedColor} textTransform="uppercase">
+                Avg per income day
+              </Text>
+              <HStack spacing={2}>
+                <Text fontSize="md" fontWeight={800} color={titleColor}>
+                  {moneyFormatterExact.format(insights.avgPerDay)}
+                </Text>
+                <Text fontSize="2xs" color={mutedColor} fontWeight={600}>
+                  {insights.incomeDays} days
+                </Text>
+              </HStack>
+            </VStack>
+          </HStack>
+
+          <SimpleGrid columns={{ base: 1, md: 3 }} spacing={2}>
+            {insights.topDays.slice(0, 3).map((day, index) => (
+              <HStack
+                key={dayKey(day.date)}
+                bg={cardBg}
+                border="1px solid"
+                borderColor={borderColor}
+                borderRadius="lg"
+                px={2.5}
+                py={1.5}
+                spacing={2}
+              >
+                <Box
+                  w={5}
+                  h={5}
+                  borderRadius="md"
+                  bg={rankBg}
+                  color={greenColor}
+                  fontSize="2xs"
+                  fontWeight={800}
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  {index + 1}
+                </Box>
+                <Text fontSize="xs" fontWeight={600} color={titleColor} noOfLines={1} flex={1}>
+                  {formatDayLabel(day.date)}
+                </Text>
+                <Text fontSize="xs" fontWeight={800} color={greenColor}>
+                  {moneyFormatter.format(day.total)}
+                </Text>
+              </HStack>
+            ))}
+          </SimpleGrid>
+        </VStack>
+      </ChartPlotShell>
+    )
+  }
+
   return (
-    <ChartPlotShell title="Income insights" caption="Patterns from this period" showPeriodBadge={false}>
+    <ChartPlotShell
+      title="Income insights"
+      caption="Patterns from this period"
+      showPeriodBadge={false}
+      compact={compact}
+    >
       <VStack align="stretch" spacing={{ base: 3, sm: 4 }}>
         <SimpleGrid columns={2} spacing={{ base: 3, sm: 4 }}>
-          <Box borderRadius="2xl" bg={cardBg} border="1px solid" borderColor={borderColor} p={{ base: 4, sm: 5 }}>
-            <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+          <Box
+            borderRadius="xl"
+            bg={cardBg}
+            border="1px solid"
+            borderColor={borderColor}
+            p={{ base: 4, sm: 5 }}
+          >
+            <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
               Best weekday
             </Text>
-            <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1.5} lineHeight="1.1" noOfLines={1}>
+            <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1} lineHeight="1.1" noOfLines={1}>
               {insights.bestWeekday ?? '--'}
             </Text>
-            <Text fontSize={{ base: 'xs', sm: 'sm' }} color={greenColor} fontWeight={600} mt={1} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            <Text fontSize="xs" color={greenColor} fontWeight={600} mt={0.5} sx={{ fontVariantNumeric: 'tabular-nums' }}>
               {insights.bestWeekday ? `${moneyFormatterExact.format(insights.bestWeekdayTotal)} earned` : 'No income yet'}
             </Text>
           </Box>
 
-          <Box borderRadius="2xl" bg={cardBg} border="1px solid" borderColor={borderColor} p={{ base: 4, sm: 5 }}>
-            <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
+          <Box
+            borderRadius="xl"
+            bg={cardBg}
+            border="1px solid"
+            borderColor={borderColor}
+            p={{ base: 4, sm: 5 }}
+          >
+            <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
               Avg per income day
             </Text>
-            <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1.5} lineHeight="1.1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1} lineHeight="1.1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
               {moneyFormatterExact.format(insights.avgPerDay)}
             </Text>
-            <Text fontSize={{ base: 'xs', sm: 'sm' }} color={mutedColor} fontWeight={600} mt={1}>
+            <Text fontSize="xs" color={mutedColor} fontWeight={600} mt={0.5}>
               across {insights.incomeDays} day{insights.incomeDays === 1 ? '' : 's'}
             </Text>
           </Box>
         </SimpleGrid>
 
-        <Box borderRadius="2xl" bg={cardBg} border="1px solid" borderColor={borderColor} px={{ base: 4, sm: 5 }} py={{ base: 3.5, sm: 4 }}>
-          <Text fontSize="xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em" mb={3}>
+        <Box
+          borderRadius="xl"
+          bg={cardBg}
+          border="1px solid"
+          borderColor={borderColor}
+          p={{ base: 4, sm: 5 }}
+        >
+          <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em" mb={3}>
             Top earning days
           </Text>
           <VStack align="stretch" spacing={{ base: 3, sm: 3.5 }}>
@@ -122,10 +240,10 @@ export default function IncomeInsights({ transactions }: IncomeInsightsProps) {
                   <Box
                     w={6}
                     h={6}
-                    borderRadius="lg"
+                    borderRadius="md"
                     bg={rankBg}
                     color={greenColor}
-                    fontSize="xs"
+                    fontSize="2xs"
                     fontWeight={800}
                     display="flex"
                     alignItems="center"

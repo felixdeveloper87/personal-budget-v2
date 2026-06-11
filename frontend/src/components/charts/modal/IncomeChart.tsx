@@ -135,7 +135,7 @@ export default function IncomeChart({
         </Box>
       </ChartPlotShell>
 
-      <IncomeInsights transactions={incomeTransactions} />
+      <IncomeInsights transactions={incomeTransactions} compact={compact} />
     </VStack>
   )
 }

@@ -188,7 +188,6 @@ export default function TransactionLedgerRow({
             fontSize="2xs"
             color={accountColor}
             noOfLines={1}
-            display={{ base: 'none', sm: 'block' }}
           >
             {accountLabel}
           </Text>
