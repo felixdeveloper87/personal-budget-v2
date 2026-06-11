@@ -36,14 +36,17 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
     [filters],
   )
 
-  // intentionally not propagating onSearch here — the SearchModal stays open
-  // while the SearchResultsModal opens on top, matching the previous flow.
+  // intentionally not propagating onSearch here — the filters modal is hidden
+  // (isOpen={isOpen && !showResults}) while the SearchResultsModal is shown, so
+  // only one Chakra modal is mounted at a time. Stacking two modals broke scroll
+  // inside the top one: the underlying modal's scroll-lock (react-remove-scroll)
+  // does not whitelist the results modal's container.
   void onSearch
 
   return (
     <>
       <PremiumModal
-        isOpen={isOpen}
+        isOpen={isOpen && !showResults}
         onClose={onClose}
         size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
         header={
