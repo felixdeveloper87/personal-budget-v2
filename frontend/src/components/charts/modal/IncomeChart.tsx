@@ -1,9 +1,10 @@
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { VStack, Box } from '@chakra-ui/react'
 import { useMemo } from 'react'
 import type { PeriodType, Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { TrendingUp } from '../../ui/icons'
-import { useChartColors } from './hooks'
+import { useChartColors, useChartDimensions } from './hooks'
 import {
   ChartPlotShell,
   ChartEmptyState,
@@ -33,6 +34,7 @@ export default function IncomeChart({
   compact = false,
 }: IncomeChartProps) {
   const chartColors = useChartColors()
+  const { smallChartHeight, pieOuterRadius } = useChartDimensions()
 
   const incomeTransactions = useMemo(
     () => transactions.filter((t) => t.type === 'INCOME'),
@@ -78,8 +80,6 @@ export default function IncomeChart({
         />
       )}
 
-      <IncomeInsights transactions={incomeTransactions} />
-
       <ChartPlotShell
         title="Income distribution"
         caption="Share of income by category"
@@ -89,7 +89,29 @@ export default function IncomeChart({
         badgeColor={chartColors.greenBadgeColor}
         compact={compact}
       >
-        <Box>
+        <ResponsiveContainer width="100%" height={compact ? 190 : smallChartHeight}>
+          <PieChart>
+            <Pie
+              data={pieData}
+              cx="50%"
+              cy="50%"
+              labelLine={false}
+              outerRadius={compact ? Math.min(pieOuterRadius, 72) : pieOuterRadius}
+              innerRadius={Math.round((compact ? Math.min(pieOuterRadius, 72) : pieOuterRadius) * 0.52)}
+              paddingAngle={2}
+              cornerRadius={4}
+              dataKey="value"
+              stroke={chartColors.cardBg}
+              strokeWidth={2}
+            >
+              {pieData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+
+        <Box mt={compact ? 2 : 4}>
           <VStack spacing={2} align="stretch">
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalIncome) * 100).toFixed(1)
@@ -111,6 +133,8 @@ export default function IncomeChart({
           </VStack>
         </Box>
       </ChartPlotShell>
+
+      <IncomeInsights transactions={incomeTransactions} />
     </VStack>
   )
 }
