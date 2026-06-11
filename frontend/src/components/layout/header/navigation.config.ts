@@ -16,6 +16,7 @@ import {
 export type AppPage =
   | 'dashboard'
   | 'accounts'
+  | 'cards'
   | 'transfers'
   | 'installments'
   | 'fixed-payments'
@@ -63,6 +64,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Accounts',
     icon: Wallet,
     description: 'Balances and cards',
+  },
+  {
+    id: 'cards',
+    label: 'Cards',
+    shortLabel: 'Cards',
+    icon: CreditCard,
+    description: 'Credit card statements',
   },
   {
     id: 'planning',

@@ -189,16 +189,17 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
         {!currentMonthLoading && currentMonthData.balance > 0 && (
           <HStack
             align="flex-start"
-            spacing={{ base: 3, sm: 4 }}
+            spacing={3}
             border="1px solid"
             borderColor={successBorder}
-            borderRadius={{ base: 'xl', sm: '2xl' }}
+            borderRadius="xl"
             bg={successBg}
-            p={{ base: 4, sm: 5 }}
+            px={4}
+            py={3}
           >
             <Box
-              w={{ base: 9, sm: 11 }}
-              h={{ base: 9, sm: 11 }}
+              w={8}
+              h={8}
               borderRadius="full"
               bg={successIconBg}
               color={successColor}
@@ -207,14 +208,14 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
               justifyContent="center"
               flexShrink={0}
             >
-              <Icon as={CheckCircle2} boxSize={{ base: 5, sm: 6 }} weight="fill" />
+              <Icon as={CheckCircle2} boxSize={4.5} weight="fill" />
             </Box>
-            <VStack align="stretch" spacing={1}>
-              <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={successColor}>
-                Great work, you are earning more than you are spending this month!
+            <VStack align="stretch" spacing={0.5}>
+              <Text fontSize="sm" fontWeight={800} color={successColor}>
+                You are ahead this month
               </Text>
-              <Text fontSize={{ base: 'xs', sm: 'sm' }} color={muted} lineHeight="1.5">
-                Income is {money(currentMonthData.income)} and expenses are {money(currentMonthData.expense)}, leaving you {money(currentMonthData.balance)} ahead. Keep building on this positive result.
+              <Text fontSize="xs" color={muted} lineHeight="1.35">
+                {money(currentMonthData.income)} income minus {money(currentMonthData.expense)} expenses leaves {money(currentMonthData.balance)} ahead.
               </Text>
             </VStack>
           </HStack>
@@ -224,18 +225,19 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
           <HStack
             align={{ base: 'stretch', md: 'center' }}
             justify="space-between"
-            spacing={{ base: 4, md: 6 }}
+            spacing={{ base: 3, md: 4 }}
             flexDirection={{ base: 'column', md: 'row' }}
             border="1px solid"
             borderColor={deficitBorder}
-            borderRadius={{ base: 'xl', sm: '2xl' }}
+            borderRadius="xl"
             bg={deficitBg}
-            p={{ base: 4, sm: 5 }}
+            px={4}
+            py={3}
           >
-            <HStack align="flex-start" spacing={{ base: 3, sm: 4 }}>
+            <HStack align="flex-start" spacing={3}>
               <Box
-                w={{ base: 9, sm: 11 }}
-                h={{ base: 9, sm: 11 }}
+                w={8}
+                h={8}
                 borderRadius="full"
                 bg={deficitIconBg}
                 color={deficitColor}
@@ -244,19 +246,20 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
                 justifyContent="center"
                 flexShrink={0}
               >
-                <Icon as={AlertTriangle} boxSize={{ base: 5, sm: 6 }} weight="fill" />
+                <Icon as={AlertTriangle} boxSize={5} weight="fill" />
               </Box>
-              <VStack align="stretch" spacing={1}>
-                <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color={deficitColor}>
-                  You are running a monthly deficit
+              <VStack align="stretch" spacing={0.5}>
+                <Text fontSize="sm" fontWeight={800} color={deficitColor}>
+                  Monthly deficit
                 </Text>
-                <Text fontSize={{ base: 'xs', sm: 'sm' }} color={muted} lineHeight="1.5">
-                  Expenses are {money(currentMonthData.expense)} against {money(currentMonthData.income)} of income, leaving a {money(Math.abs(currentMonthData.balance))} gap. Use the break-even target to calculate the daily pace needed to recover.
+                <Text fontSize="xs" color={muted} lineHeight="1.35">
+                  {money(currentMonthData.expense)} expenses against {money(currentMonthData.income)} income leaves a {money(Math.abs(currentMonthData.balance))} gap.
                 </Text>
               </VStack>
             </HStack>
             <Button
               colorScheme="red"
+              size="sm"
               flexShrink={0}
               rightIcon={<Icon as={ArrowRight} boxSize={4} />}
               onClick={() => onPageChange?.('goals')}
@@ -271,29 +274,30 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
             status={firstPositiveMonth ? 'success' : 'warning'}
             borderRadius="xl"
             alignItems="flex-start"
+            px={3}
+            py={2}
           >
-            <AlertIcon mt={0.5} />
+            <AlertIcon boxSize={4} mt={0.5} />
             <Box>
-              <Text fontWeight={800}>
+              <Text fontSize="sm" fontWeight={800} lineHeight="1.3">
                 {firstPositiveMonth
                   ? `Projected to return positive in ${monthLabel(firstPositiveMonth.month)}`
                   : 'No positive balance projected in the next 12 months'}
               </Text>
-              <AlertDescription fontSize="sm">
+              <AlertDescription fontSize="xs" lineHeight="1.35">
                 {firstPositiveMonth
-                  ? `Your projected closing balance reaches ${money(firstPositiveMonth.projectedClosingBalance)} by the end of that month.`
-                  : 'Review expected income, category budgets and recurring expenses to build a recovery path.'}
+                  ? `Projected closing balance: ${money(firstPositiveMonth.projectedClosingBalance)}.`
+                  : 'Review income, budgets and recurring expenses.'}
               </AlertDescription>
             </Box>
           </Alert>
         )}
 
         {firstNegativeMonth && (
-          <Alert status="error" borderRadius="xl">
-            <AlertIcon />
-            <AlertDescription>
-              Your balance is projected to run out in {monthLabel(firstNegativeMonth.month)}
-              {' '}({money(firstNegativeMonth.projectedClosingBalance)}).
+          <Alert status="error" borderRadius="xl" px={3} py={2}>
+            <AlertIcon boxSize={4} />
+            <AlertDescription fontSize="sm" lineHeight="1.35">
+              Balance may run out in {monthLabel(firstNegativeMonth.month)} ({money(firstNegativeMonth.projectedClosingBalance)}).
             </AlertDescription>
           </Alert>
         )}
@@ -303,22 +307,24 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
             status={forecast.hasProjectionBasis ? 'info' : 'warning'}
             borderRadius="xl"
             alignItems="flex-start"
+            px={3}
+            py={2}
           >
-            <AlertIcon mt={0.5} />
+            <AlertIcon boxSize={4} mt={0.5} />
             <Box>
-              <Text fontWeight={800}>
+              <Text fontSize="sm" fontWeight={800} lineHeight="1.3">
                 {forecast.hasProjectionBasis
                   ? `Recent pattern from ${basisLabel}`
                   : 'Not enough recent transaction history'}
               </Text>
-              <AlertDescription fontSize="sm">
+              <AlertDescription fontSize="xs" lineHeight="1.35">
                 {forecast.hasProjectionBasis
-                  ? `Starting from your current balance of ${money(forecast.currentTotalBalance)}, rolled forward month by month. Committed items (fixed payments and installments) follow their real schedule. ${
+                  ? `From ${money(forecast.currentTotalBalance)}, including scheduled commitments. ${
                       forecast.hasIncomePlan
-                        ? `Variable income uses your expected ${money(forecast.plannedMonthlyIncome ?? 0)}/month`
-                        : `Variable income is estimated from your average of ${money(forecast.averageMonthlyIncome)}/month`
-                    }; spending is estimated from your average of ${money(forecast.averageMonthlyVariableExpense)}/month.`
-                  : 'The forecast currently includes only scheduled fixed payments and installments. Add cleared income or expense transactions to build a recent monthly pattern.'}
+                        ? `Income target: ${money(forecast.plannedMonthlyIncome ?? 0)}/month`
+                        : `Average income: ${money(forecast.averageMonthlyIncome)}/month`
+                    }; average variable spending: ${money(forecast.averageMonthlyVariableExpense)}/month.`
+                  : 'Only scheduled fixed payments and installments are included for now.'}
               </AlertDescription>
             </Box>
           </Alert>
@@ -327,26 +333,55 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
         <Card>
           <CardBody>
             <VStack align="stretch" spacing={3}>
-              <Box>
-                <Heading size="md">Expected monthly income</Heading>
-                <Text fontSize="sm" color={muted} mt={1}>
-                  For predictable but variable earnings (e.g. gig work with a monthly target).
-                  When set, the forecast uses this instead of your past average. Leave 0 to estimate from history.
+              <HStack
+                align={{ base: 'stretch', md: 'baseline' }}
+                justify="space-between"
+                spacing={{ base: 1, md: 4 }}
+                flexDirection={{ base: 'column', md: 'row' }}
+              >
+                <Heading size="md" flexShrink={0}>Expected monthly income</Heading>
+                <Text fontSize="sm" color={muted}>
+                  Overrides the historical average. Set 0 to use transaction history.
                 </Text>
-              </Box>
-              <HStack align="flex-end" spacing={3} flexWrap="wrap">
-                <FormControl maxW="240px">
-                  <FormLabel>Target per month</FormLabel>
+              </HStack>
+              <HStack align="center" spacing={{ base: 2, md: 3 }} flexWrap={{ base: 'nowrap', md: 'wrap' }}>
+                <FormControl
+                  maxW={{ base: '110px', md: '360px' }}
+                  display="flex"
+                  alignItems="center"
+                  gap={3}
+                >
+                  <FormLabel mb={0} flexShrink={0} display={{ base: 'none', md: 'block' }}>
+                    Target per month
+                  </FormLabel>
                   <NumberInput min={0} precision={2} value={incomePlan} onChange={(_, value) => setIncomePlan(value || 0)}>
                     <NumberInputField />
                   </NumberInput>
                 </FormControl>
-                <Button colorScheme="blue" onClick={saveIncomePlan} isLoading={savingIncomePlan}>
-                  {incomePlan > 0 ? 'Save expected income' : 'Clear expected income'}
+                <Button
+                  colorScheme="blue"
+                  onClick={saveIncomePlan}
+                  isLoading={savingIncomePlan}
+                  px={{ base: 3, md: 4 }}
+                  flexShrink={0}
+                >
+                  {incomePlan > 0 ? 'Save' : 'Clear'}
+                  <Text as="span" display={{ base: 'none', md: 'inline' }} ml={1}>
+                    expected income
+                  </Text>
                 </Button>
                 {forecast?.hasIncomePlan && (
-                  <Badge colorScheme="purple" alignSelf="center">
-                    Active: {money(forecast.plannedMonthlyIncome ?? 0)}/month
+                  <Badge
+                    colorScheme="purple"
+                    fontSize="xs"
+                    px={{ base: 1.5, md: 2 }}
+                    py={1}
+                    borderRadius="md"
+                    whiteSpace="nowrap"
+                  >
+                    <Text as="span" display={{ base: 'none', md: 'inline' }}>Active: </Text>
+                    {money(forecast.plannedMonthlyIncome ?? 0)}
+                    <Text as="span" display={{ base: 'none', md: 'inline' }}>/month</Text>
                   </Badge>
                 )}
               </HStack>

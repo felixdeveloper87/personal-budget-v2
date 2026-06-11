@@ -7,6 +7,7 @@ import CategoriesPage from './pages/CategoriesPage'
 import AdminDashboardPage from './pages/AdminDashboardPage'
 import ReportsPage from './pages/ReportsPage'
 import AccountsPage from './pages/AccountsPage'
+import CardsPage from './pages/CardsPage'
 import TransfersPage from './pages/TransfersPage'
 import InstallmentsPage from './pages/InstallmentsPage'
 import FixedPaymentsPage from './pages/FixedPaymentsPage'
@@ -24,6 +25,7 @@ interface PageRenderArgs {
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
   accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
+  cards: () => <CardsPage />,
   transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   installments: ({ onPageChange }) => <InstallmentsPage onPageChange={onPageChange} />,
   'fixed-payments': ({ onPageChange }) => <FixedPaymentsPage onPageChange={onPageChange} />,
