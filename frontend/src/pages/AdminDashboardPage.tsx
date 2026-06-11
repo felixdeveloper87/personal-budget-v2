@@ -29,6 +29,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { Shield, Trash2, X } from '../components/ui/icons'
+import { PageHeader } from '../components/ui'
 import { useAuth } from '../contexts/AuthContext'
 import {
   approveAdminUser,
@@ -208,12 +209,13 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       </AlertDialog>
 
       <Container maxW="container.xl">
-        <HStack spacing={3} mb={6} align="center">
-          <Icon as={Shield} boxSize={8} color="blue.500" />
-          <Heading size="lg" fontWeight="800">
-            Admin
-          </Heading>
-        </HStack>
+        <Box mb={6}>
+          <PageHeader
+            icon={Shield}
+            title="Admin"
+            subtitle="Manage users, approvals and subscription access."
+          />
+        </Box>
 
         {loading ? (
           <HStack spacing={3} py={10} justify="center">

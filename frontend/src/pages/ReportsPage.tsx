@@ -24,7 +24,7 @@ import {
 } from '../components/ui/icons'
 import type { LucideIcon } from '../components/ui/icons'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
-import { SectionCard, SectionHeader } from '../components/ui'
+import { PageHeader, SectionCard, SectionHeader } from '../components/ui'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import { getReport } from '../api'
 import type {
@@ -271,62 +271,48 @@ function ReportsPageHeader({
   onGoToToday: () => void
   onExport: () => void
 }) {
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
   const pillBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const pillBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const pillColor = useColorModeValue('gray.600', 'gray.300')
 
   return (
-    <Flex
-      w="full"
-      align={{ base: 'stretch', md: 'center' }}
-      justify="space-between"
-      gap={3}
-      direction={{ base: 'column', md: 'row' }}
-      px={{ base: 1, sm: 2, md: 3 }}
-      py={{ base: 1, md: 2 }}
-    >
-      <VStack align="flex-start" spacing={0.5} minW={0}>
-        <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={700} color={titleColor} noOfLines={1}>
-          Reports
-        </Text>
-        <Text fontSize={{ base: 'xs', md: 'sm' }} color={captionColor} fontWeight={500} noOfLines={1}>
-          Review the period and export a polished PDF.
-        </Text>
-      </VStack>
-
-      <HStack spacing={2} flexShrink={0} justify={{ base: 'flex-start', md: 'flex-end' }}>
-        <HStack
-          spacing={2}
-          bg={pillBg}
-          border="1px solid"
-          borderColor={pillBorder}
-          borderRadius="full"
-          px={3}
-          py={1.5}
-          display={{ base: 'none', lg: 'flex' }}
-        >
-          <Box w="6px" h="6px" borderRadius="full" bg="blue.400" />
-          <Text fontSize="xs" fontWeight={600} color={pillColor} noOfLines={1}>
-            {periodLabel}
-          </Text>
+    <PageHeader
+      icon={FileText}
+      title="Reports"
+      subtitle="Review the period and export a polished PDF."
+      rightSlot={
+        <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
+          <HStack
+            spacing={2}
+            bg={pillBg}
+            border="1px solid"
+            borderColor={pillBorder}
+            borderRadius="full"
+            px={3}
+            py={1.5}
+            display={{ base: 'none', lg: 'flex' }}
+          >
+            <Box w="6px" h="6px" borderRadius="full" bg="blue.400" />
+            <Text fontSize="xs" fontWeight={600} color={pillColor} noOfLines={1}>
+              {periodLabel}
+            </Text>
+          </HStack>
+          <Button size="sm" h="36px" borderRadius="lg" leftIcon={<Icon as={RotateCcw} boxSize={3.5} />} onClick={onGoToToday}>
+            Today
+          </Button>
+          <Button
+            size="sm"
+            h="36px"
+            borderRadius="lg"
+            colorScheme="blue"
+            leftIcon={<Icon as={FileText} boxSize={3.5} />}
+            onClick={onExport}
+          >
+            Export PDF
+          </Button>
         </HStack>
-        <Button size="sm" h="36px" borderRadius="lg" leftIcon={<Icon as={RotateCcw} boxSize={3.5} />} onClick={onGoToToday}>
-          Today
-        </Button>
-        <Button
-          size="sm"
-          h="36px"
-          borderRadius="lg"
-          colorScheme="blue"
-          leftIcon={<Icon as={FileText} boxSize={3.5} />}
-          onClick={onExport}
-        >
-          Export PDF
-        </Button>
-      </HStack>
-    </Flex>
+      }
+    />
   )
 }
 

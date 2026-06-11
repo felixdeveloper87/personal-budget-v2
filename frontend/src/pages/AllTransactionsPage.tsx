@@ -8,6 +8,8 @@ import { listTransactions, searchTransactions, listInstallmentPlans } from '../a
 import { Transaction, InstallmentPlan } from '../types'
 import { mergeTransactionsWithFutureInstallments } from '../utils/installments'
 import { ToastService } from '../services/toast'
+import { PageHeader } from '../components/ui'
+import { ReceiptText } from '../components/ui/icons'
 
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -63,16 +65,23 @@ export default function AllTransactionsPage() {
         maxW="1400px"
         mx="auto"
       >
-        <VStack py={20} spacing={4}>
-          <Spinner
-            size="xl"
-            color={spinnerColor}
-            thickness="3px"
-            speed="0.8s"
+        <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
+          <PageHeader
+            icon={ReceiptText}
+            title="All transactions"
+            subtitle="Search, review and manage your complete transaction history."
           />
-          <Text fontSize="sm" fontWeight={500} color={textColor}>
-            Loading transactions...
-          </Text>
+          <VStack py={20} spacing={4}>
+            <Spinner
+              size="xl"
+              color={spinnerColor}
+              thickness="3px"
+              speed="0.8s"
+            />
+            <Text fontSize="sm" fontWeight={500} color={textColor}>
+              Loading transactions...
+            </Text>
+          </VStack>
         </VStack>
       </Box>
     )
@@ -86,11 +95,18 @@ export default function AllTransactionsPage() {
       mx="auto"
       minW={0}
     >
-      <AllTransactionsSection
-        transactions={transactions}
-        hasFilters={hasActiveFilters(filters)}
-        onRefresh={loadData}
-      />
+      <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
+        <PageHeader
+          icon={ReceiptText}
+          title="All transactions"
+          subtitle="Search, review and manage your complete transaction history."
+        />
+        <AllTransactionsSection
+          transactions={transactions}
+          hasFilters={hasActiveFilters(filters)}
+          onRefresh={loadData}
+        />
+      </VStack>
     </Box>
   )
 }

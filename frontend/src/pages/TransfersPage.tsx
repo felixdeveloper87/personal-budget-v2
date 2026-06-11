@@ -35,7 +35,7 @@ import type {
   FinancialAccount,
 } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
-import { SectionHeader } from '../components/ui'
+import { PageHeader, SectionHeader } from '../components/ui'
 import {
   ArrowLeft,
   ArrowRight,
@@ -234,24 +234,22 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
       py={{ base: 4, md: 7 }}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <HStack justify="space-between" align="flex-start">
-          <Box>
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800}>
-              Transfers
-            </Text>
-            <Text color={muted} mt={1} fontSize="sm">
-              Move money between your accounts without changing income or expenses.
-            </Text>
-          </Box>
-          <Button
-            size="sm"
-            variant="ghost"
-            leftIcon={<Icon as={ArrowLeft} boxSize={4} />}
-            onClick={() => onPageChange?.('accounts')}
-          >
-            Accounts
-          </Button>
-        </HStack>
+        <PageHeader
+          icon={Repeat}
+          title="Transfers"
+          subtitle="Move money between your accounts without changing income or expenses."
+          rightSlot={
+            <Button
+              size="sm"
+              variant="ghost"
+              leftIcon={<Icon as={ArrowLeft} boxSize={4} />}
+              onClick={() => onPageChange?.('accounts')}
+              w={{ base: 'full', sm: 'auto' }}
+            >
+              Accounts
+            </Button>
+          }
+        />
 
         <SimpleGrid columns={{ base: 1, lg: 5 }} spacing={5} alignItems="start">
           <Card

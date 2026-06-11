@@ -17,7 +17,7 @@ import { listRecurringTransactions } from '../api'
 import type { RecurringTransaction } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import RecurringTransactionCard from '../components/recurring/RecurringTransactionCard'
-import { SectionHeader } from '../components/ui'
+import { PageHeader, SectionHeader } from '../components/ui'
 import {
   CalendarClock,
   Plus,
@@ -94,28 +94,21 @@ export default function FixedPaymentsPage({
       py={{ base: 4, md: 7 }}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <HStack
-          justify="space-between"
-          align={{ base: 'flex-start', sm: 'center' }}
-          flexWrap="wrap"
-          gap={3}
-        >
-          <Box>
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800}>
-              Fixed payments & incomes
-            </Text>
-            <Text color={muted} mt={1} fontSize="sm">
-              Manage predictable monthly bills, subscriptions and income.
-            </Text>
-          </Box>
-          <Button
-            colorScheme="blue"
-            leftIcon={<Icon as={Plus} boxSize={4} />}
-            onClick={() => onPageChange?.('dashboard')}
-          >
-            Add from Home
-          </Button>
-        </HStack>
+        <PageHeader
+          icon={CalendarClock}
+          title="Fixed payments & incomes"
+          subtitle="Manage predictable monthly bills, subscriptions and income."
+          rightSlot={
+            <Button
+              colorScheme="blue"
+              leftIcon={<Icon as={Plus} boxSize={4} />}
+              onClick={() => onPageChange?.('dashboard')}
+              w={{ base: 'full', sm: 'auto' }}
+            >
+              Add from Home
+            </Button>
+          }
+        />
 
         {loading ? (
           <HStack justify="center" py={20}>

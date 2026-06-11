@@ -6,7 +6,6 @@ import {
   Button,
   Flex,
   HStack,
-  Heading,
   Icon,
   Text,
   VStack,
@@ -82,16 +81,8 @@ export default function AllTransactionsSection({
   const headerBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
 
   /* ── Text tokens ── */
-  const titleColor = useColorModeValue('gray.900', 'whiteAlpha.900')
-  const subColor = useColorModeValue('gray.500', 'gray.400')
 
   /* ── Accent tokens ── */
-  const accentGradient = useColorModeValue(
-    'linear-gradient(135deg, #2563eb, #7c3aed)',
-    'linear-gradient(135deg, #60a5fa, #a78bfa)',
-  )
-  const iconBoxBg = useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')
-  const iconBoxColor = useColorModeValue('blue.600', 'blue.300')
 
   /* ── Tab tokens ── */
   const tabTrackBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
@@ -145,96 +136,44 @@ export default function AllTransactionsSection({
         borderBottomColor={headerBorder}
         px={{ base: 4, md: 6 }}
         py={{ base: 4, md: 5 }}
-        position="relative"
-        overflow="hidden"
       >
         {/* Subtle top accent bar */}
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          right={0}
-          h="2px"
-          background={accentGradient}
-          opacity={0.5}
-        />
-
         <Flex
           direction={{ base: 'column', md: 'row' }}
           align={{ base: 'flex-start', md: 'center' }}
           justify="space-between"
           gap={{ base: 4, md: 0 }}
         >
-          {/* Left: icon + title + count */}
-          <HStack spacing={3} align="center">
-            <Flex
-              w={{ base: 9, md: 10 }}
-              h={{ base: 9, md: 10 }}
-              align="center"
-              justify="center"
-              borderRadius="xl"
-              bg={iconBoxBg}
-              color={iconBoxColor}
-              flexShrink={0}
+          <HStack spacing={2} align="center">
+            <Box
+              px={2.5}
+              py={1}
+              borderRadius="full"
+              bg={countBg}
+              border="1px solid"
+              borderColor={countBorder}
             >
-              <Icon as={ReceiptText} boxSize={5} weight="duotone" />
-            </Flex>
-
-            <VStack spacing={0} align="flex-start">
-              <HStack spacing={2} align="center">
-                <Heading
-                  as="h1"
-                  fontSize={{ base: 'lg', md: 'xl' }}
-                  fontWeight={800}
-                  color={titleColor}
-                  letterSpacing="-0.02em"
-                  lineHeight={1.1}
-                >
-                  Transactions
-                </Heading>
-
-                {/* Count pill */}
-                <Box
-                  px={2.5}
-                  py={0.5}
-                  borderRadius="full"
-                  bg={countBg}
-                  border="1px solid"
-                  borderColor={countBorder}
-                >
-                  <Text fontSize="xs" fontWeight={800} color={countColor} lineHeight={1}>
-                    {transactions.length}
-                  </Text>
-                </Box>
-
-                {/* Filter badge */}
-                {hasFilters && (
-                  <HStack
-                    spacing={1.5}
-                    px={2.5}
-                    py={0.5}
-                    borderRadius="full"
-                    bg={filterBg}
-                    border="1px solid"
-                    borderColor={filterBorder}
-                  >
-                    <Icon as={Filter} boxSize={3} color={filterColor} weight="bold" />
-                    <Text fontSize="xs" fontWeight={700} color={filterColor} lineHeight={1}>
-                      Filtered
-                    </Text>
-                  </HStack>
-                )}
-              </HStack>
-
-              <Text
-                fontSize="xs"
-                fontWeight={500}
-                color={subColor}
-                display={{ base: 'none', sm: 'block' }}
-              >
-                Complete transaction history
+              <Text fontSize="xs" fontWeight={800} color={countColor} lineHeight={1}>
+                {transactions.length} transactions
               </Text>
-            </VStack>
+            </Box>
+
+            {hasFilters && (
+              <HStack
+                spacing={1.5}
+                px={2.5}
+                py={1}
+                borderRadius="full"
+                bg={filterBg}
+                border="1px solid"
+                borderColor={filterBorder}
+              >
+                <Icon as={Filter} boxSize={3} color={filterColor} weight="bold" />
+                <Text fontSize="xs" fontWeight={700} color={filterColor} lineHeight={1}>
+                  Filtered
+                </Text>
+              </HStack>
+            )}
           </HStack>
 
           {/* Right: actions + view toggle */}

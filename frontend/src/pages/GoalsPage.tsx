@@ -26,6 +26,8 @@ import { ToastService } from '../services/toast'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
+import { PageHeader } from '../components/ui'
+import { ShieldCheck } from '../components/ui/icons'
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
@@ -87,10 +89,11 @@ export default function GoalsPage() {
   return (
     <Box maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
-        <Box>
-          <Heading size="lg">Savings goals</Heading>
-          <Text color={muted} mt={1}>Track dedicated targets without changing account balances.</Text>
-        </Box>
+        <PageHeader
+          icon={ShieldCheck}
+          title="Savings goals"
+          subtitle="Track dedicated targets without changing account balances."
+        />
 
         {balanceLoading ? (
           <HStack justify="center" py={10}>

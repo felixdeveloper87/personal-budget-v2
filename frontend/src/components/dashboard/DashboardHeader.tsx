@@ -3,10 +3,11 @@ import {
   Box,
   HStack,
   Text,
-  VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useAuth } from '../../contexts/AuthContext'
+import { PageHeader } from '../ui'
+import { LayoutDashboard } from '../ui/icons'
 
 export interface DashboardHeaderProps {
   income?: number
@@ -76,8 +77,6 @@ export default function DashboardHeader({ income, expense }: DashboardHeaderProp
   const todayLabel = useTodayLabel()
   const status = useFinancialStatus(income, expense)
 
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
   const dateBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const dateBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const dateColor = useColorModeValue('gray.600', 'gray.300')
@@ -91,69 +90,47 @@ export default function DashboardHeader({ income, expense }: DashboardHeaderProp
   const headline = firstName ? `${greeting}, ${firstName}` : greeting
 
   return (
-    <HStack
-      w="full"
-      align="center"
-      justify="space-between"
-      spacing={4}
-      px={{ base: 1, sm: 2, md: 3 }}
-      py={{ base: 1, md: 2 }}
-    >
-      <VStack align="flex-start" spacing={0.5} minW={0}>
-        <Text
-          fontSize={{ base: 'lg', md: 'xl' }}
-          fontWeight={700}
-          color={titleColor}
-          letterSpacing="-0.01em"
-          noOfLines={1}
-        >
-          {headline}
-        </Text>
-        <Text
-          fontSize={{ base: 'xs', md: 'sm' }}
-          color={captionColor}
-          fontWeight={500}
-          noOfLines={1}
-        >
-          Here&apos;s what&apos;s happening with your money today.
-        </Text>
-      </VStack>
+    <PageHeader
+      icon={LayoutDashboard}
+      title={headline}
+      subtitle="Here's what's happening with your money today."
+      rightSlot={
+        <HStack spacing={2}>
+          {status && (
+            <HStack
+              spacing={1.5}
+              bg={statusBg}
+              border="1px solid"
+              borderColor={statusBorder}
+              borderRadius="full"
+              px={3}
+              py={1.5}
+              display={{ base: 'none', md: 'flex' }}
+            >
+              <Box w="6px" h="6px" borderRadius="full" bg={status.dot} />
+              <Text fontSize="xs" fontWeight={600} color={statusText}>
+                {status.label}
+              </Text>
+            </HStack>
+          )}
 
-      <HStack spacing={2} flexShrink={0}>
-        {status && (
           <HStack
-            spacing={1.5}
-            bg={statusBg}
+            spacing={2}
+            bg={dateBg}
             border="1px solid"
-            borderColor={statusBorder}
+            borderColor={dateBorder}
             borderRadius="full"
             px={3}
             py={1.5}
-            display={{ base: 'none', md: 'flex' }}
+            display={{ base: 'none', sm: 'flex' }}
           >
-            <Box w="6px" h="6px" borderRadius="full" bg={status.dot} />
-            <Text fontSize="xs" fontWeight={600} color={statusText}>
-              {status.label}
+            <Box w="6px" h="6px" borderRadius="full" bg={dotColor} />
+            <Text fontSize="xs" fontWeight={600} color={dateColor}>
+              {todayLabel}
             </Text>
           </HStack>
-        )}
-
-        <HStack
-          spacing={2}
-          bg={dateBg}
-          border="1px solid"
-          borderColor={dateBorder}
-          borderRadius="full"
-          px={3}
-          py={1.5}
-          display={{ base: 'none', sm: 'flex' }}
-        >
-          <Box w="6px" h="6px" borderRadius="full" bg={dotColor} />
-          <Text fontSize="xs" fontWeight={600} color={dateColor}>
-            {todayLabel}
-          </Text>
         </HStack>
-      </HStack>
-    </HStack>
+      }
+    />
   )
 }

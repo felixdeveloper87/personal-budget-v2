@@ -34,7 +34,8 @@ import {
 } from '../api'
 import { CashFlowForecast, CategoryBudget } from '../types'
 import { ToastService } from '../services/toast'
-import { AlertTriangle, ArrowRight, CheckCircle2 } from '../components/ui/icons'
+import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2 } from '../components/ui/icons'
+import { PageHeader } from '../components/ui'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
@@ -179,10 +180,11 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   return (
     <Box maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
-        <Box>
-          <Heading size="lg">Planning</Heading>
-          <Text color={muted} mt={1}>Category budgets, future balances and payment calendar.</Text>
-        </Box>
+        <PageHeader
+          icon={CalendarClock}
+          title="Planning"
+          subtitle="Category budgets, future balances and payment calendar."
+        />
 
         {!currentMonthLoading && currentMonthData.balance > 0 && (
           <HStack

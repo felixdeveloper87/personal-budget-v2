@@ -2,7 +2,6 @@ import {
   Box,
   Flex,
   HStack,
-  Heading,
   Icon,
   Text,
   VStack,
@@ -18,7 +17,7 @@ import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import ExpensesChart from '../components/charts/modal/ExpensesChart'
 import IncomeChart from '../components/charts/modal/IncomeChart'
-import { DateBasisToggle, PageSkeleton } from '../components/ui'
+import { DateBasisToggle, PageHeader, PageSkeleton } from '../components/ui'
 import type { Transaction } from '../types'
 import type { TransactionDateBasis } from '../utils/transactionDates'
 
@@ -62,23 +61,10 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
     'linear-gradient(135deg, rgba(18, 18, 22, 0.75) 0%, rgba(10, 10, 12, 0.85) 100%)',
   )
   const border = useColorModeValue('rgba(0, 0, 0, 0.06)', 'rgba(255, 255, 255, 0.04)')
-  const headerBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)',
-    'linear-gradient(135deg, rgba(15, 15, 20, 0.6) 0%, rgba(10, 10, 14, 0.5) 100%)',
-  )
   const headerBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
-  const titleColor = useColorModeValue('gray.900', 'whiteAlpha.900')
-  const subColor = useColorModeValue('gray.500', 'gray.400')
-  const iconBoxBg = useColorModeValue('purple.50', 'rgba(139, 92, 246, 0.12)')
-  const iconBoxColor = useColorModeValue('purple.600', 'purple.300')
   const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
   const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
   const infoColor = useColorModeValue('blue.600', 'blue.300')
-  const accentGradient = useColorModeValue(
-    'linear-gradient(135deg, #7c3aed, #2563eb)',
-    'linear-gradient(135deg, #a78bfa, #60a5fa)',
-  )
-
   /* ── Tab tokens ── */
   const tabTrackBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
   const tabTrackBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
@@ -140,6 +126,46 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
       mx="auto"
     >
       <VStack spacing={{ base: 4, md: 5 }} align="stretch">
+        <PageHeader
+          icon={Layers}
+          title="Categories"
+          subtitle="See where every pound goes, broken down by category."
+          rightSlot={
+            <HStack
+              spacing={0.5}
+              p={0.5}
+              borderRadius="xl"
+              bg={tabTrackBg}
+              border="1px solid"
+              borderColor={tabTrackBorder}
+            >
+              <CategoryTabButton
+                icon={TrendingDown}
+                label="Expenses"
+                isActive={activeTab === 'expenses'}
+                onClick={() => setActiveTab('expenses')}
+                activeBg={expenseActiveBg}
+                activeBorder={expenseActiveBorder}
+                activeColor={expenseActiveColor}
+                activeShadow={expenseActiveShadow}
+                inactiveColor={tabInactiveColor}
+                hoverColor={tabInactiveHoverColor}
+              />
+              <CategoryTabButton
+                icon={TrendingUp}
+                label="Incomes"
+                isActive={activeTab === 'incomes'}
+                onClick={() => setActiveTab('incomes')}
+                activeBg={incomeActiveBg}
+                activeBorder={incomeActiveBorder}
+                activeColor={incomeActiveColor}
+                activeShadow={incomeActiveShadow}
+                inactiveColor={tabInactiveColor}
+                hoverColor={tabInactiveHoverColor}
+              />
+            </HStack>
+          }
+        />
         {/* ─── Main card ─── */}
         <Box
           w="full"
@@ -151,108 +177,6 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
           boxShadow={cardShadow}
         >
           {/* ─── Header ─── */}
-          <Box
-            bg={headerBg}
-            borderBottom="1px solid"
-            borderBottomColor={headerBorder}
-            px={{ base: 4, md: 6 }}
-            py={{ base: 4, md: 5 }}
-            position="relative"
-            overflow="hidden"
-          >
-            {/* Top accent bar */}
-            <Box
-              position="absolute"
-              top={0}
-              left={0}
-              right={0}
-              h="2px"
-              background={accentGradient}
-              opacity={0.5}
-            />
-
-            <Flex
-              direction="row"
-              align="center"
-              justify="space-between"
-              gap={3}
-            >
-              {/* Left: icon + title */}
-              <HStack spacing={3} align="center">
-                <Flex
-                  w={{ base: 9, md: 10 }}
-                  h={{ base: 9, md: 10 }}
-                  align="center"
-                  justify="center"
-                  borderRadius="xl"
-                  bg={iconBoxBg}
-                  color={iconBoxColor}
-                  flexShrink={0}
-                >
-                  <Icon as={Layers} boxSize={5} weight="duotone" />
-                </Flex>
-
-                <VStack spacing={0} align="flex-start">
-                  <Heading
-                    as="h1"
-                    fontSize={{ base: 'lg', md: 'xl' }}
-                    fontWeight={800}
-                    color={titleColor}
-                    letterSpacing="-0.02em"
-                    lineHeight={1.1}
-                  >
-                    Categories
-                  </Heading>
-                  <Text
-                    fontSize="xs"
-                    fontWeight={500}
-                    color={subColor}
-                    display={{ base: 'none', sm: 'block' }}
-                  >
-                    See where every pound goes, broken down by category
-                  </Text>
-                </VStack>
-              </HStack>
-
-              {/* Right: Expenses/Incomes toggle */}
-              <HStack spacing={2}>
-                <HStack
-                  spacing={0.5}
-                  p={0.5}
-                  borderRadius="xl"
-                  bg={tabTrackBg}
-                  border="1px solid"
-                  borderColor={tabTrackBorder}
-                >
-                  <CategoryTabButton
-                    icon={TrendingDown}
-                    label="Expenses"
-                    isActive={activeTab === 'expenses'}
-                    onClick={() => setActiveTab('expenses')}
-                    activeBg={expenseActiveBg}
-                    activeBorder={expenseActiveBorder}
-                    activeColor={expenseActiveColor}
-                    activeShadow={expenseActiveShadow}
-                    inactiveColor={tabInactiveColor}
-                    hoverColor={tabInactiveHoverColor}
-                  />
-                  <CategoryTabButton
-                    icon={TrendingUp}
-                    label="Incomes"
-                    isActive={activeTab === 'incomes'}
-                    onClick={() => setActiveTab('incomes')}
-                    activeBg={incomeActiveBg}
-                    activeBorder={incomeActiveBorder}
-                    activeColor={incomeActiveColor}
-                    activeShadow={incomeActiveShadow}
-                    inactiveColor={tabInactiveColor}
-                    hoverColor={tabInactiveHoverColor}
-                  />
-                </HStack>
-              </HStack>
-            </Flex>
-          </Box>
-
           {/* ─── Period Navigator ─── */}
           <Box px={{ base: 4, md: 6 }} pt={{ base: 3, md: 4 }}>
             <Flex

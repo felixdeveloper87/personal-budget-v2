@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import {
   Box,
-  Flex,
   HStack,
   Icon,
   Text,
@@ -14,7 +13,7 @@ import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import type { TransactionDateBasis } from '../utils/transactionDates'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import TransactionsChart from '../components/charts/modal/TransactionsChart'
-import { SectionCard, PageSkeleton, DateBasisToggle } from '../components/ui'
+import { SectionCard, PageHeader, PageSkeleton, DateBasisToggle } from '../components/ui'
 import { AlertCircle, ReceiptText } from '../components/ui/icons'
 
 const BASIS_INFO: Record<TransactionDateBasis, string> = {
@@ -50,45 +49,19 @@ export default function TransactionsPage() {
   )
 
   // ── Theme tokens ──────────────────────────────────────────────────────
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-
   const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
   const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
   const infoColor = useColorModeValue('blue.600', 'blue.300')
-
-  const pageIconBg = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%)',
-    'linear-gradient(135deg, #2563eb 0%, #6d28d9 100%)',
-  )
 
   return (
     <Box px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }} maxW="1400px" mx="auto">
       <VStack spacing={{ base: 4, md: 5 }} align="stretch">
         {/* ── Page header ─────────────────────────────────────────── */}
-        <HStack px={{ base: 1, sm: 2 }} spacing={3} align="center">
-          <Flex
-            w="40px"
-            h="40px"
-            borderRadius="xl"
-            align="center"
-            justify="center"
-            bg={pageIconBg}
-            color="white"
-            boxShadow="0 4px 12px -4px rgba(59,130,246,0.5)"
-            flexShrink={0}
-          >
-            <Icon as={ReceiptText} boxSize={5} weight="duotone" />
-          </Flex>
-          <Box>
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={titleColor}>
-              Transactions
-            </Text>
-            <Text color={captionColor} fontSize="sm">
-              Activity and spending patterns for the selected period.
-            </Text>
-          </Box>
-        </HStack>
+        <PageHeader
+          icon={ReceiptText}
+          title="Transactions"
+          subtitle="Activity and spending patterns for the selected period."
+        />
 
         {/* ── Command bar ─────────────────────────────────────────── */}
         <SectionCard staticOnHover>

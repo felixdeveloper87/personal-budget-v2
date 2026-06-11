@@ -46,12 +46,13 @@ import {
   FinancialAccount,
 } from '../types'
 import { ToastService } from '../services/toast'
-import { BankCombobox, BankLogo, SectionHeader, getBankMeta } from '../components/ui'
+import { BankCombobox, BankLogo, PageHeader, SectionHeader, getBankMeta } from '../components/ui'
 import PaymentMethodsSection from '../sections/PaymentMethodsSection'
 import AccountDetailsModal from '../components/accounts/AccountDetailsModal'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import {
   Activity,
+  Building,
   CreditCard,
   Eye,
   EyeOff,
@@ -252,27 +253,21 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
   return (
     <Box w="full" maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={7}>
-        <Flex
-          justify="space-between"
-          align={{ base: 'stretch', sm: 'center' }}
-          direction={{ base: 'column', sm: 'row' }}
-          gap={3}
-        >
-          <Box>
-            <Heading size="lg" letterSpacing="-0.025em">Accounts</Heading>
-            <Text color={muted} mt={1}>
-              Manage balances, connected institutions and credit cards.
-            </Text>
-          </Box>
-          <Button
-            colorScheme="teal"
-            leftIcon={<Icon as={Repeat} boxSize={4} />}
-            onClick={() => onPageChange?.('transfers')}
-            alignSelf={{ base: 'stretch', sm: 'center' }}
-          >
-            Transfer money
-          </Button>
-        </Flex>
+        <PageHeader
+          icon={Building}
+          title="Accounts"
+          subtitle="Manage balances, connected institutions and credit cards."
+          rightSlot={
+            <Button
+              colorScheme="teal"
+              leftIcon={<Icon as={Repeat} boxSize={4} />}
+              onClick={() => onPageChange?.('transfers')}
+              w={{ base: 'full', sm: 'auto' }}
+            >
+              Transfer money
+            </Button>
+          }
+        />
 
         <Box>
           <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
