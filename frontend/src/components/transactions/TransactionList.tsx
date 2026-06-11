@@ -33,16 +33,22 @@ import { ChevronLeft, ChevronRight } from '../ui/icons'
 import {
   getTransactionDate,
   getTransactionDateSource,
-  hasDifferentPaymentDate,
+  getCounterpartDateHint,
+  type TransactionDateBasis,
 } from '../../utils/transactionDates'
 import { formatTransactionAccount } from '../../utils/transactionAccount'
 
 interface TransactionListProps {
   transactions: Transaction[]
   onTransactionDeleted?: () => void
+  dateBasis?: TransactionDateBasis
 }
 
-export default function TransactionList({ transactions, onTransactionDeleted }: TransactionListProps) {
+export default function TransactionList({
+  transactions,
+  onTransactionDeleted,
+  dateBasis = 'activity',
+}: TransactionListProps) {
   const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -57,13 +63,13 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
   }, [transactions.length])
 
   // Memoize sorted transactions to prevent recalculation on every render
-  const sortedTransactions = useMemo(() => 
+  const sortedTransactions = useMemo(() =>
     [...transactions].sort(
       (a, b) =>
-        getTransactionDate(b, 'activity').getTime() -
-        getTransactionDate(a, 'activity').getTime(),
+        getTransactionDate(b, dateBasis).getTime() -
+        getTransactionDate(a, dateBasis).getTime(),
     ),
-    [transactions]
+    [transactions, dateBasis]
   )
 
   const totalItems = sortedTransactions.length
@@ -145,19 +151,21 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
             </Tr>
           </Thead>
           <Tbody>
-            {paginatedTransactions.map((tx) => (
+            {paginatedTransactions.map((tx) => {
+              const dateHint = getCounterpartDateHint(tx, dateBasis)
+              return (
               <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.100', 'gray.700') }}>
                 <Td display={{ base: 'none', md: 'table-cell' }}>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
                     <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
-                      {formatTransactionDateTime(getTransactionDateSource(tx, 'activity')).date}
+                      {formatTransactionDateTime(getTransactionDateSource(tx, dateBasis)).date}
                     </Text>
                     <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
                       {formatTransactionDateTime(tx.dateTime).time}
                     </Text>
-                    {hasDifferentPaymentDate(tx) && tx.paymentDate && (
-                      <Text fontSize={{ base: "2xs", md: "xs" }} color="blue.500">
-                        Payment {formatDateBR(tx.paymentDate)}
+                    {dateHint && (
+                      <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
+                        {dateHint.prefix} {formatDateBR(dateHint.date)}
                       </Text>
                     )}
                   </VStack>
@@ -251,7 +259,8 @@ export default function TransactionList({ transactions, onTransactionDeleted }: 
                   )}
                 </Td>
               </Tr>
-            ))}
+              )
+            })}
           </Tbody>
         </Table>
       </TableContainer>

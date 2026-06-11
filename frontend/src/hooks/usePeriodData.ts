@@ -3,6 +3,26 @@ import { Transaction, MonthlySummary } from '../types'
 import { PeriodType } from '../types'
 import { getTransactionDate, type TransactionDateBasis } from '../utils/transactionDates'
 
+export function getPreviousPeriodDate(date: Date, period: PeriodType): Date {
+  const prev = new Date(date)
+  switch (period) {
+    case 'day':
+      prev.setDate(date.getDate() - 1)
+      break
+    case 'week':
+      prev.setDate(date.getDate() - 7)
+      break
+    case 'month':
+      prev.setDate(1)
+      prev.setMonth(prev.getMonth() - 1)
+      break
+    case 'year':
+      prev.setFullYear(prev.getFullYear() - 1)
+      break
+  }
+  return prev
+}
+
 export interface PeriodData {
   startDate: Date
   endDate: Date

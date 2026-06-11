@@ -32,3 +32,29 @@ export function hasDifferentPaymentDate(transaction: Transaction): boolean {
   const activityDate = getTransactionDateSource(transaction, 'activity').slice(0, 10)
   return transaction.paymentDate.slice(0, 10) !== activityDate
 }
+
+export interface CounterpartDateHint {
+  prefix: string
+  date: string
+}
+
+/**
+ * Secondary date label for transactions whose payment date differs from the
+ * purchase date (credit card, installments, deferred). Returns null for
+ * debit/transfer-style transactions, which look the same in both views.
+ */
+export function getCounterpartDateHint(
+  transaction: Transaction,
+  basis: TransactionDateBasis,
+): CounterpartDateHint | null {
+  if (!hasDifferentPaymentDate(transaction)) return null
+
+  if (basis === 'activity') {
+    return { prefix: 'Pays on', date: transaction.paymentDate! }
+  }
+
+  return {
+    prefix: 'Purchased on',
+    date: getTransactionDateSource(transaction, 'activity'),
+  }
+}

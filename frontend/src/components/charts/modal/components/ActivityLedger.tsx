@@ -13,7 +13,7 @@ import {
 import type { Transaction } from '../../../../types'
 import {
   getTransactionDate,
-  hasDifferentPaymentDate,
+  getCounterpartDateHint,
   type TransactionDateBasis,
 } from '../../../../utils/transactionDates'
 import { formatDateBR } from '../../../../utils/dateTime'
@@ -349,6 +349,7 @@ export default function ActivityLedger({
                 transaction.status === 'PLANNED' ||
                 transaction.status === 'PENDING'
               const showRowDate = !showDayHeaders
+              const dateHint = getCounterpartDateHint(transaction, dateBasis)
 
               return (
                 <HStack
@@ -479,9 +480,9 @@ export default function ActivityLedger({
                           Scheduled
                         </Text>
                       </HStack>
-                    ) : hasDifferentPaymentDate(transaction) && transaction.paymentDate ? (
+                    ) : dateHint ? (
                       <Text fontSize="2xs" color={mutedColor}>
-                        Pays {formatDateBR(transaction.paymentDate)}
+                        {dateHint.prefix} {formatDateBR(dateHint.date)}
                       </Text>
                     ) : null}
                   </VStack>

@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Box, VStack } from '@chakra-ui/react'
-import { usePeriodData } from '../hooks/usePeriodData'
+import { usePeriodData, getPreviousPeriodDate } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
@@ -52,6 +52,19 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
     monthSummary,
     selectedPeriod,
     selectedDate,
+    dateBasis,
+  )
+
+  // Previous period (same basis) so "For you" can compare against it.
+  const previousDate = useMemo(
+    () => getPreviousPeriodDate(selectedDate, selectedPeriod),
+    [selectedDate, selectedPeriod],
+  )
+  const previousPeriodData = usePeriodData(
+    transactions,
+    null,
+    selectedPeriod,
+    previousDate,
     dateBasis,
   )
 
@@ -114,6 +127,8 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
             <Box order={{ base: 3, lg: 3 }}>
               <DiscoverSection
                 transactions={periodData.transactions}
+                allTransactions={transactions}
+                previousPeriodData={previousPeriodData}
                 selectedPeriod={selectedPeriod}
                 income={periodData.income}
                 expense={periodData.expense}

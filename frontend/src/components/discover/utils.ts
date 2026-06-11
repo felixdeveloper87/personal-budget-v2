@@ -41,3 +41,38 @@ export function getTopExpenses(transactions: Transaction[], limit = 5): Transact
     .sort((a, b) => b.amount - a.amount)
     .slice(0, limit)
 }
+
+export const UPCOMING_WINDOW_DAYS = 7
+
+/** Expenses whose payment hits the account within the next N days. */
+export function getUpcomingPayments(
+  transactions: Transaction[],
+  days = UPCOMING_WINDOW_DAYS,
+): Transaction[] {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const end = new Date(start)
+  end.setDate(start.getDate() + days)
+  end.setHours(23, 59, 59, 999)
+
+  return transactions
+    .filter((tx) => {
+      if (tx.type !== 'EXPENSE' || !tx.paymentDate) return false
+      const due = competenceDate(tx)
+      return due >= start && due <= end
+    })
+    .sort((a, b) => competenceDate(a).getTime() - competenceDate(b).getTime())
+}
+
+export function previousPeriodLabel(selectedPeriod: string): string {
+  switch (selectedPeriod) {
+    case 'day':
+      return 'the previous day'
+    case 'week':
+      return 'last week'
+    case 'year':
+      return 'last year'
+    default:
+      return 'last month'
+  }
+}

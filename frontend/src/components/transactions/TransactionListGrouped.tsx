@@ -33,13 +33,15 @@ import EditTransactionModal from './EditTransactionModal'
 import {
   getTransactionDate,
   getTransactionDateSource,
-  hasDifferentPaymentDate,
+  getCounterpartDateHint,
+  type TransactionDateBasis,
 } from '../../utils/transactionDates'
 import { formatTransactionAccount } from '../../utils/transactionAccount'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
   onTransactionDeleted?: () => void
+  dateBasis?: TransactionDateBasis
 }
 
 interface MonthGroup {
@@ -57,7 +59,7 @@ export interface TransactionListGroupedRef {
 }
 
 const TransactionListGrouped = forwardRef<TransactionListGroupedRef, TransactionListGroupedProps>(
-  ({ transactions, onTransactionDeleted }, ref) => {
+  ({ transactions, onTransactionDeleted, dateBasis = 'activity' }, ref) => {
     const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
     const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
     const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
@@ -71,7 +73,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     const groups: Record<string, MonthGroup> = {}
 
     transactions.forEach(transaction => {
-      const date = getTransactionDate(transaction, 'activity')
+      const date = getTransactionDate(transaction, dateBasis)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       const monthName = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
       
@@ -101,14 +103,14 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
       group.netAmount = group.totalIncome - group.totalExpense
       group.transactions.sort(
         (a, b) =>
-          getTransactionDate(b, 'activity').getTime() -
-          getTransactionDate(a, 'activity').getTime(),
+          getTransactionDate(b, dateBasis).getTime() -
+          getTransactionDate(a, dateBasis).getTime(),
       )
     })
 
     // Sort groups by month (newest first)
     return Object.values(groups).sort((a, b) => b.monthKey.localeCompare(a.monthKey))
-  }, [transactions])
+  }, [transactions, dateBasis])
 
   // Find current month key and index
   const currentMonthKey = useMemo(() => {
@@ -139,9 +141,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
   }, [monthGroups, currentMonthIndex, pageSize, hasInitializedPage])
 
   // Reset initialization flag when transactions completely change
+  // or when the date basis regroups the months
   useEffect(() => {
     setHasInitializedPage(false)
-  }, [transactions.length])
+  }, [transactions.length, dateBasis])
 
   // Scroll to current month helper
   const goToCurrentMonth = () => {
@@ -469,19 +472,21 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         </Tr>
                       </Thead>
                       <Tbody>
-                        {group.transactions.map((tx) => (
+                        {group.transactions.map((tx) => {
+                          const dateHint = getCounterpartDateHint(tx, dateBasis)
+                          return (
                           <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}>
                             <Td display={{ base: 'none', md: 'table-cell' }}>
                               <VStack spacing={1} align="start">
                                 <Text fontSize="sm" fontWeight="600" color={textColor}>
-                                  {formatTransactionDateTime(getTransactionDateSource(tx, 'activity')).date}
+                                  {formatTransactionDateTime(getTransactionDateSource(tx, dateBasis)).date}
                                 </Text>
                                 <Text fontSize="xs" color="gray.500" fontWeight="500">
                                   {formatTransactionDateTime(tx.dateTime).time}
                                 </Text>
-                                {hasDifferentPaymentDate(tx) && tx.paymentDate && (
-                                  <Text fontSize="xs" color="blue.500">
-                                    Payment {formatDateBR(tx.paymentDate)}
+                                {dateHint && (
+                                  <Text fontSize="xs" color="gray.500">
+                                    {dateHint.prefix} {formatDateBR(dateHint.date)}
                                   </Text>
                                 )}
                               </VStack>
@@ -575,7 +580,8 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                               )}
                             </Td>
                           </Tr>
-                        ))}
+                          )
+                        })}
                       </Tbody>
                     </Table>
                   </TableContainer>

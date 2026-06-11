@@ -86,11 +86,10 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
   const ctaColor = useColorModeValue('gray.700', 'gray.200')
   const ctaHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const statsBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.10)')
-  const statsBorder = useColorModeValue('teal.100', 'rgba(20,184,166,0.22)')
-  const statsAmountColor = useColorModeValue('teal.700', 'teal.200')
-  const statsLabelColor = useColorModeValue('teal.600', 'teal.300')
-  const statsDivider = useColorModeValue('teal.100', 'rgba(20,184,166,0.2)')
+  const statsBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const statsBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const statsAmountColor = useColorModeValue('red.600', 'red.300')
+  const statsLabelColor = useColorModeValue('gray.500', 'gray.400')
 
   const caption =
     activeCount === 0
@@ -115,7 +114,7 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
               icon={CreditCard}
               title="Installments"
               caption={caption}
-              accent="teal"
+              accent="neutral"
               rightSlot={
                 <HStack spacing={2}>
                   <Button
@@ -146,32 +145,22 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
 
             {activeCount > 0 && totalMonthly > 0 && (
               <HStack
-                spacing={0}
+                spacing={3}
                 bg={statsBg}
                 border="1px solid"
                 borderColor={statsBorder}
                 borderRadius="xl"
-                overflow="hidden"
+                px={3.5}
+                py={2.5}
+                justify="space-between"
               >
-                <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                  <Text fontSize="xs" fontWeight={600} color={statsLabelColor} textTransform="uppercase" letterSpacing="0.05em">
-                    Monthly
-                  </Text>
-                  <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
-                    {currencyFmt.format(totalMonthly)}
-                    <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
-                  </Text>
-                </VStack>
-                <Box w="1px" h="full" bg={statsDivider} alignSelf="stretch" />
-                <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                  <Text fontSize="xs" fontWeight={600} color={statsLabelColor} textTransform="uppercase" letterSpacing="0.05em">
-                    Plans
-                  </Text>
-                  <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
-                    {activeCount}
-                    <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}> active</Text>
-                  </Text>
-                </VStack>
+                <Text fontSize="lg" fontWeight={700} color={statsAmountColor}>
+                  {currencyFmt.format(totalMonthly)}
+                  <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
+                </Text>
+                <Text fontSize="sm" fontWeight={600} color={statsLabelColor}>
+                  {activeCount} active
+                </Text>
               </HStack>
             )}
           </VStack>

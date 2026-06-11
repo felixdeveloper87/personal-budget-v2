@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import {
   Badge,
   Box,
@@ -18,26 +18,25 @@ import {
   type DiscoverInsightsContext,
   type DiscoverModalId,
 } from '../components/discover'
+import type { DiscoverPreviousPeriod } from '../components/discover/types'
+import { getUpcomingPayments, previousPeriodLabel } from '../components/discover/utils'
 import { useDiscoverCards } from '../hooks/useDiscoverCards'
 import { useTransactionInsights } from '../hooks/useTransactionInsights'
+import type { PeriodData } from '../hooks/usePeriodData'
 import type { Transaction, PeriodType } from '../types'
 
 export interface DiscoverSectionProps {
   transactions: Transaction[]
+  allTransactions: Transaction[]
+  previousPeriodData: PeriodData
   selectedPeriod: PeriodType
   income: number
   expense: number
   balance: number
 }
 
-function CarouselDots({
-  count,
-  activeIndex,
-}: {
-  count: number
-  activeIndex: number
-}) {
-  const activeColor = useColorModeValue('purple.500', 'purple.300')
+function CarouselDots({ count, activeIndex }: { count: number; activeIndex: number }) {
+  const activeColor = useColorModeValue('gray.600', 'gray.300')
   const inactiveColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
 
   if (count <= 1) return null
@@ -60,19 +59,41 @@ function CarouselDots({
 
 export default function DiscoverSection({
   transactions,
+  allTransactions,
+  previousPeriodData,
   selectedPeriod,
   income,
   expense,
   balance,
 }: DiscoverSectionProps) {
-  const cards = useDiscoverCards({ transactions, selectedPeriod, income, expense, balance })
+  const previousPeriod = useMemo<DiscoverPreviousPeriod>(
+    () => ({
+      income: previousPeriodData.income,
+      expense: previousPeriodData.expense,
+      transactions: previousPeriodData.transactions,
+      label: previousPeriodLabel(selectedPeriod),
+    }),
+    [previousPeriodData, selectedPeriod],
+  )
+  const upcomingPayments = useMemo(
+    () => getUpcomingPayments(allTransactions),
+    [allTransactions],
+  )
+  const cards = useDiscoverCards({
+    transactions,
+    allTransactions,
+    previousPeriod,
+    income,
+    expense,
+    balance,
+  })
   const insights = useTransactionInsights(transactions, selectedPeriod)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [activeModal, setActiveModal] = useState<DiscoverModalId | null>(null)
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const countBg = useColorModeValue('purple.50', 'rgba(139,92,246,0.16)')
-  const countColor = useColorModeValue('purple.700', 'purple.200')
+  const countBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const countColor = useColorModeValue('gray.700', 'gray.200')
 
   const context: DiscoverInsightsContext = {
     totalIncome: income,
@@ -83,6 +104,8 @@ export default function DiscoverSection({
     totalTransactions: insights.totalTransactions,
     averageExpensePerDay: insights.averageExpensePerDay,
     transactions,
+    previousPeriod,
+    upcomingPayments,
   }
 
   const handleCardClick = useCallback(
@@ -121,7 +144,7 @@ export default function DiscoverSection({
               icon={Sparkles}
               title="For you"
               caption="Personalised insights from your activity this period."
-              accent="violet"
+              accent="neutral"
               rightSlot={
                 <Badge
                   px={2.5}
@@ -132,7 +155,6 @@ export default function DiscoverSection({
                   fontSize="2xs"
                   fontWeight={700}
                   textTransform="none"
-                  letterSpacing="0"
                 >
                   {cards.length} {cards.length === 1 ? 'insight' : 'insights'}
                 </Badge>
@@ -159,12 +181,7 @@ export default function DiscoverSection({
               >
                 {cards.map((item) => (
                   <Box key={item.id} flex="0 0 86%" scrollSnapAlign="center">
-                    <DiscoverCard
-                      item={item}
-                      onClick={() => handleCardClick(item)}
-                      featured={item.featured}
-                      compact
-                    />
+                    <DiscoverCard item={item} onClick={() => handleCardClick(item)} compact />
                   </Box>
                 ))}
               </Box>
@@ -173,24 +190,13 @@ export default function DiscoverSection({
 
             <Grid
               display={{ base: 'none', md: 'grid' }}
-              templateColumns={{
-                md: 'repeat(2, minmax(0, 1fr))',
-                lg: 'repeat(3, minmax(0, 1fr))',
-              }}
-              gap={{ md: 4 }}
+              templateColumns="repeat(3, minmax(0, 1fr))"
+              gap={4}
               alignItems="stretch"
             >
-              {cards.map((item, index) => (
-                <GridItem
-                  key={item.id}
-                  colSpan={item.featured && index === 0 ? { md: 2, lg: 2 } : 1}
-                >
-                  <DiscoverCard
-                    item={item}
-                    onClick={() => handleCardClick(item)}
-                    featured={item.featured && index === 0}
-                    compact={!item.featured}
-                  />
+              {cards.map((item) => (
+                <GridItem key={item.id}>
+                  <DiscoverCard item={item} onClick={() => handleCardClick(item)} compact />
                 </GridItem>
               ))}
             </Grid>

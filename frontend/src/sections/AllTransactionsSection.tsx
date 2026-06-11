@@ -14,6 +14,11 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { Calendar, Download, Filter, List, ReceiptText, Upload } from '../components/ui/icons'
+import { DateBasisToggle } from '../components/ui'
+import {
+  getTransactionDate,
+  type TransactionDateBasis,
+} from '../utils/transactionDates'
 import { exportAllData } from '../utils/export'
 import { ToastService } from '../services/toast'
 
@@ -29,6 +34,7 @@ export default function AllTransactionsSection({
   onRefresh,
 }: AllTransactionsSectionProps) {
   const [groupByMonth, setGroupByMonth] = useState(true)
+  const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('activity')
   const groupedListRef = useRef<{ goToCurrentMonth: () => void } | null>(null)
   const importModal = useDisclosure()
   const [exporting, setExporting] = useState(false)
@@ -57,11 +63,11 @@ export default function AllTransactionsSection({
     const now = new Date()
     const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
     return transactions.some(t => {
-      const date = new Date(t.paymentDate || t.dateTime)
+      const date = getTransactionDate(t, dateBasis)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
       return monthKey === currentMonthKey
     })
-  }, [transactions])
+  }, [transactions, dateBasis])
 
   /* ── Surface tokens ── */
   const surface = useColorModeValue(
@@ -232,7 +238,9 @@ export default function AllTransactionsSection({
           </HStack>
 
           {/* Right: actions + view toggle */}
-          <HStack spacing={{ base: 2, md: 3 }} align="center">
+          <HStack spacing={{ base: 2, md: 3 }} align="center" flexWrap="wrap">
+            <DateBasisToggle value={dateBasis} onChange={setDateBasis} />
+
             {groupByMonth && hasCurrentMonth && (
               <Button
                 size="sm"
@@ -326,11 +334,13 @@ export default function AllTransactionsSection({
             ref={groupedListRef}
             transactions={transactions}
             onTransactionDeleted={onRefresh}
+            dateBasis={dateBasis}
           />
         ) : (
           <TransactionList
             transactions={transactions}
             onTransactionDeleted={onRefresh}
+            dateBasis={dateBasis}
           />
         )}
       </Box>

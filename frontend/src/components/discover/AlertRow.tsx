@@ -13,14 +13,14 @@ interface AccentTokens {
 }
 
 const ACCENTS: Record<DiscoverAccent, AccentTokens> = {
-  violet: {
-    borderColor: 'purple.400',
+  neutral: {
+    borderColor: 'gray.400',
     bgLight: 'transparent',
-    bgDark: 'rgba(139,92,246,0.07)',
-    chipBgLight: 'purple.100',
-    chipBgDark: 'rgba(139,92,246,0.22)',
-    fgLight: 'purple.600',
-    fgDark: 'purple.300',
+    bgDark: 'whiteAlpha.50',
+    chipBgLight: 'gray.100',
+    chipBgDark: 'whiteAlpha.100',
+    fgLight: 'gray.600',
+    fgDark: 'gray.300',
   },
   blue: {
     borderColor: 'blue.400',

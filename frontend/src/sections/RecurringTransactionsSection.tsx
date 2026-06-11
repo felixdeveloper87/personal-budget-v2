@@ -82,11 +82,11 @@ export default function RecurringTransactionsSection({
   const ctaHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const statsBg = useColorModeValue('orange.50', 'rgba(249,115,22,0.10)')
-  const statsBorder = useColorModeValue('orange.100', 'rgba(249,115,22,0.22)')
-  const statsAmountColor = useColorModeValue('orange.700', 'orange.200')
-  const statsLabelColor = useColorModeValue('orange.600', 'orange.300')
-  const statsDivider = useColorModeValue('orange.100', 'rgba(249,115,22,0.2)')
+  const statsBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const statsBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const statsAmountColor = useColorModeValue('red.600', 'red.300')
+  const statsLabelColor = useColorModeValue('gray.500', 'gray.400')
+  const statsDivider = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const statsIncomeColor = useColorModeValue('green.600', 'green.300')
 
   const caption =
@@ -111,7 +111,7 @@ export default function RecurringTransactionsSection({
               icon={CalendarClock}
               title="Fixed payments"
               caption={caption}
-              accent="amber"
+              accent="neutral"
               rightSlot={
                 <HStack spacing={2}>
                   <Button
@@ -151,7 +151,7 @@ export default function RecurringTransactionsSection({
               >
                 {monthlyExpense > 0 && (
                   <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor} textTransform="uppercase" letterSpacing="0.05em">
+                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor}>
                       Expenses
                     </Text>
                     <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
@@ -165,7 +165,7 @@ export default function RecurringTransactionsSection({
                 )}
                 {monthlyIncome > 0 && (
                   <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                    <Text fontSize="xs" fontWeight={600} color={statsIncomeColor} textTransform="uppercase" letterSpacing="0.05em">
+                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor}>
                       Income
                     </Text>
                     <Text fontSize="lg" fontWeight={700} color={statsIncomeColor} lineHeight="1.2">
