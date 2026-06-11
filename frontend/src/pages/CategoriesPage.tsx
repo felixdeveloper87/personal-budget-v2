@@ -347,19 +347,13 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                 <ExpensesChart
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
-                  periodType={selectedPeriod}
-                  selectedDate={selectedDate}
                   showPeriodBadge={false}
-                  dateBasis="activity"
                 />
               ) : (
                 <IncomeChart
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
-                  periodType={selectedPeriod}
-                  selectedDate={selectedDate}
                   showPeriodBadge={false}
-                  dateBasis="activity"
                 />
               )
             ) : (
