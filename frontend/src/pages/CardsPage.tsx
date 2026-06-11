@@ -10,12 +10,13 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { listPaymentMethods, listTransactions } from '../api'
+import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../api'
 import type { PaymentMethod, Transaction } from '../types'
 import { buildCardStatements } from '../utils/creditCardStatements'
-import { PageHeader } from '../components/ui'
-import { ArrowLeft, CreditCard } from '../components/ui/icons'
+import { ConfirmDeleteDialog, PageHeader } from '../components/ui'
+import { ArrowLeft, CreditCard, Pencil, Plus, Trash2 } from '../components/ui/icons'
 import CreditCardTile from '../components/cards/CreditCardTile'
+import CardFormModal from '../components/cards/CardFormModal'
 import StatementCard from '../components/cards/StatementCard'
 import { ToastService } from '../services/toast'
 
@@ -25,6 +26,11 @@ export default function CardsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [openStatementKey, setOpenStatementKey] = useState<string | null>(null)
+
+  // Create/edit modal: `undefined` closed, `null` create, a card edits it.
+  const [formCard, setFormCard] = useState<PaymentMethod | null | undefined>(undefined)
+  const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   const muted = useColorModeValue('gray.500', 'gray.400')
   const emptyBorder = useColorModeValue('gray.200', 'gray.700')
@@ -81,6 +87,46 @@ export default function CardsPage() {
     setOpenStatementKey(initial?.key ?? null)
   }
 
+  const confirmDelete = async () => {
+    if (!cardToDelete) return
+    setDeleting(true)
+    try {
+      await deletePaymentMethod(cardToDelete.id)
+      ToastService.success({ title: 'Card deleted', dedupeKey: `card-deleted:${cardToDelete.id}` })
+      if (selectedId === cardToDelete.id) setSelectedId(null)
+      setCardToDelete(null)
+      await load()
+    } catch (err) {
+      ToastService.apiError(err, {
+        title: 'Could not delete card',
+        dedupeKey: `card-delete-failed:${cardToDelete.id}`,
+      })
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  // Modals are shared by both views, rendered once at the end.
+  const modals = (
+    <>
+      <CardFormModal
+        isOpen={formCard !== undefined}
+        card={formCard}
+        onClose={() => setFormCard(undefined)}
+        onSaved={load}
+      />
+      <ConfirmDeleteDialog
+        isOpen={cardToDelete !== null}
+        onClose={() => setCardToDelete(null)}
+        onConfirm={confirmDelete}
+        isLoading={deleting}
+        title="Delete card"
+        itemName={cardToDelete?.name}
+        description="Removes the card and its statement settings. Transactions are kept."
+      />
+    </>
+  )
+
   if (loading) {
     return (
       <CardsShell>
@@ -111,6 +157,25 @@ export default function CardsPage() {
               icon={CreditCard}
               title={selectedCard.name}
               subtitle={`${selectedCard.issuer ? `${selectedCard.issuer} · ` : ''}Closes day ${selectedCard.statementClosingDay} · Pays day ${selectedCard.paymentDay}`}
+              rightSlot={
+                <HStack spacing={2}>
+                  <Button
+                    variant="outline"
+                    leftIcon={<Icon as={Pencil} boxSize={4} />}
+                    onClick={() => setFormCard(selectedCard)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    colorScheme="red"
+                    leftIcon={<Icon as={Trash2} boxSize={4} />}
+                    onClick={() => setCardToDelete(selectedCard)}
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              }
             />
           </Box>
 
@@ -137,6 +202,7 @@ export default function CardsPage() {
             </VStack>
           )}
         </VStack>
+        {modals}
       </CardsShell>
     )
   }
@@ -149,13 +215,23 @@ export default function CardsPage() {
           icon={CreditCard}
           title="Cards"
           subtitle="Select a card to see its current and past statements."
+          rightSlot={
+            <Button
+              colorScheme="blue"
+              leftIcon={<Icon as={Plus} boxSize={4} />}
+              onClick={() => setFormCard(null)}
+              w={{ base: 'full', sm: 'auto' }}
+            >
+              Add card
+            </Button>
+          }
         />
 
         {cards.length === 0 ? (
           <EmptyState
             border={emptyBorder}
             muted={muted}
-            text="No credit cards yet. Add one under Accounts to start tracking statements."
+            text="No credit cards yet. Add your first card to start tracking statements."
           />
         ) : (
           <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>
@@ -168,12 +244,15 @@ export default function CardsPage() {
                   currentTotal={info?.total ?? 0}
                   statementCount={info?.count ?? 0}
                   onSelect={() => selectCard(card.id)}
+                  onEdit={() => setFormCard(card)}
+                  onDelete={() => setCardToDelete(card)}
                 />
               )
             })}
           </SimpleGrid>
         )}
       </VStack>
+      {modals}
     </CardsShell>
   )
 }

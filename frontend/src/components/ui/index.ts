@@ -1,5 +1,7 @@
 // UI Components - Reusable interface components
 export { default as DeleteTransactionDialog } from './DeleteTransactionDialog'
+export { default as ConfirmDeleteDialog } from './ConfirmDeleteDialog'
+export type { ConfirmDeleteDialogProps } from './ConfirmDeleteDialog'
 export { default as PremiumModal } from './PremiumModal'
 export { default as ModalHeader } from './ModalHeader'
 export type { ModalHeaderProps, ModalHeaderAccent } from './ModalHeader'

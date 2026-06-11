@@ -48,10 +48,6 @@ interface EditState {
   paymentDay: number
 }
 
-interface PaymentMethodsSectionProps {
-  creditCardsOnly?: boolean
-}
-
 const DEFAULT_EDIT: EditState = {
   name: '',
   issuer: '',
@@ -61,9 +57,7 @@ const DEFAULT_EDIT: EditState = {
   paymentDay: 28,
 }
 
-export default function PaymentMethodsSection({
-  creditCardsOnly = false,
-}: PaymentMethodsSectionProps) {
+export default function PaymentMethodsSection() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -95,13 +89,6 @@ export default function PaymentMethodsSection({
   const activeCards = useMemo(
     () => paymentMethods.filter((m) => m.active && m.type === 'CREDIT_CARD').length,
     [paymentMethods],
-  )
-  const visibleMethods = useMemo(
-    () =>
-      creditCardsOnly
-        ? paymentMethods.filter((method) => method.type === 'CREDIT_CARD')
-        : paymentMethods,
-    [creditCardsOnly, paymentMethods],
   )
 
   const load = async () => {
@@ -207,23 +194,17 @@ export default function PaymentMethodsSection({
         <VStack spacing={4} align="stretch">
           <SectionHeader
             icon={CreditCard}
-            title={creditCardsOnly ? 'Credit cards' : 'Cards & payment methods'}
-            caption={
-              creditCardsOnly
-                ? `${visibleMethods.length} card${visibleMethods.length !== 1 ? 's' : ''} · ${activeCards} active`
-                : `${paymentMethods.length} method${paymentMethods.length !== 1 ? 's' : ''} · ${activeCards} active credit card${activeCards !== 1 ? 's' : ''}`
-            }
+            title="Cards & payment methods"
+            caption={`${paymentMethods.length} method${paymentMethods.length !== 1 ? 's' : ''} · ${activeCards} active credit card${activeCards !== 1 ? 's' : ''}`}
             accent="blue"
           />
           <Text fontSize="xs" color={mutedColor}>
-            {creditCardsOnly
-              ? 'Manage card issuers, statement closing dates and payment dates.'
-              : 'Payment methods describe how you pay. Credit cards here store statement dates; their balance or debt is tracked separately under Accounts.'}
+            Payment methods describe how you pay. Credit cards here store statement dates; their balance or debt is tracked separately under Accounts.
           </Text>
 
           {/* Methods list */}
           <VStack spacing={2} align="stretch">
-            {visibleMethods.length === 0 && (
+            {paymentMethods.length === 0 && (
               <Box
                 py={6}
                 textAlign="center"
@@ -233,12 +214,12 @@ export default function PaymentMethodsSection({
               >
                 <Icon as={CreditCard} boxSize={6} color={emptyColor} mb={2} display="block" mx="auto" />
                 <Text fontSize="sm" color={mutedColor}>
-                  {loading ? 'Loading...' : creditCardsOnly ? 'No credit cards yet.' : 'No payment methods yet.'}
+                  {loading ? 'Loading...' : 'No payment methods yet.'}
                 </Text>
               </Box>
             )}
 
-            {visibleMethods.map((method) => {
+            {paymentMethods.map((method) => {
               const isEditing = editingId === method.id
               return (
                 <Box key={method.id}>
@@ -340,20 +321,18 @@ export default function PaymentMethodsSection({
                               onChange={(v) => patch({ issuer: v })}
                             />
                           </FormControl>
-                          {!creditCardsOnly && (
-                            <FormControl>
-                              <FormLabel fontSize="xs">Type</FormLabel>
-                              <Select
-                                size="sm"
-                                value={editState.type}
-                                onChange={(e) => patch({ type: e.target.value as PaymentMethodType })}
-                              >
-                                {Object.entries(TYPE_LABELS).map(([v, l]) => (
-                                  <option key={v} value={v}>{l}</option>
-                                ))}
-                              </Select>
-                            </FormControl>
-                          )}
+                          <FormControl>
+                            <FormLabel fontSize="xs">Type</FormLabel>
+                            <Select
+                              size="sm"
+                              value={editState.type}
+                              onChange={(e) => patch({ type: e.target.value as PaymentMethodType })}
+                            >
+                              {Object.entries(TYPE_LABELS).map(([v, l]) => (
+                                <option key={v} value={v}>{l}</option>
+                              ))}
+                            </Select>
+                          </FormControl>
                           <FormControl display="flex" alignItems="end" justifyContent="space-between">
                             <FormLabel fontSize="xs" mb={2}>Active</FormLabel>
                             <Switch
@@ -429,7 +408,7 @@ export default function PaymentMethodsSection({
               }}
               _hover={{ bg: 'transparent', opacity: 0.8 }}
             >
-              {showAddForm ? 'Cancel' : creditCardsOnly ? 'Add credit card' : 'Add new payment method'}
+              {showAddForm ? 'Cancel' : 'Add new payment method'}
             </Button>
 
             <Collapse in={showAddForm} animateOpacity>
@@ -451,16 +430,14 @@ export default function PaymentMethodsSection({
                       <FormLabel fontSize="xs">Issuer</FormLabel>
                       <BankCombobox value={issuer} onChange={setIssuer} />
                     </FormControl>
-                    {!creditCardsOnly && (
-                      <FormControl>
-                        <FormLabel fontSize="xs">Type</FormLabel>
-                        <Select size="sm" value={type} onChange={(e) => setType(e.target.value as PaymentMethodType)}>
-                          {Object.entries(TYPE_LABELS).map(([v, l]) => (
-                            <option key={v} value={v}>{l}</option>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
+                    <FormControl>
+                      <FormLabel fontSize="xs">Type</FormLabel>
+                      <Select size="sm" value={type} onChange={(e) => setType(e.target.value as PaymentMethodType)}>
+                        {Object.entries(TYPE_LABELS).map(([v, l]) => (
+                          <option key={v} value={v}>{l}</option>
+                        ))}
+                      </Select>
+                    </FormControl>
                     <FormControl display="flex" alignItems="end" justifyContent="space-between">
                       <FormLabel fontSize="xs" mb={2}>Active</FormLabel>
                       <Switch isChecked={active} onChange={(e) => setActive(e.target.checked)} />
@@ -492,7 +469,7 @@ export default function PaymentMethodsSection({
                       isLoading={saving}
                       isDisabled={!name.trim()}
                     >
-                      {creditCardsOnly ? 'Save card' : 'Save method'}
+                      Save method
                     </Button>
                   </HStack>
                 </VStack>

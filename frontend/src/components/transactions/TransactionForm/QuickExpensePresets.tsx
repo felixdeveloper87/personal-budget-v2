@@ -59,6 +59,17 @@ const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
   { label: 'Co-op',        category: 'Groceries', icon: ShoppingCart, domain: 'coop.co.uk' },
   { label: 'Iceland',      category: 'Groceries', icon: ShoppingCart, domain: 'iceland.co.uk' },
 
+  { label: "McDonald's", category: 'Dining out', icon: Coffee, domain: 'mcdonalds.com' },
+  { label: "Nando's",    category: 'Dining out', icon: Coffee, domain: 'nandos.co.uk' },
+  { label: "Pepe's",     category: 'Dining out', icon: Coffee, domain: 'pepes.co.uk' },
+  { label: 'KFC',         category: 'Dining out', icon: Coffee, domain: 'kfc.co.uk' },
+  { label: 'Greggs',      category: 'Dining out', icon: Coffee, domain: 'greggs.co.uk' },
+  { label: 'Burger King', category: 'Dining out', icon: Coffee, domain: 'burgerking.co.uk' },
+  { label: 'Subway',      category: 'Dining out', icon: Coffee, domain: 'subway.com' },
+  { label: 'Pizza Hut',   category: 'Dining out', icon: Coffee, domain: 'pizzahut.co.uk' },
+  { label: "Domino's",   category: 'Dining out', icon: Coffee, domain: 'dominos.co.uk' },
+  { label: 'Costa Coffee', category: 'Dining out', icon: Coffee, domain: 'costa.co.uk' },
+
   { label: 'Boots',            category: 'Health', icon: Heart, domain: 'boots.com' },
   { label: 'Holland & Barrett', category: 'Health', icon: Heart, domain: 'hollandandbarrett.com' },
   { label: 'Superdrug',        category: 'Health', icon: Heart, domain: 'superdrug.com' },

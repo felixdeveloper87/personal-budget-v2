@@ -4,13 +4,14 @@ import {
   Flex,
   HStack,
   Icon,
+  IconButton,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
 import type { PaymentMethod } from '../../types'
 import { BankLogo, getBankMeta } from '../ui'
-import { ChevronRight, CreditCard } from '../ui/icons'
+import { CreditCard, Pencil, Trash2 } from '../ui/icons'
 
 const moneyFormatter = new Intl.NumberFormat('en-GB', {
   style: 'currency',
@@ -23,6 +24,8 @@ export interface CreditCardTileProps {
   currentTotal: number
   statementCount: number
   onSelect: () => void
+  onEdit?: () => void
+  onDelete?: () => void
 }
 
 export default function CreditCardTile({
@@ -30,6 +33,8 @@ export default function CreditCardTile({
   currentTotal,
   statementCount,
   onSelect,
+  onEdit,
+  onDelete,
 }: CreditCardTileProps) {
   const border = useColorModeValue('gray.200', 'whiteAlpha.200')
   const muted = useColorModeValue('gray.500', 'gray.400')
@@ -39,9 +44,16 @@ export default function CreditCardTile({
 
   return (
     <Box
-      as="button"
-      type="button"
+      role="button"
+      tabIndex={0}
       onClick={onSelect}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onSelect()
+        }
+      }}
+      cursor="pointer"
       textAlign="left"
       w="full"
       borderRadius="2xl"
@@ -51,6 +63,7 @@ export default function CreditCardTile({
       p={5}
       transition="all 0.18s ease"
       _hover={{ transform: 'translateY(-2px)', boxShadow: 'lg', borderColor: 'blue.300' }}
+      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)' }}
       opacity={card.active ? 1 : 0.6}
     >
       <VStack align="stretch" spacing={4}>
@@ -82,7 +95,35 @@ export default function CreditCardTile({
               </Text>
             </Box>
           </HStack>
-          <Icon as={ChevronRight} boxSize={5} color={muted} flexShrink={0} />
+          {(onEdit || onDelete) && (
+            <HStack spacing={1} flexShrink={0}>
+              {onEdit && (
+                <IconButton
+                  aria-label={`Edit ${card.name}`}
+                  icon={<Icon as={Pencil} boxSize={3.5} />}
+                  size="sm"
+                  variant="ghost"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onEdit()
+                  }}
+                />
+              )}
+              {onDelete && (
+                <IconButton
+                  aria-label={`Delete ${card.name}`}
+                  icon={<Icon as={Trash2} boxSize={3.5} />}
+                  size="sm"
+                  variant="ghost"
+                  colorScheme="red"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDelete()
+                  }}
+                />
+              )}
+            </HStack>
+          )}
         </HStack>
 
         <HStack justify="space-between" align="end">
