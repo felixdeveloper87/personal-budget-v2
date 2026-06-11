@@ -458,9 +458,9 @@ function MiniStatCard({ label, value, accent, bg, border, valueColor, labelColor
     <Box
       flex="1"
       minW="130px"
-      px={4}
-      py={3}
-      borderRadius="xl"
+      px={3.5}
+      py={2}
+      borderRadius="lg"
       bg={bg}
       border="1px solid"
       borderColor={border}
@@ -471,17 +471,17 @@ function MiniStatCard({ label, value, accent, bg, border, valueColor, labelColor
       <Box
         position="absolute"
         left={0}
-        top="20%"
-        bottom="20%"
+        top="24%"
+        bottom="24%"
         w="3px"
         borderRadius="full"
         bg={accent}
       />
       <VStack spacing={0} align="flex-start">
-        <Text fontSize="2xs" fontWeight={700} color={labelColor} textTransform="uppercase" letterSpacing="0.06em">
+        <Text fontSize="3xs" fontWeight={700} color={labelColor} textTransform="uppercase" letterSpacing="0.05em">
           {label}
         </Text>
-        <Text fontSize="md" fontWeight={800} color={valueColor} letterSpacing="-0.02em">
+        <Text fontSize="sm" fontWeight={800} color={valueColor} letterSpacing="-0.01em" lineHeight="1.25">
           {value}
         </Text>
       </VStack>
