@@ -12,7 +12,10 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import type { Transaction } from '../../types'
-import { getTransactionDate } from '../../utils/transactionDates'
+import {
+  getTransactionDate,
+  type TransactionDateBasis,
+} from '../../utils/transactionDates'
 import TransactionLedgerRow from '../transactions/TransactionLedgerRow'
 import { ChevronDown, ChevronUp } from '../ui/icons'
 
@@ -31,6 +34,7 @@ interface CategoryTransactionDropdownProps {
   isExpanded?: boolean
   onToggle?: () => void
   initialVisibleCount?: number
+  dateBasis?: TransactionDateBasis
 }
 
 const PAGE_SIZE = 5
@@ -54,6 +58,7 @@ export default function CategoryTransactionDropdown({
   isExpanded,
   onToggle,
   initialVisibleCount = PAGE_SIZE,
+  dateBasis = 'activity',
 }: CategoryTransactionDropdownProps) {
   const [internalExpanded, setInternalExpanded] = useState(false)
   const [visibleCount, setVisibleCount] = useState(initialVisibleCount)
@@ -83,10 +88,10 @@ export default function CategoryTransactionDropdown({
     () =>
       [...transactions].sort(
         (a, b) =>
-          getTransactionDate(b, 'activity').getTime() -
-          getTransactionDate(a, 'activity').getTime(),
+          getTransactionDate(b, dateBasis).getTime() -
+          getTransactionDate(a, dateBasis).getTime(),
       ),
-    [transactions],
+    [transactions, dateBasis],
   )
 
   useEffect(() => {
@@ -218,7 +223,7 @@ export default function CategoryTransactionDropdown({
               <TransactionLedgerRow
                 key={transaction.id ?? `${transaction.description}-${transaction.dateTime}-${transaction.amount}`}
                 transaction={transaction}
-                dateBasis="activity"
+                dateBasis={dateBasis}
                 showCategory={false}
                 withTopBorder={index > 0}
               />

@@ -131,6 +131,7 @@ export default function ExpensesChart({
                   hoverBg={legendHoverBg}
                   badgeBg={chartColors.grayBadgeBg}
                   accentScheme="red"
+                  dateBasis={dateBasis}
                 />
               )
             })}

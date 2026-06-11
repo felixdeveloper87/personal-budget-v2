@@ -8,6 +8,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useState } from 'react'
 import { AlertCircle, Layers, TrendingDown, TrendingUp } from '../components/ui/icons'
 
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -17,8 +18,9 @@ import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
 import PeriodNavigator from '../components/summary/PeriodNavigator'
 import ExpensesChart from '../components/charts/modal/ExpensesChart'
 import IncomeChart from '../components/charts/modal/IncomeChart'
-import { PageSkeleton } from '../components/ui'
+import { DateBasisToggle, PageSkeleton } from '../components/ui'
 import type { Transaction } from '../types'
+import type { TransactionDateBasis } from '../utils/transactionDates'
 
 interface CategoriesPageProps {
   /** Tab to open on first render — used when navigating from the home cards. */
@@ -30,6 +32,7 @@ interface CategoriesPageProps {
  * an integrated header, summary stats, and inline period navigation.
  */
 export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
+  const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('activity')
   const {
     selectedDate,
     selectedPeriod,
@@ -50,7 +53,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
     monthSummary,
     selectedPeriod,
     selectedDate,
-    'activity',
+    dateBasis,
   )
 
   /* ── Surface tokens ── */
@@ -252,8 +255,8 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
 
           {/* ─── Period Navigator ─── */}
           <Box px={{ base: 4, md: 6 }} pt={{ base: 3, md: 4 }}>
-            <HStack
-              spacing={2.5}
+            <Flex
+              gap={3}
               px={3}
               py={2.5}
               bg={infoBg}
@@ -261,13 +264,20 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
               borderColor={infoBorder}
               borderRadius="lg"
               color={infoColor}
-              align="flex-start"
+              align={{ base: 'stretch', md: 'center' }}
+              direction={{ base: 'column', md: 'row' }}
+              justify="space-between"
             >
-              <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
-              <Text fontSize="xs" lineHeight="1.45">
-                Categories follow daily activity and purchase dates to show spending behaviour.
-              </Text>
-            </HStack>
+              <HStack spacing={2.5} align="flex-start">
+                <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
+                <Text fontSize="xs" lineHeight="1.45">
+                  {dateBasis === 'activity'
+                    ? 'Behaviour groups categories by purchase date: when you actually spent or earned.'
+                    : 'Payments groups categories by payment date: when money hits or leaves your account.'}
+                </Text>
+              </HStack>
+              <DateBasisToggle value={dateBasis} onChange={setDateBasis} />
+            </Flex>
           </Box>
 
           <Box
@@ -348,6 +358,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
                   showPeriodBadge={false}
+                  dateBasis={dateBasis}
                   compact
                 />
               ) : (
@@ -355,6 +366,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
                   showPeriodBadge={false}
+                  dateBasis={dateBasis}
                   compact
                 />
               )

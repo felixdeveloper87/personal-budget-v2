@@ -127,6 +127,7 @@ export default function IncomeChart({
                   hoverBg={chartColors.legendHoverBg}
                   badgeBg={chartColors.grayBadgeBg}
                   accentScheme="green"
+                  dateBasis={dateBasis}
                 />
               )
             })}
