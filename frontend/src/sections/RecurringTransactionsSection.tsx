@@ -86,7 +86,6 @@ export default function RecurringTransactionsSection({
   const statsBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const statsAmountColor = useColorModeValue('red.600', 'red.300')
   const statsLabelColor = useColorModeValue('gray.500', 'gray.400')
-  const statsDivider = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const statsIncomeColor = useColorModeValue('green.600', 'green.300')
 
   const caption =
@@ -142,38 +141,28 @@ export default function RecurringTransactionsSection({
 
             {activeCount > 0 && (monthlyExpense > 0 || monthlyIncome > 0) && (
               <HStack
-                spacing={0}
+                spacing={3}
                 bg={statsBg}
                 border="1px solid"
                 borderColor={statsBorder}
                 borderRadius="xl"
-                overflow="hidden"
+                px={3.5}
+                py={2.5}
+                justify="space-between"
               >
-                {monthlyExpense > 0 && (
-                  <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor}>
-                      Expenses
-                    </Text>
-                    <Text fontSize="lg" fontWeight={700} color={statsAmountColor} lineHeight="1.2">
-                      {currencyFmt.format(monthlyExpense)}
-                      <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
-                    </Text>
-                  </VStack>
-                )}
-                {monthlyExpense > 0 && monthlyIncome > 0 && (
-                  <Box w="1px" h="full" bg={statsDivider} alignSelf="stretch" />
-                )}
-                {monthlyIncome > 0 && (
-                  <VStack spacing={0} align="flex-start" flex={1} px={3.5} py={2.5}>
-                    <Text fontSize="xs" fontWeight={600} color={statsLabelColor}>
-                      Income
-                    </Text>
-                    <Text fontSize="lg" fontWeight={700} color={statsIncomeColor} lineHeight="1.2">
-                      {currencyFmt.format(monthlyIncome)}
-                      <Text as="span" fontSize="xs" fontWeight={500}>/mo</Text>
-                    </Text>
-                  </VStack>
-                )}
+                <Text
+                  fontSize="lg"
+                  fontWeight={700}
+                  color={monthlyExpense > 0 ? statsAmountColor : statsIncomeColor}
+                >
+                  {currencyFmt.format(monthlyExpense > 0 ? monthlyExpense : monthlyIncome)}
+                  <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>
+                    /mo
+                  </Text>
+                </Text>
+                <Text fontSize="sm" fontWeight={600} color={statsLabelColor}>
+                  {activeCount} active
+                </Text>
               </HStack>
             )}
           </VStack>
