@@ -30,6 +30,7 @@ import { usePeriodData } from '../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
 import PennyChallengeCard from '../components/goals/PennyChallengeCard'
 import PennyChallengeSummaryRow from '../components/goals/PennyChallengeSummaryRow'
+import StartChallengeDialog from '../components/goals/StartChallengeDialog'
 import { PageHeader } from '../components/ui'
 import { ChevronDown, ChevronUp, Sparkles, ShieldCheck } from '../components/ui/icons'
 import {
@@ -49,6 +50,7 @@ export default function GoalsPage() {
   const [contributions, setContributions] = useState<Record<number, number>>({})
   const [challengeBusyId, setChallengeBusyId] = useState<number | null>(null)
   const [startingChallenge, setStartingChallenge] = useState(false)
+  const [confirmStartOpen, setConfirmStartOpen] = useState(false)
   const [challengeCollapsed, setChallengeCollapsed] = useState(() => {
     try {
       return localStorage.getItem(CHALLENGE_COLLAPSED_KEY) === 'true'
@@ -159,6 +161,7 @@ export default function GoalsPage() {
         color: '#f59e0b',
       })
       await load()
+      setConfirmStartOpen(false)
       ToastService.success({ title: 'Challenge started', dedupeKey: 'challenge-started' })
     } catch (err) {
       ToastService.apiError(err, { title: 'Could not start challenge', dedupeKey: 'challenge-start-failed' })
@@ -201,8 +204,7 @@ export default function GoalsPage() {
                 colorScheme="orange"
                 variant="ghost"
                 leftIcon={<Sparkles size={16} weight="duotone" />}
-                onClick={startChallenge}
-                isLoading={startingChallenge}
+                onClick={() => setConfirmStartOpen(true)}
               >
                 Start penny-a-day challenge
               </Button>
@@ -304,6 +306,13 @@ export default function GoalsPage() {
           ))}
         </SimpleGrid>
       </VStack>
+
+      <StartChallengeDialog
+        isOpen={confirmStartOpen}
+        onClose={() => setConfirmStartOpen(false)}
+        onConfirm={startChallenge}
+        isLoading={startingChallenge}
+      />
     </Box>
   )
 }
