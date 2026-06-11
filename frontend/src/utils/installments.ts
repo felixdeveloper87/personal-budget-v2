@@ -46,6 +46,7 @@ export function calculateFutureInstallments(
         const futureTransaction: Transaction = {
           id: -(plan.id * 1000 + i + 1), // Negative ID to distinguish from real transactions
           dateTime: installmentDate.toISOString(),
+          transactionDate: firstInstallment.date,
           type: 'EXPENSE',
           category: firstInstallment.category,
           description: `${getInstallmentPlanTitle(firstInstallment.description)} (Installment ${i + 1}/${totalInstallments})`,
