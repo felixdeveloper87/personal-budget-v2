@@ -26,10 +26,9 @@ export interface DashboardProps {
    * Navigate to the Categories page with a tab preselected — used by the
    * Income/Expenses summary cards instead of opening the breakdown modal.
    */
-  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
 }
 
-export default function Dashboard({ onPageChange, onNavigateCategory }: DashboardProps) {
+export default function Dashboard({ onPageChange }: DashboardProps) {
   const {
     selectedDate,
     selectedPeriod,
@@ -102,9 +101,7 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
                   navigatePeriod={navigatePeriod}
                   goToToday={goToToday}
                   formatLabel={formatLabel}
-                  onNavigateCategory={onNavigateCategory}
                   onViewTransactions={() => onPageChange?.('transactions')}
-                  onViewBalance={() => onPageChange?.('goals')}
                 />
               </Box>
             )}

@@ -265,7 +265,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
             >
               <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
               <Text fontSize="xs" lineHeight="1.45">
-                Categories follow daily activity and purchase dates to show spending behaviour. Card payments may appear in another month on the Home cash-flow overview.
+                Categories follow daily activity and purchase dates to show spending behaviour.
               </Text>
             </HStack>
           </Box>

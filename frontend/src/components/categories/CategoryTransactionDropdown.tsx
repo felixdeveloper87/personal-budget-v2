@@ -11,15 +11,10 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { ChevronDown, ChevronUp } from '../ui/icons'
-import { useThemeColors } from '../../hooks/useThemeColors'
 import type { Transaction } from '../../types'
-import {
-  getTransactionDate,
-  hasDifferentPaymentDate,
-} from '../../utils/transactionDates'
-import { formatDateBR } from '../../utils/dateTime'
-import { formatTransactionAccount } from '../../utils/transactionAccount'
+import { getTransactionDate } from '../../utils/transactionDates'
+import TransactionLedgerRow from '../transactions/TransactionLedgerRow'
+import { ChevronDown, ChevronUp } from '../ui/icons'
 
 interface CategoryTransactionDropdownProps {
   category: string
@@ -39,6 +34,10 @@ interface CategoryTransactionDropdownProps {
 }
 
 const PAGE_SIZE = 5
+const currencyFormatter = new Intl.NumberFormat('en-GB', {
+  style: 'currency',
+  currency: 'GBP',
+})
 
 export default function CategoryTransactionDropdown({
   category,
@@ -48,6 +47,7 @@ export default function CategoryTransactionDropdown({
   transactions,
   accentScheme,
   borderColor,
+  hoverBg,
   badgeBg,
   amountColor,
   showProgress = false,
@@ -55,7 +55,6 @@ export default function CategoryTransactionDropdown({
   onToggle,
   initialVisibleCount = PAGE_SIZE,
 }: CategoryTransactionDropdownProps) {
-  const colors = useThemeColors()
   const [internalExpanded, setInternalExpanded] = useState(false)
   const [visibleCount, setVisibleCount] = useState(initialVisibleCount)
 
@@ -64,34 +63,34 @@ export default function CategoryTransactionDropdown({
   const activeBorder = useColorModeValue('gray.300', 'whiteAlpha.300')
   const neutralHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
   const fallbackBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const expandedBg = useColorModeValue('gray.50', 'blackAlpha.300')
   const rowBg = useColorModeValue('white', 'whiteAlpha.50')
   const rowBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const rowHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const titleColor = useColorModeValue('gray.900', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const progressBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const accentTint = useColorModeValue(`${color}14`, `${color}24`)
   const actionColor = useColorModeValue('gray.700', 'gray.200')
+  const expandedShadow = useColorModeValue(
+    '0 8px 24px -18px rgba(15, 23, 42, 0.35)',
+    '0 8px 24px -18px rgba(0, 0, 0, 0.8)',
+  )
 
   const expanded = isExpanded ?? internalExpanded
   const percentageValue = typeof percentage === 'number' ? percentage : Number(percentage)
   const percentageLabel = Number.isFinite(percentageValue) ? percentageValue.toFixed(1) : '0.0'
-
   const sortedTransactions = useMemo(
     () =>
-      transactions
-        .slice()
-        .sort(
-          (a, b) =>
-            getTransactionDate(b, 'activity').getTime() -
-            getTransactionDate(a, 'activity').getTime(),
-        ),
+      [...transactions].sort(
+        (a, b) =>
+          getTransactionDate(b, 'activity').getTime() -
+          getTransactionDate(a, 'activity').getTime(),
+      ),
     [transactions],
   )
 
   useEffect(() => {
-    if (!expanded) {
-      setVisibleCount(initialVisibleCount)
-    }
+    if (!expanded) setVisibleCount(initialVisibleCount)
   }, [expanded, initialVisibleCount])
 
   const visibleTransactions = sortedTransactions.slice(0, visibleCount)
@@ -107,24 +106,22 @@ export default function CategoryTransactionDropdown({
 
   return (
     <Box
-      borderRadius="lg"
+      borderRadius="xl"
       border="1px solid"
       borderColor={expanded ? activeBorder : borderColor ?? fallbackBorder}
       bg={surfaceBg}
       data-accent-scheme={accentScheme}
-      boxShadow={expanded ? `inset 3px 0 0 ${color}` : 'none'}
+      boxShadow={expanded ? expandedShadow : 'none'}
       transition="background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease"
-      _hover={{
-        bg: neutralHoverBg,
-        borderColor: activeBorder,
-      }}
+      _hover={{ bg: hoverBg ?? neutralHoverBg, borderColor: activeBorder }}
       overflow="hidden"
     >
       <Box
         as="button"
         type="button"
         w="full"
-        p={3}
+        px={{ base: 3, md: 4 }}
+        py={3.5}
         textAlign="left"
         onClick={handleToggle}
         _focusVisible={{
@@ -136,27 +133,26 @@ export default function CategoryTransactionDropdown({
         <HStack justify="space-between" align="center" gap={3}>
           <HStack spacing={3} align="center" minW={0} flex={1}>
             <Box
-              w={3.5}
-              h={3.5}
-              borderRadius={showProgress ? 'full' : 'sm'}
-              bg={accentTint}
-              border="1px solid"
-              borderColor={color}
+              w={2.5}
+              h={2.5}
+              borderRadius="full"
+              bg={color}
+              boxShadow={`0 0 0 4px ${accentTint}`}
               flexShrink={0}
             />
-            <VStack align="flex-start" spacing={0} minW={0}>
-              <Text fontSize="sm" fontWeight={600} color={colors.text.primary} isTruncated>
+            <VStack align="flex-start" spacing={0.5} minW={0}>
+              <Text fontSize="sm" fontWeight={700} color={titleColor} isTruncated>
                 {category}
               </Text>
-              <Text fontSize="2xs" color={mutedColor}>
+              <Text fontSize="xs" color={mutedColor}>
                 {sortedTransactions.length} transaction{sortedTransactions.length === 1 ? '' : 's'}
               </Text>
             </VStack>
           </HStack>
 
-          <HStack spacing={3} align="center" flexShrink={0}>
-            <Text fontSize="sm" fontWeight={700} color={amountColor ?? colors.text.primary}>
-              £{amount.toFixed(2)}
+          <HStack spacing={{ base: 2, md: 3 }} align="center" flexShrink={0}>
+            <Text fontSize="sm" fontWeight={800} color={amountColor ?? titleColor}>
+              {currencyFormatter.format(amount)}
             </Text>
             <Badge
               px={2}
@@ -164,14 +160,23 @@ export default function CategoryTransactionDropdown({
               borderRadius="full"
               bg={badgeBg ?? fallbackBadgeBg}
               color={mutedColor}
-              fontSize="xs"
-              fontWeight={600}
+              fontSize="2xs"
+              fontWeight={700}
               textTransform="none"
-              letterSpacing="0"
             >
               {percentageLabel}%
             </Badge>
-            <Icon as={expanded ? ChevronUp : ChevronDown} boxSize={4} color={mutedColor} />
+            <Box
+              w={7}
+              h={7}
+              borderRadius="md"
+              bg={expanded ? fallbackBadgeBg : 'transparent'}
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Icon as={expanded ? ChevronUp : ChevronDown} boxSize={3.5} color={mutedColor} />
+            </Box>
           </HStack>
         </HStack>
 
@@ -193,58 +198,45 @@ export default function CategoryTransactionDropdown({
       </Box>
 
       <Collapse in={expanded} animateOpacity>
-        <VStack align="stretch" spacing={1.5} px={3} pb={3}>
-          {visibleTransactions.map((transaction) => (
-            <HStack
-              key={transaction.id ?? `${transaction.description}-${transaction.dateTime}-${transaction.amount}`}
-              justify="space-between"
-              align="center"
-              gap={3}
-              px={3}
-              py={2}
-              bg={rowBg}
-              border="1px solid"
-              borderColor={rowBorder}
-              borderRadius="md"
-              _hover={{ bg: rowHoverBg }}
-            >
-              <VStack align="flex-start" spacing={0} minW={0} flex={1}>
-                <Text fontSize="xs" fontWeight={700} color={colors.text.primary} noOfLines={1}>
-                  {transaction.description || 'No description'}
-                </Text>
-                <Text fontSize="2xs" color={mutedColor}>
-                  {getTransactionDate(transaction, 'activity').toLocaleDateString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </Text>
-                {formatTransactionAccount(transaction) && (
-                  <Text fontSize="2xs" color="teal.500" noOfLines={1}>
-                    {formatTransactionAccount(transaction)}
-                  </Text>
-                )}
-                {hasDifferentPaymentDate(transaction) && transaction.paymentDate && (
-                  <Text fontSize="2xs" color={mutedColor}>
-                    Payment {formatDateBR(transaction.paymentDate)}
-                  </Text>
-                )}
-              </VStack>
-              <Text fontSize="xs" fontWeight={800} color={amountColor ?? colors.text.primary} flexShrink={0}>
-                £{Number(transaction.amount || 0).toFixed(2)}
-              </Text>
-            </HStack>
-          ))}
+        <VStack
+          align="stretch"
+          spacing={0}
+          px={{ base: 2.5, md: 3 }}
+          py={3}
+          bg={expandedBg}
+          borderTop="1px solid"
+          borderTopColor={rowBorder}
+        >
+          <Box
+            bg={rowBg}
+            border="1px solid"
+            borderColor={rowBorder}
+            borderRadius="xl"
+            overflow="hidden"
+          >
+            {visibleTransactions.map((transaction, index) => (
+              <TransactionLedgerRow
+                key={transaction.id ?? `${transaction.description}-${transaction.dateTime}-${transaction.amount}`}
+                transaction={transaction}
+                dateBasis="activity"
+                showCategory={false}
+                withTopBorder={index > 0}
+              />
+            ))}
+          </Box>
 
           {remainingCount > 0 && (
             <Button
+              mt={2}
               size="sm"
-              variant="ghost"
+              variant="outline"
               color={actionColor}
+              borderColor={rowBorder}
+              bg={rowBg}
               fontSize="xs"
               fontWeight={700}
               onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
-              _hover={{ bg: neutralHoverBg }}
+              _hover={{ bg: neutralHoverBg, borderColor: activeBorder }}
             >
               Show {Math.min(PAGE_SIZE, remainingCount)} more
             </Button>

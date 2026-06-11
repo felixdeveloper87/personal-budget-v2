@@ -16,9 +16,7 @@ interface SummaryWithAnalysisSectionProps {
   dateBasis?: TransactionDateBasis
   /** When provided, the container renders the Behaviour | Payments toggle. */
   onDateBasisChange?: (basis: TransactionDateBasis) => void
-  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
   onViewTransactions?: () => void
-  onViewBalance?: () => void
 }
 
 export default function SummaryWithAnalysisSection({
@@ -32,9 +30,7 @@ export default function SummaryWithAnalysisSection({
   formatLabel,
   dateBasis,
   onDateBasisChange,
-  onNavigateCategory,
   onViewTransactions,
-  onViewBalance,
 }: SummaryWithAnalysisSectionProps) {
   return (
     <SummaryContainer
@@ -48,9 +44,7 @@ export default function SummaryWithAnalysisSection({
       formatLabel={formatLabel}
       dateBasis={dateBasis}
       onDateBasisChange={onDateBasisChange}
-      onNavigateCategory={onNavigateCategory}
       onViewTransactions={onViewTransactions}
-      onViewBalance={onViewBalance}
     />
   )
 }

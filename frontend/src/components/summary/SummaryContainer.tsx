@@ -36,9 +36,7 @@ interface SummaryContainerProps {
   dateBasis?: TransactionDateBasis
   /** When provided, renders the Behaviour | Payments toggle above the stats. */
   onDateBasisChange?: (basis: TransactionDateBasis) => void
-  onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
   onViewTransactions?: () => void
-  onViewBalance?: () => void
 }
 
 const fallbackFormatLabel = (date: Date, period: PeriodType) => {
@@ -107,9 +105,7 @@ export default function SummaryContainer({
   formatLabel: externalFormatLabel,
   dateBasis = 'cash-flow',
   onDateBasisChange,
-  onNavigateCategory,
   onViewTransactions,
-  onViewBalance,
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance } = periodData
 
@@ -127,20 +123,7 @@ export default function SummaryContainer({
     externalFormatLabel ??
     (() => fallbackFormatLabel(selectedDate, selectedPeriod))
 
-  const handleCardClick = (cardId: string) => {
-    if (onNavigateCategory && (cardId === 'income' || cardId === 'expenses')) {
-      onNavigateCategory(cardId === 'income' ? 'incomes' : 'expenses')
-      return
-    }
-    if (onViewTransactions && cardId === 'transactions') {
-      onViewTransactions()
-      return
-    }
-    if (onViewBalance && cardId === 'balance') {
-      onViewBalance()
-      return
-    }
-  }
+  const handleCardClick = () => onViewTransactions?.()
 
   return (
     <SectionCard staticOnHover>
