@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Box, useColorModeValue } from '@chakra-ui/react'
+import { Box, VStack, useColorModeValue } from '@chakra-ui/react'
 import SearchHeader from './SearchHeader'
 import SearchFilters from './SearchFilters'
 import SearchFooter from './SearchFooter'
@@ -7,7 +7,8 @@ import SearchResultsModal from './SearchResultsModal'
 import { useSearchFilters } from '../../hooks/useSearchFilters'
 import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
-import { PremiumModal } from '../ui'
+import { ModalHeader, PremiumModal } from '../ui'
+import { Search } from '../ui/icons'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
   const { user } = useAuth()
@@ -50,10 +51,12 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         onClose={onClose}
         size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
         header={
-          <SearchHeader
+          <ModalHeader
+            icon={Search}
+            title="Search transactions"
+            caption="Filter by text, type, category or date"
             onClose={onClose}
-            searchText={filters.text}
-            onSearchTextChange={(v) => updateFilter('text', v)}
+            accent="blue"
           />
         }
         footer={
@@ -76,14 +79,20 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
         <Box
           bg={surfaceBg}
           px={{ base: 4, sm: 6 }}
-          py={{ base: 4, sm: 6 }}
+          py={{ base: 4, sm: 5 }}
         >
-          <SearchFilters
-            filters={filters}
-            onUpdateFilter={updateFilter}
-            onTypeChange={handleTypeChange}
-            availableCategories={getAvailableCategories()}
-          />
+          <VStack spacing={{ base: 5, sm: 6 }} align="stretch">
+            <SearchHeader
+              searchText={filters.text}
+              onSearchTextChange={(v) => updateFilter('text', v)}
+            />
+            <SearchFilters
+              filters={filters}
+              onUpdateFilter={updateFilter}
+              onTypeChange={handleTypeChange}
+              availableCategories={getAvailableCategories()}
+            />
+          </VStack>
         </Box>
       </PremiumModal>
 

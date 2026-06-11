@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import {
-  Box,
   HStack,
   IconButton,
   Input,
@@ -8,15 +7,11 @@ import {
   InputLeftElement,
   InputRightElement,
   Kbd,
-  Text,
-  VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Search, X } from '../ui/icons'
-import { AppCloseButton } from '../ui'
 
-interface SearchHeaderProps {
-  onClose: () => void
+interface SearchFieldProps {
   searchText: string
   onSearchTextChange: (value: string) => void
   /** When true, focus the input on open. Defaults to true. */
@@ -24,25 +19,20 @@ interface SearchHeaderProps {
 }
 
 /**
- * Spotlight-style search header.
+ * Spotlight-style search field.
  *
- * The text input is the protagonist (top of the modal), filters live below.
- * No looped animations — modal stays cheap to keep open.
+ * Lives at the top of the filters modal body — the title / close button are
+ * handled by the shared <ModalHeader/> so every modal shares one header look.
+ * No looped animations — the modal stays cheap to keep open.
  */
 export default function SearchHeader({
-  onClose,
   searchText,
   onSearchTextChange,
   autoFocus = true,
-}: SearchHeaderProps) {
+}: SearchFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
   const closeHoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
-
   const inputBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const inputBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
   const inputColor = useColorModeValue('gray.900', 'gray.50')
@@ -64,105 +54,60 @@ export default function SearchHeader({
   }, [autoFocus])
 
   return (
-    <Box
-      bg={surfaceBg}
-      borderBottom="1px solid"
-      borderColor={borderColor}
-      px={{ base: 4, sm: 6 }}
-      pt={{ base: 4, sm: 5 }}
-      pb={{ base: 3, sm: 4 }}
-    >
-      <HStack justify="space-between" align="center" mb={3} spacing={3}>
-        <HStack spacing={3} minW={0}>
-          <Box
-            w={{ base: 8, sm: 9 }}
-            h={{ base: 8, sm: 9 }}
-            borderRadius="lg"
-            bg={useColorModeValue('blue.50', 'whiteAlpha.100')}
-            color={useColorModeValue('blue.600', 'blue.300')}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexShrink={0}
-          >
-            <Search size={18} weight="bold" />
-          </Box>
-          <VStack align="flex-start" spacing={0} minW={0}>
-            <Text
-              fontWeight={700}
-              fontSize="md"
-              color={titleColor}
-              lineHeight="1.2"
-              noOfLines={1}
-            >
-              Search transactions
-            </Text>
-            <Text display={{ base: 'none', sm: 'block' }} fontSize="xs" color={captionColor} noOfLines={1}>
-              Filter by text, type, category or date
-            </Text>
-          </VStack>
-        </HStack>
-
-        <AppCloseButton onClick={onClose} />
-      </HStack>
-
-      <InputGroup size="md">
-        <InputLeftElement pointerEvents="none" h="44px" color={iconColor}>
-          <Search size={16} weight="bold" />
-        </InputLeftElement>
-        <Input
-          ref={inputRef}
-          value={searchText}
-          onChange={(e) => onSearchTextChange(e.target.value)}
-          placeholder="Search by description…"
-          h={{ base: '42px', sm: '44px' }}
-          pl={10}
-          pr={searchText ? 24 : 16}
-          bg={inputBg}
-          border="1px solid"
-          borderColor={inputBorder}
-          color={inputColor}
-          fontSize="sm"
-          _placeholder={{ color: placeholderColor }}
-          _hover={{ borderColor: focusBorder }}
-          _focus={{
-            borderColor: focusBorder,
-            boxShadow: `0 0 0 3px ${focusGlow}`,
-          }}
-          _focusVisible={{
-            borderColor: focusBorder,
-            boxShadow: `0 0 0 3px ${focusGlow}`,
-          }}
-          transition="border-color 0.15s ease, box-shadow 0.15s ease"
-        />
-        <InputRightElement h="44px" pr={3} width="auto">
-          <HStack spacing={1}>
-            {searchText && (
-              <IconButton
-                aria-label="Clear search"
-                icon={<X size={14} weight="bold" />}
-                onClick={() => onSearchTextChange('')}
-                size="xs"
-                variant="ghost"
-                color={iconColor}
-                _hover={{ bg: closeHoverBg }}
-              />
-            )}
-            <HStack
-              spacing={0.5}
-              display={{ base: 'none', sm: 'flex' }}
-              opacity={0.85}
-            >
-              <Kbd bg={kbdBg} color={kbdColor} fontSize="2xs" border="none">
-                ⌘
-              </Kbd>
-              <Kbd bg={kbdBg} color={kbdColor} fontSize="2xs" border="none">
-                K
-              </Kbd>
-            </HStack>
+    <InputGroup size="md">
+      <InputLeftElement pointerEvents="none" h="46px" color={iconColor}>
+        <Search size={16} weight="bold" />
+      </InputLeftElement>
+      <Input
+        ref={inputRef}
+        value={searchText}
+        onChange={(e) => onSearchTextChange(e.target.value)}
+        placeholder="Search by description…"
+        h={{ base: '44px', sm: '46px' }}
+        pl={10}
+        pr={searchText ? 24 : 16}
+        bg={inputBg}
+        border="1px solid"
+        borderColor={inputBorder}
+        color={inputColor}
+        fontSize="sm"
+        fontWeight={500}
+        borderRadius="xl"
+        _placeholder={{ color: placeholderColor }}
+        _hover={{ borderColor: focusBorder }}
+        _focus={{
+          borderColor: focusBorder,
+          boxShadow: `0 0 0 3px ${focusGlow}`,
+        }}
+        _focusVisible={{
+          borderColor: focusBorder,
+          boxShadow: `0 0 0 3px ${focusGlow}`,
+        }}
+        transition="border-color 0.15s ease, box-shadow 0.15s ease"
+      />
+      <InputRightElement h="46px" pr={3} width="auto">
+        <HStack spacing={1}>
+          {searchText && (
+            <IconButton
+              aria-label="Clear search"
+              icon={<X size={14} weight="bold" />}
+              onClick={() => onSearchTextChange('')}
+              size="xs"
+              variant="ghost"
+              color={iconColor}
+              _hover={{ bg: closeHoverBg }}
+            />
+          )}
+          <HStack spacing={0.5} display={{ base: 'none', sm: 'flex' }} opacity={0.85}>
+            <Kbd bg={kbdBg} color={kbdColor} fontSize="2xs" border="none">
+              ⌘
+            </Kbd>
+            <Kbd bg={kbdBg} color={kbdColor} fontSize="2xs" border="none">
+              K
+            </Kbd>
           </HStack>
-        </InputRightElement>
-      </InputGroup>
-    </Box>
+        </HStack>
+      </InputRightElement>
+    </InputGroup>
   )
 }

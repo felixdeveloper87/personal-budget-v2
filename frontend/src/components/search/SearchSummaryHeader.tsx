@@ -1,38 +1,26 @@
 import { memo } from 'react'
 import {
-  Box,
-  HStack,
   Icon,
   Tag,
   TagLabel,
-  Text,
-  VStack,
   Wrap,
   WrapItem,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Calendar, ListFilter, Search, TrendingDown, TrendingUp } from '../ui/icons'
-import { AppCloseButton } from '../ui'
+import { Calendar, Search, TrendingDown, TrendingUp } from '../ui/icons'
 import { formatTransactionDate } from '../../utils/dateTime'
 import { SearchSummaryHeaderProps } from '../../types'
 
-interface Props extends SearchSummaryHeaderProps {
-  onClose?: () => void
-  /** Optional total count to display next to the title. */
-  resultCount?: number
-}
-
+/**
+ * Compact "active filters" bar shown at the top of the results modal body.
+ *
+ * The title / count / close button now live in the shared <ModalHeader/> so the
+ * results modal shares the same header look as every other modal in the app.
+ * Renders nothing when no filter is active.
+ */
 const SearchSummaryHeader = memo(function SearchSummaryHeader({
   searchFilters,
-  onClose,
-  resultCount,
-}: Props) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const accentBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const accentColor = useColorModeValue('blue.600', 'blue.300')
+}: SearchSummaryHeaderProps) {
   const tagBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const tagColor = useColorModeValue('gray.700', 'gray.200')
   const incomeColor = useColorModeValue('green.700', 'green.200')
@@ -48,120 +36,61 @@ const SearchSummaryHeader = memo(function SearchSummaryHeader({
       searchFilters.endDate,
   )
 
-  const caption =
-    typeof resultCount === 'number'
-      ? resultCount === 1
-        ? '1 transaction found'
-        : `${resultCount} transactions found`
-      : hasActiveFilters
-        ? 'Showing filtered results'
-        : 'Showing all transactions'
+  if (!hasActiveFilters) return null
 
   return (
-    <Box
-      bg={surfaceBg}
-      borderBottom="1px solid"
-      borderColor={borderColor}
-      px={{ base: 4, sm: 6 }}
-      pt={{
-        // Keep the X close button clear of the iOS Dynamic Island / status
-        // bar with extra breathing room beyond the raw safe-area inset.
-        base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
-        sm: 5,
-      }}
-      pb={hasActiveFilters ? 4 : 5}
-    >
-      <HStack justify="space-between" align="center" mb={hasActiveFilters ? 3 : 0} spacing={3}>
-        <HStack spacing={3} minW={0}>
-          <Box
-            w={9}
-            h={9}
-            borderRadius="lg"
-            bg={accentBg}
-            color={accentColor}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexShrink={0}
-          >
-            <Icon as={ListFilter} boxSize={4} strokeWidth={2.25} />
-          </Box>
-          <VStack align="flex-start" spacing={0} minW={0}>
-            <Text
-              fontWeight={700}
-              fontSize="md"
-              color={titleColor}
-              lineHeight="1.2"
-              noOfLines={1}
-            >
-              Results
-            </Text>
-            <Text fontSize="xs" color={captionColor} noOfLines={1}>
-              {caption}
-            </Text>
-          </VStack>
-        </HStack>
-
-        {onClose && (
-          <AppCloseButton onClick={onClose} />
-        )}
-      </HStack>
-
-      {hasActiveFilters && (
-        <Wrap spacing={2}>
-          {searchFilters.text && (
-            <WrapItem>
-              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
-                <Icon as={Search} boxSize={3} mr={1.5} />
-                <TagLabel maxW="180px" noOfLines={1}>
-                  {searchFilters.text}
-                </TagLabel>
-              </Tag>
-            </WrapItem>
-          )}
-          {searchFilters.type && (
-            <WrapItem>
-              <Tag
-                size="sm"
-                bg={searchFilters.type === 'income' ? incomeBg : expenseBg}
-                color={searchFilters.type === 'income' ? incomeColor : expenseColor}
-                borderRadius="full"
-                px={3}
-                py={1}
-              >
-                <Icon
-                  as={searchFilters.type === 'income' ? TrendingUp : TrendingDown}
-                  boxSize={3}
-                  mr={1.5}
-                />
-                <TagLabel>{searchFilters.type === 'income' ? 'Income' : 'Expense'}</TagLabel>
-              </Tag>
-            </WrapItem>
-          )}
-          {searchFilters.category && (
-            <WrapItem>
-              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
-                <TagLabel>{searchFilters.category}</TagLabel>
-              </Tag>
-            </WrapItem>
-          )}
-          {(searchFilters.startDate || searchFilters.endDate) && (
-            <WrapItem>
-              <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={3} py={1}>
-                <Icon as={Calendar} boxSize={3} mr={1.5} />
-                <TagLabel>
-                  {searchFilters.startDate && searchFilters.endDate
-                    ? `${formatTransactionDate(searchFilters.startDate)} – ${formatTransactionDate(searchFilters.endDate)}`
-                    : searchFilters.startDate
-                      ? `From ${formatTransactionDate(searchFilters.startDate)}`
-                      : `Until ${formatTransactionDate(searchFilters.endDate)}`}
-                </TagLabel>
-              </Tag>
-            </WrapItem>
-          )}
-        </Wrap>
+    <Wrap spacing={2} mb={4}>
+      {searchFilters.text && (
+        <WrapItem>
+          <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={2.5} py={1}>
+            <Icon as={Search} boxSize={3} mr={1.5} />
+            <TagLabel maxW="180px" noOfLines={1}>
+              {searchFilters.text}
+            </TagLabel>
+          </Tag>
+        </WrapItem>
       )}
-    </Box>
+      {searchFilters.type && (
+        <WrapItem>
+          <Tag
+            size="sm"
+            bg={searchFilters.type === 'income' ? incomeBg : expenseBg}
+            color={searchFilters.type === 'income' ? incomeColor : expenseColor}
+            borderRadius="full"
+            px={2.5}
+            py={1}
+          >
+            <Icon
+              as={searchFilters.type === 'income' ? TrendingUp : TrendingDown}
+              boxSize={3}
+              mr={1.5}
+            />
+            <TagLabel>{searchFilters.type === 'income' ? 'Income' : 'Expense'}</TagLabel>
+          </Tag>
+        </WrapItem>
+      )}
+      {searchFilters.category && (
+        <WrapItem>
+          <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={2.5} py={1}>
+            <TagLabel>{searchFilters.category}</TagLabel>
+          </Tag>
+        </WrapItem>
+      )}
+      {(searchFilters.startDate || searchFilters.endDate) && (
+        <WrapItem>
+          <Tag size="sm" bg={tagBg} color={tagColor} borderRadius="full" px={2.5} py={1}>
+            <Icon as={Calendar} boxSize={3} mr={1.5} />
+            <TagLabel>
+              {searchFilters.startDate && searchFilters.endDate
+                ? `${formatTransactionDate(searchFilters.startDate)} – ${formatTransactionDate(searchFilters.endDate)}`
+                : searchFilters.startDate
+                  ? `From ${formatTransactionDate(searchFilters.startDate)}`
+                  : `Until ${formatTransactionDate(searchFilters.endDate)}`}
+            </TagLabel>
+          </Tag>
+        </WrapItem>
+      )}
+    </Wrap>
   )
 })
 

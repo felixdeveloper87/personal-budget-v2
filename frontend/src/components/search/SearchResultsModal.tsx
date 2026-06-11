@@ -10,14 +10,14 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { AlertCircle, RefreshCw } from '../ui/icons'
+import { AlertCircle, ListFilter, RefreshCw } from '../ui/icons'
 import { Transaction } from '../../types'
 import { searchTransactions } from '../../api'
 import { useAuth } from '../../contexts/AuthContext'
 import SearchSummaryHeader from './SearchSummaryHeader'
 import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
-import { PremiumModal } from '../ui'
+import { ModalHeader, PremiumModal } from '../ui'
 import { ToastService } from '../../services/toast'
 
 const SearchResultsModal = memo(function SearchResultsModal({
@@ -91,10 +91,20 @@ const SearchResultsModal = memo(function SearchResultsModal({
       onClose={onClose}
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       header={
-        <SearchSummaryHeader
-          searchFilters={searchFilters}
+        <ModalHeader
+          icon={ListFilter}
+          title="Results"
+          caption={
+            isLoading
+              ? 'Searching…'
+              : error
+                ? 'Could not load results'
+                : transactions.length === 1
+                  ? '1 transaction found'
+                  : `${transactions.length} transactions found`
+          }
           onClose={onClose}
-          resultCount={isLoading || error ? undefined : transactions.length}
+          accent="blue"
         />
       }
       contentProps={{ bg: surfaceBg }}
@@ -112,6 +122,7 @@ const SearchResultsModal = memo(function SearchResultsModal({
           overscrollBehaviorY: 'contain',
         }}
       >
+        {!isLoading && !error && <SearchSummaryHeader searchFilters={searchFilters} />}
         {isLoading ? (
           <VStack spacing={3} align="stretch" w="full">
             {/* Summary pills skeleton */}

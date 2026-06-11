@@ -209,8 +209,8 @@ export default function SearchFilters({
                 key={opt.id}
                 variant="unstyled"
                 flex={1}
-                h={{ base: '58px', sm: '64px' }}
-                px={{ base: 3, sm: 4 }}
+                h={{ base: '52px', sm: '56px' }}
+                px={{ base: 3, sm: 3.5 }}
                 borderRadius="xl"
                 border="1px solid"
                 borderColor={tone.borderColor}
@@ -231,10 +231,10 @@ export default function SearchFilters({
                   boxShadow: `${tone.boxShadow}, 0 0 0 3px ${focusGlow}`,
                 }}
               >
-                <HStack spacing={{ base: 2, sm: 3 }} align="center" w="full">
+                <HStack spacing={{ base: 2, sm: 2.5 }} align="center" w="full">
                   <Box
-                    w={{ base: 8, sm: 9 }}
-                    h={{ base: 8, sm: 9 }}
+                    w={{ base: 7, sm: 8 }}
+                    h={{ base: 7, sm: 8 }}
                     borderRadius="lg"
                     bg={tone.iconBg}
                     color={tone.iconColor}
@@ -244,7 +244,7 @@ export default function SearchFilters({
                     flexShrink={0}
                     transition="background-color 0.18s ease, color 0.18s ease"
                   >
-                      <IconComponent size={18} weight="bold" />
+                      <IconComponent size={16} weight="bold" />
                   </Box>
                   <VStack align="flex-start" spacing={0} minW={0} flex={1}>
                     <Text
@@ -320,8 +320,8 @@ export default function SearchFilters({
                 <WrapItem key={cat}>
                   <Button
                     variant="unstyled"
-                    h="34px"
-                    px={3.5}
+                    h="28px"
+                    px={3}
                     fontSize="xs"
                     fontWeight={600}
                     borderRadius="full"
