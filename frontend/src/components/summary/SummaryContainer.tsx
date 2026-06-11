@@ -1,10 +1,27 @@
-import { Box, Divider, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import {
+  Box,
+  Divider,
+  Flex,
+  HStack,
+  Icon,
+  Text,
+  VStack,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
-import SummaryCardsGrid from './SummaryCardsGrid'
+import type { TransactionDateBasis } from '../../utils/transactionDates'
+import SummaryStatsStrip from './SummaryStatsStrip'
 import PeriodNavigator from './PeriodNavigator'
-import { SectionCard } from '../ui'
+import { SectionCard, DateBasisToggle } from '../ui'
 import { AlertCircle } from '../ui/icons'
+
+const BASIS_INFO: Record<TransactionDateBasis, string> = {
+  'cash-flow':
+    'Payments view — what hits your account in this period: income received and bills due.',
+  activity:
+    'Behaviour view — what you actually spent and earned in this period by purchase date.',
+}
 
 interface SummaryContainerProps {
   periodData: PeriodData
@@ -15,20 +32,12 @@ interface SummaryContainerProps {
   navigatePeriod?: (direction: 'prev' | 'next') => void
   goToToday?: () => void
   formatLabel?: () => string
-  /**
-   * When provided, the Income/Expenses cards navigate to the Categories page
-   * (with the matching tab) instead of opening the breakdown modal.
-   */
+  /** Active date basis for the overview ("cash-flow" = payments, "activity" = behaviour). */
+  dateBasis?: TransactionDateBasis
+  /** When provided, renders the Behaviour | Payments toggle above the stats. */
+  onDateBasisChange?: (basis: TransactionDateBasis) => void
   onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
-  /**
-   * When provided, the Transactions card navigates to the Transactions page.
-   */
   onViewTransactions?: () => void
-  /**
-   * When provided, the Balance card navigates to the Goals page (which hosts
-   * the balance break-even content). With all four callbacks wired, the cards
-   * are pure CTAs and no modal is rendered.
-   */
   onViewBalance?: () => void
 }
 
@@ -96,6 +105,8 @@ export default function SummaryContainer({
   navigatePeriod: externalNavigatePeriod,
   goToToday: externalGoToToday,
   formatLabel: externalFormatLabel,
+  dateBasis = 'cash-flow',
+  onDateBasisChange,
   onNavigateCategory,
   onViewTransactions,
   onViewBalance,
@@ -103,9 +114,6 @@ export default function SummaryContainer({
   const { transactions, income, expense, balance } = periodData
 
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
-  const infoBorder = useColorModeValue('blue.100', 'rgba(96,165,250,0.20)')
-  const infoColor = useColorModeValue('blue.700', 'blue.200')
   const infoMuted = useColorModeValue('blue.600', 'blue.300')
 
   const navigatePeriod =
@@ -137,7 +145,7 @@ export default function SummaryContainer({
   return (
     <SectionCard staticOnHover>
       <VStack spacing={0} align="stretch" w="full">
-        {/* Period Navigator as the integrated header */}
+        {/* Period Navigator */}
         <Box px={{ base: 4, sm: 5 }} pt={{ base: 4, sm: 5 }} pb={{ base: 3, sm: 4 }}>
           <PeriodNavigator
             selectedPeriod={selectedPeriod}
@@ -153,32 +161,38 @@ export default function SummaryContainer({
 
         <Divider borderColor={dividerColor} />
 
-        {/* Summary Cards */}
-        <Box px={{ base: 4, sm: 5 }} py={{ base: 4, sm: 5 }}>
+        {/* Stats area */}
+        <Box px={{ base: 4, sm: 5 }} py={{ base: 3, sm: 4 }}>
           <VStack align="stretch" spacing={3}>
-            <HStack
-              spacing={2.5}
-              px={3}
-              py={2.5}
-              bg={infoBg}
-              border="1px solid"
-              borderColor={infoBorder}
-              borderRadius="lg"
-              color={infoColor}
-              align="flex-start"
+            {/* View toggle + contextual note (side by side on desktop) */}
+            <Flex
+              direction={{ base: 'column', md: 'row' }}
+              gap={{ base: 2, md: 4 }}
+              align={{ base: 'stretch', md: 'center' }}
             >
-              <Icon as={AlertCircle} boxSize={4} mt={0.5} flexShrink={0} />
-              <Text fontSize="xs" lineHeight="1.45" color={infoMuted}>
-                This overview follows payment dates, showing income received and bills due in the selected period. Purchase activity is shown separately in Transactions and Categories.
-              </Text>
-            </HStack>
+              {onDateBasisChange && (
+                <HStack spacing={2.5} flexShrink={0}>
+                  <Text fontSize="xs" fontWeight={700} color={infoMuted}>
+                    View as
+                  </Text>
+                  <DateBasisToggle value={dateBasis} onChange={onDateBasisChange} />
+                </HStack>
+              )}
 
-            <SummaryCardsGrid
-              transactions={transactions}
+              <HStack spacing={1.5} color={infoMuted} minW={0} align="flex-start">
+                <Icon as={AlertCircle} boxSize={3.5} mt="2px" flexShrink={0} />
+                <Text fontSize="xs" lineHeight="1.45" opacity={0.9}>
+                  {BASIS_INFO[dateBasis]}
+                </Text>
+              </HStack>
+            </Flex>
+
+            {/* Compact stats strip */}
+            <SummaryStatsStrip
+              txCount={transactions.length}
               income={income}
               expense={expense}
               balance={balance}
-              selectedPeriod={selectedPeriod}
               onCardClick={handleCardClick}
             />
           </VStack>

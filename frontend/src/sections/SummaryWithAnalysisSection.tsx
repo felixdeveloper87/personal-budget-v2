@@ -1,6 +1,6 @@
-import { Box } from '@chakra-ui/react'
 import { PeriodData } from '../hooks/usePeriodData'
 import { PeriodType } from '../types'
+import type { TransactionDateBasis } from '../utils/transactionDates'
 import { SummaryContainer } from '../components/summary'
 
 interface SummaryWithAnalysisSectionProps {
@@ -12,6 +12,10 @@ interface SummaryWithAnalysisSectionProps {
   navigatePeriod: (direction: 'prev' | 'next') => void
   goToToday: () => void
   formatLabel: () => string
+  /** Active date basis for the overview ("cash-flow" = payments, "activity" = behaviour). */
+  dateBasis?: TransactionDateBasis
+  /** When provided, the container renders the Behaviour | Payments toggle. */
+  onDateBasisChange?: (basis: TransactionDateBasis) => void
   onNavigateCategory?: (tab: 'expenses' | 'incomes') => void
   onViewTransactions?: () => void
   onViewBalance?: () => void
@@ -26,6 +30,8 @@ export default function SummaryWithAnalysisSection({
   navigatePeriod,
   goToToday,
   formatLabel,
+  dateBasis,
+  onDateBasisChange,
   onNavigateCategory,
   onViewTransactions,
   onViewBalance,
@@ -40,6 +46,8 @@ export default function SummaryWithAnalysisSection({
       navigatePeriod={navigatePeriod}
       goToToday={goToToday}
       formatLabel={formatLabel}
+      dateBasis={dateBasis}
+      onDateBasisChange={onDateBasisChange}
       onNavigateCategory={onNavigateCategory}
       onViewTransactions={onViewTransactions}
       onViewBalance={onViewBalance}

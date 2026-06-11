@@ -12,6 +12,8 @@ export type {
   SectionHeaderAccent,
 } from './SectionHeader'
 export { default as PageSkeleton } from './PageSkeleton'
+export { default as DateBasisToggle } from './DateBasisToggle'
+export type { DateBasisToggleProps } from './DateBasisToggle'
 export { default as BankLogo, getBankMeta, UK_BANKS } from './BankLogo'
 export { default as BankCombobox } from './BankCombobox'
 

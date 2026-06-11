@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { Box, VStack } from '@chakra-ui/react'
 import { usePeriodData } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodNavigator } from '../hooks/usePeriodNavigator'
+import type { TransactionDateBasis } from '../utils/transactionDates'
 
 import {
   AddTransactionSection,
@@ -40,12 +42,17 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
   const { transactions, monthSummary, loading, loadData, filters } =
     useDashboardData(selectedDate, selectedPeriod)
 
+  // Home defaults to "Payments" (cash-flow): what hits the account in the
+  // period — card bills and installments included. The toggle flips the
+  // overview to "Behaviour" (purchase dates) without leaving the page.
+  const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('cash-flow')
+
   const periodData = usePeriodData(
     transactions,
     monthSummary,
     selectedPeriod,
     selectedDate,
-    'cash-flow',
+    dateBasis,
   )
 
   const filtersActive = hasActiveFilters(filters)
@@ -73,6 +80,8 @@ export default function Dashboard({ onPageChange, onNavigateCategory }: Dashboar
               <Box order={{ base: 1, lg: 2 }}>
                 <SummaryWithAnalysisSection
                   periodData={periodData}
+                  dateBasis={dateBasis}
+                  onDateBasisChange={setDateBasis}
                   selectedPeriod={selectedPeriod}
                   selectedDate={selectedDate}
                   onDateChange={onDateChange}
