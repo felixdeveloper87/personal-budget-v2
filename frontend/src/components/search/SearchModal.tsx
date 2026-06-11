@@ -64,10 +64,12 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
       >
         <Box
           flex="1"
+          minH="0"
           bg={surfaceBg}
           px={{ base: 5, sm: 6 }}
           py={{ base: 5, sm: 6 }}
           overflowY="auto"
+          sx={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
         >
           <SearchFilters
             filters={filters}

@@ -54,9 +54,9 @@ export default function DashboardPreview() {
   const balance  = useCountUp(totals.balance,  1300, 450)
 
   // Surfaces
-  const surface       = useColorModeValue('rgba(255,255,255,0.92)', 'rgba(15,17,21,0.86)')
-  const surfaceBorder = useColorModeValue('rgba(15,23,42,0.08)',    'rgba(255,255,255,0.08)')
-  const innerSurface  = useColorModeValue('white',                  'rgba(255,255,255,0.04)')
+  const surface       = useColorModeValue('rgba(255,255,255,0.68)', 'rgba(15,17,21,0.64)')
+  const surfaceBorder = useColorModeValue('rgba(255,255,255,0.52)', 'rgba(255,255,255,0.07)')
+  const innerSurface  = useColorModeValue('rgba(255,255,255,0.58)', 'rgba(255,255,255,0.04)')
   const innerBorder   = useColorModeValue('gray.100',               'whiteAlpha.200')
   const subText       = useColorModeValue('gray.500',               'gray.400')
   const text          = useColorModeValue('gray.900',               'whiteAlpha.900')
@@ -86,12 +86,12 @@ export default function DashboardPreview() {
 
   // Card surface
   const chromeBg  = useColorModeValue(
-    'linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)',
-    'linear-gradient(180deg,rgba(255,255,255,0.04) 0%,rgba(255,255,255,0.01) 100%)',
+    'linear-gradient(180deg,rgba(255,255,255,0.44) 0%,rgba(248,250,252,0.18) 100%)',
+    'linear-gradient(180deg,rgba(255,255,255,0.035) 0%,rgba(255,255,255,0.01) 100%)',
   )
   const cardBg     = useColorModeValue(
-    'linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)',
-    'linear-gradient(135deg,rgba(25,27,34,0.65) 0%,rgba(12,13,17,0.78) 100%)',
+    'linear-gradient(135deg,rgba(255,255,255,0.66) 0%,rgba(248,250,252,0.42) 100%)',
+    'linear-gradient(135deg,rgba(25,27,34,0.48) 0%,rgba(12,13,17,0.58) 100%)',
   )
   const cardBorder  = useColorModeValue('rgba(0,0,0,0.05)', 'rgba(255,255,255,0.04)')
   const rowHoverBg  = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -115,10 +115,10 @@ export default function DashboardPreview() {
       bg={surface}
       border="1px solid"
       borderColor={surfaceBorder}
-      backdropFilter="saturate(180%) blur(24px)"
+      backdropFilter="saturate(155%) blur(18px)"
       boxShadow={useColorModeValue(
-        '0 30px 60px -20px rgba(15,23,42,0.25),0 18px 40px -25px rgba(15,23,42,0.15)',
-        '0 30px 60px -20px rgba(0,0,0,0.65),0 18px 40px -25px rgba(0,0,0,0.55)',
+        '0 34px 90px -38px rgba(79,70,229,0.34), 0 22px 55px -42px rgba(15,23,42,0.28), inset 0 1px 0 rgba(255,255,255,0.62)',
+        '0 34px 90px -38px rgba(99,102,241,0.42), 0 22px 60px -42px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.08)',
       )}
       overflow="hidden"
       sx={{
@@ -392,8 +392,8 @@ interface BalancePillProps {
 
 function BalancePill({ label, value, delta, icon: IconComponent, accent, bg, text, subText }: BalancePillProps) {
   const cardBg    = useColorModeValue(
-    'linear-gradient(135deg,#ffffff 0%,#f8fafc 100%)',
-    'linear-gradient(135deg,rgba(25,27,34,0.65) 0%,rgba(12,13,17,0.78) 100%)',
+    'linear-gradient(135deg,rgba(255,255,255,0.66) 0%,rgba(248,250,252,0.42) 100%)',
+    'linear-gradient(135deg,rgba(25,27,34,0.48) 0%,rgba(12,13,17,0.58) 100%)',
   )
   const cardBorder = useColorModeValue('rgba(0,0,0,0.05)', 'rgba(255,255,255,0.04)')
 

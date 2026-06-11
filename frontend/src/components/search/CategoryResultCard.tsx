@@ -1,24 +1,22 @@
-import { 
-  Box, 
-  VStack, 
-  HStack, 
-  Text, 
-  Button, 
-  Table, 
-  Thead, 
-  Tbody, 
-  Tr, 
-  Th, 
-  Td, 
+import {
+  Box,
+  VStack,
+  HStack,
+  Text,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
   Badge,
   useColorModeValue,
   Icon,
-  Collapse
+  Collapse,
 } from '@chakra-ui/react'
-import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign } from '../ui/icons'
+import { ChevronDown, ChevronUp, Calendar, Tag, DollarSign, TrendingUp, TrendingDown } from '../ui/icons'
 import { memo, useMemo } from 'react'
 import { formatDateBR } from '../../utils/dateTime'
-import { getTypeColor, getTableStyles, getResponsiveStyles } from '../ui'
 import { CategoryResultCardProps } from '../../types'
 
 const CategoryResultCard = memo(function CategoryResultCard({
@@ -26,21 +24,38 @@ const CategoryResultCard = memo(function CategoryResultCard({
   transactions,
   type,
   isExpanded,
-  onToggle
+  onToggle,
 }: CategoryResultCardProps) {
-  const bgColor = useColorModeValue('white', 'gray.800')
-  const borderColor = useColorModeValue('gray.200', 'gray.700')
-  const textColor = useColorModeValue('gray.600', 'gray.400')
-  const headerBg = useColorModeValue('gray.50', 'gray.700')
-  const typeColor = getTypeColor(type)
-  const tableStyles = getTableStyles()
-  const responsiveStyles = getResponsiveStyles()
+  const bgColor = useColorModeValue('white', '#111111')
+  const borderColor = useColorModeValue('gray.150', 'whiteAlpha.100')
+  const headerBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const headerHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const textColor = useColorModeValue('gray.700', 'gray.300')
+  const subtleColor = useColorModeValue('gray.500', 'gray.500')
+  const rowHoverBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const dividerColor = useColorModeValue('gray.100', 'whiteAlpha.80')
+  const tableHeaderBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const altRowBg = useColorModeValue('gray.50', 'whiteAlpha.30')
 
-  // Memoized calculations
-  const categoryTotal = useMemo(() => {
-    return transactions.reduce((sum, transaction) => sum + transaction.amount, 0)
-  }, [transactions])
+  const incomeAccent = useColorModeValue('#16a34a', '#4ade80')
+  const expenseAccent = useColorModeValue('#dc2626', '#f87171')
+  const incomeAccentBg = useColorModeValue('green.50', 'rgba(34,197,94,0.08)')
+  const expenseAccentBg = useColorModeValue('red.50', 'rgba(239,68,68,0.08)')
+  const incomeBadgeBg = useColorModeValue('green.100', 'rgba(34,197,94,0.15)')
+  const expenseBadgeBg = useColorModeValue('red.100', 'rgba(239,68,68,0.15)')
+  const incomeBadgeColor = useColorModeValue('green.700', 'green.200')
+  const expenseBadgeColor = useColorModeValue('red.700', 'red.200')
 
+  const isIncome = type === 'INCOME'
+  const accentColor = isIncome ? incomeAccent : expenseAccent
+  const accentBg = isIncome ? incomeAccentBg : expenseAccentBg
+  const badgeBg = isIncome ? incomeBadgeBg : expenseBadgeBg
+  const badgeColor = isIncome ? incomeBadgeColor : expenseBadgeColor
+
+  const categoryTotal = useMemo(
+    () => transactions.reduce((sum, t) => sum + t.amount, 0),
+    [transactions],
+  )
 
   return (
     <Box
@@ -48,75 +63,195 @@ const CategoryResultCard = memo(function CategoryResultCard({
       borderRadius="xl"
       border="1px solid"
       borderColor={borderColor}
-      shadow="md"
       overflow="hidden"
-      mb={4}
+      position="relative"
+      _before={{
+        content: '""',
+        position: 'absolute',
+        left: 0,
+        top: 0,
+        bottom: 0,
+        w: '3px',
+        bg: accentColor,
+        borderRadius: '3px 0 0 3px',
+      }}
     >
-      {/* Category Header */}
-      <Button
+      {/* Header — clickable */}
+      <Box
+        as="button"
         w="full"
-        h={responsiveStyles.categoryCard.header.height}
-        p={responsiveStyles.categoryCard.header.padding}
+        px={{ base: 3, md: 4 }}
+        py={{ base: 3, md: 3.5 }}
+        pl={{ base: 5, md: 6 }}
         bg={headerBg}
-        borderRadius="none"
         onClick={onToggle}
-        _hover={{ bg: useColorModeValue('gray.100', 'gray.600') }}
-        _active={{ bg: useColorModeValue('gray.200', 'gray.500') }}
-        justifyContent="space-between"
-        variant="ghost"
+        display="flex"
+        alignItems="center"
+        cursor="pointer"
+        textAlign="left"
+        transition="background-color 0.15s ease"
+        _hover={{ bg: headerHoverBg }}
+        _active={{ bg: headerHoverBg }}
       >
-        <HStack spacing={{ base: 2, md: 4 }} flex={1}>
-          <Icon as={Tag} boxSize={{ base: 4, md: 5 }} color={typeColor} />
-          <VStack align="start" spacing={1} flex={1}>
-            <Text fontSize={responsiveStyles.categoryCard.header.fontSize} fontWeight="bold" color={textColor}>
-              {category}
-            </Text>
-            <HStack spacing={{ base: 2, md: 4 }}>
-              <Text fontSize={responsiveStyles.categoryCard.table.fontSize} color={textColor}>
-                {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
-              </Text>
-              <Badge 
-                colorScheme={type === 'INCOME' ? 'green' : 'red'} 
-                variant="subtle"
-                px={responsiveStyles.categoryCard.badge.padding}
-                py={1}
-                borderRadius="md"
-                fontSize={responsiveStyles.categoryCard.badge.fontSize}
+        <HStack spacing={{ base: 2.5, md: 3 }} flex={1} minW={0}>
+          {/* Category icon */}
+          <Box
+            w={{ base: 8, md: 9 }}
+            h={{ base: 8, md: 9 }}
+            borderRadius="lg"
+            bg={accentBg}
+            color={accentColor}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            flexShrink={0}
+          >
+            <Icon as={Tag} boxSize={{ base: 3.5, md: 4 }} />
+          </Box>
+
+          {/* Category info */}
+          <VStack align="start" spacing={0.5} flex={1} minW={0}>
+            <HStack spacing={2} maxW="full">
+              <Text
+                fontSize={{ base: 'sm', md: 'md' }}
+                fontWeight={700}
+                color={textColor}
+                noOfLines={1}
               >
-                {type === 'INCOME' ? 'Income' : 'Expense'}
+                {category}
+              </Text>
+              <Badge
+                px={2}
+                py={0.5}
+                borderRadius="full"
+                bg={badgeBg}
+                color={badgeColor}
+                fontSize="2xs"
+                fontWeight={700}
+                textTransform="none"
+                display="flex"
+                alignItems="center"
+                gap={1}
+                flexShrink={0}
+              >
+                <Icon as={isIncome ? TrendingUp : TrendingDown} boxSize={2.5} />
+                {isIncome ? 'Income' : 'Expense'}
               </Badge>
             </HStack>
-          </VStack>
-          <HStack spacing={2}>
-            <Text fontSize={responsiveStyles.categoryCard.amount.fontSize} fontWeight="bold" color={typeColor}>
-              £{categoryTotal.toFixed(2)}
+            <Text fontSize={{ base: '2xs', md: 'xs' }} color={subtleColor}>
+              {transactions.length} transaction{transactions.length !== 1 ? 's' : ''}
             </Text>
-            <Icon 
-              as={isExpanded ? ChevronUp : ChevronDown} 
-              boxSize={{ base: 4, md: 5 }} 
-              color={textColor} 
+          </VStack>
+
+          {/* Total + chevron */}
+          <HStack spacing={{ base: 1.5, md: 2 }} flexShrink={0}>
+            <Text
+              fontSize={{ base: 'sm', md: 'md' }}
+              fontWeight={800}
+              color={accentColor}
+              letterSpacing="-0.01em"
+            >
+              {isIncome ? '+' : ''}£{Math.abs(categoryTotal).toFixed(2)}
+            </Text>
+            <Icon
+              as={isExpanded ? ChevronUp : ChevronDown}
+              boxSize={{ base: 4, md: 4 }}
+              color={subtleColor}
+              transition="transform 0.2s ease"
             />
           </HStack>
         </HStack>
-      </Button>
+      </Box>
 
-      {/* Transactions Table */}
+      {/* Transactions */}
       <Collapse in={isExpanded} animateOpacity>
-        <Box p={0} {...tableStyles.container}>
-          <Table {...tableStyles.table}>
-            <Thead bg={headerBg}>
+        {/* Mobile: stacked rows */}
+        <Box display={{ base: 'block', md: 'none' }}>
+          {transactions.map((transaction, idx) => (
+            <Box
+              key={transaction.id}
+              px={4}
+              pl={5}
+              py={2.5}
+              borderTop="1px solid"
+              borderColor={dividerColor}
+              _hover={{ bg: rowHoverBg }}
+              transition="background-color 0.12s ease"
+              bg={idx % 2 === 0 ? 'transparent' : altRowBg}
+            >
+              <HStack justify="space-between" align="flex-start" spacing={2}>
+                <Text
+                  fontSize="sm"
+                  fontWeight={500}
+                  color={textColor}
+                  flex={1}
+                  noOfLines={2}
+                  lineHeight="1.35"
+                >
+                  {transaction.description}
+                </Text>
+                <Text
+                  fontSize="sm"
+                  fontWeight={700}
+                  color={accentColor}
+                  flexShrink={0}
+                  letterSpacing="-0.01em"
+                >
+                  {isIncome ? '+' : ''}£{Math.abs(transaction.amount).toFixed(2)}
+                </Text>
+              </HStack>
+              <HStack spacing={1} mt={0.5}>
+                <Icon as={Calendar} boxSize={2.5} color={subtleColor} />
+                <Text fontSize="2xs" color={subtleColor}>
+                  {formatDateBR((transaction as any).date || transaction.dateTime)}
+                </Text>
+              </HStack>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Desktop: table */}
+        <Box display={{ base: 'none', md: 'block' }}>
+          <Table variant="simple" size="sm" w="full">
+            <Thead bg={tableHeaderBg}>
               <Tr>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" {...tableStyles.columns.date}>
-                  <HStack spacing={1}>
+                <Th
+                  color={subtleColor}
+                  fontSize="2xs"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  letterSpacing="0.06em"
+                  py={2}
+                  pl={6}
+                  w="130px"
+                >
+                  <HStack spacing={1.5}>
                     <Icon as={Calendar} boxSize={3} />
                     <Text>Date</Text>
                   </HStack>
                 </Th>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase">
+                <Th
+                  color={subtleColor}
+                  fontSize="2xs"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  letterSpacing="0.06em"
+                  py={2}
+                >
                   Description
                 </Th>
-                <Th color={textColor} fontSize="xs" fontWeight="600" textTransform="uppercase" isNumeric {...tableStyles.columns.amount}>
-                  <HStack spacing={1} justify="flex-end">
+                <Th
+                  color={subtleColor}
+                  fontSize="2xs"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  letterSpacing="0.06em"
+                  isNumeric
+                  py={2}
+                  pr={5}
+                  w="130px"
+                >
+                  <HStack spacing={1.5} justify="flex-end">
                     <Icon as={DollarSign} boxSize={3} />
                     <Text>Amount</Text>
                   </HStack>
@@ -125,31 +260,38 @@ const CategoryResultCard = memo(function CategoryResultCard({
             </Thead>
             <Tbody>
               {transactions.map((transaction) => (
-                <Tr 
+                <Tr
                   key={transaction.id}
-                  _hover={{ bg: useColorModeValue('gray.50', 'gray.700') }}
-                  transition="background-color 0.2s"
+                  _hover={{ bg: rowHoverBg }}
+                  transition="background-color 0.12s ease"
                 >
-                  <Td color={textColor} fontSize={responsiveStyles.categoryCard.table.fontSize} {...tableStyles.columns.date}>
+                  <Td
+                    color={subtleColor}
+                    fontSize="xs"
+                    pl={6}
+                    py={2.5}
+                    borderColor={dividerColor}
+                  >
                     {formatDateBR((transaction as any).date || transaction.dateTime)}
                   </Td>
-                  <Td color={textColor} fontSize={responsiveStyles.categoryCard.table.fontSize}>
-                    <Text 
-                      isTruncated 
-                      title={transaction.description}
-                      maxW="100%"
-                    >
+                  <Td
+                    color={textColor}
+                    fontSize="sm"
+                    py={2.5}
+                    borderColor={dividerColor}
+                  >
+                    <Text isTruncated title={transaction.description}>
                       {transaction.description}
                     </Text>
                   </Td>
-                  <Td isNumeric {...tableStyles.columns.amount}>
-                    <Text 
-                      fontSize={responsiveStyles.categoryCard.table.fontSize} 
-                      fontWeight="600" 
-                      color={typeColor}
-                      whiteSpace="nowrap"
+                  <Td isNumeric pr={5} py={2.5} borderColor={dividerColor}>
+                    <Text
+                      fontSize="sm"
+                      fontWeight={700}
+                      color={accentColor}
+                      letterSpacing="-0.01em"
                     >
-                      {type === 'INCOME' ? '+' : ''}£{Math.abs(transaction.amount).toFixed(2)}
+                      {isIncome ? '+' : ''}£{Math.abs(transaction.amount).toFixed(2)}
                     </Text>
                   </Td>
                 </Tr>

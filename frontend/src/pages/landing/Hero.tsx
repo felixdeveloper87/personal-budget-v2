@@ -290,15 +290,27 @@ export default function Hero({ onGetStarted }: HeroProps) {
             animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.85, ease: EASE, delay: 0.15 }}
           >
-            <MotionBox
-              animate={reduceMotion ? undefined : { y: [0, -14, 0] }}
-              transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+            <Box
+              position="relative"
               w="full"
               display="flex"
               justifyContent={{ base: 'center', lg: 'flex-end' }}
+              isolation="isolate"
+              _before={{
+                content: '""',
+                position: 'absolute',
+                inset: { base: '-8%', md: '-14%' },
+                background: useColorModeValue(
+                  'radial-gradient(circle at 65% 40%, rgba(99,102,241,0.24) 0%, rgba(59,130,246,0.12) 38%, transparent 72%)',
+                  'radial-gradient(circle at 65% 40%, rgba(99,102,241,0.28) 0%, rgba(59,130,246,0.13) 40%, transparent 72%)',
+                ),
+                filter: 'blur(24px)',
+                zIndex: -1,
+                pointerEvents: 'none',
+              }}
             >
               <DashboardPreview />
-            </MotionBox>
+            </Box>
           </MotionBox>
 
         </Flex>

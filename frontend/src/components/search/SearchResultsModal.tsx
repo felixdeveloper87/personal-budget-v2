@@ -3,8 +3,9 @@ import {
   Box,
   Button,
   Center,
+  HStack,
   Icon,
-  Spinner,
+  Skeleton,
   Text,
   VStack,
   useColorModeValue,
@@ -34,7 +35,10 @@ const SearchResultsModal = memo(function SearchResultsModal({
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const subtleText = useColorModeValue('gray.500', 'gray.400')
   const errorText = useColorModeValue('gray.700', 'gray.300')
-  const spinnerEmpty = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const skeletonStart = useColorModeValue('gray.100', 'whiteAlpha.80')
+  const skeletonEnd = useColorModeValue('gray.200', 'whiteAlpha.150')
+  const skeletonCardBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const skeletonCardBorder = useColorModeValue('gray.150', 'whiteAlpha.100')
 
   const performSearch = useCallback(async () => {
     if (!user?.token) return
@@ -97,25 +101,47 @@ const SearchResultsModal = memo(function SearchResultsModal({
     >
       <Box
         flex="1"
+        minH="0"
         bg={surfaceBg}
         px={{ base: 4, sm: 6 }}
         py={{ base: 5, sm: 6 }}
         overflowY="auto"
+        sx={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
       >
         {isLoading ? (
-          <Center py={20}>
-            <VStack spacing={4}>
-              <Spinner
-                size="lg"
-                color="blue.500"
-                thickness="3px"
-                emptyColor={spinnerEmpty}
-              />
-              <Text color={subtleText} fontSize="sm">
-                Searching transactions…
-              </Text>
-            </VStack>
-          </Center>
+          <VStack spacing={3} align="stretch" w="full">
+            {/* Summary pills skeleton */}
+            <HStack spacing={2}>
+              <Skeleton h="28px" w="90px" borderRadius="full" startColor={skeletonStart} endColor={skeletonEnd} />
+              <Skeleton h="28px" w="90px" borderRadius="full" startColor={skeletonStart} endColor={skeletonEnd} />
+              <Skeleton h="28px" w="70px" borderRadius="full" startColor={skeletonStart} endColor={skeletonEnd} />
+            </HStack>
+            {/* Header row skeleton */}
+            <HStack justify="space-between">
+              <Skeleton h="18px" w="80px" borderRadius="md" startColor={skeletonStart} endColor={skeletonEnd} />
+              <Skeleton h="28px" w="90px" borderRadius="lg" startColor={skeletonStart} endColor={skeletonEnd} />
+            </HStack>
+            {/* Category card skeletons */}
+            {[1, 2, 3].map((i) => (
+              <Box
+                key={i}
+                bg={skeletonCardBg}
+                border="1px solid"
+                borderColor={skeletonCardBorder}
+                borderRadius="xl"
+                overflow="hidden"
+              >
+                <HStack px={4} pl={5} py={3} spacing={3}>
+                  <Skeleton w={9} h={9} borderRadius="lg" startColor={skeletonStart} endColor={skeletonEnd} />
+                  <VStack align="start" spacing={1.5} flex={1}>
+                    <Skeleton h="14px" w={`${60 + i * 15}px`} borderRadius="md" startColor={skeletonStart} endColor={skeletonEnd} />
+                    <Skeleton h="11px" w="80px" borderRadius="md" startColor={skeletonStart} endColor={skeletonEnd} />
+                  </VStack>
+                  <Skeleton h="16px" w="64px" borderRadius="md" startColor={skeletonStart} endColor={skeletonEnd} />
+                </HStack>
+              </Box>
+            ))}
+          </VStack>
         ) : error ? (
           <Center py={16}>
             <VStack spacing={5} maxW="sm" textAlign="center">

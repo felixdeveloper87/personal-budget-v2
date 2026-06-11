@@ -98,8 +98,13 @@ export default function PremiumModal({
                     display="flex"
                     flexDirection="column"
                     flex="1"
+                    minH="0"
                     position="relative"
                     zIndex={1}
+                    sx={{
+                        WebkitOverflowScrolling: 'touch',
+                        overscrollBehavior: 'contain',
+                    }}
                 >
                     {children}
                 </ModalBody>
