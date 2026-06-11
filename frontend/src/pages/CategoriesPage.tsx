@@ -348,12 +348,14 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
                   showPeriodBadge={false}
+                  compact
                 />
               ) : (
                 <IncomeChart
                   transactions={periodData.transactions}
                   selectedPeriod={formatLabel()}
                   showPeriodBadge={false}
+                  compact
                 />
               )
             ) : (

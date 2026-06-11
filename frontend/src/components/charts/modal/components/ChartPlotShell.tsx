@@ -17,6 +17,7 @@ export interface ChartPlotShellProps {
   showPeriodBadge?: boolean
   badgeBg?: string
   badgeColor?: string
+  compact?: boolean
   children: ReactNode
 }
 
@@ -31,6 +32,7 @@ export default function ChartPlotShell({
   showPeriodBadge = true,
   badgeBg,
   badgeColor,
+  compact = false,
   children,
 }: ChartPlotShellProps) {
   const surfaceBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -44,13 +46,13 @@ export default function ChartPlotShell({
       border="1px solid"
       borderColor={surfaceBorder}
       bg={surfaceBg}
-      p={{ base: 4, sm: 5 }}
+      p={compact ? { base: 3, sm: 4 } : { base: 4, sm: 5 }}
     >
       <HStack
         justify="space-between"
         align="flex-start"
         spacing={3}
-        mb={4}
+        mb={compact ? 2 : 4}
       >
         <VStack align="flex-start" spacing={0.5} minW={0}>
           <Text

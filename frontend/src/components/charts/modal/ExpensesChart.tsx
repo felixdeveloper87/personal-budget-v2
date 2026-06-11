@@ -20,6 +20,7 @@ export interface ExpensesChartProps {
   periodType?: PeriodType
   selectedDate?: Date
   dateBasis?: TransactionDateBasis
+  compact?: boolean
 }
 
 export default function ExpensesChart({
@@ -29,6 +30,7 @@ export default function ExpensesChart({
   periodType,
   selectedDate,
   dateBasis = 'cash-flow',
+  compact = false,
 }: ExpensesChartProps) {
   const chartColors = useChartColors()
   const { smallChartHeight, pieOuterRadius } = useChartDimensions()
@@ -89,16 +91,17 @@ export default function ExpensesChart({
         showPeriodBadge={showPeriodBadge}
         badgeBg={chartColors.redBadgeBg}
         badgeColor={chartColors.redBadgeColor}
+        compact={compact}
       >
-        <ResponsiveContainer width="100%" height={smallChartHeight}>
+        <ResponsiveContainer width="100%" height={compact ? 190 : smallChartHeight}>
           <PieChart>
             <Pie
               data={pieData}
               cx="50%"
               cy="50%"
               labelLine={false}
-              outerRadius={pieOuterRadius}
-              innerRadius={Math.round(pieOuterRadius * 0.52)}
+              outerRadius={compact ? Math.min(pieOuterRadius, 72) : pieOuterRadius}
+              innerRadius={Math.round((compact ? Math.min(pieOuterRadius, 72) : pieOuterRadius) * 0.52)}
               paddingAngle={2}
               cornerRadius={4}
               dataKey="value"
@@ -112,7 +115,7 @@ export default function ExpensesChart({
           </PieChart>
         </ResponsiveContainer>
 
-        <Box mt={4}>
+        <Box mt={compact ? 2 : 4}>
           <VStack spacing={2} align="stretch">
             {pieData.map((entry, index) => {
               const percentage = ((entry.value / totalExpenses) * 100).toFixed(1)

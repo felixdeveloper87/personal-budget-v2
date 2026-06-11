@@ -20,6 +20,7 @@ export interface IncomeChartProps {
   periodType?: PeriodType
   selectedDate?: Date
   dateBasis?: TransactionDateBasis
+  compact?: boolean
 }
 
 export default function IncomeChart({
@@ -29,6 +30,7 @@ export default function IncomeChart({
   periodType,
   selectedDate,
   dateBasis = 'cash-flow',
+  compact = false,
 }: IncomeChartProps) {
   const chartColors = useChartColors()
 
@@ -85,6 +87,7 @@ export default function IncomeChart({
         showPeriodBadge={showPeriodBadge}
         badgeBg={chartColors.greenBadgeBg}
         badgeColor={chartColors.greenBadgeColor}
+        compact={compact}
       >
         <Box>
           <VStack spacing={2} align="stretch">
