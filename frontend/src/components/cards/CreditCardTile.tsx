@@ -23,6 +23,7 @@ export interface CreditCardTileProps {
   /** Total of the current open statement, if any. */
   currentTotal: number
   statementCount: number
+  hideValues?: boolean
   onSelect: () => void
   onEdit?: () => void
   onDelete?: () => void
@@ -32,6 +33,7 @@ export default function CreditCardTile({
   card,
   currentTotal,
   statementCount,
+  hideValues = false,
   onSelect,
   onEdit,
   onDelete,
@@ -132,7 +134,7 @@ export default function CreditCardTile({
               Current statement
             </Text>
             <Text fontSize="xl" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-              {moneyFormatter.format(currentTotal)}
+              {hideValues ? '••••••' : moneyFormatter.format(currentTotal)}
             </Text>
           </Box>
           <VStack align="end" spacing={1}>

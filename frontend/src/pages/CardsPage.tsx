@@ -4,6 +4,7 @@ import {
   Button,
   HStack,
   Icon,
+  IconButton,
   SimpleGrid,
   Spinner,
   Text,
@@ -14,11 +15,13 @@ import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../ap
 import type { PaymentMethod, Transaction } from '../types'
 import { buildCardStatements } from '../utils/creditCardStatements'
 import { ConfirmDeleteDialog, PageHeader } from '../components/ui'
-import { ArrowLeft, CreditCard, Pencil, Plus, Trash2 } from '../components/ui/icons'
+import { ArrowLeft, CreditCard, Eye, EyeOff, Pencil, Plus, Trash2 } from '../components/ui/icons'
 import CreditCardTile from '../components/cards/CreditCardTile'
 import CardFormModal from '../components/cards/CardFormModal'
 import StatementCard from '../components/cards/StatementCard'
 import { ToastService } from '../services/toast'
+
+const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
 
 export default function CardsPage() {
   const [cards, setCards] = useState<PaymentMethod[]>([])
@@ -31,6 +34,13 @@ export default function CardsPage() {
   const [formCard, setFormCard] = useState<PaymentMethod | null | undefined>(undefined)
   const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [hideValues, setHideValues] = useState(() => {
+    try {
+      return localStorage.getItem(CARD_BALANCE_VISIBILITY_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
 
   const muted = useColorModeValue('gray.500', 'gray.400')
   const emptyBorder = useColorModeValue('gray.200', 'gray.700')
@@ -54,6 +64,29 @@ export default function CardsPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  const toggleValues = () => {
+    setHideValues((current) => {
+      const next = !current
+      try {
+        localStorage.setItem(CARD_BALANCE_VISIBILITY_KEY, String(next))
+      } catch {
+        // Keep the preference for this session when storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  const visibilityButton = (
+    <IconButton
+      aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+      title={hideValues ? 'Show card values' : 'Hide card values'}
+      icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
+      onClick={toggleValues}
+      variant="ghost"
+      borderRadius="full"
+    />
+  )
 
   const selectedCard = useMemo(
     () => cards.find((c) => c.id === selectedId) ?? null,
@@ -159,6 +192,7 @@ export default function CardsPage() {
               subtitle={`${selectedCard.issuer ? `${selectedCard.issuer} · ` : ''}Closes day ${selectedCard.statementClosingDay} · Pays day ${selectedCard.paymentDay}`}
               rightSlot={
                 <HStack spacing={2}>
+                  {visibilityButton}
                   <Button
                     variant="outline"
                     leftIcon={<Icon as={Pencil} boxSize={4} />}
@@ -192,6 +226,7 @@ export default function CardsPage() {
                   key={statement.key}
                   statement={statement}
                   isOpen={openStatementKey === statement.key}
+                  hideValues={hideValues}
                   onToggle={() =>
                     setOpenStatementKey((current) =>
                       current === statement.key ? null : statement.key,
@@ -216,14 +251,17 @@ export default function CardsPage() {
           title="Cards"
           subtitle="Select a card to see its current and past statements."
           rightSlot={
-            <Button
-              colorScheme="blue"
-              leftIcon={<Icon as={Plus} boxSize={4} />}
-              onClick={() => setFormCard(null)}
-              w={{ base: 'full', sm: 'auto' }}
-            >
-              Add card
-            </Button>
+            <HStack spacing={2}>
+              {visibilityButton}
+              <Button
+                colorScheme="blue"
+                leftIcon={<Icon as={Plus} boxSize={4} />}
+                onClick={() => setFormCard(null)}
+                flex={{ base: 1, sm: 'initial' }}
+              >
+                Add card
+              </Button>
+            </HStack>
           }
         />
 
@@ -243,6 +281,7 @@ export default function CardsPage() {
                   card={card}
                   currentTotal={info?.total ?? 0}
                   statementCount={info?.count ?? 0}
+                  hideValues={hideValues}
                   onSelect={() => selectCard(card.id)}
                   onEdit={() => setFormCard(card)}
                   onDelete={() => setCardToDelete(card)}

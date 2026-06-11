@@ -40,10 +40,16 @@ const STATUS_META: Record<
 export interface StatementCardProps {
   statement: CardStatement
   isOpen: boolean
+  hideValues?: boolean
   onToggle: () => void
 }
 
-export default function StatementCard({ statement, isOpen, onToggle }: StatementCardProps) {
+export default function StatementCard({
+  statement,
+  isOpen,
+  hideValues = false,
+  onToggle,
+}: StatementCardProps) {
   const border = useColorModeValue('gray.200', 'whiteAlpha.200')
   const muted = useColorModeValue('gray.500', 'gray.400')
   const headerBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -90,7 +96,7 @@ export default function StatementCard({ statement, isOpen, onToggle }: Statement
             </HStack>
             <HStack spacing={2} flexShrink={0}>
               <Text fontSize="lg" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                {moneyFormatter.format(statement.total)}
+                {hideValues ? '••••••' : moneyFormatter.format(statement.total)}
               </Text>
               <Icon as={isOpen ? ChevronUp : ChevronDown} boxSize={5} color={muted} />
             </HStack>
@@ -122,6 +128,7 @@ export default function StatementCard({ statement, isOpen, onToggle }: Statement
               transaction={tx}
               dateBasis="activity"
               withTopBorder={index > 0}
+              hideAmount={hideValues}
             />
           ))}
         </VStack>

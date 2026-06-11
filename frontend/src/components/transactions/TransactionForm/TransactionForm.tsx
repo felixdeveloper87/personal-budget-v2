@@ -149,7 +149,7 @@ export default function TransactionForm({
     }
   }, [type, expenseMode, incomeMode])
 
-  const applyExpensePreset = useCallback(
+  const applyQuickPreset = useCallback(
     ({ description: nextDescription, category: nextCategory }: {
       description: string
       category: string
@@ -402,12 +402,11 @@ export default function TransactionForm({
               />
           )}
           <CategorySelector type={type} category={category} onChange={setCategory} />
-          {type === 'EXPENSE' && (
-            <QuickExpensePresets
-              category={category}
-              onSelect={applyExpensePreset}
-            />
-          )}
+          <QuickExpensePresets
+            category={category}
+            transactionType={type}
+            onSelect={applyQuickPreset}
+          />
           <DescriptionInput
             value={description}
             onChange={setDescription}
@@ -570,12 +569,11 @@ export default function TransactionForm({
                   />
               )}
               <CategorySelector type={type} category={category} onChange={setCategory} />
-              {type === 'EXPENSE' && (
-                <QuickExpensePresets
-                  category={category}
-                  onSelect={applyExpensePreset}
-                />
-              )}
+              <QuickExpensePresets
+                category={category}
+                transactionType={type}
+                onSelect={applyQuickPreset}
+              />
               <DescriptionInput
                 value={description}
                 onChange={setDescription}

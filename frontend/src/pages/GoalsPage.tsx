@@ -7,6 +7,7 @@ import {
   CardBody,
   Heading,
   HStack,
+  Icon,
   NumberInput,
   NumberInputField,
   Progress,
@@ -19,6 +20,7 @@ import {
 import {
   archiveSavingsGoal,
   contributeToSavingsGoal,
+  createSavingsGoal,
   listSavingsGoals,
 } from '../api'
 import { SavingsGoal } from '../types'
@@ -26,15 +28,34 @@ import { ToastService } from '../services/toast'
 import { useDashboardData } from '../hooks/useDashboardData'
 import { usePeriodData } from '../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../components/charts/modal/BalanceBreakEvenPanel'
+import PennyChallengeCard from '../components/goals/PennyChallengeCard'
+import PennyChallengeSummaryRow from '../components/goals/PennyChallengeSummaryRow'
 import { PageHeader } from '../components/ui'
-import { ShieldCheck } from '../components/ui/icons'
+import { ChevronDown, ChevronUp, Sparkles, ShieldCheck } from '../components/ui/icons'
+import {
+  CHALLENGE_NAME_PREFIX,
+  challengeYearTotal,
+  expectedCumulativeToday,
+  isPennyChallengeGoal,
+} from '../utils/pennyChallenge'
 
 const money = (value: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
 
+const CHALLENGE_COLLAPSED_KEY = 'goals:challenge-collapsed'
+
 export default function GoalsPage() {
   const [goals, setGoals] = useState<SavingsGoal[]>([])
   const [contributions, setContributions] = useState<Record<number, number>>({})
+  const [challengeBusyId, setChallengeBusyId] = useState<number | null>(null)
+  const [startingChallenge, setStartingChallenge] = useState(false)
+  const [challengeCollapsed, setChallengeCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem(CHALLENGE_COLLAPSED_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
 
   const muted = useColorModeValue('gray.600', 'gray.400')
   const spinnerColor = useColorModeValue('blue.500', 'blue.300')
@@ -86,6 +107,66 @@ export default function GoalsPage() {
     }
   }
 
+  const activeGoals = useMemo(() => goals.filter((goal) => !goal.archived), [goals])
+  const challengeGoals = useMemo(() => activeGoals.filter(isPennyChallengeGoal), [activeGoals])
+  const normalGoals = useMemo(
+    () => activeGoals.filter((goal) => !isPennyChallengeGoal(goal)),
+    [activeGoals],
+  )
+
+  const toggleChallengeCollapsed = () => {
+    setChallengeCollapsed((current) => {
+      const next = !current
+      try {
+        localStorage.setItem(CHALLENGE_COLLAPSED_KEY, String(next))
+      } catch {
+        // Keep the preference for this session when storage is unavailable.
+      }
+      return next
+    })
+  }
+
+  // Contribute an explicit amount to a challenge goal (catch-up or today's coin).
+  const applyChallengeContribution = async (goal: SavingsGoal, amount: number) => {
+    const rounded = Math.round(amount * 100) / 100
+    if (rounded === 0) return
+    setChallengeBusyId(goal.id)
+    try {
+      await contributeToSavingsGoal(goal.id, rounded)
+      await load()
+      ToastService.success({ title: 'Challenge updated', dedupeKey: `challenge-contribution:${goal.id}` })
+    } catch (err) {
+      ToastService.apiError(err, {
+        title: 'Could not update challenge',
+        dedupeKey: `challenge-contribution-failed:${goal.id}`,
+      })
+    } finally {
+      setChallengeBusyId(null)
+    }
+  }
+
+  // Create this year's challenge, seeded so it's already caught up to today.
+  const startChallenge = async () => {
+    const today = new Date()
+    const year = today.getFullYear()
+    setStartingChallenge(true)
+    try {
+      await createSavingsGoal({
+        name: `${CHALLENGE_NAME_PREFIX} ${year}`,
+        targetAmount: challengeYearTotal(year),
+        currentAmount: expectedCumulativeToday(year, today),
+        targetDate: `${year}-12-31`,
+        color: '#f59e0b',
+      })
+      await load()
+      ToastService.success({ title: 'Challenge started', dedupeKey: 'challenge-started' })
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Could not start challenge', dedupeKey: 'challenge-start-failed' })
+    } finally {
+      setStartingChallenge(false)
+    }
+  }
+
   return (
     <Box maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
@@ -108,8 +189,72 @@ export default function GoalsPage() {
           />
         )}
 
+        {/* Penny-a-day challenge */}
+        <VStack align="stretch" spacing={3}>
+          <HStack justify="space-between" px={1}>
+            <Text fontSize="2xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.08em">
+              Savings challenge
+            </Text>
+            {challengeGoals.length === 0 ? (
+              <Button
+                size="sm"
+                colorScheme="orange"
+                variant="ghost"
+                leftIcon={<Sparkles size={16} weight="duotone" />}
+                onClick={startChallenge}
+                isLoading={startingChallenge}
+              >
+                Start penny-a-day challenge
+              </Button>
+            ) : (
+              <Button
+                size="xs"
+                variant="ghost"
+                color={muted}
+                rightIcon={<Icon as={challengeCollapsed ? ChevronDown : ChevronUp} boxSize={4} />}
+                onClick={toggleChallengeCollapsed}
+              >
+                {challengeCollapsed ? 'Expand' : 'Collapse'}
+              </Button>
+            )}
+          </HStack>
+          {challengeGoals.length === 0 ? (
+            <Card borderStyle="dashed" borderWidth="1px">
+              <CardBody>
+                <Text fontSize="sm" color={muted}>
+                  Save £0.01 on Jan 1, £0.02 on Jan 2, increasing by a penny every day up to
+                  the last day of the year — {money(challengeYearTotal(new Date().getFullYear()))} saved
+                  in total. Starting today seeds it caught up to the current day.
+                </Text>
+              </CardBody>
+            </Card>
+          ) : challengeCollapsed ? (
+            <VStack align="stretch" spacing={3}>
+              {challengeGoals.map((goal) => (
+                <PennyChallengeSummaryRow
+                  key={goal.id}
+                  goal={goal}
+                  onExpand={toggleChallengeCollapsed}
+                />
+              ))}
+            </VStack>
+          ) : (
+            <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={5}>
+              {challengeGoals.map((goal) => (
+                <PennyChallengeCard
+                  key={goal.id}
+                  goal={goal}
+                  busy={challengeBusyId === goal.id}
+                  onContribute={applyChallengeContribution}
+                  onArchive={archive}
+                />
+              ))}
+            </SimpleGrid>
+          )}
+        </VStack>
+
         <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={5}>
-          {goals.filter((goal) => !goal.archived).map((goal) => (
+          {normalGoals.map((goal) => (
             <Card key={goal.id}>
               <CardBody>
                 <VStack align="stretch" spacing={4}>

@@ -74,6 +74,7 @@ export interface TransactionLedgerRowProps {
   showDate?: boolean
   showCategory?: boolean
   withTopBorder?: boolean
+  hideAmount?: boolean
 }
 
 export default function TransactionLedgerRow({
@@ -82,6 +83,7 @@ export default function TransactionLedgerRow({
   showDate = true,
   showCategory = true,
   withTopBorder = false,
+  hideAmount = false,
 }: TransactionLedgerRowProps) {
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
@@ -202,8 +204,9 @@ export default function TransactionLedgerRow({
           whiteSpace="nowrap"
           sx={{ fontVariantNumeric: 'tabular-nums' }}
         >
-          {isIncome ? '+' : '-'}
-          {moneyFormatter.format(transaction.amount)}
+          {hideAmount
+            ? '••••••'
+            : `${isIncome ? '+' : '-'}${moneyFormatter.format(transaction.amount)}`}
         </Text>
         {isScheduled ? (
           <HStack spacing={1} color={scheduledColor}>
