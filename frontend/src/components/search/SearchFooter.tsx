@@ -1,4 +1,4 @@
-import { Button, HStack, Icon, useColorModeValue } from '@chakra-ui/react'
+import { Button, Flex, useColorModeValue } from '@chakra-ui/react'
 import { ArrowRight, RotateCcw } from '../ui/icons'
 
 interface SearchFooterProps {
@@ -18,9 +18,14 @@ export default function SearchFooter({
   const resetHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
 
   return (
-    <HStack spacing={3} justify="space-between" w="full">
+    <Flex
+      gap={3}
+      justify="space-between"
+      w="full"
+      direction={{ base: 'column-reverse', sm: 'row' }}
+    >
       <Button
-        variant="outline"
+        variant={{ base: 'ghost', sm: 'outline' }}
         h="44px"
         px={4}
         fontSize="sm"
@@ -28,7 +33,8 @@ export default function SearchFooter({
         borderRadius="lg"
         borderColor={resetBorder}
         color={resetColor}
-        leftIcon={<Icon as={RotateCcw} boxSize={3.5} />}
+        w={{ base: 'full', sm: 'auto' }}
+        leftIcon={<RotateCcw size={14} weight="bold" />}
         isDisabled={!hasFilters}
         onClick={onClearAll}
         _hover={{ bg: resetHoverBg }}
@@ -44,12 +50,13 @@ export default function SearchFooter({
         fontSize="sm"
         fontWeight={700}
         color="white"
+        w={{ base: 'full', sm: 'auto' }}
         borderRadius="lg"
         bg="linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
         bgSize="200% 100%"
         bgPosition="0% 50%"
         boxShadow="0 8px 24px -10px rgba(79, 70, 229, 0.55)"
-        rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+        rightIcon={<ArrowRight size={16} weight="bold" />}
         onClick={onSearch}
         _hover={{
           bgPosition: '100% 50%',
@@ -61,6 +68,6 @@ export default function SearchFooter({
       >
         Show results
       </Button>
-    </HStack>
+    </Flex>
   )
 }

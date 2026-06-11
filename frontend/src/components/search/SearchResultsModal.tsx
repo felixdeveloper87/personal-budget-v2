@@ -105,8 +105,12 @@ const SearchResultsModal = memo(function SearchResultsModal({
         bg={surfaceBg}
         px={{ base: 4, sm: 6 }}
         py={{ base: 5, sm: 6 }}
+        overflowX="hidden"
         overflowY="auto"
-        sx={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+        sx={{
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehaviorY: 'contain',
+        }}
       >
         {isLoading ? (
           <VStack spacing={3} align="stretch" w="full">

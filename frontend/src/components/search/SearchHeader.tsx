@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import {
   Box,
   HStack,
-  Icon,
   IconButton,
   Input,
   InputGroup,
@@ -70,19 +69,14 @@ export default function SearchHeader({
       borderBottom="1px solid"
       borderColor={borderColor}
       px={{ base: 4, sm: 6 }}
-      pt={{
-        // Keep the X close button clear of the iOS Dynamic Island / status
-        // bar with extra breathing room beyond the raw safe-area inset.
-        base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
-        sm: 5,
-      }}
-      pb={4}
+      pt={{ base: 4, sm: 5 }}
+      pb={{ base: 3, sm: 4 }}
     >
-      <HStack justify="space-between" align="center" mb={4} spacing={3}>
+      <HStack justify="space-between" align="center" mb={3} spacing={3}>
         <HStack spacing={3} minW={0}>
           <Box
-            w={9}
-            h={9}
+            w={{ base: 8, sm: 9 }}
+            h={{ base: 8, sm: 9 }}
             borderRadius="lg"
             bg={useColorModeValue('blue.50', 'whiteAlpha.100')}
             color={useColorModeValue('blue.600', 'blue.300')}
@@ -91,7 +85,7 @@ export default function SearchHeader({
             justifyContent="center"
             flexShrink={0}
           >
-            <Icon as={Search} boxSize={4} strokeWidth={2.25} />
+            <Search size={18} weight="bold" />
           </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
@@ -103,7 +97,7 @@ export default function SearchHeader({
             >
               Search transactions
             </Text>
-            <Text fontSize="xs" color={captionColor} noOfLines={1}>
+            <Text display={{ base: 'none', sm: 'block' }} fontSize="xs" color={captionColor} noOfLines={1}>
               Filter by text, type, category or date
             </Text>
           </VStack>
@@ -114,14 +108,14 @@ export default function SearchHeader({
 
       <InputGroup size="md">
         <InputLeftElement pointerEvents="none" h="44px" color={iconColor}>
-          <Icon as={Search} boxSize={4} />
+          <Search size={16} weight="bold" />
         </InputLeftElement>
         <Input
           ref={inputRef}
           value={searchText}
           onChange={(e) => onSearchTextChange(e.target.value)}
           placeholder="Search by description…"
-          h="44px"
+          h={{ base: '42px', sm: '44px' }}
           pl={10}
           pr={searchText ? 24 : 16}
           bg={inputBg}
@@ -146,7 +140,7 @@ export default function SearchHeader({
             {searchText && (
               <IconButton
                 aria-label="Clear search"
-                icon={<Icon as={X} boxSize={3.5} />}
+                icon={<X size={14} weight="bold" />}
                 onClick={() => onSearchTextChange('')}
                 size="xs"
                 variant="ghost"

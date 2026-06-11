@@ -3,8 +3,8 @@ import {
   Box,
   Button,
   HStack,
-  Icon,
   Input,
+  SimpleGrid,
   Text,
   VStack,
   Wrap,
@@ -186,7 +186,7 @@ export default function SearchFilters({
     filters.startDate === r.start && filters.endDate === r.end
 
   return (
-    <VStack spacing={6} align="stretch" pb={{ base: 4, md: 0 }} minH="fit-content">
+    <VStack spacing={{ base: 5, sm: 6 }} align="stretch" minH="fit-content">
       {/* Type */}
       <Box>
         <Text
@@ -199,17 +199,18 @@ export default function SearchFilters({
         >
           Type
         </Text>
-        <HStack spacing={3} align="stretch">
+        <SimpleGrid columns={2} spacing={3}>
           {TYPE_OPTIONS.map((opt) => {
             const isActive = filters.type === opt.id
             const tone = typeStyleFor(opt.id, isActive)
+            const IconComponent = opt.icon
             return (
               <Button
                 key={opt.id}
                 variant="unstyled"
                 flex={1}
-                h="64px"
-                px={4}
+                h={{ base: '58px', sm: '64px' }}
+                px={{ base: 3, sm: 4 }}
                 borderRadius="xl"
                 border="1px solid"
                 borderColor={tone.borderColor}
@@ -230,10 +231,10 @@ export default function SearchFilters({
                   boxShadow: `${tone.boxShadow}, 0 0 0 3px ${focusGlow}`,
                 }}
               >
-                <HStack spacing={3} align="center" w="full">
+                <HStack spacing={{ base: 2, sm: 3 }} align="center" w="full">
                   <Box
-                    w={9}
-                    h={9}
+                    w={{ base: 8, sm: 9 }}
+                    h={{ base: 8, sm: 9 }}
                     borderRadius="lg"
                     bg={tone.iconBg}
                     color={tone.iconColor}
@@ -243,7 +244,7 @@ export default function SearchFilters({
                     flexShrink={0}
                     transition="background-color 0.18s ease, color 0.18s ease"
                   >
-                    <Icon as={opt.icon} boxSize={4.5} strokeWidth={2.25} />
+                      <IconComponent size={18} weight="bold" />
                   </Box>
                   <VStack align="flex-start" spacing={0} minW={0} flex={1}>
                     <Text
@@ -270,21 +271,21 @@ export default function SearchFilters({
                       justifyContent="center"
                       flexShrink={0}
                     >
-                      <Icon as={Check} boxSize={3} strokeWidth={3} />
+                      <Check size={12} weight="bold" />
                     </Box>
                   )}
                 </HStack>
               </Button>
             )
           })}
-        </HStack>
+        </SimpleGrid>
       </Box>
 
       {/* Category */}
       {filters.type && (
         <Box>
           <HStack mb={2} spacing={2}>
-            <Icon as={Tag} boxSize={3.5} color={subLabelColor} />
+            <Tag size={14} weight="bold" color={subLabelColor} />
             <Text
               fontSize="xs"
               fontWeight={600}
@@ -302,7 +303,7 @@ export default function SearchFilters({
                 color={subLabelColor}
                 fontWeight={500}
                 onClick={() => onUpdateFilter('category', '')}
-                rightIcon={<Icon as={X} boxSize={3} />}
+                rightIcon={<X size={12} weight="bold" />}
                 _hover={{ color: activeChipColor, textDecoration: 'none' }}
               >
                 Clear
@@ -390,7 +391,7 @@ export default function SearchFilters({
       {/* Date */}
       <Box>
         <HStack mb={2} spacing={2}>
-          <Icon as={Calendar} boxSize={3.5} color={subLabelColor} />
+          <Calendar size={14} weight="bold" color={subLabelColor} />
           <Text
             fontSize="xs"
             fontWeight={600}
@@ -411,7 +412,7 @@ export default function SearchFilters({
                 onUpdateFilter('startDate', '')
                 onUpdateFilter('endDate', '')
               }}
-              rightIcon={<Icon as={X} boxSize={3} />}
+              rightIcon={<X size={12} weight="bold" />}
               _hover={{ color: activeChipColor, textDecoration: 'none' }}
             >
               Clear
@@ -456,7 +457,7 @@ export default function SearchFilters({
           })}
         </Wrap>
 
-        <HStack spacing={3} align="flex-end">
+        <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
           <Box flex={1}>
             <Text fontSize="2xs" color={subLabelColor} mb={1.5} fontWeight={500}>
               From
@@ -497,7 +498,7 @@ export default function SearchFilters({
               transition="border-color 0.15s ease, box-shadow 0.15s ease"
             />
           </Box>
-        </HStack>
+        </SimpleGrid>
       </Box>
     </VStack>
   )

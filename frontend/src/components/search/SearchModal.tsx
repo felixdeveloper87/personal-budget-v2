@@ -60,16 +60,20 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
             hasFilters={hasFilters}
           />
         }
-        contentProps={{ bg: surfaceBg }}
+        contentProps={{
+          bg: surfaceBg,
+          w: { base: 'calc(100% - 24px)', sm: 'auto' },
+          h: { base: 'auto', sm: 'auto' },
+          maxH: { base: 'calc(100dvh - 24px)', sm: 'calc(100dvh - 48px)' },
+          mx: { base: 3, sm: 0 },
+          my: { base: 3, sm: 0 },
+          borderRadius: { base: '2xl', md: '3xl' },
+        }}
       >
         <Box
-          flex="1"
-          minH="0"
           bg={surfaceBg}
-          px={{ base: 5, sm: 6 }}
-          py={{ base: 5, sm: 6 }}
-          overflowY="auto"
-          sx={{ WebkitOverflowScrolling: 'touch', overscrollBehavior: 'contain' }}
+          px={{ base: 4, sm: 6 }}
+          py={{ base: 4, sm: 6 }}
         >
           <SearchFilters
             filters={filters}
