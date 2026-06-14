@@ -87,11 +87,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         <Box
           aria-hidden
           position="absolute"
-          top={{ base: '-80px', md: '-140px' }}
-          left="50%"
-          transform="translateX(-50%)"
-          w={{ base: '140%', md: '900px' }}
-          h={{ base: '320px', md: '480px' }}
+          inset={0}
           pointerEvents="none"
           zIndex={0}
         >
