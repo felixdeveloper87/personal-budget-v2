@@ -148,6 +148,7 @@ const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
   { label: 'Waitrose',     category: 'Groceries', icon: ShoppingCart, domain: 'waitrose.com' },
   { label: 'Co-op',        category: 'Groceries', icon: ShoppingCart, domain: 'coop.co.uk' },
   { label: 'Iceland',      category: 'Groceries', icon: ShoppingCart, domain: 'iceland.co.uk' },
+  { label: 'Assaí',        category: 'Groceries', icon: ShoppingCart, domain: 'assai.com.br' },
 
   { label: "McDonald's", category: 'Dining out', icon: Coffee, domain: 'mcdonalds.com' },
   { label: "Nando's",    category: 'Dining out', icon: Coffee, domain: 'nandos.co.uk' },
