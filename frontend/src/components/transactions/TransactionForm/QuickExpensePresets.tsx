@@ -157,6 +157,7 @@ const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
   { label: 'Greggs',      category: 'Dining out', icon: Coffee, domain: 'greggs.co.uk' },
   { label: 'Burger King', category: 'Dining out', icon: Coffee, domain: 'burgerking.co.uk' },
   { label: 'Subway',      category: 'Dining out', icon: Coffee, domain: 'subway.com' },
+  { label: 'Kokoro',      category: 'Dining out', icon: Coffee, domain: 'kokorouk.com' },
   { label: 'Pizza Hut',   category: 'Dining out', icon: Coffee, domain: 'pizzahut.co.uk' },
   { label: "Domino's",   category: 'Dining out', icon: Coffee, domain: 'dominos.co.uk' },
   { label: 'Costa Coffee', category: 'Dining out', icon: Coffee, domain: 'costa.co.uk' },
