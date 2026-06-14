@@ -11,6 +11,7 @@ import {
 import { PeriodData } from '../../hooks/usePeriodData'
 import { PeriodType } from '../../types'
 import type { TransactionDateBasis } from '../../utils/transactionDates'
+import { useEd } from '../../editorial'
 import SummaryStatsStrip from './SummaryStatsStrip'
 import PeriodNavigator from './PeriodNavigator'
 import { SectionCard, DateBasisToggle } from '../ui'
@@ -109,8 +110,11 @@ export default function SummaryContainer({
 }: SummaryContainerProps) {
   const { transactions, income, expense, balance } = periodData
 
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const infoMuted = useColorModeValue('blue.600', 'blue.300')
+  const ed = useEd()
+  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dividerColor = ed ? ed.line : dividerColorBase
+  const infoMutedBase = useColorModeValue('blue.600', 'blue.300')
+  const infoMuted = ed ? ed.jade : infoMutedBase
 
   const navigatePeriod =
     externalNavigatePeriod ??

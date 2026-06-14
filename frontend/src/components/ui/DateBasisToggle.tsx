@@ -1,5 +1,6 @@
 import { Box, Button, HStack, useColorModeValue } from '@chakra-ui/react'
 import type { TransactionDateBasis } from '../../utils/transactionDates'
+import { useEd } from '../../editorial'
 
 export interface DateBasisToggleProps {
   value: TransactionDateBasis
@@ -19,15 +20,21 @@ const OPTIONS: { value: TransactionDateBasis; label: string }[] = [
  *    account, including card bills from last month's purchases.
  */
 export default function DateBasisToggle({ value, onChange }: DateBasisToggleProps) {
-  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const activeBg = useColorModeValue('white', 'rgba(255,255,255,0.12)')
-  const activeBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const ed = useEd()
+  const trackBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const trackBg = ed ? ed.trackBg : trackBgBase
+  const activeBgBase = useColorModeValue('white', 'rgba(255,255,255,0.12)')
+  const activeBg = ed ? ed.thumbBg : activeBgBase
+  const activeBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const activeBorder = ed ? ed.lineStrong : activeBorderBase
   const activeShadow = useColorModeValue(
     '0 1px 4px rgba(15,23,42,0.12)',
     '0 1px 4px rgba(0,0,0,0.5)',
   )
-  const activeColor = useColorModeValue('gray.900', 'gray.50')
-  const inactiveColor = useColorModeValue('gray.500', 'gray.400')
+  const activeColorBase = useColorModeValue('gray.900', 'gray.50')
+  const activeColor = ed ? ed.cream : activeColorBase
+  const inactiveColorBase = useColorModeValue('gray.500', 'gray.400')
+  const inactiveColor = ed ? ed.muted : inactiveColorBase
 
   return (
     <Box bg={trackBg} p="3px" borderRadius="lg" display="inline-flex" flexShrink={0}>

@@ -7,6 +7,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 import type { LucideIcon } from './icons'
 
 export type SectionHeaderAccent =
@@ -95,12 +96,18 @@ export default function SectionHeader({
   dense,
 }: SectionHeaderProps) {
   const tokens = ACCENT_TOKENS[accent]
+  const ed = useEd()
 
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const accentColor = useColorModeValue(tokens.fgLight, tokens.fgDark)
-  const iconBg = useColorModeValue(tokens.bgLight, tokens.bgDark)
-  const iconFg = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+  const captionColorBase = useColorModeValue('gray.500', 'gray.400')
+  const captionColor = ed ? ed.muted : captionColorBase
+  const accentColorBase = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const accentColor = ed ? ed.jade : accentColorBase
+  const iconBgBase = useColorModeValue(tokens.bgLight, tokens.bgDark)
+  const iconBg = ed ? ed.panel : iconBgBase
+  const iconFgBase = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const iconFg = ed ? ed.jade : iconFgBase
   const rightIconOpacity = useColorModeValue(0.9, 0.82)
 
   return (
@@ -117,12 +124,13 @@ export default function SectionHeader({
 
         <VStack align="flex-start" spacing={0.5} minW={0} justify="center">
           <Text
-            fontWeight={800}
-            fontSize={dense ? 'sm' : { base: 'md', sm: 'lg' }}
+            fontFamily={ed ? ed.fontDisplay : undefined}
+            fontWeight={ed ? 400 : 800}
+            fontSize={ed ? (dense ? 'lg' : { base: 'lg', sm: 'xl' }) : (dense ? 'sm' : { base: 'md', sm: 'lg' })}
             color={titleColor}
             lineHeight="1.05"
             noOfLines={1}
-            letterSpacing="0"
+            letterSpacing={ed ? '-0.01em' : '0'}
           >
             {title}
           </Text>

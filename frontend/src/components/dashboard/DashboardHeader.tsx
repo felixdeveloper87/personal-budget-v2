@@ -6,6 +6,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useEd } from '../../editorial'
 import { PageHeader } from '../ui'
 import { LayoutDashboard } from '../ui/icons'
 
@@ -73,18 +74,26 @@ function useFinancialStatus(income?: number, expense?: number) {
 
 export default function DashboardHeader({ income, expense }: DashboardHeaderProps) {
   const { user } = useAuth()
+  const ed = useEd()
   const greeting = useGreeting()
   const todayLabel = useTodayLabel()
   const status = useFinancialStatus(income, expense)
 
-  const dateBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const dateBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const dateColor = useColorModeValue('gray.600', 'gray.300')
-  const dotColor = useColorModeValue('green.500', 'green.300')
+  const dateBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const dateBg = ed ? ed.panel : dateBgBase
+  const dateBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dateBorder = ed ? ed.line : dateBorderBase
+  const dateColorBase = useColorModeValue('gray.600', 'gray.300')
+  const dateColor = ed ? ed.muted : dateColorBase
+  const dotColorBase = useColorModeValue('green.500', 'green.300')
+  const dotColor = ed ? ed.jade : dotColorBase
 
-  const statusBg = useColorModeValue(status?.bg ?? 'transparent', status?.bgDark ?? 'transparent')
-  const statusBorder = useColorModeValue(status?.border ?? 'transparent', status?.borderDark ?? 'transparent')
-  const statusText = useColorModeValue(status?.text ?? 'gray.600', status?.textDark ?? 'gray.300')
+  const statusBgBase = useColorModeValue(status?.bg ?? 'transparent', status?.bgDark ?? 'transparent')
+  const statusBg = ed ? ed.panel : statusBgBase
+  const statusBorderBase = useColorModeValue(status?.border ?? 'transparent', status?.borderDark ?? 'transparent')
+  const statusBorder = ed ? ed.line : statusBorderBase
+  const statusTextBase = useColorModeValue(status?.text ?? 'gray.600', status?.textDark ?? 'gray.300')
+  const statusText = ed ? ed.cream : statusTextBase
 
   const firstName = getFirstName(user?.name)
   const headline = firstName ? `${greeting}, ${firstName}` : greeting

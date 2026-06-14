@@ -14,6 +14,7 @@ import type { LucideIcon } from '../components/ui/icons'
 import { AddTransactionModal } from '../components/transactions'
 import { Transaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'
+import { useEd, EDITORIAL } from '../editorial'
 
 interface AddTransactionSectionProps {
   transactions: Transaction[]
@@ -45,7 +46,9 @@ export default function AddTransactionSection({
 }: AddTransactionSectionProps) {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
-  const actionStyles = {
+  const ed = useEd()
+  const pal = ed ?? EDITORIAL
+  const baseStyles = {
     INCOME: {
       bg: useColorModeValue('green.50', 'rgba(16,185,129,0.10)'),
       border: useColorModeValue('green.100', 'rgba(16,185,129,0.24)'),
@@ -67,6 +70,29 @@ export default function AddTransactionSection({
       focus: useColorModeValue('rgba(220,38,38,0.22)', 'rgba(248,113,113,0.26)'),
     },
   }
+  const editorialStyles = {
+    INCOME: {
+      bg: 'rgba(127,230,179,0.10)',
+      border: 'rgba(127,230,179,0.22)',
+      hoverBorder: 'rgba(127,230,179,0.48)',
+      hoverBg: 'rgba(127,230,179,0.16)',
+      label: pal.cream,
+      iconBg: 'rgba(127,230,179,0.16)',
+      iconColor: pal.jade,
+      focus: 'rgba(127,230,179,0.30)',
+    },
+    EXPENSE: {
+      bg: 'rgba(248,163,163,0.10)',
+      border: 'rgba(248,163,163,0.22)',
+      hoverBorder: 'rgba(248,163,163,0.48)',
+      hoverBg: 'rgba(248,163,163,0.16)',
+      label: pal.cream,
+      iconBg: 'rgba(248,163,163,0.16)',
+      iconColor: pal.red,
+      focus: 'rgba(248,163,163,0.30)',
+    },
+  }
+  const actionStyles = ed ? editorialStyles : baseStyles
 
   const handleOpen = (next: 'INCOME' | 'EXPENSE') => {
     setType(next)

@@ -17,6 +17,7 @@ import {
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NAV_ITEMS, type AppPage, type NavItem } from './navigation.config'
 import { List } from '../../ui/icons'
+import { useEd } from '../../../editorial'
 
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
   currentPage: AppPage
@@ -51,28 +52,37 @@ export default function NavBar({
   const isTabletRange = useBreakpointValue({ base: false, md: true, lg: false }) ?? false
   const isIconOnly = !isMobile && isTabletRange
 
-  const trackBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
-  const trackBorder = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const ed = useEd()
+  const trackBgBase = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const trackBg = ed ? ed.controlBg : trackBgBase
+  const trackBorderBase = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const trackBorder = ed ? ed.line : trackBorderBase
   const trackShadow = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 6px rgba(15,23,42,0.04)',
     'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 6px rgba(0,0,0,0.2)',
   )
-  const inactiveColor = useColorModeValue('gray.600', 'gray.300')
-  const hoverColor = useColorModeValue('gray.900', 'white')
-  const activeColor = useColorModeValue('blue.700', 'blue.100')
-  const indicatorBg = useColorModeValue('white', 'rgba(255,255,255,0.14)')
+  const inactiveColorBase = useColorModeValue('gray.600', 'gray.300')
+  const inactiveColor = ed ? ed.muted : inactiveColorBase
+  const hoverColorBase = useColorModeValue('gray.900', 'white')
+  const hoverColor = ed ? ed.cream : hoverColorBase
+  const activeColorBase = useColorModeValue('blue.700', 'blue.100')
+  const activeColor = ed ? ed.jade : activeColorBase
+  const indicatorBgBase = useColorModeValue('white', 'rgba(255,255,255,0.14)')
+  const indicatorBg = ed ? ed.thumbBg : indicatorBgBase
   const indicatorShadow = useColorModeValue(
     '0 1px 4px rgba(15, 23, 42, 0.08), 0 6px 18px rgba(37, 99, 235, 0.20)',
     '0 1px 4px rgba(0,0,0,0.5), 0 6px 20px rgba(96, 165, 250, 0.25)',
   )
-  const indicatorRing = useColorModeValue(
+  const indicatorRingBase = useColorModeValue(
     'inset 0 0 0 1px rgba(37, 99, 235, 0.20)',
     'inset 0 0 0 1px rgba(96, 165, 250, 0.35)',
   )
-  const accentBar = useColorModeValue(
+  const indicatorRing = ed ? 'inset 0 0 0 1px rgba(127, 230, 179, 0.30)' : indicatorRingBase
+  const accentBarBase = useColorModeValue(
     'linear-gradient(90deg, #2563eb, #7c3aed)',
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
   )
+  const accentBar = ed ? `linear-gradient(90deg, ${ed.jade}, ${ed.gold})` : accentBarBase
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})

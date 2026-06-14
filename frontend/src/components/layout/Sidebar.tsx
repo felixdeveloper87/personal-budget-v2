@@ -12,6 +12,7 @@ import {
 } from '@chakra-ui/react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { useEd } from '../../editorial'
 import {
   CaretDoubleLeft,
   SidebarSimple,
@@ -47,17 +48,21 @@ export default function Sidebar({
   items,
 }: SidebarProps) {
   const { user } = useAuth()
+  const ed = useEd()
 
   /* ---- Surface tokens ---- */
-  const surface = useColorModeValue(
+  const surfaceBase = useColorModeValue(
     'rgba(255, 255, 255, 0.80)',
     'rgba(12, 12, 14, 0.82)',
   )
-  const borderRight = useColorModeValue(
+  const surface = ed ? ed.glass : surfaceBase
+  const borderRightBase = useColorModeValue(
     'rgba(15, 23, 42, 0.06)',
     'rgba(255, 255, 255, 0.04)',
   )
-  const sectionLabel = useColorModeValue('gray.400', 'gray.600')
+  const borderRight = ed ? ed.line : borderRightBase
+  const sectionLabelBase = useColorModeValue('gray.400', 'gray.600')
+  const sectionLabel = ed ? ed.muted : sectionLabelBase
 
   /* ---- Active-indicator position ---- */
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -176,12 +181,26 @@ function SidebarHeader({
   isCollapsed: boolean
   onToggle: () => void
 }) {
-  const textColor = useColorModeValue('gray.900', 'whiteAlpha.900')
-  const brandAccent = useColorModeValue('#2563eb', '#60a5fa')
-  const toggleBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const toggleHoverBg = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const toggleColor = useColorModeValue('gray.600', 'gray.400')
-  const divider = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const textColorBase = useColorModeValue('gray.900', 'whiteAlpha.900')
+  const textColor = ed ? ed.cream : textColorBase
+  const brandAccentBase = useColorModeValue('#2563eb', '#60a5fa')
+  const brandAccent = ed ? ed.jade : brandAccentBase
+  const toggleBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const toggleBg = ed ? ed.line : toggleBgBase
+  const toggleHoverBgBase = useColorModeValue('gray.200', 'whiteAlpha.200')
+  const toggleHoverBg = ed ? ed.lineStrong : toggleHoverBgBase
+  const toggleColorBase = useColorModeValue('gray.600', 'gray.400')
+  const toggleColor = ed ? ed.muted : toggleColorBase
+  const dividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const divider = ed ? ed.line : dividerBase
+  const markBg = ed
+    ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
+    : `linear-gradient(135deg, ${brandAccent}, #7c3aed)`
+  const markShadow = ed
+    ? `0 4px 16px rgba(127, 230, 179, 0.25)`
+    : `0 4px 12px ${brandAccent}44`
+  const markGlyphColor = ed ? ed.onAccent : 'white'
 
   return (
     <Box
@@ -200,19 +219,20 @@ function SidebarHeader({
             align="center"
             justify="center"
             borderRadius="xl"
-            bg={`linear-gradient(135deg, ${brandAccent}, #7c3aed)`}
+            bg={markBg}
             flexShrink={0}
-            boxShadow={`0 4px 12px ${brandAccent}44`}
+            boxShadow={markShadow}
           >
-            <Text fontSize="md" fontWeight={800} color="white" lineHeight={1}>
+            <Text fontSize="md" fontWeight={800} color={markGlyphColor} lineHeight={1}>
               £
             </Text>
           </Flex>
           {!isCollapsed && (
             <VStack spacing={0} align="start" minW={0}>
               <Text
-                fontSize="sm"
-                fontWeight={800}
+                fontSize={ed ? 'lg' : 'sm'}
+                fontWeight={ed ? 400 : 800}
+                fontFamily={ed ? ed.fontDisplay : undefined}
                 color={textColor}
                 letterSpacing="-0.02em"
                 lineHeight={1.1}
@@ -294,14 +314,21 @@ function ActiveIndicator({
   ready: boolean
   isCollapsed: boolean
 }) {
-  const indicatorBg = useColorModeValue(
+  const ed = useEd()
+  const indicatorBgBase = useColorModeValue(
     'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%)',
     'linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(167, 139, 250, 0.08) 100%)',
   )
-  const accentBar = useColorModeValue(
+  const indicatorBg = ed
+    ? 'linear-gradient(135deg, rgba(127, 230, 179, 0.14) 0%, rgba(217, 179, 106, 0.08) 100%)'
+    : indicatorBgBase
+  const accentBarBase = useColorModeValue(
     'linear-gradient(180deg, #2563eb, #7c3aed)',
     'linear-gradient(180deg, #60a5fa, #a78bfa)',
   )
+  const accentBar = ed
+    ? `linear-gradient(180deg, ${ed.jade}, ${ed.gold})`
+    : accentBarBase
 
   return (
     <>
@@ -356,10 +383,15 @@ function SidebarItem({
   onSelect,
   assignRef,
 }: SidebarItemProps) {
-  const inactiveColor = useColorModeValue('gray.600', 'gray.400')
-  const hoverColor = useColorModeValue('gray.900', 'white')
-  const activeColor = useColorModeValue('blue.700', 'blue.200')
-  const hoverBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.50')
+  const ed = useEd()
+  const inactiveColorBase = useColorModeValue('gray.600', 'gray.400')
+  const inactiveColor = ed ? ed.muted : inactiveColorBase
+  const hoverColorBase = useColorModeValue('gray.900', 'white')
+  const hoverColor = ed ? ed.cream : hoverColorBase
+  const activeColorBase = useColorModeValue('blue.700', 'blue.200')
+  const activeColor = ed ? ed.jade : activeColorBase
+  const hoverBgBase = useColorModeValue('blackAlpha.50', 'whiteAlpha.50')
+  const hoverBg = ed ? ed.panelRaised : hoverBgBase
 
   const button = (
     <Box
@@ -441,15 +473,24 @@ function SidebarFooter({
   isCollapsed: boolean
   user: any
 }) {
-  const divider = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const textColor = useColorModeValue('gray.800', 'whiteAlpha.900')
-  const subColor = useColorModeValue('gray.500', 'gray.500')
-  const avatarRing = useColorModeValue(
+  const ed = useEd()
+  const dividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const divider = ed ? ed.line : dividerBase
+  const textColorBase = useColorModeValue('gray.800', 'whiteAlpha.900')
+  const textColor = ed ? ed.cream : textColorBase
+  const subColorBase = useColorModeValue('gray.500', 'gray.500')
+  const subColor = ed ? ed.muted : subColorBase
+  const avatarRingBase = useColorModeValue(
     'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     'linear-gradient(135deg, #60a5fa, #a78bfa)',
   )
-  const statusDotBg = useColorModeValue('green.400', 'green.300')
-  const statusDotRing = useColorModeValue('white', 'gray.900')
+  const avatarRing = ed
+    ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
+    : avatarRingBase
+  const statusDotBgBase = useColorModeValue('green.400', 'green.300')
+  const statusDotBg = ed ? ed.jade : statusDotBgBase
+  const statusDotRingBase = useColorModeValue('white', 'gray.900')
+  const statusDotRing = ed ? ed.bg : statusDotRingBase
 
   const displayName = user?.name || 'User'
   const displayEmail = user?.email || ''
@@ -478,8 +519,8 @@ function SidebarFooter({
           <Avatar
             size="sm"
             name={displayName}
-            bg="blue.500"
-            color="white"
+            bg={ed ? ed.bg2 : 'blue.500'}
+            color={ed ? ed.jade : 'white'}
             fontWeight={700}
           />
           <Box

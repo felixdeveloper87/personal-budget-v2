@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronLeft, ChevronRight } from '../ui/icons'
 import { PeriodType } from '../../types'
+import { useEd } from '../../editorial'
 
 interface PeriodDatePickerProps {
   selectedDate: Date
@@ -87,6 +88,7 @@ export default function PeriodDatePicker({
   const days = useMemo(() => calendarDays(viewDate), [viewDate])
   const weeks = useMemo(() => calendarWeeks(viewDate), [viewDate])
 
+  const ed = useEd()
   const contentBg = useColorModeValue('white', 'gray.900')
   const borderColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
@@ -94,9 +96,16 @@ export default function PeriodDatePicker({
   const selectedBg = useColorModeValue('blue.500', 'blue.400')
   const selectedColor = useColorModeValue('white', 'gray.900')
   const outsideColor = useColorModeValue('gray.300', 'gray.600')
+  // `labelColor` styles both the trigger and the popover (a light surface), so
+  // the popover keeps its base value; the trigger gets editorial overrides.
   const labelColor = useColorModeValue('gray.900', 'gray.50')
   const hintColor = useColorModeValue('blue.600', 'blue.300')
   const hintBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
+  const triggerLabelColor = ed ? ed.cream : labelColor
+  const triggerChevronColor = ed ? ed.muted : mutedColor
+  const triggerHoverBg = ed ? ed.panelRaised : hoverBg
+  const triggerHintColor = ed ? ed.jade : hintColor
+  const triggerHintBg = ed ? ed.jadeSoft : hintBg
 
   const closeWithDate = (date: Date) => {
     onDateChange(date)
@@ -267,7 +276,7 @@ export default function PeriodDatePicker({
           variant="ghost"
           borderRadius="none"
           aria-label={`Choose ${selectedPeriod}`}
-          _hover={{ bg: hoverBg }}
+          _hover={{ bg: triggerHoverBg }}
           _focusVisible={{
             outline: '2px solid',
             outlineColor: 'blue.300',
@@ -276,9 +285,10 @@ export default function PeriodDatePicker({
         >
           <HStack spacing={2} minW={0} justify="center" w="full">
             <Text
-              fontSize={{ base: 'sm', md: 'md' }}
-              fontWeight={700}
-              color={labelColor}
+              fontFamily={ed ? ed.fontDisplay : undefined}
+              fontSize={ed ? { base: 'md', md: 'lg' } : { base: 'sm', md: 'md' }}
+              fontWeight={ed ? 400 : 700}
+              color={triggerLabelColor}
               letterSpacing="-0.01em"
               lineHeight="1.3"
               noOfLines={1}
@@ -290,8 +300,8 @@ export default function PeriodDatePicker({
                 as="span"
                 fontSize="2xs"
                 fontWeight={700}
-                color={hintColor}
-                bg={hintBg}
+                color={triggerHintColor}
+                bg={triggerHintBg}
                 px={2}
                 py={0.5}
                 borderRadius="full"
@@ -302,7 +312,7 @@ export default function PeriodDatePicker({
                 {hint}
               </Text>
             )}
-            <Icon as={ChevronDown} boxSize={3} color={mutedColor} flexShrink={0} />
+            <Icon as={ChevronDown} boxSize={3} color={triggerChevronColor} flexShrink={0} />
           </HStack>
         </Button>
       </PopoverTrigger>

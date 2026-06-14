@@ -63,7 +63,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       await login({ email: email.trim(), password })
       ToastService.success({
         title: 'Welcome back',
-        duration: 1800,
+        duration: 1000,
         dedupeKey: 'login-success',
       })
     } catch (error: unknown) {

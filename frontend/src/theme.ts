@@ -78,6 +78,9 @@ const theme = extendTheme({
     heading: 'Inter, system-ui, sans-serif',
     body: 'Inter, system-ui, sans-serif',
   },
+  sizes: {
+    appContent: '1800px',
+  },
   colors: {
     brand: {
       50: '#f0f9ff',
@@ -126,4 +129,3 @@ export default theme
 
 // Exportar gradientes para uso em outros componentes
 export { GRADIENTS }
-

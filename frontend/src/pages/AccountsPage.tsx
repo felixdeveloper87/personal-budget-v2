@@ -127,7 +127,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
   }
 
   return (
-    <Box w="full" maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
+    <Box w="full" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
         <PageHeader
           icon={Building}

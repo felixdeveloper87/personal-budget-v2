@@ -122,7 +122,7 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
     <Box
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 4, md: 7 }}
-      maxW="1400px"
+      maxW="appContent"
       mx="auto"
     >
       <VStack spacing={{ base: 4, md: 5 }} align="stretch">

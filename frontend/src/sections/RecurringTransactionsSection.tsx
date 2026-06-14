@@ -14,6 +14,7 @@ import { listRecurringTransactions } from '../api'
 import { useAuth } from '../contexts/AuthContext'
 import { RecurringTransaction } from '../types'
 import { SectionCard, SectionHeader } from '../components/ui'
+import { useEd } from '../editorial'
 import { ToastService } from '../services/toast'
 import type { AppPage } from '../components/layout/header/navigation.config'
 
@@ -76,17 +77,29 @@ export default function RecurringTransactionsSection({
 
   const currencyFmt = useMemo(() => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }), [])
 
-  const ctaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const ctaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const ctaColor = useColorModeValue('gray.700', 'gray.200')
-  const ctaHoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const ctaHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const statsBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const statsBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const statsAmountColor = useColorModeValue('red.600', 'red.300')
-  const statsLabelColor = useColorModeValue('gray.500', 'gray.400')
-  const statsIncomeColor = useColorModeValue('green.600', 'green.300')
+  const ed = useEd()
+  const ctaBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ctaBg = ed ? ed.panelRaised : ctaBgBase
+  const ctaBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ctaBorder = ed ? ed.line : ctaBorderBase
+  const ctaColorBase = useColorModeValue('gray.700', 'gray.200')
+  const ctaColor = ed ? ed.cream : ctaColorBase
+  const ctaHoverBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const ctaHoverBg = ed ? ed.controlHoverBg : ctaHoverBgBase
+  const ctaHoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const ctaHoverBorder = ed ? ed.lineStrong : ctaHoverBorderBase
+  const mutedColorBase = useColorModeValue('gray.500', 'gray.400')
+  const mutedColor = ed ? ed.muted : mutedColorBase
+  const statsBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const statsBg = ed ? ed.panelRaised : statsBgBase
+  const statsBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const statsBorder = ed ? ed.line : statsBorderBase
+  const statsAmountColorBase = useColorModeValue('red.600', 'red.300')
+  const statsAmountColor = ed ? ed.red : statsAmountColorBase
+  const statsLabelColorBase = useColorModeValue('gray.500', 'gray.400')
+  const statsLabelColor = ed ? ed.muted : statsLabelColorBase
+  const statsIncomeColorBase = useColorModeValue('green.600', 'green.300')
+  const statsIncomeColor = ed ? ed.jade : statsIncomeColorBase
 
   const caption =
     activeCount === 0
@@ -151,12 +164,13 @@ export default function RecurringTransactionsSection({
                 justify="space-between"
               >
                 <Text
-                  fontSize="lg"
-                  fontWeight={700}
+                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  fontSize={ed ? 'xl' : 'lg'}
+                  fontWeight={ed ? 400 : 700}
                   color={monthlyExpense > 0 ? statsAmountColor : statsIncomeColor}
                 >
                   {currencyFmt.format(monthlyExpense > 0 ? monthlyExpense : monthlyIncome)}
-                  <Text as="span" fontSize="xs" fontWeight={500} color={statsLabelColor}>
+                  <Text as="span" fontFamily={ed ? ed.fontMono : undefined} fontSize="xs" fontWeight={500} color={statsLabelColor}>
                     /mo
                   </Text>
                 </Text>

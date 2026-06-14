@@ -6,6 +6,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 import {
   ArrowUpRight,
   ArrowDownRight,
@@ -52,16 +53,26 @@ export default function SummaryStatsStrip({
   balance,
   onCardClick,
 }: SummaryStatsStripProps) {
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const labelColor = useColorModeValue('gray.500', 'gray.400')
-  const hoverBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ed = useEd()
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const borderColor = ed ? ed.line : borderColorBase
+  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dividerColor = ed ? ed.line : dividerColorBase
+  const labelColorBase = useColorModeValue('gray.500', 'gray.400')
+  const labelColor = ed ? ed.muted : labelColorBase
+  const hoverBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const hoverBg = ed ? ed.panelRaised : hoverBgBase
 
-  const txColor = useColorModeValue('blue.600', 'blue.300')
-  const incomeColor = useColorModeValue('green.600', 'green.300')
-  const expenseColor = useColorModeValue('red.500', 'red.300')
-  const balancePositiveColor = useColorModeValue('blue.600', 'blue.300')
-  const balanceNegativeColor = useColorModeValue('red.500', 'red.300')
+  const txColorBase = useColorModeValue('blue.600', 'blue.300')
+  const txColor = ed ? ed.gold : txColorBase
+  const incomeColorBase = useColorModeValue('green.600', 'green.300')
+  const incomeColor = ed ? ed.jade : incomeColorBase
+  const expenseColorBase = useColorModeValue('red.500', 'red.300')
+  const expenseColor = ed ? ed.red : expenseColorBase
+  const balancePositiveBase = useColorModeValue('blue.600', 'blue.300')
+  const balanceNegativeBase = useColorModeValue('red.500', 'red.300')
+  const balancePositiveColor = ed ? ed.jade : balancePositiveBase
+  const balanceNegativeColor = ed ? ed.red : balanceNegativeBase
   const balanceColor = balance >= 0 ? balancePositiveColor : balanceNegativeColor
 
   const metrics: Metric[] = [
@@ -140,21 +151,24 @@ export default function SummaryStatsStrip({
           <HStack spacing={1.5} minW={0}>
             <Icon as={metric.icon} boxSize={3} color={metric.accent} weight="bold" flexShrink={0} />
             <Text
+              fontFamily={ed ? ed.fontMono : undefined}
               fontSize="2xs"
               fontWeight={700}
               color={labelColor}
               textTransform="uppercase"
-              letterSpacing="0.07em"
+              letterSpacing={ed ? '0.12em' : '0.07em'}
               noOfLines={1}
             >
               {metric.label}
             </Text>
           </HStack>
           <Text
-            fontSize={{ base: 'md', md: 'lg' }}
-            fontWeight={800}
+            fontFamily={ed ? ed.fontDisplay : undefined}
+            fontSize={ed ? { base: 'xl', md: '2xl' } : { base: 'md', md: 'lg' }}
+            fontWeight={ed ? 400 : 800}
             color={metric.accent}
             letterSpacing="-0.01em"
+            lineHeight={ed ? '1.1' : undefined}
             noOfLines={1}
             sx={{ fontVariantNumeric: 'tabular-nums' }}
           >

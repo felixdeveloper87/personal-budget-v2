@@ -8,6 +8,7 @@ import {
   Tooltip,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../../editorial'
 import { Search } from '../../ui/icons'
 
 interface SearchTriggerProps {
@@ -20,23 +21,33 @@ interface SearchTriggerProps {
 }
 
 export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
-  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
-  const border = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
-  const color = useColorModeValue('gray.500', 'gray.400')
+  const ed = useEd()
+  const bgBase = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const bg = ed ? ed.controlBg : bgBase
+  const borderBase = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const border = ed ? ed.line : borderBase
+  const colorBase = useColorModeValue('gray.500', 'gray.400')
+  const color = ed ? ed.muted : colorBase
   const shadow = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
     'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
   )
-  const hoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
-  const hoverBorder = useColorModeValue('blue.300', 'blue.400')
-  const hoverColor = useColorModeValue('gray.900', 'white')
+  const hoverBgBase = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
+  const hoverBg = ed ? ed.controlHoverBg : hoverBgBase
+  const hoverBorderBase = useColorModeValue('blue.300', 'blue.400')
+  const hoverBorder = ed ? ed.jade : hoverBorderBase
+  const hoverColorBase = useColorModeValue('gray.900', 'white')
+  const hoverColor = ed ? ed.cream : hoverColorBase
   const hoverShadow = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 12px rgba(37,99,235,0.12)',
     'inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.3)',
   )
-  const kbdBg = useColorModeValue('rgba(226,232,240,0.7)', 'rgba(255,255,255,0.06)')
-  const kbdBorder = useColorModeValue('rgba(203,213,225,0.8)', 'rgba(255,255,255,0.10)')
-  const kbdColor = useColorModeValue('gray.500', 'gray.500')
+  const kbdBgBase = useColorModeValue('rgba(226,232,240,0.7)', 'rgba(255,255,255,0.06)')
+  const kbdBg = ed ? ed.controlBg : kbdBgBase
+  const kbdBorderBase = useColorModeValue('rgba(203,213,225,0.8)', 'rgba(255,255,255,0.10)')
+  const kbdBorder = ed ? ed.line : kbdBorderBase
+  const kbdColorBase = useColorModeValue('gray.500', 'gray.500')
+  const kbdColor = ed ? ed.muted : kbdColorBase
 
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
   const shortcut = isMac ? '⌘K' : 'Ctrl K'

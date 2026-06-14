@@ -20,6 +20,7 @@ import {
   RotateCcw,
 } from '../ui/icons'
 import { PeriodType } from '../../types'
+import { useEd } from '../../editorial'
 import PeriodDatePicker from './PeriodDatePicker'
 
 /* -------------------------------------------------------------------------- */
@@ -174,28 +175,44 @@ export default function PeriodNavigator({
   )
 
   // ── Theme tokens ──────────────────────────────────────────────────────
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const surfaceBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed ? ed.panel : surfaceBgBase
+  const surfaceBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const surfaceBorder = ed ? ed.line : surfaceBorderBase
 
-  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const thumbBg = useColorModeValue('white', 'rgba(255,255,255,0.12)')
-  const thumbBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const trackBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const trackBg = ed ? ed.trackBg : trackBgBase
+  const thumbBgBase = useColorModeValue('white', 'rgba(255,255,255,0.12)')
+  const thumbBg = ed ? ed.thumbBg : thumbBgBase
+  const thumbBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const thumbBorder = ed ? ed.lineStrong : thumbBorderBase
   const thumbShadow = useColorModeValue(
     '0 1px 4px rgba(15,23,42,0.12)',
     '0 1px 4px rgba(0,0,0,0.5)',
   )
-  const segActiveColor = useColorModeValue('gray.900', 'gray.50')
-  const segInactiveColor = useColorModeValue('gray.500', 'gray.400')
+  const segActiveColorBase = useColorModeValue('gray.900', 'gray.50')
+  const segActiveColor = ed ? ed.cream : segActiveColorBase
+  const segInactiveColorBase = useColorModeValue('gray.500', 'gray.400')
+  const segInactiveColor = ed ? ed.muted : segInactiveColorBase
 
-  const capsuleBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const capsuleDivider = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const navBtnColor = useColorModeValue('gray.500', 'gray.400')
-  const navBtnHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
-  const navBtnHoverColor = useColorModeValue('blue.600', 'blue.300')
+  const capsuleBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const capsuleBorder = ed ? ed.lineStrong : capsuleBorderBase
+  const capsuleDividerBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const capsuleDivider = ed ? ed.line : capsuleDividerBase
+  const navBtnColorBase = useColorModeValue('gray.500', 'gray.400')
+  const navBtnColor = ed ? ed.muted : navBtnColorBase
+  const navBtnHoverBgBase = useColorModeValue('gray.50', 'whiteAlpha.100')
+  const navBtnHoverBg = ed ? ed.panelRaised : navBtnHoverBgBase
+  const navBtnHoverColorBase = useColorModeValue('blue.600', 'blue.300')
+  const navBtnHoverColor = ed ? ed.jade : navBtnHoverColorBase
 
-  const todayBtnColor = useColorModeValue('blue.600', 'blue.300')
-  const todayBtnBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
-  const todayBtnHoverBg = useColorModeValue('blue.100', 'rgba(59,130,246,0.22)')
+  const todayBtnColorBase = useColorModeValue('blue.600', 'blue.300')
+  const todayBtnColor = ed ? ed.jade : todayBtnColorBase
+  const todayBtnBgBase = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
+  const todayBtnBg = ed ? ed.jadeSoft : todayBtnBgBase
+  const todayBtnHoverBgBase = useColorModeValue('blue.100', 'rgba(59,130,246,0.22)')
+  const todayBtnHoverBg = ed ? ed.jadeSoftHover : todayBtnHoverBgBase
 
   // ── Derived state ─────────────────────────────────────────────────────
   const isCurrent = isCurrentPeriod(selectedDate, selectedPeriod)

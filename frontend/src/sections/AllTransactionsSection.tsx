@@ -1,4 +1,4 @@
-import { TransactionList, TransactionListGrouped, ImportCsvModal } from '../components'
+import { TransactionList, TransactionListGrouped } from '../components'
 import { Transaction } from '../types'
 import { useState, useRef, useMemo } from 'react'
 import {
@@ -10,16 +10,13 @@ import {
   Text,
   VStack,
   useColorModeValue,
-  useDisclosure,
 } from '@chakra-ui/react'
-import { Calendar, Download, Filter, List, ReceiptText, Upload } from '../components/ui/icons'
+import { Calendar, Filter, List, ReceiptText } from '../components/ui/icons'
 import { DateBasisToggle } from '../components/ui'
 import {
   getTransactionDate,
   type TransactionDateBasis,
 } from '../utils/transactionDates'
-import { exportAllData } from '../utils/export'
-import { ToastService } from '../services/toast'
 
 interface AllTransactionsSectionProps {
   transactions: Transaction[]
@@ -35,28 +32,6 @@ export default function AllTransactionsSection({
   const [groupByMonth, setGroupByMonth] = useState(true)
   const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('activity')
   const groupedListRef = useRef<{ goToCurrentMonth: () => void } | null>(null)
-  const importModal = useDisclosure()
-  const [exporting, setExporting] = useState(false)
-
-  const handleExport = async () => {
-    if (transactions.length === 0) {
-      ToastService.info({ title: 'Nothing to export', dedupeKey: 'csv-export-empty' })
-      return
-    }
-    setExporting(true)
-    try {
-      await exportAllData()
-      ToastService.success({
-        title: 'Export ready',
-        description: 'One CSV containing all of your data was downloaded.',
-        dedupeKey: 'csv-export-done',
-      })
-    } catch (err) {
-      ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
-    } finally {
-      setExporting(false)
-    }
-  }
 
   const hasCurrentMonth = useMemo(() => {
     const now = new Date()
@@ -100,13 +75,6 @@ export default function AllTransactionsSection({
   const filterBorder = useColorModeValue('orange.200', 'orange.700')
   const filterColor = useColorModeValue('orange.600', 'orange.300')
 
-  /* ── Refresh button tokens ── */
-  const refreshBg = useColorModeValue('white', 'whiteAlpha.100')
-  const refreshBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const refreshColor = useColorModeValue('gray.600', 'gray.400')
-  const refreshHoverBg = useColorModeValue('gray.50', 'whiteAlpha.200')
-  const refreshHoverColor = useColorModeValue('gray.900', 'white')
-
   /* ── Count badge tokens ── */
   const countBg = useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')
   const countColor = useColorModeValue('blue.700', 'blue.300')
@@ -119,7 +87,6 @@ export default function AllTransactionsSection({
   const tabHoverColor = useColorModeValue('gray.900', 'white')
 
   return (
-    <>
     <Box
       w="full"
       borderRadius="2xl"
@@ -195,39 +162,6 @@ export default function AllTransactionsSection({
               </Button>
             )}
 
-            {/* Export / Import */}
-            <HStack spacing={1.5}>
-              <Button
-                size="sm"
-                variant="outline"
-                leftIcon={<Icon as={Download} boxSize={4} />}
-                onClick={handleExport}
-                isLoading={exporting}
-                bg={refreshBg}
-                borderColor={refreshBorder}
-                color={refreshColor}
-                fontWeight={700}
-                _hover={{ bg: refreshHoverBg, color: refreshHoverColor }}
-                iconSpacing={{ base: 0, md: 2 }}
-              >
-                <Box as="span" display={{ base: 'none', md: 'inline' }}>Export</Box>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                leftIcon={<Icon as={Upload} boxSize={4} />}
-                onClick={importModal.onOpen}
-                bg={refreshBg}
-                borderColor={refreshBorder}
-                color={refreshColor}
-                fontWeight={700}
-                _hover={{ bg: refreshHoverBg, color: refreshHoverColor }}
-                iconSpacing={{ base: 0, md: 2 }}
-              >
-                <Box as="span" display={{ base: 'none', md: 'inline' }}>Import</Box>
-              </Button>
-            </HStack>
-
             {/* View toggle — segmented control */}
             <HStack
               spacing={0.5}
@@ -284,13 +218,6 @@ export default function AllTransactionsSection({
         )}
       </Box>
     </Box>
-
-    <ImportCsvModal
-      isOpen={importModal.isOpen}
-      onClose={importModal.onClose}
-      onImported={onRefresh}
-    />
-    </>
   )
 }
 

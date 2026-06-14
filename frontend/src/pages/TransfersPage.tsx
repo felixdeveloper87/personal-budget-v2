@@ -10,6 +10,7 @@ import {
   Divider,
   FormControl,
   FormLabel,
+  Grid,
   HStack,
   Icon,
   Input,
@@ -228,9 +229,9 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
   return (
     <Box
       w="full"
-      maxW="1200px"
+      maxW="1800px"
       mx="auto"
-      px={{ base: 2, md: 4, lg: 6 }}
+      px={{ base: 2, md: 4, lg: 6, '2xl': 8 }}
       py={{ base: 4, md: 7 }}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
@@ -251,9 +252,16 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
           }
         />
 
-        <SimpleGrid columns={{ base: 1, lg: 5 }} spacing={5} alignItems="start">
+        <Grid
+          templateColumns={{
+            base: 'minmax(0, 1fr)',
+            lg: 'minmax(0, 3fr) minmax(320px, 2fr)',
+            '2xl': 'minmax(0, 2fr) minmax(420px, 1fr)',
+          }}
+          gap={{ base: 5, '2xl': 6 }}
+          alignItems="start"
+        >
           <Card
-            gridColumn={{ lg: 'span 3' }}
             border="1px solid"
             borderColor={borderColor}
             boxShadow="sm"
@@ -425,7 +433,6 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
           </Card>
 
           <Card
-            gridColumn={{ lg: 'span 2' }}
             border="1px solid"
             borderColor={borderColor}
             boxShadow="sm"
@@ -492,7 +499,7 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
               </VStack>
             </CardBody>
           </Card>
-        </SimpleGrid>
+        </Grid>
       </VStack>
     </Box>
   )

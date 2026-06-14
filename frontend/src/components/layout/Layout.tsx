@@ -1,6 +1,7 @@
-import { Box, Flex, useBreakpointValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
+import { EditorialProvider, editorialPalette } from '../../editorial'
 import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
 import Header from './header/Header'
@@ -53,6 +54,7 @@ export default function Layout({
   showFooter = true,
 }: LayoutProps) {
   const { user } = useAuth()
+  const { colorMode } = useColorMode()
   const profileModal = useDisclosure()
   const settingsModal = useDisclosure()
   const { isCollapsed, toggle } = useSidebarCollapse()
@@ -62,6 +64,14 @@ export default function Layout({
   const isAdmin = Boolean(user?.admin)
   const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet
 
+  // The whole user app wears the "Editorial · guilloché" identity (light/dark
+  // variants). The provider lives here once, so the chrome and every shared
+  // primitive that reads `useEd()` (PageHeader, SectionCard, SectionHeader,
+  // summary, …) pick it up automatically — DRY, no per-page wiring. Only the
+  // admin shell is left on its own theming.
+  const editorial = !isAdmin
+  const pal = editorial ? editorialPalette(colorMode) : null
+
   const navItems = useMemo(
     () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
     [user?.admin],
@@ -70,7 +80,14 @@ export default function Layout({
   const sidebarWidth = isCollapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_EXPANDED_W
 
   return (
-    <Flex direction="row" minH="100vh">
+    <EditorialProvider active={editorial}>
+    <Flex
+      direction="row"
+      minH="100vh"
+      bg={pal ? pal.bg : undefined}
+      color={pal ? pal.cream : undefined}
+      fontFamily={pal ? pal.fontBody : undefined}
+    >
       {/* ─── Sidebar (md+ screens, logged-in, non-admin) ─── */}
       {showSidebar && (
         <Sidebar
@@ -94,7 +111,6 @@ export default function Layout({
         <Header
           onOpenProfile={profileModal.onOpen}
           onOpenSettings={settingsModal.onOpen}
-          onOpenAllTransactions={() => onPageChange?.('all-transactions')}
           currentPage={currentPage}
           onPageChange={onPageChange}
           hasSidebar={showSidebar}
@@ -117,5 +133,6 @@ export default function Layout({
         />
       </Flex>
     </Flex>
+    </EditorialProvider>
   )
 }

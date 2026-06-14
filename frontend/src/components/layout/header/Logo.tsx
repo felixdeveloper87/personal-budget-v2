@@ -1,4 +1,5 @@
 import { Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { useEd } from '../../../editorial'
 import { BRAND } from './brand.config'
 
 interface LogoProps {
@@ -268,13 +269,20 @@ export function LogoIconWallet() {
 }
 
 export default function Logo({ user, onClick }: LogoProps) {
-  const wordMuted = useColorModeValue('gray.700', 'gray.300')
-  const wordBudgetGradient = useColorModeValue(
+  const ed = useEd()
+  const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
+  const wordMuted = ed ? ed.cream : wordMutedBase
+  const wordBudgetGradientBase = useColorModeValue(
     'linear(to-r, #1d4ed8, #5b21b6)',
     'linear(to-r, #60a5fa, #a78bfa)',
   )
-  const separatorColor = useColorModeValue('gray.300', 'whiteAlpha.400')
-  const subtitleColor = useColorModeValue('gray.500', 'gray.500')
+  const wordBudgetGradient = ed
+    ? `linear(to-r, ${ed.jade}, ${ed.gold})`
+    : wordBudgetGradientBase
+  const separatorColorBase = useColorModeValue('gray.300', 'whiteAlpha.400')
+  const separatorColor = ed ? ed.muted : separatorColorBase
+  const subtitleColorBase = useColorModeValue('gray.500', 'gray.500')
+  const subtitleColor = ed ? ed.muted : subtitleColorBase
   const frameBg = useColorModeValue(
     'linear-gradient(135deg, #ffffff 0%, #eef2ff 50%, #e0e7ff 100%)',
     'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
@@ -363,8 +371,9 @@ export default function Logo({ user, onClick }: LogoProps) {
         >
           <Text
             as="span"
-            fontSize={titleFontSize}
-            fontWeight={600}
+            fontFamily={ed ? ed.fontDisplay : undefined}
+            fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
+            fontWeight={ed ? 400 : 600}
             letterSpacing="-0.02em"
             color={wordMuted}
             noOfLines={1}
@@ -389,8 +398,10 @@ export default function Logo({ user, onClick }: LogoProps) {
 
           <Text
             as="span"
-            fontSize={titleFontSize}
-            fontWeight={800}
+            fontFamily={ed ? ed.fontDisplay : undefined}
+            fontStyle={ed ? 'italic' : undefined}
+            fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
+            fontWeight={ed ? 400 : 800}
             letterSpacing="-0.03em"
             bgGradient={wordBudgetGradient}
             bgClip="text"

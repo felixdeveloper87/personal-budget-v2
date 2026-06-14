@@ -1,4 +1,5 @@
 import { Icon, IconButton, Tooltip, useColorMode, useColorModeValue } from '@chakra-ui/react'
+import { useEd } from '../../../editorial'
 import { Sun, Moon } from '../../ui/icons'
 
 interface ThemeToggleProps {
@@ -8,17 +9,24 @@ interface ThemeToggleProps {
 export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const isLight = colorMode === 'light'
+  const ed = useEd()
 
-  const bg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
-  const border = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const bgBase = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const bg = ed ? ed.controlBg : bgBase
+  const borderBase = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const border = ed ? ed.line : borderBase
   const shadow = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
     'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
   )
-  const color = useColorModeValue('gray.600', 'yellow.300')
-  const hoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
-  const hoverBorder = useColorModeValue('blue.300', 'yellow.400')
-  const hoverColor = useColorModeValue('blue.600', 'yellow.200')
+  const colorBase = useColorModeValue('gray.600', 'yellow.300')
+  const color = ed ? ed.gold : colorBase
+  const hoverBgBase = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
+  const hoverBg = ed ? ed.controlHoverBg : hoverBgBase
+  const hoverBorderBase = useColorModeValue('blue.300', 'yellow.400')
+  const hoverBorder = ed ? ed.jade : hoverBorderBase
+  const hoverColorBase = useColorModeValue('blue.600', 'yellow.200')
+  const hoverColor = ed ? ed.jade : hoverColorBase
 
   const dimensions = size === 'sm' ? '36px' : '40px'
 

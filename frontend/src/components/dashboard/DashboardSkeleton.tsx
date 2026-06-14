@@ -5,14 +5,18 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 
 interface SkeletonShellProps {
   height: string | number
 }
 
 function SkeletonShell({ height }: SkeletonShellProps) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed ? ed.panel : surfaceBgBase
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const borderColor = ed ? ed.line : borderColorBase
 
   return (
     <Box
@@ -23,6 +27,14 @@ function SkeletonShell({ height }: SkeletonShellProps) {
       borderColor={borderColor}
       borderRadius="2xl"
       p={5}
+      sx={
+        ed
+          ? {
+              '--skeleton-start-color': ed.controlBg,
+              '--skeleton-end-color': ed.lineStrong,
+            }
+          : undefined
+      }
     >
       <VStack align="stretch" spacing={3} h="full" justify="space-between">
         <Skeleton height="20px" width="40%" borderRadius="md" />

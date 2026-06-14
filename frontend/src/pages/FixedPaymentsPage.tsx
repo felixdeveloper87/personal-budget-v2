@@ -88,7 +88,7 @@ export default function FixedPaymentsPage({
   return (
     <Box
       w="full"
-      maxW="1400px"
+      maxW="appContent"
       mx="auto"
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 4, md: 7 }}

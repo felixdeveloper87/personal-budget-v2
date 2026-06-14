@@ -2,6 +2,7 @@ import {
   FileText,
   Layers,
   LayoutDashboard,
+  List,
   ReceiptText,
   Repeat,
   Shield,
@@ -85,6 +86,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Installments',
     icon: CreditCard,
     description: 'Purchase plans and payments',
+  },
+  {
+    id: 'all-transactions',
+    label: 'All transactions',
+    shortLabel: 'All',
+    icon: List,
+    description: 'Browse and manage every transaction',
   },
   {
     id: 'fixed-payments',

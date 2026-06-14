@@ -20,6 +20,7 @@ import {
   type DiscoverPreviousPeriod,
 } from '../components/discover'
 import { getUpcomingPayments, previousPeriodLabel } from '../components/discover/utils'
+import { useEd } from '../editorial'
 import { useDiscoverCards } from '../hooks/useDiscoverCards'
 import type { PeriodData } from '../hooks/usePeriodData'
 import type { Transaction, PeriodType } from '../types'
@@ -35,8 +36,11 @@ export interface DiscoverSectionProps {
 }
 
 function CarouselDots({ count, activeIndex }: { count: number; activeIndex: number }) {
-  const activeColor = useColorModeValue('gray.600', 'gray.300')
-  const inactiveColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const ed = useEd()
+  const activeColorBase = useColorModeValue('gray.600', 'gray.300')
+  const activeColor = ed ? ed.jade : activeColorBase
+  const inactiveColorBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const inactiveColor = ed ? ed.line : inactiveColorBase
 
   if (count <= 1) return null
 
@@ -89,8 +93,11 @@ export default function DiscoverSection({
   const [activeModal, setActiveModal] = useState<DiscoverModalId | null>(null)
   const [activeSlide, setActiveSlide] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const countBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const countColor = useColorModeValue('gray.700', 'gray.200')
+  const ed = useEd()
+  const countBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const countBg = ed ? ed.panel : countBgBase
+  const countColorBase = useColorModeValue('gray.700', 'gray.200')
+  const countColor = ed ? ed.jade : countColorBase
 
   const context: DiscoverInsightsContext = {
     totalIncome: income,

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Box, useColorModeValue } from '@chakra-ui/react'
 import type { BoxProps } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 
 export interface SectionCardProps extends Omit<BoxProps, 'children'> {
   /** Section content. */
@@ -30,9 +31,13 @@ export default function SectionCard({
   staticOnHover,
   ...rest
 }: SectionCardProps) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const hoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed ? ed.panel : surfaceBgBase
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const borderColor = ed ? ed.line : borderColorBase
+  const hoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const hoverBorder = ed ? ed.lineStrong : hoverBorderBase
   const shadow = useColorModeValue(
     '0 1px 2px rgba(15,23,42,0.04), 0 1px 0 rgba(15,23,42,0.02)',
     '0 1px 0 rgba(255,255,255,0.04)',

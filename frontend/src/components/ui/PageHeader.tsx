@@ -8,6 +8,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 import type { LucideIcon } from './icons'
 
 export interface PageHeaderProps {
@@ -23,11 +24,17 @@ export default function PageHeader({
   subtitle,
   rightSlot,
 }: PageHeaderProps) {
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const subtitleColor = useColorModeValue('gray.500', 'gray.400')
-  const iconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const iconColor = useColorModeValue('gray.700', 'gray.200')
-  const iconBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+  const subtitleColorBase = useColorModeValue('gray.500', 'gray.400')
+  const subtitleColor = ed ? ed.muted : subtitleColorBase
+  const iconBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const iconBg = ed ? ed.panel : iconBgBase
+  const iconColorBase = useColorModeValue('gray.700', 'gray.200')
+  const iconColor = ed ? ed.jade : iconColorBase
+  const iconBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const iconBorder = ed ? ed.line : iconBorderBase
 
   return (
     <Flex
@@ -59,11 +66,12 @@ export default function PageHeader({
         <VStack align="flex-start" spacing={0.5} minW={0}>
           <Text
             as="h1"
-            fontSize={{ base: 'xl', md: '2xl' }}
-            fontWeight={800}
+            fontFamily={ed ? ed.fontDisplay : undefined}
+            fontSize={ed ? { base: '3xl', md: '4xl' } : { base: 'xl', md: '2xl' }}
+            fontWeight={ed ? 400 : 800}
             color={titleColor}
             letterSpacing="-0.025em"
-            lineHeight="1.1"
+            lineHeight={ed ? '1.0' : '1.1'}
             noOfLines={{ base: 2, md: 1 }}
           >
             {title}

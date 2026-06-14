@@ -8,6 +8,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { ChevronRight, TrendingDown, TrendingUp } from '../ui/icons'
+import { useEd } from '../../editorial'
 import type { DiscoverAccent, DiscoverCardItem } from './types'
 
 interface AccentTokens {
@@ -49,21 +50,45 @@ export interface DiscoverCardProps {
   onClick: () => void
 }
 
+/** Editorial chip palette keyed by accent — { bg, fg }. */
+const ED_CHIP: Record<DiscoverAccent, { bg: string; fg: 'jade' | 'gold' | 'red' | 'cream' }> = {
+  neutral: { bg: 'rgba(239,234,224,0.06)', fg: 'cream' },
+  amber: { bg: 'rgba(217,179,106,0.16)', fg: 'gold' },
+  green: { bg: 'rgba(127,230,179,0.16)', fg: 'jade' },
+  red: { bg: 'rgba(248,163,163,0.16)', fg: 'red' },
+}
+
 export default function DiscoverCard({ item, onClick }: DiscoverCardProps) {
   const tokens = ACCENTS[item.accent]
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const hoverBorderColor = useColorModeValue('gray.300', 'whiteAlpha.300')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const descriptionColor = useColorModeValue('gray.500', 'gray.400')
-  const ctaColor = useColorModeValue('gray.600', 'gray.300')
-  const chipBg = useColorModeValue(tokens.chipBgLight, tokens.chipBgDark)
-  const chipFg = useColorModeValue(tokens.chipFgLight, tokens.chipFgDark)
-  const badgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const badgeColor = useColorModeValue('gray.600', 'gray.300')
-  const positive = useColorModeValue('green.600', 'green.300')
-  const negative = useColorModeValue('red.600', 'red.300')
-  const neutral = useColorModeValue('gray.500', 'gray.400')
+  const ed = useEd()
+  const cardBgBase = useColorModeValue('white', 'whiteAlpha.50')
+  const cardBg = ed ? ed.panelRaised : cardBgBase
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const borderColor = ed ? ed.line : borderColorBase
+  const hoverBorderColorBase = useColorModeValue('gray.300', 'whiteAlpha.300')
+  const hoverBorderColor = ed ? ed.lineStrong : hoverBorderColorBase
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+  const descriptionColorBase = useColorModeValue('gray.500', 'gray.400')
+  const descriptionColor = ed ? ed.muted : descriptionColorBase
+  const ctaColorBase = useColorModeValue('gray.600', 'gray.300')
+  const ctaColor = ed ? ed.jade : ctaColorBase
+  const chipBgBase = useColorModeValue(tokens.chipBgLight, tokens.chipBgDark)
+  const chipFgBase = useColorModeValue(tokens.chipFgLight, tokens.chipFgDark)
+  const chipBg = ed
+    ? (item.accent === 'neutral' ? ed.controlBg : ED_CHIP[item.accent].bg)
+    : chipBgBase
+  const chipFg = ed ? ed[ED_CHIP[item.accent].fg] : chipFgBase
+  const badgeBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const badgeBg = ed ? ed.panel : badgeBgBase
+  const badgeColorBase = useColorModeValue('gray.600', 'gray.300')
+  const badgeColor = ed ? ed.muted : badgeColorBase
+  const positiveBase = useColorModeValue('green.600', 'green.300')
+  const positive = ed ? ed.jade : positiveBase
+  const negativeBase = useColorModeValue('red.600', 'red.300')
+  const negative = ed ? ed.red : negativeBase
+  const neutralBase = useColorModeValue('gray.500', 'gray.400')
+  const neutral = ed ? ed.muted : neutralBase
   const deltaColor =
     item.delta?.tone === 'positive'
       ? positive
@@ -126,7 +151,13 @@ export default function DiscoverCard({ item, onClick }: DiscoverCardProps) {
             {item.title}
           </Text>
           {item.value && (
-            <Text fontSize="xl" fontWeight={800} color={chipFg} lineHeight="1.2">
+            <Text
+              fontFamily={ed ? ed.fontDisplay : undefined}
+              fontSize={ed ? '2xl' : 'xl'}
+              fontWeight={ed ? 400 : 800}
+              color={chipFg}
+              lineHeight="1.2"
+            >
               {item.value}
             </Text>
           )}

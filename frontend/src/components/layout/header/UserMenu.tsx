@@ -12,14 +12,14 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { ChevronDown, LogOut, ReceiptText, Settings, User } from '../../ui/icons'
+import { ChevronDown, LogOut, Settings, User } from '../../ui/icons'
+import { useEd } from '../../../editorial'
 import type { UserPlan } from '../../../types'
 
 interface UserMenuProps {
   user: any
   onOpenProfile?: () => void
   onOpenSettings?: () => void
-  onOpenAllTransactions?: () => void
   onLogout: () => void
 }
 
@@ -28,20 +28,30 @@ const PLAN_LABEL: Record<UserPlan, string> = {
   PREMIUM: 'Premium',
 }
 
-export default function UserMenu({ user, onOpenProfile, onOpenSettings, onOpenAllTransactions, onLogout }: UserMenuProps) {
+export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout }: UserMenuProps) {
   const plan: UserPlan = user?.plan ?? 'STANDARD'
+  const ed = useEd()
 
-  const triggerBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
-  const triggerBorder = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const triggerBgBase = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
+  const triggerBg = ed ? ed.controlBg : triggerBgBase
+  const triggerBorderBase = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
+  const triggerBorder = ed ? ed.line : triggerBorderBase
   const triggerShadow = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 4px rgba(15,23,42,0.04)',
     'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 4px rgba(0,0,0,0.2)',
   )
-  const triggerHoverBg = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
-  const triggerHoverBorder = useColorModeValue('blue.300', 'blue.400')
+  const triggerHoverBgBase = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.08)')
+  const triggerHoverBg = ed ? ed.controlHoverBg : triggerHoverBgBase
+  const triggerHoverBorderBase = useColorModeValue('blue.300', 'blue.400')
+  const triggerHoverBorder = ed ? ed.jade : triggerHoverBorderBase
 
+  // NOTE: textColor/subTextColor style the dropdown popover (a light surface),
+  // so they must keep their normal light/dark values even in editorial mode.
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const subTextColor = useColorModeValue('gray.500', 'gray.400')
+  const triggerNameColorBase = useColorModeValue('gray.700', 'gray.200')
+  const triggerNameColor = ed ? ed.cream : triggerNameColorBase
+  const triggerChevronColor = ed ? ed.muted : subTextColor
   const menuListBg = useColorModeValue(
     'rgba(255, 255, 255, 0.85)',
     'rgba(15, 15, 17, 0.85)'
@@ -138,13 +148,13 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onOpenAl
             display={{ base: 'none', md: 'block' }}
             fontSize="sm"
             fontWeight={600}
-            color={useColorModeValue('gray.700', 'gray.200')}
+            color={triggerNameColor}
             maxW="100px"
             isTruncated
           >
             {displayName.split(' ')[0]}
           </Text>
-          <Icon as={ChevronDown} boxSize={3.5} color={subTextColor} transition="transform 0.2s ease"
+          <Icon as={ChevronDown} boxSize={3.5} color={triggerChevronColor} transition="transform 0.2s ease"
             sx={{ '[aria-expanded=true] &': { transform: 'rotate(180deg)' } }}
           />
         </HStack>
@@ -315,45 +325,6 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onOpenAl
               <Text>Settings</Text>
             </HStack>
           </MenuItem>
-          {onOpenAllTransactions && (
-            <MenuItem
-              onClick={onOpenAllTransactions}
-              bg="transparent"
-              color={textColor}
-              fontWeight={500}
-              fontSize="sm"
-              px={3}
-              py={2.5}
-              borderRadius="xl"
-              _hover={{
-                bg: itemHoverBg,
-                color: itemHoverColor,
-              }}
-              _focus={{
-                bg: itemHoverBg,
-                color: itemHoverColor,
-              }}
-              _active={{ bg: 'transparent' }}
-              transition="all 0.15s cubic-bezier(0.16, 1, 0.3, 1)"
-              sx={{
-                '&:hover .menu-icon': {
-                  transform: 'translateX(2px)',
-                  color: itemHoverColor,
-                },
-              }}
-            >
-              <HStack spacing={3} w="full">
-                <Icon
-                  as={ReceiptText}
-                  boxSize={4}
-                  color={subTextColor}
-                  className="menu-icon"
-                  transition="all 0.15s ease"
-                />
-                <Text>All transactions</Text>
-              </HStack>
-            </MenuItem>
-          )}
         </Box>
 
         <Box h="1px" bg={borderColor} mx={3} />

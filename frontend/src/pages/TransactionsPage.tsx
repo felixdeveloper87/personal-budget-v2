@@ -54,7 +54,7 @@ export default function TransactionsPage() {
   const infoColor = useColorModeValue('blue.600', 'blue.300')
 
   return (
-    <Box px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }} maxW="1400px" mx="auto">
+    <Box px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }} maxW="appContent" mx="auto">
       <VStack spacing={{ base: 4, md: 5 }} align="stretch">
         {/* ── Page header ─────────────────────────────────────────── */}
         <PageHeader

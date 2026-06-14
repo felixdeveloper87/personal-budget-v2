@@ -1,6 +1,7 @@
 import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
+import { useEd } from '../../../editorial'
 import { useSearch } from '../../../contexts/SearchContext'
 import SearchModal from '../../search/SearchModal'
 import HeaderActions from './HeaderActions'
@@ -13,7 +14,6 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 interface HeaderProps {
   onOpenProfile?: () => void
   onOpenSettings?: () => void
-  onOpenAllTransactions?: () => void
   onLogin?: () => void
   currentPage?: AppPage
   onPageChange?: (page: AppPage) => void
@@ -24,13 +24,13 @@ interface HeaderProps {
 export default function Header({
   onOpenProfile,
   onOpenSettings,
-  onOpenAllTransactions,
   onLogin,
   currentPage = 'dashboard',
   onPageChange,
   hasSidebar = false,
 }: HeaderProps) {
   const { user, logout } = useAuth()
+  const ed = useEd()
   const { runSearch } = useSearch()
   const navItems = useMemo(
     () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
@@ -67,24 +67,30 @@ export default function Header({
   const isLanding = !user
   const showGlass = isScrolled || !isLanding
 
-  const bg = useColorModeValue(
+  const bgBase = useColorModeValue(
     showGlass ? (isScrolled ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.62)') : 'transparent',
     showGlass ? (isScrolled ? 'rgba(10,10,12,0.78)'    : 'rgba(10,10,12,0.55)')    : 'transparent',
   )
+  const bg = ed ? ed.glass : bgBase
   const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
-  const bgOverlay = showGlass ? bgOverlayVal : 'transparent'
+  const bgOverlay = ed ? 'transparent' : (showGlass ? bgOverlayVal : 'transparent')
   const topHighlightVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))',
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
-  const topHighlight = showGlass ? topHighlightVal : 'transparent'
-  const accentBorder = useColorModeValue(
+  const topHighlight = ed
+    ? 'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))'
+    : (showGlass ? topHighlightVal : 'transparent')
+  const accentBorderBase = useColorModeValue(
     'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.18) 30%, rgba(124, 58, 237, 0.18) 70%, transparent 100%)',
     'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
   )
+  const accentBorder = ed
+    ? 'linear-gradient(90deg, transparent 0%, rgba(127, 230, 179, 0.40) 30%, rgba(217, 179, 106, 0.30) 70%, transparent 100%)'
+    : accentBorderBase
   const shadow = useColorModeValue(
     isScrolled ? '0 10px 30px rgba(15, 23, 42, 0.08)' : 'none',
     isScrolled ? '0 14px 36px rgba(0, 0, 0, 0.5)' : 'none',
@@ -170,7 +176,6 @@ export default function Header({
               onLogin={onLogin}
               onOpenProfile={onOpenProfile}
               onOpenSettings={onOpenSettings}
-              onOpenAllTransactions={onOpenAllTransactions}
               onLogout={logout}
             />
           </Flex>

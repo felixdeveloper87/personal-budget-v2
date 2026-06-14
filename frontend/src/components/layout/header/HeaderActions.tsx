@@ -13,7 +13,6 @@ interface HeaderActionsProps {
   onLogin?: () => void
   onOpenProfile?: () => void
   onOpenSettings?: () => void
-  onOpenAllTransactions?: () => void
   onLogout?: () => void
 }
 
@@ -24,7 +23,6 @@ export default function HeaderActions({
   onLogin,
   onOpenProfile,
   onOpenSettings,
-  onOpenAllTransactions,
   onLogout,
 }: HeaderActionsProps) {
   const ctaLabel =
@@ -52,7 +50,6 @@ export default function HeaderActions({
           user={user}
           onOpenProfile={onOpenProfile}
           onOpenSettings={onOpenSettings}
-          onOpenAllTransactions={onOpenAllTransactions}
           onLogout={onLogout}
         />
       ) : (

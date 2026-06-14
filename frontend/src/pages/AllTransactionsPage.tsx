@@ -62,7 +62,7 @@ export default function AllTransactionsPage() {
       <Box
         px={{ base: 2, md: 4, lg: 6 }}
         py={{ base: 4, md: 7 }}
-        maxW="1400px"
+        maxW="appContent"
         mx="auto"
       >
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
@@ -91,7 +91,7 @@ export default function AllTransactionsPage() {
     <Box
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 4, md: 7 }}
-      maxW="1400px"
+      maxW="appContent"
       mx="auto"
       minW={0}
     >

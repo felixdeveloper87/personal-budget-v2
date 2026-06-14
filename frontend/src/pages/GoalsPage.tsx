@@ -171,7 +171,7 @@ export default function GoalsPage() {
   }
 
   return (
-    <Box maxW="1400px" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
+    <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
         <PageHeader
           icon={ShieldCheck}
