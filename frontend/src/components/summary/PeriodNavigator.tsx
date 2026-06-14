@@ -50,10 +50,10 @@ interface PeriodOption {
 }
 
 const PERIODS: PeriodOption[] = [
-  { type: 'day',   label: 'Day',   icon: Calendar },
-  { type: 'week',  label: 'Week',  icon: CalendarDays },
+  { type: 'day', label: 'Day', icon: Calendar },
+  { type: 'week', label: 'Week', icon: CalendarDays },
   { type: 'month', label: 'Month', icon: CalendarRange },
-  { type: 'year',  label: 'Year',  icon: Activity },
+  { type: 'year', label: 'Year', icon: Activity },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -176,13 +176,13 @@ export default function PeriodNavigator({
 
   // ── Theme tokens ──────────────────────────────────────────────────────
   const ed = useEd()
-  const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
-  const surfaceBg = ed ? ed.panel : surfaceBgBase
+  const surfaceBgBase = useColorModeValue('transparent', 'transparent')
+  const surfaceBg = ed ? 'transparent' : surfaceBgBase
   const surfaceBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const surfaceBorder = ed ? ed.line : surfaceBorderBase
 
-  const trackBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const trackBg = ed ? ed.trackBg : trackBgBase
+  const trackBgBase = useColorModeValue('transparent', 'transparent')
+  const trackBg = ed ? 'transparent' : trackBgBase
   const thumbBgBase = useColorModeValue('white', 'rgba(255,255,255,0.12)')
   const thumbBg = ed ? ed.thumbBg : thumbBgBase
   const thumbBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')

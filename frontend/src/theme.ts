@@ -75,8 +75,9 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    heading: 'Inter, system-ui, sans-serif',
-    body: 'Inter, system-ui, sans-serif',
+    heading: "'Instrument Serif', Georgia, serif",
+    body: "'Schibsted Grotesk', system-ui, sans-serif",
+    mono: "'Spline Sans Mono', ui-monospace, monospace",
   },
   sizes: {
     appContent: '1800px',
