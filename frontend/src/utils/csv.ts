@@ -78,6 +78,17 @@ export interface ParsedRow {
   description: string
   amount: number
   paymentMethodName: string
+  accountName: string
+  paymentDate?: string
+  status?: 'PLANNED' | 'PENDING' | 'CLEARED' | 'RECONCILED'
+  installmentPlanId?: string
+  fixedPaymentId?: string
+}
+
+export interface FullDataRecord {
+  line: number
+  recordType: string
+  values: Record<string, string>
 }
 
 export interface ParseError {
@@ -88,6 +99,7 @@ export interface ParseError {
 export interface CsvParseResult {
   rows: ParsedRow[]
   errors: ParseError[]
+  fullDataRows: FullDataRecord[]
 }
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
@@ -104,6 +116,7 @@ function normHeader(h: string): string {
 export function parseTransactionsCsv(text: string): CsvParseResult {
   const rows: ParsedRow[] = []
   const errors: ParseError[] = []
+  const fullDataRows: FullDataRecord[] = []
 
   const lines = text
     .replace(/^﻿/, '')
@@ -112,7 +125,7 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     .filter((l, idx) => !(idx > 0 && l.trim() === '') || idx === 0)
 
   if (lines.length === 0 || lines.every((l) => l.trim() === '')) {
-    return { rows, errors: [{ line: 0, message: 'The file is empty.' }] }
+    return { rows, errors: [{ line: 0, message: 'The file is empty.' }], fullDataRows }
   }
 
   // Detect header row.
@@ -120,12 +133,18 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
   const hasHeader = firstCells.includes('date') && firstCells.includes('amount')
 
   const colIndex: Record<string, number> = {
+    'record type': -1,
     date: 0,
     type: 1,
     category: 2,
     description: 3,
     amount: 4,
     'payment method': 5,
+    account: 6,
+    'payment date': 7,
+    status: 8,
+    'installment plan id': -1,
+    'fixed payment id': -1,
   }
   if (hasHeader) {
     firstCells.forEach((h, i) => {
@@ -142,6 +161,17 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
 
     const cells = parseCsvLine(raw)
     const get = (key: string) => (cells[colIndex[key]] ?? '').trim()
+    const recordType = get('record type').toUpperCase()
+
+    if (recordType) {
+      const values: Record<string, string> = {}
+      firstCells.forEach((header, index) => {
+        values[header] = (cells[index] ?? '').trim()
+      })
+      fullDataRows.push({ line: lineNo, recordType, values })
+    }
+
+    if (recordType && recordType !== 'TRANSACTION') continue
 
     const date = get('date')
     const typeRaw = get('type').toUpperCase()
@@ -149,6 +179,9 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     const description = get('description')
     const amountRaw = get('amount')
     const paymentMethodName = get('payment method')
+    const accountName = get('account')
+    const paymentDate = get('payment date')
+    const statusRaw = get('status').toUpperCase()
 
     if (!DATE_RE.test(date)) {
       errors.push({ line: lineNo, message: `Invalid date "${date}" (expected YYYY-MM-DD).` })
@@ -164,6 +197,15 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
       errors.push({ line: lineNo, message: `Invalid amount "${amountRaw}".` })
       continue
     }
+    if (paymentDate && !DATE_RE.test(paymentDate)) {
+      errors.push({ line: lineNo, message: `Invalid payment date "${paymentDate}" (expected YYYY-MM-DD).` })
+      continue
+    }
+    const validStatuses = ['PLANNED', 'PENDING', 'CLEARED', 'RECONCILED'] as const
+    if (statusRaw && !validStatuses.includes(statusRaw as typeof validStatuses[number])) {
+      errors.push({ line: lineNo, message: `Invalid status "${statusRaw}".` })
+      continue
+    }
     rows.push({
       line: lineNo,
       date,
@@ -172,8 +214,15 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
       description,
       amount: Math.abs(amount),
       paymentMethodName,
+      accountName,
+      paymentDate: paymentDate || undefined,
+      status: statusRaw
+        ? statusRaw as typeof validStatuses[number]
+        : undefined,
+      installmentPlanId: get('installment plan id') || undefined,
+      fixedPaymentId: get('fixed payment id') || undefined,
     })
   }
 
-  return { rows, errors }
+  return { rows, errors, fullDataRows }
 }

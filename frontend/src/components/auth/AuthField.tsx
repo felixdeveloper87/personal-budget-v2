@@ -8,7 +8,6 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import type { LucideIcon } from '../ui/icons'
 
@@ -24,17 +23,9 @@ export interface AuthFieldProps {
   rightElement?: ReactNode
   isRequired?: boolean
   isDisabled?: boolean
-  /** Override the default native input id. Useful when label/aria need pairing. */
   name?: string
 }
 
-/**
- * Shared auth-form field: label + icon-prefixed input + inline error helper.
- *
- * Resolves color tokens once (no useColorModeValue inside .map() callers) and
- * uses tight, GPU-cheap transitions (border-color, box-shadow) instead of
- * `transition: all` so the modal stays responsive while animating in.
- */
 const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthField(
   {
     label,
@@ -54,35 +45,25 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
 ) {
   const generatedId = useId()
   const id = name ?? generatedId
-
-  const labelColor = useColorModeValue('gray.700', 'gray.200')
-  const inputBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const inputBorder = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const inputColor = useColorModeValue('gray.900', 'gray.50')
-  const placeholderColor = useColorModeValue('gray.400', 'gray.600')
-  const iconColor = useColorModeValue('gray.400', 'gray.500')
-  const focusBorder = useColorModeValue('#3b82f6', '#60a5fa')
-  const focusGlow = useColorModeValue(
-    'rgba(59, 130, 246, 0.18)',
-    'rgba(96, 165, 250, 0.28)',
-  )
-
   const hasError = Boolean(error)
 
   return (
     <FormControl isInvalid={hasError} isRequired={isRequired}>
       <FormLabel
         htmlFor={id}
-        fontSize="sm"
+        fontSize="xs"
         fontWeight={600}
-        color={labelColor}
+        color="#94a398"
         mb={1.5}
+        fontFamily="'Spline Sans Mono', monospace"
+        letterSpacing="0.1em"
+        textTransform="uppercase"
       >
         {label}
       </FormLabel>
       <InputGroup>
-        <InputLeftElement pointerEvents="none" h="44px" color={iconColor}>
-          <Icon as={icon} boxSize={4} weight="bold" />
+        <InputLeftElement pointerEvents="none" h="44px" color="#94a398">
+          <Icon as={icon} boxSize={4} />
         </InputLeftElement>
         <Input
           ref={ref}
@@ -97,31 +78,39 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           h="44px"
           pl={10}
           pr={rightElement ? 10 : 4}
-          bg={inputBg}
+          bg="rgba(18, 26, 21, 0.6)"
           border="1px solid"
-          borderColor={inputBorder}
-          color={inputColor}
+          borderColor="rgba(239, 234, 224, 0.1)"
+          color="#efeae0"
           fontSize="sm"
-          _placeholder={{ color: placeholderColor }}
-          _hover={{ borderColor: focusBorder }}
+          borderRadius="10px"
+          _placeholder={{ color: 'rgba(148, 163, 152, 0.5)' }}
+          _hover={{ borderColor: 'rgba(127, 230, 179, 0.4)' }}
           _focus={{
-            borderColor: focusBorder,
-            boxShadow: `0 0 0 3px ${focusGlow}`,
+            borderColor: '#7fe6b3',
+            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.18)',
+            bg: 'rgba(18, 26, 21, 0.8)',
           }}
           _focusVisible={{
-            borderColor: focusBorder,
-            boxShadow: `0 0 0 3px ${focusGlow}`,
+            borderColor: '#7fe6b3',
+            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.18)',
+            bg: 'rgba(18, 26, 21, 0.8)',
           }}
           _invalid={{
-            borderColor: 'red.400',
-            boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.18)',
+            borderColor: 'rgba(239, 68, 68, 0.7)',
+            boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.14)',
           }}
-          transition="border-color 0.15s ease, box-shadow 0.15s ease"
+          _disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
+          transition="border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease"
         />
-        {rightElement && <InputRightElement h="44px">{rightElement}</InputRightElement>}
+        {rightElement && (
+          <InputRightElement h="44px" color="#94a398">
+            {rightElement}
+          </InputRightElement>
+        )}
       </InputGroup>
       {hasError && (
-        <FormErrorMessage fontSize="xs" mt={1.5}>
+        <FormErrorMessage fontSize="xs" mt={1.5} color="rgba(239, 68, 68, 0.85)">
           {error}
         </FormErrorMessage>
       )}

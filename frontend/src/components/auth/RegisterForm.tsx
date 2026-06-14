@@ -7,7 +7,6 @@ import {
   IconButton,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck, User } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
@@ -43,12 +42,6 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const confirmRef = useRef<HTMLInputElement>(null)
 
   const { register } = useAuth()
-
-  const subtleText = useColorModeValue('gray.500', 'gray.400')
-  const linkColor = useColorModeValue('blue.600', 'blue.300')
-  const linkHover = useColorModeValue('blue.700', 'blue.200')
-  const eyeIconColor = useColorModeValue('gray.500', 'gray.400')
-  const trustText = useColorModeValue('gray.500', 'gray.500')
 
   const clearError = (field: keyof RegisterErrors) => {
     if (errors[field]) setErrors((prev) => ({ ...prev, [field]: undefined }))
@@ -121,142 +114,132 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       <GoogleSignInSection />
       <Box as="form" onSubmit={handleSubmit} noValidate>
         <VStack spacing={4} align="stretch">
-        <AuthField
-          ref={nameRef}
-          label="Name"
-          icon={User}
-          name="name"
-          value={name}
-          onChange={(v) => {
-            setName(v)
-            clearError('name')
-          }}
-          placeholder="Your name"
-          autoComplete="name"
-          error={errors.name}
-          isDisabled={loading}
-        />
+          <AuthField
+            ref={nameRef}
+            label="Name"
+            icon={User}
+            name="name"
+            value={name}
+            onChange={(v) => { setName(v); clearError('name') }}
+            placeholder="Your name"
+            autoComplete="name"
+            error={errors.name}
+            isDisabled={loading}
+          />
 
-        <AuthField
-          ref={emailRef}
-          label="Email"
-          icon={Mail}
-          type="email"
-          name="email"
-          value={email}
-          onChange={(v) => {
-            setEmail(v)
-            clearError('email')
-          }}
-          placeholder="you@example.com"
-          autoComplete="email"
-          error={errors.email}
-          isDisabled={loading}
-        />
+          <AuthField
+            ref={emailRef}
+            label="Email"
+            icon={Mail}
+            type="email"
+            name="email"
+            value={email}
+            onChange={(v) => { setEmail(v); clearError('email') }}
+            placeholder="you@example.com"
+            autoComplete="email"
+            error={errors.email}
+            isDisabled={loading}
+          />
 
-        <AuthField
-          ref={passwordRef}
-          label="Password"
-          icon={Lock}
-          type={showPassword ? 'text' : 'password'}
-          name="new-password"
-          value={password}
-          onChange={(v) => {
-            setPassword(v)
-            clearError('password')
-          }}
-          placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
-          autoComplete="new-password"
-          error={errors.password}
-          isDisabled={loading}
-          rightElement={
-            <IconButton
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              icon={<Icon as={showPassword ? EyeOff : Eye} boxSize={4} />}
-              variant="ghost"
-              size="sm"
-              color={eyeIconColor}
-              onClick={() => setShowPassword((s) => !s)}
-              tabIndex={-1}
-            />
-          }
-        />
+          <AuthField
+            ref={passwordRef}
+            label="Password"
+            icon={Lock}
+            type={showPassword ? 'text' : 'password'}
+            name="new-password"
+            value={password}
+            onChange={(v) => { setPassword(v); clearError('password') }}
+            placeholder={`At least ${MIN_PASSWORD_LENGTH} characters`}
+            autoComplete="new-password"
+            error={errors.password}
+            isDisabled={loading}
+            rightElement={
+              <IconButton
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                icon={<Icon as={showPassword ? EyeOff : Eye} boxSize={4} />}
+                variant="ghost"
+                size="sm"
+                color="#94a398"
+                _hover={{ color: '#efeae0', bg: 'rgba(239,234,224,0.06)' }}
+                onClick={() => setShowPassword((s) => !s)}
+                tabIndex={-1}
+              />
+            }
+          />
 
-        <AuthField
-          ref={confirmRef}
-          label="Confirm password"
-          icon={Lock}
-          type={showConfirmPassword ? 'text' : 'password'}
-          name="confirm-password"
-          value={confirmPassword}
-          onChange={(v) => {
-            setConfirmPassword(v)
-            clearError('confirmPassword')
-          }}
-          placeholder="Re-enter your password"
-          autoComplete="new-password"
-          error={errors.confirmPassword}
-          isDisabled={loading}
-          rightElement={
-            <IconButton
-              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-              icon={<Icon as={showConfirmPassword ? EyeOff : Eye} boxSize={4} />}
-              variant="ghost"
-              size="sm"
-              color={eyeIconColor}
-              onClick={() => setShowConfirmPassword((s) => !s)}
-              tabIndex={-1}
-            />
-          }
-        />
+          <AuthField
+            ref={confirmRef}
+            label="Confirm password"
+            icon={Lock}
+            type={showConfirmPassword ? 'text' : 'password'}
+            name="confirm-password"
+            value={confirmPassword}
+            onChange={(v) => { setConfirmPassword(v); clearError('confirmPassword') }}
+            placeholder="Re-enter your password"
+            autoComplete="new-password"
+            error={errors.confirmPassword}
+            isDisabled={loading}
+            rightElement={
+              <IconButton
+                aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                icon={<Icon as={showConfirmPassword ? EyeOff : Eye} boxSize={4} />}
+                variant="ghost"
+                size="sm"
+                color="#94a398"
+                _hover={{ color: '#efeae0', bg: 'rgba(239,234,224,0.06)' }}
+                onClick={() => setShowConfirmPassword((s) => !s)}
+                tabIndex={-1}
+              />
+            }
+          />
 
-        <Button
-          type="submit"
-          isLoading={loading}
-          loadingText="Creating account"
-          rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
-          h="48px"
-          w="full"
-          mt={2}
-          fontSize="sm"
-          fontWeight={700}
-          color="white"
-          borderRadius="lg"
-          bg="linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%)"
-          bgSize="200% 100%"
-          bgPosition="0% 50%"
-          boxShadow="0 8px 24px -10px rgba(79, 70, 229, 0.55)"
-          transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
-          _hover={{
-            bgPosition: '100% 50%',
-            transform: 'translateY(-1px)',
-            boxShadow: '0 12px 30px -10px rgba(79, 70, 229, 0.65)',
-          }}
-          _active={{ transform: 'translateY(0)' }}
-        >
-          Create account
-        </Button>
-
-        <HStack spacing={2} justify="center" pt={1}>
-          <Icon as={ShieldCheck} boxSize={3.5} color={trustText} />
-          <Text fontSize="xs" color={trustText}>
-            No credit card. Cancel anytime.
-          </Text>
-        </HStack>
-
-        <Text textAlign="center" color={subtleText} fontSize="sm">
-          Already have an account?{' '}
           <Button
-            variant="link"
-            color={linkColor}
-            fontWeight={600}
+            type="submit"
+            isLoading={loading}
+            loadingText="Creating account"
+            rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
+            h="48px"
+            w="full"
+            mt={2}
             fontSize="sm"
-            onClick={onSwitchToLogin}
-            _hover={{ color: linkHover, textDecoration: 'underline' }}
+            fontWeight={700}
+            color="#070a08"
+            borderRadius="999px"
+            bg="#7fe6b3"
+            border="1px solid #7fe6b3"
+            boxShadow="0 8px 24px -10px rgba(127, 230, 179, 0.4)"
+            transition="transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease"
+            _hover={{
+              bg: '#a5edca',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 12px 30px -10px rgba(127, 230, 179, 0.55)',
+            }}
+            _active={{ transform: 'translateY(0)', bg: '#6dd9a3' }}
+            _loading={{ opacity: 0.7 }}
           >
-            Sign in
+            Create account
           </Button>
-        </Text>
+
+          <HStack spacing={2} justify="center" pt={1}>
+            <Icon as={ShieldCheck} boxSize={3.5} color="#94a398" />
+            <Text fontSize="xs" color="#94a398">
+              No credit card. Cancel anytime.
+            </Text>
+          </HStack>
+
+          <Text textAlign="center" color="#94a398" fontSize="sm">
+            Already have an account?{' '}
+            <Button
+              variant="link"
+              color="#7fe6b3"
+              fontWeight={600}
+              fontSize="sm"
+              onClick={onSwitchToLogin}
+              _hover={{ color: '#a5edca', textDecoration: 'none' }}
+            >
+              Sign in
+            </Button>
+          </Text>
         </VStack>
       </Box>
     </VStack>

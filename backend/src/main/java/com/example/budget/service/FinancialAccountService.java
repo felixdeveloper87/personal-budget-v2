@@ -230,6 +230,11 @@ public class FinancialAccountService {
     }
 
     @Transactional(readOnly = true)
+    public List<FinancialAccount> findEntitiesByUser(User user) {
+        return accountRepository.findByUserOrderByActiveDescNameAsc(user);
+    }
+
+    @Transactional(readOnly = true)
     public BigDecimal currentBalance(FinancialAccount account, User user) {
         LocalDate today = LocalDate.now();
         LocalDate anchorDate = account.getBalanceAnchorAt().toLocalDate();

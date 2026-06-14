@@ -37,16 +37,6 @@
   background: rgba(127, 230, 179, 0.25);
   color: var(--cream);
 }
-.pbv3.ready,
-.pbv3.ready * {
-  cursor: none;
-}
-@media (pointer: coarse) {
-  .pbv3.ready,
-  .pbv3.ready * {
-    cursor: auto;
-  }
-}
 .pbv3 .mono {
   font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
@@ -58,60 +48,6 @@
 .pbv3 .it {
   font-style: italic;
   color: var(--jade);
-}
-
-/* ==========================================================================
-   Custom cursor (dot + ring with inertia)
-   ========================================================================== */
-.pbv3-cursor,
-.pbv3-cursor__dot {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 90;
-  pointer-events: none;
-  border-radius: 999px;
-  will-change: transform;
-}
-.pbv3-cursor {
-  width: 40px;
-  height: 40px;
-  margin: -20px 0 0 -20px;
-  border: 1px solid var(--line-strong);
-  display: grid;
-  place-content: center;
-  transition: width 0.25s ease, height 0.25s ease, background 0.25s ease,
-    border-color 0.25s ease, color 0.25s ease;
-}
-.pbv3-cursor__label {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--bg);
-  opacity: 0;
-  white-space: nowrap;
-}
-.pbv3-cursor.hot {
-  width: auto;
-  height: 28px;
-  padding: 0 0.9rem;
-  margin: -14px 0 0 -14px;
-  border-radius: 999px;
-  background: var(--jade);
-  border-color: var(--jade);
-}
-.pbv3-cursor.hot .pbv3-cursor__label {
-  opacity: 1;
-}
-.pbv3-cursor__dot {
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  background: var(--jade);
-}
-.pbv3-cursor.hot ~ .pbv3-cursor__dot {
-  opacity: 0;
 }
 
 /* ==========================================================================
@@ -268,7 +204,7 @@
   font-size: 0.95rem;
   font-weight: 600;
   text-decoration: none;
-  cursor: none;
+  cursor: pointer;
   will-change: transform;
 }
 .pbv3-btn--ghost {
@@ -807,34 +743,23 @@
 .pbv3-manifesto {
   position: relative;
   z-index: 2;
-  height: 230vh;
+  padding-block: clamp(5rem, 13vh, 10rem);
 }
 .pbv3-manifesto__inner {
-  position: sticky;
-  top: 0;
-  height: 100vh;
   display: grid;
   align-content: center;
-  padding-block: 4rem;
 }
 .pbv3-manifesto__text {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(1.8rem, 4.5vw, 3.4rem);
   line-height: 1.3;
-  max-width: 22ch;
 }
 .pbv3-mw {
-  color: rgba(239, 234, 224, 0.16);
-  transition: color 0.3s ease, text-shadow 0.3s ease;
-}
-.pbv3-mw.lit {
   color: var(--cream);
 }
 .pbv3-mw.key {
   font-style: italic;
-}
-.pbv3-mw.key.lit {
   color: var(--jade);
   text-shadow: 0 0 24px rgba(127, 230, 179, 0.45);
 }
@@ -983,12 +908,6 @@
     animation: none !important;
     transition: none !important;
   }
-  .pbv3.ready,
-  .pbv3.ready * {
-    cursor: auto !important;
-  }
-  .pbv3-cursor,
-  .pbv3-cursor__dot,
   .pbv3-loader {
     display: none !important;
   }

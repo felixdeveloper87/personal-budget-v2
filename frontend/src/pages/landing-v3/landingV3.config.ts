@@ -68,10 +68,8 @@ export const BENTO = {
  */
 export const MANIFESTO =
   'Money is not the goal. *Clarity* is. ' +
-  'When you can *see* every flow — what comes in, what goes out, what stays — ' +
-  'anxiety quietly becomes *arithmetic*. ' +
-  'Personal Budget turns a thousand small decisions into one calm, honest *picture*. ' +
-  'No more spreadsheets. No more guilt. Just *clarity*, kept sharp.'
+  'When you *see* every flow, anxiety becomes *arithmetic*. ' +
+  'One calm, honest *picture* — kept sharp.'
 
 export const TESTIMONIALS = [
   { quote: 'I finally see my month before it happens.', name: 'Marina', role: 'Designer' },

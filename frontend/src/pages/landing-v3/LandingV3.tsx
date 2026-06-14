@@ -162,16 +162,12 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
 
   const rootRef = useRef<HTMLDivElement>(null)
   const navRef = useRef<HTMLElement>(null)
-  const cursorRef = useRef<HTMLDivElement>(null)
-  const cursorDotRef = useRef<HTMLDivElement>(null)
-  const cursorLabelRef = useRef<HTMLSpanElement>(null)
   const tickerRef = useRef<HTMLDivElement>(null)
   const voicesARef = useRef<HTMLDivElement>(null)
   const voicesBRef = useRef<HTMLDivElement>(null)
   const mockupSectionRef = useRef<HTMLDivElement>(null)
   const mockupRef = useRef<HTMLDivElement>(null)
   const budgetsRef = useRef<HTMLDivElement>(null)
-  const manifestoRef = useRef<HTMLDivElement>(null)
 
   const [pct, setPct] = useState(reduce ? 100 : 0)
   const [loaderDone, setLoaderDone] = useState(reduce)
@@ -248,51 +244,15 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     return () => io.disconnect()
   }, [reduce])
 
-  /* ------------------------------------------------ cursor hover labelling -- */
-  useEffect(() => {
-    if (reduce || !window.matchMedia('(pointer: fine)').matches) return
-    const root = rootRef.current
-    const cursor = cursorRef.current
-    const label = cursorLabelRef.current
-    if (!root || !cursor || !label) return
-    root.classList.add('ready')
-    const onOver = (e: Event) => {
-      const el = (e.target as HTMLElement).closest?.('[data-cursor]') as HTMLElement | null
-      if (el) {
-        cursor.classList.add('hot')
-        label.textContent = el.dataset.cursor || ''
-      } else {
-        cursor.classList.remove('hot')
-      }
-    }
-    document.addEventListener('mouseover', onOver)
-    return () => {
-      document.removeEventListener('mouseover', onOver)
-      root.classList.remove('ready')
-    }
-  }, [reduce])
-
   /* ----------------------------------------- single master rAF loop -------- */
   useEffect(() => {
     if (reduce) return
-    const cursor = cursorRef.current
-    const dot = cursorDotRef.current
     const ticker = tickerRef.current
     const rowA = voicesARef.current
     const rowB = voicesBRef.current
     const mockup = mockupRef.current
     const mockupSection = mockupSectionRef.current
-    const manifesto = manifestoRef.current
-    const mwords = manifesto
-      ? Array.from(manifesto.querySelectorAll<HTMLElement>('.pbv3-mw'))
-      : []
 
-    let mx = window.innerWidth / 2
-    let my = window.innerHeight / 2
-    let cx = mx
-    let cy = my
-    let dx = mx
-    let dy = my
     let sy = window.scrollY
     let lastSy = sy
     let velS = 0
@@ -300,25 +260,13 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     let tx = 0
     let ax = 0
     let bx = 0
-    let lastLit = -1
-    let started = false
 
     const tickerHalf = ticker ? ticker.scrollWidth / 2 : 0
     const aHalf = rowA ? rowA.scrollWidth / 2 : 0
     const bHalf = rowB ? rowB.scrollWidth / 2 : 0
     bx = -bHalf
 
-    const onMove = (e: MouseEvent) => {
-      mx = e.clientX
-      my = e.clientY
-      if (!started) {
-        cx = dx = mx
-        cy = dy = my
-        started = true
-      }
-    }
     const onScroll = () => (sy = window.scrollY)
-    window.addEventListener('mousemove', onMove, { passive: true })
     window.addEventListener('scroll', onScroll, { passive: true })
 
     let raf = 0
@@ -330,14 +278,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
       const vel = sy - lastSy
       lastSy = sy
       velS += (vel - velS) * 0.1
-
-      // cursor inertia
-      cx += (mx - cx) * 0.16
-      cy += (my - cy) * 0.16
-      dx += (mx - dx) * 0.34
-      dy += (my - dy) * 0.34
-      if (cursor) cursor.style.transform = `translate(${cx}px, ${cy}px)`
-      if (dot) dot.style.transform = `translate(${dx}px, ${dy}px)`
 
       // ticker — base drift + velocity, skew with velocity
       if (ticker && tickerHalf) {
@@ -371,25 +311,12 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
         mockup.style.transform = `rotateX(${rotX}deg) translateY(${ty}px) scale(${sc})`
       }
 
-      // manifesto scroll-lit
-      if (manifesto && mwords.length) {
-        const r = manifesto.getBoundingClientRect()
-        const total = manifesto.offsetHeight - vh()
-        const prog = clamp(-r.top / total, 0, 1)
-        const lit = Math.round(prog * mwords.length)
-        if (lit !== lastLit) {
-          mwords.forEach((w, i) => w.classList.toggle('lit', i < lit))
-          lastLit = lit
-        }
-      }
-
       raf = requestAnimationFrame(master)
     }
     raf = requestAnimationFrame(master)
 
     return () => {
       cancelAnimationFrame(raf)
-      window.removeEventListener('mousemove', onMove)
       window.removeEventListener('scroll', onScroll)
     }
   }, [reduce, loaderDone])
@@ -399,16 +326,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
 
   return (
     <div className="pbv3" ref={rootRef}>
-      {/* custom cursor */}
-      {!reduce && (
-        <>
-          <div className="pbv3-cursor" ref={cursorRef} aria-hidden>
-            <span className="pbv3-cursor__label" ref={cursorLabelRef} />
-          </div>
-          <div className="pbv3-cursor__dot" ref={cursorDotRef} aria-hidden />
-        </>
-      )}
-
       {/* preloader */}
       {!loaderDone && (
         <div className={`pbv3-loader${pct >= 100 ? ' done' : ''}`} aria-hidden>
@@ -627,7 +544,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
       </section>
 
       {/* manifesto */}
-      <section className="pbv3-manifesto" id="manifesto" ref={manifestoRef}>
+      <section className="pbv3-manifesto" id="manifesto">
         <div className="pbv3-manifesto__inner">
           <div className="shell">
             <p className="pbv3-manifesto__text">

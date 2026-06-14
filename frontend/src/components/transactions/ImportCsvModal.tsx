@@ -27,8 +27,21 @@ import {
   CSV_HEADERS,
   type CsvParseResult,
 } from '../../utils/csv'
-import { importTransactions, listAccounts } from '../../api'
-import { FinancialAccount } from '../../types'
+import {
+  createAccount,
+  createInstallmentPlan,
+  createPaymentMethod,
+  createRecurringTransaction,
+  importTransactions,
+  listAccounts,
+  listPaymentMethods,
+} from '../../api'
+import {
+  FinancialAccount,
+  FinancialAccountRequest,
+  PaymentMethod,
+  PaymentMethodRequest,
+} from '../../types'
 import { ToastService } from '../../services/toast'
 
 interface ImportCsvModalProps {
@@ -47,6 +60,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   const [importing, setImporting] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [accounts, setAccounts] = useState<FinancialAccount[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [accountId, setAccountId] = useState<number | null>(null)
 
   const dropBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -67,9 +81,10 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
 
   useEffect(() => {
     if (!isOpen) return
-    listAccounts()
-      .then((items) => {
-        setAccounts(items)
+    Promise.all([listAccounts(), listPaymentMethods()])
+      .then(([accountItems, methodItems]) => {
+        setAccounts(accountItems)
+        setPaymentMethods(methodItems)
       })
       .catch((err) => {
         ToastService.apiError(err, {
@@ -101,11 +116,12 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       // installments/fixed-payments exports are not mistaken for the transactions header.
       const headerCells = firstLine.split(',').map((cell) => cell.trim().toLowerCase())
       const looksLikeTransactions = headerCells.includes('date') && headerCells.includes('amount')
+      const looksLikeFullExport = headerCells.includes('record type')
       const parsed = parseTransactionsCsv(text)
 
       // A transactions CSV always has Date + Amount headers. The installments and
       // fixed-payments exports start with "Description" and can't be imported here.
-      if (!looksLikeTransactions && parsed.rows.length === 0) {
+      if (!looksLikeTransactions && !looksLikeFullExport && parsed.rows.length === 0) {
         ToastService.error({
           title: 'Wrong file format',
           description: 'This looks like an installments or fixed-payments export. Import the transactions CSV (transactions-*.csv) instead.',
@@ -144,10 +160,125 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   }
 
   const runImport = async () => {
-    if (!result || result.rows.length === 0) return
+    if (!result || (result.rows.length === 0 && result.fullDataRows.length === 0)) return
     setImporting(true)
 
     try {
+      const isFullDataImport = result.fullDataRows.some((row) => row.recordType !== 'TRANSACTION')
+      if (isFullDataImport) {
+        const get = (values: Record<string, string>, key: string) => values[key.toLowerCase()] ?? ''
+        const number = (value: string, fallback = 0) => {
+          const parsed = Number(value)
+          return Number.isFinite(parsed) ? parsed : fallback
+        }
+        const optionalNumber = (value: string) => value ? number(value) : undefined
+        const bool = (value: string, fallback = true) =>
+          value ? value.trim().toLowerCase() === 'true' : fallback
+        const key = (value: string) => value.trim().toLowerCase()
+
+        const accountByName = new Map(accounts.map((account) => [key(account.name), account]))
+        for (const row of result.fullDataRows.filter((item) => item.recordType === 'ACCOUNT')) {
+          const name = get(row.values, 'name')
+          if (!name || accountByName.has(key(name))) continue
+          const request: FinancialAccountRequest = {
+            name,
+            type: get(row.values, 'type') as FinancialAccountRequest['type'],
+            institution: get(row.values, 'institution') || undefined,
+            currency: get(row.values, 'currency') || 'GBP',
+            openingBalance: number(get(row.values, 'opening balance')),
+            overdraftLimit: number(get(row.values, 'overdraft limit')),
+            active: bool(get(row.values, 'active')),
+          }
+          const created = await createAccount(request)
+          accountByName.set(key(created.name), created)
+        }
+
+        const methodByName = new Map(paymentMethods.map((method) => [key(method.name), method]))
+        for (const row of result.fullDataRows.filter((item) => item.recordType === 'PAYMENT_METHOD')) {
+          const name = get(row.values, 'name')
+          if (!name || methodByName.has(key(name))) continue
+          const request: PaymentMethodRequest = {
+            name,
+            type: get(row.values, 'type') as PaymentMethodRequest['type'],
+            issuer: get(row.values, 'issuer') || undefined,
+            active: bool(get(row.values, 'active')),
+            statementClosingDay: optionalNumber(get(row.values, 'statement closing day')),
+            paymentDay: optionalNumber(get(row.values, 'payment day')),
+          }
+          const created = await createPaymentMethod(request)
+          methodByName.set(key(created.name), created)
+        }
+
+        let fixedPaymentsImported = 0
+        for (const row of result.fullDataRows.filter((item) => item.recordType === 'FIXED_PAYMENT')) {
+          const account = accountByName.get(key(get(row.values, 'account')))
+          if (!account) continue
+          const method = methodByName.get(key(get(row.values, 'payment method')))
+          await createRecurringTransaction({
+            type: get(row.values, 'type') as 'INCOME' | 'EXPENSE',
+            category: get(row.values, 'category'),
+            description: get(row.values, 'description'),
+            amount: number(get(row.values, 'amount')),
+            startDate: get(row.values, 'start date'),
+            endDate: get(row.values, 'end date') || undefined,
+            dayOfMonth: optionalNumber(get(row.values, 'day of month')),
+            accountId: account.id,
+            paymentMethodId: method?.id ?? null,
+          })
+          fixedPaymentsImported++
+        }
+
+        let installmentsImported = 0
+        for (const row of result.fullDataRows.filter((item) => item.recordType === 'INSTALLMENT_PLAN')) {
+          const account = accountByName.get(key(get(row.values, 'account')))
+          if (!account) continue
+          const method = methodByName.get(key(get(row.values, 'payment method')))
+          await createInstallmentPlan({
+            totalInstallments: number(get(row.values, 'total installments')),
+            installmentValue: number(get(row.values, 'installment value')),
+            category: get(row.values, 'category'),
+            description: get(row.values, 'description')
+              .replace(/\s*\(Installment\s+\d+\/\d+\)\s*$/i, '')
+              .trim(),
+            startDate: get(row.values, 'first date'),
+            accountId: account.id,
+            paymentMethodId: method?.id ?? null,
+          })
+          installmentsImported++
+        }
+
+        const standaloneTransactions = result.rows.filter(
+          (row) => !row.installmentPlanId && !row.fixedPaymentId,
+        )
+        const transactionOutcome = standaloneTransactions.length > 0
+          ? await importTransactions(
+              standaloneTransactions.map((row) => ({
+                line: row.line,
+                date: row.date,
+                type: row.type,
+                category: row.category,
+                description: row.description,
+                amount: row.amount,
+                paymentMethodName: row.paymentMethodName || undefined,
+                accountName: row.accountName || undefined,
+                paymentDate: row.paymentDate,
+                status: row.status,
+              })),
+              null,
+            )
+          : { imported: 0, failed: 0, errors: [] }
+
+        ToastService.success({
+          title: 'Data imported',
+          description: `${accountByName.size} accounts available, ${methodByName.size} cards/payment methods available, ${installmentsImported} installment plans, ${fixedPaymentsImported} fixed payments and ${transactionOutcome.imported} standalone transactions imported.`,
+          dedupeKey: 'csv-full-import-done',
+        })
+        onImported()
+        reset()
+        onClose()
+        return
+      }
+
       const outcome = await importTransactions(
         result.rows.map((r) => ({
           line: r.line,
@@ -157,6 +288,9 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
           description: r.description,
           amount: r.amount,
           paymentMethodName: r.paymentMethodName || undefined,
+          accountName: r.accountName || undefined,
+          paymentDate: r.paymentDate,
+          status: r.status,
         })),
         accountId,
       )
@@ -185,6 +319,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   }
 
   const rows = result?.rows ?? []
+  const fullDataRows = result?.fullDataRows ?? []
+  const importCount = fullDataRows.length > 0 ? fullDataRows.length : rows.length
   const errors = result?.errors ?? []
   const previewRows = rows.slice(0, 8)
 
@@ -196,8 +332,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       header={
         <ModalHeader
           icon={Upload}
-          title="Import transactions"
-          caption="Upload a CSV file to add transactions in bulk"
+          title="Import data"
+          caption="Restore a full data export or import transactions in bulk"
           accent="blue"
           onClose={handleClose}
         />
@@ -213,9 +349,9 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             onClick={runImport}
             isLoading={importing}
             loadingText="Importing…"
-            isDisabled={!result || rows.length === 0 || importing}
+            isDisabled={!result || importCount === 0 || importing}
           >
-            Import {rows.length > 0 ? `${rows.length} row${rows.length === 1 ? '' : 's'}` : ''}
+            Import {importCount > 0 ? `${importCount} row${importCount === 1 ? '' : 's'}` : ''}
           </Button>
         </HStack>
       }
@@ -233,8 +369,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             ))}
           </Select>
           <Text fontSize="xs" color={subColor} mt={1}>
-            Leave empty to import without an account. You can associate these transactions
-            to an account afterwards.
+            Leave empty to match each row by the Account column. Unmatched or blank account
+            names are imported without an account.
           </Text>
         </FormControl>
 

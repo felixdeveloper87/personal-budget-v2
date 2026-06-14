@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
 import { ModalHeader, PremiumModal } from '../ui'
+import ImportCsvModal from '../transactions/ImportCsvModal'
 import { deleteAllUserData } from '../../api'
 import { exportAllData } from '../../utils/export'
 import { ToastService } from '../../services/toast'
@@ -35,6 +36,7 @@ import {
   Shield,
   Sun,
   Trash2,
+  Upload,
 } from '../ui/icons'
 
 interface UserSettingsModalProps {
@@ -56,6 +58,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const [deleting, setDeleting] = useState(false)
   const [confirmText, setConfirmText] = useState('')
   const deleteDialog = useDisclosure()
+  const importDialog = useDisclosure()
   const cancelDeleteRef = useRef<HTMLButtonElement>(null)
 
   const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
@@ -81,7 +84,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       await exportAllData()
       ToastService.success({
         title: 'Export ready',
-        description: 'Transactions, installments and fixed payments downloaded.',
+        description: 'One CSV containing all of your data was downloaded.',
         dedupeKey: 'csv-export-done',
       })
     } catch (err) {
@@ -176,6 +179,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   )
 
   return (
+    <>
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
@@ -376,9 +380,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               overflow="hidden"
             >
               <SettingRow
-                label="Export my data"
-                description="Download transactions, installments and fixed payments as CSV"
-                noBorder
+                label="Export all data"
+                description="Download one CSV containing transactions, accounts, cards, installments, fixed payments and planning data"
               >
                 <Button
                   size="sm"
@@ -390,6 +393,21 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   loadingText="Exporting"
                 >
                   Export
+                </Button>
+              </SettingRow>
+              <SettingRow
+                label="Import data"
+                description="Restore accounts, cards, installments, fixed payments and transactions from the full data CSV"
+                noBorder
+              >
+                <Button
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<Icon as={Upload} boxSize={3.5} />}
+                  borderRadius="lg"
+                  onClick={importDialog.onOpen}
+                >
+                  Import
                 </Button>
               </SettingRow>
             </VStack>
@@ -488,5 +506,11 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
         </AlertDialogOverlay>
       </AlertDialog>
     </PremiumModal>
+    <ImportCsvModal
+      isOpen={importDialog.isOpen}
+      onClose={importDialog.onClose}
+      onImported={() => window.location.reload()}
+    />
+    </>
   )
 }

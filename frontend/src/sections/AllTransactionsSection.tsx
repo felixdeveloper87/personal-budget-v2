@@ -48,7 +48,7 @@ export default function AllTransactionsSection({
       await exportAllData()
       ToastService.success({
         title: 'Export ready',
-        description: 'Transactions, installments and fixed payments downloaded.',
+        description: 'One CSV containing all of your data was downloaded.',
         dedupeKey: 'csv-export-done',
       })
     } catch (err) {

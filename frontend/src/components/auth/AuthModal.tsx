@@ -3,23 +3,15 @@ import {
   Box,
   Button,
   HStack,
-  Icon,
   Skeleton,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { Wallet } from '../ui/icons'
 import { AppCloseButton, PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
+import { LogoIconWallet } from '../layout/header/Logo'
 import LoginForm from './LoginForm'
 
-/**
- * RegisterForm is only loaded when the user actually switches to the
- * "Create account" tab. Keeps the initial bundle for first-paint small —
- * the modal opens with Sign in by default, which is what 95% of returning
- * users want. Saves a few KB and a parse pass on the hot path.
- */
 const RegisterForm = lazy(() => import('./RegisterForm'))
 
 type AuthTab = 'signIn' | 'signUp'
@@ -40,38 +32,31 @@ interface AuthModalProps {
   onClose: () => void
 }
 
+/* Landing v3 palette — always dark */
+const C = {
+  bg: '#070a08',
+  bg2: '#0b100d',
+  panel: 'rgba(18, 26, 21, 0.95)',
+  jade: '#7fe6b3',
+  gold: '#d9b36a',
+  cream: '#efeae0',
+  muted: '#94a398',
+  line: 'rgba(239, 234, 224, 0.1)',
+  lineStrong: 'rgba(239, 234, 224, 0.18)',
+}
+
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [tab, setTab] = useState<AuthTab>('signIn')
-
-  // Theme tokens — resolved once at the top, not inside the JSX tree.
-  // Avoids re-running useColorModeValue inside .map() and prevents a
-  // recompute storm on tab change.
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const headerBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const tabIdleColor = useColorModeValue('gray.500', 'gray.400')
-  const tabActiveColor = useColorModeValue('gray.900', 'gray.50')
-  const tabIndicator = useColorModeValue(
-    'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-    'linear-gradient(90deg, #60a5fa, #a78bfa)',
-  )
-  const logoBg = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
-    'linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%)',
-  )
 
   const activeTab = TABS.find((t) => t.id === tab) ?? TABS[0]
 
   const Header = (
     <Box
-      bg={surfaceBg}
+      bg={C.bg}
       borderBottom="1px solid"
-      borderColor={headerBorder}
+      borderColor={C.line}
       px={{ base: 4, sm: 6 }}
       pt={{
-        // Keep the X close button clear of the iOS Dynamic Island / status
-        // bar with extra breathing room beyond the raw safe-area inset.
         base: 'max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem))',
         sm: 5,
       }}
@@ -80,30 +65,31 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       <HStack justify="space-between" align="center" mb={4} spacing={3}>
         <HStack spacing={3} minW={0}>
           <Box
-            w={9}
-            h={9}
-            borderRadius="lg"
-            bg={logoBg}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            color="white"
             flexShrink={0}
-            boxShadow="0 4px 12px -4px rgba(79, 70, 229, 0.5)"
+            position="relative"
+            p={1.5}
+            bg="rgba(18, 26, 21, 0.8)"
+            border="1px solid"
+            borderColor={C.lineStrong}
+            borderRadius="xl"
+            boxShadow={`0 4px 16px -4px rgba(127, 230, 179, 0.2)`}
+            overflow="hidden"
           >
-            <Icon as={Wallet} boxSize={4} strokeWidth={2.25} />
+            <LogoIconWallet />
           </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
               fontWeight={700}
               fontSize="md"
-              color={titleColor}
+              color={C.cream}
               lineHeight="1.2"
               noOfLines={1}
+              fontFamily="'Instrument Serif', Georgia, serif"
+              fontStyle="italic"
             >
               {BRAND.nameFull}
             </Text>
-            <Text fontSize="xs" color={captionColor} noOfLines={1}>
+            <Text fontSize="xs" color={C.muted} noOfLines={1} fontFamily="'Spline Sans Mono', monospace" letterSpacing="0.08em">
               {activeTab.caption}
             </Text>
           </VStack>
@@ -117,7 +103,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           spacing={0}
           position="relative"
           borderBottom="1px solid"
-          borderColor={headerBorder}
+          borderColor={C.line}
         >
           {TABS.map((t) => {
             const isActive = t.id === tab
@@ -133,13 +119,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 h={10}
                 fontSize="sm"
                 fontWeight={600}
-                color={isActive ? tabActiveColor : tabIdleColor}
+                color={isActive ? C.cream : C.muted}
                 position="relative"
                 borderRadius={0}
                 transition="color 0.18s ease"
-                _hover={{ color: tabActiveColor }}
+                _hover={{ color: C.cream }}
                 _focusVisible={{
-                  boxShadow: 'inset 0 0 0 2px var(--chakra-colors-blue-500)',
+                  boxShadow: `inset 0 0 0 2px ${C.jade}`,
                   outline: 'none',
                 }}
                 sx={
@@ -152,7 +138,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                           right: '18%',
                           bottom: '-1px',
                           height: '2px',
-                          background: tabIndicator,
+                          background: C.jade,
                           borderRadius: '2px',
                         },
                       }
@@ -174,11 +160,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClose={onClose}
       size={{ base: 'full', sm: 'md', md: 'md' }}
       header={Header}
-      contentProps={{ bg: surfaceBg }}
+      contentProps={{ bg: C.bg }}
     >
       <Box
         flex="1"
-        bg={surfaceBg}
+        bg={C.bg}
         px={{ base: 5, sm: 8 }}
         py={{ base: 6, sm: 8 }}
         overflowY="auto"
@@ -200,11 +186,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 function RegisterFormFallback() {
   return (
     <VStack spacing={4} align="stretch">
-      <Skeleton h="68px" borderRadius="md" />
-      <Skeleton h="68px" borderRadius="md" />
-      <Skeleton h="68px" borderRadius="md" />
-      <Skeleton h="68px" borderRadius="md" />
-      <Skeleton h="48px" borderRadius="md" />
+      <Skeleton h="68px" borderRadius="md" startColor="rgba(239,234,224,0.05)" endColor="rgba(239,234,224,0.12)" />
+      <Skeleton h="68px" borderRadius="md" startColor="rgba(239,234,224,0.05)" endColor="rgba(239,234,224,0.12)" />
+      <Skeleton h="68px" borderRadius="md" startColor="rgba(239,234,224,0.05)" endColor="rgba(239,234,224,0.12)" />
+      <Skeleton h="68px" borderRadius="md" startColor="rgba(239,234,224,0.05)" endColor="rgba(239,234,224,0.12)" />
+      <Skeleton h="48px" borderRadius="md" startColor="rgba(239,234,224,0.05)" endColor="rgba(239,234,224,0.12)" />
     </VStack>
   )
 }

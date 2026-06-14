@@ -13,6 +13,7 @@ import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.model.PaymentMethod;
+import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
@@ -151,11 +152,17 @@ public class TransactionService {
 
     @Transactional
     public ImportResultDTO importTransactions(List<ImportTransactionRow> rows, Long accountId, User user) {
-        var account = financialAccountService.getOwnedAccount(accountId, user);
+        var selectedAccount = financialAccountService.getOwnedAccount(accountId, user);
         Map<String, PaymentMethod> methodsByName = new HashMap<>();
         for (PaymentMethod m : paymentMethodService.findEntitiesByUser(user)) {
             if (StringUtils.hasText(m.getName())) {
                 methodsByName.putIfAbsent(m.getName().trim().toLowerCase(), m);
+            }
+        }
+        Map<String, FinancialAccount> accountsByName = new HashMap<>();
+        for (FinancialAccount account : financialAccountService.findEntitiesByUser(user)) {
+            if (StringUtils.hasText(account.getName())) {
+                accountsByName.putIfAbsent(account.getName().trim().toLowerCase(), account);
             }
         }
 
@@ -181,6 +188,10 @@ public class TransactionService {
                 if (StringUtils.hasText(row.getPaymentMethodName())) {
                     paymentMethod = methodsByName.get(row.getPaymentMethodName().trim().toLowerCase());
                 }
+                FinancialAccount account = selectedAccount;
+                if (account == null && StringUtils.hasText(row.getAccountName())) {
+                    account = accountsByName.get(row.getAccountName().trim().toLowerCase());
+                }
 
                 Transaction t = new Transaction();
                 t.setUser(user);
@@ -192,8 +203,14 @@ public class TransactionService {
                 t.setAmount(row.getAmount().abs());
                 t.setPaymentMethod(paymentMethod);
                 t.setAccount(account);
-                t.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
-                prepareDates(t, paymentMethod);
+                t.setStatus(row.getStatus() != null
+                        ? row.getStatus()
+                        : com.example.budget.model.TransactionStatus.CLEARED);
+                if (row.getPaymentDate() != null) {
+                    t.setPaymentDate(row.getPaymentDate());
+                } else {
+                    prepareDates(t, paymentMethod);
+                }
 
                 toSave.add(t);
             } catch (Exception e) {

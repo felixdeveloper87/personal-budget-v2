@@ -29,6 +29,7 @@ import {
   CategoryBudget,
   CategoryBudgetRequest,
   CashFlowForecast,
+  TransactionStatus,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -208,6 +209,9 @@ export interface ImportTransactionRow {
   description: string
   amount: number
   paymentMethodName?: string
+  accountName?: string
+  paymentDate?: string
+  status?: TransactionStatus
 }
 
 export interface ImportResult {
@@ -264,6 +268,11 @@ export async function listAccounts(): Promise<FinancialAccount[]> {
 // Permanently delete all of the current user's financial data → DELETE /user/data
 export async function deleteAllUserData(): Promise<void> {
   await api.delete('/user/data')
+}
+
+export async function exportAllUserData(): Promise<Blob> {
+  const { data } = await api.get<Blob>('/user/data/export', { responseType: 'blob' })
+  return data
 }
 
 export async function getAccountSummary(): Promise<AccountSummary> {

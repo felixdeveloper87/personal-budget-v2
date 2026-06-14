@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.TransactionType;
+import com.example.budget.model.TransactionStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,6 +31,15 @@ public class ImportTransactionRow {
 
     /** Free-text payment method name; matched case-insensitively against the user's methods. */
     private String paymentMethodName;
+
+    /** Free-text account name; used when the request does not select one account for every row. */
+    private String accountName;
+
+    /** Optional exact cash-flow date from a full data export. */
+    private LocalDate paymentDate;
+
+    /** Optional status from a full data export. */
+    private TransactionStatus status;
 
     public ImportTransactionRow() {
     }
@@ -88,5 +98,29 @@ public class ImportTransactionRow {
 
     public void setPaymentMethodName(String paymentMethodName) {
         this.paymentMethodName = paymentMethodName;
+    }
+
+    public String getAccountName() {
+        return accountName;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    public LocalDate getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDate paymentDate) {
+        this.paymentDate = paymentDate;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 }

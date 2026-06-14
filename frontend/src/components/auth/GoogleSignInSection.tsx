@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, HStack, Spinner, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthContext'
 import { ToastService } from '../../services/toast'
@@ -45,15 +45,12 @@ export default function GoogleSignInSection() {
   const [busy, setBusy] = useState(false)
   const [buttonHost, setButtonHost] = useState<HTMLDivElement | null>(null)
 
-  const btnBg = useColorModeValue('white', 'rgba(255,255,255,0.06)')
-  const btnBorder = useColorModeValue('rgba(203,213,225,0.8)', 'rgba(255,255,255,0.1)')
-  const btnText = useColorModeValue('gray.700', 'gray.100')
-  const btnShadow = useColorModeValue(
-    '0 1px 3px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9)',
-    '0 1px 4px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04)'
-  )
-  const dividerColor = useColorModeValue('gray.400', 'gray.500')
-  const muted = useColorModeValue('gray.500', 'gray.400')
+  const btnBg = 'rgba(18, 26, 21, 0.6)'
+  const btnBorder = 'rgba(239, 234, 224, 0.18)'
+  const btnText = '#efeae0'
+  const btnShadow = '0 1px 4px rgba(0,0,0,0.25)'
+  const dividerColor = '#7fe6b3'
+  const muted = '#94a398'
 
   const onCredential = useCallback(
     async (credential: string | undefined) => {

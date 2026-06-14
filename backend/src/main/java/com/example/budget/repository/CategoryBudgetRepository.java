@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CategoryBudgetRepository extends JpaRepository<CategoryBudget, Long> {
+    List<CategoryBudget> findByUserOrderByYearAscMonthAscCategoryAsc(User user);
+
     List<CategoryBudget> findByUserAndYearAndMonthOrderByCategoryAsc(User user, int year, int month);
     Optional<CategoryBudget> findByUserAndCategoryIgnoreCaseAndYearAndMonth(
             User user, String category, int year, int month);

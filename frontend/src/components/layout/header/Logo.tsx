@@ -162,7 +162,7 @@ function LogoIconGeometric() {
 }
 
 // Opção 3: Carteira com moeda entrando (Estilo Financeiro / Ativo agora)
-function LogoIconWallet() {
+export function LogoIconWallet() {
   const primaryColor = useColorModeValue('#2563eb', '#3b82f6')
   const secondaryColor = useColorModeValue('#7c3aed', '#8b5cf6')
   const accentColor = useColorModeValue('#db2777', '#ec4899')
