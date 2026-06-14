@@ -1,0 +1,96 @@
+/**
+ * Landing v3 — "Editorial · guilloché" edition.
+ * Deep ink-green + luminous jade + giant editorial serif.
+ * All copy is English. Ported from docs/personal-budget-landing-v3-editorial.md.
+ */
+
+export const NAV_LINKS = [
+  { id: 'product', label: 'Product' },
+  { id: 'manifesto', label: 'Manifesto' },
+  { id: 'voices', label: 'Voices' },
+] as const
+
+export const HERO = {
+  /** Massive serif headline. The accent word renders in jade italic. */
+  line1: 'Clarity',
+  line2is: 'is',
+  line2accent: 'wealth.',
+  subtitle:
+    'Personal Budget turns a thousand small money decisions into one calm, honest picture — every transaction, category and trend, kept sharp.',
+  primaryCta: 'Start free',
+  secondaryCta: 'See it move',
+  cursorCta: 'Begin',
+} as const
+
+/** Ticker stats — marquee that skews with scroll velocity. */
+export const TICKER = [
+  '£0 forever',
+  '60s to set up',
+  '100% exportable',
+  '0 trackers',
+  '⌘K search',
+  '∞ categories',
+  'Dark mode that ships',
+  'Private by default',
+] as const
+
+/** Scroll-scrubbed mockup — small data that fills its panels. */
+export const MOCKUP = {
+  balanceLabel: 'Available balance',
+  balance: '£2,287.20',
+  delta: '+£540 this week',
+  /** Live rows that arrive inside the mockup. */
+  feed: [
+    { label: 'Salary · April', amount: '+£3,200', tone: 'jade' as const },
+    { label: 'Groceries · Continente', amount: '−£42.80', tone: 'muted' as const },
+    { label: 'Invoice · Side project', amount: '+£540.00', tone: 'jade' as const },
+    { label: 'Spotify · Family', amount: '−£15.99', tone: 'muted' as const },
+  ],
+  budgets: [
+    { label: 'Essentials', value: 0.62 },
+    { label: 'Lifestyle', value: 0.41 },
+    { label: 'Savings', value: 0.8 },
+  ],
+} as const
+
+/** Bento grid — six cells with functional micro-demos. */
+export const BENTO = {
+  searchQuery: 'coffee',
+  searchResults: ['Coffee · Starbucks', 'Coffee beans · Lidl', 'Coffee machine · Amazon'],
+  searchMeta: '3 results · 41ms',
+  recurringMonths: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'],
+  exportFormats: ['.csv', '.pdf', '.xlsx'],
+} as const
+
+/**
+ * Manifesto — scroll-lit text. Words wrapped in *asterisks* become keywords
+ * that ignite in jade italic as the section scrolls.
+ */
+export const MANIFESTO =
+  'Money is not the goal. *Clarity* is. ' +
+  'When you can *see* every flow — what comes in, what goes out, what stays — ' +
+  'anxiety quietly becomes *arithmetic*. ' +
+  'Personal Budget turns a thousand small decisions into one calm, honest *picture*. ' +
+  'No more spreadsheets. No more guilt. Just *clarity*, kept sharp.'
+
+export const TESTIMONIALS = [
+  { quote: 'I finally see my month before it happens.', name: 'Marina', role: 'Designer' },
+  { quote: 'It reads like a magazine and works like a spreadsheet.', name: 'Tomás', role: 'Engineer' },
+  { quote: 'The first budgeting app I did not abandon in a week.', name: 'Aisha', role: 'Founder' },
+  { quote: 'Calm, fast, and it never tries to sell me anything.', name: 'Lukas', role: 'Teacher' },
+  { quote: 'Logging a transaction takes two taps. The rest is just there.', name: 'Sofia', role: 'Nurse' },
+  { quote: 'My spending finally has a shape I can read.', name: 'Daniel', role: 'Writer' },
+] as const
+
+export const CTA = {
+  eyebrow: 'You vs. the spreadsheet',
+  title: 'Open the dashboard you’ve been meaning to build.',
+  subtitle: 'Two minutes from now, your first month is logged and the picture is already telling you something.',
+  button: 'Start free',
+} as const
+
+export const FOOTER = {
+  wordmark: 'PERSONAL BUDGET',
+  tagline: 'Clarity for your money.',
+  note: 'No ads · No trackers · No card on file',
+} as const

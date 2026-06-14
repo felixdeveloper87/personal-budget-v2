@@ -14,7 +14,7 @@ import FixedPaymentsPage from './pages/FixedPaymentsPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
 import { AuthModal, Layout } from './components'
-import LandingPage from './pages/LandingPage'
+import LandingV3 from './pages/landing-v3/LandingV3'
 import { useState, useEffect } from 'react'
 import type { AppPage } from './components/layout/header/navigation.config'
 
@@ -109,7 +109,7 @@ function AppContent() {
   if (!showAuth) {
     return (
       <>
-        <LandingPage onGetStarted={() => setShowAuth(true)} />
+        <LandingV3 onGetStarted={() => setShowAuth(true)} />
         <AuthModal 
           isOpen={showAuth} 
           onClose={() => setShowAuth(false)} 
@@ -121,7 +121,7 @@ function AppContent() {
   // Se clicou em "Começar", mostrar modal de login/cadastro
   return (
     <>
-      <LandingPage onGetStarted={() => setShowAuth(true)} />
+      <LandingV3 onGetStarted={() => setShowAuth(true)} />
       <AuthModal 
         isOpen={showAuth} 
         onClose={() => setShowAuth(false)} 
