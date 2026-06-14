@@ -29,6 +29,7 @@ import {
   listAccounts,
 } from '../../api'
 import { ToastService } from '../../services/toast'
+import { useEditorialPalette } from '../../editorial'
 
 export interface AssignableItem {
   id: number
@@ -63,6 +64,7 @@ export default function AccountAssignmentWizard({
   items,
   onAssigned,
 }: AccountAssignmentWizardProps) {
+  const ed = useEditorialPalette()
   const [queue, setQueue] = useState<AssignableItem[]>([])
   const [index, setIndex] = useState(0)
   const [assignedCount, setAssignedCount] = useState(0)
@@ -71,8 +73,6 @@ export default function AccountAssignmentWizard({
   const [loadingAccounts, setLoadingAccounts] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
   const cardBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
   const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
@@ -169,9 +169,8 @@ export default function AccountAssignmentWizard({
           }
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6 }} overflowY="auto">
+      <Box flex="1" bg={ed.bg} p={{ base: 4, sm: 6 }} overflowY="auto">
         {noCurrentAccounts ? (
           <Alert status="warning" borderRadius="xl" alignItems="flex-start">
             <AlertIcon mt={1} />

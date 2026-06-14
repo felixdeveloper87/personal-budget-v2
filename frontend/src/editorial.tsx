@@ -149,6 +149,12 @@ export function useEd(): EditorialTokens | null {
   return active ? editorialPalette(colorMode) : null
 }
 
+/** Returns the V3 editorial palette regardless of provider scope. */
+export function useEditorialPalette(): EditorialTokens {
+  const { colorMode } = useColorMode()
+  return editorialPalette(colorMode)
+}
+
 /* ── Guilloché engraving ──────────────────────────────────────────────────── */
 /**
  * Static code-generated guilloché — concentric counter-rotated ellipses,

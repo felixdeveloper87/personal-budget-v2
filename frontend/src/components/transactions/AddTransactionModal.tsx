@@ -3,6 +3,7 @@ import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
 import { PremiumModal } from '../ui'
 import TransactionModalHeader from './TransactionModalHeader'
+import { useEditorialPalette } from '../../editorial'
 
 interface AddTransactionModalProps {
   isOpen: boolean
@@ -21,8 +22,7 @@ export default function AddTransactionModal({
   onTransactionCreated,
   onRefresh,
 }: AddTransactionModalProps) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const ed = useEditorialPalette()
 
   const handleTransactionCreated = () => {
     onTransactionCreated()
@@ -37,9 +37,8 @@ export default function AddTransactionModal({
       header={
         <TransactionModalHeader type={type} onClose={onClose} />
       }
-      contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" bg={ed.bg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         <TransactionForm
           transactions={transactions}
           onCreated={handleTransactionCreated}

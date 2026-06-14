@@ -112,13 +112,58 @@ const theme = extendTheme({
     Modal: {
       baseStyle: (props: any) => ({
         dialog: {
-          bg: props.colorMode === 'dark' ? GRADIENTS.cardDark : GRADIENTS.cardLight,
-          borderRadius: '2xl',
-          border: props.colorMode === 'dark' ? '1px solid' : 'none',
-          borderColor: props.colorMode === 'dark' ? 'gray.800' : 'transparent',
+          bg: props.colorMode === 'dark' ? '#0e0f0e' : '#fffdf7',
+          color: props.colorMode === 'dark' ? '#efeae0' : '#16241c',
+          borderRadius: '18px',
+          border: '1px solid',
+          borderColor: props.colorMode === 'dark'
+            ? 'rgba(239, 234, 224, 0.18)'
+            : 'rgba(20, 36, 28, 0.20)',
+          boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
+          overflow: 'hidden',
         },
         overlay: {
-          bg: props.colorMode === 'dark' ? 'rgba(0, 0, 0, 0.9)' : 'rgba(0, 0, 0, 0.6)',
+          bg: 'rgba(3, 8, 5, 0.74)',
+          backdropFilter: 'blur(18px) saturate(115%)',
+        },
+        header: {
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontWeight: 400,
+        },
+        footer: {
+          borderTop: '1px solid',
+          borderColor: props.colorMode === 'dark'
+            ? 'rgba(239, 234, 224, 0.10)'
+            : 'rgba(20, 36, 28, 0.12)',
+        },
+      }),
+    },
+    AlertDialog: {
+      baseStyle: (props: any) => ({
+        dialog: {
+          bg: props.colorMode === 'dark' ? '#0e0f0e' : '#fffdf7',
+          color: props.colorMode === 'dark' ? '#efeae0' : '#16241c',
+          borderRadius: '18px',
+          border: '1px solid',
+          borderColor: props.colorMode === 'dark'
+            ? 'rgba(239, 234, 224, 0.18)'
+            : 'rgba(20, 36, 28, 0.20)',
+          boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
+          overflow: 'hidden',
+        },
+        overlay: {
+          bg: 'rgba(3, 8, 5, 0.74)',
+          backdropFilter: 'blur(18px) saturate(115%)',
+        },
+        header: {
+          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontWeight: 400,
+        },
+        footer: {
+          borderTop: '1px solid',
+          borderColor: props.colorMode === 'dark'
+            ? 'rgba(239, 234, 224, 0.10)'
+            : 'rgba(20, 36, 28, 0.12)',
         },
       }),
     },

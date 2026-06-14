@@ -21,7 +21,7 @@ import { InstallmentPlan } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
 import { getInstallmentPlanTitle } from '../../utils/installments'
-
+import { useEd } from '../../editorial'
 interface InstallmentPlansModalProps {
   isOpen: boolean
   onClose: () => void
@@ -46,17 +46,29 @@ export default function InstallmentPlansModal({
     if (!isOpen) setHideActiveList(false)
   }, [isOpen])
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
-  const panelBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
-  const panelBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const iconBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
-  const iconFg = useColorModeValue('teal.700', 'teal.300')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const sectionLabelColor = useColorModeValue('gray.500', 'gray.400')
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const statBg = useColorModeValue('white', 'whiteAlpha.50')
-  const statBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed ? ed.solid : surfaceBgBase
+  const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const bodyBg = ed?.bg ?? fallbackBodyBg
+  const panelBgBase = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const panelBg = ed ? ed.panelRaised : panelBgBase
+  const panelBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const panelBorder = ed ? ed.line : panelBorderBase
+  const iconBgBase = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const iconBg = ed ? ed.jadeSoft : iconBgBase
+  const iconFgBase = useColorModeValue('teal.700', 'teal.300')
+  const iconFg = ed ? ed.jade : iconFgBase
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+  const sectionLabelColorBase = useColorModeValue('gray.500', 'gray.400')
+  const sectionLabelColor = ed ? ed.muted : sectionLabelColorBase
+  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dividerColor = ed ? ed.line : dividerColorBase
+  const statBgBase = useColorModeValue('white', 'whiteAlpha.50')
+  const statBg = ed ? ed.panelRaised : statBgBase
+  const statBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const statBorder = ed ? ed.line : statBorderBase
   const heroBg = useColorModeValue(
     'linear-gradient(135deg, #071a2c 0%, #0f766e 48%, #22c55e 100%)',
     'linear-gradient(135deg, #07111f 0%, #0f766e 52%, #16a34a 100%)',
@@ -367,8 +379,11 @@ function InstallmentStat({
   titleColor,
   captionColor,
 }: InstallmentStatProps) {
-  const chipBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
-  const chipFg = useColorModeValue('teal.700', 'teal.300')
+  const ed = useEd()
+  const chipBgBase = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const chipBg = ed ? ed.jadeSoft : chipBgBase
+  const chipFgBase = useColorModeValue('teal.700', 'teal.300')
+  const chipFg = ed ? ed.jade : chipFgBase
 
   return (
     <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="xl" p={{ base: 3, sm: 4 }}>
@@ -435,9 +450,13 @@ function PlansSection({
   headerActions,
 }: PlansSectionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
-  const chevronMuted = useColorModeValue('gray.400', 'gray.500')
-  const titleRowColor = useColorModeValue('gray.900', 'gray.50')
-  const emptyMessageBg = useColorModeValue('white', 'whiteAlpha.50')
+  const ed = useEd()
+  const chevronMutedBase = useColorModeValue('gray.400', 'gray.500')
+  const chevronMuted = ed ? ed.muted : chevronMutedBase
+  const titleRowColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleRowColor = ed ? ed.cream : titleRowColorBase
+  const emptyMessageBgBase = useColorModeValue('white', 'whiteAlpha.50')
+  const emptyMessageBg = ed ? ed.panelRaised : emptyMessageBgBase
   const panelId = `installment-section-${label.toLowerCase().replace(/\s+/g, '-')}`
 
   const isExpanded = collapsible ? expanded : true

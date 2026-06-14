@@ -20,6 +20,7 @@ import CategorySelector from './TransactionForm/CategorySelector'
 import DescriptionInput from './TransactionForm/DescriptionInput'
 import PaymentMethodSelector from './TransactionForm/PaymentMethodSelector'
 import AccountSelector from './TransactionForm/AccountSelector'
+import { useEditorialPalette } from '../../editorial'
 
 interface EditTransactionModalProps {
   isOpen: boolean
@@ -35,9 +36,7 @@ export default function EditTransactionModal({
   onTransactionUpdated,
 }: EditTransactionModalProps) {
   const { user } = useAuth()
-
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const ed = useEditorialPalette()
 
   const type = transaction?.type || 'EXPENSE'
   const isIncome = type === 'INCOME'
@@ -165,9 +164,8 @@ export default function EditTransactionModal({
           accent={isIncome ? 'green' : 'red'}
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
+      <Box flex="1" bg={ed.bg} p={{ base: 4, sm: 6, md: 8 }} overflowY="auto">
         <VStack spacing={6} align="stretch" w="full">
           <DateSelector date={date} onChange={setDate} />
           <AccountSelector

@@ -41,6 +41,7 @@ import {
 } from '../../api'
 import { ToastService } from '../../services/toast'
 import { getInstallmentPlanTitle } from '../../utils/installments'
+import { useEd } from '../../editorial'
 
 interface InstallmentPlanCardProps {
   plan: InstallmentPlan
@@ -90,6 +91,7 @@ export default function InstallmentPlanCard({
   onDeleted,
   variant = 'active',
 }: InstallmentPlanCardProps) {
+  const ed = useEd()
   const [isExpanded, setIsExpanded] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
@@ -107,48 +109,89 @@ export default function InstallmentPlanCard({
   const isPast = variant === 'past'
 
   // ---- All useColorModeValue calls resolved once at the top ----
-  const cardBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
-  const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
+  const cardBgBase = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const cardBg = ed ? ed.panelRaised : cardBgBase
 
-  const accentBgActive = useColorModeValue('blue.50', 'rgba(37,99,235,0.16)')
-  const accentFgActive = useColorModeValue('blue.700', 'blue.300')
-  const accentBgPast = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const accentFgPast = useColorModeValue('gray.600', 'gray.400')
+  const cardBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const cardBorder = ed ? ed.line : cardBorderBase
+
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+
+  const captionColorBase = useColorModeValue('gray.500', 'gray.400')
+  const captionColor = ed ? ed.muted : captionColorBase
+
+  const accentBgActiveBase = useColorModeValue('blue.50', 'rgba(37,99,235,0.16)')
+  const accentBgActive = ed ? ed.jadeSoft : accentBgActiveBase
+
+  const accentFgActiveBase = useColorModeValue('blue.700', 'blue.300')
+  const accentFgActive = ed ? ed.jade : accentFgActiveBase
+
+  const accentBgPastBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const accentBgPast = ed ? ed.controlBg : accentBgPastBase
+
+  const accentFgPastBase = useColorModeValue('gray.600', 'gray.400')
+  const accentFgPast = ed ? ed.muted : accentFgPastBase
 
   const accentBg = isPast ? accentBgPast : accentBgActive
   const accentFg = isPast ? accentFgPast : accentFgActive
   const valueColor = isPast ? titleColor : accentFgActive
 
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const collapseBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dividerColor = ed ? ed.line : dividerColorBase
 
-  const completedBadgeBg = useColorModeValue('rgba(16,185,129,0.10)', 'rgba(16,185,129,0.16)')
-  const completedBadgeFg = useColorModeValue('green.700', 'green.300')
+  const collapseBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const collapseBg = ed ? ed.panelRaised : collapseBgBase
+
+  const completedBadgeBgBase = useColorModeValue('rgba(16,185,129,0.10)', 'rgba(16,185,129,0.16)')
+  const completedBadgeBg = ed ? ed.jadeSoft : completedBadgeBgBase
+
+  const completedBadgeFgBase = useColorModeValue('green.700', 'green.300')
+  const completedBadgeFg = ed ? ed.jade : completedBadgeFgBase
+
+  const rowTokensBasePaidBg = useColorModeValue('rgba(16,185,129,0.08)', 'rgba(16,185,129,0.14)')
+  const rowTokensBasePaidBorder = useColorModeValue('rgba(16,185,129,0.25)', 'rgba(16,185,129,0.35)')
+  const rowTokensBasePaidColor = useColorModeValue('green.700', 'green.300')
+  const rowTokensBasePendingBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const rowTokensBasePendingBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const rowTokensBasePendingColor = useColorModeValue('gray.600', 'gray.400')
+  const rowTokensBaseMetaColor = useColorModeValue('gray.500', 'gray.500')
+  const rowTokensBaseTextColor = useColorModeValue('gray.900', 'gray.100')
 
   const rowTokens: InstallmentRowTokens = {
-    paidBg: useColorModeValue('rgba(16,185,129,0.08)', 'rgba(16,185,129,0.14)'),
-    paidBorder: useColorModeValue('rgba(16,185,129,0.25)', 'rgba(16,185,129,0.35)'),
-    paidColor: useColorModeValue('green.700', 'green.300'),
-    pendingBg: useColorModeValue('gray.50', 'whiteAlpha.50'),
-    pendingBorder: useColorModeValue('blackAlpha.100', 'whiteAlpha.100'),
-    pendingColor: useColorModeValue('gray.600', 'gray.400'),
-    metaColor: useColorModeValue('gray.500', 'gray.500'),
-    textColor: useColorModeValue('gray.900', 'gray.100'),
+    paidBg: ed ? ed.jadeSoft : rowTokensBasePaidBg,
+    paidBorder: ed ? ed.line : rowTokensBasePaidBorder,
+    paidColor: ed ? ed.jade : rowTokensBasePaidColor,
+    pendingBg: ed ? ed.controlBg : rowTokensBasePendingBg,
+    pendingBorder: ed ? ed.line : rowTokensBasePendingBorder,
+    pendingColor: ed ? ed.muted : rowTokensBasePendingColor,
+    metaColor: ed ? ed.muted : rowTokensBaseMetaColor,
+    textColor: ed ? ed.cream : rowTokensBaseTextColor,
   }
 
-  const cardHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const cardHoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const cardHoverBorder = ed ? ed.lineStrong : cardHoverBorderBase
+
   const deleteHoverBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
 
   // Dialog tokens
-  const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const fallbackDialogBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const dialogBg = ed?.solid ?? fallbackDialogBg
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const warningChipFg = useColorModeValue('red.600', 'red.300')
-  const activeStripe = useColorModeValue('blue.600', 'blue.400')
-  const progressBar = useColorModeValue('blue.600', 'blue.400')
-  const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const warningChipFgBase = useColorModeValue('red.600', 'red.300')
+  const warningChipFg = ed ? ed.red : warningChipFgBase
+
+  const activeStripeBase = useColorModeValue('blue.600', 'blue.400')
+  const activeStripe = ed ? ed.jade : activeStripeBase
+
+  const progressBarBase = useColorModeValue('blue.600', 'blue.400')
+  const progressBar = ed ? ed.jade : progressBarBase
+
+  const metaBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const metaBg = ed ? ed.panelRaised : metaBgBase
+
+  const metaBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const metaBorder = ed ? ed.line : metaBorderBase
 
   useEffect(() => {
     setDraftInstallmentValue(String(plan.installmentValue))
@@ -365,7 +408,13 @@ export default function InstallmentPlanCard({
                 <Text fontSize="xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Per installment
                 </Text>
-                <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={valueColor} lineHeight="1">
+                <Text
+                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontWeight={ed ? 400 : 800}
+                  color={valueColor}
+                  lineHeight="1"
+                >
                   £{plan.installmentValue.toFixed(2)}
                 </Text>
               </VStack>
@@ -373,7 +422,13 @@ export default function InstallmentPlanCard({
                 <Text fontSize="xs" color={captionColor} fontWeight={600} textTransform="uppercase" letterSpacing="0.04em">
                   Total
                 </Text>
-                <Text fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color={titleColor} lineHeight="1">
+                <Text
+                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  fontSize={{ base: 'md', md: 'lg' }}
+                  fontWeight={ed ? 400 : 700}
+                  color={titleColor}
+                  lineHeight="1"
+                >
                   £{plan.totalAmount.toFixed(2)}
                 </Text>
               </VStack>
@@ -707,4 +762,3 @@ export default function InstallmentPlanCard({
     </>
   )
 }
-

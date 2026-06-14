@@ -9,8 +9,10 @@ import { useAuth } from '../../contexts/AuthContext'
 import { SearchModalProps } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import { Search } from '../ui/icons'
+import { useEd } from '../../editorial'
 
 export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalProps) {
+  const ed = useEd()
   const { user } = useAuth()
   const {
     filters,
@@ -23,7 +25,8 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
     getAvailableCategories,
   } = useSearchFilters(isOpen)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed?.solid ?? fallbackSurfaceBg
 
   const hasFilters = useMemo(
     () =>
@@ -67,13 +70,12 @@ export default function SearchModal({ isOpen, onClose, onSearch }: SearchModalPr
           />
         }
         contentProps={{
-          bg: surfaceBg,
           w: { base: 'calc(100% - 24px)', sm: 'auto' },
           h: { base: 'auto', sm: 'auto' },
           maxH: { base: 'calc(100dvh - 24px)', sm: 'calc(100dvh - 48px)' },
           mx: { base: 3, sm: 0 },
           my: { base: 3, sm: 0 },
-          borderRadius: { base: '2xl', md: '3xl' },
+          borderRadius: '18px',
         }}
       >
         <Box

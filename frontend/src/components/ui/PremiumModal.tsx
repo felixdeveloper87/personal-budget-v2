@@ -9,13 +9,13 @@ import {
 } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
+import { useEd } from '../../editorial'
 import { safariStyles, getResponsiveStyles } from './ui'
 
 export interface PremiumModalProps extends Omit<ModalProps, 'children'> {
     children: ReactNode
     header?: ReactNode
     footer?: ReactNode
-    showCloseButton?: boolean
     contentProps?: any
 }
 
@@ -27,14 +27,18 @@ export default function PremiumModal({
     children,
     header,
     footer,
-    showCloseButton = true,
     contentProps,
     ...props
 }: PremiumModalProps) {
+    const ed = useEd()
     const responsiveStyles = getResponsiveStyles()
-    const { sx: contentSx, ...restContentProps } = contentProps ?? {}
+    const {
+        sx: contentSx,
+        bg: requestedBg,
+        background: requestedBackground,
+        ...restContentProps
+    } = contentProps ?? {}
 
-    // Premium visual styles
     const overlayBg = useColorModeValue('rgba(0, 0, 0, 0.2)', 'rgba(0, 0, 0, 0.6)')
     const contentBg = useColorModeValue('rgba(255, 255, 255, 0.95)', 'rgba(20, 20, 20, 0.95)')
     const borderColor = useColorModeValue('rgba(255, 255, 255, 0.4)', 'rgba(255, 255, 255, 0.08)')
@@ -42,6 +46,17 @@ export default function PremiumModal({
         '0 20px 50px -12px rgba(0, 0, 0, 0.25)',
         '0 20px 50px -12px rgba(0, 0, 0, 0.5)'
     )
+    const footerBorder = useColorModeValue('gray.100', 'whiteAlpha.100')
+    const resolvedOverlayBg = ed
+        ? 'rgba(3, 8, 5, 0.74)'
+        : overlayBg
+    const resolvedContentBg = ed
+        ? ed.solid
+        : requestedBg ?? requestedBackground ?? contentBg
+    const resolvedBorder = ed ? ed.lineStrong : borderColor
+    const resolvedShadow = ed
+        ? '0 32px 90px -28px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(127, 230, 179, 0.03)'
+        : shadow
 
     return (
         <Modal
@@ -54,8 +69,8 @@ export default function PremiumModal({
             {...props}
         >
             <ModalOverlay
-                bg={overlayBg}
-                backdropFilter="blur(16px)"
+                bg={resolvedOverlayBg}
+                backdropFilter="blur(18px) saturate(115%)"
                 transition="all 0.3s ease-in-out"
             />
 
@@ -64,12 +79,14 @@ export default function PremiumModal({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-                bg={contentBg}
-                backdropFilter="blur(20px) saturate(180%)"
-                borderRadius={{ base: 0, md: '3xl' }}
+                bg={resolvedContentBg}
+                color={ed?.cream}
+                fontFamily={ed?.fontBody}
+                backdropFilter={ed ? 'blur(22px) saturate(125%)' : 'blur(20px) saturate(180%)'}
+                borderRadius={{ base: 0, md: '18px' }}
                 border="1px solid"
-                borderColor={borderColor}
-                boxShadow={shadow}
+                borderColor={resolvedBorder}
+                boxShadow={resolvedShadow}
                 overflow="hidden"
                 // No margin on mobile: with `size='full'` + `100dvh` we want
                 // the modal to sit edge-to-edge in the visible viewport, so
@@ -78,11 +95,24 @@ export default function PremiumModal({
                 mx={{ base: 0, md: 0 }}
                 my={{ base: 0, md: 0 }}
                 {...responsiveStyles.modal}
+                {...restContentProps}
                 sx={{
                     ...safariStyles.modal,
+                    ...(ed
+                        ? {
+                            '&::after': {
+                                content: '""',
+                                position: 'absolute',
+                                inset: 0,
+                                pointerEvents: 'none',
+                                borderRadius: 'inherit',
+                                boxShadow: `inset 0 1px 0 ${ed.line}`,
+                                zIndex: 3,
+                            },
+                        }
+                        : {}),
                     ...(contentSx && typeof contentSx === 'object' ? contentSx : {}),
                 }}
-                {...restContentProps}
             >
                 {header && (
                     <Box
@@ -122,7 +152,8 @@ export default function PremiumModal({
                             md: 6,
                         }}
                         borderTop="1px solid"
-                        borderColor={useColorModeValue('gray.100', 'whiteAlpha.100')}
+                        borderColor={ed?.line ?? footerBorder}
+                        bg={ed?.bg2}
                     >
                         {footer}
                     </Box>

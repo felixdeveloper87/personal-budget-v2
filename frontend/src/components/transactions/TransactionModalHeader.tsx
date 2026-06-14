@@ -3,8 +3,9 @@ import {
   HStack,
   Text,
   VStack,
-  useColorModeValue,
+  useColorMode,
 } from '@chakra-ui/react'
+import { editorialPalette, useEd } from '../../editorial'
 import { AppCloseButton } from '../ui'
 
 interface TransactionModalHeaderProps {
@@ -16,12 +17,10 @@ const HEADER_COPY = {
   INCOME: {
     title: 'Income',
     caption: 'Track salary, transfers and one-off payments.',
-    line: 'linear-gradient(90deg, #22c55e, #10b981)',
   },
   EXPENSE: {
     title: 'Expense',
     caption: 'Track spending, bills and monthly commitments.',
-    line: 'linear-gradient(90deg, #fb7185, #ef4444)',
   },
 } as const
 
@@ -29,18 +28,15 @@ export default function TransactionModalHeader({
   type,
   onClose,
 }: TransactionModalHeaderProps) {
+  const { colorMode } = useColorMode()
+  const ed = useEd() ?? editorialPalette(colorMode)
   const copy = HEADER_COPY[type]
-
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
 
   return (
     <Box
-      bg={surfaceBg}
+      bg={ed.bg2}
       borderBottom="1px solid"
-      borderColor={borderColor}
+      borderColor={ed.line}
       px={{ base: 3.5, sm: 6 }}
       pt={{
         base: 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))',
@@ -50,15 +46,25 @@ export default function TransactionModalHeader({
       position="relative"
       overflow="hidden"
     >
-      <Box position="absolute" top={0} left={0} right={0} h="3px" bg={copy.line} />
+      <Box
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        h="2px"
+        bg={type === 'INCOME'
+          ? `linear-gradient(90deg, ${ed.jade}, ${ed.gold})`
+          : `linear-gradient(90deg, ${ed.red}, ${ed.gold})`}
+      />
 
       <VStack align="stretch" spacing={0.5}>
         <HStack align="center" justify="space-between" spacing={3}>
           <Text
-            fontWeight={800}
-            fontSize={{ base: 'lg', sm: 'xl' }}
-            color={titleColor}
-            lineHeight="1.1"
+            fontFamily={ed.fontDisplay}
+            fontWeight={400}
+            fontSize={{ base: 'xl', sm: '2xl' }}
+            color={ed.cream}
+            lineHeight="1"
             noOfLines={1}
           >
             {copy.title}
@@ -68,7 +74,9 @@ export default function TransactionModalHeader({
 
         <Text
           fontSize={{ base: 'xs', sm: 'sm' }}
-          color={captionColor}
+          fontFamily={ed.fontMono}
+          color={ed.muted}
+          letterSpacing="0.025em"
           lineHeight="1.4"
           noOfLines={1}
           pr={10}

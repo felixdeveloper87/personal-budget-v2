@@ -19,6 +19,7 @@ import CategoryResultsList from './CategoryResultsList'
 import { SearchResultsModalProps } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import { ToastService } from '../../services/toast'
+import { useEd } from '../../editorial'
 
 const SearchResultsModal = memo(function SearchResultsModal({
   isOpen,
@@ -26,13 +27,15 @@ const SearchResultsModal = memo(function SearchResultsModal({
   searchFilters,
   user: propUser,
 }: SearchResultsModalProps) {
+  const ed = useEd()
   const { user: contextUser } = useAuth()
   const user = propUser || contextUser
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const surfaceBg = ed?.solid ?? fallbackSurfaceBg
   const subtleText = useColorModeValue('gray.500', 'gray.400')
   const errorText = useColorModeValue('gray.700', 'gray.300')
   const skeletonStart = useColorModeValue('gray.100', 'whiteAlpha.80')
@@ -107,7 +110,6 @@ const SearchResultsModal = memo(function SearchResultsModal({
           accent="blue"
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
       <Box
         flex="1"

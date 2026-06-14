@@ -5,8 +5,9 @@ import {
   Icon,
   Text,
   VStack,
-  useColorModeValue,
+  useColorMode,
 } from '@chakra-ui/react'
+import { editorialPalette, useEd } from '../../editorial'
 import AppCloseButton from './AppCloseButton'
 import type { LucideIcon } from './icons'
 
@@ -32,52 +33,6 @@ export interface ModalHeaderProps {
   hideClose?: boolean
 }
 
-interface AccentTokens {
-  bgLight: string
-  bgDark: string
-  fgLight: string
-  fgDark: string
-  line: string
-}
-
-const ACCENT_TOKENS: Record<ModalHeaderAccent, AccentTokens> = {
-  blue: {
-    bgLight: 'blue.50',
-    bgDark: 'whiteAlpha.100',
-    fgLight: 'blue.600',
-    fgDark: 'blue.300',
-    line: 'linear-gradient(90deg, #06b6d4, #2563eb)',
-  },
-  green: {
-    bgLight: 'green.50',
-    bgDark: 'rgba(34,197,94,0.14)',
-    fgLight: 'green.600',
-    fgDark: 'green.300',
-    line: 'linear-gradient(90deg, #22c55e, #10b981)',
-  },
-  red: {
-    bgLight: 'red.50',
-    bgDark: 'rgba(239,68,68,0.14)',
-    fgLight: 'red.600',
-    fgDark: 'red.300',
-    line: 'linear-gradient(90deg, #fb7185, #ef4444)',
-  },
-  violet: {
-    bgLight: 'purple.50',
-    bgDark: 'rgba(139,92,246,0.14)',
-    fgLight: 'purple.600',
-    fgDark: 'purple.300',
-    line: 'linear-gradient(90deg, #8b5cf6, #6366f1)',
-  },
-  neutral: {
-    bgLight: 'gray.100',
-    bgDark: 'whiteAlpha.100',
-    fgLight: 'gray.700',
-    fgDark: 'gray.200',
-    line: 'linear-gradient(90deg, #64748b, #94a3b8)',
-  },
-}
-
 /**
  * Standard modal header used across the app.
  *
@@ -98,21 +53,21 @@ export default function ModalHeader({
   rightSlot,
   hideClose,
 }: ModalHeaderProps) {
-  const tokens = ACCENT_TOKENS[accent]
-
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-
-  const chipBg = useColorModeValue(tokens.bgLight, tokens.bgDark)
-  const chipFg = useColorModeValue(tokens.fgLight, tokens.fgDark)
+  const { colorMode } = useColorMode()
+  const ed = useEd() ?? editorialPalette(colorMode)
+  const semanticColor =
+    accent === 'red' ? ed.red :
+    accent === 'violet' ? ed.gold :
+    ed.jade
+  const accentLine = accent === 'red'
+    ? `linear-gradient(90deg, ${ed.red}, ${ed.gold})`
+    : `linear-gradient(90deg, ${ed.jade}, ${ed.gold})`
 
   return (
     <Box
-      bg={surfaceBg}
+      bg={ed.bg2}
       borderBottom="1px solid"
-      borderColor={borderColor}
+      borderColor={ed.line}
       px={{ base: 3.5, sm: 6 }}
       pt={{
         // Always leave breathing room above the close button:
@@ -126,15 +81,17 @@ export default function ModalHeader({
       position="relative"
       overflow="hidden"
     >
-      <Box position="absolute" top={0} left={0} right={0} h="3px" bg={tokens.line} />
+      <Box position="absolute" top={0} left={0} right={0} h="2px" bg={accentLine} />
       <HStack justify="space-between" align="center" spacing={3}>
         <HStack spacing={3} minW={0} flex={1}>
           <Box
             w={{ base: 8, sm: 9 }}
             h={{ base: 8, sm: 9 }}
-            borderRadius="xl"
-            bg={chipBg}
-            color={chipFg}
+            borderRadius="full"
+            bg={ed.panelRaised}
+            color={semanticColor}
+            border="1px solid"
+            borderColor={ed.lineStrong}
             display="flex"
             alignItems="center"
             justifyContent="center"
@@ -144,16 +101,23 @@ export default function ModalHeader({
           </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
-              fontWeight={700}
-              fontSize={{ base: 'sm', sm: 'md' }}
-              color={titleColor}
-              lineHeight="1.2"
+              fontFamily={ed.fontDisplay}
+              fontWeight={400}
+              fontSize={{ base: 'lg', sm: 'xl' }}
+              color={ed.cream}
+              lineHeight="1.05"
               noOfLines={1}
             >
               {title}
             </Text>
             {caption && (
-              <Text fontSize={{ base: '2xs', sm: 'xs' }} color={captionColor} noOfLines={1}>
+              <Text
+                fontFamily={ed.fontMono}
+                fontSize={{ base: '2xs', sm: 'xs' }}
+                color={ed.muted}
+                letterSpacing="0.025em"
+                noOfLines={1}
+              >
                 {caption}
               </Text>
             )}

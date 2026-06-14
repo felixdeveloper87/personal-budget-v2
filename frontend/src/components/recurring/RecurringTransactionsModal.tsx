@@ -19,6 +19,7 @@ import { ModalHeader, PremiumModal } from '../ui'
 import { RecurringTransaction } from '../../types'
 import RecurringTransactionCard from './RecurringTransactionCard'
 import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
+import { useEditorialPalette } from '../../editorial'
 
 interface RecurringTransactionsModalProps {
   isOpen: boolean
@@ -37,14 +38,13 @@ export default function RecurringTransactionsModal({
   recurringTransactions,
   onChanged,
 }: RecurringTransactionsModalProps) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const ed = useEditorialPalette()
   const [hideActiveList, setHideActiveList] = useState(false)
 
   useEffect(() => {
     if (!isOpen) setHideActiveList(false)
   }, [isOpen])
 
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
   const panelBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
   const panelBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
@@ -128,9 +128,8 @@ export default function RecurringTransactionsModal({
           }
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
-      <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" bg={ed.bg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         {recurringTransactions.length === 0 ? (
           <Box
             bg={panelBg}

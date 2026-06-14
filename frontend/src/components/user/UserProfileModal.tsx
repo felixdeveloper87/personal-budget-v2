@@ -13,6 +13,7 @@ import { ModalHeader, PremiumModal } from '../ui'
 import { User as UserIcon, Mail, Shield } from '../ui/icons'
 import PaymentMethodsSection from '../../sections/PaymentMethodsSection'
 import type { User, UserPlan } from '../../types'
+import { useEd } from '../../editorial'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -26,19 +27,26 @@ const PLAN_META: Record<UserPlan, { label: string; colorScheme: string; descript
 }
 
 export default function UserProfileModal({ isOpen, onClose, user }: UserProfileModalProps) {
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const ed = useEd()
+  const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const surfaceBg = ed?.solid ?? fallbackSurfaceBg
+  const bodyBg = ed?.bg ?? fallbackBodyBg
   const textColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const avatarRing = useColorModeValue(
+  const defaultAvatarRing = useColorModeValue(
     'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     'linear-gradient(135deg, #60a5fa, #a78bfa)',
   )
-  const heroBg = useColorModeValue(
+  const avatarRing = ed ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})` : defaultAvatarRing
+  const defaultHeroBg = useColorModeValue(
     'linear-gradient(135deg, #eff6ff 0%, #eef2ff 50%, #faf5ff 100%)',
     'linear-gradient(135deg, rgba(96,165,250,0.06) 0%, rgba(167,139,250,0.06) 100%)',
   )
+  const heroBg = ed
+    ? `linear-gradient(135deg, ${ed.jadeSoft}, ${ed.panelRaised} 55%, ${ed.gold}12)`
+    : defaultHeroBg
   const fieldLabelColor = useColorModeValue('gray.500', 'gray.500')
   const fieldValueColor = useColorModeValue('gray.800', 'gray.100')
   const fieldBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -66,7 +74,6 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
           accent="blue"
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
       <Box flex="1" bg={bodyBg} overflowY="auto">
 

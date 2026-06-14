@@ -38,6 +38,7 @@ import {
   Trash2,
   Upload,
 } from '../ui/icons'
+import { useEd } from '../../editorial'
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -45,6 +46,7 @@ interface UserSettingsModalProps {
 }
 
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
+  const ed = useEd()
   const { colorMode, setColorMode } = useColorMode()
   const toast = useToast()
 
@@ -61,8 +63,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const importDialog = useDisclosure()
   const cancelDeleteRef = useRef<HTMLButtonElement>(null)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const bodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
+  const surfaceBg = ed?.solid ?? fallbackSurfaceBg
+  const bodyBg = ed?.bg ?? fallbackBodyBg
   const textColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100')
@@ -193,7 +197,6 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
           accent="blue"
         />
       }
-      contentProps={{ bg: surfaceBg }}
     >
       <Box flex="1" bg={bodyBg} overflowY="auto">
         <VStack

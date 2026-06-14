@@ -30,6 +30,7 @@ import {
   Repeat,
   Wallet,
 } from '../ui/icons'
+import { useEd } from '../../editorial'
 
 const money = (value: number, currency = 'GBP') =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
@@ -146,10 +147,13 @@ export default function AccountDetailsModal({
   onClose,
   hideBalances,
 }: AccountDetailsModalProps) {
+  const ed = useEd()
   const [details, setDetails] = useState<AccountDetails | null>(null)
   const [loading, setLoading] = useState(false)
-  const bodyBg = useColorModeValue('gray.50', '#080808')
-  const panelBg = useColorModeValue('white', 'whiteAlpha.50')
+  const fallbackBodyBg = useColorModeValue('gray.50', '#080808')
+  const fallbackPanelBg = useColorModeValue('white', 'whiteAlpha.50')
+  const bodyBg = ed?.bg ?? fallbackBodyBg
+  const panelBg = ed?.panelRaised ?? fallbackPanelBg
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const muted = useColorModeValue('gray.500', 'gray.400')
 

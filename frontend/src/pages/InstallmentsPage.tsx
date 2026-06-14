@@ -14,6 +14,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../editorial'
 import { listInstallmentPlans } from '../api'
 import type { InstallmentPlan } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
@@ -49,9 +50,15 @@ export default function InstallmentsPage({
   const [activeOpen, setActiveOpen] = useState(true)
   const [completedOpen, setCompletedOpen] = useState(true)
 
-  const borderColor = useColorModeValue('gray.200', 'gray.800')
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const softBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ed = useEd()
+
+  const borderColorBase = useColorModeValue('gray.200', 'gray.800')
+  const borderColor = ed ? ed.line : borderColorBase
+  const mutedBase = useColorModeValue('gray.600', 'gray.400')
+  const muted = ed ? ed.muted : mutedBase
+  const softBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const softBg = ed ? ed.panelRaised : softBgBase
+  const panelBg = ed ? ed.panel : undefined
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -129,6 +136,7 @@ export default function InstallmentsPage({
                 value={String(summary.active.length)}
                 borderColor={borderColor}
                 bg={softBg}
+                panelBg={panelBg}
               />
               <MetricCard
                 icon={Wallet}
@@ -136,6 +144,7 @@ export default function InstallmentsPage({
                 value={money(summary.remaining)}
                 borderColor={borderColor}
                 bg={softBg}
+                panelBg={panelBg}
               />
               <MetricCard
                 icon={CheckCircle2}
@@ -143,10 +152,11 @@ export default function InstallmentsPage({
                 value={money(summary.paid)}
                 borderColor={borderColor}
                 bg={softBg}
+                panelBg={panelBg}
               />
             </SimpleGrid>
 
-            <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
+            <Card bg={panelBg} border="1px solid" borderColor={borderColor} boxShadow="sm">
               <CardBody p={{ base: 4, md: 6 }}>
                 <VStack align="stretch" spacing={4}>
                   <Box
@@ -193,7 +203,7 @@ export default function InstallmentsPage({
             </Card>
 
             {summary.completed.length > 0 && (
-              <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
+              <Card bg={panelBg} border="1px solid" borderColor={borderColor} boxShadow="sm">
                 <CardBody p={{ base: 4, md: 6 }}>
                   <VStack align="stretch" spacing={4}>
                     <Box
@@ -253,6 +263,7 @@ interface MetricCardProps {
   value: string
   borderColor: string
   bg: string
+  panelBg?: string
 }
 
 function MetricCard({
@@ -261,9 +272,11 @@ function MetricCard({
   value,
   borderColor,
   bg,
+  panelBg,
 }: MetricCardProps) {
+  const ed = useEd()
   return (
-    <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
+    <Card bg={panelBg} border="1px solid" borderColor={borderColor} boxShadow="sm">
       <CardBody p={4}>
         <HStack spacing={3}>
           <Box
@@ -293,8 +306,11 @@ function MetricCard({
 }
 
 function EmptyState({ text }: { text: string }) {
-  const muted = useColorModeValue('gray.500', 'gray.400')
-  const border = useColorModeValue('gray.200', 'gray.700')
+  const ed = useEd()
+  const mutedBase = useColorModeValue('gray.500', 'gray.400')
+  const muted = ed ? ed.muted : mutedBase
+  const borderBase = useColorModeValue('gray.200', 'gray.700')
+  const border = ed ? ed.line : borderBase
   return (
     <Box py={10} textAlign="center" border="1px dashed" borderColor={border} borderRadius="xl">
       <Text fontSize="sm" color={muted}>
