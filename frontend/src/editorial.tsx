@@ -36,6 +36,8 @@ export const EDITORIAL_DARK = {
    *  Near-black, neutral — kept darker than the page bg so cards read black,
    *  not grey and not green. */
   panel: 'rgba(10, 11, 10, 0.94)',
+  /** Opaque surface for modals / dropdowns (no bleed-through). */
+  solid: '#0e0f0e',
   /** Slightly raised panel (cards inside cards). */
   panelRaised: 'rgba(239, 234, 224, 0.03)',
   line: 'rgba(239, 234, 224, 0.10)',
@@ -82,6 +84,7 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   onAccent: '#08120c',
 
   panel: 'rgba(255, 253, 247, 0.62)',
+  solid: '#fffdf7',
   panelRaised: 'rgba(20, 36, 28, 0.035)',
   line: 'rgba(20, 36, 28, 0.12)',
   lineStrong: 'rgba(20, 36, 28, 0.20)',
