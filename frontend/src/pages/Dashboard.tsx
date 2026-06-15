@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { Box, VStack } from '@chakra-ui/react'
-import { useEd, Guilloche } from '../editorial'
 import { usePeriodData, getPreviousPeriodDate } from '../hooks/usePeriodData'
 import { hasActiveFilters } from '../utils/filters'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -70,7 +69,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   const filtersActive = hasActiveFilters(filters)
   const hasOverview = !filtersActive && !!monthSummary
-  const ed = useEd()
 
   return (
     <Box
@@ -82,20 +80,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       mx="auto"
       overflow="hidden"
     >
-      {/* Guilloché engraving behind the greeting — echoes the landing identity. */}
-      {ed && (
-        <Box
-          aria-hidden
-          position="absolute"
-          inset={0}
-          pointerEvents="none"
-          zIndex={0}
-        >
-          <Guilloche n={30} rx={300} ry={120} opacity={0.22} />
-        </Box>
-      )}
-
-      <VStack spacing={{ base: 3, md: 4 }} align="stretch" position="relative" zIndex={1}>
+      <VStack spacing={{ base: 3, md: 4 }} align="stretch">
         <DashboardHeader
           income={monthSummary?.totalIncome}
           expense={monthSummary?.totalExpense}

@@ -8,6 +8,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../../../editorial'
 import type { Transaction } from '../../../../types'
 import {
   getTransactionDate,
@@ -103,13 +104,18 @@ export default function ActivityLedger({
   const hiddenCount = Math.max(0, totalRows - visibleLimit)
 
   // ── Theme tokens ──────────────────────────────────────────────────────
-  const surfaceBg = useColorModeValue('#ffffff', '#0d0d0d')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('#ffffff', '#0d0d0d')
+  const headerBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const dayHeaderBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  // No tema editorial as superfícies ficam transparentes (revelam o painel/backdrop).
+  const surfaceBg = ed ? 'transparent' : surfaceBgBase
   const surfaceBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const headerBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const headerBg = ed ? 'transparent' : headerBgBase
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const rowBorder = useColorModeValue('blackAlpha.50', 'whiteAlpha.50')
-  const dayHeaderBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const dayHeaderBg = ed ? 'transparent' : dayHeaderBgBase
   const dayHeaderColor = useColorModeValue('gray.500', 'gray.400')
   const incomeChipBg = useColorModeValue('green.50', 'rgba(16,185,129,0.12)')
   const incomeChipColor = useColorModeValue('green.600', 'green.300')

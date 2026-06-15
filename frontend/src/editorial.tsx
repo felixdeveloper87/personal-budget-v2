@@ -16,7 +16,7 @@
  * is left untouched.
  */
 import { createContext, useContext, useMemo } from 'react'
-import { useColorMode } from '@chakra-ui/react'
+import { Box, useColorMode } from '@chakra-ui/react'
 
 /* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
 export const EDITORIAL_DARK = {
@@ -34,8 +34,9 @@ export const EDITORIAL_DARK = {
 
   /** Card surface (Quick actions, Installments, Fixed payments, etc.).
    *  Near-black, neutral — kept darker than the page bg so cards read black,
-   *  not grey and not green. */
-  panel: 'rgba(10, 11, 10, 0.94)',
+   *  not grey and not green. Translúcido o bastante pro guilloché do backdrop
+   *  aparecer através dos cards (Home + todas as páginas). */
+  panel: 'rgba(10, 11, 10, 0.80)',
   /** Opaque surface for modals / dropdowns (no bleed-through). */
   solid: '#0e0f0e',
   /** Slightly raised panel (cards inside cards). */
@@ -221,5 +222,29 @@ export function Guilloche({
         ))}
       </svg>
     </div>
+  )
+}
+
+/* ── Page backdrop ────────────────────────────────────────────────────────── */
+/**
+ * The dashboard's signature backdrop, factored out so every page wears the same
+ * look without repeating it. Renders the guilloché engraving absolutely behind
+ * the page content. Returns `null` outside editorial mode (admin shell).
+ *
+ * Mounted once in the Layout's `<main>` (which is `position="relative"
+ * overflow="hidden"`), with the page content kept above via `zIndex={1}`. Works
+ * for both color modes automatically — {@link Guilloche} follows the palette.
+ */
+export function EditorialBackdrop({ opacity }: { opacity?: number }) {
+  const ed = useEd()
+  const { colorMode } = useColorMode()
+  if (!ed) return null
+  // No dark as linhas (jade claro) somem sobre o quase-preto; subimos a opacidade
+  // pra o padrão aparecer nos dois modos. Override via prop quando preciso.
+  const resolved = opacity ?? (colorMode === 'dark' ? 0.45 : 0.22)
+  return (
+    <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
+      <Guilloche n={30} rx={300} ry={120} opacity={resolved} />
+    </Box>
   )
 }

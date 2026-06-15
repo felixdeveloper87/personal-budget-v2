@@ -95,7 +95,7 @@ const theme = extendTheme({
   fontSizes: {
     '2xs': '0.6875rem', // 10 → 11px
     xs: '0.8125rem', // 12 → 13px
-    sm: '0.9375rem', // 14 → 15px
+    sm: '1.05rem', // 14 → 15px
   },
   // Tokens de tipografia reutilizáveis. Use `textStyle="display"` (serifada
   // editorial, = padrão), `"mono"` (labels/números) ou `"sans"` (escape hatch

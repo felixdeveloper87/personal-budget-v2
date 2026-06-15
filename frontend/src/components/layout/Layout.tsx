@@ -1,7 +1,7 @@
 import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { EditorialProvider, editorialPalette } from '../../editorial'
+import { EditorialBackdrop, EditorialProvider, editorialPalette } from '../../editorial'
 import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
 import Header from './header/Header'
@@ -116,8 +116,13 @@ export default function Layout({
           hasSidebar={showSidebar}
         />
 
-        <Box as="main" flex="1">
-          {children}
+        {/* Backdrop guilloché único — toda página herda o fundo da home
+            (dark e claro), sem repetir o estilo em cada arquivo. */}
+        <Box as="main" flex="1" position="relative" overflow="hidden">
+          <EditorialBackdrop />
+          <Box position="relative" zIndex={1}>
+            {children}
+          </Box>
         </Box>
 
         {showFooter ? <Footer /> : null}

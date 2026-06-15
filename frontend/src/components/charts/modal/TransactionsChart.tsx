@@ -8,6 +8,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../../editorial'
 import type { PeriodType, Transaction } from '../../../types'
 import {
   getTransactionDate,
@@ -195,8 +196,12 @@ export default function TransactionsChart({
     return insights
   }, [expenseCategories, expenseTransactions, totalExpenses, dateBasis])
 
-  const cardBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const ed = useEd()
+  const cardBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  // No tema editorial os cards de insights ficam transparentes (revelam o backdrop).
+  const cardBg = ed ? 'transparent' : cardBgBase
+  const borderColor = ed ? ed.line : borderColorBase
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const insightHoverShadow = useColorModeValue(

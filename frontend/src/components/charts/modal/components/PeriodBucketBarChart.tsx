@@ -13,6 +13,7 @@ import {
   XAxis,
 } from 'recharts'
 
+import { useEd } from '../../../../editorial'
 import type { PeriodType, Transaction } from '../../../../types'
 import type { TransactionDateBasis } from '../../../../utils/transactionDates'
 import {
@@ -127,11 +128,15 @@ export default function PeriodBucketBarChart({
 
   const palette = ACCENTS[accent]
 
-  const surfaceBg = useColorModeValue(
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue(
     'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
     'linear-gradient(135deg, #0f0f0f 0%, #141414 100%)',
   )
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const borderColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  // No tema editorial o gráfico fica transparente, deixando o painel/backdrop aparecer.
+  const surfaceBg = ed ? 'transparent' : surfaceBgBase
+  const borderColor = ed ? ed.line : borderColorBase
   const titleColor = useColorModeValue('gray.500', 'gray.500')
   const valueColor = useColorModeValue('gray.900', 'gray.50')
   const tickColor = useColorModeValue('#94a3b8', '#64748b')
