@@ -105,7 +105,7 @@ export default function SectionHeader({
   const accentColorBase = useColorModeValue(tokens.fgLight, tokens.fgDark)
   const accentColor = ed ? ed.jade : accentColorBase
   const iconBgBase = useColorModeValue(tokens.bgLight, tokens.bgDark)
-  const iconBg = ed ? ed.panel : iconBgBase
+  const iconBg = ed ? ed.jadeSoft : iconBgBase
   const iconFgBase = useColorModeValue(tokens.fgLight, tokens.fgDark)
   const iconFg = ed ? ed.jade : iconFgBase
   const rightIconOpacity = useColorModeValue(0.9, 0.82)

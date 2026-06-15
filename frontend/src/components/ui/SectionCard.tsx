@@ -39,12 +39,16 @@ export default function SectionCard({
   const hoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
   const hoverBorder = ed ? ed.lineStrong : hoverBorderBase
   const shadow = useColorModeValue(
-    '0 1px 2px rgba(15,23,42,0.04), 0 1px 0 rgba(15,23,42,0.02)',
+    'inset 0 1px 0 rgba(255,255,255,0.82), 0 12px 34px -22px rgba(19,56,37,0.32), 0 3px 10px rgba(87,65,28,0.06)',
     '0 1px 0 rgba(255,255,255,0.04)',
   )
   const hoverShadow = useColorModeValue(
-    '0 6px 24px -8px rgba(15,23,42,0.10), 0 2px 4px rgba(15,23,42,0.04)',
+    'inset 0 1px 0 rgba(255,255,255,0.92), 0 20px 46px -24px rgba(8,122,80,0.38), 0 8px 22px -16px rgba(165,111,22,0.24)',
     '0 6px 24px -8px rgba(0,0,0,0.6)',
+  )
+  const editorialFilter = useColorModeValue(
+    'blur(16px) saturate(125%)',
+    'blur(12px) saturate(115%)',
   )
 
   if (bare) {
@@ -63,6 +67,7 @@ export default function SectionCard({
       borderColor={borderColor}
       borderRadius="2xl"
       boxShadow={shadow}
+      backdropFilter={ed ? editorialFilter : undefined}
       overflow="hidden"
       transition="border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease"
       _hover={

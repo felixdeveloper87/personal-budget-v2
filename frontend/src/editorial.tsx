@@ -73,38 +73,39 @@ export type EditorialTokens = {
 
 /* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  bg: '#f5f1e8',
-  bg2: '#efe9db',
+  bg: '#f4efe4',
+  bg2: '#ebe3d4',
   /** Accents stay legible on cream: deep emerald + bronze gold. */
-  jade: '#0e8f5e',
-  gold: '#9c7320',
+  jade: '#087a50',
+  gold: '#a56f16',
   /** Primary text → deep ink-green (the "cream" slot, semantically primary). */
-  cream: '#16241c',
-  muted: '#5f6d62',
-  red: '#c0473f',
+  cream: '#13281d',
+  muted: '#586a5e',
+  red: '#b8443d',
   onAccent: '#08120c',
 
   // Superfícies de card — ver doc no EDITORIAL_DARK.
   // Light paper needs a little more transparency so the guilloche remains
   // visible through large surfaces, matching the perceived dark-mode depth.
-  panel: 'rgba(255, 253, 247, 0.68)',
-  modal: 'rgba(255, 253, 247, 0.88)',
-  solid: '#fffdf7',
-  panelRaised: 'rgba(20, 36, 28, 0.035)',
-  line: 'rgba(20, 36, 28, 0.12)',
-  lineStrong: 'rgba(20, 36, 28, 0.20)',
+  panel: 'rgba(255, 252, 244, 0.70)',
+  modal: 'rgba(255, 252, 244, 0.92)',
+  solid: '#fffcf5',
+  panelRaised: 'rgba(255, 255, 255, 0.48)',
+  line: 'rgba(19, 56, 37, 0.14)',
+  lineStrong: 'rgba(8, 122, 80, 0.28)',
 
-  glass: 'rgba(245, 241, 232, 0.78)',
+  glass: 'rgba(248, 244, 235, 0.82)',
 
-  hoverBg: 'rgba(20, 36, 28, 0.05)',
-  controlBg: 'rgba(20, 36, 28, 0.035)',
-  controlHoverBg: 'rgba(20, 36, 28, 0.06)',
-  trackBg: 'rgba(20, 36, 28, 0.05)',
-  thumbBg: 'rgba(255, 253, 247, 0.95)',
-  jadeSoft: 'rgba(14, 143, 94, 0.10)',
-  jadeSoftHover: 'rgba(14, 143, 94, 0.18)',
+  hoverBg: 'rgba(8, 122, 80, 0.07)',
+  controlBg: 'rgba(255, 255, 255, 0.48)',
+  controlHoverBg: 'rgba(255, 255, 255, 0.76)',
+  trackBg: 'rgba(19, 40, 29, 0.065)',
+  thumbBg: 'rgba(255, 253, 248, 0.98)',
+  jadeSoft: 'rgba(8, 122, 80, 0.11)',
+  jadeSoftHover: 'rgba(8, 122, 80, 0.19)',
 
-  bgGradient: 'linear-gradient(180deg, #faf7f0 0%, #f5f1e8 100%)',
+  bgGradient:
+    'radial-gradient(circle at 12% 8%, rgba(8,122,80,0.13) 0%, transparent 30%), radial-gradient(circle at 88% 14%, rgba(165,111,22,0.12) 0%, transparent 28%), linear-gradient(145deg, #fcfaf4 0%, #f4eee1 52%, #ece2d0 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }
@@ -160,10 +161,9 @@ export function useEditorialPalette(): EditorialTokens {
 
 /* ── Guilloché engraving ──────────────────────────────────────────────────── */
 /**
- * Static code-generated guilloché — concentric counter-rotated ellipses,
- * radially masked. Purely decorative; rendered behind a section. Kept static
- * (no animation) since this sits behind dense, interactive content. Stroke
- * colours follow the active editorial palette.
+ * Code-generated guilloché — concentric ellipses split into two slowly
+ * counter-rotating groups, matching the landing page. Purely decorative,
+ * radially masked, and disabled when reduced motion is requested.
  */
 export function Guilloche({
   n = 28,
@@ -181,26 +181,66 @@ export function Guilloche({
   const ellipses = useMemo(
     () =>
       Array.from({ length: n }, (_, i) => ({
+        id: i,
         angle: (i / n) * 180,
         gold: i % 5 === 0,
+        group: i % 2,
       })),
     [n],
   )
+  const drawGroup = (group: number) =>
+    ellipses
+      .filter((ellipse) => ellipse.group === group)
+      .map((ellipse) => (
+        <ellipse
+          key={ellipse.id}
+          cx="0"
+          cy="0"
+          rx={rx}
+          ry={ry}
+          transform={`rotate(${ellipse.angle})`}
+          fill="none"
+          strokeWidth={0.6}
+          vectorEffect="non-scaling-stroke"
+          stroke={ellipse.gold ? pal.gold : pal.jade}
+        />
+      ))
 
   return (
-    <div
+    <Box
       aria-hidden
-      style={{
-        position: 'absolute',
-        inset: 0,
-        display: 'grid',
-        placeItems: 'center',
-        pointerEvents: 'none',
-        zIndex: 0,
-        opacity,
+      position="absolute"
+      inset={0}
+      display="grid"
+      placeItems="center"
+      pointerEvents="none"
+      zIndex={0}
+      opacity={opacity}
+      sx={{
         WebkitMaskImage:
           'radial-gradient(circle at center, #000 30%, transparent 72%)',
         maskImage: 'radial-gradient(circle at center, #000 30%, transparent 72%)',
+        '@keyframes editorialGuillocheSpin': {
+          to: { transform: 'rotate(360deg)' },
+        },
+        '.editorial-guilloche-spin': {
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          willChange: 'transform',
+          animation: 'editorialGuillocheSpin 140s linear infinite',
+        },
+        '.editorial-guilloche-spin-reverse': {
+          transformBox: 'fill-box',
+          transformOrigin: 'center',
+          willChange: 'transform',
+          animation: 'editorialGuillocheSpin 200s linear infinite reverse',
+        },
+        '@media (prefers-reduced-motion: reduce)': {
+          '.editorial-guilloche-spin, .editorial-guilloche-spin-reverse': {
+            animation: 'none',
+            willChange: 'auto',
+          },
+        },
       }}
     >
       <svg
@@ -208,22 +248,10 @@ export function Guilloche({
         preserveAspectRatio="xMidYMid slice"
         style={{ width: '100%', height: '100%', overflow: 'visible' }}
       >
-        {ellipses.map((e, i) => (
-          <ellipse
-            key={i}
-            cx="0"
-            cy="0"
-            rx={rx}
-            ry={ry}
-            transform={`rotate(${e.angle})`}
-            fill="none"
-            strokeWidth={0.6}
-            vectorEffect="non-scaling-stroke"
-            stroke={e.gold ? pal.gold : pal.jade}
-          />
-        ))}
+        <g className="editorial-guilloche-spin">{drawGroup(0)}</g>
+        <g className="editorial-guilloche-spin-reverse">{drawGroup(1)}</g>
       </svg>
-    </div>
+    </Box>
   )
 }
 
@@ -243,7 +271,7 @@ export function EditorialBackdrop({ opacity }: { opacity?: number }) {
   if (!ed) return null
   // No dark as linhas (jade claro) somem sobre o quase-preto; subimos a opacidade
   // pra o padrão aparecer nos dois modos. Override via prop quando preciso.
-  const resolved = opacity ?? (colorMode === 'dark' ? 0.45 : 0.22)
+  const resolved = opacity ?? (colorMode === 'dark' ? 0.45 : 0.29)
   return (
     <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
       <Box position="sticky" top={0} h="100vh" overflow="hidden">

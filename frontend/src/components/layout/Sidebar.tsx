@@ -60,6 +60,15 @@ export default function Sidebar({
     'rgba(255, 255, 255, 0.04)',
   )
   const borderRight = ed ? ed.line : borderRightBase
+  const surfaceShadowBase = useColorModeValue(
+    '8px 0 32px -24px rgba(15,23,42,0.18)',
+    '8px 0 32px -24px rgba(0,0,0,0.65)',
+  )
+  const editorialSurfaceShadow = useColorModeValue(
+    '10px 0 38px -24px rgba(19,56,37,0.28)',
+    '10px 0 38px -24px rgba(0,0,0,0.72)',
+  )
+  const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
   const sectionLabelBase = useColorModeValue('gray.400', 'gray.600')
   const sectionLabel = ed ? ed.muted : sectionLabelBase
 
@@ -107,6 +116,7 @@ export default function Sidebar({
       backdropFilter="saturate(180%) blur(20px)"
       borderRight="1px solid"
       borderRightColor={borderRight}
+      boxShadow={surfaceShadow}
       zIndex={1100}
       display="flex"
       flexDirection="column"
@@ -196,8 +206,12 @@ function SidebarHeader({
   const markBg = ed
     ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
     : `linear-gradient(135deg, ${brandAccent}, #7c3aed)`
+  const editorialMarkShadow = useColorModeValue(
+    '0 8px 22px rgba(8,122,80,0.24), 0 2px 8px rgba(165,111,22,0.16)',
+    '0 4px 16px rgba(127,230,179,0.25)',
+  )
   const markShadow = ed
-    ? `0 4px 16px rgba(127, 230, 179, 0.25)`
+    ? editorialMarkShadow
     : `0 4px 12px ${brandAccent}44`
   const markGlyphColor = ed ? ed.onAccent : 'white'
 
@@ -318,8 +332,12 @@ function ActiveIndicator({
     'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%)',
     'linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(167, 139, 250, 0.08) 100%)',
   )
+  const editorialIndicatorBg = useColorModeValue(
+    'linear-gradient(135deg, rgba(8,122,80,0.13) 0%, rgba(165,111,22,0.10) 100%)',
+    'linear-gradient(135deg, rgba(127,230,179,0.14) 0%, rgba(217,179,106,0.08) 100%)',
+  )
   const indicatorBg = ed
-    ? 'linear-gradient(135deg, rgba(127, 230, 179, 0.14) 0%, rgba(217, 179, 106, 0.08) 100%)'
+    ? editorialIndicatorBg
     : indicatorBgBase
   const accentBarBase = useColorModeValue(
     'linear-gradient(180deg, #2563eb, #7c3aed)',

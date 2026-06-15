@@ -129,12 +129,15 @@ const theme = extendTheme({
         container: {
           // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
           // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(10, 11, 10, 0.80)' : 'rgba(255, 253, 247, 0.80)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(239, 234, 224, 0.10)' : 'rgba(20, 36, 28, 0.12)',
+          bg: props.colorMode === 'dark' ? 'rgba(10, 11, 10, 0.80)' : 'rgba(255, 252, 244, 0.70)',
+          borderColor: props.colorMode === 'dark' ? 'rgba(239, 234, 224, 0.10)' : 'rgba(19, 56, 37, 0.14)',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark'
             ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
-            : '0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(0, 0, 0, 0.04)',
+            : 'inset 0 1px 0 rgba(255,255,255,0.82), 0 12px 34px -22px rgba(19,56,37,0.32), 0 3px 10px rgba(87,65,28,0.06)',
+          backdropFilter: props.colorMode === 'dark'
+            ? 'blur(12px) saturate(115%)'
+            : 'blur(16px) saturate(125%)',
         },
       }),
     },

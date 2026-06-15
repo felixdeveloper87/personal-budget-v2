@@ -30,7 +30,7 @@ export default function PageHeader({
   const subtitleColorBase = useColorModeValue('gray.500', 'gray.400')
   const subtitleColor = ed ? ed.muted : subtitleColorBase
   const iconBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const iconBg = ed ? ed.panel : iconBgBase
+  const iconBg = ed ? ed.jadeSoft : iconBgBase
   const iconColorBase = useColorModeValue('gray.700', 'gray.200')
   const iconColor = ed ? ed.jade : iconColorBase
   const iconBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -55,6 +55,7 @@ export default function PageHeader({
           color={iconColor}
           border="1px solid"
           borderColor={iconBorder}
+          boxShadow={ed ? `inset 0 1px 0 rgba(255,255,255,0.36), 0 8px 20px -14px ${ed.jade}` : undefined}
           display="flex"
           alignItems="center"
           justifyContent="center"

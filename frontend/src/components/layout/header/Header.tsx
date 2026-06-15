@@ -76,25 +76,44 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
-  const bgOverlay = ed ? 'transparent' : (showGlass ? bgOverlayVal : 'transparent')
+  const editorialOverlay = useColorModeValue(
+    'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 68%)',
+    'linear-gradient(180deg, rgba(239,234,224,0.04) 0%, rgba(239,234,224,0) 68%)',
+  )
+  const bgOverlay = ed ? editorialOverlay : (showGlass ? bgOverlayVal : 'transparent')
   const topHighlightVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))',
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
+  const editorialTopHighlight = useColorModeValue(
+    'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0))',
+    'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))',
+  )
   const topHighlight = ed
-    ? 'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))'
+    ? editorialTopHighlight
     : (showGlass ? topHighlightVal : 'transparent')
   const accentBorderBase = useColorModeValue(
     'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.18) 30%, rgba(124, 58, 237, 0.18) 70%, transparent 100%)',
     'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
   )
+  const editorialAccentBorder = useColorModeValue(
+    'linear-gradient(90deg, transparent 0%, rgba(8,122,80,0.52) 30%, rgba(165,111,22,0.46) 70%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(127,230,179,0.40) 30%, rgba(217,179,106,0.30) 70%, transparent 100%)',
+  )
   const accentBorder = ed
-    ? 'linear-gradient(90deg, transparent 0%, rgba(127, 230, 179, 0.40) 30%, rgba(217, 179, 106, 0.30) 70%, transparent 100%)'
+    ? editorialAccentBorder
     : accentBorderBase
-  const shadow = useColorModeValue(
+  const shadowBase = useColorModeValue(
     isScrolled ? '0 10px 30px rgba(15, 23, 42, 0.08)' : 'none',
     isScrolled ? '0 14px 36px rgba(0, 0, 0, 0.5)' : 'none',
   )
+  const editorialShadow = useColorModeValue(
+    isScrolled
+      ? '0 14px 40px rgba(19,56,37,0.12), inset 0 -1px 0 rgba(255,255,255,0.72)'
+      : 'none',
+    isScrolled ? '0 14px 36px rgba(0,0,0,0.5)' : 'none',
+  )
+  const shadow = ed ? editorialShadow : shadowBase
 
   return (
     <>

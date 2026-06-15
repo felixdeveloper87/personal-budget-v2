@@ -85,6 +85,8 @@ export default function Layout({
       direction="row"
       minH="100vh"
       bg={pal ? pal.bg : undefined}
+      backgroundImage={pal ? pal.bgGradient : undefined}
+      backgroundAttachment={{ base: 'scroll', md: 'fixed' }}
       color={pal ? pal.cream : undefined}
       fontFamily={pal ? pal.fontDisplay : undefined}
     >
