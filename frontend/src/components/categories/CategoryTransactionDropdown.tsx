@@ -11,6 +11,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 import type { Transaction } from '../../types'
 import {
   getTransactionDate,
@@ -63,13 +64,17 @@ export default function CategoryTransactionDropdown({
   const [internalExpanded, setInternalExpanded] = useState(false)
   const [visibleCount, setVisibleCount] = useState(initialVisibleCount)
 
-  const surfaceBg = useColorModeValue('white', 'whiteAlpha.50')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('white', 'whiteAlpha.50')
+  // Linha de categoria translúcida (ed.panelRaised) — consistente com a plataforma.
+  const surfaceBg = ed ? ed.panelRaised : surfaceBgBase
   const fallbackBorder = useColorModeValue('gray.200', 'whiteAlpha.100')
   const activeBorder = useColorModeValue('gray.300', 'whiteAlpha.300')
   const neutralHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
   const fallbackBadgeBg = useColorModeValue('gray.100', 'whiteAlpha.100')
   const expandedBg = useColorModeValue('gray.50', 'blackAlpha.300')
-  const rowBg = useColorModeValue('white', 'whiteAlpha.50')
+  const rowBgBase = useColorModeValue('white', 'whiteAlpha.50')
+  const rowBg = ed ? ed.panelRaised : rowBgBase
   const rowBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.900', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')

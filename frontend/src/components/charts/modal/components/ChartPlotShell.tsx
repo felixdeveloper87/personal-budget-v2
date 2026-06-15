@@ -7,6 +7,7 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../../../editorial'
 
 export interface ChartPlotShellProps {
   /** Short label above the plot (subsection under the page shell). */
@@ -35,7 +36,10 @@ export default function ChartPlotShell({
   compact = false,
   children,
 }: ChartPlotShellProps) {
-  const surfaceBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ed = useEd()
+  const surfaceBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  // Superfície inset translúcida (ed.panelRaised) — card aninhado, consistente.
+  const surfaceBg = ed ? ed.panelRaised : surfaceBgBase
   const surfaceBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const titleColor = useColorModeValue('gray.800', 'gray.100')
   const captionColor = useColorModeValue('gray.500', 'gray.400')

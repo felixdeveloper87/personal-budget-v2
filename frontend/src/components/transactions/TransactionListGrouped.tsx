@@ -22,6 +22,7 @@ import {
 } from '@chakra-ui/react'
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
+import { useEd } from '../../editorial'
 import { Transaction } from '../../types'
 import { useMemo, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
@@ -208,7 +209,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     }))
   }
 
+  const ed = useEd()
   const borderColor = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
+  // Card de mês translúcido (ed.panelRaised) — aninhado, consistente com a plataforma.
+  const groupCardBgBase = useColorModeValue('white', 'linear-gradient(135deg, rgba(23, 23, 28, 0.7) 0%, rgba(15, 15, 20, 0.4) 100%)')
+  const groupCardBg = ed ? ed.panelRaised : groupCardBgBase
   const headerBg = useColorModeValue('transparent', 'transparent')
   const textColor = useColorModeValue('gray.900', 'whiteAlpha.900')
   const secondaryTextColor = useColorModeValue('gray.500', 'gray.400')
@@ -248,7 +253,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                 : borderColor}
               borderRadius="xl"
               overflow="hidden"
-              bg={useColorModeValue('white', 'linear-gradient(135deg, rgba(23, 23, 28, 0.7) 0%, rgba(15, 15, 20, 0.4) 100%)')}
+              bg={groupCardBg}
               boxShadow={isCurrentMonth
                 ? useColorModeValue('0 4px 20px -2px rgba(59, 130, 246, 0.12)', '0 4px 20px -8px rgba(59, 130, 246, 0.35)')
                 : useColorModeValue('0 4px 18px -4px rgba(15, 23, 42, 0.05)', '0 4px 20px -8px rgba(0, 0, 0, 0.3)')}
