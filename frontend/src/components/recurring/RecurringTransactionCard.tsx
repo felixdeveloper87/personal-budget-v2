@@ -71,20 +71,37 @@ export default function RecurringTransactionCard({
   const cardBgBase = useColorModeValue('#ffffff', 'whiteAlpha.50')
   // Card translúcido padrão (ed.panel) nos dois modos — consistente com a plataforma.
   const cardBg = ed ? ed.panel : cardBgBase
-  const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const cardHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const accentBg = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
-  const accentFg = useColorModeValue('teal.700', 'teal.300')
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const cardBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const cardBorder = ed ? ed.line : cardBorderBase
+  const cardHoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const cardHoverBorder = ed ? ed.lineStrong : cardHoverBorderBase
+  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
+  const titleColor = ed ? ed.cream : titleColorBase
+  const captionColorBase = useColorModeValue('gray.500', 'gray.400')
+  const captionColor = ed ? ed.muted : captionColorBase
+  const accentBgBase = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
+  const accentBg = ed ? ed.jadeSoft : accentBgBase
+  const accentFgBase = useColorModeValue('teal.700', 'teal.300')
+  const accentFg = ed ? ed.jade : accentFgBase
+  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const dividerColor = ed ? ed.line : dividerColorBase
   const deleteHoverBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const dialogBgBase = useColorModeValue('#ffffff', '#0a0a0a')
   const dialogBg = ed ? ed.modal : dialogBgBase
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
-  const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const metaBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const metaBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const metaBg = ed ? ed.panelRaised : metaBgBase
+  const metaBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const metaBorder = ed ? ed.line : metaBorderBase
+  const cardShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.72), 0 10px 26px -22px rgba(19,56,37,0.34)',
+    '0 4px 18px -12px rgba(0,0,0,0.68)',
+  )
+  const cardHoverShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.86), 0 16px 34px -22px rgba(8,122,80,0.38)',
+    '0 8px 24px -14px rgba(0,0,0,0.78)',
+  )
   const activeStripe = useColorModeValue('linear-gradient(180deg, #14b8a6, #2563eb)', 'linear-gradient(180deg, #2dd4bf, #60a5fa)')
   const amountPanelBg = useColorModeValue(
     'linear-gradient(135deg, rgba(20,184,166,0.10), rgba(37,99,235,0.08))',
@@ -192,13 +209,14 @@ export default function RecurringTransactionCard({
         border="1px solid"
         borderColor={cardBorder}
         borderRadius="xl"
-        boxShadow="0 1px 2px rgba(0,0,0,0.04)"
+        boxShadow={ed ? cardShadow : '0 1px 2px rgba(0,0,0,0.04)'}
+        backdropFilter={ed ? 'none' : undefined}
         overflow="hidden"
         position="relative"
         transition="border-color 0.18s ease, box-shadow 0.18s ease"
         _hover={{
           borderColor: cardHoverBorder,
-          boxShadow: '0 3px 10px -6px rgba(0,0,0,0.16)',
+          boxShadow: ed ? cardHoverShadow : '0 3px 10px -6px rgba(0,0,0,0.16)',
         }}
       >
         {recurringTransaction.active && (

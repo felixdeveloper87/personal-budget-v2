@@ -3,8 +3,6 @@ import {
   Badge,
   Box,
   Button,
-  Card,
-  CardBody,
   HStack,
   Icon,
   SimpleGrid,
@@ -17,7 +15,7 @@ import { listRecurringTransactions } from '../api'
 import type { RecurringTransaction } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import RecurringTransactionCard from '../components/recurring/RecurringTransactionCard'
-import { PageHeader, SectionHeader } from '../components/ui'
+import { PageHeader, SectionCard, SectionHeader } from '../components/ui'
 import {
   CalendarClock,
   Plus,
@@ -25,6 +23,7 @@ import {
   TrendingUp,
 } from '../components/ui/icons'
 import { ToastService } from '../services/toast'
+import { useEd } from '../editorial'
 
 interface FixedPaymentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -42,9 +41,9 @@ export default function FixedPaymentsPage({
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
 
-  const borderColor = useColorModeValue('gray.200', 'gray.800')
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const softBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const ed = useEd()
+  const softBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const softBg = ed ? ed.panelRaised : softBgBase
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -122,7 +121,6 @@ export default function FixedPaymentsPage({
                 label="Fixed income"
                 value={money(summary.income)}
                 color="green.500"
-                borderColor={borderColor}
                 bg={softBg}
               />
               <MetricCard
@@ -130,7 +128,6 @@ export default function FixedPaymentsPage({
                 label="Fixed expenses"
                 value={money(summary.expenses)}
                 color="red.500"
-                borderColor={borderColor}
                 bg={softBg}
               />
               <MetricCard
@@ -138,13 +135,12 @@ export default function FixedPaymentsPage({
                 label="Monthly net"
                 value={money(summary.net)}
                 color={summary.net < 0 ? 'red.500' : 'blue.500'}
-                borderColor={borderColor}
                 bg={softBg}
               />
             </SimpleGrid>
 
-            <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
-              <CardBody p={{ base: 4, md: 6 }}>
+            <SectionCard bare>
+              <Box p={{ base: 4, md: 6 }}>
                 <VStack align="stretch" spacing={5}>
                   <SectionHeader
                     icon={CalendarClock}
@@ -166,12 +162,12 @@ export default function FixedPaymentsPage({
                     </SimpleGrid>
                   )}
                 </VStack>
-              </CardBody>
-            </Card>
+              </Box>
+            </SectionCard>
 
             {summary.cancelled.length > 0 && (
-              <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
-                <CardBody p={{ base: 4, md: 6 }}>
+              <SectionCard bare>
+                <Box p={{ base: 4, md: 6 }}>
                   <VStack align="stretch" spacing={5}>
                     <SectionHeader
                       icon={CalendarClock}
@@ -194,8 +190,8 @@ export default function FixedPaymentsPage({
                       ))}
                     </SimpleGrid>
                   </VStack>
-                </CardBody>
-              </Card>
+                </Box>
+              </SectionCard>
             )}
           </>
         )}
@@ -209,7 +205,6 @@ interface MetricCardProps {
   label: string
   value: string
   color: string
-  borderColor: string
   bg: string
 }
 
@@ -218,12 +213,11 @@ function MetricCard({
   label,
   value,
   color,
-  borderColor,
   bg,
 }: MetricCardProps) {
   return (
-    <Card border="1px solid" borderColor={borderColor} boxShadow="sm">
-      <CardBody p={4}>
+    <SectionCard>
+      <Box p={4}>
         <HStack spacing={3}>
           <Box
             w={9}
@@ -246,8 +240,8 @@ function MetricCard({
             </Text>
           </Box>
         </HStack>
-      </CardBody>
-    </Card>
+      </Box>
+    </SectionCard>
   )
 }
 
