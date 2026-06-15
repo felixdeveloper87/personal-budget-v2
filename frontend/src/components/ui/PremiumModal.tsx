@@ -51,7 +51,7 @@ export default function PremiumModal({
         ? 'rgba(3, 8, 5, 0.74)'
         : overlayBg
     const resolvedContentBg = ed
-        ? ed.solid
+        ? ed.modal
         : requestedBg ?? requestedBackground ?? contentBg
     const resolvedBorder = ed ? ed.lineStrong : borderColor
     const resolvedShadow = ed

@@ -8,6 +8,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import { useEd } from '../editorial'
 import { AlertCircle, Layers, TrendingDown, TrendingUp } from '../components/ui/icons'
 
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -56,10 +57,13 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
   )
 
   /* ── Surface tokens ── */
-  const surface = useColorModeValue(
+  const ed = useEd()
+  const surfaceBase = useColorModeValue(
     'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
     'linear-gradient(135deg, rgba(18, 18, 22, 0.75) 0%, rgba(10, 10, 12, 0.85) 100%)',
   )
+  // Card translúcido padrão (ed.panel) pra consistência com o resto da plataforma.
+  const surface = ed ? ed.panel : surfaceBase
   const border = useColorModeValue('rgba(0, 0, 0, 0.06)', 'rgba(255, 255, 255, 0.04)')
   const headerBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
   const infoBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.10)')
@@ -106,7 +110,8 @@ export default function CategoriesPage({ initialTab }: CategoriesPageProps) {
 
   const statValueColor = useColorModeValue('gray.900', 'whiteAlpha.900')
   const statLabelColor = useColorModeValue('gray.500', 'gray.400')
-  const statCardBg = useColorModeValue('white', 'rgba(255, 255, 255, 0.03)')
+  const statCardBgBase = useColorModeValue('white', 'rgba(255, 255, 255, 0.03)')
+  const statCardBg = ed ? ed.panel : statCardBgBase
   const statCardBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
   const redAccent = useColorModeValue('red.500', 'red.300')
   const greenAccent = useColorModeValue('green.500', 'green.300')

@@ -34,6 +34,7 @@ import {
 } from '../../api'
 import { FinancialAccount, PaymentMethod, RecurringTransaction } from '../../types'
 import { ToastService } from '../../services/toast'
+import { useEd } from '../../editorial'
 
 interface RecurringTransactionCardProps {
   recurringTransaction: RecurringTransaction
@@ -66,7 +67,10 @@ export default function RecurringTransactionCard({
   const { isOpen, onOpen, onClose } = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
-  const cardBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  const ed = useEd()
+  const cardBgBase = useColorModeValue('#ffffff', 'whiteAlpha.50')
+  // Card translúcido padrão (ed.panel) nos dois modos — consistente com a plataforma.
+  const cardBg = ed ? ed.panel : cardBgBase
   const cardBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const cardHoverBorder = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
   const titleColor = useColorModeValue('gray.900', 'gray.50')
@@ -75,7 +79,8 @@ export default function RecurringTransactionCard({
   const accentFg = useColorModeValue('teal.700', 'teal.300')
   const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const deleteHoverBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const dialogBg = useColorModeValue('#ffffff', '#0a0a0a')
+  const dialogBgBase = useColorModeValue('#ffffff', '#0a0a0a')
+  const dialogBg = ed ? ed.modal : dialogBgBase
   const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
   const warningChipFg = useColorModeValue('red.600', 'red.300')
   const metaBg = useColorModeValue('gray.50', 'whiteAlpha.50')

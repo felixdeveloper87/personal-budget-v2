@@ -12,6 +12,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { Calendar, Filter, List, ReceiptText } from '../components/ui/icons'
+import { useEd } from '../editorial'
 import { DateBasisToggle } from '../components/ui'
 import {
   getTransactionDate,
@@ -44,10 +45,13 @@ export default function AllTransactionsSection({
   }, [transactions, dateBasis])
 
   /* ── Surface tokens ── */
-  const surface = useColorModeValue(
+  const ed = useEd()
+  const surfaceBase = useColorModeValue(
     'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
     'linear-gradient(135deg, rgba(18, 18, 22, 0.75) 0%, rgba(10, 10, 12, 0.85) 100%)',
   )
+  // Card translúcido padrão (ed.panel) pra consistência com o resto da plataforma.
+  const surface = ed ? ed.panel : surfaceBase
   const border = useColorModeValue('rgba(0, 0, 0, 0.06)', 'rgba(255, 255, 255, 0.04)')
   const headerBg = useColorModeValue(
     'linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)',

@@ -7,7 +7,6 @@ import {
   Progress,
   Text,
   VStack,
-  useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useEd } from '../../editorial'
@@ -32,12 +31,11 @@ export default function AccountTile({
   onArchive,
 }: AccountTileProps) {
   const ed = useEd()
-  const { colorMode } = useColorMode()
   const border = useColorModeValue('gray.200', 'whiteAlpha.200')
   const muted = useColorModeValue('gray.500', 'gray.400')
   const subtleBase = useColorModeValue('gray.50', 'whiteAlpha.50')
-  // No dark o tile fica mais opaco (ed.panel) pra o backdrop não vazar tão forte.
-  const subtle = ed && colorMode === 'dark' ? ed.panel : subtleBase
+  // Card translúcido padrão (ed.panel) nos dois modos — consistente com a plataforma.
+  const subtle = ed ? ed.panel : subtleBase
   const iconBoxBg = useColorModeValue('white', 'whiteAlpha.100')
 
   const hasMeta = Boolean(getBankMeta(account.institution))

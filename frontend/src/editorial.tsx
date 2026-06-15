@@ -32,14 +32,16 @@ export const EDITORIAL_DARK = {
   /** Dark glyph colour for text sitting on a jade/gold accent fill. */
   onAccent: '#07100a',
 
-  /** Card surface (Quick actions, Installments, Fixed payments, etc.).
-   *  Near-black, neutral — kept darker than the page bg so cards read black,
-   *  not grey and not green. Translúcido o bastante pro guilloché do backdrop
-   *  aparecer através dos cards (Home + todas as páginas). */
+  /** ── Superfícies de card (fonte única) ──────────────────────────────
+   *  `panel`  → card padrão da plataforma (páginas). Leve transparência pro
+   *             backdrop aparecer sem atrapalhar a leitura.
+   *  `modal`  → diálogos/modais. Um pouco mais opaco (conteúdo denso) + o blur
+   *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
+   *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
+   *  `panelRaised` → painéis internos (card dentro de card). */
   panel: 'rgba(10, 11, 10, 0.80)',
-  /** Opaque surface for modals / dropdowns (no bleed-through). */
+  modal: 'rgba(14, 15, 14, 0.88)',
   solid: '#0e0f0e',
-  /** Slightly raised panel (cards inside cards). */
   panelRaised: 'rgba(239, 234, 224, 0.03)',
   line: 'rgba(239, 234, 224, 0.10)',
   lineStrong: 'rgba(239, 234, 224, 0.18)',
@@ -82,7 +84,9 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   red: '#c0473f',
   onAccent: '#08120c',
 
-  panel: 'rgba(255, 253, 247, 0.62)',
+  // Superfícies de card — ver doc no EDITORIAL_DARK.
+  panel: 'rgba(255, 253, 247, 0.80)',
+  modal: 'rgba(255, 253, 247, 0.88)',
   solid: '#fffdf7',
   panelRaised: 'rgba(20, 36, 28, 0.035)',
   line: 'rgba(20, 36, 28, 0.12)',
