@@ -72,13 +72,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   return (
     <Box
-      position="relative"
       minH="100vh"
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 4, md: 7 }}
       maxW="appContent"
       mx="auto"
-      overflow="hidden"
     >
       <VStack spacing={{ base: 3, md: 4 }} align="stretch">
         <DashboardHeader

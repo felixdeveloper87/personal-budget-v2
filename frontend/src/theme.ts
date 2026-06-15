@@ -18,7 +18,6 @@ const GRADIENTS = {
 // textStyle="display" | "body" | "mono"), para não repetir a família em cada arquivo.
 const FONTS = {
   display: "'Instrument Serif', Georgia, serif",
-  body: "'Schibsted Grotesk', system-ui, sans-serif",
   mono: "'Spline Sans Mono', ui-monospace, monospace",
 } as const
 
@@ -98,13 +97,12 @@ const theme = extendTheme({
     sm: '1.05rem', // 14 → 15px
   },
   // Tokens de tipografia reutilizáveis. Use `textStyle="display"` (serifada
-  // editorial, = padrão), `"mono"` (labels/números) ou `"sans"` (escape hatch
-  // p/ Schibsted Grotesk onde o serif não couber). Carregam apenas a família —
-  // peso/tamanho/spacing ficam por conta de cada componente, pois variam.
+  // editorial, = padrão) ou `"mono"` (labels/números) em vez de repetir
+  // `fontFamily`. Carregam só a família — peso/tamanho/spacing ficam por conta
+  // de cada componente, pois variam.
   textStyles: {
     display: { fontFamily: FONTS.display },
     body: { fontFamily: FONTS.display },
-    sans: { fontFamily: FONTS.body },
     mono: { fontFamily: FONTS.mono },
   },
   sizes: {

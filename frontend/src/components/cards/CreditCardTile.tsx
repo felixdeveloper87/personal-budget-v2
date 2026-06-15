@@ -7,8 +7,10 @@ import {
   IconButton,
   Text,
   VStack,
+  useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { useEd } from '../../editorial'
 import type { PaymentMethod } from '../../types'
 import { BankLogo, getBankMeta } from '../ui'
 import { CreditCard, Pencil, Trash2 } from '../ui/icons'
@@ -38,9 +40,13 @@ export default function CreditCardTile({
   onEdit,
   onDelete,
 }: CreditCardTileProps) {
+  const ed = useEd()
+  const { colorMode } = useColorMode()
   const border = useColorModeValue('gray.200', 'whiteAlpha.200')
   const muted = useColorModeValue('gray.500', 'gray.400')
-  const subtle = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const subtleBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  // No dark o tile fica mais opaco (ed.panel) pra o backdrop não vazar tão forte.
+  const subtle = ed && colorMode === 'dark' ? ed.panel : subtleBase
   const iconBoxBg = useColorModeValue('white', 'whiteAlpha.100')
   const hasMeta = Boolean(getBankMeta(card.issuer))
 

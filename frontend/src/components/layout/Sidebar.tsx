@@ -16,7 +16,6 @@ import { useEd } from '../../editorial'
 import {
   CaretDoubleLeft,
   SidebarSimple,
-  type LucideIcon,
 } from '../ui/icons'
 import type { AppPage, NavItem } from './header/navigation.config'
 

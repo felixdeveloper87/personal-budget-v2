@@ -63,8 +63,6 @@ export const EDITORIAL_DARK = {
   bgGradient: 'linear-gradient(180deg, #0b100d 0%, #070a08 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
-  fontBody: "'Schibsted Grotesk', system-ui, sans-serif",
-  fontMono: "'Spline Sans Mono', ui-monospace, monospace",
 } as const
 
 export type EditorialTokens = {
@@ -103,8 +101,6 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   bgGradient: 'linear-gradient(180deg, #faf7f0 0%, #f5f1e8 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
-  fontBody: "'Schibsted Grotesk', system-ui, sans-serif",
-  fontMono: "'Spline Sans Mono', ui-monospace, monospace",
 }
 
 /** Back-compat alias — defaults to the dark palette. */

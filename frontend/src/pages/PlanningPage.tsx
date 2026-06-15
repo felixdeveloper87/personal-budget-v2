@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   AlertDescription,
@@ -13,6 +13,7 @@ import {
   Heading,
   HStack,
   Icon,
+  IconButton,
   Input,
   NumberInput,
   NumberInputField,
@@ -34,7 +35,14 @@ import {
 } from '../api'
 import { CashFlowForecast, CategoryBudget } from '../types'
 import { ToastService } from '../services/toast'
-import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2 } from '../components/ui/icons'
+import {
+  AlertTriangle,
+  ArrowRight,
+  CalendarClock,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+} from '../components/ui/icons'
 import { PageHeader } from '../components/ui'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import { useDashboardData } from '../hooks/useDashboardData'
@@ -67,6 +75,9 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   const [saving, setSaving] = useState(false)
   const [incomePlan, setIncomePlan] = useState(0)
   const [savingIncomePlan, setSavingIncomePlan] = useState(false)
+  const [isDraggingForecast, setIsDraggingForecast] = useState(false)
+  const forecastCarouselRef = useRef<HTMLDivElement>(null)
+  const forecastDragRef = useRef({ startX: 0, scrollLeft: 0 })
 
   const borderColor = useColorModeValue('gray.200', 'gray.800')
   const muted = useColorModeValue('gray.600', 'gray.400')
@@ -176,6 +187,53 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   const basisLabel = forecast?.projectionBasisMonths.map(monthLabel).join(', ')
   const basisCount = forecast?.projectionBasisMonths.length ?? 0
   const variableLabel = basisCount > 0 ? `Variable (${basisCount}-mo avg)` : 'Variable'
+
+  const scrollForecast = (direction: -1 | 1) => {
+    const carousel = forecastCarouselRef.current
+    if (!carousel) return
+
+    const card = carousel.querySelector<HTMLElement>('[data-forecast-card]')
+    const gap = 12
+    carousel.scrollBy({
+      left: direction * ((card?.offsetWidth ?? carousel.clientWidth * 0.85) + gap),
+      behavior: 'smooth',
+    })
+  }
+
+  const startForecastDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0) return
+
+    const carousel = forecastCarouselRef.current
+    if (!carousel) return
+
+    forecastDragRef.current = {
+      startX: event.clientX,
+      scrollLeft: carousel.scrollLeft,
+    }
+    setIsDraggingForecast(true)
+    carousel.setPointerCapture(event.pointerId)
+  }
+
+  const moveForecastDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingForecast || event.pointerType !== 'mouse') return
+
+    const carousel = forecastCarouselRef.current
+    if (!carousel) return
+
+    event.preventDefault()
+    carousel.scrollLeft =
+      forecastDragRef.current.scrollLeft - (event.clientX - forecastDragRef.current.startX)
+  }
+
+  const stopForecastDrag = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse') return
+
+    const carousel = forecastCarouselRef.current
+    if (carousel?.hasPointerCapture(event.pointerId)) {
+      carousel.releasePointerCapture(event.pointerId)
+    }
+    setIsDraggingForecast(false)
+  }
 
   return (
     <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
@@ -476,71 +534,119 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
                     installments + fixed + average of your last {basisCount || 3} months of one-off spending.
                   </Text>
                 </Box>
-                {(forecast?.months ?? []).map((month) => {
-                  const confidence = month.confidencePercent
-                  const confidenceScheme =
-                    confidence >= 66 ? 'green' : confidence >= 33 ? 'orange' : 'gray'
-                  return (
-                    <Box
-                      key={month.month}
-                      p={3}
-                      border="1px solid"
-                      borderColor={month.negative ? 'red.400' : borderColor}
-                      borderRadius="xl"
-                    >
-                      <HStack justify="space-between" align="flex-start" spacing={4}>
-                        <Box>
-                          <Text fontWeight={800}>{monthLabel(month.month)}</Text>
-                          <Badge mt={1} colorScheme={confidenceScheme}>{confidence}% committed</Badge>
-                        </Box>
-                        <Box textAlign="right" flexShrink={0}>
-                          <Text fontWeight={900} fontSize="lg" color={month.negative ? 'red.500' : undefined}>
-                            {money(month.projectedClosingBalance)}
-                          </Text>
-                          <HStack justify="flex-end" spacing={2} mt={1}>
-                            <Text fontSize="xs" color={muted}>net</Text>
-                            <Badge colorScheme={month.netCashFlow >= 0 ? 'green' : 'red'}>
-                              {signedMoney(month.netCashFlow)}
-                            </Badge>
-                          </HStack>
-                        </Box>
-                      </HStack>
-
-                      <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3} mt={3}>
-                        <Box>
-                          <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
-                            Income
-                          </Text>
-                          <Text fontWeight={700} color="green.500">
-                            {signedMoney(month.fixedIncome + month.estimatedIncome)}
-                          </Text>
-                          <Text fontSize="xs" color={muted}>
-                            Recurring {money(month.fixedIncome)} · {forecast?.hasIncomePlan ? 'Planned' : 'Estimated'} {money(month.estimatedIncome)}
-                          </Text>
-                        </Box>
-                        <Box>
-                          <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
-                            Expenses
-                          </Text>
-                          <Text fontWeight={700} color="red.500">
-                            {signedMoney(-(month.installmentExpense + month.fixedExpense + month.estimatedVariableExpense))}
-                          </Text>
-                          <Text fontSize="xs" color={muted}>
-                            Installments {money(month.installmentExpense)} · Fixed {money(month.fixedExpense)} · {variableLabel} {money(month.estimatedVariableExpense)}
-                          </Text>
-                        </Box>
-                      </SimpleGrid>
-
-                      <Progress
-                        mt={3}
-                        value={confidence}
-                        colorScheme={confidenceScheme}
-                        borderRadius="full"
+                {!!forecast?.months.length && (
+                  <Box position="relative">
+                    <HStack justify="flex-end" spacing={2} mb={2}>
+                      <IconButton
+                        aria-label="Previous forecast month"
+                        icon={<Icon as={ChevronLeft} boxSize={4} />}
                         size="sm"
+                        variant="outline"
+                        borderRadius="full"
+                        onClick={() => scrollForecast(-1)}
                       />
+                      <IconButton
+                        aria-label="Next forecast month"
+                        icon={<Icon as={ChevronRight} boxSize={4} />}
+                        size="sm"
+                        variant="outline"
+                        borderRadius="full"
+                        onClick={() => scrollForecast(1)}
+                      />
+                    </HStack>
+                    <Box
+                      ref={forecastCarouselRef}
+                      onPointerDown={startForecastDrag}
+                      onPointerMove={moveForecastDrag}
+                      onPointerUp={stopForecastDrag}
+                      onPointerCancel={stopForecastDrag}
+                      onLostPointerCapture={() => setIsDraggingForecast(false)}
+                      display="flex"
+                      gap={3}
+                      overflowX="auto"
+                      overflowY="hidden"
+                      pb={2}
+                      cursor={isDraggingForecast ? 'grabbing' : 'grab'}
+                      scrollSnapType={isDraggingForecast ? 'none' : 'x mandatory'}
+                      userSelect={isDraggingForecast ? 'none' : 'auto'}
+                      sx={{
+                        WebkitOverflowScrolling: 'touch',
+                        scrollbarWidth: 'none',
+                        '&::-webkit-scrollbar': { display: 'none' },
+                      }}
+                    >
+                      {forecast.months.map((month) => {
+                        const confidence = month.confidencePercent
+                        const confidenceScheme =
+                          confidence >= 66 ? 'green' : confidence >= 33 ? 'orange' : 'gray'
+                        return (
+                          <Box
+                            key={month.month}
+                            data-forecast-card
+                            flex={{ base: '0 0 88%', sm: '0 0 70%', lg: '0 0 calc(50% - 6px)' }}
+                            minW={0}
+                            p={3}
+                            border="1px solid"
+                            borderColor={month.negative ? 'red.400' : borderColor}
+                            borderRadius="xl"
+                            scrollSnapAlign="start"
+                          >
+                            <HStack justify="space-between" align="flex-start" spacing={4}>
+                              <Box>
+                                <Text fontWeight={800}>{monthLabel(month.month)}</Text>
+                                <Badge mt={1} colorScheme={confidenceScheme}>{confidence}% committed</Badge>
+                              </Box>
+                              <Box textAlign="right" flexShrink={0}>
+                                <Text fontWeight={900} fontSize="lg" color={month.negative ? 'red.500' : undefined}>
+                                  {money(month.projectedClosingBalance)}
+                                </Text>
+                                <HStack justify="flex-end" spacing={2} mt={1}>
+                                  <Text fontSize="xs" color={muted}>net</Text>
+                                  <Badge colorScheme={month.netCashFlow >= 0 ? 'green' : 'red'}>
+                                    {signedMoney(month.netCashFlow)}
+                                  </Badge>
+                                </HStack>
+                              </Box>
+                            </HStack>
+
+                            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3} mt={3}>
+                              <Box>
+                                <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
+                                  Income
+                                </Text>
+                                <Text fontWeight={700} color="green.500">
+                                  {signedMoney(month.fixedIncome + month.estimatedIncome)}
+                                </Text>
+                                <Text fontSize="xs" color={muted}>
+                                  Recurring {money(month.fixedIncome)} · {forecast.hasIncomePlan ? 'Planned' : 'Estimated'} {money(month.estimatedIncome)}
+                                </Text>
+                              </Box>
+                              <Box>
+                                <Text fontSize="xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.05em">
+                                  Expenses
+                                </Text>
+                                <Text fontWeight={700} color="red.500">
+                                  {signedMoney(-(month.installmentExpense + month.fixedExpense + month.estimatedVariableExpense))}
+                                </Text>
+                                <Text fontSize="xs" color={muted}>
+                                  Installments {money(month.installmentExpense)} · Fixed {money(month.fixedExpense)} · {variableLabel} {money(month.estimatedVariableExpense)}
+                                </Text>
+                              </Box>
+                            </SimpleGrid>
+
+                            <Progress
+                              mt={3}
+                              value={confidence}
+                              colorScheme={confidenceScheme}
+                              borderRadius="full"
+                              size="sm"
+                            />
+                          </Box>
+                        )
+                      })}
                     </Box>
-                  )
-                })}
+                  </Box>
+                )}
                 {!forecast?.months.length && (
                   <Text color={muted}>No forecast is available yet.</Text>
                 )}
