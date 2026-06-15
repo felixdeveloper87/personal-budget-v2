@@ -124,7 +124,7 @@ export default function SectionHeader({
 
         <VStack align="flex-start" spacing={0.5} minW={0} justify="center">
           <Text
-            fontFamily={ed ? ed.fontDisplay : undefined}
+            textStyle={ed ? 'display' : undefined}
             fontWeight={ed ? 400 : 800}
             fontSize={ed ? (dense ? 'lg' : { base: 'lg', sm: 'xl' }) : (dense ? 'sm' : { base: 'md', sm: 'lg' })}
             color={titleColor}

@@ -151,7 +151,7 @@ export default function SummaryStatsStrip({
           <HStack spacing={1.5} minW={0}>
             <Icon as={metric.icon} boxSize={3} color={metric.accent} weight="bold" flexShrink={0} />
             <Text
-              fontFamily={ed ? ed.fontMono : undefined}
+              textStyle={ed ? 'mono' : undefined}
               fontSize="2xs"
               fontWeight={700}
               color={labelColor}
@@ -163,7 +163,7 @@ export default function SummaryStatsStrip({
             </Text>
           </HStack>
           <Text
-            fontFamily={ed ? ed.fontDisplay : undefined}
+            textStyle={ed ? 'display' : undefined}
             fontSize={ed ? { base: 'xl', md: '2xl' } : { base: 'md', md: 'lg' }}
             fontWeight={ed ? 400 : 800}
             color={metric.accent}

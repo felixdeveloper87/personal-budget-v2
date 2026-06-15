@@ -26,8 +26,6 @@ export default function Footer() {
   const muted = ed?.muted ?? fallbackMuted
   const line = ed?.line ?? fallbackLine
   const jade = ed?.jade ?? fallbackJade
-  const displayFont = ed?.fontDisplay ?? "'Instrument Serif', Georgia, serif"
-  const monoFont = ed?.fontMono ?? "'Spline Sans Mono', ui-monospace, monospace"
   const year = new Date().getFullYear()
 
   return (
@@ -45,7 +43,7 @@ export default function Footer() {
     >
       <Text
         aria-hidden
-        fontFamily={displayFont}
+        textStyle="display"
         fontSize={{ base: 'clamp(3.25rem, 15vw, 7rem)', md: 'clamp(5rem, 11vw, 11rem)' }}
         fontWeight={400}
         lineHeight={0.9}
@@ -90,7 +88,7 @@ export default function Footer() {
         <Flex
           align="center"
           gap={{ base: 3, md: 5 }}
-          fontFamily={monoFont}
+          textStyle="mono"
           fontSize="xs"
           letterSpacing="0.04em"
           flexWrap="wrap"

@@ -45,9 +45,6 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
     jade,
     gold,
     red,
-    fontBody: bodyFont,
-    fontDisplay: displayFont,
-    fontMono: monoFont,
   } = ed
 
   const avatarGradient = `linear-gradient(135deg, ${jade}, ${gold})`
@@ -57,7 +54,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
   const menuItem = {
     bg: 'transparent',
     color: text,
-    fontFamily: bodyFont,
+    textStyle: 'body',
     fontWeight: 500,
     fontSize: 'sm',
     px: 3,
@@ -117,7 +114,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
           </Box>
           <Text
             display={{ base: 'none', md: 'block' }}
-            fontFamily={displayFont}
+            textStyle="display"
             fontSize="md"
             color={text}
             maxW="100px"
@@ -134,7 +131,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
         minW="276px"
         bg={surface}
         color={text}
-        fontFamily={bodyFont}
+        textStyle="body"
         border="1px solid"
         borderColor={lineStrong}
         borderRadius="16px"
@@ -152,7 +149,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
             <VStack spacing={1} align="start" flex={1} minW={0}>
               <HStack spacing={2} w="full">
                 <Text
-                  fontFamily={displayFont}
+                  textStyle="display"
                   fontSize="lg"
                   lineHeight="1"
                   color={text}
@@ -169,7 +166,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
                   color={planColor}
                   border="1px solid"
                   borderColor={line}
-                  fontFamily={monoFont}
+                  textStyle="mono"
                   fontSize="2xs"
                   fontWeight={600}
                   textTransform="uppercase"
@@ -181,7 +178,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
               {displayEmail && (
                 <Text
                   w="full"
-                  fontFamily={monoFont}
+                  textStyle="mono"
                   fontSize="2xs"
                   color={muted}
                   letterSpacing="0.025em"
@@ -199,7 +196,7 @@ export default function UserMenu({ user, onOpenProfile, onOpenSettings, onLogout
             px={3}
             pt={2}
             pb={1.5}
-            fontFamily={monoFont}
+            textStyle="mono"
             fontSize="2xs"
             fontWeight={600}
             color={muted}

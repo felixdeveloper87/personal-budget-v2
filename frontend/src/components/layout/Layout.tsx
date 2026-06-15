@@ -86,7 +86,7 @@ export default function Layout({
       minH="100vh"
       bg={pal ? pal.bg : undefined}
       color={pal ? pal.cream : undefined}
-      fontFamily={pal ? pal.fontBody : undefined}
+      fontFamily={pal ? pal.fontDisplay : undefined}
     >
       {/* ─── Sidebar (md+ screens, logged-in, non-admin) ─── */}
       {showSidebar && (

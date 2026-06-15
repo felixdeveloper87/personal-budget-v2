@@ -285,7 +285,7 @@ export default function PeriodDatePicker({
         >
           <HStack spacing={2} minW={0} justify="center" w="full">
             <Text
-              fontFamily={ed ? ed.fontDisplay : undefined}
+              textStyle={ed ? 'display' : undefined}
               fontSize={ed ? { base: 'md', md: 'lg' } : { base: 'sm', md: 'md' }}
               fontWeight={ed ? 400 : 700}
               color={triggerLabelColor}

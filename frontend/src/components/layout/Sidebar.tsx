@@ -232,7 +232,7 @@ function SidebarHeader({
               <Text
                 fontSize={ed ? 'lg' : 'sm'}
                 fontWeight={ed ? 400 : 800}
-                fontFamily={ed ? ed.fontDisplay : undefined}
+                textStyle={ed ? 'display' : undefined}
                 color={textColor}
                 letterSpacing="-0.02em"
                 lineHeight={1.1}

@@ -66,7 +66,7 @@ export default function PageHeader({
         <VStack align="flex-start" spacing={0.5} minW={0}>
           <Text
             as="h1"
-            fontFamily={ed ? ed.fontDisplay : undefined}
+            textStyle={ed ? 'display' : undefined}
             fontSize={ed ? { base: '3xl', md: '4xl' } : { base: 'xl', md: '2xl' }}
             fontWeight={ed ? 400 : 800}
             color={titleColor}

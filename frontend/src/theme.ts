@@ -12,6 +12,16 @@ const GRADIENTS = {
   secondaryDark: 'linear-gradient(135deg, #1E1E20 0%, #2A2A2D 100%)',
 } as const
 
+// 🔤 Fontes da plataforma — fonte única de verdade.
+// Os mesmos valores da skin editorial (ver src/editorial.tsx). Reusados abaixo
+// em `fonts` (defaults do Chakra) e em `textStyles` (tokens reutilizáveis:
+// textStyle="display" | "body" | "mono"), para não repetir a família em cada arquivo.
+const FONTS = {
+  display: "'Instrument Serif', Georgia, serif",
+  body: "'Schibsted Grotesk', system-ui, sans-serif",
+  mono: "'Spline Sans Mono', ui-monospace, monospace",
+} as const
+
 const config: ThemeConfig = {
   initialColorMode: 'system',
   useSystemColorMode: true,
@@ -75,9 +85,27 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    heading: "'Instrument Serif', Georgia, serif",
-    body: "'Schibsted Grotesk', system-ui, sans-serif",
-    mono: "'Spline Sans Mono', ui-monospace, monospace",
+    // A serifada editorial é a fonte PADRÃO da plataforma (títulos e corpo).
+    heading: FONTS.display,
+    body: FONTS.display,
+    mono: FONTS.mono,
+  },
+  // Escala de tamanhos: subimos só os degraus PEQUENOS (~+1px), pois no serif
+  // ficavam apertados. Títulos usam `lg`/`xl`/`2xl`+ (intactos, defaults Chakra).
+  fontSizes: {
+    '2xs': '0.6875rem', // 10 → 11px
+    xs: '0.8125rem', // 12 → 13px
+    sm: '0.9375rem', // 14 → 15px
+  },
+  // Tokens de tipografia reutilizáveis. Use `textStyle="display"` (serifada
+  // editorial, = padrão), `"mono"` (labels/números) ou `"sans"` (escape hatch
+  // p/ Schibsted Grotesk onde o serif não couber). Carregam apenas a família —
+  // peso/tamanho/spacing ficam por conta de cada componente, pois variam.
+  textStyles: {
+    display: { fontFamily: FONTS.display },
+    body: { fontFamily: FONTS.display },
+    sans: { fontFamily: FONTS.body },
+    mono: { fontFamily: FONTS.mono },
   },
   sizes: {
     appContent: '1800px',
@@ -128,7 +156,7 @@ const theme = extendTheme({
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
-          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontFamily: FONTS.display,
           fontWeight: 400,
         },
         footer: {
@@ -157,7 +185,7 @@ const theme = extendTheme({
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
-          fontFamily: "'Instrument Serif', Georgia, serif",
+          fontFamily: FONTS.display,
           fontWeight: 400,
         },
         footer: {

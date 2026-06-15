@@ -81,7 +81,7 @@ export default function PremiumModal({
                 transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 bg={resolvedContentBg}
                 color={ed?.cream}
-                fontFamily={ed?.fontBody}
+                textStyle={ed ? 'body' : undefined}
                 backdropFilter={ed ? 'blur(22px) saturate(125%)' : 'blur(20px) saturate(180%)'}
                 borderRadius={{ base: 0, md: '18px' }}
                 border="1px solid"

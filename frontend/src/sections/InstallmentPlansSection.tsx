@@ -167,13 +167,13 @@ export default function InstallmentPlansSection({ onPageChange }: InstallmentPla
                 justify="space-between"
               >
                 <Text
-                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  textStyle={ed ? 'display' : undefined}
                   fontSize={ed ? 'xl' : 'lg'}
                   fontWeight={ed ? 400 : 700}
                   color={statsAmountColor}
                 >
                   {currencyFmt.format(totalMonthly)}
-                  <Text as="span" fontFamily={ed ? ed.fontMono : undefined} fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
+                  <Text as="span" textStyle={ed ? 'mono' : undefined} fontSize="xs" fontWeight={500} color={statsLabelColor}>/mo</Text>
                 </Text>
                 <Text fontSize="sm" fontWeight={600} color={statsLabelColor}>
                   {activeCount} active

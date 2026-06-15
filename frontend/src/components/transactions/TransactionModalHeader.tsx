@@ -60,7 +60,7 @@ export default function TransactionModalHeader({
       <VStack align="stretch" spacing={0.5}>
         <HStack align="center" justify="space-between" spacing={3}>
           <Text
-            fontFamily={ed.fontDisplay}
+            textStyle="display"
             fontWeight={400}
             fontSize={{ base: 'xl', sm: '2xl' }}
             color={ed.cream}
@@ -74,7 +74,7 @@ export default function TransactionModalHeader({
 
         <Text
           fontSize={{ base: 'xs', sm: 'sm' }}
-          fontFamily={ed.fontMono}
+          textStyle="mono"
           color={ed.muted}
           letterSpacing="0.025em"
           lineHeight="1.4"

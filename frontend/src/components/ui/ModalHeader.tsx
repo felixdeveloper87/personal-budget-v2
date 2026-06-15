@@ -101,7 +101,7 @@ export default function ModalHeader({
           </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
-              fontFamily={ed.fontDisplay}
+              textStyle="display"
               fontWeight={400}
               fontSize={{ base: 'lg', sm: 'xl' }}
               color={ed.cream}
@@ -112,7 +112,7 @@ export default function ModalHeader({
             </Text>
             {caption && (
               <Text
-                fontFamily={ed.fontMono}
+                textStyle="mono"
                 fontSize={{ base: '2xs', sm: 'xs' }}
                 color={ed.muted}
                 letterSpacing="0.025em"

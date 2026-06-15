@@ -371,7 +371,7 @@ export default function Logo({ user, onClick }: LogoProps) {
         >
           <Text
             as="span"
-            fontFamily={ed ? ed.fontDisplay : undefined}
+            textStyle={ed ? 'display' : undefined}
             fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
             fontWeight={ed ? 400 : 600}
             letterSpacing="-0.02em"
@@ -398,7 +398,7 @@ export default function Logo({ user, onClick }: LogoProps) {
 
           <Text
             as="span"
-            fontFamily={ed ? ed.fontDisplay : undefined}
+            textStyle={ed ? 'display' : undefined}
             fontStyle={ed ? 'italic' : undefined}
             fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
             fontWeight={ed ? 400 : 800}

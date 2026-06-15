@@ -152,7 +152,7 @@ export default function DiscoverCard({ item, onClick }: DiscoverCardProps) {
           </Text>
           {item.value && (
             <Text
-              fontFamily={ed ? ed.fontDisplay : undefined}
+              textStyle={ed ? 'display' : undefined}
               fontSize={ed ? '2xl' : 'xl'}
               fontWeight={ed ? 400 : 800}
               color={chipFg}

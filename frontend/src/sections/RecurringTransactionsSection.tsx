@@ -164,13 +164,13 @@ export default function RecurringTransactionsSection({
                 justify="space-between"
               >
                 <Text
-                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  textStyle={ed ? 'display' : undefined}
                   fontSize={ed ? 'xl' : 'lg'}
                   fontWeight={ed ? 400 : 700}
                   color={monthlyExpense > 0 ? statsAmountColor : statsIncomeColor}
                 >
                   {currencyFmt.format(monthlyExpense > 0 ? monthlyExpense : monthlyIncome)}
-                  <Text as="span" fontFamily={ed ? ed.fontMono : undefined} fontSize="xs" fontWeight={500} color={statsLabelColor}>
+                  <Text as="span" textStyle={ed ? 'mono' : undefined} fontSize="xs" fontWeight={500} color={statsLabelColor}>
                     /mo
                   </Text>
                 </Text>

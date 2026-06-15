@@ -409,7 +409,7 @@ export default function InstallmentPlanCard({
                   Per installment
                 </Text>
                 <Text
-                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  textStyle={ed ? 'display' : undefined}
                   fontSize={{ base: 'xl', md: '2xl' }}
                   fontWeight={ed ? 400 : 800}
                   color={valueColor}
@@ -423,7 +423,7 @@ export default function InstallmentPlanCard({
                   Total
                 </Text>
                 <Text
-                  fontFamily={ed ? ed.fontDisplay : undefined}
+                  textStyle={ed ? 'display' : undefined}
                   fontSize={{ base: 'md', md: 'lg' }}
                   fontWeight={ed ? 400 : 700}
                   color={titleColor}
