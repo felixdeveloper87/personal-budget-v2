@@ -85,7 +85,9 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   onAccent: '#08120c',
 
   // Superfícies de card — ver doc no EDITORIAL_DARK.
-  panel: 'rgba(255, 253, 247, 0.80)',
+  // Light paper needs a little more transparency so the guilloche remains
+  // visible through large surfaces, matching the perceived dark-mode depth.
+  panel: 'rgba(255, 253, 247, 0.68)',
   modal: 'rgba(255, 253, 247, 0.88)',
   solid: '#fffdf7',
   panelRaised: 'rgba(20, 36, 28, 0.035)',
@@ -244,7 +246,9 @@ export function EditorialBackdrop({ opacity }: { opacity?: number }) {
   const resolved = opacity ?? (colorMode === 'dark' ? 0.45 : 0.22)
   return (
     <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
-      <Guilloche n={30} rx={300} ry={120} opacity={resolved} />
+      <Box position="sticky" top={0} h="100vh" overflow="hidden">
+        <Guilloche n={30} rx={300} ry={120} opacity={resolved} />
+      </Box>
     </Box>
   )
 }
