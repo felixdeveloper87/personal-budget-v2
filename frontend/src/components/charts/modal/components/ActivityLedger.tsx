@@ -1,7 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import {
   Box,
-  Button,
   Flex,
   HStack,
   Icon,
@@ -18,7 +17,6 @@ import TransactionLedgerRow from '../../../transactions/TransactionLedgerRow'
 import {
   ArrowDownRight,
   ArrowUpRight,
-  ChevronDown,
   ReceiptText,
 } from '../../../ui/icons'
 
@@ -41,8 +39,6 @@ interface DayGroup {
   items: Transaction[]
   net: number
 }
-
-const INITIAL_VISIBLE_ROWS = 8
 
 /* -------------------------------------------------------------------------- */
 /* Component                                                                   */
@@ -68,8 +64,7 @@ export interface ActivityLedgerProps {
  *    than one day, e.g. a whole month in the year view).
  *  - Each row: category-tinted icon tile, description + badges, meta line,
  *    signed amount and schedule hint.
- *  - Long lists collapse to the first rows with a "Show all" control —
- *    remount with a `key` per bucket to reset.
+ *  - Every transaction in the bucket is rendered (no collapse).
  */
 export default function ActivityLedger({
   transactions,
@@ -79,8 +74,6 @@ export default function ActivityLedger({
   hasSelection,
   dateBasis = 'activity',
 }: ActivityLedgerProps) {
-  const [expanded, setExpanded] = useState(false)
-
   const groups = useMemo<DayGroup[]>(() => {
     const map = new Map<string, DayGroup>()
     for (const transaction of transactions) {
@@ -100,8 +93,6 @@ export default function ActivityLedger({
 
   const showDayHeaders = groups.length > 1
   const totalRows = transactions.length
-  const visibleLimit = expanded ? totalRows : INITIAL_VISIBLE_ROWS
-  const hiddenCount = Math.max(0, totalRows - visibleLimit)
 
   // ── Theme tokens ──────────────────────────────────────────────────────
   const ed = useEd()
@@ -124,8 +115,6 @@ export default function ActivityLedger({
   const netPositive = useColorModeValue('green.600', 'green.300')
   const netNegative = useColorModeValue('red.500', 'red.300')
   const emptyIconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const showAllColor = useColorModeValue('blue.600', 'blue.300')
-  const showAllHoverBg = useColorModeValue('blue.50', 'whiteAlpha.100')
 
   // ── Empty state ───────────────────────────────────────────────────────
   if (transactions.length === 0) {
@@ -162,8 +151,6 @@ export default function ActivityLedger({
       </Box>
     )
   }
-
-  let renderedRows = 0
 
   return (
     <Box
@@ -239,8 +226,6 @@ export default function ActivityLedger({
 
       {/* ── Rows grouped by day ──────────────────────────────────────── */}
       {groups.map((group) => {
-        if (renderedRows >= visibleLimit) return null
-
         const dayLabel = group.date
           .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
           .toUpperCase()
@@ -277,9 +262,6 @@ export default function ActivityLedger({
             )}
 
             {group.items.map((transaction, indexInGroup) => {
-              if (renderedRows >= visibleLimit) return null
-              renderedRows += 1
-
               return (
                 <TransactionLedgerRow
                   key={transaction.id ?? `${transaction.description}-${indexInGroup}`}
@@ -293,27 +275,6 @@ export default function ActivityLedger({
           </Box>
         )
       })}
-
-      {/* ── Show all ─────────────────────────────────────────────────── */}
-      {hiddenCount > 0 && (
-        <Button
-          w="full"
-          variant="ghost"
-          size="sm"
-          h="42px"
-          borderRadius="none"
-          borderTop="1px solid"
-          borderColor={rowBorder}
-          color={showAllColor}
-          fontWeight={700}
-          fontSize="xs"
-          rightIcon={<Icon as={ChevronDown} boxSize={3.5} />}
-          _hover={{ bg: showAllHoverBg }}
-          onClick={() => setExpanded(true)}
-        >
-          Show all {totalRows} transactions
-        </Button>
-      )}
     </Box>
   )
 }
