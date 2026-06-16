@@ -98,13 +98,19 @@ export default function CardsPage() {
     [selectedCard, transactions],
   )
 
-  // Per-card current-statement total, for the tile preview.
+  // Per-card current-statement total + outstanding balance, for the tile preview.
   const currentTotals = useMemo(() => {
-    const totals = new Map<number, { total: number; count: number }>()
+    const totals = new Map<number, { total: number; outstanding: number; count: number }>()
     for (const card of cards) {
       const sts = buildCardStatements(card, transactions)
       const current = sts.find((s) => s.status === 'open')
-      totals.set(card.id, { total: current?.total ?? 0, count: sts.length })
+      // Credit in use = everything not yet on a settled (past) statement: the current
+      // cycle plus all upcoming cycles. This way the full remaining of an installment
+      // purchase counts against the limit, not just this month's installment.
+      const outstanding = sts
+        .filter((s) => s.status !== 'closed')
+        .reduce((sum, s) => sum + s.total, 0)
+      totals.set(card.id, { total: current?.total ?? 0, outstanding, count: sts.length })
     }
     return totals
   }, [cards, transactions])
@@ -280,6 +286,7 @@ export default function CardsPage() {
                   key={card.id}
                   card={card}
                   currentTotal={info?.total ?? 0}
+                  usedCredit={info?.outstanding ?? 0}
                   statementCount={info?.count ?? 0}
                   hideValues={hideValues}
                   onSelect={() => selectCard(card.id)}

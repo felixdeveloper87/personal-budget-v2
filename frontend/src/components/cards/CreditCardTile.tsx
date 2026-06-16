@@ -23,6 +23,12 @@ export interface CreditCardTileProps {
   card: PaymentMethod
   /** Total of the current open statement, if any. */
   currentTotal: number
+  /**
+   * Credit currently in use against the limit — the outstanding balance across the
+   * current and upcoming statements (so the full remaining of installment purchases
+   * counts). Falls back to `currentTotal` when not provided.
+   */
+  usedCredit?: number
   statementCount: number
   hideValues?: boolean
   onSelect: () => void
@@ -33,6 +39,7 @@ export interface CreditCardTileProps {
 export default function CreditCardTile({
   card,
   currentTotal,
+  usedCredit,
   statementCount,
   hideValues = false,
   onSelect,
@@ -51,8 +58,9 @@ export default function CreditCardTile({
 
   const limit = card.creditLimit ?? 0
   const hasLimit = limit > 0
-  const usedPct = hasLimit ? Math.min(100, Math.max(0, (currentTotal / limit) * 100)) : 0
-  const remaining = Math.max(0, limit - currentTotal)
+  const used = usedCredit ?? currentTotal
+  const usedPct = hasLimit ? Math.min(100, Math.max(0, (used / limit) * 100)) : 0
+  const remaining = Math.max(0, limit - used)
   const utilColor = usedPct >= 90 ? 'red.400' : usedPct >= 70 ? 'orange.400' : 'green.400'
 
   return (
