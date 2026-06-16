@@ -18,10 +18,14 @@ public class PaymentMethodService {
 
     private final PaymentMethodRepository repository;
     private final PaymentMethodMapper mapper;
+    private final FinancialAccountService financialAccountService;
 
-    public PaymentMethodService(PaymentMethodRepository repository, PaymentMethodMapper mapper) {
+    public PaymentMethodService(PaymentMethodRepository repository,
+                                PaymentMethodMapper mapper,
+                                FinancialAccountService financialAccountService) {
         this.repository = repository;
         this.mapper = mapper;
+        this.financialAccountService = financialAccountService;
     }
 
     @Transactional(readOnly = true)
@@ -49,7 +53,9 @@ public class PaymentMethodService {
     @Transactional
     public PaymentMethodDTO create(PaymentMethodRequest request, User user) {
         validateCardRules(request);
-        return mapper.toDTO(repository.save(mapper.toEntity(request, user)));
+        PaymentMethod paymentMethod = mapper.toEntity(request, user);
+        applySettlementAccount(paymentMethod, request, user);
+        return mapper.toDTO(repository.save(paymentMethod));
     }
 
     @Transactional
@@ -57,7 +63,21 @@ public class PaymentMethodService {
         validateCardRules(request);
         PaymentMethod paymentMethod = getOwnedPaymentMethod(id, user);
         mapper.apply(paymentMethod, request);
+        applySettlementAccount(paymentMethod, request, user);
         return mapper.toDTO(repository.save(paymentMethod));
+    }
+
+    /**
+     * Resolves and assigns the card's settlement account, validating ownership.
+     * Only credit cards may carry a settlement account; it is cleared otherwise.
+     */
+    private void applySettlementAccount(PaymentMethod paymentMethod, PaymentMethodRequest request, User user) {
+        if (PaymentMethodType.CREDIT_CARD.equals(request.getType()) && request.getSettlementAccountId() != null) {
+            paymentMethod.setSettlementAccount(
+                    financialAccountService.getOwnedAccount(request.getSettlementAccountId(), user));
+        } else {
+            paymentMethod.setSettlementAccount(null);
+        }
     }
 
     @Transactional

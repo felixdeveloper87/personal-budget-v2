@@ -48,6 +48,46 @@ function transactionDay(tx: Transaction): Date | null {
 }
 
 /**
+ * Resolve the statement payment (due) date for a charge made on `purchaseDate`.
+ * Mirrors the backend CreditCardBillingService.resolvePaymentDate so the preview
+ * shown when creating an installment matches what the server will schedule.
+ * Returns null if the card is missing its closing/payment days.
+ */
+export function resolveCardPaymentDate(purchaseDate: Date, card: PaymentMethod): Date | null {
+  const closingDay = card.statementClosingDay
+  const paymentDay = card.paymentDay
+  if (!closingDay || !paymentDay) return null
+
+  const year = purchaseDate.getFullYear()
+  const month = purchaseDate.getMonth()
+  const closingDate = atClampedDay(year, month, closingDay)
+
+  // After the closing day → rolls into next month's statement.
+  let stYear = year
+  let stMonth = month
+  if (purchaseDate.getTime() > closingDate.getTime()) {
+    stMonth += 1
+    if (stMonth > 11) {
+      stMonth = 0
+      stYear += 1
+    }
+  }
+
+  // Payment falls in the statement month when the due day is on/after the closing
+  // day, otherwise in the following month.
+  let payYear = stYear
+  let payMonth = stMonth
+  if (paymentDay < closingDay) {
+    payMonth += 1
+    if (payMonth > 11) {
+      payMonth = 0
+      payYear += 1
+    }
+  }
+  return atClampedDay(payYear, payMonth, paymentDay)
+}
+
+/**
  * Group a card's transactions into billing statements. Only expenses charged to
  * the given credit card are considered. Returns statements sorted newest-first.
  */

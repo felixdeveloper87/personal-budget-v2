@@ -1,4 +1,5 @@
 import type { Transaction } from '../types'
+import { formatDateBR } from './dateTime'
 
 function localDateKey(date = new Date()): string {
   const year = date.getFullYear()
@@ -21,9 +22,14 @@ export function formatTransactionAccount(
     transaction.status === 'PENDING' ||
     Boolean(transaction.paymentDate && transaction.paymentDate > localDateKey())
 
+  const onDate =
+    transaction.paymentDate && formatDateBR(transaction.paymentDate) !== 'Invalid Date'
+      ? ` on ${formatDateBR(transaction.paymentDate)}`
+      : ''
+
   if (transaction.type === 'INCOME') {
-    return `${scheduled ? 'Will be paid' : 'Paid'} into ${transaction.accountName}`
+    return `${scheduled ? 'Will be paid' : 'Paid'} into ${transaction.accountName}${onDate}`
   }
 
-  return `${scheduled ? 'Will be debited' : 'Debited'} from ${transaction.accountName}`
+  return `${scheduled ? 'Will be debited' : 'Debited'} from ${transaction.accountName}${onDate}`
 }

@@ -46,7 +46,14 @@ export default function CreditCardTile({
   // Card translúcido padrão (ed.panel) nos dois modos — consistente com a plataforma.
   const subtle = ed ? ed.panel : subtleBase
   const iconBoxBg = useColorModeValue('white', 'whiteAlpha.100')
+  const trackBg = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
   const hasMeta = Boolean(getBankMeta(card.issuer))
+
+  const limit = card.creditLimit ?? 0
+  const hasLimit = limit > 0
+  const usedPct = hasLimit ? Math.min(100, Math.max(0, (currentTotal / limit) * 100)) : 0
+  const remaining = Math.max(0, limit - currentTotal)
+  const utilColor = usedPct >= 90 ? 'red.400' : usedPct >= 70 ? 'orange.400' : 'green.400'
 
   return (
     <Box
@@ -155,6 +162,28 @@ export default function CreditCardTile({
             </Text>
           </VStack>
         </HStack>
+
+        {hasLimit && (
+          <Box>
+            <Flex justify="space-between" align="baseline" mb={1.5}>
+              <Text fontSize="2xs" color={muted} textTransform="uppercase" letterSpacing="0.05em" fontWeight={700}>
+                {hideValues ? '••••' : `${Math.round(usedPct)}% of limit`}
+              </Text>
+              <Text fontSize="2xs" color={muted} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                {hideValues ? '••••••' : `${moneyFormatter.format(remaining)} left of ${moneyFormatter.format(limit)}`}
+              </Text>
+            </Flex>
+            <Box h="6px" w="full" bg={trackBg} borderRadius="full" overflow="hidden">
+              <Box h="full" w={`${usedPct}%`} bg={utilColor} borderRadius="full" transition="width 0.4s ease" />
+            </Box>
+          </Box>
+        )}
+
+        {card.settlementAccountName && (
+          <Text fontSize="2xs" color={muted} noOfLines={1}>
+            Debited from {card.settlementAccountName}
+          </Text>
+        )}
       </VStack>
     </Box>
   )

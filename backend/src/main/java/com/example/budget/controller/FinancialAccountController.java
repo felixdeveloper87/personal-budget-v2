@@ -70,11 +70,4 @@ public class FinancialAccountController {
         return service.transfer(request, (User) authentication.getPrincipal());
     }
 
-    @PostMapping("/{id}/assign-legacy-transactions")
-    public LegacyTransactionAssignmentResult assignLegacy(
-            @PathVariable Long id,
-            @RequestBody LegacyTransactionAssignmentRequest request,
-            Authentication authentication) {
-        return service.assignLegacyTransactions(id, request, (User) authentication.getPrincipal());
-    }
 }

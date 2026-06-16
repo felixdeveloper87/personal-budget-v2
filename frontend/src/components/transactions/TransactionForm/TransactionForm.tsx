@@ -160,6 +160,20 @@ export default function TransactionForm({
     [],
   )
 
+  /** Selecting a card also points the transaction at the account it settles to. */
+  const handlePaymentMethodChange = useCallback(
+    (id: number | null) => {
+      setPaymentMethodId(id)
+      const card = paymentMethods.find((method) => method.id === id)
+      if (card?.settlementAccountId) {
+        setAccountId(card.settlementAccountId)
+      }
+    },
+    [paymentMethods],
+  )
+
+  const selectedCard = paymentMethods.find((method) => method.id === paymentMethodId) ?? null
+
 
   /**
    * 🧾 Handle form submission:
@@ -178,6 +192,15 @@ export default function TransactionForm({
           title: 'Select an account',
           description: 'Create an account from the Accounts page before adding transactions.',
           dedupeKey: 'transaction-account-required',
+        })
+        return
+      }
+      const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
+      if (isInstallment && !paymentMethodId) {
+        ToastService.warning({
+          title: 'Select a credit card',
+          description: 'Installments must be linked to the credit card they were charged on.',
+          dedupeKey: 'installment-card-required',
         })
         return
       }
@@ -360,7 +383,7 @@ export default function TransactionForm({
           {type === 'EXPENSE' && (
             <PaymentMethodSelector
               value={paymentMethodId}
-              onChange={setPaymentMethodId}
+              onChange={handlePaymentMethodChange}
               paymentMethods={paymentMethods}
               loading={paymentMethodsLoading}
             />
@@ -399,6 +422,7 @@ export default function TransactionForm({
                 firstInstallmentDate={firstInstallmentDate}
                 onFirstInstallmentDateChange={setFirstInstallmentDate}
                 showToggle={false}
+                card={selectedCard}
               />
           )}
           <CategorySelector type={type} category={category} onChange={setCategory} />

@@ -23,7 +23,6 @@ import {
   AccountDetails,
   AccountTransfer,
   AccountTransferRequest,
-  LegacyTransactionAssignmentRequest,
   SavingsGoal,
   SavingsGoalRequest,
   CategoryBudget,
@@ -312,17 +311,6 @@ export async function createAccountTransfer(
 ): Promise<AccountTransfer> {
   const { data } = await api.post<AccountTransfer>('/accounts/transfers', request)
   return data
-}
-
-export async function assignLegacyTransactions(
-  accountId: number,
-  request: LegacyTransactionAssignmentRequest,
-): Promise<number> {
-  const { data } = await api.post<{ assignedCount: number }>(
-    `/accounts/${accountId}/assign-legacy-transactions`,
-    request,
-  )
-  return data.assignedCount
 }
 
 // Get monthly summary → GET /summary/month?year=&month=

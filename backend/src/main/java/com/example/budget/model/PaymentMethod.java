@@ -2,6 +2,7 @@ package com.example.budget.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,6 +42,14 @@ public class PaymentMethod {
 
     @Column(name = "payment_day")
     private Integer paymentDay;
+
+    @Column(name = "credit_limit", precision = 14, scale = 2)
+    private BigDecimal creditLimit;
+
+    /** Balance account the card statement is debited from (e.g. NatWest card → NatWest account). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "settlement_account_id")
+    private FinancialAccount settlementAccount;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -126,6 +135,22 @@ public class PaymentMethod {
 
     public void setPaymentDay(Integer paymentDay) {
         this.paymentDay = paymentDay;
+    }
+
+    public BigDecimal getCreditLimit() {
+        return creditLimit;
+    }
+
+    public void setCreditLimit(BigDecimal creditLimit) {
+        this.creditLimit = creditLimit;
+    }
+
+    public FinancialAccount getSettlementAccount() {
+        return settlementAccount;
+    }
+
+    public void setSettlementAccount(FinancialAccount settlementAccount) {
+        this.settlementAccount = settlementAccount;
     }
 
     public LocalDateTime getCreatedAt() {

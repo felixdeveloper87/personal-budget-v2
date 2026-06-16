@@ -366,7 +366,9 @@ export default function InstallmentPlanCard({
                       : 'Installment plan'}
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1}>
-                    {firstTransaction?.category}{plan.accountName ? ` · ${plan.accountName}` : ' · Account not linked'}
+                    {firstTransaction?.category}
+                    {plan.paymentMethodName ? ` · ${plan.paymentMethodName}` : ' · No card linked'}
+                    {plan.accountName ? ` · ${plan.accountName}` : ' · Account not linked'}
                   </Text>
                 </VStack>
               </HStack>
@@ -622,7 +624,15 @@ export default function InstallmentPlanCard({
                 <Select
                   size="sm"
                   value={draftPaymentMethodId ?? ''}
-                  onChange={(event) => setDraftPaymentMethodId(event.target.value ? Number(event.target.value) : null)}
+                  onChange={(event) => {
+                    const nextId = event.target.value ? Number(event.target.value) : null
+                    setDraftPaymentMethodId(nextId)
+                    // Follow the card's settlement account (NatWest card → NatWest account).
+                    const card = paymentMethods.find((method) => method.id === nextId)
+                    if (card?.settlementAccountId) {
+                      setDraftAccountId(card.settlementAccountId)
+                    }
+                  }}
                 >
                   <option value="">No payment method</option>
                   {paymentMethods.filter((method) => method.active).map((method) => (

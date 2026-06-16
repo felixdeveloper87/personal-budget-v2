@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.PaymentMethodType;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class PaymentMethodDTO {
@@ -11,6 +12,9 @@ public class PaymentMethodDTO {
     private boolean active;
     private Integer statementClosingDay;
     private Integer paymentDay;
+    private BigDecimal creditLimit;
+    private Long settlementAccountId;
+    private String settlementAccountName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -25,6 +29,9 @@ public class PaymentMethodDTO {
             boolean active,
             Integer statementClosingDay,
             Integer paymentDay,
+            BigDecimal creditLimit,
+            Long settlementAccountId,
+            String settlementAccountName,
             LocalDateTime createdAt,
             LocalDateTime updatedAt
     ) {
@@ -35,6 +42,9 @@ public class PaymentMethodDTO {
         this.active = active;
         this.statementClosingDay = statementClosingDay;
         this.paymentDay = paymentDay;
+        this.creditLimit = creditLimit;
+        this.settlementAccountId = settlementAccountId;
+        this.settlementAccountName = settlementAccountName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -65,6 +75,18 @@ public class PaymentMethodDTO {
 
     public Integer getPaymentDay() {
         return paymentDay;
+    }
+
+    public BigDecimal getCreditLimit() {
+        return creditLimit;
+    }
+
+    public Long getSettlementAccountId() {
+        return settlementAccountId;
+    }
+
+    public String getSettlementAccountName() {
+        return settlementAccountName;
     }
 
     public LocalDateTime getCreatedAt() {

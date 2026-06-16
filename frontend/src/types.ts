@@ -50,6 +50,11 @@ export interface PaymentMethod {
   active: boolean
   statementClosingDay?: number | null
   paymentDay?: number | null
+  /** Optional credit limit (credit cards only). */
+  creditLimit?: number | null
+  /** Balance account the card statement is debited from (e.g. NatWest card → NatWest account). */
+  settlementAccountId?: number | null
+  settlementAccountName?: string | null
   createdAt?: string
   updatedAt?: string
 }
@@ -61,6 +66,8 @@ export interface PaymentMethodRequest {
   active: boolean
   statementClosingDay?: number | null
   paymentDay?: number | null
+  creditLimit?: number | null
+  settlementAccountId?: number | null
 }
 
 export interface FinancialAccount {
@@ -134,14 +141,6 @@ export interface AccountTransferRequest {
   amount: number
   transferDate: string
   description?: string
-}
-
-export interface LegacyTransactionAssignmentRequest {
-  paymentMethodId?: number | null
-  installmentPlanId?: number | null
-  recurringTransactionId?: number | null
-  startDate?: string
-  endDate?: string
 }
 
 // Resumo mensal

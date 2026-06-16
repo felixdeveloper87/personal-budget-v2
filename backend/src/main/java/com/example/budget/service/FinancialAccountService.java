@@ -1,6 +1,5 @@
 package com.example.budget.service;
 
-import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.dto.*;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
@@ -16,7 +15,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
@@ -26,17 +24,14 @@ public class FinancialAccountService {
     private final FinancialAccountRepository accountRepository;
     private final AccountTransferRepository transferRepository;
     private final TransactionRepository transactionRepository;
-    private final CacheInvalidationService cacheInvalidation;
 
     public FinancialAccountService(
             FinancialAccountRepository accountRepository,
             AccountTransferRepository transferRepository,
-            TransactionRepository transactionRepository,
-            CacheInvalidationService cacheInvalidation) {
+            TransactionRepository transactionRepository) {
         this.accountRepository = accountRepository;
         this.transferRepository = transferRepository;
         this.transactionRepository = transactionRepository;
-        this.cacheInvalidation = cacheInvalidation;
     }
 
     @Transactional(readOnly = true)
@@ -171,49 +166,6 @@ public class FinancialAccountService {
         return transferRepository.findByUserOrderByTransferDateDescIdDesc(user).stream()
                 .map(this::toDTO)
                 .toList();
-    }
-
-    @Transactional
-    public LegacyTransactionAssignmentResult assignLegacyTransactions(
-            Long accountId,
-            LegacyTransactionAssignmentRequest request,
-            User user) {
-        FinancialAccount account = getOwnedAccount(accountId, user);
-        List<Transaction> candidates = transactionRepository.findByUserAndAccountIsNull(user);
-        List<Transaction> matched = new ArrayList<>();
-
-        for (Transaction transaction : candidates) {
-            if (request.getPaymentMethodId() != null
-                    && (transaction.getPaymentMethod() == null
-                    || !request.getPaymentMethodId().equals(transaction.getPaymentMethod().getId()))) {
-                continue;
-            }
-            if (request.getInstallmentPlanId() != null
-                    && (transaction.getInstallmentPlan() == null
-                    || !request.getInstallmentPlanId().equals(transaction.getInstallmentPlan().getId()))) {
-                continue;
-            }
-            if (request.getRecurringTransactionId() != null
-                    && (transaction.getRecurringTransaction() == null
-                    || !request.getRecurringTransactionId().equals(transaction.getRecurringTransaction().getId()))) {
-                continue;
-            }
-            LocalDate date = transaction.getPaymentDate();
-            if (request.getStartDate() != null && (date == null || date.isBefore(request.getStartDate()))) {
-                continue;
-            }
-            if (request.getEndDate() != null && (date == null || date.isAfter(request.getEndDate()))) {
-                continue;
-            }
-            transaction.setAccount(account);
-            matched.add(transaction);
-        }
-
-        if (!matched.isEmpty()) {
-            transactionRepository.saveAll(matched);
-            cacheInvalidation.evictTransactionsList(user.getId());
-        }
-        return new LegacyTransactionAssignmentResult(matched.size());
     }
 
     @Transactional(readOnly = true)

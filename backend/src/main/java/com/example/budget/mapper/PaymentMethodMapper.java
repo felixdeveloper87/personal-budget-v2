@@ -28,10 +28,13 @@ public class PaymentMethodMapper {
         if (PaymentMethodType.CREDIT_CARD.equals(request.getType())) {
             paymentMethod.setStatementClosingDay(request.getStatementClosingDay());
             paymentMethod.setPaymentDay(request.getPaymentDay());
+            paymentMethod.setCreditLimit(request.getCreditLimit());
         } else {
             paymentMethod.setStatementClosingDay(null);
             paymentMethod.setPaymentDay(null);
+            paymentMethod.setCreditLimit(null);
         }
+        // The settlement account is resolved (with ownership check) in the service.
     }
 
     public PaymentMethodDTO toDTO(PaymentMethod paymentMethod) {
@@ -43,6 +46,9 @@ public class PaymentMethodMapper {
                 paymentMethod.isActive(),
                 paymentMethod.getStatementClosingDay(),
                 paymentMethod.getPaymentDay(),
+                paymentMethod.getCreditLimit(),
+                paymentMethod.getSettlementAccount() != null ? paymentMethod.getSettlementAccount().getId() : null,
+                paymentMethod.getSettlementAccount() != null ? paymentMethod.getSettlementAccount().getName() : null,
                 paymentMethod.getCreatedAt(),
                 paymentMethod.getUpdatedAt()
         );

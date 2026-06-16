@@ -5,7 +5,10 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 
 public class PaymentMethodRequest {
 
@@ -28,6 +31,11 @@ public class PaymentMethodRequest {
     @Min(value = 1, message = "Payment day must be between 1 and 31")
     @Max(value = 31, message = "Payment day must be between 1 and 31")
     private Integer paymentDay;
+
+    @PositiveOrZero(message = "Credit limit cannot be negative")
+    private BigDecimal creditLimit;
+
+    private Long settlementAccountId;
 
     public String getName() {
         return name;
@@ -75,5 +83,21 @@ public class PaymentMethodRequest {
 
     public void setPaymentDay(Integer paymentDay) {
         this.paymentDay = paymentDay;
+    }
+
+    public BigDecimal getCreditLimit() {
+        return creditLimit;
+    }
+
+    public void setCreditLimit(BigDecimal creditLimit) {
+        this.creditLimit = creditLimit;
+    }
+
+    public Long getSettlementAccountId() {
+        return settlementAccountId;
+    }
+
+    public void setSettlementAccountId(Long settlementAccountId) {
+        this.settlementAccountId = settlementAccountId;
     }
 }

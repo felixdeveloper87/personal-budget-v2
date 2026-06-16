@@ -1,8 +1,6 @@
 package com.example.budget.service;
 
-import com.example.budget.cache.CacheInvalidationService;
 import com.example.budget.dto.FinancialAccountRequest;
-import com.example.budget.dto.LegacyTransactionAssignmentRequest;
 import com.example.budget.model.*;
 import com.example.budget.repository.AccountTransferRepository;
 import com.example.budget.repository.FinancialAccountRepository;
@@ -10,7 +8,6 @@ import com.example.budget.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -22,7 +19,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,9 +29,6 @@ class FinancialAccountServiceTest {
     private AccountTransferRepository transferRepository;
     @Mock
     private TransactionRepository transactionRepository;
-    @Mock
-    private CacheInvalidationService cacheInvalidation;
-
     private FinancialAccountService service;
     private User user;
     private FinancialAccount account;
@@ -43,7 +36,7 @@ class FinancialAccountServiceTest {
     @BeforeEach
     void setUp() {
         service = new FinancialAccountService(
-                accountRepository, transferRepository, transactionRepository, cacheInvalidation);
+                accountRepository, transferRepository, transactionRepository);
         user = new User();
         user.setId(1L);
         account = new FinancialAccount();
@@ -73,37 +66,6 @@ class FinancialAccountServiceTest {
 
         assertThat(service.currentBalance(account, user))
                 .isEqualByComparingTo("1090.00");
-    }
-
-    @Test
-    void assignLegacyTransactions_changesOnlyMatchingUnassignedRows() {
-        Transaction matching = transaction(TransactionType.EXPENSE, "10.00", TransactionStatus.CLEARED, 11);
-        matching.setAccount(null);
-        PaymentMethod monzo = new PaymentMethod();
-        ReflectionTestUtils.setField(monzo, "id", 5L);
-        matching.setPaymentMethod(monzo);
-
-        Transaction other = transaction(TransactionType.EXPENSE, "20.00", TransactionStatus.CLEARED, 11);
-        other.setAccount(null);
-        PaymentMethod natwest = new PaymentMethod();
-        ReflectionTestUtils.setField(natwest, "id", 6L);
-        other.setPaymentMethod(natwest);
-
-        when(accountRepository.findById(10L)).thenReturn(java.util.Optional.of(account));
-        when(transactionRepository.findByUserAndAccountIsNull(user)).thenReturn(List.of(matching, other));
-
-        LegacyTransactionAssignmentRequest request = new LegacyTransactionAssignmentRequest();
-        request.setPaymentMethodId(5L);
-
-        var result = service.assignLegacyTransactions(10L, request, user);
-
-        assertThat(result.assignedCount()).isEqualTo(1);
-        assertThat(matching.getAccount()).isSameAs(account);
-        assertThat(other.getAccount()).isNull();
-        ArgumentCaptor<List<Transaction>> captor = ArgumentCaptor.forClass(List.class);
-        verify(transactionRepository).saveAll(captor.capture());
-        assertThat(captor.getValue()).containsExactly(matching);
-        verify(cacheInvalidation).evictTransactionsList(1L);
     }
 
     @Test

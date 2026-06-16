@@ -35,8 +35,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     long countByUserAndAccountIsNull(User user);
 
-    List<Transaction> findByUserAndAccountIsNull(User user);
-
     List<Transaction> findByUserAndAccountAndPaymentDateBetween(
                     User user, FinancialAccount account, LocalDate start, LocalDate end);
 
