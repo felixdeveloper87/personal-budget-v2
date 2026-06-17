@@ -10,13 +10,17 @@ import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.InstallmentPlanMapper;
 import com.example.budget.model.InstallmentPlan;
+import com.example.budget.model.PaymentMethod;
+import com.example.budget.model.PaymentMethodType;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.repository.InstallmentPlanRepository;
 import com.example.budget.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -36,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -78,7 +81,6 @@ class InstallmentPlanServiceTest {
                 installmentPlanMapper,
                 financialAccountService,
                 paymentMethodService,
-                new CreditCardBillingService(),
                 cacheInvalidation,
                 cacheManager);
 
@@ -104,10 +106,15 @@ class InstallmentPlanServiceTest {
 
         InstallmentPlanDTO result = installmentPlanService.createInstallmentPlan(request, owner);
 
-        verify(transactionRepository).saveAll(argThat((List<Transaction> txs) ->
-                txs.size() == 3
-                        && txs.get(0).getInstallmentNumber() == 1
-                        && txs.get(0).getAmount().compareTo(new BigDecimal("100.00")) == 0));
+        ArgumentCaptor<List<Transaction>> transactionsCaptor = captureSavedTransactions();
+        List<Transaction> transactions = transactionsCaptor.getValue();
+        assertThat(transactions).hasSize(3);
+        assertThat(transactions.get(0).getInstallmentNumber()).isEqualTo(1);
+        assertThat(transactions.get(0).getAmount()).isEqualByComparingTo("100.00");
+        assertThat(transactions.get(0).getTransactionDate()).isEqualTo(LocalDate.of(2026, 1, 10));
+        assertThat(transactions.get(0).getPaymentDate()).isEqualTo(LocalDate.of(2026, 1, 10));
+        assertThat(transactions.get(2).getTransactionDate()).isEqualTo(LocalDate.of(2026, 3, 10));
+        assertThat(transactions.get(2).getPaymentDate()).isEqualTo(LocalDate.of(2026, 3, 10));
 
         assertThat(result.getId()).isEqualTo(88L);
         assertThat(result.getTotalInstallments()).isEqualTo(3);
@@ -115,6 +122,34 @@ class InstallmentPlanServiceTest {
         verify(cacheInvalidation).evictInstallmentPlansList(20L);
         verify(cacheInvalidation).evictTransactionsList(20L);
         verify(cacheInvalidation, times(3)).evictMonthlySummary(eq(owner), any(LocalDate.class));
+    }
+
+    @Test
+    void createInstallmentPlan_withCreditCardDoesNotShiftInstallmentPaymentDateToNextStatement() {
+        PaymentMethod card = creditCard(15, 31);
+        when(paymentMethodService.getOwnedPaymentMethod(2L, owner)).thenReturn(card);
+
+        CreateInstallmentPlanRequest request = new CreateInstallmentPlanRequest(
+                6,
+                new BigDecimal("100.00"),
+                "Travel",
+                "British Airways",
+                LocalDate.of(2026, 4, 30),
+                null);
+        request.setPaymentMethodId(2L);
+
+        when(installmentPlanRepository.save(any(InstallmentPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        installmentPlanService.createInstallmentPlan(request, owner);
+
+        ArgumentCaptor<List<Transaction>> transactionsCaptor = captureSavedTransactions();
+        Transaction lastInstallment = transactionsCaptor.getValue().get(5);
+
+        assertThat(lastInstallment.getInstallmentNumber()).isEqualTo(6);
+        assertThat(lastInstallment.getTransactionDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(lastInstallment.getPaymentDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(lastInstallment.getPaymentDate()).isNotEqualTo(LocalDate.of(2026, 10, 31));
+        assertThat(lastInstallment.getPaymentMethod()).isSameAs(card);
     }
 
     @Test
@@ -196,6 +231,60 @@ class InstallmentPlanServiceTest {
     }
 
     @Test
+    void update_setsFutureInstallmentsToPlannedUsingInstallmentDate() {
+        Transaction transaction = new Transaction();
+        transaction.setInstallmentNumber(1);
+        transaction.setPaymentDate(LocalDate.now().minusDays(10));
+        transaction.setStatus(TransactionStatus.CLEARED);
+
+        InstallmentPlan plan = new InstallmentPlan(1, BigDecimal.TEN, BigDecimal.TEN, owner);
+        ReflectionTestUtils.setField(plan, "id", 25L);
+        plan.setTransactions(new ArrayList<>(List.of(transaction)));
+
+        when(installmentPlanRepository.findById(25L)).thenReturn(Optional.of(plan));
+        when(installmentPlanRepository.save(plan)).thenReturn(plan);
+
+        LocalDate futureDate = LocalDate.now().plusDays(10);
+        UpdateInstallmentPlanRequest request = new UpdateInstallmentPlanRequest(
+                BigDecimal.TEN,
+                futureDate,
+                null);
+
+        installmentPlanService.update(25L, request, owner);
+
+        assertThat(transaction.getTransactionDate()).isEqualTo(futureDate);
+        assertThat(transaction.getPaymentDate()).isEqualTo(futureDate);
+        assertThat(transaction.getStatus()).isEqualTo(TransactionStatus.PLANNED);
+    }
+
+    @Test
+    void update_preservesReconciledInstallmentWhenScheduleIsRecalculated() {
+        Transaction transaction = new Transaction();
+        transaction.setInstallmentNumber(1);
+        transaction.setPaymentDate(LocalDate.of(2026, 1, 5));
+        transaction.setStatus(TransactionStatus.RECONCILED);
+
+        InstallmentPlan plan = new InstallmentPlan(1, BigDecimal.TEN, BigDecimal.TEN, owner);
+        ReflectionTestUtils.setField(plan, "id", 26L);
+        plan.setTransactions(new ArrayList<>(List.of(transaction)));
+
+        when(installmentPlanRepository.findById(26L)).thenReturn(Optional.of(plan));
+        when(installmentPlanRepository.save(plan)).thenReturn(plan);
+
+        LocalDate pastDate = LocalDate.now().minusDays(10);
+        UpdateInstallmentPlanRequest request = new UpdateInstallmentPlanRequest(
+                BigDecimal.TEN,
+                pastDate,
+                null);
+
+        installmentPlanService.update(26L, request, owner);
+
+        assertThat(transaction.getTransactionDate()).isEqualTo(pastDate);
+        assertThat(transaction.getPaymentDate()).isEqualTo(pastDate);
+        assertThat(transaction.getStatus()).isEqualTo(TransactionStatus.RECONCILED);
+    }
+
+    @Test
     void update_withTotalAmountRecalculatesInstallmentValueAndLastInstallmentRounding() {
         Transaction t1 = new Transaction();
         t1.setInstallmentNumber(1);
@@ -268,5 +357,20 @@ class InstallmentPlanServiceTest {
         verify(cacheInvalidation).evictInstallmentPlansList(20L);
         verify(cacheInvalidation).evictTransactionsList(20L);
         verify(cacheInvalidation).evictMonthlySummary(owner, t1.getPaymentDate());
+    }
+
+    @SuppressWarnings("unchecked")
+    private ArgumentCaptor<List<Transaction>> captureSavedTransactions() {
+        ArgumentCaptor<List<Transaction>> transactionsCaptor = ArgumentCaptor.forClass(List.class);
+        verify(transactionRepository).saveAll(transactionsCaptor.capture());
+        return transactionsCaptor;
+    }
+
+    private static PaymentMethod creditCard(int closingDay, int paymentDay) {
+        PaymentMethod card = new PaymentMethod();
+        card.setType(PaymentMethodType.CREDIT_CARD);
+        card.setStatementClosingDay(closingDay);
+        card.setPaymentDay(paymentDay);
+        return card;
     }
 }

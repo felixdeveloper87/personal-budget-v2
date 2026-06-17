@@ -14,6 +14,7 @@ import com.example.budget.mapper.InstallmentPlanMapper;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.InstallmentPlan;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.repository.InstallmentPlanRepository;
 import com.example.budget.repository.TransactionRepository;
@@ -23,11 +24,11 @@ import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +48,6 @@ public class InstallmentPlanService {
     private final InstallmentPlanMapper installmentPlanMapper;
     private final FinancialAccountService financialAccountService;
     private final PaymentMethodService paymentMethodService;
-    private final CreditCardBillingService creditCardBillingService;
     private final CacheInvalidationService cacheInvalidation;
     private final Cache installmentPlansListCache;
 
@@ -56,7 +56,6 @@ public class InstallmentPlanService {
                                   InstallmentPlanMapper installmentPlanMapper,
                                   FinancialAccountService financialAccountService,
                                   PaymentMethodService paymentMethodService,
-                                  CreditCardBillingService creditCardBillingService,
                                   CacheInvalidationService cacheInvalidation,
                                   CacheManager cacheManager) {
         this.installmentPlanRepository = installmentPlanRepository;
@@ -64,7 +63,6 @@ public class InstallmentPlanService {
         this.installmentPlanMapper = installmentPlanMapper;
         this.financialAccountService = financialAccountService;
         this.paymentMethodService = paymentMethodService;
-        this.creditCardBillingService = creditCardBillingService;
         this.cacheInvalidation = cacheInvalidation;
         Cache plansCache = cacheManager.getCache(RedisCacheConfig.INSTALLMENT_PLANS_LIST_CACHE);
         if (plansCache == null) {
@@ -94,7 +92,7 @@ public class InstallmentPlanService {
 
         List<Transaction> transactions = installmentPlanMapper.createTransactionsFromPlan(plan, request);
         for (Transaction transaction : transactions) {
-            applyPaymentSchedule(transaction, plan);
+            applyInstallmentSchedule(transaction);
         }
         transactionRepository.saveAll(transactions);
         plan.setTransactions(transactions);
@@ -188,7 +186,7 @@ public class InstallmentPlanService {
             transaction.setTransactionDate(installmentDateTime.toLocalDate());
             transaction.setAccount(plan.getAccount());
             transaction.setPaymentMethod(plan.getPaymentMethod());
-            applyPaymentSchedule(transaction, plan);
+            applyInstallmentSchedule(transaction);
         }
 
         InstallmentPlan saved = installmentPlanRepository.save(plan);
@@ -308,15 +306,13 @@ public class InstallmentPlanService {
         return totalAmount.subtract(installmentValue.multiply(BigDecimal.valueOf(transactionCount - 1)));
     }
 
-    private void applyPaymentSchedule(Transaction transaction, InstallmentPlan plan) {
-        LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
-                transaction.getTransactionDate(),
-                plan.getPaymentMethod());
+    private void applyInstallmentSchedule(Transaction transaction) {
+        LocalDate paymentDate = transaction.getTransactionDate();
         transaction.setPaymentDate(paymentDate);
         if (paymentDate.isAfter(LocalDate.now())) {
-            transaction.setStatus(com.example.budget.model.TransactionStatus.PLANNED);
-        } else if (transaction.getStatus() != com.example.budget.model.TransactionStatus.RECONCILED) {
-            transaction.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
+            transaction.setStatus(TransactionStatus.PLANNED);
+        } else if (transaction.getStatus() != TransactionStatus.RECONCILED) {
+            transaction.setStatus(TransactionStatus.CLEARED);
         }
     }
 }

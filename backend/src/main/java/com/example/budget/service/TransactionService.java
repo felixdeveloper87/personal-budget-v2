@@ -499,6 +499,10 @@ public class TransactionService {
         if (transaction.getTransactionDate() == null) {
             transaction.setTransactionDate(transaction.getDateTime().toLocalDate());
         }
+        if (transaction.getInstallmentPlan() != null) {
+            transaction.setPaymentDate(transaction.getTransactionDate());
+            return;
+        }
         transaction.setPaymentDate(creditCardBillingService.resolvePaymentDate(
                 transaction.getTransactionDate(),
                 paymentMethod));

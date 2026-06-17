@@ -7,6 +7,9 @@ import com.example.budget.dto.MonthlySummary;
 import com.example.budget.mapper.TransactionMapper;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
+import com.example.budget.model.InstallmentPlan;
+import com.example.budget.model.PaymentMethod;
+import com.example.budget.model.PaymentMethodType;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
@@ -164,6 +167,61 @@ class TransactionServiceTest {
     }
 
     @Test
+    void update_standaloneCreditCardTransactionUsesBillingCycle() {
+        PaymentMethod card = creditCard(15, 31);
+        Transaction existing = new Transaction();
+        existing.setUser(owner);
+        existing.setDateTime(LocalDateTime.of(2026, 8, 1, 10, 0));
+        existing.setTransactionDate(LocalDate.of(2026, 8, 1));
+        existing.setPaymentDate(LocalDate.of(2026, 8, 31));
+        when(repository.findById(6L)).thenReturn(Optional.of(existing));
+        when(repository.save(existing)).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction patch = new Transaction();
+        patch.setDateTime(LocalDateTime.of(2026, 9, 30, 15, 30));
+        patch.setTransactionDate(LocalDate.of(2026, 9, 30));
+        patch.setType(TransactionType.EXPENSE);
+        patch.setCategory("Travel");
+        patch.setDescription("British Airways");
+        patch.setAmount(new BigDecimal("100.00"));
+        patch.setPaymentMethod(card);
+
+        Transaction result = transactionService.update(6L, patch, owner);
+
+        assertThat(result.getTransactionDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(result.getPaymentDate()).isEqualTo(LocalDate.of(2026, 10, 31));
+    }
+
+    @Test
+    void update_installmentCreditCardTransactionKeepsPaymentDateOnInstallmentDate() {
+        PaymentMethod card = creditCard(15, 31);
+        InstallmentPlan plan = new InstallmentPlan(6, new BigDecimal("600.00"), new BigDecimal("100.00"), owner);
+        Transaction existing = new Transaction();
+        existing.setUser(owner);
+        existing.setInstallmentPlan(plan);
+        existing.setDateTime(LocalDateTime.of(2026, 8, 30, 10, 0));
+        existing.setTransactionDate(LocalDate.of(2026, 8, 30));
+        existing.setPaymentDate(LocalDate.of(2026, 9, 30));
+        when(repository.findById(7L)).thenReturn(Optional.of(existing));
+        when(repository.save(existing)).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction patch = new Transaction();
+        patch.setDateTime(LocalDateTime.of(2026, 9, 30, 12, 0));
+        patch.setTransactionDate(LocalDate.of(2026, 9, 30));
+        patch.setType(TransactionType.EXPENSE);
+        patch.setCategory("Travel");
+        patch.setDescription("British Airways (Installment 6/6)");
+        patch.setAmount(new BigDecimal("100.00"));
+        patch.setPaymentMethod(card);
+
+        Transaction result = transactionService.update(7L, patch, owner);
+
+        assertThat(result.getTransactionDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(result.getPaymentDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(result.getPaymentDate()).isNotEqualTo(LocalDate.of(2026, 10, 31));
+    }
+
+    @Test
     void delete_throwsWhenWrongOwner() {
         User other = new User();
         other.setId(2L);
@@ -226,5 +284,13 @@ class TransactionServiceTest {
         assertThat(result.totalExpense).isEqualByComparingTo("120");
         assertThat(result.balance).isEqualByComparingTo("180");
         assertThat(result.byCategory).isEmpty();
+    }
+
+    private static PaymentMethod creditCard(int closingDay, int paymentDay) {
+        PaymentMethod card = new PaymentMethod();
+        card.setType(PaymentMethodType.CREDIT_CARD);
+        card.setStatementClosingDay(closingDay);
+        card.setPaymentDay(paymentDay);
+        return card;
     }
 }
