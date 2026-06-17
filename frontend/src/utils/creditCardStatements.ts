@@ -47,6 +47,18 @@ function transactionDay(tx: Transaction): Date | null {
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
 }
 
+function paymentDay(tx: Transaction): Date | null {
+  const raw = tx.paymentDate ?? tx.transactionDate ?? tx.dateTime
+  if (!raw) return null
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw)
+  if (!match) return null
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+}
+
+function statementBucketDay(tx: Transaction): Date | null {
+  return tx.installmentPlanId ? paymentDay(tx) : transactionDay(tx)
+}
+
 /**
  * Resolve the statement payment (due) date for a charge made on `purchaseDate`.
  * Mirrors the backend CreditCardBillingService.resolvePaymentDate so the preview
@@ -107,7 +119,7 @@ export function buildCardStatements(
   const byMonth = new Map<string, Transaction[]>()
 
   for (const tx of charges) {
-    const day = transactionDay(tx)
+    const day = statementBucketDay(tx)
     if (!day) continue
 
     const txYear = day.getFullYear()
@@ -117,7 +129,7 @@ export function buildCardStatements(
     // After the closing day → rolls into next month's statement.
     let stYear = txYear
     let stMonth = txMonth
-    if (day.getTime() > closingThisMonth.getTime()) {
+    if (!tx.installmentPlanId && day.getTime() > closingThisMonth.getTime()) {
       stMonth += 1
       if (stMonth > 11) {
         stMonth = 0
@@ -162,7 +174,7 @@ export function buildCardStatements(
 
     const total = txs.reduce((sum, tx) => sum + tx.amount, 0)
     const sortedTxs = [...txs].sort(
-      (a, b) => (transactionDay(b)?.getTime() ?? 0) - (transactionDay(a)?.getTime() ?? 0),
+      (a, b) => (statementBucketDay(b)?.getTime() ?? 0) - (statementBucketDay(a)?.getTime() ?? 0),
     )
 
     statements.push({
