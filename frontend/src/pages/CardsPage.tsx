@@ -100,7 +100,18 @@ export default function CardsPage() {
 
   // Per-card current-statement total + outstanding balance, for the tile preview.
   const currentTotals = useMemo(() => {
-    const totals = new Map<number, { total: number; outstanding: number; count: number }>()
+    const totals = new Map<
+      number,
+      {
+        total: number
+        outstanding: number
+        count: number
+        nextPaymentAmount: number
+        nextPaymentDate: Date | null
+      }
+    >()
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     for (const card of cards) {
       const sts = buildCardStatements(card, transactions)
       const current = sts.find((s) => s.status === 'open')
@@ -110,7 +121,17 @@ export default function CardsPage() {
       const outstanding = sts
         .filter((s) => s.status !== 'closed')
         .reduce((sum, s) => sum + s.total, 0)
-      totals.set(card.id, { total: current?.total ?? 0, outstanding, count: sts.length })
+      // Next payment = the statement whose due date is the soonest one still ahead.
+      const next = sts
+        .filter((s) => s.paymentDate.getTime() >= today.getTime())
+        .sort((a, b) => a.paymentDate.getTime() - b.paymentDate.getTime())[0]
+      totals.set(card.id, {
+        total: current?.total ?? 0,
+        outstanding,
+        count: sts.length,
+        nextPaymentAmount: next?.total ?? 0,
+        nextPaymentDate: next?.paymentDate ?? null,
+      })
     }
     return totals
   }, [cards, transactions])
@@ -288,6 +309,8 @@ export default function CardsPage() {
                   currentTotal={info?.total ?? 0}
                   usedCredit={info?.outstanding ?? 0}
                   statementCount={info?.count ?? 0}
+                  nextPaymentAmount={info?.nextPaymentAmount ?? 0}
+                  nextPaymentDate={info?.nextPaymentDate ?? null}
                   hideValues={hideValues}
                   onSelect={() => selectCard(card.id)}
                   onEdit={() => setFormCard(card)}

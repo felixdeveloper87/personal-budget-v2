@@ -19,6 +19,11 @@ const moneyFormatter = new Intl.NumberFormat('en-GB', {
   currency: 'GBP',
 })
 
+const dateFormatter = new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric',
+  month: 'short',
+})
+
 export interface CreditCardTileProps {
   card: PaymentMethod
   /** Total of the current open statement, if any. */
@@ -30,6 +35,10 @@ export interface CreditCardTileProps {
    */
   usedCredit?: number
   statementCount: number
+  /** Amount due on the soonest statement whose payment date is still ahead. */
+  nextPaymentAmount?: number
+  /** Due date of that next payment, or null when nothing is scheduled. */
+  nextPaymentDate?: Date | null
   hideValues?: boolean
   onSelect: () => void
   onEdit?: () => void
@@ -41,6 +50,8 @@ export default function CreditCardTile({
   currentTotal,
   usedCredit,
   statementCount,
+  nextPaymentAmount = 0,
+  nextPaymentDate = null,
   hideValues = false,
   onSelect,
   onEdit,
@@ -170,6 +181,34 @@ export default function CreditCardTile({
             </Text>
           </VStack>
         </HStack>
+
+        {nextPaymentDate && (
+          <Flex
+            justify="space-between"
+            align="center"
+            borderTop="1px solid"
+            borderColor={border}
+            pt={3}
+          >
+            <Box>
+              <Text
+                fontSize="2xs"
+                color={muted}
+                textTransform="uppercase"
+                letterSpacing="0.05em"
+                fontWeight={700}
+              >
+                Next payment
+              </Text>
+              <Text fontSize="2xs" color={muted}>
+                due {dateFormatter.format(nextPaymentDate)}
+              </Text>
+            </Box>
+            <Text fontSize="lg" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+              {hideValues ? '••••••' : moneyFormatter.format(nextPaymentAmount)}
+            </Text>
+          </Flex>
+        )}
 
         {hasLimit && (
           <Box>
