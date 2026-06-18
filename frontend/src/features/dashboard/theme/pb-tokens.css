@@ -1,0 +1,64 @@
+:root {
+  --pb-paper: #f1eee3;
+  --pb-paper-2: #e8e4d6;
+  --pb-paper-3: #fdfcf7;
+  --pb-surface: #fbfaf4;
+  --pb-surface-2: #f4f2e9;
+  --pb-surface-3: #eeebe0;
+  --pb-ink: #17251c;
+  --pb-ink-soft: #5b685a;
+  --pb-ink-faint: #8a9287;
+  --pb-forest: #1e4d38;
+  --pb-forest-2: #2d6a4f;
+  --pb-mint: #4f9d74;
+  --pb-line: #357a55;
+  --pb-coral: #a8432e;
+  --pb-coral-2: #c0563d;
+  --pb-gold: #876723;
+  --pb-gold-2: #b1872f;
+  --pb-hair: rgba(30, 77, 56, 0.15);
+  --pb-hair-2: rgba(30, 77, 56, 0.27);
+  --pb-tint-green: rgba(45, 106, 79, 0.10);
+  --pb-tint-coral: rgba(168, 67, 46, 0.09);
+  --pb-tint-gold: rgba(135, 103, 35, 0.10);
+  --pb-seal-edge: #ece8dc;
+  --pb-serif: "Spectral", "Instrument Serif", Georgia, serif;
+  --pb-mono: "IBM Plex Mono", "Spline Sans Mono", ui-monospace, monospace;
+  --pb-shadow: 0 1px 2px rgba(28, 55, 40, 0.05), 0 10px 28px rgba(28, 55, 40, 0.06);
+  --pb-shadow-lift: 0 2px 6px rgba(28, 55, 40, 0.07), 0 22px 50px rgba(28, 55, 40, 0.12);
+}
+
+/* Dark variant — mirrors the editorial "ink-green · cream · jade" palette used
+   by the rest of the app (see EDITORIAL_DARK in src/editorial.tsx). Cards become
+   translucent dark panels so the shared guilloché backdrop shows through. */
+[data-theme="dark"] {
+  --pb-paper: #070a08;
+  --pb-paper-2: #0b100d;
+  --pb-paper-3: #0e1411;
+  --pb-surface: rgba(12, 16, 13, 0.78);
+  --pb-surface-2: rgba(16, 21, 17, 0.78);
+  --pb-surface-3: rgba(239, 234, 224, 0.06);
+  --pb-ink: #efeae0;
+  --pb-ink-soft: #aeb8b0;
+  --pb-ink-faint: #8a948b;
+  --pb-forest: #7fe6b3;
+  --pb-forest-2: #6cd6a1;
+  --pb-mint: #7fe6b3;
+  --pb-line: #4f9d74;
+  --pb-coral: #f8a3a3;
+  --pb-coral-2: #f6b0a2;
+  --pb-gold: #d9b36a;
+  --pb-gold-2: #e3c489;
+  --pb-hair: rgba(239, 234, 224, 0.10);
+  --pb-hair-2: rgba(239, 234, 224, 0.20);
+  --pb-tint-green: rgba(127, 230, 179, 0.12);
+  --pb-tint-coral: rgba(248, 163, 163, 0.12);
+  --pb-tint-gold: rgba(217, 179, 106, 0.12);
+  --pb-seal-edge: #0a0d0b;
+  --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.45);
+  --pb-shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.5), 0 22px 50px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes pb-spin {
+  to { transform: rotate(360deg); }
+}
