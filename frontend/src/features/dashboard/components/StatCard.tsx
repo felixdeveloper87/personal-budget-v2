@@ -1,6 +1,8 @@
-import { HStack, Text, VStack } from '@chakra-ui/react'
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
+import { HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { ArrowDownRight, ArrowUpRight, Eye, EyeOff } from 'lucide-react'
 import Panel from './Panel'
+
+export const MASK = '••••••'
 
 interface StatCardProps {
   eyebrow: string
@@ -11,6 +13,10 @@ interface StatCardProps {
   deltaLabel?: string
   deltaPositive?: boolean
   accent?: 'forest' | 'gold'
+  /** When true, the figure and delta are replaced by a privacy mask. */
+  masked?: boolean
+  /** When provided, renders an eye toggle in the top-right corner. */
+  onToggleMask?: () => void
 }
 
 export default function StatCard({
@@ -20,6 +26,8 @@ export default function StatCard({
   deltaLabel,
   deltaPositive,
   accent = 'forest',
+  masked = false,
+  onToggleMask,
 }: StatCardProps) {
   const figureColor = accent === 'gold' ? 'var(--pb-gold-2)' : 'var(--pb-forest)'
   const deltaColor = deltaPositive ? 'var(--pb-forest-2)' : 'var(--pb-coral)'
@@ -28,29 +36,48 @@ export default function StatCard({
   return (
     <Panel h="full">
       <VStack align="stretch" spacing={2}>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10.5px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-        >
-          {eyebrow}
-        </Text>
+        <HStack justify="space-between" align="center">
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="10.5px"
+            letterSpacing="0.2em"
+            textTransform="uppercase"
+            color="var(--pb-ink-faint)"
+          >
+            {eyebrow}
+          </Text>
+
+          {onToggleMask && (
+            <IconButton
+              aria-label={masked ? 'Show value' : 'Hide value'}
+              title={masked ? 'Show value' : 'Hide value'}
+              icon={masked ? <Eye size={14} /> : <EyeOff size={14} />}
+              onClick={onToggleMask}
+              variant="ghost"
+              size="xs"
+              h="26px"
+              w="26px"
+              minW="26px"
+              borderRadius="999px"
+              color="var(--pb-ink-faint)"
+              _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink-soft)' }}
+            />
+          )}
+        </HStack>
 
         <HStack align="baseline" spacing={3} flexWrap="wrap">
           <Text
             fontFamily="var(--pb-serif)"
             fontSize="clamp(1.9rem, 4vw, 2.4rem)"
             fontWeight={500}
-            color={figureColor}
+            color={masked ? 'var(--pb-ink-faint)' : figureColor}
             lineHeight={1.05}
             style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
           >
-            {figure}
+            {masked ? MASK : figure}
           </Text>
 
-          {deltaLabel && (
+          {deltaLabel && !masked && (
             <HStack
               spacing={1}
               px={2}

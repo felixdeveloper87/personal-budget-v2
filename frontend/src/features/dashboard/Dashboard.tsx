@@ -43,6 +43,9 @@ export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
 }
 
+// Shared with AccountsPage / TransfersPage so the privacy toggle stays in sync.
+const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
+
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
 
@@ -96,11 +99,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     void listRecurringTransactions().then(setRecurringItems).catch(() => {})
   }, [user?.token])
 
-  /* ── Net available money: spendable (current + cash) account balances ── */
+  /* ── Net available money: current + cash + savings (everything but cards) ── */
   const netAvailable = useMemo(() => {
     if (!accountSummary) return null
     return accountSummary.accounts
-      .filter((a) => a.active && (a.type === 'CURRENT' || a.type === 'CASH'))
+      .filter(
+        (a) =>
+          a.active &&
+          (a.type === 'CURRENT' || a.type === 'CASH' || a.type === 'SAVINGS'),
+      )
       .reduce((s, a) => s + a.currentBalance, 0)
   }, [accountSummary])
 
@@ -254,6 +261,26 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   const serialLabel = `№ PB·${selectedDate.getFullYear()}·${String(selectedDate.getMonth() + 1).padStart(2, '0')} · ${dateBasis === 'cash-flow' ? 'Payments' : 'Behaviour'} view`
 
+  /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
+  const [hideBalances, setHideBalances] = useState(() => {
+    try {
+      return localStorage.getItem(BALANCE_VISIBILITY_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
+  const toggleHideBalances = useCallback(() => {
+    setHideBalances((current) => {
+      const next = !current
+      try {
+        localStorage.setItem(BALANCE_VISIBILITY_KEY, String(next))
+      } catch {
+        /* noop */
+      }
+      return next
+    })
+  }, [])
+
   /* ── Quick-add modal ── */
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const [modalType, setModalType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
@@ -312,9 +339,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             <StatCard
               eyebrow="Net available money"
               figure={netAvailable !== null ? fmtCurrency(netAvailable) : '—'}
-              caption="Balance across your current and cash accounts."
+              caption="Balance across your current, cash and savings accounts."
               deltaLabel={`${netDeltaPositive ? '+' : '−'}${fmtCurrency(Math.abs(periodData.balance), { minimumFractionDigits: 2 })}`}
               deltaPositive={netDeltaPositive}
+              masked={hideBalances}
+              onToggleMask={toggleHideBalances}
             />
           </MotionBox>
           <MotionBox variants={riseV}>
@@ -327,6 +356,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
                   : 'Add fixed payments and income to see a projection.'
               }
               accent="gold"
+              masked={hideBalances}
+              onToggleMask={toggleHideBalances}
             />
           </MotionBox>
         </Grid>
