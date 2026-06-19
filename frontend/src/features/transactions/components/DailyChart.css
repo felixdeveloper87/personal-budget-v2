@@ -1,0 +1,116 @@
+/* Daily income/spending chart — bands, bars, day-selection, tooltip. */
+
+.pb-chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.pb-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Background highlight bands: rendered always, revealed via container class. */
+.pb-chart-svg .tue-band,
+.pb-chart-svg .h2-band {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.pb-chart-svg.hl-tue .tue-band {
+  opacity: 1;
+}
+.pb-chart-svg.hl-h2 .h2-band {
+  opacity: 1;
+}
+.tue-band {
+  fill: rgba(45, 106, 79, 0.12);
+}
+.h2-band {
+  fill: rgba(168, 67, 46, 0.08);
+}
+
+/* Day-selection rect. */
+.pb-day-sel {
+  fill: rgba(45, 106, 79, 0.12);
+  stroke: var(--pb-line);
+  stroke-opacity: 0.45;
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+/* Baselines. */
+.pb-baseline {
+  stroke: var(--pb-hair-2);
+  stroke-width: 1;
+}
+.pb-baseline-eng {
+  stroke: var(--pb-line);
+  stroke-dasharray: 0.6 4;
+  opacity: 0.4;
+}
+
+/* Bar entrance. */
+@keyframes pb-barin {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pb-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: pb-barin 0.5s both;
+}
+
+/* Hit targets. */
+.pb-hit {
+  fill: transparent;
+  cursor: pointer;
+  outline: none;
+}
+.pb-hit:focus-visible {
+  fill: rgba(45, 106, 79, 0.06);
+}
+
+/* Tooltip. */
+.pb-chart-tip {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: var(--pb-ink);
+  color: #f4f3ec;
+  border-radius: 10px;
+  padding: 0.4rem 0.6rem;
+  min-width: 116px;
+  box-shadow: 0 8px 22px rgba(28, 55, 40, 0.28);
+  z-index: 4;
+}
+.pb-chart-tip-head {
+  font-family: var(--pb-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+.pb-chart-tip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-family: var(--pb-mono);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.pb-chart-tip-row.in {
+  color: #9fe3bd;
+}
+.pb-chart-tip-row.out {
+  color: #f3b0a0;
+}

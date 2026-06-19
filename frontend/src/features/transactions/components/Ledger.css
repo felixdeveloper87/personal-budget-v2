@@ -1,0 +1,13 @@
+@keyframes pb-rowin {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.pb-row {
+  animation: pb-rowin 0.32s both;
+}
