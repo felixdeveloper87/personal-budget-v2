@@ -60,23 +60,33 @@ export default function TransactionsPage() {
 
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
 
-  // Membership is purchase-based ("two clocks": Behaviour axis) and stable across
-  // the view toggle — the toggle only changes grouping/labels, not which rows show.
-  const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'activity')
-
-  const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
-
   const [state, dispatch] = useReducer(txReducer, initialTxState)
   const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
 
-  // Reset the day filter when the navigated period changes.
+  // The view toggle swaps the page's time axis ("two clocks"): Behaviour shows
+  // each transaction on its purchase day, Payments on the day money clears. This
+  // drives membership too — a card purchase that settles next month leaves the
+  // Payments view of this month, exactly like the dashboard's date basis.
+  const basis = state.view === 'behaviour' ? 'activity' : 'cash-flow'
+  const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, basis)
+  const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
+
+  // Behavioural patterns are always about *purchase* behaviour, so they read from
+  // the purchase-based set regardless of which view is active.
+  const behaviourData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'activity')
+  const behaviourVm = useMemo<TxnVM[]>(
+    () => toViewModel(behaviourData.transactions),
+    [behaviourData.transactions],
+  )
+
+  // Reset the day filter when the navigated period or view axis changes.
   useEffect(() => {
     dispatch({ type: 'SET_DAY', day: null })
-  }, [selectedDate, selectedPeriod])
+  }, [selectedDate, selectedPeriod, state.view])
 
-  const rhythm = useMemo(() => deriveRhythm(vm), [vm])
-  const habit = useMemo(() => deriveHabit(vm), [vm])
-  const momentum = useMemo(() => deriveMomentum(vm), [vm])
+  const rhythm = useMemo(() => deriveRhythm(behaviourVm), [behaviourVm])
+  const habit = useMemo(() => deriveHabit(behaviourVm), [behaviourVm])
+  const momentum = useMemo(() => deriveMomentum(behaviourVm), [behaviourVm])
 
   const days = useMemo(
     () => buildDays(periodData.startDate, periodData.endDate),
@@ -143,6 +153,7 @@ export default function TransactionsPage() {
             <DailyChart
               days={days}
               txns={vm}
+              view={state.view}
               selectedDay={state.selectedDay}
               onSelectDay={selectDay}
               hlRhythm={state.hlRhythm}

@@ -1,8 +1,8 @@
 import { useMemo, useState, type KeyboardEvent } from 'react'
 import { Box, Flex, HStack, Text } from '@chakra-ui/react'
-import type { TxnVM } from '../transactions.types'
+import type { TxnVM, TxView } from '../transactions.types'
 import { fmtCurrency } from '../../dashboard/components/format'
-import { parseISO } from '../transactions.utils'
+import { groupKey, parseISO } from '../transactions.utils'
 import './DailyChart.css'
 
 export interface ChartDay {
@@ -13,6 +13,7 @@ export interface ChartDay {
 interface DailyChartProps {
   days: ChartDay[]
   txns: TxnVM[]
+  view: TxView
   selectedDay: string | null
   onSelectDay: (iso: string) => void
   hlRhythm: boolean
@@ -34,6 +35,7 @@ const WD_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 export default function DailyChart({
   days,
   txns,
+  view,
   selectedDay,
   onSelectDay,
   hlRhythm,
@@ -46,17 +48,19 @@ export default function DailyChart({
     { iso: string; leftPct: number; inV: number; outV: number } | null
   >(null)
 
-  // Per-day in/out totals, keyed by purchase-date ISO.
+  // Per-day in/out totals, keyed by the active view axis (purchase date in
+  // Behaviour, settlement date in Payments) so bars match the ledger grouping.
   const totals = useMemo(() => {
     const map = new Map<string, { in: number; out: number }>()
     for (const t of txns) {
-      const cur = map.get(t.purchaseDate) ?? { in: 0, out: 0 }
+      const key = groupKey(t, view)
+      const cur = map.get(key) ?? { in: 0, out: 0 }
       if (t.type === 'in') cur.in += t.amount
       else cur.out += t.amount
-      map.set(t.purchaseDate, cur)
+      map.set(key, cur)
     }
     return map
-  }, [txns])
+  }, [txns, view])
 
   const n = Math.max(days.length, 1)
   const colW = VW / n

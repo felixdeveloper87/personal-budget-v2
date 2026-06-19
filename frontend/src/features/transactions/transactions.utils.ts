@@ -122,9 +122,11 @@ export function deriveMomentum(txns: TxnVM[], midDay = 15): MomentumInsight | nu
 /* Filtering                                                                   */
 /* -------------------------------------------------------------------------- */
 
-/** All conditions AND-ed. `selectedDay` always filters against purchaseDate. */
+/** All conditions AND-ed. `selectedDay` filters against the active view axis
+ * (purchase date in Behaviour, settlement date in Payments) so it matches the
+ * day the user tapped on the chart. */
 export function matches(t: TxnVM, state: TxState): boolean {
-  if (state.selectedDay && t.purchaseDate !== state.selectedDay) return false
+  if (state.selectedDay && groupKey(t, state.view) !== state.selectedDay) return false
   if (state.filter === 'in' && t.type !== 'in') return false
   if (state.filter === 'out' && t.type !== 'out') return false
   if (state.filter === 'deferred' && !t.deferred) return false
