@@ -23,8 +23,8 @@ function GroupTotalPill({ kind, value }: { kind: 'in' | 'out'; value: number }) 
       px=".6rem"
       py="2px"
       borderRadius="999px"
-      bg={isIn ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
-      color={isIn ? 'var(--pb-forest)' : 'var(--pb-coral)'}
+      bg={isIn ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
+      color={isIn ? 'var(--pb-income)' : 'var(--pb-coral)'}
     >
       <Text as="span" fontSize="11px" lineHeight="1">
         {isIn ? '↗' : '↘'}

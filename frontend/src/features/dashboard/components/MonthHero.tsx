@@ -37,7 +37,7 @@ export default function MonthHero({
     ? `${fmtCurrency(income)} earned against ${fmtCurrency(expense)} in expenses and bills.`
     : `${fmtCurrency(income)} earned with ${fmtCurrency(surplus)} surplus after ${fmtCurrency(expense)} in expenses.`
 
-  const netLabel = fmtCurrency(Math.abs(net))
+  const netLabel = `${net < 0 ? '−' : ''}${fmtCurrency(Math.abs(net))}`
 
   return (
     <Panel
@@ -167,7 +167,7 @@ export default function MonthHero({
           spacing={2}
         >
           <Box w="full" maxW="260px">
-            <BalanceSeal netLabel={netLabel} currency="GBP" />
+            <BalanceSeal netLabel={netLabel} currency="GBP" negative={net < 0} />
           </Box>
           <Text
             fontFamily="var(--pb-mono)"

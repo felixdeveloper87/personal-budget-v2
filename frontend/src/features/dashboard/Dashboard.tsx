@@ -23,6 +23,8 @@ import type { TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
+import DashboardHeading from './components/DashboardHeading'
+import SectionLabel from './components/SectionLabel'
 import PeriodToolbar from './components/PeriodToolbar'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
@@ -300,6 +302,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     >
       <MotionBox variants={containerV} initial="hidden" animate="show">
       <VStack spacing={{ base: 5, md: 6 }} align="stretch">
+        {/* Page header */}
+        <MotionBox variants={riseV}>
+          <DashboardHeading />
+        </MotionBox>
+
         {/* Period toolbar */}
         <MotionBox variants={riseV}>
           <PeriodToolbar
@@ -334,6 +341,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         ) : null}
 
         {/* Stat row: Net available · Month forecast */}
+        <MotionBox variants={riseV}>
+          <SectionLabel>Balance &amp; forecast</SectionLabel>
+        </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <StatCard
@@ -388,6 +398,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </Grid>
 
         {/* Commitments · For you */}
+        <MotionBox variants={riseV}>
+          <SectionLabel>Commitments &amp; insights</SectionLabel>
+        </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <CommitmentsPanel

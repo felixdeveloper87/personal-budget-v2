@@ -27,7 +27,7 @@ interface ActivityPaneProps {
 
 const FILTERS: TxFilter[] = ['all', 'in', 'out', 'deferred']
 const DOT_COLOR: Partial<Record<TxFilter, string>> = {
-  in: 'var(--pb-forest-2)',
+  in: 'var(--pb-income-2)',
   out: 'var(--pb-coral)',
   deferred: 'var(--pb-gold-2)',
 }

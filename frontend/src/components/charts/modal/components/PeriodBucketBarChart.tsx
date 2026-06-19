@@ -85,9 +85,8 @@ export interface PeriodBucketBarChartProps {
  *  - Bold total top-right
  *  - One bar per sub-bucket (hour block / day / day-of-month / month)
  *
- * Designed to be used inside `<TransactionsChart />`, `<IncomeChart />` and
- * `<ExpensesChart />` as the headline visualization above the more detailed
- * pie / line / stacked-bar charts.
+ * Designed to be used inside `<IncomeChart />` and `<ExpensesChart />` as the
+ * headline visualization above the more detailed pie / line / stacked-bar charts.
  */
 export default function PeriodBucketBarChart({
   transactions,
