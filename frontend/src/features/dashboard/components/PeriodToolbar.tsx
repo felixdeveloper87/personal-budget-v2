@@ -96,7 +96,7 @@ export default function PeriodToolbar({
                 bg="var(--pb-tint-green)"
                 color="var(--pb-forest)"
                 border="1px solid var(--pb-hair)"
-                _hover={{ bg: 'rgba(45,106,79,0.16)' }}
+                _hover={{ bg: 'rgba(29,90,135,0.16)' }}
                 onClick={onGoToToday}
                 fontWeight={500}
               >

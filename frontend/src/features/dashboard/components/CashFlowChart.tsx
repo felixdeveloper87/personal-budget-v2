@@ -41,13 +41,13 @@ export default function CashFlowChart({
   // recharts writes stroke/fill as SVG attributes, where CSS var() is
   // unreliable — so resolve concrete colours per color mode here.
   const c = {
-    income: dark ? '#7fe6b3' : '#2d6a4f',
-    expense: dark ? '#f8a3a3' : '#a8432e',
-    grid: dark ? 'rgba(239,234,224,0.10)' : 'rgba(30,77,56,0.15)',
-    tick: dark ? '#8a948b' : '#8a9287',
-    tooltipBg: dark ? '#0e1411' : '#fbfaf4',
-    tooltipBorder: dark ? 'rgba(239,234,224,0.18)' : 'rgba(30,77,56,0.15)',
-    tooltipText: dark ? '#efeae0' : '#17251c',
+    income: dark ? '#5fd394' : '#1f8a4f',
+    expense: dark ? '#f6928a' : '#c23a2c',
+    grid: dark ? 'rgba(226,235,247,0.10)' : 'rgba(28,58,92,0.14)',
+    tick: dark ? '#7f8d9d' : '#8392a3',
+    tooltipBg: dark ? '#12181f' : '#f6f8fb',
+    tooltipBorder: dark ? 'rgba(226,235,247,0.18)' : 'rgba(28,58,92,0.14)',
+    tooltipText: dark ? '#e8eef6' : '#15202e',
   }
 
   const [range, setRange] = useState<PeriodType>('month')

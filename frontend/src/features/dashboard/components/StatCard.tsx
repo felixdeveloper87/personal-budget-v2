@@ -30,7 +30,7 @@ export default function StatCard({
   onToggleMask,
 }: StatCardProps) {
   const figureColor = accent === 'gold' ? 'var(--pb-gold-2)' : 'var(--pb-forest)'
-  const deltaColor = deltaPositive ? 'var(--pb-forest-2)' : 'var(--pb-coral)'
+  const deltaColor = deltaPositive ? 'var(--pb-income-2)' : 'var(--pb-coral)'
   const DeltaIcon = deltaPositive ? ArrowUpRight : ArrowDownRight
 
   return (
@@ -83,7 +83,7 @@ export default function StatCard({
               px={2}
               py="2px"
               borderRadius="999px"
-              bg={deltaPositive ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
+              bg={deltaPositive ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
               color={deltaColor}
               flexShrink={0}
             >

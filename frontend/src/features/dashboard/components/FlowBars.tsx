@@ -49,7 +49,7 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
             width={`${incomePct}%`}
             style={{
               transformOrigin: 'left center',
-              background: 'linear-gradient(to right, #2d6a4f, #3f8a63)',
+              background: 'linear-gradient(to right, #1f8a4f, #29a25e)',
               borderRadius: '7px',
             }}
             variants={reduce ? undefined : barV}
@@ -84,7 +84,7 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
             width={`${expensePct}%`}
             style={{
               transformOrigin: 'left center',
-              background: 'linear-gradient(to right, #a8432e, #bb5640)',
+              background: 'linear-gradient(to right, #c23a2c, #d84a39)',
               borderRadius: '7px',
             }}
             variants={reduce ? undefined : barV}

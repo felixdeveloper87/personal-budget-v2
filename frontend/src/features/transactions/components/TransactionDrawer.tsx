@@ -131,8 +131,8 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
             borderRadius="12px"
             display="grid"
             placeItems="center"
-            bg={isIn ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
-            color={isIn ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
+            bg={isIn ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
+            color={isIn ? 'var(--pb-income-2)' : 'var(--pb-coral)'}
             border="1px solid var(--pb-hair)"
             flexShrink={0}
           >
@@ -162,7 +162,7 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
               fontFamily="var(--pb-serif)"
               fontSize="1.5rem"
               fontWeight={500}
-              color={isIn ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
+              color={isIn ? 'var(--pb-income-2)' : 'var(--pb-coral)'}
               style={{ fontVariantNumeric: 'tabular-nums' }}
               whiteSpace="nowrap"
             >

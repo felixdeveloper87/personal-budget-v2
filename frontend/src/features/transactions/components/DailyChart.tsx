@@ -133,12 +133,12 @@ export default function DailyChart({
         >
           <defs>
             <linearGradient id="pb-tx-out" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c0563d" />
-              <stop offset="100%" stopColor="#a8432e" />
+              <stop offset="0%" stopColor="#d84a39" />
+              <stop offset="100%" stopColor="#c23a2c" />
             </linearGradient>
             <linearGradient id="pb-tx-in" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#4f9d74" />
-              <stop offset="100%" stopColor="#2d6a4f" />
+              <stop offset="0%" stopColor="#29a25e" />
+              <stop offset="100%" stopColor="#1f8a4f" />
             </linearGradient>
           </defs>
 
@@ -271,13 +271,13 @@ export default function DailyChart({
       {/* Legend */}
       <Flex align="center" gap="1rem" mt=".7rem" flexWrap="wrap">
         <HStack spacing="0.4rem">
-          <Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #4f9d74, #2d6a4f)" />
+          <Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" />
           <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">
             Income
           </Text>
         </HStack>
         <HStack spacing="0.4rem">
-          <Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #c0563d, #a8432e)" />
+          <Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #d84a39, #c23a2c)" />
           <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">
             Spending
           </Text>

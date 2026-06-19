@@ -90,7 +90,7 @@ export default function MonthHero({
               ) : (
                 <>
                   Income is{' '}
-                  <Text as="em" color="var(--pb-mint)">
+                  <Text as="em" color="var(--pb-income-2)">
                     ahead
                   </Text>{' '}
                   of spending this month.
@@ -119,15 +119,15 @@ export default function MonthHero({
                   flex={1}
                   h="36px"
                   borderRadius="999px"
-                  bg="var(--pb-tint-green)"
-                  color="var(--pb-forest)"
+                  bg="var(--pb-tint-income)"
+                  color="var(--pb-income)"
                   border="1px solid var(--pb-hair)"
                   fontFamily="var(--pb-mono)"
                   fontSize="11px"
                   fontWeight={500}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
-                  _hover={{ bg: 'rgba(45,106,79,0.16)', borderColor: 'var(--pb-hair-2)' }}
+                  _hover={{ bg: 'rgba(31,138,79,0.18)', borderColor: 'var(--pb-hair-2)' }}
                   onClick={onAddIncome}
                 >
                   + Add income
@@ -146,7 +146,7 @@ export default function MonthHero({
                   fontWeight={500}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
-                  _hover={{ bg: 'rgba(168,67,46,0.15)', borderColor: 'var(--pb-hair-2)' }}
+                  _hover={{ bg: 'rgba(194,58,44,0.16)', borderColor: 'var(--pb-hair-2)' }}
                   onClick={onAddExpense}
                 >
                   + Add expense

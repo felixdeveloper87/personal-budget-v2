@@ -35,10 +35,10 @@ export default function PatternCard({
       w="full"
       bg="var(--pb-surface)"
       border="1px solid"
-      borderColor={active ? 'rgba(45,106,79,.4)' : 'var(--pb-hair)'}
+      borderColor={active ? 'rgba(29,90,135,.4)' : 'var(--pb-hair)'}
       borderRadius="18px"
       p="1rem"
-      boxShadow={active ? '0 0 0 1px rgba(45,106,79,.25), var(--pb-shadow)' : 'var(--pb-shadow)'}
+      boxShadow={active ? '0 0 0 1px rgba(29,90,135,.25), var(--pb-shadow)' : 'var(--pb-shadow)'}
       transition="transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease"
       cursor="pointer"
       sx={{ '&:hover .pb-hint': { opacity: 1 } }}

@@ -16,10 +16,10 @@ export default function SpendingMix({ transactions }: SpendingMixProps) {
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
-  const sliceStroke = dark ? '#0e1411' : '#fbfaf4'
-  const tooltipBg = dark ? '#0e1411' : '#fbfaf4'
-  const tooltipBorder = dark ? 'rgba(239,234,224,0.18)' : 'rgba(30,77,56,0.15)'
-  const tooltipText = dark ? '#efeae0' : '#17251c'
+  const sliceStroke = dark ? '#12181f' : '#f6f8fb'
+  const tooltipBg = dark ? '#12181f' : '#f6f8fb'
+  const tooltipBorder = dark ? 'rgba(226,235,247,0.18)' : 'rgba(28,58,92,0.14)'
+  const tooltipText = dark ? '#e8eef6' : '#15202e'
 
   const { slices, total } = useMemo(() => {
     const byCategory = new Map<string, number>()

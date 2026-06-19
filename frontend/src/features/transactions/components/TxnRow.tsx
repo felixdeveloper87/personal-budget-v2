@@ -12,7 +12,7 @@ interface TxnRowProps {
 
 export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
   const isIn = txn.type === 'in'
-  const amountColor = isIn ? 'var(--pb-forest-2)' : 'var(--pb-coral)'
+  const amountColor = isIn ? 'var(--pb-income-2)' : 'var(--pb-coral)'
   const sign = isIn ? '+' : '−'
 
   const settle = (() => {
@@ -52,8 +52,8 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
           borderRadius="11px"
           display="grid"
           placeItems="center"
-          bg={isIn ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
-          color={isIn ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
+          bg={isIn ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
+          color={isIn ? 'var(--pb-income-2)' : 'var(--pb-coral)'}
           border="1px solid var(--pb-hair)"
         >
           <CategoryIcon iconKey={txn.iconKey} boxSize="19px" />

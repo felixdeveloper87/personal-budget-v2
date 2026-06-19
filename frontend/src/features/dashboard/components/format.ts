@@ -1,14 +1,14 @@
-/** Engraving-friendly palette for category slices (forest → gold → coral spectrum). */
+/** Cool metallic palette for category slices (steel-blue led, with brass + red accents). */
 export const CATEGORY_COLORS = [
-  '#2d6a4f',
-  '#b1872f',
-  '#a8432e',
-  '#4f9d74',
-  '#357a55',
-  '#876723',
-  '#c0563d',
-  '#1e4d38',
-  '#8a9287',
+  '#2f7bb0',
+  '#1d5a87',
+  '#5aa1d6',
+  '#1f8a4f',
+  '#9c7b2c',
+  '#3f86c2',
+  '#c23a2c',
+  '#6b7c8e',
+  '#c19a3c',
 ] as const
 
 export const categoryColor = (index: number): string =>

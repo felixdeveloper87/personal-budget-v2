@@ -12,7 +12,7 @@ export default function PageHeader() {
         display="grid"
         placeItems="center"
         bg="var(--pb-tint-green)"
-        border="1px solid rgba(45,106,79,.2)"
+        border="1px solid rgba(29,90,135,.2)"
         color="var(--pb-forest)"
         flexShrink={0}
       >

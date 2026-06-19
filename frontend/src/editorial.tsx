@@ -20,17 +20,18 @@ import { Box, useColorMode } from '@chakra-ui/react'
 
 /* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
 export const EDITORIAL_DARK = {
-  bg: '#070a08',
-  bg2: '#0b100d',
-  jade: '#7fe6b3',
-  gold: '#d9b36a',
+  bg: '#0a0f16',
+  bg2: '#0e141d',
+  /** Brand accent (steel blue) + brass. */
+  jade: '#6db3e8',
+  gold: '#d8b772',
   /** Primary text. */
-  cream: '#efeae0',
+  cream: '#e8eef6',
   /** Secondary / muted text. */
-  muted: '#94a398',
-  red: '#f8a3a3',
-  /** Dark glyph colour for text sitting on a jade/gold accent fill. */
-  onAccent: '#07100a',
+  muted: '#94a3b1',
+  red: '#f6928a',
+  /** Dark glyph colour for text sitting on a brand/gold accent fill. */
+  onAccent: '#06101a',
 
   /** ── Superfícies de card (fonte única) ──────────────────────────────
    *  `panel`  → card padrão da plataforma (páginas). Leve transparência pro
@@ -39,30 +40,30 @@ export const EDITORIAL_DARK = {
    *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
    *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
    *  `panelRaised` → painéis internos (card dentro de card). */
-  panel: 'rgba(10, 11, 10, 0.80)',
-  modal: 'rgba(14, 15, 14, 0.88)',
-  solid: '#0e0f0e',
-  panelRaised: 'rgba(239, 234, 224, 0.03)',
-  line: 'rgba(239, 234, 224, 0.10)',
-  lineStrong: 'rgba(239, 234, 224, 0.18)',
+  panel: 'rgba(16, 22, 31, 0.80)',
+  modal: 'rgba(18, 24, 33, 0.88)',
+  solid: '#12181f',
+  panelRaised: 'rgba(226, 235, 247, 0.03)',
+  line: 'rgba(226, 235, 247, 0.10)',
+  lineStrong: 'rgba(226, 235, 247, 0.18)',
 
   /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(7, 10, 8, 0.80)',
+  glass: 'rgba(10, 15, 22, 0.80)',
 
   /** Subtle hover wash on a panel. */
-  hoverBg: 'rgba(239, 234, 224, 0.08)',
+  hoverBg: 'rgba(226, 235, 247, 0.08)',
   /** Chrome control surface (search pill, theme toggle, user trigger). */
-  controlBg: 'rgba(239, 234, 224, 0.04)',
-  controlHoverBg: 'rgba(239, 234, 224, 0.08)',
+  controlBg: 'rgba(226, 235, 247, 0.04)',
+  controlHoverBg: 'rgba(226, 235, 247, 0.08)',
   /** Segmented-control track and its active thumb. */
-  trackBg: 'rgba(239, 234, 224, 0.05)',
-  thumbBg: 'rgba(239, 234, 224, 0.12)',
-  /** Jade-tinted soft fills (Today button, hints). */
-  jadeSoft: 'rgba(127, 230, 179, 0.12)',
-  jadeSoftHover: 'rgba(127, 230, 179, 0.20)',
+  trackBg: 'rgba(226, 235, 247, 0.05)',
+  thumbBg: 'rgba(226, 235, 247, 0.12)',
+  /** Brand-tinted soft fills (Today button, hints). */
+  jadeSoft: 'rgba(109, 179, 232, 0.12)',
+  jadeSoftHover: 'rgba(109, 179, 232, 0.20)',
 
   /** Full-bleed background for the app shell. */
-  bgGradient: 'linear-gradient(180deg, #0b100d 0%, #070a08 100%)',
+  bgGradient: 'linear-gradient(180deg, #0e141d 0%, #0a0f16 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
@@ -73,39 +74,37 @@ export type EditorialTokens = {
 
 /* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  bg: '#f4efe4',
-  bg2: '#ebe3d4',
-  /** Accents stay legible on cream: deep emerald + bronze gold. */
-  jade: '#087a50',
-  gold: '#a56f16',
-  /** Primary text → deep ink-green (the "cream" slot, semantically primary). */
-  cream: '#13281d',
-  muted: '#586a5e',
-  red: '#b8443d',
-  onAccent: '#08120c',
+  bg: '#e7ebf1',
+  bg2: '#dde2ea',
+  /** Brand accent (steel blue) + brass, legible on cool metallic. */
+  jade: '#1d5a87',
+  gold: '#9c7b2c',
+  /** Primary text → deep slate (the "cream" slot, semantically primary). */
+  cream: '#15202e',
+  muted: '#4d5c6c',
+  red: '#c23a2c',
+  onAccent: '#f6f8fb',
 
-  // Superfícies de card — ver doc no EDITORIAL_DARK.
-  // Light paper needs a little more transparency so the guilloche remains
-  // visible through large surfaces, matching the perceived dark-mode depth.
-  panel: 'rgba(255, 252, 244, 0.70)',
-  modal: 'rgba(255, 252, 244, 0.92)',
-  solid: '#fffcf5',
-  panelRaised: 'rgba(255, 255, 255, 0.48)',
-  line: 'rgba(19, 56, 37, 0.14)',
-  lineStrong: 'rgba(8, 122, 80, 0.28)',
+  // Superfícies de card — ver doc no EDITORIAL_DARK. Cool near-white panels on
+  // the flat metallic background (the guilloché page backdrop is off in light).
+  panel: 'rgba(255, 255, 255, 0.72)',
+  modal: 'rgba(255, 255, 255, 0.92)',
+  solid: '#ffffff',
+  panelRaised: 'rgba(255, 255, 255, 0.55)',
+  line: 'rgba(28, 58, 92, 0.14)',
+  lineStrong: 'rgba(29, 90, 135, 0.28)',
 
-  glass: 'rgba(248, 244, 235, 0.82)',
+  glass: 'rgba(244, 247, 251, 0.82)',
 
-  hoverBg: 'rgba(8, 122, 80, 0.07)',
-  controlBg: 'rgba(255, 255, 255, 0.48)',
-  controlHoverBg: 'rgba(255, 255, 255, 0.76)',
-  trackBg: 'rgba(19, 40, 29, 0.065)',
-  thumbBg: 'rgba(255, 253, 248, 0.98)',
-  jadeSoft: 'rgba(8, 122, 80, 0.11)',
-  jadeSoftHover: 'rgba(8, 122, 80, 0.19)',
+  hoverBg: 'rgba(29, 90, 135, 0.07)',
+  controlBg: 'rgba(255, 255, 255, 0.55)',
+  controlHoverBg: 'rgba(255, 255, 255, 0.82)',
+  trackBg: 'rgba(28, 48, 72, 0.07)',
+  thumbBg: 'rgba(255, 255, 255, 0.98)',
+  jadeSoft: 'rgba(29, 90, 135, 0.11)',
+  jadeSoftHover: 'rgba(29, 90, 135, 0.19)',
 
-  bgGradient:
-    'radial-gradient(circle at 12% 8%, rgba(8,122,80,0.13) 0%, transparent 30%), radial-gradient(circle at 88% 14%, rgba(165,111,22,0.12) 0%, transparent 28%), linear-gradient(145deg, #fcfaf4 0%, #f4eee1 52%, #ece2d0 100%)',
+  bgGradient: 'linear-gradient(180deg, #eef1f6 0%, #e3e8f0 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }
@@ -269,9 +268,10 @@ export function EditorialBackdrop({ opacity }: { opacity?: number }) {
   const ed = useEd()
   const { colorMode } = useColorMode()
   if (!ed) return null
-  // No dark as linhas (jade claro) somem sobre o quase-preto; subimos a opacidade
-  // pra o padrão aparecer nos dois modos. Override via prop quando preciso.
-  const resolved = opacity ?? (colorMode === 'dark' ? 0.45 : 0.29)
+  // Light mode is a flat metallic surface — no page-background engraving. The
+  // guilloché backdrop stays only in dark, where it reads as quiet depth.
+  if (colorMode !== 'dark') return null
+  const resolved = opacity ?? 0.45
   return (
     <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
       <Box position="sticky" top={0} h="100vh" overflow="hidden">

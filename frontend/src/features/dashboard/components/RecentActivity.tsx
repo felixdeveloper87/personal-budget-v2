@@ -67,14 +67,14 @@ export default function RecentActivity({
                       w={7}
                       h={7}
                       borderRadius="10px"
-                      bg={income ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
+                      bg={income ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
                       border="1px solid var(--pb-hair)"
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
                       flexShrink={0}
                     >
-                      <Icon size={13} color={income ? 'var(--pb-forest-2)' : 'var(--pb-coral)'} />
+                      <Icon size={13} color={income ? 'var(--pb-income-2)' : 'var(--pb-coral)'} />
                     </Box>
                     <VStack align="stretch" spacing={0} minW={0}>
                       <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
@@ -89,7 +89,7 @@ export default function RecentActivity({
                     fontFamily="var(--pb-mono)"
                     fontSize="13px"
                     fontWeight={500}
-                    color={income ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
+                    color={income ? 'var(--pb-income-2)' : 'var(--pb-ink-soft)'}
                     flexShrink={0}
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >

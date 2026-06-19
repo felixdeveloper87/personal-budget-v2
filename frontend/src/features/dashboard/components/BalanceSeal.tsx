@@ -5,7 +5,7 @@ import { guilloche } from './guilloche'
 interface BalanceSealProps {
   netLabel: string
   currency?: string
-  /** Deficit (net < 0) → coral figure; surplus → forest. */
+  /** Deficit (net < 0) → red figure; surplus → green. */
   negative?: boolean
 }
 
@@ -19,7 +19,7 @@ export default function BalanceSeal({ netLabel, currency = 'GBP', negative = fal
   const ringMid = useMemo(() => guilloche(90, 3, 15), []) //   30 petals · ~72–102
   const ringInner = useMemo(() => guilloche(78, 3, 12), []) //  26 petals · ~63–87
 
-  const figureColor = negative ? 'var(--pb-coral)' : 'var(--pb-forest-2)'
+  const figureColor = negative ? 'var(--pb-coral)' : 'var(--pb-income-2)'
 
   return (
     <svg

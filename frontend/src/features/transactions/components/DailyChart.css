@@ -25,15 +25,15 @@
   opacity: 1;
 }
 .tue-band {
-  fill: rgba(45, 106, 79, 0.12);
+  fill: rgba(29, 90, 135, 0.12);
 }
 .h2-band {
-  fill: rgba(168, 67, 46, 0.08);
+  fill: rgba(194, 58, 44, 0.08);
 }
 
 /* Day-selection rect. */
 .pb-day-sel {
-  fill: rgba(45, 106, 79, 0.12);
+  fill: rgba(29, 90, 135, 0.12);
   stroke: var(--pb-line);
   stroke-opacity: 0.45;
   stroke-width: 1;
@@ -75,7 +75,7 @@
   outline: none;
 }
 .pb-hit:focus-visible {
-  fill: rgba(45, 106, 79, 0.06);
+  fill: rgba(29, 90, 135, 0.06);
 }
 
 /* Tooltip. */
@@ -109,8 +109,8 @@
   font-variant-numeric: tabular-nums;
 }
 .pb-chart-tip-row.in {
-  color: #9fe3bd;
+  color: #7fe0a6;
 }
 .pb-chart-tip-row.out {
-  color: #f3b0a0;
+  color: #f3a293;
 }

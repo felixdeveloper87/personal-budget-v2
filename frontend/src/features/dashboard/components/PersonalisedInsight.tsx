@@ -20,7 +20,7 @@ interface PersonalisedInsightProps {
 export default function PersonalisedInsight({ insight, onPageChange }: PersonalisedInsightProps) {
   const { headline, body, actionLabel, deltaLabel, deltaPositive, href } = insight
   const DeltaIcon = deltaPositive ? TrendingUp : TrendingDown
-  const deltaColor = deltaPositive ? 'var(--pb-forest-2)' : 'var(--pb-coral)'
+  const deltaColor = deltaPositive ? 'var(--pb-income-2)' : 'var(--pb-coral)'
 
   return (
     <Panel h="full">
@@ -56,7 +56,7 @@ export default function PersonalisedInsight({ insight, onPageChange }: Personali
               px={2}
               py="2px"
               borderRadius="999px"
-              bg={deltaPositive ? 'var(--pb-tint-green)' : 'var(--pb-tint-coral)'}
+              bg={deltaPositive ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
               color={deltaColor}
             >
               <DeltaIcon size={12} />

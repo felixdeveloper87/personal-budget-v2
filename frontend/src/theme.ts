@@ -129,12 +129,12 @@ const theme = extendTheme({
         container: {
           // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
           // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(10, 11, 10, 0.80)' : 'rgba(255, 252, 244, 0.70)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(239, 234, 224, 0.10)' : 'rgba(19, 56, 37, 0.14)',
+          bg: props.colorMode === 'dark' ? 'rgba(16, 22, 31, 0.80)' : 'rgba(255, 255, 255, 0.72)',
+          borderColor: props.colorMode === 'dark' ? 'rgba(226, 235, 247, 0.10)' : 'rgba(28, 58, 92, 0.14)',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark'
             ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.82), 0 12px 34px -22px rgba(19,56,37,0.32), 0 3px 10px rgba(87,65,28,0.06)',
+            : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 34px -22px rgba(18,38,60,0.28), 0 3px 10px rgba(18,38,60,0.05)',
           backdropFilter: props.colorMode === 'dark'
             ? 'blur(12px) saturate(115%)'
             : 'blur(16px) saturate(125%)',
@@ -146,14 +146,14 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(14, 15, 14, 0.88)' : 'rgba(255, 253, 247, 0.88)',
+          bg: props.colorMode === 'dark' ? 'rgba(18, 24, 33, 0.88)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#efeae0' : '#16241c',
+          color: props.colorMode === 'dark' ? '#e8eef6' : '#15202e',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(239, 234, 224, 0.18)'
-            : 'rgba(20, 36, 28, 0.20)',
+            ? 'rgba(226, 235, 247, 0.18)'
+            : 'rgba(28, 58, 92, 0.18)',
           boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
           overflow: 'hidden',
         },
@@ -168,8 +168,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(239, 234, 224, 0.10)'
-            : 'rgba(20, 36, 28, 0.12)',
+            ? 'rgba(226, 235, 247, 0.10)'
+            : 'rgba(28, 58, 92, 0.12)',
         },
       }),
     },
@@ -178,14 +178,14 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(14, 15, 14, 0.88)' : 'rgba(255, 253, 247, 0.88)',
+          bg: props.colorMode === 'dark' ? 'rgba(18, 24, 33, 0.88)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#efeae0' : '#16241c',
+          color: props.colorMode === 'dark' ? '#e8eef6' : '#15202e',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(239, 234, 224, 0.18)'
-            : 'rgba(20, 36, 28, 0.20)',
+            ? 'rgba(226, 235, 247, 0.18)'
+            : 'rgba(28, 58, 92, 0.18)',
           boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
           overflow: 'hidden',
         },
@@ -200,8 +200,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(239, 234, 224, 0.10)'
-            : 'rgba(20, 36, 28, 0.12)',
+            ? 'rgba(226, 235, 247, 0.10)'
+            : 'rgba(28, 58, 92, 0.12)',
         },
       }),
     },

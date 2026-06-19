@@ -2,7 +2,7 @@
  * Personal Budget — design tokens (light metallic · blue brand).
  *
  * Semantic mapping (names kept stable to avoid churn across components):
- *   brand / structure  → --pb-forest, --pb-forest-2, --pb-mint, --pb-line,
+ *   brand / structure  → --pb-forest, --pb-forest-2, --pb-line,
  *                         --pb-tint-green   (now a STEEL-BLUE family)
  *   income / positive  → --pb-income, --pb-income-2, --pb-tint-income  (GREEN)
  *   expense / negative → --pb-coral, --pb-coral-2, --pb-tint-coral     (RED)
@@ -25,7 +25,6 @@
   /* Brand — steel blue */
   --pb-forest: #1d5a87;
   --pb-forest-2: #2f7bb0;
-  --pb-mint: #5aa1d6;
   --pb-line: #3f86c2;
   --pb-tint-green: rgba(29, 90, 135, 0.10);
 
@@ -68,7 +67,6 @@
 
   --pb-forest: #6db3e8;
   --pb-forest-2: #5aa6df;
-  --pb-mint: #6db3e8;
   --pb-line: #4f93c9;
   --pb-tint-green: rgba(109, 179, 232, 0.12);
 
