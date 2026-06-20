@@ -8,7 +8,8 @@ import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PaperFooter from '../dashboard/components/PaperFooter'
-import PageHeader from './components/PageHeader'
+import { PageHeader } from '../../components/ui'
+import { List } from '../../components/ui/icons'
 import ViewBar from './components/ViewBar'
 import PeriodToolbar from './components/PeriodToolbar'
 import DailyChart, { type ChartDay } from './components/DailyChart'
@@ -121,8 +122,12 @@ export default function TransactionsPage() {
         initial={reduce ? false : 'hidden'}
         animate="show"
       >
-        <MotionBox variants={riseV}>
-          <PageHeader />
+        <MotionBox variants={riseV} mb="1.3rem">
+          <PageHeader
+            icon={List}
+            title="Transactions"
+            subtitle="Activity and spending patterns for the selected period."
+          />
         </MotionBox>
 
         <MotionBox variants={riseV}>
