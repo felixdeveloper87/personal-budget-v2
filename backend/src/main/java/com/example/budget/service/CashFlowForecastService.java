@@ -27,10 +27,10 @@ import java.util.Map;
  * conflates the live account snapshot (the Accounts page) with the realised
  * period figures (the Dashboard).</p>
  *
- * <p>It starts on the <b>next full month</b> and runs for {@link #FORECAST_MONTHS}
- * months. The current, partially-elapsed month is left out on purpose: it is
- * already covered by the dashboard, and estimating "the rest of this month"
- * produces noisy, low-trust numbers.</p>
+ * <p>It includes the <b>current month</b> as a live-balance snapshot, followed
+ * by forward projections, for a total of {@link #FORECAST_MONTHS} months. The
+ * current partial month is not estimated again: its account balance is already
+ * realised, so reapplying a full month's average would double-count activity.</p>
  *
  * <p>Each month separates committed amounts (scheduled fixed payments and
  * installments — high confidence) from estimated amounts (recent monthly
@@ -80,8 +80,8 @@ public class CashFlowForecastService {
         YearMonth currentMonth = YearMonth.from(today);
         YearMonth firstHistoryMonth = currentMonth.minusMonths(HISTORY_MONTHS);
         YearMonth lastHistoryMonth = currentMonth.minusMonths(1);
-        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
-        YearMonth lastForecastMonth = currentMonth.plusMonths(FORECAST_MONTHS);
+        YearMonth firstForecastMonth = currentMonth;
+        YearMonth lastForecastMonth = currentMonth.plusMonths(FORECAST_MONTHS - 1L);
         LocalDate forecastStart = firstForecastMonth.atDay(1);
         LocalDate forecastEnd = lastForecastMonth.atEndOfMonth();
 
@@ -124,6 +124,27 @@ public class CashFlowForecastService {
         BigDecimal cumulativeNet = BigDecimal.ZERO;
         for (int offset = 0; offset < FORECAST_MONTHS; offset++) {
             YearMonth month = firstForecastMonth.plusMonths(offset);
+
+            // The first card is the live starting point. Projecting full monthly
+            // averages over the current account balance would count this month's
+            // realised income and expenses twice.
+            if (month.equals(currentMonth)) {
+                months.add(new CashFlowForecastDTO.MonthForecast(
+                        month.toString(),
+                        month.atEndOfMonth(),
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        currentTotalBalance,
+                        100,
+                        currentTotalBalance.signum() < 0));
+                continue;
+            }
             BigDecimal monthFixedIncome = fixedIncome.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthFixedExpense = fixedExpenses.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthInstallmentExpense = installmentExpenses.getOrDefault(

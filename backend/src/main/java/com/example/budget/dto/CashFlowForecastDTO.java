@@ -20,8 +20,8 @@ public record CashFlowForecastDTO(
      * <p>The income/expense/net values are flows over the month (money expected to
      * move); {@code projectedClosingBalance} is the running balance, anchored on the
      * current total account balance and rolled forward month by month so it answers
-     * "when does my money run out". The forecast starts on the next full month, so
-     * the current partial month (already covered by the dashboard) is not projected.</p>
+     * "when does my money run out". The first item is the current live-balance
+     * snapshot; the remaining items are projected future months.</p>
      *
      * <p>Each month is split into two confidence layers:</p>
      * <ul>
