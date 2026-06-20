@@ -220,7 +220,13 @@ dist
 *.db
 *.sqlite
 *.sqlite3
+# Runtime data remains ignored. Feature source modules under frontend/src are
+# explicitly included so they are available in clean checkouts and CI builds.
 data/
+!frontend/src/features/accounts/data/
+!frontend/src/features/accounts/data/*.ts
+!frontend/src/features/categories/data/
+!frontend/src/features/categories/data/*.ts
 *.mv.db
 
 # Docker
