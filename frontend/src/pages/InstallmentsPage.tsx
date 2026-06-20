@@ -1,13 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Box, Button, Collapse, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from 'react'
+import { Box, Button, Collapse, Flex, HStack, Icon, IconButton, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 
-import { listInstallmentPlans, listRecurringTransactions } from '../api'
-import type { InstallmentPlan, RecurringTransaction } from '../types'
+import { listInstallmentPlans } from '../api'
+import type { InstallmentPlan } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
-import RecurringTransactionCard from '../components/recurring/RecurringTransactionCard'
 import { PageHeader } from '../components/ui'
-import { CalendarClock, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Plus, Repeat, TrendingDown, TrendingUp, Wallet } from '../components/ui/icons'
+import { CalendarClock, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CreditCard, Plus, Wallet } from '../components/ui/icons'
 import { ToastService } from '../services/toast'
 
 import '../features/dashboard/theme/pb-tokens.css'
@@ -19,23 +18,21 @@ interface InstallmentsPageProps {
 }
 
 const money = (value: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+const monthName = (date: Date) => date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
 
 export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps) {
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
-  const [recurringItems, setRecurringItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [activePlansOpen, setActivePlansOpen] = useState(true)
-  const [fixedOpen, setFixedOpen] = useState(true)
+  const [activeOpen, setActiveOpen] = useState(true)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const outlookRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [planItems, recurring] = await Promise.all([listInstallmentPlans(), listRecurringTransactions()])
-      setPlans(planItems)
-      setRecurringItems(recurring)
+      setPlans(await listInstallmentPlans())
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not load commitments', dedupeKey: 'commitments-page-load-failed' })
+      ToastService.apiError(err, { title: 'Could not load installment plans', dedupeKey: 'installments-page-load-failed' })
     } finally {
       setLoading(false)
     }
@@ -44,20 +41,32 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
   useEffect(() => { void load() }, [load])
 
   const summary = useMemo(() => {
-    const activePlans = plans.filter((plan) => !isInstallmentPlanCompleted(plan))
-    const completedPlans = plans.filter(isInstallmentPlanCompleted)
+    const active = plans.filter((plan) => !isInstallmentPlanCompleted(plan))
+    const completed = plans.filter(isInstallmentPlanCompleted)
     const now = Date.now()
-    const remaining = activePlans.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() >= now).reduce((total, item) => total + item.amount, 0), 0)
-    const installmentMonthly = activePlans.reduce((sum, plan) => sum + plan.installmentValue, 0)
+    const remaining = active.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() >= now).reduce((total, item) => total + item.amount, 0), 0)
+    const paid = plans.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() < now).reduce((total, item) => total + item.amount, 0), 0)
+    const monthly = active.reduce((sum, plan) => sum + plan.installmentValue, 0)
+    const today = new Date()
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+    const nextSixMonths = Array.from({ length: 6 }, (_, offset) => {
+      const date = new Date(today.getFullYear(), today.getMonth() + offset, 1)
+      const total = active.reduce((sum, plan) => sum + plan.transactions.reduce((planTotal, installment) => {
+        const paymentDate = new Date(`${installment.date}T00:00:00`)
+        const sameMonth = paymentDate.getFullYear() === date.getFullYear() && paymentDate.getMonth() === date.getMonth()
+        return sameMonth && paymentDate >= startOfToday ? planTotal + installment.amount : planTotal
+      }, 0), 0)
+      return { date, total }
+    })
+    return { active, completed, remaining, paid, monthly, nextSixMonths }
+  }, [plans])
 
-    const activeFixed = recurringItems.filter((item) => item.active).sort((a, b) => b.amount - a.amount)
-    const stoppedFixed = recurringItems.filter((item) => !item.active).sort((a, b) => a.description.localeCompare(b.description))
-    const fixedIncome = activeFixed.filter((item) => item.type === 'INCOME').reduce((sum, item) => sum + item.amount, 0)
-    const fixedExpenses = activeFixed.filter((item) => item.type === 'EXPENSE').reduce((sum, item) => sum + item.amount, 0)
-
-    const activeExpenseRules = activeFixed.filter((item) => item.type === 'EXPENSE')
-    return { activePlans, completedPlans, remaining, installmentMonthly, activeFixed, activeExpenseRules, stoppedFixed, fixedIncome, fixedExpenses, monthlyNet: fixedIncome - fixedExpenses - installmentMonthly }
-  }, [plans, recurringItems])
+  const scrollOutlook = (direction: -1 | 1) => {
+    const carousel = outlookRef.current
+    if (!carousel) return
+    const card = carousel.querySelector<HTMLElement>('[data-installment-month]')
+    carousel.scrollBy({ left: direction * ((card?.offsetWidth ?? carousel.clientWidth * 0.8) + 12), behavior: 'smooth' })
+  }
 
   return (
     <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
@@ -65,43 +74,35 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
             <PageHeader
-              icon={CalendarClock}
-              title="Commitments"
-              subtitle="Keep instalments and fixed payments together in one monthly view."
+              icon={CreditCard}
+              title="Installments"
+              subtitle="Track every purchase plan, remaining payment and completed agreement."
               rightSlot={<ActionButton label="Add from Home" icon={Plus} primary onClick={() => onPageChange?.('dashboard')} />}
             />
           </MotionBox>
 
           {loading ? <Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex> : <>
-            <MotionBox variants={riseV}><CommitmentsHero summary={summary} /></MotionBox>
-
-            <MotionBox variants={riseV}><SectionLabel>Monthly commitments</SectionLabel></MotionBox>
-            <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="0.8rem">
-              <MotionBox variants={riseV}><Metric icon={CreditCard} label="Instalments" value={money(summary.installmentMonthly)} note={`${summary.activePlans.length} active plan${summary.activePlans.length !== 1 ? 's' : ''}`} /></MotionBox>
-              <MotionBox variants={riseV}><Metric icon={TrendingDown} label="Fixed expenses" value={money(summary.fixedExpenses)} note={`${summary.activeExpenseRules.length} active rule${summary.activeExpenseRules.length !== 1 ? 's' : ''}`} items={summary.activeExpenseRules.map((item) => item.description)} accent="expense" /></MotionBox>
-              <MotionBox variants={riseV}><Metric icon={TrendingUp} label="Fixed income" value={money(summary.fixedIncome)} note="Recurring monthly income" accent="income" /></MotionBox>
-              <MotionBox variants={riseV}><Metric icon={Wallet} label="Monthly net" value={money(summary.monthlyNet)} note="Income less committed outgoings" accent={summary.monthlyNet < 0 ? 'expense' : 'brand'} /></MotionBox>
+            <MotionBox variants={riseV}><InstallmentsHero summary={summary} /></MotionBox>
+            <MotionBox variants={riseV}>
+              <InstallmentOutlook months={summary.nextSixMonths} carouselRef={outlookRef} onNavigate={scrollOutlook} />
+            </MotionBox>
+            <MotionBox variants={riseV}><SectionLabel>Plan overview</SectionLabel></MotionBox>
+            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing="0.8rem">
+              <MotionBox variants={riseV}><Metric icon={CreditCard} label="Active plans" value={String(summary.active.length)} note="Purchase plans in progress" /></MotionBox>
+              <MotionBox variants={riseV}><Metric icon={Wallet} label="Remaining" value={money(summary.remaining)} note="Still scheduled to be paid" accent="brand" /></MotionBox>
+              <MotionBox variants={riseV}><Metric icon={CheckCircle2} label="Already paid" value={money(summary.paid)} note={`${summary.completed.length} completed plan${summary.completed.length !== 1 ? 's' : ''}`} accent="income" /></MotionBox>
             </SimpleGrid>
 
             <MotionBox variants={riseV}>
-              <CommitmentPanel icon={CreditCard} title="Active instalments" caption={`${summary.activePlans.length} purchase plan${summary.activePlans.length !== 1 ? 's' : ''} still in progress`} open={activePlansOpen} onToggle={() => setActivePlansOpen((value) => !value)}>
-                {summary.activePlans.length ? <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.activePlans.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="active" />)}</SimpleGrid> : <EmptyState icon={CreditCard} title="No active instalments" body="New plans created from a transaction will appear here with their remaining payments." />}
-              </CommitmentPanel>
+              <InstallmentPanel title="Active plans" caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} currently reducing your available monthly budget`} open={activeOpen} onToggle={() => setActiveOpen((value) => !value)}>
+                {summary.active.length ? <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="active" />)}</SimpleGrid> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
+              </InstallmentPanel>
             </MotionBox>
 
-            <MotionBox variants={riseV}>
-              <CommitmentPanel icon={Repeat} title="Fixed payments & income" caption={`${summary.activeFixed.length} active recurring rule${summary.activeFixed.length !== 1 ? 's' : ''}`} open={fixedOpen} onToggle={() => setFixedOpen((value) => !value)}>
-                {summary.activeFixed.length ? <SimpleGrid columns={{ base: 1, md: 2 }} spacing="0.9rem">{summary.activeFixed.map((item) => <RecurringTransactionCard key={item.id} recurringTransaction={item} onChanged={load} />)}</SimpleGrid> : <EmptyState icon={Repeat} title="No fixed payments" body="Create a recurring transaction from Home to add bills, subscriptions, rent or a regular income." />}
-              </CommitmentPanel>
-            </MotionBox>
-
-            {(summary.completedPlans.length > 0 || summary.stoppedFixed.length > 0) && <MotionBox variants={riseV}>
-              <CommitmentPanel icon={CheckCircle2} title="History" caption={`${summary.completedPlans.length} completed plan${summary.completedPlans.length !== 1 ? 's' : ''} · ${summary.stoppedFixed.length} stopped rule${summary.stoppedFixed.length !== 1 ? 's' : ''}`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
-                <VStack align="stretch" spacing={5}>
-                  {summary.completedPlans.length > 0 && <Box><SectionLabel>Completed instalments</SectionLabel><SimpleGrid mt={3} columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.completedPlans.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="past" />)}</SimpleGrid></Box>}
-                  {summary.stoppedFixed.length > 0 && <Box><SectionLabel>Stopped fixed payments</SectionLabel><SimpleGrid mt={3} columns={{ base: 1, md: 2 }} spacing="0.9rem">{summary.stoppedFixed.map((item) => <RecurringTransactionCard key={item.id} recurringTransaction={item} onChanged={load} />)}</SimpleGrid></Box>}
-                </VStack>
-              </CommitmentPanel>
+            {summary.completed.length > 0 && <MotionBox variants={riseV}>
+              <InstallmentPanel title="Completed plans" caption={`${summary.completed.length} plan${summary.completed.length !== 1 ? 's' : ''} kept for reference`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
+                <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="past" />)}</SimpleGrid>
+              </InstallmentPanel>
             </MotionBox>}
           </>}
 
@@ -112,18 +113,41 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
   )
 }
 
-function CommitmentsHero({ summary }: { summary: { installmentMonthly: number; fixedExpenses: number; fixedIncome: number; monthlyNet: number; remaining: number } }) {
-  const outgoings = summary.installmentMonthly + summary.fixedExpenses
-  return <Box overflow="hidden" position="relative" borderRadius="22px" bg="linear-gradient(125deg, var(--pb-forest) 0%, var(--pb-forest-2) 58%, var(--pb-line) 100%)" color="#f6f8fb" boxShadow="var(--pb-shadow-lift)" p="clamp(1.25rem, 4vw, 2rem)"><Box position="absolute" w="310px" h="310px" border="1px solid rgba(255,255,255,.15)" borderRadius="full" right="-70px" top="-175px" /><Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={6}><Box maxW="580px"><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.76}>Monthly commitment load</Text><Text className="num" fontSize={{ base: '2.4rem', md: '3.25rem' }} fontWeight={500} lineHeight="1" letterSpacing="-0.035em" mt={2} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(outgoings)}</Text><Text fontSize="sm" opacity={0.82} mt={3}>Instalments and fixed expenses that your monthly plan needs to cover.</Text></Box><SimpleGrid columns={2} spacing={{ base: 3, md: 5 }} minW={{ lg: '310px' }}><HeroMetric label="Fixed income" value={money(summary.fixedIncome)} /><HeroMetric label="Monthly net" value={money(summary.monthlyNet)} /><HeroMetric label="Instalments left" value={money(summary.remaining)} /><HeroMetric label="Fixed expenses" value={money(summary.fixedExpenses)} /></SimpleGrid></Flex></Box>
+function InstallmentsHero({ summary }: { summary: { active: InstallmentPlan[]; remaining: number; paid: number; monthly: number } }) {
+  return <Box overflow="hidden" position="relative" borderRadius="22px" bg="linear-gradient(125deg, var(--pb-forest) 0%, var(--pb-forest-2) 58%, var(--pb-line) 100%)" color="#f6f8fb" boxShadow="var(--pb-shadow-lift)" p="clamp(1.25rem, 4vw, 2rem)"><Box position="absolute" w="310px" h="310px" border="1px solid rgba(255,255,255,.15)" borderRadius="full" right="-70px" top="-175px" /><Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={6}><Box maxW="580px"><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.76}>Monthly installment load</Text><Text className="num" fontSize={{ base: '2.4rem', md: '3.25rem' }} fontWeight={500} lineHeight="1" letterSpacing="-0.035em" mt={2} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(summary.monthly)}</Text><Text fontSize="sm" opacity={0.82} mt={3}>The total of your active monthly installment payments.</Text></Box><SimpleGrid columns={2} spacing={{ base: 3, md: 5 }} minW={{ lg: '310px' }}><HeroMetric label="Active plans" value={String(summary.active.length)} /><HeroMetric label="Still to pay" value={money(summary.remaining)} /><HeroMetric label="Already paid" value={money(summary.paid)} /><HeroMetric label="Average plan" value={summary.active.length ? money(summary.remaining / summary.active.length) : '—'} /></SimpleGrid></Flex></Box>
 }
+
+function InstallmentOutlook({ months, carouselRef, onNavigate }: { months: Array<{ date: Date; total: number }>; carouselRef: RefObject<HTMLDivElement>; onNavigate: (direction: -1 | 1) => void }) {
+  const highest = Math.max(...months.map((month) => month.total), 1)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef({ startX: 0, scrollLeft: 0 })
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || event.button !== 0 || !carouselRef.current) return
+    dragRef.current = { startX: event.clientX, scrollLeft: carouselRef.current.scrollLeft }
+    setIsDragging(true)
+    carouselRef.current.setPointerCapture(event.pointerId)
+  }
+  const moveDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!isDragging || event.pointerType !== 'mouse' || !carouselRef.current) return
+    event.preventDefault()
+    carouselRef.current.scrollLeft = dragRef.current.scrollLeft - (event.clientX - dragRef.current.startX)
+  }
+  const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse') return
+    if (carouselRef.current?.hasPointerCapture(event.pointerId)) carouselRef.current.releasePointerCapture(event.pointerId)
+    setIsDragging(false)
+  }
+  return <Box p={{ base: 4, md: 5 }} borderRadius="22px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)"><Flex justify="space-between" align="start" gap={3} mb={4}><Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-forest-2)">Installment outlook</Text><Text fontSize="lg" fontWeight={600} color="var(--pb-ink)" mt="3px">Your next six months</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt="2px">Drag to compare the total installment payments due in each month.</Text></Box><HStack spacing={2}><OutlookNav label="Previous month" icon={ChevronLeft} onClick={() => onNavigate(-1)} /><OutlookNav label="Next month" icon={ChevronRight} onClick={() => onNavigate(1)} /></HStack></Flex><Box ref={carouselRef} onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={stopDrag} onPointerCancel={stopDrag} onLostPointerCapture={() => setIsDragging(false)} display="flex" gap={3} overflowX="auto" pb={2} cursor={isDragging ? 'grabbing' : 'grab'} touchAction="pan-y" userSelect={isDragging ? 'none' : 'auto'} scrollSnapType={isDragging ? 'none' : 'x mandatory'} sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>{months.map((month, index) => <Box key={month.date.toISOString()} data-installment-month flex={{ base: '0 0 78%', sm: '0 0 calc(50% - 6px)', lg: '0 0 calc(33.333% - 8px)' }} p={4} borderRadius="16px" bg={index === 0 ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={index === 0 ? 'var(--pb-hair-2)' : 'var(--pb-hair)'} scrollSnapAlign="start"><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">{index === 0 ? 'This month' : monthName(month.date)}</Text><Text className="num" fontSize="xl" fontWeight={600} color="var(--pb-ink)" mt="5px" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(month.total)}</Text><Box h="5px" mt={4} bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${Math.max(4, (month.total / highest) * 100)}%`} bg="var(--pb-forest-2)" borderRadius="full" /></Box><Text fontSize="xs" color="var(--pb-ink-soft)" mt={2}>{month.total > 0 ? 'Scheduled installment total' : 'No installment due'}</Text></Box>)}</Box></Box>
+}
+
+function OutlookNav({ label, icon, onClick }: { label: string; icon: typeof ChevronLeft; onClick: () => void }) { return <IconButton aria-label={label} icon={<Icon as={icon} boxSize={4} />} size="sm" variant="ghost" borderRadius="10px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" color="var(--pb-ink-soft)" onClick={onClick} _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink)' }} /> }
 
 function HeroMetric({ label, value }: { label: string; value: string }) { return <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" opacity={0.68}>{label}</Text><Text className="num" fontSize={{ base: 'lg', md: 'xl' }} fontWeight={500} mt="2px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text></Box> }
 function SectionLabel({ children }: { children: ReactNode }) { return <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)" pl="0.15rem">{children}</Text> }
 
-function Metric({ icon, label, value, note, items, accent = 'brand' }: { icon: typeof Wallet; label: string; value: string; note: string; items?: string[]; accent?: 'brand' | 'income' | 'expense' }) { const colour = accent === 'income' ? 'var(--pb-income)' : accent === 'expense' ? 'var(--pb-coral)' : 'var(--pb-forest-2)'; const tint = accent === 'income' ? 'var(--pb-tint-income)' : accent === 'expense' ? 'var(--pb-tint-coral)' : 'var(--pb-tint-green)'; return <Box h="full" p={4} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="0 1px 2px rgba(15,23,42,.04)"><Flex w={9} h={9} align="center" justify="center" borderRadius="12px" bg={tint} color={colour} mb={4} flexShrink={0}><Icon as={icon} boxSize={5} strokeWidth={1.8} aria-hidden="true" /></Flex><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">{label}</Text><Text className="num" fontSize="lg" fontWeight={500} color="var(--pb-ink)" mt="3px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="3px">{note}</Text>{items?.length ? <VStack align="stretch" spacing={1} mt={3} pt={3} borderTop="1px solid var(--pb-hair)">{items.map((item, index) => <Text key={`${item}-${index}`} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>• {item}</Text>)}</VStack> : null}</Box> }
+function Metric({ icon, label, value, note, accent = 'brand' }: { icon: typeof Wallet; label: string; value: string; note: string; accent?: 'brand' | 'income' }) { const colour = accent === 'income' ? 'var(--pb-income)' : 'var(--pb-forest-2)'; const tint = accent === 'income' ? 'var(--pb-tint-income)' : 'var(--pb-tint-green)'; return <Box h="full" p={4} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="0 1px 2px rgba(15,23,42,.04)"><Flex w={9} h={9} align="center" justify="center" borderRadius="12px" bg={tint} color={colour} mb={4}><Icon as={icon} boxSize={5} strokeWidth={1.8} aria-hidden="true" /></Flex><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">{label}</Text><Text className="num" fontSize="lg" fontWeight={500} color="var(--pb-ink)" mt="3px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="3px">{note}</Text></Box> }
 
-function CommitmentPanel({ icon, title, caption, open, onToggle, muted, children }: { icon: typeof CreditCard; title: string; caption: string; open: boolean; onToggle: () => void; muted?: boolean; children: ReactNode }) { return <Box p={{ base: 4, md: 5 }} borderRadius="22px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)" opacity={muted ? 0.86 : 1}><Box as="button" type="button" onClick={onToggle} w="full" textAlign="left" aria-expanded={open} _focusVisible={{ outline: '2px solid var(--pb-forest-2)', outlineOffset: '3px', borderRadius: '12px' }}><Flex justify="space-between" align="center" gap={3}><HStack spacing={3}><Flex w={10} h={10} align="center" justify="center" borderRadius="13px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" color="var(--pb-forest-2)"><Icon as={icon} boxSize={5} weight="duotone" /></Flex><Box><Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{title}</Text><Text fontSize="sm" color="var(--pb-ink-soft)">{caption}</Text></Box></HStack><Icon as={open ? ChevronUp : ChevronDown} boxSize={5} color="var(--pb-ink-faint)" /></Flex></Box><Collapse in={open} animateOpacity><Box mt={5}>{children}</Box></Collapse></Box> }
+function InstallmentPanel({ title, caption, open, onToggle, muted, children }: { title: string; caption: string; open: boolean; onToggle: () => void; muted?: boolean; children: ReactNode }) { return <Box p={{ base: 4, md: 5 }} borderRadius="22px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)" opacity={muted ? 0.86 : 1}><Box as="button" type="button" onClick={onToggle} w="full" textAlign="left" aria-expanded={open} _focusVisible={{ outline: '2px solid var(--pb-forest-2)', outlineOffset: '3px', borderRadius: '12px' }}><Flex justify="space-between" align="center" gap={3}><HStack spacing={3}><Flex w={10} h={10} align="center" justify="center" borderRadius="13px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" color="var(--pb-forest-2)"><Icon as={muted ? CheckCircle2 : CreditCard} boxSize={5} weight="duotone" /></Flex><Box><Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{title}</Text><Text fontSize="sm" color="var(--pb-ink-soft)">{caption}</Text></Box></HStack><Icon as={open ? ChevronUp : ChevronDown} boxSize={5} color="var(--pb-ink-faint)" /></Flex></Box><Collapse in={open} animateOpacity><Box mt={5}>{children}</Box></Collapse></Box> }
 
-function EmptyState({ icon, title, body }: { icon: typeof CreditCard; title: string; body: string }) { return <Flex direction="column" align="center" textAlign="center" py={9} px={4} border="1px dashed var(--pb-hair-2)" borderRadius="15px"><Flex w={11} h={11} align="center" justify="center" borderRadius="12px" bg="var(--pb-surface-2)" color="var(--pb-ink-faint)" mb={3}><Icon as={icon} boxSize={5} weight="duotone" /></Flex><Text fontWeight={600} color="var(--pb-ink)">{title}</Text><Text fontSize="sm" color="var(--pb-ink-soft)" maxW="430px" mt={1}>{body}</Text></Flex> }
-
+function EmptyState({ title, body }: { title: string; body: string }) { return <Flex direction="column" align="center" textAlign="center" py={9} px={4} border="1px dashed var(--pb-hair-2)" borderRadius="15px"><Flex w={11} h={11} align="center" justify="center" borderRadius="12px" bg="var(--pb-surface-2)" color="var(--pb-ink-faint)" mb={3}><Icon as={CreditCard} boxSize={5} weight="duotone" /></Flex><Text fontWeight={600} color="var(--pb-ink)">{title}</Text><Text fontSize="sm" color="var(--pb-ink-soft)" maxW="430px" mt={1}>{body}</Text></Flex> }
 function ActionButton({ label, icon, primary, onClick }: { label: string; icon: typeof Plus; primary?: boolean; onClick: () => void }) { return <Button leftIcon={<Icon as={icon} boxSize={4} />} onClick={onClick} h="44px" px={4} borderRadius="12px" fontWeight={500} color={primary ? '#f6f8fb' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={primary ? 'transparent' : 'var(--pb-hair)'} _hover={{ bg: primary ? 'var(--pb-forest)' : 'var(--pb-surface-3)' }}>{label}</Button> }
