@@ -4,7 +4,7 @@ import { Box, Button, Flex, HStack, Icon, IconButton, SimpleGrid, Spinner, Text,
 import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../api'
 import type { PaymentMethod, Transaction } from '../types'
 import { buildCardStatements } from '../utils/creditCardStatements'
-import { ConfirmDeleteDialog, PageHeader } from '../components/ui'
+import { BankLogo, ConfirmDeleteDialog, getBankMeta, PageHeader } from '../components/ui'
 import { ArrowLeft, CreditCard, Eye, EyeOff, Pencil, Plus, Trash2 } from '../components/ui/icons'
 import CreditCardTile from '../components/cards/CreditCardTile'
 import CardFormModal from '../components/cards/CardFormModal'
@@ -87,8 +87,11 @@ export default function CardsPage() {
     for (const card of cards) {
       const cardStatements = buildCardStatements(card, transactions)
       const current = cardStatements.find((statement) => statement.status === 'open')
+      // A statement continues to consume the card limit until its payment date.
+      // `status` only describes whether the billing cycle has closed, so a closed
+      // statement that is not due yet must still be counted here.
       const outstanding = cardStatements
-        .filter((statement) => statement.status !== 'closed')
+        .filter((statement) => statement.paymentDate.getTime() >= today.getTime())
         .reduce((sum, statement) => sum + statement.total, 0)
       const next = cardStatements
         .filter((statement) => statement.paymentDate.getTime() >= today.getTime())
@@ -195,7 +198,14 @@ export default function CardsPage() {
             </MotionBox>
 
             <MotionBox variants={riseV}><CardFocus card={selectedCard} info={currentTotals.get(selectedCard.id)} hideValues={hideValues} /></MotionBox>
-            <MotionBox variants={riseV}><SectionLabel>Statements</SectionLabel></MotionBox>
+            <MotionBox variants={riseV}>
+              <Flex justify="space-between" align="center" gap={3}>
+                <SectionLabel>Statements</SectionLabel>
+                <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                  {statements.length} available
+                </Text>
+              </Flex>
+            </MotionBox>
 
             {statements.length === 0 ? (
               <MotionBox variants={riseV}><EmptyState text="No charges on this card yet." /></MotionBox>
@@ -283,5 +293,60 @@ function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: Car
   const limit = card.creditLimit ?? 0
   const used = info?.outstanding ?? 0
   const available = Math.max(limit - used, 0)
-  return <Box bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)"><SimpleGrid columns={{ base: 1, sm: 3 }} spacing={5}><Metric label="Current statement" value={hideValues ? '••••••' : money.format(info?.total ?? 0)} /><Metric label={limit > 0 ? 'Available credit' : 'Credit limit'} value={hideValues ? '••••••' : limit > 0 ? money.format(available) : 'Not recorded'} note={limit > 0 ? `${Math.round((used / limit) * 100)}% utilised` : 'Set a limit to track usage'} /><Metric label="Next payment" value={hideValues ? '••••••' : info?.nextPaymentDate ? money.format(info.nextPaymentAmount) : '—'} note={info?.nextPaymentDate ? `due ${date.format(info.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid></Box>
+  const utilised = limit > 0 ? Math.min(100, Math.max(0, (used / limit) * 100)) : 0
+  const utilisationColour = utilised >= 90 ? 'var(--pb-coral-2)' : utilised >= 70 ? 'var(--pb-gold-2)' : 'var(--pb-income-2)'
+
+  return (
+    <Box overflow="hidden" borderRadius="22px" border="1px solid var(--pb-hair)" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)">
+      <Box
+        position="relative"
+        overflow="hidden"
+        px="clamp(1.2rem, 3vw, 1.7rem)"
+        py={{ base: 5, md: 6 }}
+        bg="linear-gradient(125deg, var(--pb-forest) 0%, var(--pb-forest-2) 57%, var(--pb-line) 100%)"
+        color="#f6f8fb"
+      >
+        <Box position="absolute" w="280px" h="280px" border="1px solid rgba(255,255,255,.16)" borderRadius="full" right="-80px" top="-150px" />
+        <Box position="absolute" w="190px" h="190px" border="1px solid rgba(255,255,255,.11)" borderRadius="full" right="20px" bottom="-145px" />
+        <Flex position="relative" zIndex={1} justify="space-between" align="start" gap={4}>
+          <HStack spacing={3} minW={0}>
+            {getBankMeta(card.issuer) ? (
+              <BankLogo issuer={card.issuer} size={46} borderRadius="14px" />
+            ) : (
+              <Flex w={11.5} h={11.5} flexShrink={0} align="center" justify="center" borderRadius="14px" bg="rgba(255,255,255,.16)" border="1px solid rgba(255,255,255,.18)">
+                <Icon as={CreditCard} boxSize={6} weight="duotone" />
+              </Flex>
+            )}
+            <Box minW={0}>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.7}>Card account</Text>
+              <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={500} letterSpacing="-0.02em" noOfLines={1}>{card.name}</Text>
+              <Text fontSize="sm" opacity={0.78} mt="1px">{card.issuer || 'Credit card'} · closes on day {card.statementClosingDay}</Text>
+            </Box>
+          </HStack>
+          <Box textAlign="right" flexShrink={0}>
+            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.15em" textTransform="uppercase" opacity={0.7}>Current statement</Text>
+            <Text className="num" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={500} lineHeight="1.15" letterSpacing="-0.025em" mt="0.25rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : money.format(info?.total ?? 0)}</Text>
+          </Box>
+        </Flex>
+      </Box>
+
+      <Box p="clamp(1.2rem, 3vw, 1.7rem)">
+        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={{ base: 5, sm: 4 }}>
+          <Metric label="Payment due" value={hideValues ? '••••••' : info?.nextPaymentDate ? money.format(info.nextPaymentAmount) : '—'} note={info?.nextPaymentDate ? `due ${date.format(info.nextPaymentDate)}` : 'nothing scheduled'} />
+          <Metric label={limit > 0 ? 'Available credit' : 'Credit limit'} value={hideValues ? '••••••' : limit > 0 ? money.format(available) : 'Not recorded'} note={limit > 0 ? `${Math.round(utilised)}% of limit in use` : 'Set a limit to track usage'} />
+          <Metric label="Statement history" value={String(info?.count ?? 0)} note="cycles currently available" />
+        </SimpleGrid>
+
+        {limit > 0 && (
+          <Box mt={6} pt={5} borderTop="1px solid var(--pb-hair)">
+            <Flex justify="space-between" align="baseline" mb={2} gap={3}>
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">Credit utilisation</Text>
+              <Text fontSize="xs" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••' : `${money.format(used)} of ${money.format(limit)}`}</Text>
+            </Flex>
+            <Box h="7px" borderRadius="full" bg="var(--pb-surface-3)" overflow="hidden"><Box h="full" w={`${utilised}%`} borderRadius="full" bg={utilisationColour} transition="width .4s ease" /></Box>
+          </Box>
+        )}
+      </Box>
+    </Box>
+  )
 }
