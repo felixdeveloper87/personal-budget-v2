@@ -110,8 +110,6 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   const basisCount = forecast?.projectionBasisMonths.length ?? 0
   const basisLabel = forecast?.projectionBasisMonths.map(monthLabel).join(', ')
   const variableLabel = basisCount > 0 ? `Variable (${basisCount}-mo avg)` : 'Variable'
-  const plannedBudget = budgets.reduce((sum, budget) => sum + budget.limitAmount, 0)
-  const spentBudget = budgets.reduce((sum, budget) => sum + budget.spentAmount, 0)
   const exceededBudgets = budgets.filter((budget) => budget.exceeded).length
   const monthlyPositive = currentMonthData.balance >= 0
 
@@ -159,10 +157,17 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
           <MotionBox variants={riseV}>
             <SectionLabel>Planning signals</SectionLabel>
           </MotionBox>
+
+          <MotionBox variants={riseV}>
+            <PlanPanel eyebrow="Projection" title="Your 12-month runway" caption={forecast?.hasProjectionBasis ? `Based on recent activity from ${basisLabel}, recurring commitments, instalments and your income assumption.` : 'Add transaction history, recurring payments or instalments to make this forecast more useful.'} rightSlot={forecast?.months.length ? <HStack spacing={2}><ForecastNav label="Previous forecast month" icon={ChevronLeft} onClick={() => scrollForecast(-1)} /><ForecastNav label="Next forecast month" icon={ChevronRight} onClick={() => scrollForecast(1)} /></HStack> : undefined}>
+              {forecast?.months.length ? <Box ref={forecastCarouselRef} onPointerDown={startForecastDrag} onPointerMove={moveForecastDrag} onPointerUp={stopForecastDrag} onPointerCancel={stopForecastDrag} onLostPointerCapture={() => setIsDraggingForecast(false)} display="flex" gap={3} overflowX="auto" overflowY="hidden" pb={2} cursor={isDraggingForecast ? 'grabbing' : 'grab'} scrollSnapType={isDraggingForecast ? 'none' : 'x mandatory'} userSelect={isDraggingForecast ? 'none' : 'auto'} sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>{(forecast?.months ?? []).map((month) => <ForecastCard key={month.month} month={month} variableLabel={variableLabel} hasIncomePlan={forecast?.hasIncomePlan ?? false} />)}</Box> : <EmptyPlan icon={TrendingUp} title="Forecast is still collecting data" body="Scheduled commitments will appear here immediately; transaction history makes estimated income and spending more accurate." />}
+            </PlanPanel>
+          </MotionBox>
+
           <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="0.8rem">
             <MotionBox variants={riseV}><Signal icon={Wallet} label="Starting balance" value={forecast ? money(forecast.currentTotalBalance) : '—'} note="Across your connected accounts" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={DollarSign} label="Income assumption" value={forecast?.hasIncomePlan ? money(forecast.plannedMonthlyIncome ?? 0) : forecast ? money(forecast.averageMonthlyIncome) : '—'} note={forecast?.hasIncomePlan ? 'Your monthly target' : 'Based on transaction history'} accent="income" /></MotionBox>
-            <MotionBox variants={riseV}><Signal icon={Layers} label="Budget coverage" value={budgets.length ? `${budgets.length} categories` : 'Not set'} note={budgets.length ? `${money(spentBudget)} of ${money(plannedBudget)} allocated` : 'Set monthly category limits'} accent={exceededBudgets ? 'expense' : 'brand'} /></MotionBox>
+            <MotionBox variants={riseV}><Signal icon={TrendingDown} label="Expense assumption" value={forecast ? money(forecast.averageMonthlyVariableExpense) : '—'} note={basisCount ? `Variable spend from the last ${basisCount} active month${basisCount !== 1 ? 's' : ''}` : 'No history available yet'} accent="expense" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={firstNegativeMonth ? AlertTriangle : CheckCircle2} label="Runway" value={firstNegativeMonth ? monthLabel(firstNegativeMonth.month) : '12 months+'} note={firstNegativeMonth ? 'First projected negative balance' : 'No negative balance forecast'} accent={firstNegativeMonth ? 'expense' : 'income'} /></MotionBox>
           </SimpleGrid>
 
@@ -194,11 +199,11 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
             </PlanPanel>
           </MotionBox>
 
-          <MotionBox variants={riseV}>
+          {false && <MotionBox variants={riseV}>
             <PlanPanel eyebrow="Projection" title="Your 12-month runway" caption={forecast?.hasProjectionBasis ? `Based on recent activity from ${basisLabel}, recurring commitments, instalments and your income assumption.` : 'Add transaction history, recurring payments or instalments to make this forecast more useful.'} rightSlot={forecast?.months.length ? <HStack spacing={2}><ForecastNav label="Previous forecast month" icon={ChevronLeft} onClick={() => scrollForecast(-1)} /><ForecastNav label="Next forecast month" icon={ChevronRight} onClick={() => scrollForecast(1)} /></HStack> : undefined}>
-              {forecast?.months.length ? <Box ref={forecastCarouselRef} onPointerDown={startForecastDrag} onPointerMove={moveForecastDrag} onPointerUp={stopForecastDrag} onPointerCancel={stopForecastDrag} onLostPointerCapture={() => setIsDraggingForecast(false)} display="flex" gap={3} overflowX="auto" overflowY="hidden" pb={2} cursor={isDraggingForecast ? 'grabbing' : 'grab'} scrollSnapType={isDraggingForecast ? 'none' : 'x mandatory'} userSelect={isDraggingForecast ? 'none' : 'auto'} sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>{forecast.months.map((month) => <ForecastCard key={month.month} month={month} variableLabel={variableLabel} hasIncomePlan={forecast.hasIncomePlan} />)}</Box> : <EmptyPlan icon={TrendingUp} title="Forecast is still collecting data" body="Scheduled commitments will appear here immediately; transaction history makes estimated income and spending more accurate." />}
+              {forecast?.months.length ? <Box ref={forecastCarouselRef} onPointerDown={startForecastDrag} onPointerMove={moveForecastDrag} onPointerUp={stopForecastDrag} onPointerCancel={stopForecastDrag} onLostPointerCapture={() => setIsDraggingForecast(false)} display="flex" gap={3} overflowX="auto" overflowY="hidden" pb={2} cursor={isDraggingForecast ? 'grabbing' : 'grab'} scrollSnapType={isDraggingForecast ? 'none' : 'x mandatory'} userSelect={isDraggingForecast ? 'none' : 'auto'} sx={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>{(forecast?.months ?? []).map((month) => <ForecastCard key={month.month} month={month} variableLabel={variableLabel} hasIncomePlan={forecast?.hasIncomePlan ?? false} />)}</Box> : <EmptyPlan icon={TrendingUp} title="Forecast is still collecting data" body="Scheduled commitments will appear here immediately; transaction history makes estimated income and spending more accurate." />}
             </PlanPanel>
-          </MotionBox>
+          </MotionBox>}
 
           {horizons.length > 0 && <><MotionBox variants={riseV}><SectionLabel>Key horizons</SectionLabel></MotionBox><SimpleGrid columns={{ base: 1, md: 3 }} spacing="0.8rem">{horizons.map(({ label, month }) => <MotionBox key={label} variants={riseV}><Horizon label={label} month={month} /></MotionBox>)}</SimpleGrid></>}
           <MotionBox variants={riseV}><PaperFooter /></MotionBox>
