@@ -196,8 +196,16 @@ public class CashFlowForecastService {
             LocalDate start,
             LocalDate end) {
         for (RecurringTransaction recurring : recurringRepository.findByUserOrderByIdDesc(user)) {
-            if (!recurring.isActive() || recurring.getAccount() == null) continue;
-            LocalDate date = recurring.getNextRunDate();
+            if (!recurring.isActive()) continue;
+
+            /*
+             * The recurrence rule is the source of truth for the forecast, not
+             * nextRunDate. That field is advanced by the monthly generation job,
+             * so relying on it can skip a commitment when the job has not run yet
+             * (or when an older rule has a stale value). Start one month earlier
+             * because a card charge in the previous cycle may settle this month.
+             */
+            LocalDate date = firstRecurringDateOnOrAfter(recurring, start.minusMonths(1));
             while (date != null && !date.isAfter(end)) {
                 LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
                         date,
@@ -217,6 +225,26 @@ public class CashFlowForecastService {
                 date = nextMonthlyDate(date, recurring.getDayOfMonth());
             }
         }
+    }
+
+    private LocalDate firstRecurringDateOnOrAfter(
+            RecurringTransaction recurring,
+            LocalDate lowerBound) {
+        YearMonth month = YearMonth.from(lowerBound);
+        LocalDate candidate = month.atDay(Math.min(recurring.getDayOfMonth(), month.lengthOfMonth()));
+        if (candidate.isBefore(lowerBound)) {
+            candidate = nextMonthlyDate(candidate, recurring.getDayOfMonth());
+        }
+
+        LocalDate startDate = recurring.getStartDate();
+        if (candidate.isBefore(startDate)) {
+            YearMonth startMonth = YearMonth.from(startDate);
+            candidate = startMonth.atDay(Math.min(recurring.getDayOfMonth(), startMonth.lengthOfMonth()));
+            if (candidate.isBefore(startDate)) {
+                candidate = nextMonthlyDate(candidate, recurring.getDayOfMonth());
+            }
+        }
+        return candidate;
     }
 
     private boolean isSettledStandaloneTransaction(Transaction transaction) {

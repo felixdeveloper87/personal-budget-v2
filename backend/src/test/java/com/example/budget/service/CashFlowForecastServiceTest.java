@@ -5,6 +5,7 @@ import com.example.budget.dto.CashFlowForecastDTO;
 import com.example.budget.model.AccountType;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.InstallmentPlan;
+import com.example.budget.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;
@@ -25,6 +26,8 @@ import java.time.YearMonth;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -283,6 +286,41 @@ class CashFlowForecastServiceTest {
         assertThat(result.months())
                 .allMatch(month -> month.projectedClosingBalance().compareTo(new BigDecimal("1000.00")) == 0);
         assertThat(result.months()).noneMatch(CashFlowForecastDTO.MonthForecast::negative);
+    }
+
+    @Test
+    void forecastIncludesActiveRecurringExpensesBeforeTheMonthlyJobCreatesTransactions() {
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.from(today);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstForecastMonth = currentMonth.plusMonths(1);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(12);
+
+        RecurringTransaction rent = new RecurringTransaction();
+        rent.setType(TransactionType.EXPENSE);
+        rent.setAmount(new BigDecimal("950.00"));
+        rent.setStartDate(currentMonth.minusMonths(2).atDay(1));
+        rent.setDayOfMonth(1);
+        rent.setNextRunDate(lastForecastMonth.plusMonths(3).atDay(1)); // deliberately stale
+        rent.setActive(true);
+        rent.setUser(user);
+
+        when(recurringRepository.findByUserOrderByIdDesc(user)).thenReturn(List.of(rent));
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstForecastMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+        when(creditCardBillingService.resolvePaymentDate(any(LocalDate.class), nullable(com.example.budget.model.PaymentMethod.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = service.forecast(user);
+
+        assertThat(result.months().get(0).fixedExpense()).isEqualByComparingTo("950.00");
+        assertThat(result.months().get(1).fixedExpense()).isEqualByComparingTo("950.00");
+        assertThat(result.months().get(0).netCashFlow()).isEqualByComparingTo("-950.00");
     }
 
     private Transaction transaction(
