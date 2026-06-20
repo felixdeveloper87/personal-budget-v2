@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
-import { Box, Grid, Skeleton } from '@chakra-ui/react'
+import { Box, Grid, Skeleton, Text } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -19,6 +19,7 @@ import TransactionDrawer from './components/TransactionDrawer'
 
 import type { TxnVM } from './transactions.types'
 import { initialTxState } from './transactions.types'
+import { fmtCurrency } from '../dashboard/components/format'
 import {
   buildLedger,
   deriveHabit,
@@ -132,6 +133,54 @@ export default function TransactionsPage() {
 
         <MotionBox variants={riseV}>
           <ViewBar view={state.view} onChange={(v) => dispatch({ type: 'SET_VIEW', view: v })} />
+        </MotionBox>
+
+        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
+          <Grid
+            templateColumns={{ base: 'repeat(3, minmax(0, 1fr))' }}
+            border="1px solid var(--pb-hair)"
+            borderRadius="16px"
+            overflow="hidden"
+            bg="var(--pb-surface)"
+            boxShadow="var(--pb-shadow)"
+          >
+            {[
+              { label: 'Income', value: periodData.income, tone: 'var(--pb-income)' },
+              { label: 'Spending', value: periodData.expense, tone: 'var(--pb-coral)' },
+              { label: 'Net flow', value: periodData.balance, tone: periodData.balance >= 0 ? 'var(--pb-income)' : 'var(--pb-coral)' },
+            ].map((metric, index) => (
+              <Box
+                key={metric.label}
+                px={{ base: 3, md: 5 }}
+                py={{ base: 3, md: 3.5 }}
+                borderRight={index < 2 ? '1px solid var(--pb-hair)' : undefined}
+                minW={0}
+              >
+                <Text
+                  fontFamily="var(--pb-mono)"
+                  fontSize={{ base: '9px', md: '10px' }}
+                  letterSpacing=".1em"
+                  textTransform="uppercase"
+                  color="var(--pb-ink-faint)"
+                  mb={1}
+                >
+                  {metric.label}
+                </Text>
+                <Text
+                  fontFamily="var(--pb-mono)"
+                  fontSize={{ base: '13px', sm: '16px', md: '18px' }}
+                  fontWeight={600}
+                  letterSpacing="-.04em"
+                  color={metric.tone}
+                  whiteSpace="nowrap"
+                  overflow="hidden"
+                  textOverflow="ellipsis"
+                >
+                  {metric.value < 0 ? '−' : ''}{fmtCurrency(Math.abs(metric.value))}
+                </Text>
+              </Box>
+            ))}
+          </Grid>
         </MotionBox>
 
         <MotionBox variants={riseV}>

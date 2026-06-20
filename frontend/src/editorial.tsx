@@ -271,7 +271,10 @@ export function EditorialBackdrop({ opacity }: { opacity?: number }) {
   // Light mode is a flat metallic surface — no page-background engraving. The
   // guilloché backdrop stays only in dark, where it reads as quiet depth.
   if (colorMode !== 'dark') return null
-  const resolved = opacity ?? 0.45
+  // The page texture is deliberately subordinate to dashboard content. At the
+  // old opacity it competed with charts and made dense financial data harder to
+  // scan, particularly in dark mode.
+  const resolved = opacity ?? 0.10
   return (
     <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
       <Box position="sticky" top={0} h="100vh" overflow="hidden">
