@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import {
-  Box,
-  Button,
-  HStack,
-  Icon,
-  IconButton,
-  SimpleGrid,
-  Spinner,
-  Text,
-  VStack,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Box, Button, Flex, HStack, Icon, IconButton, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+
 import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../api'
 import type { PaymentMethod, Transaction } from '../types'
 import { buildCardStatements } from '../utils/creditCardStatements'
@@ -21,7 +11,21 @@ import CardFormModal from '../components/cards/CardFormModal'
 import StatementCard from '../components/cards/StatementCard'
 import { ToastService } from '../services/toast'
 
+import '../features/dashboard/theme/pb-tokens.css'
+import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
+import PaperFooter from '../features/dashboard/components/PaperFooter'
+
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
+const money = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
+const date = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' })
+
+type CardTotal = {
+  total: number
+  outstanding: number
+  count: number
+  nextPaymentAmount: number
+  nextPaymentDate: Date | null
+}
 
 export default function CardsPage() {
   const [cards, setCards] = useState<PaymentMethod[]>([])
@@ -29,8 +33,6 @@ export default function CardsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [openStatementKey, setOpenStatementKey] = useState<string | null>(null)
-
-  // Create/edit modal: `undefined` closed, `null` create, a card edits it.
   const [formCard, setFormCard] = useState<PaymentMethod | null | undefined>(undefined)
   const [cardToDelete, setCardToDelete] = useState<PaymentMethod | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -42,20 +44,14 @@ export default function CardsPage() {
     }
   })
 
-  const muted = useColorModeValue('gray.500', 'gray.400')
-  const emptyBorder = useColorModeValue('gray.200', 'gray.700')
-
   const load = useCallback(async () => {
     setLoading(true)
     try {
       const [methods, txs] = await Promise.all([listPaymentMethods(), listTransactions()])
-      setCards(methods.filter((m) => m.type === 'CREDIT_CARD'))
+      setCards(methods.filter((method) => method.type === 'CREDIT_CARD'))
       setTransactions(txs)
     } catch (err) {
-      ToastService.apiError(err, {
-        title: 'Could not load cards',
-        dedupeKey: 'cards-page-load-failed',
-      })
+      ToastService.apiError(err, { title: 'Could not load cards', dedupeKey: 'cards-page-load-failed' })
     } finally {
       setLoading(false)
     }
@@ -77,58 +73,31 @@ export default function CardsPage() {
     })
   }
 
-  const visibilityButton = (
-    <IconButton
-      aria-label={hideValues ? 'Show card values' : 'Hide card values'}
-      title={hideValues ? 'Show card values' : 'Hide card values'}
-      icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
-      onClick={toggleValues}
-      variant="ghost"
-      borderRadius="full"
-    />
-  )
-
-  const selectedCard = useMemo(
-    () => cards.find((c) => c.id === selectedId) ?? null,
-    [cards, selectedId],
-  )
-
+  const selectedCard = useMemo(() => cards.find((card) => card.id === selectedId) ?? null, [cards, selectedId])
   const statements = useMemo(
     () => (selectedCard ? buildCardStatements(selectedCard, transactions) : []),
     [selectedCard, transactions],
   )
 
-  // Per-card current-statement total + outstanding balance, for the tile preview.
   const currentTotals = useMemo(() => {
-    const totals = new Map<
-      number,
-      {
-        total: number
-        outstanding: number
-        count: number
-        nextPaymentAmount: number
-        nextPaymentDate: Date | null
-      }
-    >()
+    const totals = new Map<number, CardTotal>()
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
     for (const card of cards) {
-      const sts = buildCardStatements(card, transactions)
-      const current = sts.find((s) => s.status === 'open')
-      // Credit in use = everything not yet on a settled (past) statement: the current
-      // cycle plus all upcoming cycles. This way the full remaining of an installment
-      // purchase counts against the limit, not just this month's installment.
-      const outstanding = sts
-        .filter((s) => s.status !== 'closed')
-        .reduce((sum, s) => sum + s.total, 0)
-      // Next payment = the statement whose due date is the soonest one still ahead.
-      const next = sts
-        .filter((s) => s.paymentDate.getTime() >= today.getTime())
+      const cardStatements = buildCardStatements(card, transactions)
+      const current = cardStatements.find((statement) => statement.status === 'open')
+      const outstanding = cardStatements
+        .filter((statement) => statement.status !== 'closed')
+        .reduce((sum, statement) => sum + statement.total, 0)
+      const next = cardStatements
+        .filter((statement) => statement.paymentDate.getTime() >= today.getTime())
         .sort((a, b) => a.paymentDate.getTime() - b.paymentDate.getTime())[0]
+
       totals.set(card.id, {
         total: current?.total ?? 0,
         outstanding,
-        count: sts.length,
+        count: cardStatements.length,
         nextPaymentAmount: next?.total ?? 0,
         nextPaymentDate: next?.paymentDate ?? null,
       })
@@ -136,14 +105,25 @@ export default function CardsPage() {
     return totals
   }, [cards, transactions])
 
+  const overview = useMemo(() => {
+    const datedPayments = Array.from(currentTotals.values())
+      .filter((item) => item.nextPaymentDate !== null)
+      .sort((a, b) => a.nextPaymentDate!.getTime() - b.nextPaymentDate!.getTime())
+
+    return {
+      used: Array.from(currentTotals.values()).reduce((sum, item) => sum + item.outstanding, 0),
+      limit: cards.reduce((sum, card) => sum + Math.max(card.creditLimit ?? 0, 0), 0),
+      cardsWithLimit: cards.filter((card) => (card.creditLimit ?? 0) > 0).length,
+      nextPayment: datedPayments[0] ?? null,
+    }
+  }, [cards, currentTotals])
+
   const selectCard = (id: number) => {
     setSelectedId(id)
-    const sts = buildCardStatements(
-      cards.find((c) => c.id === id)!,
-      transactions,
-    )
-    // Open the current statement by default, else the most recent one.
-    const initial = sts.find((s) => s.status === 'open') ?? sts[0]
+    const card = cards.find((item) => item.id === id)
+    if (!card) return
+    const cardStatements = buildCardStatements(card, transactions)
+    const initial = cardStatements.find((statement) => statement.status === 'open') ?? cardStatements[0]
     setOpenStatementKey(initial?.key ?? null)
   }
 
@@ -157,24 +137,30 @@ export default function CardsPage() {
       setCardToDelete(null)
       await load()
     } catch (err) {
-      ToastService.apiError(err, {
-        title: 'Could not delete card',
-        dedupeKey: `card-delete-failed:${cardToDelete.id}`,
-      })
+      ToastService.apiError(err, { title: 'Could not delete card', dedupeKey: `card-delete-failed:${cardToDelete.id}` })
     } finally {
       setDeleting(false)
     }
   }
 
-  // Modals are shared by both views, rendered once at the end.
+  const visibilityButton = (
+    <IconButton
+      aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+      title={hideValues ? 'Show card values' : 'Hide card values'}
+      icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
+      onClick={toggleValues}
+      variant="ghost"
+      borderRadius="11px"
+      color="var(--pb-ink-soft)"
+      bg="var(--pb-surface)"
+      border="1px solid var(--pb-hair)"
+      _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
+    />
+  )
+
   const modals = (
     <>
-      <CardFormModal
-        isOpen={formCard !== undefined}
-        card={formCard}
-        onClose={() => setFormCard(undefined)}
-        onSaved={load}
-      />
+      <CardFormModal isOpen={formCard !== undefined} card={formCard} onClose={() => setFormCard(undefined)} onSaved={load} />
       <ConfirmDeleteDialog
         isOpen={cardToDelete !== null}
         onClose={() => setCardToDelete(null)}
@@ -188,173 +174,114 @@ export default function CardsPage() {
   )
 
   if (loading) {
-    return (
-      <CardsShell>
-        <HStack justify="center" py={20}>
-          <Spinner color="blue.500" />
-        </HStack>
-      </CardsShell>
-    )
+    return <CardsShell><Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex></CardsShell>
   }
 
-  // ---- Detail view: a single card's statements ----
   if (selectedCard) {
     return (
       <CardsShell>
-        <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-          <Box>
-            <Button
-              variant="ghost"
-              size="sm"
-              leftIcon={<Icon as={ArrowLeft} boxSize={4} />}
-              onClick={() => setSelectedId(null)}
-              mb={2}
-              pl={1}
-            >
-              All cards
-            </Button>
-            <PageHeader
-              icon={CreditCard}
-              title={selectedCard.name}
-              subtitle={`${selectedCard.issuer ? `${selectedCard.issuer} · ` : ''}Closes day ${selectedCard.statementClosingDay} · Pays day ${selectedCard.paymentDay}`}
-              rightSlot={
-                <HStack spacing={2}>
-                  {visibilityButton}
-                  <Button
-                    variant="outline"
-                    leftIcon={<Icon as={Pencil} boxSize={4} />}
-                    onClick={() => setFormCard(selectedCard)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    colorScheme="red"
-                    leftIcon={<Icon as={Trash2} boxSize={4} />}
-                    onClick={() => setCardToDelete(selectedCard)}
-                  >
-                    Delete
-                  </Button>
-                </HStack>
-              }
-            />
-          </Box>
+        <MotionBox variants={containerV} initial="hidden" animate="show">
+          <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
+            <MotionBox variants={riseV}>
+              <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} mb={2} pl={1}>
+                All cards
+              </Button>
+              <PageHeader
+                icon={CreditCard}
+                title={selectedCard.name}
+                subtitle={`${selectedCard.issuer ? `${selectedCard.issuer} · ` : ''}Closes on day ${selectedCard.statementClosingDay} · Payment on day ${selectedCard.paymentDay}`}
+                rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex>}
+              />
+            </MotionBox>
 
-          {statements.length === 0 ? (
-            <EmptyState
-              border={emptyBorder}
-              muted={muted}
-              text="No charges on this card yet."
-            />
-          ) : (
-            <VStack align="stretch" spacing={3}>
-              {statements.map((statement) => (
-                <StatementCard
-                  key={statement.key}
-                  statement={statement}
-                  isOpen={openStatementKey === statement.key}
-                  hideValues={hideValues}
-                  onToggle={() =>
-                    setOpenStatementKey((current) =>
-                      current === statement.key ? null : statement.key,
-                    )
-                  }
-                />
-              ))}
-            </VStack>
-          )}
-        </VStack>
+            <MotionBox variants={riseV}><CardFocus card={selectedCard} info={currentTotals.get(selectedCard.id)} hideValues={hideValues} /></MotionBox>
+            <MotionBox variants={riseV}><SectionLabel>Statements</SectionLabel></MotionBox>
+
+            {statements.length === 0 ? (
+              <MotionBox variants={riseV}><EmptyState text="No charges on this card yet." /></MotionBox>
+            ) : (
+              <MotionBox variants={riseV}>
+                <VStack align="stretch" spacing="0.7rem">
+                  {statements.map((statement) => (
+                    <StatementCard key={statement.key} statement={statement} isOpen={openStatementKey === statement.key} hideValues={hideValues} onToggle={() => setOpenStatementKey((current) => current === statement.key ? null : statement.key)} />
+                  ))}
+                </VStack>
+              </MotionBox>
+            )}
+            <MotionBox variants={riseV}><PaperFooter /></MotionBox>
+          </VStack>
+        </MotionBox>
         {modals}
       </CardsShell>
     )
   }
 
-  // ---- Overview: grid of cards ----
   return (
     <CardsShell>
-      <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <PageHeader
-          icon={CreditCard}
-          title="Cards"
-          subtitle="Select a card to see its current and past statements."
-          rightSlot={
-            <HStack spacing={2}>
-              {visibilityButton}
-              <Button
-                colorScheme="blue"
-                leftIcon={<Icon as={Plus} boxSize={4} />}
-                onClick={() => setFormCard(null)}
-                flex={{ base: 1, sm: 'initial' }}
-              >
-                Add card
-              </Button>
-            </HStack>
-          }
-        />
+      <MotionBox variants={containerV} initial="hidden" animate="show">
+        <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
+          <MotionBox variants={riseV}>
+            <PageHeader
+              icon={CreditCard}
+              title="Cards"
+              subtitle="Track your card limits, payment dates and statements."
+              rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex>}
+            />
+          </MotionBox>
 
-        {cards.length === 0 ? (
-          <EmptyState
-            border={emptyBorder}
-            muted={muted}
-            text="No credit cards yet. Add your first card to start tracking statements."
-          />
-        ) : (
-          <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={4}>
-            {cards.map((card) => {
-              const info = currentTotals.get(card.id)
-              return (
-                <CreditCardTile
-                  key={card.id}
-                  card={card}
-                  currentTotal={info?.total ?? 0}
-                  usedCredit={info?.outstanding ?? 0}
-                  statementCount={info?.count ?? 0}
-                  nextPaymentAmount={info?.nextPaymentAmount ?? 0}
-                  nextPaymentDate={info?.nextPaymentDate ?? null}
-                  hideValues={hideValues}
-                  onSelect={() => selectCard(card.id)}
-                  onEdit={() => setFormCard(card)}
-                  onDelete={() => setCardToDelete(card)}
-                />
-              )
-            })}
-          </SimpleGrid>
-        )}
-      </VStack>
+          {cards.length === 0 ? (
+            <MotionBox variants={riseV}><EmptyState text="No credit cards yet. Add your first card to start tracking statements." /></MotionBox>
+          ) : (
+            <>
+              <MotionBox variants={riseV}><CardsOverview overview={overview} hideValues={hideValues} /></MotionBox>
+              <MotionBox variants={riseV}><SectionLabel>Your cards</SectionLabel></MotionBox>
+              <MotionBox variants={riseV}>
+                <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">
+                  {cards.map((card) => {
+                    const info = currentTotals.get(card.id)
+                    return <CreditCardTile key={card.id} card={card} currentTotal={info?.total ?? 0} usedCredit={info?.outstanding ?? 0} statementCount={info?.count ?? 0} nextPaymentAmount={info?.nextPaymentAmount ?? 0} nextPaymentDate={info?.nextPaymentDate ?? null} hideValues={hideValues} onSelect={() => selectCard(card.id)} onEdit={() => setFormCard(card)} onDelete={() => setCardToDelete(card)} />
+                  })}
+                </SimpleGrid>
+              </MotionBox>
+            </>
+          )}
+          <MotionBox variants={riseV}><PaperFooter /></MotionBox>
+        </VStack>
+      </MotionBox>
       {modals}
     </CardsShell>
   )
 }
 
 function CardsShell({ children }: { children: React.ReactNode }) {
-  return (
-    <Box
-      w="full"
-      maxW="appContent"
-      mx="auto"
-      px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 4, md: 7 }}
-    >
-      {children}
-    </Box>
-  )
+  return <Box minH="100vh" w="full" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>{children}</Box>
 }
 
-function EmptyState({
-  text,
-  border,
-  muted,
-}: {
-  text: string
-  border: string
-  muted: string
-}) {
-  return (
-    <Box py={12} textAlign="center" border="1px dashed" borderColor={border} borderRadius="xl">
-      <Icon as={CreditCard} boxSize={7} color={muted} mb={3} />
-      <Text fontSize="sm" color={muted}>
-        {text}
-      </Text>
-    </Box>
-  )
+function ActionButton({ label, icon, primary, destructive, onClick }: { label: string; icon: typeof Plus; primary?: boolean; destructive?: boolean; onClick: () => void }) {
+  return <Box as="button" type="button" onClick={onClick} flex={{ base: 1, sm: 'initial' }} display="inline-flex" alignItems="center" justifyContent="center" gap="0.45rem" whiteSpace="nowrap" fontSize="0.95rem" fontWeight={500} px="1.05rem" py="0.58rem" borderRadius="14px" transition="0.18s" color={destructive ? 'var(--pb-coral)' : primary ? '#f4f3ec' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface)'} border="1px solid" borderColor={primary ? 'transparent' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-hair)'} boxShadow={primary ? '0 1px 2px rgba(15,23,42,.18), 0 8px 20px rgba(15,23,42,.12)' : '0 1px 2px rgba(15,23,42,.05)'} _hover={{ transform: 'translateY(-1px)', bg: primary ? 'var(--pb-forest)' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)', color: primary ? '#f4f3ec' : destructive ? 'var(--pb-coral)' : 'var(--pb-ink)' }}><Icon as={icon} boxSize="1.08em" />{label}</Box>
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)" pl="0.15rem">{children}</Text>
+}
+
+function EmptyState({ text }: { text: string }) {
+  return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">No card activity</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text></Flex>
+}
+
+function Metric({ label, value, note, emphasis }: { label: string; value: string; note?: string; emphasis?: boolean }) {
+  return <Box><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{label}</Text><Text className="num" fontSize={emphasis ? { base: '2rem', md: '2.3rem' } : '1.45rem'} fontWeight={500} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>{note && <Text fontSize="xs" color="var(--pb-ink-soft)" mt="0.35rem">{note}</Text>}</Box>
+}
+
+function CardsOverview({ overview, hideValues }: { overview: { used: number; limit: number; cardsWithLimit: number; nextPayment: CardTotal | null }; hideValues: boolean }) {
+  const available = Math.max(overview.limit - overview.used, 0)
+  const utilisation = overview.limit > 0 ? Math.min(100, (overview.used / overview.limit) * 100) : 0
+  return <Box position="relative" overflow="hidden" bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)"><Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.6)" /><SimpleGrid position="relative" zIndex={1} columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 5, lg: 4 }}><Metric label="Credit in use" value={hideValues ? '••••••' : money.format(overview.used)} emphasis /><Metric label="Available credit" value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'} note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'} /><Metric label="Cards with limits" value={String(overview.cardsWithLimit)} note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'} /><Metric label="Next payment" value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'} note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid></Box>
+}
+
+function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: CardTotal; hideValues: boolean }) {
+  const limit = card.creditLimit ?? 0
+  const used = info?.outstanding ?? 0
+  const available = Math.max(limit - used, 0)
+  return <Box bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)"><SimpleGrid columns={{ base: 1, sm: 3 }} spacing={5}><Metric label="Current statement" value={hideValues ? '••••••' : money.format(info?.total ?? 0)} /><Metric label={limit > 0 ? 'Available credit' : 'Credit limit'} value={hideValues ? '••••••' : limit > 0 ? money.format(available) : 'Not recorded'} note={limit > 0 ? `${Math.round((used / limit) * 100)}% utilised` : 'Set a limit to track usage'} /><Metric label="Next payment" value={hideValues ? '••••••' : info?.nextPaymentDate ? money.format(info.nextPaymentAmount) : '—'} note={info?.nextPaymentDate ? `due ${date.format(info.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid></Box>
 }
