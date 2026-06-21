@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Personal Budget — Header & Sidebar</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap');
+
+      :root {
+        --canvas: #071a24;
+        --sidebar: #06151e;
+        --header: rgba(8, 28, 39, .87);
+        --line: rgba(180, 216, 218, .12);
+        --line-strong: rgba(180, 216, 218, .2);
+        --ink: #e9f1f2;
+        --muted: #91a5ae;
+        --faint: #607781;
+        --cyan: #6dd7ef;
+        --mint: #82e0bd;
+        --active: rgba(72, 181, 206, .15);
+        --active-line: #69d3e7;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        overflow-x: hidden;
+        color: var(--ink);
+        background: var(--canvas);
+        font-family: "DM Sans", system-ui, sans-serif;
+      }
+
+      .app-shell { min-height: 100vh; display: flex; }
+
+      .sidebar {
+        position: fixed;
+        z-index: 5;
+        inset: 0 auto 0 0;
+        display: flex;
+        width: 260px;
+        flex-direction: column;
+        background: linear-gradient(180deg, #071b25 0%, #04131c 100%);
+        border-right: 1px solid var(--line);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        min-height: 80px;
+        padding: 0 18px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand-mark {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        flex: 0 0 auto;
+        place-items: center;
+        color: #09202a;
+        background: linear-gradient(135deg, #c3e9dc 0%, #8cc7d8 100%);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(78, 194, 210, .16);
+      }
+      .brand-copy { margin-left: 11px; line-height: 1.05; }
+      .brand-name { font-family: "Playfair Display", Georgia, serif; font-size: 18px; letter-spacing: -.7px; }
+      .brand-tag { margin-top: 4px; color: var(--cyan); font-family: "DM Mono", monospace; font-size: 8px; letter-spacing: .13em; text-transform: uppercase; }
+      .collapse {
+        display: grid;
+        width: 31px;
+        height: 31px;
+        margin-left: auto;
+        place-items: center;
+        color: var(--muted);
+        background: rgba(255,255,255,.045);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+      }
+
+      .nav { padding: 25px 12px 18px; }
+      .nav-label { margin: 0 10px 11px; color: var(--faint); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: .14em; text-transform: uppercase; }
+      .nav-list { display: grid; gap: 3px; margin: 0; padding: 0; list-style: none; }
+      .nav-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        min-height: 43px;
+        gap: 13px;
+        padding: 0 11px;
+        color: #a6b7bf;
+        border: 1px solid transparent;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: .18s ease;
+      }
+      .nav-item:hover { color: #e7f2f4; background: rgba(255,255,255,.035); }
+      .nav-item.active { color: #eaffff; background: var(--active); border-color: rgba(106, 211, 231, .10); }
+      .nav-item.active::before { position: absolute; left: -13px; width: 3px; height: 19px; background: var(--active-line); border-radius: 0 3px 3px 0; content: ""; box-shadow: 0 0 12px rgba(105, 211, 231, .5); }
+      .nav-item svg { width: 18px; height: 18px; flex: 0 0 auto; stroke-width: 1.6; }
+      .nav-item.active svg { color: var(--cyan); }
+      .nav-separator { height: 1px; margin: 16px 10px; background: var(--line); }
+
+      .sidebar-footer { margin-top: auto; padding: 16px 12px 18px; border-top: 1px solid var(--line); }
+      .account-switcher {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px;
+        color: var(--ink);
+        background: rgba(255,255,255,.03);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+      }
+      .account-avatar { display: grid; width: 30px; height: 30px; place-items: center; color: #06212c; background: #a9d9d9; border-radius: 9px; font-size: 11px; font-weight: 700; }
+      .account-copy { min-width: 0; line-height: 1.2; }
+      .account-name { overflow: hidden; font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+      .account-role { margin-top: 3px; color: var(--faint); font-family: "DM Mono", monospace; font-size: 8px; text-transform: uppercase; }
+      .account-switcher > svg { width: 15px; margin-left: auto; color: var(--muted); }
+
+      .content { width: calc(100% - 260px); min-height: 100vh; margin-left: 260px; }
+      .topbar {
+        position: sticky;
+        z-index: 4;
+        top: 0;
+        display: flex;
+        height: 80px;
+        align-items: center;
+        padding: 0 30px;
+        background: var(--header);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(18px);
+      }
+      .page-title { display: flex; align-items: center; gap: 13px; }
+      .page-title-mark { width: 37px; height: 37px; padding: 8px; color: var(--mint); background: rgba(130,224,189,.08); border: 1px solid rgba(130,224,189,.18); border-radius: 11px; }
+      .eyebrow { margin: 0 0 3px; color: var(--faint); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; }
+      h1 { margin: 0; font-family: "Playfair Display", Georgia, serif; font-size: 24px; font-weight: 500; letter-spacing: -.8px; }
+      h1 em { color: #a7dcd4; font-weight: 500; }
+      .topbar-actions { display: flex; align-items: center; gap: 9px; margin-left: auto; }
+      .search {
+        display: flex;
+        width: min(330px, 26vw);
+        height: 40px;
+        align-items: center;
+        gap: 9px;
+        padding: 0 11px;
+        color: var(--muted);
+        background: rgba(255,255,255,.035);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        font-family: "Playfair Display", Georgia, serif;
+        font-size: 14px;
+      }
+      .search svg { width: 16px; }
+      kbd { margin-left: auto; padding: 3px 5px; color: #9aabb2; background: rgba(255,255,255,.055); border: 1px solid var(--line); border-radius: 4px; font-family: "DM Mono", monospace; font-size: 8px; }
+      .icon-button { display: grid; width: 40px; height: 40px; place-items: center; color: #aabcc2; background: rgba(255,255,255,.035); border: 1px solid var(--line); border-radius: 10px; }
+      .icon-button svg { width: 18px; }
+      .profile { display: flex; height: 40px; align-items: center; gap: 8px; padding: 4px 9px 4px 5px; background: rgba(255,255,255,.035); border: 1px solid var(--line); border-radius: 10px; }
+      .profile .account-avatar { width: 29px; height: 29px; border-radius: 8px; }
+      .profile span { font-size: 12px; font-weight: 600; }
+      .profile svg { width: 14px; color: var(--muted); }
+
+      .placeholder {
+        min-height: calc(100vh - 80px);
+        padding: 42px 32px;
+        background-image: radial-gradient(circle at 50% 0, rgba(55, 143, 165, .10), transparent 37%), linear-gradient(rgba(160,220,220,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(160,220,220,.028) 1px, transparent 1px);
+        background-size: auto, 32px 32px, 32px 32px;
+      }
+      .scope-note { max-width: 710px; padding: 23px; color: var(--muted); border: 1px dashed rgba(109, 215, 239, .2); border-radius: 14px; background: rgba(4, 20, 28, .3); }
+      .scope-note strong { display: block; margin-bottom: 8px; color: var(--cyan); font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+      .scope-note p { margin: 0; font-size: 14px; line-height: 1.6; }
+
+      @media (max-width: 800px) {
+        .sidebar { width: 74px; }
+        .brand { justify-content: center; padding: 0; }
+        .brand-copy, .collapse, .nav-label, .nav-item span, .account-copy, .account-switcher > svg { display: none; }
+        .nav { padding: 24px 10px; }
+        .nav-item { justify-content: center; padding: 0; }
+        .nav-item.active::before { left: -11px; }
+        .account-switcher { justify-content: center; padding: 8px; }
+        .content { width: calc(100% - 74px); margin-left: 74px; }
+        .topbar { padding: 0 18px; }
+        .search { display: none; }
+        .profile span, .profile > svg { display: none; }
+        .profile { padding-right: 5px; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 19V9m7 10V5m7 14v-7"/><path d="m3 14 5-5 4 3 7-7"/></svg>
+          </div>
+          <div class="brand-copy"><div class="brand-name">Personal Budget</div><div class="brand-tag">Clarity for your money</div></div>
+          <button class="collapse" aria-label="Recolher menu"><svg viewBox="0 0 24 24" width="17" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+        </div>
+
+        <nav class="nav" aria-label="Navegação principal">
+          <p class="nav-label">Visão geral</p>
+          <ul class="nav-list">
+            <li><a class="nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Início</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h4"/></svg><span>Transações</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></svg><span>Categorias</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h2"/></svg><span>Contas</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h5"/></svg><span>Cartões</span></a></li>
+          </ul>
+          <div class="nav-separator"></div>
+          <p class="nav-label">Planejamento</p>
+          <ul class="nav-list">
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg><span>Planejamento</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg><span>Pagamentos fixos</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m12 2 2.6 6.4L21 9l-5 4.4 1.5 6.6-5.5-3.5L6.5 20 8 13.4 3 9l6.4-.6L12 2Z"/></svg><span>Objetivos</span></a></li>
+            <li><a class="nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 19V5m0 14h16M8 16v-4m4 4V8m4 8v-6"/></svg><span>Relatórios</span></a></li>
+          </ul>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="account-switcher">
+            <div class="account-avatar">LF</div>
+            <div class="account-copy"><div class="account-name">Leandro Ferreira</div><div class="account-role">Conta pessoal</div></div>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div class="page-title">
+            <svg class="page-title-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17.5V7.7a2 2 0 0 1 2-2h4l1.5 2H19a2 2 0 0 1 2 2v7.8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M7 15h10M7 11h5"/></svg>
+            <div><p class="eyebrow">Visão financeira</p><h1>Personal <em>Budget</em></h1></div>
+          </div>
+          <div class="topbar-actions">
+            <button class="search" aria-label="Pesquisar transações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.2-4.2"/></svg><span>Pesquisar transações</span><kbd>Ctrl K</kbd></button>
+            <button class="icon-button" aria-label="Alternar tema"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+            <button class="profile" aria-label="Abrir perfil"><div class="account-avatar">LF</div><span>Leandro</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+          </div>
+        </header>
+        <section class="placeholder"><div class="scope-note"><strong>Área de conteúdo preservada</strong><p>Esta prévia deixa o centro propositalmente neutro para avaliar somente o novo header e a sidebar, conforme marcado na referência.</p></div></section>
+      </main>
+    </div>
+  </body>
+</html>

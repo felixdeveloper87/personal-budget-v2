@@ -28,6 +28,41 @@ export const SIDEBAR_EXPANDED_W = 244
 export const SIDEBAR_COLLAPSED_W = 72
 const TRANSITION = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
 
+const NAVIGATION_GROUPS: ReadonlyArray<{
+  label: string
+  itemIds: ReadonlyArray<AppPage>
+}> = [
+  {
+    label: 'General view',
+    itemIds: ['dashboard', 'transactions', 'categories', 'accounts', 'cards', 'all-transactions'],
+  },
+  {
+    label: 'Planning',
+    itemIds: ['planning', 'installments', 'fixed-payments', 'transfers', 'goals'],
+  },
+  {
+    label: 'Reports',
+    itemIds: ['reports'],
+  },
+]
+
+function groupNavigationItems(items: ReadonlyArray<NavItem>) {
+  const groupedIds = new Set(NAVIGATION_GROUPS.flatMap((group) => group.itemIds))
+  const groups = NAVIGATION_GROUPS
+    .map((group) => ({
+      label: group.label,
+      items: group.itemIds
+        .map((id) => items.find((item) => item.id === id))
+        .filter((item): item is NavItem => Boolean(item)),
+    }))
+    .filter((group) => group.items.length > 0)
+
+  const ungroupedItems = items.filter((item) => !groupedIds.has(item.id))
+  return ungroupedItems.length > 0
+    ? [...groups, { label: 'Administration', items: ungroupedItems }]
+    : groups
+}
+
 /* -------------------------------------------------------------------------- */
 /* Sidebar component                                                           */
 /* -------------------------------------------------------------------------- */
@@ -49,6 +84,7 @@ export default function Sidebar({
 }: SidebarProps) {
   const { user } = useAuth()
   const ed = useEd()
+  const navigationGroups = groupNavigationItems(items)
 
   /* ---- Surface tokens ---- */
   const surfaceBase = useColorModeValue(
@@ -72,6 +108,8 @@ export default function Sidebar({
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
   const sectionLabelBase = useColorModeValue('gray.400', 'gray.600')
   const sectionLabel = ed ? ed.muted : sectionLabelBase
+  const sectionDividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const sectionDivider = ed ? ed.line : sectionDividerBase
   const sidebarWash = ed
     ? `linear-gradient(180deg, ${ed.glass} 0%, ${ed.bg} 100%)`
     : undefined
@@ -137,7 +175,7 @@ export default function Sidebar({
       <SidebarHeader isCollapsed={isCollapsed} onToggle={onToggleCollapse} />
 
       {/* ─── Navigation ─── */}
-      <Box ref={containerRef} position="relative" px={2} pt={2} flex={1}>
+      <Box ref={containerRef} position="relative" px={2} pt={4} pb={3} flex={1}>
         {/* Sliding active indicator */}
         <ActiveIndicator
           top={indicator.top}
@@ -146,34 +184,45 @@ export default function Sidebar({
           isCollapsed={isCollapsed}
         />
 
-        {/* Section label */}
-        {!isCollapsed && (
-          <Text
-            fontSize="2xs"
-            fontWeight={700}
-            color={sectionLabel}
-            textTransform="uppercase"
-            letterSpacing="0.08em"
-            px={3}
-            pt={1}
-            pb={2}
-            transition={TRANSITION}
-          >
-            Menu
-          </Text>
-        )}
-        {isCollapsed && <Box h={4} />}
-
-        <VStack spacing={0.5} align="stretch">
-          {items.map((item) => (
-            <SidebarItem
-              key={item.id}
-              item={item}
-              isActive={currentPage === item.id}
-              isCollapsed={isCollapsed}
-              onSelect={onPageChange}
-              assignRef={(el) => { itemRefs.current[item.id] = el }}
-            />
+        <VStack spacing={0} align="stretch">
+          {navigationGroups.map((group, groupIndex) => (
+            <Box key={group.label} w="full">
+              {groupIndex > 0 && (
+                <Box
+                  h="1px"
+                  mx={isCollapsed ? 2 : 3}
+                  my={isCollapsed ? 3 : 4}
+                  bg={sectionDivider}
+                  transition={TRANSITION}
+                />
+              )}
+              {!isCollapsed && (
+                <Text
+                  fontSize="2xs"
+                  fontWeight={700}
+                  color={sectionLabel}
+                  textTransform="uppercase"
+                  letterSpacing="0.1em"
+                  px={3}
+                  pb={2}
+                  transition={TRANSITION}
+                >
+                  {group.label}
+                </Text>
+              )}
+              <VStack spacing={0.5} align="stretch">
+                {group.items.map((item) => (
+                  <SidebarItem
+                    key={item.id}
+                    item={item}
+                    isActive={currentPage === item.id}
+                    isCollapsed={isCollapsed}
+                    onSelect={onPageChange}
+                    assignRef={(el) => { itemRefs.current[item.id] = el }}
+                  />
+                ))}
+              </VStack>
+            </Box>
           ))}
         </VStack>
       </Box>

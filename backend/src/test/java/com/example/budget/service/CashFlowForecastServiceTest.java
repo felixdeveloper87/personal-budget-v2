@@ -56,6 +56,7 @@ class CashFlowForecastServiceTest {
         account.setName("Monzo Current");
         account.setType(AccountType.CURRENT);
         account.setCurrency("GBP");
+        account.setActive(true);
 
         when(recurringRepository.findByUserOrderByIdDesc(user)).thenReturn(List.of());
         when(accountService.summary(user))
@@ -63,7 +64,7 @@ class CashFlowForecastServiceTest {
     }
 
     @Test
-    void forecastStartsWithTheLiveCurrentMonthBalanceThenProjectsFutureMonths() {
+    void forecastAppliesEveryFutureTransactionInItsPaymentMonth() {
         YearMonth currentMonth = YearMonth.now();
         YearMonth previousMonth = currentMonth.minusMonths(1);
         YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
@@ -75,8 +76,10 @@ class CashFlowForecastServiceTest {
                         transaction(TransactionType.INCOME, "1000.00", previousMonth.atDay(10)),
                         transaction(TransactionType.EXPENSE, "200.00", previousMonth.atDay(15))));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
-                .thenReturn(List.of());
+                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of(
+                        transaction(TransactionType.INCOME, "1000.00", currentMonth.plusMonths(1).atDay(10)),
+                        transaction(TransactionType.EXPENSE, "200.00", currentMonth.plusMonths(1).atDay(15))));
 
         var result = service.forecast(user);
 
@@ -87,8 +90,9 @@ class CashFlowForecastServiceTest {
 
         var nextMonth = result.months().get(1);
         assertThat(nextMonth.month()).isEqualTo(currentMonth.plusMonths(1).toString());
-        assertThat(nextMonth.estimatedIncome()).isEqualByComparingTo("1000.00");
-        assertThat(nextMonth.estimatedVariableExpense()).isEqualByComparingTo("200.00");
+        assertThat(nextMonth.fixedIncome()).isEqualByComparingTo("1000.00");
+        assertThat(nextMonth.fixedExpense()).isEqualByComparingTo("200.00");
+        assertThat(nextMonth.estimatedIncome()).isEqualByComparingTo("0.00");
         assertThat(nextMonth.projectedClosingBalance()).isEqualByComparingTo("1800.00");
     }
 
@@ -101,18 +105,19 @@ class CashFlowForecastServiceTest {
         RecurringTransaction rent = new RecurringTransaction();
         rent.setType(TransactionType.EXPENSE);
         rent.setAmount(new BigDecimal("950.00"));
-        rent.setStartDate(currentMonth.minusMonths(2).atDay(1));
+        rent.setStartDate(currentMonth.plusMonths(1).atDay(1));
         rent.setDayOfMonth(1);
         rent.setNextRunDate(lastForecastMonth.plusMonths(3).atDay(1));
         rent.setActive(true);
         rent.setUser(user);
+        rent.setAccount(account);
 
         when(recurringRepository.findByUserOrderByIdDesc(user)).thenReturn(List.of(rent));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                 user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
                 .thenReturn(List.of());
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of());
         when(creditCardBillingService.resolvePaymentDate(any(LocalDate.class), nullable(com.example.budget.model.PaymentMethod.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -137,8 +142,9 @@ class CashFlowForecastServiceTest {
                 user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
                 .thenReturn(List.of(transaction(TransactionType.INCOME, "1000.00", previousMonth.atDay(10))));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
-                .thenReturn(List.of());
+                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of(transaction(
+                        TransactionType.INCOME, "1000.00", currentMonth.plusMonths(1).atDay(10))));
 
         var result = service.forecast(user);
 

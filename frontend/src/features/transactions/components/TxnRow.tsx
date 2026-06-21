@@ -3,6 +3,7 @@ import type { TxnVM, TxView } from '../transactions.types'
 import { fmtShort } from '../transactions.utils'
 import { fmtCurrency } from '../../dashboard/components/format'
 import CategoryIcon, { Clock } from './CategoryIcon'
+import { Check } from '../../../components/ui/icons'
 
 interface TxnRowProps {
   txn: TxnVM
@@ -112,7 +113,7 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
           mt="2px"
           color={settle.gold ? 'var(--pb-gold)' : 'var(--pb-ink-faint)'}
         >
-          {settle.gold && <Icon as={Clock} boxSize="11px" />}
+          <Icon as={settle.gold ? Clock : Check} boxSize="11px" />
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="9.5px"

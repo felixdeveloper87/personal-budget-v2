@@ -18,18 +18,18 @@ public record CashFlowForecastDTO(
      * A single future month in the cash-flow forecast.
      *
      * <p>The income/expense/net values are flows over the month (money expected to
-     * move); {@code projectedClosingBalance} is the running balance, anchored on the
-     * current total account balance and rolled forward month by month so it answers
-     * "when does my money run out". The first item is the current live-balance
-     * snapshot; the remaining items are projected future months.</p>
+     * move); {@code projectedClosingBalance} is the month-end running balance,
+     * anchored on today's live total account balance and rolled forward month by
+     * month. The first item includes the remaining scheduled activity in the
+     * current month.</p>
      *
      * <p>Each month is split into two confidence layers:</p>
      * <ul>
      *   <li><b>Committed</b> ({@code fixedIncome}, {@code fixedExpense},
-     *       {@code installmentExpense}): scheduled, known amounts. High confidence.</li>
+     *       {@code installmentExpense}): dated transactions and recurring commitments.</li>
      *   <li><b>Estimated</b> ({@code estimatedIncome},
-     *       {@code estimatedVariableExpense}): projected from the recent monthly
-     *       average. Clearly a forecast, not a fact.</li>
+     *       {@code estimatedVariableExpense}): only the optional income-plan top-up
+     *       when confirmed income is below that month's target.</li>
      * </ul>
      */
     public record MonthForecast(

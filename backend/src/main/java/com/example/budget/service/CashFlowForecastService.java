@@ -2,7 +2,10 @@ package com.example.budget.service;
 
 import com.example.budget.dto.CashFlowForecastDTO;
 import com.example.budget.exception.EntityNotFoundException;
-import com.example.budget.model.*;
+import com.example.budget.model.RecurringTransaction;
+import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionType;
+import com.example.budget.model.User;
 import com.example.budget.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
 import com.example.budget.repository.UserRepository;
@@ -15,27 +18,24 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
- * Builds a forward-looking cash-flow forecast for the planning page.
+ * Builds a month-by-month balance ledger for the planning page.
  *
- * <p>The forecast is intentionally a <b>flow</b> projection: it answers
- * "how much money will move in and out each future month", never "what will my
- * balance be". It does not anchor on the current account balance, so it never
- * conflates the live account snapshot (the Accounts page) with the realised
- * period figures (the Dashboard).</p>
+ * <p>The forecast starts at the live total across active accounts, then applies
+ * every balance-affecting transaction due from today onwards. One-off future
+ * transactions, installments and recurring commitments therefore appear in the
+ * actual month in which they will change the account balance.</p>
  *
- * <p>It includes the <b>current month</b> as a live-balance snapshot, followed
- * by forward projections, for a total of {@link #FORECAST_MONTHS} months. The
- * current partial month is not estimated again: its account balance is already
- * realised, so reapplying a full month's average would double-count activity.</p>
- *
- * <p>Each month separates committed amounts (scheduled fixed payments and
- * installments — high confidence) from estimated amounts (recent monthly
- * average — clearly a forecast), and reports how much of the projected movement
- * is committed via {@code confidencePercent}.</p>
+ * <p>Recurring rules fill only dates without a generated transaction row, which
+ * prevents double counting. Historical averages remain in the response as
+ * context, but never change the projected balance. The optional income plan is
+ * the only assumption: it tops up a future month only when confirmed income is
+ * below the declared target.</p>
  */
 @Service
 public class CashFlowForecastService {
@@ -61,10 +61,6 @@ public class CashFlowForecastService {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Sets (or clears, with {@code null}) the user's global expected monthly income
-     * and returns the recalculated forecast.
-     */
     @Transactional
     public CashFlowForecastDTO updateIncomePlan(User principal, BigDecimal plannedMonthlyIncome) {
         User user = userRepository.findById(principal.getId())
@@ -80,9 +76,7 @@ public class CashFlowForecastService {
         YearMonth currentMonth = YearMonth.from(today);
         YearMonth firstHistoryMonth = currentMonth.minusMonths(HISTORY_MONTHS);
         YearMonth lastHistoryMonth = currentMonth.minusMonths(1);
-        YearMonth firstForecastMonth = currentMonth;
         YearMonth lastForecastMonth = currentMonth.plusMonths(FORECAST_MONTHS - 1L);
-        LocalDate forecastStart = firstForecastMonth.atDay(1);
         LocalDate forecastEnd = lastForecastMonth.atEndOfMonth();
 
         List<Transaction> historyTransactions = transactionRepository
@@ -93,91 +87,66 @@ public class CashFlowForecastService {
                 .stream()
                 .filter(this::isSettledStandaloneTransaction)
                 .toList();
-
-        List<YearMonth> basisMonths = historyMonthsWithActivity(
-                historyTransactions, firstHistoryMonth);
+        List<YearMonth> basisMonths = historyMonthsWithActivity(historyTransactions, firstHistoryMonth);
         BigDecimal averageIncome = monthlyAverage(
                 historyTransactions, TransactionType.INCOME, basisMonths.size());
         BigDecimal averageVariableExpense = monthlyAverage(
                 historyTransactions, TransactionType.EXPENSE, basisMonths.size());
 
-        // Predictable-but-not-fixed income: when the user declares an expected
-        // monthly income (e.g. a gig-work target), use it instead of the history
-        // average so the forecast reflects their plan, not just the past.
         BigDecimal plannedMonthlyIncome = user.getPlannedMonthlyIncome();
-        boolean hasIncomePlan = plannedMonthlyIncome != null
-                && plannedMonthlyIncome.signum() > 0;
-        BigDecimal monthlyVariableIncome = hasIncomePlan ? plannedMonthlyIncome : averageIncome;
-
-        // Anchor: the live total balance across all accounts. The projection rolls
-        // this forward month by month so it can answer "when does my money run out".
+        boolean hasIncomePlan = plannedMonthlyIncome != null && plannedMonthlyIncome.signum() > 0;
         BigDecimal currentTotalBalance = accountService.summary(user).totalBalance();
 
+        Map<YearMonth, BigDecimal> scheduledIncome = new HashMap<>();
+        Map<YearMonth, BigDecimal> scheduledExpenses = new HashMap<>();
         Map<YearMonth, BigDecimal> installmentExpenses = new HashMap<>();
-        addPersistedInstallments(installmentExpenses, user, forecastStart, forecastEnd);
-
-        Map<YearMonth, BigDecimal> fixedIncome = new HashMap<>();
-        Map<YearMonth, BigDecimal> fixedExpenses = new HashMap<>();
-        addRecurring(fixedIncome, fixedExpenses, user, forecastStart, forecastEnd);
+        Set<String> persistedRecurringPayments = addPersistedTransactions(
+                scheduledIncome,
+                scheduledExpenses,
+                installmentExpenses,
+                user,
+                today,
+                forecastEnd);
+        addMissingRecurringTransactions(
+                scheduledIncome,
+                scheduledExpenses,
+                user,
+                today,
+                forecastEnd,
+                persistedRecurringPayments);
 
         List<CashFlowForecastDTO.MonthForecast> months = new ArrayList<>();
-        BigDecimal cumulativeNet = BigDecimal.ZERO;
+        BigDecimal projectedBalance = currentTotalBalance;
         for (int offset = 0; offset < FORECAST_MONTHS; offset++) {
-            YearMonth month = firstForecastMonth.plusMonths(offset);
+            YearMonth month = currentMonth.plusMonths(offset);
+            BigDecimal monthIncome = scheduledIncome.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal monthExpense = scheduledExpenses.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal monthInstallments = installmentExpenses.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal plannedIncomeTopUp = !month.equals(currentMonth) && hasIncomePlan
+                    ? plannedMonthlyIncome.subtract(monthIncome).max(BigDecimal.ZERO)
+                    : BigDecimal.ZERO;
 
-            // The first card is the live starting point. Projecting full monthly
-            // averages over the current account balance would count this month's
-            // realised income and expenses twice.
-            if (month.equals(currentMonth)) {
-                months.add(new CashFlowForecastDTO.MonthForecast(
-                        month.toString(),
-                        month.atEndOfMonth(),
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
-                        currentTotalBalance,
-                        100,
-                        currentTotalBalance.signum() < 0));
-                continue;
-            }
-            BigDecimal monthFixedIncome = fixedIncome.getOrDefault(month, BigDecimal.ZERO);
-            BigDecimal monthFixedExpense = fixedExpenses.getOrDefault(month, BigDecimal.ZERO);
-            BigDecimal monthInstallmentExpense = installmentExpenses.getOrDefault(
-                    month, BigDecimal.ZERO);
-
-            BigDecimal committedNet = monthFixedIncome
-                    .subtract(monthFixedExpense)
-                    .subtract(monthInstallmentExpense);
-            BigDecimal estimatedNet = monthlyVariableIncome.subtract(averageVariableExpense);
+            BigDecimal committedNet = monthIncome.subtract(monthExpense).subtract(monthInstallments);
+            BigDecimal estimatedNet = plannedIncomeTopUp;
             BigDecimal netCashFlow = committedNet.add(estimatedNet);
-            cumulativeNet = cumulativeNet.add(netCashFlow);
-            BigDecimal projectedClosingBalance = currentTotalBalance.add(cumulativeNet);
+            projectedBalance = projectedBalance.add(netCashFlow);
 
-            BigDecimal committedGross = monthFixedIncome
-                    .add(monthFixedExpense)
-                    .add(monthInstallmentExpense);
-            BigDecimal estimatedGross = monthlyVariableIncome.add(averageVariableExpense);
-            int confidencePercent = confidence(committedGross, estimatedGross);
-
+            BigDecimal committedGross = monthIncome.add(monthExpense).add(monthInstallments);
+            int confidencePercent = confidence(committedGross, plannedIncomeTopUp);
             months.add(new CashFlowForecastDTO.MonthForecast(
                     month.toString(),
                     month.atEndOfMonth(),
-                    monthFixedIncome,
-                    monthlyVariableIncome,
-                    monthFixedExpense,
-                    monthInstallmentExpense,
-                    averageVariableExpense,
+                    monthIncome,
+                    plannedIncomeTopUp,
+                    monthExpense,
+                    monthInstallments,
+                    BigDecimal.ZERO,
                     committedNet,
                     estimatedNet,
                     netCashFlow,
-                    projectedClosingBalance,
+                    projectedBalance,
                     confidencePercent,
-                    projectedClosingBalance.signum() < 0));
+                    projectedBalance.signum() < 0));
         }
 
         return new CashFlowForecastDTO(
@@ -191,41 +160,49 @@ public class CashFlowForecastService {
                 months);
     }
 
-    private void addPersistedInstallments(
-            Map<YearMonth, BigDecimal> installmentExpenses,
+    private Set<String> addPersistedTransactions(
+            Map<YearMonth, BigDecimal> income,
+            Map<YearMonth, BigDecimal> expenses,
+            Map<YearMonth, BigDecimal> installments,
             User user,
-            LocalDate start,
+            LocalDate today,
             LocalDate end) {
+        Set<String> recurringPayments = new HashSet<>();
         for (Transaction transaction : transactionRepository
-                .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, start, end)) {
-            if (transaction.getAccount() == null
-                    || transaction.getInstallmentPlan() == null
-                    || transaction.getType() != TransactionType.EXPENSE) {
+                .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, today, end)) {
+            if (transaction.getRecurringTransaction() != null) {
+                recurringPayments.add(recurringPaymentKey(
+                        transaction.getRecurringTransaction().getId(), transaction.getPaymentDate()));
+            }
+            if (!isFutureBalanceTransaction(transaction, today)) {
                 continue;
             }
-            addAmount(
-                    installmentExpenses,
-                    YearMonth.from(transaction.getPaymentDate()),
-                    transaction.getAmount());
+            YearMonth month = YearMonth.from(transaction.getPaymentDate());
+            if (transaction.getType() == TransactionType.INCOME) {
+                addAmount(income, month, transaction.getAmount());
+            } else if (transaction.getInstallmentPlan() != null) {
+                addAmount(installments, month, transaction.getAmount());
+            } else {
+                addAmount(expenses, month, transaction.getAmount());
+            }
         }
+        return recurringPayments;
     }
 
-    private void addRecurring(
-            Map<YearMonth, BigDecimal> fixedIncome,
-            Map<YearMonth, BigDecimal> fixedExpenses,
+    private void addMissingRecurringTransactions(
+            Map<YearMonth, BigDecimal> income,
+            Map<YearMonth, BigDecimal> expenses,
             User user,
             LocalDate start,
-            LocalDate end) {
+            LocalDate end,
+            Set<String> persistedRecurringPayments) {
         for (RecurringTransaction recurring : recurringRepository.findByUserOrderByIdDesc(user)) {
-            if (!recurring.isActive()) continue;
+            if (!recurring.isActive()
+                    || recurring.getAccount() == null
+                    || !recurring.getAccount().isActive()) {
+                continue;
+            }
 
-            /*
-             * The recurrence rule is the source of truth for the forecast, not
-             * nextRunDate. That field is advanced by the monthly generation job,
-             * so relying on it can skip a commitment when the job has not run yet
-             * (or when an older rule has a stale value). Start one month earlier
-             * because a card charge in the previous cycle may settle this month.
-             */
             LocalDate date = firstRecurringDateOnOrAfter(recurring, start.minusMonths(1));
             while (date != null && !date.isAfter(end)) {
                 LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
@@ -233,24 +210,20 @@ public class CashFlowForecastService {
                         recurring.getPaymentMethod());
                 if (!paymentDate.isBefore(start)
                         && !paymentDate.isAfter(end)
+                        && !persistedRecurringPayments.contains(
+                                recurringPaymentKey(recurring.getId(), paymentDate))
                         && (recurring.getEndDate() == null || !date.isAfter(recurring.getEndDate()))) {
-                    Map<YearMonth, BigDecimal> target =
-                            recurring.getType() == TransactionType.INCOME
-                                    ? fixedIncome
-                                    : fixedExpenses;
-                    addAmount(
-                            target,
-                            YearMonth.from(paymentDate),
-                            recurring.getAmount());
+                    Map<YearMonth, BigDecimal> target = recurring.getType() == TransactionType.INCOME
+                            ? income
+                            : expenses;
+                    addAmount(target, YearMonth.from(paymentDate), recurring.getAmount());
                 }
                 date = nextMonthlyDate(date, recurring.getDayOfMonth());
             }
         }
     }
 
-    private LocalDate firstRecurringDateOnOrAfter(
-            RecurringTransaction recurring,
-            LocalDate lowerBound) {
+    private LocalDate firstRecurringDateOnOrAfter(RecurringTransaction recurring, LocalDate lowerBound) {
         YearMonth month = YearMonth.from(lowerBound);
         LocalDate candidate = month.atDay(Math.min(recurring.getDayOfMonth(), month.lengthOfMonth()));
         if (candidate.isBefore(lowerBound)) {
@@ -276,23 +249,31 @@ public class CashFlowForecastService {
                 && transaction.getStatus().affectsCurrentBalance();
     }
 
+    private boolean isFutureBalanceTransaction(Transaction transaction, LocalDate today) {
+        if (transaction.getAccount() == null || !transaction.getAccount().isActive()) {
+            return false;
+        }
+        if (transaction.getPaymentDate().isAfter(today)) {
+            return true;
+        }
+        return transaction.getPaymentDate().isEqual(today)
+                && (transaction.getStatus() == null || !transaction.getStatus().affectsCurrentBalance());
+    }
+
     private List<YearMonth> historyMonthsWithActivity(
             List<Transaction> transactions, YearMonth firstHistoryMonth) {
         List<YearMonth> months = new ArrayList<>();
         for (int offset = 0; offset < HISTORY_MONTHS; offset++) {
             YearMonth month = firstHistoryMonth.plusMonths(offset);
-            boolean hasActivity = transactions.stream()
-                    .anyMatch(transaction ->
-                            YearMonth.from(transaction.getPaymentDate()).equals(month));
-            if (hasActivity) {
+            if (transactions.stream().anyMatch(transaction ->
+                    YearMonth.from(transaction.getPaymentDate()).equals(month))) {
                 months.add(month);
             }
         }
         return months;
     }
 
-    private BigDecimal monthlyAverage(
-            List<Transaction> transactions, TransactionType type, int monthCount) {
+    private BigDecimal monthlyAverage(List<Transaction> transactions, TransactionType type, int monthCount) {
         if (monthCount == 0) {
             return BigDecimal.ZERO;
         }
@@ -307,24 +288,22 @@ public class CashFlowForecastService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    /**
-     * Share of the month's projected gross movement that is committed (scheduled),
-     * as a 0-100 percentage. Returns 0 when there is no projected movement at all.
-     */
     private int confidence(BigDecimal committedGross, BigDecimal estimatedGross) {
         BigDecimal total = committedGross.add(estimatedGross);
         if (total.signum() == 0) {
             return 0;
         }
-        return committedGross
-                .multiply(BigDecimal.valueOf(100))
+        return committedGross.multiply(BigDecimal.valueOf(100))
                 .divide(total, 0, RoundingMode.HALF_UP)
                 .intValue();
     }
 
-    private void addAmount(
-            Map<YearMonth, BigDecimal> amounts, YearMonth month, BigDecimal amount) {
+    private void addAmount(Map<YearMonth, BigDecimal> amounts, YearMonth month, BigDecimal amount) {
         amounts.merge(month, amount, BigDecimal::add);
+    }
+
+    private String recurringPaymentKey(Long recurringId, LocalDate paymentDate) {
+        return recurringId + ":" + paymentDate;
     }
 
     private LocalDate nextMonthlyDate(LocalDate currentDate, int targetDay) {

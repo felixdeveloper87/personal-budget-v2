@@ -21,7 +21,7 @@ import { ToastService } from '../../services/toast'
 import type { Transaction } from '../../types'
 
 import { PremiumModal } from '../ui'
-import { useEd } from '../../editorial'
+import { Guilloche, useEd } from '../../editorial'
 
 import '../../features/dashboard/theme/pb-tokens.css'
 import { toViewModel, buildLedger, parseISO, FILTER_LABELS, type LedgerGroup } from '../../features/transactions/transactions.utils'
@@ -227,9 +227,21 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
         borderRadius: { base: '18px', md: '18px' },
       }}
     >
-      <Flex direction="column" h="full" minH={0} bg={surfaceBg}>
+      <Flex direction="column" h="full" minH={0} bg={surfaceBg} position="relative">
+        {/* Guilloché watermark — the ledger's quiet engraving identity. */}
+        <Box aria-hidden position="absolute" inset={0} overflow="hidden" pointerEvents="none" zIndex={0}>
+          <Box position="absolute" top="-22%" right="-14%" w="380px" h="380px">
+            <Guilloche n={26} rx={300} ry={120} opacity={0.16} />
+          </Box>
+          <Box position="absolute" bottom="-26%" right="-8%" w="300px" h="300px">
+            <Guilloche n={22} rx={300} ry={120} opacity={0.12} />
+          </Box>
+        </Box>
+
         {/* Search field + chips */}
         <Box
+          position="relative"
+          zIndex={1}
           px={{ base: 4, sm: 5 }}
           pt={{ base: 4, sm: 5 }}
           pb={3}
@@ -293,7 +305,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
         </Box>
 
         {/* Results */}
-        <Box flex="1" minH={0} overflowY="auto" px={{ base: 4, sm: 5 }} py={4}>
+        <Box position="relative" zIndex={1} flex="1" minH={0} overflowY="auto" px={{ base: 4, sm: 5 }} py={4}>
           {!hasCriteria ? (
             <IdleHint />
           ) : loading && raw.length === 0 ? (
