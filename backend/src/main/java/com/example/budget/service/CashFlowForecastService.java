@@ -129,8 +129,14 @@ public class CashFlowForecastService {
             BigDecimal monthInstallments = installmentExpenses.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthIncomeReceived = incomeReceived.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthExpensesPaid = expensesPaid.getOrDefault(month, BigDecimal.ZERO);
-            BigDecimal plannedIncomeTopUp = !month.equals(currentMonth) && hasIncomePlan
-                    ? plannedMonthlyIncome.subtract(monthIncome).max(BigDecimal.ZERO)
+            // In the current month, income already received is part of the live
+            // account balance. The plan therefore contributes only the amount still
+            // needed to reach the user's monthly target; it never re-adds income
+            // that has already happened.
+            BigDecimal plannedIncomeTopUp = hasIncomePlan
+                    ? plannedMonthlyIncome
+                            .subtract(monthIncomeReceived.add(monthIncome))
+                            .max(BigDecimal.ZERO)
                     : BigDecimal.ZERO;
 
             BigDecimal committedNet = monthIncome.subtract(monthExpense).subtract(monthInstallments);

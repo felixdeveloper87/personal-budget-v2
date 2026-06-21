@@ -133,6 +133,31 @@ class CashFlowForecastServiceTest {
     }
 
     @Test
+    void currentMonthUsesActualIncomeThenProjectsOnlyTheRemainingIncomePlan() {
+        YearMonth currentMonth = YearMonth.now();
+        YearMonth previousMonth = currentMonth.minusMonths(1);
+        YearMonth firstHistoryMonth = currentMonth.minusMonths(3);
+        YearMonth lastForecastMonth = currentMonth.plusMonths(11);
+        user.setPlannedMonthlyIncome(new BigDecimal("1000.00"));
+
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+        when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
+                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
+                .thenReturn(List.of(transaction(
+                        TransactionType.INCOME, "400.00", currentMonth.atDay(1))));
+
+        var result = service.forecast(user);
+        var thisMonth = result.months().get(0);
+
+        assertThat(thisMonth.incomeReceivedSoFar()).isEqualByComparingTo("400.00");
+        assertThat(thisMonth.estimatedIncome()).isEqualByComparingTo("600.00");
+        assertThat(thisMonth.netCashFlow()).isEqualByComparingTo("600.00");
+        assertThat(thisMonth.projectedClosingBalance()).isEqualByComparingTo("1600.00");
+    }
+
+    @Test
     void forecastShowsTheFirstPositiveMonthAfterANegativeStartingBalance() {
         YearMonth currentMonth = YearMonth.now();
         YearMonth previousMonth = currentMonth.minusMonths(1);

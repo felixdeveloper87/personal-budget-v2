@@ -260,10 +260,13 @@ function ForecastCard({ month, hasIncomePlan }: { month: CashFlowForecastMonth; 
   const current = month.month === monthValue(new Date())
   const colour = month.negative ? 'var(--pb-coral)' : 'var(--pb-ink)'
   const scheduledIncome = month.fixedIncome ?? 0
-  const totalOutgoings = (month.installmentExpense ?? 0) + (month.fixedExpense ?? 0)
+  const scheduledOutgoings = (month.installmentExpense ?? 0) + (month.fixedExpense ?? 0)
   const incomeReceived = month.incomeReceivedSoFar ?? 0
+  const expensesPaid = month.expensesPaidSoFar ?? 0
   const projectedIncome = incomeReceived + scheduledIncome + (month.estimatedIncome ?? 0)
+  const projectedOutgoings = expensesPaid + scheduledOutgoings
   const incomeProgress = projectedIncome > 0 ? Math.min(100, (incomeReceived / projectedIncome) * 100) : 0
+  const expensesProgress = projectedOutgoings > 0 ? Math.min(100, (expensesPaid / projectedOutgoings) * 100) : 0
 
   return <Box data-forecast-card flex={{ base: '0 0 88%', sm: '0 0 62%', lg: '0 0 calc(33.333% - 8px)' }} minW={0} p={4} borderRadius="16px" scrollSnapAlign="start" bg={current ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={month.negative ? 'var(--pb-tint-coral)' : current ? 'var(--pb-hair-2)' : 'var(--pb-hair)'}>
     <Flex justify="space-between" align="start" gap={3}>
@@ -272,11 +275,13 @@ function ForecastCard({ month, hasIncomePlan }: { month: CashFlowForecastMonth; 
     </Flex>
     <SimpleGrid columns={2} spacing={3} mt={4}>
       <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-income)" mt="2px">{money(current ? projectedIncome : scheduledIncome + month.estimatedIncome)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">{current ? 'Projected for this month' : `Scheduled${month.estimatedIncome > 0 ? ' + income plan' : ''}`}</Text></Box>
-      <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Outgoings</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-coral)" mt="2px">{money(totalOutgoings)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">All scheduled transactions</Text></Box>
+      <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Outgoings</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-coral)" mt="2px">{money(current ? projectedOutgoings : scheduledOutgoings)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">{current ? 'Paid + scheduled this month' : 'All scheduled transactions'}</Text></Box>
     </SimpleGrid>
     {current && <Box mt={4} p={3} borderRadius="10px" bg="var(--pb-surface)">
       <Flex justify="space-between" gap={3}><Text fontSize="xs" color="var(--pb-ink-soft)">Income received so far</Text><Text className="num" fontSize="xs" fontWeight={600} color="var(--pb-income)">{money(incomeReceived)} of {money(projectedIncome)}</Text></Flex>
       <Box h="6px" mt={2} bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${incomeProgress}%`} bg="var(--pb-income-2)" borderRadius="full" /></Box>
+      <Flex justify="space-between" gap={3} mt={3}><Text fontSize="xs" color="var(--pb-ink-soft)">Outgoings paid so far</Text><Text className="num" fontSize="xs" fontWeight={600} color="var(--pb-coral)">{money(expensesPaid)} of {money(projectedOutgoings)}</Text></Flex>
+      <Box h="6px" mt={2} bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${expensesProgress}%`} bg="var(--pb-coral-2)" borderRadius="full" /></Box>
     </Box>}
     <Box h="5px" mt={4} bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${confidence}%`} bg={confidence >= 66 ? 'var(--pb-income-2)' : confidence >= 33 ? 'var(--pb-gold-2)' : 'var(--pb-ink-faint)'} borderRadius="full" /></Box>
   </Box>
