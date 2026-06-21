@@ -2,14 +2,14 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
-  light: 'linear-gradient(135deg, #F9FAFB 0%, #E5E7EB 100%)',
-  dark: 'linear-gradient(135deg,rgb(12, 11, 11) 0%,rgb(4, 4, 4) 100%)',
+  light: 'radial-gradient(900px circle at 24% -18%, rgba(96, 165, 250, 0.14), transparent 58%), linear-gradient(180deg, #fafcff 0%, #edf3fb 100%)',
+  dark: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.16), transparent 58%), linear-gradient(180deg, #0b1d27 0%, #07151d 100%)',
 
-  cardLight: 'linear-gradient(135deg, #FFFFFF 0%, #F3F4F6 100%)',
-  cardDark: 'linear-gradient(135deg, #111111 0%, #000000 100%)',
+  cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f7 100%)',
+  cardDark: 'linear-gradient(135deg, #102631 0%, #07151d 100%)',
 
-  secondaryLight: 'linear-gradient(135deg,rgb(254, 254, 255) 0%,rgb(255, 255, 255) 100%)',
-  secondaryDark: 'linear-gradient(135deg, #1E1E20 0%, #2A2A2D 100%)',
+  secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f8fcfa 100%)',
+  secondaryDark: 'linear-gradient(135deg, #102631 0%, #163440 100%)',
 } as const
 
 // 🔤 Fontes da plataforma — fonte única de verdade.
@@ -58,13 +58,13 @@ const theme = extendTheme({
         // Estilos de tema
         bg: GRADIENTS.light,
 
-        color: '#0f172a',
+        color: '#132923',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
       // Estilos para modo escuro
       '[data-theme="dark"] body': {
         bg: GRADIENTS.dark,
-        color: '#ffffff',
+        color: '#ecf7f5',
       },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
@@ -116,16 +116,16 @@ const theme = extendTheme({
   },
   colors: {
     brand: {
-      50: '#f0f9ff',
-      100: '#e0f2fe',
-      200: '#bae6fd',
-      300: '#7dd3fc',
-      400: '#38bdf8',
-      500: '#0ea5e9',
-      600: '#0284c7',
-      700: '#0369a1',
-      800: '#075985',
-      900: '#0c4a6e',
+      50: '#eff6ff',
+      100: '#dbeafe',
+      200: '#bfdbfe',
+      300: '#93c5fd',
+      400: '#60a5fa',
+      500: '#3b82f6',
+      600: '#2563eb',
+      700: '#1d4ed8',
+      800: '#1e40af',
+      900: '#1e3a8a',
     },
   },
   components: {

@@ -15,6 +15,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
 import {
   CaretDoubleLeft,
+  ChartLineUp,
   SidebarSimple,
 } from '../ui/icons'
 import type { AppPage, NavItem } from './header/navigation.config'
@@ -71,6 +72,9 @@ export default function Sidebar({
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
   const sectionLabelBase = useColorModeValue('gray.400', 'gray.600')
   const sectionLabel = ed ? ed.muted : sectionLabelBase
+  const sidebarWash = ed
+    ? `linear-gradient(180deg, ${ed.glass} 0%, ${ed.bg} 100%)`
+    : undefined
 
   /* ---- Active-indicator position ---- */
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -113,6 +117,7 @@ export default function Sidebar({
       bottom={0}
       w={`${width}px`}
       bg={surface}
+      backgroundImage={sidebarWash}
       backdropFilter="saturate(180%) blur(20px)"
       borderRight="1px solid"
       borderRightColor={borderRight}
@@ -193,7 +198,7 @@ function SidebarHeader({
   const ed = useEd()
   const textColorBase = useColorModeValue('gray.900', 'whiteAlpha.900')
   const textColor = ed ? ed.cream : textColorBase
-  const brandAccentBase = useColorModeValue('#2563eb', '#60a5fa')
+  const brandAccentBase = useColorModeValue('#2563eb', '#7dd3fc')
   const brandAccent = ed ? ed.jade : brandAccentBase
   const toggleBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
   const toggleBg = ed ? ed.line : toggleBgBase
@@ -205,10 +210,10 @@ function SidebarHeader({
   const divider = ed ? ed.line : dividerBase
   const markBg = ed
     ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
-    : `linear-gradient(135deg, ${brandAccent}, #7c3aed)`
+    : `linear-gradient(135deg, ${brandAccent}, #c18b35)`
   const editorialMarkShadow = useColorModeValue(
-    '0 8px 22px rgba(8,122,80,0.24), 0 2px 8px rgba(165,111,22,0.16)',
-    '0 4px 16px rgba(127,230,179,0.25)',
+    '0 8px 22px rgba(37,99,235,0.20), 0 2px 8px rgba(154,104,27,0.14)',
+    '0 4px 18px rgba(125,211,252,0.24)',
   )
   const markShadow = ed
     ? editorialMarkShadow
@@ -231,14 +236,14 @@ function SidebarHeader({
             h="36px"
             align="center"
             justify="center"
-            borderRadius="xl"
+            borderRadius="14px"
             bg={markBg}
             flexShrink={0}
             boxShadow={markShadow}
+            border="1px solid"
+            borderColor={ed ? ed.lineStrong : 'whiteAlpha.300'}
           >
-            <Text fontSize="md" fontWeight={800} color={markGlyphColor} lineHeight={1}>
-              £
-            </Text>
+            <Icon as={ChartLineUp} weight="bold" boxSize={5} color={markGlyphColor} />
           </Flex>
           {!isCollapsed && (
             <VStack spacing={0} align="start" minW={0}>
@@ -329,19 +334,13 @@ function ActiveIndicator({
 }) {
   const ed = useEd()
   const indicatorBgBase = useColorModeValue(
-    'linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(124, 58, 237, 0.06) 100%)',
-    'linear-gradient(135deg, rgba(96, 165, 250, 0.12) 0%, rgba(167, 139, 250, 0.08) 100%)',
+    'rgba(37, 99, 235, 0.08)',
+    'rgba(125, 211, 252, 0.12)',
   )
-  const editorialIndicatorBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(8,122,80,0.13) 0%, rgba(165,111,22,0.10) 100%)',
-    'linear-gradient(135deg, rgba(127,230,179,0.14) 0%, rgba(217,179,106,0.08) 100%)',
-  )
-  const indicatorBg = ed
-    ? editorialIndicatorBg
-    : indicatorBgBase
+  const indicatorBg = ed ? ed.jadeSoft : indicatorBgBase
   const accentBarBase = useColorModeValue(
-    'linear-gradient(180deg, #2563eb, #7c3aed)',
-    'linear-gradient(180deg, #60a5fa, #a78bfa)',
+    'linear-gradient(180deg, #2563eb, #c18b35)',
+    'linear-gradient(180deg, #7dd3fc, #e8c477)',
   )
   const accentBar = ed
     ? `linear-gradient(180deg, ${ed.jade}, ${ed.gold})`
@@ -498,8 +497,8 @@ function SidebarFooter({
   const subColorBase = useColorModeValue('gray.500', 'gray.500')
   const subColor = ed ? ed.muted : subColorBase
   const avatarRingBase = useColorModeValue(
-    'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-    'linear-gradient(135deg, #60a5fa, #a78bfa)',
+    'linear-gradient(135deg, #2563eb, #c18b35)',
+    'linear-gradient(135deg, #7dd3fc, #e8c477)',
   )
   const avatarRing = ed
     ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`

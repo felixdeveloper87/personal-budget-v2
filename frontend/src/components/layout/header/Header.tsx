@@ -2,8 +2,7 @@ import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
-import { useSearch } from '../../../contexts/SearchContext'
-import SearchModal from '../../search/SearchModal'
+import SpotlightSearch from '../../search/SpotlightSearch'
 import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
@@ -31,7 +30,6 @@ export default function Header({
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const ed = useEd()
-  const { runSearch } = useSearch()
   const navItems = useMemo(
     () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
     [user?.admin]
@@ -229,17 +227,7 @@ export default function Header({
       </Box>
 
       {user && !isAdminOnly && (
-        <SearchModal
-          isOpen={isSearchOpen}
-          onClose={closeSearch}
-          onSearch={async (filters: any) => {
-            await runSearch({
-              ...filters,
-              type: filters.type === null ? undefined : filters.type,
-            })
-            closeSearch()
-          }}
-        />
+        <SpotlightSearch isOpen={isSearchOpen} onClose={closeSearch} />
       )}
     </>
   )

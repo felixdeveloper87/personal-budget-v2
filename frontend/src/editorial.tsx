@@ -20,18 +20,18 @@ import { Box, useColorMode } from '@chakra-ui/react'
 
 /* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
 export const EDITORIAL_DARK = {
-  bg: '#0a0f16',
-  bg2: '#0e141d',
-  /** Brand accent (steel blue) + brass. */
-  jade: '#6db3e8',
-  gold: '#d8b772',
+  bg: '#07151d',
+  bg2: '#0b1d27',
+  /** Brand accent (sky blue) + soft gold. */
+  jade: '#7dd3fc',
+  gold: '#e8c477',
   /** Primary text. */
-  cream: '#e8eef6',
+  cream: '#eff6ff',
   /** Secondary / muted text. */
-  muted: '#94a3b1',
-  red: '#f6928a',
+  muted: '#a8b5c8',
+  red: '#ff9a90',
   /** Dark glyph colour for text sitting on a brand/gold accent fill. */
-  onAccent: '#06101a',
+  onAccent: '#06221f',
 
   /** ── Superfícies de card (fonte única) ──────────────────────────────
    *  `panel`  → card padrão da plataforma (páginas). Leve transparência pro
@@ -40,30 +40,30 @@ export const EDITORIAL_DARK = {
    *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
    *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
    *  `panelRaised` → painéis internos (card dentro de card). */
-  panel: 'rgba(16, 22, 31, 0.80)',
-  modal: 'rgba(18, 24, 33, 0.88)',
-  solid: '#12181f',
-  panelRaised: 'rgba(226, 235, 247, 0.03)',
-  line: 'rgba(226, 235, 247, 0.10)',
-  lineStrong: 'rgba(226, 235, 247, 0.18)',
+  panel: 'rgba(12, 30, 40, 0.82)',
+  modal: 'rgba(12, 30, 40, 0.92)',
+  solid: '#102631',
+  panelRaised: 'rgba(239, 246, 255, 0.05)',
+  line: 'rgba(239, 246, 255, 0.10)',
+  lineStrong: 'rgba(239, 246, 255, 0.18)',
 
   /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(10, 15, 22, 0.80)',
+  glass: 'rgba(7, 21, 29, 0.86)',
 
   /** Subtle hover wash on a panel. */
-  hoverBg: 'rgba(226, 235, 247, 0.08)',
+  hoverBg: 'rgba(239, 246, 255, 0.08)',
   /** Chrome control surface (search pill, theme toggle, user trigger). */
-  controlBg: 'rgba(226, 235, 247, 0.04)',
-  controlHoverBg: 'rgba(226, 235, 247, 0.08)',
+  controlBg: 'rgba(239, 246, 255, 0.04)',
+  controlHoverBg: 'rgba(239, 246, 255, 0.08)',
   /** Segmented-control track and its active thumb. */
-  trackBg: 'rgba(226, 235, 247, 0.05)',
-  thumbBg: 'rgba(226, 235, 247, 0.12)',
+  trackBg: 'rgba(239, 246, 255, 0.05)',
+  thumbBg: 'rgba(239, 246, 255, 0.12)',
   /** Brand-tinted soft fills (Today button, hints). */
-  jadeSoft: 'rgba(109, 179, 232, 0.12)',
-  jadeSoftHover: 'rgba(109, 179, 232, 0.20)',
+  jadeSoft: 'rgba(125, 211, 252, 0.12)',
+  jadeSoftHover: 'rgba(125, 211, 252, 0.20)',
 
   /** Full-bleed background for the app shell. */
-  bgGradient: 'linear-gradient(180deg, #0e141d 0%, #0a0f16 100%)',
+  bgGradient: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.16), transparent 58%), linear-gradient(180deg, #0b1d27 0%, #07151d 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
@@ -74,37 +74,37 @@ export type EditorialTokens = {
 
 /* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  bg: '#e7ebf1',
-  bg2: '#dde2ea',
-  /** Brand accent (steel blue) + brass, legible on cool metallic. */
-  jade: '#1d5a87',
-  gold: '#9c7b2c',
+  bg: '#f6f8fc',
+  bg2: '#e9eef7',
+  /** Brand accent (royal blue) + restrained gold. */
+  jade: '#2563eb',
+  gold: '#9a681b',
   /** Primary text → deep slate (the "cream" slot, semantically primary). */
-  cream: '#15202e',
-  muted: '#4d5c6c',
-  red: '#c23a2c',
-  onAccent: '#f6f8fb',
+  cream: '#172033',
+  muted: '#5b6980',
+  red: '#c94d45',
+  onAccent: '#f7fffc',
 
   // Superfícies de card — ver doc no EDITORIAL_DARK. Cool near-white panels on
   // the flat metallic background (the guilloché page backdrop is off in light).
-  panel: 'rgba(255, 255, 255, 0.72)',
-  modal: 'rgba(255, 255, 255, 0.92)',
+  panel: 'rgba(255, 255, 255, 0.78)',
+  modal: 'rgba(255, 255, 255, 0.94)',
   solid: '#ffffff',
-  panelRaised: 'rgba(255, 255, 255, 0.55)',
-  line: 'rgba(28, 58, 92, 0.14)',
-  lineStrong: 'rgba(29, 90, 135, 0.28)',
+  panelRaised: 'rgba(255, 255, 255, 0.62)',
+  line: 'rgba(19, 41, 35, 0.12)',
+  lineStrong: 'rgba(37, 99, 235, 0.24)',
 
-  glass: 'rgba(244, 247, 251, 0.82)',
+  glass: 'rgba(247, 252, 250, 0.86)',
 
-  hoverBg: 'rgba(29, 90, 135, 0.07)',
-  controlBg: 'rgba(255, 255, 255, 0.55)',
-  controlHoverBg: 'rgba(255, 255, 255, 0.82)',
-  trackBg: 'rgba(28, 48, 72, 0.07)',
+  hoverBg: 'rgba(37, 99, 235, 0.07)',
+  controlBg: 'rgba(255, 255, 255, 0.62)',
+  controlHoverBg: 'rgba(255, 255, 255, 0.88)',
+  trackBg: 'rgba(19, 41, 35, 0.06)',
   thumbBg: 'rgba(255, 255, 255, 0.98)',
-  jadeSoft: 'rgba(29, 90, 135, 0.11)',
-  jadeSoftHover: 'rgba(29, 90, 135, 0.19)',
+  jadeSoft: 'rgba(37, 99, 235, 0.09)',
+  jadeSoftHover: 'rgba(37, 99, 235, 0.16)',
 
-  bgGradient: 'linear-gradient(180deg, #eef1f6 0%, #e3e8f0 100%)',
+  bgGradient: 'radial-gradient(900px circle at 24% -18%, rgba(96, 165, 250, 0.14), transparent 58%), linear-gradient(180deg, #fafcff 0%, #edf3fb 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }

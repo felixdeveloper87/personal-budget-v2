@@ -6,15 +6,6 @@ export type AccountType = 'CURRENT' | 'SAVINGS' | 'CASH' | 'CREDIT_CARD'
 // Period types for navigation
 export type PeriodType = 'day' | 'week' | 'month' | 'year'
 
-// Search filters type (moved from useSearchFilters hook)
-export interface SearchFilters {
-  text: string
-  type: 'income' | 'expense' | null
-  category: string
-  startDate: string
-  endDate: string
-}
-
 // Transação padrão
 export interface Transaction {
   id?: number // opcional apenas na criação
@@ -396,56 +387,4 @@ export interface CashFlowForecast {
   hasIncomePlan: boolean
   plannedMonthlyIncome: number | null
   months: CashFlowForecastMonth[]
-}
-
-// Search component interfaces
-export interface SearchModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSearch: (filters: SearchFilters) => void
-}
-
-export interface SearchResultsModalProps {
-  isOpen: boolean
-  onClose: () => void
-  searchFilters: SearchFilters
-  user?: {
-    id: number
-    name: string
-    email: string
-    token: string
-  }
-}
-
-export interface SearchFiltersProps {
-  filters: SearchFilters
-  onUpdateFilter: <K extends keyof SearchFilters>(key: K, value: SearchFilters[K]) => void
-  onTypeChange: (type: 'income' | 'expense' | null) => void
-  availableCategories: string[]
-}
-
-export interface SearchFooterProps {
-  onClearAll: () => void
-  onSearch: () => void
-}
-
-export interface SearchHeaderProps {
-  onClose: () => void
-}
-
-export interface SearchSummaryHeaderProps {
-  searchFilters: SearchFilters
-}
-
-export interface CategoryResultCardProps {
-  category: string
-  transactions: Transaction[]
-  type: 'INCOME' | 'EXPENSE'
-  isExpanded: boolean
-  onToggle: () => void
-}
-
-export interface CategoryResultsListProps {
-  transactions: Transaction[]
-  searchFilters: SearchFilters
 }

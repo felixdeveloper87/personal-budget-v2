@@ -1,92 +1,75 @@
-/*
- * Personal Budget — design tokens (light metallic · blue brand).
- *
- * Semantic mapping (names kept stable to avoid churn across components):
- *   brand / structure  → --pb-forest, --pb-forest-2, --pb-line,
- *                         --pb-tint-green   (now a STEEL-BLUE family)
- *   income / positive  → --pb-income, --pb-income-2, --pb-tint-income  (GREEN)
- *   expense / negative → --pb-coral, --pb-coral-2, --pb-tint-coral     (RED)
- *   deferred / pending → --pb-gold, --pb-gold-2, --pb-tint-gold        (BRASS)
- *
- * So colour reads at a glance: blue = the app, green = money in, red = money out.
- */
+/* Shared financial UI tokens. Brand uses teal; income and expense remain distinct. */
 :root {
-  /* Cool metallic neutrals (light) */
-  --pb-paper: #e7ebf1;
-  --pb-paper-2: #dde2ea;
-  --pb-paper-3: #f8fafc;
-  --pb-surface: #f6f8fb;
-  --pb-surface-2: #eceff5;
-  --pb-surface-3: #e1e6ef;
-  --pb-ink: #15202e;
-  --pb-ink-soft: #4d5c6c;
-  --pb-ink-faint: #8392a3;
+  --pb-paper: #f0f3fa;
+  --pb-paper-2: #e6ebf5;
+  --pb-paper-3: #fcfdff;
+  --pb-surface: rgba(255, 255, 255, 0.82);
+  --pb-surface-2: #f4f7fc;
+  --pb-surface-3: #e9eef7;
+  --pb-ink: #172033;
+  --pb-ink-soft: #5b6980;
+  --pb-ink-faint: #8492a7;
 
-  /* Brand — steel blue */
-  --pb-forest: #1d5a87;
-  --pb-forest-2: #2f7bb0;
-  --pb-line: #3f86c2;
-  --pb-tint-green: rgba(29, 90, 135, 0.10);
+  --pb-forest: #2563eb;
+  --pb-forest-2: #3b82f6;
+  --pb-line: #4f8df7;
+  --pb-tint-green: rgba(37, 99, 235, 0.09);
 
-  /* Income — green */
-  --pb-income: #1f8a4f;
-  --pb-income-2: #29a25e;
-  --pb-tint-income: rgba(31, 138, 79, 0.12);
+  --pb-income: #18794e;
+  --pb-income-2: #259b67;
+  --pb-tint-income: rgba(24, 121, 78, 0.11);
 
-  /* Expense — red */
-  --pb-coral: #c23a2c;
-  --pb-coral-2: #d84a39;
-  --pb-tint-coral: rgba(194, 58, 44, 0.10);
+  --pb-coral: #c94d45;
+  --pb-coral-2: #de665d;
+  --pb-tint-coral: rgba(201, 77, 69, 0.10);
 
-  /* Deferred — brass */
-  --pb-gold: #9c7b2c;
-  --pb-gold-2: #c19a3c;
-  --pb-tint-gold: rgba(156, 123, 44, 0.12);
+  --pb-gold: #9a681b;
+  --pb-gold-2: #c18b35;
+  --pb-tint-gold: rgba(154, 104, 27, 0.11);
 
-  --pb-hair: rgba(28, 58, 92, 0.14);
-  --pb-hair-2: rgba(28, 58, 92, 0.26);
-  --pb-seal-edge: #dce2ea;
+  --pb-hair: rgba(23, 32, 51, 0.12);
+  --pb-hair-2: rgba(23, 32, 51, 0.22);
+  --pb-seal-edge: #dde5f0;
 
   --pb-serif: "Spectral", "Instrument Serif", Georgia, serif;
   --pb-mono: "IBM Plex Mono", "Spline Sans Mono", ui-monospace, monospace;
-  --pb-shadow: 0 1px 2px rgba(18, 38, 60, 0.05), 0 10px 28px rgba(18, 38, 60, 0.07);
-  --pb-shadow-lift: 0 2px 6px rgba(18, 38, 60, 0.08), 0 22px 50px rgba(18, 38, 60, 0.14);
+  --pb-shadow: 0 1px 2px rgba(30, 64, 175, 0.04), 0 12px 30px rgba(30, 64, 175, 0.06);
+  --pb-shadow-lift: 0 3px 9px rgba(30, 64, 175, 0.08), 0 24px 50px rgba(30, 64, 175, 0.13);
 }
 
-/* Dark variant — metallic slate-blue, same semantic split (lighter accents). */
 [data-theme="dark"] {
-  --pb-paper: #0a0f16;
-  --pb-paper-2: #0e141d;
-  --pb-paper-3: #121a24;
-  --pb-surface: rgba(18, 26, 37, 0.80);
-  --pb-surface-2: rgba(22, 31, 43, 0.80);
-  --pb-surface-3: rgba(226, 235, 247, 0.06);
-  --pb-ink: #e8eef6;
-  --pb-ink-soft: #a7b4c2;
-  --pb-ink-faint: #7f8d9d;
+  --pb-paper: #07151d;
+  --pb-paper-2: #0b1d27;
+  --pb-paper-3: #102631;
+  --pb-surface: rgba(13, 32, 42, 0.84);
+  --pb-surface-2: rgba(16, 39, 50, 0.88);
+  --pb-surface-3: rgba(225, 245, 241, 0.07);
+  --pb-ink: #eff6ff;
+  --pb-ink-soft: #b3c0d2;
+  --pb-ink-faint: #8496ad;
 
-  --pb-forest: #6db3e8;
-  --pb-forest-2: #5aa6df;
-  --pb-line: #4f93c9;
-  --pb-tint-green: rgba(109, 179, 232, 0.12);
+  --pb-forest: #7dd3fc;
+  --pb-forest-2: #60a5fa;
+  --pb-line: #6cb7fb;
+  --pb-tint-green: rgba(125, 211, 252, 0.12);
 
-  --pb-income: #5fd394;
-  --pb-income-2: #74dca6;
-  --pb-tint-income: rgba(95, 211, 148, 0.12);
+  --pb-income: #62dca2;
+  --pb-income-2: #7ce7b7;
+  --pb-tint-income: rgba(98, 220, 162, 0.12);
 
-  --pb-coral: #f6928a;
-  --pb-coral-2: #f4a59a;
-  --pb-tint-coral: rgba(246, 146, 138, 0.12);
+  --pb-coral: #ff9a90;
+  --pb-coral-2: #ffb0a8;
+  --pb-tint-coral: rgba(255, 154, 144, 0.12);
 
-  --pb-gold: #d8b772;
-  --pb-gold-2: #e3c98c;
-  --pb-tint-gold: rgba(216, 183, 114, 0.12);
+  --pb-gold: #e8c477;
+  --pb-gold-2: #f2d694;
+  --pb-tint-gold: rgba(232, 196, 119, 0.12);
 
-  --pb-hair: rgba(226, 235, 247, 0.10);
-  --pb-hair-2: rgba(226, 235, 247, 0.20);
-  --pb-seal-edge: #0b1118;
-  --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 10px 28px rgba(0, 0, 0, 0.45);
-  --pb-shadow-lift: 0 2px 6px rgba(0, 0, 0, 0.5), 0 22px 50px rgba(0, 0, 0, 0.6);
+  --pb-hair: rgba(239, 246, 255, 0.10);
+  --pb-hair-2: rgba(239, 246, 255, 0.19);
+  --pb-seal-edge: #0a1a23;
+  --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.36), 0 12px 30px rgba(0, 0, 0, 0.34);
+  --pb-shadow-lift: 0 4px 10px rgba(0, 0, 0, 0.42), 0 26px 54px rgba(0, 0, 0, 0.48);
 }
 
 @keyframes pb-spin {

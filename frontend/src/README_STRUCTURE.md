@@ -15,7 +15,6 @@ frontend/src/components/
 │   ├── CategoryModal.tsx
 │   ├── NumberPad.tsx
 │   ├── PeriodNavigator.tsx
-│   ├── SearchModal.tsx
 │   └── index.ts
 │
 ├── 📂 forms/                 # Formulários e inputs
@@ -90,7 +89,6 @@ import { FormCard, TransactionForm, BalanceChart } from '../components'
 Cada pasta tem um `index.ts` que exporta todos os componentes:
 ```typescript
 // components/ui/index.ts
-export { default as SearchModal } from './SearchModal'
 export { default as CategoryModal } from './CategoryModal'
 // ... outros componentes
 ```
@@ -117,7 +115,7 @@ export { default as CategoryModal } from './CategoryModal'
 ```typescript
 // Importar de uma categoria específica
 import { FormCard } from '@/components/ui'
-import { SearchModal } from '@/components/search'
+import { SpotlightSearch } from '@/components/search'
 
 // Importar de múltiplas categorias
 import { TransactionForm } from '@/components/forms'

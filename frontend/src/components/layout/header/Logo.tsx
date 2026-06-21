@@ -164,9 +164,9 @@ function LogoIconGeometric() {
 
 // Opção 3: Carteira com moeda entrando (Estilo Financeiro / Ativo agora)
 export function LogoIconWallet() {
-  const primaryColor = useColorModeValue('#2563eb', '#3b82f6')
-  const secondaryColor = useColorModeValue('#7c3aed', '#8b5cf6')
-  const accentColor = useColorModeValue('#db2777', '#ec4899')
+  const primaryColor = useColorModeValue('#2563eb', '#7dd3fc')
+  const secondaryColor = useColorModeValue('#3b82f6', '#a5b4fc')
+  const accentColor = useColorModeValue('#c18b35', '#e8c477')
 
   return (
     <Box
@@ -273,8 +273,8 @@ export default function Logo({ user, onClick }: LogoProps) {
   const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
   const wordMuted = ed ? ed.cream : wordMutedBase
   const wordBudgetGradientBase = useColorModeValue(
-    'linear(to-r, #1d4ed8, #5b21b6)',
-    'linear(to-r, #60a5fa, #a78bfa)',
+    'linear(to-r, #2563eb, #9a681b)',
+    'linear(to-r, #7dd3fc, #e8c477)',
   )
   const wordBudgetGradient = ed
     ? `linear(to-r, ${ed.jade}, ${ed.gold})`
@@ -283,19 +283,23 @@ export default function Logo({ user, onClick }: LogoProps) {
   const separatorColor = ed ? ed.muted : separatorColorBase
   const subtitleColorBase = useColorModeValue('gray.500', 'gray.500')
   const subtitleColor = ed ? ed.muted : subtitleColorBase
-  const frameBg = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #eef2ff 50%, #e0e7ff 100%)',
-    'linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+  const frameBgBase = useColorModeValue(
+    'linear-gradient(135deg, #ffffff 0%, #f0f5ff 50%, #ddeaff 100%)',
+    'linear-gradient(135deg, rgba(125,211,252,0.16) 0%, rgba(165,180,252,0.07) 100%)',
   )
-  const frameBorder = useColorModeValue('rgba(37, 99, 235, 0.18)', 'whiteAlpha.300')
-  const frameShadow = useColorModeValue(
-    '0 4px 14px rgba(37, 99, 235, 0.18), inset 0 1px 0 rgba(255,255,255,0.9)',
+  const frameBg = ed ? `linear-gradient(135deg, ${ed.panelRaised}, ${ed.jadeSoft})` : frameBgBase
+  const frameBorderBase = useColorModeValue('rgba(37, 99, 235, 0.18)', 'rgba(125,211,252,0.28)')
+  const frameBorder = ed ? ed.lineStrong : frameBorderBase
+  const frameShadowBase = useColorModeValue(
+    '0 4px 14px rgba(37,99,235,0.16), inset 0 1px 0 rgba(255,255,255,0.9)',
     '0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.06)',
   )
-  const frameHoverShadow = useColorModeValue(
-    '0 8px 22px rgba(37, 99, 235, 0.28), inset 0 1px 0 rgba(255,255,255,0.95)',
+  const frameShadow = ed ? `0 5px 16px ${ed.jadeSoft}, inset 0 1px 0 ${ed.lineStrong}` : frameShadowBase
+  const frameHoverShadowBase = useColorModeValue(
+    '0 8px 22px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.95)',
     '0 10px 26px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
   )
+  const frameHoverShadow = ed ? `0 10px 24px ${ed.jadeSoftHover}, inset 0 1px 0 ${ed.lineStrong}` : frameHoverShadowBase
   const glossOverlay = useColorModeValue(
     'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)',
