@@ -43,10 +43,8 @@ export default function PageHeader({
         px={{ base: 1, sm: 2 }}
       >
         <Text
-          fontSize={{ base: 'sm', md: 'lg' }}
+          textStyle="pageSubtitle"
           color={subtitleColor}
-          fontWeight={500}
-          lineHeight="1.35"
           noOfLines={{ base: 2, md: 1 }}
         >
           {subtitle}

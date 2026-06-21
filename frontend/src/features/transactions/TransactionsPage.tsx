@@ -136,45 +136,44 @@ export default function TransactionsPage() {
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
-          <Grid
-            templateColumns={{ base: 'repeat(3, minmax(0, 1fr))' }}
-            border="1px solid var(--pb-hair)"
-            borderRadius="16px"
-            overflow="hidden"
-            bg="var(--pb-surface)"
-            boxShadow="var(--pb-shadow)"
-          >
+          <Grid templateColumns={{ base: 'repeat(3, 1fr)' }} gap="0.7rem">
             {[
-              { label: 'Income', value: periodData.income, tone: 'var(--pb-income)' },
-              { label: 'Spending', value: periodData.expense, tone: 'var(--pb-coral)' },
-              { label: 'Net flow', value: periodData.balance, tone: periodData.balance >= 0 ? 'var(--pb-income)' : 'var(--pb-coral)' },
-            ].map((metric, index) => (
+              { label: 'Income',   value: periodData.income,   accent: 'var(--pb-income)' },
+              { label: 'Spending', value: periodData.expense,  accent: 'var(--pb-coral)' },
+              { label: 'Net flow', value: periodData.balance,  accent: periodData.balance >= 0 ? 'var(--pb-income)' : 'var(--pb-coral)' },
+            ].map((metric) => (
               <Box
                 key={metric.label}
-                px={{ base: 3, md: 5 }}
-                py={{ base: 3, md: 3.5 }}
-                borderRight={index < 2 ? '1px solid var(--pb-hair)' : undefined}
+                position="relative"
+                bg="var(--pb-surface)"
+                border="1px solid var(--pb-hair)"
+                borderRadius="14px"
+                boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
+                pl="1.05rem"
+                pr="0.95rem"
+                py="0.85rem"
+                overflow="hidden"
                 minW={0}
               >
+                <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={metric.accent} />
                 <Text
                   fontFamily="var(--pb-mono)"
-                  fontSize={{ base: '9px', md: '10px' }}
-                  letterSpacing=".1em"
+                  fontSize="9.5px"
+                  letterSpacing="0.13em"
                   textTransform="uppercase"
                   color="var(--pb-ink-faint)"
-                  mb={1}
+                  mb="0.35rem"
+                  noOfLines={1}
                 >
                   {metric.label}
                 </Text>
                 <Text
-                  fontFamily="var(--pb-mono)"
-                  fontSize={{ base: '13px', sm: '16px', md: '18px' }}
-                  fontWeight={600}
-                  letterSpacing="-.04em"
-                  color={metric.tone}
-                  whiteSpace="nowrap"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
+                  fontSize={{ base: '1.3rem', md: '1.5rem' }}
+                  fontWeight={500}
+                  lineHeight="1"
+                  color="var(--pb-ink)"
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                  noOfLines={1}
                 >
                   {metric.value < 0 ? '−' : ''}{fmtCurrency(Math.abs(metric.value))}
                 </Text>
