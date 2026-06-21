@@ -49,12 +49,13 @@
   top: 3px;
   transform: translateX(-50%);
   pointer-events: none;
-  background: var(--pb-ink);
-  color: var(--pb-paper-3);
+  background: var(--pb-paper-2);
+  color: var(--pb-ink);
+  border: 1px solid var(--pb-hair-2);
   border-radius: 9px;
   padding: .38rem .55rem;
   min-width: 126px;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, .22);
+  box-shadow: var(--pb-shadow-lift);
   z-index: 4;
 }
 .pb-chart-tip-head { font-family: var(--pb-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; opacity: .72; margin-bottom: 4px; }

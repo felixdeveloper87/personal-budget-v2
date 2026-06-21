@@ -28,7 +28,6 @@ const VH = 182
 const AXIS_Y = 148
 const TOP = 16
 const USABLE = AXIS_Y - TOP
-const MAX_BAR_W = 11
 const WD_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
 export default function DailyChart({
@@ -61,7 +60,6 @@ export default function DailyChart({
 
   const n = Math.max(days.length, 1)
   const colW = VW / n
-  const barW = Math.min(MAX_BAR_W, colW * 0.46)
 
   const max = useMemo(() => {
     let maximum = 0
@@ -158,15 +156,14 @@ export default function DailyChart({
               if (!values || (values.in === 0 && values.out === 0)) return null
               const hOut = scale(values.out)
               const hIn = scale(values.in)
-              const center = i * colW + colW / 2
-              const gap = Math.min(3, colW * 0.16)
-              const pairedW = Math.max(2, Math.min(barW, (colW - gap - 2) / 2))
+              const x = i * colW + colW * 0.08
+              const w = Math.max(2, colW * 0.84)
               const style = reduce ? undefined : ({ animationDelay: `${i * 9}ms` } as const)
               const cls = reduce ? undefined : 'pb-bar'
               return (
                 <g key={`bar-${day.iso}`}>
-                  {hOut > 0 && <rect className={cls} style={style} x={center - gap / 2 - pairedW} y={AXIS_Y - hOut} width={pairedW} height={hOut} rx={2.5} fill="url(#pb-tx-out)" />}
-                  {hIn > 0 && <rect className={cls} style={style} x={center + gap / 2} y={AXIS_Y - hIn} width={pairedW} height={hIn} rx={2.5} fill="url(#pb-tx-in)" />}
+                  {hOut > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hOut} width={w} height={hOut} rx={2.5} fill="url(#pb-tx-out)" />}
+                  {hIn > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hOut - hIn} width={w} height={hIn} rx={2.5} fill="url(#pb-tx-in)" />}
                 </g>
               )
             })}
