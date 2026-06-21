@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Box,
+  Divider,
   Flex,
   HStack,
   Icon,
@@ -23,15 +24,18 @@ import { PremiumModal } from '../ui'
 import { useEd } from '../../editorial'
 
 import '../../features/dashboard/theme/pb-tokens.css'
-import { toViewModel, buildLedger, FILTER_LABELS } from '../../features/transactions/transactions.utils'
+import { toViewModel, buildLedger, parseISO, FILTER_LABELS, type LedgerGroup } from '../../features/transactions/transactions.utils'
 import { initialTxState, type TxFilter } from '../../features/transactions/transactions.types'
 import { fmtCurrency } from '../../features/dashboard/components/format'
-import Ledger from '../../features/transactions/components/Ledger'
+import TxnRow from '../../features/transactions/components/TxnRow'
 
 interface SpotlightSearchProps {
   isOpen: boolean
   onClose: () => void
 }
+
+/** A spotlight never renders the full ledger — only the most recent matches. */
+const RESULT_CAP = 50
 
 const FILTERS: TxFilter[] = ['all', 'in', 'out', 'deferred']
 const DOT_COLOR: Partial<Record<TxFilter, string>> = {
@@ -148,22 +152,37 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   }, [isOpen])
 
   const vm = useMemo(() => toViewModel(raw), [raw])
-  const groups = useMemo(
-    () => buildLedger(vm, { ...initialTxState, q: text, filter }),
-    [vm, text, filter],
-  )
 
-  const summary = useMemo(() => {
+  // Filter the whole set, but only render the most recent RESULT_CAP rows. A
+  // spotlight never needs the full ledger, and rendering thousands of rows is
+  // what makes "All" feel heavy — especially on mobile. Totals below still
+  // reflect every match so the figures stay honest.
+  const { groups, summary } = useMemo(() => {
+    const all = buildLedger(vm, { ...initialTxState, q: text, filter })
     let count = 0
     let inTotal = 0
     let outTotal = 0
-    for (const g of groups) {
+    for (const g of all) {
       count += g.rows.length
       inTotal += g.inTotal
       outTotal += g.outTotal
     }
-    return { count, inTotal, outTotal }
-  }, [groups])
+    // Take the first RESULT_CAP rows in render order (newest day first).
+    const capped: LedgerGroup[] = []
+    let remaining = RESULT_CAP
+    for (const g of all) {
+      if (remaining <= 0) break
+      if (g.rows.length <= remaining) {
+        capped.push(g)
+        remaining -= g.rows.length
+      } else {
+        capped.push({ ...g, rows: g.rows.slice(0, remaining) })
+        remaining = 0
+      }
+    }
+    const shown = Math.min(count, RESULT_CAP)
+    return { groups: capped, summary: { count, shown, inTotal, outTotal } }
+  }, [vm, text, filter])
 
   const surfaceBg = ed?.modal ?? 'var(--pb-paper)'
 
@@ -271,7 +290,9 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                     textTransform="uppercase"
                     color="var(--pb-ink-faint)"
                   >
-                    {summary.count} result{summary.count === 1 ? '' : 's'}
+                    {summary.shown < summary.count
+                      ? `Showing ${summary.shown} of ${summary.count}`
+                      : `${summary.count} result${summary.count === 1 ? '' : 's'}`}
                   </Text>
                   <HStack spacing=".4rem">
                     {summary.inTotal > 0 && (
@@ -283,12 +304,66 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                   </HStack>
                 </Flex>
               )}
-              <Ledger groups={groups} view="behaviour" onOpen={() => {}} reduce />
+              <ResultsList groups={groups} />
             </>
           )}
         </Box>
       </Flex>
     </PremiumModal>
+  )
+}
+
+/** "Tuesday 11 June 2024" — search spans years, so the year is always shown. */
+function fmtDayHeader(iso: string): string {
+  return parseISO(iso).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+/**
+ * Results grouped by day, styled like the Transactions ledger but with a
+ * year-aware day header (the search crosses years). Rows reuse the shared
+ * TxnRow so the look stays identical.
+ */
+function ResultsList({ groups }: { groups: LedgerGroup[] }) {
+  if (groups.length === 0) {
+    return (
+      <Box py="2.5rem" textAlign="center">
+        <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
+          No transactions match your search.
+        </Text>
+      </Box>
+    )
+  }
+
+  return (
+    <Box>
+      {groups.map((g, gi) => (
+        <Box key={g.key} mt={gi === 0 ? 0 : '1.4rem'}>
+          <Flex align="center" justify="space-between" gap=".5rem" mb=".4rem">
+            <Text fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)">
+              {fmtDayHeader(g.key)}
+            </Text>
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="10px"
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              color="var(--pb-ink-faint)"
+            >
+              {g.rows.length} transaction{g.rows.length === 1 ? '' : 's'}
+            </Text>
+          </Flex>
+          <Divider borderColor="var(--pb-hair)" mb=".2rem" />
+          {g.rows.map((t) => (
+            <TxnRow key={t.id} txn={t} view="behaviour" onOpen={() => {}} />
+          ))}
+        </Box>
+      ))}
+    </Box>
   )
 }
 
