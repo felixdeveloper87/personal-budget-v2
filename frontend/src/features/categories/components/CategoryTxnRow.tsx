@@ -1,5 +1,5 @@
-import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
-import { Clock, type LucideIcon } from '../../../components/ui/icons'
+import { Box, Flex, Icon, Text } from '@chakra-ui/react'
+import { type LucideIcon } from '../../../components/ui/icons'
 import { gbp, hexA, shortDate } from '../data/format'
 import type { CategoryTxn, Side } from '../data/types'
 
@@ -10,7 +10,7 @@ interface CategoryTxnRowProps {
   side: Side
 }
 
-/** A single sample transaction inside a category's expand, with a settlement chip. */
+/** A single sample transaction inside a category's expanded row. */
 export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRowProps) {
   const sign = side === 'expense' ? '−' : '+'
   const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
@@ -23,7 +23,6 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
       borderBottom="1px solid var(--pb-hair)"
       _last={{ borderBottom: 'none' }}
     >
-      {/* Tinted icon tile */}
       <Flex
         flexShrink={0}
         w="32px"
@@ -39,7 +38,6 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
         <Icon as={icon} boxSize="16px" weight="duotone" />
       </Flex>
 
-      {/* Merchant + meta */}
       <Box minW={0} flex={1}>
         <Text fontSize="0.98rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>
           {txn.merchant}
@@ -56,7 +54,6 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
         </Text>
       </Box>
 
-      {/* Amount + settlement chip */}
       <Box textAlign="right" flexShrink={0}>
         <Text
           className="num"
@@ -68,33 +65,16 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
           {sign}
           {gbp(txn.amount, 2)}
         </Text>
-        {txn.deferred ? (
-          <HStack
-            as="span"
-            spacing="0.22rem"
-            justify="flex-end"
-            mt="0.18rem"
-            fontFamily="var(--pb-mono)"
-            fontSize="8.5px"
-            letterSpacing="0.05em"
-            textTransform="uppercase"
-            color="var(--pb-gold)"
-          >
-            <Icon as={Clock} boxSize="11px" />
-            <span>Pays {shortDate(txn.settlesDate)}</span>
-          </HStack>
-        ) : (
-          <Text
-            mt="0.18rem"
-            fontFamily="var(--pb-mono)"
-            fontSize="8.5px"
-            letterSpacing="0.05em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            Settled {shortDate(txn.settlesDate)}
-          </Text>
-        )}
+        <Text
+          mt="0.18rem"
+          fontFamily="var(--pb-mono)"
+          fontSize="8.5px"
+          letterSpacing="0.05em"
+          textTransform="uppercase"
+          color="var(--pb-ink-faint)"
+        >
+          Paid {shortDate(txn.settlesDate)}
+        </Text>
       </Box>
     </Flex>
   )

@@ -1,8 +1,7 @@
-import { useMemo } from 'react'
 import { Box, Collapse, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import { ChevronDown, List } from '../../../components/ui/icons'
 import { gbp } from '../data/format'
-import type { ComputedCategory, Side, ViewMode } from '../data/types'
+import type { ComputedCategory, Side } from '../data/types'
 import CategoryTxnRow from './CategoryTxnRow'
 
 /** How many sample transactions to render before collapsing into "+N more". */
@@ -11,7 +10,6 @@ const DISPLAY_LIMIT = 5
 interface CategoryRowProps {
   cat: ComputedCategory
   side: Side
-  view: ViewMode
   isOpen: boolean
   isHot: boolean
   onToggle: () => void
@@ -21,7 +19,6 @@ interface CategoryRowProps {
 export default function CategoryRow({
   cat,
   side,
-  view,
   isOpen,
   isHot,
   onToggle,
@@ -30,12 +27,8 @@ export default function CategoryRow({
   const sign = side === 'expense' ? '−' : '+'
   const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
 
-  const { shown, more } = useMemo(() => {
-    // Payments view: drop samples that didn't clear this period.
-    const visible = view === 'payments' ? cat.sample.filter((t) => !t.deferred) : cat.sample
-    const display = visible.slice(0, DISPLAY_LIMIT)
-    return { shown: display, more: Math.max(0, cat.shownCount - display.length) }
-  }, [cat.sample, cat.shownCount, view])
+  const shown = cat.sample.slice(0, DISPLAY_LIMIT)
+  const more = Math.max(0, cat.shownCount - shown.length)
 
   return (
     <Box

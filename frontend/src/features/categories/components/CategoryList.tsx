@@ -1,11 +1,10 @@
 import { VStack } from '@chakra-ui/react'
-import type { ComputedCategory, Side, ViewMode } from '../data/types'
+import type { ComputedCategory, Side } from '../data/types'
 import CategoryRow from './CategoryRow'
 
 interface CategoryListProps {
   rows: ComputedCategory[]
   side: Side
-  view: ViewMode
   openIds: Set<string>
   activeCat: string | null
   onToggle: (id: string) => void
@@ -15,7 +14,6 @@ interface CategoryListProps {
 export default function CategoryList({
   rows,
   side,
-  view,
   openIds,
   activeCat,
   onToggle,
@@ -28,7 +26,6 @@ export default function CategoryList({
           key={cat.id}
           cat={cat}
           side={side}
-          view={view}
           isOpen={openIds.has(cat.id)}
           isHot={activeCat === cat.id}
           onToggle={() => onToggle(cat.id)}

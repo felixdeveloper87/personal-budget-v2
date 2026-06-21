@@ -30,7 +30,7 @@ export default function Distribution({
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
 
   const { rows, total } = useMemo(
-    () => computeSide(side === 'expense' ? expense : income, view),
+    () => computeSide(side === 'expense' ? expense : income),
     [side, view, expense, income],
   )
 
@@ -120,7 +120,6 @@ export default function Distribution({
           <CategoryList
             rows={rows}
             side={side}
-            view={view}
             openIds={openIds}
             activeCat={activeCat}
             onToggle={onToggle}

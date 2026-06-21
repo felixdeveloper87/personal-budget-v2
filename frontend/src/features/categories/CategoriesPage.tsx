@@ -4,6 +4,7 @@ import { Box, Grid, Skeleton, VStack } from '@chakra-ui/react'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
+import type { TransactionDateBasis } from '../../utils/transactionDates'
 
 import { PageHeader } from '../../components/ui'
 import { Layers } from '../../components/ui/icons'
@@ -42,28 +43,28 @@ export default function CategoriesPage({ initialTab = 'expenses' }: CategoriesPa
 
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
 
-  // Period bounds, anchored on the Behaviour (purchase) clock.
-  const { startDate, endDate } = usePeriodData(
+  const dateBasis: TransactionDateBasis = view === 'payments' ? 'cash-flow' : 'activity'
+  const periodData = usePeriodData(
     transactions,
     null,
     selectedPeriod,
     selectedDate,
-    'activity',
+    dateBasis,
   )
 
   const expense = useMemo(
-    () => aggregateSide(transactions, startDate, endDate, 'expense'),
-    [transactions, startDate, endDate],
+    () => aggregateSide(periodData.transactions, 'expense'),
+    [periodData.transactions],
   )
   const income = useMemo(
-    () => aggregateSide(transactions, startDate, endDate, 'income'),
-    [transactions, startDate, endDate],
+    () => aggregateSide(periodData.transactions, 'income'),
+    [periodData.transactions],
   )
 
   // Summary recomputes on view only — always shows both sides at once.
   const summaryCards = useMemo(() => {
-    const e = computeSide(expense, view)
-    const i = computeSide(income, view)
+    const e = computeSide(expense)
+    const i = computeSide(income)
     return [
       { label: 'Expense categories', value: String(e.rows.length), side: 'expense' as Side },
       { label: 'Total expenses', value: gbp(e.total, 2), side: 'expense' as Side },
