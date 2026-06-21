@@ -76,8 +76,9 @@ class CashFlowForecastServiceTest {
                         transaction(TransactionType.INCOME, "1000.00", previousMonth.atDay(10)),
                         transaction(TransactionType.EXPENSE, "200.00", previousMonth.atDay(15))));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
+                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of(
+                        transaction(TransactionType.INCOME, "500.00", currentMonth.atDay(1)),
                         transaction(TransactionType.INCOME, "1000.00", currentMonth.plusMonths(1).atDay(10)),
                         transaction(TransactionType.EXPENSE, "200.00", currentMonth.plusMonths(1).atDay(15))));
 
@@ -87,6 +88,7 @@ class CashFlowForecastServiceTest {
         assertThat(result.months().get(0).month()).isEqualTo(currentMonth.toString());
         assertThat(result.months().get(0).netCashFlow()).isEqualByComparingTo("0.00");
         assertThat(result.months().get(0).projectedClosingBalance()).isEqualByComparingTo("1000.00");
+        assertThat(result.months().get(0).incomeReceivedSoFar()).isEqualByComparingTo("500.00");
 
         var nextMonth = result.months().get(1);
         assertThat(nextMonth.month()).isEqualTo(currentMonth.plusMonths(1).toString());
@@ -117,7 +119,7 @@ class CashFlowForecastServiceTest {
                 user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
                 .thenReturn(List.of());
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
+                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of());
         when(creditCardBillingService.resolvePaymentDate(any(LocalDate.class), nullable(com.example.budget.model.PaymentMethod.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -142,7 +144,7 @@ class CashFlowForecastServiceTest {
                 user, firstHistoryMonth.atDay(1), previousMonth.atEndOfMonth()))
                 .thenReturn(List.of(transaction(TransactionType.INCOME, "1000.00", previousMonth.atDay(10))));
         when(transactionRepository.findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
-                user, LocalDate.now(), lastForecastMonth.atEndOfMonth()))
+                user, currentMonth.atDay(1), lastForecastMonth.atEndOfMonth()))
                 .thenReturn(List.of(transaction(
                         TransactionType.INCOME, "1000.00", currentMonth.plusMonths(1).atDay(10))));
 

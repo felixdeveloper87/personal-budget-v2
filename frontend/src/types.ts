@@ -376,6 +376,8 @@ export interface CashFlowForecastMonth {
   projectedClosingBalance: number
   confidencePercent: number
   negative: boolean
+  incomeReceivedSoFar: number
+  expensesPaidSoFar: number
 }
 
 export interface CashFlowForecast {

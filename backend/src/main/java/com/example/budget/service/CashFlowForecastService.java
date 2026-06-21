@@ -100,11 +100,16 @@ public class CashFlowForecastService {
         Map<YearMonth, BigDecimal> scheduledIncome = new HashMap<>();
         Map<YearMonth, BigDecimal> scheduledExpenses = new HashMap<>();
         Map<YearMonth, BigDecimal> installmentExpenses = new HashMap<>();
+        Map<YearMonth, BigDecimal> incomeReceived = new HashMap<>();
+        Map<YearMonth, BigDecimal> expensesPaid = new HashMap<>();
         Set<String> persistedRecurringPayments = addPersistedTransactions(
                 scheduledIncome,
                 scheduledExpenses,
                 installmentExpenses,
+                incomeReceived,
+                expensesPaid,
                 user,
+                currentMonth.atDay(1),
                 today,
                 forecastEnd);
         addMissingRecurringTransactions(
@@ -122,6 +127,8 @@ public class CashFlowForecastService {
             BigDecimal monthIncome = scheduledIncome.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthExpense = scheduledExpenses.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthInstallments = installmentExpenses.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal monthIncomeReceived = incomeReceived.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal monthExpensesPaid = expensesPaid.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal plannedIncomeTopUp = !month.equals(currentMonth) && hasIncomePlan
                     ? plannedMonthlyIncome.subtract(monthIncome).max(BigDecimal.ZERO)
                     : BigDecimal.ZERO;
@@ -146,7 +153,9 @@ public class CashFlowForecastService {
                     netCashFlow,
                     projectedBalance,
                     confidencePercent,
-                    projectedBalance.signum() < 0));
+                    projectedBalance.signum() < 0,
+                    monthIncomeReceived,
+                    monthExpensesPaid));
         }
 
         return new CashFlowForecastDTO(
@@ -164,15 +173,25 @@ public class CashFlowForecastService {
             Map<YearMonth, BigDecimal> income,
             Map<YearMonth, BigDecimal> expenses,
             Map<YearMonth, BigDecimal> installments,
+            Map<YearMonth, BigDecimal> incomeReceived,
+            Map<YearMonth, BigDecimal> expensesPaid,
             User user,
+            LocalDate currentMonthStart,
             LocalDate today,
             LocalDate end) {
         Set<String> recurringPayments = new HashSet<>();
         for (Transaction transaction : transactionRepository
-                .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, today, end)) {
+                .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, currentMonthStart, end)) {
             if (transaction.getRecurringTransaction() != null) {
                 recurringPayments.add(recurringPaymentKey(
                         transaction.getRecurringTransaction().getId(), transaction.getPaymentDate()));
+            }
+            if (isSettledBalanceTransaction(transaction, today)) {
+                Map<YearMonth, BigDecimal> actualTarget = transaction.getType() == TransactionType.INCOME
+                        ? incomeReceived
+                        : expensesPaid;
+                addAmount(actualTarget, YearMonth.from(transaction.getPaymentDate()), transaction.getAmount());
+                continue;
             }
             if (!isFutureBalanceTransaction(transaction, today)) {
                 continue;
@@ -258,6 +277,14 @@ public class CashFlowForecastService {
         }
         return transaction.getPaymentDate().isEqual(today)
                 && (transaction.getStatus() == null || !transaction.getStatus().affectsCurrentBalance());
+    }
+
+    private boolean isSettledBalanceTransaction(Transaction transaction, LocalDate today) {
+        return transaction.getAccount() != null
+                && transaction.getAccount().isActive()
+                && !transaction.getPaymentDate().isAfter(today)
+                && transaction.getStatus() != null
+                && transaction.getStatus().affectsCurrentBalance();
     }
 
     private List<YearMonth> historyMonthsWithActivity(

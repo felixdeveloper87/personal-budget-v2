@@ -45,6 +45,8 @@ public record CashFlowForecastDTO(
             BigDecimal netCashFlow,
             BigDecimal projectedClosingBalance,
             int confidencePercent,
-            boolean negative
+            boolean negative,
+            BigDecimal incomeReceivedSoFar,
+            BigDecimal expensesPaidSoFar
     ) {}
 }
