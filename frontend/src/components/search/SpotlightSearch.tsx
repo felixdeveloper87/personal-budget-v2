@@ -15,7 +15,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 
-import { Search, X } from '../ui/icons'
+import { Search, X, ChevronLeft, ChevronRight } from '../ui/icons'
 import { listTransactions } from '../../api'
 import { ToastService } from '../../services/toast'
 import type { Transaction } from '../../types'
@@ -34,8 +34,57 @@ interface SpotlightSearchProps {
   onClose: () => void
 }
 
-/** A spotlight never renders the full ledger — only the most recent matches. */
-const RESULT_CAP = 50
+/** Results per page — newest first, paged so we never render a huge ledger. */
+const PAGE_SIZE = 50
+
+const MONTHS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
+]
+
+const cap1 = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+
+interface ParsedQuery {
+  /** Free-text terms matched against merchant + category (original case). */
+  textTerms: string[]
+  /** Candidate month numbers (1-12) the query restricts to. */
+  months: number[]
+  /** A partial month token resolving to >1 month, to surface as suggestions. */
+  suggestion: { months: number[] } | null
+}
+
+/**
+ * Splits a query into free-text terms and month tokens. A token is read as a
+ * month when it is a prefix of a month name ("ju" → June/July, "mar" → March).
+ * Ambiguous partials become suggestions the user can tap to narrow down.
+ */
+function parseQuery(q: string): ParsedQuery {
+  const tokens = q.split(/\s+/).filter(Boolean)
+  const textTerms: string[] = []
+  const monthSet = new Set<number>()
+  let suggestion: { months: number[] } | null = null
+
+  for (const tok of tokens) {
+    const low = tok.toLowerCase()
+    if (low.length >= 2) {
+      const matched: number[] = []
+      MONTHS.forEach((m, i) => {
+        if (m.startsWith(low)) matched.push(i + 1)
+      })
+      if (matched.length > 0) {
+        matched.forEach((n) => monthSet.add(n))
+        // Only an *incomplete* month with several candidates needs suggestions.
+        if (!MONTHS.includes(low) && matched.length > 1) {
+          suggestion = { months: matched }
+        }
+        continue
+      }
+    }
+    textTerms.push(tok)
+  }
+
+  return { textTerms, months: [...monthSet], suggestion }
+}
 
 const FILTERS: TxFilter[] = ['all', 'in', 'out', 'deferred']
 const DOT_COLOR: Partial<Record<TxFilter, string>> = {
@@ -98,16 +147,22 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   const ed = useEd()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<TxFilter>('all')
+  const [page, setPage] = useState(0)
   const [raw, setRaw] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(false)
   const reqId = useRef(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const text = q.trim()
-  const hasQuery = text.length > 0
-  // Show results as soon as there is any criterion — typed text OR an active
-  // filter chip. With everything loaded client-side the chips filter instantly.
-  const hasCriteria = hasQuery || filter !== 'all'
+  const parsed = useMemo(() => parseQuery(text), [text])
+  // Show results as soon as there is any criterion — text, a month, or a chip.
+  const hasCriteria =
+    parsed.textTerms.length > 0 || parsed.months.length > 0 || filter !== 'all'
+
+  // Any change of criteria sends the user back to the newest page.
+  useEffect(() => {
+    setPage(0)
+  }, [text, filter])
 
   // Focus the field shortly after open (after the modal mount animation).
   useEffect(() => {
@@ -121,6 +176,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
     if (!isOpen) {
       setQ('')
       setFilter('all')
+      setPage(0)
       setRaw([])
       setLoading(false)
     }
@@ -153,36 +209,59 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
 
   const vm = useMemo(() => toViewModel(raw), [raw])
 
-  // Filter the whole set, but only render the most recent RESULT_CAP rows. A
-  // spotlight never needs the full ledger, and rendering thousands of rows is
-  // what makes "All" feel heavy — especially on mobile. Totals below still
-  // reflect every match so the figures stay honest.
-  const { groups, summary } = useMemo(() => {
-    const all = buildLedger(vm, { ...initialTxState, q: text, filter })
+  // Filter the whole set (text terms + month tokens + active chip), newest day
+  // first, then render only the current page. Totals reflect every match so the
+  // figures stay honest even while we render one page at a time.
+  const { groups, summary, totalPages, safePage } = useMemo(() => {
+    const filtered = vm.filter((t) => {
+      if (parsed.textTerms.length) {
+        const hay = `${t.merchant} ${t.category}`.toLowerCase()
+        for (const term of parsed.textTerms) {
+          if (!hay.includes(term.toLowerCase())) return false
+        }
+      }
+      if (parsed.months.length) {
+        const m = Number(t.purchaseDate.slice(5, 7))
+        if (!parsed.months.includes(m)) return false
+      }
+      return true
+    })
+
+    // Chip filter (in/out/deferred) + day grouping, newest day first.
+    const all = buildLedger(filtered, { ...initialTxState, filter })
+
     let count = 0
     let inTotal = 0
     let outTotal = 0
+    const flat: Array<{ row: typeof all[number]['rows'][number]; key: string; date: Date }> = []
     for (const g of all) {
       count += g.rows.length
       inTotal += g.inTotal
       outTotal += g.outTotal
+      for (const row of g.rows) flat.push({ row, key: g.key, date: g.date })
     }
-    // Take the first RESULT_CAP rows in render order (newest day first).
-    const capped: LedgerGroup[] = []
-    let remaining = RESULT_CAP
-    for (const g of all) {
-      if (remaining <= 0) break
-      if (g.rows.length <= remaining) {
-        capped.push(g)
-        remaining -= g.rows.length
-      } else {
-        capped.push({ ...g, rows: g.rows.slice(0, remaining) })
-        remaining = 0
-      }
+
+    const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
+    const safePage = Math.min(page, totalPages - 1)
+    const slice = flat.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
+
+    // Re-group the page slice back into day groups, preserving order.
+    const pageGroups: LedgerGroup[] = []
+    for (const item of slice) {
+      const last = pageGroups[pageGroups.length - 1]
+      if (last && last.key === item.key) last.rows.push(item.row)
+      else pageGroups.push({ key: item.key, date: item.date, rows: [item.row], inTotal: 0, outTotal: 0 })
     }
-    const shown = Math.min(count, RESULT_CAP)
-    return { groups: capped, summary: { count, shown, inTotal, outTotal } }
-  }, [vm, text, filter])
+
+    const from = count === 0 ? 0 : safePage * PAGE_SIZE + 1
+    const to = safePage * PAGE_SIZE + slice.length
+    return {
+      groups: pageGroups,
+      summary: { count, from, to, inTotal, outTotal },
+      totalPages,
+      safePage,
+    }
+  }, [vm, parsed, filter, page])
 
   const surfaceBg = ed?.modal ?? 'var(--pb-paper)'
 
@@ -260,6 +339,27 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
               <Chip key={f} value={f} active={filter === f} onClick={() => setFilter(f)} />
             ))}
           </Flex>
+
+          {parsed.suggestion && (
+            <Flex gap=".45rem" flexWrap="wrap" mt={2.5} align="center">
+              <Text
+                fontFamily="var(--pb-mono)"
+                fontSize="9.5px"
+                letterSpacing="0.08em"
+                textTransform="uppercase"
+                color="var(--pb-ink-faint)"
+              >
+                Did you mean
+              </Text>
+              {parsed.suggestion.months.map((n) => (
+                <SuggestionChip
+                  key={n}
+                  label={cap1(MONTHS[n - 1])}
+                  onClick={() => setQ([...parsed.textTerms, cap1(MONTHS[n - 1])].join(' '))}
+                />
+              ))}
+            </Flex>
+          )}
         </Box>
 
         {/* Results */}
@@ -290,8 +390,8 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                     textTransform="uppercase"
                     color="var(--pb-ink-faint)"
                   >
-                    {summary.shown < summary.count
-                      ? `Showing ${summary.shown} of ${summary.count}`
+                    {summary.count > PAGE_SIZE
+                      ? `Showing ${summary.from}–${summary.to} of ${summary.count}`
                       : `${summary.count} result${summary.count === 1 ? '' : 's'}`}
                   </Text>
                   <HStack spacing=".4rem">
@@ -305,6 +405,13 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                 </Flex>
               )}
               <ResultsList groups={groups} />
+              {totalPages > 1 && (
+                <Pager
+                  page={safePage}
+                  totalPages={totalPages}
+                  onChange={setPage}
+                />
+              )}
             </>
           )}
         </Box>
@@ -367,6 +474,127 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
   )
 }
 
+function SuggestionChip({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <Box
+      as="button"
+      type="button"
+      onClick={onClick}
+      px=".65rem"
+      py=".28rem"
+      borderRadius="999px"
+      border="1px solid var(--pb-hair-2)"
+      bg="var(--pb-tint-gold)"
+      color="var(--pb-gold)"
+      cursor="pointer"
+      fontFamily="var(--pb-mono)"
+      fontSize="10.5px"
+      letterSpacing="0.04em"
+      transition="all 0.15s ease"
+      _hover={{ bg: 'var(--pb-surface-2)' }}
+      _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-gold)', outline: 'none' }}
+    >
+      {label}
+    </Box>
+  )
+}
+
+/** Compact pager: ‹ prev · page numbers (with ellipsis) · next › */
+function Pager({
+  page,
+  totalPages,
+  onChange,
+}: {
+  page: number
+  totalPages: number
+  onChange: (p: number) => void
+}) {
+  // Window of page numbers around the current page, always including first/last.
+  const pages: Array<number | '…'> = []
+  const push = (n: number | '…') => pages.push(n)
+  const window = 1
+  let last = -1
+  for (let i = 0; i < totalPages; i++) {
+    const inWindow = i === 0 || i === totalPages - 1 || Math.abs(i - page) <= window
+    if (inWindow) {
+      if (last >= 0 && i - last > 1) push('…')
+      push(i)
+      last = i
+    }
+  }
+
+  const arrowSx = {
+    w: '30px',
+    h: '30px',
+    minW: '30px',
+    borderRadius: '9px',
+    border: '1px solid var(--pb-hair)',
+    bg: 'var(--pb-surface)',
+    color: 'var(--pb-ink-soft)',
+    _hover: { borderColor: 'var(--pb-hair-2)', color: 'var(--pb-ink)' },
+    _disabled: { opacity: 0.4, cursor: 'not-allowed', _hover: { borderColor: 'var(--pb-hair)' } },
+  } as const
+
+  return (
+    <Flex align="center" justify="center" gap=".4rem" mt="1.4rem" flexWrap="wrap">
+      <IconButton
+        aria-label="Previous page"
+        icon={<Icon as={ChevronLeft} boxSize="15px" />}
+        onClick={() => onChange(page - 1)}
+        isDisabled={page === 0}
+        variant="unstyled"
+        display="inline-flex"
+        alignItems="center"
+        justifyContent="center"
+        {...arrowSx}
+      />
+      {pages.map((p, i) =>
+        p === '…' ? (
+          <Box key={`e${i}`} px="2px" color="var(--pb-ink-faint)" fontFamily="var(--pb-mono)" fontSize="11px">
+            …
+          </Box>
+        ) : (
+          <Box
+            key={p}
+            as="button"
+            type="button"
+            onClick={() => onChange(p)}
+            aria-current={p === page ? 'page' : undefined}
+            minW="30px"
+            h="30px"
+            px="8px"
+            borderRadius="9px"
+            border="1px solid"
+            borderColor={p === page ? 'var(--pb-forest)' : 'var(--pb-hair)'}
+            bg={p === page ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
+            color={p === page ? 'var(--pb-forest)' : 'var(--pb-ink-soft)'}
+            fontFamily="var(--pb-mono)"
+            fontSize="11px"
+            fontWeight={p === page ? 600 : 400}
+            cursor="pointer"
+            transition="all 0.15s ease"
+            _hover={{ borderColor: 'var(--pb-hair-2)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+          >
+            {p + 1}
+          </Box>
+        ),
+      )}
+      <IconButton
+        aria-label="Next page"
+        icon={<Icon as={ChevronRight} boxSize="15px" />}
+        onClick={() => onChange(page + 1)}
+        isDisabled={page >= totalPages - 1}
+        variant="unstyled"
+        display="inline-flex"
+        alignItems="center"
+        justifyContent="center"
+        {...arrowSx}
+      />
+    </Flex>
+  )
+}
+
 function SummaryPill({ kind, value }: { kind: 'in' | 'out'; value: number }) {
   const isIn = kind === 'in'
   return (
@@ -419,7 +647,7 @@ function IdleHint() {
           color="var(--pb-ink-faint)"
           mt="0.35rem"
         >
-          Type a merchant or category to see matches across all time
+          Try a merchant, category, or month — e.g. “Lidl june”
         </Text>
       </Box>
     </VStack>
