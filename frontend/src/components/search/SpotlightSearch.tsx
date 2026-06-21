@@ -37,53 +37,10 @@ interface SpotlightSearchProps {
 /** Results per page — newest first, paged so we never render a huge ledger. */
 const PAGE_SIZE = 50
 
-const MONTHS = [
-  'january', 'february', 'march', 'april', 'may', 'june',
-  'july', 'august', 'september', 'october', 'november', 'december',
-]
-
-const cap1 = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
-
-interface ParsedQuery {
-  /** Free-text terms matched against merchant + category (original case). */
-  textTerms: string[]
-  /** Candidate month numbers (1-12) the query restricts to. */
-  months: number[]
-  /** A partial month token resolving to >1 month, to surface as suggestions. */
-  suggestion: { months: number[] } | null
-}
-
-/**
- * Splits a query into free-text terms and month tokens. A token is read as a
- * month when it is a prefix of a month name ("ju" → June/July, "mar" → March).
- * Ambiguous partials become suggestions the user can tap to narrow down.
- */
-function parseQuery(q: string): ParsedQuery {
-  const tokens = q.split(/\s+/).filter(Boolean)
-  const textTerms: string[] = []
-  const monthSet = new Set<number>()
-  let suggestion: { months: number[] } | null = null
-
-  for (const tok of tokens) {
-    const low = tok.toLowerCase()
-    if (low.length >= 2) {
-      const matched: number[] = []
-      MONTHS.forEach((m, i) => {
-        if (m.startsWith(low)) matched.push(i + 1)
-      })
-      if (matched.length > 0) {
-        matched.forEach((n) => monthSet.add(n))
-        // Only an *incomplete* month with several candidates needs suggestions.
-        if (!MONTHS.includes(low) && matched.length > 1) {
-          suggestion = { months: matched }
-        }
-        continue
-      }
-    }
-    textTerms.push(tok)
-  }
-
-  return { textTerms, months: [...monthSet], suggestion }
+/** Today as a local "YYYY-MM-DD" string (comparable to ledger day keys). */
+function todayIso(): string {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
 const FILTERS: TxFilter[] = ['all', 'in', 'out', 'deferred']
@@ -154,15 +111,8 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   const inputRef = useRef<HTMLInputElement>(null)
 
   const text = q.trim()
-  const parsed = useMemo(() => parseQuery(text), [text])
-  // Show results as soon as there is any criterion — text, a month, or a chip.
-  const hasCriteria =
-    parsed.textTerms.length > 0 || parsed.months.length > 0 || filter !== 'all'
-
-  // Any change of criteria sends the user back to the newest page.
-  useEffect(() => {
-    setPage(0)
-  }, [text, filter])
+  // Show results as soon as there is a text query or an active transaction filter.
+  const hasCriteria = text.length > 0 || filter !== 'all'
 
   // Focus the field shortly after open (after the modal mount animation).
   useEffect(() => {
@@ -174,6 +124,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   // Reset everything when the modal closes.
   useEffect(() => {
     if (!isOpen) {
+      reqId.current += 1
       setQ('')
       setFilter('all')
       setPage(0)
@@ -209,59 +160,56 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
 
   const vm = useMemo(() => toViewModel(raw), [raw])
 
-  // Filter the whole set (text terms + month tokens + active chip), newest day
-  // first, then render only the current page. Totals reflect every match so the
-  // figures stay honest even while we render one page at a time.
-  const { groups, summary, totalPages, safePage } = useMemo(() => {
-    const filtered = vm.filter((t) => {
-      if (parsed.textTerms.length) {
-        const hay = `${t.merchant} ${t.category}`.toLowerCase()
-        for (const term of parsed.textTerms) {
-          if (!hay.includes(term.toLowerCase())) return false
-        }
-      }
-      if (parsed.months.length) {
-        const m = Number(t.purchaseDate.slice(5, 7))
-        if (!parsed.months.includes(m)) return false
-      }
-      return true
-    })
+  // This is the exact matching engine used in Transactions. The search button
+  // only changes when the ledger is displayed: typing updates it immediately.
+  const { flat, count, inTotal, outTotal } = useMemo(() => {
+    const all = buildLedger(vm, { ...initialTxState, q: text, filter })
 
-    // Chip filter (in/out/deferred) + day grouping, newest day first.
-    const all = buildLedger(filtered, { ...initialTxState, filter })
-
+    // Keys are "YYYY-MM-DD", so a lexicographic compare is chronological.
+    const today = todayIso()
+    type Item = { row: LedgerGroup['rows'][number]; key: string; date: Date }
+    const past: Item[] = []
+    const future: Item[] = []
     let count = 0
     let inTotal = 0
     let outTotal = 0
-    const flat: Array<{ row: typeof all[number]['rows'][number]; key: string; date: Date }> = []
     for (const g of all) {
       count += g.rows.length
       inTotal += g.inTotal
       outTotal += g.outTotal
-      for (const row of g.rows) flat.push({ row, key: g.key, date: g.date })
+      const bucket = g.key > today ? future : past
+      for (const row of g.rows) bucket.push({ row, key: g.key, date: g.date })
     }
 
-    const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
-    const safePage = Math.min(page, totalPages - 1)
-    const slice = flat.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
+    const flat = [...past, ...future]
+    return {
+      flat,
+      count,
+      inTotal,
+      outTotal,
+    }
+  }, [vm, text, filter])
 
-    // Re-group the page slice back into day groups, preserving order.
+  const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages - 1)
+
+  // Any change of criteria sends the user back to the first page.
+  useEffect(() => {
+    setPage(0)
+  }, [text, filter])
+
+  const { groups, summary } = useMemo(() => {
+    const slice = flat.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
     const pageGroups: LedgerGroup[] = []
     for (const item of slice) {
       const last = pageGroups[pageGroups.length - 1]
       if (last && last.key === item.key) last.rows.push(item.row)
       else pageGroups.push({ key: item.key, date: item.date, rows: [item.row], inTotal: 0, outTotal: 0 })
     }
-
     const from = count === 0 ? 0 : safePage * PAGE_SIZE + 1
     const to = safePage * PAGE_SIZE + slice.length
-    return {
-      groups: pageGroups,
-      summary: { count, from, to, inTotal, outTotal },
-      totalPages,
-      safePage,
-    }
-  }, [vm, parsed, filter, page])
+    return { groups: pageGroups, summary: { count, from, to, inTotal, outTotal } }
+  }, [flat, safePage, count, inTotal, outTotal])
 
   const surfaceBg = ed?.modal ?? 'var(--pb-paper)'
 
@@ -340,26 +288,6 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
             ))}
           </Flex>
 
-          {parsed.suggestion && (
-            <Flex gap=".45rem" flexWrap="wrap" mt={2.5} align="center">
-              <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9.5px"
-                letterSpacing="0.08em"
-                textTransform="uppercase"
-                color="var(--pb-ink-faint)"
-              >
-                Did you mean
-              </Text>
-              {parsed.suggestion.months.map((n) => (
-                <SuggestionChip
-                  key={n}
-                  label={cap1(MONTHS[n - 1])}
-                  onClick={() => setQ([...parsed.textTerms, cap1(MONTHS[n - 1])].join(' '))}
-                />
-              ))}
-            </Flex>
-          )}
         </Box>
 
         {/* Results */}
@@ -470,31 +398,6 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
           ))}
         </Box>
       ))}
-    </Box>
-  )
-}
-
-function SuggestionChip({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <Box
-      as="button"
-      type="button"
-      onClick={onClick}
-      px=".65rem"
-      py=".28rem"
-      borderRadius="999px"
-      border="1px solid var(--pb-hair-2)"
-      bg="var(--pb-tint-gold)"
-      color="var(--pb-gold)"
-      cursor="pointer"
-      fontFamily="var(--pb-mono)"
-      fontSize="10.5px"
-      letterSpacing="0.04em"
-      transition="all 0.15s ease"
-      _hover={{ bg: 'var(--pb-surface-2)' }}
-      _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-gold)', outline: 'none' }}
-    >
-      {label}
     </Box>
   )
 }
