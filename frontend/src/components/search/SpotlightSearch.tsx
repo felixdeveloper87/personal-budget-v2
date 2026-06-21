@@ -160,43 +160,45 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
 
   const vm = useMemo(() => toViewModel(raw), [raw])
 
-  // This is the exact matching engine used in Transactions. The search button
-  // only changes when the ledger is displayed: typing updates it immediately.
-  const { flat, count, inTotal, outTotal } = useMemo(() => {
+  // Same matching engine as Transactions, but laid out as one continuous
+  // chronological timeline (oldest → newest → future). `todayPage` is the page
+  // holding the first transaction dated today-or-later, so the spotlight opens
+  // on "now" with the past on earlier pages and planned items on later ones.
+  const { flat, count, inTotal, outTotal, todayPage } = useMemo(() => {
     const all = buildLedger(vm, { ...initialTxState, q: text, filter })
 
-    // Keys are "YYYY-MM-DD", so a lexicographic compare is chronological.
-    const today = todayIso()
-    type Item = { row: LedgerGroup['rows'][number]; key: string; date: Date }
-    const past: Item[] = []
-    const future: Item[] = []
     let count = 0
     let inTotal = 0
     let outTotal = 0
-    for (const g of all) {
+    type Item = { row: LedgerGroup['rows'][number]; key: string; date: Date }
+    const flat: Item[] = []
+    // buildLedger returns groups newest-first; walk them in reverse for ascending
+    // (chronological) order. Intra-day row order is left as-is.
+    for (let i = all.length - 1; i >= 0; i--) {
+      const g = all[i]
       count += g.rows.length
       inTotal += g.inTotal
       outTotal += g.outTotal
-      const bucket = g.key > today ? future : past
-      for (const row of g.rows) bucket.push({ row, key: g.key, date: g.date })
+      for (const row of g.rows) flat.push({ row, key: g.key, date: g.date })
     }
 
-    const flat = [...past, ...future]
-    return {
-      flat,
-      count,
-      inTotal,
-      outTotal,
-    }
+    // Keys are "YYYY-MM-DD", so a lexicographic compare is chronological.
+    const today = todayIso()
+    let idx = flat.findIndex((it) => it.key >= today)
+    if (idx < 0) idx = Math.max(0, flat.length - 1)
+    const todayPage = Math.floor(idx / PAGE_SIZE)
+
+    return { flat, count, inTotal, outTotal, todayPage }
   }, [vm, text, filter])
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
 
-  // Any change of criteria sends the user back to the first page.
+  // Land on today's page whenever the result set changes (new search / filter /
+  // freshly loaded data). Manual paging is preserved until criteria change.
   useEffect(() => {
-    setPage(0)
-  }, [text, filter])
+    setPage(todayPage)
+  }, [text, filter, todayPage])
 
   const { groups, summary } = useMemo(() => {
     const slice = flat.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)
