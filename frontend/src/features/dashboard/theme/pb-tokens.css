@@ -38,14 +38,17 @@
 }
 
 [data-theme="dark"] {
-  --pb-paper: #07151d;
-  --pb-paper-2: #0b1d27;
-  --pb-paper-3: #102631;
-  --pb-surface: rgba(13, 32, 42, 0.84);
-  --pb-surface-2: rgba(16, 39, 50, 0.88);
-  --pb-surface-3: rgba(225, 245, 241, 0.07);
-  --pb-ink: #eff6ff;
-  --pb-ink-soft: #b3c0d2;
+  --pb-paper: #060d14;
+  --pb-paper-2: #0a141d;
+  --pb-paper-3: #0f1b26;
+  /* Card surfaces: charcoal quase-preto (canais RGB próximos = sem tom azul),
+     renderiza ~#14171d sobre o fundo. surface-2 é um pouco mais clara só pra dar
+     o brilho do gradiente 135deg. Alinhado aos cards `panel` (editorial.tsx). */
+  --pb-surface: rgba(22, 24, 30, 0.90);
+  --pb-surface-2: rgba(28, 31, 38, 0.92);
+  --pb-surface-3: rgba(240, 244, 250, 0.06);
+  --pb-ink: #f3f8fe;
+  --pb-ink-soft: #b7c4d7;
   --pb-ink-faint: #8496ad;
 
   --pb-forest: #7dd3fc;
@@ -67,7 +70,7 @@
 
   --pb-hair: rgba(239, 246, 255, 0.10);
   --pb-hair-2: rgba(239, 246, 255, 0.19);
-  --pb-seal-edge: #0a1a23;
+  --pb-seal-edge: #0b0d11;
   --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.36), 0 12px 30px rgba(0, 0, 0, 0.34);
   --pb-shadow-lift: 0 4px 10px rgba(0, 0, 0, 0.42), 0 26px 54px rgba(0, 0, 0, 0.48);
 }
