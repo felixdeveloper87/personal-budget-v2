@@ -3,13 +3,13 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
   light: 'radial-gradient(900px circle at 24% -18%, rgba(96, 165, 250, 0.14), transparent 58%), linear-gradient(180deg, #fafcff 0%, #edf3fb 100%)',
-  dark: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.16), transparent 58%), linear-gradient(180deg, #0b1d27 0%, #07151d 100%)',
+  dark: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.14), transparent 60%), linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
 
   cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f7 100%)',
-  cardDark: 'linear-gradient(135deg, #102631 0%, #07151d 100%)',
+  cardDark: 'linear-gradient(135deg, #0e1a26 0%, #060d14 100%)',
 
   secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f8fcfa 100%)',
-  secondaryDark: 'linear-gradient(135deg, #102631 0%, #163440 100%)',
+  secondaryDark: 'linear-gradient(135deg, #0e1a26 0%, #142a36 100%)',
 } as const
 
 // 🔤 Fontes da plataforma — fonte única de verdade.
@@ -64,7 +64,7 @@ const theme = extendTheme({
       // Estilos para modo escuro
       '[data-theme="dark"] body': {
         bg: GRADIENTS.dark,
-        color: '#ecf7f5',
+        color: '#f3f8fe',
       },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
@@ -135,8 +135,8 @@ const theme = extendTheme({
         container: {
           // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
           // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(16, 22, 31, 0.80)' : 'rgba(255, 255, 255, 0.72)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(226, 235, 247, 0.10)' : 'rgba(28, 58, 92, 0.14)',
+          bg: props.colorMode === 'dark' ? 'rgba(22, 24, 30, 0.90)' : 'rgba(255, 255, 255, 0.72)',
+          borderColor: props.colorMode === 'dark' ? 'rgba(226, 235, 247, 0.12)' : 'rgba(28, 58, 92, 0.14)',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark'
             ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
@@ -152,9 +152,9 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(18, 24, 33, 0.88)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(13, 22, 32, 0.92)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#e8eef6' : '#15202e',
+          color: props.colorMode === 'dark' ? '#f3f8fe' : '#15202e',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
@@ -164,7 +164,7 @@ const theme = extendTheme({
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(3, 8, 5, 0.74)',
+          bg: 'rgba(2, 6, 11, 0.82)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
@@ -184,9 +184,9 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(18, 24, 33, 0.88)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(13, 22, 32, 0.92)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#e8eef6' : '#15202e',
+          color: props.colorMode === 'dark' ? '#f3f8fe' : '#15202e',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
@@ -196,7 +196,7 @@ const theme = extendTheme({
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(3, 8, 5, 0.74)',
+          bg: 'rgba(2, 6, 11, 0.82)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {

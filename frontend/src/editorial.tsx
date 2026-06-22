@@ -20,15 +20,15 @@ import { Box, useColorMode } from '@chakra-ui/react'
 
 /* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
 export const EDITORIAL_DARK = {
-  bg: '#07151d',
-  bg2: '#0b1d27',
+  bg: '#060d14',
+  bg2: '#0a141d',
   /** Brand accent (sky blue) + soft gold. */
   jade: '#7dd3fc',
   gold: '#e8c477',
-  /** Primary text. */
-  cream: '#eff6ff',
-  /** Secondary / muted text. */
-  muted: '#a8b5c8',
+  /** Primary text. ~18:1 on `bg`. */
+  cream: '#f3f8fe',
+  /** Secondary / muted text. Brightened for ~11:1 on the deeper `bg` (was 8.9:1). */
+  muted: '#b7c4d7',
   red: '#ff9a90',
   /** Dark glyph colour for text sitting on a brand/gold accent fill. */
   onAccent: '#06221f',
@@ -40,15 +40,19 @@ export const EDITORIAL_DARK = {
    *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
    *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
    *  `panelRaised` → painéis internos (card dentro de card). */
-  panel: 'rgba(12, 30, 40, 0.82)',
-  modal: 'rgba(12, 30, 40, 0.92)',
-  solid: '#102631',
+  // Painéis quase-pretos (charcoal levemente frio, não azul): canais próximos
+  // entre si pra tirar o tom azul, mais opacos pra o brilho azul do fundo vazar
+  // menos por trás do card. Renderizam ~#16181d sobre a base, ainda mais claros
+  // que o fundo (a elevação do card se mantém).
+  panel: 'rgba(22, 24, 30, 0.90)',
+  modal: 'rgba(14, 26, 38, 0.94)',
+  solid: '#0f1b26',
   panelRaised: 'rgba(239, 246, 255, 0.05)',
-  line: 'rgba(239, 246, 255, 0.10)',
-  lineStrong: 'rgba(239, 246, 255, 0.18)',
+  line: 'rgba(239, 246, 255, 0.12)',
+  lineStrong: 'rgba(239, 246, 255, 0.20)',
 
   /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(7, 21, 29, 0.86)',
+  glass: 'rgba(6, 13, 20, 0.88)',
 
   /** Subtle hover wash on a panel. */
   hoverBg: 'rgba(239, 246, 255, 0.08)',
@@ -62,8 +66,8 @@ export const EDITORIAL_DARK = {
   jadeSoft: 'rgba(125, 211, 252, 0.12)',
   jadeSoftHover: 'rgba(125, 211, 252, 0.20)',
 
-  /** Full-bleed background for the app shell. */
-  bgGradient: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.16), transparent 58%), linear-gradient(180deg, #0b1d27 0%, #07151d 100%)',
+  /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
+  bgGradient: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.14), transparent 60%), linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
