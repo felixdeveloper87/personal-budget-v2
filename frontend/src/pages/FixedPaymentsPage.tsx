@@ -15,6 +15,7 @@ import { listRecurringTransactions } from '../api'
 import type { RecurringTransaction } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import RecurringTransactionCard from '../components/recurring/RecurringTransactionCard'
+import RecurringTransactionDrawer from '../components/recurring/RecurringTransactionDrawer'
 import { PageHeader, SectionCard, SectionHeader } from '../components/ui'
 import {
   CalendarClock,
@@ -40,6 +41,7 @@ export default function FixedPaymentsPage({
 }: FixedPaymentsPageProps) {
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedItem, setSelectedItem] = useState<RecurringTransaction | null>(null)
 
   const ed = useEd()
   const softBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -62,6 +64,11 @@ export default function FixedPaymentsPage({
   useEffect(() => {
     void load()
   }, [load])
+
+  // Keep the open drawer pointed at the freshest rule data after a reload.
+  useEffect(() => {
+    setSelectedItem((current) => (current ? items.find((item) => item.id === current.id) ?? null : null))
+  }, [items])
 
   const summary = useMemo(() => {
     const active: RecurringTransaction[] = []
@@ -151,15 +158,15 @@ export default function FixedPaymentsPage({
                   {summary.active.length === 0 ? (
                     <EmptyState text="No active fixed payments or incomes." />
                   ) : (
-                    <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={4}>
+                    <VStack align="stretch" spacing="0.6rem">
                       {summary.active.map((item) => (
                         <RecurringTransactionCard
                           key={item.id}
                           recurringTransaction={item}
-                          onChanged={load}
+                          onOpen={setSelectedItem}
                         />
                       ))}
-                    </SimpleGrid>
+                    </VStack>
                   )}
                 </VStack>
               </Box>
@@ -180,15 +187,15 @@ export default function FixedPaymentsPage({
                         </Badge>
                       }
                     />
-                    <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={4}>
+                    <VStack align="stretch" spacing="0.6rem">
                       {summary.cancelled.map((item) => (
                         <RecurringTransactionCard
                           key={item.id}
                           recurringTransaction={item}
-                          onChanged={load}
+                          onOpen={setSelectedItem}
                         />
                       ))}
-                    </SimpleGrid>
+                    </VStack>
                   </VStack>
                 </Box>
               </SectionCard>
@@ -196,6 +203,12 @@ export default function FixedPaymentsPage({
           </>
         )}
       </VStack>
+
+      <RecurringTransactionDrawer
+        recurringTransaction={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onChanged={load}
+      />
     </Box>
   )
 }

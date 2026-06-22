@@ -5,6 +5,7 @@ import { listInstallmentPlans } from '../api'
 import type { InstallmentPlan } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
+import InstallmentPlanDrawer from '../components/installments/InstallmentPlanDrawer'
 import { PageHeader } from '../components/ui'
 import { CalendarClock, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, CreditCard, Plus, Wallet } from '../components/ui/icons'
 import { ToastService } from '../services/toast'
@@ -25,6 +26,7 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
   const [loading, setLoading] = useState(true)
   const [activeOpen, setActiveOpen] = useState(true)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
   const outlookRef = useRef<HTMLDivElement>(null)
 
   const load = useCallback(async () => {
@@ -39,6 +41,11 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
   }, [])
 
   useEffect(() => { void load() }, [load])
+
+  // Keep the open drawer pointed at the freshest plan data after an edit reloads.
+  useEffect(() => {
+    setSelectedPlan((current) => (current ? plans.find((plan) => plan.id === current.id) ?? null : null))
+  }, [plans])
 
   const summary = useMemo(() => {
     const active = plans.filter((plan) => !isInstallmentPlanCompleted(plan))
@@ -95,13 +102,13 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
 
             <MotionBox variants={riseV}>
               <InstallmentPanel title="Active plans" caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} currently reducing your available monthly budget`} open={activeOpen} onToggle={() => setActiveOpen((value) => !value)}>
-                {summary.active.length ? <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="active" />)}</SimpleGrid> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
+                {summary.active.length ? <VStack align="stretch" spacing="0.6rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="active" />)}</VStack> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
               </InstallmentPanel>
             </MotionBox>
 
             {summary.completed.length > 0 && <MotionBox variants={riseV}>
               <InstallmentPanel title="Completed plans" caption={`${summary.completed.length} plan${summary.completed.length !== 1 ? 's' : ''} kept for reference`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
-                <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onDeleted={load} variant="past" />)}</SimpleGrid>
+                <VStack align="stretch" spacing="0.6rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="past" />)}</VStack>
               </InstallmentPanel>
             </MotionBox>}
           </>}
@@ -109,6 +116,8 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
           <MotionBox variants={riseV}><PaperFooter /></MotionBox>
         </VStack>
       </MotionBox>
+
+      <InstallmentPlanDrawer plan={selectedPlan} onClose={() => setSelectedPlan(null)} onChanged={load} />
     </Box>
   )
 }

@@ -18,6 +18,7 @@ import { ArrowRight, CalendarClock, ChevronDown, Repeat, Wallet } from '../ui/ic
 import { ModalHeader, PremiumModal } from '../ui'
 import { RecurringTransaction } from '../../types'
 import RecurringTransactionCard from './RecurringTransactionCard'
+import RecurringTransactionDrawer from './RecurringTransactionDrawer'
 import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
 import { useEditorialPalette } from '../../editorial'
 
@@ -40,10 +41,16 @@ export default function RecurringTransactionsModal({
 }: RecurringTransactionsModalProps) {
   const ed = useEditorialPalette()
   const [hideActiveList, setHideActiveList] = useState(false)
+  const [selectedItem, setSelectedItem] = useState<RecurringTransaction | null>(null)
 
   useEffect(() => {
     if (!isOpen) setHideActiveList(false)
   }, [isOpen])
+
+  // Keep the open drawer pointed at the freshest rule data after a reload.
+  useEffect(() => {
+    setSelectedItem((current) => (current ? recurringTransactions.find((item) => item.id === current.id) ?? null : null))
+  }, [recurringTransactions])
 
   const panelBg = useColorModeValue('#ffffff', 'whiteAlpha.50')
   const panelBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -288,7 +295,7 @@ export default function RecurringTransactionsModal({
               title="Active"
               caption={`${activeItems.length} fixed payments sorted by amount`}
               items={activeItems}
-              onChanged={onChanged}
+              onOpen={setSelectedItem}
               emptyMessage="No active fixed expenses right now."
               showItems={!hideActiveList}
               headerActions={
@@ -314,7 +321,7 @@ export default function RecurringTransactionsModal({
                 title="Cancelled"
                 caption={`${cancelledItems.length} stopped payments kept for reference`}
                 items={cancelledItems}
-                onChanged={onChanged}
+                onOpen={setSelectedItem}
                 muted
                 collapsible
                 defaultExpanded={false}
@@ -331,6 +338,12 @@ export default function RecurringTransactionsModal({
       kind="recurring"
       items={assignmentItems}
       onAssigned={onChanged}
+    />
+
+    <RecurringTransactionDrawer
+      recurringTransaction={selectedItem}
+      onClose={() => setSelectedItem(null)}
+      onChanged={onChanged}
     />
     </>
   )
@@ -391,7 +404,7 @@ interface RecurringGroupProps {
   title: string
   caption: string
   items: RecurringTransaction[]
-  onChanged: () => void | Promise<void>
+  onOpen: (item: RecurringTransaction) => void
   emptyMessage?: string
   muted?: boolean
   collapsible?: boolean
@@ -404,7 +417,7 @@ function RecurringGroup({
   title,
   caption,
   items,
-  onChanged,
+  onOpen,
   emptyMessage,
   muted,
   collapsible = false,
@@ -449,12 +462,12 @@ function RecurringGroup({
         </Box>
       )
     ) : !showItems ? null : (
-      <SimpleGrid columns={{ base: 1, md: 2 }} spacing={{ base: 3, md: 5 }}>
+      <SimpleGrid columns={1} spacing={{ base: 2, md: 2.5 }}>
         {items.map((item) => (
           <RecurringTransactionCard
             key={item.id}
             recurringTransaction={item}
-            onChanged={onChanged}
+            onOpen={onOpen}
           />
         ))}
       </SimpleGrid>

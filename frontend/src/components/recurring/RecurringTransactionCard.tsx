@@ -1,515 +1,124 @@
-import React, { useEffect, useState } from 'react'
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardBody,
-  FormControl,
-  FormLabel,
-  HStack,
-  Icon,
-  IconButton,
-  Input,
-  Select,
-  SimpleGrid,
-  Text,
-  Tooltip,
-  useColorModeValue,
-  useDisclosure,
-  VStack,
-} from '@chakra-ui/react'
-import { AlertTriangle, CalendarClock, Check, Pencil, Trash2, TrendingUp, TrendingDown } from '../ui/icons'
-import {
-  cancelRecurringTransaction,
-  listAccounts,
-  listPaymentMethods,
-  updateRecurringTransaction,
-} from '../../api'
-import { FinancialAccount, PaymentMethod, RecurringTransaction } from '../../types'
-import { ToastService } from '../../services/toast'
-import { useEd } from '../../editorial'
+import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { ChevronRight, TrendingDown, TrendingUp } from '../ui/icons'
+import { RecurringTransaction } from '../../types'
+import '../../features/dashboard/theme/pb-tokens.css'
 
 interface RecurringTransactionCardProps {
   recurringTransaction: RecurringTransaction
-  onChanged: () => void | Promise<void>
+  /** Open the detail drawer for this rule. */
+  onOpen: (item: RecurringTransaction) => void
 }
 
-function formatDate(value?: string) {
-  if (!value) return 'Not scheduled'
-  return new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+const money = (value: number) => `£${value.toFixed(2)}`
 
+/**
+ * Compact single-line row for a fixed payment / income. Clicking it opens the
+ * detail drawer (mirrors the Transactions page list → drawer pattern).
+ */
 export default function RecurringTransactionCard({
   recurringTransaction,
-  onChanged,
+  onOpen,
 }: RecurringTransactionCardProps) {
-  const [isCancelling, setIsCancelling] = useState(false)
-  const [isSavingAmount, setIsSavingAmount] = useState(false)
-  const [isEditingAmount, setIsEditingAmount] = useState(false)
-  const [draftAmount, setDraftAmount] = useState(String(recurringTransaction.amount))
-  const [draftStartDate, setDraftStartDate] = useState(recurringTransaction.startDate)
-  const [draftDayOfMonth, setDraftDayOfMonth] = useState(String(recurringTransaction.dayOfMonth))
-  const [accounts, setAccounts] = useState<FinancialAccount[]>([])
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
-  const [draftAccountId, setDraftAccountId] = useState<number | null>(recurringTransaction.accountId ?? null)
-  const [draftPaymentMethodId, setDraftPaymentMethodId] = useState<number | null>(recurringTransaction.paymentMethodId ?? null)
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const cancelRef = React.useRef<HTMLButtonElement>(null)
+  const r = recurringTransaction
+  const isIncome = r.type === 'INCOME'
+  const isActive = r.active
+  const typeIcon = isIncome ? TrendingUp : TrendingDown
+  const amountColor = isIncome ? 'var(--pb-income-2)' : 'var(--pb-coral)'
+  const accentTint = isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
 
-  const ed = useEd()
-  const cardBgBase = useColorModeValue('#ffffff', 'whiteAlpha.50')
-  // Card translúcido padrão (ed.panel) nos dois modos — consistente com a plataforma.
-  const cardBg = ed ? ed.panel : cardBgBase
-  const cardBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const cardBorder = ed ? ed.line : cardBorderBase
-  const cardHoverBorderBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const cardHoverBorder = ed ? ed.lineStrong : cardHoverBorderBase
-  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
-  const titleColor = ed ? ed.cream : titleColorBase
-  const captionColorBase = useColorModeValue('gray.500', 'gray.400')
-  const captionColor = ed ? ed.muted : captionColorBase
-  const accentBgBase = useColorModeValue('teal.50', 'rgba(20,184,166,0.14)')
-  const accentBg = ed ? ed.jadeSoft : accentBgBase
-  const accentFgBase = useColorModeValue('teal.700', 'teal.300')
-  const accentFg = ed ? ed.jade : accentFgBase
-  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const dividerColor = ed ? ed.line : dividerColorBase
-  const deleteHoverBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const dialogBgBase = useColorModeValue('#ffffff', '#0a0a0a')
-  const dialogBg = ed ? ed.modal : dialogBgBase
-  const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const warningChipFg = useColorModeValue('red.600', 'red.300')
-  const metaBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const metaBg = ed ? ed.panelRaised : metaBgBase
-  const metaBorderBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const metaBorder = ed ? ed.line : metaBorderBase
-  const cardShadow = useColorModeValue(
-    'inset 0 1px 0 rgba(255,255,255,0.72), 0 10px 26px -22px rgba(19,56,37,0.34)',
-    '0 4px 18px -12px rgba(0,0,0,0.68)',
-  )
-  const cardHoverShadow = useColorModeValue(
-    'inset 0 1px 0 rgba(255,255,255,0.86), 0 16px 34px -22px rgba(8,122,80,0.38)',
-    '0 8px 24px -14px rgba(0,0,0,0.78)',
-  )
-  const activeStripe = useColorModeValue('linear-gradient(180deg, #14b8a6, #2563eb)', 'linear-gradient(180deg, #2dd4bf, #60a5fa)')
-  const amountPanelBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(20,184,166,0.10), rgba(37,99,235,0.08))',
-    'linear-gradient(135deg, rgba(45,212,191,0.16), rgba(96,165,250,0.10))',
-  )
-  const typeIcon = recurringTransaction.type === 'INCOME' ? TrendingUp : TrendingDown
-
-  useEffect(() => {
-    setDraftAmount(String(recurringTransaction.amount))
-    setDraftStartDate(recurringTransaction.startDate)
-    setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
-    setDraftAccountId(recurringTransaction.accountId ?? null)
-    setDraftPaymentMethodId(recurringTransaction.paymentMethodId ?? null)
-  }, [recurringTransaction])
-
-  useEffect(() => {
-    if (!isEditingAmount) return
-    Promise.all([listAccounts(), listPaymentMethods()])
-      .then(([accountItems, methodItems]) => {
-        setAccounts(accountItems)
-        setPaymentMethods(methodItems)
-      })
-      .catch((err) => {
-        ToastService.apiError(err, {
-          title: 'Could not load account options',
-          dedupeKey: `recurring-options-load-failed:${recurringTransaction.id}`,
-        })
-      })
-  }, [isEditingAmount, recurringTransaction.id])
-
-  const handleCancel = async () => {
-    setIsCancelling(true)
-    try {
-      await cancelRecurringTransaction(recurringTransaction.id)
-      ToastService.success({
-        title: 'Fixed payment cancelled',
-        duration: 2000,
-        dedupeKey: `recurring-cancelled:${recurringTransaction.id}`,
-      })
-      await Promise.resolve(onChanged())
-      onClose()
-    } catch (err: unknown) {
-      ToastService.apiError(err, {
-        title: 'Could not cancel fixed payment',
-        duration: 3000,
-        dedupeKey: `recurring-cancel-failed:${recurringTransaction.id}`,
-      })
-    } finally {
-      setIsCancelling(false)
-    }
-  }
-
-  const handleSaveAmount = async () => {
-    const nextAmount = Number(draftAmount)
-    const nextDayOfMonth = Number(draftDayOfMonth)
-    if (
-      nextAmount <= 0 ||
-      Number.isNaN(nextAmount) ||
-      !draftStartDate ||
-      nextDayOfMonth < 1 ||
-      nextDayOfMonth > 31 ||
-      Number.isNaN(nextDayOfMonth)
-      || !draftAccountId
-    ) {
-      ToastService.warning({
-        title: 'Enter a valid amount and date',
-        duration: 2500,
-        dedupeKey: `recurring-invalid-amount:${recurringTransaction.id}`,
-      })
-      return
-    }
-
-    setIsSavingAmount(true)
-    try {
-      await updateRecurringTransaction(recurringTransaction.id, {
-        amount: nextAmount,
-        startDate: draftStartDate,
-        dayOfMonth: nextDayOfMonth,
-        accountId: draftAccountId,
-        paymentMethodId: draftPaymentMethodId,
-      })
-      ToastService.success({
-        title: 'Fixed payment updated',
-        description: 'Future transactions were recalculated.',
-        duration: 2500,
-        dedupeKey: `recurring-amount-updated:${recurringTransaction.id}`,
-      })
-      setIsEditingAmount(false)
-      await Promise.resolve(onChanged())
-    } catch (err: unknown) {
-      ToastService.apiError(err, {
-        title: 'Could not update amount',
-        duration: 3000,
-        dedupeKey: `recurring-amount-update-failed:${recurringTransaction.id}`,
-      })
-    } finally {
-      setIsSavingAmount(false)
-    }
-  }
+  const caption = [
+    r.category,
+    r.accountName ?? 'No account',
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <>
-      <Card
-        bg={cardBg}
-        border="1px solid"
-        borderColor={cardBorder}
-        borderRadius="xl"
-        boxShadow={ed ? cardShadow : '0 1px 2px rgba(0,0,0,0.04)'}
-        backdropFilter={ed ? 'none' : undefined}
-        overflow="hidden"
-        position="relative"
-        transition="border-color 0.18s ease, box-shadow 0.18s ease"
-        _hover={{
-          borderColor: cardHoverBorder,
-          boxShadow: ed ? cardHoverShadow : '0 3px 10px -6px rgba(0,0,0,0.16)',
-        }}
-      >
-        {recurringTransaction.active && (
-          <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg={activeStripe} />
-        )}
-        <CardBody
-          p={{ base: 3, md: 5 }}
-          pl={recurringTransaction.active ? { base: 4.5, md: 6 } : { base: 3, md: 5 }}
+    <Box
+      as="button"
+      type="button"
+      onClick={() => onOpen(r)}
+      textAlign="left"
+      w="full"
+      position="relative"
+      overflow="hidden"
+      borderRadius="14px"
+      bg="var(--pb-surface)"
+      border="1px solid var(--pb-hair)"
+      boxShadow="0 1px 2px rgba(15,23,42,.05)"
+      opacity={isActive ? 1 : 0.78}
+      transition="border-color .18s ease, box-shadow .18s ease"
+      _hover={{ borderColor: 'var(--pb-hair-2)', boxShadow: 'var(--pb-shadow)' }}
+      _focusVisible={{ outline: '2px solid var(--pb-forest-2)', outlineOffset: '2px' }}
+    >
+      {isActive && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg="var(--pb-forest-2)" />}
+      <Flex align="center" gap="0.85rem" pl={isActive ? '1.1rem' : '0.95rem'} pr="0.85rem" py="0.8rem">
+        <Flex
+          w="38px"
+          h="38px"
+          flexShrink={0}
+          align="center"
+          justify="center"
+          borderRadius="11px"
+          bg={isActive ? accentTint : 'var(--pb-surface-2)'}
+          color={isActive ? amountColor : 'var(--pb-ink-faint)'}
+          border="1px solid var(--pb-hair)"
         >
-          <VStack align="stretch" spacing={{ base: 2.5, md: 4 }}>
-            <HStack justify="space-between" align="flex-start">
-              <HStack spacing={{ base: 2, md: 3 }} minW={0} flex={1}>
-                <Box
-                  w={{ base: 8, md: 9 }}
-                  h={{ base: 8, md: 9 }}
-                  borderRadius="lg"
-                  bg={accentBg}
-                  color={accentFg}
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="center"
-                  flexShrink={0}
-                >
-                  <Icon as={typeIcon} boxSize={{ base: 3.5, md: 4 }} weight="duotone" />
-                </Box>
-                <VStack align="flex-start" spacing={0} minW={0}>
-                  <Text fontWeight={700} fontSize={{ base: 'sm', md: 'md' }} color={titleColor} noOfLines={1}>
-                    {recurringTransaction.description}
-                  </Text>
-                  <Text fontSize="xs" color={captionColor} noOfLines={1} fontWeight={600}>
-                    {recurringTransaction.category}
-                    {recurringTransaction.accountName ? ` · ${recurringTransaction.accountName}` : ' · Account not linked'}
-                  </Text>
-                </VStack>
-              </HStack>
-              <Badge
-                borderRadius="full"
-                px={2.5}
-                py={1}
-                colorScheme={recurringTransaction.active ? 'teal' : 'gray'}
-                textTransform="none"
-              >
-                {recurringTransaction.active ? 'Active' : 'Cancelled'}
-              </Badge>
-            </HStack>
+          <Icon as={typeIcon} boxSize={5} weight="duotone" />
+        </Flex>
 
-            <Box bg={amountPanelBg} borderRadius="xl" p={{ base: 3, md: 4 }} border="1px solid" borderColor={metaBorder}>
-              <HStack justify="space-between" align="flex-start" mb={isEditingAmount ? 2 : 0}>
-                <Text fontSize="xs" color={captionColor} fontWeight={500}>
-                  Fixed monthly amount
-                </Text>
-                {!isEditingAmount && recurringTransaction.active && (
-                  <HStack spacing={1}>
-                    <Tooltip label="Edit fixed payment">
-                      <IconButton
-                        aria-label="Edit fixed payment"
-                        icon={<Icon as={Pencil} boxSize={3.5} />}
-                        size="xs"
-                        variant="ghost"
-                        color={captionColor}
-                        onClick={() => setIsEditingAmount(true)}
-                      />
-                    </Tooltip>
-                    <Tooltip label="Cancel future transactions">
-                      <IconButton
-                        aria-label="Cancel fixed payment"
-                        icon={<Icon as={Trash2} boxSize={3.5} />}
-                        size="xs"
-                        variant="ghost"
-                        color={captionColor}
-                        _hover={{ bg: deleteHoverBg, color: 'red.500' }}
-                        onClick={onOpen}
-                      />
-                    </Tooltip>
-                  </HStack>
-                )}
-              </HStack>
+        <Box flex={1} minW={0}>
+          <Text fontWeight={600} fontSize="sm" color="var(--pb-ink)" noOfLines={1} lineHeight="1.3">
+            {r.description}
+          </Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
+            {caption}
+          </Text>
+        </Box>
 
-              <VStack align="stretch" spacing={2}>
-                {isEditingAmount ? (
-                  <VStack align="stretch" spacing={3}>
-                    <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
-                      <FormControl>
-                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
-                          Amount
-                        </FormLabel>
-                        <Input
-                          value={draftAmount}
-                          onChange={(event) => setDraftAmount(event.target.value)}
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          size="sm"
-                          fontWeight={700}
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
-                          Start date
-                        </FormLabel>
-                        <Input
-                          value={draftStartDate}
-                          onChange={(event) => setDraftStartDate(event.target.value)}
-                          type="date"
-                          size="sm"
-                        />
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
-                          Payment day
-                        </FormLabel>
-                        <Input
-                          value={draftDayOfMonth}
-                          onChange={(event) => setDraftDayOfMonth(event.target.value)}
-                          type="number"
-                          min={1}
-                          max={31}
-                          step={1}
-                          size="sm"
-                        />
-                      </FormControl>
-                    </SimpleGrid>
-                    <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
-                      <FormControl>
-                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
-                          Account
-                        </FormLabel>
-                        <Select
-                          size="sm"
-                          value={draftAccountId ?? ''}
-                          onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
-                          placeholder="Select account"
-                        >
-                          {accounts.filter((account) => account.active).map((account) => (
-                            <option key={account.id} value={account.id}>{account.name}</option>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl>
-                        <FormLabel fontSize="2xs" color={captionColor} fontWeight={700}>
-                          Payment method
-                        </FormLabel>
-                        <Select
-                          size="sm"
-                          value={draftPaymentMethodId ?? ''}
-                          onChange={(event) => setDraftPaymentMethodId(event.target.value ? Number(event.target.value) : null)}
-                        >
-                          <option value="">No payment method</option>
-                          {paymentMethods.filter((method) => method.active).map((method) => (
-                            <option key={method.id} value={method.id}>{method.name}</option>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </SimpleGrid>
-                    <HStack spacing={2} flexWrap="wrap">
-                      <Button
-                        size="sm"
-                        colorScheme="teal"
-                        onClick={handleSaveAmount}
-                        isLoading={isSavingAmount}
-                        isDisabled={!draftAccountId}
-                        leftIcon={<Icon as={Check} boxSize={3.5} />}
-                      >
-                        Save
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => {
-                          setDraftAmount(String(recurringTransaction.amount))
-                          setDraftStartDate(recurringTransaction.startDate)
-                          setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
-                          setDraftAccountId(recurringTransaction.accountId ?? null)
-                          setDraftPaymentMethodId(recurringTransaction.paymentMethodId ?? null)
-                          setIsEditingAmount(false)
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </HStack>
-                  </VStack>
-                ) : (
-                  <HStack spacing={2}>
-                    <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={800} color={accentFg} lineHeight="1.05">
-                      £{recurringTransaction.amount.toFixed(2)}
-                    </Text>
-                  </HStack>
-                )}
-              </VStack>
-            </Box>
+        {/* Monthly amount */}
+        <VStack align="flex-end" spacing={0} flexShrink={0} display={{ base: 'none', sm: 'flex' }}>
+          <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Monthly
+          </Text>
+          <Text fontSize="md" fontWeight={600} color={amountColor} lineHeight="1.1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {isIncome ? '+' : '−'}{money(r.amount)}
+          </Text>
+        </VStack>
 
-            <SimpleGrid columns={{ base: 2, md: 2 }} spacing={{ base: 1.5, md: 2 }}>
-              <MetaTile
-                label="Payment day"
-                value={`Day ${recurringTransaction.dayOfMonth}`}
-                bg={metaBg}
-                borderColor={metaBorder}
-                titleColor={titleColor}
-                captionColor={captionColor}
-              />
-              <MetaTile
-                label="Next payment"
-                value={formatDate(recurringTransaction.nextRunDate)}
-                bg={metaBg}
-                borderColor={metaBorder}
-                titleColor={titleColor}
-                captionColor={captionColor}
-              />
-            </SimpleGrid>
-          </VStack>
-        </CardBody>
-      </Card>
-
-      <AlertDialog
-        isOpen={isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={onClose}
-        isCentered
-        motionPreset="slideInBottom"
-      >
-        <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
-          <AlertDialogContent bg={dialogBg} borderRadius="xl" maxW="440px" mx={4}>
-            <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
-              <Box
-                w={9}
-                h={9}
-                borderRadius="lg"
-                bg={warningChipBg}
-                color={warningChipFg}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-              >
-                <Icon as={AlertTriangle} boxSize={4} strokeWidth={2.25} />
-              </Box>
-              <VStack align="flex-start" spacing={0}>
-                <Text fontWeight={700} fontSize="md" color={titleColor}>
-                  Cancel fixed payment
-                </Text>
-                <Text fontSize="xs" color={captionColor}>
-                  Existing transactions will stay in your history.
-                </Text>
-              </VStack>
-            </AlertDialogHeader>
-
-            <AlertDialogBody px={6} pb={4}>
-              <Text fontSize="sm" color={captionColor}>
-                Future payments for <Text as="span" fontWeight={700} color={titleColor}>{recurringTransaction.description}</Text>{' '}
-                will stop being generated.
+        {/* Status / schedule */}
+        <Box w="92px" flexShrink={0} display={{ base: 'none', md: 'flex' }} justifyContent="center">
+          {isActive ? (
+            <Text
+              fontSize="2xs"
+              fontWeight={600}
+              px={2.5}
+              py={1}
+              borderRadius="999px"
+              bg="var(--pb-surface-2)"
+              color="var(--pb-ink-soft)"
+              whiteSpace="nowrap"
+            >
+              Day {r.dayOfMonth}
+            </Text>
+          ) : (
+            <HStack
+              spacing={1}
+              px={2.5}
+              py={1}
+              borderRadius="999px"
+              bg="var(--pb-surface-2)"
+              color="var(--pb-ink-faint)"
+            >
+              <Text fontSize="2xs" fontWeight={700} textTransform="uppercase" letterSpacing="0.04em">
+                Cancelled
               </Text>
-            </AlertDialogBody>
+            </HStack>
+          )}
+        </Box>
 
-            <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
-              <Button ref={cancelRef} onClick={onClose} variant="ghost" fontSize="sm" color={captionColor}>
-                Keep active
-              </Button>
-              <Button colorScheme="red" onClick={handleCancel} isLoading={isCancelling} fontSize="sm">
-                Cancel payment
-              </Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
-  )
-}
-
-interface MetaTileProps {
-  label: string
-  value: string
-  bg: string
-  borderColor: string
-  titleColor: string
-  captionColor: string
-}
-
-function MetaTile({
-  label,
-  value,
-  bg,
-  borderColor,
-  titleColor,
-  captionColor,
-}: MetaTileProps) {
-  return (
-    <Box bg={bg} border="1px solid" borderColor={borderColor} borderRadius="lg" p={{ base: 2, md: 3 }}>
-      <Text fontSize="2xs" color={captionColor} fontWeight={700} textTransform="uppercase">
-        {label}
-      </Text>
-      <Text fontSize={{ base: '2xs', md: 'xs' }} color={titleColor} fontWeight={800} mt={0.5} noOfLines={1}>
-        {value}
-      </Text>
+        <Icon as={ChevronRight} boxSize={4} color="var(--pb-ink-faint)" flexShrink={0} />
+      </Flex>
     </Box>
   )
 }

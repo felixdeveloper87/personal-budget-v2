@@ -17,6 +17,7 @@ import {
 import { ArrowRight, ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
+import InstallmentPlanDrawer from './InstallmentPlanDrawer'
 import { InstallmentPlan } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
@@ -41,10 +42,16 @@ export default function InstallmentPlansModal({
 }: InstallmentPlansModalProps) {
   const colors = useThemeColors()
   const [hideActiveList, setHideActiveList] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
 
   useEffect(() => {
     if (!isOpen) setHideActiveList(false)
   }, [isOpen])
+
+  // Keep the open drawer pointed at the freshest plan data after a reload.
+  useEffect(() => {
+    setSelectedPlan((current) => (current ? plans.find((plan) => plan.id === current.id) ?? null : null))
+  }, [plans])
 
   const ed = useEd()
   const surfaceBgBase = useColorModeValue('#ffffff', '#0a0a0a')
@@ -308,7 +315,7 @@ export default function InstallmentPlansModal({
               emptyMessage="No active plans right now."
               plans={activePlans}
               variant="active"
-              onDeleted={onPlanDeleted}
+              onOpen={setSelectedPlan}
               labelColor={sectionLabelColor}
               dividerColor={dividerColor}
               showPlans={!hideActiveList}
@@ -337,7 +344,7 @@ export default function InstallmentPlansModal({
                 count={pastPlans.length}
                 plans={pastPlans}
                 variant="past"
-                onDeleted={onPlanDeleted}
+                onOpen={setSelectedPlan}
                 labelColor={sectionLabelColor}
                 dividerColor={dividerColor}
                 collapsible
@@ -356,6 +363,8 @@ export default function InstallmentPlansModal({
       items={assignmentItems}
       onAssigned={onPlanDeleted}
     />
+
+    <InstallmentPlanDrawer plan={selectedPlan} onClose={() => setSelectedPlan(null)} onChanged={onPlanDeleted} />
     </>
   )
 }
@@ -420,7 +429,7 @@ interface PlansSectionProps {
   count: number
   plans: InstallmentPlan[]
   variant: 'active' | 'past'
-  onDeleted: () => void
+  onOpen: (plan: InstallmentPlan) => void
   emptyMessage?: string
   labelColor: string
   dividerColor: string
@@ -440,7 +449,7 @@ function PlansSection({
   count,
   plans,
   variant,
-  onDeleted,
+  onOpen,
   emptyMessage,
   labelColor,
   dividerColor,
@@ -560,15 +569,15 @@ function PlansSection({
             )
           ) : !showPlans ? null : (
             <SimpleGrid
-              columns={{ base: 1, md: 2 }}
-              spacing={{ base: 3, md: 5 }}
+              columns={1}
+              spacing={{ base: 2, md: 2.5 }}
               w="full"
             >
               {plans.map((plan) => (
                 <InstallmentPlanCard
                   key={plan.id}
                   plan={plan}
-                  onDeleted={onDeleted}
+                  onOpen={onOpen}
                   variant={variant}
                 />
               ))}
