@@ -22,7 +22,13 @@ export default function RecentActivity({
   limit = 6,
 }: RecentActivityProps) {
   const items = useMemo(() => {
+    // "Recent" means activity that has already happened — exclude future-dated
+    // entries (scheduled installments/recurring) so they don't crowd out the
+    // genuinely latest transactions.
+    const cutoff = new Date()
+    cutoff.setHours(23, 59, 59, 999)
     return [...transactions]
+      .filter((t) => getTransactionDate(t, dateBasis).getTime() <= cutoff.getTime())
       .sort(
         (a, b) =>
           getTransactionDate(b, dateBasis).getTime() -
