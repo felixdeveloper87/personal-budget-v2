@@ -9,7 +9,7 @@ import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PaperFooter from '../dashboard/components/PaperFooter'
-import FlowSummary from '../dashboard/components/FlowSummary'
+import FlowSummary, { type FlowMetric } from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import { PageHeader } from '../../components/ui'
 import { Wallet } from '../../components/ui/icons'
@@ -77,6 +77,22 @@ export default function PaymentsPage() {
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
 
+  // Outflow-focused triad: total owed this period, what has already settled, and
+  // what is still scheduled — split on settlement date vs today.
+  const paymentMetrics = useMemo<FlowMetric[]>(() => {
+    const today = isoOf(new Date())
+    let paid = 0
+    for (const t of vm) {
+      if (t.type === 'out' && t.settlementDate <= today) paid += t.amount
+    }
+    const upcoming = Math.max(0, periodData.expense - paid)
+    return [
+      { label: 'Spending', value: periodData.expense, accent: 'var(--pb-coral)' },
+      { label: 'Paid', value: paid, accent: 'var(--pb-income)' },
+      { label: 'Upcoming', value: upcoming, accent: 'var(--pb-gold-2)' },
+    ]
+  }, [vm, periodData.expense])
+
   const days = useMemo(
     () => buildDays(periodData.startDate, periodData.endDate),
     [periodData.startDate, periodData.endDate],
@@ -108,7 +124,12 @@ export default function PaymentsPage() {
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
-          <FlowSummary income={periodData.income} expense={periodData.expense} balance={periodData.balance} />
+          <FlowSummary
+            income={periodData.income}
+            expense={periodData.expense}
+            balance={periodData.balance}
+            metrics={paymentMetrics}
+          />
         </MotionBox>
 
         <MotionBox variants={riseV}>

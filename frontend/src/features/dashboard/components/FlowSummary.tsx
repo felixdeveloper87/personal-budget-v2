@@ -1,15 +1,24 @@
 import { Box, Grid, Text } from '@chakra-ui/react'
 import { fmtCurrency } from './format'
 
+export interface FlowMetric {
+  label: string
+  value: number
+  accent: string
+}
+
 interface FlowSummaryProps {
   income: number
   expense: number
   balance: number
+  /** Override the default Income/Spending/Net-flow triad (used by Payments). */
+  metrics?: FlowMetric[]
 }
 
-/** Income / Spending / Net-flow summary triad shared by Behaviour & Payments. */
-export default function FlowSummary({ income, expense, balance }: FlowSummaryProps) {
-  const metrics = [
+/** Three-up summary triad. Defaults to Income / Spending / Net flow (Behaviour);
+ * callers can pass their own `metrics` for an outflow-focused breakdown. */
+export default function FlowSummary({ income, expense, balance, metrics }: FlowSummaryProps) {
+  const triad: FlowMetric[] = metrics ?? [
     { label: 'Income', value: income, accent: 'var(--pb-income)' },
     { label: 'Spending', value: expense, accent: 'var(--pb-coral)' },
     {
@@ -21,7 +30,7 @@ export default function FlowSummary({ income, expense, balance }: FlowSummaryPro
 
   return (
     <Grid templateColumns={{ base: 'repeat(3, 1fr)' }} gap="0.7rem">
-      {metrics.map((metric) => (
+      {triad.map((metric) => (
         <Box
           key={metric.label}
           position="relative"

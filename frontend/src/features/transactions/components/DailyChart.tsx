@@ -46,6 +46,9 @@ export default function DailyChart({
     { iso: string; leftPct: number; inV: number; outV: number } | null
   >(null)
 
+  // Payments is an outflow-only lens — drop the income series entirely.
+  const showIncome = view !== 'payments'
+
   const totals = useMemo(() => {
     const map = new Map<string, { in: number; out: number }>()
     for (const t of txns) {
@@ -65,7 +68,7 @@ export default function DailyChart({
     let maximum = 0
     for (const day of days) {
       const values = totals.get(day.iso)
-      if (values) maximum = Math.max(maximum, values.in, values.out)
+      if (values) maximum = Math.max(maximum, showIncome ? values.in : 0, values.out)
     }
     return maximum || 1
   }, [days, totals])
@@ -105,8 +108,10 @@ export default function DailyChart({
     <Box className="pb-chart-card">
       <Flex className="pb-chart-heading" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap=".75rem" direction={{ base: 'column', sm: 'row' }}>
         <Box>
-          <Text className="pb-chart-kicker">Cash flow</Text>
-          <Text className="pb-chart-caption">Daily income and spending</Text>
+          <Text className="pb-chart-kicker">{showIncome ? 'Cash flow' : 'Outflow'}</Text>
+          <Text className="pb-chart-caption">
+            {showIncome ? 'Daily income and spending' : 'Daily payments by settlement date'}
+          </Text>
         </Box>
         <Text className="pb-chart-instruction">Select a day to filter activity</Text>
       </Flex>
@@ -117,7 +122,7 @@ export default function DailyChart({
             <div className="pb-chart-tip-head">
               {WD_SHORT[parseISO(hover.iso).getDay()]} {parseISO(hover.iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }).toUpperCase()}
             </div>
-            <div className="pb-chart-tip-row in"><span>In</span><span>{fmtCurrency(hover.inV, { minimumFractionDigits: 2 })}</span></div>
+            {showIncome && <div className="pb-chart-tip-row in"><span>In</span><span>{fmtCurrency(hover.inV, { minimumFractionDigits: 2 })}</span></div>}
             <div className="pb-chart-tip-row out"><span>Out</span><span>{fmtCurrency(hover.outV, { minimumFractionDigits: 2 })}</span></div>
           </Box>
         )}
@@ -126,7 +131,7 @@ export default function DailyChart({
           className={svgClass}
           viewBox={`0 0 ${VW} ${VH}`}
           role="img"
-          aria-label={`Daily income and spending for ${monthLabel}`}
+          aria-label={`${showIncome ? 'Daily income and spending' : 'Daily payments'} for ${monthLabel}`}
           onMouseLeave={() => setHover(null)}
         >
           <defs>
@@ -153,9 +158,9 @@ export default function DailyChart({
           <g>
             {days.map((day, i) => {
               const values = totals.get(day.iso)
-              if (!values || (values.in === 0 && values.out === 0)) return null
+              if (!values || ((!showIncome || values.in === 0) && values.out === 0)) return null
               const hOut = scale(values.out)
-              const hIn = scale(values.in)
+              const hIn = showIncome ? scale(values.in) : 0
               const x = i * colW + colW * 0.08
               const w = Math.max(2, colW * 0.84)
               const style = reduce ? undefined : ({ animationDelay: `${i * 9}ms` } as const)
@@ -187,7 +192,7 @@ export default function DailyChart({
       </Box>
 
       <Flex className="pb-chart-legend" align="center" gap="1rem" flexWrap="wrap">
-        <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text></HStack>
+        {showIncome && <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text></HStack>}
         <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #d84a39, #c23a2c)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Spending</Text></HStack>
       </Flex>
     </Box>

@@ -25,7 +25,12 @@ interface ActivityPaneProps {
   reduce: boolean
 }
 
-const FILTERS: TxFilter[] = ['all', 'in', 'out', 'deferred']
+// Payments is outflow-only — the In/Out split is meaningless there, so the
+// schedule keeps just All + Deferred (installments clearing in another month).
+const FILTERS_BY_VIEW: Record<TxState['view'], TxFilter[]> = {
+  behaviour: ['all', 'in', 'out', 'deferred'],
+  payments: ['all', 'deferred'],
+}
 const DOT_COLOR: Partial<Record<TxFilter, string>> = {
   in: 'var(--pb-income-2)',
   out: 'var(--pb-coral)',
@@ -118,7 +123,7 @@ export default function ActivityPane({
         aria-label="Filter transactions"
         mb=".9rem"
       >
-        {FILTERS.map((f) => (
+        {FILTERS_BY_VIEW[state.view].map((f) => (
           <Chip key={f} value={f} active={state.filter === f} onClick={() => onSetFilter(f)} />
         ))}
       </Flex>

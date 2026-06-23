@@ -25,7 +25,9 @@ export default function Distribution({
   periodLabel,
   initialSide = 'expense',
 }: DistributionProps) {
-  const [side, setSide] = useState<Side>(initialSide)
+  // Payments is an outflow-only lens — lock to expense and hide the income tab.
+  const lockExpense = view === 'payments'
+  const [side, setSide] = useState<Side>(lockExpense ? 'expense' : initialSide)
   // `pinned` is a click-selected category that persists; `hovered` is a transient
   // pointer preview. The donut highlights whichever is in effect (hover wins).
   const [pinned, setPinned] = useState<string | null>(null)
@@ -129,7 +131,7 @@ export default function Distribution({
             {side === 'expense' ? 'Share of spending by category' : 'Share of income by source'}
           </Text>
         </VStack>
-        <SideToggle value={side} onChange={setSide} />
+        {!lockExpense && <SideToggle value={side} onChange={setSide} />}
       </Flex>
 
       {/* Body */}
