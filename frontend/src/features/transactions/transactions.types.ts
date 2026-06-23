@@ -32,6 +32,13 @@ export interface TxnVM {
   purchaseDate: string // "YYYY-MM-DD" — when bought
   settlementDate: string // "YYYY-MM-DD" — when it clears
   deferred: boolean // settlementDate month !== purchaseDate month
+  paymentMethodId: number | null // links a charge to its card (statement grouping)
+  /**
+   * Set only on synthetic credit-card statement (fatura) rows on the Payments
+   * page: the card's charges due that day are folded into one invoice line that
+   * links to the Cards page instead of opening a transaction drawer.
+   */
+  statement?: { cardId: number; count: number }
 }
 
 export type TxView = 'behaviour' | 'payments'

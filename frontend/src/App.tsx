@@ -31,7 +31,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   'fixed-payments': ({ onPageChange }) => <FixedPaymentsPage onPageChange={onPageChange} />,
   behaviour: () => <BehaviourPage />,
   'all-transactions': () => <AllTransactionsPage />,
-  payments: () => <PaymentsPage />,
+  payments: ({ onPageChange }) => <PaymentsPage onPageChange={onPageChange} />,
   goals: () => <GoalsPage />,
   planning: ({ onPageChange }) => <PlanningPage onPageChange={onPageChange} />,
   reports: () => <ReportsPage />,

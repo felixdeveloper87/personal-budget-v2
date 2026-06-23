@@ -59,6 +59,7 @@ export function toViewModel(transactions: Transaction[]): TxnVM[] {
       purchaseDate,
       settlementDate,
       deferred: settlementDate.slice(0, 7) !== purchaseDate.slice(0, 7),
+      paymentMethodId: t.paymentMethodId ?? null,
     }
   })
 }
@@ -177,6 +178,60 @@ export function buildLedger(txns: TxnVM[], state: TxState): LedgerGroup[] {
   }
   groups.sort((a, b) => b.key.localeCompare(a.key))
   return groups
+}
+
+/**
+ * Payments-only: collapse each credit card's charges within a day group into a
+ * single statement (fatura) row showing the invoice total due that day. Credit
+ * card charges already settle on their statement's due date, so every charge of
+ * one statement lands on the same group key — folding them by card here turns a
+ * wall of line items into one invoice line. The per-charge detail lives on the
+ * Cards page, so the synthetic row links there (see `statement`) rather than
+ * opening a transaction drawer. Group totals are untouched (the sum is equal).
+ */
+export function collapseCardStatements(
+  groups: LedgerGroup[],
+  cardNames: Map<number, string>,
+): LedgerGroup[] {
+  if (cardNames.size === 0) return groups
+  return groups.map((g) => {
+    const passthrough: TxnVM[] = []
+    const byCard = new Map<number, TxnVM[]>()
+    for (const r of g.rows) {
+      const isCardCharge =
+        r.type === 'out' && r.paymentMethodId != null && cardNames.has(r.paymentMethodId)
+      if (!isCardCharge) {
+        passthrough.push(r)
+        continue
+      }
+      const arr = byCard.get(r.paymentMethodId!)
+      if (arr) arr.push(r)
+      else byCard.set(r.paymentMethodId!, [r])
+    }
+    if (byCard.size === 0) return g
+
+    const statementRows: TxnVM[] = []
+    for (const [cardId, rows] of byCard) {
+      const name = cardNames.get(cardId) ?? 'Credit card'
+      statementRows.push({
+        id: `stmt-${cardId}-${g.key}`,
+        merchant: name,
+        category: 'Credit card statement',
+        iconKey: 'tag',
+        account: name,
+        type: 'out',
+        amount: rows.reduce((sum, r) => sum + r.amount, 0),
+        purchaseDate: g.key,
+        settlementDate: g.key,
+        deferred: false,
+        paymentMethodId: cardId,
+        statement: { cardId, count: rows.length },
+      })
+    }
+
+    const merged = [...passthrough, ...statementRows].sort((a, b) => b.amount - a.amount)
+    return { ...g, rows: merged }
+  })
 }
 
 /* -------------------------------------------------------------------------- */

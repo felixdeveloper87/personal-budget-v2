@@ -84,7 +84,6 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
               icon={CreditCard}
               title="Installments"
               subtitle="Track every purchase plan, remaining payment and completed agreement."
-              rightSlot={<ActionButton label="Add from Home" icon={Plus} primary onClick={() => onPageChange?.('dashboard')} />}
             />
           </MotionBox>
 

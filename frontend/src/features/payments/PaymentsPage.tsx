@@ -17,9 +17,11 @@ import { Wallet } from '../../components/ui/icons'
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityPane from '../transactions/components/ActivityPane'
 import TransactionDrawer from '../transactions/components/TransactionDrawer'
-import { buildLedger, toViewModel, txReducer } from '../transactions/transactions.utils'
+import { buildLedger, collapseCardStatements, toViewModel, txReducer } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { initialTxState } from '../transactions/transactions.types'
+import { listPaymentMethods } from '../../api'
+import type { AppPage } from '../../components/layout/header/navigation.config'
 
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
@@ -45,8 +47,33 @@ function buildDays(start: Date, end: Date): ChartDay[] {
   return days
 }
 
-export default function PaymentsPage() {
+interface PaymentsPageProps {
+  onPageChange?: (page: AppPage) => void
+}
+
+export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   const reduce = useReducedMotion() ?? false
+
+  // Credit-card id → name, used to fold a card's charges into one fatura row.
+  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
+  useEffect(() => {
+    let alive = true
+    listPaymentMethods()
+      .then((methods) => {
+        if (!alive) return
+        const map = new Map<number, string>()
+        for (const m of methods) {
+          if (m.type === 'CREDIT_CARD') map.set(m.id, m.name)
+        }
+        setCardNames(map)
+      })
+      .catch(() => {
+        // A failed lookup just means cards render as individual rows — no fatal.
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   const {
     selectedDate,
@@ -97,7 +124,10 @@ export default function PaymentsPage() {
     () => buildDays(periodData.startDate, periodData.endDate),
     [periodData.startDate, periodData.endDate],
   )
-  const groups = useMemo(() => buildLedger(vm, state), [vm, state])
+  const groups = useMemo(
+    () => collapseCardStatements(buildLedger(vm, state), cardNames),
+    [vm, state, cardNames],
+  )
 
   const periodLabel = formatLabel()
 
@@ -173,7 +203,7 @@ export default function PaymentsPage() {
             onSetQuery={(q) => dispatch({ type: 'SET_Q', q })}
             onSetFilter={(filter) => dispatch({ type: 'SET_FILTER', filter })}
             onClearDay={() => dispatch({ type: 'SET_DAY', day: null })}
-            onOpen={setDrawerTxn}
+            onOpen={(txn) => (txn.statement ? onPageChange?.('cards') : setDrawerTxn(txn))}
             reduce={reduce}
           />
         </MotionBox>
