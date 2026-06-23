@@ -20,7 +20,7 @@ function paymentDateOf(t: Transaction): Date {
 export default function UpcomingPayments({
   transactions,
   onPageChange,
-  limit = 5,
+  limit = 6,
 }: UpcomingPaymentsProps) {
   const { items, total } = useMemo(() => {
     const now = new Date()
