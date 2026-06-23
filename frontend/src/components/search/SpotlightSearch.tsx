@@ -247,48 +247,66 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
           pb={3}
           borderBottom="1px solid var(--pb-hair)"
         >
-          <InputGroup>
-            <InputLeftElement pointerEvents="none" h="full">
-              <Icon as={Search} boxSize="18px" color="var(--pb-forest-2)" />
-            </InputLeftElement>
-            <Input
-              ref={inputRef}
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Search transactions…"
-              fontFamily="var(--pb-serif)"
-              fontSize="1.05rem"
+          <HStack spacing={{ base: 2, sm: 3 }} align="stretch">
+            <InputGroup flex="1">
+              <InputLeftElement pointerEvents="none" h="full">
+                <Icon as={Search} boxSize="18px" color="var(--pb-forest-2)" />
+              </InputLeftElement>
+              <Input
+                ref={inputRef}
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Search transactions…"
+                fontFamily="var(--pb-serif)"
+                fontSize="1.05rem"
+                h="48px"
+                pr="44px"
+                bg="var(--pb-surface)"
+                border="1px solid var(--pb-hair)"
+                borderRadius="14px"
+                color="var(--pb-ink)"
+                _placeholder={{ color: 'var(--pb-ink-faint)' }}
+                _hover={{ borderColor: 'var(--pb-hair-2)' }}
+                _focus={{
+                  borderColor: 'var(--pb-hair-2)',
+                  boxShadow: 'var(--pb-shadow-lift)',
+                }}
+              />
+              {q && (
+                <InputRightElement h="full" pr="6px">
+                  <IconButton
+                    aria-label="Clear search"
+                    icon={<Icon as={X} boxSize="14px" />}
+                    size="xs"
+                    variant="ghost"
+                    color="var(--pb-ink-faint)"
+                    borderRadius="full"
+                    onClick={() => {
+                      setQ('')
+                      inputRef.current?.focus()
+                    }}
+                    _hover={{ bg: 'var(--pb-surface-2)', color: 'var(--pb-ink)' }}
+                  />
+                </InputRightElement>
+              )}
+            </InputGroup>
+
+            <IconButton
+              aria-label="Close search"
+              icon={<Icon as={X} boxSize="18px" />}
+              onClick={onClose}
               h="48px"
-              pr="44px"
+              w="48px"
+              minW="48px"
+              flexShrink={0}
               bg="var(--pb-surface)"
               border="1px solid var(--pb-hair)"
               borderRadius="14px"
-              color="var(--pb-ink)"
-              _placeholder={{ color: 'var(--pb-ink-faint)' }}
-              _hover={{ borderColor: 'var(--pb-hair-2)' }}
-              _focus={{
-                borderColor: 'var(--pb-hair-2)',
-                boxShadow: 'var(--pb-shadow-lift)',
-              }}
+              color="var(--pb-ink-soft)"
+              _hover={{ borderColor: 'var(--pb-hair-2)', color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
             />
-            {q && (
-              <InputRightElement h="full" pr="6px">
-                <IconButton
-                  aria-label="Clear search"
-                  icon={<Icon as={X} boxSize="14px" />}
-                  size="xs"
-                  variant="ghost"
-                  color="var(--pb-ink-faint)"
-                  borderRadius="full"
-                  onClick={() => {
-                    setQ('')
-                    inputRef.current?.focus()
-                  }}
-                  _hover={{ bg: 'var(--pb-surface-2)', color: 'var(--pb-ink)' }}
-                />
-              </InputRightElement>
-            )}
-          </InputGroup>
+          </HStack>
 
           <Flex
             gap=".45rem"
