@@ -89,6 +89,16 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     dateBasis,
   )
 
+  // Recent activity mirrors the Behaviour lens (by purchase date) instead of the
+  // cash-flow lens the rest of the home is anchored to.
+  const behaviourPeriodData = usePeriodData(
+    transactions,
+    null,
+    selectedPeriod,
+    selectedDate,
+    'activity',
+  )
+
   /* ── Side data: accounts, forecast, installments, recurring ── */
   const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null)
   const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
@@ -388,7 +398,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             <UpcomingPayments transactions={transactions} onPageChange={onPageChange} />
           </MotionBox>
           <MotionBox variants={riseV}>
-            <RecentActivity transactions={periodData.transactions} dateBasis={dateBasis} onPageChange={onPageChange} />
+            <RecentActivity transactions={behaviourPeriodData.transactions} dateBasis="activity" onPageChange={onPageChange} />
           </MotionBox>
         </Grid>
 
