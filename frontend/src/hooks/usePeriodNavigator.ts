@@ -1,10 +1,9 @@
 import { useState, useCallback } from 'react'
 import { PeriodType } from '../types'
 
-export function usePeriodNavigator(initialTab: 'expenses' | 'incomes' = 'expenses') {
+export function usePeriodNavigator() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
-  const [activeTab, setActiveTab] = useState<'expenses' | 'incomes'>(initialTab)
 
   const onDateChange = useCallback((date: Date) => {
     setSelectedDate(date)
@@ -39,6 +38,37 @@ export function usePeriodNavigator(initialTab: 'expenses' | 'incomes' = 'expense
   const goToToday = useCallback(() => {
     setSelectedDate(new Date())
   }, [])
+
+  // True when the navigated period contains today — used to show a "Now" badge
+  // instead of a "Today" jump button.
+  const isCurrentPeriod = (() => {
+    const now = new Date()
+    switch (selectedPeriod) {
+      case 'day':
+        return (
+          selectedDate.getFullYear() === now.getFullYear() &&
+          selectedDate.getMonth() === now.getMonth() &&
+          selectedDate.getDate() === now.getDate()
+        )
+      case 'week': {
+        const startOfWeek = (d: Date) => {
+          const s = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+          const day = s.getDay()
+          s.setDate(s.getDate() - (day === 0 ? 6 : day - 1))
+          return s.getTime()
+        }
+        return startOfWeek(selectedDate) === startOfWeek(now)
+      }
+      case 'year':
+        return selectedDate.getFullYear() === now.getFullYear()
+      case 'month':
+      default:
+        return (
+          selectedDate.getFullYear() === now.getFullYear() &&
+          selectedDate.getMonth() === now.getMonth()
+        )
+    }
+  })()
 
   const formatLabel = useCallback(() => {
     if (selectedPeriod === 'month') {
@@ -75,12 +105,11 @@ export function usePeriodNavigator(initialTab: 'expenses' | 'incomes' = 'expense
   return {
     selectedDate,
     selectedPeriod,
-    activeTab,
-    setActiveTab,
     onDateChange,
     onPeriodChange,
     navigatePeriod,
     goToToday,
     formatLabel,
+    isCurrentPeriod,
   }
 }

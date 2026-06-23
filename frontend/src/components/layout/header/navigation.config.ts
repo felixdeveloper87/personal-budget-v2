@@ -1,6 +1,6 @@
 import {
   FileText,
-  Layers,
+  Activity,
   LayoutDashboard,
   List,
   ReceiptText,
@@ -21,9 +21,9 @@ export type AppPage =
   | 'transfers'
   | 'installments'
   | 'fixed-payments'
-  | 'transactions'
+  | 'behaviour'
   | 'all-transactions'
-  | 'categories'
+  | 'payments'
   | 'goals'
   | 'planning'
   | 'reports'
@@ -46,18 +46,18 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Overview of your finances',
   },
   {
-    id: 'transactions',
-    label: 'Transactions',
-    shortLabel: 'Activity',
-    icon: ReceiptText,
-    description: 'All income and expenses',
+    id: 'behaviour',
+    label: 'Behaviour',
+    shortLabel: 'Behaviour',
+    icon: Activity,
+    description: 'How you spend, by purchase date',
   },
   {
-    id: 'categories',
-    label: 'Categories',
-    shortLabel: 'Categories',
-    icon: Layers,
-    description: 'Breakdown by category',
+    id: 'payments',
+    label: 'Payments',
+    shortLabel: 'Payments',
+    icon: ReceiptText,
+    description: 'When money leaves and what is ahead',
   },
   {
     id: 'accounts',

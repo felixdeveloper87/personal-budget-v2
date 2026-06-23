@@ -1,9 +1,9 @@
 import { Box, Flex, HStack, IconButton, Text } from '@chakra-ui/react'
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { PeriodType } from '../../../types'
-import Segmented from '../../dashboard/components/Segmented'
+import Segmented from './Segmented'
 
-interface PeriodToolbarProps {
+interface PeriodNavBarProps {
   selectedPeriod: PeriodType
   label: string
   isCurrent: boolean
@@ -13,8 +13,10 @@ interface PeriodToolbarProps {
 }
 
 const PERIOD_OPTIONS: Array<{ value: PeriodType; label: string }> = [
+  { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
+  { value: 'year', label: 'Year' },
 ]
 
 const navBtnSx = {
@@ -26,23 +28,23 @@ const navBtnSx = {
   _hover: { bg: 'var(--pb-surface-2)', borderColor: 'var(--pb-hair-2)' },
 }
 
-export default function PeriodToolbar({
+/**
+ * Period range selector (day / week / month / year) + prev/next navigation,
+ * shared by the Behaviour and Payments pages. No "view as" lens toggle — each
+ * page is locked to a single lens.
+ */
+export default function PeriodNavBar({
   selectedPeriod,
   label,
   isCurrent,
   onPeriodChange,
   onNavigate,
   onGoToToday,
-}: PeriodToolbarProps) {
+}: PeriodNavBarProps) {
   const navSize = { base: '30px', sm: '32px' }
 
   return (
-    <Flex
-      wrap="wrap"
-      align="center"
-      gap=".7rem"
-      mb="clamp(1.2rem,2.6vw,1.7rem)"
-    >
+    <Flex wrap="wrap" align="center" gap=".7rem" mb="clamp(1.2rem,2.6vw,1.7rem)">
       <Segmented
         options={PERIOD_OPTIONS}
         value={selectedPeriod}
@@ -92,7 +94,7 @@ export default function PeriodToolbar({
               fontWeight={500}
               whiteSpace="nowrap"
             >
-              This month
+              Now
             </Box>
           ) : (
             <Box
@@ -117,8 +119,6 @@ export default function PeriodToolbar({
               Today
             </Box>
           )}
-
-          <ChevronDown size={14} color="var(--pb-ink-faint)" aria-hidden />
         </HStack>
 
         <IconButton

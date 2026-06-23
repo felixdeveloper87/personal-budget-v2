@@ -223,7 +223,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                         showBackButton={!isSplit}
                         onBack={() => setDetailOpen(false)}
                         onTransfer={() => onPageChange?.('transfers')}
-                        onViewAll={() => onPageChange?.('transactions')}
+                        onViewAll={() => onPageChange?.('behaviour')}
                       />
                     </Box>
                   )}

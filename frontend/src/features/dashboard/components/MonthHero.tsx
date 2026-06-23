@@ -1,17 +1,17 @@
+import type { ReactNode } from 'react'
 import { Box, Grid, HStack, Text, VStack, Button } from '@chakra-ui/react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
 import BalanceSeal from './BalanceSeal'
 import { fmtCurrency } from './format'
-import type { TransactionDateBasis } from '../../../utils/transactionDates'
 
 interface MonthHeroProps {
   income: number
   expense: number
   net: number
   transactions: number
-  serialLabel: string
-  dateBasis: TransactionDateBasis
+  /** Month navigation rendered along the hero's top rule. */
+  headerSlot?: ReactNode
   onAddIncome?: () => void
   onAddExpense?: () => void
 }
@@ -21,8 +21,7 @@ export default function MonthHero({
   expense,
   net,
   transactions,
-  serialLabel,
-  dateBasis,
+  headerSlot,
   onAddIncome,
   onAddExpense,
 }: MonthHeroProps) {
@@ -52,22 +51,12 @@ export default function MonthHero({
       >
         {/* Left — statement */}
         <VStack align="stretch" spacing={5}>
-          {/* Serial number */}
-          <Box
-            borderBottom="1px solid var(--pb-hair)"
-            pb={2}
-            aria-hidden="true"
-          >
-            <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="10px"
-              letterSpacing="0.18em"
-              color="var(--pb-ink-faint)"
-              textTransform="uppercase"
-            >
-              {serialLabel} &nbsp;·&nbsp; GBP &nbsp;·&nbsp; {transactions} entries
-            </Text>
-          </Box>
+          {/* Month navigation */}
+          {headerSlot && (
+            <Box borderBottom="1px solid var(--pb-hair)" pb={3}>
+              {headerSlot}
+            </Box>
+          )}
 
           {/* Lede */}
           <VStack align="stretch" spacing={2}>

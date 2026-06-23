@@ -55,7 +55,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const {
     selectedDate,
     selectedPeriod,
-    onPeriodChange,
     navigatePeriod,
     goToToday,
     formatLabel,
@@ -66,7 +65,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     selectedPeriod,
   )
 
-  const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('cash-flow')
+  // Home is anchored to the Payments (cash-flow) lens — the Behaviour lens has
+  // its own page now.
+  const dateBasis: TransactionDateBasis = 'cash-flow'
   const periodData = usePeriodData(
     transactions,
     monthSummary,
@@ -213,7 +214,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         title: 'Spending exceeds income',
         valueLabel: fmtCurrency(Math.abs(balance), { minimumFractionDigits: 2 }),
         description: 'Expenses are higher than income this period.',
-        href: 'transactions',
+        href: 'behaviour',
         icon: 'warn',
       })
     }
@@ -233,7 +234,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         title: `${upcoming.length} payment${upcoming.length !== 1 ? 's' : ''} due`,
         valueLabel: fmtCurrency(upcomingTotal),
         description: 'Upcoming expense payments scheduled this week.',
-        href: 'transactions',
+        href: 'payments',
         icon: 'calendar',
       })
     }
@@ -261,8 +262,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     selectedPeriod === 'month' &&
     selectedDate.getFullYear() === now.getFullYear() &&
     selectedDate.getMonth() === now.getMonth()
-
-  const serialLabel = `№ PB·${selectedDate.getFullYear()}·${String(selectedDate.getMonth() + 1).padStart(2, '0')} · ${dateBasis === 'cash-flow' ? 'Payments' : 'Behaviour'} view`
 
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
@@ -312,22 +311,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           />
         </MotionBox>
 
-        {/* Period toolbar */}
-        <MotionBox variants={riseV}>
-          <PeriodToolbar
-            selectedPeriod={selectedPeriod}
-            selectedDate={selectedDate}
-            formatLabel={formatLabel}
-            dateBasis={dateBasis}
-            isCurrent={isCurrent}
-            onPeriodChange={onPeriodChange}
-            onNavigate={navigatePeriod}
-            onGoToToday={goToToday}
-            onDateBasisChange={setDateBasis}
-          />
-        </MotionBox>
-
-        {/* Hero card */}
+        {/* Hero card — month navigation lives along its top rule */}
         {loading ? (
           <Skeleton height="280px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
@@ -337,8 +321,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               expense={periodData.expense}
               net={periodData.balance}
               transactions={periodData.transactions.length}
-              serialLabel={serialLabel}
-              dateBasis={dateBasis}
+              headerSlot={
+                <PeriodToolbar
+                  formatLabel={formatLabel}
+                  isCurrent={isCurrent}
+                  onNavigate={navigatePeriod}
+                  onGoToToday={goToToday}
+                />
+              }
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
             />

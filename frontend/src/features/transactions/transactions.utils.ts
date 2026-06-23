@@ -183,8 +183,6 @@ export function buildLedger(txns: TxnVM[], state: TxState): LedgerGroup[] {
 
 export function txReducer(state: TxState, action: TxAction): TxState {
   switch (action.type) {
-    case 'SET_VIEW':
-      return { ...state, view: action.view }
     case 'SET_Q':
       // A manual edit detaches the highlight from the habit card.
       return { ...state, q: action.q, habitActive: false }

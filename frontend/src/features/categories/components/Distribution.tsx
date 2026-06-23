@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Flex, Grid, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { Layers } from '../../../components/ui/icons'
@@ -26,8 +26,14 @@ export default function Distribution({
   initialSide = 'expense',
 }: DistributionProps) {
   const [side, setSide] = useState<Side>(initialSide)
-  const [activeCat, setActiveCat] = useState<string | null>(null)
+  // `pinned` is a click-selected category that persists; `hovered` is a transient
+  // pointer preview. The donut highlights whichever is in effect (hover wins).
+  const [pinned, setPinned] = useState<string | null>(null)
+  const [hovered, setHovered] = useState<string | null>(null)
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
+  const donutRef = useRef<HTMLDivElement>(null)
+
+  const activeCat = hovered ?? pinned
 
   const { rows, total } = useMemo(
     () => computeSide(side === 'expense' ? expense : income),
@@ -36,9 +42,29 @@ export default function Distribution({
 
   // A view/side swap re-shuffles the donut — drop any lingering highlight/expands.
   useEffect(() => {
-    setActiveCat(null)
+    setPinned(null)
+    setHovered(null)
     setOpenIds(new Set())
   }, [view, side])
+
+  // Clicking anywhere outside the donut clears the selection — back to the
+  // default "Total" view and collapses the row that the segment opened.
+  useEffect(() => {
+    if (!pinned) return
+    const handlePointerDown = (event: PointerEvent) => {
+      if (donutRef.current && !donutRef.current.contains(event.target as Node)) {
+        setOpenIds((prev) => {
+          const next = new Set(prev)
+          next.delete(pinned)
+          return next
+        })
+        setPinned(null)
+        setHovered(null)
+      }
+    }
+    document.addEventListener('pointerdown', handlePointerDown)
+    return () => document.removeEventListener('pointerdown', handlePointerDown)
+  }, [pinned])
 
   const onToggle = useCallback((id: string) => {
     setOpenIds((prev) => {
@@ -49,11 +75,24 @@ export default function Distribution({
     })
   }, [])
 
-  // Clicking a donut segment opens its row and scrolls it into view.
+  // Clicking a donut segment pins it (opens its row + scrolls); clicking the same
+  // segment again unpins back to default.
   const onSegmentClick = useCallback((id: string) => {
-    setOpenIds((prev) => new Set(prev).add(id))
-    requestAnimationFrame(() => {
-      document.getElementById(`cat-row-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    setPinned((prev) => {
+      const next = prev === id ? null : id
+      setOpenIds((open) => {
+        const updated = new Set(open)
+        if (next) {
+          updated.add(next)
+          requestAnimationFrame(() => {
+            document.getElementById(`cat-row-${next}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          })
+        } else {
+          updated.delete(id)
+        }
+        return updated
+      })
+      return next
     })
   }, [])
 
@@ -106,14 +145,14 @@ export default function Distribution({
           gap={{ base: '1.5rem', lg: '2rem' }}
           alignItems="start"
         >
-          <Box position={{ base: 'static', lg: 'sticky' }} top={{ lg: '90px' }}>
+          <Box ref={donutRef} position={{ base: 'static', lg: 'sticky' }} top={{ lg: '90px' }}>
             <AllocationDonut
               rows={rows}
               total={total}
               side={side}
               periodLabel={periodLabel}
               activeCat={activeCat}
-              onActive={setActiveCat}
+              onActive={setHovered}
               onSegmentClick={onSegmentClick}
             />
           </Box>
@@ -123,7 +162,7 @@ export default function Distribution({
             openIds={openIds}
             activeCat={activeCat}
             onToggle={onToggle}
-            onHover={setActiveCat}
+            onHover={setHovered}
           />
         </MotionGrid>
       ) : (

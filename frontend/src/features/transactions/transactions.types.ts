@@ -58,7 +58,6 @@ export const initialTxState: TxState = {
 }
 
 export type TxAction =
-  | { type: 'SET_VIEW'; view: TxView }
   | { type: 'SET_Q'; q: string }
   | { type: 'SET_FILTER'; filter: TxFilter }
   | { type: 'SET_DAY'; day: string | null }

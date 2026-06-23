@@ -37,7 +37,7 @@ export default function RecentActivity({
     <Panel
       h="full"
       interactive={clickable}
-      onClick={clickable ? () => onPageChange?.('transactions') : undefined}
+      onClick={clickable ? () => onPageChange?.('behaviour') : undefined}
     >
       <VStack align="stretch" spacing={4}>
         <Text

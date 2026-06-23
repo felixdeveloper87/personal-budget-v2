@@ -13,7 +13,6 @@ import {
 } from '@chakra-ui/react'
 import { Calendar, Filter, List, ReceiptText } from '../components/ui/icons'
 import { useEd } from '../editorial'
-import { DateBasisToggle } from '../components/ui'
 import {
   getTransactionDate,
   type TransactionDateBasis,
@@ -31,7 +30,9 @@ export default function AllTransactionsSection({
   onRefresh,
 }: AllTransactionsSectionProps) {
   const [groupByMonth, setGroupByMonth] = useState(true)
-  const [dateBasis, setDateBasis] = useState<TransactionDateBasis>('activity')
+  // All-transactions is a management view — fixed to the purchase-date basis;
+  // the Behaviour/Payments lens split lives on its own pages now.
+  const dateBasis: TransactionDateBasis = 'activity'
   const groupedListRef = useRef<{ goToCurrentMonth: () => void } | null>(null)
 
   const hasCurrentMonth = useMemo(() => {
@@ -149,8 +150,6 @@ export default function AllTransactionsSection({
 
           {/* Right: actions + view toggle */}
           <HStack spacing={{ base: 2, md: 3 }} align="center" flexWrap="wrap">
-            <DateBasisToggle value={dateBasis} onChange={setDateBasis} />
-
             {groupByMonth && hasCurrentMonth && (
               <Button
                 size="sm"
