@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Box, Button, Collapse, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 
 import { listInstallmentPlans } from '../api'
@@ -30,6 +30,28 @@ interface InstallmentsPageProps {
 }
 
 const money = (value: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+
+/**
+ * Total installment amount actually due in the current calendar month — sums the
+ * active plans' transactions dated this month. Matches the current month's
+ * statement, so the "Monthly load" / "Committed monthly" figures stay in sync
+ * with the Monthly statements view (an active plan whose next payment is a later
+ * month contributes nothing here, even though it counts as an active plan).
+ */
+export function currentMonthInstallmentTotal(plans: InstallmentPlan[]): number {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = now.getMonth()
+  let total = 0
+  for (const plan of plans) {
+    if (isInstallmentPlanCompleted(plan)) continue
+    for (const tx of plan.transactions) {
+      const due = new Date(`${tx.date}T00:00:00`)
+      if (due.getFullYear() === year && due.getMonth() === month) total += tx.amount
+    }
+  }
+  return total
+}
 
 export default function InstallmentsPage({ onPageChange, embedded = false, onDataChange }: InstallmentsPageProps) {
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
@@ -64,7 +86,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
     const now = Date.now()
     const remaining = active.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() >= now).reduce((total, item) => total + item.amount, 0), 0)
     const paid = plans.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() < now).reduce((total, item) => total + item.amount, 0), 0)
-    const monthly = active.reduce((sum, plan) => sum + plan.installmentValue, 0)
+    const monthly = currentMonthInstallmentTotal(plans)
     return { active, completed, remaining, paid, monthly }
   }, [plans])
 
@@ -198,24 +220,17 @@ function buildStatements(plans: InstallmentPlan[]): StatementMonth[] {
 }
 
 function InstallmentStatements({ months }: { months: StatementMonth[] }) {
-  const [openKeys, setOpenKeys] = useState<Set<string>>(() => new Set())
-  const initRef = useRef(false)
+  const [selectedKey, setSelectedKey] = useState<string>(() => months[0]?.key ?? '')
 
-  // Open the nearest (current) month once the data arrives.
+  // Keep the selection valid as data loads/changes; fall back to the first month.
   useEffect(() => {
-    if (!initRef.current && months.length > 0) {
-      initRef.current = true
-      setOpenKeys(new Set([months[0].key]))
+    if (months.length > 0 && !months.some((m) => m.key === selectedKey)) {
+      setSelectedKey(months[0].key)
     }
-  }, [months])
+  }, [months, selectedKey])
 
-  const toggle = (key: string) =>
-    setOpenKeys((prev) => {
-      const next = new Set(prev)
-      if (next.has(key)) next.delete(key)
-      else next.add(key)
-      return next
-    })
+  const selected = months.find((m) => m.key === selectedKey) ?? months[0]
+  if (!selected) return null
 
   return (
     <Box p={{ base: 3, md: 3.5 }} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)">
@@ -228,53 +243,89 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
           <Text fontSize="xs" color="var(--pb-ink-soft)">Installments grouped by the month they fall due</Text>
         </Box>
       </HStack>
-      <VStack align="stretch" spacing="0.6rem">
-        {months.map((month) => (
-          <MonthStatement key={month.key} month={month} open={openKeys.has(month.key)} onToggle={() => toggle(month.key)} />
-        ))}
-      </VStack>
-    </Box>
-  )
-}
 
-function MonthStatement({ month, open, onToggle }: { month: StatementMonth; open: boolean; onToggle: () => void }) {
-  const label = month.date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-  return (
-    <Box borderRadius="13px" border="1px solid var(--pb-hair)" bg="var(--pb-surface-2)" overflow="hidden">
-      <Box as="button" type="button" onClick={onToggle} w="full" textAlign="left" px={3.5} py={3} aria-expanded={open} _hover={{ bg: 'var(--pb-surface-3)' }} transition="background .16s ease">
-        <Flex justify="space-between" align="center" gap={3}>
-          <HStack spacing={2.5} minW={0}>
-            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{label}</Text>
-            <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" whiteSpace="nowrap">{month.items.length} payment{month.items.length !== 1 ? 's' : ''}</Text>
-          </HStack>
-          <HStack spacing={2} flexShrink={0}>
-            <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(month.total)}</Text>
-            <Icon as={open ? ChevronUp : ChevronDown} boxSize={4} color="var(--pb-ink-faint)" />
-          </HStack>
-        </Flex>
-      </Box>
-      <Collapse in={open} animateOpacity>
-        <VStack align="stretch" spacing={0}>
-          {month.items.map((item) => {
-            const due = new Date(`${item.date}T00:00:00`)
+      <Flex direction={{ base: 'column', md: 'row' }} gap={{ base: 3, md: 4 }} align="stretch">
+        {/* Month menu */}
+        <Flex
+          as="nav"
+          aria-label="Statement months"
+          direction={{ base: 'row', md: 'column' }}
+          gap={1.5}
+          flexShrink={0}
+          w={{ base: 'full', md: '210px' }}
+          overflowX={{ base: 'auto', md: 'visible' }}
+          pb={{ base: 1, md: 0 }}
+          sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
+        >
+          {months.map((month) => {
+            const isActive = month.key === selected.key
             return (
-              <Flex key={item.id} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop="1px solid var(--pb-hair)">
-                <HStack spacing={3} minW={0}>
-                  <Box w={9} flexShrink={0} textAlign="center" borderRight="1px solid var(--pb-hair)" pr={2}>
-                    <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{due.toLocaleDateString('en-GB', { month: 'short' })}</Text>
-                    <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>{due.getDate()}</Text>
-                  </Box>
-                  <VStack align="stretch" spacing={0} minW={0}>
-                    <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>{item.description}</Text>
-                    <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>{item.label}</Text>
-                  </VStack>
-                </HStack>
-                <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color="var(--pb-ink-soft)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(item.amount)}</Text>
-              </Flex>
+              <Box
+                as="button"
+                type="button"
+                key={month.key}
+                onClick={() => setSelectedKey(month.key)}
+                textAlign="left"
+                flexShrink={0}
+                minW={{ base: '150px', md: 'auto' }}
+                px={3}
+                py={2.5}
+                borderRadius="11px"
+                border="1px solid"
+                borderColor={isActive ? 'var(--pb-hair-2)' : 'transparent'}
+                bg={isActive ? 'var(--pb-surface-2)' : 'transparent'}
+                boxShadow={isActive ? 'var(--pb-shadow)' : 'none'}
+                _hover={{ bg: isActive ? 'var(--pb-surface-2)' : 'var(--pb-surface-3)' }}
+                transition="all .15s ease"
+              >
+                <Text fontSize="sm" fontWeight={isActive ? 600 : 500} color={isActive ? 'var(--pb-ink)' : 'var(--pb-ink-soft)'} noOfLines={1}>
+                  {month.date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                </Text>
+                <Flex justify="space-between" align="baseline" gap={2} mt={0.5}>
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" color="var(--pb-ink-faint)" letterSpacing="0.06em" whiteSpace="nowrap">
+                    {month.items.length} payment{month.items.length !== 1 ? 's' : ''}
+                  </Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {money(month.total)}
+                  </Text>
+                </Flex>
+              </Box>
             )
           })}
-        </VStack>
-      </Collapse>
+        </Flex>
+
+        {/* Selected month detail */}
+        <Box flex={1} minW={0} borderRadius="13px" border="1px solid var(--pb-hair)" bg="var(--pb-surface-2)" overflow="hidden">
+          <Flex justify="space-between" align="center" gap={3} px={3.5} py={3} borderBottom="1px solid var(--pb-hair)">
+            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)">
+              {selected.date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+            </Text>
+            <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {money(selected.total)}
+            </Text>
+          </Flex>
+          <VStack align="stretch" spacing={0}>
+            {selected.items.map((item, index) => {
+              const due = new Date(`${item.date}T00:00:00`)
+              return (
+                <Flex key={item.id} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop={index > 0 ? '1px solid var(--pb-hair)' : undefined}>
+                  <HStack spacing={3} minW={0}>
+                    <Box w={9} flexShrink={0} textAlign="center" borderRight="1px solid var(--pb-hair)" pr={2}>
+                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{due.toLocaleDateString('en-GB', { month: 'short' })}</Text>
+                      <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>{due.getDate()}</Text>
+                    </Box>
+                    <VStack align="stretch" spacing={0} minW={0}>
+                      <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>{item.description}</Text>
+                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>{item.label}</Text>
+                    </VStack>
+                  </HStack>
+                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color="var(--pb-ink-soft)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(item.amount)}</Text>
+                </Flex>
+              )
+            })}
+          </VStack>
+        </Box>
+      </Flex>
     </Box>
   )
 }

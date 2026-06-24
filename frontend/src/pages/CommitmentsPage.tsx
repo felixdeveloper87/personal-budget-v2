@@ -4,7 +4,6 @@ import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { listInstallmentPlans, listRecurringTransactions } from '../api'
 import type { InstallmentPlan, RecurringTransaction } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
-import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 import { PageHeader } from '../components/ui'
 import { CalendarClock } from '../components/ui/icons'
 import { useAuth } from '../contexts/AuthContext'
@@ -16,7 +15,7 @@ import { fmtCurrency } from '../features/dashboard/components/format'
 import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 import FixedPaymentsPage from './FixedPaymentsPage'
-import InstallmentsPage from './InstallmentsPage'
+import InstallmentsPage, { currentMonthInstallmentTotal } from './InstallmentsPage'
 
 export type CommitmentsTab = 'fixed' | 'installments'
 
@@ -59,9 +58,7 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
     const fixedMonthly = recurring
       .filter((r) => r.active && r.type === 'EXPENSE')
       .reduce((sum, r) => sum + r.amount, 0)
-    const installmentsMonthly = plans
-      .filter((p) => !isInstallmentPlanCompleted(p))
-      .reduce((sum, p) => sum + p.installmentValue, 0)
+    const installmentsMonthly = currentMonthInstallmentTotal(plans)
     return {
       fixedMonthly,
       installmentsMonthly,
