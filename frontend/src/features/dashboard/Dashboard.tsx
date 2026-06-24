@@ -391,7 +391,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         {/* Cash flow chart (full width, own range toggle) */}
         <MotionBox variants={riseV}>
-          <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis={dateBasis} />
+          {/* Cash flow follows the Behaviour lens (purchase date), not payments. */}
+          <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
         </MotionBox>
 
         {/* Spending mix · Personalised insight */}
