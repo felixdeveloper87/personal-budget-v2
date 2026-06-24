@@ -75,14 +75,11 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
               icon={CalendarClock}
               title="Commitments"
               subtitle="Everything you're locked into each month — fixed payments and installment plans."
-              rightSlot={
-                <Segmented options={TAB_OPTIONS} value={tab} onChange={setTab} aria-label="Commitments view" />
-              }
             />
           </MotionBox>
 
           <MotionBox variants={riseV}>
-            <SummaryBar summary={summary} />
+            <SummaryBar summary={summary} tab={tab} onTabChange={setTab} />
           </MotionBox>
 
           <MotionBox variants={riseV}>
@@ -108,7 +105,15 @@ interface SummaryShape {
   total: number
 }
 
-function SummaryBar({ summary }: { summary: SummaryShape }) {
+function SummaryBar({
+  summary,
+  tab,
+  onTabChange,
+}: {
+  summary: SummaryShape
+  tab: CommitmentsTab
+  onTabChange: (tab: CommitmentsTab) => void
+}) {
   return (
     <Box
       borderRadius="16px"
@@ -118,8 +123,8 @@ function SummaryBar({ summary }: { summary: SummaryShape }) {
       px={{ base: 4, md: 5 }}
       py={{ base: 3.5, md: 4 }}
     >
-      <Flex direction={{ base: 'column', sm: 'row' }} justify="space-between" align={{ sm: 'center' }} gap={3}>
-        <Box>
+      <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align="center" gap={{ base: 4, md: 3 }}>
+        <Box w={{ base: 'full', md: 'auto' }}>
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="9px"
@@ -140,6 +145,7 @@ function SummaryBar({ summary }: { summary: SummaryShape }) {
             {fmtCurrency(summary.total, { minimumFractionDigits: 2 })}
           </Text>
         </Box>
+        <Segmented options={TAB_OPTIONS} value={tab} onChange={onTabChange} aria-label="Commitments view" />
         <HStack spacing={{ base: 5, md: 7 }}>
           <Stat label="Fixed payments" value={fmtCurrency(summary.fixedMonthly, { minimumFractionDigits: 2 })} />
           <Stat label="Installments" value={fmtCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} />
