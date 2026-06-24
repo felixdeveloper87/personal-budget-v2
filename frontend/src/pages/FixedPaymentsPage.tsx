@@ -125,29 +125,31 @@ export default function FixedPaymentsPage({
           </HStack>
         ) : (
           <>
-            <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
-              <MetricCard
-                icon={TrendingUp}
-                label="Fixed income"
-                value={money(summary.income)}
-                color="green.500"
-                bg={softBg}
-              />
-              <MetricCard
-                icon={TrendingDown}
-                label="Fixed expenses"
-                value={money(summary.expenses)}
-                color="red.500"
-                bg={softBg}
-              />
-              <MetricCard
-                icon={CalendarClock}
-                label="Monthly net"
-                value={money(summary.net)}
-                color={summary.net < 0 ? 'red.500' : 'blue.500'}
-                bg={softBg}
-              />
-            </SimpleGrid>
+            {!embedded && (
+              <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+                <MetricCard
+                  icon={TrendingUp}
+                  label="Fixed income"
+                  value={money(summary.income)}
+                  color="green.500"
+                  bg={softBg}
+                />
+                <MetricCard
+                  icon={TrendingDown}
+                  label="Fixed expenses"
+                  value={money(summary.expenses)}
+                  color="red.500"
+                  bg={softBg}
+                />
+                <MetricCard
+                  icon={CalendarClock}
+                  label="Monthly net"
+                  value={money(summary.net)}
+                  color={summary.net < 0 ? 'red.500' : 'blue.500'}
+                  bg={softBg}
+                />
+              </SimpleGrid>
+            )}
 
             <SectionCard bare>
               <Box p={{ base: 4, md: 6 }}>
