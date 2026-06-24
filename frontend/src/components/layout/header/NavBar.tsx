@@ -15,7 +15,7 @@ import {
   type StackProps,
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { NAV_ITEMS, type AppPage, type NavItem } from './navigation.config'
+import { NAV_ITEMS, navItemIdFor, type AppPage, type NavItem } from './navigation.config'
 import { List } from '../../ui/icons'
 import { useEd } from '../../../editorial'
 
@@ -46,7 +46,8 @@ export default function NavBar({
   const isMobile = variant === 'mobile'
   const visibleItems = isMobile && items.length > 4 ? items.slice(0, 4) : items
   const overflowItems = isMobile && items.length > 4 ? items.slice(4) : []
-  const isOverflowActive = overflowItems.some((item) => item.id === currentPage)
+  const activeNavId = navItemIdFor(currentPage)
+  const isOverflowActive = overflowItems.some((item) => item.id === activeNavId)
   // Tablet range (md..lg, ~768–991px): collapse desktop nav to icon-only
   // so the top row never squeezes the Logo / Actions.
   const isTabletRange = useBreakpointValue({ base: false, md: true, lg: false }) ?? false
@@ -91,13 +92,13 @@ export default function NavBar({
   const [indicator, setIndicator] = useState<IndicatorRect>({ left: 0, width: 0, ready: false })
 
   const measure = useCallback(() => {
-    const el = itemRefs.current[currentPage] ?? (isOverflowActive ? moreRef.current : null)
+    const el = itemRefs.current[activeNavId] ?? (isOverflowActive ? moreRef.current : null)
     if (!el) return
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
     if (isMobile) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
     }
-  }, [currentPage, isMobile, isOverflowActive])
+  }, [activeNavId, isMobile, isOverflowActive])
 
   useLayoutEffect(() => {
     measure()
@@ -169,7 +170,7 @@ export default function NavBar({
         <NavBarItem
           key={item.id}
           item={item}
-          isActive={currentPage === item.id}
+          isActive={activeNavId === item.id}
           isMobile={isMobile}
           isIconOnly={isIconOnly}
           onSelect={onPageChange}
@@ -229,13 +230,13 @@ export default function NavBar({
                     icon={
                       <ItemIcon
                         size={18}
-                        weight={currentPage === item.id ? 'duotone' : 'regular'}
+                        weight={activeNavId === item.id ? 'duotone' : 'regular'}
                         aria-hidden
                       />
                     }
                     borderRadius="lg"
-                    fontWeight={currentPage === item.id ? 700 : 500}
-                    color={currentPage === item.id ? activeColor : undefined}
+                    fontWeight={activeNavId === item.id ? 700 : 500}
+                    color={activeNavId === item.id ? activeColor : undefined}
                     onClick={() => onPageChange?.(item.id)}
                   >
                     {item.label}

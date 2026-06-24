@@ -28,6 +28,10 @@ import { useEd } from '../editorial'
 
 interface FixedPaymentsPageProps {
   onPageChange?: (page: AppPage) => void
+  /** When hosted inside the Commitments page: drop the page chrome. */
+  embedded?: boolean
+  /** Notify the host so a shared summary can refresh after a reload/edit. */
+  onDataChange?: () => void
 }
 
 const money = (value: number) =>
@@ -38,6 +42,8 @@ const money = (value: number) =>
 
 export default function FixedPaymentsPage({
   onPageChange,
+  embedded = false,
+  onDataChange,
 }: FixedPaymentsPageProps) {
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,6 +57,7 @@ export default function FixedPaymentsPage({
     setLoading(true)
     try {
       setItems(await listRecurringTransactions())
+      onDataChange?.()
     } catch (err) {
       ToastService.apiError(err, {
         title: 'Could not load fixed payments',
@@ -59,7 +66,7 @@ export default function FixedPaymentsPage({
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [onDataChange])
 
   useEffect(() => {
     void load()
@@ -91,30 +98,26 @@ export default function FixedPaymentsPage({
     return { active, cancelled, income, expenses, net: income - expenses }
   }, [items])
 
-  return (
-    <Box
-      w="full"
-      maxW="appContent"
-      mx="auto"
-      px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 4, md: 7 }}
-    >
+  const body = (
+    <>
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <PageHeader
-          icon={CalendarClock}
-          title="Fixed payments & incomes"
-          subtitle="Manage predictable monthly bills, subscriptions and income."
-          rightSlot={
-            <Button
-              colorScheme="blue"
-              leftIcon={<Icon as={Plus} boxSize={4} />}
-              onClick={() => onPageChange?.('dashboard')}
-              w={{ base: 'full', sm: 'auto' }}
-            >
-              Add from Home
-            </Button>
-          }
-        />
+        {!embedded && (
+          <PageHeader
+            icon={CalendarClock}
+            title="Fixed payments & incomes"
+            subtitle="Manage predictable monthly bills, subscriptions and income."
+            rightSlot={
+              <Button
+                colorScheme="blue"
+                leftIcon={<Icon as={Plus} boxSize={4} />}
+                onClick={() => onPageChange?.('dashboard')}
+                w={{ base: 'full', sm: 'auto' }}
+              >
+                Add from Home
+              </Button>
+            }
+          />
+        )}
 
         {loading ? (
           <HStack justify="center" py={20}>
@@ -209,6 +212,20 @@ export default function FixedPaymentsPage({
         onClose={() => setSelectedItem(null)}
         onChanged={load}
       />
+    </>
+  )
+
+  if (embedded) return body
+
+  return (
+    <Box
+      w="full"
+      maxW="appContent"
+      mx="auto"
+      px={{ base: 2, md: 4, lg: 6 }}
+      py={{ base: 4, md: 7 }}
+    >
+      {body}
     </Box>
   )
 }

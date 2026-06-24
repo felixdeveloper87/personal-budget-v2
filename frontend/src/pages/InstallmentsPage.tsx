@@ -16,12 +16,16 @@ import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 interface InstallmentsPageProps {
   onPageChange?: (page: AppPage) => void
+  /** When hosted inside the Commitments page: drop the page chrome. */
+  embedded?: boolean
+  /** Notify the host so a shared summary can refresh after a reload/edit. */
+  onDataChange?: () => void
 }
 
 const money = (value: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
 const monthName = (date: Date) => date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
 
-export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps) {
+export default function InstallmentsPage({ onPageChange, embedded = false, onDataChange }: InstallmentsPageProps) {
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [activeOpen, setActiveOpen] = useState(true)
@@ -33,12 +37,13 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
     setLoading(true)
     try {
       setPlans(await listInstallmentPlans())
+      onDataChange?.()
     } catch (err) {
       ToastService.apiError(err, { title: 'Could not load installment plans', dedupeKey: 'installments-page-load-failed' })
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [onDataChange])
 
   useEffect(() => { void load() }, [load])
 
@@ -75,17 +80,19 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
     carousel.scrollBy({ left: direction * ((card?.offsetWidth ?? carousel.clientWidth * 0.8) + 12), behavior: 'smooth' })
   }
 
-  return (
-    <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 3, md: 5 }}>
+  const body = (
+    <>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 3, md: 3.5 }}>
-          <MotionBox variants={riseV}>
-            <PageHeader
-              icon={CreditCard}
-              title="Installments"
-              subtitle="Track every purchase plan, remaining payment and completed agreement."
-            />
-          </MotionBox>
+          {!embedded && (
+            <MotionBox variants={riseV}>
+              <PageHeader
+                icon={CreditCard}
+                title="Installments"
+                subtitle="Track every purchase plan, remaining payment and completed agreement."
+              />
+            </MotionBox>
+          )}
 
           {loading ? <Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex> : <>
             <MotionBox variants={riseV}><InstallmentsHero summary={summary} /></MotionBox>
@@ -105,11 +112,19 @@ export default function InstallmentsPage({ onPageChange }: InstallmentsPageProps
             </MotionBox>}
           </>}
 
-          <MotionBox variants={riseV}><PaperFooter /></MotionBox>
+          {!embedded && <MotionBox variants={riseV}><PaperFooter /></MotionBox>}
         </VStack>
       </MotionBox>
 
       <InstallmentPlanDrawer plan={selectedPlan} onClose={() => setSelectedPlan(null)} onChanged={load} />
+    </>
+  )
+
+  if (embedded) return body
+
+  return (
+    <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 3, md: 5 }}>
+      {body}
     </Box>
   )
 }

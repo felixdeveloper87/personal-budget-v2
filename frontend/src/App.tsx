@@ -9,8 +9,7 @@ import ReportsPage from './pages/ReportsPage'
 import AccountsPage from './pages/AccountsPage'
 import CardsPage from './pages/CardsPage'
 import TransfersPage from './pages/TransfersPage'
-import InstallmentsPage from './pages/InstallmentsPage'
-import FixedPaymentsPage from './pages/FixedPaymentsPage'
+import CommitmentsPage from './pages/CommitmentsPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
 import { AuthModal, Layout } from './components'
@@ -27,8 +26,9 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
   cards: () => <CardsPage />,
   transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
-  installments: ({ onPageChange }) => <InstallmentsPage onPageChange={onPageChange} />,
-  'fixed-payments': ({ onPageChange }) => <FixedPaymentsPage onPageChange={onPageChange} />,
+  installments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="installments" />,
+  'fixed-payments': ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="fixed" />,
+  commitments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} />,
   behaviour: () => <BehaviourPage />,
   'all-transactions': () => <AllTransactionsPage />,
   payments: ({ onPageChange }) => <PaymentsPage onPageChange={onPageChange} />,

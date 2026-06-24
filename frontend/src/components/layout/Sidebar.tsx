@@ -18,7 +18,7 @@ import {
   ChartLineUp,
   SidebarSimple,
 } from '../ui/icons'
-import type { AppPage, NavItem } from './header/navigation.config'
+import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -38,7 +38,7 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
   },
   {
     label: 'Planning',
-    itemIds: ['planning', 'installments', 'fixed-payments', 'transfers', 'goals'],
+    itemIds: ['planning', 'commitments', 'transfers', 'goals'],
   },
   {
     label: 'Reports',
@@ -120,7 +120,7 @@ export default function Sidebar({
   const [indicator, setIndicator] = useState({ top: 0, height: 0, ready: false })
 
   const measure = useCallback(() => {
-    const el = itemRefs.current[currentPage]
+    const el = itemRefs.current[navItemIdFor(currentPage)]
     const container = containerRef.current
     if (!el || !container) return
     const cRect = container.getBoundingClientRect()
@@ -215,7 +215,7 @@ export default function Sidebar({
                   <SidebarItem
                     key={item.id}
                     item={item}
-                    isActive={currentPage === item.id}
+                    isActive={navItemIdFor(currentPage) === item.id}
                     isCollapsed={isCollapsed}
                     onSelect={onPageChange}
                     assignRef={(el) => { itemRefs.current[item.id] = el }}
