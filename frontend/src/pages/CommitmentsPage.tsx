@@ -78,15 +78,14 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
               icon={CalendarClock}
               title="Commitments"
               subtitle="Everything you're locked into each month — fixed payments and installment plans."
+              rightSlot={
+                <Segmented options={TAB_OPTIONS} value={tab} onChange={setTab} aria-label="Commitments view" />
+              }
             />
           </MotionBox>
 
           <MotionBox variants={riseV}>
             <SummaryBar summary={summary} />
-          </MotionBox>
-
-          <MotionBox variants={riseV}>
-            <Segmented options={TAB_OPTIONS} value={tab} onChange={setTab} aria-label="Commitments view" />
           </MotionBox>
 
           <MotionBox variants={riseV}>
