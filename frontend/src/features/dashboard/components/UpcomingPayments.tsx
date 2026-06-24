@@ -97,7 +97,7 @@ export default function UpcomingPayments({
     <Panel
       h="full"
       interactive={clickable}
-      onClick={clickable ? () => onPageChange?.('all-transactions') : undefined}
+      onClick={clickable ? () => onPageChange?.('payments') : undefined}
     >
       <VStack align="stretch" spacing={4}>
         <HStack justify="space-between">
