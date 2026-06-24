@@ -13,6 +13,13 @@ import { ToastService } from '../services/toast'
 import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
 import PaperFooter from '../features/dashboard/components/PaperFooter'
+import Segmented from '../features/dashboard/components/Segmented'
+
+type InstallmentView = 'plans' | 'statements'
+const INSTALLMENT_VIEWS: Array<{ value: InstallmentView; label: string }> = [
+  { value: 'plans', label: 'Plans' },
+  { value: 'statements', label: 'Statements' },
+]
 
 interface InstallmentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -30,6 +37,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
   const [activeOpen, setActiveOpen] = useState(true)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
+  const [view, setView] = useState<InstallmentView>('plans')
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -78,22 +86,36 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
 
           {loading ? <Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex> : <>
             <MotionBox variants={riseV}><InstallmentsHero summary={summary} /></MotionBox>
-            {statements.length > 0 && (
-              <MotionBox variants={riseV}>
-                <InstallmentStatements months={statements} />
-              </MotionBox>
-            )}
+
             <MotionBox variants={riseV}>
-              <InstallmentPanel title="Active plans" caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} currently reducing your available monthly budget`} open={activeOpen} onToggle={() => setActiveOpen((value) => !value)}>
-                {summary.active.length ? <VStack align="stretch" spacing="0.6rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="active" />)}</VStack> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
-              </InstallmentPanel>
+              <Flex justify="center">
+                <Segmented options={INSTALLMENT_VIEWS} value={view} onChange={setView} aria-label="Installments view" />
+              </Flex>
             </MotionBox>
 
-            {summary.completed.length > 0 && <MotionBox variants={riseV}>
-              <InstallmentPanel title="Completed plans" caption={`${summary.completed.length} plan${summary.completed.length !== 1 ? 's' : ''} kept for reference`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
-                <VStack align="stretch" spacing="0.6rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="past" />)}</VStack>
-              </InstallmentPanel>
-            </MotionBox>}
+            {view === 'plans' ? (
+              <>
+                <MotionBox variants={riseV}>
+                  <InstallmentPanel title="Active plans" caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} currently reducing your available monthly budget`} open={activeOpen} onToggle={() => setActiveOpen((value) => !value)}>
+                    {summary.active.length ? <VStack align="stretch" spacing="0.6rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="active" />)}</VStack> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
+                  </InstallmentPanel>
+                </MotionBox>
+
+                {summary.completed.length > 0 && <MotionBox variants={riseV}>
+                  <InstallmentPanel title="Completed plans" caption={`${summary.completed.length} plan${summary.completed.length !== 1 ? 's' : ''} kept for reference`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
+                    <VStack align="stretch" spacing="0.6rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="past" />)}</VStack>
+                  </InstallmentPanel>
+                </MotionBox>}
+              </>
+            ) : (
+              <MotionBox variants={riseV}>
+                {statements.length > 0 ? (
+                  <InstallmentStatements months={statements} />
+                ) : (
+                  <EmptyState title="No upcoming statements" body="Monthly statements appear here once you have active plans with payments ahead." />
+                )}
+              </MotionBox>
+            )}
           </>}
 
           {!embedded && <MotionBox variants={riseV}><PaperFooter /></MotionBox>}
