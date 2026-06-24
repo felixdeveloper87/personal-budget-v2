@@ -9,15 +9,16 @@ import { fmtCurrency } from './format'
 
 interface UpcomingPaymentsProps {
   transactions: Transaction[]
+  /** Credit-card id → name. Charges to these cards fold into one fatura row. */
+  cardNames?: Map<number, string>
   onPageChange?: (page: AppPage) => void
   limit?: number
 }
 
-interface UpcomingGroup {
+interface UpcomingItem {
   key: string
   date: Date
   total: number
-  count: number
   title: string
   subtitle: string
 }
@@ -35,10 +36,11 @@ function isoOf(d: Date): string {
 
 export default function UpcomingPayments({
   transactions,
+  cardNames,
   onPageChange,
   limit = 6,
 }: UpcomingPaymentsProps) {
-  const { groups, total } = useMemo(() => {
+  const { items, total } = useMemo(() => {
     const now = new Date()
     now.setHours(0, 0, 0, 0)
 
@@ -46,56 +48,48 @@ export default function UpcomingPayments({
       (t) => t.type === 'EXPENSE' && settlementDate(t) >= now,
     )
 
-    // Bucket by settlement date so a credit-card statement (whose charges all
-    // share one due date) collapses into a single invoice line — mirroring the
-    // Payments page, which shows the whole fatura instead of each charge.
-    const byDate = new Map<string, Transaction[]>()
+    // Only fold actual credit-card charges into a statement; everything else
+    // (loan installments, rent, …) stays its own line — even when it shares a
+    // due date with a card. Charges of one card on one due date = one fatura.
+    const list: UpcomingItem[] = []
+    const byStatement = new Map<string, Transaction[]>()
+
     for (const t of future) {
-      const iso = isoOf(settlementDate(t))
-      const bucket = byDate.get(iso)
-      if (bucket) bucket.push(t)
-      else byDate.set(iso, [t])
+      const isCardCharge =
+        t.paymentMethodId != null && !!cardNames?.has(t.paymentMethodId)
+      if (isCardCharge) {
+        const k = `${t.paymentMethodId}|${isoOf(settlementDate(t))}`
+        const bucket = byStatement.get(k)
+        if (bucket) bucket.push(t)
+        else byStatement.set(k, [t])
+      } else {
+        list.push({
+          key: t.id != null ? `tx-${t.id}` : `tx-${isoOf(settlementDate(t))}-${t.description}`,
+          date: settlementDate(t),
+          total: t.amount,
+          title: t.description || t.category,
+          subtitle: t.category,
+        })
+      }
     }
 
-    const grouped: UpcomingGroup[] = [...byDate.entries()]
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([iso, txs]) => {
-        const groupTotal = txs.reduce((s, t) => s + t.amount, 0)
-        let title: string
-        let subtitle: string
-        if (txs.length === 1) {
-          title = txs[0].description || txs[0].category
-          subtitle = txs[0].category
-        } else {
-          const cards = new Set(
-            txs.map((t) => t.paymentMethodName).filter((n): n is string => !!n),
-          )
-          if (cards.size === 1) {
-            // One payment method due on one date → a single statement/invoice.
-            title = [...cards][0]
-            subtitle = `${txs.length} transactions`
-          } else {
-            const catTotals = new Map<string, number>()
-            for (const t of txs) {
-              catTotals.set(t.category, (catTotals.get(t.category) ?? 0) + t.amount)
-            }
-            title = [...catTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'Payments'
-            subtitle = `${txs.length} payments`
-          }
-        }
-        return {
-          key: iso,
-          date: settlementDate(txs[0]),
-          total: groupTotal,
-          count: txs.length,
-          title,
-          subtitle,
-        }
+    for (const [k, txs] of byStatement) {
+      const cardId = Number(k.split('|')[0])
+      list.push({
+        key: `stmt-${k}`,
+        date: settlementDate(txs[0]),
+        total: txs.reduce((s, t) => s + t.amount, 0),
+        title: cardNames?.get(cardId) ?? 'Credit card',
+        subtitle: 'Credit card statement',
       })
+    }
+
+    // Nearest due first; bigger amount breaks ties on the same day.
+    list.sort((a, b) => a.date.getTime() - b.date.getTime() || b.total - a.total)
 
     const sum = future.reduce((s, t) => s + t.amount, 0)
-    return { groups: grouped.slice(0, limit), total: sum }
-  }, [transactions, limit])
+    return { items: list.slice(0, limit), total: sum }
+  }, [transactions, cardNames, limit])
 
   const clickable = !!onPageChange
 
@@ -129,7 +123,7 @@ export default function UpcomingPayments({
         </HStack>
 
         <VStack align="stretch" spacing={0} divider={<Box borderBottom="1px solid var(--pb-hair)" />}>
-          {groups.length === 0 ? (
+          {items.length === 0 ? (
             <HStack spacing={3} py={4} color="var(--pb-ink-faint)">
               <CalendarClock size={16} />
               <Text fontFamily="var(--pb-serif)" fontSize="sm">
@@ -137,8 +131,8 @@ export default function UpcomingPayments({
               </Text>
             </HStack>
           ) : (
-            groups.map((g) => (
-              <HStack key={g.key} justify="space-between" py={3} spacing={3}>
+            items.map((item) => (
+              <HStack key={item.key} justify="space-between" py={3} spacing={3}>
                 <HStack spacing={3} minW={0}>
                   <Box
                     w={9}
@@ -148,18 +142,18 @@ export default function UpcomingPayments({
                     pr={2}
                   >
                     <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">
-                      {g.date.toLocaleDateString('en-GB', { month: 'short' })}
+                      {item.date.toLocaleDateString('en-GB', { month: 'short' })}
                     </Text>
                     <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
-                      {g.date.getDate()}
+                      {item.date.getDate()}
                     </Text>
                   </Box>
                   <VStack align="stretch" spacing={0} minW={0}>
                     <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
-                      {g.title}
+                      {item.title}
                     </Text>
                     <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>
-                      {g.subtitle}
+                      {item.subtitle}
                     </Text>
                   </VStack>
                 </HStack>
@@ -171,7 +165,7 @@ export default function UpcomingPayments({
                   flexShrink={0}
                   style={{ fontVariantNumeric: 'tabular-nums' }}
                 >
-                  {fmtCurrency(g.total, { minimumFractionDigits: 2 })}
+                  {fmtCurrency(item.total, { minimumFractionDigits: 2 })}
                 </Text>
               </HStack>
             ))

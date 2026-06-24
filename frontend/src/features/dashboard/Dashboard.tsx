@@ -9,6 +9,7 @@ import {
   getAccountSummary,
   getCashFlowForecast,
   listInstallmentPlans,
+  listPaymentMethods,
   listRecurringTransactions,
 } from '../../api'
 import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
@@ -104,6 +105,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
   const [recurringItems, setRecurringItems] = useState<RecurringTransaction[]>([])
+  // Credit-card id → name, used to fold a card's charges into one fatura row.
+  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
 
   useEffect(() => {
     if (!user?.token) return
@@ -111,6 +114,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     void getCashFlowForecast().then(setForecast).catch(() => {})
     void listInstallmentPlans().then(setInstallmentPlans).catch(() => {})
     void listRecurringTransactions().then(setRecurringItems).catch(() => {})
+    void listPaymentMethods()
+      .then((methods) => {
+        const map = new Map<number, string>()
+        for (const m of methods) {
+          if (m.type === 'CREDIT_CARD') map.set(m.id, m.name)
+        }
+        setCardNames(map)
+      })
+      .catch(() => {})
   }, [user?.token])
 
   /* ── Net available money: current + cash + savings (everything but cards) ── */
@@ -395,7 +407,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         {/* Upcoming payments · Recent activity */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
-            <UpcomingPayments transactions={transactions} onPageChange={onPageChange} />
+            <UpcomingPayments transactions={transactions} cardNames={cardNames} onPageChange={onPageChange} />
           </MotionBox>
           <MotionBox variants={riseV}>
             <RecentActivity transactions={behaviourPeriodData.transactions} dateBasis="activity" onPageChange={onPageChange} />
