@@ -58,7 +58,7 @@ export default function UpcomingPayments({
               color="var(--pb-ink-soft)"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {fmtCurrency(total)}
+              {fmtCurrency(total, { minimumFractionDigits: 2 })}
             </Text>
           )}
         </HStack>
@@ -108,7 +108,7 @@ export default function UpcomingPayments({
                     flexShrink={0}
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
-                    {fmtCurrency(t.amount)}
+                    {fmtCurrency(t.amount, { minimumFractionDigits: 2 })}
                   </Text>
                 </HStack>
               )

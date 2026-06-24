@@ -100,7 +100,7 @@ export default function RecentActivity({
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
                     {income ? '+' : '−'}
-                    {fmtCurrency(t.amount)}
+                    {fmtCurrency(t.amount, { minimumFractionDigits: 2 })}
                   </Text>
                 </HStack>
               )
