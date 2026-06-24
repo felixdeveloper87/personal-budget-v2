@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text, VStack, useBreakpointValue, type BoxProps } from '@chakra-ui/react'
 
 import { listInstallmentPlans, listRecurringTransactions } from '../api'
 import type { InstallmentPlan, RecurringTransaction } from '../types'
@@ -114,6 +114,8 @@ function SummaryBar({
   tab: CommitmentsTab
   onTabChange: (tab: CommitmentsTab) => void
 }) {
+  // Full-width segmented control on phones so the two options are easy to tap.
+  const fullWidthToggle = useBreakpointValue({ base: true, md: false }) ?? false
   return (
     <Box
       borderRadius="16px"
@@ -121,10 +123,15 @@ function SummaryBar({
       border="1px solid var(--pb-hair)"
       boxShadow="var(--pb-shadow)"
       px={{ base: 4, md: 5 }}
-      py={{ base: 3.5, md: 4 }}
+      py={{ base: 4, md: 4 }}
     >
-      <Flex direction={{ base: 'column', md: 'row' }} justify="space-between" align="center" gap={{ base: 4, md: 3 }}>
-        <Box w={{ base: 'full', md: 'auto' }}>
+      <Flex
+        direction={{ base: 'column', md: 'row' }}
+        justify="space-between"
+        align={{ base: 'stretch', md: 'center' }}
+        gap={{ base: 4, md: 3 }}
+      >
+        <Box>
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="9px"
@@ -136,7 +143,7 @@ function SummaryBar({
           </Text>
           <Text
             fontFamily="var(--pb-serif)"
-            fontSize={{ base: '1.7rem', md: '2rem' }}
+            fontSize={{ base: '1.9rem', md: '2rem' }}
             fontWeight={500}
             lineHeight="1.1"
             color="var(--pb-ink)"
@@ -145,19 +152,31 @@ function SummaryBar({
             {fmtCurrency(summary.total, { minimumFractionDigits: 2 })}
           </Text>
         </Box>
-        <Segmented options={TAB_OPTIONS} value={tab} onChange={onTabChange} aria-label="Commitments view" />
-        <HStack spacing={{ base: 5, md: 7 }}>
+
+        <Segmented
+          options={TAB_OPTIONS}
+          value={tab}
+          onChange={onTabChange}
+          fullWidth={fullWidthToggle}
+          aria-label="Commitments view"
+        />
+
+        <HStack
+          spacing={{ base: 0, md: 7 }}
+          justify={{ base: 'space-between', md: 'flex-start' }}
+          w={{ base: 'full', md: 'auto' }}
+        >
           <Stat label="Fixed payments" value={fmtCurrency(summary.fixedMonthly, { minimumFractionDigits: 2 })} />
-          <Stat label="Installments" value={fmtCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} />
+          <Stat label="Installments" value={fmtCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} align={{ base: 'right', md: 'left' }} />
         </HStack>
       </Flex>
     </Box>
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, align }: { label: string; value: string; align?: BoxProps['textAlign'] }) {
   return (
-    <Box>
+    <Box textAlign={align}>
       <Text
         fontFamily="var(--pb-mono)"
         fontSize="9px"
