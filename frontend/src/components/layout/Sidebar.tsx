@@ -19,6 +19,7 @@ import {
   SidebarSimple,
 } from '../ui/icons'
 import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
+import { ChartLineUpIcon } from '@phosphor-icons/react'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -292,7 +293,7 @@ function SidebarHeader({
             border="1px solid"
             borderColor={ed ? ed.lineStrong : 'whiteAlpha.300'}
           >
-            <Icon as={ChartLineUp} weight="bold" boxSize={5} color={markGlyphColor} />
+            <Icon as={ChartLineUpIcon} weight="bold" boxSize={5} color={markGlyphColor} />
           </Flex>
           {!isCollapsed && (
             <VStack spacing={0} align="start" minW={0}>

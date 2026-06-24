@@ -1,13 +1,14 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Box, Button, Collapse, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Box, Button, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 
 import { listInstallmentPlans } from '../api'
 import type { InstallmentPlan } from '../types'
 import type { AppPage } from '../components/layout/header/navigation.config'
-import InstallmentPlanCard, { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
+import { isInstallmentPlanCompleted } from '../components/installments/InstallmentPlanCard'
 import InstallmentPlanDrawer from '../components/installments/InstallmentPlanDrawer'
+import { getInstallmentPlanTitle } from '../utils/installments'
 import { PageHeader } from '../components/ui'
-import { CalendarClock, CheckCircle2, ChevronDown, ChevronUp, CreditCard, Plus } from '../components/ui/icons'
+import { CalendarClock, CheckCircle2, ChevronRight, CreditCard, Plus } from '../components/ui/icons'
 import { ToastService } from '../services/toast'
 
 import '../features/dashboard/theme/pb-tokens.css'
@@ -56,8 +57,6 @@ export function currentMonthInstallmentTotal(plans: InstallmentPlan[]): number {
 export default function InstallmentsPage({ onPageChange, embedded = false, onDataChange }: InstallmentsPageProps) {
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeOpen, setActiveOpen] = useState(true)
-  const [historyOpen, setHistoryOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
   const [view, setView] = useState<InstallmentView>('plans')
 
@@ -116,19 +115,13 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
             </MotionBox>
 
             {view === 'plans' ? (
-              <>
-                <MotionBox variants={riseV}>
-                  <InstallmentPanel title="Active plans" caption={`${summary.active.length} installment plan${summary.active.length !== 1 ? 's' : ''} currently reducing your available monthly budget`} open={activeOpen} onToggle={() => setActiveOpen((value) => !value)}>
-                    {summary.active.length ? <VStack align="stretch" spacing="0.6rem">{summary.active.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="active" />)}</VStack> : <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />}
-                  </InstallmentPanel>
-                </MotionBox>
-
-                {summary.completed.length > 0 && <MotionBox variants={riseV}>
-                  <InstallmentPanel title="Completed plans" caption={`${summary.completed.length} plan${summary.completed.length !== 1 ? 's' : ''} kept for reference`} open={historyOpen} onToggle={() => setHistoryOpen((value) => !value)} muted>
-                    <VStack align="stretch" spacing="0.6rem">{summary.completed.map((plan) => <InstallmentPlanCard key={plan.id} plan={plan} onOpen={setSelectedPlan} variant="past" />)}</VStack>
-                  </InstallmentPanel>
-                </MotionBox>}
-              </>
+              <MotionBox variants={riseV}>
+                {summary.active.length || summary.completed.length ? (
+                  <InstallmentPlansBoard active={summary.active} completed={summary.completed} onOpenPlan={setSelectedPlan} />
+                ) : (
+                  <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />
+                )}
+              </MotionBox>
             ) : (
               <MotionBox variants={riseV}>
                 {statements.length > 0 ? (
@@ -163,7 +156,164 @@ function InstallmentsHero({ summary }: { summary: { active: InstallmentPlan[]; r
 
 function HeroMetric({ label, value }: { label: string; value: string }) { return <Box><Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" opacity={0.68}>{label}</Text><Text className="num" fontSize={{ base: 'md', md: 'lg' }} fontWeight={500} mt="1px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text></Box> }
 
-function InstallmentPanel({ title, caption, open, onToggle, muted, children }: { title: string; caption: string; open: boolean; onToggle: () => void; muted?: boolean; children: ReactNode }) { return <Box p={{ base: 3, md: 3.5 }} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)" opacity={muted ? 0.86 : 1}><Box as="button" type="button" onClick={onToggle} w="full" textAlign="left" aria-expanded={open} _focusVisible={{ outline: '2px solid var(--pb-forest-2)', outlineOffset: '3px', borderRadius: '12px' }}><Flex justify="space-between" align="center" gap={3}><HStack spacing={2.5}><Flex w={8} h={8} align="center" justify="center" borderRadius="10px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" color="var(--pb-forest-2)"><Icon as={muted ? CheckCircle2 : CreditCard} boxSize={4} weight="duotone" /></Flex><Box><Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">{title}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{caption}</Text></Box></HStack><Icon as={open ? ChevronUp : ChevronDown} boxSize={5} color="var(--pb-ink-faint)" /></Flex></Box><Collapse in={open} animateOpacity><Box mt={3.5}>{children}</Box></Collapse></Box> }
+function planTitleOf(plan: InstallmentPlan): string {
+  const first = plan.transactions[0]
+  return first?.description ? getInstallmentPlanTitle(first.description) : 'Installment plan'
+}
+
+/** Master-detail board for installment plans — a sidebar menu of plans on the
+ *  left, the selected plan's schedule on the right (mirrors Monthly statements). */
+function InstallmentPlansBoard({
+  active,
+  completed,
+  onOpenPlan,
+}: {
+  active: InstallmentPlan[]
+  completed: InstallmentPlan[]
+  onOpenPlan: (plan: InstallmentPlan) => void
+}) {
+  const plans = useMemo(() => [...active, ...completed], [active, completed])
+  const [selectedId, setSelectedId] = useState<number>(() => plans[0]?.id ?? -1)
+
+  useEffect(() => {
+    if (plans.length > 0 && !plans.some((p) => p.id === selectedId)) {
+      setSelectedId(plans[0].id)
+    }
+  }, [plans, selectedId])
+
+  const selected = plans.find((p) => p.id === selectedId) ?? plans[0]
+  if (!selected) return null
+
+  const now = Date.now()
+  const paidIn = (plan: InstallmentPlan) => plan.transactions.filter((t) => new Date(`${t.date}T00:00:00`).getTime() < now).length
+  const selectedPaid = paidIn(selected)
+  const selectedProgress = selected.totalInstallments > 0 ? Math.min(100, Math.round((selectedPaid / selected.totalInstallments) * 100)) : 0
+  const selectedCaption = [selected.transactions[0]?.category, selected.paymentMethodName ?? 'No card', selected.accountName ?? 'No account'].filter(Boolean).join(' · ')
+  const rows = [...selected.transactions].sort((a, b) => a.date.localeCompare(b.date))
+
+  return (
+    <Box p={{ base: 3, md: 3.5 }} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)">
+      <HStack spacing={2.5} mb={3.5}>
+        <Flex w={8} h={8} align="center" justify="center" borderRadius="10px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" color="var(--pb-forest-2)">
+          <Icon as={CreditCard} boxSize={4} weight="duotone" />
+        </Flex>
+        <Box>
+          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">Installment plans</Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)">Select a plan to see its schedule</Text>
+        </Box>
+      </HStack>
+
+      <Flex direction={{ base: 'column', md: 'row' }} gap={{ base: 3, md: 4 }} align="stretch">
+        {/* Plan menu */}
+        <Flex
+          as="nav"
+          aria-label="Installment plans"
+          direction={{ base: 'row', md: 'column' }}
+          gap={1.5}
+          flexShrink={0}
+          w={{ base: 'full', md: '230px' }}
+          overflowX={{ base: 'auto', md: 'visible' }}
+          pb={{ base: 1, md: 0 }}
+          sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
+        >
+          {plans.map((plan) => {
+            const isSel = plan.id === selected.id
+            const past = isInstallmentPlanCompleted(plan)
+            return (
+              <Box
+                as="button"
+                type="button"
+                key={plan.id}
+                onClick={() => setSelectedId(plan.id)}
+                textAlign="left"
+                flexShrink={0}
+                minW={{ base: '180px', md: 'auto' }}
+                px={3}
+                py={2.5}
+                borderRadius="11px"
+                border="1px solid"
+                borderColor={isSel ? 'var(--pb-hair-2)' : 'transparent'}
+                bg={isSel ? 'var(--pb-surface-2)' : 'transparent'}
+                boxShadow={isSel ? 'var(--pb-shadow)' : 'none'}
+                opacity={past && !isSel ? 0.7 : 1}
+                _hover={{ bg: isSel ? 'var(--pb-surface-2)' : 'var(--pb-surface-3)' }}
+                transition="all .15s ease"
+              >
+                <HStack spacing={1.5} minW={0}>
+                  {past && <Icon as={CheckCircle2} boxSize={3} color="var(--pb-income)" flexShrink={0} />}
+                  <Text fontSize="sm" fontWeight={isSel ? 600 : 500} color={isSel ? 'var(--pb-ink)' : 'var(--pb-ink-soft)'} noOfLines={1}>
+                    {planTitleOf(plan)}
+                  </Text>
+                </HStack>
+                <Flex justify="space-between" align="baseline" gap={2} mt={0.5}>
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" color="var(--pb-ink-faint)" letterSpacing="0.06em" whiteSpace="nowrap">
+                    {paidIn(plan)}/{plan.totalInstallments}
+                  </Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {money(plan.installmentValue)}
+                  </Text>
+                </Flex>
+              </Box>
+            )
+          })}
+        </Flex>
+
+        {/* Selected plan detail */}
+        <Box flex={1} minW={0} borderRadius="13px" border="1px solid var(--pb-hair)" bg="var(--pb-surface-2)" overflow="hidden">
+          <Box as="button" type="button" onClick={() => onOpenPlan(selected)} w="full" textAlign="left" _hover={{ bg: 'var(--pb-surface-3)' }} transition="background .16s ease" aria-label="Open plan details">
+            <Flex justify="space-between" align="center" gap={3} px={3.5} py={3} borderBottom="1px solid var(--pb-hair)">
+              <Box minW={0}>
+                <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{planTitleOf(selected)}</Text>
+                <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{selectedCaption}</Text>
+              </Box>
+              <HStack spacing={2} flexShrink={0}>
+                <VStack align="flex-end" spacing={0}>
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">Per month</Text>
+                  <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(selected.installmentValue)}</Text>
+                </VStack>
+                <Icon as={ChevronRight} boxSize={4} color="var(--pb-ink-faint)" />
+              </HStack>
+            </Flex>
+          </Box>
+
+          {/* Progress */}
+          <Box px={3.5} pt={3} pb={1}>
+            <Flex justify="space-between" align="baseline" mb="4px">
+              <Text fontSize="xs" color="var(--pb-ink-soft)">{selectedPaid}/{selected.totalInstallments} paid</Text>
+              <Text fontSize="xs" fontWeight={700} color="var(--pb-forest-2)">{selectedProgress}%</Text>
+            </Flex>
+            <Box h="5px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
+              <Box h="full" w={`${selectedProgress}%`} bg="var(--pb-forest-2)" borderRadius="full" transition="width 0.4s ease" />
+            </Box>
+          </Box>
+
+          {/* Schedule */}
+          <VStack align="stretch" spacing={0} pt={2}>
+            {rows.map((tx) => {
+              const due = new Date(`${tx.date}T00:00:00`)
+              const isPaid = due.getTime() < now
+              return (
+                <Flex key={tx.id} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop="1px solid var(--pb-hair)">
+                  <HStack spacing={3} minW={0}>
+                    <Box w={9} flexShrink={0} textAlign="center" borderRight="1px solid var(--pb-hair)" pr={2}>
+                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{due.toLocaleDateString('en-GB', { month: 'short' })}</Text>
+                      <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>{due.getDate()}</Text>
+                    </Box>
+                    <VStack align="stretch" spacing={0} minW={0}>
+                      <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>Installment {tx.installmentNumber}/{selected.totalInstallments}</Text>
+                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color={isPaid ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} letterSpacing="0.06em" noOfLines={1}>{isPaid ? 'Paid' : 'Upcoming'} · {due.toLocaleDateString('en-GB', { year: 'numeric' })}</Text>
+                    </VStack>
+                  </HStack>
+                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color={isPaid ? 'var(--pb-ink-faint)' : 'var(--pb-ink-soft)'} flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(tx.amount)}</Text>
+                </Flex>
+              )
+            })}
+          </VStack>
+        </Box>
+      </Flex>
+    </Box>
+  )
+}
 
 function EmptyState({ title, body }: { title: string; body: string }) { return <Flex direction="column" align="center" textAlign="center" py={9} px={4} border="1px dashed var(--pb-hair-2)" borderRadius="15px"><Flex w={11} h={11} align="center" justify="center" borderRadius="12px" bg="var(--pb-surface-2)" color="var(--pb-ink-faint)" mb={3}><Icon as={CreditCard} boxSize={5} weight="duotone" /></Flex><Text fontWeight={600} color="var(--pb-ink)">{title}</Text><Text fontSize="sm" color="var(--pb-ink-soft)" maxW="430px" mt={1}>{body}</Text></Flex> }
 function ActionButton({ label, icon, primary, onClick }: { label: string; icon: typeof Plus; primary?: boolean; onClick: () => void }) { return <Button leftIcon={<Icon as={icon} boxSize={4} />} onClick={onClick} h="44px" px={4} borderRadius="12px" fontWeight={500} color={primary ? '#f6f8fb' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={primary ? 'transparent' : 'var(--pb-hair)'} _hover={{ bg: primary ? 'var(--pb-forest)' : 'var(--pb-surface-3)' }}>{label}</Button> }
