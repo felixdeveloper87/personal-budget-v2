@@ -1,5 +1,0 @@
-export { default as AddTransactionSection } from './AddTransactionSection'
-export { default as AllTransactionsSection } from './AllTransactionsSection'
-export { default as InstallmentPlansSection } from './InstallmentPlansSection'
-export { default as RecurringTransactionsSection } from './RecurringTransactionsSection'
-export { default as DiscoverSection } from './DiscoverSection'
