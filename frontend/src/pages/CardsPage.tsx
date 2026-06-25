@@ -13,7 +13,6 @@ import { ToastService } from '../services/toast'
 
 import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
-import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
 const money = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
@@ -218,7 +217,6 @@ export default function CardsPage() {
                 </VStack>
               </MotionBox>
             )}
-            <MotionBox variants={riseV}><PaperFooter /></MotionBox>
           </VStack>
         </MotionBox>
         {modals}
@@ -255,7 +253,6 @@ export default function CardsPage() {
               </MotionBox>
             </>
           )}
-          <MotionBox variants={riseV}><PaperFooter /></MotionBox>
         </VStack>
       </MotionBox>
       {modals}

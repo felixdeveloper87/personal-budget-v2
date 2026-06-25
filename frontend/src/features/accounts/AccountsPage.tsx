@@ -13,7 +13,6 @@ import { Building, Plus, Repeat, Wallet } from '../../components/ui/icons'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import PaperFooter from '../dashboard/components/PaperFooter'
 
 import TotalHero from './components/TotalHero'
 import AccountList from './components/AccountList'
@@ -232,9 +231,6 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
             </>
           )}
 
-          <MotionBox variants={riseV}>
-            <PaperFooter />
-          </MotionBox>
         </VStack>
       </MotionBox>
 

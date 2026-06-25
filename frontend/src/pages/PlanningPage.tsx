@@ -12,7 +12,6 @@ import { usePeriodData } from '../hooks/usePeriodData'
 
 import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
-import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 const monthValue = (date: Date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
 const money = (value: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
@@ -208,7 +207,6 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
           </MotionBox>}
 
           {false && horizons.length > 0 && <><MotionBox variants={riseV}><SectionLabel>Key horizons</SectionLabel></MotionBox><SimpleGrid columns={{ base: 1, md: 3 }} spacing="0.8rem">{horizons.map(({ label, month }) => <MotionBox key={month.month} variants={riseV}><Horizon label={label} month={month} /></MotionBox>)}</SimpleGrid></>}
-          <MotionBox variants={riseV}><PaperFooter /></MotionBox>
         </VStack>
       </MotionBox>
     </Box>

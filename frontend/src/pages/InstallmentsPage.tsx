@@ -13,7 +13,6 @@ import { ToastService } from '../services/toast'
 
 import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
-import PaperFooter from '../features/dashboard/components/PaperFooter'
 import Segmented from '../features/dashboard/components/Segmented'
 
 type InstallmentView = 'plans' | 'statements'
@@ -133,7 +132,6 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
             )}
           </>}
 
-          {!embedded && <MotionBox variants={riseV}><PaperFooter /></MotionBox>}
         </VStack>
       </MotionBox>
 

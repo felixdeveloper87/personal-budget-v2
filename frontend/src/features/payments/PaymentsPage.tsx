@@ -8,7 +8,6 @@ import { usePeriodData } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import PaperFooter from '../dashboard/components/PaperFooter'
 import FlowSummary, { type FlowMetric } from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import { PageHeader } from '../../components/ui'
@@ -212,9 +211,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           <Distribution expense={expense} income={income} view="payments" periodLabel={periodLabel} initialSide="expense" />
         </MotionBox>
 
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <PaperFooter />
-        </MotionBox>
       </MotionBox>
 
       <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />

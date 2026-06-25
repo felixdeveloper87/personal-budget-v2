@@ -40,7 +40,6 @@ import CommitmentsPanel from './components/CommitmentsPanel'
 import type { CommitmentsData } from './components/CommitmentsPanel'
 import InsightList from './components/InsightList'
 import type { InsightItem } from './components/InsightList'
-import PaperFooter from './components/PaperFooter'
 import { fmtCurrency } from './components/format'
 
 export interface DashboardProps {
@@ -432,10 +431,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         </Grid>
 
-        {/* Footer band */}
-        <MotionBox variants={riseV}>
-          <PaperFooter />
-        </MotionBox>
       </VStack>
       </MotionBox>
 

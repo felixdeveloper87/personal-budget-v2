@@ -12,7 +12,6 @@ import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
 import Segmented from '../features/dashboard/components/Segmented'
 import { fmtCurrency } from '../features/dashboard/components/format'
-import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 import FixedPaymentsPage from './FixedPaymentsPage'
 import InstallmentsPage, { currentMonthInstallmentTotal } from './InstallmentsPage'
@@ -90,9 +89,6 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
             )}
           </MotionBox>
 
-          <MotionBox variants={riseV}>
-            <PaperFooter />
-          </MotionBox>
         </VStack>
       </MotionBox>
     </Box>

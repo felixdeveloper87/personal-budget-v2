@@ -24,7 +24,6 @@ import { ToastService } from '../services/toast'
 
 import '../features/dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../features/dashboard/components/motion'
-import PaperFooter from '../features/dashboard/components/PaperFooter'
 
 interface FixedPaymentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -124,7 +123,6 @@ export default function FixedPaymentsPage({
             </>
           )}
 
-          {!embedded && <MotionBox variants={riseV}><PaperFooter /></MotionBox>}
         </VStack>
       </MotionBox>
 
