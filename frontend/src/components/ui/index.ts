@@ -13,8 +13,6 @@ export type {
   SectionHeaderProps,
   SectionHeaderAccent,
 } from './SectionHeader'
-export { default as PageHeader } from './PageHeader'
-export type { PageHeaderProps } from './PageHeader'
 export { default as PageSkeleton } from './PageSkeleton'
 export { default as DateBasisToggle } from './DateBasisToggle'
 export type { DateBasisToggleProps } from './DateBasisToggle'

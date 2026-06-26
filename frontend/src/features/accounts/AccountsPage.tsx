@@ -6,14 +6,12 @@ import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 
-import { PageHeader } from '../../components/ui'
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
-import { Building, Plus, Repeat, Wallet } from '../../components/ui/icons'
+import {  Plus, Repeat, Wallet } from '../../components/ui/icons'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import PaperFooter from '../dashboard/components/PaperFooter'
 
 import TotalHero from './components/TotalHero'
 import AccountList from './components/AccountList'
@@ -139,11 +137,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader
-              icon={Building}
-              title="Accounts"
-              subtitle="Manage balances and connected institutions."
-              rightSlot={
+            <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
                 <Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>
                   <HeaderButton
                     label="Transfer"
@@ -157,8 +151,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                     onClick={() => setFormAccount(null)}
                   />
                 </Flex>
-              }
-            />
+              </Flex>
           </MotionBox>
 
           {loading ? (
@@ -232,9 +225,6 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
             </>
           )}
 
-          <MotionBox variants={riseV}>
-            <PaperFooter />
-          </MotionBox>
         </VStack>
       </MotionBox>
 

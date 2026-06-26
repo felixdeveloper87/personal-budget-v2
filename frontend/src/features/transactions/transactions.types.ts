@@ -47,6 +47,8 @@ export type TxFilter = 'all' | 'in' | 'out' | 'deferred'
 export interface TxState {
   view: TxView
   q: string // free-text search (merchant or category)
+  month: number | null // 0..11 month filter (any year); null = all months
+  year: number | null // 4-digit year filter; only honoured with `month`; null = any year
   filter: TxFilter
   selectedDay: string | null // ISO date from chart click; null = all days
   hlRhythm: boolean // highlight best-spend weekday bands on chart
@@ -57,6 +59,8 @@ export interface TxState {
 export const initialTxState: TxState = {
   view: 'behaviour',
   q: '',
+  month: null,
+  year: null,
   filter: 'all',
   selectedDay: null,
   hlRhythm: false,

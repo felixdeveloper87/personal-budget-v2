@@ -8,11 +8,8 @@ import { usePeriodData, getPreviousPeriodDate } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import PaperFooter from '../dashboard/components/PaperFooter'
 import FlowSummary from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import { PageHeader } from '../../components/ui'
-import { Activity } from '../../components/ui/icons'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityPane from '../transactions/components/ActivityPane'
@@ -122,13 +119,6 @@ export default function BehaviourPage() {
   return (
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
-        <MotionBox variants={riseV} mb="1.3rem">
-          <PageHeader
-            icon={Activity}
-            title="Behaviour"
-            subtitle="How you spend — by purchase date, with insights for the selected period."
-          />
-        </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           <FlowSummary income={periodData.income} expense={periodData.expense} balance={periodData.balance} />
@@ -204,9 +194,6 @@ export default function BehaviourPage() {
           <Distribution expense={expense} income={income} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
         </MotionBox>
 
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <PaperFooter />
-        </MotionBox>
       </MotionBox>
 
       <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />

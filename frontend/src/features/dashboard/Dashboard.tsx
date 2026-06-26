@@ -9,6 +9,7 @@ import {
   getAccountSummary,
   getCashFlowForecast,
   listInstallmentPlans,
+  listPaymentMethods,
   listRecurringTransactions,
 } from '../../api'
 import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
@@ -23,10 +24,7 @@ import type { TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
-import { PageHeader } from '../../components/ui'
-import { LayoutDashboard } from '../../components/ui/icons'
 import SectionLabel from './components/SectionLabel'
-import PeriodToolbar from './components/PeriodToolbar'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashFlowChart from './components/CashFlowChart'
@@ -39,7 +37,6 @@ import CommitmentsPanel from './components/CommitmentsPanel'
 import type { CommitmentsData } from './components/CommitmentsPanel'
 import InsightList from './components/InsightList'
 import type { InsightItem } from './components/InsightList'
-import PaperFooter from './components/PaperFooter'
 import { fmtCurrency } from './components/format'
 
 export interface DashboardProps {
@@ -52,13 +49,9 @@ const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
 
-  const {
-    selectedDate,
-    selectedPeriod,
-    navigatePeriod,
-    goToToday,
-    formatLabel,
-  } = usePeriodNavigator()
+  // Home is a snapshot of the current month — period browsing lives on the
+  // Behaviour / Payments / Reports pages, so there's no navigator here.
+  const { selectedDate, selectedPeriod } = usePeriodNavigator()
 
   const { transactions, monthSummary, loading, loadData } = useDashboardData(
     selectedDate,
@@ -89,11 +82,23 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     dateBasis,
   )
 
+  // Recent activity mirrors the Behaviour lens (by purchase date) instead of the
+  // cash-flow lens the rest of the home is anchored to.
+  const behaviourPeriodData = usePeriodData(
+    transactions,
+    null,
+    selectedPeriod,
+    selectedDate,
+    'activity',
+  )
+
   /* ── Side data: accounts, forecast, installments, recurring ── */
   const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null)
   const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
   const [recurringItems, setRecurringItems] = useState<RecurringTransaction[]>([])
+  // Credit-card id → name, used to fold a card's charges into one fatura row.
+  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
 
   useEffect(() => {
     if (!user?.token) return
@@ -101,6 +106,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     void getCashFlowForecast().then(setForecast).catch(() => {})
     void listInstallmentPlans().then(setInstallmentPlans).catch(() => {})
     void listRecurringTransactions().then(setRecurringItems).catch(() => {})
+    void listPaymentMethods()
+      .then((methods) => {
+        const map = new Map<number, string>()
+        for (const m of methods) {
+          if (m.type === 'CREDIT_CARD') map.set(m.id, m.name)
+        }
+        setCardNames(map)
+      })
+      .catch(() => {})
   }, [user?.token])
 
   /* ── Net available money: current + cash + savings (everything but cards) ── */
@@ -256,13 +270,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     return result
   }, [periodData])
 
-  /* ── Period helpers ── */
-  const now = new Date()
-  const isCurrent =
-    selectedPeriod === 'month' &&
-    selectedDate.getFullYear() === now.getFullYear() &&
-    selectedDate.getMonth() === now.getMonth()
-
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
     try {
@@ -302,16 +309,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     >
       <MotionBox variants={containerV} initial="hidden" animate="show">
       <VStack spacing={{ base: 5, md: 6 }} align="stretch">
-        {/* Page header */}
-        <MotionBox variants={riseV}>
-          <PageHeader
-            icon={LayoutDashboard}
-            title="Overview"
-            subtitle="A clear read on your money for the selected period."
-          />
-        </MotionBox>
 
-        {/* Hero card — month navigation lives along its top rule */}
+        {/* Hero card — current-month snapshot */}
         {loading ? (
           <Skeleton height="280px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
@@ -321,14 +320,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               expense={periodData.expense}
               net={periodData.balance}
               transactions={periodData.transactions.length}
-              headerSlot={
-                <PeriodToolbar
-                  formatLabel={formatLabel}
-                  isCurrent={isCurrent}
-                  onNavigate={navigatePeriod}
-                  onGoToToday={goToToday}
-                />
-              }
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
             />
@@ -369,7 +360,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         {/* Cash flow chart (full width, own range toggle) */}
         <MotionBox variants={riseV}>
-          <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis={dateBasis} />
+          {/* Cash flow follows the Behaviour lens (purchase date), not payments. */}
+          <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
         </MotionBox>
 
         {/* Spending mix · Personalised insight */}
@@ -385,10 +377,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         {/* Upcoming payments · Recent activity */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
-            <UpcomingPayments transactions={transactions} onPageChange={onPageChange} />
+            <UpcomingPayments transactions={transactions} cardNames={cardNames} onPageChange={onPageChange} />
           </MotionBox>
           <MotionBox variants={riseV}>
-            <RecentActivity transactions={periodData.transactions} dateBasis={dateBasis} onPageChange={onPageChange} />
+            <RecentActivity transactions={behaviourPeriodData.transactions} dateBasis="activity" onPageChange={onPageChange} />
           </MotionBox>
         </Grid>
 
@@ -409,10 +401,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         </Grid>
 
-        {/* Footer band */}
-        <MotionBox variants={riseV}>
-          <PaperFooter />
-        </MotionBox>
       </VStack>
       </MotionBox>
 

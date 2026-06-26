@@ -1,4 +1,4 @@
-import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Container, Flex, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
@@ -7,8 +7,13 @@ import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
 import NavBar from './NavBar'
+import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
+
+/** Chrome bar height — shared so the sidebar's brand block lines up with the
+ * header's bottom edge (their dividers sit on the same baseline). */
+export const HEADER_HEIGHT = { base: '72px', md: '80px' } as const
 
 interface HeaderProps {
   onOpenProfile?: () => void
@@ -37,6 +42,11 @@ export default function Header({
   const isAdminOnly = Boolean(user?.admin)
   const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useDisclosure()
   const [isScrolled, setIsScrolled] = useState(false)
+
+  // When the sidebar owns the brand, the header leads with the search bar on the
+  // left instead of repeating the logo. Mobile/admin keep the logo + right search.
+  const searchOnLeft = Boolean(user) && hasSidebar && !isAdminOnly
+  const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12)
@@ -75,7 +85,8 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
   const editorialOverlay = useColorModeValue(
-    'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 68%)',
+    // Light: flat — the header shares the page colour, so no white sheen on top.
+    'transparent',
     'linear-gradient(180deg, rgba(239,234,224,0.04) 0%, rgba(239,234,224,0) 68%)',
   )
   const bgOverlay = ed ? editorialOverlay : (showGlass ? bgOverlayVal : 'transparent')
@@ -84,7 +95,8 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
   const editorialTopHighlight = useColorModeValue(
-    'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0))',
+    // Light: flat — no top edge highlight, keep the chrome one even colour.
+    'transparent',
     'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))',
   )
   const topHighlight = ed
@@ -162,10 +174,21 @@ export default function Header({
             align="center"
             justify="space-between"
             gap={{ base: 3, md: 4, lg: 6 }}
-            h={{ base: '72px', md: '80px' }}
+            h={HEADER_HEIGHT}
             minW={0}
           >
-            <Logo user={user} />
+            {/* Left slot: search bar when the sidebar carries the brand,
+                otherwise the logo (landing + mobile/admin shells). */}
+            {searchOnLeft ? (
+              <Box flexShrink={1} minW={0} maxW={{ base: '44px', lg: '300px' }}>
+                <SearchTrigger
+                  variant={showExpandedSearch ? 'expanded' : 'compact'}
+                  onOpen={openSearch}
+                />
+              </Box>
+            ) : (
+              <Logo user={user} />
+            )}
 
             {/* Desktop primary nav (md+). Hidden when sidebar is active. */}
             {user && !hasSidebar && (
@@ -186,15 +209,17 @@ export default function Header({
             {/* Landing-page anchor nav (logged-out, md+). */}
             {!user && <LandingNav />}
 
-            <HeaderActions
-              user={user}
-              hideSearch={isAdminOnly}
-              onSearchOpen={openSearch}
-              onLogin={onLogin}
-              onOpenProfile={onOpenProfile}
-              onOpenSettings={onOpenSettings}
-              onLogout={logout}
-            />
+            <Box ml="auto" flexShrink={0}>
+              <HeaderActions
+                user={user}
+                hideSearch={isAdminOnly || searchOnLeft}
+                onSearchOpen={openSearch}
+                onLogin={onLogin}
+                onOpenProfile={onOpenProfile}
+                onOpenSettings={onOpenSettings}
+                onLogout={logout}
+              />
+            </Box>
           </Flex>
 
           {/* Mobile primary nav: four frequent destinations plus a More menu. */}

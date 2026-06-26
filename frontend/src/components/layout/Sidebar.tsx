@@ -2,12 +2,12 @@ import {
   Avatar,
   Box,
   Flex,
-  HStack,
   Icon,
   IconButton,
   Text,
   Tooltip,
   VStack,
+  useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
@@ -15,10 +15,11 @@ import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
 import {
   CaretDoubleLeft,
-  ChartLineUp,
   SidebarSimple,
 } from '../ui/icons'
-import type { AppPage, NavItem } from './header/navigation.config'
+import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
+import { HEADER_HEIGHT } from './header/Header'
+import Logo from './header/Logo'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -38,7 +39,7 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
   },
   {
     label: 'Planning',
-    itemIds: ['planning', 'installments', 'fixed-payments', 'transfers', 'goals'],
+    itemIds: ['planning', 'commitments', 'transfers', 'goals'],
   },
   {
     label: 'Reports',
@@ -84,6 +85,10 @@ export default function Sidebar({
 }: SidebarProps) {
   const { user } = useAuth()
   const ed = useEd()
+  const { colorMode } = useColorMode()
+  // In editorial light the sidebar shares the page colour (opaque glass), so it
+  // must read as one continuous surface: no raised-panel shadow, no backdrop blur.
+  const isEdLight = !!ed && colorMode === 'light'
   const navigationGroups = groupNavigationItems(items)
 
   /* ---- Surface tokens ---- */
@@ -102,7 +107,8 @@ export default function Sidebar({
     '8px 0 32px -24px rgba(0,0,0,0.65)',
   )
   const editorialSurfaceShadow = useColorModeValue(
-    '10px 0 38px -24px rgba(19,56,37,0.28)',
+    // Light: flush with the page — no shadow so the sidebar isn't a raised panel.
+    'none',
     '10px 0 38px -24px rgba(0,0,0,0.72)',
   )
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
@@ -120,7 +126,7 @@ export default function Sidebar({
   const [indicator, setIndicator] = useState({ top: 0, height: 0, ready: false })
 
   const measure = useCallback(() => {
-    const el = itemRefs.current[currentPage]
+    const el = itemRefs.current[navItemIdFor(currentPage)]
     const container = containerRef.current
     if (!el || !container) return
     const cRect = container.getBoundingClientRect()
@@ -155,8 +161,8 @@ export default function Sidebar({
       bottom={0}
       w={`${width}px`}
       bg={surface}
-      backgroundImage={sidebarWash}
-      backdropFilter="saturate(180%) blur(20px)"
+      backgroundImage={isEdLight ? undefined : sidebarWash}
+      backdropFilter={isEdLight ? 'none' : 'saturate(180%) blur(20px)'}
       borderRight="1px solid"
       borderRightColor={borderRight}
       boxShadow={surfaceShadow}
@@ -172,7 +178,11 @@ export default function Sidebar({
       }}
     >
       {/* ─── Top: Branding + collapse toggle ─── */}
-      <SidebarHeader isCollapsed={isCollapsed} onToggle={onToggleCollapse} />
+      <SidebarHeader
+        isCollapsed={isCollapsed}
+        onToggle={onToggleCollapse}
+        onPageChange={onPageChange}
+      />
 
       {/* ─── Navigation ─── */}
       <Box ref={containerRef} position="relative" px={2} pt={4} pb={3} flex={1}>
@@ -215,7 +225,7 @@ export default function Sidebar({
                   <SidebarItem
                     key={item.id}
                     item={item}
-                    isActive={currentPage === item.id}
+                    isActive={navItemIdFor(currentPage) === item.id}
                     isCollapsed={isCollapsed}
                     onSelect={onPageChange}
                     assignRef={(el) => { itemRefs.current[item.id] = el }}
@@ -240,15 +250,15 @@ export default function Sidebar({
 function SidebarHeader({
   isCollapsed,
   onToggle,
+  onPageChange,
 }: {
   isCollapsed: boolean
   onToggle: () => void
+  onPageChange?: (page: AppPage) => void
 }) {
   const ed = useEd()
   const textColorBase = useColorModeValue('gray.900', 'whiteAlpha.900')
   const textColor = ed ? ed.cream : textColorBase
-  const brandAccentBase = useColorModeValue('#2563eb', '#7dd3fc')
-  const brandAccent = ed ? ed.jade : brandAccentBase
   const toggleBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
   const toggleBg = ed ? ed.line : toggleBgBase
   const toggleHoverBgBase = useColorModeValue('gray.200', 'whiteAlpha.200')
@@ -257,94 +267,21 @@ function SidebarHeader({
   const toggleColor = ed ? ed.muted : toggleColorBase
   const dividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
   const divider = ed ? ed.line : dividerBase
-  const markBg = ed
-    ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
-    : `linear-gradient(135deg, ${brandAccent}, #c18b35)`
-  const editorialMarkShadow = useColorModeValue(
-    '0 8px 22px rgba(37,99,235,0.20), 0 2px 8px rgba(154,104,27,0.14)',
-    '0 4px 18px rgba(125,211,252,0.24)',
-  )
-  const markShadow = ed
-    ? editorialMarkShadow
-    : `0 4px 12px ${brandAccent}44`
-  const markGlyphColor = ed ? ed.onAccent : 'white'
 
   return (
     <Box
       px={isCollapsed ? 2 : 4}
-      py={4}
+      h={HEADER_HEIGHT}
+      flexShrink={0}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
       borderBottom="1px solid"
       borderBottomColor={divider}
       transition={TRANSITION}
     >
-      <Flex align="center" justify={isCollapsed ? 'center' : 'space-between'}>
-        {/* Mini brand mark */}
-        <HStack spacing={3} overflow="hidden">
-          <Flex
-            w="36px"
-            h="36px"
-            align="center"
-            justify="center"
-            borderRadius="14px"
-            bg={markBg}
-            flexShrink={0}
-            boxShadow={markShadow}
-            border="1px solid"
-            borderColor={ed ? ed.lineStrong : 'whiteAlpha.300'}
-          >
-            <Icon as={ChartLineUp} weight="bold" boxSize={5} color={markGlyphColor} />
-          </Flex>
-          {!isCollapsed && (
-            <VStack spacing={0} align="start" minW={0}>
-              <Text
-                fontSize={ed ? 'lg' : 'sm'}
-                fontWeight={ed ? 400 : 800}
-                textStyle={ed ? 'display' : undefined}
-                color={textColor}
-                letterSpacing="-0.02em"
-                lineHeight={1.1}
-                whiteSpace="nowrap"
-              >
-                Personal Budget
-              </Text>
-              <Text
-                fontSize="2xs"
-                fontWeight={600}
-                color={brandAccent}
-                letterSpacing="0.02em"
-                lineHeight={1.2}
-              >
-                Dashboard
-              </Text>
-            </VStack>
-          )}
-        </HStack>
-
-        {/* Collapse/Expand toggle */}
-        {!isCollapsed && (
-          <Tooltip label="Collapse sidebar" hasArrow placement="right" openDelay={400}>
-            <IconButton
-              aria-label="Collapse sidebar"
-              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={4} />}
-              size="sm"
-              variant="ghost"
-              color={toggleColor}
-              bg={toggleBg}
-              borderRadius="lg"
-              h="32px"
-              w="32px"
-              minW="32px"
-              _hover={{ bg: toggleHoverBg, color: textColor }}
-              transition={TRANSITION}
-              onClick={onToggle}
-            />
-          </Tooltip>
-        )}
-      </Flex>
-
-      {/* Expand trigger when collapsed */}
-      {isCollapsed && (
-        <Flex justify="center" pt={3}>
+      {isCollapsed ? (
+        <Flex justify="center">
           <Tooltip label="Expand sidebar" hasArrow placement="right" openDelay={200}>
             <IconButton
               aria-label="Expand sidebar"
@@ -357,6 +294,32 @@ function SidebarHeader({
               h="36px"
               w="36px"
               minW="36px"
+              _hover={{ bg: toggleHoverBg, color: textColor }}
+              transition={TRANSITION}
+              onClick={onToggle}
+            />
+          </Tooltip>
+        </Flex>
+      ) : (
+        <Flex align="center" justify="space-between" gap={2}>
+          {/* Brand lockup — same logo as the marketing header, sized for the rail */}
+          <Box minW={0}>
+            <Logo compact onClick={() => onPageChange?.('dashboard')} />
+          </Box>
+
+          <Tooltip label="Collapse sidebar" hasArrow placement="right" openDelay={400}>
+            <IconButton
+              aria-label="Collapse sidebar"
+              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} />}
+              size="xs"
+              variant="ghost"
+              color={toggleColor}
+              bg={toggleBg}
+              borderRadius="md"
+              h="26px"
+              w="26px"
+              minW="26px"
+              flexShrink={0}
               _hover={{ bg: toggleHoverBg, color: textColor }}
               transition={TRANSITION}
               onClick={onToggle}

@@ -8,11 +8,8 @@ import { usePeriodData } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import PaperFooter from '../dashboard/components/PaperFooter'
 import FlowSummary, { type FlowMetric } from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import { PageHeader } from '../../components/ui'
-import { Wallet } from '../../components/ui/icons'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityPane from '../transactions/components/ActivityPane'
@@ -145,13 +142,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   return (
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
-        <MotionBox variants={riseV} mb="1.3rem">
-          <PageHeader
-            icon={Wallet}
-            title="Payments"
-            subtitle="When money leaves — every payment and the schedule ahead."
-          />
-        </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           <FlowSummary
@@ -212,9 +202,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           <Distribution expense={expense} income={income} view="payments" periodLabel={periodLabel} initialSide="expense" />
         </MotionBox>
 
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <PaperFooter />
-        </MotionBox>
       </MotionBox>
 
       <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />

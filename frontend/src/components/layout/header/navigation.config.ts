@@ -21,6 +21,7 @@ export type AppPage =
   | 'transfers'
   | 'installments'
   | 'fixed-payments'
+  | 'commitments'
   | 'behaviour'
   | 'all-transactions'
   | 'payments'
@@ -81,11 +82,11 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Budgets and cash flow',
   },
   {
-    id: 'installments',
-    label: 'Installments',
-    shortLabel: 'Installments',
-    icon: CreditCard,
-    description: 'Purchase plans and payments',
+    id: 'commitments',
+    label: 'Commitments',
+    shortLabel: 'Commit.',
+    icon: CalendarClock,
+    description: 'Fixed payments and installment plans',
   },
   {
     id: 'all-transactions',
@@ -93,13 +94,6 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'All',
     icon: List,
     description: 'Browse and manage every transaction',
-  },
-  {
-    id: 'fixed-payments',
-    label: 'Fixed payments',
-    shortLabel: 'Fixed',
-    icon: CalendarClock,
-    description: 'Monthly payments and incomes',
   },
   {
     id: 'transfers',
@@ -123,6 +117,16 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     description: 'Export financial reports',
   },
 ]
+
+/**
+ * Installments and fixed payments now live under a single "Commitments" page,
+ * but their legacy page ids are kept as deep links (they open the matching tab).
+ * This maps a current page to the nav entry that should appear active.
+ */
+export function navItemIdFor(page: AppPage): AppPage {
+  if (page === 'installments' || page === 'fixed-payments') return 'commitments'
+  return page
+}
 
 export const ADMIN_NAV_ITEM: Readonly<NavItem> = {
   id: 'admin',

@@ -133,6 +133,11 @@ export function matches(t: TxnVM, state: TxState): boolean {
   if (state.filter === 'in' && t.type !== 'in') return false
   if (state.filter === 'out' && t.type !== 'out') return false
   if (state.filter === 'deferred' && !t.deferred) return false
+  if (state.month != null) {
+    const d = parseISO(groupKey(t, state.view))
+    if (d.getMonth() !== state.month) return false
+    if (state.year != null && d.getFullYear() !== state.year) return false
+  }
   if (state.q) {
     const q = state.q.toLowerCase()
     if (!t.merchant.toLowerCase().includes(q) && !t.category.toLowerCase().includes(q)) {
@@ -145,6 +150,67 @@ export function matches(t: TxnVM, state: TxState): boolean {
 /** Group key depends on the active view (purchase vs settlement axis). */
 export function groupKey(t: TxnVM, view: TxView): string {
   return view === 'behaviour' ? t.purchaseDate : t.settlementDate
+}
+
+/* -------------------------------------------------------------------------- */
+/* Search query parsing                                                        */
+/* -------------------------------------------------------------------------- */
+
+/** Month name / abbreviation → month index (0 = January). */
+const MONTH_TOKENS: Record<string, number> = {
+  jan: 0, january: 0,
+  feb: 1, february: 1,
+  mar: 2, march: 2,
+  apr: 3, april: 3,
+  may: 4,
+  jun: 5, june: 5,
+  jul: 6, july: 6,
+  aug: 7, august: 7,
+  sep: 8, sept: 8, september: 8,
+  oct: 9, october: 9,
+  nov: 10, november: 10,
+  dec: 11, december: 11,
+}
+
+export interface ParsedQuery {
+  text: string // free-text remainder (merchant / category match)
+  month: number | null // 0..11 if a month token was present
+  year: number | null // 4-digit year if present alongside a month
+}
+
+/**
+ * Split a raw search string into a free-text remainder plus optional month/year
+ * tokens, so "Lidl june" → { text: "lidl", month: 5, year: null } and
+ * "Lidl june 2025" → { text: "lidl", month: 5, year: 2025 }. A month token
+ * matches that month in any year unless a 4-digit year is also given. The year
+ * is only honoured when a month is present (a bare "2025" stays free text).
+ */
+export function parseSearchQuery(raw: string): ParsedQuery {
+  let month: number | null = null
+  let year: number | null = null
+  const rest: string[] = []
+
+  for (const tok of raw.trim().toLowerCase().split(/\s+/)) {
+    if (!tok) continue
+    if (month === null && tok in MONTH_TOKENS) {
+      month = MONTH_TOKENS[tok]
+      continue
+    }
+    if (year === null && /^\d{4}$/.test(tok)) {
+      year = Number(tok)
+      continue
+    }
+    rest.push(tok)
+  }
+
+  // A 4-digit token is only a year filter when paired with a month; otherwise
+  // it is part of the free-text query (e.g. an amount or reference number).
+  if (month === null && year !== null) {
+    rest.push(String(year))
+    year = null
+  }
+
+  return { text: rest.join(' '), month, year }
 }
 
 export interface LedgerGroup {

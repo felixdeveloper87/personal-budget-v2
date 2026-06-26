@@ -5,6 +5,8 @@ import { BRAND } from './brand.config'
 interface LogoProps {
   user?: any
   onClick?: () => void
+  /** Smaller, fixed-size lockup that fits inside the sidebar header. */
+  compact?: boolean
 }
 
 // Opção 1: Gráfico ondulado ascendente com micro-animação de desenho (Não deletado)
@@ -163,7 +165,7 @@ function LogoIconGeometric() {
 }
 
 // Opção 3: Carteira com moeda entrando (Estilo Financeiro / Ativo agora)
-export function LogoIconWallet() {
+export function LogoIconWallet({ boxSize }: { boxSize?: number } = {}) {
   const primaryColor = useColorModeValue('#2563eb', '#7dd3fc')
   const secondaryColor = useColorModeValue('#3b82f6', '#a5b4fc')
   const accentColor = useColorModeValue('#c18b35', '#e8c477')
@@ -171,8 +173,8 @@ export function LogoIconWallet() {
   return (
     <Box
       as="svg"
-      w={{ base: 7, md: 8 }}
-      h={{ base: 7, md: 8 }}
+      w={boxSize ?? { base: 7, md: 8 }}
+      h={boxSize ?? { base: 7, md: 8 }}
       viewBox="0 0 32 32"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -268,7 +270,7 @@ export function LogoIconWallet() {
   )
 }
 
-export default function Logo({ user, onClick }: LogoProps) {
+export default function Logo({ user, onClick, compact = false }: LogoProps) {
   const ed = useEd()
   const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
   const wordMuted = ed ? ed.cream : wordMutedBase
@@ -310,8 +312,13 @@ export default function Logo({ user, onClick }: LogoProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const titleFontSize = { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const
-  const sepFontSize = { base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const
+  const titleFontSize = compact
+    ? (ed ? 'lg' : 'sm')
+    : ({ base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const)
+  const edTitleFontSize = compact
+    ? 'lg'
+    : ({ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } as const)
+  const sepFontSize = compact ? 'sm' : ({ base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const)
 
   return (
     <HStack
@@ -332,11 +339,11 @@ export default function Logo({ user, onClick }: LogoProps) {
       <Box
         flexShrink={0}
         position="relative"
-        p={{ base: 1.5, md: 2 }}
+        p={compact ? 1.5 : { base: 1.5, md: 2 }}
         bg={frameBg}
         border="1px solid"
         borderColor={frameBorder}
-        rounded={{ base: 'lg', md: 'xl' }}
+        rounded={compact ? 'lg' : { base: 'lg', md: 'xl' }}
         boxShadow={frameShadow}
         backdropFilter="blur(8px)"
         overflow="hidden"
@@ -355,7 +362,7 @@ export default function Logo({ user, onClick }: LogoProps) {
           },
         }}
       >
-        <LogoIconWallet />
+        <LogoIconWallet boxSize={compact ? 9 : undefined} />
       </Box>
 
       <VStack
@@ -376,7 +383,7 @@ export default function Logo({ user, onClick }: LogoProps) {
           <Text
             as="span"
             textStyle={ed ? 'display' : undefined}
-            fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
+            fontSize={ed ? edTitleFontSize : titleFontSize}
             fontWeight={ed ? 400 : 600}
             letterSpacing="-0.02em"
             color={wordMuted}
@@ -404,7 +411,7 @@ export default function Logo({ user, onClick }: LogoProps) {
             as="span"
             textStyle={ed ? 'display' : undefined}
             fontStyle={ed ? 'italic' : undefined}
-            fontSize={ed ? { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } : titleFontSize}
+            fontSize={ed ? edTitleFontSize : titleFontSize}
             fontWeight={ed ? 400 : 800}
             letterSpacing="-0.03em"
             bgGradient={wordBudgetGradient}
@@ -426,7 +433,7 @@ export default function Logo({ user, onClick }: LogoProps) {
           lineHeight="1.2"
           mt={0.5}
           noOfLines={2}
-          display={{ base: 'none', lg: 'block' }}
+          display={compact ? 'block' : { base: 'none', lg: 'block' }}
           _dark={{ color: 'gray.500' }}
         >
           {BRAND.tagline}
