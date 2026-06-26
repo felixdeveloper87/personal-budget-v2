@@ -18,6 +18,7 @@ import {
   SidebarSimple,
 } from '../ui/icons'
 import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
+import { HEADER_HEIGHT } from './header/Header'
 import Logo from './header/Logo'
 
 /* -------------------------------------------------------------------------- */
@@ -270,7 +271,11 @@ function SidebarHeader({
   return (
     <Box
       px={isCollapsed ? 2 : 4}
-      py={4}
+      h={HEADER_HEIGHT}
+      flexShrink={0}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
       borderBottom="1px solid"
       borderBottomColor={divider}
       transition={TRANSITION}

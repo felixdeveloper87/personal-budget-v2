@@ -11,6 +11,10 @@ import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
+/** Chrome bar height — shared so the sidebar's brand block lines up with the
+ * header's bottom edge (their dividers sit on the same baseline). */
+export const HEADER_HEIGHT = { base: '72px', md: '80px' } as const
+
 interface HeaderProps {
   onOpenProfile?: () => void
   onOpenSettings?: () => void
@@ -170,7 +174,7 @@ export default function Header({
             align="center"
             justify="space-between"
             gap={{ base: 3, md: 4, lg: 6 }}
-            h={{ base: '72px', md: '80px' }}
+            h={HEADER_HEIGHT}
             minW={0}
           >
             {/* Left slot: search bar when the sidebar carries the brand,
