@@ -13,7 +13,6 @@ import { listRecurringTransactions } from '../../api'
 import type { RecurringTransaction } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import RecurringTransactionDrawer from '../../components/recurring/RecurringTransactionDrawer'
-import { PageHeader } from '../../components/ui'
 import {
   CalendarClock,
   ChevronRight,
@@ -91,11 +90,6 @@ export default function FixedPaymentsPage({
     <>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 3, md: 3.5 }}>
-          {!embedded && (
-            <MotionBox variants={riseV}>
-              <PageHeader />
-            </MotionBox>
-          )}
 
           {loading ? (
             <Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex>

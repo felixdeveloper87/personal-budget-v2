@@ -5,7 +5,6 @@ import { deleteCategoryBudget, getCashFlowForecast, listCategoryBudgets, updateI
 import type { CashFlowForecast, CashFlowForecastMonth, CategoryBudget } from '../../types'
 import { ToastService } from '../../services/toast'
 import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, DollarSign, Layers, Plus, TrendingDown, TrendingUp, Wallet } from '../../components/ui/icons'
-import { PageHeader } from '../../components/ui'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
@@ -145,9 +144,6 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
     <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-          <MotionBox variants={riseV}>
-            <PageHeader />
-          </MotionBox>
 
           <MotionBox variants={riseV}>
             {currentMonthLoading ? <Box h="250px" borderRadius="22px" bg="var(--pb-surface-2)" /> : <PlanningHero monthlyPositive={monthlyPositive} balance={currentMonthData.balance} income={currentMonthData.income} expense={currentMonthData.expense} forecast={forecast} firstNegativeMonth={firstNegativeMonth} firstPositiveMonth={firstPositiveMonth} onOpenGoals={() => onPageChange?.('goals')} />}

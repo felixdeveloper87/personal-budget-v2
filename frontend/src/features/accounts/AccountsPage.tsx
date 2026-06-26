@@ -6,7 +6,6 @@ import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 
-import { PageHeader } from '../../components/ui'
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
 import {  Plus, Repeat, Wallet } from '../../components/ui/icons'
@@ -138,7 +137,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader rightSlot={
+            <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
                 <Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>
                   <HeaderButton
                     label="Transfer"
@@ -152,8 +151,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                     onClick={() => setFormAccount(null)}
                   />
                 </Flex>
-              }
-            />
+              </Flex>
           </MotionBox>
 
           {loading ? (

@@ -24,7 +24,7 @@ import {
 } from '../../components/ui/icons'
 import type { LucideIcon } from '../../components/ui/icons'
 import PeriodNavigator from '../../components/summary/PeriodNavigator'
-import { PageHeader, SectionCard, SectionHeader } from '../../components/ui'
+import {  SectionCard, SectionHeader } from '../../components/ui'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { getReport } from '../../api'
 import type {
@@ -276,7 +276,7 @@ function ReportsPageHeader({
   const pillColor = useColorModeValue('gray.600', 'gray.300')
 
   return (
-    <PageHeader rightSlot={
+    <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
         <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
           <HStack
             spacing={2}
@@ -307,8 +307,7 @@ function ReportsPageHeader({
             Export PDF
           </Button>
         </HStack>
-      }
-    />
+      </Flex>
   )
 }
 

@@ -4,7 +4,7 @@ import { Box, Button, Flex, HStack, Icon, IconButton, SimpleGrid, Spinner, Text,
 import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../../api'
 import type { PaymentMethod, Transaction } from '../../types'
 import { buildCardStatements } from '../../utils/creditCardStatements'
-import { BankLogo, ConfirmDeleteDialog, getBankMeta, PageHeader } from '../../components/ui'
+import { BankLogo, ConfirmDeleteDialog, getBankMeta } from '../../components/ui'
 import { ArrowLeft, CreditCard, Eye, EyeOff, Pencil, Plus, Trash2 } from '../../components/ui/icons'
 import CreditCardTile from '../../components/cards/CreditCardTile'
 import CardFormModal from '../../components/cards/CardFormModal'
@@ -188,8 +188,7 @@ export default function CardsPage() {
               <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} mb={2} pl={1}>
                 All cards
               </Button>
-              <PageHeader rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex>}
-              />
+              <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}><Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex></Flex>
             </MotionBox>
 
             <MotionBox variants={riseV}><CardFocus card={selectedCard} info={currentTotals.get(selectedCard.id)} hideValues={hideValues} /></MotionBox>
@@ -225,8 +224,7 @@ export default function CardsPage() {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex>}
-            />
+            <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}><Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex></Flex>
           </MotionBox>
 
           {cards.length === 0 ? (

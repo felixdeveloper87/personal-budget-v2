@@ -7,7 +7,6 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
 import InstallmentPlanDrawer from '../../components/installments/InstallmentPlanDrawer'
 import { getInstallmentPlanTitle } from '../../utils/installments'
-import { PageHeader } from '../../components/ui'
 import { CalendarClock, CheckCircle2, ChevronRight, CreditCard, Plus } from '../../components/ui/icons'
 import { ToastService } from '../../services/toast'
 
@@ -94,11 +93,6 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
     <>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 3, md: 3.5 }}>
-          {!embedded && (
-            <MotionBox variants={riseV}>
-              <PageHeader />
-            </MotionBox>
-          )}
 
           {loading ? <Flex justify="center" py={20}><Spinner color="var(--pb-forest-2)" /></Flex> : <>
             <MotionBox variants={riseV}><InstallmentsHero summary={summary} /></MotionBox>

@@ -4,7 +4,6 @@ import { Box, Flex, HStack, Text, VStack, useBreakpointValue, type BoxProps } fr
 import { listInstallmentPlans, listRecurringTransactions } from '../../api'
 import type { InstallmentPlan, RecurringTransaction } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { PageHeader } from '../../components/ui'
 import { useAuth } from '../../contexts/AuthContext'
 
 import '../dashboard/theme/pb-tokens.css'
@@ -68,9 +67,6 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
     <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-          <MotionBox variants={riseV}>
-            <PageHeader />
-          </MotionBox>
 
           <MotionBox variants={riseV}>
             <SummaryBar summary={summary} tab={tab} onTabChange={setTab} />

@@ -25,6 +25,7 @@ import {
   Text,
   VStack,
   useColorModeValue,
+  Flex,
 } from '@chakra-ui/react'
 import {
   createAccountTransfer,
@@ -36,7 +37,7 @@ import type {
   FinancialAccount,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { PageHeader, SectionHeader } from '../../components/ui'
+import {  SectionHeader } from '../../components/ui'
 import {
   ArrowLeft,
   ArrowRight,
@@ -235,7 +236,7 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
       py={{ base: 4, md: 7 }}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <PageHeader rightSlot={
+        <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
             <Button
               size="sm"
               variant="ghost"
@@ -245,8 +246,7 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
             >
               Accounts
             </Button>
-          }
-        />
+          </Flex>
 
         <Grid
           templateColumns={{

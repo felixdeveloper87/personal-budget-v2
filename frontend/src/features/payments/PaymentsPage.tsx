@@ -10,7 +10,6 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import FlowSummary, { type FlowMetric } from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import { PageHeader } from '../../components/ui'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityPane from '../transactions/components/ActivityPane'
@@ -143,9 +142,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   return (
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
-        <MotionBox variants={riseV} mb="1.3rem">
-          <PageHeader />
-        </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           <FlowSummary

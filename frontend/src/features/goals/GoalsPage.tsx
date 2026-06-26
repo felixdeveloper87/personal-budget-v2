@@ -31,7 +31,6 @@ import BalanceBreakEvenPanel from '../../components/charts/modal/BalanceBreakEve
 import PennyChallengeCard from '../../components/goals/PennyChallengeCard'
 import PennyChallengeSummaryRow from '../../components/goals/PennyChallengeSummaryRow'
 import StartChallengeDialog from '../../components/goals/StartChallengeDialog'
-import { PageHeader } from '../../components/ui'
 import { ChevronDown, ChevronUp, Sparkles } from '../../components/ui/icons'
 import {
   CHALLENGE_NAME_PREFIX,
@@ -173,7 +172,6 @@ export default function GoalsPage() {
   return (
     <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
-        <PageHeader />
 
         {balanceLoading ? (
           <HStack justify="center" py={10}>

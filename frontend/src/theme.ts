@@ -104,12 +104,6 @@ const theme = extendTheme({
     display: { fontFamily: FONTS.display },
     body: { fontFamily: FONTS.display },
     mono: { fontFamily: FONTS.mono },
-    // Frase descritiva do PageHeader de cada página
-    pageSubtitle: {
-      fontSize: { base: 'sm', md: 'lg' },
-      fontWeight: 500,
-      lineHeight: '1.35',
-    },
   },
   sizes: {
     appContent: '1800px',

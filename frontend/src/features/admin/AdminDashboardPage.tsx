@@ -29,7 +29,6 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import {  Trash2, X } from '../../components/ui/icons'
-import { PageHeader } from '../../components/ui'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   approveAdminUser,
@@ -209,9 +208,6 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       </AlertDialog>
 
       <Container maxW="container.xl">
-        <Box mb={6}>
-          <PageHeader />
-        </Box>
 
         {loading ? (
           <HStack spacing={3} py={10} justify="center">
