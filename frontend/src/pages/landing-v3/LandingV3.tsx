@@ -522,7 +522,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
             </div>
             <div className="pbv3-cell pbv3-reveal">
               <div className="pbv3-cell__title">Export</div>
-              <div className="pbv3-cell__hint">your data, yours</div>
+              <div className="pbv3-cell__hint">your data, always</div>
               <ExportDemo reduce={reduce} />
             </div>
             <div className="pbv3-cell pbv3-reveal">

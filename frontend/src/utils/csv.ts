@@ -179,6 +179,13 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     firstCells.forEach((h, i) => {
       if (h in colIndex) colIndex[h] = i
     })
+    // When the file has a header but no 'category' column, the default positional
+    // index (2) would alias whichever column happens to sit there (e.g. the bank's
+    // Description). Reset it so the value falls back to 'Others'.
+    if (!firstCells.includes('category')) colIndex['category'] = -1
+    // Prefer 'account name' over the positional 'account' fallback when the header
+    // row has 'account name' but no 'account' (common in bank exports).
+    if (!firstCells.includes('account') && colIndex['account name'] !== -1) colIndex['account'] = -1
   }
 
   // Bank exports name the signed amount column "Value"; our own exports use "Amount".
