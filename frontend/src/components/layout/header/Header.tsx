@@ -1,4 +1,4 @@
-import { Box, Container, Flex, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Container, Flex, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
@@ -7,6 +7,7 @@ import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
 import NavBar from './NavBar'
+import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
@@ -37,6 +38,11 @@ export default function Header({
   const isAdminOnly = Boolean(user?.admin)
   const { isOpen: isSearchOpen, onOpen: openSearch, onClose: closeSearch } = useDisclosure()
   const [isScrolled, setIsScrolled] = useState(false)
+
+  // When the sidebar owns the brand, the header leads with the search bar on the
+  // left instead of repeating the logo. Mobile/admin keep the logo + right search.
+  const searchOnLeft = Boolean(user) && hasSidebar && !isAdminOnly
+  const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 12)
@@ -165,7 +171,18 @@ export default function Header({
             h={{ base: '72px', md: '80px' }}
             minW={0}
           >
-            <Logo user={user} />
+            {/* Left slot: search bar when the sidebar carries the brand,
+                otherwise the logo (landing + mobile/admin shells). */}
+            {searchOnLeft ? (
+              <Box flexShrink={1} minW={0} maxW={{ base: '44px', lg: '300px' }}>
+                <SearchTrigger
+                  variant={showExpandedSearch ? 'expanded' : 'compact'}
+                  onOpen={openSearch}
+                />
+              </Box>
+            ) : (
+              <Logo user={user} />
+            )}
 
             {/* Desktop primary nav (md+). Hidden when sidebar is active. */}
             {user && !hasSidebar && (
@@ -186,15 +203,17 @@ export default function Header({
             {/* Landing-page anchor nav (logged-out, md+). */}
             {!user && <LandingNav />}
 
-            <HeaderActions
-              user={user}
-              hideSearch={isAdminOnly}
-              onSearchOpen={openSearch}
-              onLogin={onLogin}
-              onOpenProfile={onOpenProfile}
-              onOpenSettings={onOpenSettings}
-              onLogout={logout}
-            />
+            <Box ml="auto" flexShrink={0}>
+              <HeaderActions
+                user={user}
+                hideSearch={isAdminOnly || searchOnLeft}
+                onSearchOpen={openSearch}
+                onLogin={onLogin}
+                onOpenProfile={onOpenProfile}
+                onOpenSettings={onOpenSettings}
+                onLogout={logout}
+              />
+            </Box>
           </Flex>
 
           {/* Mobile primary nav: four frequent destinations plus a More menu. */}
