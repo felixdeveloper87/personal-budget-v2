@@ -176,7 +176,6 @@ export default function GoalsPage() {
         <PageHeader
           icon={ShieldCheck}
           title="Savings goals"
-          subtitle="Track dedicated targets without changing account balances."
         />
 
         {balanceLoading ? (

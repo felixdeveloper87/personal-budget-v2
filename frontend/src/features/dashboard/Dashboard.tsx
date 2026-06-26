@@ -328,7 +328,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           <PageHeader
             icon={LayoutDashboard}
             title="Overview"
-            subtitle="A clear read on your money for the selected period."
           />
         </MotionBox>
 

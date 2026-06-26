@@ -99,7 +99,6 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
               <PageHeader
                 icon={CreditCard}
                 title="Installments"
-                subtitle="Track every purchase plan, remaining payment and completed agreement."
               />
             </MotionBox>
           )}

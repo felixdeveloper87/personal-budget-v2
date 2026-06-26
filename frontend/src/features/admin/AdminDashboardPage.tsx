@@ -213,7 +213,6 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
           <PageHeader
             icon={Shield}
             title="Admin"
-            subtitle="Manage users, approvals and subscription access."
           />
         </Box>
 

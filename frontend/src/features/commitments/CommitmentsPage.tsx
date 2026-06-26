@@ -73,7 +73,6 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
             <PageHeader
               icon={CalendarClock}
               title="Commitments"
-              subtitle="Everything you're locked into each month — fixed payments and installment plans."
             />
           </MotionBox>
 

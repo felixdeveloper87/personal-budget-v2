@@ -146,7 +146,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader icon={CalendarClock} title="Planning" subtitle="Turn your current position into a confident plan for the months ahead." />
+            <PageHeader icon={CalendarClock} title="Planning" />
           </MotionBox>
 
           <MotionBox variants={riseV}>

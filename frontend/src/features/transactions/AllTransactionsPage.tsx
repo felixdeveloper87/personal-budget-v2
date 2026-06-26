@@ -69,7 +69,6 @@ export default function AllTransactionsPage() {
           <PageHeader
             icon={ReceiptText}
             title="All transactions"
-            subtitle="Search, review and manage your complete transaction history."
           />
           <VStack py={20} spacing={4}>
             <Spinner
@@ -99,7 +98,6 @@ export default function AllTransactionsPage() {
         <PageHeader
           icon={ReceiptText}
           title="All transactions"
-          subtitle="Search, review and manage your complete transaction history."
         />
         <AllTransactionsSection
           transactions={transactions}

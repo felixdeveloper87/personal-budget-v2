@@ -148,7 +148,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           <PageHeader
             icon={Wallet}
             title="Payments"
-            subtitle="When money leaves — every payment and the schedule ahead."
           />
         </MotionBox>
 

@@ -279,7 +279,6 @@ function ReportsPageHeader({
     <PageHeader
       icon={FileText}
       title="Reports"
-      subtitle="Review the period and export a polished PDF."
       rightSlot={
         <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
           <HStack

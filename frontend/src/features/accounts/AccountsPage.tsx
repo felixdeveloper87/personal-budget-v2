@@ -141,7 +141,6 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
             <PageHeader
               icon={Building}
               title="Accounts"
-              subtitle="Manage balances and connected institutions."
               rightSlot={
                 <Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>
                   <HeaderButton

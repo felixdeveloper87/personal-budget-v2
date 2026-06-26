@@ -238,7 +238,6 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
         <PageHeader
           icon={Repeat}
           title="Transfers"
-          subtitle="Move money between your accounts without changing income or expenses."
           rightSlot={
             <Button
               size="sm"

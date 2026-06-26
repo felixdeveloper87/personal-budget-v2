@@ -191,7 +191,6 @@ export default function CardsPage() {
               <PageHeader
                 icon={CreditCard}
                 title={selectedCard.name}
-                subtitle={`${selectedCard.issuer ? `${selectedCard.issuer} · ` : ''}Closes on day ${selectedCard.statementClosingDay} · Payment on day ${selectedCard.paymentDay}`}
                 rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex>}
               />
             </MotionBox>
@@ -232,7 +231,6 @@ export default function CardsPage() {
             <PageHeader
               icon={CreditCard}
               title="Cards"
-              subtitle="Track your card limits, payment dates and statements."
               rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex>}
             />
           </MotionBox>

@@ -96,7 +96,6 @@ export default function FixedPaymentsPage({
               <PageHeader
                 icon={CalendarClock}
                 title="Fixed payments & incomes"
-                subtitle="Manage predictable monthly bills, subscriptions and income."
               />
             </MotionBox>
           )}

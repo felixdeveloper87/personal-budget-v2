@@ -125,7 +125,6 @@ export default function BehaviourPage() {
           <PageHeader
             icon={Activity}
             title="Behaviour"
-            subtitle="How you spend — by purchase date, with insights for the selected period."
           />
         </MotionBox>
 
