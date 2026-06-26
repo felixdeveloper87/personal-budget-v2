@@ -24,7 +24,7 @@ import { PremiumModal } from '../ui'
 import { Guilloche, useEd } from '../../editorial'
 
 import '../../features/dashboard/theme/pb-tokens.css'
-import { toViewModel, buildLedger, parseISO, FILTER_LABELS, type LedgerGroup } from '../../features/transactions/transactions.utils'
+import { toViewModel, buildLedger, parseISO, parseSearchQuery, FILTER_LABELS, type LedgerGroup } from '../../features/transactions/transactions.utils'
 import { initialTxState, type TxFilter } from '../../features/transactions/transactions.types'
 import { fmtCurrency } from '../../features/dashboard/components/format'
 import TxnRow from '../../features/transactions/components/TxnRow'
@@ -110,9 +110,11 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   const reqId = useRef(0)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const text = q.trim()
-  // Show results as soon as there is a text query or an active transaction filter.
-  const hasCriteria = text.length > 0 || filter !== 'all'
+  // Split the raw query into free text + optional month/year tokens, so
+  // "Lidl june" narrows to that merchant within June (any year).
+  const { text, month, year } = useMemo(() => parseSearchQuery(q), [q])
+  // Show results as soon as there is any active criterion.
+  const hasCriteria = text.length > 0 || month != null || filter !== 'all'
 
   // Focus the field shortly after open (after the modal mount animation).
   useEffect(() => {
@@ -165,7 +167,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   // holding the first transaction dated today-or-later, so the spotlight opens
   // on "now" with the past on earlier pages and planned items on later ones.
   const { flat, count, inTotal, outTotal, todayPage } = useMemo(() => {
-    const all = buildLedger(vm, { ...initialTxState, q: text, filter })
+    const all = buildLedger(vm, { ...initialTxState, q: text, month, year, filter })
 
     let count = 0
     let inTotal = 0
@@ -189,7 +191,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
     const todayPage = Math.floor(idx / PAGE_SIZE)
 
     return { flat, count, inTotal, outTotal, todayPage }
-  }, [vm, text, filter])
+  }, [vm, text, month, year, filter])
 
   const totalPages = Math.max(1, Math.ceil(count / PAGE_SIZE))
   const safePage = Math.min(page, totalPages - 1)
@@ -198,7 +200,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   // freshly loaded data). Manual paging is preserved until criteria change.
   useEffect(() => {
     setPage(todayPage)
-  }, [text, filter, todayPage])
+  }, [text, month, year, filter, todayPage])
 
   const { groups, summary } = useMemo(() => {
     const slice = flat.slice(safePage * PAGE_SIZE, safePage * PAGE_SIZE + PAGE_SIZE)

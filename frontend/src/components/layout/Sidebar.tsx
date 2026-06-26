@@ -299,15 +299,15 @@ function SidebarHeader({
           <Tooltip label="Collapse sidebar" hasArrow placement="right" openDelay={400}>
             <IconButton
               aria-label="Collapse sidebar"
-              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={4} />}
-              size="sm"
+              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} />}
+              size="xs"
               variant="ghost"
               color={toggleColor}
               bg={toggleBg}
-              borderRadius="lg"
-              h="32px"
-              w="32px"
-              minW="32px"
+              borderRadius="md"
+              h="26px"
+              w="26px"
+              minW="26px"
               flexShrink={0}
               _hover={{ bg: toggleHoverBg, color: textColor }}
               transition={TRANSITION}

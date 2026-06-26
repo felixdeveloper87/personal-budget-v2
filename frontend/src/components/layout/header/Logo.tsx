@@ -362,7 +362,7 @@ export default function Logo({ user, onClick, compact = false }: LogoProps) {
           },
         }}
       >
-        <LogoIconWallet boxSize={compact ? 6 : undefined} />
+        <LogoIconWallet boxSize={compact ? 9 : undefined} />
       </Box>
 
       <VStack
