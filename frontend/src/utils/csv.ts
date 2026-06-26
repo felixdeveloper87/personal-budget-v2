@@ -104,6 +104,32 @@ export interface CsvParseResult {
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
+const MONTHS: Record<string, string> = {
+  jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+  jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+}
+
+/**
+ * Normalize a date cell to YYYY-MM-DD, or return null if unrecognized.
+ * Accepts ISO (`2026-06-25`), bank-style `25 Jun 2026` / `25 June 2026`, and
+ * UK day-first `25/06/2026` or `25-06-2026`.
+ */
+function toIsoDate(raw: string): string | null {
+  const s = raw.trim()
+  if (DATE_RE.test(s)) return s
+
+  let m = s.match(/^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/)
+  if (m) {
+    const mon = MONTHS[m[2].slice(0, 3).toLowerCase()]
+    if (mon) return `${m[3]}-${mon}-${m[1].padStart(2, '0')}`
+  }
+
+  m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/)
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`
+
+  return null
+}
+
 /** Normalize a header cell for matching: lowercase, trimmed, spaces collapsed. */
 function normHeader(h: string): string {
   return h.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -130,7 +156,8 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
 
   // Detect header row.
   const firstCells = parseCsvLine(lines[0]).map(normHeader)
-  const hasHeader = firstCells.includes('date') && firstCells.includes('amount')
+  const hasHeader =
+    firstCells.includes('date') && (firstCells.includes('amount') || firstCells.includes('value'))
 
   const colIndex: Record<string, number> = {
     'record type': -1,
@@ -139,8 +166,10 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     category: 2,
     description: 3,
     amount: 4,
+    value: -1,
     'payment method': 5,
     account: 6,
+    'account name': -1,
     'payment date': 7,
     status: 8,
     'installment plan id': -1,
@@ -151,6 +180,9 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
       if (h in colIndex) colIndex[h] = i
     })
   }
+
+  // Bank exports name the signed amount column "Value"; our own exports use "Amount".
+  const useValueColumn = hasHeader && !firstCells.includes('amount') && firstCells.includes('value')
 
   const startAt = hasHeader ? 1 : 0
 
@@ -173,33 +205,40 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
 
     if (recordType && recordType !== 'TRANSACTION') continue
 
-    const date = get('date')
-    const typeRaw = get('type').toUpperCase()
+    const dateRaw = get('date')
+    let typeRaw = get('type').toUpperCase()
     const category = get('category')
     const description = get('description')
-    const amountRaw = get('amount')
+    const amountRaw = useValueColumn ? get('value') : get('amount')
     const paymentMethodName = get('payment method')
-    const accountName = get('account')
-    const paymentDate = get('payment date')
+    const accountName = get('account') || get('account name')
+    const paymentDateRaw = get('payment date')
     const statusRaw = get('status').toUpperCase()
 
-    if (!DATE_RE.test(date)) {
-      errors.push({ line: lineNo, message: `Invalid date "${date}" (expected YYYY-MM-DD).` })
-      continue
-    }
-    if (typeRaw !== 'INCOME' && typeRaw !== 'EXPENSE') {
-      errors.push({ line: lineNo, message: `Invalid type "${typeRaw}" (expected INCOME or EXPENSE).` })
+    const date = toIsoDate(dateRaw)
+    if (!date) {
+      errors.push({ line: lineNo, message: `Invalid date "${dateRaw}" (expected YYYY-MM-DD).` })
       continue
     }
     // Strip currency symbols / thousands separators, keep digits, sign and decimal point.
     const amount = Number(amountRaw.replace(/[^0-9.-]/g, ''))
-    if (!Number.isFinite(amount)) {
+    if (!amountRaw.trim() || !Number.isFinite(amount)) {
       errors.push({ line: lineNo, message: `Invalid amount "${amountRaw}".` })
       continue
     }
-    if (paymentDate && !DATE_RE.test(paymentDate)) {
-      errors.push({ line: lineNo, message: `Invalid payment date "${paymentDate}" (expected YYYY-MM-DD).` })
-      continue
+    // Bank exports carry a transaction-code column (POS/D-D/BAC…) instead of INCOME/EXPENSE,
+    // so when the type isn't explicit we derive it from the sign of the value.
+    if (typeRaw !== 'INCOME' && typeRaw !== 'EXPENSE') {
+      typeRaw = amount < 0 ? 'EXPENSE' : 'INCOME'
+    }
+    let paymentDate = ''
+    if (paymentDateRaw) {
+      const iso = toIsoDate(paymentDateRaw)
+      if (!iso) {
+        errors.push({ line: lineNo, message: `Invalid payment date "${paymentDateRaw}" (expected YYYY-MM-DD).` })
+        continue
+      }
+      paymentDate = iso
     }
     const validStatuses = ['PLANNED', 'PENDING', 'CLEARED', 'RECONCILED'] as const
     if (statusRaw && !validStatuses.includes(statusRaw as typeof validStatuses[number])) {

@@ -115,7 +115,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       // Match whole header cells (not substrings) so "First Date"/"Total Amount" from the
       // installments/fixed-payments exports are not mistaken for the transactions header.
       const headerCells = firstLine.split(',').map((cell) => cell.trim().toLowerCase())
-      const looksLikeTransactions = headerCells.includes('date') && headerCells.includes('amount')
+      const looksLikeTransactions =
+        headerCells.includes('date') && (headerCells.includes('amount') || headerCells.includes('value'))
       const looksLikeFullExport = headerCells.includes('record type')
       const parsed = parseTransactionsCsv(text)
 
