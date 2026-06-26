@@ -1,18 +1,21 @@
 /* ==========================================================================
    Personal Budget — Landing v3 ("Editorial · guilloché")
-   Deep ink-green, luminous jade, giant editorial serif. Self-contained and
-   always-dark, scoped under .pbv3. Ported from
+   Deep ink-blue, luminous app-blue, giant editorial serif. Self-contained and
+   always-dark, scoped under .pbv3. Accent + ink aligned to the app palette
+   (pb-tokens.css / theme.ts). Ported from
    docs/personal-budget-landing-v3-editorial.md.
    ========================================================================== */
 
 .pbv3 {
-  --bg: #070a08;
-  --bg2: #0b100d;
-  --jade: #7fe6b3;
+  /* Ink + accent mirror the app's dark palette (see pb-tokens.css). The accent
+     `--jade` keeps its name for stability but now carries the app blue. */
+  --bg: #060d14;
+  --bg2: #0a141d;
+  --jade: #60a5fa;
   --gold: #d9b36a;
   --cream: #efeae0;
   --muted: #94a398;
-  --panel: rgba(18, 26, 21, 0.6);
+  --panel: rgba(22, 24, 30, 0.6);
   --line: rgba(239, 234, 224, 0.1);
   --line-strong: rgba(239, 234, 224, 0.18);
 
@@ -34,7 +37,7 @@
   box-sizing: border-box;
 }
 .pbv3 ::selection {
-  background: rgba(127, 230, 179, 0.25);
+  background: rgba(96, 165, 250, 0.25);
   color: var(--cream);
 }
 .pbv3 .mono {
@@ -148,7 +151,7 @@
 }
 .pbv3-nav.scrolled {
   padding: 0.85rem 0;
-  background: rgba(7, 10, 8, 0.7);
+  background: rgba(6, 13, 20, 0.7);
   backdrop-filter: blur(14px) saturate(140%);
   border-bottom-color: var(--line);
 }
@@ -357,7 +360,7 @@
 .pbv3-mockup__frame {
   border-radius: 22px;
   border: 1px solid var(--line-strong);
-  background: linear-gradient(180deg, rgba(18, 26, 21, 0.9), rgba(7, 10, 8, 0.95));
+  background: linear-gradient(180deg, rgba(22, 24, 30, 0.9), rgba(6, 13, 20, 0.95));
   box-shadow: 0 60px 120px -40px rgba(0, 0, 0, 0.9);
   overflow: hidden;
 }
@@ -583,7 +586,7 @@
   padding: 0.6rem 0.8rem;
   border-radius: 10px;
   border: 1px solid var(--line-strong);
-  background: rgba(7, 10, 8, 0.5);
+  background: rgba(6, 13, 20, 0.5);
   font-family: var(--font-mono);
   font-size: 0.85rem;
 }
@@ -761,7 +764,7 @@
 .pbv3-mw.key {
   font-style: italic;
   color: var(--jade);
-  text-shadow: 0 0 24px rgba(127, 230, 179, 0.45);
+  text-shadow: 0 0 24px rgba(96, 165, 250, 0.45);
 }
 
 /* ==========================================================================
@@ -861,7 +864,7 @@
   background: linear-gradient(
     100deg,
     transparent 30%,
-    rgba(127, 230, 179, 0.55) 50%,
+    rgba(96, 165, 250, 0.55) 50%,
     transparent 70%
   );
   background-size: 250% 100%;

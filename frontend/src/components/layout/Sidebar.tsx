@@ -7,6 +7,7 @@ import {
   Text,
   Tooltip,
   VStack,
+  useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useCallback, useLayoutEffect, useRef, useState } from 'react'
@@ -83,6 +84,10 @@ export default function Sidebar({
 }: SidebarProps) {
   const { user } = useAuth()
   const ed = useEd()
+  const { colorMode } = useColorMode()
+  // In editorial light the sidebar shares the page colour (opaque glass), so it
+  // must read as one continuous surface: no raised-panel shadow, no backdrop blur.
+  const isEdLight = !!ed && colorMode === 'light'
   const navigationGroups = groupNavigationItems(items)
 
   /* ---- Surface tokens ---- */
@@ -101,7 +106,8 @@ export default function Sidebar({
     '8px 0 32px -24px rgba(0,0,0,0.65)',
   )
   const editorialSurfaceShadow = useColorModeValue(
-    '10px 0 38px -24px rgba(19,56,37,0.28)',
+    // Light: flush with the page — no shadow so the sidebar isn't a raised panel.
+    'none',
     '10px 0 38px -24px rgba(0,0,0,0.72)',
   )
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
@@ -154,8 +160,8 @@ export default function Sidebar({
       bottom={0}
       w={`${width}px`}
       bg={surface}
-      backgroundImage={sidebarWash}
-      backdropFilter="saturate(180%) blur(20px)"
+      backgroundImage={isEdLight ? undefined : sidebarWash}
+      backdropFilter={isEdLight ? 'none' : 'saturate(180%) blur(20px)'}
       borderRight="1px solid"
       borderRightColor={borderRight}
       boxShadow={surfaceShadow}

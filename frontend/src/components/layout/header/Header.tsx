@@ -81,7 +81,8 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
   const editorialOverlay = useColorModeValue(
-    'linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0) 68%)',
+    // Light: flat — the header shares the page colour, so no white sheen on top.
+    'transparent',
     'linear-gradient(180deg, rgba(239,234,224,0.04) 0%, rgba(239,234,224,0) 68%)',
   )
   const bgOverlay = ed ? editorialOverlay : (showGlass ? bgOverlayVal : 'transparent')
@@ -90,7 +91,8 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
   const editorialTopHighlight = useColorModeValue(
-    'linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0))',
+    // Light: flat — no top edge highlight, keep the chrome one even colour.
+    'transparent',
     'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))',
   )
   const topHighlight = ed

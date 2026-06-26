@@ -78,8 +78,11 @@ export type EditorialTokens = {
 
 /* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  bg: '#f6f8fc',
-  bg2: '#e9eef7',
+  // Single soft-grey shell surface: header, sidebar and pages all share `bg`
+  // (glass is opaque to the same value, bgGradient is flat). White cards then
+  // elevate cleanly off the grey.
+  bg: '#f4f5f7',
+  bg2: '#eceef1',
   /** Brand accent (royal blue) + restrained gold. */
   jade: '#2563eb',
   gold: '#9a681b',
@@ -89,16 +92,19 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   red: '#c94d45',
   onAccent: '#f7fffc',
 
-  // Superfícies de card — ver doc no EDITORIAL_DARK. Cool near-white panels on
-  // the flat metallic background (the guilloché page backdrop is off in light).
-  panel: 'rgba(255, 255, 255, 0.78)',
+  // Superfícies de card — ver doc no EDITORIAL_DARK. Solid white panels so cards
+  // lift clearly off the soft-grey shell (the guilloché page backdrop is off in
+  // light).
+  panel: '#ffffff',
   modal: 'rgba(255, 255, 255, 0.94)',
   solid: '#ffffff',
   panelRaised: 'rgba(255, 255, 255, 0.62)',
   line: 'rgba(19, 41, 35, 0.12)',
   lineStrong: 'rgba(37, 99, 235, 0.24)',
 
-  glass: 'rgba(247, 252, 250, 0.86)',
+  // Opaque = same colour as the page, so the sticky header / sidebar read as one
+  // continuous surface with the content (no glass tint seam).
+  glass: '#f4f5f7',
 
   hoverBg: 'rgba(37, 99, 235, 0.07)',
   controlBg: 'rgba(255, 255, 255, 0.62)',
@@ -108,7 +114,9 @@ export const EDITORIAL_LIGHT: EditorialTokens = {
   jadeSoft: 'rgba(37, 99, 235, 0.09)',
   jadeSoftHover: 'rgba(37, 99, 235, 0.16)',
 
-  bgGradient: 'radial-gradient(900px circle at 24% -18%, rgba(96, 165, 250, 0.14), transparent 58%), linear-gradient(180deg, #fafcff 0%, #edf3fb 100%)',
+  // Flat — no radial glow / gradient — so the page is a single even grey that
+  // matches the header and sidebar.
+  bgGradient: 'linear-gradient(180deg, #f4f5f7 0%, #f4f5f7 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }

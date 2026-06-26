@@ -2,7 +2,7 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
-  light: 'radial-gradient(900px circle at 24% -18%, rgba(96, 165, 250, 0.14), transparent 58%), linear-gradient(180deg, #fafcff 0%, #edf3fb 100%)',
+  light: '#f4f5f7',
   dark: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.14), transparent 60%), linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
 
   cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f7 100%)',
