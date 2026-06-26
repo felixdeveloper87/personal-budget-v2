@@ -408,7 +408,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
             </button>
           </div>
         </div>
-        <div className="pbv3-hero__scroll">scroll ↓</div>
       </header>
 
       {/* scroll-scrubbed mockup */}
