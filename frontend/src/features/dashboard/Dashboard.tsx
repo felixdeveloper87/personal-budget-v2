@@ -25,7 +25,6 @@ import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
 import SectionLabel from './components/SectionLabel'
-import PeriodToolbar from './components/PeriodToolbar'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashFlowChart from './components/CashFlowChart'
@@ -50,13 +49,9 @@ const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
 
-  const {
-    selectedDate,
-    selectedPeriod,
-    navigatePeriod,
-    goToToday,
-    formatLabel,
-  } = usePeriodNavigator()
+  // Home is a snapshot of the current month — period browsing lives on the
+  // Behaviour / Payments / Reports pages, so there's no navigator here.
+  const { selectedDate, selectedPeriod } = usePeriodNavigator()
 
   const { transactions, monthSummary, loading, loadData } = useDashboardData(
     selectedDate,
@@ -275,13 +270,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     return result
   }, [periodData])
 
-  /* ── Period helpers ── */
-  const now = new Date()
-  const isCurrent =
-    selectedPeriod === 'month' &&
-    selectedDate.getFullYear() === now.getFullYear() &&
-    selectedDate.getMonth() === now.getMonth()
-
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
     try {
@@ -322,7 +310,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
       <VStack spacing={{ base: 5, md: 6 }} align="stretch">
 
-        {/* Hero card — month navigation lives along its top rule */}
+        {/* Hero card — current-month snapshot */}
         {loading ? (
           <Skeleton height="280px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
@@ -332,14 +320,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               expense={periodData.expense}
               net={periodData.balance}
               transactions={periodData.transactions.length}
-              headerSlot={
-                <PeriodToolbar
-                  formatLabel={formatLabel}
-                  isCurrent={isCurrent}
-                  onNavigate={navigatePeriod}
-                  onGoToToday={goToToday}
-                />
-              }
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
             />

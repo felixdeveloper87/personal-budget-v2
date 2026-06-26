@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { Box, Grid, HStack, Text, VStack, Button } from '@chakra-ui/react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
@@ -10,8 +9,6 @@ interface MonthHeroProps {
   expense: number
   net: number
   transactions: number
-  /** Month navigation rendered along the hero's top rule. */
-  headerSlot?: ReactNode
   onAddIncome?: () => void
   onAddExpense?: () => void
 }
@@ -21,7 +18,6 @@ export default function MonthHero({
   expense,
   net,
   transactions,
-  headerSlot,
   onAddIncome,
   onAddExpense,
 }: MonthHeroProps) {
@@ -51,13 +47,6 @@ export default function MonthHero({
       >
         {/* Left — statement */}
         <VStack align="stretch" spacing={5}>
-          {/* Month navigation */}
-          {headerSlot && (
-            <Box borderBottom="1px solid var(--pb-hair)" pb={3}>
-              {headerSlot}
-            </Box>
-          )}
-
           {/* Lede */}
           <VStack align="stretch" spacing={2}>
             <Text
