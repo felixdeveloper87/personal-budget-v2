@@ -235,10 +235,7 @@ export default function TransfersPage({ onPageChange }: TransfersPageProps) {
       py={{ base: 4, md: 7 }}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
-        <PageHeader
-          icon={Repeat}
-          title="Transfers"
-          rightSlot={
+        <PageHeader rightSlot={
             <Button
               size="sm"
               variant="ghost"

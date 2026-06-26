@@ -5,7 +5,6 @@ import { listInstallmentPlans, listRecurringTransactions } from '../../api'
 import type { InstallmentPlan, RecurringTransaction } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { PageHeader } from '../../components/ui'
-import { CalendarClock } from '../../components/ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 
 import '../dashboard/theme/pb-tokens.css'
@@ -70,10 +69,7 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
           <MotionBox variants={riseV}>
-            <PageHeader
-              icon={CalendarClock}
-              title="Commitments"
-            />
+            <PageHeader />
           </MotionBox>
 
           <MotionBox variants={riseV}>

@@ -188,10 +188,7 @@ export default function CardsPage() {
               <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} mb={2} pl={1}>
                 All cards
               </Button>
-              <PageHeader
-                icon={CreditCard}
-                title={selectedCard.name}
-                rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex>}
+              <PageHeader rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex>}
               />
             </MotionBox>
 
@@ -228,10 +225,7 @@ export default function CardsPage() {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader
-              icon={CreditCard}
-              title="Cards"
-              rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex>}
+            <PageHeader rightSlot={<Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex>}
             />
           </MotionBox>
 

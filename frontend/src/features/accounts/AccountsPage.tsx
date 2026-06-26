@@ -9,7 +9,7 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 import { PageHeader } from '../../components/ui'
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
-import { Building, Plus, Repeat, Wallet } from '../../components/ui/icons'
+import {  Plus, Repeat, Wallet } from '../../components/ui/icons'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -138,10 +138,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader
-              icon={Building}
-              title="Accounts"
-              rightSlot={
+            <PageHeader rightSlot={
                 <Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>
                   <HeaderButton
                     label="Transfer"

@@ -5,12 +5,8 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useEd } from '../../editorial'
-import type { LucideIcon } from './icons'
 
 export interface PageHeaderProps {
-  icon: LucideIcon
-  title: string
-  subtitle?: string
   rightSlot?: ReactNode
 }
 

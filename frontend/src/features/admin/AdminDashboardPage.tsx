@@ -28,7 +28,7 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import { Shield, Trash2, X } from '../../components/ui/icons'
+import {  Trash2, X } from '../../components/ui/icons'
 import { PageHeader } from '../../components/ui'
 import { useAuth } from '../../contexts/AuthContext'
 import {
@@ -210,10 +210,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
 
       <Container maxW="container.xl">
         <Box mb={6}>
-          <PageHeader
-            icon={Shield}
-            title="Admin"
-          />
+          <PageHeader />
         </Box>
 
         {loading ? (

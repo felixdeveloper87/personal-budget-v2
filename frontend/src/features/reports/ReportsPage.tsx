@@ -276,10 +276,7 @@ function ReportsPageHeader({
   const pillColor = useColorModeValue('gray.600', 'gray.300')
 
   return (
-    <PageHeader
-      icon={FileText}
-      title="Reports"
-      rightSlot={
+    <PageHeader rightSlot={
         <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
           <HStack
             spacing={2}

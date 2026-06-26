@@ -96,10 +96,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
         <VStack align="stretch" spacing={{ base: 3, md: 3.5 }}>
           {!embedded && (
             <MotionBox variants={riseV}>
-              <PageHeader
-                icon={CreditCard}
-                title="Installments"
-              />
+              <PageHeader />
             </MotionBox>
           )}
 

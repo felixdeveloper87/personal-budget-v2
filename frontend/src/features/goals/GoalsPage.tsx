@@ -32,7 +32,7 @@ import PennyChallengeCard from '../../components/goals/PennyChallengeCard'
 import PennyChallengeSummaryRow from '../../components/goals/PennyChallengeSummaryRow'
 import StartChallengeDialog from '../../components/goals/StartChallengeDialog'
 import { PageHeader } from '../../components/ui'
-import { ChevronDown, ChevronUp, Sparkles, ShieldCheck } from '../../components/ui/icons'
+import { ChevronDown, ChevronUp, Sparkles } from '../../components/ui/icons'
 import {
   CHALLENGE_NAME_PREFIX,
   challengeYearTotal,
@@ -173,10 +173,7 @@ export default function GoalsPage() {
   return (
     <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <VStack align="stretch" spacing={6}>
-        <PageHeader
-          icon={ShieldCheck}
-          title="Savings goals"
-        />
+        <PageHeader />
 
         {balanceLoading ? (
           <HStack justify="center" py={10}>

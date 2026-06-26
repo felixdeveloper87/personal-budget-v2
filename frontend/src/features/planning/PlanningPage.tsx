@@ -4,7 +4,7 @@ import { Box, Button, Flex, HStack, Icon, IconButton, Input, NumberInput, Number
 import { deleteCategoryBudget, getCashFlowForecast, listCategoryBudgets, updateIncomePlan, upsertCategoryBudget } from '../../api'
 import type { CashFlowForecast, CashFlowForecastMonth, CategoryBudget } from '../../types'
 import { ToastService } from '../../services/toast'
-import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, ChevronLeft, ChevronRight, DollarSign, Layers, Plus, TrendingDown, TrendingUp, Wallet } from '../../components/ui/icons'
+import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, DollarSign, Layers, Plus, TrendingDown, TrendingUp, Wallet } from '../../components/ui/icons'
 import { PageHeader } from '../../components/ui'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -146,7 +146,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           <MotionBox variants={riseV}>
-            <PageHeader icon={CalendarClock} title="Planning" />
+            <PageHeader />
           </MotionBox>
 
           <MotionBox variants={riseV}>

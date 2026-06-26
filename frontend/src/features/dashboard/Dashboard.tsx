@@ -25,7 +25,6 @@ import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
 import { PageHeader } from '../../components/ui'
-import { LayoutDashboard } from '../../components/ui/icons'
 import SectionLabel from './components/SectionLabel'
 import PeriodToolbar from './components/PeriodToolbar'
 import MonthHero from './components/MonthHero'
@@ -324,12 +323,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       <MotionBox variants={containerV} initial="hidden" animate="show">
       <VStack spacing={{ base: 5, md: 6 }} align="stretch">
         {/* Page header */}
-        <MotionBox variants={riseV}>
-          <PageHeader
-            icon={LayoutDashboard}
-            title="Overview"
-          />
-        </MotionBox>
+        {/* <MotionBox variants={riseV}>
+          <PageHeader />
+        </MotionBox> */}
 
         {/* Hero card — month navigation lives along its top rule */}
         {loading ? (

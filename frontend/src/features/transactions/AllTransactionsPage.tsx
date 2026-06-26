@@ -9,7 +9,6 @@ import { Transaction, InstallmentPlan } from '../../types'
 import { mergeTransactionsWithFutureInstallments } from '../../utils/installments'
 import { ToastService } from '../../services/toast'
 import { PageHeader } from '../../components/ui'
-import { ReceiptText } from '../../components/ui/icons'
 
 export default function AllTransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -66,10 +65,7 @@ export default function AllTransactionsPage() {
         mx="auto"
       >
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-          <PageHeader
-            icon={ReceiptText}
-            title="All transactions"
-          />
+          <PageHeader />
           <VStack py={20} spacing={4}>
             <Spinner
               size="xl"
@@ -95,10 +91,7 @@ export default function AllTransactionsPage() {
       minW={0}
     >
       <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-        <PageHeader
-          icon={ReceiptText}
-          title="All transactions"
-        />
+        <PageHeader />
         <AllTransactionsSection
           transactions={transactions}
           hasFilters={hasActiveFilters(filters)}

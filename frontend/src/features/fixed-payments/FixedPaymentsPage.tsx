@@ -93,10 +93,7 @@ export default function FixedPaymentsPage({
         <VStack align="stretch" spacing={{ base: 3, md: 3.5 }}>
           {!embedded && (
             <MotionBox variants={riseV}>
-              <PageHeader
-                icon={CalendarClock}
-                title="Fixed payments & incomes"
-              />
+              <PageHeader />
             </MotionBox>
           )}
 
