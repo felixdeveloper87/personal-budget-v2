@@ -313,7 +313,7 @@ export async function createAccountTransfer(
   return data
 }
 
-// Get monthly summary → GET /summary/month?year=&month=
+// Get monthly summary → GET /summary/month?year=&month==
 export async function getMonthlySummary(date: Date): Promise<MonthlySummary> {
   const year = date.getFullYear()
   const month = date.getMonth() + 1
