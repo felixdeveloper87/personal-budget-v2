@@ -1,5 +1,21 @@
 import React, { useState, useCallback, useEffect } from 'react'
-import { Box, VStack, Card, CardBody, Button } from '@chakra-ui/react'
+import {
+  Box,
+  VStack,
+  Card,
+  CardBody,
+  Button,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  HStack,
+  Text,
+  Badge,
+  Divider,
+} from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import {
@@ -32,6 +48,13 @@ function toLocalYYYYMMDD(d = new Date()): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
+}
+
+/** Readable date from `YYYY-MM-DD` (local TZ) for the review summary. */
+function formatYMD(ymd: string): string {
+  const d = new Date(`${ymd}T00:00:00`)
+  if (Number.isNaN(d.getTime())) return ymd
+  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 /** Day-of-month part of `YYYY-MM-DD`, clamped — matches the transaction calendar date picker. */
@@ -81,6 +104,9 @@ export default function TransactionForm({
   const [accounts, setAccounts] = useState<FinancialAccount[]>([])
   const [accountsLoading, setAccountsLoading] = useState(false)
   const [accountId, setAccountId] = useState<number | null>(null)
+
+  // Review-before-save step shown after the user taps the submit button.
+  const [reviewOpen, setReviewOpen] = useState(false)
 
   // 💳 Installment states
   const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
@@ -183,17 +209,17 @@ export default function TransactionForm({
    * - Resets form on success
    */
   const onSubmit = useCallback(
-    async () => {
-      if (!user?.token) return
+    async (): Promise<boolean> => {
+      if (!user?.token) return false
 
-      if (loading) return
+      if (loading) return false
       if (!accountId) {
         ToastService.warning({
           title: 'Select an account',
           description: 'Create an account from the Accounts page before adding transactions.',
           dedupeKey: 'transaction-account-required',
         })
-        return
+        return false
       }
       const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
       if (isInstallment && !paymentMethodId) {
@@ -202,7 +228,7 @@ export default function TransactionForm({
           description: 'Installments must be linked to the credit card they were charged on.',
           dedupeKey: 'installment-card-required',
         })
-        return
+        return false
       }
 
       setLoading(true)
@@ -305,12 +331,14 @@ export default function TransactionForm({
 
         // Trigger parent refresh
         onCreated({} as Transaction)
+        return true
       } catch (err: unknown) {
         ToastService.apiError(err, {
           title: 'Could not save transaction',
           duration: 3000,
           dedupeKey: 'transaction-save-failed',
         })
+        return false
       } finally {
         setLoading(false)
       }
@@ -332,6 +360,104 @@ export default function TransactionForm({
       onCreated,
     ]
   )
+
+  const selectedAccount = accounts.find((account) => account.id === accountId) ?? null
+
+  /** Pre-flight checks before opening the review summary. */
+  const canReview = (): boolean => {
+    if (!accountId) {
+      ToastService.warning({
+        title: 'Select an account',
+        description: 'Create an account from the Accounts page before adding transactions.',
+        dedupeKey: 'transaction-account-required',
+      })
+      return false
+    }
+    if (!amount || Number(amount) <= 0) {
+      ToastService.warning({
+        title: 'Enter an amount',
+        description: 'Add a value greater than zero before saving.',
+        dedupeKey: 'transaction-amount-required',
+      })
+      return false
+    }
+    const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
+    if (isInstallment && !paymentMethodId) {
+      ToastService.warning({
+        title: 'Select a credit card',
+        description: 'Installments must be linked to the credit card they were charged on.',
+        dedupeKey: 'installment-card-required',
+      })
+      return false
+    }
+    return true
+  }
+
+  const handleReviewRequest = () => {
+    if (canReview()) setReviewOpen(true)
+  }
+
+  const handleConfirmSave = async () => {
+    const ok = await onSubmit()
+    // On success the parent closes the modal (this unmounts); only reset on failure.
+    if (!ok) setReviewOpen(false)
+  }
+
+  const modeLabel =
+    type === 'EXPENSE'
+      ? expenseMode === 'fixed'
+        ? 'Fixed monthly'
+        : expenseMode === 'installment'
+          ? 'Installments'
+          : 'One-off'
+      : incomeMode === 'fixed'
+        ? 'Fixed monthly'
+        : 'One-off'
+
+  const isInstallmentReview =
+    type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
+
+  const reviewItems: Array<{ label: string; value: string }> = [
+    { label: 'How it works', value: modeLabel },
+    {
+      label: 'Amount',
+      value: isInstallmentReview
+        ? `£${Number(amount).toFixed(2)} · ${installments}× £${(Number(amount) / installments).toFixed(2)}`
+        : `£${Number(amount).toFixed(2)}`,
+    },
+    { label: 'Category', value: category || '—' },
+    { label: 'Account', value: selectedAccount ? selectedAccount.name : '—' },
+  ]
+  if (type === 'EXPENSE') {
+    reviewItems.push({
+      label: 'Payment method',
+      value: selectedCard ? selectedCard.name : 'Debit card (default)',
+    })
+  }
+  if (
+    (type === 'EXPENSE' && expenseMode === 'single') ||
+    (type === 'INCOME' && incomeMode === 'single')
+  ) {
+    reviewItems.push({ label: 'Date', value: formatYMD(date) })
+  } else if (type === 'EXPENSE' && expenseMode === 'fixed') {
+    reviewItems.push({
+      label: 'Schedule',
+      value: `Every month on day ${recurringDayOfMonth} · from ${formatYMD(recurringStartDate)}`,
+    })
+  } else if (type === 'INCOME' && incomeMode === 'fixed') {
+    reviewItems.push({ label: 'Schedule', value: `Every month on day ${recurringDayOfMonth}` })
+  } else if (type === 'EXPENSE' && expenseMode === 'installment') {
+    reviewItems.push({ label: 'First installment', value: formatYMD(firstInstallmentDate) })
+  }
+  if (description.trim()) {
+    reviewItems.push({ label: 'Description', value: description.trim() })
+  }
+
+  const isIncome = type === 'INCOME'
+  const accentScheme = isIncome ? 'green' : 'red'
+  const confirmGradient = isIncome
+    ? 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
+    : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
 
   return (
     <Box w="full">
@@ -458,7 +584,7 @@ export default function TransactionForm({
                 : '0 8px 24px -10px rgba(244, 63, 94, 0.55)'
               }
               leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
-              onClick={onSubmit}
+              onClick={handleReviewRequest}
               isLoading={loading}
               isDisabled={!accountId}
               loadingText={
@@ -620,6 +746,78 @@ export default function TransactionForm({
           />
         </Box>
       )}
+
+      {/* ✅ Review-before-save summary */}
+      <Modal
+        isOpen={reviewOpen}
+        onClose={() => !loading && setReviewOpen(false)}
+        isCentered
+        size={{ base: 'sm', sm: 'md' }}
+        motionPreset="slideInBottom"
+      >
+        <ModalOverlay backdropFilter="blur(4px)" />
+        <ModalContent bg={colors.cardBg} borderRadius="2xl" mx={3}>
+          <ModalHeader pb={2}>
+            <VStack align="stretch" spacing={1}>
+              <HStack spacing={2}>
+                <Badge colorScheme={accentScheme} borderRadius="full" px={2.5} py={0.5}>
+                  {isIncome ? 'Income' : 'Expense'}
+                </Badge>
+                <Text fontSize="md" fontWeight={700} color={colors.text.primary}>
+                  Review before saving
+                </Text>
+              </HStack>
+              <Text fontSize="xs" color={colors.text.secondary} fontWeight={500}>
+                Check the details — nothing is saved until you confirm.
+              </Text>
+            </VStack>
+          </ModalHeader>
+          <ModalBody>
+            <VStack align="stretch" spacing={0} divider={<Divider borderColor={colors.border} />}>
+              {reviewItems.map((item) => (
+                <HStack key={item.label} justify="space-between" align="flex-start" py={2.5} spacing={4}>
+                  <Text fontSize="sm" color={colors.text.secondary} flexShrink={0}>
+                    {item.label}
+                  </Text>
+                  <Text
+                    fontSize="sm"
+                    fontWeight={700}
+                    color={colors.text.primary}
+                    textAlign="right"
+                    minW={0}
+                  >
+                    {item.value}
+                  </Text>
+                </HStack>
+              ))}
+            </VStack>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button
+              variant="ghost"
+              onClick={() => setReviewOpen(false)}
+              isDisabled={loading}
+              flex={1}
+              borderRadius="xl"
+            >
+              Back
+            </Button>
+            <Button
+              flex={1}
+              color="white"
+              borderRadius="xl"
+              bg={confirmGradient}
+              onClick={handleConfirmSave}
+              isLoading={loading}
+              loadingText="Saving…"
+              _hover={{ transform: 'translateY(-1px)' }}
+              _active={{ transform: 'translateY(0)' }}
+            >
+              Confirm &amp; save
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }
