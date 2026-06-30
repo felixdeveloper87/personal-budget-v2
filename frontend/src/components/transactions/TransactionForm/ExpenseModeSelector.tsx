@@ -1,4 +1,4 @@
-import { Box, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 
 export type ExpenseMode = 'single' | 'fixed' | 'installment'
@@ -41,7 +41,22 @@ export default function ExpenseModeSelector({
         How should this expense work?
       </Text>
 
-      <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
+      {/* Mobile: a single horizontal row that scrolls (carousel) so all three
+          modes stay on one line. sm+: an equal 3-column grid. */}
+      <Flex
+        direction="row"
+        gap={{ base: 2.5, sm: 3 }}
+        overflowX={{ base: 'auto', sm: 'visible' }}
+        mx={{ base: -1, sm: 0 }}
+        px={{ base: 1, sm: 0 }}
+        sx={{
+          scrollSnapType: 'x proximity',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          '::-webkit-scrollbar': { display: 'none' },
+        }}
+      >
         {MODES.map((mode) => {
           const selected = value === mode.value
           return (
@@ -52,7 +67,9 @@ export default function ExpenseModeSelector({
               onClick={() => onChange(mode.value)}
               textAlign="left"
               borderRadius="2xl"
-              minH={{ base: '72px', sm: '78px' }}
+              flex={{ base: '0 0 auto', sm: 1 }}
+              minW={{ base: '128px', sm: 0 }}
+              minH={{ base: '64px', sm: '78px' }}
               px={{ base: 3, sm: 3.5 }}
               py={{ base: 2.5, sm: 3 }}
               border="2px solid"
@@ -60,6 +77,7 @@ export default function ExpenseModeSelector({
               bg={selected ? `${mode.accent}14` : colors.inputBg}
               boxShadow={selected ? `0 12px 30px -18px ${mode.accent}` : 'none'}
               transition="transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease"
+              sx={{ scrollSnapAlign: 'center' }}
               _hover={{
                 transform: 'translateY(-2px)',
                 borderColor: mode.accent,
@@ -70,7 +88,7 @@ export default function ExpenseModeSelector({
                 outlineOffset: '2px',
               }}
             >
-              <VStack align="stretch" spacing={2}>
+              <VStack align="stretch" spacing={{ base: 1, sm: 2 }}>
                 <HStack justify="space-between" align="flex-start">
                   <Text color={colors.text.primary} fontWeight={800} fontSize="sm">
                     {mode.title}
@@ -86,14 +104,19 @@ export default function ExpenseModeSelector({
                     flexShrink={0}
                   />
                 </HStack>
-                <Text color={colors.text.secondary} fontSize="xs" lineHeight="short" noOfLines={2}>
+                <Text
+                  color={colors.text.secondary}
+                  fontSize="xs"
+                  lineHeight="short"
+                  noOfLines={{ base: 1, sm: 2 }}
+                >
                   {mode.caption}
                 </Text>
               </VStack>
             </Box>
           )
         })}
-      </SimpleGrid>
+      </Flex>
     </Box>
   )
 }
