@@ -9,7 +9,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { CreditCard, Wallet, Minus } from '../../ui/icons'
+import { CreditCard, Wallet } from '../../ui/icons'
 import { BankLogo, getBankMeta } from '../../ui'
 import { PaymentMethod, PaymentMethodType } from '../../../types'
 
@@ -103,14 +103,14 @@ export default function PaymentMethodSelector({
                 justifyContent="center"
                 flexShrink={0}
               >
-                <Icon as={Minus} boxSize={4} color={captionColor} />
+                <Icon as={CreditCard} boxSize={4} />
               </Box>
               <VStack align="flex-start" spacing={0} minW={0}>
                 <Text noOfLines={1} fontWeight={700} fontSize="sm" color={nameColor}>
-                  None
+                  Debit card
                 </Text>
                 <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                  No method
+                  Default
                 </Text>
               </VStack>
             </HStack>
@@ -161,7 +161,7 @@ export default function PaymentMethodSelector({
       )}
       {!selected && (
         <Text mt={2} fontSize="xs" color={captionColor}>
-          Optional. The balance account above is still required.
+          Defaults to debit card. The balance account above is still required.
         </Text>
       )}
     </FormControl>
