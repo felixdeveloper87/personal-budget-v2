@@ -1,6 +1,5 @@
 import {
   Box,
-  Flex,
   FormControl,
   FormLabel,
   HStack,
@@ -11,6 +10,7 @@ import {
 } from '@chakra-ui/react'
 import { CreditCard, Wallet } from '../../ui/icons'
 import { BankLogo, getBankMeta } from '../../ui'
+import ChipCarousel from './ChipCarousel'
 import { PaymentMethod, PaymentMethodType } from '../../../types'
 
 interface PaymentMethodSelectorProps {
@@ -77,25 +77,8 @@ export default function PaymentMethodSelector({
         </Box>
       ) : (
         // Single horizontal line of real-icon method chips; scrolls (carousel)
-        // when there are more than fit. A leading "None" clears the choice.
-        <Flex
-          direction="row"
-          gap={2.5}
-          overflowX="auto"
-          w="full"
-          minW={0}
-          maxW="100%"
-          pb={1}
-          mx={-1}
-          px={1}
-          sx={{
-            scrollSnapType: 'x proximity',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            '::-webkit-scrollbar': { display: 'none' },
-          }}
-        >
+        // when there are more than fit, with chevrons on wider screens.
+        <ChipCarousel>
           <Box {...chipProps(value === null)} onClick={() => onChange(null)}>
             <HStack spacing={2.5} align="center">
               <Box
@@ -167,7 +150,7 @@ export default function PaymentMethodSelector({
               </Box>
             )
           })}
-        </Flex>
+        </ChipCarousel>
       )}
 
       {selected?.type === 'CREDIT_CARD' && (

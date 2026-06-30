@@ -1,11 +1,11 @@
 import {
   Box,
   Button,
-  HStack,
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { useState } from 'react'
+import ChipCarousel from './ChipCarousel'
 import {
   BookOpen,
   Briefcase,
@@ -273,15 +273,7 @@ export default function QuickExpensePresets({
         Quick add for {category}
       </Text>
 
-      <HStack
-        spacing={2}
-        overflowX="auto"
-        pb={1}
-        sx={{
-          scrollbarWidth: 'none',
-          '&::-webkit-scrollbar': { display: 'none' },
-        }}
-      >
+      <ChipCarousel>
         {presets.map((preset) => {
           const PresetIcon = preset.icon
 
@@ -307,7 +299,7 @@ export default function QuickExpensePresets({
             </Button>
           )
         })}
-      </HStack>
+      </ChipCarousel>
     </Box>
   )
 }

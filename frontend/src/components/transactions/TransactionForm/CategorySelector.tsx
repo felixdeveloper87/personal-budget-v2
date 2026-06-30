@@ -10,6 +10,7 @@ import {
   Input,
 } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import ChipCarousel from './ChipCarousel'
 import {
   TRANSACTION_EXPENSE_OTHER_OPTIONS,
   TRANSACTION_INCOME_OTHER_OPTIONS,
@@ -259,21 +260,7 @@ export default function CategorySelector({
             </HStack>
 
             {/* Single horizontal carousel with every category. */}
-            <Flex
-              gap={2}
-              align="center"
-              overflowX="auto"
-              pb={1}
-              mx={-1}
-              px={1}
-              sx={{
-                scrollSnapType: 'x proximity',
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-                '::-webkit-scrollbar': { display: 'none' },
-              }}
-            >
+            <ChipCarousel>
               {allCategories.map((cat) => {
                 const isSelected = category === cat.name
                 return (
@@ -308,7 +295,7 @@ export default function CategorySelector({
                   </Box>
                 )
               })}
-            </Flex>
+            </ChipCarousel>
 
             {/* Custom category — always available, no expanding needed. */}
             <VStack spacing={2} align="stretch">

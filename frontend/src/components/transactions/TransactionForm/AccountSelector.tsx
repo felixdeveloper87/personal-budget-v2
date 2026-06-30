@@ -1,6 +1,5 @@
 import {
   Box,
-  Flex,
   FormControl,
   FormLabel,
   HStack,
@@ -9,6 +8,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import AccountAvatar from '../../../features/accounts/components/AccountAvatar'
+import ChipCarousel from './ChipCarousel'
 import { FinancialAccount } from '../../../types'
 
 interface AccountSelectorProps {
@@ -46,25 +46,8 @@ export default function AccountSelector({
         </Box>
       ) : (
         // Single horizontal line of real-icon account chips; scrolls (carousel)
-        // when there are more accounts than fit.
-        <Flex
-          direction="row"
-          gap={2.5}
-          overflowX="auto"
-          w="full"
-          minW={0}
-          maxW="100%"
-          pb={1}
-          mx={-1}
-          px={1}
-          sx={{
-            scrollSnapType: 'x proximity',
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            '::-webkit-scrollbar': { display: 'none' },
-          }}
-        >
+        // when there are more accounts than fit, with chevrons on wider screens.
+        <ChipCarousel>
           {activeAccounts.map((account) => {
             const isSelected = account.id === value
             return (
@@ -110,7 +93,7 @@ export default function AccountSelector({
               </Box>
             )
           })}
-        </Flex>
+        </ChipCarousel>
       )}
 
       <Text mt={2} fontSize="xs" color={captionColor}>
