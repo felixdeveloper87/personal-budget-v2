@@ -118,17 +118,12 @@ export default function RecurringSelector({
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
-          _hover={{
-            borderColor: accentBorder,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg',
-          }}
+          _hover={{ borderColor: accentBorder }}
           _focusWithin={{
             borderColor: accentBorder,
             boxShadow: focusWithinShadow,
-            transform: 'translateY(-2px)',
           }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack align="stretch" spacing={0} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 3.5 }}>
             <Flex align="flex-start" gap={3}>

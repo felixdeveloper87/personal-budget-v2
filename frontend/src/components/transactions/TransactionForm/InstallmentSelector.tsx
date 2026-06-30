@@ -144,17 +144,12 @@ export default function InstallmentSelector({
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
-          _hover={{
-            borderColor: accentBorder,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg',
-          }}
+          _hover={{ borderColor: accentBorder }}
           _focusWithin={{
             borderColor: accentBorder,
             boxShadow: focusWithinShadow,
-            transform: 'translateY(-2px)',
           }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack align="stretch" spacing={0} px={{ base: 3, sm: 3.5 }} py={{ base: 2.5, sm: 3 }}>
             <HStack justify="space-between" align="center" spacing={3}>

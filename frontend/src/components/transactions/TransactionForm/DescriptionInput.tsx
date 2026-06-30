@@ -40,17 +40,12 @@ export default function DescriptionInput({
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
-          _hover={{
-            borderColor: accentBorder,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg',
-          }}
+          _hover={{ borderColor: accentBorder }}
           _focusWithin={{
             borderColor: accentBorder,
             boxShadow: focusWithinShadow,
-            transform: 'translateY(-2px)',
           }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <HStack
             spacing={{ base: 2, sm: 2.5 }}
