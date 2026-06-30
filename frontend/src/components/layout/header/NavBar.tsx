@@ -1,13 +1,8 @@
 import {
   Box,
   Flex,
-  HStack,
   Icon,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
+  HStack,
   Text,
   Tooltip,
   useBreakpointValue,
@@ -16,7 +11,7 @@ import {
 } from '@chakra-ui/react'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { NAV_ITEMS, navItemIdFor, type AppPage, type NavItem } from './navigation.config'
-import { List } from '../../ui/icons'
+import { ChevronLeft, ChevronRight } from '../../ui/icons'
 import { useEd } from '../../../editorial'
 
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
@@ -44,10 +39,9 @@ export default function NavBar({
   ...stackProps
 }: NavBarProps) {
   const isMobile = variant === 'mobile'
-  const visibleItems = isMobile && items.length > 4 ? items.slice(0, 4) : items
-  const overflowItems = isMobile && items.length > 4 ? items.slice(4) : []
+  // Mobile shows every destination in a horizontally scrollable carousel
+  // (no "More" overflow menu); desktop lays them out inline.
   const activeNavId = navItemIdFor(currentPage)
-  const isOverflowActive = overflowItems.some((item) => item.id === activeNavId)
   // Tablet range (md..lg, ~768–991px): collapse desktop nav to icon-only
   // so the top row never squeezes the Logo / Actions.
   const isTabletRange = useBreakpointValue({ base: false, md: true, lg: false }) ?? false
@@ -79,6 +73,16 @@ export default function NavBar({
     'inset 0 0 0 1px rgba(96, 165, 250, 0.35)',
   )
   const indicatorRing = ed ? 'inset 0 0 0 1px rgba(127, 230, 179, 0.30)' : indicatorRingBase
+  // Mobile gets a crisper frame, a jade-tinted active pill and solid chevrons so
+  // the carousel reads sharply against the header glass.
+  const trackBgMobileBase = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.07)')
+  const trackBgMobile = ed ? 'rgba(239, 246, 255, 0.07)' : trackBgMobileBase
+  const trackBorderMobileBase = useColorModeValue('rgba(203,213,225,0.95)', 'rgba(255,255,255,0.16)')
+  const trackBorderMobile = ed ? 'rgba(239, 246, 255, 0.22)' : trackBorderMobileBase
+  const indicatorBgMobileBase = useColorModeValue('white', 'rgba(255,255,255,0.22)')
+  const indicatorBgMobile = ed ? ed.jadeSoftHover : indicatorBgMobileBase
+  const chevronBgBase = useColorModeValue('rgba(255,255,255,0.96)', 'rgba(18,20,26,0.94)')
+  const chevronBg = ed ? ed.glass : chevronBgBase
   const accentBarBase = useColorModeValue(
     'linear-gradient(90deg, #2563eb, #7c3aed)',
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
@@ -87,50 +91,109 @@ export default function NavBar({
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
-  const moreRef = useRef<HTMLButtonElement | null>(null)
 
   const [indicator, setIndicator] = useState<IndicatorRect>({ left: 0, width: 0, ready: false })
+  // Whether the carousel can still scroll further in each direction — drives the
+  // edge chevrons that hint there are more pages off-screen.
+  const [edges, setEdges] = useState({ start: false, end: false })
+  // The chevrons only surface while the user is actively touching/scrolling.
+  const [interacting, setInteracting] = useState(false)
+  const idleTimer = useRef<number | null>(null)
+
+  const flagInteracting = useCallback(() => {
+    setInteracting(true)
+    if (idleTimer.current) window.clearTimeout(idleTimer.current)
+    idleTimer.current = window.setTimeout(() => setInteracting(false), 1100)
+  }, [])
+
+  useEffect(() => () => {
+    if (idleTimer.current) window.clearTimeout(idleTimer.current)
+  }, [])
+
+  const updateEdges = useCallback(() => {
+    const el = containerRef.current
+    if (!el || !isMobile) {
+      setEdges((prev) => (prev.start || prev.end ? { start: false, end: false } : prev))
+      return
+    }
+    const start = el.scrollLeft > 1
+    const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+    setEdges((prev) => (prev.start === start && prev.end === end ? prev : { start, end }))
+  }, [isMobile])
 
   const measure = useCallback(() => {
-    const el = itemRefs.current[activeNavId] ?? (isOverflowActive ? moreRef.current : null)
+    const el = itemRefs.current[activeNavId]
     if (!el) return
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
     if (isMobile) {
       el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
     }
-  }, [activeNavId, isMobile, isOverflowActive])
+  }, [activeNavId, isMobile])
 
   useLayoutEffect(() => {
     measure()
-  }, [measure, variant, isIconOnly])
+    updateEdges()
+  }, [measure, updateEdges, variant, isIconOnly])
 
   useEffect(() => {
     if (!containerRef.current || typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(() => measure())
+    const ro = new ResizeObserver(() => {
+      measure()
+      updateEdges()
+    })
     ro.observe(containerRef.current)
     return () => ro.disconnect()
-  }, [measure])
+  }, [measure, updateEdges])
 
-  return (
+
+  const nudge = (dir: 1 | -1) => {
+    const el = containerRef.current
+    if (!el) return
+    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: 'smooth' })
+    flagInteracting()
+  }
+
+  const track = (
     <HStack
       ref={containerRef}
       as="nav"
       role="tablist"
       aria-label="Primary"
-      spacing={isMobile ? 0 : 1}
+      spacing={1}
       p={1}
       borderRadius={isMobile ? '2xl' : 'xl'}
-      bg={trackBg}
+      bg={isMobile ? trackBgMobile : trackBg}
       border="1px solid"
-      borderColor={trackBorder}
-      backdropFilter="blur(12px)"
+      borderColor={isMobile ? trackBorderMobile : trackBorder}
+      backdropFilter={isMobile ? 'blur(16px) saturate(150%)' : 'blur(12px)'}
       boxShadow={trackShadow}
       flexShrink={0}
       w={isMobile ? 'full' : 'auto'}
-      maxW={isMobile ? '380px' : 'none'}
+      maxW="none"
       mx="auto"
-      overflow="hidden"
+      overflowX={isMobile ? 'auto' : 'hidden'}
+      overflowY="hidden"
       position="relative"
+      onScroll={
+        isMobile
+          ? () => {
+              updateEdges()
+              flagInteracting()
+            }
+          : undefined
+      }
+      onPointerDown={isMobile ? flagInteracting : undefined}
+      sx={
+        isMobile
+          ? {
+              scrollSnapType: 'x proximity',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              WebkitOverflowScrolling: 'touch',
+              '::-webkit-scrollbar': { display: 'none' },
+            }
+          : undefined
+      }
       {...stackProps}
     >
       {/* Sliding active indicator */}
@@ -142,7 +205,7 @@ export default function NavBar({
         left={`${indicator.left}px`}
         width={`${indicator.width}px`}
         borderRadius={isMobile ? 'xl' : 'lg'}
-        bg={indicatorBg}
+        bg={isMobile ? indicatorBgMobile : indicatorBg}
         boxShadow={`${indicatorShadow}, ${indicatorRing}`}
         opacity={indicator.ready ? 1 : 0}
         transition="left 0.35s cubic-bezier(0.32, 0.72, 0, 1), width 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease"
@@ -166,7 +229,7 @@ export default function NavBar({
         pointerEvents="none"
       />
 
-      {visibleItems.map((item) => (
+      {items.map((item) => (
         <NavBarItem
           key={item.id}
           item={item}
@@ -182,72 +245,74 @@ export default function NavBar({
           }}
         />
       ))}
-
-      {overflowItems.length > 0 && (
-        <Menu placement="bottom-end" isLazy>
-          <MenuButton
-            ref={moreRef}
-            type="button"
-            role="tab"
-            aria-selected={isOverflowActive}
-            aria-label="More pages"
-            flex={1}
-            px={1.5}
-            py={2}
-            minH="52px"
-            minW={0}
-            borderRadius="xl"
-            bg="transparent"
-            color={isOverflowActive ? activeColor : inactiveColor}
-            fontWeight={isOverflowActive ? 700 : 600}
-            fontSize="2xs"
-            position="relative"
-            zIndex={1}
-            transition="color 0.2s ease, transform 0.15s ease"
-            _hover={{ color: isOverflowActive ? activeColor : hoverColor }}
-            _focusVisible={{
-              outline: 'none',
-              boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
-            }}
-          >
-            <Flex direction="column" align="center" justify="center" gap={1}>
-              <List
-                size={18}
-                weight={isOverflowActive ? 'duotone' : 'regular'}
-                aria-hidden
-              />
-              <Text as="span" lineHeight="1" whiteSpace="nowrap">More</Text>
-            </Flex>
-          </MenuButton>
-          <Portal>
-            <MenuList zIndex={2000} minW="220px" p={2} borderRadius="xl">
-              {overflowItems.map((item) => {
-                const ItemIcon = item.icon
-
-                return (
-                  <MenuItem
-                    key={item.id}
-                    icon={
-                      <ItemIcon
-                        size={18}
-                        weight={activeNavId === item.id ? 'duotone' : 'regular'}
-                        aria-hidden
-                      />
-                    }
-                    borderRadius="lg"
-                    fontWeight={activeNavId === item.id ? 700 : 500}
-                    color={activeNavId === item.id ? activeColor : undefined}
-                    onClick={() => onPageChange?.(item.id)}
-                  >
-                    {item.label}
-                  </MenuItem>
-                )
-              })}
-            </MenuList>
-          </Portal>
-        </Menu>
-      )}
     </HStack>
+  )
+
+  if (!isMobile) return track
+
+  return (
+    <Box position="relative" w="full">
+      {track}
+
+      {/* Edge chevrons — surface only while the user is browsing the carousel
+          and only on the side that still has pages to scroll toward. */}
+      <Box
+        as="button"
+        type="button"
+        aria-label="Previous pages"
+        tabIndex={interacting && edges.start ? 0 : -1}
+        onClick={() => nudge(-1)}
+        position="absolute"
+        top="50%"
+        left="6px"
+        transform={`translateY(-50%) translateX(${interacting && edges.start ? '0' : '-6px'})`}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        boxSize="28px"
+        borderRadius="full"
+        bg={chevronBg}
+        color={hoverColor}
+        border="1px solid"
+        borderColor={trackBorderMobile}
+        boxShadow={indicatorShadow}
+        opacity={interacting && edges.start ? 1 : 0}
+        transition="opacity 0.2s ease, transform 0.2s ease"
+        pointerEvents={interacting && edges.start ? 'auto' : 'none'}
+        cursor="pointer"
+        zIndex={3}
+      >
+        <Icon as={ChevronLeft} boxSize="16px" />
+      </Box>
+      <Box
+        as="button"
+        type="button"
+        aria-label="More pages"
+        tabIndex={interacting && edges.end ? 0 : -1}
+        onClick={() => nudge(1)}
+        position="absolute"
+        top="50%"
+        right="6px"
+        transform={`translateY(-50%) translateX(${interacting && edges.end ? '0' : '6px'})`}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        boxSize="28px"
+        borderRadius="full"
+        bg={chevronBg}
+        color={hoverColor}
+        border="1px solid"
+        borderColor={trackBorderMobile}
+        boxShadow={indicatorShadow}
+        opacity={interacting && edges.end ? 1 : 0}
+        transition="opacity 0.2s ease, transform 0.2s ease"
+        pointerEvents={interacting && edges.end ? 'auto' : 'none'}
+        cursor="pointer"
+        zIndex={3}
+      >
+        <Icon as={ChevronRight} boxSize="16px" />
+      </Box>
+    </Box>
   )
 }
 
@@ -286,18 +351,19 @@ function NavBarItem({
       title={isIconOnly ? undefined : item.description}
       onClick={() => onSelect?.(item.id)}
       ref={assignRef as unknown as React.Ref<HTMLDivElement>}
-      flex={isMobile ? 1 : undefined}
-      flexShrink={isMobile ? 1 : undefined}
-      px={isMobile ? 1.5 : isIconOnly ? 2.5 : 3.5}
+      flex={isMobile ? '0 0 auto' : undefined}
+      flexShrink={isMobile ? 0 : undefined}
+      px={isMobile ? 3.5 : isIconOnly ? 2.5 : 3.5}
       py={isMobile ? 2.5 : 2}
       minH={isMobile ? '52px' : '40px'}
-      minW={0}
+      minW={isMobile ? '64px' : 0}
+      sx={isMobile ? { scrollSnapAlign: 'center' } : undefined}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"
       color={isActive ? activeColor : inactiveColor}
       fontWeight={isActive ? 700 : 600}
-      fontSize={isMobile ? '2xs' : 'sm'}
-      letterSpacing="0.005em"
+      fontSize={isMobile ? 'xs' : 'sm'}
+      letterSpacing={isMobile ? '0.01em' : '0.005em'}
       position="relative"
       zIndex={1}
       cursor="pointer"
@@ -321,7 +387,7 @@ function NavBarItem({
       >
         <Icon
           as={item.icon}
-          boxSize={4}
+          boxSize={isMobile ? 5 : 4}
           transition="transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)"
           transform={isActive ? 'scale(1.05)' : 'scale(1)'}
           weight={isActive ? 'duotone' : 'regular'}
