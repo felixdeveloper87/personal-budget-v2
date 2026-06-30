@@ -159,17 +159,12 @@ export default function CategorySelector({
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
-          _hover={{
-            borderColor: accentBorder,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg',
-          }}
+          _hover={{ borderColor: accentBorder }}
           _focusWithin={{
             borderColor: accentBorder,
             boxShadow: focusWithinShadow,
-            transform: 'translateY(-2px)',
           }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack
             spacing={3}
@@ -304,7 +299,7 @@ export default function CategorySelector({
                       fontSize={{ base: 'xs', sm: 'xs' }}
                       fontWeight={isSelected ? 600 : 500}
                       opacity={isSelected ? 1 : 0.78}
-                      _hover={{ bg: colors.bgSecondary, opacity: 1 }}
+                      _hover={{ bg: colors.bgSecondary, opacity: 1, textDecoration: 'underline' }}
                       _active={{ bg: colors.bgSecondary }}
                       _focusVisible={{ boxShadow: focusRing }}
                     >

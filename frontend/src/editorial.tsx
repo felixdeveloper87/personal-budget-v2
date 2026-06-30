@@ -67,7 +67,7 @@ export const EDITORIAL_DARK = {
   jadeSoftHover: 'rgba(125, 211, 252, 0.20)',
 
   /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
-  bgGradient: 'radial-gradient(900px circle at 28% -16%, rgba(59, 130, 246, 0.14), transparent 60%), linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
+  bgGradient: 'linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const

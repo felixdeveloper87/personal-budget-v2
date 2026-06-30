@@ -47,6 +47,7 @@ export default function PaymentMethodSelector({
   const chipProps = (isSelected: boolean) => ({
     as: 'button' as const,
     type: 'button' as const,
+    role: 'group',
     textAlign: 'left' as const,
     flex: '0 0 auto',
     minW: '160px',
@@ -58,14 +59,14 @@ export default function PaymentMethodSelector({
     borderColor: isSelected ? accent : borderColor,
     bg: isSelected ? selectedBg : cardBg,
     boxShadow: isSelected ? `0 12px 30px -18px ${accent}` : 'none',
-    transition: 'transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease',
+    transition: 'border-color 0.18s ease, box-shadow 0.18s ease',
     sx: { scrollSnapAlign: 'start' },
-    _hover: { transform: 'translateY(-2px)', borderColor: accent },
+    _hover: { borderColor: accent },
     _focusVisible: { outline: '2px solid', outlineColor: accent, outlineOffset: '2px' },
   })
 
   return (
-    <FormControl>
+    <FormControl minW={0}>
       <FormLabel fontSize="sm" fontWeight={700}>
         Payment method (how you paid)
       </FormLabel>
@@ -81,6 +82,9 @@ export default function PaymentMethodSelector({
           direction="row"
           gap={2.5}
           overflowX="auto"
+          w="full"
+          minW={0}
+          maxW="100%"
           pb={1}
           mx={-1}
           px={1}
@@ -106,7 +110,13 @@ export default function PaymentMethodSelector({
                 <Icon as={CreditCard} boxSize={4} />
               </Box>
               <VStack align="flex-start" spacing={0} minW={0}>
-                <Text noOfLines={1} fontWeight={700} fontSize="sm" color={nameColor}>
+                <Text
+                  noOfLines={1}
+                  fontWeight={700}
+                  fontSize="sm"
+                  color={nameColor}
+                  _groupHover={{ textDecoration: 'underline' }}
+                >
                   Debit card
                 </Text>
                 <Text noOfLines={1} fontSize="xs" color={captionColor}>
@@ -140,7 +150,13 @@ export default function PaymentMethodSelector({
                     </Box>
                   )}
                   <VStack align="flex-start" spacing={0} minW={0}>
-                    <Text noOfLines={1} fontWeight={700} fontSize="sm" color={nameColor}>
+                    <Text
+                      noOfLines={1}
+                      fontWeight={700}
+                      fontSize="sm"
+                      color={nameColor}
+                      _groupHover={{ textDecoration: 'underline' }}
+                    >
                       {method.name}
                     </Text>
                     <Text noOfLines={1} fontSize="xs" color={captionColor}>

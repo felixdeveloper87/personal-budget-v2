@@ -64,6 +64,7 @@ export default function ExpenseModeSelector({
               key={mode.value}
               as="button"
               type="button"
+              role="group"
               onClick={() => onChange(mode.value)}
               textAlign="left"
               borderRadius="2xl"
@@ -76,12 +77,9 @@ export default function ExpenseModeSelector({
               borderColor={selected ? mode.accent : colors.border}
               bg={selected ? `${mode.accent}14` : colors.inputBg}
               boxShadow={selected ? `0 12px 30px -18px ${mode.accent}` : 'none'}
-              transition="transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease"
+              transition="border-color 0.18s ease, box-shadow 0.18s ease"
               sx={{ scrollSnapAlign: 'center' }}
-              _hover={{
-                transform: 'translateY(-2px)',
-                borderColor: mode.accent,
-              }}
+              _hover={{ borderColor: mode.accent }}
               _focusVisible={{
                 outline: '2px solid',
                 outlineColor: mode.accent,
@@ -90,7 +88,12 @@ export default function ExpenseModeSelector({
             >
               <VStack align="stretch" spacing={{ base: 1, sm: 2 }}>
                 <HStack justify="space-between" align="flex-start">
-                  <Text color={colors.text.primary} fontWeight={800} fontSize="sm">
+                  <Text
+                    color={colors.text.primary}
+                    fontWeight={800}
+                    fontSize="sm"
+                    _groupHover={{ textDecoration: 'underline' }}
+                  >
                     {mode.title}
                   </Text>
                   <Box

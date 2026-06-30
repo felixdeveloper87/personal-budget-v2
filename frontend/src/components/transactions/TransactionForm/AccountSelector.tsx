@@ -35,7 +35,7 @@ export default function AccountSelector({
   const selected = activeAccounts.find((account) => account.id === value)
 
   return (
-    <FormControl isRequired>
+    <FormControl isRequired minW={0}>
       <FormLabel fontSize="sm" fontWeight={700}>Balance account</FormLabel>
 
       {loading || activeAccounts.length === 0 ? (
@@ -51,6 +51,9 @@ export default function AccountSelector({
           direction="row"
           gap={2.5}
           overflowX="auto"
+          w="full"
+          minW={0}
+          maxW="100%"
           pb={1}
           mx={-1}
           px={1}
@@ -69,6 +72,7 @@ export default function AccountSelector({
                 key={account.id}
                 as="button"
                 type="button"
+                role="group"
                 onClick={() => onChange(account.id)}
                 textAlign="left"
                 flex="0 0 auto"
@@ -81,15 +85,21 @@ export default function AccountSelector({
                 borderColor={isSelected ? accent : borderColor}
                 bg={isSelected ? selectedBg : cardBg}
                 boxShadow={isSelected ? `0 12px 30px -18px ${accent}` : 'none'}
-                transition="transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease"
+                transition="border-color 0.18s ease, box-shadow 0.18s ease"
                 sx={{ scrollSnapAlign: 'start' }}
-                _hover={{ transform: 'translateY(-2px)', borderColor: accent }}
+                _hover={{ borderColor: accent }}
                 _focusVisible={{ outline: '2px solid', outlineColor: accent, outlineOffset: '2px' }}
               >
                 <HStack spacing={2.5} align="center">
                   <AccountAvatar account={account} size={34} />
                   <VStack align="flex-start" spacing={0} minW={0}>
-                    <Text noOfLines={1} fontWeight={700} fontSize="sm" color={nameColor}>
+                    <Text
+                      noOfLines={1}
+                      fontWeight={700}
+                      fontSize="sm"
+                      color={nameColor}
+                      _groupHover={{ textDecoration: 'underline' }}
+                    >
                       {account.name}
                     </Text>
                     <Text noOfLines={1} fontSize="xs" color={captionColor}>

@@ -600,13 +600,11 @@ export default function TransactionForm({
               }
               _hover={{
                 bgPosition: '100% 50%',
-                transform: 'translateY(-1px)',
                 boxShadow: type === 'INCOME'
                   ? '0 12px 30px -10px rgba(16, 185, 129, 0.65)'
                   : '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
               }}
-              _active={{ transform: 'translateY(0)' }}
-              transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
+              transition="background-position 0.3s ease, box-shadow 0.2s ease"
             >
               {type === 'INCOME' && incomeMode === 'fixed'
                 ? 'Create fixed income'
@@ -810,8 +808,7 @@ export default function TransactionForm({
               onClick={handleConfirmSave}
               isLoading={loading}
               loadingText="Saving…"
-              _hover={{ transform: 'translateY(-1px)' }}
-              _active={{ transform: 'translateY(0)' }}
+              _hover={{ filter: 'brightness(1.06)' }}
             >
               Confirm &amp; save
             </Button>

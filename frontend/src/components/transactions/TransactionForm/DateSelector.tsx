@@ -61,17 +61,12 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
           bg={colors.inputBg}
           border="2px solid"
           borderColor={colors.border}
-          _hover={{
-            borderColor: colors.accent,
-            transform: 'translateY(-2px)',
-            boxShadow: 'lg'
-          }}
+          _hover={{ borderColor: colors.accent }}
           _focusWithin={{
             borderColor: colors.accent,
-            boxShadow: `0 0 0 3px ${colors.accent}20`,
-            transform: 'translateY(-2px)'
+            boxShadow: `0 0 0 3px ${colors.accent}20`
           }}
-          transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+          transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack align="stretch" spacing={0}>
             <VStack
@@ -189,7 +184,7 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
                       fontSize={{ base: 'xs', sm: 'xs' }}
                       fontWeight={date === option.value ? 600 : 500}
                       opacity={date === option.value ? 1 : 0.78}
-                      _hover={{ bg: colors.bgSecondary, opacity: 1 }}
+                      _hover={{ bg: colors.bgSecondary, opacity: 1, textDecoration: 'underline' }}
                       _active={{ bg: colors.bgSecondary }}
                       _focusVisible={{ boxShadow: `0 0 0 2px ${colors.accent}20` }}
                     >
