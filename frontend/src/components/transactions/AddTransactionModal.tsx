@@ -1,4 +1,4 @@
-import { Box, useColorModeValue } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
 import { PremiumModal } from '../ui'
@@ -38,7 +38,7 @@ export default function AddTransactionModal({
         <TransactionModalHeader type={type} onClose={onClose} />
       }
     >
-      <Box flex="1" bg={ed.bg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
+      <Box flex="1" minW={0} maxW="100%" bg={ed.bg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
         <TransactionForm
           transactions={transactions}
           onCreated={handleTransactionCreated}

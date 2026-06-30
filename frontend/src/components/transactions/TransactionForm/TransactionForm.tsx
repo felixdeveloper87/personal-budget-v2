@@ -460,7 +460,7 @@ export default function TransactionForm({
     : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
 
   return (
-    <Box w="full">
+    <Box w="full" minW={0}>
       {compact ? (
         /**
          * 🧩 Compact layout (used inside modals)
@@ -471,6 +471,7 @@ export default function TransactionForm({
               spacing={{ base: 4, sm: 5 }}
               align="stretch"
               w="full"
+              minW={0}
               aria-label="Add transaction form" // ♿ Accessibility
             >
           {type === 'INCOME' && (
