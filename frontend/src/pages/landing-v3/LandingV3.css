@@ -269,6 +269,7 @@
 .pbv3-hero {
   position: relative;
   min-height: 100vh;
+  min-height: 100svh;
   display: grid;
   align-items: center;
   overflow: hidden;
@@ -340,6 +341,25 @@
   opacity: 0;
   animation: pbv3-fade 1s ease 1.3s forwards;
   z-index: 2;
+}
+/* Mobile: keep the centered full-screen hero, compact enough that the whole
+   block (title → sub → CTA) sits inside the guilloché circle */
+@media (max-width: 560px) {
+  .pbv3-hero {
+    padding-top: 5rem;
+    padding-bottom: 2.5rem;
+  }
+  .pbv3-hero__title {
+    font-size: clamp(3.5rem, 17vw, 6rem);
+  }
+  .pbv3-hero__sub {
+    max-width: 44ch;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+  }
+  .pbv3-hero__cta {
+    margin-top: 1.4rem;
+  }
 }
 
 /* ==========================================================================
