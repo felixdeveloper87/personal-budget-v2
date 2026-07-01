@@ -1,4 +1,5 @@
 import { Grid, HStack, Text, VStack, Button } from '@chakra-ui/react'
+import { Plus } from 'lucide-react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
 import { fmtCurrency } from './format'
@@ -26,8 +27,8 @@ export default function MonthHero({
   const deficit = expense > income
 
   const netLabel = `${net < 0 ? '−' : ''}${fmtCurrency(Math.abs(net))}`
-  const monthName = (date ?? new Date()).toLocaleDateString('en-GB', { month: 'long' })
   const netColor = net < 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'
+  const monthName = (date ?? new Date()).toLocaleDateString('en-GB', { month: 'long' })
 
   return (
     <Panel
@@ -40,7 +41,7 @@ export default function MonthHero({
         gap={`clamp(1.4rem, 3vw, 2.2rem)`}
         p={`clamp(1.5rem, 3.4vw, 2.4rem)`}
       >
-        {/* Left — statement */}
+        {/* Left — statement: lede, flow bars and the month's net */}
         <VStack align="stretch" spacing={5}>
           {/* Lede */}
           <Text
@@ -70,117 +71,108 @@ export default function MonthHero({
             )}
           </Text>
 
-          {/* Flow bars */}
+          {/* Flow bars (labels carry the exact income/expense figures) */}
           <FlowBars income={income} expense={expense} transactions={transactions} />
 
-          {/* Quick actions */}
-          {(onAddIncome || onAddExpense) && (
-            <HStack spacing={2} maxW="440px" pt={1}>
+          {/* Net balance — the statement's bottom line */}
+          <HStack
+            justify="space-between"
+            align="baseline"
+            pt={3}
+            borderTop="1px solid var(--pb-hair)"
+          >
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="10.5px"
+              letterSpacing="0.2em"
+              textTransform="uppercase"
+              color="var(--pb-ink-faint)"
+            >
+              Net balance in {monthName}
+            </Text>
+            <Text
+              fontFamily="var(--pb-serif)"
+              fontSize="clamp(1.3rem, 2.6vw, 1.7rem)"
+              fontWeight={600}
+              lineHeight={1}
+              color={netColor}
+              style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
+            >
+              {netLabel}
+            </Text>
+          </HStack>
+        </VStack>
+
+        {/* Right — quick add: where new entries come in */}
+        {(onAddIncome || onAddExpense) && (
+          <VStack
+            align="stretch"
+            justify="center"
+            borderLeft={{ base: 'none', md: '1px solid var(--pb-hair)' }}
+            borderTop={{ base: '1px solid var(--pb-hair)', md: 'none' }}
+            pl={{ base: 0, md: 8 }}
+            pt={{ base: 5, md: 0 }}
+            spacing={3}
+          >
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="10.5px"
+              letterSpacing="0.2em"
+              textTransform="uppercase"
+              color="var(--pb-ink-faint)"
+            >
+              New entry
+            </Text>
+
+            <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.55}>
+              Record what happened — every entry keeps {monthName}'s ledger honest.
+            </Text>
+
+            <VStack align="stretch" spacing={2.5} pt={1}>
               {onAddIncome && (
                 <Button
-                  flex={1}
-                  h="36px"
-                  borderRadius="999px"
-                  bg="var(--pb-tint-income)"
-                  color="var(--pb-income)"
-                  border="1px solid var(--pb-hair)"
+                  h="46px"
+                  borderRadius="14px"
+                  bg="var(--pb-income)"
+                  color="var(--pb-paper-3)"
                   fontFamily="var(--pb-mono)"
-                  fontSize="11px"
-                  fontWeight={500}
+                  fontSize="12px"
+                  fontWeight={600}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
-                  _hover={{ bg: 'rgba(31,138,79,0.18)', borderColor: 'var(--pb-hair-2)' }}
+                  leftIcon={<Plus size={15} strokeWidth={2.5} />}
+                  boxShadow="var(--pb-shadow)"
+                  _hover={{ bg: 'var(--pb-income-2)', transform: 'translateY(-1px)', boxShadow: 'var(--pb-shadow-lift)' }}
+                  _active={{ transform: 'translateY(0)' }}
                   onClick={onAddIncome}
                 >
-                  + Add income
+                  Add income
                 </Button>
               )}
               {onAddExpense && (
                 <Button
-                  flex={1}
-                  h="36px"
-                  borderRadius="999px"
-                  bg="var(--pb-tint-coral)"
-                  color="var(--pb-coral)"
-                  border="1px solid var(--pb-hair)"
+                  h="46px"
+                  borderRadius="14px"
+                  bg="var(--pb-coral)"
+                  color="var(--pb-paper-3)"
                   fontFamily="var(--pb-mono)"
-                  fontSize="11px"
-                  fontWeight={500}
+                  fontSize="12px"
+                  fontWeight={600}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
-                  _hover={{ bg: 'rgba(194,58,44,0.16)', borderColor: 'var(--pb-hair-2)' }}
+                  leftIcon={<Plus size={15} strokeWidth={2.5} />}
+                  boxShadow="var(--pb-shadow)"
+                  _hover={{ bg: 'var(--pb-coral-2)', transform: 'translateY(-1px)', boxShadow: 'var(--pb-shadow-lift)' }}
+                  _active={{ transform: 'translateY(0)' }}
                   onClick={onAddExpense}
                 >
-                  + Add expense
+                  Add expense
                 </Button>
               )}
-            </HStack>
-          )}
-        </VStack>
-
-        {/* Right — net balance card */}
-        <VStack
-          align="stretch"
-          justify="center"
-          borderLeft={{ base: 'none', md: '1px solid var(--pb-hair)' }}
-          borderTop={{ base: '1px solid var(--pb-hair)', md: 'none' }}
-          pl={{ base: 0, md: 8 }}
-          pt={{ base: 5, md: 0 }}
-          spacing={3}
-        >
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10.5px"
-            letterSpacing="0.2em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            Net balance in {monthName}
-          </Text>
-
-          <Text
-            fontFamily="var(--pb-serif)"
-            fontSize="clamp(1.9rem, 4vw, 2.4rem)"
-            fontWeight={500}
-            lineHeight={1.05}
-            color={netColor}
-            style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
-          >
-            {netLabel}
-          </Text>
-
-          {/* Ledger rows — the two sides that make up the figure above */}
-          <VStack align="stretch" spacing={0} pt={1}>
-            <LedgerRow label="Income" value={fmtCurrency(income)} color="var(--pb-income-2)" />
-            <LedgerRow label="Expenses" value={fmtCurrency(expense)} color="var(--pb-coral)" />
+            </VStack>
           </VStack>
-        </VStack>
+        )}
       </Grid>
     </Panel>
-  )
-}
-
-function LedgerRow({ label, value, color }: { label: string; value: string; color: string }) {
-  return (
-    <HStack justify="space-between" align="baseline" py={2} borderTop="1px solid var(--pb-hair)">
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="10px"
-        letterSpacing="0.16em"
-        textTransform="uppercase"
-        color="var(--pb-ink-faint)"
-      >
-        {label}
-      </Text>
-      <Text
-        fontFamily="var(--pb-serif)"
-        fontSize="sm"
-        fontWeight={500}
-        color={color}
-        style={{ fontVariantNumeric: 'tabular-nums' }}
-      >
-        {value}
-      </Text>
-    </HStack>
   )
 }

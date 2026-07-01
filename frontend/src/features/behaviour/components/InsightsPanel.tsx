@@ -4,7 +4,7 @@ import type { LucideIcon } from '../../../components/ui/icons'
 import { fmtCurrency } from '../../dashboard/components/format'
 import { weekdayName } from '../../transactions/transactions.utils'
 import type { HabitInsight, RhythmInsight } from '../../transactions/transactions.types'
-import type { CategoryShift } from '../insights'
+import type { CategoryShift, EarningsInsight } from '../insights'
 
 interface InsightsPanelProps {
   periodWord: string
@@ -12,6 +12,7 @@ interface InsightsPanelProps {
   topCategory: { category: string; total: number } | null
   rhythm: RhythmInsight | null
   habit: HabitInsight | null
+  earnings: EarningsInsight | null
 }
 
 interface InsightCardData {
@@ -31,8 +32,22 @@ export default function InsightsPanel({
   topCategory,
   rhythm,
   habit,
+  earnings,
 }: InsightsPanelProps) {
   const cards: InsightCardData[] = []
+
+  // Earnings lead — for daily/variable income the best-paying weekday is the
+  // headline behaviour signal, not a footnote.
+  if (earnings && earnings.bestWeekday != null) {
+    cards.push({
+      icon: TrendingUp,
+      tint: 'var(--pb-tint-income)',
+      color: 'var(--pb-income)',
+      tag: 'Earnings rhythm',
+      title: `${weekdayName(earnings.bestWeekday)}s pay best`,
+      value: `${fmtCurrency(earnings.bestWeekdayTotal)} total · ${fmtCurrency(earnings.avgPerWorkedDay)} avg per working day`,
+    })
+  }
 
   if (shift.riser && shift.riser.diff > 0) {
     const r = shift.riser

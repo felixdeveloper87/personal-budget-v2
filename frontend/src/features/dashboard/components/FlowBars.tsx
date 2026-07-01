@@ -38,7 +38,10 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
           color="var(--pb-ink-faint)"
           mb={1}
         >
-          Income
+          Income ·{' '}
+          <Text as="span" color="var(--pb-income-2)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(income)}
+          </Text>
         </Text>
         <Box style={trackStyle} aria-hidden="true">
           <MotionBox
@@ -69,7 +72,10 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
           color="var(--pb-ink-faint)"
           mb={1}
         >
-          Expenses
+          Expenses ·{' '}
+          <Text as="span" color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(expense)}
+          </Text>
         </Text>
         <Box
           style={trackStyle}

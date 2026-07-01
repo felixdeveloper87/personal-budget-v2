@@ -8,7 +8,6 @@ import { usePeriodData, getPreviousPeriodDate } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import FlowSummary from '../dashboard/components/FlowSummary'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
@@ -30,7 +29,16 @@ import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
 
 import InsightsPanel from './components/InsightsPanel'
-import { deriveCategoryShift, deriveTopCategory, periodWord } from './insights'
+import DayToDaySummary from './components/DayToDaySummary'
+import SoFarBreakdown from './components/SoFarBreakdown'
+import {
+  deriveCategoryShift,
+  deriveEarnings,
+  deriveTopCategory,
+  earningsBySource,
+  periodWord,
+  spendByCategory,
+} from './insights'
 
 function isoOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
@@ -66,11 +74,28 @@ export default function BehaviourPage() {
 
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
 
+  // Behaviour is the day-to-day lens: variable spending and variable income
+  // (e.g. daily gig earnings). Fixed/recurring items and installment charges
+  // are commitments, not behaviour — they live on Payments / Commitments.
+  // Card statements (faturas) never appear here by construction: they are a
+  // Payments-page synthetic row; card purchases show on their purchase date.
+  const dayToDayTransactions = useMemo(
+    () =>
+      transactions.filter(
+        (t) =>
+          !t.isInstallment &&
+          t.installmentPlanId == null &&
+          !t.isRecurring &&
+          t.recurringTransactionId == null,
+      ),
+    [transactions],
+  )
+
   // Behaviour is locked to the purchase-date ("activity") lens.
   const [state, dispatch] = useReducer(txReducer, initialTxState)
   const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
 
-  const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'activity')
+  const periodData = usePeriodData(dayToDayTransactions, null, selectedPeriod, selectedDate, 'activity')
   const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
 
   // Previous period, same lens — powers the month-over-month "spending more on X" insight.
@@ -78,7 +103,7 @@ export default function BehaviourPage() {
     () => getPreviousPeriodDate(selectedDate, selectedPeriod),
     [selectedDate, selectedPeriod],
   )
-  const prevPeriodData = usePeriodData(transactions, null, selectedPeriod, prevDate, 'activity')
+  const prevPeriodData = usePeriodData(dayToDayTransactions, null, selectedPeriod, prevDate, 'activity')
   const prevVm = useMemo<TxnVM[]>(
     () => toViewModel(prevPeriodData.transactions),
     [prevPeriodData.transactions],
@@ -93,6 +118,20 @@ export default function BehaviourPage() {
   const momentum = useMemo(() => deriveMomentum(vm), [vm])
   const shift = useMemo(() => deriveCategoryShift(vm, prevVm), [vm, prevVm])
   const topCategory = useMemo(() => deriveTopCategory(vm), [vm])
+  const earnings = useMemo(() => deriveEarnings(vm), [vm])
+  const spendBreakdown = useMemo(() => spendByCategory(vm), [vm])
+  const earningsBreakdown = useMemo(() => earningsBySource(vm), [vm])
+
+  // Days of the period already lived through — denominators for the per-day
+  // averages (a month in progress shouldn't be divided by 30).
+  const daysElapsed = useMemo(() => {
+    const clip = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    const today = clip(new Date())
+    const start = clip(periodData.startDate)
+    const end = today < periodData.endDate ? today : clip(periodData.endDate)
+    if (end < start) return 0
+    return Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1
+  }, [periodData.startDate, periodData.endDate])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
@@ -120,10 +159,6 @@ export default function BehaviourPage() {
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
 
-        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
-          <FlowSummary income={periodData.income} expense={periodData.expense} balance={periodData.balance} />
-        </MotionBox>
-
         <MotionBox variants={riseV}>
           <PeriodNavBar
             selectedPeriod={selectedPeriod}
@@ -135,7 +170,8 @@ export default function BehaviourPage() {
           />
         </MotionBox>
 
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+        {/* Cash flow first — the day-by-day picture leads the page */}
+        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
@@ -154,13 +190,28 @@ export default function BehaviourPage() {
           )}
         </MotionBox>
 
+        {/* Income / Spending / Net summary right under the chart */}
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <InsightsPanel
-            periodWord={periodWord(selectedPeriod)}
-            shift={shift}
-            topCategory={topCategory}
-            rhythm={rhythm}
-            habit={habit}
+          <DayToDaySummary
+            income={periodData.income}
+            expense={periodData.expense}
+            balance={periodData.balance}
+            earnings={earnings}
+            daysElapsed={daysElapsed}
+            periodLabel={periodLabel}
+          />
+        </MotionBox>
+
+        {/* "So far": spend per category · earnings per source (description) */}
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+          <SoFarBreakdown
+            spend={spendBreakdown}
+            earnings={earningsBreakdown}
+            scopeLabel={
+              isCurrentPeriod
+                ? `so far this ${periodWord(selectedPeriod)}`
+                : `in ${periodLabel}`
+            }
           />
         </MotionBox>
 
@@ -192,6 +243,18 @@ export default function BehaviourPage() {
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution expense={expense} income={income} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
+        </MotionBox>
+
+        {/* Pattern insights close the page, just before the footer */}
+        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
+          <InsightsPanel
+            periodWord={periodWord(selectedPeriod)}
+            shift={shift}
+            topCategory={topCategory}
+            rhythm={rhythm}
+            habit={habit}
+            earnings={earnings}
+          />
         </MotionBox>
 
       </MotionBox>
