@@ -1,7 +1,6 @@
-import { Box, Grid, HStack, Text, VStack, Button } from '@chakra-ui/react'
+import { Grid, HStack, Text, VStack, Button } from '@chakra-ui/react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
-import BalanceSeal from './BalanceSeal'
 import { fmtCurrency } from './format'
 
 interface MonthHeroProps {
@@ -9,7 +8,7 @@ interface MonthHeroProps {
   expense: number
   net: number
   transactions: number
-  /** Period anchor for the statement serial line (№ PB·YYYY·MM). */
+  /** Period anchor — names the month in the net-balance label. */
   date?: Date
   onAddIncome?: () => void
   onAddExpense?: () => void
@@ -25,20 +24,10 @@ export default function MonthHero({
   onAddExpense,
 }: MonthHeroProps) {
   const deficit = expense > income
-  const surplus = income - expense
-
-  const lede = deficit
-    ? 'Spending has outpaced income this month.'
-    : 'Income is ahead of spending this month.'
-
-  const sublede = deficit
-    ? `${fmtCurrency(income)} earned against ${fmtCurrency(expense)} in expenses and bills.`
-    : `${fmtCurrency(income)} earned with ${fmtCurrency(surplus)} surplus after ${fmtCurrency(expense)} in expenses.`
 
   const netLabel = `${net < 0 ? '−' : ''}${fmtCurrency(Math.abs(net))}`
-
-  const anchor = date ?? new Date()
-  const serial = `№ PB·${anchor.getFullYear()}·${String(anchor.getMonth() + 1).padStart(2, '0')}`
+  const monthName = (date ?? new Date()).toLocaleDateString('en-GB', { month: 'long' })
+  const netColor = net < 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'
 
   return (
     <Panel
@@ -54,43 +43,32 @@ export default function MonthHero({
         {/* Left — statement */}
         <VStack align="stretch" spacing={5}>
           {/* Lede */}
-          <VStack align="stretch" spacing={2}>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="clamp(1.7rem, 4.4vw, 2.5rem)"
-              fontWeight={400}
-              lineHeight={1.08}
-              color="var(--pb-ink)"
-              maxW="18ch"
-            >
-              {deficit ? (
-                <>
-                  Spending has{' '}
-                  <Text as="em" color="var(--pb-coral)">
-                    outpaced
-                  </Text>{' '}
-                  income this month.
-                </>
-              ) : (
-                <>
-                  Income is{' '}
-                  <Text as="em" color="var(--pb-income-2)">
-                    ahead
-                  </Text>{' '}
-                  of spending this month.
-                </>
-              )}
-            </Text>
-
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="sm"
-              color="var(--pb-ink-soft)"
-              lineHeight={1.55}
-            >
-              {sublede}
-            </Text>
-          </VStack>
+          <Text
+            fontFamily="var(--pb-serif)"
+            fontSize="clamp(1.7rem, 4.4vw, 2.5rem)"
+            fontWeight={400}
+            lineHeight={1.08}
+            color="var(--pb-ink)"
+            maxW="18ch"
+          >
+            {deficit ? (
+              <>
+                Spending has{' '}
+                <Text as="em" color="var(--pb-coral)">
+                  outpaced
+                </Text>{' '}
+                income this month.
+              </>
+            ) : (
+              <>
+                Income is{' '}
+                <Text as="em" color="var(--pb-income-2)">
+                  ahead
+                </Text>{' '}
+                of spending this month.
+              </>
+            )}
+          </Text>
 
           {/* Flow bars */}
           <FlowBars income={income} expense={expense} transactions={transactions} />
@@ -140,31 +118,69 @@ export default function MonthHero({
           )}
         </VStack>
 
-        {/* Right — balance seal */}
+        {/* Right — net balance card */}
         <VStack
-          align="center"
+          align="stretch"
           justify="center"
           borderLeft={{ base: 'none', md: '1px solid var(--pb-hair)' }}
           borderTop={{ base: '1px solid var(--pb-hair)', md: 'none' }}
-          pl={{ base: 0, md: 6 }}
+          pl={{ base: 0, md: 8 }}
           pt={{ base: 5, md: 0 }}
-          spacing={2}
+          spacing={3}
         >
-          <Box w="full" maxW="260px">
-            <BalanceSeal netLabel={netLabel} currency="GBP" negative={net < 0} />
-          </Box>
           <Text
             fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            letterSpacing="0.16em"
+            fontSize="10.5px"
+            letterSpacing="0.2em"
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
-            textAlign="center"
           >
-            Net this period · income minus spending
+            Net balance in {monthName}
           </Text>
+
+          <Text
+            fontFamily="var(--pb-serif)"
+            fontSize="clamp(1.9rem, 4vw, 2.4rem)"
+            fontWeight={500}
+            lineHeight={1.05}
+            color={netColor}
+            style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
+          >
+            {netLabel}
+          </Text>
+
+          {/* Ledger rows — the two sides that make up the figure above */}
+          <VStack align="stretch" spacing={0} pt={1}>
+            <LedgerRow label="Income" value={fmtCurrency(income)} color="var(--pb-income-2)" />
+            <LedgerRow label="Expenses" value={fmtCurrency(expense)} color="var(--pb-coral)" />
+          </VStack>
         </VStack>
       </Grid>
     </Panel>
+  )
+}
+
+function LedgerRow({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <HStack justify="space-between" align="baseline" py={2} borderTop="1px solid var(--pb-hair)">
+      <Text
+        fontFamily="var(--pb-mono)"
+        fontSize="10px"
+        letterSpacing="0.16em"
+        textTransform="uppercase"
+        color="var(--pb-ink-faint)"
+      >
+        {label}
+      </Text>
+      <Text
+        fontFamily="var(--pb-serif)"
+        fontSize="sm"
+        fontWeight={500}
+        color={color}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {value}
+      </Text>
+    </HStack>
   )
 }

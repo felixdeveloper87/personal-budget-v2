@@ -49,7 +49,7 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
             width={`${incomePct}%`}
             style={{
               transformOrigin: 'left center',
-              background: 'linear-gradient(to right, #1f8a4f, #29a25e)',
+              background: 'linear-gradient(to right, var(--pb-income), var(--pb-income-2))',
               borderRadius: '7px',
             }}
             variants={reduce ? undefined : barV}
@@ -84,7 +84,7 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
             width={`${expensePct}%`}
             style={{
               transformOrigin: 'left center',
-              background: 'linear-gradient(to right, #c23a2c, #d84a39)',
+              background: 'linear-gradient(to right, var(--pb-coral), var(--pb-coral-2))',
               borderRadius: '7px',
             }}
             variants={reduce ? undefined : barV}
@@ -115,7 +115,9 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
         lineHeight="1.55"
       >
         {deficit
-          ? `The hatched band is this month's shortfall — spending reached about ${expenseRatio}% of income${transactions ? `, across ${transactions} entries` : ''}.`
+          ? income > 0
+            ? `The hatched band is this month's shortfall — spending reached about ${expenseRatio}% of income${transactions ? `, across ${transactions} entries` : ''}.`
+            : `No income recorded yet this month — everything below is uncovered spending${transactions ? `, across ${transactions} entries` : ''}.`
           : `Income covered spending with ${fmtCurrency(income - expense)} to spare${transactions ? ` across ${transactions} entries` : ''}.`}
       </Text>
     </VStack>

@@ -20,15 +20,16 @@ import { Box, useColorMode } from '@chakra-ui/react'
 
 /* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
 export const EDITORIAL_DARK = {
-  bg: '#060d14',
-  bg2: '#0a141d',
-  /** Brand accent (sky blue) + soft gold. */
-  jade: '#7dd3fc',
+  // Preto fosco neutro — o verde/dourado vive só nos acentos, nunca no fundo.
+  bg: '#0b0b0c',
+  bg2: '#111113',
+  /** Brand accent (jade mint) + soft gold. */
+  jade: '#7fe6b3',
   gold: '#e8c477',
   /** Primary text. ~18:1 on `bg`. */
-  cream: '#f3f8fe',
-  /** Secondary / muted text. Brightened for ~11:1 on the deeper `bg` (was 8.9:1). */
-  muted: '#b7c4d7',
+  cream: '#f2f4f0',
+  /** Secondary / muted text. ~11:1 on the matte-black `bg`. */
+  muted: '#b6bab4',
   red: '#ff9a90',
   /** Dark glyph colour for text sitting on a brand/gold accent fill. */
   onAccent: '#06221f',
@@ -40,34 +41,32 @@ export const EDITORIAL_DARK = {
    *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
    *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
    *  `panelRaised` → painéis internos (card dentro de card). */
-  // Painéis quase-pretos (charcoal levemente frio, não azul): canais próximos
-  // entre si pra tirar o tom azul, mais opacos pra o brilho azul do fundo vazar
-  // menos por trás do card. Renderizam ~#16181d sobre a base, ainda mais claros
-  // que o fundo (a elevação do card se mantém).
-  panel: 'rgba(22, 24, 30, 0.90)',
-  modal: 'rgba(14, 26, 38, 0.94)',
-  solid: '#0f1b26',
-  panelRaised: 'rgba(239, 246, 255, 0.05)',
-  line: 'rgba(239, 246, 255, 0.12)',
-  lineStrong: 'rgba(239, 246, 255, 0.20)',
+  // Painéis no MESMO preto fosco do glass da sidebar (pedido do usuário): os
+  // cards se separam do fundo pelo hairline `line`, não por elevação de tom.
+  panel: 'rgba(10, 10, 11, 0.88)',
+  modal: 'rgba(18, 18, 20, 0.94)',
+  solid: '#141416',
+  panelRaised: 'rgba(244, 246, 242, 0.05)',
+  line: 'rgba(244, 246, 242, 0.12)',
+  lineStrong: 'rgba(244, 246, 242, 0.20)',
 
   /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(6, 13, 20, 0.88)',
+  glass: 'rgba(10, 10, 11, 0.88)',
 
   /** Subtle hover wash on a panel. */
-  hoverBg: 'rgba(239, 246, 255, 0.08)',
+  hoverBg: 'rgba(244, 246, 242, 0.08)',
   /** Chrome control surface (search pill, theme toggle, user trigger). */
-  controlBg: 'rgba(239, 246, 255, 0.04)',
-  controlHoverBg: 'rgba(239, 246, 255, 0.08)',
+  controlBg: 'rgba(244, 246, 242, 0.04)',
+  controlHoverBg: 'rgba(244, 246, 242, 0.08)',
   /** Segmented-control track and its active thumb. */
-  trackBg: 'rgba(239, 246, 255, 0.05)',
-  thumbBg: 'rgba(239, 246, 255, 0.12)',
+  trackBg: 'rgba(244, 246, 242, 0.05)',
+  thumbBg: 'rgba(244, 246, 242, 0.12)',
   /** Brand-tinted soft fills (Today button, hints). */
-  jadeSoft: 'rgba(125, 211, 252, 0.12)',
-  jadeSoftHover: 'rgba(125, 211, 252, 0.20)',
+  jadeSoft: 'rgba(127, 230, 179, 0.10)',
+  jadeSoftHover: 'rgba(127, 230, 179, 0.18)',
 
   /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
-  bgGradient: 'linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
+  bgGradient: 'linear-gradient(180deg, #111113 0%, #0b0b0c 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
@@ -78,45 +77,45 @@ export type EditorialTokens = {
 
 /* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  // Single soft-grey shell surface: header, sidebar and pages all share `bg`
+  // Single warm-cream shell surface: header, sidebar and pages all share `bg`
   // (glass is opaque to the same value, bgGradient is flat). White cards then
-  // elevate cleanly off the grey.
-  bg: '#f4f5f7',
-  bg2: '#eceef1',
-  /** Brand accent (royal blue) + restrained gold. */
-  jade: '#2563eb',
-  gold: '#9a681b',
-  /** Primary text → deep slate (the "cream" slot, semantically primary). */
-  cream: '#172033',
-  muted: '#5b6980',
-  red: '#c94d45',
+  // elevate cleanly off the paper.
+  bg: '#f2f0e6',
+  bg2: '#e9e6d8',
+  /** Brand accent (forest green) + restrained gold. */
+  jade: '#1e5a41',
+  gold: '#8f6b1f',
+  /** Primary text → deep green-ink (the "cream" slot, semantically primary). */
+  cream: '#1a2620',
+  muted: '#5a685e',
+  red: '#b8452f',
   onAccent: '#f7fffc',
 
   // Superfícies de card — ver doc no EDITORIAL_DARK. Solid white panels so cards
-  // lift clearly off the soft-grey shell (the guilloché page backdrop is off in
+  // lift clearly off the cream shell (the guilloché page backdrop is off in
   // light).
   panel: '#ffffff',
   modal: 'rgba(255, 255, 255, 0.94)',
   solid: '#ffffff',
   panelRaised: 'rgba(255, 255, 255, 0.62)',
-  line: 'rgba(19, 41, 35, 0.12)',
-  lineStrong: 'rgba(37, 99, 235, 0.24)',
+  line: 'rgba(26, 38, 32, 0.13)',
+  lineStrong: 'rgba(30, 90, 65, 0.26)',
 
   // Opaque = same colour as the page, so the sticky header / sidebar read as one
   // continuous surface with the content (no glass tint seam).
-  glass: '#f4f5f7',
+  glass: '#f2f0e6',
 
-  hoverBg: 'rgba(37, 99, 235, 0.07)',
+  hoverBg: 'rgba(30, 90, 65, 0.07)',
   controlBg: 'rgba(255, 255, 255, 0.62)',
   controlHoverBg: 'rgba(255, 255, 255, 0.88)',
-  trackBg: 'rgba(19, 41, 35, 0.06)',
+  trackBg: 'rgba(26, 38, 32, 0.06)',
   thumbBg: 'rgba(255, 255, 255, 0.98)',
-  jadeSoft: 'rgba(37, 99, 235, 0.09)',
-  jadeSoftHover: 'rgba(37, 99, 235, 0.16)',
+  jadeSoft: 'rgba(30, 90, 65, 0.09)',
+  jadeSoftHover: 'rgba(30, 90, 65, 0.16)',
 
-  // Flat — no radial glow / gradient — so the page is a single even grey that
+  // Flat — no radial glow / gradient — so the page is a single even cream that
   // matches the header and sidebar.
-  bgGradient: 'linear-gradient(180deg, #f4f5f7 0%, #f4f5f7 100%)',
+  bgGradient: 'linear-gradient(180deg, #f2f0e6 0%, #f2f0e6 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }

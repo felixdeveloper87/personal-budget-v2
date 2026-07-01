@@ -42,12 +42,12 @@ export default function CashFlowChart({
   // unreliable — so resolve concrete colours per color mode here.
   const c = {
     income: dark ? '#5fd394' : '#1f8a4f',
-    expense: dark ? '#f6928a' : '#c23a2c',
-    grid: dark ? 'rgba(226,235,247,0.10)' : 'rgba(28,58,92,0.14)',
-    tick: dark ? '#7f8d9d' : '#8392a3',
-    tooltipBg: dark ? '#12181f' : '#f6f8fb',
-    tooltipBorder: dark ? 'rgba(226,235,247,0.18)' : 'rgba(28,58,92,0.14)',
-    tooltipText: dark ? '#e8eef6' : '#15202e',
+    expense: dark ? '#ff9a90' : '#b8452f',
+    grid: dark ? 'rgba(244,246,242,0.10)' : 'rgba(26,50,38,0.14)',
+    tick: dark ? '#8a8f89' : '#84907f',
+    tooltipBg: dark ? '#151517' : '#faf9f2',
+    tooltipBorder: dark ? 'rgba(244,246,242,0.18)' : 'rgba(26,50,38,0.16)',
+    tooltipText: dark ? '#f2f4f0' : '#1a2620',
   }
 
   const [range, setRange] = useState<PeriodType>('month')

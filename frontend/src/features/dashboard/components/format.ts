@@ -1,14 +1,14 @@
-/** Cool metallic palette for category slices (steel-blue led, with brass + red accents). */
+/** Banknote palette for category slices (forest-green led, with gold + coral accents). */
 export const CATEGORY_COLORS = [
-  '#2f7bb0',
-  '#1d5a87',
-  '#5aa1d6',
-  '#1f8a4f',
-  '#9c7b2c',
-  '#3f86c2',
-  '#c23a2c',
+  '#2d7a57',
+  '#b58a2e',
+  '#b8452f',
+  '#557c8e',
+  '#8a9a5b',
+  '#1e4d38',
+  '#c9a35a',
+  '#4f9d74',
   '#6b7c8e',
-  '#c19a3c',
 ] as const
 
 export const categoryColor = (index: number): string =>

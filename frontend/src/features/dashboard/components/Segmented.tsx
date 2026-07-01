@@ -29,7 +29,7 @@ export default function Segmented<T extends string>({
   return (
     <HStack
       spacing={0}
-      bg="rgba(28,58,92,0.06)"
+      bg="var(--pb-surface-3)"
       borderRadius="999px"
       p="3px"
       border="1px solid var(--pb-hair)"

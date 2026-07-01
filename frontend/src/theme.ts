@@ -2,14 +2,14 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
-  light: '#f4f5f7',
-  dark: 'linear-gradient(180deg, #0a141d 0%, #060d14 100%)',
+  light: '#f2f0e6',
+  dark: 'linear-gradient(180deg, #111113 0%, #0b0b0c 100%)',
 
-  cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f7 100%)',
-  cardDark: 'linear-gradient(135deg, #0e1a26 0%, #060d14 100%)',
+  cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f6 100%)',
+  cardDark: 'linear-gradient(135deg, #111113 0%, #0a0a0b 100%)',
 
   secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f8fcfa 100%)',
-  secondaryDark: 'linear-gradient(135deg, #0e1a26 0%, #142a36 100%)',
+  secondaryDark: 'linear-gradient(135deg, #141416 0%, #1b1b1e 100%)',
 } as const
 
 // 🔤 Fontes da plataforma — fonte única de verdade.
@@ -58,13 +58,13 @@ const theme = extendTheme({
         // Estilos de tema
         bg: GRADIENTS.light,
 
-        color: '#132923',
+        color: '#1a2620',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
       // Estilos para modo escuro
       '[data-theme="dark"] body': {
         bg: GRADIENTS.dark,
-        color: '#f3f8fe',
+        color: '#f2f4f0',
       },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
@@ -110,16 +110,16 @@ const theme = extendTheme({
   },
   colors: {
     brand: {
-      50: '#eff6ff',
-      100: '#dbeafe',
-      200: '#bfdbfe',
-      300: '#93c5fd',
-      400: '#60a5fa',
-      500: '#3b82f6',
-      600: '#2563eb',
-      700: '#1d4ed8',
-      800: '#1e40af',
-      900: '#1e3a8a',
+      50: '#ecf8f1',
+      100: '#d2eede',
+      200: '#a8dcc0',
+      300: '#74c39c',
+      400: '#45a678',
+      500: '#2d8a5f',
+      600: '#1e6b4b',
+      700: '#1e5a41',
+      800: '#173f2f',
+      900: '#122d23',
     },
   },
   components: {
@@ -129,12 +129,12 @@ const theme = extendTheme({
         container: {
           // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
           // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(22, 24, 30, 0.90)' : 'rgba(255, 255, 255, 0.72)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(226, 235, 247, 0.12)' : 'rgba(28, 58, 92, 0.14)',
+          bg: props.colorMode === 'dark' ? 'rgba(10, 10, 11, 0.88)' : 'rgba(255, 255, 255, 0.72)',
+          borderColor: props.colorMode === 'dark' ? 'rgba(244, 246, 242, 0.12)' : 'rgba(26, 38, 32, 0.14)',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark'
             ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 34px -22px rgba(18,38,60,0.28), 0 3px 10px rgba(18,38,60,0.05)',
+            : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 34px -22px rgba(28,55,40,0.28), 0 3px 10px rgba(28,55,40,0.05)',
           backdropFilter: props.colorMode === 'dark'
             ? 'blur(12px) saturate(115%)'
             : 'blur(16px) saturate(125%)',
@@ -146,19 +146,19 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(13, 22, 32, 0.92)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(18, 18, 20, 0.92)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#f3f8fe' : '#15202e',
+          color: props.colorMode === 'dark' ? '#f2f4f0' : '#1a2620',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(226, 235, 247, 0.18)'
-            : 'rgba(28, 58, 92, 0.18)',
+            ? 'rgba(244, 246, 242, 0.18)'
+            : 'rgba(26, 38, 32, 0.18)',
           boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(2, 6, 11, 0.82)',
+          bg: 'rgba(0, 0, 0, 0.82)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
@@ -168,8 +168,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(226, 235, 247, 0.10)'
-            : 'rgba(28, 58, 92, 0.12)',
+            ? 'rgba(244, 246, 242, 0.10)'
+            : 'rgba(26, 38, 32, 0.12)',
         },
       }),
     },
@@ -178,19 +178,19 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(13, 22, 32, 0.92)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(18, 18, 20, 0.92)' : 'rgba(255, 255, 255, 0.90)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#f3f8fe' : '#15202e',
+          color: props.colorMode === 'dark' ? '#f2f4f0' : '#1a2620',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(226, 235, 247, 0.18)'
-            : 'rgba(28, 58, 92, 0.18)',
+            ? 'rgba(244, 246, 242, 0.18)'
+            : 'rgba(26, 38, 32, 0.18)',
           boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(2, 6, 11, 0.82)',
+          bg: 'rgba(0, 0, 0, 0.82)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
@@ -200,8 +200,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(226, 235, 247, 0.10)'
-            : 'rgba(28, 58, 92, 0.12)',
+            ? 'rgba(244, 246, 242, 0.10)'
+            : 'rgba(26, 38, 32, 0.12)',
         },
       }),
     },

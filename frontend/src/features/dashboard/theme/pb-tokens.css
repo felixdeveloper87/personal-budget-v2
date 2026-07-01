@@ -1,60 +1,64 @@
-/* Shared financial UI tokens. Brand uses teal; income and expense remain distinct. */
+/* Shared financial UI tokens — "banknote" palette.
+   Light: cream paper, forest-green brand, gold + coral accents.
+   Dark:  deep ink-green, jade brand, soft gold + coral. */
 :root {
-  --pb-paper: #f0f3fa;
-  --pb-paper-2: #e6ebf5;
-  --pb-paper-3: #fcfdff;
-  --pb-surface: rgba(255, 255, 255, 0.82);
-  --pb-surface-2: #f4f7fc;
-  --pb-surface-3: #e9eef7;
-  --pb-ink: #172033;
-  --pb-ink-soft: #5b6980;
-  --pb-ink-faint: #8492a7;
+  --pb-paper: #f2f0e6;
+  --pb-paper-2: #e9e6d8;
+  --pb-paper-3: #fdfcf6;
+  --pb-surface: rgba(255, 255, 255, 0.86);
+  --pb-surface-2: #f6f4ea;
+  --pb-surface-3: #edeadd;
+  --pb-ink: #1a2620;
+  --pb-ink-soft: #5a685e;
+  --pb-ink-faint: #84907f;
 
-  --pb-forest: #2563eb;
-  --pb-forest-2: #3b82f6;
-  --pb-line: #4f8df7;
-  --pb-tint-green: rgba(37, 99, 235, 0.09);
+  --pb-forest: #1e5a41;
+  --pb-forest-2: #2d7a57;
+  --pb-line: #3a8a62;
+  --pb-tint-green: rgba(30, 90, 65, 0.09);
 
-  --pb-income: #18794e;
+  --pb-income: #1f8a4f;
   --pb-income-2: #259b67;
-  --pb-tint-income: rgba(24, 121, 78, 0.11);
+  --pb-tint-income: rgba(31, 138, 79, 0.11);
 
-  --pb-coral: #c94d45;
-  --pb-coral-2: #de665d;
-  --pb-tint-coral: rgba(201, 77, 69, 0.10);
+  --pb-coral: #b8452f;
+  --pb-coral-2: #cd5b42;
+  --pb-tint-coral: rgba(184, 69, 47, 0.10);
 
-  --pb-gold: #9a681b;
-  --pb-gold-2: #c18b35;
-  --pb-tint-gold: rgba(154, 104, 27, 0.11);
+  --pb-gold: #8f6b1f;
+  --pb-gold-2: #b58a2e;
+  --pb-tint-gold: rgba(143, 107, 31, 0.11);
 
-  --pb-hair: rgba(23, 32, 51, 0.12);
-  --pb-hair-2: rgba(23, 32, 51, 0.22);
-  --pb-seal-edge: #dde5f0;
+  --pb-hair: rgba(26, 38, 32, 0.13);
+  --pb-hair-2: rgba(26, 38, 32, 0.24);
+  --pb-seal-edge: #e6e2d2;
 
   --pb-serif: "Spectral", "Instrument Serif", Georgia, serif;
   --pb-mono: "IBM Plex Mono", "Spline Sans Mono", ui-monospace, monospace;
-  --pb-shadow: 0 1px 2px rgba(30, 64, 175, 0.04), 0 12px 30px rgba(30, 64, 175, 0.06);
-  --pb-shadow-lift: 0 3px 9px rgba(30, 64, 175, 0.08), 0 24px 50px rgba(30, 64, 175, 0.13);
+  --pb-shadow: 0 1px 2px rgba(28, 55, 40, 0.05), 0 12px 30px rgba(28, 55, 40, 0.07);
+  --pb-shadow-lift: 0 3px 9px rgba(28, 55, 40, 0.09), 0 24px 50px rgba(28, 55, 40, 0.14);
 }
 
 [data-theme="dark"] {
-  --pb-paper: #060d14;
-  --pb-paper-2: #0a141d;
-  --pb-paper-3: #0f1b26;
-  /* Card surfaces: charcoal quase-preto (canais RGB próximos = sem tom azul),
-     renderiza ~#14171d sobre o fundo. surface-2 é um pouco mais clara só pra dar
-     o brilho do gradiente 135deg. Alinhado aos cards `panel` (editorial.tsx). */
-  --pb-surface: rgba(22, 24, 30, 0.90);
-  --pb-surface-2: rgba(28, 31, 38, 0.92);
-  --pb-surface-3: rgba(240, 244, 250, 0.06);
-  --pb-ink: #f3f8fe;
-  --pb-ink-soft: #b7c4d7;
-  --pb-ink-faint: #8496ad;
+  /* Preto fosco neutro — nenhum tom de cor nos fundos; o verde/dourado vive
+     apenas nos acentos. */
+  --pb-paper: #0b0b0c;
+  --pb-paper-2: #111113;
+  --pb-paper-3: #17171a;
+  /* Card surfaces: mesmo preto fosco do glass da sidebar (ed.glass) — os cards
+     se separam do fundo pelo hairline, não por elevação. surface-2 é um pouco
+     mais clara só pra dar o brilho do gradiente 135deg. */
+  --pb-surface: rgba(10, 10, 11, 0.88);
+  --pb-surface-2: rgba(17, 17, 19, 0.90);
+  --pb-surface-3: rgba(244, 246, 242, 0.06);
+  --pb-ink: #f2f4f0;
+  --pb-ink-soft: #b6bab4;
+  --pb-ink-faint: #8a8f89;
 
-  --pb-forest: #7dd3fc;
-  --pb-forest-2: #60a5fa;
-  --pb-line: #6cb7fb;
-  --pb-tint-green: rgba(125, 211, 252, 0.12);
+  --pb-forest: #7fe6b3;
+  --pb-forest-2: #5fd394;
+  --pb-line: #6bd9a6;
+  --pb-tint-green: rgba(127, 230, 179, 0.10);
 
   --pb-income: #62dca2;
   --pb-income-2: #7ce7b7;
@@ -68,9 +72,9 @@
   --pb-gold-2: #f2d694;
   --pb-tint-gold: rgba(232, 196, 119, 0.12);
 
-  --pb-hair: rgba(239, 246, 255, 0.10);
-  --pb-hair-2: rgba(239, 246, 255, 0.19);
-  --pb-seal-edge: #0b0d11;
+  --pb-hair: rgba(244, 246, 242, 0.10);
+  --pb-hair-2: rgba(244, 246, 242, 0.19);
+  --pb-seal-edge: #0e0e0f;
   --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.36), 0 12px 30px rgba(0, 0, 0, 0.34);
   --pb-shadow-lift: 0 4px 10px rgba(0, 0, 0, 0.42), 0 26px 54px rgba(0, 0, 0, 0.48);
 }

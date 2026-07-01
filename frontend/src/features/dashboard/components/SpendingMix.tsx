@@ -18,10 +18,10 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
-  const sliceStroke = dark ? '#12181f' : '#f6f8fb'
-  const tooltipBg = dark ? '#12181f' : '#f6f8fb'
-  const tooltipBorder = dark ? 'rgba(226,235,247,0.18)' : 'rgba(28,58,92,0.14)'
-  const tooltipText = dark ? '#e8eef6' : '#15202e'
+  const sliceStroke = dark ? '#151517' : '#faf9f2'
+  const tooltipBg = dark ? '#151517' : '#faf9f2'
+  const tooltipBorder = dark ? 'rgba(244,246,242,0.18)' : 'rgba(26,50,38,0.16)'
+  const tooltipText = dark ? '#f2f4f0' : '#1a2620'
 
   const { slices, total } = useMemo(() => {
     const sumByCategory = (txns: Transaction[]) => {
