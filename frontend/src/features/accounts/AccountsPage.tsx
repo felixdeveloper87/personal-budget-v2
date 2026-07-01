@@ -8,7 +8,7 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
-import {  Plus, Repeat, Wallet } from '../../components/ui/icons'
+import { Plus, Wallet } from '../../components/ui/icons'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -136,31 +136,13 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
     <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-          <MotionBox variants={riseV}>
-            <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
-                <Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>
-                  <HeaderButton
-                    label="Transfer"
-                    icon={Repeat}
-                    onClick={() => onPageChange?.('transfers')}
-                  />
-                  <HeaderButton
-                    label="Add account"
-                    icon={Plus}
-                    primary
-                    onClick={() => setFormAccount(null)}
-                  />
-                </Flex>
-              </Flex>
-          </MotionBox>
-
           {loading ? (
             <Flex justify="center" py={20}>
               <Spinner color="var(--pb-forest-2)" />
             </Flex>
           ) : activeAccounts.length === 0 ? (
             <MotionBox variants={riseV}>
-              <EmptyState />
+              <EmptyState onAdd={() => setFormAccount(null)} />
             </MotionBox>
           ) : (
             <>
@@ -178,16 +160,41 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
 
               {showList && (
                 <MotionBox variants={riseV}>
-                  <Text
-                    fontFamily="var(--pb-mono)"
-                    fontSize="10.5px"
-                    letterSpacing="0.2em"
-                    textTransform="uppercase"
-                    color="var(--pb-ink-faint)"
-                    pl="0.15rem"
-                  >
-                    Your accounts
-                  </Text>
+                  <Flex align="baseline" justify="space-between" gap={3}>
+                    <Text
+                      fontFamily="var(--pb-mono)"
+                      fontSize="10.5px"
+                      letterSpacing="0.2em"
+                      textTransform="uppercase"
+                      color="var(--pb-ink-faint)"
+                      pl="0.15rem"
+                    >
+                      Your accounts
+                    </Text>
+                    <Box
+                      as="button"
+                      type="button"
+                      onClick={() => setFormAccount(null)}
+                      display="inline-flex"
+                      alignItems="center"
+                      gap="0.35rem"
+                      fontFamily="var(--pb-mono)"
+                      fontSize="10.5px"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--pb-ink-soft)"
+                      px="0.7rem"
+                      py="0.32rem"
+                      borderRadius="999px"
+                      border="1px solid var(--pb-hair)"
+                      bg="var(--pb-surface)"
+                      transition="0.18s"
+                      _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
+                    >
+                      <Icon as={Plus} boxSize="0.95em" />
+                      Add account
+                    </Box>
+                  </Flex>
                 </MotionBox>
               )}
 
@@ -293,7 +300,7 @@ function HeaderButton({
   )
 }
 
-function EmptyState() {
+function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <Flex
       direction="column"
@@ -314,6 +321,9 @@ function EmptyState() {
       <Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="340px">
         Add your first account to start tracking balances and connected institutions.
       </Text>
+      <Box mt={5}>
+        <HeaderButton label="Add account" icon={Plus} primary onClick={onAdd} />
+      </Box>
     </Flex>
   )
 }

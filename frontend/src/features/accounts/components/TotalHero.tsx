@@ -28,7 +28,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
       border="1px solid var(--pb-hair)"
       borderRadius="22px"
       boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
-      p="clamp(1.2rem, 3vw, 1.7rem)"
+      p={{ base: 3.5, sm: 'clamp(1.2rem, 3vw, 1.7rem)' }}
     >
       <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.6)" />
       <Box
@@ -76,12 +76,12 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
         />
       </Flex>
 
-      <SimpleGrid position="relative" zIndex={2} columns={{ base: 1, sm: 2 }} spacing={3} mt={4}>
+      <SimpleGrid position="relative" zIndex={2} columns={2} spacing={{ base: 2, sm: 3 }} mt={4}>
         <BalanceBlock label="Current accounts" amount={currentBalance} hidden={hideBalances} />
         <BalanceBlock label="Savings" amount={savingsBalance} hidden={hideBalances} />
       </SimpleGrid>
 
-      <Flex position="relative" zIndex={2} justify="space-between" align="baseline" mt={4} pt={3} borderTop="1px solid var(--pb-hair)">
+      <Flex position="relative" zIndex={2} justify="space-between" align="baseline" mt={{ base: 3, sm: 4 }} pt={{ base: 2.5, sm: 3 }} borderTop="1px solid var(--pb-hair)">
         <Text fontSize="sm" color="var(--pb-ink-soft)">Total across all active accounts</Text>
         <Text
           className="num"
@@ -101,16 +101,24 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
 
 function BalanceBlock({ label, amount, hidden }: { label: string; amount: number; hidden: boolean }) {
   return (
-    <Box p={4} borderRadius="14px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)">
-      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">
+    <Box p={{ base: 2.5, sm: 4 }} borderRadius="14px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" minW={0}>
+      <Text
+        fontFamily="var(--pb-mono)"
+        fontSize={{ base: '8px', sm: '9px' }}
+        letterSpacing="0.14em"
+        textTransform="uppercase"
+        color="var(--pb-ink-faint)"
+        noOfLines={1}
+      >
         {label}
       </Text>
       <Text
         className="num"
-        fontSize={{ base: '2xl', md: '3xl' }}
+        fontSize={{ base: 'lg', sm: '2xl', md: '3xl' }}
         fontWeight={500}
         lineHeight="1.1"
-        mt={2}
+        mt={{ base: 1, sm: 2 }}
+        noOfLines={1}
         color={!hidden && amount < 0 ? 'var(--pb-coral)' : 'var(--pb-ink)'}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
