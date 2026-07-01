@@ -165,10 +165,26 @@ export default function DailyChart({
               const w = Math.max(2, colW * 0.84)
               const style = reduce ? undefined : ({ animationDelay: `${i * 9}ms` } as const)
               const cls = reduce ? undefined : 'pb-bar'
+              // Income and spending are drawn side by side, both anchored on the
+              // baseline. Stacking them let the combined height exceed the plot
+              // area (each series is scaled independently) and cover the header.
+              const gap = w > 6 ? 1.5 : 0.5
+              const wHalf = Math.max(1.5, (w - gap) / 2)
               return (
                 <g key={`bar-${day.iso}`}>
-                  {hOut > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hOut} width={w} height={hOut} rx={2.5} fill="url(#pb-tx-out)" />}
-                  {hIn > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hOut - hIn} width={w} height={hIn} rx={2.5} fill="url(#pb-tx-in)" />}
+                  {hIn > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hIn} width={wHalf} height={hIn} rx={2} fill="url(#pb-tx-in)" />}
+                  {hOut > 0 && (
+                    <rect
+                      className={cls}
+                      style={style}
+                      x={showIncome ? x + wHalf + gap : x}
+                      y={AXIS_Y - hOut}
+                      width={showIncome ? wHalf : w}
+                      height={hOut}
+                      rx={2}
+                      fill="url(#pb-tx-out)"
+                    />
+                  )}
                 </g>
               )
             })}

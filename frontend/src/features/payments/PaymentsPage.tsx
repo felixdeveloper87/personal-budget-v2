@@ -143,15 +143,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
 
-        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
-          <FlowSummary
-            income={periodData.income}
-            expense={periodData.expense}
-            balance={periodData.balance}
-            metrics={paymentMetrics}
-          />
-        </MotionBox>
-
         <MotionBox variants={riseV}>
           <PeriodNavBar
             selectedPeriod={selectedPeriod}
@@ -163,7 +154,8 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           />
         </MotionBox>
 
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+        {/* Outflow chart leads the page, mirroring Behaviour */}
+        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
@@ -180,6 +172,16 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
               reduce={reduce}
             />
           )}
+        </MotionBox>
+
+        {/* Spending / Paid / Upcoming triad right under the chart */}
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+          <FlowSummary
+            income={periodData.income}
+            expense={periodData.expense}
+            balance={periodData.balance}
+            metrics={paymentMetrics}
+          />
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
