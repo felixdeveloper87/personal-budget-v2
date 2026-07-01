@@ -5,7 +5,7 @@ import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../..
 import type { PaymentMethod, Transaction } from '../../types'
 import { buildCardStatements } from '../../utils/creditCardStatements'
 import { BankLogo, ConfirmDeleteDialog, getBankMeta } from '../../components/ui'
-import { ArrowLeft, CreditCard, Eye, EyeOff, Pencil, Plus, Trash2 } from '../../components/ui/icons'
+import { ArrowLeft, CreditCard, Eye, EyeOff, Plus } from '../../components/ui/icons'
 import CreditCardTile from '../../components/cards/CreditCardTile'
 import CardFormModal from '../../components/cards/CardFormModal'
 import StatementCard from '../../components/cards/StatementCard'
@@ -145,21 +145,6 @@ export default function CardsPage() {
     }
   }
 
-  const visibilityButton = (
-    <IconButton
-      aria-label={hideValues ? 'Show card values' : 'Hide card values'}
-      title={hideValues ? 'Show card values' : 'Hide card values'}
-      icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
-      onClick={toggleValues}
-      variant="ghost"
-      borderRadius="11px"
-      color="var(--pb-ink-soft)"
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
-    />
-  )
-
   const modals = (
     <>
       <CardFormModal isOpen={formCard !== undefined} card={formCard} onClose={() => setFormCard(undefined)} onSaved={load} />
@@ -185,10 +170,9 @@ export default function CardsPage() {
         <MotionBox variants={containerV} initial="hidden" animate="show">
           <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
             <MotionBox variants={riseV}>
-              <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} mb={2} pl={1}>
+              <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} pl={1}>
                 All cards
               </Button>
-              <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}><Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Edit" icon={Pencil} onClick={() => setFormCard(selectedCard)} /><ActionButton label="Delete" icon={Trash2} destructive onClick={() => setCardToDelete(selectedCard)} /></Flex></Flex>
             </MotionBox>
 
             <MotionBox variants={riseV}><CardFocus card={selectedCard} info={currentTotals.get(selectedCard.id)} hideValues={hideValues} /></MotionBox>
@@ -223,16 +207,43 @@ export default function CardsPage() {
     <CardsShell>
       <MotionBox variants={containerV} initial="hidden" animate="show">
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-          <MotionBox variants={riseV}>
-            <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}><Flex gap="0.6rem" w={{ base: 'full', sm: 'auto' }}>{visibilityButton}<ActionButton label="Add card" icon={Plus} primary onClick={() => setFormCard(null)} /></Flex></Flex>
-          </MotionBox>
-
           {cards.length === 0 ? (
-            <MotionBox variants={riseV}><EmptyState text="No credit cards yet. Add your first card to start tracking statements." /></MotionBox>
+            <MotionBox variants={riseV}>
+              <EmptyState text="No credit cards yet. Add your first card to start tracking statements." onAdd={() => setFormCard(null)} />
+            </MotionBox>
           ) : (
             <>
-              <MotionBox variants={riseV}><CardsOverview overview={overview} hideValues={hideValues} /></MotionBox>
-              <MotionBox variants={riseV}><SectionLabel>Your cards</SectionLabel></MotionBox>
+              <MotionBox variants={riseV}>
+                <CardsOverview overview={overview} hideValues={hideValues} onToggleHide={toggleValues} />
+              </MotionBox>
+              <MotionBox variants={riseV}>
+                <Flex align="baseline" justify="space-between" gap={3}>
+                  <SectionLabel>Your cards</SectionLabel>
+                  <Box
+                    as="button"
+                    type="button"
+                    onClick={() => setFormCard(null)}
+                    display="inline-flex"
+                    alignItems="center"
+                    gap="0.35rem"
+                    fontFamily="var(--pb-mono)"
+                    fontSize="10.5px"
+                    letterSpacing="0.08em"
+                    textTransform="uppercase"
+                    color="var(--pb-ink-soft)"
+                    px="0.7rem"
+                    py="0.32rem"
+                    borderRadius="999px"
+                    border="1px solid var(--pb-hair)"
+                    bg="var(--pb-surface)"
+                    transition="0.18s"
+                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
+                  >
+                    <Icon as={Plus} boxSize="0.95em" />
+                    Add card
+                  </Box>
+                </Flex>
+              </MotionBox>
               <MotionBox variants={riseV}>
                 <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">
                   {cards.map((card) => {
@@ -262,18 +273,49 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   return <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)" pl="0.15rem">{children}</Text>
 }
 
-function EmptyState({ text }: { text: string }) {
-  return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">No card activity</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text></Flex>
+function EmptyState({ text, onAdd }: { text: string; onAdd?: () => void }) {
+  return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">No card activity</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text>{onAdd && <Box mt={5}><ActionButton label="Add card" icon={Plus} primary onClick={onAdd} /></Box>}</Flex>
 }
 
 function Metric({ label, value, note, emphasis }: { label: string; value: string; note?: string; emphasis?: boolean }) {
   return <Box><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{label}</Text><Text className="num" fontSize={emphasis ? { base: '2rem', md: '2.3rem' } : '1.45rem'} fontWeight={500} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>{note && <Text fontSize="xs" color="var(--pb-ink-soft)" mt="0.35rem">{note}</Text>}</Box>
 }
 
-function CardsOverview({ overview, hideValues }: { overview: { used: number; limit: number; cardsWithLimit: number; nextPayment: CardTotal | null }; hideValues: boolean }) {
+function CardsOverview({
+  overview,
+  hideValues,
+  onToggleHide,
+}: {
+  overview: { used: number; limit: number; cardsWithLimit: number; nextPayment: CardTotal | null }
+  hideValues: boolean
+  onToggleHide: () => void
+}) {
   const available = Math.max(overview.limit - overview.used, 0)
   const utilisation = overview.limit > 0 ? Math.min(100, (overview.used / overview.limit) * 100) : 0
-  return <Box position="relative" overflow="hidden" bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)"><Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.6)" /><SimpleGrid position="relative" zIndex={1} columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 5, lg: 4 }}><Metric label="Credit in use" value={hideValues ? '••••••' : money.format(overview.used)} emphasis /><Metric label="Available credit" value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'} note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'} /><Metric label="Cards with limits" value={String(overview.cardsWithLimit)} note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'} /><Metric label="Next payment" value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'} note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid></Box>
+  return (
+    <Box position="relative" overflow="hidden" bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)">
+      <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.6)" />
+      <Flex position="relative" zIndex={1} align="flex-start" justify="space-between" gap="1rem" mb={4}>
+        <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+          Cards overview
+        </Text>
+        <IconButton
+          aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+          title={hideValues ? 'Show card values' : 'Hide card values'}
+          icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
+          onClick={onToggleHide}
+          flexShrink={0}
+          variant="ghost"
+          borderRadius="11px"
+          color="var(--pb-ink-soft)"
+          bg="var(--pb-surface)"
+          border="1px solid var(--pb-hair)"
+          _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
+        />
+      </Flex>
+      <SimpleGrid position="relative" zIndex={1} columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 5, lg: 4 }}><Metric label="Credit in use" value={hideValues ? '••••••' : money.format(overview.used)} emphasis /><Metric label="Available credit" value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'} note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'} /><Metric label="Cards with limits" value={String(overview.cardsWithLimit)} note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'} /><Metric label="Next payment" value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'} note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid>
+    </Box>
+  )
 }
 
 function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: CardTotal; hideValues: boolean }) {
