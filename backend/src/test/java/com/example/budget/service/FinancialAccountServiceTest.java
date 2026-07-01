@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -147,16 +149,16 @@ class FinancialAccountServiceTest {
         transfer.setTransferDate(LocalDate.now());
 
         when(transactionRepository
-                .findTop20ByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
-                        user, account, LocalDate.now()))
+                .findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                        eq(user), eq(account), eq(LocalDate.now()), any(Pageable.class)))
                 .thenReturn(List.of(income));
         when(transactionRepository
                 .findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
                         user, account, LocalDate.now()))
                 .thenReturn(List.of(upcomingExpense));
         when(transferRepository
-                .findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
-                        account, LocalDate.now()))
+                .findByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                        eq(account), eq(LocalDate.now()), any(Pageable.class)))
                 .thenReturn(List.of(transfer));
 
         var result = service.details(10L, user);

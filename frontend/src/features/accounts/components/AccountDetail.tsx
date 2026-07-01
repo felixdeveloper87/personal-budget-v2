@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { Box, Flex, Grid, HStack, Icon, Spinner, Text } from '@chakra-ui/react'
+import { Box, Flex, Grid, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { getAccountDetails } from '../../../api'
-import type { AccountDetails, FinancialAccount } from '../../../types'
+import { getAccountDetails, getAccountActivityPage } from '../../../api'
+import type { AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { ChevronLeft, ChevronRight, Repeat } from '../../../components/ui/icons'
 import { ACCOUNT_LABELS, money } from '../../../components/accounts/accountMeta'
 import AccountAvatar from './AccountAvatar'
 import RecentActivity from './RecentActivity'
+
+const ACTIVITY_PAGE_SIZE = 15
 
 const MotionBox = motion(Box)
 
@@ -17,7 +19,6 @@ interface AccountDetailProps {
   showBackButton: boolean
   onBack: () => void
   onTransfer: () => void
-  onViewAll: () => void
 }
 
 export default function AccountDetail({
@@ -26,7 +27,6 @@ export default function AccountDetail({
   showBackButton,
   onBack,
   onTransfer,
-  onViewAll,
 }: AccountDetailProps) {
   const [details, setDetails] = useState<AccountDetails | null>(null)
   const [loading, setLoading] = useState(false)
@@ -52,6 +52,37 @@ export default function AccountDetail({
       active = false
     }
   }, [account.id])
+
+  // Recent activity is paged independently of the balance/overview fetch above
+  // — switching accounts (or pages) always jumps back to the most recent page.
+  const [activityPage, setActivityPage] = useState(0)
+  const [activity, setActivity] = useState<AccountActivityPage | null>(null)
+  const [activityLoading, setActivityLoading] = useState(false)
+
+  useEffect(() => {
+    setActivityPage(0)
+  }, [account.id])
+
+  useEffect(() => {
+    let active = true
+    setActivityLoading(true)
+    getAccountActivityPage(account.id, activityPage, ACTIVITY_PAGE_SIZE)
+      .then((data) => {
+        if (active) setActivity(data)
+      })
+      .catch((err) => {
+        ToastService.apiError(err, {
+          title: 'Could not load account activity',
+          dedupeKey: `account-activity-load-failed:${account.id}`,
+        })
+      })
+      .finally(() => {
+        if (active) setActivityLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [account.id, activityPage])
 
   const shown = details?.account ?? account
   const mask = (value: number) => (hideBalances ? '••••••' : money(value, shown.currency))
@@ -158,51 +189,70 @@ export default function AccountDetail({
             <StatCard label="Account type" value={ACCOUNT_LABELS[details.account.type]} small />
           </Grid>
 
-          <HStack spacing="0.6rem" mb="0.6rem">
-            <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
-              Recent activity
-            </Text>
-            <Text
-              className="num"
-              fontFamily="var(--pb-mono)"
-              fontSize="10.5px"
-              fontWeight={500}
-              color="var(--pb-forest-2)"
-              bg="var(--pb-tint-green)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="999px"
-              px="0.5rem"
-              py="0.15rem"
-            >
-              {details.recentActivity.length}
-            </Text>
+          <HStack spacing="0.6rem" mb="0.6rem" justify="space-between">
+            <HStack spacing="0.6rem">
+              <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
+                Recent activity
+              </Text>
+              <Text
+                className="num"
+                fontFamily="var(--pb-mono)"
+                fontSize="10.5px"
+                fontWeight={500}
+                color="var(--pb-forest-2)"
+                bg="var(--pb-tint-green)"
+                border="1px solid var(--pb-hair)"
+                borderRadius="999px"
+                px="0.5rem"
+                py="0.15rem"
+              >
+                Page {activityPage + 1}
+              </Text>
+            </HStack>
+
+            <HStack spacing="0.3rem">
+              <IconButton
+                aria-label="Older activity"
+                title="Older activity"
+                icon={<Icon as={ChevronLeft} boxSize="16px" />}
+                size="xs"
+                variant="ghost"
+                borderRadius="8px"
+                color="var(--pb-ink-soft)"
+                bg="var(--pb-surface-2)"
+                border="1px solid var(--pb-hair)"
+                isDisabled={activityPage === 0 || activityLoading}
+                onClick={() => setActivityPage((p) => Math.max(0, p - 1))}
+                _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
+              />
+              <IconButton
+                aria-label="Newer activity"
+                title="Newer activity"
+                icon={<Icon as={ChevronRight} boxSize="16px" />}
+                size="xs"
+                variant="ghost"
+                borderRadius="8px"
+                color="var(--pb-ink-soft)"
+                bg="var(--pb-surface-2)"
+                border="1px solid var(--pb-hair)"
+                isDisabled={!activity?.hasMore || activityLoading}
+                onClick={() => setActivityPage((p) => p + 1)}
+                _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
+              />
+            </HStack>
           </HStack>
 
-          <RecentActivity
-            items={details.recentActivity}
-            currency={details.account.currency}
-            hideBalances={hideBalances}
-          />
-
-          <Box
-            as="button"
-            type="button"
-            onClick={onViewAll}
-            display="inline-flex"
-            alignItems="center"
-            gap="0.4rem"
-            mt="1rem"
-            fontFamily="var(--pb-mono)"
-            fontSize="11px"
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            color="var(--pb-forest-2)"
-            transition="gap 0.15s"
-            _hover={{ gap: '0.6rem' }}
-          >
-            View all activity in Transactions
-            <Icon as={ChevronRight} boxSize="15px" />
-          </Box>
+          {activityLoading && !activity ? (
+            <Flex minH="120px" align="center" justify="center">
+              <Spinner size="sm" color="var(--pb-forest-2)" />
+            </Flex>
+          ) : (
+            <RecentActivity
+              items={activity?.items ?? []}
+              currency={details.account.currency}
+              hideBalances={hideBalances}
+            />
+          )}
         </MotionBox>
       )}
     </Box>

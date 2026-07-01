@@ -114,6 +114,14 @@ export interface AccountDetails {
   upcomingActivity: AccountActivityItem[]
 }
 
+/** One page of an account's past activity, most recent first. */
+export interface AccountActivityPage {
+  items: AccountActivityItem[]
+  page: number
+  size: number
+  hasMore: boolean
+}
+
 export interface AccountTransfer {
   id: number
   fromAccountId: number

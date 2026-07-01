@@ -5,6 +5,7 @@ import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.model.FinancialAccount;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -43,6 +44,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     List<Transaction> findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
                     User user, FinancialAccount account, LocalDate date);
+
+    /**
+     * Same past-activity query as the Top20 variant above, but with a caller-supplied
+     * {@link Pageable} cap so the account activity feed can page arbitrarily far back
+     * instead of being frozen at 20 rows. Used to merge-sort against transfers — see
+     * {@link com.example.budget.service.FinancialAccountService#recentActivityPage}.
+     */
+    List<Transaction> findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                    User user, FinancialAccount account, LocalDate date, Pageable pageable);
 
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);

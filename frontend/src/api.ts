@@ -21,6 +21,7 @@ import {
   FinancialAccountRequest,
   AccountSummary,
   AccountDetails,
+  AccountActivityPage,
   AccountTransfer,
   AccountTransferRequest,
   SavingsGoal,
@@ -281,6 +282,17 @@ export async function getAccountSummary(): Promise<AccountSummary> {
 
 export async function getAccountDetails(id: number): Promise<AccountDetails> {
   const { data } = await api.get<AccountDetails>(`/accounts/${id}`)
+  return data
+}
+
+export async function getAccountActivityPage(
+  id: number,
+  page: number,
+  size = 15,
+): Promise<AccountActivityPage> {
+  const { data } = await api.get<AccountActivityPage>(`/accounts/${id}/activity`, {
+    params: { page, size },
+  })
   return data
 }
 

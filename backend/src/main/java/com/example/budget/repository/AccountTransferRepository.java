@@ -3,6 +3,7 @@ package com.example.budget.repository;
 import com.example.budget.model.AccountTransfer;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.User;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,6 +24,13 @@ public interface AccountTransferRepository extends JpaRepository<AccountTransfer
             FinancialAccount account, LocalDate date);
     List<AccountTransfer> findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
             FinancialAccount account, LocalDate date);
+
+    // Pageable-capped variants of the two queries above, so the account activity
+    // feed can page arbitrarily far back instead of being frozen at 20 rows.
+    List<AccountTransfer> findByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+            FinancialAccount account, LocalDate date, Pageable pageable);
+    List<AccountTransfer> findByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+            FinancialAccount account, LocalDate date, Pageable pageable);
     List<AccountTransfer> findTop20ByFromAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(
             FinancialAccount account, LocalDate date);
     List<AccountTransfer> findTop20ByToAccountAndTransferDateGreaterThanOrderByTransferDateAscIdAsc(

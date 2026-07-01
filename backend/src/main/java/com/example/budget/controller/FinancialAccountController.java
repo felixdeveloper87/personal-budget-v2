@@ -35,6 +35,15 @@ public class FinancialAccountController {
         return service.details(id, (User) authentication.getPrincipal());
     }
 
+    @GetMapping("/{id}/activity")
+    public AccountActivityPageDTO activity(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "15") int size,
+            Authentication authentication) {
+        return service.recentActivityPage(id, (User) authentication.getPrincipal(), page, size);
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public FinancialAccountDTO create(

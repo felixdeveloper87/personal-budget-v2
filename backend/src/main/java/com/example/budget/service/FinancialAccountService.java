@@ -7,6 +7,7 @@ import com.example.budget.model.*;
 import com.example.budget.repository.AccountTransferRepository;
 import com.example.budget.repository.FinancialAccountRepository;
 import com.example.budget.repository.TransactionRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -63,27 +64,7 @@ public class FinancialAccountService {
         FinancialAccount account = getOwnedAccount(id, user);
         LocalDate today = LocalDate.now();
 
-        List<AccountActivityItemDTO> recent = Stream.concat(
-                        transactionRepository
-                                .findTop20ByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
-                                        user, account, today)
-                                .stream()
-                                .map(this::toActivity),
-                        Stream.concat(
-                                transferRepository
-                                        .findTop20ByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
-                                                account, today)
-                                        .stream()
-                                        .map(transfer -> toTransferActivity(transfer, false)),
-                                transferRepository
-                                        .findTop20ByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
-                                                account, today)
-                                        .stream()
-                                        .map(transfer -> toTransferActivity(transfer, true))))
-                .sorted(Comparator.comparing(AccountActivityItemDTO::date).reversed()
-                        .thenComparing(AccountActivityItemDTO::id, Comparator.reverseOrder()))
-                .limit(10)
-                .toList();
+        List<AccountActivityItemDTO> recent = mergeRecentActivity(account, user, today, 10);
 
         List<AccountActivityItemDTO> upcoming = Stream.concat(
                         transactionRepository
@@ -108,6 +89,59 @@ public class FinancialAccountService {
                 .toList();
 
         return new AccountDetailsDTO(toDTO(account, user), recent, upcoming);
+    }
+
+    /**
+     * One page of an account's past activity (transactions + transfers, both
+     * directions), most recent first. Unlike {@link #details}'s fixed 10-row
+     * preview, this pages arbitrarily far back.
+     *
+     * Each source query is capped at {@code (page + 1) * size + 1} rows (the
+     * "+1" is a sentinel used only to detect whether another page exists) —
+     * since every source is independently sorted newest-first, merging each
+     * source's own top-N and re-cutting to top-N globally is exactly correct,
+     * as long as N is at least the true global top-N need, which it is here.
+     */
+    @Transactional(readOnly = true)
+    public AccountActivityPageDTO recentActivityPage(Long id, User user, int page, int size) {
+        FinancialAccount account = getOwnedAccount(id, user);
+        LocalDate today = LocalDate.now();
+
+        int fetchLimit = (page + 1) * size + 1;
+        List<AccountActivityItemDTO> merged = mergeRecentActivity(account, user, today, fetchLimit);
+
+        int from = Math.min(page * size, merged.size());
+        int to = Math.min(from + size, merged.size());
+        boolean hasMore = merged.size() > to;
+
+        return new AccountActivityPageDTO(merged.subList(from, to), page, size, hasMore);
+    }
+
+    /** Shared merge-sort of transactions + both transfer directions, capped at {@code limit}. */
+    private List<AccountActivityItemDTO> mergeRecentActivity(
+            FinancialAccount account, User user, LocalDate today, int limit) {
+        PageRequest cap = PageRequest.of(0, limit);
+        return Stream.concat(
+                        transactionRepository
+                                .findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
+                                        user, account, today, cap)
+                                .stream()
+                                .map(this::toActivity),
+                        Stream.concat(
+                                transferRepository
+                                        .findByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                                                account, today, cap)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, false)),
+                                transferRepository
+                                        .findByToAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
+                                                account, today, cap)
+                                        .stream()
+                                        .map(transfer -> toTransferActivity(transfer, true))))
+                .sorted(Comparator.comparing(AccountActivityItemDTO::date).reversed()
+                        .thenComparing(AccountActivityItemDTO::id, Comparator.reverseOrder()))
+                .limit(limit)
+                .toList();
     }
 
     @Transactional

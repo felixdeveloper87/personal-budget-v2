@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Flex, Grid, Icon, Spinner, Text, VStack, useMediaQuery } from '@chakra-ui/react'
+import { Box, Flex, Grid, Icon, Spinner, Text, VStack, useDisclosure, useMediaQuery } from '@chakra-ui/react'
 
 import { archiveAccount, getAccountSummary } from '../../api'
 import type { AccountSummary, FinancialAccount } from '../../types'
@@ -8,7 +8,8 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
-import { Plus, Wallet } from '../../components/ui/icons'
+import { Plus, Search, Wallet } from '../../components/ui/icons'
+import SpotlightSearch from '../../components/search/SpotlightSearch'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -33,6 +34,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
   const [deleting, setDeleting] = useState(false)
 
   const [isSplit] = useMediaQuery('(min-width: 920px)')
+  const search = useDisclosure()
 
   const [hideBalances, setHideBalances] = useState(() => {
     try {
@@ -171,29 +173,51 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                     >
                       Your accounts
                     </Text>
-                    <Box
-                      as="button"
-                      type="button"
-                      onClick={() => setFormAccount(null)}
-                      display="inline-flex"
-                      alignItems="center"
-                      gap="0.35rem"
-                      fontFamily="var(--pb-mono)"
-                      fontSize="10.5px"
-                      letterSpacing="0.08em"
-                      textTransform="uppercase"
-                      color="var(--pb-ink-soft)"
-                      px="0.7rem"
-                      py="0.32rem"
-                      borderRadius="999px"
-                      border="1px solid var(--pb-hair)"
-                      bg="var(--pb-surface)"
-                      transition="0.18s"
-                      _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
-                    >
-                      <Icon as={Plus} boxSize="0.95em" />
-                      Add account
-                    </Box>
+                    <Flex gap="0.5rem">
+                      <Box
+                        as="button"
+                        type="button"
+                        aria-label="Search transactions"
+                        title="Search transactions"
+                        onClick={search.onOpen}
+                        display="inline-flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        w="1.95rem"
+                        h="1.95rem"
+                        borderRadius="999px"
+                        border="1px solid var(--pb-hair)"
+                        bg="var(--pb-surface)"
+                        color="var(--pb-ink-soft)"
+                        transition="0.18s"
+                        _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
+                      >
+                        <Icon as={Search} boxSize="0.9em" />
+                      </Box>
+                      <Box
+                        as="button"
+                        type="button"
+                        onClick={() => setFormAccount(null)}
+                        display="inline-flex"
+                        alignItems="center"
+                        gap="0.35rem"
+                        fontFamily="var(--pb-mono)"
+                        fontSize="10.5px"
+                        letterSpacing="0.08em"
+                        textTransform="uppercase"
+                        color="var(--pb-ink-soft)"
+                        px="0.7rem"
+                        py="0.32rem"
+                        borderRadius="999px"
+                        border="1px solid var(--pb-hair)"
+                        bg="var(--pb-surface)"
+                        transition="0.18s"
+                        _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
+                      >
+                        <Icon as={Plus} boxSize="0.95em" />
+                        Add account
+                      </Box>
+                    </Flex>
                   </Flex>
                 </MotionBox>
               )}
@@ -223,7 +247,6 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                         showBackButton={!isSplit}
                         onBack={() => setDetailOpen(false)}
                         onTransfer={() => onPageChange?.('transfers')}
-                        onViewAll={() => onPageChange?.('behaviour')}
                       />
                     </Box>
                   )}
@@ -250,6 +273,7 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
         itemName={accountToDelete?.name}
         description="Removes the account from your active accounts. Existing transactions are kept."
       />
+      <SpotlightSearch isOpen={search.isOpen} onClose={search.onClose} />
     </Box>
   )
 }
