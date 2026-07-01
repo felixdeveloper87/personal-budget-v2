@@ -53,6 +53,15 @@ public class User {
     @Column(name = "planned_monthly_income")
     private BigDecimal plannedMonthlyIncome;
 
+    /**
+     * Optional global "estimated day-to-day expense" — a monthly assumption for
+     * variable spending (groceries, transport, etc) that the cash-flow forecast
+     * adds on top of fixed payments and installments. {@code null} means no plan
+     * is set, so the forecast only counts fixed/installment commitments.
+     */
+    @Column(name = "planned_monthly_variable_expense")
+    private BigDecimal plannedMonthlyVariableExpense;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
@@ -140,6 +149,14 @@ public class User {
 
     public void setPlannedMonthlyIncome(BigDecimal plannedMonthlyIncome) {
         this.plannedMonthlyIncome = plannedMonthlyIncome;
+    }
+
+    public BigDecimal getPlannedMonthlyVariableExpense() {
+        return plannedMonthlyVariableExpense;
+    }
+
+    public void setPlannedMonthlyVariableExpense(BigDecimal plannedMonthlyVariableExpense) {
+        this.plannedMonthlyVariableExpense = plannedMonthlyVariableExpense;
     }
 
     public List<Transaction> getTransactions() {

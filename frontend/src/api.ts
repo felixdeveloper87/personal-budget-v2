@@ -538,4 +538,13 @@ export async function updateIncomePlan(
   return data
 }
 
+export async function updateExpensePlan(
+  plannedMonthlyVariableExpense: number | null,
+): Promise<CashFlowForecast> {
+  const { data } = await api.put<CashFlowForecast>('/planning/expense-plan', {
+    plannedMonthlyVariableExpense,
+  })
+  return data
+}
+
 export default api

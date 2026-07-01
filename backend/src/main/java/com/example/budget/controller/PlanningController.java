@@ -4,6 +4,7 @@ import com.example.budget.dto.CashFlowForecastDTO;
 import com.example.budget.dto.CategoryBudgetDTO;
 import com.example.budget.dto.CategoryBudgetRequest;
 import com.example.budget.dto.IncomePlanRequest;
+import com.example.budget.dto.VariableExpensePlanRequest;
 import com.example.budget.model.User;
 import com.example.budget.service.CashFlowForecastService;
 import com.example.budget.service.CategoryBudgetService;
@@ -60,5 +61,13 @@ public class PlanningController {
             Authentication authentication) {
         return forecastService.updateIncomePlan(
                 (User) authentication.getPrincipal(), request.plannedMonthlyIncome());
+    }
+
+    @PutMapping("/expense-plan")
+    public CashFlowForecastDTO updateExpensePlan(
+            @Valid @RequestBody VariableExpensePlanRequest request,
+            Authentication authentication) {
+        return forecastService.updateExpensePlan(
+                (User) authentication.getPrincipal(), request.plannedMonthlyVariableExpense());
     }
 }

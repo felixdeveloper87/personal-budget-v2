@@ -12,6 +12,8 @@ public record CashFlowForecastDTO(
         BigDecimal averageMonthlyVariableExpense,
         boolean hasIncomePlan,
         BigDecimal plannedMonthlyIncome,
+        boolean hasExpensePlan,
+        BigDecimal plannedMonthlyVariableExpense,
         List<MonthForecast> months
 ) {
     /**
@@ -27,9 +29,10 @@ public record CashFlowForecastDTO(
      * <ul>
      *   <li><b>Committed</b> ({@code fixedIncome}, {@code fixedExpense},
      *       {@code installmentExpense}): dated transactions and recurring commitments.</li>
-     *   <li><b>Estimated</b> ({@code estimatedIncome},
-     *       {@code estimatedVariableExpense}): only the optional income-plan top-up
-     *       when confirmed income is below that month's target.</li>
+     *   <li><b>Estimated</b> ({@code estimatedIncome}, {@code estimatedVariableExpense}):
+     *       the optional income-plan top-up (when confirmed income is below that
+     *       month's target) and the optional day-to-day expense-plan top-up (when
+     *       confirmed day-to-day spending is below that month's estimate).</li>
      * </ul>
      */
     public record MonthForecast(

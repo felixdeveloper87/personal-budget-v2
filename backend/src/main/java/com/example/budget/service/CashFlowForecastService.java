@@ -70,6 +70,15 @@ public class CashFlowForecastService {
         return forecast(userRepository.save(user));
     }
 
+    @Transactional
+    public CashFlowForecastDTO updateExpensePlan(User principal, BigDecimal plannedMonthlyVariableExpense) {
+        User user = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new EntityNotFoundException("User", principal.getId()));
+        boolean cleared = plannedMonthlyVariableExpense == null || plannedMonthlyVariableExpense.signum() <= 0;
+        user.setPlannedMonthlyVariableExpense(cleared ? null : plannedMonthlyVariableExpense);
+        return forecast(userRepository.save(user));
+    }
+
     @Transactional(readOnly = true)
     public CashFlowForecastDTO forecast(User user) {
         LocalDate today = LocalDate.now();
@@ -95,6 +104,8 @@ public class CashFlowForecastService {
 
         BigDecimal plannedMonthlyIncome = user.getPlannedMonthlyIncome();
         boolean hasIncomePlan = plannedMonthlyIncome != null && plannedMonthlyIncome.signum() > 0;
+        BigDecimal plannedMonthlyVariableExpense = user.getPlannedMonthlyVariableExpense();
+        boolean hasExpensePlan = plannedMonthlyVariableExpense != null && plannedMonthlyVariableExpense.signum() > 0;
         BigDecimal currentTotalBalance = accountService.summary(user).totalBalance();
 
         Map<YearMonth, BigDecimal> scheduledIncome = new HashMap<>();
@@ -102,12 +113,19 @@ public class CashFlowForecastService {
         Map<YearMonth, BigDecimal> installmentExpenses = new HashMap<>();
         Map<YearMonth, BigDecimal> incomeReceived = new HashMap<>();
         Map<YearMonth, BigDecimal> expensesPaid = new HashMap<>();
+        // Day-to-day only (excludes installment/recurring charges) — the baseline
+        // an expense plan tops up, mirroring how the income plan nets against
+        // income already received. Without this split, an installment or fixed
+        // payment settling this month would silently eat into the day-to-day
+        // estimate's top-up.
+        Map<YearMonth, BigDecimal> dayToDayExpensesPaid = new HashMap<>();
         Set<String> persistedRecurringPayments = addPersistedTransactions(
                 scheduledIncome,
                 scheduledExpenses,
                 installmentExpenses,
                 incomeReceived,
                 expensesPaid,
+                dayToDayExpensesPaid,
                 user,
                 currentMonth.atDay(1),
                 today,
@@ -129,6 +147,7 @@ public class CashFlowForecastService {
             BigDecimal monthInstallments = installmentExpenses.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthIncomeReceived = incomeReceived.getOrDefault(month, BigDecimal.ZERO);
             BigDecimal monthExpensesPaid = expensesPaid.getOrDefault(month, BigDecimal.ZERO);
+            BigDecimal monthDayToDaySpent = dayToDayExpensesPaid.getOrDefault(month, BigDecimal.ZERO);
             // In the current month, income already received is part of the live
             // account balance. The plan therefore contributes only the amount still
             // needed to reach the user's monthly target; it never re-adds income
@@ -138,14 +157,21 @@ public class CashFlowForecastService {
                             .subtract(monthIncomeReceived.add(monthIncome))
                             .max(BigDecimal.ZERO)
                     : BigDecimal.ZERO;
+            // Same idea in the other direction: the expense plan only adds the
+            // remainder of the day-to-day estimate not yet spent this month. Future
+            // months have no day-to-day activity recorded, so they get the full
+            // estimate on top of fixed expenses and installments.
+            BigDecimal plannedExpenseTopUp = hasExpensePlan
+                    ? plannedMonthlyVariableExpense.subtract(monthDayToDaySpent).max(BigDecimal.ZERO)
+                    : BigDecimal.ZERO;
 
             BigDecimal committedNet = monthIncome.subtract(monthExpense).subtract(monthInstallments);
-            BigDecimal estimatedNet = plannedIncomeTopUp;
+            BigDecimal estimatedNet = plannedIncomeTopUp.subtract(plannedExpenseTopUp);
             BigDecimal netCashFlow = committedNet.add(estimatedNet);
             projectedBalance = projectedBalance.add(netCashFlow);
 
             BigDecimal committedGross = monthIncome.add(monthExpense).add(monthInstallments);
-            int confidencePercent = confidence(committedGross, plannedIncomeTopUp);
+            int confidencePercent = confidence(committedGross, plannedIncomeTopUp.add(plannedExpenseTopUp));
             months.add(new CashFlowForecastDTO.MonthForecast(
                     month.toString(),
                     month.atEndOfMonth(),
@@ -153,7 +179,7 @@ public class CashFlowForecastService {
                     plannedIncomeTopUp,
                     monthExpense,
                     monthInstallments,
-                    BigDecimal.ZERO,
+                    plannedExpenseTopUp,
                     committedNet,
                     estimatedNet,
                     netCashFlow,
@@ -172,6 +198,8 @@ public class CashFlowForecastService {
                 averageVariableExpense,
                 hasIncomePlan,
                 hasIncomePlan ? plannedMonthlyIncome : null,
+                hasExpensePlan,
+                hasExpensePlan ? plannedMonthlyVariableExpense : null,
                 months);
     }
 
@@ -181,6 +209,7 @@ public class CashFlowForecastService {
             Map<YearMonth, BigDecimal> installments,
             Map<YearMonth, BigDecimal> incomeReceived,
             Map<YearMonth, BigDecimal> expensesPaid,
+            Map<YearMonth, BigDecimal> dayToDayExpensesPaid,
             User user,
             LocalDate currentMonthStart,
             LocalDate today,
@@ -197,6 +226,11 @@ public class CashFlowForecastService {
                         ? incomeReceived
                         : expensesPaid;
                 addAmount(actualTarget, YearMonth.from(transaction.getPaymentDate()), transaction.getAmount());
+                if (transaction.getType() != TransactionType.INCOME
+                        && transaction.getInstallmentPlan() == null
+                        && transaction.getRecurringTransaction() == null) {
+                    addAmount(dayToDayExpensesPaid, YearMonth.from(transaction.getPaymentDate()), transaction.getAmount());
+                }
                 continue;
             }
             if (!isFutureBalanceTransaction(transaction, today)) {

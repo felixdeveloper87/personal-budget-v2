@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Box, Button, Flex, HStack, Icon, IconButton, Input, NumberInput, NumberInputField, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 
-import { deleteCategoryBudget, getCashFlowForecast, listCategoryBudgets, updateIncomePlan, upsertCategoryBudget } from '../../api'
+import { deleteCategoryBudget, getCashFlowForecast, listCategoryBudgets, updateExpensePlan, updateIncomePlan, upsertCategoryBudget } from '../../api'
 import type { CashFlowForecast, CashFlowForecastMonth, CategoryBudget } from '../../types'
 import { ToastService } from '../../services/toast'
-import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, DollarSign, Layers, Plus, TrendingDown, TrendingUp, Wallet } from '../../components/ui/icons'
+import { AlertTriangle, ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, DollarSign, Layers, Plus, ShoppingCart, TrendingDown, TrendingUp, Wallet } from '../../components/ui/icons'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
@@ -34,6 +34,8 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
   const [saving, setSaving] = useState(false)
   const [incomePlan, setIncomePlan] = useState(0)
   const [savingIncomePlan, setSavingIncomePlan] = useState(false)
+  const [expensePlan, setExpensePlan] = useState(0)
+  const [savingExpensePlan, setSavingExpensePlan] = useState(false)
   const [isDraggingForecast, setIsDraggingForecast] = useState(false)
   const forecastCarouselRef = useRef<HTMLDivElement>(null)
   const forecastDragRef = useRef({ startX: 0, scrollLeft: 0 })
@@ -52,6 +54,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
       setBudgets(budgetItems)
       setForecast(forecastData)
       setIncomePlan(forecastData.plannedMonthlyIncome ?? 0)
+      setExpensePlan(forecastData.plannedMonthlyVariableExpense ?? 0)
     } catch (err) {
       ToastService.apiError(err, { title: 'Could not load planning data', dedupeKey: 'planning-load-failed' })
     }
@@ -95,6 +98,20 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
       ToastService.apiError(err, { title: 'Could not save expected income', dedupeKey: 'income-plan-save-failed' })
     } finally {
       setSavingIncomePlan(false)
+    }
+  }
+
+  const saveExpensePlan = async () => {
+    setSavingExpensePlan(true)
+    try {
+      const forecastData = await updateExpensePlan(expensePlan > 0 ? expensePlan : null)
+      setForecast(forecastData)
+      setExpensePlan(forecastData.plannedMonthlyVariableExpense ?? 0)
+      ToastService.success({ title: expensePlan > 0 ? 'Day-to-day estimate saved' : 'Day-to-day estimate cleared', dedupeKey: 'expense-plan-saved' })
+    } catch (err) {
+      ToastService.apiError(err, { title: 'Could not save day-to-day estimate', dedupeKey: 'expense-plan-save-failed' })
+    } finally {
+      setSavingExpensePlan(false)
     }
   }
 
@@ -164,14 +181,14 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
           <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="0.8rem">
             <MotionBox variants={riseV}><Signal icon={Wallet} label="Starting balance" value={forecast ? money(forecast.currentTotalBalance) : '—'} note="Across your connected accounts" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={DollarSign} label="Income assumption" value={forecast?.hasIncomePlan ? money(forecast.plannedMonthlyIncome ?? 0) : forecast ? money(forecast.averageMonthlyIncome) : '—'} note={forecast?.hasIncomePlan ? 'Your monthly target' : 'Based on transaction history'} accent="income" /></MotionBox>
-            <MotionBox variants={riseV}><Signal icon={TrendingDown} label="Expense assumption" value={forecast ? money(forecast.averageMonthlyVariableExpense) : '—'} note={basisCount ? `Variable spend from the last ${basisCount} active month${basisCount !== 1 ? 's' : ''}` : 'No history available yet'} accent="expense" /></MotionBox>
+            <MotionBox variants={riseV}><Signal icon={TrendingDown} label="Expense assumption" value={forecast?.hasExpensePlan ? money(forecast.plannedMonthlyVariableExpense ?? 0) : forecast ? money(forecast.averageMonthlyVariableExpense) : '—'} note={forecast?.hasExpensePlan ? 'Your day-to-day estimate' : basisCount ? `Variable spend from the last ${basisCount} active month${basisCount !== 1 ? 's' : ''}` : 'No history available yet'} accent="expense" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={firstNegativeMonth ? AlertTriangle : CheckCircle2} label="Runway" value={firstNegativeMonth ? monthLabel(firstNegativeMonth.month) : '12 months+'} note={firstNegativeMonth ? 'First projected negative balance' : 'No negative balance forecast'} accent={firstNegativeMonth ? 'expense' : 'income'} /></MotionBox>
           </SimpleGrid>
 
           <MotionBox variants={riseV}>
             <SectionLabel>Build the plan</SectionLabel>
           </MotionBox>
-          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={{ base: 4, md: 5 }}>
+          <SimpleGrid columns={{ base: 1, lg: 2, xl: 3 }} spacing={{ base: 4, md: 5 }}>
             <MotionBox variants={riseV}>
               <PlanPanel eyebrow="01 · Income" title="Set a reliable monthly income" caption="Use a target when your expected income differs from the historical average.">
                 <Flex gap={3} align="end" flexDirection={{ base: 'column', sm: 'row' }}>
@@ -183,7 +200,17 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
             </MotionBox>
 
             <MotionBox variants={riseV}>
-              <PlanPanel eyebrow="02 · Budget" title="Give each category a boundary" caption="Limits make it easier to decide what is safe to spend before the month is over." rightSlot={<Input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} maxW="150px" h="36px" bg="var(--pb-surface-2)" borderColor="var(--pb-hair)" borderRadius="10px" />}>
+              <PlanPanel eyebrow="02 · Day-to-day" title="Estimate everyday spending" caption="Groceries, transport and other day-to-day costs — added on top of fixed payments and instalments in the forecast.">
+                <Flex gap={3} align="end" flexDirection={{ base: 'column', sm: 'row' }}>
+                  <Box flex={1} w="full"><FieldLabel>Estimated day-to-day expense</FieldLabel><NumberInput min={0} precision={2} value={expensePlan} onChange={(_, value) => setExpensePlan(value || 0)}><NumberInputField bg="var(--pb-surface-2)" borderColor="var(--pb-hair)" borderRadius="12px" h="44px" /></NumberInput></Box>
+                  <ActionButton label={expensePlan > 0 ? 'Save estimate' : 'Use history'} icon={ShoppingCart} primary={expensePlan > 0} onClick={saveExpensePlan} isLoading={savingExpensePlan} />
+                </Flex>
+                <PlanHint accent="brand">{forecast?.hasExpensePlan ? `Active estimate: ${money(forecast.plannedMonthlyVariableExpense ?? 0)} per month.` : `Currently using an average of ${money(forecast?.averageMonthlyVariableExpense ?? 0)} per month.`}</PlanHint>
+              </PlanPanel>
+            </MotionBox>
+
+            <MotionBox variants={riseV}>
+              <PlanPanel eyebrow="03 · Budget" title="Give each category a boundary" caption="Limits make it easier to decide what is safe to spend before the month is over." rightSlot={<Input type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} maxW="150px" h="36px" bg="var(--pb-surface-2)" borderColor="var(--pb-hair)" borderRadius="10px" />}>
                 <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}><Box><FieldLabel>Category</FieldLabel><Input value={category} onChange={(event) => setCategory(event.target.value)} placeholder="Groceries" h="44px" bg="var(--pb-surface-2)" borderColor="var(--pb-hair)" borderRadius="12px" /></Box><Box><FieldLabel>Monthly limit</FieldLabel><NumberInput min={0} precision={2} value={limitAmount} onChange={(_, value) => setLimitAmount(value || 0)}><NumberInputField h="44px" bg="var(--pb-surface-2)" borderColor="var(--pb-hair)" borderRadius="12px" /></NumberInput></Box></SimpleGrid>
                 <ActionButton label="Add category limit" icon={Plus} primary onClick={saveBudget} isLoading={saving} disabled={!category.trim() || limitAmount <= 0} />
               </PlanPanel>
@@ -258,7 +285,7 @@ function ForecastCard({ month, hasIncomePlan }: { month: CashFlowForecastMonth; 
   const incomeReceived = month.incomeReceivedSoFar ?? 0
   const expensesPaid = month.expensesPaidSoFar ?? 0
   const projectedIncome = incomeReceived + scheduledIncome + (month.estimatedIncome ?? 0)
-  const projectedOutgoings = expensesPaid + scheduledOutgoings
+  const projectedOutgoings = expensesPaid + scheduledOutgoings + (month.estimatedVariableExpense ?? 0)
   const incomeProgress = projectedIncome > 0 ? Math.min(100, (incomeReceived / projectedIncome) * 100) : 0
   const expensesProgress = projectedOutgoings > 0 ? Math.min(100, (expensesPaid / projectedOutgoings) * 100) : 0
 
@@ -269,7 +296,7 @@ function ForecastCard({ month, hasIncomePlan }: { month: CashFlowForecastMonth; 
     </Flex>
     <SimpleGrid columns={2} spacing={3} mt={4}>
       <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-income)" mt="2px">{money(current ? projectedIncome : scheduledIncome + month.estimatedIncome)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">{current ? 'Projected for this month' : `Scheduled${month.estimatedIncome > 0 ? ' + income plan' : ''}`}</Text></Box>
-      <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Outgoings</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-coral)" mt="2px">{money(current ? projectedOutgoings : scheduledOutgoings)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">{current ? 'Paid + scheduled this month' : 'All scheduled transactions'}</Text></Box>
+      <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Outgoings</Text><Text fontSize="sm" fontWeight={600} color="var(--pb-coral)" mt="2px">{money(current ? projectedOutgoings : scheduledOutgoings + month.estimatedVariableExpense)}</Text><Text fontSize="10px" color="var(--pb-ink-soft)" mt="2px">{current ? 'Paid + scheduled this month' : `Scheduled${month.estimatedVariableExpense > 0 ? ' + day-to-day estimate' : ''}`}</Text></Box>
     </SimpleGrid>
     {current && <Box mt={4} p={3} borderRadius="10px" bg="var(--pb-surface)">
       <Flex justify="space-between" gap={3}><Text fontSize="xs" color="var(--pb-ink-soft)">Income received so far</Text><Text className="num" fontSize="xs" fontWeight={600} color="var(--pb-income)">{money(incomeReceived)} of {money(projectedIncome)}</Text></Flex>

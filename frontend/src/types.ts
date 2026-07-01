@@ -396,5 +396,7 @@ export interface CashFlowForecast {
   averageMonthlyVariableExpense: number
   hasIncomePlan: boolean
   plannedMonthlyIncome: number | null
+  hasExpensePlan: boolean
+  plannedMonthlyVariableExpense: number | null
   months: CashFlowForecastMonth[]
 }
