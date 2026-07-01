@@ -5,8 +5,6 @@ import { BRAND } from './brand.config'
 interface LogoProps {
   user?: any
   onClick?: () => void
-  /** Smaller, fixed-size lockup that fits inside the sidebar header. */
-  compact?: boolean
 }
 
 // Opção 1: Gráfico ondulado ascendente com micro-animação de desenho (Não deletado)
@@ -270,7 +268,7 @@ export function LogoIconWallet({ boxSize }: { boxSize?: number } = {}) {
   )
 }
 
-export default function Logo({ user, onClick, compact = false }: LogoProps) {
+export default function Logo({ user, onClick }: LogoProps) {
   const ed = useEd()
   const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
   const wordMuted = ed ? ed.cream : wordMutedBase
@@ -312,13 +310,9 @@ export default function Logo({ user, onClick, compact = false }: LogoProps) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  const titleFontSize = compact
-    ? (ed ? 'lg' : 'sm')
-    : ({ base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const)
-  const edTitleFontSize = compact
-    ? 'lg'
-    : ({ base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } as const)
-  const sepFontSize = compact ? 'sm' : ({ base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const)
+  const titleFontSize = { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const
+  const edTitleFontSize = { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } as const
+  const sepFontSize = { base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const
 
   return (
     <HStack
@@ -339,11 +333,11 @@ export default function Logo({ user, onClick, compact = false }: LogoProps) {
       <Box
         flexShrink={0}
         position="relative"
-        p={compact ? 1.5 : { base: 1.5, md: 2 }}
+        p={{ base: 1.5, md: 2 }}
         bg={frameBg}
         border="1px solid"
         borderColor={frameBorder}
-        rounded={compact ? 'lg' : { base: 'lg', md: 'xl' }}
+        rounded={{ base: 'lg', md: 'xl' }}
         boxShadow={frameShadow}
         backdropFilter="blur(8px)"
         overflow="hidden"
@@ -362,7 +356,7 @@ export default function Logo({ user, onClick, compact = false }: LogoProps) {
           },
         }}
       >
-        <LogoIconWallet boxSize={compact ? 9 : undefined} />
+        <LogoIconWallet />
       </Box>
 
       <VStack
@@ -433,7 +427,7 @@ export default function Logo({ user, onClick, compact = false }: LogoProps) {
           lineHeight="1.2"
           mt={0.5}
           noOfLines={2}
-          display={compact ? 'block' : { base: 'none', lg: 'block' }}
+          display={{ base: 'none', lg: 'block' }}
           _dark={{ color: 'gray.500' }}
         >
           {BRAND.tagline}
