@@ -1,5 +1,5 @@
 import { Box, HStack, Text, VStack } from '@chakra-ui/react'
-import { AlertTriangle, Calendar, TrendingDown } from 'lucide-react'
+import { AlertTriangle, Calendar, Gauge, Receipt, Store, TrendingDown } from 'lucide-react'
 import Panel from './Panel'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 
@@ -11,7 +11,7 @@ export interface InsightItem {
   valueLabel?: string
   description: string
   href: AppPage | null
-  icon: 'warn' | 'calendar' | 'trend-down'
+  icon: 'warn' | 'calendar' | 'trend-down' | 'store' | 'gauge' | 'receipt'
 }
 
 interface InsightListProps {
@@ -23,6 +23,9 @@ const ICONS = {
   warn: AlertTriangle,
   calendar: Calendar,
   'trend-down': TrendingDown,
+  store: Store,
+  gauge: Gauge,
+  receipt: Receipt,
 }
 
 const ICON_COLORS = {

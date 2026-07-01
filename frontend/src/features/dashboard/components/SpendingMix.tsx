@@ -8,11 +8,13 @@ import { categoryColor, fmtCurrency } from './format'
 
 interface SpendingMixProps {
   transactions: Transaction[]
+  /** Same-basis transactions for the previous period, used for delta chips. */
+  previousTransactions?: Transaction[]
 }
 
 const MAX_SLICES = 6
 
-export default function SpendingMix({ transactions }: SpendingMixProps) {
+export default function SpendingMix({ transactions, previousTransactions = [] }: SpendingMixProps) {
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
@@ -22,14 +24,25 @@ export default function SpendingMix({ transactions }: SpendingMixProps) {
   const tooltipText = dark ? '#e8eef6' : '#15202e'
 
   const { slices, total } = useMemo(() => {
-    const byCategory = new Map<string, number>()
-    for (const t of transactions) {
-      if (t.type !== 'EXPENSE') continue
-      byCategory.set(t.category, (byCategory.get(t.category) ?? 0) + t.amount)
+    const sumByCategory = (txns: Transaction[]) => {
+      const map = new Map<string, number>()
+      for (const t of txns) {
+        if (t.type !== 'EXPENSE') continue
+        map.set(t.category, (map.get(t.category) ?? 0) + t.amount)
+      }
+      return map
     }
 
+    const byCategory = sumByCategory(transactions)
+    const prevByCategory = sumByCategory(previousTransactions)
+
     const sorted = [...byCategory.entries()]
-      .map(([category, amount]) => ({ category, amount }))
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        // null when the category didn't exist last period ("new" spending).
+        delta: prevByCategory.has(category) ? amount - (prevByCategory.get(category) ?? 0) : null,
+      }))
       .sort((a, b) => b.amount - a.amount)
 
     let result = sorted
@@ -37,12 +50,12 @@ export default function SpendingMix({ transactions }: SpendingMixProps) {
       const head = sorted.slice(0, MAX_SLICES - 1)
       const rest = sorted.slice(MAX_SLICES - 1)
       const otherAmount = rest.reduce((s, r) => s + r.amount, 0)
-      result = [...head, { category: 'Other', amount: otherAmount }]
+      result = [...head, { category: 'Other', amount: otherAmount, delta: null }]
     }
 
     const sum = result.reduce((s, r) => s + r.amount, 0)
     return { slices: result, total: sum }
-  }, [transactions])
+  }, [transactions, previousTransactions])
 
   const hasData = slices.length > 0 && total > 0
 
@@ -138,16 +151,38 @@ export default function SpendingMix({ transactions }: SpendingMixProps) {
                       <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink)" noOfLines={1}>
                         {s.category}
                       </Text>
+                      <Text
+                        fontFamily="var(--pb-mono)"
+                        fontSize="9.5px"
+                        color="var(--pb-ink-faint)"
+                        flexShrink={0}
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
+                        {pct}%
+                      </Text>
                     </HStack>
-                    <Text
-                      fontFamily="var(--pb-mono)"
-                      fontSize="10px"
-                      color="var(--pb-ink-faint)"
-                      flexShrink={0}
-                      style={{ fontVariantNumeric: 'tabular-nums' }}
-                    >
-                      {pct}%
-                    </Text>
+                    <HStack spacing={2} flexShrink={0} align="baseline">
+                      <Text
+                        fontFamily="var(--pb-mono)"
+                        fontSize="10px"
+                        color="var(--pb-ink-soft)"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
+                        {fmtCurrency(s.amount)}
+                      </Text>
+                      {s.delta !== null && s.delta !== 0 && (
+                        <Text
+                          fontFamily="var(--pb-mono)"
+                          fontSize="9.5px"
+                          color={s.delta > 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
+                          style={{ fontVariantNumeric: 'tabular-nums' }}
+                          title="Change vs previous period"
+                        >
+                          {s.delta > 0 ? '+' : '−'}
+                          {fmtCurrency(Math.abs(s.delta))}
+                        </Text>
+                      )}
+                    </HStack>
                   </HStack>
                 )
               })}

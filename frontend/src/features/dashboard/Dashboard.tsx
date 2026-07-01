@@ -28,6 +28,8 @@ import SectionLabel from './components/SectionLabel'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashFlowChart from './components/CashFlowChart'
+import SpendingPace from './components/SpendingPace'
+import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
@@ -38,6 +40,7 @@ import type { CommitmentsData } from './components/CommitmentsPanel'
 import InsightList from './components/InsightList'
 import type { InsightItem } from './components/InsightList'
 import { fmtCurrency } from './components/format'
+import { daysInMonth, merchantStats } from './insights'
 
 export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
@@ -89,6 +92,16 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     null,
     selectedPeriod,
     selectedDate,
+    'activity',
+  )
+
+  // Previous period on the Behaviour lens, so merchant comparisons ("last month
+  // you spent £X at Lidl") reflect when purchases actually happened.
+  const previousBehaviourPeriodData = usePeriodData(
+    transactions,
+    null,
+    selectedPeriod,
+    previousDate,
     'activity',
   )
 
@@ -233,6 +246,26 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       })
     }
 
+    // Month-end pace projection — only meaningful a few days into the live month.
+    const today = new Date()
+    const isCurrentMonth =
+      selectedPeriod === 'month' &&
+      selectedDate.getFullYear() === today.getFullYear() &&
+      selectedDate.getMonth() === today.getMonth()
+    if (isCurrentMonth && today.getDate() >= 3 && expense > 0) {
+      const totalDays = daysInMonth(today.getFullYear(), today.getMonth())
+      const projected = (expense / today.getDate()) * totalDays
+      result.push({
+        id: 'pace',
+        severity: income > 0 && projected > income ? 'attention' : 'info',
+        tag: 'Month-end pace',
+        title: `On pace for ~${fmtCurrency(projected)}`,
+        description: `You are averaging ${fmtCurrency(expense / today.getDate())} a day across ${today.getDate()} days.`,
+        href: 'behaviour',
+        icon: 'gauge',
+      })
+    }
+
     const now = Date.now()
     const in7 = now + 7 * 24 * 60 * 60 * 1000
     const upcoming = txns.filter((t) => {
@@ -253,6 +286,43 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       })
     }
 
+    // Last period's top merchant, e.g. "Last month you spent £84 at Lidl".
+    const prevMerchants = merchantStats(previousBehaviourPeriodData.transactions)
+    if (prevMerchants.length > 0) {
+      const top = prevMerchants[0]
+      const sameNow = merchantStats(behaviourPeriodData.transactions).find((m) => m.key === top.key)
+      const periodWord = selectedPeriod === 'month' ? 'month' : selectedPeriod
+      result.push({
+        id: 'top-merchant',
+        severity: 'info',
+        tag: `Last ${periodWord}`,
+        title: `You spent ${fmtCurrency(top.total)} at ${top.name}`,
+        description:
+          `${top.count} purchase${top.count !== 1 ? 's' : ''} — your top merchant last ${periodWord}.` +
+          (sameNow ? ` This ${periodWord} you are at ${fmtCurrency(sameNow.total)} so far.` : ''),
+        href: 'all-transactions',
+        icon: 'store',
+      })
+    }
+
+    // Largest single expense, when it dominates the period.
+    const biggest = txns.reduce<(typeof txns)[number] | null>(
+      (acc, t) => (t.type === 'EXPENSE' && (!acc || t.amount > acc.amount) ? t : acc),
+      null,
+    )
+    if (biggest && expense > 0 && biggest.amount / expense >= 0.15) {
+      result.push({
+        id: 'big-ticket',
+        severity: 'info',
+        tag: 'Largest expense',
+        title: biggest.description?.trim() || biggest.category,
+        valueLabel: fmtCurrency(biggest.amount),
+        description: `${Math.round((biggest.amount / expense) * 100)}% of this period's spending in a single purchase.`,
+        href: 'all-transactions',
+        icon: 'receipt',
+      })
+    }
+
     const savingsRate = income > 0 ? Math.round(((income - expense) / income) * 100) : -100
     result.push({
       id: 'savings-rate',
@@ -267,8 +337,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       icon: 'trend-down',
     })
 
-    return result
-  }, [periodData])
+    return result.slice(0, 5)
+  }, [periodData, behaviourPeriodData, previousBehaviourPeriodData, selectedDate, selectedPeriod])
 
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
@@ -364,10 +434,26 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
         </MotionBox>
 
+        {/* Spending pace · Top merchants (Behaviour lens: when purchases happened) */}
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+          <MotionBox variants={riseV}>
+            <SpendingPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
+          </MotionBox>
+          <MotionBox variants={riseV}>
+            <TopMerchants
+              transactions={behaviourPeriodData.transactions}
+              previousTransactions={previousBehaviourPeriodData.transactions}
+            />
+          </MotionBox>
+        </Grid>
+
         {/* Spending mix · Personalised insight */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
-            <SpendingMix transactions={periodData.transactions} />
+            <SpendingMix
+              transactions={periodData.transactions}
+              previousTransactions={previousPeriodData.transactions}
+            />
           </MotionBox>
           <MotionBox variants={riseV}>
             <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
