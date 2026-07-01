@@ -66,6 +66,7 @@ public class CategoryBudgetService {
                 .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                         user, month.atDay(1), month.atEndOfMonth())
                 .stream()
+                .filter(transaction -> transaction.getStatus() != null && transaction.getStatus().affectsCurrentBalance())
                 .filter(transaction -> transaction.getType() == TransactionType.EXPENSE)
                 .filter(transaction -> budget.getCategory().equalsIgnoreCase(transaction.getCategory()))
                 .map(Transaction::getAmount)

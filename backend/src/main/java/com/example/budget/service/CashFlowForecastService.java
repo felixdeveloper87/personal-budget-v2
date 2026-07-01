@@ -237,7 +237,7 @@ public class CashFlowForecastService {
                         && !paymentDate.isAfter(end)
                         && !persistedRecurringPayments.contains(
                                 recurringPaymentKey(recurring.getId(), paymentDate))
-                        && (recurring.getEndDate() == null || !date.isAfter(recurring.getEndDate()))) {
+                        && (recurring.getEndDate() == null || !paymentDate.isAfter(recurring.getEndDate()))) {
                     Map<YearMonth, BigDecimal> target = recurring.getType() == TransactionType.INCOME
                             ? income
                             : expenses;
