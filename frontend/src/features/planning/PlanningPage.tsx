@@ -149,7 +149,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
             {currentMonthLoading ? <Box h="250px" borderRadius="22px" bg="var(--pb-surface-2)" /> : <PlanningHero monthlyPositive={monthlyPositive} balance={currentMonthData.balance} income={currentMonthData.income} expense={currentMonthData.expense} forecast={forecast} firstNegativeMonth={firstNegativeMonth} firstPositiveMonth={firstPositiveMonth} onOpenGoals={() => onPageChange?.('goals')} />}
           </MotionBox>
 
-          <MotionBox variants={riseV} display="none">
+          <MotionBox variants={riseV}>
             <SectionLabel>Planning signals</SectionLabel>
           </MotionBox>
 
@@ -161,7 +161,7 @@ export default function PlanningPage({ onPageChange }: PlanningPageProps) {
 
           {horizons.length > 0 && <><MotionBox variants={riseV}><SectionLabel>Key horizons</SectionLabel></MotionBox><SimpleGrid columns={{ base: 1, md: 3 }} spacing="0.8rem">{horizons.map(({ label, month }) => <MotionBox key={label} variants={riseV}><Horizon label={label} month={month} /></MotionBox>)}</SimpleGrid></>}
 
-          <SimpleGrid display="none" columns={{ base: 1, sm: 2, xl: 4 }} spacing="0.8rem">
+          <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing="0.8rem">
             <MotionBox variants={riseV}><Signal icon={Wallet} label="Starting balance" value={forecast ? money(forecast.currentTotalBalance) : '—'} note="Across your connected accounts" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={DollarSign} label="Income assumption" value={forecast?.hasIncomePlan ? money(forecast.plannedMonthlyIncome ?? 0) : forecast ? money(forecast.averageMonthlyIncome) : '—'} note={forecast?.hasIncomePlan ? 'Your monthly target' : 'Based on transaction history'} accent="income" /></MotionBox>
             <MotionBox variants={riseV}><Signal icon={TrendingDown} label="Expense assumption" value={forecast ? money(forecast.averageMonthlyVariableExpense) : '—'} note={basisCount ? `Variable spend from the last ${basisCount} active month${basisCount !== 1 ? 's' : ''}` : 'No history available yet'} accent="expense" /></MotionBox>
