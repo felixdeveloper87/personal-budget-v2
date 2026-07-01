@@ -9,6 +9,8 @@ interface MonthHeroProps {
   expense: number
   net: number
   transactions: number
+  /** Period anchor for the statement serial line (№ PB·YYYY·MM). */
+  date?: Date
   onAddIncome?: () => void
   onAddExpense?: () => void
 }
@@ -18,6 +20,7 @@ export default function MonthHero({
   expense,
   net,
   transactions,
+  date,
   onAddIncome,
   onAddExpense,
 }: MonthHeroProps) {
@@ -33,6 +36,9 @@ export default function MonthHero({
     : `${fmtCurrency(income)} earned with ${fmtCurrency(surplus)} surplus after ${fmtCurrency(expense)} in expenses.`
 
   const netLabel = `${net < 0 ? '−' : ''}${fmtCurrency(Math.abs(net))}`
+
+  const anchor = date ?? new Date()
+  const serial = `№ PB·${anchor.getFullYear()}·${String(anchor.getMonth() + 1).padStart(2, '0')}`
 
   return (
     <Panel

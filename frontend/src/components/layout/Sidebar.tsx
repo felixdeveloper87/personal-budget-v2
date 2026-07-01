@@ -10,16 +10,16 @@ import {
   useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
+import { guilloche } from '../../features/dashboard/components/guilloche'
 import {
   CaretDoubleLeft,
   SidebarSimple,
 } from '../ui/icons'
 import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
-import Logo from './header/Logo'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -91,17 +91,13 @@ export default function Sidebar({
   const isEdLight = !!ed && colorMode === 'light'
   const navigationGroups = groupNavigationItems(items)
 
-  /* ---- Surface tokens ---- */
+  /* ---- Surface tokens (glass stays tied to the editorial palette so the
+         rail sits flush with the page in light mode) ---- */
   const surfaceBase = useColorModeValue(
     'rgba(255, 255, 255, 0.80)',
     'rgba(12, 12, 14, 0.82)',
   )
   const surface = ed ? ed.glass : surfaceBase
-  const borderRightBase = useColorModeValue(
-    'rgba(15, 23, 42, 0.06)',
-    'rgba(255, 255, 255, 0.04)',
-  )
-  const borderRight = ed ? ed.line : borderRightBase
   const surfaceShadowBase = useColorModeValue(
     '8px 0 32px -24px rgba(15,23,42,0.18)',
     '8px 0 32px -24px rgba(0,0,0,0.65)',
@@ -112,10 +108,6 @@ export default function Sidebar({
     '10px 0 38px -24px rgba(0,0,0,0.72)',
   )
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
-  const sectionLabelBase = useColorModeValue('gray.400', 'gray.600')
-  const sectionLabel = ed ? ed.muted : sectionLabelBase
-  const sectionDividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const sectionDivider = ed ? ed.line : sectionDividerBase
   const sidebarWash = ed
     ? `linear-gradient(180deg, ${ed.glass} 0%, ${ed.bg} 100%)`
     : undefined
@@ -163,8 +155,7 @@ export default function Sidebar({
       bg={surface}
       backgroundImage={isEdLight ? undefined : sidebarWash}
       backdropFilter={isEdLight ? 'none' : 'saturate(180%) blur(20px)'}
-      borderRight="1px solid"
-      borderRightColor={borderRight}
+      borderRight="1px solid var(--pb-hair)"
       boxShadow={surfaceShadow}
       zIndex={1100}
       display="flex"
@@ -202,17 +193,18 @@ export default function Sidebar({
                   h="1px"
                   mx={isCollapsed ? 2 : 3}
                   my={isCollapsed ? 3 : 4}
-                  bg={sectionDivider}
+                  bg="var(--pb-hair)"
                   transition={TRANSITION}
                 />
               )}
               {!isCollapsed && (
                 <Text
-                  fontSize="2xs"
-                  fontWeight={700}
-                  color={sectionLabel}
+                  fontFamily="var(--pb-mono)"
+                  fontSize="9.5px"
+                  fontWeight={500}
+                  color="var(--pb-ink-faint)"
                   textTransform="uppercase"
-                  letterSpacing="0.1em"
+                  letterSpacing="0.2em"
                   px={3}
                   pb={2}
                   transition={TRANSITION}
@@ -247,6 +239,70 @@ export default function Sidebar({
 /* Sub-components                                                              */
 /* -------------------------------------------------------------------------- */
 
+/** Editorial brand lockup: engraved mini seal + serif wordmark + mono tagline. */
+function SidebarBrand({ onClick }: { onClick?: () => void }) {
+  const ring1 = useMemo(() => guilloche(58, 19, 62), [])
+  const ring2 = useMemo(() => guilloche(58, 27, 44), [])
+
+  return (
+    <Flex
+      as="button"
+      type="button"
+      aria-label="Personal Budget — go to dashboard"
+      onClick={onClick}
+      align="center"
+      gap={2.5}
+      minW={0}
+      cursor="pointer"
+      role="group"
+      textAlign="left"
+      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)', borderRadius: '10px' }}
+    >
+      <Box
+        as="svg"
+        viewBox="-108 -108 216 216"
+        w="38px"
+        h="38px"
+        flexShrink={0}
+        aria-hidden
+        transition="transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)"
+        _groupHover={{ transform: 'rotate(18deg)' }}
+      >
+        <circle r="102" fill="none" stroke="var(--pb-hair-2)" strokeWidth="4" />
+        <path d={ring1} fill="none" stroke="var(--pb-forest)" strokeWidth="1.6" strokeOpacity="0.6" />
+        <path d={ring2} fill="none" stroke="var(--pb-gold-2)" strokeWidth="1.6" strokeOpacity="0.55" />
+      </Box>
+
+      <VStack align="flex-start" spacing="1px" minW={0}>
+        <Text
+          fontFamily="var(--pb-serif)"
+          fontSize="md"
+          fontWeight={500}
+          letterSpacing="-0.01em"
+          color="var(--pb-ink)"
+          lineHeight={1.1}
+          noOfLines={1}
+        >
+          Personal{' '}
+          <Text as="em" color="var(--pb-forest)" fontWeight={500}>
+            Budget
+          </Text>
+        </Text>
+        <Text
+          fontFamily="var(--pb-mono)"
+          fontSize="8px"
+          letterSpacing="0.26em"
+          textTransform="uppercase"
+          color="var(--pb-ink-faint)"
+          noOfLines={1}
+        >
+          Clarity for money
+        </Text>
+      </VStack>
+    </Flex>
+  )
+}
+
 function SidebarHeader({
   isCollapsed,
   onToggle,
@@ -256,17 +312,12 @@ function SidebarHeader({
   onToggle: () => void
   onPageChange?: (page: AppPage) => void
 }) {
-  const ed = useEd()
-  const textColorBase = useColorModeValue('gray.900', 'whiteAlpha.900')
-  const textColor = ed ? ed.cream : textColorBase
-  const toggleBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const toggleBg = ed ? ed.line : toggleBgBase
-  const toggleHoverBgBase = useColorModeValue('gray.200', 'whiteAlpha.200')
-  const toggleHoverBg = ed ? ed.lineStrong : toggleHoverBgBase
-  const toggleColorBase = useColorModeValue('gray.600', 'gray.400')
-  const toggleColor = ed ? ed.muted : toggleColorBase
-  const dividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const divider = ed ? ed.line : dividerBase
+  const toggleStyles = {
+    color: 'var(--pb-ink-faint)',
+    bg: 'transparent',
+    border: '1px solid var(--pb-hair)',
+    _hover: { bg: 'var(--pb-tint-green)', color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' },
+  } as const
 
   return (
     <Box
@@ -276,8 +327,7 @@ function SidebarHeader({
       display="flex"
       flexDirection="column"
       justifyContent="center"
-      borderBottom="1px solid"
-      borderBottomColor={divider}
+      borderBottom="1px solid var(--pb-hair)"
       transition={TRANSITION}
     >
       {isCollapsed ? (
@@ -288,23 +338,20 @@ function SidebarHeader({
               icon={<Icon as={SidebarSimple} weight="duotone" boxSize={5} />}
               size="sm"
               variant="ghost"
-              color={toggleColor}
-              bg={toggleBg}
-              borderRadius="lg"
+              borderRadius="full"
               h="36px"
               w="36px"
               minW="36px"
-              _hover={{ bg: toggleHoverBg, color: textColor }}
               transition={TRANSITION}
               onClick={onToggle}
+              {...toggleStyles}
             />
           </Tooltip>
         </Flex>
       ) : (
         <Flex align="center" justify="space-between" gap={2}>
-          {/* Brand lockup — same logo as the marketing header, sized for the rail */}
           <Box minW={0}>
-            <Logo compact onClick={() => onPageChange?.('dashboard')} />
+            <SidebarBrand onClick={() => onPageChange?.('dashboard')} />
           </Box>
 
           <Tooltip label="Collapse sidebar" hasArrow placement="right" openDelay={400}>
@@ -313,16 +360,14 @@ function SidebarHeader({
               icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} />}
               size="xs"
               variant="ghost"
-              color={toggleColor}
-              bg={toggleBg}
-              borderRadius="md"
+              borderRadius="full"
               h="26px"
               w="26px"
               minW="26px"
               flexShrink={0}
-              _hover={{ bg: toggleHoverBg, color: textColor }}
               transition={TRANSITION}
               onClick={onToggle}
+              {...toggleStyles}
             />
           </Tooltip>
         </Flex>
@@ -344,20 +389,6 @@ function ActiveIndicator({
   ready: boolean
   isCollapsed: boolean
 }) {
-  const ed = useEd()
-  const indicatorBgBase = useColorModeValue(
-    'rgba(37, 99, 235, 0.08)',
-    'rgba(125, 211, 252, 0.12)',
-  )
-  const indicatorBg = ed ? ed.jadeSoft : indicatorBgBase
-  const accentBarBase = useColorModeValue(
-    'linear-gradient(180deg, #2563eb, #c18b35)',
-    'linear-gradient(180deg, #7dd3fc, #e8c477)',
-  )
-  const accentBar = ed
-    ? `linear-gradient(180deg, ${ed.jade}, ${ed.gold})`
-    : accentBarBase
-
   return (
     <>
       {/* Background pill */}
@@ -368,8 +399,9 @@ function ActiveIndicator({
         right="8px"
         top={`${top}px`}
         h={`${height}px`}
-        borderRadius="xl"
-        bg={indicatorBg}
+        borderRadius="12px"
+        bg="var(--pb-tint-green)"
+        border="1px solid var(--pb-hair)"
         opacity={ready ? 1 : 0}
         transition={`top 0.35s cubic-bezier(0.32, 0.72, 0, 1), height 0.25s ease, opacity 0.2s ease`}
         pointerEvents="none"
@@ -380,11 +412,11 @@ function ActiveIndicator({
         aria-hidden
         position="absolute"
         left={isCollapsed ? '6px' : '8px'}
-        top={`${top + height * 0.2}px`}
-        h={`${height * 0.6}px`}
+        top={`${top + height * 0.22}px`}
+        h={`${height * 0.56}px`}
         w="3px"
         borderRadius="full"
-        background={accentBar}
+        background="linear-gradient(180deg, var(--pb-forest), var(--pb-gold-2))"
         opacity={ready ? 1 : 0}
         transition={`top 0.35s cubic-bezier(0.32, 0.72, 0, 1), height 0.25s ease, opacity 0.2s ease`}
         pointerEvents="none"
@@ -411,16 +443,6 @@ function SidebarItem({
   onSelect,
   assignRef,
 }: SidebarItemProps) {
-  const ed = useEd()
-  const inactiveColorBase = useColorModeValue('gray.600', 'gray.400')
-  const inactiveColor = ed ? ed.muted : inactiveColorBase
-  const hoverColorBase = useColorModeValue('gray.900', 'white')
-  const hoverColor = ed ? ed.cream : hoverColorBase
-  const activeColorBase = useColorModeValue('blue.700', 'blue.200')
-  const activeColor = ed ? ed.jade : activeColorBase
-  const hoverBgBase = useColorModeValue('blackAlpha.50', 'whiteAlpha.50')
-  const hoverBg = ed ? ed.panelRaised : hoverBgBase
-
   const button = (
     <Box
       as="button"
@@ -437,25 +459,27 @@ function SidebarItem({
       px={isCollapsed ? 0 : 3}
       py={2.5}
       minH="44px"
-      borderRadius="xl"
+      borderRadius="12px"
       bg="transparent"
-      color={isActive ? activeColor : inactiveColor}
-      fontWeight={isActive ? 700 : 500}
-      fontSize="sm"
+      color={isActive ? 'var(--pb-forest)' : 'var(--pb-ink-soft)'}
+      fontFamily="var(--pb-serif)"
+      fontWeight={isActive ? 600 : 400}
+      fontSize="0.95rem"
+      letterSpacing="0.01em"
       cursor="pointer"
       position="relative"
       zIndex={1}
       justifyContent={isCollapsed ? 'center' : 'flex-start'}
       transition="color 0.2s ease, transform 0.15s ease"
       _hover={{
-        color: isActive ? activeColor : hoverColor,
-        bg: isActive ? 'transparent' : hoverBg,
+        color: isActive ? 'var(--pb-forest)' : 'var(--pb-ink)',
+        bg: isActive ? 'transparent' : 'var(--pb-tint-green)',
         transform: isActive ? 'none' : 'translateX(2px)',
       }}
       _active={{ transform: 'translateX(0)' }}
       _focusVisible={{
         outline: 'none',
-        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+        boxShadow: '0 0 0 2px var(--pb-forest)',
       }}
     >
       <Icon
@@ -501,25 +525,6 @@ function SidebarFooter({
   isCollapsed: boolean
   user: any
 }) {
-  const ed = useEd()
-  const dividerBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const divider = ed ? ed.line : dividerBase
-  const textColorBase = useColorModeValue('gray.800', 'whiteAlpha.900')
-  const textColor = ed ? ed.cream : textColorBase
-  const subColorBase = useColorModeValue('gray.500', 'gray.500')
-  const subColor = ed ? ed.muted : subColorBase
-  const avatarRingBase = useColorModeValue(
-    'linear-gradient(135deg, #2563eb, #c18b35)',
-    'linear-gradient(135deg, #7dd3fc, #e8c477)',
-  )
-  const avatarRing = ed
-    ? `linear-gradient(135deg, ${ed.jade}, ${ed.gold})`
-    : avatarRingBase
-  const statusDotBgBase = useColorModeValue('green.400', 'green.300')
-  const statusDotBg = ed ? ed.jade : statusDotBgBase
-  const statusDotRingBase = useColorModeValue('white', 'gray.900')
-  const statusDotRing = ed ? ed.bg : statusDotRingBase
-
   const displayName = user?.name || 'User'
   const displayEmail = user?.email || ''
 
@@ -527,8 +532,7 @@ function SidebarFooter({
     <Box
       px={isCollapsed ? 2 : 4}
       py={4}
-      borderTop="1px solid"
-      borderTopColor={divider}
+      borderTop="1px solid var(--pb-hair)"
       transition={TRANSITION}
     >
       <Flex
@@ -541,36 +545,37 @@ function SidebarFooter({
           position="relative"
           p="2px"
           borderRadius="full"
-          background={avatarRing}
+          border="1px solid var(--pb-hair-2)"
           flexShrink={0}
         >
           <Avatar
             size="sm"
             name={displayName}
-            bg={ed ? ed.bg2 : 'blue.500'}
-            color={ed ? ed.jade : 'white'}
-            fontWeight={700}
+            bg="var(--pb-tint-green)"
+            color="var(--pb-forest)"
+            fontWeight={600}
+            fontFamily="var(--pb-serif)"
           />
           <Box
             aria-hidden
             position="absolute"
             bottom="0px"
             right="0px"
-            w="10px"
-            h="10px"
+            w="9px"
+            h="9px"
             borderRadius="full"
-            bg={statusDotBg}
-            border="2px solid"
-            borderColor={statusDotRing}
+            bg="var(--pb-income-2)"
+            border="2px solid var(--pb-paper)"
           />
         </Box>
 
         {!isCollapsed && (
-          <VStack spacing={0} align="start" minW={0} flex={1}>
+          <VStack spacing="1px" align="start" minW={0} flex={1}>
             <Text
+              fontFamily="var(--pb-serif)"
               fontSize="sm"
-              fontWeight={700}
-              color={textColor}
+              fontWeight={600}
+              color="var(--pb-ink)"
               letterSpacing="-0.01em"
               noOfLines={1}
               w="full"
@@ -579,8 +584,10 @@ function SidebarFooter({
             </Text>
             {displayEmail && (
               <Text
-                fontSize="2xs"
-                color={subColor}
+                fontFamily="var(--pb-mono)"
+                fontSize="9px"
+                letterSpacing="0.03em"
+                color="var(--pb-ink-faint)"
                 noOfLines={1}
                 w="full"
               >

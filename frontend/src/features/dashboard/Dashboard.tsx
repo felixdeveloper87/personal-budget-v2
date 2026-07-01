@@ -390,6 +390,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               expense={periodData.expense}
               net={periodData.balance}
               transactions={periodData.transactions.length}
+              date={selectedDate}
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
             />

@@ -1,4 +1,4 @@
-import { Box, Container, Flex, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Container, Flex, Text, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
@@ -188,6 +188,26 @@ export default function Header({
               </Box>
             ) : (
               <Logo user={user} />
+            )}
+
+            {/* Editorial masthead: today's date in the mono ledger voice,
+                centered between search and actions (desktop, sidebar shell). */}
+            {user && hasSidebar && ed && (
+              <Box display={{ base: 'none', lg: 'block' }} mx="auto" px={4} minW={0}>
+                <Text
+                  as="span"
+                  fontFamily="var(--pb-mono)"
+                  fontSize="10.5px"
+                  letterSpacing="0.22em"
+                  textTransform="uppercase"
+                  color="var(--pb-ink-faint)"
+                  whiteSpace="nowrap"
+                >
+                  {new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
+                  {' · '}
+                  {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </Text>
+              </Box>
             )}
 
             {/* Desktop primary nav (md+). Hidden when sidebar is active. */}

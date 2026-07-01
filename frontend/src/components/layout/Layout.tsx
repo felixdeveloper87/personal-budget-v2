@@ -2,6 +2,9 @@ import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@cha
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { EditorialBackdrop, EditorialProvider, editorialPalette } from '../../editorial'
+// The chrome (Sidebar, SearchTrigger, masthead date) reads the pb-* CSS vars
+// directly, so the token sheet must load with the shell, not only the dashboard.
+import '../../features/dashboard/theme/pb-tokens.css'
 import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
 import Header from './header/Header'
