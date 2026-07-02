@@ -86,8 +86,10 @@ class CashFlowForecastServiceTest {
 
         assertThat(result.months()).hasSize(12);
         assertThat(result.months().get(0).month()).isEqualTo(currentMonth.toString());
-        assertThat(result.months().get(0).netCashFlow()).isEqualByComparingTo("0.00");
-        assertThat(result.months().get(0).projectedClosingBalance()).isEqualByComparingTo("1000.00");
+        // No expense plan is set, so the £200 historical average day-to-day
+        // spend (1 basis month) is applied as the estimate for this month.
+        assertThat(result.months().get(0).netCashFlow()).isEqualByComparingTo("-200.00");
+        assertThat(result.months().get(0).projectedClosingBalance()).isEqualByComparingTo("800.00");
         assertThat(result.months().get(0).incomeReceivedSoFar()).isEqualByComparingTo("500.00");
 
         var nextMonth = result.months().get(1);
@@ -95,7 +97,7 @@ class CashFlowForecastServiceTest {
         assertThat(nextMonth.fixedIncome()).isEqualByComparingTo("1000.00");
         assertThat(nextMonth.fixedExpense()).isEqualByComparingTo("200.00");
         assertThat(nextMonth.estimatedIncome()).isEqualByComparingTo("0.00");
-        assertThat(nextMonth.projectedClosingBalance()).isEqualByComparingTo("1800.00");
+        assertThat(nextMonth.projectedClosingBalance()).isEqualByComparingTo("1400.00");
     }
 
     @Test

@@ -160,10 +160,13 @@ public class CashFlowForecastService {
             // Same idea in the other direction: the expense plan only adds the
             // remainder of the day-to-day estimate not yet spent this month. Future
             // months have no day-to-day activity recorded, so they get the full
-            // estimate on top of fixed expenses and installments.
-            BigDecimal plannedExpenseTopUp = hasExpensePlan
-                    ? plannedMonthlyVariableExpense.subtract(monthDayToDaySpent).max(BigDecimal.ZERO)
-                    : BigDecimal.ZERO;
+            // estimate on top of fixed expenses and installments. With no explicit
+            // plan, fall back to the historical average — the "Expense assumption"
+            // signal already tells the user this average is the active assumption,
+            // so the projection must actually apply it instead of silently ignoring
+            // variable spend for every future month.
+            BigDecimal expenseEstimateBasis = hasExpensePlan ? plannedMonthlyVariableExpense : averageVariableExpense;
+            BigDecimal plannedExpenseTopUp = expenseEstimateBasis.subtract(monthDayToDaySpent).max(BigDecimal.ZERO);
 
             BigDecimal committedNet = monthIncome.subtract(monthExpense).subtract(monthInstallments);
             BigDecimal estimatedNet = plannedIncomeTopUp.subtract(plannedExpenseTopUp);
