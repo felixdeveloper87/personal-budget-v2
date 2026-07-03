@@ -94,7 +94,6 @@ export default function PersonalisedInsight({ insight }: PersonalisedInsightProp
               px={2}
               py="2px"
               borderRadius="999px"
-              bg={deltaPositive ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
               color={deltaColor}
             >
               <DeltaIcon size={12} />

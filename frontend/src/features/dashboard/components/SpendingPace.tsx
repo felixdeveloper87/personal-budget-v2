@@ -129,7 +129,6 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
             px={2}
             py="2px"
             borderRadius="999px"
-            bg={ahead ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
             color={ahead ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
             flexShrink={0}
           >
