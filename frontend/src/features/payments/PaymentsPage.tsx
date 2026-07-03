@@ -85,7 +85,11 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
 
   // Payments is locked to the settlement-date ("cash-flow") lens.
-  const [state, dispatch] = useReducer(txReducer, { ...initialTxState, view: 'payments' })
+  const [state, dispatch] = useReducer(txReducer, {
+    ...initialTxState,
+    view: 'payments',
+    selectedDay: isoOf(new Date()),
+  })
   const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
 
   const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'cash-flow')
@@ -95,8 +99,8 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   const allVm = useMemo<TxnVM[]>(() => toViewModel(transactions), [transactions])
 
   useEffect(() => {
-    dispatch({ type: 'SET_DAY', day: null })
-  }, [selectedDate, selectedPeriod])
+    dispatch({ type: 'SET_DAY', day: isCurrentPeriod ? isoOf(new Date()) : null })
+  }, [selectedDate, selectedPeriod, isCurrentPeriod])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
