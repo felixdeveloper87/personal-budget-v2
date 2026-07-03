@@ -27,18 +27,6 @@ export default function PersonalisedInsight({ insight, onPageChange }: Personali
       <VStack align="stretch" spacing={4} h="full">
         <HStack justify="space-between">
           <HStack spacing={2}>
-            <Box
-              w={7}
-              h={7}
-              borderRadius="10px"
-              bg="var(--pb-tint-gold)"
-              border="1px solid var(--pb-hair)"
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Sparkles size={14} color="var(--pb-gold)" />
-            </Box>
             <Text
               fontFamily="var(--pb-mono)"
               fontSize="10.5px"
@@ -80,27 +68,6 @@ export default function PersonalisedInsight({ insight, onPageChange }: Personali
         <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
           {body}
         </Text>
-
-        {actionLabel && (
-          <Button
-            alignSelf="flex-start"
-            mt="auto"
-            h="34px"
-            px={4}
-            borderRadius="999px"
-            bg="var(--pb-forest)"
-            color="var(--pb-paper-3)"
-            fontFamily="var(--pb-mono)"
-            fontSize="11px"
-            fontWeight={500}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            _hover={{ bg: 'var(--pb-forest-2)' }}
-            onClick={href ? () => onPageChange?.(href) : undefined}
-          >
-            {actionLabel}
-          </Button>
-        )}
       </VStack>
     </Panel>
   )
