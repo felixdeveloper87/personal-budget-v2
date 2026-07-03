@@ -268,8 +268,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
       const pct = previousAmt > 0 ? Math.round((Math.abs(delta) / previousAmt) * 100) : 100
       return delta < 0
-        ? `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) below the same point last period.`
-        : `${category} is up ${fmtCurrency(Math.abs(delta))} (${pct}%) versus the same point last period.`
+        ? `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) below the same point last month.`
+        : `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) above the same point last month.`
     }
 
     const findCategory = (wanted: string): string | null => {
@@ -292,10 +292,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       : 100
     const incomeLine =
       incomeDelta === 0
-        ? `Income is flat versus the same point last period.`
+        ? `Income is flat versus the same point last month.`
         : incomeDelta > 0
-          ? `Income is ${incomePct}% above the same point last period.`
-          : `Income is ${incomePct}% below the same point last period.`
+          ? `Income is ${incomePct}% above the same point last month.`
+          : `Income is ${incomePct}% below the same point last month.`
 
     if (!topCategory || topDelta === 0) {
       const bodyLines =
@@ -304,7 +304,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           : [incomeLine, ...(extraLines.length ? extraLines : ['Keep logging transactions to surface trends across categories.'])]
 
       return {
-        headline: 'Your spending is steady this period.',
+        headline: 'Your spending is steady this month.',
         body: bodyLines.join(' '),
         bodyLines,
         deltaLabel: overallExpenseLabel,
@@ -313,16 +313,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       }
     }
 
-    const spendingLess = topDelta < 0
     const topLine = comparisonLine(topCategory)
     const bodyLines = [incomeLine, topLine, ...extraLines].filter(
       (line): line is string => Boolean(line),
     )
 
     return {
-      headline: spendingLess
-        ? `You are spending less on ${topCategory.toLowerCase()} this period.`
-        : `Your ${topCategory.toLowerCase()} spending is climbing this period.`,
+      headline: overallExpenseDelta <= 0
+        ? 'You are spending less overall this month.'
+        : 'Your overall spending is climbing this month.',
       body: bodyLines.join(' '),
       bodyLines,
       deltaLabel: overallExpenseLabel,
