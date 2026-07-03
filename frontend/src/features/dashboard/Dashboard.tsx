@@ -240,10 +240,24 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const currentExpense = currentTransactions
       .filter((t) => t.type === 'EXPENSE')
       .reduce((sum, t) => sum + t.amount, 0)
+    const previousExpense = previousTransactions
+      .filter((t) => t.type === 'EXPENSE')
+      .reduce((sum, t) => sum + t.amount, 0)
     const savingsRate =
       currentIncome > 0
         ? Math.round(((currentIncome - currentExpense) / currentIncome) * 100)
         : null
+    const overallExpenseDelta = currentExpense - previousExpense
+    const overallExpensePct = previousExpense > 0
+      ? Math.round((Math.abs(overallExpenseDelta) / previousExpense) * 100)
+      : currentExpense > 0
+        ? 100
+        : 0
+    const overallExpenseLabel =
+      overallExpenseDelta === 0
+        ? '0%'
+        : `${overallExpenseDelta < 0 ? '−' : '+'}${overallExpensePct}%`
+    const overallExpensePositive = overallExpenseDelta <= 0
 
     const comparisonLine = (category: string): string | null => {
       const currentAmt = current.get(category) ?? 0
@@ -293,13 +307,13 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         headline: 'Your spending is steady this period.',
         body: bodyLines.join(' '),
         bodyLines,
+        deltaLabel: overallExpenseLabel,
+        deltaPositive: overallExpensePositive,
         href: 'planning',
       }
     }
 
     const spendingLess = topDelta < 0
-    const prevAmt = previous.get(topCategory) ?? 0
-    const pct = prevAmt > 0 ? Math.round((Math.abs(topDelta) / prevAmt) * 100) : 100
     const topLine = comparisonLine(topCategory)
     const bodyLines = [incomeLine, topLine, ...extraLines].filter(
       (line): line is string => Boolean(line),
@@ -311,8 +325,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         : `Your ${topCategory.toLowerCase()} spending is climbing this period.`,
       body: bodyLines.join(' '),
       bodyLines,
-      deltaLabel: `${spendingLess ? '−' : '+'}${pct}%`,
-      deltaPositive: spendingLess,
+      deltaLabel: overallExpenseLabel,
+      deltaPositive: overallExpensePositive,
       href: 'planning',
     }
   }, [periodData, previousPeriodData, dateBasis])

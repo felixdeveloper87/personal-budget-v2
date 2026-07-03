@@ -27,29 +27,42 @@ function percentColor(paragraph: string): string | undefined {
   return undefined
 }
 
+function trendDirection(paragraph: string): 'up' | 'down' | null {
+  if (/\b(above|up)\b/i.test(paragraph)) return 'up'
+  if (/\bbelow\b/i.test(paragraph)) return 'down'
+  return null
+}
+
 function HighlightedParagraph({ text }: { text: string }) {
   const color = percentColor(text)
+  const direction = trendDirection(text)
+  const TrendIcon = direction === 'up' ? TrendingUp : direction === 'down' ? TrendingDown : null
   const parts = text.split(PERCENT_PATTERN)
 
   return (
-    <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
-      {parts.map((part, index) =>
-        PERCENT_TOKEN_PATTERN.test(part) && color ? (
-          <Text
-            key={`${index}-${part}`}
-            as="span"
-            color={color}
-            fontFamily="var(--pb-mono)"
-            fontWeight={500}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {part}
-          </Text>
-        ) : (
-          part
-        ),
+    <HStack align="flex-start" spacing={2}>
+      {TrendIcon && color && (
+        <TrendIcon size={14} color={color} style={{ marginTop: '0.28rem', flexShrink: 0 }} />
       )}
-    </Text>
+      <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
+        {parts.map((part, index) =>
+          PERCENT_TOKEN_PATTERN.test(part) && color ? (
+            <Text
+              key={`${index}-${part}`}
+              as="span"
+              color={color}
+              fontFamily="var(--pb-mono)"
+              fontWeight={400}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {part}
+            </Text>
+          ) : (
+            part
+          ),
+        )}
+      </Text>
+    </HStack>
   )
 }
 
