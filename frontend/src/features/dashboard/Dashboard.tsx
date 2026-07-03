@@ -294,8 +294,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       incomeDelta === 0
         ? `Income is flat versus the same point last month.`
         : incomeDelta > 0
-          ? `Income is ${incomePct}% above the same point last month.`
-          : `Income is ${incomePct}% below the same point last month.`
+          ? `Income is ${fmtCurrency(incomeDelta, { minimumFractionDigits: 2 })} ${incomePct}% above the same point last month.`
+          : `Income is ${fmtCurrency(Math.abs(incomeDelta), { minimumFractionDigits: 2 })} ${incomePct}% below the same point last month.`
 
     if (!topCategory || topDelta === 0) {
       const bodyLines =
