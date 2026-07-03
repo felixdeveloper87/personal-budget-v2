@@ -6,6 +6,7 @@ import Panel from './Panel'
 export interface PersonalInsightData {
   headline: string
   body: string
+  bodyLines?: string[]
   actionLabel?: string
   deltaLabel?: string
   deltaPositive?: boolean
@@ -18,9 +19,10 @@ interface PersonalisedInsightProps {
 }
 
 export default function PersonalisedInsight({ insight, onPageChange }: PersonalisedInsightProps) {
-  const { headline, body, actionLabel, deltaLabel, deltaPositive, href } = insight
+  const { headline, body, bodyLines, actionLabel, deltaLabel, deltaPositive, href } = insight
   const DeltaIcon = deltaPositive ? TrendingUp : TrendingDown
   const deltaColor = deltaPositive ? 'var(--pb-income-2)' : 'var(--pb-coral)'
+  const paragraphs = bodyLines?.length ? bodyLines : [body]
 
   return (
     <Panel h="full">
@@ -65,9 +67,13 @@ export default function PersonalisedInsight({ insight, onPageChange }: Personali
           {headline}
         </Text>
 
-        <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
-          {body}
-        </Text>
+        <VStack align="stretch" spacing={2}>
+          {paragraphs.map((paragraph, index) => (
+            <Text key={`${index}-${paragraph}`} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
+              {paragraph}
+            </Text>
+          ))}
+        </VStack>
       </VStack>
     </Panel>
   )

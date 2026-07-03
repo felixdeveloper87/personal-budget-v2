@@ -242,13 +242,45 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         ? Math.round(((currentIncome - currentExpense) / currentIncome) * 100)
         : null
 
+    const comparisonLine = (category: string): string | null => {
+      const currentAmt = current.get(category) ?? 0
+      const previousAmt = previous.get(category) ?? 0
+      const delta = currentAmt - previousAmt
+      if (currentAmt === 0 && previousAmt === 0) return null
+      if (delta === 0) return `${category} is flat at ${fmtCurrency(currentAmt)}.`
+
+      const pct = previousAmt > 0 ? Math.round((Math.abs(delta) / previousAmt) * 100) : 100
+      return delta < 0
+        ? `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) below the same point last period.`
+        : `${category} is up ${fmtCurrency(Math.abs(delta))} (${pct}%) versus the same point last period.`
+    }
+
+    const findCategory = (wanted: string): string | null => {
+      const lower = wanted.toLowerCase()
+      for (const category of new Set([...current.keys(), ...previous.keys()])) {
+        if (category.toLowerCase() === lower) return category
+      }
+      return null
+    }
+
+    const extraLines = ['Shopping', 'Transport']
+      .map(findCategory)
+      .filter((category): category is string => Boolean(category) && category !== topCategory)
+      .map(comparisonLine)
+      .filter((line): line is string => Boolean(line))
+
+    const incomeLine = `You have earned ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} in this period.`
+
     if (!topCategory || topDelta === 0) {
+      const bodyLines =
+        savingsRate !== null
+          ? [incomeLine, `You are keeping a ${savingsRate}% savings rate.`, ...extraLines]
+          : [incomeLine, ...(extraLines.length ? extraLines : ['Keep logging transactions to surface trends across categories.'])]
+
       return {
         headline: 'Your spending is steady this period.',
-        body:
-          savingsRate !== null
-            ? `You are keeping a ${savingsRate}% savings rate. Keep logging transactions to surface trends across categories.`
-            : 'Keep logging transactions and a personalised trend will appear here as your history grows.',
+        body: bodyLines.join(' '),
+        bodyLines,
         href: 'planning',
       }
     }
@@ -256,18 +288,20 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const spendingLess = topDelta < 0
     const prevAmt = previous.get(topCategory) ?? 0
     const pct = prevAmt > 0 ? Math.round((Math.abs(topDelta) / prevAmt) * 100) : 100
+    const topLine = comparisonLine(topCategory)
+    const bodyLines = [incomeLine, topLine, ...extraLines].filter(
+      (line): line is string => Boolean(line),
+    )
 
     return {
       headline: spendingLess
         ? `You are spending less on ${topCategory.toLowerCase()} this period.`
         : `Your ${topCategory.toLowerCase()} spending is climbing this period.`,
-      body: spendingLess
-        ? `${topCategory} is ${fmtCurrency(Math.abs(topDelta))} (${pct}%) below last period. Moving that difference to savings would steadily build your buffer.`
-        : `${topCategory} is up ${fmtCurrency(Math.abs(topDelta))} (${pct}%) versus last period. Review it to keep your plan on track.`,
-      actionLabel: spendingLess ? `Move ${fmtCurrency(Math.abs(topDelta))} to savings` : 'Review in planning',
+      body: bodyLines.join(' '),
+      bodyLines,
       deltaLabel: `${spendingLess ? '−' : '+'}${pct}%`,
       deltaPositive: spendingLess,
-      href: spendingLess ? 'goals' : 'planning',
+      href: 'planning',
     }
   }, [periodData, previousPeriodData, dateBasis])
 
