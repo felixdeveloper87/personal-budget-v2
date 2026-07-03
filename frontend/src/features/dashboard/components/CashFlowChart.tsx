@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Box, HStack, Text, VStack, useColorMode } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import {
@@ -14,25 +14,25 @@ import type { PeriodType, Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { bucketTransactionsByPeriod } from '../../../components/charts/modal/utils/periodBuckets'
 import Panel from './Panel'
-import Segmented from './Segmented'
 import { fmtCurrency } from './format'
 
 interface CashFlowChartProps {
   transactions: Transaction[]
   selectedDate: Date
+  periodType: PeriodType
   dateBasis: TransactionDateBasis
+  totals: {
+    income: number
+    expense: number
+  }
 }
-
-const RANGE_OPTIONS: Array<{ value: PeriodType; label: string }> = [
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
-]
 
 export default function CashFlowChart({
   transactions,
   selectedDate,
+  periodType,
   dateBasis,
+  totals,
 }: CashFlowChartProps) {
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
@@ -50,28 +50,16 @@ export default function CashFlowChart({
     tooltipText: dark ? '#f2f4f0' : '#1a2620',
   }
 
-  const [range, setRange] = useState<PeriodType>('month')
-
   const data = useMemo(
     () =>
-      bucketTransactionsByPeriod(transactions, range, selectedDate, 'ALL', dateBasis).map((b) => ({
+      bucketTransactionsByPeriod(transactions, periodType, selectedDate, 'ALL', dateBasis).map((b) => ({
         label: b.label,
         tooltip: b.tooltip,
         income: b.income,
         expense: b.expense,
       })),
-    [transactions, range, selectedDate, dateBasis],
+    [transactions, periodType, selectedDate, dateBasis],
   )
-
-  const totals = useMemo(() => {
-    let income = 0
-    let expense = 0
-    for (const d of data) {
-      income += d.income
-      expense += d.expense
-    }
-    return { income, expense, net: income - expense }
-  }, [data])
 
   return (
     <Panel>
@@ -93,14 +81,6 @@ export default function CashFlowChart({
               <Legend color={c.expense} label="Expenses" value={fmtCurrency(totals.expense)} />
             </HStack>
           </VStack>
-
-          <Segmented
-            options={RANGE_OPTIONS}
-            value={range}
-            onChange={setRange}
-            size="sm"
-            aria-label="Select cash flow range"
-          />
         </HStack>
 
         {/* Chart */}

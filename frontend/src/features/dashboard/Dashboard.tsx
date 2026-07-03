@@ -397,6 +397,17 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         ) : null}
 
+        {/* Cash flow chart (same period and payments lens as the hero) */}
+        <MotionBox variants={riseV}>
+          <CashFlowChart
+            transactions={periodData.transactions}
+            selectedDate={selectedDate}
+            periodType={selectedPeriod}
+            dateBasis={dateBasis}
+            totals={{ income: periodData.income, expense: periodData.expense }}
+          />
+        </MotionBox>
+
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
           <SectionLabel>Balance &amp; forecast</SectionLabel>
@@ -428,12 +439,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             />
           </MotionBox>
         </Grid>
-
-        {/* Cash flow chart (full width, own range toggle) */}
-        <MotionBox variants={riseV}>
-          {/* Cash flow follows the Behaviour lens (purchase date), not payments. */}
-          <CashFlowChart transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
-        </MotionBox>
 
         {/* Spending pace · Top merchants (Behaviour lens: when purchases happened) */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
