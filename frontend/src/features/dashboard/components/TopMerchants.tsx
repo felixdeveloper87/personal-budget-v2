@@ -11,7 +11,6 @@ interface TopMerchantsProps {
 }
 
 const MAX_ROWS = 5
-const GROCERIES_CATEGORY = 'groceries'
 
 function isCommitmentTransaction(t: Transaction): boolean {
   return (
@@ -22,25 +21,24 @@ function isCommitmentTransaction(t: Transaction): boolean {
   )
 }
 
-function isGroceryMerchantTransaction(t: Transaction): boolean {
+function isMerchantTransaction(t: Transaction): boolean {
   return (
     t.type === 'EXPENSE' &&
     !isCommitmentTransaction(t) &&
-    t.category.trim().toLowerCase() === GROCERIES_CATEGORY &&
     Boolean(t.description?.trim())
   )
 }
 
 /**
- * Where grocery money actually went: variable grocery expenses grouped by
- * description ("merchant"), each compared against the same merchant last month.
+ * Where money actually went: variable expenses grouped by description
+ * ("merchant"), each compared against the same merchant last month.
  */
 export default function TopMerchants({ transactions, previousTransactions }: TopMerchantsProps) {
   const { rows, maxTotal } = useMemo(() => {
-    const groceryTransactions = transactions.filter(isGroceryMerchantTransaction)
-    const previousGroceryTransactions = previousTransactions.filter(isGroceryMerchantTransaction)
-    const current = merchantStats(groceryTransactions).slice(0, MAX_ROWS)
-    const previous = new Map(merchantStats(previousGroceryTransactions).map((m) => [m.key, m.total]))
+    const merchantTransactions = transactions.filter(isMerchantTransaction)
+    const previousMerchantTransactions = previousTransactions.filter(isMerchantTransaction)
+    const current = merchantStats(merchantTransactions).slice(0, MAX_ROWS)
+    const previous = new Map(merchantStats(previousMerchantTransactions).map((m) => [m.key, m.total]))
 
     return {
       rows: current.map((m) => ({
@@ -73,7 +71,7 @@ export default function TopMerchants({ transactions, previousTransactions }: Top
 
         {rows.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
-            No grocery merchants recorded for this period.
+            No merchants recorded for this period.
           </Text>
         ) : (
           <VStack align="stretch" spacing={3.5}>
