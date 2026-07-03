@@ -48,10 +48,17 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
     const year = selectedDate.getFullYear()
     const month = selectedDate.getMonth()
     const prev = new Date(year, month - 1, 1)
+    const variableTransactions = transactions.filter(
+      (t) =>
+        !t.isInstallment &&
+        t.installmentPlanId == null &&
+        !t.isRecurring &&
+        t.recurringTransactionId == null,
+    )
 
-    const current = cumulativeDailyExpense(transactions, year, month, dateBasis)
+    const current = cumulativeDailyExpense(variableTransactions, year, month, dateBasis)
     const previous = cumulativeDailyExpense(
-      transactions,
+      variableTransactions,
       prev.getFullYear(),
       prev.getMonth(),
       dateBasis,
