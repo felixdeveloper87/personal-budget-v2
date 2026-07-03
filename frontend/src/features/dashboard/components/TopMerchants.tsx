@@ -11,15 +11,36 @@ interface TopMerchantsProps {
 }
 
 const MAX_ROWS = 5
+const GROCERIES_CATEGORY = 'groceries'
+
+function isCommitmentTransaction(t: Transaction): boolean {
+  return (
+    Boolean(t.isInstallment) ||
+    t.installmentPlanId != null ||
+    Boolean(t.isRecurring) ||
+    t.recurringTransactionId != null
+  )
+}
+
+function isGroceryMerchantTransaction(t: Transaction): boolean {
+  return (
+    t.type === 'EXPENSE' &&
+    !isCommitmentTransaction(t) &&
+    t.category.trim().toLowerCase() === GROCERIES_CATEGORY &&
+    Boolean(t.description?.trim())
+  )
+}
 
 /**
- * Where the money actually went: expenses grouped by description ("merchant"),
- * ranked by total, each compared against the same merchant last month.
+ * Where grocery money actually went: variable grocery expenses grouped by
+ * description ("merchant"), each compared against the same merchant last month.
  */
 export default function TopMerchants({ transactions, previousTransactions }: TopMerchantsProps) {
   const { rows, maxTotal } = useMemo(() => {
-    const current = merchantStats(transactions).slice(0, MAX_ROWS)
-    const previous = new Map(merchantStats(previousTransactions).map((m) => [m.key, m.total]))
+    const groceryTransactions = transactions.filter(isGroceryMerchantTransaction)
+    const previousGroceryTransactions = previousTransactions.filter(isGroceryMerchantTransaction)
+    const current = merchantStats(groceryTransactions).slice(0, MAX_ROWS)
+    const previous = new Map(merchantStats(previousGroceryTransactions).map((m) => [m.key, m.total]))
 
     return {
       rows: current.map((m) => ({
@@ -52,7 +73,7 @@ export default function TopMerchants({ transactions, previousTransactions }: Top
 
         {rows.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
-            No expenses recorded for this period.
+            No grocery merchants recorded for this period.
           </Text>
         ) : (
           <VStack align="stretch" spacing={3.5}>
