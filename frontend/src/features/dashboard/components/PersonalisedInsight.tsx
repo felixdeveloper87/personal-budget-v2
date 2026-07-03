@@ -1,5 +1,5 @@
-import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
-import { Sparkles, TrendingDown, TrendingUp } from 'lucide-react'
+import { HStack, Text, VStack } from '@chakra-ui/react'
+import { TrendingDown, TrendingUp } from 'lucide-react'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 import Panel from './Panel'
 
@@ -18,8 +18,43 @@ interface PersonalisedInsightProps {
   onPageChange?: (page: AppPage) => void
 }
 
-export default function PersonalisedInsight({ insight, onPageChange }: PersonalisedInsightProps) {
-  const { headline, body, bodyLines, actionLabel, deltaLabel, deltaPositive, href } = insight
+const PERCENT_PATTERN = /(\(?\d+(?:\.\d+)?%\)?)/g
+const PERCENT_TOKEN_PATTERN = /^\(?\d+(?:\.\d+)?%\)?$/
+
+function percentColor(paragraph: string): string | undefined {
+  if (/\b(above|up)\b/i.test(paragraph)) return 'var(--pb-income-2)'
+  if (/\bbelow\b/i.test(paragraph)) return 'var(--pb-coral)'
+  return undefined
+}
+
+function HighlightedParagraph({ text }: { text: string }) {
+  const color = percentColor(text)
+  const parts = text.split(PERCENT_PATTERN)
+
+  return (
+    <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
+      {parts.map((part, index) =>
+        PERCENT_TOKEN_PATTERN.test(part) && color ? (
+          <Text
+            key={`${index}-${part}`}
+            as="span"
+            color={color}
+            fontFamily="var(--pb-mono)"
+            fontWeight={500}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {part}
+          </Text>
+        ) : (
+          part
+        ),
+      )}
+    </Text>
+  )
+}
+
+export default function PersonalisedInsight({ insight }: PersonalisedInsightProps) {
+  const { headline, body, bodyLines, deltaLabel, deltaPositive } = insight
   const DeltaIcon = deltaPositive ? TrendingUp : TrendingDown
   const deltaColor = deltaPositive ? 'var(--pb-income-2)' : 'var(--pb-coral)'
   const paragraphs = bodyLines?.length ? bodyLines : [body]
@@ -69,9 +104,7 @@ export default function PersonalisedInsight({ insight, onPageChange }: Personali
 
         <VStack align="stretch" spacing={2}>
           {paragraphs.map((paragraph, index) => (
-            <Text key={`${index}-${paragraph}`} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
-              {paragraph}
-            </Text>
+            <HighlightedParagraph key={`${index}-${paragraph}`} text={paragraph} />
           ))}
         </VStack>
       </VStack>

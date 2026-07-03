@@ -234,6 +234,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const currentIncome = currentTransactions
       .filter((t) => t.type === 'INCOME')
       .reduce((sum, t) => sum + t.amount, 0)
+    const previousIncome = previousTransactions
+      .filter((t) => t.type === 'INCOME')
+      .reduce((sum, t) => sum + t.amount, 0)
     const currentExpense = currentTransactions
       .filter((t) => t.type === 'EXPENSE')
       .reduce((sum, t) => sum + t.amount, 0)
@@ -269,7 +272,16 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       .map(comparisonLine)
       .filter((line): line is string => Boolean(line))
 
-    const incomeLine = `You have earned ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} in this period.`
+    const incomeDelta = currentIncome - previousIncome
+    const incomePct = previousIncome > 0
+      ? Math.round((Math.abs(incomeDelta) / previousIncome) * 100)
+      : 100
+    const incomeLine =
+      incomeDelta === 0
+        ? `Income is flat versus the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
+        : incomeDelta > 0
+          ? `Income is ${incomePct}% above the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
+          : `Income is ${incomePct}% below the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
 
     if (!topCategory || topDelta === 0) {
       const bodyLines =
@@ -485,6 +497,32 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           />
         </MotionBox>
 
+        {/* Spending pace · Personalised insight */}
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+          <MotionBox variants={riseV}>
+            <SpendingPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
+          </MotionBox>
+          <MotionBox variants={riseV}>
+            <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
+          </MotionBox>
+        </Grid>
+
+        {/* Spending mix · Top merchants (Behaviour lens: when purchases happened) */}
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+          <MotionBox variants={riseV}>
+            <SpendingMix
+              transactions={periodData.transactions}
+              previousTransactions={previousPeriodData.transactions}
+            />
+          </MotionBox>
+          <MotionBox variants={riseV}>
+            <TopMerchants
+              transactions={behaviourPeriodData.transactions}
+              previousTransactions={previousBehaviourPeriodData.transactions}
+            />
+          </MotionBox>
+        </Grid>
+
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
           <SectionLabel>Balance &amp; forecast</SectionLabel>
@@ -513,32 +551,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               accent="gold"
               masked={hideBalances}
               onToggleMask={toggleHideBalances}
-            />
-          </MotionBox>
-        </Grid>
-
-        {/* Spending pace · Personalised insight */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <SpendingPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
-          </MotionBox>
-        </Grid>
-
-        {/* Spending mix · Top merchants (Behaviour lens: when purchases happened) */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <SpendingMix
-              transactions={periodData.transactions}
-              previousTransactions={previousPeriodData.transactions}
-            />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <TopMerchants
-              transactions={behaviourPeriodData.transactions}
-              previousTransactions={previousBehaviourPeriodData.transactions}
             />
           </MotionBox>
         </Grid>
