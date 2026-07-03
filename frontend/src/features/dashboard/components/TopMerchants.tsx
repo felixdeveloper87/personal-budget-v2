@@ -7,7 +7,6 @@ import { fmtCurrency } from './format'
 
 interface TopMerchantsProps {
   transactions: Transaction[]
-  previousTransactions: Transaction[]
 }
 
 const MAX_ROWS = 5
@@ -31,23 +30,18 @@ function isMerchantTransaction(t: Transaction): boolean {
 
 /**
  * Where money actually went: variable expenses grouped by description
- * ("merchant"), each compared against the same merchant last month.
+ * ("merchant").
  */
-export default function TopMerchants({ transactions, previousTransactions }: TopMerchantsProps) {
+export default function TopMerchants({ transactions }: TopMerchantsProps) {
   const { rows, maxTotal } = useMemo(() => {
     const merchantTransactions = transactions.filter(isMerchantTransaction)
-    const previousMerchantTransactions = previousTransactions.filter(isMerchantTransaction)
     const current = merchantStats(merchantTransactions).slice(0, MAX_ROWS)
-    const previous = new Map(merchantStats(previousMerchantTransactions).map((m) => [m.key, m.total]))
 
     return {
-      rows: current.map((m) => ({
-        ...m,
-        prevTotal: previous.get(m.key) ?? null,
-      })),
+      rows: current,
       maxTotal: current[0]?.total ?? 0,
     }
-  }, [transactions, previousTransactions])
+  }, [transactions])
 
   return (
     <Panel h="full">
@@ -62,16 +56,11 @@ export default function TopMerchants({ transactions, previousTransactions }: Top
           >
             Top merchants
           </Text>
-          {rows.length > 0 && (
-            <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.12em" color="var(--pb-ink-faint)">
-              vs last month
-            </Text>
-          )}
         </HStack>
 
         {rows.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
-            No merchants recorded for this period.
+            No merchants recorded for this month.
           </Text>
         ) : (
           <VStack align="stretch" spacing={3.5}>
@@ -81,7 +70,6 @@ export default function TopMerchants({ transactions, previousTransactions }: Top
                 name={m.name}
                 count={m.count}
                 total={m.total}
-                prevTotal={m.prevTotal}
                 share={maxTotal > 0 ? m.total / maxTotal : 0}
               />
             ))}
@@ -96,24 +84,11 @@ interface MerchantRowProps {
   name: string
   count: number
   total: number
-  prevTotal: number | null
-  /** 0–1, relative to the biggest merchant in the list. */
+  /** 0-1, relative to the biggest merchant in the list. */
   share: number
 }
 
-function MerchantRow({ name, count, total, prevTotal, share }: MerchantRowProps) {
-  const delta = prevTotal !== null ? total - prevTotal : null
-  const deltaLabel =
-    delta === null
-      ? 'new'
-      : `${delta >= 0 ? '+' : '−'}${fmtCurrency(Math.abs(delta))}`
-  const deltaColor =
-    delta === null
-      ? 'var(--pb-gold)'
-      : delta > 0
-        ? 'var(--pb-coral)'
-        : 'var(--pb-income-2)'
-
+function MerchantRow({ name, count, total, share }: MerchantRowProps) {
   return (
     <VStack align="stretch" spacing={1.5}>
       <HStack justify="space-between" align="baseline" spacing={3}>
@@ -122,7 +97,7 @@ function MerchantRow({ name, count, total, prevTotal, share }: MerchantRowProps)
             {name}
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" flexShrink={0}>
-            ×{count}
+            x{count}
           </Text>
         </HStack>
 
@@ -136,18 +111,9 @@ function MerchantRow({ name, count, total, prevTotal, share }: MerchantRowProps)
           >
             {fmtCurrency(total)}
           </Text>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            color={deltaColor}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {deltaLabel}
-          </Text>
         </HStack>
       </HStack>
 
-      {/* Share bar */}
       <Box h="6px" borderRadius="4px" bg="var(--pb-surface-3)" overflow="hidden">
         <Box
           h="full"
