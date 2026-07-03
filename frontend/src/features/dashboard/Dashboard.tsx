@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import type { TransactionDateBasis } from '../../utils/transactionDates'
+import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -171,6 +171,43 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   /* ── Personalised insight: biggest category move vs previous period ── */
   const personalInsight = useMemo<PersonalInsightData>(() => {
+    const today = new Date()
+    const endOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59,
+      999,
+    )
+    const periodContainsToday =
+      endOfToday >= periodData.startDate &&
+      new Date(today.getFullYear(), today.getMonth(), today.getDate()) <= periodData.endDate
+
+    const currentTransactions = periodContainsToday
+      ? periodData.transactions.filter((t) => getTransactionDate(t, dateBasis) <= endOfToday)
+      : periodData.transactions
+
+    const previousTransactions = (() => {
+      if (!periodContainsToday) return previousPeriodData.transactions
+
+      const currentCutoff = new Date(
+        Math.min(endOfToday.getTime(), periodData.endDate.getTime()),
+      )
+      const elapsedMs = currentCutoff.getTime() - periodData.startDate.getTime()
+      const previousCutoff = new Date(
+        Math.min(
+          previousPeriodData.startDate.getTime() + elapsedMs,
+          previousPeriodData.endDate.getTime(),
+        ),
+      )
+
+      return previousPeriodData.transactions.filter(
+        (t) => getTransactionDate(t, dateBasis) <= previousCutoff,
+      )
+    })()
+
     const sumByCategory = (txns: typeof periodData.transactions) => {
       const map = new Map<string, number>()
       for (const t of txns) {
@@ -180,8 +217,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       return map
     }
 
-    const current = sumByCategory(periodData.transactions)
-    const previous = sumByCategory(previousPeriodData.transactions)
+    const current = sumByCategory(currentTransactions)
+    const previous = sumByCategory(previousTransactions)
 
     // Find the category with the biggest absolute change vs last period.
     let topCategory = ''
@@ -194,9 +231,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       }
     }
 
+    const currentIncome = currentTransactions
+      .filter((t) => t.type === 'INCOME')
+      .reduce((sum, t) => sum + t.amount, 0)
+    const currentExpense = currentTransactions
+      .filter((t) => t.type === 'EXPENSE')
+      .reduce((sum, t) => sum + t.amount, 0)
     const savingsRate =
-      periodData.income > 0
-        ? Math.round(((periodData.income - periodData.expense) / periodData.income) * 100)
+      currentIncome > 0
+        ? Math.round(((currentIncome - currentExpense) / currentIncome) * 100)
         : null
 
     if (!topCategory || topDelta === 0) {
@@ -226,7 +269,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       deltaPositive: spendingLess,
       href: spendingLess ? 'goals' : 'planning',
     }
-  }, [periodData, previousPeriodData])
+  }, [periodData, previousPeriodData, dateBasis])
 
   /* ── "For you" editorial list ── */
   const insights = useMemo<InsightItem[]>(() => {
@@ -440,20 +483,17 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         </Grid>
 
-        {/* Spending pace · Top merchants (Behaviour lens: when purchases happened) */}
+        {/* Spending pace · Personalised insight */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <SpendingPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
           </MotionBox>
           <MotionBox variants={riseV}>
-            <TopMerchants
-              transactions={behaviourPeriodData.transactions}
-              previousTransactions={previousBehaviourPeriodData.transactions}
-            />
+            <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
           </MotionBox>
         </Grid>
 
-        {/* Spending mix · Personalised insight */}
+        {/* Spending mix · Top merchants (Behaviour lens: when purchases happened) */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <SpendingMix
@@ -462,7 +502,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             />
           </MotionBox>
           <MotionBox variants={riseV}>
-            <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
+            <TopMerchants
+              transactions={behaviourPeriodData.transactions}
+              previousTransactions={previousBehaviourPeriodData.transactions}
+            />
           </MotionBox>
         </Grid>
 
