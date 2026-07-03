@@ -292,10 +292,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       : 100
     const incomeLine =
       incomeDelta === 0
-        ? `Income is flat versus the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
+        ? `Income is flat versus the same point last period.`
         : incomeDelta > 0
-          ? `Income is ${incomePct}% above the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
-          : `Income is ${incomePct}% below the same point last period, with ${fmtCurrency(currentIncome, { minimumFractionDigits: 2 })} earned this period.`
+          ? `Income is ${incomePct}% above the same point last period.`
+          : `Income is ${incomePct}% below the same point last period.`
 
     if (!topCategory || topDelta === 0) {
       const bodyLines =
