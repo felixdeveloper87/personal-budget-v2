@@ -92,7 +92,10 @@ export default function BehaviourPage() {
   )
 
   // Behaviour is locked to the purchase-date ("activity") lens.
-  const [state, dispatch] = useReducer(txReducer, initialTxState)
+  const [state, dispatch] = useReducer(txReducer, {
+    ...initialTxState,
+    selectedDay: isoOf(new Date()),
+  })
   const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
 
   const periodData = usePeriodData(dayToDayTransactions, null, selectedPeriod, selectedDate, 'activity')
@@ -110,8 +113,8 @@ export default function BehaviourPage() {
   )
 
   useEffect(() => {
-    dispatch({ type: 'SET_DAY', day: null })
-  }, [selectedDate, selectedPeriod])
+    dispatch({ type: 'SET_DAY', day: isCurrentPeriod ? isoOf(new Date()) : null })
+  }, [selectedDate, selectedPeriod, isCurrentPeriod])
 
   const rhythm = useMemo(() => deriveRhythm(vm), [vm])
   const habit = useMemo(() => deriveHabit(vm), [vm])
