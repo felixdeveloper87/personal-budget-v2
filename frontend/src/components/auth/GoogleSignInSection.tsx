@@ -45,11 +45,11 @@ export default function GoogleSignInSection() {
   const [busy, setBusy] = useState(false)
   const [buttonHost, setButtonHost] = useState<HTMLDivElement | null>(null)
 
-  const btnBg = 'rgba(18, 26, 21, 0.6)'
+  const btnBg = 'rgba(22, 24, 30, 0.6)'
   const btnBorder = 'rgba(239, 234, 224, 0.18)'
   const btnText = '#efeae0'
   const btnShadow = '0 1px 4px rgba(0,0,0,0.25)'
-  const dividerColor = '#7fe6b3'
+  const dividerColor = '#60a5fa'
   const muted = '#94a398'
 
   const onCredential = useCallback(

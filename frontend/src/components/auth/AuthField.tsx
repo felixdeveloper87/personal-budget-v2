@@ -78,23 +78,23 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           h="44px"
           pl={10}
           pr={rightElement ? 10 : 4}
-          bg="rgba(18, 26, 21, 0.6)"
+          bg="rgba(22, 24, 30, 0.6)"
           border="1px solid"
           borderColor="rgba(239, 234, 224, 0.1)"
           color="#efeae0"
           fontSize="sm"
           borderRadius="10px"
           _placeholder={{ color: 'rgba(148, 163, 152, 0.5)' }}
-          _hover={{ borderColor: 'rgba(127, 230, 179, 0.4)' }}
+          _hover={{ borderColor: 'rgba(96, 165, 250, 0.4)' }}
           _focus={{
-            borderColor: '#7fe6b3',
-            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.18)',
-            bg: 'rgba(18, 26, 21, 0.8)',
+            borderColor: '#60a5fa',
+            boxShadow: '0 0 0 3px rgba(96, 165, 250, 0.18)',
+            bg: 'rgba(22, 24, 30, 0.8)',
           }}
           _focusVisible={{
-            borderColor: '#7fe6b3',
-            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.18)',
-            bg: 'rgba(18, 26, 21, 0.8)',
+            borderColor: '#60a5fa',
+            boxShadow: '0 0 0 3px rgba(96, 165, 250, 0.18)',
+            bg: 'rgba(22, 24, 30, 0.8)',
           }}
           _invalid={{
             borderColor: 'rgba(239, 68, 68, 0.7)',

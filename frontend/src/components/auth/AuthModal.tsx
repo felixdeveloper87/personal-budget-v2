@@ -32,12 +32,12 @@ interface AuthModalProps {
   onClose: () => void
 }
 
-/* Landing v3 palette — always dark */
+/* Landing v3 palette — always dark. Ink-blue, matching LandingV3.css. */
 const C = {
-  bg: '#070a08',
-  bg2: '#0b100d',
-  panel: 'rgba(18, 26, 21, 0.95)',
-  jade: '#7fe6b3',
+  bg: '#060d14',
+  bg2: '#0a141d',
+  panel: 'rgba(22, 24, 30, 0.95)',
+  jade: '#60a5fa',
   gold: '#d9b36a',
   cream: '#efeae0',
   muted: '#94a398',
@@ -68,11 +68,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             flexShrink={0}
             position="relative"
             p={1.5}
-            bg="rgba(18, 26, 21, 0.8)"
+            bg="rgba(22, 24, 30, 0.8)"
             border="1px solid"
             borderColor={C.lineStrong}
             borderRadius="xl"
-            boxShadow={`0 4px 16px -4px rgba(127, 230, 179, 0.2)`}
+            boxShadow={`0 4px 16px -4px rgba(96, 165, 250, 0.2)`}
             overflow="hidden"
           >
             <LogoIconWallet />

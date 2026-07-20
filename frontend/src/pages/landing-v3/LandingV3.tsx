@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import Lenis from 'lenis'
 import './LandingV3.css'
 import {
   BENTO,
@@ -155,6 +156,92 @@ function ExportDemo({ reduce }: { reduce: boolean }) {
 }
 
 /* ========================================================================== */
+/* Magnetic — pulls an element toward the pointer, springs back on leave       */
+/* ========================================================================== */
+function useMagnetic<T extends HTMLElement>(strength = 0.3) {
+  const ref = useRef<T>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || !window.matchMedia('(pointer: fine)').matches || prefersReduced()) return
+    const onMove = (e: PointerEvent) => {
+      const r = el.getBoundingClientRect()
+      el.style.transition = 'none'
+      el.style.transform = `translate3d(${(e.clientX - r.left - r.width / 2) * strength}px, ${
+        (e.clientY - r.top - r.height / 2) * strength
+      }px, 0)`
+    }
+    const onLeave = () => {
+      el.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
+      el.style.transform = ''
+    }
+    el.addEventListener('pointermove', onMove)
+    el.addEventListener('pointerleave', onLeave)
+    return () => {
+      el.removeEventListener('pointermove', onMove)
+      el.removeEventListener('pointerleave', onLeave)
+    }
+  }, [strength])
+  return ref
+}
+
+/* ========================================================================== */
+/* Custom cursor — lerped dot that morphs into a label pill over [data-cursor] */
+/* ========================================================================== */
+function Cursor() {
+  const dotRef = useRef<HTMLDivElement>(null)
+  const [label, setLabel] = useState('')
+  const [active, setActive] = useState(false)
+
+  useEffect(() => {
+    const pos = { x: window.innerWidth / 2, y: window.innerHeight / 2 }
+    const target = { ...pos }
+    let magnet: HTMLElement | null = null
+    let raf = 0
+
+    const onMove = (e: PointerEvent) => {
+      target.x = e.clientX
+      target.y = e.clientY
+      const el = (e.target as HTMLElement)?.closest?.('[data-cursor]') as HTMLElement | null
+      if (el !== magnet) {
+        magnet = el
+        setActive(!!el)
+        setLabel(el?.dataset.cursor ?? '')
+      }
+    }
+    window.addEventListener('pointermove', onMove)
+
+    const loop = () => {
+      let tx = target.x
+      let ty = target.y
+      if (magnet) {
+        const r = magnet.getBoundingClientRect()
+        // gravitate toward the target's center rather than tracking the raw pointer
+        tx = target.x * 0.6 + (r.left + r.width / 2) * 0.4
+        ty = target.y * 0.6 + (r.top + r.height / 2) * 0.4
+      }
+      pos.x += (tx - pos.x) * 0.2
+      pos.y += (ty - pos.y) * 0.2
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${pos.x}px, ${pos.y}px, 0)`
+      }
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return (
+    <div className={`pbv3-cursor${active ? ' active' : ''}`} ref={dotRef} aria-hidden>
+      <span className="pbv3-cursor__label">{label}</span>
+    </div>
+  )
+}
+
+/* ========================================================================== */
 /* Main                                                                        */
 /* ========================================================================== */
 export default function LandingV3({ onGetStarted }: LandingV3Props) {
@@ -171,6 +258,18 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
 
   const [pct, setPct] = useState(reduce ? 100 : 0)
   const [loaderDone, setLoaderDone] = useState(reduce)
+
+  /* custom cursor — only on precise pointers, never when motion is reduced */
+  const [cursorEnabled, setCursorEnabled] = useState(false)
+  useEffect(() => {
+    if (reduce) return
+    if (window.matchMedia('(pointer: fine)').matches) setCursorEnabled(true)
+  }, [reduce])
+
+  const navCtaRef = useMagnetic<HTMLButtonElement>()
+  const heroPrimaryRef = useMagnetic<HTMLButtonElement>()
+  const heroSecondaryRef = useMagnetic<HTMLButtonElement>()
+  const ctaButtonRef = useMagnetic<HTMLButtonElement>()
 
   /* manifesto word tokens */
   const words = useMemo(() => {
@@ -253,6 +352,14 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     const mockup = mockupRef.current
     const mockupSection = mockupSectionRef.current
 
+    // Smooth, eased native scroll — the marquees/mockup below read window.scrollY,
+    // which Lenis keeps updating (it eases real scroll, not a virtual proxy).
+    const lenis = new Lenis({
+      duration: 1.1,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+    })
+
     let sy = window.scrollY
     let lastSy = sy
     let velS = 0
@@ -273,7 +380,9 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     const vh = () => window.innerHeight
     const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
 
-    const master = () => {
+    const master = (time: number) => {
+      lenis.raf(time)
+
       // velocity (smoothed)
       const vel = sy - lastSy
       lastSy = sy
@@ -318,6 +427,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('scroll', onScroll)
+      lenis.destroy()
     }
   }, [reduce, loaderDone])
 
@@ -325,7 +435,10 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
-    <div className="pbv3" ref={rootRef}>
+    <div className={`pbv3${cursorEnabled ? ' pbv3--cursor' : ''}`} ref={rootRef}>
+      {cursorEnabled && <Cursor />}
+      <div className="pbv3-grain" aria-hidden />
+
       {/* preloader */}
       {!loaderDone && (
         <div className={`pbv3-loader${pct >= 100 ? ' done' : ''}`} aria-hidden>
@@ -365,6 +478,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
               className="pbv3-btn pbv3-btn--sm"
               data-cursor={HERO.cursorCta}
               onClick={onGetStarted}
+              ref={navCtaRef}
             >
               {HERO.primaryCta}
             </button>
@@ -395,6 +509,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
               className="pbv3-btn"
               data-cursor={HERO.cursorCta}
               onClick={onGetStarted}
+              ref={heroPrimaryRef}
             >
               {HERO.primaryCta}
             </button>
@@ -403,6 +518,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
               className="pbv3-btn pbv3-btn--ghost"
               data-cursor="Scroll"
               onClick={() => scrollTo('product')}
+              ref={heroSecondaryRef}
             >
               {HERO.secondaryCta}
             </button>
@@ -601,6 +717,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
             className="pbv3-btn pbv3-btn--pulse"
             data-cursor={HERO.cursorCta}
             onClick={onGetStarted}
+            ref={ctaButtonRef}
           >
             {CTA.button}
           </button>

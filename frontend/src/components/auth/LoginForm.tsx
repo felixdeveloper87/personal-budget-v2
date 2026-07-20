@@ -144,18 +144,18 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             mt={2}
             fontSize="sm"
             fontWeight={700}
-            color="#070a08"
+            color="#060d14"
             borderRadius="999px"
-            bg="#7fe6b3"
-            border="1px solid #7fe6b3"
-            boxShadow="0 8px 24px -10px rgba(127, 230, 179, 0.4)"
+            bg="#60a5fa"
+            border="1px solid #60a5fa"
+            boxShadow="0 8px 24px -10px rgba(96, 165, 250, 0.4)"
             transition="transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease"
             _hover={{
-              bg: '#a5edca',
+              bg: '#93c5fd',
               transform: 'translateY(-1px)',
-              boxShadow: '0 12px 30px -10px rgba(127, 230, 179, 0.55)',
+              boxShadow: '0 12px 30px -10px rgba(96, 165, 250, 0.55)',
             }}
-            _active={{ transform: 'translateY(0)', bg: '#6dd9a3' }}
+            _active={{ transform: 'translateY(0)', bg: '#3b82f6' }}
             _loading={{ opacity: 0.7 }}
           >
             Sign in
@@ -165,11 +165,11 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             Don't have an account?{' '}
             <Button
               variant="link"
-              color="#7fe6b3"
+              color="#60a5fa"
               fontWeight={600}
               fontSize="sm"
               onClick={onSwitchToRegister}
-              _hover={{ color: '#a5edca', textDecoration: 'none' }}
+              _hover={{ color: '#93c5fd', textDecoration: 'none' }}
             >
               Create one
             </Button>
