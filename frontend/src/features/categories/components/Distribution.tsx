@@ -3,9 +3,10 @@ import { Box, Flex, Grid, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { Layers } from '../../../components/ui/icons'
 import { computeSide } from '../data/computeSide'
-import type { Category, Side, ViewMode } from '../data/types'
+import type { Category, ComputedCategory, Side, ViewMode } from '../data/types'
 import AllocationDonut from './AllocationDonut'
 import CategoryList from './CategoryList'
+import CategoryTransactionsModal from './CategoryTransactionsModal'
 import SideToggle from './SideToggle'
 
 const MotionGrid = motion(Grid)
@@ -33,6 +34,7 @@ export default function Distribution({
   const [pinned, setPinned] = useState<string | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
   const [openIds, setOpenIds] = useState<Set<string>>(() => new Set())
+  const [viewAllCat, setViewAllCat] = useState<ComputedCategory | null>(null)
   const donutRef = useRef<HTMLDivElement>(null)
 
   const activeCat = hovered ?? pinned
@@ -165,11 +167,19 @@ export default function Distribution({
             activeCat={activeCat}
             onToggle={onToggle}
             onHover={setHovered}
+            onViewAll={setViewAllCat}
           />
         </MotionGrid>
       ) : (
         <EmptyState side={side} />
       )}
+
+      <CategoryTransactionsModal
+        cat={viewAllCat}
+        side={side}
+        periodLabel={periodLabel}
+        onClose={() => setViewAllCat(null)}
+      />
     </Box>
   )
 }

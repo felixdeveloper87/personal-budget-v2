@@ -9,6 +9,7 @@ interface CategoryListProps {
   activeCat: string | null
   onToggle: (id: string) => void
   onHover: (id: string | null) => void
+  onViewAll: (cat: ComputedCategory) => void
 }
 
 export default function CategoryList({
@@ -18,6 +19,7 @@ export default function CategoryList({
   activeCat,
   onToggle,
   onHover,
+  onViewAll,
 }: CategoryListProps) {
   return (
     <VStack align="stretch" spacing="0.5rem">
@@ -30,6 +32,7 @@ export default function CategoryList({
           isHot={activeCat === cat.id}
           onToggle={() => onToggle(cat.id)}
           onHover={onHover}
+          onViewAll={() => onViewAll(cat)}
         />
       ))}
     </VStack>

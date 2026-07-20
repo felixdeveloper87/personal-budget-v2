@@ -14,6 +14,7 @@ interface CategoryRowProps {
   isHot: boolean
   onToggle: () => void
   onHover: (id: string | null) => void
+  onViewAll: () => void
 }
 
 export default function CategoryRow({
@@ -23,6 +24,7 @@ export default function CategoryRow({
   isHot,
   onToggle,
   onHover,
+  onViewAll,
 }: CategoryRowProps) {
   const sign = side === 'expense' ? '−' : '+'
   const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
@@ -143,15 +145,22 @@ export default function CategoryRow({
           ))}
           {more > 0 && (
             <Flex
+              as="button"
+              type="button"
+              onClick={onViewAll}
               align="center"
               gap="0.35rem"
               pt="0.6rem"
               pb="0.15rem"
+              w="full"
               fontFamily="var(--pb-mono)"
               fontSize="9.5px"
               letterSpacing="0.06em"
               textTransform="uppercase"
               color="var(--pb-income)"
+              cursor="pointer"
+              _hover={{ textDecoration: 'underline' }}
+              _focusVisible={{ outline: 'none', textDecoration: 'underline' }}
             >
               <Icon as={List} boxSize="13px" />
               <span>+{more} more in this category</span>
