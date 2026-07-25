@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { type TransactionDateBasis } from '../../utils/transactionDates'
+import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -188,6 +188,41 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const current = sumByCategory(currentTransactions)
     const previous = sumByCategory(previousTransactions)
 
+    // Income is a pace comparison: compare what has arrived up to today with
+    // the same elapsed portion of the previous month, by purchase/activity date.
+    const today = new Date()
+    const endOfToday = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+      23,
+      59,
+      59,
+      999,
+    )
+    const periodContainsToday =
+      endOfToday >= behaviourPeriodData.startDate &&
+      new Date(today.getFullYear(), today.getMonth(), today.getDate()) <= behaviourPeriodData.endDate
+    const currentIncomeTransactions = periodContainsToday
+      ? behaviourPeriodData.transactions.filter(
+          (t) => getTransactionDate(t, 'activity') <= endOfToday,
+        )
+      : currentTransactions
+    const previousIncomeTransactions = (() => {
+      if (!periodContainsToday) return previousTransactions
+
+      const elapsedMs = endOfToday.getTime() - behaviourPeriodData.startDate.getTime()
+      const previousCutoff = new Date(
+        Math.min(
+          previousBehaviourPeriodData.startDate.getTime() + elapsedMs,
+          previousBehaviourPeriodData.endDate.getTime(),
+        ),
+      )
+      return previousBehaviourPeriodData.transactions.filter(
+        (t) => getTransactionDate(t, 'activity') <= previousCutoff,
+      )
+    })()
+
     // Find the category with the biggest absolute change vs last period.
     let topCategory = ''
     let topDelta = 0
@@ -199,10 +234,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       }
     }
 
-    const currentIncome = currentTransactions
+    const currentIncome = currentIncomeTransactions
       .filter((t) => t.type === 'INCOME')
       .reduce((sum, t) => sum + t.amount, 0)
-    const previousIncome = previousTransactions
+    const previousIncome = previousIncomeTransactions
       .filter((t) => t.type === 'INCOME')
       .reduce((sum, t) => sum + t.amount, 0)
     const currentExpense = currentTransactions
