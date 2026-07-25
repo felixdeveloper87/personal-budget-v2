@@ -256,6 +256,7 @@ export interface InstallmentPlan {
   totalInstallments: number
   totalAmount: number
   installmentValue: number
+  purchaseDate?: string | null
   accountId?: number | null
   accountName?: string | null
   paymentMethodId?: number | null
@@ -278,6 +279,7 @@ export interface CreateInstallmentPlanRequest {
   category: string
   description: string
   startDate: string // yyyy-MM-dd
+  purchaseDate: string // yyyy-MM-dd
   /** Local wall-clock, no TZ — e.g. `2026-05-03T14:30:00` (Java LocalDateTime). Avoid `…Z`. */
   startDateTime?: string
   accountId: number
@@ -288,6 +290,7 @@ export interface UpdateInstallmentPlanRequest {
   installmentValue?: number
   totalAmount?: number
   startDate: string
+  purchaseDate?: string
   startDateTime?: string
   accountId?: number | null
   paymentMethodId?: number | null

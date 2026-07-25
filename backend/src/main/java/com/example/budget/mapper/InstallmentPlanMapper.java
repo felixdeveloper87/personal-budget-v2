@@ -39,6 +39,7 @@ public class InstallmentPlanMapper {
         plan.setTotalInstallments(request.getTotalInstallments());
         plan.setInstallmentValue(request.getInstallmentValue());
         plan.setTotalAmount(request.getInstallmentValue().multiply(new BigDecimal(request.getTotalInstallments())));
+        plan.setPurchaseDate(resolvePurchaseDate(request));
         plan.setUser(user);
         return plan;
     }
@@ -75,6 +76,7 @@ public class InstallmentPlanMapper {
                 plan.getTotalInstallments(),
                 plan.getTotalAmount(),
                 plan.getInstallmentValue(),
+                plan.getPurchaseDate(),
                 plan.getAccount() != null ? plan.getAccount().getId() : null,
                 plan.getAccount() != null ? plan.getAccount().getName() : null,
                 plan.getPaymentMethod() != null ? plan.getPaymentMethod().getId() : null,
@@ -107,7 +109,7 @@ public class InstallmentPlanMapper {
             transaction.setAmount(request.getInstallmentValue());
             LocalDateTime installmentDateTime = baseDateTime.plusMonths(i - 1);
             transaction.setDateTime(installmentDateTime);
-            transaction.setTransactionDate(installmentDateTime.toLocalDate());
+            transaction.setTransactionDate(plan.getPurchaseDate());
             transaction.setPaymentDate(installmentDateTime.toLocalDate());
             transaction.setUser(plan.getUser());
             transaction.setAccount(plan.getAccount());
@@ -139,6 +141,13 @@ public class InstallmentPlanMapper {
         }
         LocalDate startDate = request.getStartDate() != null ? request.getStartDate() : LocalDate.now();
         return startDate.atTime(12, 0);
+    }
+
+    private LocalDate resolvePurchaseDate(CreateInstallmentPlanRequest request) {
+        if (request.getPurchaseDate() != null) return request.getPurchaseDate();
+        if (request.getStartDateTime() != null) return request.getStartDateTime().toLocalDate();
+        if (request.getStartDate() != null) return request.getStartDate();
+        return LocalDate.now();
     }
 }
 

@@ -5,6 +5,7 @@ import { useThemeColors } from '../../../hooks/useThemeColors'
 interface DateSelectorProps {
   date: string
   onChange: (date: string) => void
+  label?: string
 }
 
 /**
@@ -13,7 +14,7 @@ interface DateSelectorProps {
  * - Uses HTML5 date input for native date picker
  * - Handles date formatting and validation
  */
-export default function DateSelector({ date, onChange }: DateSelectorProps) {
+export default function DateSelector({ date, onChange, label = 'What date?' }: DateSelectorProps) {
   const colors = useThemeColors()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,7 +94,7 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
                   zIndex={2}
                   cursor="pointer"
                   fontSize="16px"
-                  aria-label="Transaction date"
+                  aria-label={label}
                   sx={{
                     '&::-webkit-calendar-picker-indicator': {
                       position: 'absolute',
@@ -139,7 +140,7 @@ export default function DateSelector({ date, onChange }: DateSelectorProps) {
                       lineHeight="1.1"
                       noOfLines={1}
                     >
-                      What date?
+                      {label}
                     </Text>
                   </HStack>
 

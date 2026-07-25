@@ -113,7 +113,7 @@ class InstallmentPlanServiceTest {
         assertThat(transactions.get(0).getAmount()).isEqualByComparingTo("100.00");
         assertThat(transactions.get(0).getTransactionDate()).isEqualTo(LocalDate.of(2026, 1, 10));
         assertThat(transactions.get(0).getPaymentDate()).isEqualTo(LocalDate.of(2026, 1, 10));
-        assertThat(transactions.get(2).getTransactionDate()).isEqualTo(LocalDate.of(2026, 3, 10));
+        assertThat(transactions.get(2).getTransactionDate()).isEqualTo(LocalDate.of(2026, 1, 10));
         assertThat(transactions.get(2).getPaymentDate()).isEqualTo(LocalDate.of(2026, 3, 10));
 
         assertThat(result.getId()).isEqualTo(88L);
@@ -146,7 +146,7 @@ class InstallmentPlanServiceTest {
         Transaction lastInstallment = transactionsCaptor.getValue().get(5);
 
         assertThat(lastInstallment.getInstallmentNumber()).isEqualTo(6);
-        assertThat(lastInstallment.getTransactionDate()).isEqualTo(LocalDate.of(2026, 9, 30));
+        assertThat(lastInstallment.getTransactionDate()).isEqualTo(LocalDate.of(2026, 4, 30));
         assertThat(lastInstallment.getPaymentDate()).isEqualTo(LocalDate.of(2026, 9, 30));
         assertThat(lastInstallment.getPaymentDate()).isNotEqualTo(LocalDate.of(2026, 10, 31));
         assertThat(lastInstallment.getPaymentMethod()).isSameAs(card);

@@ -173,6 +173,10 @@ public class InstallmentPlanService {
         plan.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
 
         LocalDateTime baseDateTime = determineBaseDateTime(request);
+        LocalDate purchaseDate = request.getPurchaseDate() != null
+                ? request.getPurchaseDate()
+                : plan.getPurchaseDate() != null ? plan.getPurchaseDate() : baseDateTime.toLocalDate();
+        plan.setPurchaseDate(purchaseDate);
         List<Transaction> transactions = plan.getTransactions().stream()
                 .sorted(Comparator.comparing(
                         tx -> tx.getInstallmentNumber() != null ? tx.getInstallmentNumber() : Integer.MAX_VALUE))
@@ -183,7 +187,7 @@ public class InstallmentPlanService {
             LocalDateTime installmentDateTime = baseDateTime.plusMonths(index);
             transaction.setAmount(resolveTransactionAmount(index, transactions.size(), installmentValue, totalAmount, request.getTotalAmount() != null));
             transaction.setDateTime(installmentDateTime);
-            transaction.setTransactionDate(installmentDateTime.toLocalDate());
+            transaction.setTransactionDate(purchaseDate);
             transaction.setAccount(plan.getAccount());
             transaction.setPaymentMethod(plan.getPaymentMethod());
             applyInstallmentSchedule(transaction);
@@ -307,7 +311,9 @@ public class InstallmentPlanService {
     }
 
     private void applyInstallmentSchedule(Transaction transaction) {
-        LocalDate paymentDate = transaction.getTransactionDate();
+        LocalDate paymentDate = transaction.getDateTime() != null
+                ? transaction.getDateTime().toLocalDate()
+                : transaction.getTransactionDate();
         transaction.setPaymentDate(paymentDate);
         if (paymentDate.isAfter(LocalDate.now())) {
             transaction.setStatus(TransactionStatus.PLANNED);

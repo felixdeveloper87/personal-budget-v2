@@ -15,6 +15,7 @@ public class InstallmentPlanDTO {
     private int totalInstallments;
     private BigDecimal totalAmount;
     private BigDecimal installmentValue;
+    private LocalDate purchaseDate;
     private Long accountId;
     private String accountName;
     private Long paymentMethodId;
@@ -26,7 +27,7 @@ public class InstallmentPlanDTO {
 
     public InstallmentPlanDTO(Long id, int totalInstallments, BigDecimal totalAmount, 
                               BigDecimal installmentValue, List<InstallmentTransactionDTO> transactions) {
-        this(id, totalInstallments, totalAmount, installmentValue, null, null, null, null, transactions);
+        this(id, totalInstallments, totalAmount, installmentValue, null, null, null, null, null, transactions);
     }
 
     public InstallmentPlanDTO(
@@ -34,6 +35,7 @@ public class InstallmentPlanDTO {
             int totalInstallments,
             BigDecimal totalAmount,
             BigDecimal installmentValue,
+            LocalDate purchaseDate,
             Long accountId,
             String accountName,
             Long paymentMethodId,
@@ -43,6 +45,7 @@ public class InstallmentPlanDTO {
         this.totalInstallments = totalInstallments;
         this.totalAmount = totalAmount;
         this.installmentValue = installmentValue;
+        this.purchaseDate = purchaseDate;
         this.accountId = accountId;
         this.accountName = accountName;
         this.paymentMethodId = paymentMethodId;
@@ -80,6 +83,14 @@ public class InstallmentPlanDTO {
 
     public void setInstallmentValue(BigDecimal installmentValue) {
         this.installmentValue = installmentValue;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public Long getAccountId() { return accountId; }

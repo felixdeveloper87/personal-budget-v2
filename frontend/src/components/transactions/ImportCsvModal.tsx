@@ -242,6 +242,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
               .replace(/\s*\(Installment\s+\d+\/\d+\)\s*$/i, '')
               .trim(),
             startDate: get(row.values, 'first date'),
+            purchaseDate: get(row.values, 'first date'),
             accountId: account.id,
             paymentMethodId: method?.id ?? null,
           })

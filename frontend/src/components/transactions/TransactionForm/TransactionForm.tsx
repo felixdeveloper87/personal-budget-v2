@@ -287,6 +287,7 @@ export default function TransactionForm({
             category,
             description,
             startDate: firstInstallmentDate,
+            purchaseDate: date,
             startDateTime: toLocalIsoDateTimeFromYMD(firstInstallmentDate, start),
             accountId,
             paymentMethodId,
@@ -447,6 +448,7 @@ export default function TransactionForm({
   } else if (type === 'INCOME' && incomeMode === 'fixed') {
     reviewItems.push({ label: 'Schedule', value: `Every month on day ${recurringDayOfMonth}` })
   } else if (type === 'EXPENSE' && expenseMode === 'installment') {
+    reviewItems.push({ label: 'Purchase date', value: formatYMD(date) })
     reviewItems.push({ label: 'First installment', value: formatYMD(firstInstallmentDate) })
   }
   if (description.trim()) {
@@ -515,9 +517,13 @@ export default function TransactionForm({
               loading={paymentMethodsLoading}
             />
           )}
-          {((type === 'EXPENSE' && expenseMode === 'single') ||
+          {((type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment')) ||
             (type === 'INCOME' && incomeMode === 'single')) && (
-            <DateSelector date={date} onChange={onTransactionDateChange} />
+            <DateSelector
+              date={date}
+              onChange={onTransactionDateChange}
+              label={expenseMode === 'installment' ? 'Purchase date' : undefined}
+            />
           )}
           {type === 'EXPENSE' && expenseMode === 'fixed' && (
               <RecurringSelector
@@ -681,9 +687,13 @@ export default function TransactionForm({
                   loading={paymentMethodsLoading}
                 />
               )}
-              {((type === 'EXPENSE' && expenseMode === 'single') ||
+              {((type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment')) ||
                 (type === 'INCOME' && incomeMode === 'single')) && (
-                <DateSelector date={date} onChange={onTransactionDateChange} />
+                <DateSelector
+                  date={date}
+                  onChange={onTransactionDateChange}
+                  label={expenseMode === 'installment' ? 'Purchase date' : undefined}
+                />
               )}
               {type === 'EXPENSE' && expenseMode === 'fixed' && (
                   <RecurringSelector

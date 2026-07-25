@@ -2,6 +2,7 @@ package com.example.budget.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,9 @@ public class InstallmentPlan {
 
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal installmentValue;
+
+    @Column(name = "purchase_date")
+    private LocalDate purchaseDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -78,6 +82,14 @@ public class InstallmentPlan {
 
     public void setInstallmentValue(BigDecimal installmentValue) {
         this.installmentValue = installmentValue;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public User getUser() {

@@ -35,6 +35,9 @@ public class CreateInstallmentPlanRequest {
 
     private LocalDateTime startDateTime;
 
+    /** Calendar date when the purchase happened, independent of its installments. */
+    private LocalDate purchaseDate;
+
     @NotNull(message = "Account is required")
     private Long accountId;
 
@@ -81,6 +84,14 @@ public class CreateInstallmentPlanRequest {
 
     public LocalDateTime getStartDateTime() {
         return startDateTime;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public Long getAccountId() {
