@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
+import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -171,44 +171,12 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   /* ── Personalised insight: biggest category move vs previous period ── */
   const personalInsight = useMemo<PersonalInsightData>(() => {
-    const today = new Date()
-    const endOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      23,
-      59,
-      59,
-      999,
-    )
-    const periodContainsToday =
-      endOfToday >= periodData.startDate &&
-      new Date(today.getFullYear(), today.getMonth(), today.getDate()) <= periodData.endDate
+    // Use the entire selected period and the date the purchase happened.
+    // Payment dates do not affect this insight.
+    const currentTransactions = behaviourPeriodData.transactions
+    const previousTransactions = previousBehaviourPeriodData.transactions
 
-    const currentTransactions = periodContainsToday
-      ? periodData.transactions.filter((t) => getTransactionDate(t, dateBasis) <= endOfToday)
-      : periodData.transactions
-
-    const previousTransactions = (() => {
-      if (!periodContainsToday) return previousPeriodData.transactions
-
-      const currentCutoff = new Date(
-        Math.min(endOfToday.getTime(), periodData.endDate.getTime()),
-      )
-      const elapsedMs = currentCutoff.getTime() - periodData.startDate.getTime()
-      const previousCutoff = new Date(
-        Math.min(
-          previousPeriodData.startDate.getTime() + elapsedMs,
-          previousPeriodData.endDate.getTime(),
-        ),
-      )
-
-      return previousPeriodData.transactions.filter(
-        (t) => getTransactionDate(t, dateBasis) <= previousCutoff,
-      )
-    })()
-
-    const sumByCategory = (txns: typeof periodData.transactions) => {
+    const sumByCategory = (txns: typeof behaviourPeriodData.transactions) => {
       const map = new Map<string, number>()
       for (const t of txns) {
         if (t.type !== 'EXPENSE') continue
@@ -328,7 +296,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       deltaPositive: overallExpensePositive,
       href: 'planning',
     }
-  }, [periodData, previousPeriodData, dateBasis])
+  }, [behaviourPeriodData, previousBehaviourPeriodData])
 
   /* ── "For you" editorial list ── */
   const insights = useMemo<InsightItem[]>(() => {
