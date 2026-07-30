@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
-import { Box, Grid, Skeleton } from '@chakra-ui/react'
+import { useEffect, useMemo, useState } from 'react'
+import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -11,22 +11,17 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
-import ActivityPane from '../transactions/components/ActivityPane'
-import PatternsAside from '../transactions/components/PatternsAside'
-import TransactionDrawer from '../transactions/components/TransactionDrawer'
 import {
-  buildLedger,
   deriveHabit,
   deriveMomentum,
   deriveRhythm,
   toViewModel,
-  txReducer,
 } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
-import { initialTxState } from '../transactions/transactions.types'
 
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
+import { fmtCurrency } from '../dashboard/components/format'
 
 import InsightsPanel from './components/InsightsPanel'
 import DayToDaySummary from './components/DayToDaySummary'
@@ -105,12 +100,7 @@ export default function BehaviourPage() {
     [transactions],
   )
 
-  // Behaviour is locked to the purchase-date ("activity") lens.
-  const [state, dispatch] = useReducer(txReducer, {
-    ...initialTxState,
-    selectedDay: isoOf(new Date()),
-  })
-  const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
+  const [selectedChartDay, setSelectedChartDay] = useState<string | null>(null)
 
   const periodData = usePeriodData(spendingTransactions, null, selectedPeriod, selectedDate, 'activity')
   const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
@@ -127,8 +117,8 @@ export default function BehaviourPage() {
   )
 
   useEffect(() => {
-    dispatch({ type: 'SET_DAY', day: isCurrentPeriod ? isoOf(new Date()) : null })
-  }, [selectedDate, selectedPeriod, isCurrentPeriod])
+    setSelectedChartDay(null)
+  }, [selectedDate, selectedPeriod])
 
   const rhythm = useMemo(() => deriveRhythm(vm), [vm])
   const habit = useMemo(() => deriveHabit(vm), [vm])
@@ -143,20 +133,16 @@ export default function BehaviourPage() {
     () => buildDays(periodData.startDate, periodData.endDate),
     [periodData.startDate, periodData.endDate],
   )
-  const groups = useMemo(() => buildLedger(vm, state), [vm, state])
+  const selectedDayExpenses = useMemo(
+    () => selectedChartDay ? vm.filter((transaction) => transaction.purchaseDate === selectedChartDay) : [],
+    [vm, selectedChartDay],
+  )
 
   const periodLabel = formatLabel()
   const narrativePeriodLabel = selectedDateLabel(selectedDate, selectedPeriod)
 
   const selectDay = (iso: string) => {
-    if (state.selectedDay === iso) {
-      dispatch({ type: 'SET_DAY', day: null })
-      return
-    }
-    dispatch({ type: 'SET_DAY', day: iso })
-    if (window.matchMedia('(max-width:919px)').matches) {
-      document.querySelector('.body-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    setSelectedChartDay((current) => current === iso ? null : iso)
   }
 
   return (
@@ -204,11 +190,11 @@ export default function BehaviourPage() {
               days={days}
               txns={vm}
               view="behaviour"
-              selectedDay={state.selectedDay}
+              selectedDay={selectedChartDay}
               onSelectDay={selectDay}
-              hlRhythm={state.hlRhythm}
-              hlMomentum={state.hlMomentum}
-              rhythmWeekday={rhythm ? rhythm.weekday : null}
+              hlRhythm={false}
+              hlMomentum={false}
+              rhythmWeekday={null}
               monthLabel={periodLabel}
               reduce={reduce}
               title="Spending"
@@ -217,32 +203,11 @@ export default function BehaviourPage() {
           )}
         </MotionBox>
 
-        <Grid className="body-grid" templateColumns={{ base: '1fr', lg: '1fr 330px' }} gap={{ base: 6, lg: 8 }} alignItems="start">
-          <MotionBox variants={riseV} minW={0}>
-            <ActivityPane
-              state={state}
-              groups={groups}
-              onSetQuery={(q) => dispatch({ type: 'SET_Q', q })}
-              onSetFilter={(filter) => dispatch({ type: 'SET_FILTER', filter })}
-              onClearDay={() => dispatch({ type: 'SET_DAY', day: null })}
-              onOpen={setDrawerTxn}
-              reduce={reduce}
-              availableFilters={['all', 'out', 'deferred']}
-            />
+        {selectedChartDay && (
+          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+            <SelectedDayExpenses day={selectedChartDay} expenses={selectedDayExpenses} />
           </MotionBox>
-
-          <MotionBox variants={riseV}>
-            <PatternsAside
-              state={state}
-              rhythm={rhythm}
-              habit={habit}
-              momentum={momentum}
-              onToggleRhythm={() => dispatch({ type: 'TOGGLE_RHYTHM' })}
-              onToggleHabit={(category) => dispatch({ type: 'TOGGLE_HABIT', category })}
-              onToggleMomentum={() => dispatch({ type: 'TOGGLE_MOMENTUM' })}
-            />
-          </MotionBox>
-        </Grid>
+        )}
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution expense={expense} income={[]} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
@@ -262,7 +227,49 @@ export default function BehaviourPage() {
 
       </MotionBox>
 
-      <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />
+    </Box>
+  )
+}
+
+function SelectedDayExpenses({ day, expenses }: { day: string; expenses: TxnVM[] }) {
+  const total = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return (
+    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
+      <VStack align="stretch" spacing={3}>
+        <Box>
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Spending on {dayLabel}
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.35rem" color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(total)}
+          </Text>
+        </Box>
+
+        {expenses.length === 0 ? (
+          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
+            No expenses recorded on this day.
+          </Text>
+        ) : (
+          <VStack align="stretch" spacing={1.5}>
+            {expenses.map((expense) => (
+              <Box key={expense.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
+                <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
+                  {expense.merchant}
+                </Text>
+                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {fmtCurrency(expense.amount)}
+                </Text>
+              </Box>
+            ))}
+          </VStack>
+        )}
+      </VStack>
     </Box>
   )
 }

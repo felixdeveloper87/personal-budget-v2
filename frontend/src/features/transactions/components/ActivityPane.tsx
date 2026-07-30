@@ -23,7 +23,6 @@ interface ActivityPaneProps {
   onClearDay: () => void
   onOpen: (txn: TxnVM) => void
   reduce: boolean
-  availableFilters?: TxFilter[]
 }
 
 // Payments is outflow-only — the In/Out split is meaningless there, so the
@@ -89,9 +88,7 @@ export default function ActivityPane({
   onClearDay,
   onOpen,
   reduce,
-  availableFilters,
 }: ActivityPaneProps) {
-  const filters = availableFilters ?? FILTERS_BY_VIEW[state.view]
   return (
     <Panel>
       {/* Search */}
@@ -117,7 +114,6 @@ export default function ActivityPane({
           }}
         />
       </InputGroup>
-
       {/* Filter chips */}
       <Flex
         gap=".45rem"
@@ -126,7 +122,7 @@ export default function ActivityPane({
         aria-label="Filter transactions"
         mb=".9rem"
       >
-        {filters.map((f) => (
+        {FILTERS_BY_VIEW[state.view].map((f) => (
           <Chip key={f} value={f} active={state.filter === f} onClick={() => onSetFilter(f)} />
         ))}
       </Flex>
