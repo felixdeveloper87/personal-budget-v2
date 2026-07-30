@@ -91,34 +91,6 @@ export default function EarningsPage() {
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           {loading ? (
-            <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <DailyChart
-              days={days}
-              txns={incomeTransactions}
-              view="behaviour"
-              selectedDay={selectedDay}
-              onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
-              hlRhythm={false}
-              hlMomentum={false}
-              rhythmWeekday={null}
-              monthLabel={periodLabel}
-              reduce={reduce}
-              title="Earnings"
-              caption="Daily income by activity date"
-              instruction="Select a day to view its earnings"
-            />
-          )}
-        </MotionBox>
-
-        {selectedDay && (
-          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-            <SelectedDayIncomes day={selectedDay} incomes={selectedDayIncomes} />
-          </MotionBox>
-        )}
-
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          {loading ? (
             <Skeleton height="180px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
             <EarningsOverview
@@ -140,6 +112,34 @@ export default function EarningsPage() {
             />
           )}
         </MotionBox>
+
+        <MotionBox variants={riseV} mt="clamp(1.4rem,3vw,2rem)" mb={selectedDay ? "clamp(1.4rem,3vw,2rem)" : 0}>
+          {loading ? (
+            <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          ) : (
+            <DailyChart
+              days={days}
+              txns={incomeTransactions}
+              view="behaviour"
+              selectedDay={selectedDay}
+              onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
+              hlRhythm={false}
+              hlMomentum={false}
+              rhythmWeekday={null}
+              monthLabel={periodLabel}
+              reduce={reduce}
+              title="Earnings"
+              caption="Daily income by activity date"
+              instruction="Select a day to view its earnings"
+            />
+          )}
+        </MotionBox>
+
+        {selectedDay && (
+          <MotionBox variants={riseV}>
+            <SelectedDayIncomes day={selectedDay} incomes={selectedDayIncomes} />
+          </MotionBox>
+        )}
       </MotionBox>
     </Box>
   )
