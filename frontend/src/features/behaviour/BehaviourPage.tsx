@@ -179,8 +179,6 @@ export default function BehaviourPage() {
             income={periodData.income}
             expense={periodData.expense}
             balance={periodData.balance}
-            earnings={earnings}
-            daysElapsed={daysElapsed}
             periodLabel={periodLabel}
           />
         </MotionBox>
