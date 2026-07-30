@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -12,13 +12,9 @@ import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
-import ActivityPane from '../transactions/components/ActivityPane'
-import TransactionDrawer from '../transactions/components/TransactionDrawer'
-import { buildLedger, collapseCardStatements, toViewModel, txReducer } from '../transactions/transactions.utils'
+import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
-import { initialTxState } from '../transactions/transactions.types'
 import { listPaymentMethods } from '../../api'
-import type { AppPage } from '../../components/layout/header/navigation.config'
 
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
@@ -44,15 +40,11 @@ function buildDays(start: Date, end: Date): ChartDay[] {
   return days
 }
 
-interface PaymentsPageProps {
-  onPageChange?: (page: AppPage) => void
-}
-
-export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
+export default function PaymentsPage() {
   const reduce = useReducedMotion() ?? false
 
   // Credit-card id → name, used to fold a card's charges into one fatura row.
-  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
+  const [, setCardNames] = useState<Map<number, string>>(() => new Map())
   useEffect(() => {
     let alive = true
     listPaymentMethods()
@@ -84,13 +76,7 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
 
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
 
-  // Payments is locked to the settlement-date ("cash-flow") lens.
-  const [state, dispatch] = useReducer(txReducer, {
-    ...initialTxState,
-    view: 'payments',
-    selectedDay: isoOf(new Date()),
-  })
-  const [drawerTxn, setDrawerTxn] = useState<TxnVM | null>(null)
+  const [selectedChartDay, setSelectedChartDay] = useState<string | null>(null)
 
   const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'cash-flow')
   const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
@@ -99,8 +85,8 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
   const allVm = useMemo<TxnVM[]>(() => toViewModel(transactions), [transactions])
 
   useEffect(() => {
-    dispatch({ type: 'SET_DAY', day: isCurrentPeriod ? isoOf(new Date()) : null })
-  }, [selectedDate, selectedPeriod, isCurrentPeriod])
+    setSelectedChartDay(null)
+  }, [selectedDate, selectedPeriod])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
@@ -121,22 +107,17 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
     () => buildDays(periodData.startDate, periodData.endDate),
     [periodData.startDate, periodData.endDate],
   )
-  const groups = useMemo(
-    () => collapseCardStatements(buildLedger(vm, state), cardNames),
-    [vm, state, cardNames],
+  const selectedDayPayments = useMemo(
+    () => selectedChartDay
+      ? vm.filter((transaction) => transaction.type === 'out' && transaction.settlementDate === selectedChartDay)
+      : [],
+    [vm, selectedChartDay],
   )
 
   const periodLabel = formatLabel()
 
   const selectDay = (iso: string) => {
-    if (state.selectedDay === iso) {
-      dispatch({ type: 'SET_DAY', day: null })
-      return
-    }
-    dispatch({ type: 'SET_DAY', day: iso })
-    if (window.matchMedia('(max-width:919px)').matches) {
-      document.querySelector('.body-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
+    setSelectedChartDay((current) => current === iso ? null : iso)
   }
 
   return (
@@ -172,10 +153,10 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
               days={days}
               txns={vm}
               view="payments"
-              selectedDay={state.selectedDay}
+              selectedDay={selectedChartDay}
               onSelectDay={selectDay}
-              hlRhythm={state.hlRhythm}
-              hlMomentum={state.hlMomentum}
+              hlRhythm={false}
+              hlMomentum={false}
               rhythmWeekday={null}
               monthLabel={periodLabel}
               reduce={reduce}
@@ -183,20 +164,14 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           )}
         </MotionBox>
 
+        {selectedChartDay && (
+          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+            <SelectedDayPayments day={selectedChartDay} payments={selectedDayPayments} />
+          </MotionBox>
+        )}
+
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           <UpcomingPayments allTxns={allVm} />
-        </MotionBox>
-
-        <MotionBox className="body-grid" variants={riseV} minW={0}>
-          <ActivityPane
-            state={state}
-            groups={groups}
-            onSetQuery={(q) => dispatch({ type: 'SET_Q', q })}
-            onSetFilter={(filter) => dispatch({ type: 'SET_FILTER', filter })}
-            onClearDay={() => dispatch({ type: 'SET_DAY', day: null })}
-            onOpen={(txn) => (txn.statement ? onPageChange?.('cards') : setDrawerTxn(txn))}
-            reduce={reduce}
-          />
         </MotionBox>
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
@@ -205,7 +180,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
 
       </MotionBox>
 
-      <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />
     </Box>
   )
 }
@@ -246,6 +220,49 @@ function PaymentsSummary({
               ? `${fmtCurrency(upcoming)} remaining · ${fmtCurrency(paid)} paid`
               : `All payments settled · ${fmtCurrency(paid)} paid`}
         </Text>
+      </VStack>
+    </Box>
+  )
+}
+
+function SelectedDayPayments({ day, payments }: { day: string; payments: TxnVM[] }) {
+  const total = payments.reduce((sum, payment) => sum + payment.amount, 0)
+  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return (
+    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
+      <VStack align="stretch" spacing={3}>
+        <Box>
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Payments on {dayLabel}
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.35rem" color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(total)}
+          </Text>
+        </Box>
+
+        {payments.length === 0 ? (
+          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
+            No payments recorded on this day.
+          </Text>
+        ) : (
+          <VStack align="stretch" spacing={1.5}>
+            {payments.map((payment) => (
+              <Box key={payment.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
+                <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
+                  {payment.merchant}
+                </Text>
+                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {fmtCurrency(payment.amount)}
+                </Text>
+              </Box>
+            ))}
+          </VStack>
+        )}
       </VStack>
     </Box>
   )
