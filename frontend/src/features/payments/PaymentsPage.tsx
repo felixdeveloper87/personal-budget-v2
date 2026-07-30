@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from 'react'
-import { Box, Skeleton } from '@chakra-ui/react'
+import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -8,7 +8,7 @@ import { usePeriodData } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import FlowSummary, { type FlowMetric } from '../dashboard/components/FlowSummary'
+import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
@@ -107,18 +107,14 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
 
   // Outflow-focused triad: total owed this period, what has already settled, and
   // what is still scheduled — split on settlement date vs today.
-  const paymentMetrics = useMemo<FlowMetric[]>(() => {
+  const paymentStatus = useMemo(() => {
     const today = isoOf(new Date())
     let paid = 0
     for (const t of vm) {
       if (t.type === 'out' && t.settlementDate <= today) paid += t.amount
     }
     const upcoming = Math.max(0, periodData.expense - paid)
-    return [
-      { label: 'Spending', value: periodData.expense, accent: 'var(--pb-coral)' },
-      { label: 'Paid', value: paid, accent: 'var(--pb-income)' },
-      { label: 'Upcoming', value: upcoming, accent: 'var(--pb-gold-2)' },
-    ]
+    return { paid, upcoming }
   }, [vm, periodData.expense])
 
   const days = useMemo(
@@ -158,6 +154,15 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
           />
         </MotionBox>
 
+        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
+          <PaymentsSummary
+            total={periodData.expense}
+            paid={paymentStatus.paid}
+            upcoming={paymentStatus.upcoming}
+            periodLabel={periodLabel}
+          />
+        </MotionBox>
+
         {/* Outflow chart leads the page, mirroring Behaviour */}
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           {loading ? (
@@ -176,16 +181,6 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
               reduce={reduce}
             />
           )}
-        </MotionBox>
-
-        {/* Spending / Paid / Upcoming triad right under the chart */}
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <FlowSummary
-            income={periodData.income}
-            expense={periodData.expense}
-            balance={periodData.balance}
-            metrics={paymentMetrics}
-          />
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
@@ -211,6 +206,47 @@ export default function PaymentsPage({ onPageChange }: PaymentsPageProps) {
       </MotionBox>
 
       <TransactionDrawer txn={drawerTxn} onClose={() => setDrawerTxn(null)} />
+    </Box>
+  )
+}
+
+function PaymentsSummary({
+  total,
+  paid,
+  upcoming,
+  periodLabel,
+}: {
+  total: number
+  paid: number
+  upcoming: number
+  periodLabel: string
+}) {
+  return (
+    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem, 2.4vw, 1.5rem)">
+      <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" spacing={1}>
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Payments - {periodLabel}
+          </Text>
+          <Text fontSize="sm" color="var(--pb-ink-soft)">Scheduled cash outflow</Text>
+        </VStack>
+
+        <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-ink)" maxW="48ch">
+          {total > 0 ? (
+            <>You have <Text as="em" color="var(--pb-coral)">{fmtCurrency(total)}</Text> scheduled to leave in {periodLabel}.</>
+          ) : (
+            <>No payments are scheduled in {periodLabel}.</>
+          )}
+        </Text>
+
+        <Text pt={3} borderTop="1px solid var(--pb-hair)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={upcoming > 0 ? 'var(--pb-gold-2)' : 'var(--pb-income)'}>
+          {total === 0
+            ? 'No payments due in this period'
+            : upcoming > 0
+              ? `${fmtCurrency(upcoming)} remaining · ${fmtCurrency(paid)} paid`
+              : `All payments settled · ${fmtCurrency(paid)} paid`}
+        </Text>
+      </VStack>
     </Box>
   )
 }
