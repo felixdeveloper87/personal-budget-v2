@@ -125,17 +125,6 @@ export default function BehaviourPage() {
   const spendBreakdown = useMemo(() => spendByCategory(vm), [vm])
   const earningsBreakdown = useMemo(() => earningsBySource(vm), [vm])
 
-  // Days of the period already lived through — denominators for the per-day
-  // averages (a month in progress shouldn't be divided by 30).
-  const daysElapsed = useMemo(() => {
-    const clip = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate())
-    const today = clip(new Date())
-    const start = clip(periodData.startDate)
-    const end = today < periodData.endDate ? today : clip(periodData.endDate)
-    if (end < start) return 0
-    return Math.floor((end.getTime() - start.getTime()) / 86_400_000) + 1
-  }, [periodData.startDate, periodData.endDate])
-
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
 
