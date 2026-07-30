@@ -178,6 +178,19 @@ export default function BehaviourPage() {
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+          <SoFarBreakdown
+            spend={spendBreakdown}
+            earnings={[]}
+            showEarnings={false}
+            scopeLabel={
+              isCurrentPeriod
+                ? `so far this ${periodWord(selectedPeriod)}`
+                : `in ${periodLabel}`
+            }
+          />
+        </MotionBox>
+
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
@@ -196,19 +209,6 @@ export default function BehaviourPage() {
               caption="Daily expenses by transaction date"
             />
           )}
-        </MotionBox>
-
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <SoFarBreakdown
-            spend={spendBreakdown}
-            earnings={[]}
-            showEarnings={false}
-            scopeLabel={
-              isCurrentPeriod
-                ? `so far this ${periodWord(selectedPeriod)}`
-                : `in ${periodLabel}`
-            }
-          />
         </MotionBox>
 
         <Grid className="body-grid" templateColumns={{ base: '1fr', lg: '1fr 330px' }} gap={{ base: 6, lg: 8 }} alignItems="start">
