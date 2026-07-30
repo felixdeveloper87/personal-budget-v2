@@ -64,8 +64,8 @@ function Lede({ income, expense, balance }: Pick<DayToDaySummaryProps, 'income' 
     return (
       <>
         You earned <Text as="em" color="var(--pb-income)">{fmtCurrency(income)}</Text>, spent{' '}
-        <Text as="em" color="var(--pb-coral)">{fmtCurrency(expense)}</Text> day to day, and kept{' '}
-        <Text as="em" color="var(--pb-income)">{fmtCurrency(balance)}</Text>.
+        <Text as="em" color="var(--pb-coral)">{fmtCurrency(expense)}</Text>, and kept{' '}
+        <Text as="em" color="var(--pb-income)">{fmtCurrency(balance)}</Text> in this period.
       </>
     )
   }
