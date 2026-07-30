@@ -21,6 +21,9 @@ interface DailyChartProps {
   rhythmWeekday: number | null
   monthLabel: string
   reduce: boolean
+  title?: string
+  caption?: string
+  instruction?: string
 }
 
 const VW = 720
@@ -41,6 +44,9 @@ export default function DailyChart({
   rhythmWeekday,
   monthLabel,
   reduce,
+  title,
+  caption,
+  instruction,
 }: DailyChartProps) {
   const [hover, setHover] = useState<
     { iso: string; leftPct: number; inV: number; outV: number } | null
@@ -108,12 +114,12 @@ export default function DailyChart({
     <Box className="pb-chart-card">
       <Flex className="pb-chart-heading" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap=".75rem" direction={{ base: 'column', sm: 'row' }}>
         <Box>
-          <Text className="pb-chart-kicker">{showIncome ? 'Cash flow' : 'Outflow'}</Text>
+          <Text className="pb-chart-kicker">{title ?? (showIncome ? 'Cash flow' : 'Outflow')}</Text>
           <Text className="pb-chart-caption">
-            {showIncome ? 'Daily income and spending' : 'Daily payments by settlement date'}
+            {caption ?? (showIncome ? 'Daily income and spending' : 'Daily payments by settlement date')}
           </Text>
         </Box>
-        <Text className="pb-chart-instruction">Select a day to filter activity</Text>
+        {instruction !== '' && <Text className="pb-chart-instruction">{instruction ?? 'Select a day to filter activity'}</Text>}
       </Flex>
 
       <Box className="pb-chart-wrap">

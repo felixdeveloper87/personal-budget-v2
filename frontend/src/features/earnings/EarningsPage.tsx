@@ -1,5 +1,5 @@
 import { Box, Grid, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -10,8 +10,25 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
+import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import { toViewModel } from '../transactions/transactions.utils'
+import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
+
+function isoOf(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+function buildDays(start: Date, end: Date): ChartDay[] {
+  const days: ChartDay[] = []
+  const current = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+  const last = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+  while (current <= last && days.length < 400) {
+    days.push({ iso: isoOf(current), date: new Date(current) })
+    current.setDate(current.getDate() + 1)
+  }
+  return days
+}
 
 export default function EarningsPage() {
   const reduce = useReducedMotion() ?? false
@@ -25,6 +42,7 @@ export default function EarningsPage() {
     isCurrentPeriod,
   } = usePeriodNavigator()
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
+  const [selectedDay, setSelectedDay] = useState<string | null>(null)
 
   const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'activity')
   const previousDate = useMemo(
@@ -35,6 +53,18 @@ export default function EarningsPage() {
   const sources = useMemo(
     () => earningsBySource(toViewModel(periodData.transactions)),
     [periodData.transactions],
+  )
+  const incomeTransactions = useMemo<TxnVM[]>(
+    () => toViewModel(periodData.transactions).filter((transaction) => transaction.type === 'in'),
+    [periodData.transactions],
+  )
+  const days = useMemo(
+    () => buildDays(periodData.startDate, periodData.endDate),
+    [periodData.startDate, periodData.endDate],
+  )
+  const selectedDayIncomes = useMemo(
+    () => selectedDay ? incomeTransactions.filter((transaction) => transaction.purchaseDate === selectedDay) : [],
+    [incomeTransactions, selectedDay],
   )
 
   const periodLabel = formatLabel()
@@ -61,6 +91,34 @@ export default function EarningsPage() {
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           {loading ? (
+            <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          ) : (
+            <DailyChart
+              days={days}
+              txns={incomeTransactions}
+              view="behaviour"
+              selectedDay={selectedDay}
+              onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
+              hlRhythm={false}
+              hlMomentum={false}
+              rhythmWeekday={null}
+              monthLabel={periodLabel}
+              reduce={reduce}
+              title="Earnings"
+              caption="Daily income by activity date"
+              instruction="Select a day to view its earnings"
+            />
+          )}
+        </MotionBox>
+
+        {selectedDay && (
+          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+            <SelectedDayIncomes day={selectedDay} incomes={selectedDayIncomes} />
+          </MotionBox>
+        )}
+
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
+          {loading ? (
             <Skeleton height="180px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
             <EarningsOverview
@@ -76,10 +134,56 @@ export default function EarningsPage() {
           {loading ? (
             <Skeleton height="300px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
-            <EarningsSources sources={sources} periodLabel={periodLabel} />
+            <EarningsSources
+              sources={sources}
+              periodLabel={periodLabel}
+            />
           )}
         </MotionBox>
       </MotionBox>
+    </Box>
+  )
+}
+
+function SelectedDayIncomes({ day, incomes }: { day: string; incomes: TxnVM[] }) {
+  const total = incomes.reduce((sum, income) => sum + income.amount, 0)
+  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+
+  return (
+    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
+      <VStack align="stretch" spacing={3}>
+        <Box>
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Earnings on {dayLabel}
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.35rem" color="var(--pb-income)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(total)}
+          </Text>
+        </Box>
+
+        {incomes.length === 0 ? (
+          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
+            No earnings recorded on this day.
+          </Text>
+        ) : (
+          <VStack align="stretch" spacing={1.5}>
+            {incomes.map((income) => (
+              <Box key={income.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
+                <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
+                  {income.merchant}
+                </Text>
+                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-income)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {fmtCurrency(income.amount)}
+                </Text>
+              </Box>
+            ))}
+          </VStack>
+        )}
+      </VStack>
     </Box>
   )
 }
