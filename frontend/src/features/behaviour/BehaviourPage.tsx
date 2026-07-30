@@ -95,7 +95,13 @@ export default function BehaviourPage() {
 
   // Expenses are shown only when their real transaction date is available.
   const spendingTransactions = useMemo(
-    () => transactions.filter((transaction) => transaction.type === 'EXPENSE' && Boolean(transaction.transactionDate)),
+    () => transactions.filter(
+      (transaction) =>
+        transaction.type === 'EXPENSE' &&
+        Boolean(transaction.transactionDate) &&
+        !transaction.isInstallment &&
+        transaction.installmentPlanId == null,
+    ),
     [transactions],
   )
 

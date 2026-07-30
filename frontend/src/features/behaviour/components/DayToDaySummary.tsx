@@ -31,7 +31,7 @@ export default function DayToDaySummary({
         </Text>
 
         <Text pt={3} borderTop="1px solid var(--pb-hair)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-          Only expenses with a transaction date are included
+          Installments are shown in Payments and Commitments
         </Text>
       </VStack>
     </Box>
