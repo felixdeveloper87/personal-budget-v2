@@ -1,4 +1,4 @@
-import { Box, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import { fmtCurrency } from '../../dashboard/components/format'
 
 interface DayToDaySummaryProps {
@@ -6,6 +6,7 @@ interface DayToDaySummaryProps {
   expense: number
   balance: number
   periodLabel: string
+  narrativePeriodLabel: string
 }
 
 export default function DayToDaySummary({
@@ -13,6 +14,7 @@ export default function DayToDaySummary({
   expense,
   balance,
   periodLabel,
+  narrativePeriodLabel,
 }: DayToDaySummaryProps) {
   return (
     <Box
@@ -22,8 +24,8 @@ export default function DayToDaySummary({
       boxShadow="var(--pb-shadow)"
       p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
-      <VStack align="stretch" spacing={3}>
-        <HStack justify="space-between" align="baseline" flexWrap="wrap" gap={2}>
+      <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" spacing={1}>
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="10.5px"
@@ -34,15 +36,12 @@ export default function DayToDaySummary({
             Day-to-day - {periodLabel}
           </Text>
           <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9.5px"
-            letterSpacing="0.1em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
+            fontSize="sm"
+            color="var(--pb-ink-soft)"
           >
-            Fixed payments &amp; installments excluded
+            Daily income and variable spending
           </Text>
-        </HStack>
+        </VStack>
 
         <Text
           fontFamily="var(--pb-serif)"
@@ -52,20 +51,42 @@ export default function DayToDaySummary({
           color="var(--pb-ink)"
           maxW="48ch"
         >
-          <Lede income={income} expense={expense} balance={balance} />
+          <Lede
+            income={income}
+            expense={expense}
+            balance={balance}
+            narrativePeriodLabel={narrativePeriodLabel}
+          />
+        </Text>
+
+        <Text
+          pt={3}
+          borderTop="1px solid var(--pb-hair)"
+          fontFamily="var(--pb-mono)"
+          fontSize="9.5px"
+          letterSpacing="0.08em"
+          textTransform="uppercase"
+          color="var(--pb-ink-faint)"
+        >
+          Fixed payments and installments are excluded
         </Text>
       </VStack>
     </Box>
   )
 }
 
-function Lede({ income, expense, balance }: Pick<DayToDaySummaryProps, 'income' | 'expense' | 'balance'>) {
+function Lede({
+  income,
+  expense,
+  balance,
+  narrativePeriodLabel,
+}: Pick<DayToDaySummaryProps, 'income' | 'expense' | 'balance' | 'narrativePeriodLabel'>) {
   if (income > 0 && balance >= 0) {
     return (
       <>
         You earned <Text as="em" color="var(--pb-income)">{fmtCurrency(income)}</Text>, spent{' '}
         <Text as="em" color="var(--pb-coral)">{fmtCurrency(expense)}</Text>, and kept{' '}
-        <Text as="em" color="var(--pb-income)">{fmtCurrency(balance)}</Text> in this period.
+        <Text as="em" color="var(--pb-income)">{fmtCurrency(balance)}</Text> in {narrativePeriodLabel}.
       </>
     )
   }
@@ -89,5 +110,5 @@ function Lede({ income, expense, balance }: Pick<DayToDaySummaryProps, 'income' 
     )
   }
 
-  return <>No earnings or spending logged day to day.</>
+  return <>No earnings or spending logged in {narrativePeriodLabel}.</>
 }

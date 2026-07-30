@@ -59,6 +59,27 @@ function buildDays(start: Date, end: Date): ChartDay[] {
   return days
 }
 
+function selectedDateLabel(date: Date, period: 'day' | 'week' | 'month' | 'year'): string {
+  if (period === 'month') {
+    return date.toLocaleDateString('en-GB', { month: 'long' })
+  }
+
+  if (period === 'week') {
+    const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+    const weekday = utcDate.getUTCDay() || 7
+    utcDate.setUTCDate(utcDate.getUTCDate() + 4 - weekday)
+    const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1))
+    const week = Math.ceil(((utcDate.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7)
+    return `Week ${week}`
+  }
+
+  if (period === 'day') {
+    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+  }
+
+  return String(date.getFullYear())
+}
+
 export default function BehaviourPage() {
   const reduce = useReducedMotion() ?? false
 
@@ -135,6 +156,7 @@ export default function BehaviourPage() {
   const groups = useMemo(() => buildLedger(vm, state), [vm, state])
 
   const periodLabel = formatLabel()
+  const narrativePeriodLabel = selectedDateLabel(selectedDate, selectedPeriod)
 
   const selectDay = (iso: string) => {
     if (state.selectedDay === iso) {
@@ -169,6 +191,7 @@ export default function BehaviourPage() {
             expense={periodData.expense}
             balance={periodData.balance}
             periodLabel={periodLabel}
+            narrativePeriodLabel={narrativePeriodLabel}
           />
         </MotionBox>
 
