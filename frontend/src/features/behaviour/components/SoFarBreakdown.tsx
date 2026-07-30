@@ -5,6 +5,7 @@ import type { BreakdownItem } from '../insights'
 interface SoFarBreakdownProps {
   spend: BreakdownItem[]
   earnings: BreakdownItem[]
+  showEarnings?: boolean
   /** e.g. "so far this month" or "in June 2026" (past periods). */
   scopeLabel: string
 }
@@ -16,9 +17,9 @@ const MAX_ROWS = 6
  * from <source>" — the source read from the transaction description (Uber,
  * Deliveroo, …). Everything is already day-to-day-filtered upstream.
  */
-export default function SoFarBreakdown({ spend, earnings, scopeLabel }: SoFarBreakdownProps) {
+export default function SoFarBreakdown({ spend, earnings, showEarnings = true, scopeLabel }: SoFarBreakdownProps) {
   return (
-    <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap="0.7rem" alignItems="stretch">
+    <Grid templateColumns={{ base: '1fr', md: showEarnings ? '1fr 1fr' : '1fr' }} gap="0.7rem" alignItems="stretch">
       <BreakdownPanel
         title="You spent"
         scopeLabel={scopeLabel}
@@ -28,15 +29,17 @@ export default function SoFarBreakdown({ spend, earnings, scopeLabel }: SoFarBre
         preposition="on"
         emptyText="No day-to-day expenses yet."
       />
-      <BreakdownPanel
-        title="You earned"
-        scopeLabel={scopeLabel}
-        items={earnings}
-        accent="var(--pb-income)"
-        barGradient="linear-gradient(to right, var(--pb-income), var(--pb-income-2))"
-        preposition="from"
-        emptyText="No earnings logged yet."
-      />
+      {showEarnings && (
+        <BreakdownPanel
+          title="You earned"
+          scopeLabel={scopeLabel}
+          items={earnings}
+          accent="var(--pb-income)"
+          barGradient="linear-gradient(to right, var(--pb-income), var(--pb-income-2))"
+          preposition="from"
+          emptyText="No earnings logged yet."
+        />
+      )}
     </Grid>
   )
 }

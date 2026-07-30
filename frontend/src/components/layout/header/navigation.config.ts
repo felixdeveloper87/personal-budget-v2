@@ -50,10 +50,10 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
   },
   {
     id: 'behaviour',
-    label: 'Behaviour',
-    shortLabel: 'Behaviour',
+    label: 'Expenses',
+    shortLabel: 'Expenses',
     icon: Activity,
-    description: 'How you spend, by purchase date',
+    description: 'Expenses by transaction date',
   },
   {
     id: 'earnings',
