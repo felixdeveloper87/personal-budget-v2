@@ -173,8 +173,19 @@ export default function BehaviourPage() {
           />
         </MotionBox>
 
-        {/* Cash flow first — the day-by-day picture leads the page */}
+        {/* Day-to-day summary first */}
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
+          <DayToDaySummary
+            income={periodData.income}
+            expense={periodData.expense}
+            balance={periodData.balance}
+            earnings={earnings}
+            daysElapsed={daysElapsed}
+            periodLabel={periodLabel}
+          />
+        </MotionBox>
+
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
@@ -191,18 +202,6 @@ export default function BehaviourPage() {
               reduce={reduce}
             />
           )}
-        </MotionBox>
-
-        {/* Income / Spending / Net summary right under the chart */}
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <DayToDaySummary
-            income={periodData.income}
-            expense={periodData.expense}
-            balance={periodData.balance}
-            earnings={earnings}
-            daysElapsed={daysElapsed}
-            periodLabel={periodLabel}
-          />
         </MotionBox>
 
         {/* "So far": spend per category · earnings per source (description) */}
