@@ -239,7 +239,7 @@ export default function BehaviourPage() {
         </Grid>
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <Distribution expense={expense} income={0} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
+          <Distribution expense={expense} income={[]} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
         </MotionBox>
 
         {/* Pattern insights close the page, just before the footer */}
