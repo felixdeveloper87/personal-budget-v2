@@ -11,6 +11,7 @@ import {
   CalendarDays,
   CalendarClock,
   CreditCard,
+  TrendingUp,
   type LucideIcon,
 } from '../../ui/icons'
 
@@ -23,6 +24,7 @@ export type AppPage =
   | 'fixed-payments'
   | 'commitments'
   | 'behaviour'
+  | 'earnings'
   | 'all-transactions'
   | 'payments'
   | 'goals'
@@ -52,6 +54,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Behaviour',
     icon: Activity,
     description: 'How you spend, by purchase date',
+  },
+  {
+    id: 'earnings',
+    label: 'Earnings',
+    shortLabel: 'Earnings',
+    icon: TrendingUp,
+    description: 'Income by source and period',
   },
   {
     id: 'payments',

@@ -35,7 +35,7 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
 }> = [
   {
     label: 'General view',
-    itemIds: ['dashboard', 'behaviour', 'payments', 'accounts', 'cards', 'all-transactions'],
+    itemIds: ['dashboard', 'behaviour', 'earnings', 'payments', 'accounts', 'cards', 'all-transactions'],
   },
   {
     label: 'Planning',
