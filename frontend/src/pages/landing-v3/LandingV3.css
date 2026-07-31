@@ -100,52 +100,6 @@
 }
 
 /* ==========================================================================
-   Preloader (0→100 counter + bar)
-   ========================================================================== */
-.pbv3-loader {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  display: grid;
-  place-content: center;
-  gap: 1.3rem;
-  background: var(--bg);
-  transition: opacity 0.6s ease, visibility 0.6s ease;
-}
-.pbv3-loader.done {
-  opacity: 0;
-  visibility: hidden;
-}
-.pbv3-loader__num {
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 9vw, 6rem);
-  line-height: 1;
-  color: var(--cream);
-}
-.pbv3-loader__num small {
-  color: var(--jade);
-}
-.pbv3-loader__bar {
-  height: 1px;
-  width: clamp(180px, 32vw, 360px);
-  background: var(--line);
-  overflow: hidden;
-}
-.pbv3-loader__bar i {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, var(--jade), var(--gold));
-}
-.pbv3-loader__cap {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-/* ==========================================================================
    Guilloché (code-generated security engraving)
    ========================================================================== */
 .pbv3-guilloche {
@@ -968,7 +922,7 @@
 }
 
 /* ==========================================================================
-   Reduced motion — flat mockup, all words lit, no cursor/loader
+   Reduced motion — flat mockup and all words lit
    ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
   .pbv3 *,
@@ -976,9 +930,6 @@
   .pbv3 *::after {
     animation: none !important;
     transition: none !important;
-  }
-  .pbv3-loader {
-    display: none !important;
   }
   .pbv3-hero__title .row > span,
   .pbv3-hero__sub,

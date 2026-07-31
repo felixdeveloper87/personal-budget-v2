@@ -199,9 +199,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
   const mockupRef = useRef<HTMLDivElement>(null)
   const budgetsRef = useRef<HTMLDivElement>(null)
 
-  const [pct, setPct] = useState(reduce ? 100 : 0)
-  const [loaderDone, setLoaderDone] = useState(reduce)
-
   const navCtaRef = useMagnetic<HTMLButtonElement>()
   const heroPrimaryRef = useMagnetic<HTMLButtonElement>()
   const heroSecondaryRef = useMagnetic<HTMLButtonElement>()
@@ -214,21 +211,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
       return { text: key ? w.slice(1, -1) : w, key }
     })
   }, [])
-
-  /* ----------------------------------------------------------- preloader -- */
-  useEffect(() => {
-    if (reduce) return
-    let v = 0
-    const id = window.setInterval(() => {
-      v = Math.min(100, v + Math.ceil(Math.random() * 7))
-      setPct(v)
-      if (v >= 100) {
-        clearInterval(id)
-        window.setTimeout(() => setLoaderDone(true), 450)
-      }
-    }, 90)
-    return () => clearInterval(id)
-  }, [reduce])
 
   /* -------------------------------------------------- nav scrolled toggle -- */
   useEffect(() => {
@@ -365,7 +347,7 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
       window.removeEventListener('scroll', onScroll)
       lenis.destroy()
     }
-  }, [reduce, loaderDone])
+  }, [reduce])
 
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -373,20 +355,6 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
   return (
     <div className="pbv3" ref={rootRef}>
       <div className="pbv3-grain" aria-hidden />
-
-      {/* preloader */}
-      {!loaderDone && (
-        <div className={`pbv3-loader${pct >= 100 ? ' done' : ''}`} aria-hidden>
-          <div className="pbv3-loader__num">
-            {String(pct).padStart(2, '0')}
-            <small>/100</small>
-          </div>
-          <div className="pbv3-loader__bar">
-            <i style={{ width: `${pct}%` }} />
-          </div>
-          <div className="pbv3-loader__cap">loading clarity…</div>
-        </div>
-      )}
 
       {/* nav */}
       <nav className="pbv3-nav" ref={navRef}>
