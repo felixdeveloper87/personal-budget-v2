@@ -26,7 +26,15 @@ type CardTotal = {
   nextPaymentDate: Date | null
 }
 
-export default function CardsPage() {
+interface CardsPageProps {
+  statementTarget?: { cardId: number; paymentDate: string } | null
+  onStatementTargetHandled?: () => void
+}
+
+const isoDate = (value: Date) =>
+  `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
+
+export default function CardsPage({ statementTarget = null, onStatementTargetHandled }: CardsPageProps) {
   const [cards, setCards] = useState<PaymentMethod[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -59,6 +67,20 @@ export default function CardsPage() {
   useEffect(() => {
     void load()
   }, [load])
+
+  useEffect(() => {
+    if (loading || !statementTarget) return
+
+    const card = cards.find((item) => item.id === statementTarget.cardId)
+    if (card) {
+      const statement = buildCardStatements(card, transactions).find(
+        (item) => isoDate(item.paymentDate) === statementTarget.paymentDate,
+      )
+      setSelectedId(card.id)
+      setOpenStatementKey(statement?.key ?? null)
+    }
+    onStatementTargetHandled?.()
+  }, [cards, loading, onStatementTargetHandled, statementTarget, transactions])
 
   const toggleValues = () => {
     setHideValues((current) => {

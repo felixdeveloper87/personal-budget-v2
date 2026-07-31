@@ -20,12 +20,22 @@ import type { AppPage } from './components/layout/header/navigation.config'
 
 interface PageRenderArgs {
   onPageChange: (page: AppPage) => void
+  cardStatementTarget: CardStatementTarget | null
+  onOpenCardStatement: (target: CardStatementTarget) => void
+  onCardStatementTargetHandled: () => void
+}
+
+interface CardStatementTarget {
+  cardId: number
+  paymentDate: string
 }
 
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
   accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
-  cards: () => <CardsPage />,
+  cards: ({ cardStatementTarget, onCardStatementTargetHandled }) => (
+    <CardsPage statementTarget={cardStatementTarget} onStatementTargetHandled={onCardStatementTargetHandled} />
+  ),
   transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   installments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="installments" />,
   'fixed-payments': ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="fixed" />,
@@ -33,7 +43,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   behaviour: () => <BehaviourPage />,
   earnings: () => <EarningsPage />,
   'all-transactions': () => <AllTransactionsPage />,
-  payments: () => <PaymentsPage />,
+  payments: ({ onOpenCardStatement }) => <PaymentsPage onOpenCardStatement={onOpenCardStatement} />,
   goals: () => <GoalsPage />,
   planning: ({ onPageChange }) => <PlanningPage onPageChange={onPageChange} />,
   reports: () => <ReportsPage />,
@@ -44,6 +54,12 @@ function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
   const [currentPage, setCurrentPage] = useState<AppPage>('dashboard')
+  const [cardStatementTarget, setCardStatementTarget] = useState<CardStatementTarget | null>(null)
+
+  const openCardStatement = (target: CardStatementTarget) => {
+    setCardStatementTarget(target)
+    setCurrentPage('cards')
+  }
 
   useEffect(() => {
     if (user?.admin) {
@@ -102,6 +118,9 @@ function AppContent() {
       <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
         {renderPage({
           onPageChange: setCurrentPage,
+          cardStatementTarget,
+          onOpenCardStatement: openCardStatement,
+          onCardStatementTargetHandled: () => setCardStatementTarget(null),
         })}
       </Layout>
     )

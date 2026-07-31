@@ -12,7 +12,7 @@ import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
-import { toViewModel } from '../transactions/transactions.utils'
+import { collapseCardStatements, toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { listPaymentMethods } from '../../api'
 
@@ -20,6 +20,10 @@ import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
 
 import UpcomingPayments from './components/UpcomingPayments'
+
+interface PaymentsPageProps {
+  onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
+}
 
 function isoOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
@@ -40,11 +44,11 @@ function buildDays(start: Date, end: Date): ChartDay[] {
   return days
 }
 
-export default function PaymentsPage() {
+export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps) {
   const reduce = useReducedMotion() ?? false
 
   // Credit-card id → name, used to fold a card's charges into one fatura row.
-  const [, setCardNames] = useState<Map<number, string>>(() => new Map())
+  const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
   useEffect(() => {
     let alive = true
     listPaymentMethods()
@@ -107,12 +111,18 @@ export default function PaymentsPage() {
     () => buildDays(periodData.startDate, periodData.endDate),
     [periodData.startDate, periodData.endDate],
   )
-  const selectedDayPayments = useMemo(
-    () => selectedChartDay
-      ? vm.filter((transaction) => transaction.type === 'out' && transaction.settlementDate === selectedChartDay)
-      : [],
-    [vm, selectedChartDay],
-  )
+  const selectedDayPayments = useMemo(() => {
+    if (!selectedChartDay) return []
+
+    const rows = vm.filter(
+      (transaction) => transaction.type === 'out' && transaction.settlementDate === selectedChartDay,
+    )
+    const total = rows.reduce((sum, transaction) => sum + transaction.amount, 0)
+    return collapseCardStatements(
+      [{ key: selectedChartDay, date: new Date(`${selectedChartDay}T00:00:00`), rows, inTotal: 0, outTotal: total }],
+      cardNames,
+    )[0]?.rows ?? []
+  }, [cardNames, selectedChartDay, vm])
 
   const periodLabel = formatLabel()
 
@@ -166,7 +176,11 @@ export default function PaymentsPage() {
 
         {selectedChartDay && (
           <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-            <SelectedDayPayments day={selectedChartDay} payments={selectedDayPayments} />
+            <SelectedDayPayments
+              day={selectedChartDay}
+              payments={selectedDayPayments}
+              onOpenCardStatement={onOpenCardStatement}
+            />
           </MotionBox>
         )}
 
@@ -225,7 +239,15 @@ function PaymentsSummary({
   )
 }
 
-function SelectedDayPayments({ day, payments }: { day: string; payments: TxnVM[] }) {
+function SelectedDayPayments({
+  day,
+  payments,
+  onOpenCardStatement,
+}: {
+  day: string
+  payments: TxnVM[]
+  onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
+}) {
   const total = payments.reduce((sum, payment) => sum + payment.amount, 0)
   const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -251,7 +273,16 @@ function SelectedDayPayments({ day, payments }: { day: string; payments: TxnVM[]
           </Text>
         ) : (
           <VStack align="stretch" spacing={1.5}>
-            {payments.map((payment) => (
+            {payments.map((payment) => payment.statement ? (
+              <StatementPaymentRow
+                key={payment.id}
+                payment={payment}
+                onOpen={() => onOpenCardStatement?.({
+                  cardId: payment.statement!.cardId,
+                  paymentDate: payment.settlementDate,
+                })}
+              />
+            ) : (
               <Box key={payment.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
                 <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
                   {payment.merchant}
@@ -264,6 +295,47 @@ function SelectedDayPayments({ day, payments }: { day: string; payments: TxnVM[]
           </VStack>
         )}
       </VStack>
+    </Box>
+  )
+}
+
+function StatementPaymentRow({ payment, onOpen }: { payment: TxnVM; onOpen: () => void }) {
+  const statementMonth = new Date(`${payment.settlementDate}T00:00:00`).toLocaleDateString('en-GB', {
+    month: 'long',
+    year: 'numeric',
+  })
+
+  return (
+    <Box
+      as="button"
+      type="button"
+      onClick={onOpen}
+      display="flex"
+      w="full"
+      justifyContent="space-between"
+      alignItems="baseline"
+      gap={4}
+      py="0.7rem"
+      borderTop="1px solid var(--pb-hair)"
+      textAlign="left"
+      cursor="pointer"
+      borderRadius="10px"
+      px={2}
+      mx={-2}
+      _hover={{ bg: 'var(--pb-surface-2)' }}
+      _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+    >
+      <Box minW={0}>
+        <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
+          {payment.merchant} statement
+        </Text>
+        <Text mt={0.5} fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" noOfLines={1}>
+          {statementMonth} statement · View card statement
+        </Text>
+      </Box>
+      <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {fmtCurrency(payment.amount)}
+      </Text>
     </Box>
   )
 }
