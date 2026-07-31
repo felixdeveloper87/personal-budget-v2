@@ -9,6 +9,7 @@ import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
+import TopMerchants from '../dashboard/components/TopMerchants'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import {
@@ -211,6 +212,14 @@ export default function BehaviourPage() {
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution expense={expense} income={[]} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
+        </MotionBox>
+
+        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
+          {loading ? (
+            <Skeleton height="260px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          ) : (
+            <TopMerchants transactions={periodData.transactions} />
+          )}
         </MotionBox>
 
         {/* Pattern insights close the page, just before the footer */}
