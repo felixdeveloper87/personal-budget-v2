@@ -19,7 +19,6 @@ export const HERO = {
     'Personal Budget turns a thousand small money decisions into one calm, honest picture — every transaction, category and trend, kept sharp.',
   primaryCta: 'Start free',
   secondaryCta: 'See it move',
-  cursorCta: 'Begin',
 } as const
 
 /** Ticker stats — marquee that skews with scroll velocity. */

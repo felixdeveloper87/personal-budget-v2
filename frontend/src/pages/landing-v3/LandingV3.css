@@ -100,61 +100,6 @@
 }
 
 /* ==========================================================================
-   Custom cursor — lerped dot that expands into a label pill over
-   [data-cursor] targets (nav links, CTAs). Only enabled by the component
-   when the pointer is fine and motion isn't reduced, so the OS cursor is
-   never hidden without a replacement.
-   ========================================================================== */
-.pbv3--cursor,
-.pbv3--cursor a,
-.pbv3--cursor button {
-  cursor: none;
-}
-.pbv3-cursor {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 10px;
-  height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  background: var(--jade);
-  z-index: 300;
-  pointer-events: none;
-  display: grid;
-  place-items: center;
-  transition:
-    width 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    height 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    margin 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    background 0.35s ease;
-  will-change: transform;
-}
-.pbv3-cursor.active {
-  width: 86px;
-  height: 86px;
-  margin: -43px 0 0 -43px;
-  background: var(--cream);
-}
-.pbv3-cursor__label {
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--bg);
-  opacity: 0;
-  transition: opacity 0.25s ease 0.05s;
-}
-.pbv3-cursor.active .pbv3-cursor__label {
-  opacity: 1;
-}
-@media (pointer: coarse) {
-  .pbv3-cursor {
-    display: none;
-  }
-}
-
-/* ==========================================================================
    Preloader (0→100 counter + bar)
    ========================================================================== */
 .pbv3-loader {
