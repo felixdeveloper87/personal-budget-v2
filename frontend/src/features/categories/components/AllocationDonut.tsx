@@ -77,6 +77,7 @@ export default function AllocationDonut({
                 opacity: activeCat && activeCat !== s.id ? 0.3 : 1,
                 transform: activeCat === s.id ? `translate(${s.dx}px, ${s.dy}px)` : undefined,
                 transition: 'opacity 0.2s, transform 0.2s',
+                outline: 'none',
               }}
               role="button"
               tabIndex={0}

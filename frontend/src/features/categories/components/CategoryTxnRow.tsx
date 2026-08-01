@@ -19,8 +19,12 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
     <Flex
       align="center"
       gap={3}
+      px="0.45rem"
       py={2.5}
       borderBottom="1px solid var(--pb-hair)"
+      borderRadius="10px"
+      transition="background .16s ease, transform .16s ease"
+      _hover={{ bg: 'var(--pb-surface-2)', transform: 'translateX(2px)' }}
       _last={{ borderBottom: 'none' }}
     >
       <Flex

@@ -3,7 +3,7 @@ import { Box, Flex, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, Layers, ReceiptText } from '../../../components/ui/icons'
 import { condenseCategories, computeSide } from '../data/computeSide'
-import { gbp } from '../data/format'
+import { gbp, hexA } from '../data/format'
 import type { Category, ComputedCategory, Side, ViewMode } from '../data/types'
 import AllocationDonut from './AllocationDonut'
 import CategoryTransactionsModal from './CategoryTransactionsModal'
@@ -223,44 +223,53 @@ function CategorySpotlight({
   const moreTransactions = Math.max(0, cat.shownCount - shownTransactions.length)
 
   return (
-    <Box border="1px solid var(--pb-hair-2)" borderRadius="16px" bg="var(--pb-surface)" p="1rem" boxShadow="0 6px 18px rgba(15,23,42,.05)">
-      <Flex align="flex-start" justify="space-between" gap={3}>
+    <Box position="relative" overflow="hidden" border="1px solid var(--pb-hair-2)" borderRadius="18px" bg="var(--pb-surface)" p="clamp(1rem,2vw,1.25rem)" boxShadow="0 12px 30px rgba(15,23,42,.07)">
+      <Box position="absolute" insetX={0} top={0} h="2px" bg={cat.color} opacity={0.9} />
+      <Box position="absolute" top="-90px" right="-70px" w="220px" h="220px" borderRadius="full" bg={hexA(cat.color, 0.1)} filter="blur(34px)" pointerEvents="none" />
+
+      <Flex position="relative" align="flex-start" justify="space-between" gap={4}>
         <HStack spacing={2.5} minW={0}>
-          <Flex w="34px" h="34px" align="center" justify="center" borderRadius="11px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" flexShrink={0}>
-            <Icon as={cat.icon} boxSize="18px" color={cat.color} />
+          <Flex w="40px" h="40px" align="center" justify="center" borderRadius="13px" bg={hexA(cat.color, 0.1)} border="1px solid" borderColor={hexA(cat.color, 0.34)} flexShrink={0}>
+            <Icon as={cat.icon} boxSize="20px" color={cat.color} weight="duotone" />
           </Flex>
           <Box minW={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.11em" textTransform="uppercase" color="var(--pb-ink-faint)">Category spotlight</Text>
-            <Text fontFamily="var(--pb-serif)" fontSize="1.2rem" lineHeight="1.15" color="var(--pb-ink)" noOfLines={1}>{cat.name}</Text>
+            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">Category spotlight</Text>
+            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem,2vw,1.45rem)" lineHeight="1.08" color="var(--pb-ink)" noOfLines={1}>{cat.name}</Text>
           </Box>
         </HStack>
         <Box textAlign="right" flexShrink={0}>
-          <Text className="num" fontSize="1.25rem" fontWeight={600} lineHeight="1" color={amountColor}>{gbp(cat.amount)}</Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" color="var(--pb-ink-faint)" mt={1}>{cat.pct.toFixed(1)}% of total</Text>
+          <Text className="num" fontFamily="var(--pb-serif)" fontSize="clamp(1.45rem,2.4vw,1.85rem)" fontWeight={500} lineHeight="0.95" color={amountColor}>{gbp(cat.amount)}</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt={1}>{cat.pct.toFixed(1)}% of total</Text>
         </Box>
       </Flex>
 
-      <HStack mt={3} pt={3} borderTop="1px solid var(--pb-hair)" spacing={1.5} color={changeColor}>
+      <HStack position="relative" display="inline-flex" mt={3} px="0.55rem" py="0.38rem" borderRadius="999px" spacing={1.5} color={changeColor} bg={cat.change === 0 ? 'var(--pb-surface-2)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.1)} border="1px solid" borderColor={cat.change === 0 ? 'var(--pb-hair)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.24)}>
         <Icon as={cat.change >= 0 ? ArrowUpRight : ArrowDownRight} boxSize="14px" />
-        <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.05em">{comparison}</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.06em" textTransform="uppercase">{comparison}</Text>
       </HStack>
 
-      <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={3}>
+      <Grid position="relative" templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={3.5}>
         <Metric icon={ReceiptText} label="Transactions" value={String(cat.shownCount)} />
         <Metric icon={CalendarDays} label="Active days" value={String(cat.activeDays)} />
         <Metric icon={cat.icon} label="Avg. spend" value={gbp(cat.averageAmount)} />
       </Grid>
 
       {cat.topMerchant && (
-        <Text mt={3} fontSize="sm" color="var(--pb-ink-soft)" noOfLines={1}>
-          Top merchant: <Text as="span" fontWeight={600} color="var(--pb-ink)">{cat.topMerchant}</Text>
-        </Text>
+        <Flex position="relative" mt={3} align="baseline" gap={1.5} fontSize="sm" noOfLines={1}>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">Top merchant</Text>
+          <Text fontFamily="var(--pb-serif)" fontSize="1rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{cat.topMerchant}</Text>
+        </Flex>
       )}
 
-      <Box mt={4} pt={3} borderTop="1px solid var(--pb-hair)">
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)" mb={2}>
-          Recent transactions
-        </Text>
+      <Box position="relative" mt={4} pt={3.5} borderTop="1px solid var(--pb-hair)">
+        <Flex align="center" justify="space-between" mb={1}>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            Recent transactions
+          </Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.06em" color="var(--pb-ink-faint)">
+            {cat.shownCount} total
+          </Text>
+        </Flex>
         <VStack align="stretch" spacing={0}>
           {shownTransactions.map((transaction) => (
             <CategoryTxnRow key={transaction.id} txn={transaction} icon={cat.icon} color={cat.color} side={side} />
@@ -272,19 +281,25 @@ function CategorySpotlight({
             type="button"
             onClick={onViewAll}
             align="center"
-            gap="0.35rem"
-            pt="0.8rem"
+            justify="center"
+            minH="38px"
+            mt={2}
             w="full"
+            borderRadius="10px"
+            bg={hexA(cat.color, 0.09)}
+            border="1px solid"
+            borderColor={hexA(cat.color, 0.28)}
             fontFamily="var(--pb-mono)"
             fontSize="9.5px"
             letterSpacing="0.06em"
             textTransform="uppercase"
-            color="var(--pb-income)"
+            color={cat.color}
             cursor="pointer"
-            _hover={{ textDecoration: 'underline' }}
-            _focusVisible={{ outline: 'none', textDecoration: 'underline' }}
+            transition="background .16s ease, transform .16s ease"
+            _hover={{ bg: hexA(cat.color, 0.16), transform: 'translateY(-1px)' }}
+            _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '2px' }}
           >
-            +{moreTransactions} more in this category
+            View {moreTransactions} more transaction{moreTransactions !== 1 ? 's' : ''}
           </Flex>
         )}
       </Box>
@@ -295,12 +310,12 @@ function CategorySpotlight({
 
 function Metric({ icon, label, value }: { icon: ComputedCategory['icon']; label: string; value: string }) {
   return (
-    <Box bg="var(--pb-surface-2)" borderRadius="10px" p="0.55rem" minW={0}>
+    <Box bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="11px" p="0.65rem" minW={0}>
       <HStack spacing={1} color="var(--pb-ink-faint)">
-        <Icon as={icon} boxSize="11px" />
+        <Icon as={icon} boxSize="10px" />
         <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.04em" textTransform="uppercase" noOfLines={1}>{label}</Text>
       </HStack>
-      <Text className="num" mt={1} fontSize="0.95rem" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{value}</Text>
+      <Text className="num" mt={1.5} fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{value}</Text>
     </Box>
   )
 }
