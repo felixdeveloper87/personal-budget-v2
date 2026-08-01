@@ -1,4 +1,4 @@
-import { Box, Text, VStack } from '@chakra-ui/react'
+import { Box, Icon, Text, VStack } from '@chakra-ui/react'
 import { gbp } from '../data/format'
 import type { ComputedCategory, Side } from '../data/types'
 
@@ -42,13 +42,15 @@ export default function AllocationDonut({
 
   let angle = -Math.PI / 2
   const segments = rows.map((c) => {
-    const a1 = angle + (c.amount / total) * 2 * Math.PI
-    const d = arc(cx, cy, rO, rI, angle, a1)
+    const a0 = angle
+    const a1 = a0 + (c.amount / total) * 2 * Math.PI
+    const d = arc(cx, cy, rO, rI, a0, a1)
     angle = a1
-    return { id: c.id, d, color: c.color }
+    const midpoint = (a0 + a1) / 2
+    return { id: c.id, d, color: c.color, dx: Math.cos(midpoint) * 5, dy: Math.sin(midpoint) * 5 }
   })
 
-  const active = activeCat ? rows.find((c) => c.id === activeCat) ?? null : null
+  const active = (activeCat ? rows.find((c) => c.id === activeCat) : null) ?? rows[0] ?? null
 
   return (
     <Box position="relative" w="min(280px, 78vw)" mx="auto" mt="0.2rem">
@@ -73,11 +75,24 @@ export default function AllocationDonut({
               style={{
                 cursor: 'pointer',
                 opacity: activeCat && activeCat !== s.id ? 0.3 : 1,
-                transition: 'opacity 0.2s',
+                transform: activeCat === s.id ? `translate(${s.dx}px, ${s.dy}px)` : undefined,
+                transition: 'opacity 0.2s, transform 0.2s',
               }}
+              role="button"
+              tabIndex={0}
+              aria-label={`Show ${rows.find((row) => row.id === s.id)?.name ?? 'category'}`}
+              aria-pressed={activeCat === s.id}
               onMouseEnter={() => onActive(s.id)}
               onMouseLeave={() => onActive(null)}
+              onFocus={() => onActive(s.id)}
+              onBlur={() => onActive(null)}
               onClick={() => onSegmentClick(s.id)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  onSegmentClick(s.id)
+                }
+              }}
             />
           ))}
         </g>
@@ -98,6 +113,7 @@ export default function AllocationDonut({
         pointerEvents="none"
         px="22%"
       >
+        {active && <Icon as={active.icon} boxSize="15px" color={active.color} mb="0.1rem" />}
         <Text
           fontFamily="var(--pb-mono)"
           fontSize="9px"

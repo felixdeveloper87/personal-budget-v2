@@ -4,7 +4,7 @@ import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
-import { usePeriodData } from '../../hooks/usePeriodData'
+import { getPreviousPeriodDate, usePeriodData } from '../../hooks/usePeriodData'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -85,6 +85,11 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
   const [selectedChartDay, setSelectedChartDay] = useState<string | null>(null)
 
   const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'cash-flow')
+  const previousDate = useMemo(
+    () => getPreviousPeriodDate(selectedDate, selectedPeriod),
+    [selectedDate, selectedPeriod],
+  )
+  const previousPeriodData = usePeriodData(transactions, null, selectedPeriod, previousDate, 'cash-flow')
   const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
 
   // Upcoming schedule reads the FULL list (future payment dates fall outside the period).
@@ -96,6 +101,14 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
+  const previousExpense = useMemo(
+    () => aggregateSide(previousPeriodData.transactions, 'expense'),
+    [previousPeriodData.transactions],
+  )
+  const previousIncome = useMemo(
+    () => aggregateSide(previousPeriodData.transactions, 'income'),
+    [previousPeriodData.transactions],
+  )
 
   // Outflow-focused triad: total owed this period, what has already settled, and
   // what is still scheduled — split on settlement date vs today.
@@ -189,7 +202,15 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
         </MotionBox>
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <Distribution expense={expense} income={income} view="payments" periodLabel={periodLabel} initialSide="expense" />
+          <Distribution
+            expense={expense}
+            income={income}
+            previousExpense={previousExpense}
+            previousIncome={previousIncome}
+            view="payments"
+            periodLabel={periodLabel}
+            initialSide="expense"
+          />
         </MotionBox>
 
       </MotionBox>

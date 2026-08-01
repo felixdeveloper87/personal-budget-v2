@@ -1,5 +1,5 @@
 import { Box, Collapse, Flex, HStack, Icon, Text } from '@chakra-ui/react'
-import { ChevronDown, List } from '../../../components/ui/icons'
+import { ArrowDownRight, ArrowUpRight, ChevronDown, List } from '../../../components/ui/icons'
 import { gbp } from '../data/format'
 import type { ComputedCategory, Side } from '../data/types'
 import CategoryTxnRow from './CategoryTxnRow'
@@ -31,6 +31,7 @@ export default function CategoryRow({
 
   const shown = cat.sample.slice(0, DISPLAY_LIMIT)
   const more = Math.max(0, cat.shownCount - shown.length)
+  const hasComparison = cat.changePct !== null
 
   return (
     <Box
@@ -85,6 +86,23 @@ export default function CategoryRow({
             mt="0.14rem"
           >
             {cat.shownCount} transaction{cat.shownCount !== 1 ? 's' : ''}
+          </Text>
+          <Text
+            display="flex"
+            alignItems="center"
+            gap="0.18rem"
+            fontFamily="var(--pb-mono)"
+            fontSize="9.5px"
+            letterSpacing="0.04em"
+            color={cat.change > 0 ? 'var(--pb-coral)' : cat.change < 0 ? 'var(--pb-income)' : 'var(--pb-ink-faint)'}
+            mt="0.12rem"
+          >
+            {hasComparison ? (
+              <>
+                <Icon as={cat.change >= 0 ? ArrowUpRight : ArrowDownRight} boxSize="11px" />
+                {Math.abs(cat.changePct!).toFixed(0)}% vs previous
+              </>
+            ) : 'New this period'}
           </Text>
         </Box>
 

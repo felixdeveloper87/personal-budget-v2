@@ -30,4 +30,10 @@ export interface ComputedCategory extends Category {
   amount: number
   shownCount: number
   pct: number
+  previousAmount: number
+  change: number
+  changePct: number | null
+  averageAmount: number
+  activeDays: number
+  topMerchant: string | null
 }

@@ -131,6 +131,10 @@ export default function BehaviourPage() {
   const spendBreakdown = useMemo(() => spendByCategory(vm), [vm])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
+  const previousExpense = useMemo(
+    () => aggregateSide(prevPeriodData.transactions, 'expense'),
+    [prevPeriodData.transactions],
+  )
 
   const days = useMemo(
     () => buildDays(periodData.startDate, periodData.endDate),
@@ -212,7 +216,14 @@ export default function BehaviourPage() {
         )}
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <Distribution expense={expense} income={[]} view="behaviour" periodLabel={periodLabel} initialSide="expense" />
+          <Distribution
+            expense={expense}
+            income={[]}
+            previousExpense={previousExpense}
+            view="behaviour"
+            periodLabel={periodLabel}
+            initialSide="expense"
+          />
         </MotionBox>
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
