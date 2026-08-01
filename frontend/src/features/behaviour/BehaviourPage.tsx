@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Flex, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -207,9 +207,11 @@ export default function BehaviourPage() {
         </MotionBox>
 
         {selectedChartDay && (
-          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-            <SelectedDayExpenses day={selectedChartDay} expenses={selectedDayExpenses} />
-          </MotionBox>
+          <SelectedDayExpenses
+            day={selectedChartDay}
+            expenses={selectedDayExpenses}
+            onClose={() => setSelectedChartDay(null)}
+          />
         )}
 
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
@@ -242,7 +244,15 @@ export default function BehaviourPage() {
   )
 }
 
-function SelectedDayExpenses({ day, expenses }: { day: string; expenses: TxnVM[] }) {
+function SelectedDayExpenses({
+  day,
+  expenses,
+  onClose,
+}: {
+  day: string
+  expenses: TxnVM[]
+  onClose: () => void
+}) {
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0)
   const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -251,9 +261,13 @@ function SelectedDayExpenses({ day, expenses }: { day: string; expenses: TxnVM[]
   })
 
   return (
-    <Box position="relative" overflow="hidden" bg="var(--pb-surface)" border="1px solid var(--pb-tint-coral)" borderRadius="20px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
-      <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2), transparent)" />
-      <VStack align="stretch" spacing={5}>
+    <Modal isOpen onClose={onClose} isCentered size="lg">
+      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
+      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-coral)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Expenses on ${dayLabel}`}>
+        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' }} />
+        <ModalBody p={{ base: 5, sm: 6 }}>
+          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2), transparent)" />
+          <VStack align="stretch" spacing={5}>
         <Flex justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
           <Box>
             <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">
@@ -310,7 +324,9 @@ function SelectedDayExpenses({ day, expenses }: { day: string; expenses: TxnVM[]
             ))}
           </VStack>
         )}
-      </VStack>
-    </Box>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   )
 }
