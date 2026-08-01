@@ -1,4 +1,4 @@
-import { Box, Grid, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Grid, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -11,6 +11,7 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
+import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
@@ -164,22 +165,18 @@ function SelectedDayIncomes({
   })
 
   return (
-    <Modal isOpen onClose={onClose} isCentered size="lg">
-      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
-      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-income)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Earnings on ${dayLabel}`}>
-        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-income)', color: 'var(--pb-income)' }} />
-        <ModalBody p={{ base: 5, sm: 6 }}>
-          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-income), var(--pb-income-2), transparent)" />
-          <VStack align="stretch" spacing={3}>
-        <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            Earnings on {dayLabel}
-          </Text>
-          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.35rem" color="var(--pb-income)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(total)}
-          </Text>
-        </Box>
-
+    <ActivityDayModal
+      isOpen
+      onClose={onClose}
+      label={`Earnings on ${dayLabel}`}
+      tone="income"
+      title={dayLabel}
+      totalLabel="Received"
+      total={fmtCurrency(total)}
+      count={incomes.length}
+      dateContext="Activity date"
+    >
+      <VStack align="stretch" spacing={2}>
         {incomes.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
             No earnings recorded on this day.
@@ -198,10 +195,8 @@ function SelectedDayIncomes({
             ))}
           </VStack>
         )}
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+      </VStack>
+    </ActivityDayModal>
   )
 }
 

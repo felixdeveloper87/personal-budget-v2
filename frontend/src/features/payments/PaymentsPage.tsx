@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -12,6 +12,7 @@ import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
+import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import { collapseCardStatements, toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { listPaymentMethods } from '../../api'
@@ -257,22 +258,18 @@ function SelectedDayPayments({
   })
 
   return (
-    <Modal isOpen onClose={onClose} isCentered size="lg">
-      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
-      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-coral)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Payments on ${dayLabel}`}>
-        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' }} />
-        <ModalBody p={{ base: 5, sm: 6 }}>
-          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2), transparent)" />
-          <VStack align="stretch" spacing={3}>
-        <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            Payments on {dayLabel}
-          </Text>
-          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.35rem" color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(total)}
-          </Text>
-        </Box>
-
+    <ActivityDayModal
+      isOpen
+      onClose={onClose}
+      label={`Payments on ${dayLabel}`}
+      tone="expense"
+      title={dayLabel}
+      totalLabel="Paid"
+      total={fmtCurrency(total)}
+      count={payments.length}
+      dateContext="Settlement date"
+    >
+      <VStack align="stretch" spacing={2}>
         {payments.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
             No payments recorded on this day.
@@ -303,10 +300,8 @@ function SelectedDayPayments({
             ))}
           </VStack>
         )}
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+      </VStack>
+    </ActivityDayModal>
   )
 }
 

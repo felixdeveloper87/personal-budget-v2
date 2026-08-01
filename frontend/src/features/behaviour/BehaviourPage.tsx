@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -12,6 +12,7 @@ import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import TopMerchants from '../dashboard/components/TopMerchants'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
+import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import {
   deriveHabit,
   deriveMomentum,
@@ -261,39 +262,18 @@ function SelectedDayExpenses({
   })
 
   return (
-    <Modal isOpen onClose={onClose} isCentered size="lg">
-      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
-      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-coral)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Expenses on ${dayLabel}`}>
-        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' }} />
-        <ModalBody p={{ base: 5, sm: 6 }}>
-          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2), transparent)" />
-          <VStack align="stretch" spacing={5}>
-        <Flex justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
-          <Box>
-            <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">
-              Selected day
-            </Text>
-            <Text mt={1} fontFamily="var(--pb-serif)" fontSize="clamp(1.3rem, 3vw, 1.65rem)" lineHeight={1.1} color="var(--pb-ink)">
-              {dayLabel}
-            </Text>
-            <HStack mt={2} spacing={2}>
-              <Box px={2} py="3px" borderRadius="full" bg="var(--pb-tint-coral)" color="var(--pb-coral)" fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={600} letterSpacing="0.06em" textTransform="uppercase">
-                {expenses.length} {expenses.length === 1 ? 'transaction' : 'transactions'}
-              </Box>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.05em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                Activity date
-              </Text>
-            </HStack>
-          </Box>
-
-          <Box minW={{ base: 'full', sm: '145px' }} bg="var(--pb-tint-coral)" border="1px solid var(--pb-tint-coral)" borderRadius="14px" px={4} py={3} textAlign={{ base: 'left', sm: 'right' }}>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">Spent</Text>
-            <Text mt={1} fontFamily="var(--pb-serif)" fontSize="1.45rem" lineHeight={1} color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {fmtCurrency(total)}
-            </Text>
-          </Box>
-        </Flex>
-
+    <ActivityDayModal
+      isOpen
+      onClose={onClose}
+      label={`Expenses on ${dayLabel}`}
+      tone="expense"
+      title={dayLabel}
+      totalLabel="Spent"
+      total={fmtCurrency(total)}
+      count={expenses.length}
+      dateContext="Activity date"
+    >
+      <VStack align="stretch" spacing={2}>
         {expenses.length === 0 ? (
           <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
             <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
@@ -324,9 +304,7 @@ function SelectedDayExpenses({
             ))}
           </VStack>
         )}
-          </VStack>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+      </VStack>
+    </ActivityDayModal>
   )
 }

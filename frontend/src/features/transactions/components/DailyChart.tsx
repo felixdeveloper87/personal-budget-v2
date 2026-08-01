@@ -56,7 +56,6 @@ export default function DailyChart({
 
   // Payments is an outflow-only lens — drop the income series entirely.
   const isSpendingVariant = variant === 'spending'
-  const showIncome = !isSpendingVariant && view !== 'payments'
 
   const totals = useMemo(() => {
     const map = new Map<string, { in: number; out: number }>()
@@ -70,6 +69,16 @@ export default function DailyChart({
     return map
   }, [txns, view])
 
+  const hasIncome = useMemo(
+    () => !isSpendingVariant && view !== 'payments' && txns.some((transaction) => transaction.type === 'in'),
+    [isSpendingVariant, txns, view],
+  )
+  const hasOutflow = useMemo(
+    () => txns.some((transaction) => transaction.type === 'out'),
+    [txns],
+  )
+  const splitSeries = hasIncome && hasOutflow
+
   const n = Math.max(days.length, 1)
   const colW = VW / n
 
@@ -77,10 +86,10 @@ export default function DailyChart({
     let maximum = 0
     for (const day of days) {
       const values = totals.get(day.iso)
-      if (values) maximum = Math.max(maximum, showIncome ? values.in : 0, values.out)
+      if (values) maximum = Math.max(maximum, hasIncome ? values.in : 0, hasOutflow ? values.out : 0)
     }
     return maximum || 1
-  }, [days, totals])
+  }, [days, hasIncome, hasOutflow, totals])
 
   const spendingSummary = useMemo(() => {
     let total = 0
@@ -133,9 +142,9 @@ export default function DailyChart({
     <Box className={`pb-chart-card ${isSpendingVariant ? 'pb-chart-card-spending' : ''}`}>
       <Flex className="pb-chart-heading" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap=".75rem" direction={{ base: 'column', sm: 'row' }}>
         <Box>
-          <Text className="pb-chart-kicker">{title ?? (showIncome ? 'Cash flow' : 'Outflow')}</Text>
+          <Text className="pb-chart-kicker">{title ?? (hasIncome ? 'Cash flow' : 'Outflow')}</Text>
           <Text className="pb-chart-caption">
-            {caption ?? (showIncome ? 'Daily income and spending' : 'Daily payments by settlement date')}
+            {caption ?? (hasIncome ? 'Daily income and spending' : 'Daily payments by settlement date')}
           </Text>
         </Box>
         {isSpendingVariant ? (
@@ -159,8 +168,8 @@ export default function DailyChart({
             <div className="pb-chart-tip-head">
               {WD_SHORT[parseISO(hover.iso).getDay()]} {parseISO(hover.iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }).toUpperCase()}
             </div>
-            {showIncome && <div className="pb-chart-tip-row in"><span>In</span><span>{fmtCurrency(hover.inV, { minimumFractionDigits: 2 })}</span></div>}
-            <div className="pb-chart-tip-row out"><span>Out</span><span>{fmtCurrency(hover.outV, { minimumFractionDigits: 2 })}</span></div>
+            {hasIncome && <div className="pb-chart-tip-row in"><span>In</span><span>{fmtCurrency(hover.inV, { minimumFractionDigits: 2 })}</span></div>}
+            {hasOutflow && <div className="pb-chart-tip-row out"><span>Out</span><span>{fmtCurrency(hover.outV, { minimumFractionDigits: 2 })}</span></div>}
           </Box>
         )}
 
@@ -168,7 +177,7 @@ export default function DailyChart({
           className={svgClass}
           viewBox={`0 0 ${VW} ${VH}`}
           role="img"
-          aria-label={`${showIncome ? 'Daily income and spending' : 'Daily payments'} for ${monthLabel}`}
+          aria-label={`${hasIncome ? 'Daily income and spending' : 'Daily payments'} for ${monthLabel}`}
           onMouseLeave={() => setHover(null)}
         >
           <defs>
@@ -197,9 +206,9 @@ export default function DailyChart({
           <g>
             {days.map((day, i) => {
               const values = totals.get(day.iso)
-              if (!values || ((!showIncome || values.in === 0) && values.out === 0)) return null
-              const hOut = scale(values.out)
-              const hIn = showIncome ? scale(values.in) : 0
+              if (!values || ((values.in === 0 || !hasIncome) && (values.out === 0 || !hasOutflow))) return null
+              const hOut = hasOutflow ? scale(values.out) : 0
+              const hIn = hasIncome ? scale(values.in) : 0
               const x = i * colW + colW * 0.08
               const w = Math.max(2, colW * 0.84)
               const style = reduce ? undefined : ({ animationDelay: `${i * 9}ms` } as const)
@@ -207,8 +216,8 @@ export default function DailyChart({
               // Income and spending are drawn side by side, both anchored on the
               // baseline. Stacking them let the combined height exceed the plot
               // area (each series is scaled independently) and cover the header.
-              const gap = w > 6 ? 1.5 : 0.5
-              const wHalf = Math.max(1.5, (w - gap) / 2)
+              const gap = splitSeries && w > 6 ? 1.5 : 0.5
+              const wHalf = splitSeries ? Math.max(1.5, (w - gap) / 2) : w
               return (
                 <g key={`bar-${day.iso}`}>
                   {hIn > 0 && <rect className={cls} style={style} x={x} y={AXIS_Y - hIn} width={wHalf} height={hIn} rx={2} fill="url(#pb-tx-in)" />}
@@ -216,9 +225,9 @@ export default function DailyChart({
                     <rect
                       className={cls}
                       style={style}
-                      x={showIncome ? x + wHalf + gap : x}
+                      x={splitSeries ? x + wHalf + gap : x}
                       y={AXIS_Y - hOut}
-                      width={showIncome ? wHalf : w}
+                      width={wHalf}
                       height={hOut}
                       rx={isSpendingVariant ? Math.min(6, w / 2) : 2}
                       fill={isSpendingVariant ? 'url(#pb-tx-out-spending)' : 'url(#pb-tx-out)'}
@@ -248,8 +257,8 @@ export default function DailyChart({
       </Box>
 
       <Flex className="pb-chart-legend" align="center" gap="1rem" flexWrap="wrap">
-        {showIncome && <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text></HStack>}
-        <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius={isSpendingVariant ? '50%' : '2px'} bgGradient={isSpendingVariant ? 'linear(to-b, #ef8066, #ae3827)' : 'linear(to-b, #d84a39, #c23a2c)'} /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Spending</Text></HStack>
+        {hasIncome && <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text></HStack>}
+        {hasOutflow && <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius={isSpendingVariant ? '50%' : '2px'} bgGradient={isSpendingVariant ? 'linear(to-b, #ef8066, #ae3827)' : 'linear(to-b, #d84a39, #c23a2c)'} /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Spending</Text></HStack>}
         {isSpendingVariant && <Text className="pb-spending-legend-note">Select a day to see its transactions</Text>}
       </Flex>
     </Box>
