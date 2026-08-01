@@ -100,13 +100,8 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
   }, [selectedDate, selectedPeriod])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
-  const income = useMemo(() => aggregateSide(periodData.transactions, 'income'), [periodData.transactions])
   const previousExpense = useMemo(
     () => aggregateSide(previousPeriodData.transactions, 'expense'),
-    [previousPeriodData.transactions],
-  )
-  const previousIncome = useMemo(
-    () => aggregateSide(previousPeriodData.transactions, 'income'),
     [previousPeriodData.transactions],
   )
 
@@ -204,12 +199,8 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution
             expense={expense}
-            income={income}
             previousExpense={previousExpense}
-            previousIncome={previousIncome}
-            view="payments"
             periodLabel={periodLabel}
-            initialSide="expense"
           />
         </MotionBox>
 

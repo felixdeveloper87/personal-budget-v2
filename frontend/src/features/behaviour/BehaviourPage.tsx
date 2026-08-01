@@ -218,11 +218,8 @@ export default function BehaviourPage() {
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution
             expense={expense}
-            income={[]}
             previousExpense={previousExpense}
-            view="behaviour"
             periodLabel={periodLabel}
-            initialSide="expense"
           />
         </MotionBox>
 

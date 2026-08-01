@@ -4,37 +4,27 @@ import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, Layers, ReceiptText } from '../../../components/ui/icons'
 import { condenseCategories, computeSide } from '../data/computeSide'
 import { gbp, hexA } from '../data/format'
-import type { Category, ComputedCategory, Side, ViewMode } from '../data/types'
+import type { Category, ComputedCategory, Side } from '../data/types'
 import AllocationDonut from './AllocationDonut'
 import CategoryTransactionsModal from './CategoryTransactionsModal'
 import CategoryTxnRow from './CategoryTxnRow'
-import SideToggle from './SideToggle'
 
 const MotionGrid = motion(Grid)
 const TRANSACTION_LIMIT = 5
 
 interface DistributionProps {
   expense: Category[]
-  income: Category[]
   previousExpense?: Category[]
-  previousIncome?: Category[]
-  view: ViewMode
   periodLabel: string
-  initialSide?: Side
 }
 
 export default function Distribution({
   expense,
-  income,
   previousExpense = [],
-  previousIncome = [],
-  view,
   periodLabel,
-  initialSide = 'expense',
 }: DistributionProps) {
   // Payments is an outflow-only lens — lock to expense and hide the income tab.
-  const lockExpense = view === 'payments'
-  const [side, setSide] = useState<Side>(lockExpense ? 'expense' : initialSide)
+  const side: Side = 'expense'
   // `pinned` is a click-selected category that persists; `hovered` is a transient
   // pointer preview. The donut highlights whichever is in effect (hover wins).
   const [pinned, setPinned] = useState<string | null>(null)
@@ -47,11 +37,8 @@ export default function Distribution({
   const activeCat = hovered ?? pinned
 
   const { rows, total } = useMemo(
-    () => computeSide(
-      side === 'expense' ? expense : income,
-      side === 'expense' ? previousExpense : previousIncome,
-    ),
-    [side, expense, income, previousExpense, previousIncome],
+    () => computeSide(expense, previousExpense),
+    [expense, previousExpense],
   )
   const displayRows = useMemo(
     () => showAllCategories ? rows : condenseCategories(rows),
@@ -61,12 +48,6 @@ export default function Distribution({
   const spotlight = (activeCat ? displayRows.find((row) => row.id === activeCat) : null) ?? displayRows[0] ?? null
 
   // A view/side swap re-shuffles the donut — drop any lingering highlight/expands.
-  useEffect(() => {
-    setPinned(null)
-    setHovered(null)
-    setShowAllCategories(false)
-  }, [view, side])
-
   // Clicking anywhere outside the donut clears the selection — back to the
   // default "Total" view and collapses the row that the segment opened.
   useEffect(() => {
@@ -123,13 +104,11 @@ export default function Distribution({
             {side === 'expense' ? 'Share of spending by category' : 'Share of income by source'}
           </Text>
         </VStack>
-        {!lockExpense && <SideToggle value={side} onChange={setSide} />}
       </Flex>
 
       {/* Body */}
       {hasData ? (
         <MotionGrid
-          key={`${view}-${side}`}
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.15 }}

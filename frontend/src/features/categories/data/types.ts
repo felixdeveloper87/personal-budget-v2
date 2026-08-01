@@ -1,8 +1,6 @@
 import type { LucideIcon } from '../../../components/ui/icons'
 
 export type Side = 'expense' | 'income'
-export type ViewMode = 'behaviour' | 'payments'
-
 /** A representative transaction shown inside a category's expanded row. */
 export interface CategoryTxn {
   id: string
