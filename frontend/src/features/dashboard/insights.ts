@@ -55,19 +55,20 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 /**
- * Cumulative expense per day of the given month (index 0 = day 1).
- * Days without spending carry the previous day's running total forward.
+ * Cumulative total for one transaction type per day of the given month
+ * (index 0 = day 1). Days without activity carry the running total forward.
  */
-export function cumulativeDailyExpense(
+export function cumulativeDailyAmount(
   transactions: Transaction[],
   year: number,
   month: number,
   basis: TransactionDateBasis,
+  type: Transaction['type'],
 ): number[] {
   const days = daysInMonth(year, month)
   const daily = new Array<number>(days).fill(0)
   for (const t of transactions) {
-    if (t.type !== 'EXPENSE') continue
+    if (t.type !== type) continue
     const d = getTransactionDate(t, basis)
     if (d.getFullYear() === year && d.getMonth() === month) {
       daily[d.getDate() - 1] += t.amount

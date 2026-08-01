@@ -13,29 +13,38 @@ import {
 } from 'recharts'
 import type { Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
-import { cumulativeDailyExpense, daysInMonth } from '../insights'
+import { cumulativeDailyAmount, daysInMonth } from '../insights'
 import Panel from './Panel'
 import { fmtCurrency } from './format'
 
-interface SpendingPaceProps {
+type PaceKind = 'expense' | 'income'
+
+interface CashPaceProps {
   transactions: Transaction[]
   selectedDate: Date
   dateBasis: TransactionDateBasis
+  kind?: PaceKind
 }
 
 /**
  * Cumulative spend this month plotted against last month on the same
  * day-of-month scale, so "am I ahead of or behind last month?" is one glance.
  */
-export default function SpendingPace({ transactions, selectedDate, dateBasis }: SpendingPaceProps) {
+export default function CashPace({
+  transactions,
+  selectedDate,
+  dateBasis,
+  kind = 'expense',
+}: CashPaceProps) {
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
+  const isIncome = kind === 'income'
 
   // recharts writes stroke/fill as SVG attributes, where CSS var() is
   // unreliable — so resolve concrete colours per color mode here.
   const c = {
-    current: dark ? '#ff9a90' : '#b8452f',
+    current: isIncome ? (dark ? '#62dca2' : '#1f8a4f') : (dark ? '#ff9a90' : '#b8452f'),
     previous: dark ? '#8a8f89' : '#84907f',
     grid: dark ? 'rgba(244,246,242,0.10)' : 'rgba(26,50,38,0.14)',
     tick: dark ? '#8a8f89' : '#84907f',
@@ -44,24 +53,28 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
     tooltipText: dark ? '#f2f4f0' : '#1a2620',
   }
 
-  const { data, spentSoFar, paceDelta, projected, prevTotal, elapsedDays } = useMemo(() => {
+  const { data, amountSoFar, paceDelta, projected, prevTotal, elapsedDays } = useMemo(() => {
     const year = selectedDate.getFullYear()
     const month = selectedDate.getMonth()
     const prev = new Date(year, month - 1, 1)
-    const variableTransactions = transactions.filter(
-      (t) =>
-        !t.isInstallment &&
-        t.installmentPlanId == null &&
-        !t.isRecurring &&
-        t.recurringTransactionId == null,
-    )
+    const pacedTransactions = isIncome
+      ? transactions
+      : transactions.filter(
+        (t) =>
+          !t.isInstallment &&
+          t.installmentPlanId == null &&
+          !t.isRecurring &&
+          t.recurringTransactionId == null,
+      )
 
-    const current = cumulativeDailyExpense(variableTransactions, year, month, dateBasis)
-    const previous = cumulativeDailyExpense(
-      variableTransactions,
+    const transactionType = isIncome ? 'INCOME' : 'EXPENSE'
+    const current = cumulativeDailyAmount(pacedTransactions, year, month, dateBasis, transactionType)
+    const previous = cumulativeDailyAmount(
+      pacedTransactions,
       prev.getFullYear(),
       prev.getMonth(),
       dateBasis,
+      transactionType,
     )
 
     // Draw the current line only up to today when we're inside the month.
@@ -82,16 +95,20 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
 
     return {
       data: points,
-      spentSoFar: spent,
+      amountSoFar: spent,
       paceDelta: spent - prevAtSameDay,
       projected: isCurrentMonth && shownDays >= 3 ? (spent / shownDays) * monthTotal : null,
       prevTotal: previous[previous.length - 1] ?? 0,
       elapsedDays: shownDays,
     }
-  }, [transactions, selectedDate, dateBasis])
+  }, [transactions, selectedDate, dateBasis, isIncome])
 
-  const ahead = paceDelta > 0
-  const DeltaIcon = ahead ? ArrowUpRight : ArrowDownRight
+  const higherThanPrevious = paceDelta > 0
+  const DeltaIcon = higherThanPrevious ? ArrowUpRight : ArrowDownRight
+  const deltaColor = isIncome
+    ? higherThanPrevious ? 'var(--pb-income-2)' : 'var(--pb-coral)'
+    : higherThanPrevious ? 'var(--pb-coral)' : 'var(--pb-income-2)'
+  const title = isIncome ? 'Income pace' : 'Spending pace'
 
   return (
     <Panel h="full">
@@ -106,7 +123,7 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              Spending pace
+              {title}
             </Text>
             <HStack align="baseline" spacing={3} flexWrap="wrap">
               <Text
@@ -116,7 +133,7 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
                 color="var(--pb-ink)"
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {fmtCurrency(spentSoFar)}
+                {fmtCurrency(amountSoFar)}
               </Text>
               <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.08em">
                 BY DAY {elapsedDays}
@@ -129,7 +146,7 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
             px={2}
             py="2px"
             borderRadius="999px"
-            color={ahead ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
+            color={deltaColor}
             flexShrink={0}
           >
             <DeltaIcon size={12} />
@@ -144,7 +161,7 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
               <defs>
-                <linearGradient id="pb-pace-current" x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={`pb-${kind}-pace-current`} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={c.current} stopOpacity={0.24} />
                   <stop offset="100%" stopColor={c.current} stopOpacity={0.02} />
                 </linearGradient>
@@ -197,7 +214,7 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
                 dataKey="current"
                 stroke={c.current}
                 strokeWidth={2}
-                fill="url(#pb-pace-current)"
+                fill={`url(#pb-${kind}-pace-current)`}
                 connectNulls={false}
                 isAnimationActive={!reduce}
               />
@@ -206,11 +223,18 @@ export default function SpendingPace({ transactions, selectedDate, dateBasis }: 
         </Box>
 
         {/* Caption */}
-        <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
+        <Text display={isIncome ? 'none' : undefined} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
           {projected !== null
             ? `At this pace you'll spend about ${fmtCurrency(projected)} this month — last month closed at ${fmtCurrency(prevTotal)}.`
             : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
         </Text>
+        {isIncome && (
+          <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
+            {projected !== null
+              ? `At this pace you'll earn about ${fmtCurrency(projected)} this month. Last month closed at ${fmtCurrency(prevTotal)}.`
+              : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
+          </Text>
+        )}
       </VStack>
     </Panel>
   )

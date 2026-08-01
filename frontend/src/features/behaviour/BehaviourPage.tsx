@@ -11,7 +11,7 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import TopMerchants from '../dashboard/components/TopMerchants'
 
-import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
+import type { ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import {
@@ -29,6 +29,7 @@ import { fmtCurrency } from '../dashboard/components/format'
 import InsightsPanel from './components/InsightsPanel'
 import DayToDaySummary from './components/DayToDaySummary'
 import SoFarBreakdown from './components/SoFarBreakdown'
+import SpendingActivityStrip from './components/SpendingActivityStrip'
 import {
   deriveCategoryShift,
   deriveTopCategory,
@@ -189,21 +190,12 @@ export default function BehaviourPage() {
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
-            <DailyChart
+            <SpendingActivityStrip
               days={days}
               txns={vm}
-              view="behaviour"
               selectedDay={selectedChartDay}
               onSelectDay={selectDay}
-              hlRhythm={false}
-              hlMomentum={false}
-              rhythmWeekday={null}
-              monthLabel={periodLabel}
-              reduce={reduce}
-              title="Spending"
-              caption="Daily expenses by transaction date"
-              instruction=""
-              variant="spending"
+              periodLabel={periodLabel}
             />
           )}
         </MotionBox>

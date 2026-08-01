@@ -28,7 +28,7 @@ import SectionLabel from './components/SectionLabel'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashFlowChart from './components/CashFlowChart'
-import SpendingPace from './components/SpendingPace'
+import CashPace from './components/SpendingPace'
 import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
@@ -503,11 +503,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         ) : null}
 
         {/* Spending pace · Personalised insight */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
-            <SpendingPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" />
+            <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
           </MotionBox>
           <MotionBox variants={riseV}>
+            <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="income" />
+          </MotionBox>
+          <MotionBox variants={riseV} gridColumn={{ md: 'span 2', xl: 'auto' }}>
             <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
           </MotionBox>
         </Grid>
