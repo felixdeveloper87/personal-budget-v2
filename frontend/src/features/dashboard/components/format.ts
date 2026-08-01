@@ -15,7 +15,11 @@ export const categoryColor = (index: number): string =>
   CATEGORY_COLORS[index % CATEGORY_COLORS.length]
 
 export const fmtCurrency = (amount: number, opts: Intl.NumberFormatOptions = {}): string => {
-  const merged: Intl.NumberFormatOptions = { maximumFractionDigits: 0, ...opts }
+  const merged: Intl.NumberFormatOptions = {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    ...opts,
+  }
   // Intl throws RangeError when minimumFractionDigits > maximumFractionDigits
   if (
     merged.minimumFractionDigits !== undefined &&
