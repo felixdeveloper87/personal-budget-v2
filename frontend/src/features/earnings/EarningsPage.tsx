@@ -10,9 +10,9 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
+import ActivityIntensityStrip, { type ChartDay } from '../transactions/components/ActivityIntensityStrip'
 import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
@@ -119,20 +119,16 @@ export default function EarningsPage() {
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
-            <DailyChart
+            <ActivityIntensityStrip
               days={days}
               txns={incomeTransactions}
-              view="behaviour"
               selectedDay={selectedDay}
               onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
-              hlRhythm={false}
-              hlMomentum={false}
-              rhythmWeekday={null}
-              monthLabel={periodLabel}
-              reduce={reduce}
-              title="Earnings"
-              caption="Daily income by activity date"
-              instruction="Select a day to view its earnings"
+              periodLabel={periodLabel}
+              tone="income"
+              dateKey="purchaseDate"
+              title="Income activity"
+              caption="Daily income intensity"
             />
           )}
         </MotionBox>

@@ -11,9 +11,9 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
-import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
+import ActivityIntensityStrip, { type ChartDay } from '../transactions/components/ActivityIntensityStrip'
 import { collapseCardStatements, toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { listPaymentMethods } from '../../api'
@@ -156,22 +156,21 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
           />
         </MotionBox>
 
-        {/* Outflow chart leads the page, mirroring Behaviour */}
+        {/* Payment activity follows settlement date. */}
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
-            <DailyChart
+            <ActivityIntensityStrip
               days={days}
               txns={vm}
-              view="payments"
               selectedDay={selectedChartDay}
               onSelectDay={selectDay}
-              hlRhythm={false}
-              hlMomentum={false}
-              rhythmWeekday={null}
-              monthLabel={periodLabel}
-              reduce={reduce}
+              periodLabel={periodLabel}
+              tone="expense"
+              dateKey="settlementDate"
+              title="Payment activity"
+              caption="Daily payment intensity"
             />
           )}
         </MotionBox>
