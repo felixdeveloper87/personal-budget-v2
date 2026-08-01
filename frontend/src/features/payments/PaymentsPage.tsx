@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -175,13 +175,12 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
         </MotionBox>
 
         {selectedChartDay && (
-          <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-            <SelectedDayPayments
-              day={selectedChartDay}
-              payments={selectedDayPayments}
-              onOpenCardStatement={onOpenCardStatement}
-            />
-          </MotionBox>
+          <SelectedDayPayments
+            day={selectedChartDay}
+            payments={selectedDayPayments}
+            onClose={() => setSelectedChartDay(null)}
+            onOpenCardStatement={onOpenCardStatement}
+          />
         )}
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
@@ -242,10 +241,12 @@ function PaymentsSummary({
 function SelectedDayPayments({
   day,
   payments,
+  onClose,
   onOpenCardStatement,
 }: {
   day: string
   payments: TxnVM[]
+  onClose: () => void
   onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
 }) {
   const total = payments.reduce((sum, payment) => sum + payment.amount, 0)
@@ -256,8 +257,13 @@ function SelectedDayPayments({
   })
 
   return (
-    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
-      <VStack align="stretch" spacing={3}>
+    <Modal isOpen onClose={onClose} isCentered size="lg">
+      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
+      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-coral)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Payments on ${dayLabel}`}>
+        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' }} />
+        <ModalBody p={{ base: 5, sm: 6 }}>
+          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2), transparent)" />
+          <VStack align="stretch" spacing={3}>
         <Box>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
             Payments on {dayLabel}
@@ -277,10 +283,13 @@ function SelectedDayPayments({
               <StatementPaymentRow
                 key={payment.id}
                 payment={payment}
-                onOpen={() => onOpenCardStatement?.({
-                  cardId: payment.statement!.cardId,
-                  paymentDate: payment.settlementDate,
-                })}
+                onOpen={() => {
+                  onClose()
+                  onOpenCardStatement?.({
+                    cardId: payment.statement!.cardId,
+                    paymentDate: payment.settlementDate,
+                  })
+                }}
               />
             ) : (
               <Box key={payment.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
@@ -294,8 +303,10 @@ function SelectedDayPayments({
             ))}
           </VStack>
         )}
-      </VStack>
-    </Box>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   )
 }
 

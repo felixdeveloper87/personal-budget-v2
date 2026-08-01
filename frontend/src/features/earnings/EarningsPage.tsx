@@ -1,4 +1,4 @@
-import { Box, Grid, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Grid, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -136,16 +136,26 @@ export default function EarningsPage() {
         </MotionBox>
 
         {selectedDay && (
-          <MotionBox variants={riseV}>
-            <SelectedDayIncomes day={selectedDay} incomes={selectedDayIncomes} />
-          </MotionBox>
+          <SelectedDayIncomes
+            day={selectedDay}
+            incomes={selectedDayIncomes}
+            onClose={() => setSelectedDay(null)}
+          />
         )}
       </MotionBox>
     </Box>
   )
 }
 
-function SelectedDayIncomes({ day, incomes }: { day: string; incomes: TxnVM[] }) {
+function SelectedDayIncomes({
+  day,
+  incomes,
+  onClose,
+}: {
+  day: string
+  incomes: TxnVM[]
+  onClose: () => void
+}) {
   const total = incomes.reduce((sum, income) => sum + income.amount, 0)
   const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
     weekday: 'long',
@@ -154,8 +164,13 @@ function SelectedDayIncomes({ day, incomes }: { day: string; incomes: TxnVM[] })
   })
 
   return (
-    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
-      <VStack align="stretch" spacing={3}>
+    <Modal isOpen onClose={onClose} isCentered size="lg">
+      <ModalOverlay bg="blackAlpha.500" backdropFilter="blur(5px)" />
+      <ModalContent mx={{ base: 4, sm: 6 }} bg="var(--pb-surface)" border="1px solid var(--pb-tint-income)" borderRadius="20px" boxShadow="var(--pb-shadow-lift)" overflow="hidden" aria-label={`Earnings on ${dayLabel}`}>
+        <ModalCloseButton zIndex={2} mt={1} mr={1} borderRadius="full" color="var(--pb-ink-soft)" _hover={{ bg: 'var(--pb-tint-income)', color: 'var(--pb-income)' }} />
+        <ModalBody p={{ base: 5, sm: 6 }}>
+          <Box position="absolute" top={0} left={0} right={0} h="3px" bg="linear-gradient(90deg, var(--pb-income), var(--pb-income-2), transparent)" />
+          <VStack align="stretch" spacing={3}>
         <Box>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
             Earnings on {dayLabel}
@@ -183,8 +198,10 @@ function SelectedDayIncomes({ day, incomes }: { day: string; incomes: TxnVM[] })
             ))}
           </VStack>
         )}
-      </VStack>
-    </Box>
+          </VStack>
+        </ModalBody>
+      </ModalContent>
+    </Modal>
   )
 }
 
