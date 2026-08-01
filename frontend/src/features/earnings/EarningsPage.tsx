@@ -104,18 +104,7 @@ export default function EarningsPage() {
           )}
         </MotionBox>
 
-        <MotionBox variants={riseV}>
-          {loading ? (
-            <Skeleton height="300px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <EarningsSources
-              sources={sources}
-              periodLabel={periodLabel}
-            />
-          )}
-        </MotionBox>
-
-        <MotionBox variants={riseV} mt="clamp(1.4rem,3vw,2rem)" mb={selectedDay ? "clamp(1.4rem,3vw,2rem)" : 0}>
+        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
           {loading ? (
             <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
           ) : (
@@ -129,6 +118,17 @@ export default function EarningsPage() {
               dateKey="purchaseDate"
               title="Income activity"
               caption="Daily income intensity"
+            />
+          )}
+        </MotionBox>
+
+        <MotionBox variants={riseV}>
+          {loading ? (
+            <Skeleton height="300px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          ) : (
+            <EarningsSources
+              sources={sources}
+              periodLabel={periodLabel}
             />
           )}
         </MotionBox>
