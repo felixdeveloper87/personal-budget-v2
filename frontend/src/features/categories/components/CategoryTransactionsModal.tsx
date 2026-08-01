@@ -13,7 +13,7 @@ interface CategoryTransactionsModalProps {
 }
 
 /** Full transaction list for one category — reached from the "+N more" line
- * on its `CategoryRow` preview. `cat.sample` already holds every matching
+ * on its category detail card. `cat.sample` already holds every matching
  * transaction for the period (see `aggregateSide`), so this needs no fetch. */
 export default function CategoryTransactionsModal({
   cat,
