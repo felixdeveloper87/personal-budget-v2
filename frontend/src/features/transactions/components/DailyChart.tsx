@@ -24,6 +24,7 @@ interface DailyChartProps {
   title?: string
   caption?: string
   instruction?: string
+  variant?: 'default' | 'spending'
 }
 
 const VW = 720
@@ -47,13 +48,15 @@ export default function DailyChart({
   title,
   caption,
   instruction,
+  variant = 'default',
 }: DailyChartProps) {
   const [hover, setHover] = useState<
     { iso: string; leftPct: number; inV: number; outV: number } | null
   >(null)
 
   // Payments is an outflow-only lens — drop the income series entirely.
-  const showIncome = view !== 'payments'
+  const isSpendingVariant = variant === 'spending'
+  const showIncome = !isSpendingVariant && view !== 'payments'
 
   const totals = useMemo(() => {
     const map = new Map<string, { in: number; out: number }>()
@@ -77,6 +80,21 @@ export default function DailyChart({
       if (values) maximum = Math.max(maximum, showIncome ? values.in : 0, values.out)
     }
     return maximum || 1
+  }, [days, totals])
+
+  const spendingSummary = useMemo(() => {
+    let total = 0
+    let activeDays = 0
+    let peak = { iso: '', amount: 0 }
+
+    for (const day of days) {
+      const amount = totals.get(day.iso)?.out ?? 0
+      total += amount
+      if (amount > 0) activeDays += 1
+      if (amount > peak.amount) peak = { iso: day.iso, amount }
+    }
+
+    return { total, activeDays, peak }
   }, [days, totals])
 
   // Square-root scaling keeps low-volume days visible when the period contains
@@ -106,12 +124,13 @@ export default function DailyChart({
 
   const svgClass = [
     'pb-chart-svg',
+    isSpendingVariant ? 'is-spending' : '',
     hlRhythm && rhythmWeekday != null ? 'hl-tue' : '',
     hlMomentum ? 'hl-h2' : '',
   ].filter(Boolean).join(' ')
 
   return (
-    <Box className="pb-chart-card">
+    <Box className={`pb-chart-card ${isSpendingVariant ? 'pb-chart-card-spending' : ''}`}>
       <Flex className="pb-chart-heading" justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap=".75rem" direction={{ base: 'column', sm: 'row' }}>
         <Box>
           <Text className="pb-chart-kicker">{title ?? (showIncome ? 'Cash flow' : 'Outflow')}</Text>
@@ -119,8 +138,20 @@ export default function DailyChart({
             {caption ?? (showIncome ? 'Daily income and spending' : 'Daily payments by settlement date')}
           </Text>
         </Box>
-        {instruction !== '' && <Text className="pb-chart-instruction">{instruction ?? 'Select a day to filter activity'}</Text>}
+        {isSpendingVariant ? (
+          <Box className="pb-spending-summary" aria-label={`${fmtCurrency(spendingSummary.total)} spent across ${spendingSummary.activeDays} days`}>
+            <Text className="pb-spending-total">{fmtCurrency(spendingSummary.total)}</Text>
+            <Text className="pb-spending-label">{spendingSummary.activeDays === 1 ? '1 active day' : `${spendingSummary.activeDays} active days`}</Text>
+          </Box>
+        ) : instruction !== '' && <Text className="pb-chart-instruction">{instruction ?? 'Select a day to filter activity'}</Text>}
       </Flex>
+
+      {isSpendingVariant && spendingSummary.peak.amount > 0 && (
+        <Flex className="pb-spending-insight" align="center" gap=".45rem">
+          <Box className="pb-spending-insight-dot" />
+          <Text>Highest day: <strong>{fmtCurrency(spendingSummary.peak.amount)}</strong> on {parseISO(spendingSummary.peak.iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</Text>
+        </Flex>
+      )}
 
       <Box className="pb-chart-wrap">
         {hover && (
@@ -142,7 +173,9 @@ export default function DailyChart({
         >
           <defs>
             <linearGradient id="pb-tx-out" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#d84a39" /><stop offset="100%" stopColor="#c23a2c" /></linearGradient>
+            <linearGradient id="pb-tx-out-spending" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#ef8066" /><stop offset="48%" stopColor="#d95740" /><stop offset="100%" stopColor="#ae3827" /></linearGradient>
             <linearGradient id="pb-tx-in" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#29a25e" /><stop offset="100%" stopColor="#1f8a4f" /></linearGradient>
+            <filter id="pb-spending-glow" x="-40%" y="-30%" width="180%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="2" floodColor="#b8452f" floodOpacity=".20" /></filter>
           </defs>
 
           <g aria-hidden>
@@ -158,7 +191,7 @@ export default function DailyChart({
             {[0.25, 0.5, 0.75].map((ratio) => <line key={ratio} className="pb-gridline" x1={0} y1={TOP + USABLE * ratio} x2={VW} y2={TOP + USABLE * ratio} />)}
           </g>
 
-          {selectedIndex >= 0 && <rect className="pb-day-sel" x={selectedIndex * colW + 1} y={TOP} width={colW - 2} height={USABLE} rx={4} />}
+          {selectedIndex >= 0 && <rect className={`pb-day-sel ${isSpendingVariant ? 'is-spending' : ''}`} x={selectedIndex * colW + 1} y={TOP} width={colW - 2} height={USABLE} rx={isSpendingVariant ? 7 : 4} />}
           <line className="pb-baseline" x1={0} y1={AXIS_Y} x2={VW} y2={AXIS_Y} />
 
           <g>
@@ -170,7 +203,7 @@ export default function DailyChart({
               const x = i * colW + colW * 0.08
               const w = Math.max(2, colW * 0.84)
               const style = reduce ? undefined : ({ animationDelay: `${i * 9}ms` } as const)
-              const cls = reduce ? undefined : 'pb-bar'
+              const cls = reduce ? (isSpendingVariant ? 'pb-bar-spending' : undefined) : `pb-bar${isSpendingVariant ? ' pb-bar-spending' : ''}`
               // Income and spending are drawn side by side, both anchored on the
               // baseline. Stacking them let the combined height exceed the plot
               // area (each series is scaled independently) and cover the header.
@@ -187,8 +220,9 @@ export default function DailyChart({
                       y={AXIS_Y - hOut}
                       width={showIncome ? wHalf : w}
                       height={hOut}
-                      rx={2}
-                      fill="url(#pb-tx-out)"
+                      rx={isSpendingVariant ? Math.min(6, w / 2) : 2}
+                      fill={isSpendingVariant ? 'url(#pb-tx-out-spending)' : 'url(#pb-tx-out)'}
+                      filter={isSpendingVariant && w > 4 ? 'url(#pb-spending-glow)' : undefined}
                     />
                   )}
                 </g>
@@ -215,7 +249,8 @@ export default function DailyChart({
 
       <Flex className="pb-chart-legend" align="center" gap="1rem" flexWrap="wrap">
         {showIncome && <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #29a25e, #1f8a4f)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Income</Text></HStack>}
-        <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius="2px" bgGradient="linear(to-b, #d84a39, #c23a2c)" /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Spending</Text></HStack>
+        <HStack spacing="0.4rem"><Box w="10px" h="10px" borderRadius={isSpendingVariant ? '50%' : '2px'} bgGradient={isSpendingVariant ? 'linear(to-b, #ef8066, #ae3827)' : 'linear(to-b, #d84a39, #c23a2c)'} /><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">Spending</Text></HStack>
+        {isSpendingVariant && <Text className="pb-spending-legend-note">Select a day to see its transactions</Text>}
       </Flex>
     </Box>
   )
