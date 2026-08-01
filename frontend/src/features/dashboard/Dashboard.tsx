@@ -502,17 +502,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         ) : null}
 
-        {/* Cash flow chart (same period and payments lens as the hero) */}
-        <MotionBox variants={riseV}>
-          <CashFlowChart
-            transactions={periodData.transactions}
-            selectedDate={selectedDate}
-            periodType={selectedPeriod}
-            dateBasis={dateBasis}
-            totals={{ income: periodData.income, expense: periodData.expense }}
-          />
-        </MotionBox>
-
         {/* Spending pace · Personalised insight */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
@@ -537,6 +526,17 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             />
           </MotionBox>
         </Grid>
+
+        {/* Cash flow chart (same period and payments lens as the hero) */}
+        <MotionBox variants={riseV}>
+          <CashFlowChart
+            transactions={periodData.transactions}
+            selectedDate={selectedDate}
+            periodType={selectedPeriod}
+            dateBasis={dateBasis}
+            totals={{ income: periodData.income, expense: periodData.expense }}
+          />
+        </MotionBox>
 
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
