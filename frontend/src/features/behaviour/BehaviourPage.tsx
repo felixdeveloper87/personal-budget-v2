@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Flex, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -13,6 +13,7 @@ import TopMerchants from '../dashboard/components/TopMerchants'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
+import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import {
   deriveHabit,
   deriveMomentum,
@@ -283,24 +284,7 @@ function SelectedDayExpenses({
         ) : (
           <VStack align="stretch" spacing={2}>
             {expenses.map((expense) => (
-              <Flex key={expense.id} justify="space-between" align="center" gap={4} p=".8rem .9rem" border="1px solid var(--pb-hair)" borderRadius="13px" bg="var(--pb-surface-2)" _hover={{ borderColor: 'var(--pb-tint-coral)', transform: 'translateY(-1px)' }} transition="border-color .16s ease, transform .16s ease">
-                <HStack spacing={3} minW={0}>
-                  <Flex w="30px" h="30px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-coral)" color="var(--pb-coral)" fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={600}>
-                    {expense.category.slice(0, 1).toUpperCase()}
-                  </Flex>
-                  <Box minW={0}>
-                    <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
-                      {expense.merchant}
-                    </Text>
-                    <Text mt="1px" fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)" noOfLines={1}>
-                      {expense.category}
-                    </Text>
-                  </Box>
-                </HStack>
-                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" fontWeight={600} color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {fmtCurrency(expense.amount)}
-                </Text>
-              </Flex>
+              <ActivityDayTransactionRow key={expense.id} transaction={expense} tone="expense" />
             ))}
           </VStack>
         )}

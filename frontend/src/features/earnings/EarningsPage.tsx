@@ -12,6 +12,7 @@ import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
+import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
@@ -178,20 +179,15 @@ function SelectedDayIncomes({
     >
       <VStack align="stretch" spacing={2}>
         {incomes.length === 0 ? (
-          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
-            No earnings recorded on this day.
-          </Text>
+          <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
+            <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
+              No earnings recorded on this day.
+            </Text>
+          </Box>
         ) : (
-          <VStack align="stretch" spacing={1.5}>
+          <VStack align="stretch" spacing={2}>
             {incomes.map((income) => (
-              <Box key={income.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
-                <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
-                  {income.merchant}
-                </Text>
-                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-income)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {fmtCurrency(income.amount)}
-                </Text>
-              </Box>
+              <ActivityDayTransactionRow key={income.id} transaction={income} tone="income" />
             ))}
           </VStack>
         )}

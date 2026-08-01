@@ -13,6 +13,7 @@ import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import DailyChart, { type ChartDay } from '../transactions/components/DailyChart'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
+import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import { collapseCardStatements, toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { listPaymentMethods } from '../../api'
@@ -271,11 +272,13 @@ function SelectedDayPayments({
     >
       <VStack align="stretch" spacing={2}>
         {payments.length === 0 ? (
-          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
-            No payments recorded on this day.
-          </Text>
+          <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
+            <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
+              No payments recorded on this day.
+            </Text>
+          </Box>
         ) : (
-          <VStack align="stretch" spacing={1.5}>
+          <VStack align="stretch" spacing={2}>
             {payments.map((payment) => payment.statement ? (
               <StatementPaymentRow
                 key={payment.id}
@@ -289,14 +292,7 @@ function SelectedDayPayments({
                 }}
               />
             ) : (
-              <Box key={payment.id} display="flex" justifyContent="space-between" alignItems="baseline" gap={4} py="0.7rem" borderTop="1px solid var(--pb-hair)">
-                <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
-                  {payment.merchant}
-                </Text>
-                <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {fmtCurrency(payment.amount)}
-                </Text>
-              </Box>
+              <ActivityDayTransactionRow key={payment.id} transaction={payment} tone="expense" />
             ))}
           </VStack>
         )}
@@ -319,16 +315,16 @@ function StatementPaymentRow({ payment, onOpen }: { payment: TxnVM; onOpen: () =
       display="flex"
       w="full"
       justifyContent="space-between"
-      alignItems="baseline"
+      alignItems="center"
       gap={4}
-      py="0.7rem"
-      borderTop="1px solid var(--pb-hair)"
+      p=".85rem .9rem"
+      border="1px solid var(--pb-hair)"
       textAlign="left"
       cursor="pointer"
-      borderRadius="10px"
-      px={2}
-      mx={-2}
-      _hover={{ bg: 'var(--pb-surface-2)' }}
+      borderRadius="13px"
+      bg="var(--pb-surface-2)"
+      transition="border-color .16s ease, transform .16s ease"
+      _hover={{ borderColor: 'var(--pb-tint-coral)', transform: 'translateY(-1px)' }}
       _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
     >
       <Box minW={0}>
