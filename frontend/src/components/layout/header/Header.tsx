@@ -13,7 +13,7 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */
-export const HEADER_HEIGHT = { base: '72px', md: '80px' } as const
+export const HEADER_HEIGHT = { base: '72px', md: '64px' } as const
 
 interface HeaderProps {
   onOpenProfile?: () => void

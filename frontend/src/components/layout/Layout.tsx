@@ -130,7 +130,7 @@ export default function Layout({
           flex="1"
           position="relative"
           overflow="hidden"
-          mt={showSidebar ? { md: '-12px' } : 0}
+          mt={showSidebar ? { md: '-20px' } : 0}
         >
           <Box position="relative" zIndex={1}>
             {children}
