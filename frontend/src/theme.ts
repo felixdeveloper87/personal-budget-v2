@@ -106,7 +106,7 @@ const theme = extendTheme({
     mono: { fontFamily: FONTS.mono },
   },
   sizes: {
-    appContent: '1540px',
+    appContent: '1720px',
   },
   colors: {
     brand: {

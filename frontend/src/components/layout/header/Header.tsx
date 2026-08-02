@@ -74,6 +74,10 @@ export default function Header({
   // visually merges with the hero. Once scrolled it transitions to frosted glass.
   const isLanding = !user
   const showGlass = isScrolled || !isLanding
+  // In the desktop app shell, the header belongs to the page canvas rather than
+  // reading as a second chrome layer. It gains its protective surface only once
+  // content scrolls beneath it.
+  const pageIntegrated = Boolean(user && hasSidebar && ed)
 
   const bgBase = useColorModeValue(
     showGlass ? (isScrolled ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.62)') : 'transparent',
@@ -124,6 +128,15 @@ export default function Header({
     isScrolled ? '0 14px 36px rgba(0,0,0,0.5)' : 'none',
   )
   const shadow = ed ? editorialShadow : shadowBase
+  const integratedBg = pageIntegrated && !isScrolled ? 'transparent' : bg
+  const integratedOverlay = pageIntegrated && !isScrolled ? 'transparent' : bgOverlay
+  const integratedTopHighlight = pageIntegrated && !isScrolled ? 'transparent' : topHighlight
+  const integratedBackdrop = pageIntegrated && !isScrolled
+    ? 'none'
+    : (showGlass ? 'saturate(180%) blur(20px)' : 'none')
+  const contentPadding = pageIntegrated
+    ? { base: 2, md: 4, lg: 6 }
+    : { base: 3, md: 6, lg: 8 }
 
   return (
     <>
@@ -132,9 +145,9 @@ export default function Header({
         position="sticky"
         top={0}
         zIndex={1000}
-        bg={bg}
+        bg={integratedBg}
         boxShadow={shadow}
-        backdropFilter={showGlass ? 'saturate(180%) blur(20px)' : 'none'}
+        backdropFilter={integratedBackdrop}
         transition="background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease"
         sx={{
           // Top inner highlight (1px) — premium glass top edge
@@ -142,7 +155,7 @@ export default function Header({
             content: '""',
             position: 'absolute',
             inset: 0,
-            background: bgOverlay,
+            background: integratedOverlay,
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -153,15 +166,15 @@ export default function Header({
             left: 0,
             right: 0,
             height: '1px',
-            background: topHighlight,
+            background: integratedTopHighlight,
             pointerEvents: 'none',
             zIndex: 1,
           },
         }}
       >
         <Container
-          maxW="100%"
-          px={{ base: 3, md: 6, lg: 8 }}
+          maxW={pageIntegrated ? 'appContent' : '100%'}
+          px={contentPadding}
           position="relative"
           zIndex={2}
           sx={{
@@ -233,6 +246,7 @@ export default function Header({
               <HeaderActions
                 user={user}
                 hideSearch={isAdminOnly || searchOnLeft}
+                hideUserControls={hasSidebar}
                 onSearchOpen={openSearch}
                 onLogin={onLogin}
                 onOpenProfile={onOpenProfile}
@@ -264,7 +278,7 @@ export default function Header({
           bottom={0}
           h="1px"
           background={accentBorder}
-          opacity={showGlass ? (isScrolled ? 1 : 0.55) : 0}
+          opacity={pageIntegrated ? 0 : (showGlass ? (isScrolled ? 1 : 0.55) : 0)}
           transition="opacity 0.35s ease"
           pointerEvents="none"
           zIndex={3}

@@ -9,6 +9,8 @@ interface HeaderActionsProps {
   user?: any
   /** Admin shell: hide transaction search */
   hideSearch?: boolean
+  /** Desktop sidebar owns the theme and account controls. */
+  hideUserControls?: boolean
   onSearchOpen: () => void
   onLogin?: () => void
   onOpenProfile?: () => void
@@ -19,6 +21,7 @@ interface HeaderActionsProps {
 export default function HeaderActions({
   user,
   hideSearch,
+  hideUserControls = false,
   onSearchOpen,
   onLogin,
   onOpenProfile,
@@ -43,9 +46,9 @@ export default function HeaderActions({
         )
       )}
 
-      <ThemeToggle />
+      {!hideUserControls && <ThemeToggle />}
 
-      {user && onLogout ? (
+      {user && onLogout && !hideUserControls ? (
         <UserMenu
           user={user}
           onOpenProfile={onOpenProfile}

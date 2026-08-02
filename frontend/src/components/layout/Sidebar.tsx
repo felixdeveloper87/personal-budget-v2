@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Flex,
   Icon,
@@ -20,6 +19,8 @@ import {
 } from '../ui/icons'
 import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
+import ThemeToggle from './header/ThemeToggle'
+import UserMenu from './header/UserMenu'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -74,6 +75,8 @@ interface SidebarProps {
   currentPage: AppPage
   onPageChange?: (page: AppPage) => void
   items: ReadonlyArray<NavItem>
+  onOpenProfile?: () => void
+  onOpenSettings?: () => void
 }
 
 export default function Sidebar({
@@ -82,8 +85,10 @@ export default function Sidebar({
   currentPage,
   onPageChange,
   items,
+  onOpenProfile,
+  onOpenSettings,
 }: SidebarProps) {
-  const { user } = useAuth()
+  const { user, logout } = useAuth()
   const ed = useEd()
   const { colorMode } = useColorMode()
   // In editorial light the sidebar shares the page colour (opaque glass), so it
@@ -230,7 +235,13 @@ export default function Sidebar({
       </Box>
 
       {/* ─── Bottom: User card ─── */}
-      <SidebarFooter isCollapsed={isCollapsed} user={user} />
+      <SidebarFooter
+        isCollapsed={isCollapsed}
+        user={user}
+        onOpenProfile={onOpenProfile}
+        onOpenSettings={onOpenSettings}
+        onLogout={logout}
+      />
     </Box>
   )
 }
@@ -516,18 +527,21 @@ function SidebarItem({
   return button
 }
 
-/* ---- Footer: minimal user info ---- */
+/* ---- Footer: account and appearance controls ---- */
 
 function SidebarFooter({
   isCollapsed,
   user,
+  onOpenProfile,
+  onOpenSettings,
+  onLogout,
 }: {
   isCollapsed: boolean
   user: any
+  onOpenProfile?: () => void
+  onOpenSettings?: () => void
+  onLogout: () => void
 }) {
-  const displayName = user?.name || 'User'
-  const displayEmail = user?.email || ''
-
   return (
     <Box
       px={isCollapsed ? 2 : 4}
@@ -537,65 +551,20 @@ function SidebarFooter({
     >
       <Flex
         align="center"
-        justify={isCollapsed ? 'center' : 'flex-start'}
-        gap={3}
-        overflow="hidden"
+        justify={isCollapsed ? 'center' : 'space-between'}
+        direction={isCollapsed ? 'column' : 'row'}
+        gap={isCollapsed ? 2 : 2}
       >
-        <Box
-          position="relative"
-          p="2px"
-          borderRadius="full"
-          border="1px solid var(--pb-hair-2)"
-          flexShrink={0}
-        >
-          <Avatar
-            size="sm"
-            name={displayName}
-            bg="var(--pb-tint-green)"
-            color="var(--pb-forest)"
-            fontWeight={600}
-            fontFamily="var(--pb-serif)"
-          />
-          <Box
-            aria-hidden
-            position="absolute"
-            bottom="0px"
-            right="0px"
-            w="9px"
-            h="9px"
-            borderRadius="full"
-            bg="var(--pb-income-2)"
-            border="2px solid var(--pb-paper)"
-          />
-        </Box>
-
-        {!isCollapsed && (
-          <VStack spacing="1px" align="start" minW={0} flex={1}>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="sm"
-              fontWeight={600}
-              color="var(--pb-ink)"
-              letterSpacing="-0.01em"
-              noOfLines={1}
-              w="full"
-            >
-              {displayName.split(' ')[0]}
-            </Text>
-            {displayEmail && (
-              <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9px"
-                letterSpacing="0.03em"
-                color="var(--pb-ink-faint)"
-                noOfLines={1}
-                w="full"
-              >
-                {displayEmail}
-              </Text>
-            )}
-          </VStack>
-        )}
+        <ThemeToggle size="sm" />
+        <UserMenu
+          user={user}
+          onOpenProfile={onOpenProfile}
+          onOpenSettings={onOpenSettings}
+          onLogout={onLogout}
+          placement="right-end"
+          compact={isCollapsed}
+          sidebar
+        />
       </Flex>
     </Box>
   )

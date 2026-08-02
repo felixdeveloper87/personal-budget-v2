@@ -1,7 +1,7 @@
 import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@chakra-ui/react'
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
-import { EditorialBackdrop, EditorialProvider, editorialPalette } from '../../editorial'
+import { EditorialProvider, editorialPalette } from '../../editorial'
 // The chrome (Sidebar, SearchTrigger, masthead date) reads the pb-* CSS vars
 // directly, so the token sheet must load with the shell, not only the dashboard.
 import '../../features/dashboard/theme/pb-tokens.css'
@@ -101,6 +101,8 @@ export default function Layout({
           currentPage={currentPage}
           onPageChange={onPageChange}
           items={navItems}
+          onOpenProfile={profileModal.onOpen}
+          onOpenSettings={settingsModal.onOpen}
         />
       )}
 
@@ -123,8 +125,13 @@ export default function Layout({
 
         {/* Backdrop guilloché único — toda página herda o fundo da home
             (dark e claro), sem repetir o estilo em cada arquivo. */}
-        <Box as="main" flex="1" position="relative" overflow="hidden">
-          <EditorialBackdrop />
+        <Box
+          as="main"
+          flex="1"
+          position="relative"
+          overflow="hidden"
+          mt={showSidebar ? { md: '-12px' } : 0}
+        >
           <Box position="relative" zIndex={1}>
             {children}
           </Box>
