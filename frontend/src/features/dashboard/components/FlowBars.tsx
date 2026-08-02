@@ -8,15 +8,15 @@ interface FlowBarsProps {
   expense: number
 }
 
-/** A single, comparable cash-flow meter. The fill represents the part of
- * spending that is not covered by income (or the surplus when it is covered). */
+/** A single, comparable cash-flow meter. The fill represents how much of the
+ * current expenses has been covered by income, so it grows as income arrives. */
 export default function FlowBars({ income, expense }: FlowBarsProps) {
   const reduce = useReducedMotion()
   const deficit = expense > income
   const gap = Math.abs(expense - income)
   const incomeCoverage = expense > 0 ? Math.min((income / expense) * 100, 100) : 100
-  const fill = deficit ? 100 - incomeCoverage : expense > 0 ? 100 : 0
-  const fillColor = deficit ? 'var(--pb-coral)' : 'var(--pb-income-2)'
+  const fill = expense > 0 ? incomeCoverage : income > 0 ? 100 : 0
+  const gapColor = deficit ? 'var(--pb-coral)' : 'var(--pb-income-2)'
 
   return (
     <VStack align="stretch" spacing={4}>
@@ -41,9 +41,7 @@ export default function FlowBars({ income, expense }: FlowBarsProps) {
             h="full"
             w={`${fill}%`}
             borderRadius="full"
-            bg={deficit
-              ? 'linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2))'
-              : 'linear-gradient(90deg, var(--pb-income), var(--pb-income-2))'}
+            bg="linear-gradient(90deg, var(--pb-income), var(--pb-income-2))"
             variants={reduce ? undefined : barV}
             initial={reduce ? false : 'hidden'}
             animate={reduce ? false : 'show'}
@@ -55,7 +53,7 @@ export default function FlowBars({ income, expense }: FlowBarsProps) {
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color="var(--pb-ink-faint)">
             {Math.round(incomeCoverage)}% of expenses covered
           </Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color={fillColor} textAlign="right">
+          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color={gapColor} textAlign="right">
             {deficit ? `${fmtCurrency(gap)} remaining` : `${fmtCurrency(income - expense)} left`}
           </Text>
         </Flex>
