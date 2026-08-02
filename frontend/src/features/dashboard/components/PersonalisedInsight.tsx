@@ -22,14 +22,14 @@ const PERCENT_PATTERN = /(\(?\d+(?:\.\d+)?%\)?)/g
 const PERCENT_TOKEN_PATTERN = /^\(?\d+(?:\.\d+)?%\)?$/
 
 function percentColor(paragraph: string): string | undefined {
-  if (/\b(above|up)\b/i.test(paragraph)) return 'var(--pb-income-2)'
-  if (/\bbelow\b/i.test(paragraph)) return 'var(--pb-coral)'
+  if (/\b(below|less)\b/i.test(paragraph)) return 'var(--pb-income-2)'
+  if (/\b(above|more|up)\b/i.test(paragraph)) return 'var(--pb-coral)'
   return undefined
 }
 
 function trendDirection(paragraph: string): 'up' | 'down' | null {
-  if (/\b(above|up)\b/i.test(paragraph)) return 'up'
-  if (/\bbelow\b/i.test(paragraph)) return 'down'
+  if (/\b(above|more|up)\b/i.test(paragraph)) return 'up'
+  if (/\b(below|less)\b/i.test(paragraph)) return 'down'
   return null
 }
 

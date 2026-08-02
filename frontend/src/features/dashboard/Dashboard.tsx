@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
+import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -188,41 +188,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const current = sumByCategory(currentTransactions)
     const previous = sumByCategory(previousTransactions)
 
-    // Income is a pace comparison: compare what has arrived up to today with
-    // the same elapsed portion of the previous month, by purchase/activity date.
-    const today = new Date()
-    const endOfToday = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      23,
-      59,
-      59,
-      999,
-    )
-    const periodContainsToday =
-      endOfToday >= behaviourPeriodData.startDate &&
-      new Date(today.getFullYear(), today.getMonth(), today.getDate()) <= behaviourPeriodData.endDate
-    const currentIncomeTransactions = periodContainsToday
-      ? behaviourPeriodData.transactions.filter(
-          (t) => getTransactionDate(t, 'activity') <= endOfToday,
-        )
-      : currentTransactions
-    const previousIncomeTransactions = (() => {
-      if (!periodContainsToday) return previousTransactions
-
-      const elapsedMs = endOfToday.getTime() - behaviourPeriodData.startDate.getTime()
-      const previousCutoff = new Date(
-        Math.min(
-          previousBehaviourPeriodData.startDate.getTime() + elapsedMs,
-          previousBehaviourPeriodData.endDate.getTime(),
-        ),
-      )
-      return previousBehaviourPeriodData.transactions.filter(
-        (t) => getTransactionDate(t, 'activity') <= previousCutoff,
-      )
-    })()
-
     // Find the category with the biggest absolute change vs last period.
     let topCategory = ''
     let topDelta = 0
@@ -234,22 +199,12 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       }
     }
 
-    const currentIncome = currentIncomeTransactions
-      .filter((t) => t.type === 'INCOME')
-      .reduce((sum, t) => sum + t.amount, 0)
-    const previousIncome = previousIncomeTransactions
-      .filter((t) => t.type === 'INCOME')
-      .reduce((sum, t) => sum + t.amount, 0)
     const currentExpense = currentTransactions
       .filter((t) => t.type === 'EXPENSE')
       .reduce((sum, t) => sum + t.amount, 0)
     const previousExpense = previousTransactions
       .filter((t) => t.type === 'EXPENSE')
       .reduce((sum, t) => sum + t.amount, 0)
-    const savingsRate =
-      currentIncome > 0
-        ? Math.round(((currentIncome - currentExpense) / currentIncome) * 100)
-        : null
     const overallExpenseDelta = currentExpense - previousExpense
     const overallExpensePct = previousExpense > 0
       ? Math.round((Math.abs(overallExpenseDelta) / previousExpense) * 100)
@@ -283,28 +238,29 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       return null
     }
 
+    const groceriesCategory = findCategory('Groceries')
+    const groceriesLine = (() => {
+      if (!groceriesCategory) return null
+      const currentGroceries = current.get(groceriesCategory) ?? 0
+      const previousGroceries = previous.get(groceriesCategory) ?? 0
+      if (previousGroceries === 0) return `Groceries: ${fmtCurrency(currentGroceries)} this month.`
+
+      const delta = currentGroceries - previousGroceries
+      if (delta === 0) return `Groceries: ${fmtCurrency(currentGroceries)}, the same as last month.`
+      const percent = Math.round((Math.abs(delta) / previousGroceries) * 100)
+      return `Groceries: ${fmtCurrency(currentGroceries)} this month, ${percent}% ${delta > 0 ? 'above' : 'below'} last month.`
+    })()
+
     const extraLines = ['Shopping', 'Transport']
       .map(findCategory)
       .filter((category): category is string => Boolean(category) && category !== topCategory)
       .map(comparisonLine)
       .filter((line): line is string => Boolean(line))
 
-    const incomeDelta = currentIncome - previousIncome
-    const incomePct = previousIncome > 0
-      ? Math.round((Math.abs(incomeDelta) / previousIncome) * 100)
-      : 100
-    const incomeLine =
-      incomeDelta === 0
-        ? `Income is flat versus the same point last month.`
-        : incomeDelta > 0
-          ? `Income is ${fmtCurrency(incomeDelta, { minimumFractionDigits: 2 })} ${incomePct}% above the same point last month.`
-          : `Income is ${fmtCurrency(Math.abs(incomeDelta), { minimumFractionDigits: 2 })} ${incomePct}% below the same point last month.`
-
     if (!topCategory || topDelta === 0) {
-      const bodyLines =
-        savingsRate !== null
-          ? [incomeLine, `You are keeping a ${savingsRate}% savings rate.`, ...extraLines]
-          : [incomeLine, ...(extraLines.length ? extraLines : ['Keep logging transactions to surface trends across categories.'])]
+      const bodyLines = groceriesLine || extraLines.length
+        ? [groceriesLine, ...extraLines].filter((line): line is string => Boolean(line))
+        : ['Keep logging transactions to surface trends across categories.']
 
       return {
         headline: 'Your spending is steady this month.',
@@ -317,7 +273,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     }
 
     const topLine = comparisonLine(topCategory)
-    const bodyLines = [incomeLine, topLine, ...extraLines].filter(
+    const bodyLines = [
+      groceriesLine,
+      topCategory === groceriesCategory ? null : topLine,
+      ...extraLines,
+    ].filter(
       (line): line is string => Boolean(line),
     )
 
