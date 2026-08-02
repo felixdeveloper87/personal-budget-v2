@@ -85,12 +85,12 @@ export default function MonthHero({
         {(onAddIncome || onAddExpense) && (
           <VStack
             align="stretch"
-            justify="center"
+            justify="flex-start"
             borderLeft={{ base: 'none', md: '1px solid var(--pb-hair)' }}
             borderTop={{ base: '1px solid var(--pb-hair)', md: 'none' }}
             pl={{ base: 0, md: 8 }}
-            pt={{ base: 5, md: 0 }}
-            spacing={3.5}
+            pt={{ base: 5, md: 1 }}
+            spacing={3}
           >
             <Text
               fontFamily="var(--pb-mono)"
@@ -99,24 +99,22 @@ export default function MonthHero({
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              Recommended next step
+              Quick add
             </Text>
 
             <Text fontFamily="var(--pb-serif)" fontSize="xl" color="var(--pb-ink)" lineHeight={1.15}>
-              {deficit ? 'Bring your income up to date.' : 'Keep your month up to date.'}
+              Add a transaction
             </Text>
 
             <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.55}>
-              {deficit
-                ? 'Recording income will give this month a complete cash-flow picture.'
-                : `Record new entries to keep ${monthName}'s cash flow current.`}
+              Keep {monthName}'s ledger current.
             </Text>
 
-            <VStack align="stretch" spacing={2.5} pt={1}>
+            <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2.5} pt={2} borderTop="1px solid var(--pb-hair)">
               {onAddIncome && (
                 <Button
-                  h="46px"
-                  borderRadius="14px"
+                  h="50px"
+                  borderRadius="10px"
                   bg="var(--pb-income)"
                   color="var(--pb-paper-3)"
                   fontFamily="var(--pb-mono)"
@@ -130,29 +128,30 @@ export default function MonthHero({
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddIncome}
                 >
-                  Add income
+                  Income
                 </Button>
               )}
               {onAddExpense && (
                 <Button
-                  h="42px"
-                  borderRadius="14px"
-                  variant="ghost"
-                  color="var(--pb-ink-soft)"
-                  border="1px solid var(--pb-hair)"
+                  h="50px"
+                  borderRadius="10px"
+                  bg="var(--pb-coral)"
+                  color="var(--pb-paper-3)"
+                  boxShadow="var(--pb-shadow)"
                   fontFamily="var(--pb-mono)"
-                  fontSize="11px"
+                  fontSize="12px"
                   fontWeight={600}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
                   leftIcon={<Plus size={14} strokeWidth={2.5} />}
-                  _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink)' }}
+                  _hover={{ bg: 'var(--pb-coral-2)', transform: 'translateY(-1px)', boxShadow: 'var(--pb-shadow-lift)' }}
+                  _active={{ transform: 'translateY(0)' }}
                   onClick={onAddExpense}
                 >
-                  Add expense
+                  Expense
                 </Button>
               )}
-            </VStack>
+            </Grid>
           </VStack>
         )}
       </Grid>
