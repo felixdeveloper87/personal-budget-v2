@@ -1,4 +1,4 @@
-import { Box, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import { MotionBox, barV } from './motion'
 import { fmtCurrency } from './format'
@@ -9,123 +9,121 @@ interface FlowBarsProps {
   transactions?: number
 }
 
+/** A single, comparable cash-flow meter. The fill represents the part of
+ * spending that is not covered by income (or the surplus when it is covered). */
 export default function FlowBars({ income, expense, transactions }: FlowBarsProps) {
   const reduce = useReducedMotion()
-  const max = Math.max(income, expense, 1)
-  const incomePct = (income / max) * 100
-  const expensePct = (expense / max) * 100
   const deficit = expense > income
-  const expenseRatio = income > 0 ? Math.round((expense / income) * 100) : 0
-
-  const trackStyle: React.CSSProperties = {
-    height: '30px',
-    borderRadius: '7px',
-    background: 'var(--pb-surface-3)',
-    border: '1px solid var(--pb-hair)',
-    overflow: 'hidden',
-    position: 'relative',
-  }
+  const gap = Math.abs(expense - income)
+  const incomeCoverage = expense > 0 ? Math.min((income / expense) * 100, 100) : 100
+  const fill = deficit ? 100 - incomeCoverage : expense > 0 ? 100 : 0
+  const fillColor = deficit ? 'var(--pb-coral)' : 'var(--pb-income-2)'
+  const statusLabel = deficit ? 'Uncovered spending' : 'Spending covered'
+  const statusValue = deficit ? fmtCurrency(gap) : fmtCurrency(income - expense)
 
   return (
-    <VStack align="stretch" spacing={3}>
-      {/* Income bar */}
-      <Box>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-          mb={1}
-        >
-          Income ·{' '}
-          <Text as="span" color="var(--pb-income-2)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(income)}
-          </Text>
-        </Text>
-        <Box style={trackStyle} aria-hidden="true">
-          <MotionBox
-            position="absolute"
-            top={0}
-            left={0}
-            height="100%"
-            width={`${incomePct}%`}
-            style={{
-              transformOrigin: 'left center',
-              background: 'linear-gradient(to right, var(--pb-income), var(--pb-income-2))',
-              borderRadius: '7px',
-            }}
-            variants={reduce ? undefined : barV}
-            initial={reduce ? false : 'hidden'}
-            animate={reduce ? false : 'show'}
-          />
-        </Box>
-      </Box>
+    <VStack align="stretch" spacing={4}>
+      <Flex align="baseline" gap={{ base: 4, sm: 6 }} wrap="wrap">
+        <LedgerValue label="Income" value={fmtCurrency(income)} color="var(--pb-income-2)" />
+        <Box h="18px" w="1px" bg="var(--pb-hair)" aria-hidden />
+        <LedgerValue label="Expenses" value={fmtCurrency(expense)} color="var(--pb-coral)" />
+      </Flex>
 
-      {/* Expense bar */}
       <Box>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-          mb={1}
-        >
-          Expenses ·{' '}
-          <Text as="span" color="var(--pb-coral)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(expense)}
+        <Flex align="baseline" justify="space-between" gap={3} mb={2}>
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="10px"
+            letterSpacing="0.16em"
+            textTransform="uppercase"
+            color="var(--pb-ink-faint)"
+          >
+            {statusLabel}
           </Text>
-        </Text>
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="11px"
+            fontWeight={700}
+            color={fillColor}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {statusValue}
+          </Text>
+        </Flex>
+
         <Box
-          style={trackStyle}
-          role="img"
-          aria-label={`Expenses ${fmtCurrency(expense)}${deficit ? ', shortfall shown as hatched band' : ''}`}
+          h="12px"
+          borderRadius="full"
+          bg="var(--pb-surface-3)"
+          border="1px solid var(--pb-hair)"
+          overflow="hidden"
+          aria-label={deficit
+            ? `${fmtCurrency(gap)} of spending is not covered by income`
+            : `Spending is covered, with ${fmtCurrency(income - expense)} remaining`}
         >
           <MotionBox
-            position="absolute"
-            top={0}
-            left={0}
-            height="100%"
-            width={`${expensePct}%`}
-            style={{
-              transformOrigin: 'left center',
-              background: 'linear-gradient(to right, var(--pb-coral), var(--pb-coral-2))',
-              borderRadius: '7px',
-            }}
+            h="full"
+            w={`${fill}%`}
+            borderRadius="full"
+            bg={deficit
+              ? 'linear-gradient(90deg, var(--pb-coral), var(--pb-coral-2))'
+              : 'linear-gradient(90deg, var(--pb-income), var(--pb-income-2))'}
             variants={reduce ? undefined : barV}
             initial={reduce ? false : 'hidden'}
             animate={reduce ? false : 'show'}
+            style={{ transformOrigin: 'left center' }}
           />
-          {deficit && (
-            <Box
-              position="absolute"
-              top={0}
-              bottom={0}
-              left={`${incomePct}%`}
-              right={0}
-              borderLeft="1.5px dashed rgba(255,255,255,0.7)"
-              backgroundImage="repeating-linear-gradient(135deg, rgba(255,255,255,0.22) 0 3px, transparent 3px 7px)"
-              pointerEvents="none"
-            />
-          )}
         </Box>
+
+        <Flex justify="space-between" gap={3} mt={1.5}>
+          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color="var(--pb-ink-faint)">
+            Income covers {Math.round(incomeCoverage)}% of expenses
+          </Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color={fillColor} textAlign="right">
+            {deficit ? `${Math.round(fill)}% uncovered` : 'On track'}
+          </Text>
+        </Flex>
       </Box>
 
-      {/* Caption */}
       <Text
         fontFamily="var(--pb-mono)"
         fontSize="10px"
-        letterSpacing="0.08em"
+        letterSpacing="0.04em"
         color="var(--pb-ink-faint)"
-        lineHeight="1.55"
+        lineHeight={1.55}
       >
         {deficit
           ? income > 0
-            ? `The hatched band is this month's shortfall — spending reached about ${expenseRatio}% of income${transactions ? `, across ${transactions} entries` : ''}.`
-            : `No income recorded yet this month — everything below is uncovered spending${transactions ? `, across ${transactions} entries` : ''}.`
-          : `Income covered spending with ${fmtCurrency(income - expense)} to spare${transactions ? ` across ${transactions} entries` : ''}.`}
+            ? `${fmtCurrency(gap)} still needs to be covered this month${transactions ? `, across ${transactions} entries` : ''}.`
+            : `No income has been recorded this month${transactions ? `, across ${transactions} entries` : ''}.`
+          : `Income covers all spending with ${fmtCurrency(income - expense)} remaining${transactions ? ` across ${transactions} entries` : ''}.`}
       </Text>
     </VStack>
+  )
+}
+
+function LedgerValue({ label, value, color }: { label: string; value: string; color: string }) {
+  return (
+    <Flex align="baseline" gap={2}>
+      <Text
+        fontFamily="var(--pb-mono)"
+        fontSize="9.5px"
+        letterSpacing="0.16em"
+        textTransform="uppercase"
+        color="var(--pb-ink-faint)"
+      >
+        {label}
+      </Text>
+      <Text
+        fontFamily="var(--pb-serif)"
+        fontSize="lg"
+        fontWeight={600}
+        lineHeight={1}
+        color={color}
+        style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
+      >
+        {value}
+      </Text>
+    </Flex>
   )
 }
