@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { type TransactionDateBasis } from '../../utils/transactionDates'
+import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -169,129 +169,116 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     }
   }, [installmentPlans, recurringItems])
 
-  /* ── Personalised insight: biggest category move vs previous period ── */
+  /* One useful, explainable dashboard focus. */
   const personalInsight = useMemo<PersonalInsightData>(() => {
-    // Use the entire selected period and the date the purchase happened.
-    // Payment dates do not affect this insight.
     const currentTransactions = behaviourPeriodData.transactions
     const previousTransactions = previousBehaviourPeriodData.transactions
+    const periodWord = selectedPeriod === 'month' ? 'month' : selectedPeriod
+
+    if (forecastInfo?.negative) {
+      return {
+        tone: 'attention',
+        headline: `Your ${forecastInfo.label} balance is projected to finish below zero.`,
+        detail: `The current forecast closes at ${fmtCurrency(forecastInfo.projected)} after planned payments and expected spending.`,
+        context: 'Review the payments and planned spending behind this forecast before the month closes.',
+        metricLabel: 'Projected closing balance',
+        metricValue: fmtCurrency(forecastInfo.projected),
+        actionLabel: 'Review cash flow',
+        href: 'payments',
+      }
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const nextWeek = new Date(today)
+    nextWeek.setDate(nextWeek.getDate() + 7)
+    const dueSoon = transactions.filter((t) => {
+      const date = getTransactionDate(t, 'cash-flow')
+      return t.type === 'EXPENSE' && date >= today && date <= nextWeek
+    })
+    const dueSoonTotal = dueSoon.reduce((total, t) => total + t.amount, 0)
+
+    if (netAvailable !== null && dueSoonTotal > 0 && dueSoonTotal > netAvailable) {
+      const shortfall = dueSoonTotal - netAvailable
+      return {
+        tone: 'attention',
+        headline: 'Payments due this week are larger than your available balance.',
+        detail: `${fmtCurrency(dueSoonTotal)} is scheduled in the next 7 days against ${fmtCurrency(netAvailable)} available across your current, cash and savings accounts.`,
+        context: `That leaves a ${fmtCurrency(shortfall)} shortfall unless money is moved or a payment is rescheduled.`,
+        metricLabel: 'Next 7 days',
+        metricValue: fmtCurrency(dueSoonTotal),
+        actionLabel: 'Review payments',
+        href: 'payments',
+      }
+    }
 
     const sumByCategory = (txns: typeof behaviourPeriodData.transactions) => {
-      const map = new Map<string, number>()
-      for (const t of txns) {
-        if (t.type !== 'EXPENSE') continue
-        map.set(t.category, (map.get(t.category) ?? 0) + t.amount)
+      const totals = new Map<string, number>()
+      for (const transaction of txns) {
+        if (transaction.type === 'EXPENSE') {
+          totals.set(transaction.category, (totals.get(transaction.category) ?? 0) + transaction.amount)
+        }
       }
-      return map
+      return totals
     }
 
     const current = sumByCategory(currentTransactions)
     const previous = sumByCategory(previousTransactions)
+    const currentExpense = [...current.values()].reduce((sum, value) => sum + value, 0)
+    const previousExpense = [...previous.values()].reduce((sum, value) => sum + value, 0)
+    const expenseIncrease = currentExpense - previousExpense
+    const meaningfulCategoryIncrease = [...current.entries()]
+      .map(([category, amount]) => {
+        const prior = previous.get(category) ?? 0
+        return { category, amount, prior, delta: amount - prior }
+      })
+      // Avoid misleading "100% up" messages for a newly used category or
+      // small day-to-day variation that is not worth interrupting the user for.
+      .filter(({ prior, delta }) => prior > 0 && delta >= Math.max(25, prior * 0.2))
+      .sort((a, b) => b.delta - a.delta)[0]
 
-    // Find the category with the biggest absolute change vs last period.
-    let topCategory = ''
-    let topDelta = 0
-    for (const [cat, amt] of current) {
-      const delta = amt - (previous.get(cat) ?? 0)
-      if (Math.abs(delta) > Math.abs(topDelta)) {
-        topDelta = delta
-        topCategory = cat
-      }
-    }
-
-    const currentExpense = currentTransactions
-      .filter((t) => t.type === 'EXPENSE')
-      .reduce((sum, t) => sum + t.amount, 0)
-    const previousExpense = previousTransactions
-      .filter((t) => t.type === 'EXPENSE')
-      .reduce((sum, t) => sum + t.amount, 0)
-    const overallExpenseDelta = currentExpense - previousExpense
-    const overallExpensePct = previousExpense > 0
-      ? Math.round((Math.abs(overallExpenseDelta) / previousExpense) * 100)
-      : currentExpense > 0
-        ? 100
-        : 0
-    const overallExpenseLabel =
-      overallExpenseDelta === 0
-        ? '0%'
-        : `${overallExpenseDelta < 0 ? '−' : '+'}${overallExpensePct}%`
-    const overallExpensePositive = overallExpenseDelta <= 0
-
-    const comparisonLine = (category: string): string | null => {
-      const currentAmt = current.get(category) ?? 0
-      const previousAmt = previous.get(category) ?? 0
-      const delta = currentAmt - previousAmt
-      if (currentAmt === 0 && previousAmt === 0) return null
-      if (delta === 0) return `${category} is flat at ${fmtCurrency(currentAmt)}.`
-
-      const pct = previousAmt > 0 ? Math.round((Math.abs(delta) / previousAmt) * 100) : 100
-      return delta < 0
-        ? `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) below the same point last month.`
-        : `${category} is ${fmtCurrency(Math.abs(delta))} (${pct}%) above the same point last month.`
-    }
-
-    const findCategory = (wanted: string): string | null => {
-      const lower = wanted.toLowerCase()
-      for (const category of new Set([...current.keys(), ...previous.keys()])) {
-        if (category.toLowerCase() === lower) return category
-      }
-      return null
-    }
-
-    const groceriesCategory = findCategory('Groceries')
-    const groceriesLine = (() => {
-      if (!groceriesCategory) return null
-      const currentGroceries = current.get(groceriesCategory) ?? 0
-      const previousGroceries = previous.get(groceriesCategory) ?? 0
-      if (previousGroceries === 0) return `Groceries: ${fmtCurrency(currentGroceries)} this month.`
-
-      const delta = currentGroceries - previousGroceries
-      if (delta === 0) return `Groceries: ${fmtCurrency(currentGroceries)}, the same as last month.`
-      const percent = Math.round((Math.abs(delta) / previousGroceries) * 100)
-      return `Groceries: ${fmtCurrency(currentGroceries)} this month, ${percent}% ${delta > 0 ? 'above' : 'below'} last month.`
-    })()
-
-    const extraLines = ['Shopping', 'Transport']
-      .map(findCategory)
-      .filter((category): category is string => Boolean(category) && category !== topCategory)
-      .map(comparisonLine)
-      .filter((line): line is string => Boolean(line))
-
-    if (!topCategory || topDelta === 0) {
-      const bodyLines = groceriesLine || extraLines.length
-        ? [groceriesLine, ...extraLines].filter((line): line is string => Boolean(line))
-        : ['Keep logging transactions to surface trends across categories.']
-
+    if (meaningfulCategoryIncrease) {
+      const { category, amount, prior, delta } = meaningfulCategoryIncrease
+      const shareOfIncrease = expenseIncrease > 0 ? Math.round((delta / expenseIncrease) * 100) : null
       return {
-        headline: 'Your spending is steady this month.',
-        body: bodyLines.join(' '),
-        bodyLines,
-        deltaLabel: overallExpenseLabel,
-        deltaPositive: overallExpensePositive,
-        href: 'planning',
+        tone: 'neutral',
+        headline: `${category} is ${fmtCurrency(delta)} above last ${periodWord}.`,
+        detail: `You have spent ${fmtCurrency(amount)} so far, compared with ${fmtCurrency(prior)} over the equivalent previous ${periodWord}.`,
+        context: shareOfIncrease && shareOfIncrease <= 100
+          ? `This explains ${shareOfIncrease}% of the increase in your overall spending.`
+          : 'It is the largest comparable increase across your expense categories.',
+        metricLabel: `vs last ${periodWord}`,
+        metricValue: `+${fmtCurrency(delta)}`,
+        actionLabel: `Review ${category}`,
+        href: 'all-transactions',
       }
     }
 
-    const topLine = comparisonLine(topCategory)
-    const bodyLines = [
-      groceriesLine,
-      topCategory === groceriesCategory ? null : topLine,
-      ...extraLines,
-    ].filter(
-      (line): line is string => Boolean(line),
-    )
+    if (currentExpense > 0 && previousExpense > 0 && currentExpense <= previousExpense) {
+      const saved = previousExpense - currentExpense
+      return {
+        tone: 'positive',
+        headline: `Your spending is not outpacing last ${periodWord}.`,
+        detail: `You have spent ${fmtCurrency(currentExpense)} so far, compared with ${fmtCurrency(previousExpense)} in the equivalent previous ${periodWord}.`,
+        context: saved > 0
+          ? `That is ${fmtCurrency(saved)} less spent so far.`
+          : 'Your spend is currently in line with the previous period.',
+        metricLabel: `vs last ${periodWord}`,
+        metricValue: saved > 0 ? `−${fmtCurrency(saved)}` : 'On track',
+        actionLabel: 'Explore spending',
+        href: 'behaviour',
+      }
+    }
 
     return {
-      headline: overallExpenseDelta <= 0
-        ? 'You are spending less overall this month.'
-        : 'Your overall spending is climbing this month.',
-      body: bodyLines.join(' '),
-      bodyLines,
-      deltaLabel: overallExpenseLabel,
-      deltaPositive: overallExpensePositive,
-      href: 'planning',
+      tone: 'positive',
+      headline: 'No unusually large changes are showing yet.',
+      detail: 'Keep logging income and expenses to build a useful comparison for the next period.',
+      context: 'Insights appear when there is enough comparable spending history to make a recommendation trustworthy.',
+      actionLabel: 'Explore spending',
+      href: 'behaviour',
     }
-  }, [behaviourPeriodData, previousBehaviourPeriodData])
+  }, [behaviourPeriodData, forecastInfo, netAvailable, previousBehaviourPeriodData, selectedPeriod, transactions])
 
   /* ── "For you" editorial list ── */
   const insights = useMemo<InsightItem[]>(() => {
@@ -461,15 +448,22 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         ) : null}
 
         {/* Spending pace · Personalised insight */}
-        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))', xl: 'repeat(3, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+        <MotionBox variants={riseV}>
+          <SectionLabel>Your focus</SectionLabel>
+        </MotionBox>
+        <MotionBox variants={riseV}>
+          <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
+        </MotionBox>
+
+        <MotionBox variants={riseV}>
+          <SectionLabel>This month</SectionLabel>
+        </MotionBox>
+        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
           </MotionBox>
           <MotionBox variants={riseV}>
             <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="income" />
-          </MotionBox>
-          <MotionBox variants={riseV} gridColumn={{ md: 'span 2', xl: 'auto' }}>
-            <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
           </MotionBox>
         </Grid>
 
