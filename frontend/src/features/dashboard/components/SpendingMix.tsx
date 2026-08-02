@@ -12,6 +12,12 @@ interface SpendingMixProps {
   previousTransactions?: Transaction[]
 }
 
+interface MixSlice {
+  category: string
+  amount: number
+  delta: number | null
+}
+
 const MAX_SLICES = 6
 
 export default function SpendingMix({ transactions, previousTransactions = [] }: SpendingMixProps) {
@@ -26,60 +32,72 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
   const { slices, total } = useMemo(() => {
     const sumByCategory = (txns: Transaction[]) => {
       const map = new Map<string, number>()
-      for (const t of txns) {
-        if (t.type !== 'EXPENSE') continue
-        map.set(t.category, (map.get(t.category) ?? 0) + t.amount)
+      for (const transaction of txns) {
+        if (transaction.type === 'EXPENSE') {
+          map.set(transaction.category, (map.get(transaction.category) ?? 0) + transaction.amount)
+        }
       }
       return map
     }
 
-    const byCategory = sumByCategory(transactions)
-    const prevByCategory = sumByCategory(previousTransactions)
-
-    const sorted = [...byCategory.entries()]
+    const current = sumByCategory(transactions)
+    const previous = sumByCategory(previousTransactions)
+    const sorted: MixSlice[] = [...current.entries()]
       .map(([category, amount]) => ({
         category,
         amount,
-        // null when the category didn't exist last period ("new" spending).
-        delta: prevByCategory.has(category) ? amount - (prevByCategory.get(category) ?? 0) : null,
+        delta: previous.has(category) ? amount - (previous.get(category) ?? 0) : null,
       }))
       .sort((a, b) => b.amount - a.amount)
 
-    let result = sorted
-    if (sorted.length > MAX_SLICES) {
-      const head = sorted.slice(0, MAX_SLICES - 1)
-      const rest = sorted.slice(MAX_SLICES - 1)
-      const otherAmount = rest.reduce((s, r) => s + r.amount, 0)
-      result = [...head, { category: 'Other', amount: otherAmount, delta: null }]
-    }
+    const result = sorted.length > MAX_SLICES
+      ? [
+          ...sorted.slice(0, MAX_SLICES - 1),
+          {
+            category: 'Other',
+            amount: sorted.slice(MAX_SLICES - 1).reduce((sum, item) => sum + item.amount, 0),
+            delta: null,
+          },
+        ]
+      : sorted
 
-    const sum = result.reduce((s, r) => s + r.amount, 0)
-    return { slices: result, total: sum }
+    return { slices: result, total: result.reduce((sum, item) => sum + item.amount, 0) }
   }, [transactions, previousTransactions])
 
   const hasData = slices.length > 0 && total > 0
 
   return (
     <Panel h="full">
-      <VStack align="stretch" spacing={4} h="full">
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10.5px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-        >
-          Spending mix
-        </Text>
+      <VStack align="stretch" spacing={5} h="full">
+        <HStack justify="space-between" align="flex-start">
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="10.5px"
+            letterSpacing="0.2em"
+            textTransform="uppercase"
+            color="var(--pb-ink-faint)"
+          >
+            Spending mix
+          </Text>
+          {hasData && (
+            <VStack align="flex-end" spacing={0}>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                Total spent
+              </Text>
+              <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {fmtCurrency(total)}
+              </Text>
+            </VStack>
+          )}
+        </HStack>
 
         {!hasData ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
             No expenses recorded for this period.
           </Text>
         ) : (
-          <Grid templateColumns={{ base: '1fr', sm: '140px 1fr' }} gap={4} alignItems="center">
-            {/* Donut */}
-            <Box position="relative" h="140px" w="full" minW="120px">
+          <Grid templateColumns={{ base: '1fr', sm: '180px minmax(0, 1fr)' }} gap={{ base: 5, sm: 6 }} alignItems="center" flex={1}>
+            <Box position="relative" h="190px" w="full" maxW={{ base: '230px', sm: 'none' }} mx={{ base: 'auto', sm: 0 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -88,15 +106,15 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
                     nameKey="category"
                     cx="50%"
                     cy="50%"
-                    innerRadius={42}
-                    outerRadius={64}
+                    innerRadius={58}
+                    outerRadius={82}
                     paddingAngle={2}
                     stroke={sliceStroke}
                     strokeWidth={2}
                     isAnimationActive={!reduce}
                   >
-                    {slices.map((s, i) => (
-                      <Cell key={s.category} fill={categoryColor(i)} />
+                    {slices.map((slice, index) => (
+                      <Cell key={slice.category} fill={categoryColor(index)} />
                     ))}
                   </Pie>
                   <Tooltip
@@ -110,86 +128,67 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
                     }}
                     labelStyle={{ color: tooltipText }}
                     itemStyle={{ color: tooltipText }}
-                    formatter={(value: number | string, name: string) => [
-                      fmtCurrency(Number(value)),
-                      name,
-                    ]}
+                    formatter={(value: number | string, name: string) => [fmtCurrency(Number(value)), name]}
                   />
                 </PieChart>
               </ResponsiveContainer>
-              {/* Center total */}
-              <VStack
-                position="absolute"
-                inset={0}
-                justify="center"
-                spacing={0}
-                pointerEvents="none"
-              >
+              <VStack position="absolute" inset={0} justify="center" spacing={0} pointerEvents="none">
                 <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.16em" color="var(--pb-ink-faint)" textTransform="uppercase">
-                  Total
+                  Categories
                 </Text>
-                <Text
-                  fontFamily="var(--pb-serif)"
-                  fontSize="md"
-                  fontWeight={500}
-                  color="var(--pb-ink)"
-                  style={{ fontVariantNumeric: 'tabular-nums' }}
-                >
-                  {fmtCurrency(total)}
+                <Text fontFamily="var(--pb-serif)" fontSize="2xl" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
+                  {slices.length}
                 </Text>
               </VStack>
             </Box>
 
-            {/* Legend */}
-            <VStack align="stretch" spacing={1.5}>
-              {slices.map((s, i) => {
-                const pct = Math.round((s.amount / total) * 100)
-                return (
-                  <HStack key={s.category} justify="space-between" spacing={2}>
-                    <HStack spacing={2} minW={0}>
-                      <Box w={2.5} h={2.5} borderRadius="2px" bg={categoryColor(i)} flexShrink={0} />
-                      <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink)" noOfLines={1}>
-                        {s.category}
-                      </Text>
-                      <Text
-                        fontFamily="var(--pb-mono)"
-                        fontSize="9.5px"
-                        color="var(--pb-ink-faint)"
-                        flexShrink={0}
-                        style={{ fontVariantNumeric: 'tabular-nums' }}
-                      >
-                        {pct}%
-                      </Text>
-                    </HStack>
-                    <HStack spacing={2} flexShrink={0} align="baseline">
-                      <Text
-                        fontFamily="var(--pb-mono)"
-                        fontSize="10px"
-                        color="var(--pb-ink-soft)"
-                        style={{ fontVariantNumeric: 'tabular-nums' }}
-                      >
-                        {fmtCurrency(s.amount)}
-                      </Text>
-                      {s.delta !== null && s.delta !== 0 && (
-                        <Text
-                          fontFamily="var(--pb-mono)"
-                          fontSize="9.5px"
-                          color={s.delta > 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
-                          style={{ fontVariantNumeric: 'tabular-nums' }}
-                          title="Change vs previous period"
-                        >
-                          {s.delta > 0 ? '+' : '−'}
-                          {fmtCurrency(Math.abs(s.delta))}
-                        </Text>
-                      )}
-                    </HStack>
-                  </HStack>
-                )
-              })}
+            <VStack align="stretch" spacing={0} divider={<Box borderBottom="1px solid var(--pb-hair)" />}>
+              {slices.map((slice, index) => (
+                <MixRow key={slice.category} slice={slice} total={total} color={categoryColor(index)} />
+              ))}
             </VStack>
           </Grid>
         )}
       </VStack>
     </Panel>
+  )
+}
+
+function MixRow({ slice, total, color }: { slice: MixSlice; total: number; color: string }) {
+  const percentage = Math.round((slice.amount / total) * 100)
+
+  return (
+    <Box py={2}>
+      <HStack justify="space-between" spacing={3}>
+        <HStack spacing={2} minW={0}>
+          <Box w={2.5} h={2.5} borderRadius="full" bg={color} flexShrink={0} />
+          <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
+            {slice.category}
+          </Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color="var(--pb-ink-faint)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {percentage}%
+          </Text>
+        </HStack>
+        <HStack spacing={2} flexShrink={0} align="baseline">
+          {slice.delta !== null && slice.delta !== 0 && (
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              color={slice.delta > 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+              title="Change vs previous period"
+            >
+              {slice.delta > 0 ? '+' : '−'}{fmtCurrency(Math.abs(slice.delta))}
+            </Text>
+          )}
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {fmtCurrency(slice.amount)}
+          </Text>
+        </HStack>
+      </HStack>
+      <Box mt={1.5} h="3px" borderRadius="full" bg="var(--pb-surface-3)" overflow="hidden">
+        <Box h="full" w={`${percentage}%`} borderRadius="full" bg={color} opacity={0.85} />
+      </Box>
+    </Box>
   )
 }
