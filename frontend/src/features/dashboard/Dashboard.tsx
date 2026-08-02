@@ -27,7 +27,6 @@ import { containerV, MotionBox, riseV } from './components/motion'
 import SectionLabel from './components/SectionLabel'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
-import CashFlowChart from './components/CashFlowChart'
 import CashPace from './components/SpendingPace'
 import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
@@ -360,16 +359,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </Grid>
 
         {/* Cash flow chart (same period and payments lens as the hero) */}
-        <MotionBox variants={riseV}>
-          <CashFlowChart
-            transactions={periodData.transactions}
-            selectedDate={selectedDate}
-            periodType={selectedPeriod}
-            dateBasis={dateBasis}
-            totals={{ income: periodData.income, expense: periodData.expense }}
-          />
-        </MotionBox>
-
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
           <SectionLabel>Balance &amp; forecast</SectionLabel>
