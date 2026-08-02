@@ -29,11 +29,11 @@ export default function MonthHero({
       overflow="hidden"
     >
       <Grid
-        templateColumns={{ base: '1fr', md: 'minmax(0, 1.35fr) minmax(240px, 0.8fr)' }}
-        gap="clamp(1.4rem, 3vw, 2.2rem)"
+        templateColumns={{ base: '1fr', md: '50% 50%' }}
+        gap={0}
         p="clamp(1.5rem, 3.4vw, 2.4rem)"
       >
-        <VStack align="stretch" spacing={4}>
+        <VStack align="stretch" spacing={4} pr={{ base: 0, md: 8 }}>
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="10.5px"
@@ -86,6 +86,7 @@ export default function MonthHero({
           <VStack
             align="stretch"
             justify="flex-start"
+            h="full"
             borderLeft={{ base: 'none', md: '1px solid var(--pb-hair)' }}
             borderTop={{ base: '1px solid var(--pb-hair)', md: 'none' }}
             pl={{ base: 0, md: 8 }}
@@ -110,7 +111,13 @@ export default function MonthHero({
               Keep {monthName}'s ledger current.
             </Text>
 
-            <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2.5} pt={2} borderTop="1px solid var(--pb-hair)">
+            <Grid
+              templateColumns="repeat(2, minmax(0, 1fr))"
+              gap={2.5}
+              pt={2}
+              mt="auto"
+              borderTop="1px solid var(--pb-hair)"
+            >
               {onAddIncome && (
                 <Button
                   h="50px"
