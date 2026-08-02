@@ -6,20 +6,17 @@ import { fmtCurrency } from './format'
 interface FlowBarsProps {
   income: number
   expense: number
-  transactions?: number
 }
 
 /** A single, comparable cash-flow meter. The fill represents the part of
  * spending that is not covered by income (or the surplus when it is covered). */
-export default function FlowBars({ income, expense, transactions }: FlowBarsProps) {
+export default function FlowBars({ income, expense }: FlowBarsProps) {
   const reduce = useReducedMotion()
   const deficit = expense > income
   const gap = Math.abs(expense - income)
   const incomeCoverage = expense > 0 ? Math.min((income / expense) * 100, 100) : 100
   const fill = deficit ? 100 - incomeCoverage : expense > 0 ? 100 : 0
   const fillColor = deficit ? 'var(--pb-coral)' : 'var(--pb-income-2)'
-  const statusLabel = deficit ? 'Uncovered spending' : 'Spending covered'
-  const statusValue = deficit ? fmtCurrency(gap) : fmtCurrency(income - expense)
 
   return (
     <VStack align="stretch" spacing={4}>
@@ -30,27 +27,6 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
       </Flex>
 
       <Box>
-        <Flex align="baseline" justify="space-between" gap={3} mb={2}>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            letterSpacing="0.16em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            {statusLabel}
-          </Text>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="11px"
-            fontWeight={700}
-            color={fillColor}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {statusValue}
-          </Text>
-        </Flex>
-
         <Box
           h="12px"
           borderRadius="full"
@@ -77,27 +53,13 @@ export default function FlowBars({ income, expense, transactions }: FlowBarsProp
 
         <Flex justify="space-between" gap={3} mt={1.5}>
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color="var(--pb-ink-faint)">
-            Income covers {Math.round(incomeCoverage)}% of expenses
+            {Math.round(incomeCoverage)}% of expenses covered
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color={fillColor} textAlign="right">
-            {deficit ? `${Math.round(fill)}% uncovered` : 'On track'}
+            {deficit ? `${fmtCurrency(gap)} remaining` : `${fmtCurrency(income - expense)} left`}
           </Text>
         </Flex>
       </Box>
-
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="10px"
-        letterSpacing="0.04em"
-        color="var(--pb-ink-faint)"
-        lineHeight={1.55}
-      >
-        {deficit
-          ? income > 0
-            ? `${fmtCurrency(gap)} still needs to be covered this month${transactions ? `, across ${transactions} entries` : ''}.`
-            : `No income has been recorded this month${transactions ? `, across ${transactions} entries` : ''}.`
-          : `Income covers all spending with ${fmtCurrency(income - expense)} remaining${transactions ? ` across ${transactions} entries` : ''}.`}
-      </Text>
     </VStack>
   )
 }

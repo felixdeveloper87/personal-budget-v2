@@ -1,4 +1,4 @@
-import { Button, Grid, HStack, Text, VStack } from '@chakra-ui/react'
+import { Button, Grid, Text, VStack } from '@chakra-ui/react'
 import { Plus } from 'lucide-react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
@@ -7,8 +7,6 @@ import { fmtCurrency } from './format'
 interface MonthHeroProps {
   income: number
   expense: number
-  net: number
-  transactions: number
   date?: Date
   onAddIncome?: () => void
   onAddExpense?: () => void
@@ -17,16 +15,12 @@ interface MonthHeroProps {
 export default function MonthHero({
   income,
   expense,
-  net,
-  transactions,
   date,
   onAddIncome,
   onAddExpense,
 }: MonthHeroProps) {
   const deficit = expense > income
   const monthName = (date ?? new Date()).toLocaleDateString('en-GB', { month: 'long' })
-  const netLabel = `${net < 0 ? '−' : ''}${fmtCurrency(Math.abs(net))}`
-  const netColor = net < 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'
 
   return (
     <Panel
@@ -84,29 +78,8 @@ export default function MonthHero({
               : 'Your income is covering spending for this month.'}
           </Text>
 
-          <FlowBars income={income} expense={expense} transactions={transactions} />
+          <FlowBars income={income} expense={expense} />
 
-          <HStack justify="space-between" align="baseline" pt={2} borderTop="1px solid var(--pb-hair)">
-            <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="10.5px"
-              letterSpacing="0.2em"
-              textTransform="uppercase"
-              color="var(--pb-ink-faint)"
-            >
-              Balance after spending
-            </Text>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="clamp(1.3rem, 2.6vw, 1.7rem)"
-              fontWeight={600}
-              lineHeight={1}
-              color={netColor}
-              style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
-            >
-              {netLabel}
-            </Text>
-          </HStack>
         </VStack>
 
         {(onAddIncome || onAddExpense) && (
