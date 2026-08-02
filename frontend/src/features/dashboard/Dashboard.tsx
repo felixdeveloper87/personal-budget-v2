@@ -32,12 +32,8 @@ import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
-import CommitmentsPanel from './components/CommitmentsPanel'
-import type { CommitmentsData } from './components/CommitmentsPanel'
-import InsightList from './components/InsightList'
-import type { InsightItem } from './components/InsightList'
+import CommitmentCard from './components/CommitmentCard'
 import { fmtCurrency } from './components/format'
-import { daysInMonth, merchantStats } from './insights'
 
 export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
@@ -94,14 +90,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   // Previous period on the Behaviour lens, so merchant comparisons ("last month
   // you spent £X at Lidl") reflect when purchases actually happened.
-  const previousBehaviourPeriodData = usePeriodData(
-    transactions,
-    null,
-    selectedPeriod,
-    previousDate,
-    'activity',
-  )
-
   /* ── Side data: accounts, forecast, installments, recurring ── */
   const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null)
   const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
@@ -150,7 +138,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   }, [forecast])
 
   /* ── Computed commitments ── */
-  const commitments = useMemo<CommitmentsData>(() => {
+  const commitments = useMemo(() => {
     const activePlans = installmentPlans.filter((p) => !isInstallmentPlanCompleted(p))
     const pastPlans = installmentPlans.filter((p) => isInstallmentPlanCompleted(p))
     const installMonthly = activePlans.reduce((s, p) => s + p.installmentValue, 0)
@@ -165,118 +153,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       fixed: { monthly: fixedMonthly, active: activeFixed.length, cancelled: cancelledFixed.length },
     }
   }, [installmentPlans, recurringItems])
-
-  /* ── "For you" editorial list ── */
-  const insights = useMemo<InsightItem[]>(() => {
-    const result: InsightItem[] = []
-    const { income, expense, balance, transactions: txns } = periodData
-
-    if (expense > income) {
-      result.push({
-        id: 'overspend',
-        severity: 'attention',
-        tag: 'Needs attention',
-        title: 'Spending exceeds income',
-        valueLabel: fmtCurrency(Math.abs(balance), { minimumFractionDigits: 2 }),
-        description: 'Expenses are higher than income this period.',
-        href: 'behaviour',
-        icon: 'warn',
-      })
-    }
-
-    // Month-end pace projection — only meaningful a few days into the live month.
-    const today = new Date()
-    const isCurrentMonth =
-      selectedPeriod === 'month' &&
-      selectedDate.getFullYear() === today.getFullYear() &&
-      selectedDate.getMonth() === today.getMonth()
-    if (isCurrentMonth && today.getDate() >= 3 && expense > 0) {
-      const totalDays = daysInMonth(today.getFullYear(), today.getMonth())
-      const projected = (expense / today.getDate()) * totalDays
-      result.push({
-        id: 'pace',
-        severity: income > 0 && projected > income ? 'attention' : 'info',
-        tag: 'Month-end pace',
-        title: `On pace for ~${fmtCurrency(projected)}`,
-        description: `You are averaging ${fmtCurrency(expense / today.getDate())} a day across ${today.getDate()} days.`,
-        href: 'behaviour',
-        icon: 'gauge',
-      })
-    }
-
-    const now = Date.now()
-    const in7 = now + 7 * 24 * 60 * 60 * 1000
-    const upcoming = txns.filter((t) => {
-      const d = new Date(t.paymentDate ?? t.dateTime).getTime()
-      return d >= now && d <= in7 && t.type === 'EXPENSE'
-    })
-    if (upcoming.length > 0) {
-      const upcomingTotal = upcoming.reduce((s, t) => s + t.amount, 0)
-      result.push({
-        id: 'upcoming',
-        severity: 'info',
-        tag: 'Next 7 days',
-        title: `${upcoming.length} payment${upcoming.length !== 1 ? 's' : ''} due`,
-        valueLabel: fmtCurrency(upcomingTotal),
-        description: 'Upcoming expense payments scheduled this week.',
-        href: 'payments',
-        icon: 'calendar',
-      })
-    }
-
-    // Last period's top merchant, e.g. "Last month you spent £84 at Lidl".
-    const prevMerchants = merchantStats(previousBehaviourPeriodData.transactions)
-    if (prevMerchants.length > 0) {
-      const top = prevMerchants[0]
-      const sameNow = merchantStats(behaviourPeriodData.transactions).find((m) => m.key === top.key)
-      const periodWord = selectedPeriod === 'month' ? 'month' : selectedPeriod
-      result.push({
-        id: 'top-merchant',
-        severity: 'info',
-        tag: `Last ${periodWord}`,
-        title: `You spent ${fmtCurrency(top.total)} at ${top.name}`,
-        description:
-          `${top.count} purchase${top.count !== 1 ? 's' : ''} — your top merchant last ${periodWord}.` +
-          (sameNow ? ` This ${periodWord} you are at ${fmtCurrency(sameNow.total)} so far.` : ''),
-        href: 'all-transactions',
-        icon: 'store',
-      })
-    }
-
-    // Largest single expense, when it dominates the period.
-    const biggest = txns.reduce<(typeof txns)[number] | null>(
-      (acc, t) => (t.type === 'EXPENSE' && (!acc || t.amount > acc.amount) ? t : acc),
-      null,
-    )
-    if (biggest && expense > 0 && biggest.amount / expense >= 0.15) {
-      result.push({
-        id: 'big-ticket',
-        severity: 'info',
-        tag: 'Largest expense',
-        title: biggest.description?.trim() || biggest.category,
-        valueLabel: fmtCurrency(biggest.amount),
-        description: `${Math.round((biggest.amount / expense) * 100)}% of this period's spending in a single purchase.`,
-        href: 'all-transactions',
-        icon: 'receipt',
-      })
-    }
-
-    const savingsRate = income > 0 ? Math.round(((income - expense) / income) * 100) : -100
-    result.push({
-      id: 'savings-rate',
-      severity: 'info',
-      tag: 'Savings rate',
-      title: savingsRate >= 0 ? `At ${savingsRate}%` : `Down to ${savingsRate}%`,
-      description:
-        savingsRate >= 0
-          ? 'Income is covering expenses with savings to spare.'
-          : 'Expenses are exceeding income this period.',
-      href: 'planning',
-      icon: 'trend-down',
-    })
-
-    return result.slice(0, 5)
-  }, [periodData, behaviourPeriodData, previousBehaviourPeriodData, selectedDate, selectedPeriod])
 
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
@@ -361,6 +237,30 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         {/* Cash flow chart (same period and payments lens as the hero) */}
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
+          <SectionLabel>Monthly commitments</SectionLabel>
+        </MotionBox>
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+          <MotionBox variants={riseV}>
+            <CommitmentCard
+              kind="installments"
+              monthly={commitments.installments.monthly}
+              active={commitments.installments.active}
+              inactive={commitments.installments.past}
+              onManage={() => onPageChange?.('installments')}
+            />
+          </MotionBox>
+          <MotionBox variants={riseV}>
+            <CommitmentCard
+              kind="fixed"
+              monthly={commitments.fixed.monthly}
+              active={commitments.fixed.active}
+              inactive={commitments.fixed.cancelled}
+              onManage={() => onPageChange?.('fixed-payments')}
+            />
+          </MotionBox>
+        </Grid>
+
+        <MotionBox variants={riseV}>
           <SectionLabel>Balance &amp; forecast</SectionLabel>
         </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
@@ -402,22 +302,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </Grid>
 
         {/* Commitments · For you */}
-        <MotionBox variants={riseV}>
-          <SectionLabel>Commitments &amp; insights</SectionLabel>
-        </MotionBox>
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <CommitmentsPanel
-              commitments={commitments}
-              onManageInstallments={() => onPageChange?.('installments')}
-              onManageFixed={() => onPageChange?.('fixed-payments')}
-            />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <InsightList insights={insights} onPageChange={onPageChange} />
-          </MotionBox>
-        </Grid>
-
       </VStack>
       </MotionBox>
 
