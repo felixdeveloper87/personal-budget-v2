@@ -33,8 +33,6 @@ import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
-import PersonalisedInsight from './components/PersonalisedInsight'
-import type { PersonalInsightData } from './components/PersonalisedInsight'
 import CommitmentsPanel from './components/CommitmentsPanel'
 import type { CommitmentsData } from './components/CommitmentsPanel'
 import InsightList from './components/InsightList'
@@ -168,98 +166,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       fixed: { monthly: fixedMonthly, active: activeFixed.length, cancelled: cancelledFixed.length },
     }
   }, [installmentPlans, recurringItems])
-
-  /* One useful, explainable category-spending focus. */
-  const personalInsight = useMemo<PersonalInsightData>(() => {
-    const currentTransactions = behaviourPeriodData.transactions
-    const previousTransactions = previousBehaviourPeriodData.transactions
-    const periodWord = selectedPeriod === 'month' ? 'month' : selectedPeriod
-
-    const sumByCategory = (txns: typeof behaviourPeriodData.transactions) => {
-      const totals = new Map<string, number>()
-      for (const transaction of txns) {
-        if (transaction.type === 'EXPENSE') {
-          totals.set(transaction.category, (totals.get(transaction.category) ?? 0) + transaction.amount)
-        }
-      }
-      return totals
-    }
-
-    const current = sumByCategory(currentTransactions)
-    const previous = sumByCategory(previousTransactions)
-    const currentExpense = [...current.values()].reduce((sum, value) => sum + value, 0)
-    const meaningfulCategoryIncrease = [...current.entries()]
-      .map(([category, amount]) => {
-        const prior = previous.get(category) ?? 0
-        return { category, amount, prior, delta: amount - prior }
-      })
-      // Avoid misleading "100% up" messages for a newly used category or
-      // small day-to-day variation that is not worth interrupting the user for.
-      .filter(({ prior, delta }) => prior > 0 && delta >= Math.max(25, prior * 0.2))
-      .sort((a, b) => b.delta - a.delta)[0]
-
-    if (meaningfulCategoryIncrease) {
-      const { category, amount, prior, delta } = meaningfulCategoryIncrease
-      const shareOfSpend = Math.round((amount / currentExpense) * 100)
-      return {
-        tone: 'neutral',
-        headline: `${category} is ${fmtCurrency(delta)} above last ${periodWord}.`,
-        detail: `You have spent ${fmtCurrency(amount)} so far, compared with ${fmtCurrency(prior)} over the equivalent previous ${periodWord}.`,
-        context: `It represents ${shareOfSpend}% of your spending in this ${periodWord}.`,
-        metricLabel: `vs last ${periodWord}`,
-        metricValue: `+${fmtCurrency(delta)}`,
-        actionLabel: `Review ${category}`,
-        href: 'all-transactions',
-      }
-    }
-
-    const leadingCategory = [...current.entries()]
-      .map(([category, amount]) => ({
-        category,
-        amount,
-        prior: previous.get(category) ?? 0,
-      }))
-      .sort((a, b) => b.amount - a.amount)[0]
-
-    if (leadingCategory) {
-      const { category, amount, prior } = leadingCategory
-      const delta = amount - prior
-      const shareOfSpend = Math.round((amount / currentExpense) * 100)
-
-      if (prior > 0 && delta < 0) {
-        return {
-          tone: 'positive',
-          headline: `${category} is ${fmtCurrency(Math.abs(delta))} below last ${periodWord}.`,
-          detail: `You have spent ${fmtCurrency(amount)} so far, compared with ${fmtCurrency(prior)} over the equivalent previous ${periodWord}.`,
-          context: `It is still your largest category, at ${shareOfSpend}% of spending in this ${periodWord}.`,
-          metricLabel: `vs last ${periodWord}`,
-          metricValue: `−${fmtCurrency(Math.abs(delta))}`,
-          actionLabel: `Review ${category}`,
-          href: 'all-transactions',
-        }
-      }
-
-      return {
-        tone: 'neutral',
-        headline: `${category} is your largest spending category this ${periodWord}.`,
-        detail: `You have spent ${fmtCurrency(amount)} here so far.`,
-        context: `That is ${shareOfSpend}% of all spending recorded in this ${periodWord}.`,
-        metricLabel: 'Category spend',
-        metricValue: fmtCurrency(amount),
-        actionLabel: `Review ${category}`,
-        href: 'all-transactions',
-      }
-    }
-
-    return {
-      tone: 'positive',
-      headline: 'No category spending to compare yet.',
-      detail: 'Add expenses with a category to see what is taking the largest share of your spending.',
-      context: 'A comparison appears once there is a previous period with category activity.',
-      actionLabel: 'Add an expense',
-      href: 'all-transactions',
-    }
-  }, [behaviourPeriodData, previousBehaviourPeriodData, selectedPeriod])
 
   /* ── "For you" editorial list ── */
   const insights = useMemo<InsightItem[]>(() => {
@@ -429,16 +335,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         ) : null}
 
         {/* Spending pace · Personalised insight */}
-        <MotionBox variants={riseV}>
-          <SectionLabel>Your focus</SectionLabel>
-        </MotionBox>
-        <MotionBox variants={riseV}>
-          <PersonalisedInsight insight={personalInsight} onPageChange={onPageChange} />
-        </MotionBox>
-
-        <MotionBox variants={riseV}>
-          <SectionLabel>This month</SectionLabel>
-        </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
