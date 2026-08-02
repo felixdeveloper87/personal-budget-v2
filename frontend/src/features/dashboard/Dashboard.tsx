@@ -20,7 +20,7 @@ import type {
   RecurringTransaction,
 } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
-import { getTransactionDate, type TransactionDateBasis } from '../../utils/transactionDates'
+import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
@@ -169,48 +169,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     }
   }, [installmentPlans, recurringItems])
 
-  /* One useful, explainable dashboard focus. */
+  /* One useful, explainable category-spending focus. */
   const personalInsight = useMemo<PersonalInsightData>(() => {
     const currentTransactions = behaviourPeriodData.transactions
     const previousTransactions = previousBehaviourPeriodData.transactions
     const periodWord = selectedPeriod === 'month' ? 'month' : selectedPeriod
-
-    if (forecastInfo?.negative) {
-      return {
-        tone: 'attention',
-        headline: `Your ${forecastInfo.label} balance is projected to finish below zero.`,
-        detail: `The current forecast closes at ${fmtCurrency(forecastInfo.projected)} after planned payments and expected spending.`,
-        context: 'Review the payments and planned spending behind this forecast before the month closes.',
-        metricLabel: 'Projected closing balance',
-        metricValue: fmtCurrency(forecastInfo.projected),
-        actionLabel: 'Review cash flow',
-        href: 'payments',
-      }
-    }
-
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const nextWeek = new Date(today)
-    nextWeek.setDate(nextWeek.getDate() + 7)
-    const dueSoon = transactions.filter((t) => {
-      const date = getTransactionDate(t, 'cash-flow')
-      return t.type === 'EXPENSE' && date >= today && date <= nextWeek
-    })
-    const dueSoonTotal = dueSoon.reduce((total, t) => total + t.amount, 0)
-
-    if (netAvailable !== null && dueSoonTotal > 0 && dueSoonTotal > netAvailable) {
-      const shortfall = dueSoonTotal - netAvailable
-      return {
-        tone: 'attention',
-        headline: 'Payments due this week are larger than your available balance.',
-        detail: `${fmtCurrency(dueSoonTotal)} is scheduled in the next 7 days against ${fmtCurrency(netAvailable)} available across your current, cash and savings accounts.`,
-        context: `That leaves a ${fmtCurrency(shortfall)} shortfall unless money is moved or a payment is rescheduled.`,
-        metricLabel: 'Next 7 days',
-        metricValue: fmtCurrency(dueSoonTotal),
-        actionLabel: 'Review payments',
-        href: 'payments',
-      }
-    }
 
     const sumByCategory = (txns: typeof behaviourPeriodData.transactions) => {
       const totals = new Map<string, number>()
@@ -225,8 +188,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     const current = sumByCategory(currentTransactions)
     const previous = sumByCategory(previousTransactions)
     const currentExpense = [...current.values()].reduce((sum, value) => sum + value, 0)
-    const previousExpense = [...previous.values()].reduce((sum, value) => sum + value, 0)
-    const expenseIncrease = currentExpense - previousExpense
     const meaningfulCategoryIncrease = [...current.entries()]
       .map(([category, amount]) => {
         const prior = previous.get(category) ?? 0
@@ -239,14 +200,12 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
     if (meaningfulCategoryIncrease) {
       const { category, amount, prior, delta } = meaningfulCategoryIncrease
-      const shareOfIncrease = expenseIncrease > 0 ? Math.round((delta / expenseIncrease) * 100) : null
+      const shareOfSpend = Math.round((amount / currentExpense) * 100)
       return {
         tone: 'neutral',
         headline: `${category} is ${fmtCurrency(delta)} above last ${periodWord}.`,
         detail: `You have spent ${fmtCurrency(amount)} so far, compared with ${fmtCurrency(prior)} over the equivalent previous ${periodWord}.`,
-        context: shareOfIncrease && shareOfIncrease <= 100
-          ? `This explains ${shareOfIncrease}% of the increase in your overall spending.`
-          : 'It is the largest comparable increase across your expense categories.',
+        context: `It represents ${shareOfSpend}% of your spending in this ${periodWord}.`,
         metricLabel: `vs last ${periodWord}`,
         metricValue: `+${fmtCurrency(delta)}`,
         actionLabel: `Review ${category}`,
@@ -254,31 +213,53 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       }
     }
 
-    if (currentExpense > 0 && previousExpense > 0 && currentExpense <= previousExpense) {
-      const saved = previousExpense - currentExpense
+    const leadingCategory = [...current.entries()]
+      .map(([category, amount]) => ({
+        category,
+        amount,
+        prior: previous.get(category) ?? 0,
+      }))
+      .sort((a, b) => b.amount - a.amount)[0]
+
+    if (leadingCategory) {
+      const { category, amount, prior } = leadingCategory
+      const delta = amount - prior
+      const shareOfSpend = Math.round((amount / currentExpense) * 100)
+
+      if (prior > 0 && delta < 0) {
+        return {
+          tone: 'positive',
+          headline: `${category} is ${fmtCurrency(Math.abs(delta))} below last ${periodWord}.`,
+          detail: `You have spent ${fmtCurrency(amount)} so far, compared with ${fmtCurrency(prior)} over the equivalent previous ${periodWord}.`,
+          context: `It is still your largest category, at ${shareOfSpend}% of spending in this ${periodWord}.`,
+          metricLabel: `vs last ${periodWord}`,
+          metricValue: `−${fmtCurrency(Math.abs(delta))}`,
+          actionLabel: `Review ${category}`,
+          href: 'all-transactions',
+        }
+      }
+
       return {
-        tone: 'positive',
-        headline: `Your spending is not outpacing last ${periodWord}.`,
-        detail: `You have spent ${fmtCurrency(currentExpense)} so far, compared with ${fmtCurrency(previousExpense)} in the equivalent previous ${periodWord}.`,
-        context: saved > 0
-          ? `That is ${fmtCurrency(saved)} less spent so far.`
-          : 'Your spend is currently in line with the previous period.',
-        metricLabel: `vs last ${periodWord}`,
-        metricValue: saved > 0 ? `−${fmtCurrency(saved)}` : 'On track',
-        actionLabel: 'Explore spending',
-        href: 'behaviour',
+        tone: 'neutral',
+        headline: `${category} is your largest spending category this ${periodWord}.`,
+        detail: `You have spent ${fmtCurrency(amount)} here so far.`,
+        context: `That is ${shareOfSpend}% of all spending recorded in this ${periodWord}.`,
+        metricLabel: 'Category spend',
+        metricValue: fmtCurrency(amount),
+        actionLabel: `Review ${category}`,
+        href: 'all-transactions',
       }
     }
 
     return {
       tone: 'positive',
-      headline: 'No unusually large changes are showing yet.',
-      detail: 'Keep logging income and expenses to build a useful comparison for the next period.',
-      context: 'Insights appear when there is enough comparable spending history to make a recommendation trustworthy.',
-      actionLabel: 'Explore spending',
-      href: 'behaviour',
+      headline: 'No category spending to compare yet.',
+      detail: 'Add expenses with a category to see what is taking the largest share of your spending.',
+      context: 'A comparison appears once there is a previous period with category activity.',
+      actionLabel: 'Add an expense',
+      href: 'all-transactions',
     }
-  }, [behaviourPeriodData, forecastInfo, netAvailable, previousBehaviourPeriodData, selectedPeriod, transactions])
+  }, [behaviourPeriodData, previousBehaviourPeriodData, selectedPeriod])
 
   /* ── "For you" editorial list ── */
   const insights = useMemo<InsightItem[]>(() => {
