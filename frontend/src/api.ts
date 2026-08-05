@@ -620,12 +620,18 @@ export async function removeHouseholdMember(
 export async function createHouseholdExpense(
   householdId: number,
   request: HouseholdExpenseRequest,
-): Promise<HouseholdPageState> {
-  const { data } = await api.post<HouseholdPageState>(
+): Promise<{ recordId: number; page: HouseholdPageState }> {
+  const { data } = await api.post<
+    { recordId: number; page: HouseholdPageState } | HouseholdPageState
+  >(
     `/households/${householdId}/expenses`,
     request,
   )
-  return data
+  if ('recordId' in data && 'page' in data) return data
+  return {
+    recordId: Math.max(0, ...(data.household?.expenses.map((expense) => expense.id) ?? [])),
+    page: data,
+  }
 }
 
 export async function updateHouseholdExpense(
@@ -650,13 +656,71 @@ export async function deleteHouseholdExpense(
   return data
 }
 
+export async function uploadHouseholdExpenseAttachments(
+  householdId: number,
+  expenseId: number,
+  files: File[],
+): Promise<HouseholdPageState> {
+  const form = new FormData()
+  files.forEach((file) => form.append('files', file))
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/expenses/${expenseId}/attachments`,
+    form,
+  )
+  return data
+}
+
 export async function createHouseholdSettlement(
   householdId: number,
   request: HouseholdSettlementRequest,
-): Promise<HouseholdPageState> {
-  const { data } = await api.post<HouseholdPageState>(
+): Promise<{ recordId: number; page: HouseholdPageState }> {
+  const { data } = await api.post<
+    { recordId: number; page: HouseholdPageState } | HouseholdPageState
+  >(
     `/households/${householdId}/settlements`,
     request,
+  )
+  if ('recordId' in data && 'page' in data) return data
+  return {
+    recordId: Math.max(
+      0,
+      ...(data.household?.settlements.map((settlement) => settlement.id) ?? []),
+    ),
+    page: data,
+  }
+}
+
+export async function uploadHouseholdSettlementAttachments(
+  householdId: number,
+  settlementId: number,
+  files: File[],
+): Promise<HouseholdPageState> {
+  const form = new FormData()
+  files.forEach((file) => form.append('files', file))
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/settlements/${settlementId}/attachments`,
+    form,
+  )
+  return data
+}
+
+export async function deleteHouseholdAttachment(
+  householdId: number,
+  attachmentId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.delete<HouseholdPageState>(
+    `/households/${householdId}/attachments/${attachmentId}`,
+  )
+  return data
+}
+
+export async function getHouseholdAttachmentBlob(
+  householdId: number,
+  attachmentId: number,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>(
+    `/households/${householdId}/attachments/${attachmentId}/content`,
+    { responseType: 'blob' },
   )
   return data
 }

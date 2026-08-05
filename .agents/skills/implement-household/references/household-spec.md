@@ -13,8 +13,21 @@
 - Use GBP as the initial household currency while storing an ISO currency code on the household.
 - Design membership as a join model so a future version can support multiple households, even if the first UI exposes one current household per user.
 - Invite only registered, approved users in the first version. Let the recipient accept or decline inside `/household`; do not require outbound email infrastructure.
+- Allow up to five private JPEG, PNG, or WebP proof images on each expense or settlement, with a 5 MB limit per image.
+- Retain each proof image for 90 days after upload, then delete the file while preserving expired attachment metadata and the financial record.
 
-The initial version does not require receipt uploads, recurring household bills, arbitrary percentages, multi-currency conversion, chat, or a globally minimized transfer plan.
+The initial version does not require recurring household bills, arbitrary percentages, multi-currency conversion, chat, or a globally minimized transfer plan.
+
+### Proof image rules
+
+- Store proof files outside PostgreSQL and outside the disposable container filesystem. Keep only private storage keys and audit metadata in the database.
+- Require active Household membership to view an image.
+- Let the expense payer or owner add images to an expense, and the settlement payer or owner add images to a settlement.
+- Let the uploader or owner remove an available image.
+- Validate both the declared media type and file signature. Do not serve the storage directory publicly.
+- Serve available images through authenticated endpoints with inline, no-store, and no-sniff response headers.
+- Expire each image independently 90 days after its upload. Keep the attachment row marked as expired so the UI can explain why the proof is unavailable.
+- Images and their lifecycle never change expenses, shares, debts, settlements, or Personal Budget reporting.
 
 ## 2. Shared-expense rules
 
@@ -269,6 +282,7 @@ Use dialogs or mobile-friendly drawers for:
 
 - create/edit expense;
 - view expense and its share breakdown;
+- add, view, and remove expense or settlement proof images;
 - create/confirm/reject settlement;
 - invite and manage members;
 - household settings.
@@ -315,6 +329,7 @@ Regardless of routing mechanism:
 - A non-even split allocates every penny and shares sum to the original amount.
 - Confirmed settlement reduces the exact pairwise debt and aggregate balances.
 - Pending, rejected, cancelled, and voided records do not affect active balances.
+- Adding, removing, or expiring proof images does not affect any balance.
 - Editing an expense replaces shares atomically; removing a member later does not alter historical shares.
 
 ### Security
@@ -325,6 +340,8 @@ Regardless of routing mechanism:
 - Only the intended recipient can confirm/reject a settlement.
 - Only an owner can invite/deactivate members or change household settings.
 - Request-supplied identity and role fields cannot override the JWT principal.
+- A non-member cannot download a proof image by guessing its ID.
+- Unsupported, oversized, or disguised non-image uploads are rejected.
 
 ### UI and navigation
 
@@ -334,6 +351,7 @@ Regardless of routing mechanism:
 - Desktop shows Household in navigation.
 - All feature workflows remain on the one page through dialogs/drawers.
 - Empty, loading, failure, pending, and settled states are understandable.
+- Multiple proof images can be selected from a mobile camera/gallery, reviewed, and removed.
 - The page works in light/dark modes and at narrow mobile widths.
 
 ### Regression

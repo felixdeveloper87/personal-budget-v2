@@ -236,6 +236,7 @@ data/
 application-local.properties
 application-dev.properties
 application-prod.properties
+backend/uploads/
 
 # Logs
 logs/

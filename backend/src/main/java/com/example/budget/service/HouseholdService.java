@@ -28,6 +28,7 @@ public class HouseholdService {
     private final HouseholdExpenseRepository expenseRepository;
     private final HouseholdExpenseShareRepository shareRepository;
     private final HouseholdSettlementRepository settlementRepository;
+    private final HouseholdAttachmentRepository attachmentRepository;
     private final UserRepository userRepository;
 
     public HouseholdService(
@@ -37,6 +38,7 @@ public class HouseholdService {
             HouseholdExpenseRepository expenseRepository,
             HouseholdExpenseShareRepository shareRepository,
             HouseholdSettlementRepository settlementRepository,
+            HouseholdAttachmentRepository attachmentRepository,
             UserRepository userRepository) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -44,6 +46,7 @@ public class HouseholdService {
         this.expenseRepository = expenseRepository;
         this.shareRepository = shareRepository;
         this.settlementRepository = settlementRepository;
+        this.attachmentRepository = attachmentRepository;
         this.userRepository = userRepository;
     }
 
@@ -202,7 +205,7 @@ public class HouseholdService {
     }
 
     @Transactional
-    public void createExpense(
+    public Long createExpense(
             Long householdId, HouseholdRequests.Expense request, User user) {
         HouseholdMember payer = requireMember(householdId, user);
         HouseholdExpense expense = new HouseholdExpense();
@@ -212,6 +215,7 @@ public class HouseholdService {
         applyExpense(expense, request, payer);
         expenseRepository.save(expense);
         replaceShares(expense, request.participantMemberIds(), payer);
+        return expense.getId();
     }
 
     @Transactional
@@ -239,7 +243,7 @@ public class HouseholdService {
     }
 
     @Transactional
-    public void createSettlement(
+    public Long createSettlement(
             Long householdId, HouseholdRequests.Settlement request, User user) {
         HouseholdMember from = requireMember(householdId, user);
         HouseholdMember to = memberRepository
@@ -275,6 +279,7 @@ public class HouseholdService {
         settlement.setStatus(HouseholdSettlementStatus.PENDING);
         settlement.setCreatedBy(user);
         settlementRepository.save(settlement);
+        return settlement.getId();
     }
 
     @Transactional
@@ -406,9 +411,20 @@ public class HouseholdService {
 
         Map<Long, List<HouseholdExpenseShare>> sharesByExpense = state.shares().stream()
                 .collect(Collectors.groupingBy(share -> share.getExpense().getId()));
+        List<HouseholdExpense> recentExpenses = state.expenses().stream().limit(60).toList();
+        Map<Long, List<HouseholdAttachment>> attachmentsByExpense =
+                recentExpenses.isEmpty()
+                        ? Map.of()
+                        : attachmentRepository
+                                .findByExpenseInOrderByCreatedAtAsc(recentExpenses)
+                                .stream()
+                                .filter(attachment ->
+                                        attachment.getStatus()
+                                                != HouseholdAttachmentStatus.REMOVED)
+                                .collect(Collectors.groupingBy(
+                                        attachment -> attachment.getExpense().getId()));
         boolean owner = current.getRole() == HouseholdRole.OWNER;
-        List<HouseholdPageDTO.Expense> expenseDTOs = state.expenses().stream()
-                .limit(60)
+        List<HouseholdPageDTO.Expense> expenseDTOs = recentExpenses.stream()
                 .map(expense -> new HouseholdPageDTO.Expense(
                         expense.getId(),
                         expense.getDescription(),
@@ -425,11 +441,28 @@ public class HouseholdService {
                                         share.getMember().getUser().getName(),
                                         amount(share.getAmount())))
                                 .toList(),
+                        attachmentsByExpense
+                                .getOrDefault(expense.getId(), List.of())
+                                .stream()
+                                .map(attachment -> toAttachmentDTO(attachment, current))
+                                .toList(),
                         expense.getCreatedAt()))
                 .toList();
 
-        List<HouseholdPageDTO.Settlement> settlementDTOs = state.settlements().stream()
-                .limit(40)
+        List<HouseholdSettlement> recentSettlements =
+                state.settlements().stream().limit(40).toList();
+        Map<Long, List<HouseholdAttachment>> attachmentsBySettlement =
+                recentSettlements.isEmpty()
+                        ? Map.of()
+                        : attachmentRepository
+                                .findBySettlementInOrderByCreatedAtAsc(recentSettlements)
+                                .stream()
+                                .filter(attachment ->
+                                        attachment.getStatus()
+                                                != HouseholdAttachmentStatus.REMOVED)
+                                .collect(Collectors.groupingBy(
+                                        attachment -> attachment.getSettlement().getId()));
+        List<HouseholdPageDTO.Settlement> settlementDTOs = recentSettlements.stream()
                 .map(settlement -> {
                     boolean pending =
                             settlement.getStatus() == HouseholdSettlementStatus.PENDING;
@@ -445,6 +478,12 @@ public class HouseholdService {
                             pending && settlement.getToMember().getId().equals(current.getId()),
                             pending && settlement.getToMember().getId().equals(current.getId()),
                             pending && settlement.getFromMember().getId().equals(current.getId()),
+                            owner || settlement.getFromMember().getId().equals(current.getId()),
+                            attachmentsBySettlement
+                                    .getOrDefault(settlement.getId(), List.of())
+                                    .stream()
+                                    .map(attachment -> toAttachmentDTO(attachment, current))
+                                    .toList(),
                             settlement.getCreatedAt());
                 })
                 .toList();
@@ -468,6 +507,33 @@ public class HouseholdService {
                 debtDTOs,
                 expenseDTOs,
                 settlementDTOs);
+    }
+
+    private HouseholdPageDTO.Attachment toAttachmentDTO(
+            HouseholdAttachment attachment,
+            HouseholdMember current) {
+        boolean elapsed = !attachment.getExpiresAt().isAfter(LocalDateTime.now());
+        HouseholdAttachmentStatus visibleStatus =
+                attachment.getStatus() == HouseholdAttachmentStatus.AVAILABLE && elapsed
+                        ? HouseholdAttachmentStatus.EXPIRED
+                        : attachment.getStatus();
+        boolean uploadedByCurrent = attachment.getUploadedBy() != null
+                && attachment.getUploadedBy().getId().equals(current.getUser().getId());
+        boolean canDelete = visibleStatus == HouseholdAttachmentStatus.AVAILABLE
+                && (current.getRole() == HouseholdRole.OWNER || uploadedByCurrent);
+        String uploaderName = attachment.getUploadedBy() != null
+                ? attachment.getUploadedBy().getName()
+                : "Former member";
+        return new HouseholdPageDTO.Attachment(
+                attachment.getId(),
+                attachment.getOriginalFilename(),
+                attachment.getContentType(),
+                attachment.getSizeBytes(),
+                uploaderName,
+                visibleStatus.name(),
+                canDelete,
+                attachment.getCreatedAt(),
+                attachment.getExpiresAt());
     }
 
     private LedgerState loadLedger(Household household) {

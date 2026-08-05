@@ -406,6 +406,7 @@ export interface CashFlowForecast {
 
 export type HouseholdRole = 'OWNER' | 'MEMBER'
 export type HouseholdSettlementStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
+export type HouseholdAttachmentStatus = 'AVAILABLE' | 'EXPIRED' | 'REMOVED'
 
 export interface HouseholdMember {
   id: number
@@ -439,6 +440,18 @@ export interface HouseholdExpenseShare {
   amount: number
 }
 
+export interface HouseholdAttachment {
+  id: number
+  originalFilename: string
+  contentType: string
+  sizeBytes: number
+  uploadedByName: string
+  status: HouseholdAttachmentStatus
+  canDelete: boolean
+  createdAt: string
+  expiresAt: string
+}
+
 export interface HouseholdExpense {
   id: number
   description: string
@@ -449,6 +462,7 @@ export interface HouseholdExpense {
   payerName: string
   canEdit: boolean
   shares: HouseholdExpenseShare[]
+  attachments: HouseholdAttachment[]
   createdAt: string
 }
 
@@ -464,6 +478,8 @@ export interface HouseholdSettlement {
   canConfirm: boolean
   canReject: boolean
   canCancel: boolean
+  canAttach: boolean
+  attachments: HouseholdAttachment[]
   createdAt: string
 }
 

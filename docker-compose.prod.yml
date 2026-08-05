@@ -57,7 +57,10 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - HOUSEHOLD_ATTACHMENTS_DIR=/app/uploads/household
       - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:+UseG1GC
+    volumes:
+      - household_uploads:/app/uploads/household
     depends_on:
       db:
         condition: service_healthy
@@ -69,6 +72,7 @@ services:
 
 volumes:
   dbdata:
+  household_uploads:
 
 networks:
   app-network:

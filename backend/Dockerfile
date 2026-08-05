@@ -38,6 +38,8 @@ WORKDIR /app
 # Copiar o JAR compilado
 COPY --from=build /app/target/*.jar app.jar
 
+RUN mkdir -p /app/uploads/household
+
 # Mudar propriedade dos arquivos para o usuário appuser
 RUN chown -R appuser:appuser /app
 

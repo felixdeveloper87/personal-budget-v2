@@ -58,6 +58,9 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - HOUSEHOLD_ATTACHMENTS_DIR=/app/uploads/household
+    volumes:
+      - household_uploads:/app/uploads/household
     depends_on:
       db:
         condition: service_healthy
@@ -88,6 +91,7 @@ services:
 
 volumes:
   dbdata:
+  household_uploads:
 
 # Sem nome fixo de rede Docker: assim o Compose cria algo como personal-budget-v2_app-network
 # e evita o aviso "incorrect label … (expected: app-network)" quando já existia

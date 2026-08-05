@@ -1,21 +1,33 @@
 package com.example.budget.controller;
 
 import com.example.budget.dto.HouseholdPageDTO;
+import com.example.budget.dto.HouseholdRecordCreatedDTO;
 import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.model.User;
+import com.example.budget.service.HouseholdAttachmentService;
 import com.example.budget.service.HouseholdService;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 @CrossOrigin
 public class HouseholdController {
     private final HouseholdService service;
+    private final HouseholdAttachmentService attachmentService;
 
-    public HouseholdController(HouseholdService service) {
+    public HouseholdController(
+            HouseholdService service,
+            HouseholdAttachmentService attachmentService) {
         this.service = service;
+        this.attachmentService = attachmentService;
     }
 
     @GetMapping("/households/current")
@@ -93,12 +105,25 @@ public class HouseholdController {
 
     @PostMapping("/households/{householdId}/expenses")
     @ResponseStatus(HttpStatus.CREATED)
-    public HouseholdPageDTO createExpense(
+    public HouseholdRecordCreatedDTO createExpense(
             @PathVariable Long householdId,
             @RequestBody HouseholdRequests.Expense request,
             Authentication authentication) {
         User user = user(authentication);
-        service.createExpense(householdId, request, user);
+        Long expenseId = service.createExpense(householdId, request, user);
+        return new HouseholdRecordCreatedDTO(expenseId, service.page(user));
+    }
+
+    @PostMapping(
+            value = "/households/{householdId}/expenses/{expenseId}/attachments",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public HouseholdPageDTO uploadExpenseAttachments(
+            @PathVariable Long householdId,
+            @PathVariable Long expenseId,
+            @RequestParam("files") List<MultipartFile> files,
+            Authentication authentication) {
+        User user = user(authentication);
+        attachmentService.uploadToExpense(householdId, expenseId, files, user);
         return service.page(user);
     }
 
@@ -125,12 +150,25 @@ public class HouseholdController {
 
     @PostMapping("/households/{householdId}/settlements")
     @ResponseStatus(HttpStatus.CREATED)
-    public HouseholdPageDTO createSettlement(
+    public HouseholdRecordCreatedDTO createSettlement(
             @PathVariable Long householdId,
             @RequestBody HouseholdRequests.Settlement request,
             Authentication authentication) {
         User user = user(authentication);
-        service.createSettlement(householdId, request, user);
+        Long settlementId = service.createSettlement(householdId, request, user);
+        return new HouseholdRecordCreatedDTO(settlementId, service.page(user));
+    }
+
+    @PostMapping(
+            value = "/households/{householdId}/settlements/{settlementId}/attachments",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public HouseholdPageDTO uploadSettlementAttachments(
+            @PathVariable Long householdId,
+            @PathVariable Long settlementId,
+            @RequestParam("files") List<MultipartFile> files,
+            Authentication authentication) {
+        User user = user(authentication);
+        attachmentService.uploadToSettlement(householdId, settlementId, files, user);
         return service.page(user);
     }
 
@@ -164,8 +202,36 @@ public class HouseholdController {
         return service.page(user);
     }
 
+    @GetMapping("/households/{householdId}/attachments/{attachmentId}/content")
+    public ResponseEntity<Resource> attachmentContent(
+            @PathVariable Long householdId,
+            @PathVariable Long attachmentId,
+            Authentication authentication) {
+        HouseholdAttachmentService.AttachmentContent content =
+                attachmentService.content(householdId, attachmentId, user(authentication));
+        ContentDisposition disposition = ContentDisposition.inline()
+                .filename(content.originalFilename(), StandardCharsets.UTF_8)
+                .build();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(content.contentType()))
+                .contentLength(content.sizeBytes())
+                .cacheControl(CacheControl.noStore())
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                .header("X-Content-Type-Options", "nosniff")
+                .body(new FileSystemResource(content.path()));
+    }
+
+    @DeleteMapping("/households/{householdId}/attachments/{attachmentId}")
+    public HouseholdPageDTO removeAttachment(
+            @PathVariable Long householdId,
+            @PathVariable Long attachmentId,
+            Authentication authentication) {
+        User user = user(authentication);
+        attachmentService.remove(householdId, attachmentId, user);
+        return service.page(user);
+    }
+
     private User user(Authentication authentication) {
         return (User) authentication.getPrincipal();
     }
 }
-

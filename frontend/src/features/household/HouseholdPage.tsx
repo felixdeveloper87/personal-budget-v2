@@ -47,6 +47,8 @@ import {
   revokeHouseholdInvitation,
   updateHousehold,
   updateHouseholdExpense,
+  uploadHouseholdExpenseAttachments,
+  uploadHouseholdSettlementAttachments,
 } from '../../api'
 import { useEd } from '../../editorial'
 import { ToastService } from '../../services/toast'
@@ -67,9 +69,14 @@ import {
   ReceiptText,
   RefreshCw,
   Trash2,
+  Upload,
   Wallet,
   X,
 } from '../../components/ui/icons'
+import {
+  AttachmentGalleryModal,
+  AttachmentPicker,
+} from './HouseholdAttachments'
 
 const CATEGORIES = [
   'Electricity',
@@ -83,6 +90,10 @@ const CATEGORIES = [
   'Repairs',
   'Other',
 ] as const
+
+type AttachmentTarget =
+  | { kind: 'expense'; id: number }
+  | { kind: 'settlement'; id: number }
 
 const today = () => {
   const value = new Date()
@@ -133,9 +144,11 @@ export default function HouseholdPage() {
   const [householdName, setHouseholdName] = useState('Our home')
   const [editingExpense, setEditingExpense] = useState<HouseholdExpense | null>(null)
   const [settlingDebt, setSettlingDebt] = useState<HouseholdDebt | null>(null)
+  const [attachmentTarget, setAttachmentTarget] = useState<AttachmentTarget | null>(null)
   const expenseModal = useDisclosure()
   const membersModal = useDisclosure()
   const settlementModal = useDisclosure()
+  const attachmentsModal = useDisclosure()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -355,6 +368,43 @@ export default function HouseholdPage() {
   }
 
   const household = page.household
+  const attachmentExpense = attachmentTarget?.kind === 'expense'
+    ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
+    : undefined
+  const attachmentSettlement = attachmentTarget?.kind === 'settlement'
+    ? household.settlements.find((settlement) => settlement.id === attachmentTarget.id)
+    : undefined
+  const selectedAttachments =
+    attachmentExpense?.attachments ?? attachmentSettlement?.attachments ?? []
+  const canAttach = attachmentExpense?.canEdit ?? attachmentSettlement?.canAttach ?? false
+  const attachmentTitle = attachmentExpense?.description
+    ?? (attachmentSettlement
+      ? `${attachmentSettlement.fromMemberName} paid ${attachmentSettlement.toMemberName}`
+      : 'Household record')
+
+  const openAttachments = (target: AttachmentTarget) => {
+    setAttachmentTarget(target)
+    attachmentsModal.onOpen()
+  }
+
+  const uploadTargetAttachments = (files: File[]) => {
+    if (attachmentTarget?.kind === 'expense') {
+      return uploadHouseholdExpenseAttachments(
+        household.id,
+        attachmentTarget.id,
+        files,
+      )
+    }
+    if (attachmentTarget?.kind === 'settlement') {
+      return uploadHouseholdSettlementAttachments(
+        household.id,
+        attachmentTarget.id,
+        files,
+      )
+    }
+    return Promise.reject(new Error('No Household record selected'))
+  }
+
   const balance = household.currentUserBalance
   const balanceLabel = balance > 0
     ? 'You are owed'
@@ -566,7 +616,6 @@ export default function HouseholdPage() {
                       <Box minW={0}>
                         <HStack>
                           <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
-                          {member.role === 'OWNER' && <Badge colorScheme="purple">Owner</Badge>}
                         </HStack>
                         <Text color={muted} fontSize="xs" noOfLines={1}>{member.email}</Text>
                       </Box>
@@ -660,6 +709,18 @@ export default function HouseholdPage() {
                         {expense.shares.length} shares
                       </Text>
                     </Box>
+                    {((expense.attachments ?? []).length > 0 || expense.canEdit) && (
+                      <Button
+                        aria-label={`Proof images for ${expense.description}`}
+                        size="xs"
+                        variant="ghost"
+                        leftIcon={<Upload size={14} />}
+                        px={2}
+                        onClick={() => openAttachments({ kind: 'expense', id: expense.id })}
+                      >
+                        {(expense.attachments ?? []).length}
+                      </Button>
+                    )}
                     {expense.canEdit && (
                       <IconButton
                         aria-label={`Edit ${expense.description}`}
@@ -720,6 +781,21 @@ export default function HouseholdPage() {
                     }>
                       {settlement.status.toLowerCase()}
                     </Badge>
+                    {((settlement.attachments ?? []).length > 0 || settlement.canAttach) && (
+                      <Button
+                        aria-label={`Proof images for payment from ${settlement.fromMemberName}`}
+                        size="xs"
+                        variant="ghost"
+                        leftIcon={<Upload size={14} />}
+                        px={2}
+                        onClick={() => openAttachments({
+                          kind: 'settlement',
+                          id: settlement.id,
+                        })}
+                      >
+                        {(settlement.attachments ?? []).length}
+                      </Button>
+                    )}
                     {settlement.canConfirm && (
                       <Button
                         size="xs"
@@ -788,6 +864,16 @@ export default function HouseholdPage() {
         household={household}
         onChanged={setPage}
       />
+      <AttachmentGalleryModal
+        isOpen={attachmentsModal.isOpen}
+        onClose={attachmentsModal.onClose}
+        householdId={household.id}
+        title={attachmentTitle}
+        attachments={selectedAttachments}
+        canAttach={canAttach}
+        onUpload={uploadTargetAttachments}
+        onChanged={setPage}
+      />
     </Box>
   )
 }
@@ -813,6 +899,7 @@ function ExpenseModal({
   const [amount, setAmount] = useState('')
   const [expenseDate, setExpenseDate] = useState(today())
   const [participantIds, setParticipantIds] = useState<Set<number>>(new Set())
+  const [files, setFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -822,6 +909,7 @@ function ExpenseModal({
     setCategory(expense?.category ?? 'Electricity')
     setAmount(expense ? String(expense.amount) : '')
     setExpenseDate(expense?.expenseDate ?? today())
+    setFiles([])
     setParticipantIds(new Set(
       expense?.shares.map((share) => share.memberId)
         ?? household.members.map((member) => member.id),
@@ -843,15 +931,39 @@ function ExpenseModal({
       participantMemberIds: [...participantIds],
     }
     setSaving(true)
+    let savedPage: HouseholdPageState | null = null
     try {
-      const next = expense
-        ? await updateHouseholdExpense(household.id, expense.id, request)
-        : await createHouseholdExpense(household.id, request)
-      onChanged(next)
+      let targetId = expense?.id
+      if (expense) {
+        savedPage = await updateHouseholdExpense(household.id, expense.id, request)
+      } else {
+        const created = await createHouseholdExpense(household.id, request)
+        savedPage = created.page
+        targetId = created.recordId
+      }
+      if (files.length > 0) {
+        if (!targetId) {
+          throw new Error('The saved expense could not be selected for image upload')
+        }
+        savedPage = await uploadHouseholdExpenseAttachments(
+          household.id,
+          targetId,
+          files,
+        )
+      }
+      onChanged(savedPage)
       ToastService.success({ title: expense ? 'Expense updated' : 'Expense added' })
       onClose()
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not save household expense' })
+      if (savedPage) {
+        onChanged(savedPage)
+        ToastService.apiError(error, {
+          title: 'Expense saved, but the images could not be uploaded',
+        })
+        onClose()
+      } else {
+        ToastService.apiError(error, { title: 'Could not save household expense' })
+      }
     } finally {
       setSaving(false)
     }
@@ -955,6 +1067,14 @@ function ExpenseModal({
                 Final penny allocation is calculated by the server.
               </Text>
             </FormControl>
+            <Divider borderColor={ed?.line} />
+            <AttachmentPicker
+              files={files}
+              onChange={setFiles}
+              existingCount={(expense?.attachments ?? []).filter(
+                (attachment) => attachment.status === 'AVAILABLE',
+              ).length}
+            />
           </VStack>
         </ModalBody>
         <ModalFooter
@@ -1011,12 +1131,14 @@ function SettlementModal({
   const ed = useEd()
   const [amount, setAmount] = useState('')
   const [settlementDate, setSettlementDate] = useState(today())
+  const [files, setFiles] = useState<File[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (!isOpen || !debt) return
     setAmount(String(debt.amount))
     setSettlementDate(today())
+    setFiles([])
   }, [debt, isOpen])
 
   const submit = async (event: FormEvent) => {
@@ -1028,19 +1150,41 @@ function SettlementModal({
       return
     }
     setSaving(true)
+    let savedPage: HouseholdPageState | null = null
     try {
-      onChanged(await createHouseholdSettlement(household.id, {
+      const created = await createHouseholdSettlement(household.id, {
         toMemberId: debt.toMemberId,
         amount: numericAmount,
         settlementDate,
-      }))
+      })
+      savedPage = created.page
+      const settlementId = created.recordId
+      if (files.length > 0) {
+        if (!settlementId) {
+          throw new Error('The saved payment could not be selected for image upload')
+        }
+        savedPage = await uploadHouseholdSettlementAttachments(
+          household.id,
+          settlementId,
+          files,
+        )
+      }
+      onChanged(savedPage)
       ToastService.success({
         title: 'Payment sent for confirmation',
         description: `${debt.toMemberName} needs to confirm it before balances change.`,
       })
       onClose()
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not record payment' })
+      if (savedPage) {
+        onChanged(savedPage)
+        ToastService.apiError(error, {
+          title: 'Payment saved, but the images could not be uploaded',
+        })
+        onClose()
+      } else {
+        ToastService.apiError(error, { title: 'Could not record payment' })
+      }
     } finally {
       setSaving(false)
     }
@@ -1085,6 +1229,8 @@ function SettlementModal({
               <FormLabel>Payment date</FormLabel>
               <Input type="date" value={settlementDate} onChange={(event) => setSettlementDate(event.target.value)} />
             </FormControl>
+            <Divider borderColor={ed?.line} />
+            <AttachmentPicker files={files} onChange={setFiles} />
           </VStack>
         </ModalBody>
         <ModalFooter gap={2}>
@@ -1274,7 +1420,6 @@ function MembersModal({
                       <Box minW={0}>
                         <HStack>
                           <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
-                          {member.role === 'OWNER' && <Badge colorScheme="purple">Owner</Badge>}
                         </HStack>
                         <Text color={muted} fontSize="xs" noOfLines={1}>{member.email}</Text>
                       </Box>

@@ -60,10 +60,23 @@ public record HouseholdPageDTO(
             String payerName,
             boolean canEdit,
             List<Share> shares,
+            List<Attachment> attachments,
             LocalDateTime createdAt
     ) {}
 
     public record Share(Long memberId, String memberName, BigDecimal amount) {}
+
+    public record Attachment(
+            Long id,
+            String originalFilename,
+            String contentType,
+            long sizeBytes,
+            String uploadedByName,
+            String status,
+            boolean canDelete,
+            LocalDateTime createdAt,
+            LocalDateTime expiresAt
+    ) {}
 
     public record Settlement(
             Long id,
@@ -77,6 +90,8 @@ public record HouseholdPageDTO(
             boolean canConfirm,
             boolean canReject,
             boolean canCancel,
+            boolean canAttach,
+            List<Attachment> attachments,
             LocalDateTime createdAt
     ) {}
 
