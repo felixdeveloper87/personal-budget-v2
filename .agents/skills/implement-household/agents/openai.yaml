@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement Household"
+  short_description: "Implement shared household expenses and settlements"
+  default_prompt: "Use $implement-household to implement the Household feature in this Personal Budget project."

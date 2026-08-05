@@ -13,9 +13,10 @@ import TransfersPage from './pages/TransfersPage'
 import CommitmentsPage from './pages/CommitmentsPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
+import HouseholdPage from './pages/HouseholdPage'
 import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { AppPage } from './components/layout/header/navigation.config'
 
 interface PageRenderArgs {
@@ -32,6 +33,7 @@ interface CardStatementTarget {
 
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
+  household: () => <HouseholdPage />,
   accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
   cards: ({ cardStatementTarget, onCardStatementTargetHandled }) => (
     <CardsPage statementTarget={cardStatementTarget} onStatementTargetHandled={onCardStatementTargetHandled} />
@@ -50,20 +52,52 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   admin: ({ onPageChange }) => <AdminDashboardPage onPageChange={onPageChange} />,
 }
 
+function pageFromBrowserLocation(): AppPage {
+  if (window.location.pathname === '/household') return 'household'
+  const statePage = window.history.state?.appPage
+  return typeof statePage === 'string' && statePage in PAGE_RENDERERS
+    ? statePage as AppPage
+    : 'dashboard'
+}
+
 function AppContent() {
   const { user, loading } = useAuth()
   const [showAuth, setShowAuth] = useState(false)
-  const [currentPage, setCurrentPage] = useState<AppPage>('dashboard')
+  const [currentPage, setCurrentPage] = useState<AppPage>(pageFromBrowserLocation)
   const [cardStatementTarget, setCardStatementTarget] = useState<CardStatementTarget | null>(null)
+
+  const navigateToPage = useCallback((page: AppPage) => {
+    setCurrentPage(page)
+    const nextPath = page === 'household' ? '/household' : '/'
+    const nextState = { ...(window.history.state ?? {}), appPage: page }
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState(nextState, '', nextPath)
+    } else {
+      window.history.replaceState(nextState, '', nextPath)
+    }
+  }, [])
 
   const openCardStatement = (target: CardStatementTarget) => {
     setCardStatementTarget(target)
-    setCurrentPage('cards')
+    navigateToPage('cards')
   }
+
+  useEffect(() => {
+    const onPopState = () => setCurrentPage(pageFromBrowserLocation())
+    window.addEventListener('popstate', onPopState)
+    window.history.replaceState(
+      { ...(window.history.state ?? {}), appPage: currentPage },
+      '',
+      window.location.pathname,
+    )
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
   useEffect(() => {
     if (user?.admin) {
       setCurrentPage('admin')
+    } else if (user) {
+      setCurrentPage(pageFromBrowserLocation())
     }
   }, [user?.admin, user?.id])
 
@@ -105,19 +139,19 @@ function AppContent() {
       return (
         <Layout
           currentPage="admin"
-          onPageChange={setCurrentPage}
+          onPageChange={navigateToPage}
           showFooter={false}
         >
-          <AdminDashboardPage onPageChange={setCurrentPage} />
+          <AdminDashboardPage onPageChange={navigateToPage} />
         </Layout>
       )
     }
 
     const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
-      <Layout currentPage={currentPage} onPageChange={setCurrentPage}>
+      <Layout currentPage={currentPage} onPageChange={navigateToPage}>
         {renderPage({
-          onPageChange: setCurrentPage,
+          onPageChange: navigateToPage,
           cardStatementTarget,
           onOpenCardStatement: openCardStatement,
           onCardStatementTargetHandled: () => setCardStatementTarget(null),

@@ -30,6 +30,9 @@ import {
   CategoryBudgetRequest,
   CashFlowForecast,
   TransactionStatus,
+  HouseholdPageState,
+  HouseholdExpenseRequest,
+  HouseholdSettlementRequest,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -544,6 +547,147 @@ export async function updateExpensePlan(
   const { data } = await api.put<CashFlowForecast>('/planning/expense-plan', {
     plannedMonthlyVariableExpense,
   })
+  return data
+}
+
+export async function getHouseholdPage(): Promise<HouseholdPageState> {
+  const { data } = await api.get<HouseholdPageState>('/households/current')
+  return data
+}
+
+export async function createHousehold(name: string): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>('/households', { name })
+  return data
+}
+
+export async function updateHousehold(
+  householdId: number,
+  name: string,
+): Promise<HouseholdPageState> {
+  const { data } = await api.patch<HouseholdPageState>(`/households/${householdId}`, { name })
+  return data
+}
+
+export async function inviteHouseholdMember(
+  householdId: number,
+  email: string,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/invitations`,
+    { email },
+  )
+  return data
+}
+
+export async function revokeHouseholdInvitation(
+  householdId: number,
+  invitationId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.delete<HouseholdPageState>(
+    `/households/${householdId}/invitations/${invitationId}`,
+  )
+  return data
+}
+
+export async function acceptHouseholdInvitation(
+  invitationId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/household-invitations/${invitationId}/accept`,
+  )
+  return data
+}
+
+export async function declineHouseholdInvitation(
+  invitationId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/household-invitations/${invitationId}/decline`,
+  )
+  return data
+}
+
+export async function removeHouseholdMember(
+  householdId: number,
+  memberId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.delete<HouseholdPageState>(
+    `/households/${householdId}/members/${memberId}`,
+  )
+  return data
+}
+
+export async function createHouseholdExpense(
+  householdId: number,
+  request: HouseholdExpenseRequest,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/expenses`,
+    request,
+  )
+  return data
+}
+
+export async function updateHouseholdExpense(
+  householdId: number,
+  expenseId: number,
+  request: HouseholdExpenseRequest,
+): Promise<HouseholdPageState> {
+  const { data } = await api.put<HouseholdPageState>(
+    `/households/${householdId}/expenses/${expenseId}`,
+    request,
+  )
+  return data
+}
+
+export async function deleteHouseholdExpense(
+  householdId: number,
+  expenseId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.delete<HouseholdPageState>(
+    `/households/${householdId}/expenses/${expenseId}`,
+  )
+  return data
+}
+
+export async function createHouseholdSettlement(
+  householdId: number,
+  request: HouseholdSettlementRequest,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/settlements`,
+    request,
+  )
+  return data
+}
+
+export async function confirmHouseholdSettlement(
+  householdId: number,
+  settlementId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/settlements/${settlementId}/confirm`,
+  )
+  return data
+}
+
+export async function rejectHouseholdSettlement(
+  householdId: number,
+  settlementId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/settlements/${settlementId}/reject`,
+  )
+  return data
+}
+
+export async function cancelHouseholdSettlement(
+  householdId: number,
+  settlementId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/settlements/${settlementId}/cancel`,
+  )
   return data
 }
 

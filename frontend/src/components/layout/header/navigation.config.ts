@@ -11,12 +11,14 @@ import {
   CalendarDays,
   CalendarClock,
   CreditCard,
+  Home,
   TrendingUp,
   type LucideIcon,
 } from '../../ui/icons'
 
 export type AppPage =
   | 'dashboard'
+  | 'household'
   | 'accounts'
   | 'cards'
   | 'transfers'
@@ -47,6 +49,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Home',
     icon: LayoutDashboard,
     description: 'Overview of your finances',
+  },
+  {
+    id: 'household',
+    label: 'Household',
+    shortLabel: 'Home share',
+    icon: Home,
+    description: 'Shared home expenses and balances',
   },
   {
     id: 'behaviour',

@@ -1,5 +1,5 @@
-import { Box, Button, HStack, Icon, useBreakpointValue } from '@chakra-ui/react'
-import { ArrowRight } from '../../ui/icons'
+import { Box, Button, HStack, Icon, IconButton, useBreakpointValue } from '@chakra-ui/react'
+import { ArrowRight, Home } from '../../ui/icons'
 import SearchTrigger from './SearchTrigger'
 import ThemeToggle from './ThemeToggle'
 import UserMenu from './UserMenu'
@@ -12,6 +12,8 @@ interface HeaderActionsProps {
   /** Desktop sidebar owns the theme and account controls. */
   hideUserControls?: boolean
   onSearchOpen: () => void
+  onHouseholdOpen?: () => void
+  householdActive?: boolean
   onLogin?: () => void
   onOpenProfile?: () => void
   onOpenSettings?: () => void
@@ -23,6 +25,8 @@ export default function HeaderActions({
   hideSearch,
   hideUserControls = false,
   onSearchOpen,
+  onHouseholdOpen,
+  householdActive = false,
   onLogin,
   onOpenProfile,
   onOpenSettings,
@@ -44,6 +48,24 @@ export default function HeaderActions({
         ) : (
           <SearchTrigger variant="compact" onOpen={onSearchOpen} />
         )
+      )}
+
+      {user && onHouseholdOpen && (
+        <IconButton
+          aria-label="Open Household"
+          aria-current={householdActive ? 'page' : undefined}
+          icon={<Home size={19} weight={householdActive ? 'fill' : 'duotone'} />}
+          display={{ base: 'inline-flex', md: 'none' }}
+          size="sm"
+          h="40px"
+          w="40px"
+          minW="40px"
+          borderRadius="xl"
+          variant="ghost"
+          color={householdActive ? 'var(--pb-forest)' : 'inherit'}
+          bg={householdActive ? 'var(--pb-tint-green)' : 'transparent'}
+          onClick={onHouseholdOpen}
+        />
       )}
 
       {!hideUserControls && <ThemeToggle />}

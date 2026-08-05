@@ -403,3 +403,108 @@ export interface CashFlowForecast {
   plannedMonthlyVariableExpense: number | null
   months: CashFlowForecastMonth[]
 }
+
+export type HouseholdRole = 'OWNER' | 'MEMBER'
+export type HouseholdSettlementStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
+
+export interface HouseholdMember {
+  id: number
+  userId: number
+  name: string
+  email: string
+  role: HouseholdRole
+  totalPaid: number
+  totalShare: number
+  balance: number
+}
+
+export interface HouseholdMemberInvitation {
+  id: number
+  targetName: string
+  targetEmail: string
+  createdAt: string
+}
+
+export interface HouseholdDebt {
+  fromMemberId: number
+  fromMemberName: string
+  toMemberId: number
+  toMemberName: string
+  amount: number
+}
+
+export interface HouseholdExpenseShare {
+  memberId: number
+  memberName: string
+  amount: number
+}
+
+export interface HouseholdExpense {
+  id: number
+  description: string
+  category: string
+  amount: number
+  expenseDate: string
+  payerMemberId: number
+  payerName: string
+  canEdit: boolean
+  shares: HouseholdExpenseShare[]
+  createdAt: string
+}
+
+export interface HouseholdSettlement {
+  id: number
+  fromMemberId: number
+  fromMemberName: string
+  toMemberId: number
+  toMemberName: string
+  amount: number
+  settlementDate: string
+  status: HouseholdSettlementStatus
+  canConfirm: boolean
+  canReject: boolean
+  canCancel: boolean
+  createdAt: string
+}
+
+export interface HouseholdInvitation {
+  id: number
+  householdId: number
+  householdName: string
+  invitedByName: string
+  createdAt: string
+}
+
+export interface HouseholdDashboard {
+  id: number
+  name: string
+  currency: string
+  currentMemberId: number
+  currentMemberRole: HouseholdRole
+  currentUserBalance: number
+  monthSpend: number
+  members: HouseholdMember[]
+  pendingMemberInvitations: HouseholdMemberInvitation[]
+  debts: HouseholdDebt[]
+  expenses: HouseholdExpense[]
+  settlements: HouseholdSettlement[]
+}
+
+export interface HouseholdPageState {
+  household: HouseholdDashboard | null
+  pendingInvitations: HouseholdInvitation[]
+}
+
+export interface HouseholdExpenseRequest {
+  description: string
+  category: string
+  amount: number
+  expenseDate: string
+  participantMemberIds: number[]
+}
+
+export interface HouseholdSettlementRequest {
+  toMemberId: number
+  amount: number
+  settlementDate: string
+}

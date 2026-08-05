@@ -248,6 +248,10 @@ export default function Header({
                 hideSearch={isAdminOnly || searchOnLeft}
                 hideUserControls={hasSidebar}
                 onSearchOpen={openSearch}
+                onHouseholdOpen={
+                  isAdminOnly ? undefined : () => onPageChange?.('household')
+                }
+                householdActive={currentPage === 'household'}
                 onLogin={onLogin}
                 onOpenProfile={onOpenProfile}
                 onOpenSettings={onOpenSettings}
