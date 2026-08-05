@@ -368,28 +368,28 @@ export default function HouseholdPage() {
       : muted
 
   return (
-    <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
-      <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
+    <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 3, md: 7 }}>
+      <VStack align="stretch" spacing={{ base: 3, md: 6 }}>
         <Stack
           direction={{ base: 'column', md: 'row' }}
           align={{ base: 'stretch', md: 'center' }}
           justify="space-between"
-          spacing={4}
+          spacing={{ base: 3, md: 4 }}
         >
-          <HStack spacing={4}>
+          <HStack spacing={{ base: 3, md: 4 }}>
             <Box
-              w={{ base: 11, md: 13 }}
-              h={{ base: 11, md: 13 }}
+              w={{ base: 10, md: 13 }}
+              h={{ base: 10, md: 13 }}
               flexShrink={0}
               display="grid"
               placeItems="center"
-              borderRadius="2xl"
+              borderRadius={{ base: 'xl', md: '2xl' }}
               bg={ed?.jadeSoft ?? 'teal.50'}
               color={ed?.jade ?? 'teal.600'}
               border="1px solid"
               borderColor={ed?.line ?? 'teal.100'}
             >
-              <Home size={25} weight="duotone" />
+              <Home size={22} weight="duotone" />
             </Box>
             <Box minW={0}>
               <Text
@@ -401,144 +401,168 @@ export default function HouseholdPage() {
               >
                 Household
               </Text>
-              <Heading size={{ base: 'lg', md: 'xl' }} noOfLines={1}>{household.name}</Heading>
+              <Heading size={{ base: 'md', md: 'xl' }} noOfLines={1}>{household.name}</Heading>
               <Text color={muted} fontSize="sm">
                 {household.members.length} active member{household.members.length === 1 ? '' : 's'}
               </Text>
             </Box>
           </HStack>
-          <HStack>
+          <HStack w={{ base: 'full', md: 'auto' }}>
             {household.currentMemberRole === 'OWNER' && (
               <Button
                 variant="outline"
                 leftIcon={<Gear size={17} />}
                 onClick={membersModal.onOpen}
+                size={{ base: 'sm', md: 'md' }}
+                flex={{ base: 1, md: 'initial' }}
               >
                 Manage
               </Button>
             )}
-            <Button colorScheme="teal" leftIcon={<Plus size={17} />} onClick={openNewExpense}>
+            <Button
+              colorScheme="teal"
+              leftIcon={<Plus size={17} />}
+              onClick={openNewExpense}
+              size={{ base: 'sm', md: 'md' }}
+              flex={{ base: 1, md: 'initial' }}
+            >
               Add expense
             </Button>
           </HStack>
         </Stack>
 
-        <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={4}>
-          <Surface p={5}>
-            <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-              {balanceLabel}
-            </Text>
-            <Text mt={2} fontSize={{ base: '3xl', lg: '4xl' }} fontWeight={800} color={balanceColor}>
-              {money(Math.abs(balance), household.currency)}
-            </Text>
-            <Text mt={1} color={muted} fontSize="sm">Confirmed shared balance</Text>
-          </Surface>
-          <Surface p={5}>
-            <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-              Spent this month
-            </Text>
-            <Text mt={2} fontSize={{ base: '3xl', lg: '4xl' }} fontWeight={800}>
-              {money(household.monthSpend, household.currency)}
-            </Text>
-            <Text mt={1} color={muted} fontSize="sm">Across the whole household</Text>
-          </Surface>
-          <Surface p={5}>
-            <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-              Shared expenses
-            </Text>
-            <Text mt={2} fontSize={{ base: '3xl', lg: '4xl' }} fontWeight={800}>
-              {household.expenses.length}
-            </Text>
-            <Text mt={1} color={muted} fontSize="sm">Recent active records</Text>
-          </Surface>
-        </SimpleGrid>
+        <Surface overflow="hidden">
+          <Grid templateColumns={{ base: 'repeat(2, minmax(0, 1fr))', md: '1.35fr 1fr 1fr' }}>
+            <Box
+              gridColumn={{ base: '1 / -1', md: 'auto' }}
+              p={{ base: 4, md: 5 }}
+              borderBottom={{ base: '1px solid', md: 'none' }}
+              borderRight={{ base: 'none', md: '1px solid' }}
+              borderColor={ed?.line ?? 'blackAlpha.100'}
+            >
+              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
+                {balanceLabel}
+              </Text>
+              <Text mt={1} fontSize={{ base: '2xl', md: '3xl' }} fontWeight={800} color={balanceColor}>
+                {money(Math.abs(balance), household.currency)}
+              </Text>
+              <Text color={muted} fontSize="xs">Confirmed balance</Text>
+            </Box>
+            <Box
+              p={{ base: 4, md: 5 }}
+              borderRight="1px solid"
+              borderColor={ed?.line ?? 'blackAlpha.100'}
+            >
+              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
+                This month
+              </Text>
+              <Text mt={1} fontSize={{ base: 'xl', md: '3xl' }} fontWeight={800} noOfLines={1}>
+                {money(household.monthSpend, household.currency)}
+              </Text>
+              <Text color={muted} fontSize="xs">Household spend</Text>
+            </Box>
+            <Box p={{ base: 4, md: 5 }}>
+              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
+                Expenses
+              </Text>
+              <Text mt={1} fontSize={{ base: 'xl', md: '3xl' }} fontWeight={800}>
+                {household.expenses.length}
+              </Text>
+              <Text color={muted} fontSize="xs">Active records</Text>
+            </Box>
+          </Grid>
+        </Surface>
 
-        <Grid templateColumns={{ base: '1fr', xl: '1.1fr 0.9fr' }} gap={5}>
-          <Surface p={{ base: 4, md: 6 }}>
-            <HStack justify="space-between" mb={4}>
-              <Box>
-                <Heading size="md">Who owes whom</Heading>
-                <Text color={muted} fontSize="sm">Bilateral balances after confirmed payments.</Text>
-              </Box>
-              <Wallet size={22} color={ed?.gold ?? undefined} />
-            </HStack>
-            {household.debts.length === 0 ? (
-              <VStack py={8} spacing={3}>
-                <Box
-                  w={10}
-                  h={10}
-                  display="grid"
-                  placeItems="center"
-                  borderRadius="full"
-                  bg={ed?.jadeSoft ?? 'green.50'}
-                  color={ed?.jade ?? 'green.600'}
-                >
-                  <Check size={20} weight="bold" />
+        <Surface overflow="hidden">
+          <Grid templateColumns={{ base: '1fr', xl: '1.1fr 0.9fr' }}>
+            <Box
+              p={{ base: 4, md: 6 }}
+              borderBottom={{ base: '1px solid', xl: 'none' }}
+              borderRight={{ base: 'none', xl: '1px solid' }}
+              borderColor={ed?.line ?? 'blackAlpha.100'}
+            >
+              <HStack justify="space-between" mb={4}>
+                <Box>
+                  <Heading size="md">Who owes whom</Heading>
+                  <Text color={muted} fontSize="sm">Bilateral balances after confirmed payments.</Text>
                 </Box>
-                <Text fontWeight={800}>Everyone is settled</Text>
-                <Text color={muted} fontSize="sm">There are no outstanding household debts.</Text>
-              </VStack>
-            ) : (
-              <VStack align="stretch" spacing={3}>
-                {household.debts.map((debt) => {
-                  const youPay = debt.fromMemberId === household.currentMemberId
-                  const youReceive = debt.toMemberId === household.currentMemberId
-                  return (
-                    <Stack
-                      key={`${debt.fromMemberId}-${debt.toMemberId}`}
-                      direction={{ base: 'column', sm: 'row' }}
-                      align={{ base: 'stretch', sm: 'center' }}
-                      justify="space-between"
-                      p={4}
-                      borderRadius="xl"
-                      bg={ed?.panelRaised ?? 'blackAlpha.50'}
-                      border="1px solid"
-                      borderColor={ed?.line ?? 'blackAlpha.100'}
-                    >
-                      <HStack>
-                        <Avatar size="sm" name={debt.fromMemberName} />
-                        <Box>
-                          <Text fontWeight={800}>
-                            {youPay ? 'You' : debt.fromMemberName}
-                            {' owe '}
-                            {youReceive ? 'you' : debt.toMemberName}
+                <Wallet size={22} color={ed?.gold ?? undefined} />
+              </HStack>
+              {household.debts.length === 0 ? (
+                <VStack py={8} spacing={3}>
+                  <Box
+                    w={10}
+                    h={10}
+                    display="grid"
+                    placeItems="center"
+                    borderRadius="full"
+                    bg={ed?.jadeSoft ?? 'green.50'}
+                    color={ed?.jade ?? 'green.600'}
+                  >
+                    <Check size={20} weight="bold" />
+                  </Box>
+                  <Text fontWeight={800}>Everyone is settled</Text>
+                  <Text color={muted} fontSize="sm">There are no outstanding household debts.</Text>
+                </VStack>
+              ) : (
+                <VStack align="stretch" spacing={0}>
+                  {household.debts.map((debt, index) => {
+                    const youPay = debt.fromMemberId === household.currentMemberId
+                    const youReceive = debt.toMemberId === household.currentMemberId
+                    return (
+                      <Stack
+                        key={`${debt.fromMemberId}-${debt.toMemberId}`}
+                        direction={{ base: 'column', sm: 'row' }}
+                        align={{ base: 'stretch', sm: 'center' }}
+                        justify="space-between"
+                        py={3}
+                        borderTop={index === 0 ? 'none' : '1px solid'}
+                        borderColor={ed?.line ?? 'blackAlpha.100'}
+                      >
+                        <HStack>
+                          <Avatar size={{ base: 'xs', md: 'sm' }} name={debt.fromMemberName} />
+                          <Box>
+                            <Text fontWeight={800}>
+                              {youPay ? 'You' : debt.fromMemberName}
+                              {' owe '}
+                              {youReceive ? 'you' : debt.toMemberName}
+                            </Text>
+                            <Text color={muted} fontSize="sm">
+                              {youPay ? 'Record a payment after you send it.' : 'Outstanding balance'}
+                            </Text>
+                          </Box>
+                        </HStack>
+                        <HStack justify={{ base: 'space-between', sm: 'flex-end' }}>
+                          <Text fontWeight={900} fontSize="lg">
+                            {money(debt.amount, household.currency)}
                           </Text>
-                          <Text color={muted} fontSize="sm">
-                            {youPay ? 'Record a payment after you send it.' : 'Outstanding balance'}
-                          </Text>
-                        </Box>
-                      </HStack>
-                      <HStack justify={{ base: 'space-between', sm: 'flex-end' }}>
-                        <Text fontWeight={900} fontSize="lg">
-                          {money(debt.amount, household.currency)}
-                        </Text>
-                        {youPay && (
-                          <Button size="sm" colorScheme="teal" onClick={() => openSettlement(debt)}>
-                            Record payment
-                          </Button>
-                        )}
-                      </HStack>
-                    </Stack>
-                  )
-                })}
-              </VStack>
-            )}
-          </Surface>
+                          {youPay && (
+                            <Button size="sm" colorScheme="teal" onClick={() => openSettlement(debt)}>
+                              Record payment
+                            </Button>
+                          )}
+                        </HStack>
+                      </Stack>
+                    )
+                  })}
+                </VStack>
+              )}
+            </Box>
 
-          <Surface p={{ base: 4, md: 6 }}>
+          <Box p={{ base: 4, md: 6 }}>
             <Heading size="md">Members</Heading>
             <Text color={muted} fontSize="sm" mb={4}>Paid, assigned share, and net position.</Text>
-            <VStack align="stretch" spacing={3}>
-              {household.members.map((member) => (
+            <VStack align="stretch" spacing={0}>
+              {household.members.map((member, index) => (
                 <Box
                   key={member.id}
-                  p={4}
-                  borderRadius="xl"
-                  bg={ed?.panelRaised ?? 'blackAlpha.50'}
+                  py={3}
+                  borderTop={index === 0 ? 'none' : '1px solid'}
+                  borderColor={ed?.line ?? 'blackAlpha.100'}
                 >
                   <HStack justify="space-between" align="flex-start">
                     <HStack minW={0}>
-                      <Avatar size="sm" name={member.name} />
+                      <Avatar size={{ base: 'xs', md: 'sm' }} name={member.name} />
                       <Box minW={0}>
                         <HStack>
                           <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
@@ -549,6 +573,8 @@ export default function HouseholdPage() {
                     </HStack>
                     <Text
                       fontWeight={900}
+                      fontSize={{ base: 'sm', md: 'md' }}
+                      flexShrink={0}
                       color={member.balance > 0
                         ? (ed?.jade ?? 'green.500')
                         : member.balance < 0
@@ -559,18 +585,26 @@ export default function HouseholdPage() {
                       {money(member.balance, household.currency)}
                     </Text>
                   </HStack>
-                  <HStack mt={3} color={muted} fontSize="xs" justify="space-between">
+                  <HStack
+                    mt={2}
+                    pl={{ base: 8, md: 10 }}
+                    color={muted}
+                    fontSize="xs"
+                    justify="space-between"
+                    flexWrap="wrap"
+                  >
                     <Text>Paid {money(member.totalPaid, household.currency)}</Text>
                     <Text>Share {money(member.totalShare, household.currency)}</Text>
                   </HStack>
                 </Box>
               ))}
             </VStack>
-          </Surface>
-        </Grid>
+          </Box>
+          </Grid>
+        </Surface>
 
         <Surface overflow="hidden">
-          <HStack justify="space-between" px={{ base: 4, md: 6 }} py={5}>
+          <HStack justify="space-between" px={{ base: 3, md: 6 }} py={{ base: 4, md: 5 }}>
             <Box>
               <Heading size="md">Recent expenses</Heading>
               <Text color={muted} fontSize="sm">Each split is saved with the expense.</Text>
@@ -591,16 +625,16 @@ export default function HouseholdPage() {
               {household.expenses.map((expense, index) => (
                 <HStack
                   key={expense.id}
-                  px={{ base: 4, md: 6 }}
-                  py={4}
+                  px={{ base: 3, md: 6 }}
+                  py={3}
                   justify="space-between"
                   borderTop={index === 0 ? 'none' : '1px solid'}
                   borderColor={ed?.line ?? 'blackAlpha.100'}
                 >
                   <HStack minW={0}>
                     <Box
-                      w={10}
-                      h={10}
+                      w={{ base: 9, md: 10 }}
+                      h={{ base: 9, md: 10 }}
                       flexShrink={0}
                       display="grid"
                       placeItems="center"
@@ -619,8 +653,12 @@ export default function HouseholdPage() {
                   </HStack>
                   <HStack flexShrink={0}>
                     <Box textAlign="right">
-                      <Text fontWeight={900}>{money(expense.amount, household.currency)}</Text>
-                      <Text color={muted} fontSize="xs">{expense.shares.length} shares</Text>
+                      <Text fontWeight={900} fontSize={{ base: 'sm', md: 'md' }}>
+                        {money(expense.amount, household.currency)}
+                      </Text>
+                      <Text color={muted} fontSize="xs" display={{ base: 'none', sm: 'block' }}>
+                        {expense.shares.length} shares
+                      </Text>
                     </Box>
                     {expense.canEdit && (
                       <IconButton
@@ -639,7 +677,7 @@ export default function HouseholdPage() {
         </Surface>
 
         <Surface overflow="hidden">
-          <HStack justify="space-between" px={{ base: 4, md: 6 }} py={5}>
+          <HStack justify="space-between" px={{ base: 3, md: 6 }} py={{ base: 4, md: 5 }}>
             <Box>
               <Heading size="md">Payments and confirmations</Heading>
               <Text color={muted} fontSize="sm">Only confirmed payments change balances.</Text>
@@ -657,8 +695,8 @@ export default function HouseholdPage() {
                   direction={{ base: 'column', md: 'row' }}
                   align={{ base: 'stretch', md: 'center' }}
                   justify="space-between"
-                  px={{ base: 4, md: 6 }}
-                  py={4}
+                  px={{ base: 3, md: 6 }}
+                  py={3}
                   borderTop={index === 0 ? 'none' : '1px solid'}
                   borderColor={ed?.line ?? 'blackAlpha.100'}
                 >
@@ -840,7 +878,17 @@ function ExpenseModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
-      <ModalContent bg={ed?.modal} color={ed?.cream} borderColor={ed?.lineStrong} borderWidth={ed ? '1px' : 0}>
+      <ModalContent
+        bg={ed?.modal}
+        color={ed?.cream}
+        borderColor={ed?.lineStrong}
+        borderWidth={ed ? '1px' : 0}
+        maxW={{ base: '100vw', md: 'xl' }}
+        minH={{ base: '100dvh', md: 'auto' }}
+        maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
+        my={{ base: 0, md: 16 }}
+        borderRadius={{ base: 0, md: 'md' }}
+      >
         <ModalHeader>{expense ? 'Edit household expense' : 'Add household expense'}</ModalHeader>
         <ModalCloseButton />
         <ModalBody as="form" id="household-expense-form" onSubmit={submit}>
@@ -909,7 +957,12 @@ function ExpenseModal({
             </FormControl>
           </VStack>
         </ModalBody>
-        <ModalFooter justifyContent="space-between">
+        <ModalFooter
+          justifyContent="space-between"
+          flexDirection={{ base: 'column-reverse', sm: 'row' }}
+          alignItems={{ base: 'stretch', sm: 'center' }}
+          gap={2}
+        >
           <Box>
             {expense && (
               <Button
@@ -918,14 +971,21 @@ function ExpenseModal({
                 leftIcon={<Trash2 size={16} />}
                 isLoading={deleting}
                 onClick={() => void remove()}
+                w={{ base: 'full', sm: 'auto' }}
               >
                 Remove
               </Button>
             )}
           </Box>
-          <HStack>
-            <Button variant="ghost" onClick={onClose}>Cancel</Button>
-            <Button type="submit" form="household-expense-form" colorScheme="teal" isLoading={saving}>
+          <HStack w={{ base: 'full', sm: 'auto' }}>
+            <Button flex={1} variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button
+              flex={1}
+              type="submit"
+              form="household-expense-form"
+              colorScheme="teal"
+              isLoading={saving}
+            >
               {expense ? 'Save changes' : 'Add expense'}
             </Button>
           </HStack>
@@ -987,9 +1047,19 @@ function SettlementModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="md">
+    <Modal isOpen={isOpen} onClose={onClose} size="md" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
-      <ModalContent bg={ed?.modal} color={ed?.cream} borderColor={ed?.lineStrong} borderWidth={ed ? '1px' : 0}>
+      <ModalContent
+        bg={ed?.modal}
+        color={ed?.cream}
+        borderColor={ed?.lineStrong}
+        borderWidth={ed ? '1px' : 0}
+        maxW={{ base: '100vw', md: 'md' }}
+        minH={{ base: '100dvh', md: 'auto' }}
+        maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
+        my={{ base: 0, md: 16 }}
+        borderRadius={{ base: 0, md: 'md' }}
+      >
         <ModalHeader>Record payment</ModalHeader>
         <ModalCloseButton />
         <ModalBody as="form" id="household-settlement-form" onSubmit={submit}>
@@ -1017,9 +1087,10 @@ function SettlementModal({
             </FormControl>
           </VStack>
         </ModalBody>
-        <ModalFooter>
-          <Button variant="ghost" mr={3} onClick={onClose}>Cancel</Button>
+        <ModalFooter gap={2}>
+          <Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={onClose}>Cancel</Button>
           <Button
+            flex={{ base: 1, sm: 'initial' }}
             type="submit"
             form="household-settlement-form"
             colorScheme="teal"
@@ -1086,14 +1157,27 @@ function MembersModal({
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
-      <ModalContent bg={ed?.modal} color={ed?.cream} borderColor={ed?.lineStrong} borderWidth={ed ? '1px' : 0}>
+      <ModalContent
+        bg={ed?.modal}
+        color={ed?.cream}
+        borderColor={ed?.lineStrong}
+        borderWidth={ed ? '1px' : 0}
+        maxW={{ base: '100vw', md: 'xl' }}
+        minH={{ base: '100dvh', md: 'auto' }}
+        maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
+        my={{ base: 0, md: 16 }}
+        borderRadius={{ base: 0, md: 'md' }}
+      >
         <ModalHeader>Manage Household</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <VStack align="stretch" spacing={6}>
             <Box>
               <Heading size="sm" mb={3}>Household details</Heading>
-              <HStack align="flex-end">
+              <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                align={{ base: 'stretch', sm: 'flex-end' }}
+              >
                 <FormControl>
                   <FormLabel>Name</FormLabel>
                   <Input value={name} maxLength={120} onChange={(event) => setName(event.target.value)} />
@@ -1108,7 +1192,7 @@ function MembersModal({
                 >
                   Save
                 </Button>
-              </HStack>
+              </Stack>
             </Box>
 
             <Divider borderColor={ed?.line} />
@@ -1118,7 +1202,12 @@ function MembersModal({
               <Text color={muted} fontSize="sm" mb={3}>
                 The person needs an approved Personal Budget account.
               </Text>
-              <HStack as="form" align="flex-end" onSubmit={(event) => void invite(event)}>
+              <Stack
+                as="form"
+                direction={{ base: 'column', sm: 'row' }}
+                align={{ base: 'stretch', sm: 'flex-end' }}
+                onSubmit={(event) => void invite(event)}
+              >
                 <FormControl isRequired>
                   <FormLabel>Email</FormLabel>
                   <Input
@@ -1131,7 +1220,7 @@ function MembersModal({
                 <Button type="submit" colorScheme="teal" isLoading={busy === 'invite'}>
                   Invite
                 </Button>
-              </HStack>
+              </Stack>
             </Box>
 
             {household.pendingMemberInvitations.length > 0 && (

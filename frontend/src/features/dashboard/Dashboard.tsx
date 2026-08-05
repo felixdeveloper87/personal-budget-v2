@@ -45,7 +45,7 @@ const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
 
-  // Home is a snapshot of the current month — period browsing lives on the
+  // Dashboard is a snapshot of the current month — period browsing lives on the
   // Behaviour / Payments / Reports pages, so there's no navigator here.
   const { selectedDate, selectedPeriod } = usePeriodNavigator()
 
@@ -54,7 +54,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     selectedPeriod,
   )
 
-  // Home is anchored to the Payments (cash-flow) lens — the Behaviour lens has
+  // Dashboard is anchored to the Payments (cash-flow) lens — the Behaviour lens has
   // its own page now.
   const dateBasis: TransactionDateBasis = 'cash-flow'
   const periodData = usePeriodData(
@@ -79,7 +79,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   )
 
   // Recent activity mirrors the Behaviour lens (by purchase date) instead of the
-  // cash-flow lens the rest of the home is anchored to.
+  // cash-flow lens the rest of the dashboard is anchored to.
   const behaviourPeriodData = usePeriodData(
     transactions,
     null,

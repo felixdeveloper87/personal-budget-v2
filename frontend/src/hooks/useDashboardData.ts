@@ -20,7 +20,7 @@ export interface LoadDashboardOptions {
 /* -------------------------------------------------------------------------- */
 /**
  * The dashboard data (all transactions + monthly summary) is shared by several
- * pages (Home, Transactions, Categories, Goals). Each one mounts/unmounts on
+ * pages (Dashboard, Transactions, Categories, Goals). Each one mounts/unmounts on
  * navigation, so without a cache every visit refetched everything from the
  * backend — that's the delay.
  *

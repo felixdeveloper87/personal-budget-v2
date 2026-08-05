@@ -45,15 +45,15 @@ export interface NavItem {
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
   {
     id: 'dashboard',
-    label: 'Home',
-    shortLabel: 'Home',
+    label: 'Dashboard',
+    shortLabel: 'Dashboard',
     icon: LayoutDashboard,
     description: 'Overview of your finances',
   },
   {
     id: 'household',
     label: 'Household',
-    shortLabel: 'Home share',
+    shortLabel: 'Household',
     icon: Home,
     description: 'Shared home expenses and balances',
   },
