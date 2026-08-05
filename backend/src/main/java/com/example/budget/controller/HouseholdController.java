@@ -5,6 +5,7 @@ import com.example.budget.dto.HouseholdRecordCreatedDTO;
 import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.model.User;
 import com.example.budget.service.HouseholdAttachmentService;
+import com.example.budget.service.HouseholdCleaningService;
 import com.example.budget.service.HouseholdService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -22,12 +23,15 @@ import java.util.List;
 public class HouseholdController {
     private final HouseholdService service;
     private final HouseholdAttachmentService attachmentService;
+    private final HouseholdCleaningService cleaningService;
 
     public HouseholdController(
             HouseholdService service,
-            HouseholdAttachmentService attachmentService) {
+            HouseholdAttachmentService attachmentService,
+            HouseholdCleaningService cleaningService) {
         this.service = service;
         this.attachmentService = attachmentService;
+        this.cleaningService = cleaningService;
     }
 
     @GetMapping("/households/current")
@@ -100,6 +104,27 @@ public class HouseholdController {
             Authentication authentication) {
         User user = user(authentication);
         service.deactivateMember(householdId, memberId, user);
+        return service.page(user);
+    }
+
+    @PutMapping("/households/{householdId}/cleaning-rotation")
+    public HouseholdPageDTO configureCleaningRotation(
+            @PathVariable Long householdId,
+            @RequestBody HouseholdRequests.CleaningRotation request,
+            Authentication authentication) {
+        User user = user(authentication);
+        cleaningService.configure(householdId, request, user);
+        return service.page(user);
+    }
+
+    @PostMapping(
+            "/households/{householdId}/cleaning-assignments/{assignmentId}/complete")
+    public HouseholdPageDTO completeCleaningAssignment(
+            @PathVariable Long householdId,
+            @PathVariable Long assignmentId,
+            Authentication authentication) {
+        User user = user(authentication);
+        cleaningService.completeCurrentWeek(householdId, assignmentId, user);
         return service.page(user);
     }
 

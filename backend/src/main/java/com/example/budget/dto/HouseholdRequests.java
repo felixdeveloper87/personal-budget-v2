@@ -17,5 +17,8 @@ public final class HouseholdRequests {
             LocalDate expenseDate,
             List<Long> participantMemberIds) {}
     public record Settlement(Long toMemberId, BigDecimal amount, LocalDate settlementDate) {}
+    public record CleaningRotation(
+            LocalDate startDate,
+            boolean active,
+            List<Long> participantMemberIds) {}
 }
-

@@ -29,6 +29,7 @@ public class HouseholdService {
     private final HouseholdExpenseShareRepository shareRepository;
     private final HouseholdSettlementRepository settlementRepository;
     private final HouseholdAttachmentRepository attachmentRepository;
+    private final HouseholdCleaningService cleaningService;
     private final UserRepository userRepository;
 
     public HouseholdService(
@@ -39,6 +40,7 @@ public class HouseholdService {
             HouseholdExpenseShareRepository shareRepository,
             HouseholdSettlementRepository settlementRepository,
             HouseholdAttachmentRepository attachmentRepository,
+            HouseholdCleaningService cleaningService,
             UserRepository userRepository) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -47,10 +49,11 @@ public class HouseholdService {
         this.shareRepository = shareRepository;
         this.settlementRepository = settlementRepository;
         this.attachmentRepository = attachmentRepository;
+        this.cleaningService = cleaningService;
         this.userRepository = userRepository;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public HouseholdPageDTO page(User user) {
         List<HouseholdPageDTO.Invitation> invitations =
                 invitationRepository.findByTargetUserAndStatusOrderByCreatedAtDesc(
@@ -199,6 +202,7 @@ public class HouseholdService {
                     "Settle this member's balance and pending payments before removing them");
         }
 
+        cleaningService.removeParticipant(target);
         target.setActive(false);
         target.setDeactivatedAt(LocalDateTime.now());
         memberRepository.save(target);
@@ -493,6 +497,8 @@ public class HouseholdService {
                 .filter(expense -> YearMonth.from(expense.getExpenseDate()).equals(currentMonth))
                 .map(HouseholdExpense::getAmount)
                 .reduce(ZERO, BigDecimal::add);
+        HouseholdPageDTO.CleaningRotation cleaningRotation =
+                cleaningService.dashboard(household, current);
 
         return new HouseholdPageDTO.Dashboard(
                 household.getId(),
@@ -502,6 +508,7 @@ public class HouseholdService {
                 current.getRole().name(),
                 amount(balances.getOrDefault(current.getId(), ZERO)),
                 amount(monthSpend),
+                cleaningRotation,
                 memberDTOs,
                 memberInvitationDTOs,
                 debtDTOs,

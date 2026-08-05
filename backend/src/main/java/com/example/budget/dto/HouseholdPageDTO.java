@@ -17,6 +17,7 @@ public record HouseholdPageDTO(
             String currentMemberRole,
             BigDecimal currentUserBalance,
             BigDecimal monthSpend,
+            CleaningRotation cleaningRotation,
             List<Member> members,
             List<MemberInvitation> pendingMemberInvitations,
             List<Debt> debts,
@@ -93,6 +94,27 @@ public record HouseholdPageDTO(
             boolean canAttach,
             List<Attachment> attachments,
             LocalDateTime createdAt
+    ) {}
+
+    public record CleaningRotation(
+            boolean configured,
+            boolean active,
+            boolean canManage,
+            LocalDate startDate,
+            List<Long> participantMemberIds,
+            CleaningAssignment currentWeek,
+            List<CleaningAssignment> upcomingWeeks
+    ) {}
+
+    public record CleaningAssignment(
+            Long id,
+            LocalDate weekStart,
+            LocalDate weekEnd,
+            Long assignedMemberId,
+            String assignedMemberName,
+            String status,
+            boolean canComplete,
+            LocalDateTime completedAt
     ) {}
 
     public record Invitation(

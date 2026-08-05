@@ -407,6 +407,7 @@ export interface CashFlowForecast {
 export type HouseholdRole = 'OWNER' | 'MEMBER'
 export type HouseholdSettlementStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
 export type HouseholdAttachmentStatus = 'AVAILABLE' | 'EXPIRED' | 'REMOVED'
+export type HouseholdCleaningStatus = 'PENDING' | 'UPCOMING' | 'COMPLETED' | 'MISSED'
 
 export interface HouseholdMember {
   id: number
@@ -491,6 +492,27 @@ export interface HouseholdInvitation {
   createdAt: string
 }
 
+export interface HouseholdCleaningAssignment {
+  id: number
+  weekStart: string
+  weekEnd: string
+  assignedMemberId: number
+  assignedMemberName: string
+  status: HouseholdCleaningStatus
+  canComplete: boolean
+  completedAt: string | null
+}
+
+export interface HouseholdCleaningRotation {
+  configured: boolean
+  active: boolean
+  canManage: boolean
+  startDate: string | null
+  participantMemberIds: number[]
+  currentWeek: HouseholdCleaningAssignment | null
+  upcomingWeeks: HouseholdCleaningAssignment[]
+}
+
 export interface HouseholdDashboard {
   id: number
   name: string
@@ -499,6 +521,7 @@ export interface HouseholdDashboard {
   currentMemberRole: HouseholdRole
   currentUserBalance: number
   monthSpend: number
+  cleaningRotation: HouseholdCleaningRotation
   members: HouseholdMember[]
   pendingMemberInvitations: HouseholdMemberInvitation[]
   debts: HouseholdDebt[]
@@ -523,4 +546,10 @@ export interface HouseholdSettlementRequest {
   toMemberId: number
   amount: number
   settlementDate: string
+}
+
+export interface HouseholdCleaningRotationRequest {
+  startDate: string
+  active: boolean
+  participantMemberIds: number[]
 }

@@ -34,6 +34,7 @@ import {
 import {
   acceptHouseholdInvitation,
   cancelHouseholdSettlement,
+  completeHouseholdCleaningAssignment,
   confirmHouseholdSettlement,
   createHousehold,
   createHouseholdExpense,
@@ -46,6 +47,7 @@ import {
   removeHouseholdMember,
   revokeHouseholdInvitation,
   updateHousehold,
+  updateHouseholdCleaningRotation,
   updateHouseholdExpense,
   uploadHouseholdExpenseAttachments,
   uploadHouseholdSettlementAttachments,
@@ -54,6 +56,7 @@ import { useEd } from '../../editorial'
 import { ToastService } from '../../services/toast'
 import type {
   HouseholdDashboard,
+  HouseholdCleaningRotation,
   HouseholdDebt,
   HouseholdExpense,
   HouseholdExpenseRequest,
@@ -61,6 +64,9 @@ import type {
 } from '../../types'
 import {
   Check,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
   Gear,
   Home,
   Mail,
@@ -68,6 +74,7 @@ import {
   Plus,
   ReceiptText,
   RefreshCw,
+  Sparkles,
   Trash2,
   Upload,
   Wallet,
@@ -97,6 +104,15 @@ type AttachmentTarget =
 
 const today = () => {
   const value = new Date()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${value.getFullYear()}-${month}-${day}`
+}
+
+const currentMonday = () => {
+  const value = new Date()
+  const daysSinceMonday = (value.getDay() + 6) % 7
+  value.setDate(value.getDate() - daysSinceMonday)
   const month = String(value.getMonth() + 1).padStart(2, '0')
   const day = String(value.getDate()).padStart(2, '0')
   return `${value.getFullYear()}-${month}-${day}`
@@ -149,6 +165,7 @@ export default function HouseholdPage() {
   const membersModal = useDisclosure()
   const settlementModal = useDisclosure()
   const attachmentsModal = useDisclosure()
+  const cleaningRotationModal = useDisclosure()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -523,6 +540,18 @@ export default function HouseholdPage() {
           </Grid>
         </Surface>
 
+        <CleaningRotationCard
+          rotation={household.cleaningRotation}
+          currentMemberId={household.currentMemberId}
+          busy={busyAction === 'complete-cleaning'}
+          onManage={cleaningRotationModal.onOpen}
+          onComplete={(assignmentId) => void applyAction(
+            'complete-cleaning',
+            () => completeHouseholdCleaningAssignment(household.id, assignmentId),
+            'Cleaning marked as completed',
+          )}
+        />
+
         <Surface overflow="hidden">
           <Grid templateColumns={{ base: '1fr', xl: '1.1fr 0.9fr' }}>
             <Box
@@ -864,6 +893,13 @@ export default function HouseholdPage() {
         household={household}
         onChanged={setPage}
       />
+      <CleaningRotationModal
+        isOpen={cleaningRotationModal.isOpen}
+        onClose={cleaningRotationModal.onClose}
+        household={household}
+        rotation={household.cleaningRotation}
+        onChanged={setPage}
+      />
       <AttachmentGalleryModal
         isOpen={attachmentsModal.isOpen}
         onClose={attachmentsModal.onClose}
@@ -875,6 +911,458 @@ export default function HouseholdPage() {
         onChanged={setPage}
       />
     </Box>
+  )
+}
+
+function CleaningRotationCard({
+  rotation,
+  currentMemberId,
+  busy,
+  onManage,
+  onComplete,
+}: {
+  rotation: HouseholdCleaningRotation
+  currentMemberId: number
+  busy: boolean
+  onManage: () => void
+  onComplete: (assignmentId: number) => void
+}) {
+  const ed = useEd()
+  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
+  const muted = ed?.muted ?? mutedFallback
+  const current = rotation.currentWeek
+  const firstUpcoming = rotation.upcomingWeeks[0]
+  const canCurrentUserComplete = Boolean(
+    current?.canComplete && current.assignedMemberId === currentMemberId,
+  )
+
+  return (
+    <Surface overflow="hidden">
+      <Stack
+        direction={{ base: 'column', md: 'row' }}
+        justify="space-between"
+        align={{ base: 'stretch', md: 'center' }}
+        spacing={3}
+        px={{ base: 4, md: 6 }}
+        py={{ base: 4, md: 5 }}
+        borderBottom={rotation.configured && rotation.active ? '1px solid' : 'none'}
+        borderColor={ed?.line ?? 'blackAlpha.100'}
+      >
+        <HStack spacing={3}>
+          <Box
+            w={10}
+            h={10}
+            flexShrink={0}
+            display="grid"
+            placeItems="center"
+            borderRadius="xl"
+            bg={ed?.controlBg ?? 'orange.50'}
+            color={ed?.gold ?? 'orange.500'}
+          >
+            <Sparkles size={21} weight="duotone" />
+          </Box>
+          <Box>
+            <Heading size="md">Weekly cleaning</Heading>
+            <Text color={muted} fontSize="sm">
+              One person takes care of the house each week.
+            </Text>
+          </Box>
+        </HStack>
+        {rotation.canManage && (
+          <Button
+            size="sm"
+            variant="outline"
+            leftIcon={<Gear size={16} />}
+            alignSelf={{ base: 'stretch', md: 'center' }}
+            onClick={onManage}
+          >
+            {rotation.configured ? 'Manage rotation' : 'Set up rotation'}
+          </Button>
+        )}
+      </Stack>
+
+      {!rotation.configured ? (
+        <Box px={{ base: 4, md: 6 }} pb={{ base: 4, md: 5 }}>
+          <Text color={muted} fontSize="sm">
+            {rotation.canManage
+              ? 'Choose the members and the weekly order to start the cleaning rota.'
+              : 'The household owner has not set up the cleaning rota yet.'}
+          </Text>
+        </Box>
+      ) : !rotation.active ? (
+        <HStack px={{ base: 4, md: 6 }} pb={{ base: 4, md: 5 }} spacing={2}>
+          <Badge colorScheme="gray">Paused</Badge>
+          <Text color={muted} fontSize="sm">The weekly cleaning rotation is paused.</Text>
+        </HStack>
+      ) : (
+        <Grid templateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }}>
+          <Box
+            p={{ base: 4, md: 6 }}
+            borderBottom={{ base: '1px solid', lg: 'none' }}
+            borderRight={{ base: 'none', lg: '1px solid' }}
+            borderColor={ed?.line ?? 'blackAlpha.100'}
+          >
+            {current ? (
+              <Stack
+                direction={{ base: 'column', sm: 'row' }}
+                justify="space-between"
+                align={{ base: 'stretch', sm: 'center' }}
+                spacing={4}
+              >
+                <HStack spacing={3} minW={0}>
+                  <Avatar
+                    size="md"
+                    name={current.assignedMemberName}
+                    bg={ed?.jadeSoft ?? 'teal.100'}
+                    color={ed?.jade ?? 'teal.700'}
+                  />
+                  <Box minW={0}>
+                    <HStack spacing={2} flexWrap="wrap">
+                      <Text
+                        color={muted}
+                        fontSize="10px"
+                        fontWeight={800}
+                        letterSpacing="0.12em"
+                        textTransform="uppercase"
+                      >
+                        This week
+                      </Text>
+                      <Badge
+                        colorScheme={current.status === 'COMPLETED' ? 'green' : 'orange'}
+                        variant="subtle"
+                      >
+                        {current.status === 'COMPLETED' ? 'Completed' : 'Pending'}
+                      </Badge>
+                    </HStack>
+                    <Heading mt={1} size="md" noOfLines={1}>
+                      {current.assignedMemberId === currentMemberId
+                        ? 'Your turn'
+                        : current.assignedMemberName}
+                    </Heading>
+                    <HStack mt={1} color={muted} spacing={1}>
+                      <Calendar size={14} />
+                      <Text fontSize="xs">
+                        {dateLabel(current.weekStart)} – {dateLabel(current.weekEnd)}
+                      </Text>
+                    </HStack>
+                  </Box>
+                </HStack>
+
+                {canCurrentUserComplete && (
+                  <Button
+                    colorScheme="teal"
+                    leftIcon={<Check size={17} weight="bold" />}
+                    isLoading={busy}
+                    onClick={() => onComplete(current.id)}
+                  >
+                    Mark as completed
+                  </Button>
+                )}
+                {current.status === 'COMPLETED' && (
+                  <HStack
+                    px={3}
+                    py={2}
+                    borderRadius="lg"
+                    bg={ed?.jadeSoft ?? 'green.50'}
+                    color={ed?.jade ?? 'green.700'}
+                  >
+                    <Check size={17} weight="bold" />
+                    <Text fontSize="sm" fontWeight={800}>Done for this week</Text>
+                  </HStack>
+                )}
+              </Stack>
+            ) : (
+              <Box>
+                <Text
+                  color={muted}
+                  fontSize="10px"
+                  fontWeight={800}
+                  letterSpacing="0.12em"
+                  textTransform="uppercase"
+                >
+                  Rotation scheduled
+                </Text>
+                <Heading mt={1} size="md">
+                  Starts {dateLabel(firstUpcoming?.weekStart ?? rotation.startDate ?? today())}
+                </Heading>
+                <Text mt={1} color={muted} fontSize="sm">
+                  The first weekly assignment is ready.
+                </Text>
+              </Box>
+            )}
+          </Box>
+
+          <Box p={{ base: 4, md: 6 }}>
+            <Text
+              color={muted}
+              fontSize="10px"
+              fontWeight={800}
+              letterSpacing="0.12em"
+              textTransform="uppercase"
+              mb={3}
+            >
+              Coming next
+            </Text>
+            {rotation.upcomingWeeks.length === 0 ? (
+              <Text color={muted} fontSize="sm">No upcoming weeks scheduled.</Text>
+            ) : (
+              <VStack align="stretch" spacing={3}>
+                {rotation.upcomingWeeks.map((assignment) => (
+                  <HStack key={assignment.id} justify="space-between" spacing={3}>
+                    <HStack minW={0}>
+                      <Avatar size="xs" name={assignment.assignedMemberName} />
+                      <Text fontSize="sm" fontWeight={800} noOfLines={1}>
+                        {assignment.assignedMemberId === currentMemberId
+                          ? 'You'
+                          : assignment.assignedMemberName}
+                      </Text>
+                    </HStack>
+                    <Text color={muted} fontSize="xs" flexShrink={0}>
+                      {dateLabel(assignment.weekStart)}
+                    </Text>
+                  </HStack>
+                ))}
+              </VStack>
+            )}
+          </Box>
+        </Grid>
+      )}
+    </Surface>
+  )
+}
+
+function CleaningRotationModal({
+  isOpen,
+  onClose,
+  household,
+  rotation,
+  onChanged,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  household: HouseholdDashboard
+  rotation: HouseholdCleaningRotation
+  onChanged: (page: HouseholdPageState) => void
+}) {
+  const ed = useEd()
+  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
+  const muted = ed?.muted ?? mutedFallback
+  const [startDate, setStartDate] = useState(currentMonday())
+  const [active, setActive] = useState(true)
+  const [participantIds, setParticipantIds] = useState<number[]>([])
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (!isOpen) return
+    setStartDate(rotation.startDate ?? currentMonday())
+    setActive(rotation.configured ? rotation.active : true)
+    setParticipantIds(
+      rotation.configured
+        ? rotation.participantMemberIds
+        : household.members.map((member) => member.id),
+    )
+  }, [household.members, isOpen, rotation])
+
+  const participants = participantIds.flatMap((memberId) => {
+    const member = household.members.find((candidate) => candidate.id === memberId)
+    return member ? [member] : []
+  })
+  const availableMembers = household.members.filter(
+    (member) => !participantIds.includes(member.id),
+  )
+
+  const moveParticipant = (index: number, distance: number) => {
+    setParticipantIds((current) => {
+      const destination = index + distance
+      if (destination < 0 || destination >= current.length) return current
+      const next = [...current]
+      ;[next[index], next[destination]] = [next[destination], next[index]]
+      return next
+    })
+  }
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (participantIds.length === 0) {
+      ToastService.warning({ title: 'Select at least one member' })
+      return
+    }
+    const selectedDate = new Date(`${startDate}T12:00:00`)
+    if (Number.isNaN(selectedDate.getTime()) || selectedDate.getDay() !== 1) {
+      ToastService.warning({ title: 'The rotation must start on a Monday' })
+      return
+    }
+
+    setSaving(true)
+    try {
+      onChanged(await updateHouseholdCleaningRotation(household.id, {
+        startDate,
+        active,
+        participantMemberIds: participantIds,
+      }))
+      ToastService.success({
+        title: rotation.configured ? 'Cleaning rotation updated' : 'Cleaning rotation created',
+      })
+      onClose()
+    } catch (error) {
+      ToastService.apiError(error, { title: 'Could not save the cleaning rotation' })
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
+      <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
+      <ModalContent
+        bg={ed?.modal}
+        color={ed?.cream}
+        borderColor={ed?.lineStrong}
+        borderWidth={ed ? '1px' : 0}
+        maxW={{ base: '100vw', md: 'lg' }}
+        minH={{ base: '100dvh', md: 'auto' }}
+        maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
+        my={{ base: 0, md: 16 }}
+        borderRadius={{ base: 0, md: 'md' }}
+      >
+        <ModalHeader>Manage cleaning rotation</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody as="form" id="household-cleaning-form" onSubmit={submit}>
+          <VStack align="stretch" spacing={5}>
+            <Box>
+              <Heading size="sm">Schedule</Heading>
+              <Text mt={1} color={muted} fontSize="sm">
+                Each assignment runs from Monday to Sunday.
+              </Text>
+            </Box>
+
+            <FormControl isRequired>
+              <FormLabel>First week starts</FormLabel>
+              <Input
+                type="date"
+                min="2020-01-06"
+                step={7}
+                value={startDate}
+                onChange={(event) => setStartDate(event.target.value)}
+              />
+              <Text mt={1} color={muted} fontSize="xs">Choose a Monday.</Text>
+            </FormControl>
+
+            <Checkbox
+              isChecked={active}
+              onChange={(event) => setActive(event.target.checked)}
+            >
+              <Text fontWeight={800}>Rotation active</Text>
+              <Text color={muted} fontSize="xs">
+                Turn this off to pause all weekly cleaning assignments.
+              </Text>
+            </Checkbox>
+
+            <Divider borderColor={ed?.line} />
+
+            <Box>
+              <Heading size="sm">Weekly order</Heading>
+              <Text mt={1} color={muted} fontSize="sm">
+                The order repeats after the last selected member.
+              </Text>
+            </Box>
+
+            <VStack align="stretch" spacing={2}>
+              {participants.map((member, index) => (
+                <HStack
+                  key={member.id}
+                  p={3}
+                  borderRadius="xl"
+                  bg={ed?.panelRaised ?? 'blackAlpha.50'}
+                  border="1px solid"
+                  borderColor={ed?.line ?? 'blackAlpha.100'}
+                  justify="space-between"
+                >
+                  <HStack minW={0}>
+                    <Badge
+                      minW={7}
+                      textAlign="center"
+                      colorScheme="teal"
+                      variant="subtle"
+                    >
+                      {index + 1}
+                    </Badge>
+                    <Avatar size="sm" name={member.name} />
+                    <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
+                  </HStack>
+                  <HStack spacing={1}>
+                    <IconButton
+                      aria-label={`Move ${member.name} earlier`}
+                      icon={<ChevronUp size={16} />}
+                      size="sm"
+                      variant="ghost"
+                      isDisabled={index === 0}
+                      onClick={() => moveParticipant(index, -1)}
+                    />
+                    <IconButton
+                      aria-label={`Move ${member.name} later`}
+                      icon={<ChevronDown size={16} />}
+                      size="sm"
+                      variant="ghost"
+                      isDisabled={index === participants.length - 1}
+                      onClick={() => moveParticipant(index, 1)}
+                    />
+                    <IconButton
+                      aria-label={`Remove ${member.name} from the rotation`}
+                      icon={<X size={16} />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="red"
+                      onClick={() => setParticipantIds((current) =>
+                        current.filter((memberId) => memberId !== member.id))}
+                    />
+                  </HStack>
+                </HStack>
+              ))}
+            </VStack>
+
+            {availableMembers.length > 0 && (
+              <Box>
+                <Text color={muted} fontSize="xs" fontWeight={800} mb={2}>
+                  Add another member
+                </Text>
+                <HStack flexWrap="wrap">
+                  {availableMembers.map((member) => (
+                    <Button
+                      key={member.id}
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<Plus size={15} />}
+                      onClick={() => setParticipantIds((current) => [...current, member.id])}
+                    >
+                      {member.name}
+                    </Button>
+                  ))}
+                </HStack>
+              </Box>
+            )}
+          </VStack>
+        </ModalBody>
+        <ModalFooter gap={2}>
+          <Button
+            flex={{ base: 1, sm: 'initial' }}
+            variant="ghost"
+            onClick={onClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            flex={{ base: 1, sm: 'initial' }}
+            type="submit"
+            form="household-cleaning-form"
+            colorScheme="teal"
+            isLoading={saving}
+          >
+            Save rotation
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }
 

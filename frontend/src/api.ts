@@ -33,6 +33,7 @@ import {
   HouseholdPageState,
   HouseholdExpenseRequest,
   HouseholdSettlementRequest,
+  HouseholdCleaningRotationRequest,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -613,6 +614,27 @@ export async function removeHouseholdMember(
 ): Promise<HouseholdPageState> {
   const { data } = await api.delete<HouseholdPageState>(
     `/households/${householdId}/members/${memberId}`,
+  )
+  return data
+}
+
+export async function updateHouseholdCleaningRotation(
+  householdId: number,
+  request: HouseholdCleaningRotationRequest,
+): Promise<HouseholdPageState> {
+  const { data } = await api.put<HouseholdPageState>(
+    `/households/${householdId}/cleaning-rotation`,
+    request,
+  )
+  return data
+}
+
+export async function completeHouseholdCleaningAssignment(
+  householdId: number,
+  assignmentId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/cleaning-assignments/${assignmentId}/complete`,
   )
   return data
 }
