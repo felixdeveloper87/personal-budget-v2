@@ -6,6 +6,7 @@ import {
   CTA,
   FOOTER,
   HERO,
+  HOUSEHOLD,
   MANIFESTO,
   MOCKUP,
   NAV_LINKS,
@@ -158,6 +159,36 @@ function ExportDemo({ reduce }: { reduce: boolean }) {
 /* ========================================================================== */
 /* Magnetic — pulls an element toward the pointer, springs back on leave       */
 /* ========================================================================== */
+function HouseholdDemo() {
+  return (
+    <div className="pbv3-household-mini" aria-label="Household feature preview">
+      <div className="pbv3-household-mini__rows">
+        <div>
+          <span className="pbv3-household-mini__icon" aria-hidden>£</span>
+          <span>
+            <strong>{HOUSEHOLD.bill.label}</strong>
+            <small>{HOUSEHOLD.bill.meta}</small>
+          </span>
+          <b>{HOUSEHOLD.bill.amount}</b>
+        </div>
+        <div>
+          <span className="pbv3-household-mini__icon pbv3-household-mini__icon--home" aria-hidden>⌂</span>
+          <span>
+            <strong>{HOUSEHOLD.cleaning.label}</strong>
+            <small>{HOUSEHOLD.cleaning.dates}</small>
+          </span>
+          <b>{HOUSEHOLD.cleaning.person}</b>
+        </div>
+      </div>
+      <div className="pbv3-household-mini__footer">
+        <span>{HOUSEHOLD.balance.label}</span>
+        <b>{HOUSEHOLD.balance.value}</b>
+        <small>{HOUSEHOLD.footer}</small>
+      </div>
+    </div>
+  )
+}
+
 function useMagnetic<T extends HTMLElement>(strength = 0.3) {
   const ref = useRef<T>(null)
   useEffect(() => {
@@ -551,6 +582,23 @@ export default function LandingV3({ onGetStarted }: LandingV3Props) {
                   <rect x="5" y="11" width="14" height="9" rx="2" />
                   <path d="M8 11V8a4 4 0 0 1 8 0v3" />
                 </svg>
+              </div>
+            </div>
+            <div className="pbv3-cell pbv3-cell--wide pbv3-cell--household pbv3-reveal">
+              <div className="pbv3-cell__title">{HOUSEHOLD.title}</div>
+              <div className="pbv3-cell__hint">{HOUSEHOLD.hint}</div>
+              <HouseholdDemo />
+            </div>
+            <div className="pbv3-cell pbv3-reveal">
+              <div className="pbv3-cell__title">Planning</div>
+              <div className="pbv3-cell__hint">see the month ahead</div>
+              <div className="pbv3-plan-mini" aria-label="Monthly planning preview">
+                <span style={{ '--plan-height': '44%' } as CSSProperties} />
+                <span style={{ '--plan-height': '62%' } as CSSProperties} />
+                <span style={{ '--plan-height': '52%' } as CSSProperties} />
+                <span className="is-current" style={{ '--plan-height': '82%' } as CSSProperties} />
+                <span style={{ '--plan-height': '70%' } as CSSProperties} />
+                <span style={{ '--plan-height': '90%' } as CSSProperties} />
               </div>
             </div>
           </div>

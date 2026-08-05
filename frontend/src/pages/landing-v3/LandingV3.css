@@ -547,6 +547,114 @@
 /* ==========================================================================
    Bento grid (functional micro-demos)
    ========================================================================== */
+.pbv3-cell--household {
+  background:
+    radial-gradient(circle at 84% 18%, rgba(91, 231, 167, 0.1), transparent 34%),
+    var(--panel);
+}
+.pbv3-household-mini {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(150px, 0.9fr);
+  gap: 0.7rem;
+  margin-top: auto;
+}
+.pbv3-household-mini__rows {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.pbv3-household-mini__rows > div {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(6, 13, 20, 0.36);
+}
+.pbv3-household-mini__icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(91, 231, 167, 0.12);
+  color: var(--jade);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+.pbv3-household-mini__icon--home {
+  background: rgba(239, 234, 224, 0.08);
+  color: var(--cream);
+}
+.pbv3-household-mini__rows > div > span:not(.pbv3-household-mini__icon) {
+  display: grid;
+  min-width: 0;
+  margin-right: auto;
+}
+.pbv3-household-mini strong,
+.pbv3-household-mini b {
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+.pbv3-household-mini small {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.54rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pbv3-household-mini__rows > div > b {
+  flex: 0 0 auto;
+  color: var(--jade);
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.pbv3-household-mini__footer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(91, 231, 167, 0.22);
+  border-radius: 10px;
+  background: rgba(91, 231, 167, 0.06);
+}
+.pbv3-household-mini__footer > span {
+  color: var(--muted);
+  font-size: 0.65rem;
+}
+.pbv3-household-mini__footer > b {
+  margin: 0.2rem 0 0.55rem;
+  color: var(--cream);
+  font-family: var(--font-mono);
+}
+.pbv3-household-mini__footer > small {
+  white-space: normal;
+}
+.pbv3-plan-mini {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.45rem;
+  height: 88px;
+  margin-top: auto;
+  padding: 0 0.25rem;
+  border-bottom: 1px solid var(--line-strong);
+}
+.pbv3-plan-mini > span {
+  width: 100%;
+  height: var(--plan-height);
+  border-radius: 5px 5px 0 0;
+  background: rgba(239, 234, 224, 0.14);
+}
+.pbv3-plan-mini > span.is-current {
+  background: var(--jade);
+  box-shadow: 0 0 20px rgba(91, 231, 167, 0.16);
+}
 .pbv3-bento {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -561,6 +669,16 @@
 }
 @media (max-width: 560px) {
   .pbv3-bento {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
+  .pbv3-cell {
+    min-height: 200px;
+  }
+  .pbv3-cell--household {
+    min-height: 290px;
+  }
+  .pbv3-household-mini {
     grid-template-columns: 1fr;
   }
 }

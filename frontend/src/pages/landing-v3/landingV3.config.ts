@@ -16,7 +16,7 @@ export const HERO = {
   line2is: 'is',
   line2accent: 'wealth.',
   subtitle:
-    'Personal Budget turns a thousand small money decisions into one calm, honest picture — every transaction, category and trend, kept sharp.',
+    'Personal Budget turns a thousand small money decisions into one calm, honest picture — your transactions, budgets and trends, plus shared bills when life is shared.',
   primaryCta: 'Start free',
   secondaryCta: 'See it move',
 } as const
@@ -29,6 +29,8 @@ export const TICKER = [
   '0 trackers',
   '⌘K search',
   '∞ categories',
+  'Shared bills, settled',
+  'Weekly home rota',
   'Dark mode that ships',
   'Private by default',
 ] as const
@@ -61,6 +63,27 @@ export const BENTO = {
   exportFormats: ['.csv', '.pdf', '.xlsx'],
 } as const
 
+/** Compact Household mention inside the wider product feature grid. */
+export const HOUSEHOLD = {
+  title: 'Household',
+  hint: 'shared bills + home duties',
+  bill: {
+    label: 'Electricity bill',
+    meta: 'Paid by Leandro · split 5 ways',
+    amount: '£20 each',
+  },
+  balance: {
+    label: 'Who owes whom',
+    value: 'Aisha → Leandro · £10',
+  },
+  cleaning: {
+    label: 'Cleaning this week',
+    person: 'Tom',
+    dates: '4–10 Aug',
+  },
+  footer: 'Bills · balances · repayments · private proofs · weekly rota',
+} as const
+
 /**
  * Manifesto — scroll-lit text. Words wrapped in *asterisks* become keywords
  * that ignite in jade italic as the section scrolls.
@@ -75,14 +98,15 @@ export const TESTIMONIALS = [
   { quote: 'It reads like a magazine and works like a spreadsheet.', name: 'Tomás', role: 'Engineer' },
   { quote: 'The first budgeting app I did not abandon in a week.', name: 'Aisha', role: 'Founder' },
   { quote: 'Calm, fast, and it never tries to sell me anything.', name: 'Lukas', role: 'Teacher' },
-  { quote: 'Logging a transaction takes two taps. The rest is just there.', name: 'Sofia', role: 'Nurse' },
+  { quote: 'We stopped doing bill maths in the group chat.', name: 'Sofia', role: 'Nurse' },
   { quote: 'My spending finally has a shape I can read.', name: 'Daniel', role: 'Writer' },
 ] as const
 
 export const CTA = {
   eyebrow: 'You vs. the spreadsheet',
   title: 'Open the dashboard you’ve been meaning to build.',
-  subtitle: 'Two minutes from now, your first month is logged and the picture is already telling you something.',
+  subtitle:
+    'Two minutes from now, your first month is logged. If money is shared at home, Household keeps the bills and responsibilities clear too.',
   button: 'Start free',
 } as const
 
