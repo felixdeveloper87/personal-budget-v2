@@ -9,13 +9,12 @@ import {
   useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
-import { guilloche } from '../../features/dashboard/components/guilloche'
+import BrandMark from '../brand/BrandMark'
 import {
   CaretDoubleLeft,
-  SidebarSimple,
 } from '../ui/icons'
 import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
@@ -252,9 +251,6 @@ export default function Sidebar({
 
 /** Editorial brand lockup: engraved mini seal + serif wordmark + mono tagline. */
 function SidebarBrand({ onClick }: { onClick?: () => void }) {
-  const ring1 = useMemo(() => guilloche(58, 19, 62), [])
-  const ring2 = useMemo(() => guilloche(58, 27, 44), [])
-
   return (
     <Flex
       as="button"
@@ -270,18 +266,16 @@ function SidebarBrand({ onClick }: { onClick?: () => void }) {
       _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)', borderRadius: '10px' }}
     >
       <Box
-        as="svg"
-        viewBox="-108 -108 216 216"
         w="38px"
         h="38px"
         flexShrink={0}
-        aria-hidden
         transition="transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)"
-        _groupHover={{ transform: 'rotate(18deg)' }}
+        _groupHover={{ transform: 'translateY(-1px) rotate(-2deg)' }}
       >
-        <circle r="102" fill="none" stroke="var(--pb-hair-2)" strokeWidth="4" />
-        <path d={ring1} fill="none" stroke="var(--pb-forest)" strokeWidth="1.6" strokeOpacity="0.6" />
-        <path d={ring2} fill="none" stroke="var(--pb-gold-2)" strokeWidth="1.6" strokeOpacity="0.55" />
+        <BrandMark
+          size="100%"
+          style={{ filter: 'drop-shadow(0 7px 12px rgba(0, 0, 0, 0.22))' }}
+        />
       </Box>
 
       <VStack align="flex-start" spacing="1px" minW={0}>
@@ -307,7 +301,7 @@ function SidebarBrand({ onClick }: { onClick?: () => void }) {
           color="var(--pb-ink-faint)"
           noOfLines={1}
         >
-          Clarity for money
+          Clarity for your money
         </Text>
       </VStack>
     </Flex>
@@ -346,7 +340,7 @@ function SidebarHeader({
           <Tooltip label="Expand sidebar" hasArrow placement="right" openDelay={200}>
             <IconButton
               aria-label="Expand sidebar"
-              icon={<Icon as={SidebarSimple} weight="duotone" boxSize={5} />}
+              icon={<BrandMark size={36} />}
               size="sm"
               variant="ghost"
               borderRadius="full"
@@ -356,6 +350,9 @@ function SidebarHeader({
               transition={TRANSITION}
               onClick={onToggle}
               {...toggleStyles}
+              border="0"
+              bg="transparent"
+              _hover={{ bg: 'transparent', transform: 'scale(1.04)' }}
             />
           </Tooltip>
         </Flex>

@@ -1,5 +1,6 @@
 import { Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
+import BrandMark from '../../brand/BrandMark'
 import { BRAND } from './brand.config'
 
 interface LogoProps {
@@ -273,37 +274,14 @@ export default function Logo({ user, onClick }: LogoProps) {
   const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
   const wordMuted = ed ? ed.cream : wordMutedBase
   const wordBudgetGradientBase = useColorModeValue(
-    'linear(to-r, #2563eb, #9a681b)',
-    'linear(to-r, #7dd3fc, #e8c477)',
+    'linear(to-r, #237a55, #1e5a41)',
+    'linear(to-r, #7fe6b3, #e8c477)',
   )
   const wordBudgetGradient = ed
     ? `linear(to-r, ${ed.jade}, ${ed.gold})`
     : wordBudgetGradientBase
-  const separatorColorBase = useColorModeValue('gray.300', 'whiteAlpha.400')
-  const separatorColor = ed ? ed.muted : separatorColorBase
   const subtitleColorBase = useColorModeValue('gray.500', 'gray.500')
   const subtitleColor = ed ? ed.muted : subtitleColorBase
-  const frameBgBase = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f0f5ff 50%, #ddeaff 100%)',
-    'linear-gradient(135deg, rgba(125,211,252,0.16) 0%, rgba(165,180,252,0.07) 100%)',
-  )
-  const frameBg = ed ? `linear-gradient(135deg, ${ed.panelRaised}, ${ed.jadeSoft})` : frameBgBase
-  const frameBorderBase = useColorModeValue('rgba(37, 99, 235, 0.18)', 'rgba(125,211,252,0.28)')
-  const frameBorder = ed ? ed.lineStrong : frameBorderBase
-  const frameShadowBase = useColorModeValue(
-    '0 4px 14px rgba(37,99,235,0.16), inset 0 1px 0 rgba(255,255,255,0.9)',
-    '0 6px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.06)',
-  )
-  const frameShadow = ed ? `0 5px 16px ${ed.jadeSoft}, inset 0 1px 0 ${ed.lineStrong}` : frameShadowBase
-  const frameHoverShadowBase = useColorModeValue(
-    '0 8px 22px rgba(37,99,235,0.24), inset 0 1px 0 rgba(255,255,255,0.95)',
-    '0 10px 26px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.10)',
-  )
-  const frameHoverShadow = ed ? `0 10px 24px ${ed.jadeSoftHover}, inset 0 1px 0 ${ed.lineStrong}` : frameHoverShadowBase
-  const glossOverlay = useColorModeValue(
-    'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
-    'radial-gradient(120% 60% at 50% 0%, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0) 60%)',
-  )
 
   const handleClick = () => {
     if (onClick) return onClick()
@@ -312,8 +290,6 @@ export default function Logo({ user, onClick }: LogoProps) {
 
   const titleFontSize = { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const
   const edTitleFontSize = { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } as const
-  const sepFontSize = { base: 'xs', sm: 'sm', md: 'md', lg: 'md' } as const
-
   return (
     <HStack
       as="button"
@@ -332,31 +308,17 @@ export default function Logo({ user, onClick }: LogoProps) {
     >
       <Box
         flexShrink={0}
-        position="relative"
-        p={{ base: 1.5, md: 2 }}
-        bg={frameBg}
-        border="1px solid"
-        borderColor={frameBorder}
-        rounded={{ base: 'lg', md: 'xl' }}
-        boxShadow={frameShadow}
-        backdropFilter="blur(8px)"
-        overflow="hidden"
-        transition="box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease"
+        w={{ base: 10, md: 11 }}
+        h={{ base: 10, md: 11 }}
+        transition="transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)"
         _groupHover={{
-          transform: 'scale(1.05) rotate(-2deg)',
-          boxShadow: frameHoverShadow,
-        }}
-        sx={{
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            inset: 0,
-            background: glossOverlay,
-            pointerEvents: 'none',
-          },
+          transform: 'translateY(-1px) rotate(-2deg)',
         }}
       >
-        <LogoIconWallet />
+        <BrandMark
+          size="100%"
+          style={{ filter: 'drop-shadow(0 7px 12px rgba(0, 0, 0, 0.22))' }}
+        />
       </Box>
 
       <VStack
@@ -369,7 +331,7 @@ export default function Logo({ user, onClick }: LogoProps) {
       >
         <HStack
           align="baseline"
-          spacing={0}
+          spacing={1}
           minW={0}
           w="100%"
           flexWrap="nowrap"
@@ -386,19 +348,6 @@ export default function Logo({ user, onClick }: LogoProps) {
             flexShrink={1}
           >
             {BRAND.nameFirst}
-          </Text>
-
-          <Text
-            as="span"
-            fontSize={sepFontSize}
-            color={separatorColor}
-            fontWeight={400}
-            mx={{ base: 0.5, sm: 1 }}
-            lineHeight="1"
-            flexShrink={0}
-            aria-hidden
-          >
-            ·
           </Text>
 
           <Text
