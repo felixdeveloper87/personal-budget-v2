@@ -8,7 +8,6 @@ import {
   Text,
   VStack,
   createStandaloneToast,
-  useColorModeValue,
   type ToastId,
   type ToastPosition,
 } from '@chakra-ui/react'
@@ -59,41 +58,35 @@ const { toast, ToastContainer } = createStandaloneToast({ theme })
 const STATUS_TOKENS = {
   success: {
     icon: CheckCircle2,
-    fg: 'green.500',
-    bgLight: 'rgba(16, 185, 129, 0.10)',
-    bgDark: 'rgba(16, 185, 129, 0.16)',
+    fg: 'var(--pb-income-2)',
+    bg: 'var(--pb-tint-income)',
   },
   error: {
     icon: AlertCircle,
-    fg: 'red.500',
-    bgLight: 'rgba(239, 68, 68, 0.10)',
-    bgDark: 'rgba(239, 68, 68, 0.16)',
+    fg: 'var(--pb-coral)',
+    bg: 'var(--pb-tint-coral)',
   },
   warning: {
     icon: AlertTriangle,
-    fg: 'orange.500',
-    bgLight: 'rgba(245, 158, 11, 0.12)',
-    bgDark: 'rgba(245, 158, 11, 0.18)',
+    fg: 'var(--pb-gold)',
+    bg: 'var(--pb-tint-gold)',
   },
   info: {
     icon: Zap,
-    fg: 'blue.500',
-    bgLight: 'rgba(37, 99, 235, 0.10)',
-    bgDark: 'rgba(96, 165, 250, 0.16)',
+    fg: 'var(--pb-forest-2)',
+    bg: 'var(--pb-tint-green)',
   },
   loading: {
     icon: RefreshCw,
-    fg: 'blue.500',
-    bgLight: 'rgba(37, 99, 235, 0.10)',
-    bgDark: 'rgba(96, 165, 250, 0.16)',
+    fg: 'var(--pb-forest-2)',
+    bg: 'var(--pb-tint-green)',
   },
 } as const
 
 type StatusToken = {
   icon: LucideIcon
   fg: string
-  bgLight: string
-  bgDark: string
+  bg: string
 }
 
 function buildKey(options: AppToastOptions): string {
@@ -122,13 +115,12 @@ function PremiumToast({
 }: AppToastOptions & { id: ToastId }) {
   const tokens = STATUS_TOKENS[status]
   const StatusIcon = tokens.icon as StatusToken['icon']
-  const bg = useColorModeValue('rgba(255,255,255,0.96)', 'rgba(10,10,10,0.94)')
-  const border = useColorModeValue('rgba(15,23,42,0.10)', 'rgba(255,255,255,0.12)')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const descColor = useColorModeValue('gray.600', 'gray.400')
-  const iconBg = useColorModeValue(tokens.bgLight, tokens.bgDark)
-  const actionBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
-  const actionHover = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
+  const bg = 'var(--pb-surface)'
+  const border = 'var(--pb-hair-2)'
+  const titleColor = 'var(--pb-ink)'
+  const descColor = 'var(--pb-ink-soft)'
+  const actionBg = 'var(--pb-surface-2)'
+  const actionHover = 'var(--pb-surface-3)'
 
   return (
     <Box
@@ -140,7 +132,7 @@ function PremiumToast({
       border="1px solid"
       borderColor={border}
       borderRadius="xl"
-      boxShadow="0 24px 70px -30px rgba(0,0,0,0.42), 0 10px 28px -18px rgba(0,0,0,0.32)"
+      boxShadow="var(--pb-shadow-lift)"
       backdropFilter="blur(18px) saturate(145%)"
       overflow="hidden"
     >
@@ -149,7 +141,7 @@ function PremiumToast({
           w={9}
           h={9}
           borderRadius="lg"
-          bg={iconBg}
+          bg={tokens.bg}
           color={tokens.fg}
           display="flex"
           alignItems="center"

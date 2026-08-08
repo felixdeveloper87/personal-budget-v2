@@ -11,7 +11,6 @@ import {
   Progress,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import type { SavingsGoal } from '../../types'
 import { getChallengeStatus } from '../../utils/pennyChallenge'
@@ -34,10 +33,10 @@ export default function PennyChallengeCard({
   onArchive,
   busy = false,
 }: PennyChallengeCardProps) {
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const border = useColorModeValue('orange.200', 'whiteAlpha.200')
-  const accentBg = useColorModeValue('orange.50', 'rgba(245,158,11,0.12)')
-  const accentFg = useColorModeValue('orange.600', 'orange.300')
+  const muted = 'var(--pb-ink-soft)'
+  const border = 'var(--pb-hair-2)'
+  const accentBg = 'var(--pb-tint-gold)'
+  const accentFg = 'var(--pb-gold)'
 
   const status = getChallengeStatus(goal)
   const progress = status.total > 0 ? (status.saved / status.total) * 100 : 0

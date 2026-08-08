@@ -32,9 +32,12 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
   const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
   const surfaceBg = ed?.solid ?? fallbackSurfaceBg
   const bodyBg = ed?.bg ?? fallbackBodyBg
-  const textColor = useColorModeValue('gray.900', 'gray.50')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const textColorBase = useColorModeValue('gray.900', 'gray.50')
+  const textColor = ed?.cream ?? textColorBase
+  const mutedColorBase = useColorModeValue('gray.500', 'gray.400')
+  const mutedColor = ed?.muted ?? mutedColorBase
+  const borderColorBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const borderColor = ed?.line ?? borderColorBase
   const defaultAvatarRing = useColorModeValue(
     'linear-gradient(135deg, #3b82f6, #8b5cf6)',
     'linear-gradient(135deg, #60a5fa, #a78bfa)',
@@ -47,12 +50,18 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
   const heroBg = ed
     ? `linear-gradient(135deg, ${ed.jadeSoft}, ${ed.panelRaised} 55%, ${ed.gold}12)`
     : defaultHeroBg
-  const fieldLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const fieldValueColor = useColorModeValue('gray.800', 'gray.100')
-  const fieldBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const sectionTitleColor = useColorModeValue('gray.700', 'gray.200')
-  const statusDotBg = useColorModeValue('green.400', 'green.300')
-  const statusDotRing = useColorModeValue('white', 'gray.900')
+  const fieldLabelColorBase = useColorModeValue('gray.500', 'gray.500')
+  const fieldLabelColor = ed?.muted ?? fieldLabelColorBase
+  const fieldValueColorBase = useColorModeValue('gray.800', 'gray.100')
+  const fieldValueColor = ed?.cream ?? fieldValueColorBase
+  const fieldBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const fieldBg = ed?.panelRaised ?? fieldBgBase
+  const sectionTitleColorBase = useColorModeValue('gray.700', 'gray.200')
+  const sectionTitleColor = ed?.muted ?? sectionTitleColorBase
+  const statusDotBgBase = useColorModeValue('green.400', 'green.300')
+  const statusDotBg = ed ? 'var(--pb-income)' : statusDotBgBase
+  const statusDotRingBase = useColorModeValue('white', 'gray.900')
+  const statusDotRing = ed?.solid ?? statusDotRingBase
 
   if (!user) return null
 
@@ -98,7 +107,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
             w="140px"
             h="140px"
             borderRadius="full"
-            background="radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)"
+            background={ed ? `radial-gradient(circle, ${ed.jadeSoft} 0%, transparent 70%)` : 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)'}
             pointerEvents="none"
           />
           <HStack spacing={4} align="center">
@@ -109,7 +118,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
               background={avatarRing}
               flexShrink={0}
             >
-              <Avatar size="lg" name={displayName} bg="blue.500" color="white" fontWeight={700} />
+              <Avatar size="lg" name={displayName} bg={ed?.jade ?? 'blue.500'} color={ed?.onAccent ?? 'white'} fontWeight={700} />
               <Box
                 position="absolute"
                 bottom="2px"

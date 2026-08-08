@@ -1,80 +1,84 @@
-/* Shared financial UI tokens — "banknote" palette.
-   Light: cream paper, forest-green brand, gold + coral accents.
-   Dark:  deep ink-green, jade brand, soft gold + coral. */
+/* Shared financial UI tokens — cool editorial palette.
+   Light: silvered off-white, forest ink, restrained gold + coral.
+   Dark: neutral graphite, cool teal, soft gold + coral. */
 :root {
-  --pb-paper: #f2f0e6;
-  --pb-paper-2: #e9e6d8;
-  --pb-paper-3: #fdfcf6;
-  --pb-surface: rgba(255, 255, 255, 0.86);
-  --pb-surface-2: #f6f4ea;
-  --pb-surface-3: #edeadd;
-  --pb-ink: #1a2620;
-  --pb-ink-soft: #5a685e;
-  --pb-ink-faint: #84907f;
+  --pb-paper: #f3f4f2;
+  --pb-paper-2: #e7eae7;
+  --pb-paper-3: #fafbf9;
+  --pb-surface: rgba(255, 255, 255, 0.90);
+  --pb-surface-2: #f7f8f6;
+  --pb-surface-3: #e9ece9;
+  --pb-ink: #17201c;
+  --pb-ink-soft: #58635e;
+  /* Used heavily at 8-10px; keep it above 4.5:1 on the paper canvas. */
+  --pb-ink-faint: #626d67;
 
-  --pb-forest: #1e5a41;
-  --pb-forest-2: #2d7a57;
-  --pb-line: #3a8a62;
-  --pb-tint-green: rgba(30, 90, 65, 0.09);
+  --pb-forest: #18513e;
+  --pb-forest-2: #26735a;
+  --pb-line: #358c70;
+  --pb-on-accent: #f8fbf8;
+  --pb-tint-green: rgba(38, 115, 90, 0.085);
+  --pb-hero: radial-gradient(120% 150% at 88% -30%, rgba(208, 183, 111, 0.14) 0%, transparent 52%), linear-gradient(135deg, #103d32 0%, #18513e 56%, #26735a 100%);
+  --pb-hero-ink: #f8fbf8;
+  --pb-hero-line: rgba(248, 251, 248, 0.14);
 
-  --pb-income: #1f8a4f;
-  --pb-income-2: #259b67;
-  --pb-tint-income: rgba(31, 138, 79, 0.11);
+  --pb-income: #176f52;
+  --pb-income-2: #207a59;
+  --pb-tint-income: rgba(23, 111, 82, 0.10);
 
-  --pb-coral: #b8452f;
-  --pb-coral-2: #cd5b42;
-  --pb-tint-coral: rgba(184, 69, 47, 0.10);
+  --pb-coral: #aa4938;
+  --pb-coral-2: #ad4937;
+  --pb-tint-coral: rgba(170, 73, 56, 0.09);
 
-  --pb-gold: #8f6b1f;
-  --pb-gold-2: #b58a2e;
-  --pb-tint-gold: rgba(143, 107, 31, 0.11);
+  --pb-gold: #7c6427;
+  --pb-gold-2: #806629;
+  --pb-tint-gold: rgba(124, 100, 39, 0.10);
 
-  --pb-hair: rgba(26, 38, 32, 0.13);
-  --pb-hair-2: rgba(26, 38, 32, 0.24);
+  --pb-hair: rgba(23, 32, 28, 0.11);
+  --pb-hair-2: rgba(24, 81, 62, 0.23);
 
   --pb-serif: "Spectral", "Instrument Serif", Georgia, serif;
   --pb-mono: "IBM Plex Mono", "Spline Sans Mono", ui-monospace, monospace;
-  --pb-shadow: 0 1px 2px rgba(28, 55, 40, 0.05), 0 12px 30px rgba(28, 55, 40, 0.07);
-  --pb-shadow-lift: 0 3px 9px rgba(28, 55, 40, 0.09), 0 24px 50px rgba(28, 55, 40, 0.14);
+  --pb-shadow: 0 1px 2px rgba(18, 45, 36, 0.045), 0 12px 32px rgba(18, 45, 36, 0.07);
+  --pb-shadow-lift: 0 4px 12px rgba(18, 45, 36, 0.08), 0 26px 60px rgba(18, 45, 36, 0.12);
 }
 
 [data-theme="dark"] {
-  /* Preto fosco neutro — nenhum tom de cor nos fundos; o verde/dourado vive
-     apenas nos acentos. */
-  --pb-paper: #0b0b0c;
-  --pb-paper-2: #111113;
-  --pb-paper-3: #17171a;
-  /* Card surfaces: mesmo preto fosco do glass da sidebar (ed.glass) — os cards
-     se separam do fundo pelo hairline, não por elevação. surface-2 é um pouco
-     mais clara só pra dar o brilho do gradiente 135deg. */
-  --pb-surface: rgba(10, 10, 11, 0.88);
-  --pb-surface-2: rgba(17, 17, 19, 0.90);
-  --pb-surface-3: rgba(244, 246, 242, 0.06);
-  --pb-ink: #f2f4f0;
-  --pb-ink-soft: #b6bab4;
-  --pb-ink-faint: #8a8f89;
+  --pb-paper: #080a09;
+  --pb-paper-2: #0c0f0e;
+  --pb-paper-3: #121513;
+  --pb-surface: rgba(10, 13, 12, 0.94);
+  --pb-surface-2: rgba(15, 19, 17, 0.97);
+  --pb-surface-3: rgba(239, 244, 241, 0.05);
+  --pb-ink: #eff4f1;
+  --pb-ink-soft: #a8b5af;
+  --pb-ink-faint: #7b8a83;
 
-  --pb-forest: #7fe6b3;
-  --pb-forest-2: #5fd394;
-  --pb-line: #6bd9a6;
-  --pb-tint-green: rgba(127, 230, 179, 0.10);
+  --pb-forest: #5fd0b5;
+  --pb-forest-2: #42bd98;
+  --pb-line: #54caa6;
+  --pb-on-accent: #061a15;
+  --pb-tint-green: rgba(95, 208, 181, 0.10);
+  --pb-hero: radial-gradient(120% 150% at 88% -30%, rgba(95, 208, 181, 0.10) 0%, transparent 52%), linear-gradient(135deg, #0a1110 0%, #0d1916 56%, #102720 100%);
+  --pb-hero-ink: #eff4f1;
+  --pb-hero-line: rgba(232, 242, 237, 0.11);
 
-  --pb-income: #62dca2;
-  --pb-income-2: #7ce7b7;
-  --pb-tint-income: rgba(98, 220, 162, 0.12);
+  --pb-income: #58cfa4;
+  --pb-income-2: #72d9b4;
+  --pb-tint-income: rgba(88, 207, 164, 0.11);
 
-  --pb-coral: #ff9a90;
-  --pb-coral-2: #ffb0a8;
-  --pb-tint-coral: rgba(255, 154, 144, 0.12);
+  --pb-coral: #f08f86;
+  --pb-coral-2: #f5a59d;
+  --pb-tint-coral: rgba(240, 143, 134, 0.11);
 
-  --pb-gold: #e8c477;
-  --pb-gold-2: #f2d694;
-  --pb-tint-gold: rgba(232, 196, 119, 0.12);
+  --pb-gold: #d0b76f;
+  --pb-gold-2: #dfc986;
+  --pb-tint-gold: rgba(208, 183, 111, 0.11);
 
-  --pb-hair: rgba(244, 246, 242, 0.10);
-  --pb-hair-2: rgba(244, 246, 242, 0.19);
-  --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.36), 0 12px 30px rgba(0, 0, 0, 0.34);
-  --pb-shadow-lift: 0 4px 10px rgba(0, 0, 0, 0.42), 0 26px 54px rgba(0, 0, 0, 0.48);
+  --pb-hair: rgba(232, 242, 237, 0.09);
+  --pb-hair-2: rgba(232, 242, 237, 0.17);
+  --pb-shadow: 0 1px 2px rgba(0, 0, 0, 0.52), 0 14px 38px rgba(0, 0, 0, 0.40);
+  --pb-shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.58), 0 30px 66px rgba(0, 0, 0, 0.54);
 }
 
 @keyframes pb-spin {

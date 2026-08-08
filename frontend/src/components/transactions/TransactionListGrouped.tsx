@@ -14,7 +14,6 @@ import {
   HStack,
   Collapse,
   Button,
-  useColorModeValue,
   Icon,
   Tooltip,
   Flex,
@@ -22,7 +21,6 @@ import {
 } from '@chakra-ui/react'
 import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
-import { useEd } from '../../editorial'
 import { Transaction } from '../../types'
 import { useMemo, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
@@ -209,26 +207,23 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     }))
   }
 
-  const ed = useEd()
-  const borderColor = useColorModeValue('rgba(0, 0, 0, 0.05)', 'rgba(255, 255, 255, 0.04)')
-  // Card de mês translúcido (ed.panelRaised) — aninhado, consistente com a plataforma.
-  const groupCardBgBase = useColorModeValue('white', 'linear-gradient(135deg, rgba(23, 23, 28, 0.7) 0%, rgba(15, 15, 20, 0.4) 100%)')
-  const groupCardBg = ed ? ed.panelRaised : groupCardBgBase
-  const headerBg = useColorModeValue('transparent', 'transparent')
-  const textColor = useColorModeValue('gray.900', 'whiteAlpha.900')
-  const secondaryTextColor = useColorModeValue('gray.500', 'gray.400')
+  const borderColor = 'var(--pb-hair)'
+  const groupCardBg = 'var(--pb-surface)'
+  const headerBg = 'transparent'
+  const textColor = 'var(--pb-ink)'
+  const secondaryTextColor = 'var(--pb-ink-soft)'
   
-  const paginationBg = useColorModeValue('white', 'rgba(18, 18, 22, 0.4)')
-  const paginationBorderColor = useColorModeValue('gray.100', 'rgba(255, 255, 255, 0.05)')
-  const pageBtnBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const pageBtnHover = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const pageActiveBg = useColorModeValue('blue.500', 'blue.500')
-  const pageActiveColor = 'white'
+  const paginationBg = 'var(--pb-surface)'
+  const paginationBorderColor = 'var(--pb-hair)'
+  const pageBtnBg = 'var(--pb-surface-2)'
+  const pageBtnHover = 'var(--pb-surface-3)'
+  const pageActiveBg = 'var(--pb-forest-2)'
+  const pageActiveColor = 'var(--pb-on-accent)'
 
   if (totalItems === 0) {
     return (
       <Box p={6} textAlign="center">
-        <Text color="gray.500">No transactions found</Text>
+        <Text color="var(--pb-ink-soft)">No transactions found</Text>
       </Box>
     )
   }
@@ -249,21 +244,19 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               id={`month-card-${group.monthKey}`}
               border="1px solid"
               borderColor={isCurrentMonth 
-                ? useColorModeValue('blue.400', 'rgba(59, 130, 246, 0.4)') 
+                ? 'var(--pb-forest-2)'
                 : borderColor}
               borderRadius="xl"
               overflow="hidden"
               bg={groupCardBg}
               boxShadow={isCurrentMonth
-                ? useColorModeValue('0 4px 20px -2px rgba(59, 130, 246, 0.12)', '0 4px 20px -8px rgba(59, 130, 246, 0.35)')
-                : useColorModeValue('0 4px 18px -4px rgba(15, 23, 42, 0.05)', '0 4px 20px -8px rgba(0, 0, 0, 0.3)')}
+                ? 'var(--pb-shadow-lift)'
+                : 'var(--pb-shadow)'}
               transition="all 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
               _hover={{
                 transform: 'translateY(-1px)',
-                boxShadow: isCurrentMonth
-                  ? useColorModeValue('0 12px 24px -10px rgba(59, 130, 246, 0.25)', '0 12px 30px -10px rgba(59, 130, 246, 0.6)')
-                  : useColorModeValue('0 12px 24px -10px rgba(15, 23, 42, 0.1)', '0 12px 30px -10px rgba(0, 0, 0, 0.6)'),
-                borderColor: useColorModeValue('blue.500', 'rgba(59, 130, 246, 0.6)'),
+                boxShadow: 'var(--pb-shadow-lift)',
+                borderColor: isCurrentMonth ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)',
               }}
             >
               {/* Month Header */}
@@ -273,7 +266,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                 cursor="pointer"
                 onClick={() => toggleMonth(group.monthKey)}
                 transition="background-color 0.2s ease"
-                _hover={{ bg: useColorModeValue('gray.50/50', 'whiteAlpha.50') }}
+                _hover={{ bg: 'var(--pb-surface-2)' }}
               >
                 <HStack justify="space-between" align="center" wrap="nowrap" overflow="hidden">
                   {/* Left: split Month and Year with badge & compact mobile stats */}
@@ -288,16 +281,15 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         minW={0}
                       >
                         {mName}{' '}
-                        <Text as="span" fontWeight="500" color="gray.500">
+                        <Text as="span" fontWeight="500" color="var(--pb-ink-soft)">
                           {mYear}
                         </Text>
                       </Text>
-                      <Text fontSize="xs" color="gray.500" fontWeight="500" flexShrink={0}>
+                      <Text fontSize="xs" color="var(--pb-ink-soft)" fontWeight="500" flexShrink={0}>
                         • {transactionCount} {transactionCount === 1 ? 'transaction' : 'transactions'}
                       </Text>
                       {isCurrentMonth && (
                         <Badge
-                          colorScheme="blue"
                           variant="subtle"
                           fontSize="3xs"
                           px={2}
@@ -306,10 +298,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                           fontWeight="700"
                           textTransform="uppercase"
                           letterSpacing="0.05em"
-                          bg={useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')}
-                          color={useColorModeValue('blue.600', 'blue.300')}
+                          bg="var(--pb-tint-green)"
+                          color="var(--pb-forest-2)"
                           border="1px solid"
-                          borderColor={useColorModeValue('blue.100', 'rgba(59, 130, 246, 0.25)')}
+                          borderColor="var(--pb-hair-2)"
                         >
                           Current
                         </Badge>
@@ -322,18 +314,18 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                       display={{ base: "flex", sm: "none" }} 
                       fontSize="2xs" 
                       fontWeight="600"
-                      color="gray.500"
+                      color="var(--pb-ink-soft)"
                       align="center"
                     >
-                      <Text color={useColorModeValue('green.600', 'green.400')}>
+                      <Text color="var(--pb-income-2)">
                         In: £{group.totalIncome.toFixed(0)}
                       </Text>
                       <Text opacity={0.3} fontSize="xs">•</Text>
-                      <Text color={useColorModeValue('red.600', 'red.400')}>
+                      <Text color="var(--pb-coral)">
                         Out: £{group.totalExpense.toFixed(0)}
                       </Text>
                       <Text opacity={0.3} fontSize="xs">•</Text>
-                      <Text color={group.netAmount >= 0 ? 'green.500' : 'red.500'} fontWeight="700">
+                      <Text color={group.netAmount >= 0 ? 'var(--pb-income-2)' : 'var(--pb-coral)'} fontWeight="700">
                         Net: {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(0)}
                       </Text>
                     </HStack>
@@ -352,17 +344,17 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                           w="26px"
                           h="26px"
                           borderRadius="lg"
-                          bg={useColorModeValue('green.50', 'rgba(74, 222, 128, 0.1)')}
-                          color={useColorModeValue('green.600', 'green.400')}
+                          bg="var(--pb-tint-income)"
+                          color="var(--pb-income-2)"
                           flexShrink={0}
                         >
                           <Icon as={TrendingUp} weight="bold" boxSize={3.5} />
                         </Box>
                         <VStack spacing={0} align="start">
-                          <Text fontSize="3xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
+                          <Text fontSize="3xs" fontWeight="700" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
                             Income
                           </Text>
-                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'whiteAlpha.900')}>
+                          <Text fontSize="sm" fontWeight="700" color="var(--pb-ink)">
                             £{group.totalIncome.toFixed(2)}
                           </Text>
                         </VStack>
@@ -377,17 +369,17 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                           w="26px"
                           h="26px"
                           borderRadius="lg"
-                          bg={useColorModeValue('red.50', 'rgba(248, 113, 113, 0.1)')}
-                          color={useColorModeValue('red.600', 'red.400')}
+                          bg="var(--pb-tint-coral)"
+                          color="var(--pb-coral)"
                           flexShrink={0}
                         >
                           <Icon as={TrendingDown} weight="bold" boxSize={3.5} />
                         </Box>
                         <VStack spacing={0} align="start">
-                          <Text fontSize="3xs" fontWeight="700" color="gray.500" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
+                          <Text fontSize="3xs" fontWeight="700" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
                             Expense
                           </Text>
-                          <Text fontSize="sm" fontWeight="700" color={useColorModeValue('gray.800', 'whiteAlpha.900')}>
+                          <Text fontSize="sm" fontWeight="700" color="var(--pb-ink)">
                             £{group.totalExpense.toFixed(2)}
                           </Text>
                         </VStack>
@@ -398,26 +390,24 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         px={3.5}
                         py={1.5}
                         borderRadius="xl"
-                        bg={group.netAmount >= 0 
-                          ? useColorModeValue('green.50', 'rgba(74, 222, 128, 0.08)') 
-                          : useColorModeValue('red.50', 'rgba(248, 113, 113, 0.08)')}
+                        bg={group.netAmount >= 0
+                          ? 'var(--pb-tint-income)'
+                          : 'var(--pb-tint-coral)'}
                         border="1px solid"
-                        borderColor={group.netAmount >= 0 
-                          ? useColorModeValue('green.100', 'rgba(74, 222, 128, 0.15)') 
-                          : useColorModeValue('red.100', 'rgba(248, 113, 113, 0.15)')}
+                        borderColor="var(--pb-hair)"
                         w={{ sm: "115px", md: "145px" }}
                         flexShrink={0}
                         textAlign="center"
                       >
-                        <Text fontSize="3xs" fontWeight="700" color={group.netAmount >= 0 ? 'green.500' : 'red.500'} textTransform="uppercase" letterSpacing="0.05em" mb={0.5} lineHeight={1}>
+                        <Text fontSize="3xs" fontWeight="700" color={group.netAmount >= 0 ? 'var(--pb-income-2)' : 'var(--pb-coral)'} textTransform="uppercase" letterSpacing="0.05em" mb={0.5} lineHeight={1}>
                           Net Balance
                         </Text>
                         <Text 
                           fontSize="sm" 
                           fontWeight="800" 
-                          color={group.netAmount >= 0 
-                            ? useColorModeValue('green.700', 'green.300') 
-                            : useColorModeValue('red.700', 'red.300')}
+                          color={group.netAmount >= 0
+                            ? 'var(--pb-income-2)'
+                            : 'var(--pb-coral)'}
                           lineHeight={1.1}
                         >
                           {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(2)}
@@ -432,10 +422,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                       justifyContent="center"
                       transform={isExpanded ? 'rotate(180deg)' : 'none'}
                       transition="transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)"
-                      color={useColorModeValue('gray.400', 'gray.500')}
+                      color="var(--pb-ink-faint)"
                       p={1.5}
                       borderRadius="full"
-                      bg={useColorModeValue('gray.50', 'whiteAlpha.100')}
+                      bg="var(--pb-surface-2)"
                       w="32px"
                       h="32px"
                       flexShrink={0}
@@ -450,8 +440,8 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               <Collapse in={isExpanded} animateOpacity>
                 <Box 
                   borderTop="1px solid" 
-                  borderColor={useColorModeValue('gray.100', 'rgba(255, 255, 255, 0.04)')}
-                  bg={useColorModeValue('rgba(252, 253, 255, 0.3)', 'rgba(10, 10, 12, 0.15)')}
+                  borderColor="var(--pb-hair)"
+                  bg="var(--pb-surface-2)"
                   px={{ base: 2, sm: 3, md: 5 }}
                   py={{ base: 3, sm: 4, md: 5 }}
                 >
@@ -461,36 +451,36 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                       size="sm"
                       sx={{
                         'th, td': {
-                          borderColor: useColorModeValue('gray.100', 'rgba(255,255,255,0.03)'),
+                          borderColor: 'var(--pb-hair)',
                           padding: { base: '8px 4px', md: '12px 8px' }
                         }
                       }}
                     >
                       <Thead>
                         <Tr>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Type</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Category</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Description</Th>
-                          <Th isNumeric fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Amount</Th>
-                          <Th fontSize="2xs" color="gray.500" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w={{ base: "60px", md: "80px" }}>Actions</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Type</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Category</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Description</Th>
+                          <Th isNumeric fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Amount</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w={{ base: "60px", md: "80px" }}>Actions</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
                         {group.transactions.map((tx) => {
                           const dateHint = getCounterpartDateHint(tx, dateBasis)
                           return (
-                          <Tr key={tx.id} _hover={{ bg: useColorModeValue('gray.50', 'whiteAlpha.50') }}>
+                          <Tr key={tx.id} _hover={{ bg: 'var(--pb-surface-3)' }}>
                             <Td display={{ base: 'none', md: 'table-cell' }}>
                               <VStack spacing={1} align="start">
                                 <Text fontSize="sm" fontWeight="600" color={textColor}>
                                   {formatTransactionDateTime(getTransactionDateSource(tx, dateBasis)).date}
                                 </Text>
-                                <Text fontSize="xs" color="gray.500" fontWeight="500">
+                                <Text fontSize="xs" color="var(--pb-ink-faint)" fontWeight="500">
                                   {formatTransactionDateTime(tx.dateTime).time}
                                 </Text>
                                 {dateHint && (
-                                  <Text fontSize="xs" color="gray.500">
+                                  <Text fontSize="xs" color="var(--pb-ink-faint)">
                                     {dateHint.prefix} {formatDateBR(dateHint.date)}
                                   </Text>
                                 )}
@@ -498,9 +488,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             </Td>
                             <Td display={{ base: 'none', md: 'table-cell' }}>
                               <Badge
-                                colorScheme={tx.type === 'INCOME' ? 'green' : 'red'}
                                 variant="subtle"
                                 fontSize="xs"
+                                bg={tx.type === 'INCOME' ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'}
+                                color={tx.type === 'INCOME' ? 'var(--pb-income-2)' : 'var(--pb-coral)'}
+                                border="1px solid var(--pb-hair)"
                               >
                                 {tx.type}
                               </Badge>
@@ -516,7 +508,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                   <Tooltip label={normalizeInstallmentDescription(tx.description || '-')} hasArrow isDisabled={!tx.description || tx.description.length <= 25}>
                                     <Text
                                       fontSize={{ base: "xs", md: "sm" }}
-                                      color={tx.isFutureInstallment ? "gray.500" : secondaryTextColor}
+                                      color={tx.isFutureInstallment ? 'var(--pb-ink-faint)' : secondaryTextColor}
                                       noOfLines={1}
                                       fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                                     >
@@ -524,7 +516,14 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                     </Text>
                                   </Tooltip>
                                   {tx.paymentMethodName && (
-                                    <Badge colorScheme="blue" variant="subtle" fontSize="2xs" display={{ base: 'none', sm: 'inline-flex' }}>
+                                    <Badge
+                                      variant="subtle"
+                                      fontSize="2xs"
+                                      display={{ base: 'none', sm: 'inline-flex' }}
+                                      bg="var(--pb-tint-green)"
+                                      color="var(--pb-forest-2)"
+                                      border="1px solid var(--pb-hair)"
+                                    >
                                       {tx.paymentMethodName}
                                     </Badge>
                                   )}
@@ -533,7 +532,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                       <span>
                                         <Icon
                                           as={FiCreditCard}
-                                          color={tx.isFutureInstallment ? "gray.400" : "purple.500"}
+                                          color={tx.isFutureInstallment ? 'var(--pb-ink-faint)' : 'var(--pb-forest-2)'}
                                           fontSize={{ base: "xs", md: "sm" }}
                                         />
                                       </span>
@@ -541,7 +540,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                   )}
                                 </HStack>
                                 {formatTransactionAccount(tx) && (
-                                  <Text fontSize="2xs" color="teal.500" noOfLines={1}>
+                                  <Text fontSize="2xs" color="var(--pb-forest-2)" noOfLines={1}>
                                     {formatTransactionAccount(tx)}
                                   </Text>
                                 )}
@@ -551,7 +550,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                               <Text 
                                 fontSize={{ base: "xs", md: "sm" }} 
                                 fontWeight="semibold"
-                                color={tx.isFutureInstallment ? "gray.500" : (tx.type === 'INCOME' ? 'green.600' : 'red.600')}
+                                color={tx.isFutureInstallment ? 'var(--pb-ink-faint)' : (tx.type === 'INCOME' ? 'var(--pb-income-2)' : 'var(--pb-coral)')}
                                 fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                                 whiteSpace="nowrap"
                               >
@@ -566,8 +565,9 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                     aria-label="Edit transaction"
                                     icon={<EditIcon />}
                                     size={{ base: "xs", md: "sm" }}
-                                    colorScheme="blue"
                                     variant="ghost"
+                                    color="var(--pb-forest-2)"
+                                    _hover={{ bg: 'var(--pb-tint-green)', color: 'var(--pb-forest)' }}
                                     onClick={() => {
                                       setTransactionToEdit(tx)
                                       setIsEditModalOpen(true)
@@ -577,8 +577,9 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                     aria-label="Delete transaction"
                                     icon={<DeleteIcon />}
                                     size={{ base: "xs", md: "sm" }}
-                                    colorScheme="red"
                                     variant="ghost"
+                                    color="var(--pb-coral)"
+                                    _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral-2)' }}
                                     onClick={() => openDeleteDialog(tx)}
                                   />
                                 </HStack>
@@ -611,7 +612,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
         >
           {/* Items per page selector */}
           <HStack spacing={2}>
-            <Text fontSize="xs" fontWeight="500" color="gray.500">
+            <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
               Show
             </Text>
             <Select
@@ -624,20 +625,21 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               borderColor={paginationBorderColor}
               fontSize="xs"
               fontWeight="600"
-              _focus={{ borderColor: 'blue.500', boxShadow: 'none' }}
+              color="var(--pb-ink)"
+              _focus={{ borderColor: 'var(--pb-forest-2)', boxShadow: 'none' }}
             >
               <option value={3}>3 months</option>
               <option value={6}>6 months</option>
               <option value={12}>12 months</option>
               <option value={24}>24 months</option>
             </Select>
-            <Text fontSize="xs" fontWeight="500" color="gray.500">
+            <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
               per page
             </Text>
           </HStack>
 
           {/* Page Info */}
-          <Text fontSize="xs" fontWeight="500" color="gray.500">
+          <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
             Showing {Math.min((activePage - 1) * pageSize + 1, totalItems)} to{' '}
             {Math.min(activePage * pageSize, totalItems)} of {totalItems} months
           </Text>
@@ -653,14 +655,15 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               isDisabled={activePage === 1}
               borderRadius="lg"
               bg={pageBtnBg}
+              color="var(--pb-ink-soft)"
               borderColor={paginationBorderColor}
-              _hover={{ bg: pageBtnHover }}
+              _hover={{ bg: pageBtnHover, color: 'var(--pb-ink)' }}
             />
 
             {getPageNumbers().map((page, index) => {
               if (page === '...') {
                 return (
-                  <Text key={`ellipsis-${index}`} px={2} fontSize="sm" color="gray.500">
+                  <Text key={`ellipsis-${index}`} px={2} fontSize="sm" color="var(--pb-ink-faint)">
                     ...
                   </Text>
                 )
@@ -671,7 +674,6 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                   key={`page-${page}`}
                   size="sm"
                   variant={isPageActive ? 'solid' : 'outline'}
-                  colorScheme={isPageActive ? 'blue' : 'gray'}
                   onClick={() => setCurrentPage(page as number)}
                   borderRadius="lg"
                   fontSize="xs"
@@ -680,9 +682,11 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                   w="32px"
                   p={0}
                   bg={isPageActive ? pageActiveBg : pageBtnBg}
-                  color={isPageActive ? pageActiveColor : undefined}
+                  color={isPageActive ? pageActiveColor : 'var(--pb-ink-soft)'}
                   borderColor={paginationBorderColor}
-                  _hover={isPageActive ? undefined : { bg: pageBtnHover }}
+                  _hover={isPageActive
+                    ? { bg: 'var(--pb-forest)' }
+                    : { bg: pageBtnHover, color: 'var(--pb-ink)' }}
                 >
                   {page}
                 </Button>
@@ -698,8 +702,9 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               isDisabled={activePage === totalPages}
               borderRadius="lg"
               bg={pageBtnBg}
+              color="var(--pb-ink-soft)"
               borderColor={paginationBorderColor}
-              _hover={{ bg: pageBtnHover }}
+              _hover={{ bg: pageBtnHover, color: 'var(--pb-ink)' }}
             />
           </HStack>
         </Flex>

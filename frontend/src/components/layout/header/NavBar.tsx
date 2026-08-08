@@ -52,10 +52,15 @@ export default function NavBar({
   const trackBg = ed ? ed.controlBg : trackBgBase
   const trackBorderBase = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
   const trackBorder = ed ? ed.line : trackBorderBase
-  const trackShadow = useColorModeValue(
+  const trackShadowBase = useColorModeValue(
     'inset 0 1px 0 rgba(255,255,255,0.7), 0 1px 6px rgba(15,23,42,0.04)',
     'inset 0 1px 0 rgba(255,255,255,0.04), 0 1px 6px rgba(0,0,0,0.2)',
   )
+  const editorialTrackShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.74), 0 6px 18px rgba(18,45,36,0.055)',
+    'inset 0 1px 0 rgba(255,255,255,0.035), 0 6px 18px rgba(0,0,0,0.20)',
+  )
+  const trackShadow = ed ? editorialTrackShadow : trackShadowBase
   const inactiveColorBase = useColorModeValue('gray.600', 'gray.300')
   const inactiveColor = ed ? ed.muted : inactiveColorBase
   const hoverColorBase = useColorModeValue('gray.900', 'white')
@@ -64,21 +69,26 @@ export default function NavBar({
   const activeColor = ed ? ed.jade : activeColorBase
   const indicatorBgBase = useColorModeValue('white', 'rgba(255,255,255,0.14)')
   const indicatorBg = ed ? ed.thumbBg : indicatorBgBase
-  const indicatorShadow = useColorModeValue(
+  const indicatorShadowBase = useColorModeValue(
     '0 1px 4px rgba(15, 23, 42, 0.08), 0 6px 18px rgba(37, 99, 235, 0.20)',
     '0 1px 4px rgba(0,0,0,0.5), 0 6px 20px rgba(96, 165, 250, 0.25)',
   )
+  const editorialIndicatorShadow = useColorModeValue(
+    '0 1px 3px rgba(18,45,36,0.09), 0 8px 20px rgba(24,81,62,0.10)',
+    '0 1px 4px rgba(0,0,0,0.48), 0 8px 20px rgba(0,0,0,0.32)',
+  )
+  const indicatorShadow = ed ? editorialIndicatorShadow : indicatorShadowBase
   const indicatorRingBase = useColorModeValue(
     'inset 0 0 0 1px rgba(37, 99, 235, 0.20)',
     'inset 0 0 0 1px rgba(96, 165, 250, 0.35)',
   )
-  const indicatorRing = ed ? 'inset 0 0 0 1px rgba(127, 230, 179, 0.30)' : indicatorRingBase
+  const indicatorRing = ed ? `inset 0 0 0 1px ${ed.lineStrong}` : indicatorRingBase
   // Mobile gets a crisper frame, a jade-tinted active pill and solid chevrons so
   // the carousel reads sharply against the header glass.
   const trackBgMobileBase = useColorModeValue('rgba(255,255,255,0.9)', 'rgba(255,255,255,0.07)')
-  const trackBgMobile = ed ? 'rgba(239, 246, 255, 0.07)' : trackBgMobileBase
+  const trackBgMobile = ed ? ed.controlBg : trackBgMobileBase
   const trackBorderMobileBase = useColorModeValue('rgba(203,213,225,0.95)', 'rgba(255,255,255,0.16)')
-  const trackBorderMobile = ed ? 'rgba(239, 246, 255, 0.22)' : trackBorderMobileBase
+  const trackBorderMobile = ed ? ed.lineStrong : trackBorderMobileBase
   const indicatorBgMobileBase = useColorModeValue('white', 'rgba(255,255,255,0.22)')
   const indicatorBgMobile = ed ? ed.jadeSoftHover : indicatorBgMobileBase
   const chevronBgBase = useColorModeValue('rgba(255,255,255,0.96)', 'rgba(18,20,26,0.94)')
@@ -88,6 +98,9 @@ export default function NavBar({
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
   )
   const accentBar = ed ? `linear-gradient(90deg, ${ed.jade}, ${ed.gold})` : accentBarBase
+  const focusShadow = ed
+    ? `0 0 0 2px ${ed.bg}, 0 0 0 5px ${ed.jade}`
+    : '0 0 0 3px rgba(59, 130, 246, 0.35)'
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -240,6 +253,7 @@ export default function NavBar({
           inactiveColor={inactiveColor}
           hoverColor={hoverColor}
           activeColor={activeColor}
+          focusShadow={focusShadow}
           assignRef={(el) => {
             itemRefs.current[item.id] = el
           }}
@@ -325,6 +339,7 @@ interface NavBarItemProps {
   inactiveColor: string
   hoverColor: string
   activeColor: string
+  focusShadow: string
   assignRef: (el: HTMLButtonElement | null) => void
 }
 
@@ -337,6 +352,7 @@ function NavBarItem({
   inactiveColor,
   hoverColor,
   activeColor,
+  focusShadow,
   assignRef,
 }: NavBarItemProps) {
   const showLabel = isMobile || !isIconOnly
@@ -375,7 +391,7 @@ function NavBarItem({
       _active={{ transform: 'translateY(0)' }}
       _focusVisible={{
         outline: 'none',
-        boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+        boxShadow: focusShadow,
       }}
     >
       <Flex

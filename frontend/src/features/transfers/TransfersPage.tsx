@@ -422,7 +422,7 @@ function ActionButton({ label, icon, primary, onClick, isLoading, disabled }: { 
       transition="0.18s"
       opacity={disabled ? 0.55 : 1}
       cursor={disabled ? 'not-allowed' : 'pointer'}
-      color={primary ? '#f6f8fb' : 'var(--pb-ink-soft)'}
+      color={primary ? 'var(--pb-on-accent)' : 'var(--pb-ink-soft)'}
       bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface-2)'}
       border="1px solid"
       borderColor={primary ? 'transparent' : 'var(--pb-hair)'}

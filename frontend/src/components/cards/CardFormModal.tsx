@@ -200,7 +200,7 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
             <FormControl>
               <FormLabel fontSize="sm">Credit limit</FormLabel>
               <InputGroup>
-                <InputLeftElement pointerEvents="none" color="gray.400">
+                <InputLeftElement pointerEvents="none" color="var(--pb-ink-faint)">
                   £
                 </InputLeftElement>
                 <Input

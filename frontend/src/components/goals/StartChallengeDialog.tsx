@@ -11,7 +11,6 @@ import {
   HStack,
   Icon,
   Text,
-  useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
 import { Sparkles } from '../ui/icons'
@@ -40,13 +39,13 @@ export default function StartChallengeDialog({
 }: StartChallengeDialogProps) {
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
-  const surfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const previewBg = useColorModeValue('orange.50', 'rgba(245,158,11,0.12)')
-  const previewBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const chipBg = useColorModeValue('orange.50', 'rgba(245,158,11,0.12)')
-  const chipFg = useColorModeValue('orange.600', 'orange.300')
+  const surfaceBg = 'var(--pb-surface)'
+  const previewBg = 'var(--pb-tint-gold)'
+  const previewBorder = 'var(--pb-hair)'
+  const titleColor = 'var(--pb-ink)'
+  const captionColor = 'var(--pb-ink-soft)'
+  const chipBg = 'var(--pb-tint-gold)'
+  const chipFg = 'var(--pb-gold)'
 
   const today = new Date()
   const year = today.getFullYear()

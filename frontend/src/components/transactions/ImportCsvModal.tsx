@@ -17,7 +17,6 @@ import {
   Thead,
   Tr,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { PremiumModal, ModalHeader } from '../ui'
 import { Upload, FileText, CheckCircle2, AlertTriangle, Download } from '../ui/icons'
@@ -63,21 +62,21 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [accountId, setAccountId] = useState<number | null>(null)
 
-  const dropBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const dropActiveBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
-  const dropBorder = useColorModeValue('gray.300', 'whiteAlpha.300')
-  const dropActiveBorder = useColorModeValue('blue.400', 'blue.300')
-  const dropTextColor = useColorModeValue('gray.600', 'gray.300')
-  const subColor = useColorModeValue('gray.500', 'gray.400')
-  const tableBorder = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const tableHeadColor = useColorModeValue('gray.500', 'gray.400')
-  const validBg = useColorModeValue('green.50', 'rgba(34,197,94,0.12)')
-  const validColor = useColorModeValue('green.700', 'green.300')
-  const errorBg = useColorModeValue('red.50', 'rgba(239,68,68,0.12)')
-  const errorColor = useColorModeValue('red.700', 'red.300')
-  const errorPanelBg = useColorModeValue('red.50', 'rgba(239,68,68,0.08)')
-  const linkColor = useColorModeValue('blue.600', 'blue.300')
-  const cellColor = useColorModeValue('gray.700', 'gray.200')
+  const dropBg = 'var(--pb-surface-2)'
+  const dropActiveBg = 'var(--pb-tint-green)'
+  const dropBorder = 'var(--pb-hair-2)'
+  const dropActiveBorder = 'var(--pb-forest-2)'
+  const dropTextColor = 'var(--pb-ink-soft)'
+  const subColor = 'var(--pb-ink-faint)'
+  const tableBorder = 'var(--pb-hair)'
+  const tableHeadColor = 'var(--pb-ink-faint)'
+  const validBg = 'var(--pb-tint-income)'
+  const validColor = 'var(--pb-income)'
+  const errorBg = 'var(--pb-tint-coral)'
+  const errorColor = 'var(--pb-coral)'
+  const errorPanelBg = 'var(--pb-tint-coral)'
+  const linkColor = 'var(--pb-forest-2)'
+  const cellColor = 'var(--pb-ink)'
 
   useEffect(() => {
     if (!isOpen) return

@@ -9,10 +9,8 @@ import {
   Icon,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { Calendar, Filter, List, ReceiptText } from '../components/ui/icons'
-import { useEd } from '../editorial'
 import {
   getTransactionDate,
   type TransactionDateBasis,
@@ -45,51 +43,36 @@ export default function AllTransactionsSection({
     })
   }, [transactions, dateBasis])
 
-  /* ── Surface tokens ── */
-  const ed = useEd()
-  const surfaceBase = useColorModeValue(
-    'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-    'linear-gradient(135deg, rgba(18, 18, 22, 0.75) 0%, rgba(10, 10, 12, 0.85) 100%)',
-  )
-  // Card translúcido padrão (ed.panel) pra consistência com o resto da plataforma.
-  const surface = ed ? ed.panel : surfaceBase
-  const border = useColorModeValue('rgba(0, 0, 0, 0.06)', 'rgba(255, 255, 255, 0.04)')
-  const headerBg = useColorModeValue(
-    'linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(241, 245, 249, 0.8) 100%)',
-    'linear-gradient(135deg, rgba(15, 15, 20, 0.6) 0%, rgba(10, 10, 14, 0.5) 100%)',
-  )
-  const headerBorder = useColorModeValue('rgba(0, 0, 0, 0.04)', 'rgba(255, 255, 255, 0.03)')
+  /* ── Shared PB surface tokens ── */
+  const surface = 'var(--pb-surface)'
+  const border = 'var(--pb-hair)'
+  const headerBg = 'linear-gradient(135deg, var(--pb-surface-2), var(--pb-surface))'
+  const headerBorder = 'var(--pb-hair)'
 
   /* ── Text tokens ── */
 
   /* ── Accent tokens ── */
 
   /* ── Tab tokens ── */
-  const tabTrackBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100')
-  const tabTrackBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.200')
-  const tabActiveText = useColorModeValue('blue.700', 'blue.100')
-  const tabInactiveText = useColorModeValue('gray.600', 'gray.400')
-  const tabActiveBg = useColorModeValue('white', 'whiteAlpha.200')
-  const tabActiveShadow = useColorModeValue(
-    '0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(37, 99, 235, 0.12)',
-    '0 1px 3px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(96, 165, 250, 0.15)',
-  )
+  const tabTrackBg = 'var(--pb-surface-2)'
+  const tabTrackBorder = 'var(--pb-hair)'
+  const tabActiveText = 'var(--pb-forest-2)'
+  const tabInactiveText = 'var(--pb-ink-soft)'
+  const tabActiveBg = 'var(--pb-surface)'
+  const tabActiveShadow = 'var(--pb-shadow)'
 
   /* ── Filter badge tokens ── */
-  const filterBg = useColorModeValue('orange.50', 'rgba(251, 146, 60, 0.12)')
-  const filterBorder = useColorModeValue('orange.200', 'orange.700')
-  const filterColor = useColorModeValue('orange.600', 'orange.300')
+  const filterBg = 'var(--pb-surface-3)'
+  const filterBorder = 'var(--pb-hair)'
+  const filterColor = 'var(--pb-ink-soft)'
 
   /* ── Count badge tokens ── */
-  const countBg = useColorModeValue('blue.50', 'rgba(59, 130, 246, 0.12)')
-  const countColor = useColorModeValue('blue.700', 'blue.300')
-  const countBorder = useColorModeValue('blue.100', 'rgba(59, 130, 246, 0.25)')
+  const countBg = 'var(--pb-tint-green)'
+  const countColor = 'var(--pb-forest-2)'
+  const countBorder = 'var(--pb-hair-2)'
 
-  const cardShadow = useColorModeValue(
-    '0 4px 16px -4px rgba(15, 23, 42, 0.06)',
-    '0 4px 16px -4px rgba(0, 0, 0, 0.4)',
-  )
-  const tabHoverColor = useColorModeValue('gray.900', 'white')
+  const cardShadow = 'var(--pb-shadow)'
+  const tabHoverColor = 'var(--pb-ink)'
 
   return (
     <Box
@@ -154,11 +137,11 @@ export default function AllTransactionsSection({
               <Button
                 size="sm"
                 variant="link"
-                colorScheme="blue"
+                color="var(--pb-forest-2)"
                 onClick={() => groupedListRef.current?.goToCurrentMonth()}
                 fontSize="xs"
                 fontWeight="700"
-                _hover={{ textDecoration: 'none', color: 'blue.400' }}
+                _hover={{ textDecoration: 'none', color: 'var(--pb-forest)' }}
                 display={{ base: 'none', lg: 'inline-flex' }}
               >
                 Jump to Current Month
@@ -284,8 +267,8 @@ function ViewToggleButton({
 }
 
 function EmptyState() {
-  const textColor = useColorModeValue('gray.500', 'gray.400')
-  const iconColor = useColorModeValue('gray.300', 'gray.600')
+  const textColor = 'var(--pb-ink-soft)'
+  const iconColor = 'var(--pb-ink-faint)'
 
   return (
     <VStack spacing={3} py={16} align="center">
@@ -295,7 +278,8 @@ function EmptyState() {
         align="center"
         justify="center"
         borderRadius="2xl"
-        bg={useColorModeValue('gray.50', 'whiteAlpha.50')}
+        bg="var(--pb-surface-2)"
+        border="1px solid var(--pb-hair)"
       >
         <Icon as={ReceiptText} boxSize={7} color={iconColor} weight="duotone" />
       </Flex>

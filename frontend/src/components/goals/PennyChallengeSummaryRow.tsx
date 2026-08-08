@@ -6,7 +6,6 @@ import {
   HStack,
   Icon,
   Text,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import type { SavingsGoal } from '../../types'
 import { getChallengeStatus } from '../../utils/pennyChallenge'
@@ -26,11 +25,11 @@ export interface PennyChallengeSummaryRowProps {
  * (saved, progress, status, day) without taking the full card's vertical space.
  */
 export default function PennyChallengeSummaryRow({ goal, onExpand }: PennyChallengeSummaryRowProps) {
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const border = useColorModeValue('orange.200', 'whiteAlpha.200')
-  const accentBg = useColorModeValue('orange.50', 'rgba(245,158,11,0.12)')
-  const accentFg = useColorModeValue('orange.600', 'orange.300')
-  const hoverBg = useColorModeValue('gray.50', 'whiteAlpha.50')
+  const muted = 'var(--pb-ink-soft)'
+  const border = 'var(--pb-hair-2)'
+  const accentBg = 'var(--pb-tint-gold)'
+  const accentFg = 'var(--pb-gold)'
+  const hoverBg = 'var(--pb-surface-2)'
 
   const status = getChallengeStatus(goal)
   const progress = status.total > 0 ? (status.saved / status.total) * 100 : 0

@@ -17,7 +17,6 @@ import {
   Switch,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { createPaymentMethod, deletePaymentMethod, listPaymentMethods, updatePaymentMethod } from '../api'
 import { PaymentMethod, PaymentMethodRequest, PaymentMethodType } from '../types'
@@ -74,17 +73,30 @@ export default function PaymentMethodsSection() {
   const [statementClosingDay, setStatementClosingDay] = useState(3)
   const [paymentDay, setPaymentDay] = useState(28)
 
-  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const emptyColor = useColorModeValue('gray.400', 'gray.600')
-  const methodBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const methodHoverBg = useColorModeValue('white', 'whiteAlpha.100')
-  const addLinkColor = useColorModeValue('blue.500', 'blue.300')
-  const formBg = useColorModeValue('blue.50', 'rgba(37,99,235,0.06)')
-  const formBorder = useColorModeValue('blue.100', 'rgba(37,99,235,0.2)')
-  const editFormBg = useColorModeValue('gray.50', 'rgba(255,255,255,0.03)')
-  const editFormBorder = useColorModeValue('gray.200', 'whiteAlpha.150')
-  const iconBoxBg = useColorModeValue('white', 'whiteAlpha.100')
+  const borderColor = 'var(--pb-hair)'
+  const mutedColor = 'var(--pb-ink-soft)'
+  const emptyColor = 'var(--pb-ink-faint)'
+  const methodBg = 'var(--pb-surface-2)'
+  const methodHoverBg = 'var(--pb-surface)'
+  const addLinkColor = 'var(--pb-forest-2)'
+  const formBg = 'var(--pb-tint-green)'
+  const formBorder = 'var(--pb-hair-2)'
+  const editFormBg = 'var(--pb-surface-2)'
+  const iconBoxBg = 'var(--pb-surface)'
+  const formControlStyles = {
+    '.chakra-form__label': { color: 'var(--pb-ink-soft)' },
+    'input, select': {
+      background: 'var(--pb-surface)',
+      borderColor: 'var(--pb-hair)',
+      color: 'var(--pb-ink)',
+    },
+    'input:hover, select:hover': { borderColor: 'var(--pb-hair-2)' },
+    'input:focus-visible, select:focus-visible': {
+      borderColor: 'var(--pb-forest-2)',
+      boxShadow: '0 0 0 1px var(--pb-forest-2)',
+    },
+    '.chakra-switch__track[data-checked]': { background: 'var(--pb-forest-2)' },
+  }
 
   const activeCards = useMemo(
     () => paymentMethods.filter((m) => m.active && m.type === 'CREDIT_CARD').length,
@@ -196,7 +208,7 @@ export default function PaymentMethodsSection() {
             icon={CreditCard}
             title="Cards & payment methods"
             caption={`${paymentMethods.length} method${paymentMethods.length !== 1 ? 's' : ''} · ${activeCards} active credit card${activeCards !== 1 ? 's' : ''}`}
-            accent="blue"
+            accent="green"
           />
           <Text fontSize="xs" color={mutedColor}>
             Payment methods describe how you pay. Credit cards here store statement dates; their balance or debt is tracked separately under Accounts.
@@ -251,7 +263,7 @@ export default function PaymentMethodsSection() {
                         </Box>
                       )}
                       <Box minW={0}>
-                        <Text fontSize="sm" fontWeight={700} noOfLines={1}>{method.name}</Text>
+                        <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{method.name}</Text>
                         <Text fontSize="xs" color={mutedColor} noOfLines={1}>
                           {TYPE_LABELS[method.type]}
                           {method.issuer ? ` · ${method.issuer}` : ''}
@@ -269,7 +281,9 @@ export default function PaymentMethodsSection() {
                         px={1.5}
                         py={0.5}
                         borderRadius="full"
-                        colorScheme={method.active ? 'green' : 'gray'}
+                        bg={method.active ? 'var(--pb-tint-income)' : 'var(--pb-surface-3)'}
+                        color={method.active ? 'var(--pb-income-2)' : 'var(--pb-ink-faint)'}
+                        border="1px solid var(--pb-hair)"
                         textTransform="none"
                       >
                         {method.active ? 'Active' : 'Inactive'}
@@ -279,7 +293,8 @@ export default function PaymentMethodsSection() {
                         icon={<Icon as={isEditing ? Check : Pencil} boxSize={3.5} />}
                         size="xs"
                         variant="ghost"
-                        colorScheme={isEditing ? 'blue' : 'gray'}
+                        color={isEditing ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
+                        _hover={{ bg: 'var(--pb-tint-green)', color: 'var(--pb-forest)' }}
                         onClick={() => isEditing ? saveEdit(method.id) : startEdit(method)}
                         isLoading={updating === method.id}
                       />
@@ -288,7 +303,8 @@ export default function PaymentMethodsSection() {
                         icon={<Icon as={Trash2} boxSize={3.5} />}
                         size="xs"
                         variant="ghost"
-                        colorScheme="red"
+                        color="var(--pb-coral)"
+                        _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral-2)' }}
                         onClick={() => remove(method.id)}
                       />
                     </HStack>
@@ -303,6 +319,7 @@ export default function PaymentMethodsSection() {
                       borderTop="none"
                       borderColor={formBorder}
                       borderBottomRadius="xl"
+                      sx={formControlStyles}
                     >
                       <VStack spacing={3} align="stretch">
                         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
@@ -370,10 +387,21 @@ export default function PaymentMethodsSection() {
                           )}
                         </SimpleGrid>
                         <HStack justify="flex-end" spacing={2}>
-                          <Button size="sm" variant="ghost" onClick={cancelEdit}>Cancel</Button>
                           <Button
                             size="sm"
-                            colorScheme="blue"
+                            variant="ghost"
+                            color="var(--pb-ink-soft)"
+                            _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink)' }}
+                            onClick={cancelEdit}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            size="sm"
+                            bg="var(--pb-forest-2)"
+                            color="var(--pb-on-accent)"
+                            _hover={{ bg: 'var(--pb-forest)' }}
+                            _active={{ bg: 'var(--pb-forest)' }}
                             leftIcon={<Icon as={Check} boxSize={3.5} />}
                             onClick={() => saveEdit(method.id)}
                             isLoading={updating === method.id}
@@ -419,6 +447,7 @@ export default function PaymentMethodsSection() {
                 border="1px solid"
                 borderColor={formBorder}
                 borderRadius="xl"
+                sx={formControlStyles}
               >
                 <VStack spacing={3} align="stretch">
                   <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
@@ -460,10 +489,21 @@ export default function PaymentMethodsSection() {
                     )}
                   </SimpleGrid>
                   <HStack justify="flex-end" spacing={2}>
-                    <Button size="sm" variant="ghost" onClick={resetAddForm}>Cancel</Button>
                     <Button
                       size="sm"
-                      colorScheme="blue"
+                      variant="ghost"
+                      color="var(--pb-ink-soft)"
+                      _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink)' }}
+                      onClick={resetAddForm}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      bg="var(--pb-forest-2)"
+                      color="var(--pb-on-accent)"
+                      _hover={{ bg: 'var(--pb-forest)' }}
+                      _active={{ bg: 'var(--pb-forest)' }}
                       leftIcon={<Icon as={Plus} boxSize={3.5} />}
                       onClick={saveAdd}
                       isLoading={saving}

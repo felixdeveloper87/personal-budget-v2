@@ -47,16 +47,24 @@ export default function PremiumModal({
         '0 20px 50px -12px rgba(0, 0, 0, 0.25)',
         '0 20px 50px -12px rgba(0, 0, 0, 0.5)'
     )
+    const editorialOverlay = useColorModeValue(
+        'rgba(23, 32, 28, 0.30)',
+        'rgba(2, 4, 3, 0.76)'
+    )
+    const editorialShadow = useColorModeValue(
+        '0 28px 80px -28px rgba(18, 45, 36, 0.28), 0 0 0 1px rgba(38, 115, 90, 0.04)',
+        '0 32px 90px -28px rgba(0, 0, 0, 0.82), 0 0 0 1px rgba(95, 208, 181, 0.025)'
+    )
     const footerBorder = useColorModeValue('gray.100', 'whiteAlpha.100')
     const resolvedOverlayBg = ed
-        ? 'rgba(3, 8, 5, 0.74)'
+        ? editorialOverlay
         : overlayBg
     const resolvedContentBg = ed
         ? ed.modal
         : requestedBg ?? requestedBackground ?? contentBg
     const resolvedBorder = ed ? ed.lineStrong : borderColor
     const resolvedShadow = ed
-        ? '0 32px 90px -28px rgba(0, 0, 0, 0.78), 0 0 0 1px rgba(127, 230, 179, 0.03)'
+        ? editorialShadow
         : shadow
 
     return (

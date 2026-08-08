@@ -143,14 +143,14 @@ function FixedPaymentsHero({ summary }: { summary: { active: RecurringTransactio
       overflow="hidden"
       position="relative"
       borderRadius="14px"
-      bg="radial-gradient(120% 150% at 88% -30%, rgba(96,165,250,0.20) 0%, transparent 52%), linear-gradient(135deg, #0b1a31 0%, #14253f 55%, #1c2f4c 100%)"
-      color="#eef2f8"
+      bg="var(--pb-hero)"
+      color="var(--pb-hero-ink)"
       boxShadow="var(--pb-shadow-lift)"
-      border="1px solid rgba(255,255,255,0.07)"
+      border="1px solid var(--pb-hero-line)"
       px="clamp(1rem, 2.4vw, 1.4rem)"
       py="clamp(0.65rem, 1.5vw, 0.95rem)"
     >
-      <Box position="absolute" w="180px" h="180px" border="1px solid rgba(255,255,255,.09)" borderRadius="full" right="-55px" top="-105px" />
+      <Box position="absolute" w="180px" h="180px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="-55px" top="-105px" />
       <Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={3} align={{ lg: 'center' }}>
         <HStack spacing={3} align="baseline">
           <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" opacity={0.76} whiteSpace="nowrap">

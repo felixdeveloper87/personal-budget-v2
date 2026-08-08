@@ -15,7 +15,6 @@ import {
   Spinner,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   archiveSavingsGoal,
@@ -58,8 +57,8 @@ export default function GoalsPage() {
     }
   })
 
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
+  const muted = 'var(--pb-ink-soft)'
+  const spinnerColor = 'var(--pb-forest-2)'
 
   // Break-even target — fixed to the current month (goals are about now).
   const currentMonth = useMemo(() => new Date(), [])

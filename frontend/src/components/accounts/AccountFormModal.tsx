@@ -21,7 +21,6 @@ import {
   SimpleGrid,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { createAccount, updateAccount } from '../../api'
 import type { AccountType, FinancialAccount } from '../../types'
@@ -47,10 +46,10 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
   const [overdraftLimit, setOverdraftLimit] = useState(0)
   const [saving, setSaving] = useState(false)
 
-  const muted = useColorModeValue('gray.600', 'gray.400')
-  const softBg = useColorModeValue('gray.50', 'rgba(255, 255, 255, 0.03)')
-  const blueSoftBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const fieldBg = useColorModeValue('white', 'whiteAlpha.50')
+  const muted = 'var(--pb-ink-soft)'
+  const softBg = 'var(--pb-surface-2)'
+  const blueSoftBg = 'var(--pb-tint-green)'
+  const fieldBg = 'var(--pb-surface)'
 
   // Sync the form whenever the modal opens (or the target account changes).
   useEffect(() => {

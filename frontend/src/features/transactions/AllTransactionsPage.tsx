@@ -1,4 +1,4 @@
-import { Box, VStack, Spinner, Text, useColorModeValue } from '@chakra-ui/react'
+import { Box, VStack, Spinner, Text } from '@chakra-ui/react'
 import AllTransactionsSection from '../../sections/AllTransactionsSection'
 import { useState, useEffect } from 'react'
 import { hasActiveFilters } from '../../utils/filters'
@@ -16,8 +16,8 @@ export default function AllTransactionsPage() {
   const { user } = useAuth()
   const { filters } = useSearch()
 
-  const spinnerColor = useColorModeValue('blue.500', 'blue.300')
-  const textColor = useColorModeValue('gray.500', 'gray.400')
+  const spinnerColor = 'var(--pb-forest-2)'
+  const textColor = 'var(--pb-ink-soft)'
 
   const loadData = async () => {
     if (!user?.token) return

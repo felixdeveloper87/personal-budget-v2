@@ -306,7 +306,7 @@ function HeaderButton({
       py="0.58rem"
       borderRadius="14px"
       transition="0.18s"
-      color={primary ? '#f4f3ec' : 'var(--pb-ink-soft)'}
+      color={primary ? 'var(--pb-on-accent)' : 'var(--pb-ink-soft)'}
       bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface)'}
       border="1px solid"
       borderColor={primary ? 'transparent' : 'var(--pb-hair)'}
@@ -314,7 +314,7 @@ function HeaderButton({
       _hover={{
         transform: 'translateY(-1px)',
         bg: primary ? 'var(--pb-forest)' : 'var(--pb-surface-2)',
-        color: primary ? '#f4f3ec' : 'var(--pb-ink)',
+        color: primary ? 'var(--pb-on-accent)' : 'var(--pb-ink)',
         borderColor: primary ? 'transparent' : 'var(--pb-hair-2)',
       }}
     >

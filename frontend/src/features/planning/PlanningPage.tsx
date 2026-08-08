@@ -249,7 +249,62 @@ function PlanningHero({ monthlyPositive, balance, income, expense, forecast, fir
     ? recoveryMonth ? `The forecast moves from ${money(forecast?.currentTotalBalance ?? 0)} today to a positive closing balance in ${monthLabel(recoveryMonth.month)}.` : 'Review recurring costs, income assumptions and category limits to create a route back above zero.'
     : monthlyPositive ? `${money(income)} coming in against ${money(expense)} going out leaves ${money(balance)} to protect or allocate.` : `${money(expense)} in expenses is ${money(Math.abs(balance))} above income. Rebalance a limit or create a break-even target.`
   const attention = startingNegative || !monthlyPositive
-  return <Box overflow="hidden" position="relative" borderRadius={{ base: '16px', md: '22px' }} bg="radial-gradient(120% 150% at 88% -30%, rgba(96,165,250,0.20) 0%, transparent 52%), linear-gradient(135deg, #0b1a31 0%, #14253f 55%, #1c2f4c 100%)" color="#eef2f8" boxShadow="var(--pb-shadow-lift)" border="1px solid rgba(255,255,255,0.07)" p="clamp(1rem, 4vw, 2rem)"><Box position="absolute" w="340px" h="340px" border="1px solid rgba(255,255,255,.09)" borderRadius="full" right="-85px" top="-190px" /><Box position="absolute" w="230px" h="230px" border="1px solid rgba(255,255,255,.06)" borderRadius="full" right="90px" bottom="-175px" /><Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={{ base: 4, lg: 6 }}><Box maxW="620px"><HStack spacing={2} mb={{ base: 2, md: 3 }}><Flex w={7} h={7} align="center" justify="center" borderRadius="full" bg={attention ? 'rgba(246,146,138,.20)' : 'rgba(95,211,148,.20)'}><Icon as={attention ? AlertTriangle : CheckCircle2} boxSize={4} weight="fill" /></Flex><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.76}>{startingNegative ? 'Recovery outlook' : monthlyPositive ? 'Month on track' : 'Attention needed'}</Text></HStack><Text fontSize={{ base: 'xl', md: '3xl' }} fontWeight={500} lineHeight="1.15" letterSpacing="-0.03em">{statusTitle}</Text><Text fontSize="sm" lineHeight="1.55" opacity={0.82} mt={{ base: 2, md: 3 }}>{statusBody}</Text>{attention && <Button mt={{ base: 3, md: 5 }} size="sm" rightIcon={<Icon as={ArrowRight} boxSize={4} />} onClick={onOpenGoals} bg="#eef2f8" color="#14253f" _hover={{ bg: 'white' }}>Open break-even target</Button>}</Box><SimpleGrid columns={2} spacing={{ base: 2.5, md: 5 }} minW={{ lg: '330px' }}><HeroMetric label="This month" value={signedMoney(balance)} /><HeroMetric label="Current balance" value={projected === undefined ? '—' : money(projected)} note="Live starting point" /><HeroMetric label="Recovery" value={startingNegative ? recoveryMonth ? monthLabel(recoveryMonth.month) : 'Not projected' : 'Already positive'} note={startingNegative ? 'First positive closing balance' : undefined} /><HeroMetric label="Runway" value={firstNegativeMonth ? monthLabel(firstNegativeMonth.month) : '12 months+'} note={firstNegativeMonth ? 'First negative month' : 'Plan remains positive'} /></SimpleGrid></Flex></Box>
+  return (
+    <Box
+      overflow="hidden"
+      position="relative"
+      borderRadius={{ base: '16px', md: '22px' }}
+      bg="var(--pb-hero)"
+      color="var(--pb-hero-ink)"
+      boxShadow="var(--pb-shadow-lift)"
+      border="1px solid var(--pb-hero-line)"
+      p="clamp(1rem, 4vw, 2rem)"
+    >
+      <Box position="absolute" w="340px" h="340px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="-85px" top="-190px" />
+      <Box position="absolute" w="230px" h="230px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="90px" bottom="-175px" />
+      <Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={{ base: 4, lg: 6 }}>
+        <Box maxW="620px">
+          <HStack spacing={2} mb={{ base: 2, md: 3 }}>
+            <Flex
+              w={7}
+              h={7}
+              align="center"
+              justify="center"
+              borderRadius="full"
+              bg={attention ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
+              color={attention ? 'var(--pb-coral)' : 'var(--pb-income)'}
+            >
+              <Icon as={attention ? AlertTriangle : CheckCircle2} boxSize={4} weight="fill" />
+            </Flex>
+            <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.76}>
+              {startingNegative ? 'Recovery outlook' : monthlyPositive ? 'Month on track' : 'Attention needed'}
+            </Text>
+          </HStack>
+          <Text fontSize={{ base: 'xl', md: '3xl' }} fontWeight={500} lineHeight="1.15" letterSpacing="-0.03em">{statusTitle}</Text>
+          <Text fontSize="sm" lineHeight="1.55" opacity={0.82} mt={{ base: 2, md: 3 }}>{statusBody}</Text>
+          {attention && (
+            <Button
+              mt={{ base: 3, md: 5 }}
+              size="sm"
+              rightIcon={<Icon as={ArrowRight} boxSize={4} />}
+              onClick={onOpenGoals}
+              bg="var(--pb-gold)"
+              color="var(--pb-on-accent)"
+              _hover={{ bg: 'var(--pb-gold-2)' }}
+            >
+              Open break-even target
+            </Button>
+          )}
+        </Box>
+        <SimpleGrid columns={2} spacing={{ base: 2.5, md: 5 }} minW={{ lg: '330px' }}>
+          <HeroMetric label="This month" value={signedMoney(balance)} />
+          <HeroMetric label="Current balance" value={projected === undefined ? '—' : money(projected)} note="Live starting point" />
+          <HeroMetric label="Recovery" value={startingNegative ? recoveryMonth ? monthLabel(recoveryMonth.month) : 'Not projected' : 'Already positive'} note={startingNegative ? 'First positive closing balance' : undefined} />
+          <HeroMetric label="Runway" value={firstNegativeMonth ? monthLabel(firstNegativeMonth.month) : '12 months+'} note={firstNegativeMonth ? 'First negative month' : 'Plan remains positive'} />
+        </SimpleGrid>
+      </Flex>
+    </Box>
+  )
 }
 
 function HeroMetric({ label, value, note }: { label: string; value: string; note?: string }) { return <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" opacity={0.68}>{label}</Text><Text className="num" fontSize={{ base: 'lg', md: 'xl' }} fontWeight={500} mt="2px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>{note && <Text fontSize="10px" opacity={0.68} mt="2px">{note}</Text>}</Box> }
@@ -266,7 +321,7 @@ function PlanPanel({ eyebrow, title, caption, rightSlot, children }: { eyebrow: 
 
 function FieldLabel({ children }: { children: ReactNode }) { return <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)" mb={1.5}>{children}</Text> }
 
-function ActionButton({ label, icon, primary, onClick, isLoading, disabled }: { label: string; icon: typeof Plus; primary?: boolean; onClick: () => void; isLoading?: boolean; disabled?: boolean }) { return <Button leftIcon={<Icon as={icon} boxSize={4} />} onClick={onClick} isLoading={isLoading} isDisabled={disabled} h="44px" px={4} borderRadius="12px" fontWeight={500} color={primary ? '#f6f8fb' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={primary ? 'transparent' : 'var(--pb-hair)'} _hover={{ bg: primary ? 'var(--pb-forest)' : 'var(--pb-surface-3)' }}>{label}</Button> }
+function ActionButton({ label, icon, primary, onClick, isLoading, disabled }: { label: string; icon: typeof Plus; primary?: boolean; onClick: () => void; isLoading?: boolean; disabled?: boolean }) { return <Button leftIcon={<Icon as={icon} boxSize={4} />} onClick={onClick} isLoading={isLoading} isDisabled={disabled} h="44px" px={4} borderRadius="12px" fontWeight={500} color={primary ? 'var(--pb-on-accent)' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface-2)'} border="1px solid" borderColor={primary ? 'transparent' : 'var(--pb-hair)'} _hover={{ bg: primary ? 'var(--pb-forest)' : 'var(--pb-surface-3)' }}>{label}</Button> }
 
 function PlanHint({ accent, children }: { accent: 'brand' | 'income'; children: ReactNode }) { return <Box px={3} py={2.5} borderRadius="10px" bg={accent === 'income' ? 'var(--pb-tint-income)' : 'var(--pb-tint-green)'}><Text fontSize="xs" color="var(--pb-ink-soft)">{children}</Text></Box> }
 

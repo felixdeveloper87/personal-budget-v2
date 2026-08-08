@@ -288,7 +288,7 @@ function CardsShell({ children }: { children: React.ReactNode }) {
 }
 
 function ActionButton({ label, icon, primary, destructive, onClick }: { label: string; icon: typeof Plus; primary?: boolean; destructive?: boolean; onClick: () => void }) {
-  return <Box as="button" type="button" onClick={onClick} flex={{ base: 1, sm: 'initial' }} display="inline-flex" alignItems="center" justifyContent="center" gap="0.45rem" whiteSpace="nowrap" fontSize="0.95rem" fontWeight={500} px="1.05rem" py="0.58rem" borderRadius="14px" transition="0.18s" color={destructive ? 'var(--pb-coral)' : primary ? '#f4f3ec' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface)'} border="1px solid" borderColor={primary ? 'transparent' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-hair)'} boxShadow={primary ? '0 1px 2px rgba(15,23,42,.18), 0 8px 20px rgba(15,23,42,.12)' : '0 1px 2px rgba(15,23,42,.05)'} _hover={{ transform: 'translateY(-1px)', bg: primary ? 'var(--pb-forest)' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)', color: primary ? '#f4f3ec' : destructive ? 'var(--pb-coral)' : 'var(--pb-ink)' }}><Icon as={icon} boxSize="1.08em" />{label}</Box>
+  return <Box as="button" type="button" onClick={onClick} flex={{ base: 1, sm: 'initial' }} display="inline-flex" alignItems="center" justifyContent="center" gap="0.45rem" whiteSpace="nowrap" fontSize="0.95rem" fontWeight={500} px="1.05rem" py="0.58rem" borderRadius="14px" transition="0.18s" color={destructive ? 'var(--pb-coral)' : primary ? 'var(--pb-on-accent)' : 'var(--pb-ink-soft)'} bg={primary ? 'var(--pb-forest-2)' : 'var(--pb-surface)'} border="1px solid" borderColor={primary ? 'transparent' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-hair)'} boxShadow={primary ? 'var(--pb-shadow)' : '0 1px 2px rgba(20,48,34,.05)'} _hover={{ transform: 'translateY(-1px)', bg: primary ? 'var(--pb-forest)' : destructive ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)', color: primary ? 'var(--pb-on-accent)' : destructive ? 'var(--pb-coral)' : 'var(--pb-ink)' }}><Icon as={icon} boxSize="1.08em" />{label}</Box>
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -354,11 +354,11 @@ function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: Car
         overflow="hidden"
         px="clamp(1.2rem, 3vw, 1.7rem)"
         py={{ base: 5, md: 6 }}
-        bg="linear-gradient(125deg, var(--pb-forest) 0%, var(--pb-forest-2) 57%, var(--pb-line) 100%)"
-        color="#f6f8fb"
+        bg="var(--pb-hero)"
+        color="var(--pb-hero-ink)"
       >
-        <Box position="absolute" w="280px" h="280px" border="1px solid rgba(255,255,255,.16)" borderRadius="full" right="-80px" top="-150px" />
-        <Box position="absolute" w="190px" h="190px" border="1px solid rgba(255,255,255,.11)" borderRadius="full" right="20px" bottom="-145px" />
+        <Box position="absolute" w="280px" h="280px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="-80px" top="-150px" />
+        <Box position="absolute" w="190px" h="190px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="20px" bottom="-145px" />
         <Flex position="relative" zIndex={1} justify="space-between" align="start" gap={4}>
           <HStack spacing={3} minW={0}>
             {getBankMeta(card.issuer) ? (

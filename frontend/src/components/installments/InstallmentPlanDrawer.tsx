@@ -127,7 +127,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const dividerColor = ed ? ed.line : dividerColorBase
   const fallbackDialogBg = useColorModeValue('#ffffff', '#0a0a0a')
   const dialogBg = ed?.solid ?? fallbackDialogBg
-  const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
+  const warningChipBgBase = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
+  const warningChipBg = ed ? 'var(--pb-tint-coral)' : warningChipBgBase
   const warningChipFgBase = useColorModeValue('red.600', 'red.300')
   const warningChipFg = ed ? ed.red : warningChipFgBase
 

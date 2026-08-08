@@ -89,9 +89,9 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
   const editorialOverlay = useColorModeValue(
-    // Light: flat — the header shares the page colour, so no white sheen on top.
-    'transparent',
-    'linear-gradient(180deg, rgba(239,234,224,0.04) 0%, rgba(239,234,224,0) 68%)',
+    // A restrained porcelain sheen helps the scrolled glass separate from paper.
+    'linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0) 68%)',
+    'linear-gradient(180deg, rgba(239,244,241,0.035) 0%, rgba(239,244,241,0) 68%)',
   )
   const bgOverlay = ed ? editorialOverlay : (showGlass ? bgOverlayVal : 'transparent')
   const topHighlightVal = useColorModeValue(
@@ -99,9 +99,9 @@ export default function Header({
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
   const editorialTopHighlight = useColorModeValue(
-    // Light: flat — no top edge highlight, keep the chrome one even colour.
-    'transparent',
-    'linear-gradient(180deg, rgba(239,234,224,0.08), rgba(239,234,224,0))',
+    // Hairline highlight shared by both editorial variants.
+    'linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0))',
+    'linear-gradient(180deg, rgba(239,244,241,0.07), rgba(239,244,241,0))',
   )
   const topHighlight = ed
     ? editorialTopHighlight
@@ -111,8 +111,8 @@ export default function Header({
     'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
   )
   const editorialAccentBorder = useColorModeValue(
-    'linear-gradient(90deg, transparent 0%, rgba(8,122,80,0.52) 30%, rgba(165,111,22,0.46) 70%, transparent 100%)',
-    'linear-gradient(90deg, transparent 0%, rgba(127,230,179,0.40) 30%, rgba(217,179,106,0.30) 70%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(38,115,90,0.40) 30%, rgba(124,100,39,0.30) 70%, transparent 100%)',
+    'linear-gradient(90deg, transparent 0%, rgba(95,208,181,0.36) 30%, rgba(208,183,111,0.24) 70%, transparent 100%)',
   )
   const accentBorder = ed
     ? editorialAccentBorder
@@ -123,7 +123,7 @@ export default function Header({
   )
   const editorialShadow = useColorModeValue(
     isScrolled
-      ? '0 14px 40px rgba(19,56,37,0.12), inset 0 -1px 0 rgba(255,255,255,0.72)'
+      ? '0 14px 40px rgba(18,45,36,0.08), inset 0 -1px 0 rgba(255,255,255,0.72)'
       : 'none',
     isScrolled ? '0 14px 36px rgba(0,0,0,0.5)' : 'none',
   )

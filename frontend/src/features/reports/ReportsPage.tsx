@@ -11,7 +11,6 @@ import {
   Spinner,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   CalendarClock,
@@ -24,7 +23,7 @@ import {
 } from '../../components/ui/icons'
 import type { LucideIcon } from '../../components/ui/icons'
 import PeriodNavigator from '../../components/summary/PeriodNavigator'
-import {  SectionCard, SectionHeader } from '../../components/ui'
+import { SectionCard, SectionHeader } from '../../components/ui'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { getReport } from '../../api'
 import type {
@@ -69,37 +68,55 @@ interface MetricCardProps {
   value: string
   detail: string
   icon: LucideIcon
-  accent: 'blue' | 'green' | 'red' | 'violet'
+  accent: ReportTone
+}
+
+type ReportTone = 'brand' | 'income' | 'expense' | 'commitment'
+
+const REPORT_TONES: Record<ReportTone, { color: string; strong: string; tint: string }> = {
+  brand: {
+    color: 'var(--pb-forest-2)',
+    strong: 'var(--pb-forest)',
+    tint: 'var(--pb-tint-green)',
+  },
+  income: {
+    color: 'var(--pb-income)',
+    strong: 'var(--pb-income-2)',
+    tint: 'var(--pb-tint-income)',
+  },
+  expense: {
+    color: 'var(--pb-coral)',
+    strong: 'var(--pb-coral-2)',
+    tint: 'var(--pb-tint-coral)',
+  },
+  commitment: {
+    color: 'var(--pb-gold)',
+    strong: 'var(--pb-gold-2)',
+    tint: 'var(--pb-tint-gold)',
+  },
 }
 
 function MetricCard({ label, value, detail, icon, accent }: MetricCardProps) {
-  const titleColor = useColorModeValue('gray.900', 'gray.50')
-  const detailColor = useColorModeValue('gray.500', 'gray.400')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const accentColor = {
-    blue: useColorModeValue('blue.600', 'blue.300'),
-    green: useColorModeValue('green.600', 'green.300'),
-    red: useColorModeValue('red.600', 'red.300'),
-    violet: useColorModeValue('purple.600', 'purple.300'),
-  }[accent]
-  const chipBg = {
-    blue: useColorModeValue('blue.50', 'rgba(59,130,246,0.14)'),
-    green: useColorModeValue('green.50', 'rgba(34,197,94,0.14)'),
-    red: useColorModeValue('red.50', 'rgba(239,68,68,0.14)'),
-    violet: useColorModeValue('purple.50', 'rgba(139,92,246,0.14)'),
-  }[accent]
+  const { color: accentColor, tint: chipBg } = REPORT_TONES[accent]
 
   return (
-    <Box border="1px solid" borderColor={borderColor} borderRadius="xl" p={4} minH="126px">
+    <Box
+      border="1px solid"
+      borderColor="var(--pb-hair)"
+      borderRadius="xl"
+      bg="var(--pb-surface-2)"
+      p={4}
+      minH="126px"
+    >
       <HStack justify="space-between" align="flex-start" spacing={3}>
         <VStack align="flex-start" spacing={1} minW={0}>
-          <Text fontSize="xs" color={detailColor} fontWeight={700} textTransform="uppercase">
+          <Text fontSize="xs" color="var(--pb-ink-soft)" fontWeight={700} textTransform="uppercase">
             {label}
           </Text>
-          <Text fontSize={{ base: 'lg', md: 'xl' }} color={titleColor} fontWeight={800} noOfLines={1}>
+          <Text fontSize={{ base: 'lg', md: 'xl' }} color="var(--pb-ink)" fontWeight={800} noOfLines={1}>
             {value}
           </Text>
-          <Text fontSize="xs" color={detailColor} noOfLines={2}>
+          <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={2}>
             {detail}
           </Text>
         </VStack>
@@ -128,34 +145,31 @@ function CategoryBars({
 }: {
   title: string
   items: ReportCategoryBreakdown[]
-  tone: 'green' | 'red'
+  tone: 'income' | 'expense'
 }) {
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const fillColor = tone === 'green' ? 'green.400' : 'red.400'
+  const fillColor = REPORT_TONES[tone].strong
 
   return (
     <VStack align="stretch" spacing={3}>
-      <Text fontSize="sm" fontWeight={800} color={textColor}>
+      <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
         {title}
       </Text>
       {items.length === 0 ? (
-        <Text fontSize="sm" color={mutedColor}>
+        <Text fontSize="sm" color="var(--pb-ink-soft)">
           No data for this period.
         </Text>
       ) : (
         items.slice(0, 6).map((item) => (
           <Box key={item.category}>
             <HStack justify="space-between" spacing={3} mb={1}>
-              <Text fontSize="sm" color={textColor} fontWeight={600} noOfLines={1}>
+              <Text fontSize="sm" color="var(--pb-ink)" fontWeight={600} noOfLines={1}>
                 {item.category}
               </Text>
-              <Text fontSize="xs" color={mutedColor} flexShrink={0}>
+              <Text fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
                 {formatCurrency(item.amount)} - {item.percentage}%
               </Text>
             </HStack>
-            <Box h="8px" bg={trackBg} borderRadius="full" overflow="hidden">
+            <Box h="8px" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
               <Box h="full" w={`${Math.min(item.percentage, 100)}%`} bg={fillColor} borderRadius="full" />
             </Box>
           </Box>
@@ -166,36 +180,37 @@ function CategoryBars({
 }
 
 function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] }) {
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const trackBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-
   if (items.length === 0) return null
 
   return (
     <VStack align="stretch" spacing={3}>
-      <Text fontSize="sm" fontWeight={800} color={textColor}>
+      <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
         Payment methods
       </Text>
       {items.slice(0, 6).map((item) => (
         <Box key={item.name}>
           <HStack justify="space-between" spacing={3} mb={1}>
-            <Text fontSize="sm" color={textColor} fontWeight={600} noOfLines={1}>
+            <Text fontSize="sm" color="var(--pb-ink)" fontWeight={600} noOfLines={1}>
               {item.name}
             </Text>
             <HStack spacing={2} flexShrink={0}>
-              <Text fontSize="xs" color={textColor} fontWeight={700}>
+              <Text fontSize="xs" color="var(--pb-ink)" fontWeight={700}>
                 {formatCurrency(item.amount)}
               </Text>
-              <Text fontSize="xs" color={mutedColor}>
+              <Text fontSize="xs" color="var(--pb-ink-soft)">
                 {item.percentage}%
               </Text>
             </HStack>
           </HStack>
-          <Box h="8px" bg={trackBg} borderRadius="full" overflow="hidden">
-            <Box h="full" w={`${Math.min(item.percentage, 100)}%`} bg="blue.400" borderRadius="full" />
+          <Box h="8px" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
+            <Box
+              h="full"
+              w={`${Math.min(item.percentage, 100)}%`}
+              bg="var(--pb-forest-2)"
+              borderRadius="full"
+            />
           </Box>
-          <Text fontSize="xs" color={mutedColor} mt={0.5}>
+          <Text fontSize="xs" color="var(--pb-ink-soft)" mt={0.5}>
             {item.transactionCount} {item.transactionCount === 1 ? 'transaction' : 'transactions'}
           </Text>
         </Box>
@@ -207,25 +222,33 @@ function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] })
 function TransactionTable({
   title,
   transactions,
+  tone,
 }: {
   title: string
   transactions: ReportTransactionItem[]
+  tone: 'income' | 'expense'
 }) {
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
+  const amountColor = REPORT_TONES[tone].color
 
   return (
     <VStack align="stretch" spacing={3}>
-      <Text fontSize="sm" fontWeight={800} color={textColor}>
+      <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
         {title}
       </Text>
       {transactions.length === 0 ? (
-        <Text fontSize="sm" color={mutedColor}>
+        <Text fontSize="sm" color="var(--pb-ink-soft)">
           No transactions for this period.
         </Text>
       ) : (
-        <VStack align="stretch" spacing={0} border="1px solid" borderColor={borderColor} borderRadius="xl" overflow="hidden">
+        <VStack
+          align="stretch"
+          spacing={0}
+          border="1px solid"
+          borderColor="var(--pb-hair)"
+          borderRadius="xl"
+          bg="var(--pb-surface-2)"
+          overflow="hidden"
+        >
           {transactions.slice(0, 5).map((tx) => (
             <Flex
               key={tx.id}
@@ -235,23 +258,23 @@ function TransactionTable({
               px={3}
               py={2.5}
               borderBottom="1px solid"
-              borderColor={borderColor}
+              borderColor="var(--pb-hair)"
               _last={{ borderBottom: 0 }}
             >
               <VStack align="flex-start" spacing={0} minW={0}>
-                <Text fontSize="sm" fontWeight={700} color={textColor} noOfLines={1}>
+                <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
                   {tx.description || tx.category}
                 </Text>
-                <Text fontSize="xs" color={mutedColor} noOfLines={1}>
+                <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
                   {formatDate(tx.paymentDate)} - {tx.category}
                 </Text>
                 {formatAccountMovement(tx) ? (
-                  <Text fontSize="xs" color="blue.500" noOfLines={1}>
+                  <Text fontSize="xs" color="var(--pb-forest-2)" noOfLines={1}>
                     {formatAccountMovement(tx)}
                   </Text>
                 ) : null}
               </VStack>
-              <Text fontSize="sm" fontWeight={800} color={textColor} flexShrink={0}>
+              <Text fontSize="sm" fontWeight={800} color={amountColor} flexShrink={0}>
                 {formatCurrency(tx.amount)}
               </Text>
             </Flex>
@@ -271,37 +294,52 @@ function ReportsPageHeader({
   onGoToToday: () => void
   onExport: () => void
 }) {
-  const pillBg = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const pillBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const pillColor = useColorModeValue('gray.600', 'gray.300')
-
   return (
     <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
         <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
           <HStack
             spacing={2}
-            bg={pillBg}
+            bg="var(--pb-surface-2)"
             border="1px solid"
-            borderColor={pillBorder}
+            borderColor="var(--pb-hair)"
             borderRadius="full"
             px={3}
             py={1.5}
             display={{ base: 'none', lg: 'flex' }}
           >
-            <Box w="6px" h="6px" borderRadius="full" bg="blue.400" />
-            <Text fontSize="xs" fontWeight={600} color={pillColor} noOfLines={1}>
+            <Box w="6px" h="6px" borderRadius="full" bg="var(--pb-forest-2)" />
+            <Text fontSize="xs" fontWeight={600} color="var(--pb-ink-soft)" noOfLines={1}>
               {periodLabel}
             </Text>
           </HStack>
-          <Button size="sm" h="36px" borderRadius="lg" leftIcon={<Icon as={RotateCcw} boxSize={3.5} />} onClick={onGoToToday}>
+          <Button
+            size="sm"
+            h="36px"
+            borderRadius="lg"
+            leftIcon={<Icon as={RotateCcw} boxSize={3.5} />}
+            bg="var(--pb-surface-2)"
+            color="var(--pb-ink-soft)"
+            border="1px solid"
+            borderColor="var(--pb-hair)"
+            _hover={{ bg: 'var(--pb-surface-3)', color: 'var(--pb-ink)' }}
+            _active={{ bg: 'var(--pb-surface-3)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            onClick={onGoToToday}
+          >
             Today
           </Button>
           <Button
             size="sm"
             h="36px"
             borderRadius="lg"
-            colorScheme="blue"
             leftIcon={<Icon as={FileText} boxSize={3.5} />}
+            bg="var(--pb-forest-2)"
+            color="var(--pb-on-accent)"
+            border="1px solid"
+            borderColor="var(--pb-forest-2)"
+            _hover={{ bg: 'var(--pb-forest)', borderColor: 'var(--pb-forest)' }}
+            _active={{ bg: 'var(--pb-forest)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
             onClick={onExport}
           >
             Export PDF
@@ -323,11 +361,6 @@ export default function ReportsPage() {
   } = usePeriodNavigator()
   const [report, setReport] = useState<ReportResponse | null>(null)
   const [loading, setLoading] = useState(false)
-
-  const pageBg = useColorModeValue('gray.50', '#060606')
-  const textColor = useColorModeValue('gray.700', 'gray.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const dividerColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
 
   useEffect(() => {
     let active = true
@@ -364,34 +397,40 @@ export default function ReportsPage() {
 
   const metrics = useMemo(() => {
     if (!report) return []
+    const balanceTone: ReportTone = report.balance > 0
+      ? 'income'
+      : report.balance < 0
+        ? 'expense'
+        : 'brand'
+
     return [
       {
         label: 'Income',
         value: formatCurrency(report.totalIncome),
         detail: `${numberFormatter.format(report.incomeCount)} incoming records`,
         icon: TrendingUp,
-        accent: 'green' as const,
+        accent: 'income' as const,
       },
       {
         label: 'Expenses',
         value: formatCurrency(report.totalExpense),
         detail: `${numberFormatter.format(report.expenseCount)} outgoing records`,
         icon: TrendingDown,
-        accent: 'red' as const,
+        accent: 'expense' as const,
       },
       {
         label: 'Balance',
         value: formatCurrency(report.balance),
         detail: 'Income minus expenses',
         icon: DollarSign,
-        accent: 'violet' as const,
+        accent: balanceTone,
       },
       {
         label: 'Average expense',
         value: formatCurrency(report.averageExpense),
         detail: `${numberFormatter.format(report.transactionCount)} total transactions`,
         icon: Wallet,
-        accent: 'blue' as const,
+        accent: 'brand' as const,
       },
     ]
   }, [report])
@@ -401,7 +440,7 @@ export default function ReportsPage() {
   return (
     <Box
       minH="100vh"
-      bg={pageBg}
+      bg="var(--pb-paper)"
       px={{ base: 2, md: 4, lg: 6 }}
       py={{ base: 4, md: 7 }}
       maxW="appContent"
@@ -428,13 +467,13 @@ export default function ReportsPage() {
                 isEmbedded
               />
             </Box>
-            <Divider borderColor={dividerColor} />
+            <Divider borderColor="var(--pb-hair)" />
 
             <Box p={{ base: 4, sm: 5, md: 6 }}>
               {loading ? (
                 <VStack py={14} spacing={3}>
-                  <Spinner color="blue.500" />
-                  <Text fontSize="sm" color={mutedColor}>
+                  <Spinner color="var(--pb-forest-2)" />
+                  <Text fontSize="sm" color="var(--pb-ink-soft)">
                     Preparing report...
                   </Text>
                 </VStack>
@@ -453,15 +492,22 @@ export default function ReportsPage() {
                           icon={CalendarClock}
                           title="Executive summary"
                           caption={`${formatDate(report.startDate)} - ${formatDate(report.endDate)}`}
-                          accent="blue"
+                          accent="teal"
                         />
                         <VStack align="stretch" spacing={2}>
                           {report.insights.map((insight) => (
                             <HStack key={insight} spacing={2} align="flex-start">
-                              <Badge colorScheme="blue" variant="subtle" borderRadius="full" mt="2px">
+                              <Badge
+                                bg="var(--pb-tint-green)"
+                                color="var(--pb-forest-2)"
+                                border="1px solid"
+                                borderColor="var(--pb-hair)"
+                                borderRadius="full"
+                                mt="2px"
+                              >
                                 i
                               </Badge>
-                              <Text fontSize="sm" color={textColor}>
+                              <Text fontSize="sm" color="var(--pb-ink)">
                                 {insight}
                               </Text>
                             </HStack>
@@ -476,7 +522,7 @@ export default function ReportsPage() {
                           icon={Wallet}
                           title="Commitments"
                           caption="Installment and recurring impact"
-                          accent="violet"
+                          accent="amber"
                         />
                         <SimpleGrid columns={2} spacing={3}>
                           <MetricCard
@@ -484,14 +530,14 @@ export default function ReportsPage() {
                             value={formatCurrency(report.installmentExpenseTotal)}
                             detail="Expense total from installments"
                             icon={CalendarClock}
-                            accent="violet"
+                            accent="commitment"
                           />
                           <MetricCard
                             label="Recurring"
                             value={formatCurrency(report.recurringExpenseTotal)}
                             detail="Expense total from fixed payments"
                             icon={Wallet}
-                            accent="blue"
+                            accent="commitment"
                           />
                         </SimpleGrid>
                       </VStack>
@@ -499,8 +545,8 @@ export default function ReportsPage() {
                   </SimpleGrid>
 
                   <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={5}>
-                    <CategoryBars title="Expense categories" items={report.expenseCategories} tone="red" />
-                    <CategoryBars title="Income categories" items={report.incomeCategories} tone="green" />
+                    <CategoryBars title="Expense categories" items={report.expenseCategories} tone="expense" />
+                    <CategoryBars title="Income categories" items={report.incomeCategories} tone="income" />
                   </SimpleGrid>
 
                   {report.paymentMethods.length > 0 && (
@@ -512,12 +558,12 @@ export default function ReportsPage() {
                   )}
 
                   <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={5}>
-                    <TransactionTable title="Largest expenses" transactions={report.topExpenses} />
-                    <TransactionTable title="Largest income" transactions={report.topIncome} />
+                    <TransactionTable title="Largest expenses" transactions={report.topExpenses} tone="expense" />
+                    <TransactionTable title="Largest income" transactions={report.topIncome} tone="income" />
                   </SimpleGrid>
                 </VStack>
               ) : (
-                <Text fontSize="sm" color={mutedColor}>
+                <Text fontSize="sm" color="var(--pb-ink-soft)">
                   No report data available.
                 </Text>
               )}

@@ -111,8 +111,10 @@ export default function RecurringTransactionDrawer({
   const dividerColor = ed ? ed.line : dividerColorBase
   const dialogBgBase = useColorModeValue('#ffffff', '#0a0a0a')
   const dialogBg = ed ? ed.modal : dialogBgBase
-  const warningChipBg = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const warningChipFg = useColorModeValue('red.600', 'red.300')
+  const warningChipBgBase = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
+  const warningChipBg = ed ? 'var(--pb-tint-coral)' : warningChipBgBase
+  const warningChipFgBase = useColorModeValue('red.600', 'red.300')
+  const warningChipFg = ed ? ed.red : warningChipFgBase
 
   // Keep the last rule mounted while the close transition plays out.
   useEffect(() => {

@@ -89,23 +89,32 @@ export default function PeriodDatePicker({
   const weeks = useMemo(() => calendarWeeks(viewDate), [viewDate])
 
   const ed = useEd()
-  const contentBg = useColorModeValue('white', 'gray.900')
-  const borderColor = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
-  const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const hoverBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const selectedBg = useColorModeValue('blue.500', 'blue.400')
-  const selectedColor = useColorModeValue('white', 'gray.900')
-  const outsideColor = useColorModeValue('gray.300', 'gray.600')
-  // `labelColor` styles both the trigger and the popover (a light surface), so
-  // the popover keeps its base value; the trigger gets editorial overrides.
-  const labelColor = useColorModeValue('gray.900', 'gray.50')
-  const hintColor = useColorModeValue('blue.600', 'blue.300')
-  const hintBg = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
+  const contentBgBase = useColorModeValue('white', 'gray.900')
+  const contentBg = ed?.solid ?? contentBgBase
+  const borderColorBase = useColorModeValue('blackAlpha.200', 'whiteAlpha.200')
+  const borderColor = ed?.lineStrong ?? borderColorBase
+  const mutedColorBase = useColorModeValue('gray.500', 'gray.400')
+  const mutedColor = ed?.muted ?? mutedColorBase
+  const hoverBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
+  const hoverBg = ed?.hoverBg ?? hoverBgBase
+  const selectedBgBase = useColorModeValue('blue.500', 'blue.400')
+  const selectedBg = ed?.jade ?? selectedBgBase
+  const selectedColorBase = useColorModeValue('white', 'gray.900')
+  const selectedColor = ed?.onAccent ?? selectedColorBase
+  const outsideColorBase = useColorModeValue('gray.300', 'gray.600')
+  const outsideColor = ed?.muted ?? outsideColorBase
+  const labelColorBase = useColorModeValue('gray.900', 'gray.50')
+  const labelColor = ed?.cream ?? labelColorBase
+  const hintColorBase = useColorModeValue('blue.600', 'blue.300')
+  const hintColor = ed?.jade ?? hintColorBase
+  const hintBgBase = useColorModeValue('blue.50', 'rgba(59,130,246,0.12)')
+  const hintBg = ed?.jadeSoft ?? hintBgBase
   const triggerLabelColor = ed ? ed.cream : labelColor
   const triggerChevronColor = ed ? ed.muted : mutedColor
   const triggerHoverBg = ed ? ed.panelRaised : hoverBg
   const triggerHintColor = ed ? ed.jade : hintColor
   const triggerHintBg = ed ? ed.jadeSoft : hintBg
+  const focusColor = ed?.jade ?? 'blue.300'
 
   const closeWithDate = (date: Date) => {
     onDateChange(date)
@@ -279,7 +288,7 @@ export default function PeriodDatePicker({
           _hover={{ bg: triggerHoverBg }}
           _focusVisible={{
             outline: '2px solid',
-            outlineColor: 'blue.300',
+            outlineColor: focusColor,
             outlineOffset: '-2px',
           }}
         >

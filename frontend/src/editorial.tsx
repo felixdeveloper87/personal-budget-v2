@@ -18,21 +18,20 @@
 import { createContext, useContext, useMemo } from 'react'
 import { Box, useColorMode } from '@chakra-ui/react'
 
-/* ── Dark variant (ported 1:1 from LandingV3.css) ─────────────────────────── */
+/* ── Dark variant — neutral graphite, cool teal and soft gold ────────────── */
 export const EDITORIAL_DARK = {
-  // Preto fosco neutro — o verde/dourado vive só nos acentos, nunca no fundo.
-  bg: '#0b0b0c',
-  bg2: '#111113',
+  bg: '#080a09',
+  bg2: '#0c0f0e',
   /** Brand accent (jade mint) + soft gold. */
-  jade: '#7fe6b3',
-  gold: '#e8c477',
+  jade: '#5fd0b5',
+  gold: '#d0b76f',
   /** Primary text. ~18:1 on `bg`. */
-  cream: '#f2f4f0',
+  cream: '#eff4f1',
   /** Secondary / muted text. ~11:1 on the matte-black `bg`. */
-  muted: '#b6bab4',
-  red: '#ff9a90',
+  muted: '#a8b5af',
+  red: '#f08f86',
   /** Dark glyph colour for text sitting on a brand/gold accent fill. */
-  onAccent: '#06221f',
+  onAccent: '#061a15',
 
   /** ── Superfícies de card (fonte única) ──────────────────────────────
    *  `panel`  → card padrão da plataforma (páginas). Leve transparência pro
@@ -41,32 +40,31 @@ export const EDITORIAL_DARK = {
    *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
    *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
    *  `panelRaised` → painéis internos (card dentro de card). */
-  // Painéis no MESMO preto fosco do glass da sidebar (pedido do usuário): os
-  // cards se separam do fundo pelo hairline `line`, não por elevação de tom.
-  panel: 'rgba(10, 10, 11, 0.88)',
-  modal: 'rgba(18, 18, 20, 0.94)',
-  solid: '#141416',
-  panelRaised: 'rgba(244, 246, 242, 0.05)',
-  line: 'rgba(244, 246, 242, 0.12)',
-  lineStrong: 'rgba(244, 246, 242, 0.20)',
+  panel: 'rgba(10, 13, 12, 0.94)',
+  modal: 'rgba(13, 16, 15, 0.98)',
+  solid: '#101312',
+  panelRaised: 'rgba(16, 20, 18, 0.98)',
+  line: 'rgba(232, 242, 237, 0.09)',
+  lineStrong: 'rgba(232, 242, 237, 0.17)',
 
   /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(10, 10, 11, 0.88)',
+  glass: 'rgba(8, 10, 9, 0.93)',
 
   /** Subtle hover wash on a panel. */
-  hoverBg: 'rgba(244, 246, 242, 0.08)',
+  hoverBg: 'rgba(239, 244, 241, 0.065)',
   /** Chrome control surface (search pill, theme toggle, user trigger). */
-  controlBg: 'rgba(244, 246, 242, 0.04)',
-  controlHoverBg: 'rgba(244, 246, 242, 0.08)',
+  controlBg: 'rgba(239, 244, 241, 0.04)',
+  controlHoverBg: 'rgba(239, 244, 241, 0.075)',
   /** Segmented-control track and its active thumb. */
-  trackBg: 'rgba(244, 246, 242, 0.05)',
-  thumbBg: 'rgba(244, 246, 242, 0.12)',
+  trackBg: 'rgba(239, 244, 241, 0.045)',
+  thumbBg: 'rgba(239, 244, 241, 0.105)',
   /** Brand-tinted soft fills (Today button, hints). */
-  jadeSoft: 'rgba(127, 230, 179, 0.10)',
-  jadeSoftHover: 'rgba(127, 230, 179, 0.18)',
+  jadeSoft: 'rgba(95, 208, 181, 0.10)',
+  jadeSoftHover: 'rgba(95, 208, 181, 0.17)',
 
   /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
-  bgGradient: 'linear-gradient(180deg, #111113 0%, #0b0b0c 100%)',
+  bgGradient:
+    'radial-gradient(circle at 88% -12%, rgba(55,150,125,0.08) 0%, transparent 32%), linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
@@ -75,47 +73,38 @@ export type EditorialTokens = {
   [Key in keyof typeof EDITORIAL_DARK]: string
 }
 
-/* ── Light variant ("cream paper · ink · jade") ───────────────────────────── */
+/* ── Light variant — silvered off-white, forest ink and white cards ───────── */
 export const EDITORIAL_LIGHT: EditorialTokens = {
-  // Single warm-cream shell surface: header, sidebar and pages all share `bg`
-  // (glass is opaque to the same value, bgGradient is flat). White cards then
-  // elevate cleanly off the paper.
-  bg: '#f2f0e6',
-  bg2: '#e9e6d8',
+  bg: '#f3f4f2',
+  bg2: '#e7eae7',
   /** Brand accent (forest green) + restrained gold. */
-  jade: '#1e5a41',
-  gold: '#8f6b1f',
+  jade: '#26735a',
+  gold: '#7c6427',
   /** Primary text → deep green-ink (the "cream" slot, semantically primary). */
-  cream: '#1a2620',
-  muted: '#5a685e',
-  red: '#b8452f',
-  onAccent: '#f7fffc',
+  cream: '#17201c',
+  muted: '#58635e',
+  red: '#aa4938',
+  onAccent: '#f8fbf8',
 
-  // Superfícies de card — ver doc no EDITORIAL_DARK. Solid white panels so cards
-  // lift clearly off the cream shell (the guilloché page backdrop is off in
-  // light).
-  panel: '#ffffff',
-  modal: 'rgba(255, 255, 255, 0.94)',
+  panel: 'rgba(255, 255, 255, 0.90)',
+  modal: 'rgba(255, 255, 255, 0.97)',
   solid: '#ffffff',
-  panelRaised: 'rgba(255, 255, 255, 0.62)',
-  line: 'rgba(26, 38, 32, 0.13)',
-  lineStrong: 'rgba(30, 90, 65, 0.26)',
+  panelRaised: '#ffffff',
+  line: 'rgba(23, 32, 28, 0.11)',
+  lineStrong: 'rgba(24, 81, 62, 0.23)',
 
-  // Opaque = same colour as the page, so the sticky header / sidebar read as one
-  // continuous surface with the content (no glass tint seam).
-  glass: '#f2f0e6',
+  glass: 'rgba(248, 249, 247, 0.91)',
 
-  hoverBg: 'rgba(30, 90, 65, 0.07)',
-  controlBg: 'rgba(255, 255, 255, 0.62)',
-  controlHoverBg: 'rgba(255, 255, 255, 0.88)',
-  trackBg: 'rgba(26, 38, 32, 0.06)',
-  thumbBg: 'rgba(255, 255, 255, 0.98)',
-  jadeSoft: 'rgba(30, 90, 65, 0.09)',
-  jadeSoftHover: 'rgba(30, 90, 65, 0.16)',
+  hoverBg: 'rgba(24, 81, 62, 0.06)',
+  controlBg: 'rgba(255, 255, 255, 0.70)',
+  controlHoverBg: 'rgba(255, 255, 255, 0.96)',
+  trackBg: 'rgba(23, 32, 28, 0.05)',
+  thumbBg: '#ffffff',
+  jadeSoft: 'rgba(38, 115, 90, 0.09)',
+  jadeSoftHover: 'rgba(38, 115, 90, 0.15)',
 
-  // Flat — no radial glow / gradient — so the page is a single even cream that
-  // matches the header and sidebar.
-  bgGradient: 'linear-gradient(180deg, #f2f0e6 0%, #f2f0e6 100%)',
+  bgGradient:
+    'radial-gradient(circle at 12% -8%, rgba(255,255,255,0.96) 0%, transparent 36%), radial-gradient(circle at 100% 0%, rgba(38,115,90,0.035) 0%, transparent 30%), linear-gradient(145deg, #f8f9f7 0%, #f3f4f2 48%, #ecefeb 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 }

@@ -27,6 +27,18 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
   const hoverBorder = ed ? ed.jade : hoverBorderBase
   const hoverColorBase = useColorModeValue('blue.600', 'yellow.200')
   const hoverColor = ed ? ed.jade : hoverColorBase
+  const hoverShadowBase = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 12px rgba(37,99,235,0.10)',
+    'inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.32)',
+  )
+  const editorialHoverShadow = useColorModeValue(
+    'inset 0 1px 0 rgba(255,255,255,0.88), 0 8px 20px rgba(18,45,36,0.12)',
+    'inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 20px rgba(0,0,0,0.42)',
+  )
+  const hoverShadow = ed ? editorialHoverShadow : hoverShadowBase
+  const focusShadow = ed
+    ? `0 0 0 2px ${ed.bg}, 0 0 0 5px ${ed.jade}`
+    : '0 0 0 3px rgba(59, 130, 246, 0.35)'
 
   const dimensions = size === 'sm' ? '36px' : '40px'
 
@@ -68,12 +80,12 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
           borderColor: hoverBorder,
           color: hoverColor,
           transform: 'translateY(-1px)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.9), 0 4px 12px rgba(37,99,235,0.10)',
+          boxShadow: hoverShadow,
         }}
         _active={{ transform: 'translateY(0)' }}
         _focusVisible={{
           outline: 'none',
-          boxShadow: '0 0 0 3px rgba(59, 130, 246, 0.35)',
+          boxShadow: focusShadow,
         }}
       />
     </Tooltip>

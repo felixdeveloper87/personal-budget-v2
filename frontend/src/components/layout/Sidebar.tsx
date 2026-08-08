@@ -90,8 +90,8 @@ export default function Sidebar({
   const { user, logout } = useAuth()
   const ed = useEd()
   const { colorMode } = useColorMode()
-  // In editorial light the sidebar shares the page colour (opaque glass), so it
-  // must read as one continuous surface: no raised-panel shadow, no backdrop blur.
+  // Editorial light stays close to the page canvas, with just enough glass and
+  // edge depth to preserve the navigation hierarchy.
   const isEdLight = !!ed && colorMode === 'light'
   const navigationGroups = groupNavigationItems(items)
 
@@ -107,8 +107,8 @@ export default function Sidebar({
     '8px 0 32px -24px rgba(0,0,0,0.65)',
   )
   const editorialSurfaceShadow = useColorModeValue(
-    // Light: flush with the page — no shadow so the sidebar isn't a raised panel.
-    'none',
+    // Light only gets a restrained edge shadow; dark keeps stronger separation.
+    '4px 0 26px -24px rgba(18,45,36,0.20)',
     '10px 0 38px -24px rgba(0,0,0,0.72)',
   )
   const surfaceShadow = ed ? editorialSurfaceShadow : surfaceShadowBase
@@ -158,7 +158,7 @@ export default function Sidebar({
       w={`${width}px`}
       bg={surface}
       backgroundImage={isEdLight ? undefined : sidebarWash}
-      backdropFilter={isEdLight ? 'none' : 'saturate(180%) blur(20px)'}
+      backdropFilter={ed ? 'saturate(112%) blur(18px)' : 'saturate(180%) blur(20px)'}
       borderRight="1px solid var(--pb-hair)"
       boxShadow={surfaceShadow}
       zIndex={1100}

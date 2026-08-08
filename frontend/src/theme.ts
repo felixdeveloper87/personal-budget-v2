@@ -2,14 +2,16 @@ import { extendTheme, ThemeConfig } from '@chakra-ui/react'
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
-  light: '#f2f0e6',
-  dark: 'linear-gradient(180deg, #111113 0%, #0b0b0c 100%)',
+  light:
+    'radial-gradient(circle at 12% -8%, rgba(255,255,255,0.96) 0%, transparent 36%), radial-gradient(circle at 100% 0%, rgba(38,115,90,0.035) 0%, transparent 30%), linear-gradient(145deg, #f8f9f7 0%, #f3f4f2 48%, #ecefeb 100%)',
+  dark:
+    'radial-gradient(circle at 88% -12%, rgba(55,150,125,0.08) 0%, transparent 32%), linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
 
-  cardLight: 'linear-gradient(135deg, #ffffff 0%, #f3f9f6 100%)',
-  cardDark: 'linear-gradient(135deg, #111113 0%, #0a0a0b 100%)',
+  cardLight: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(247,248,246,0.94) 100%)',
+  cardDark: 'linear-gradient(135deg, rgba(15,19,17,0.98) 0%, rgba(10,13,12,0.96) 100%)',
 
-  secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f8fcfa 100%)',
-  secondaryDark: 'linear-gradient(135deg, #141416 0%, #1b1b1e 100%)',
+  secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f3f4f2 100%)',
+  secondaryDark: 'linear-gradient(135deg, #101312 0%, #151a17 100%)',
 } as const
 
 // 🔤 Fontes da plataforma — fonte única de verdade.
@@ -58,13 +60,13 @@ const theme = extendTheme({
         // Estilos de tema
         bg: GRADIENTS.light,
 
-        color: '#1a2620',
+        color: '#17201c',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
       // Estilos para modo escuro
       '[data-theme="dark"] body': {
         bg: GRADIENTS.dark,
-        color: '#f2f4f0',
+        color: '#eff4f1',
       },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
@@ -110,16 +112,16 @@ const theme = extendTheme({
   },
   colors: {
     brand: {
-      50: '#ecf8f1',
-      100: '#d2eede',
-      200: '#a8dcc0',
-      300: '#74c39c',
-      400: '#45a678',
-      500: '#2d8a5f',
-      600: '#1e6b4b',
-      700: '#1e5a41',
-      800: '#173f2f',
-      900: '#122d23',
+      50: '#eef7f4',
+      100: '#d5ece4',
+      200: '#aad9c9',
+      300: '#5fd0b5',
+      400: '#42bd98',
+      500: '#26735a',
+      600: '#18513e',
+      700: '#144536',
+      800: '#10392d',
+      900: '#0a2a22',
     },
   },
   components: {
@@ -129,15 +131,15 @@ const theme = extendTheme({
         container: {
           // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
           // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(10, 10, 11, 0.88)' : 'rgba(255, 255, 255, 0.72)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(244, 246, 242, 0.12)' : 'rgba(26, 38, 32, 0.14)',
+          bg: props.colorMode === 'dark' ? 'rgba(10, 13, 12, 0.94)' : 'rgba(255, 255, 255, 0.90)',
+          borderColor: props.colorMode === 'dark' ? 'rgba(232, 242, 237, 0.09)' : 'rgba(23, 32, 28, 0.11)',
           borderRadius: '2xl',
           boxShadow: props.colorMode === 'dark'
-            ? '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.9), 0 12px 34px -22px rgba(28,55,40,0.28), 0 3px 10px rgba(28,55,40,0.05)',
+            ? '0 1px 2px rgba(0,0,0,0.52), 0 14px 38px rgba(0,0,0,0.40)'
+            : 'inset 0 1px 0 rgba(255,255,255,0.84), 0 1px 2px rgba(18,45,36,0.045), 0 12px 32px rgba(18,45,36,0.07)',
           backdropFilter: props.colorMode === 'dark'
-            ? 'blur(12px) saturate(115%)'
-            : 'blur(16px) saturate(125%)',
+            ? 'blur(14px) saturate(112%)'
+            : 'blur(18px) saturate(112%)',
         },
       }),
     },
@@ -146,19 +148,23 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(18, 18, 20, 0.92)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(13, 16, 15, 0.98)' : 'rgba(255, 255, 255, 0.97)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#f2f4f0' : '#1a2620',
+          color: props.colorMode === 'dark' ? '#eff4f1' : '#17201c',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(244, 246, 242, 0.18)'
-            : 'rgba(26, 38, 32, 0.18)',
-          boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
+            ? 'rgba(232, 242, 237, 0.17)'
+            : 'rgba(24, 81, 62, 0.23)',
+          boxShadow: props.colorMode === 'dark'
+            ? '0 32px 90px -28px rgba(0, 0, 0, 0.78)'
+            : '0 28px 80px -28px rgba(18, 45, 36, 0.28)',
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(0, 0, 0, 0.82)',
+          bg: props.colorMode === 'dark'
+            ? 'rgba(2, 4, 3, 0.76)'
+            : 'rgba(23, 32, 28, 0.30)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
@@ -168,8 +174,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(244, 246, 242, 0.10)'
-            : 'rgba(26, 38, 32, 0.12)',
+            ? 'rgba(232, 242, 237, 0.09)'
+            : 'rgba(23, 32, 28, 0.11)',
         },
       }),
     },
@@ -178,19 +184,23 @@ const theme = extendTheme({
         dialog: {
           // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
           // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(18, 18, 20, 0.92)' : 'rgba(255, 255, 255, 0.90)',
+          bg: props.colorMode === 'dark' ? 'rgba(13, 16, 15, 0.98)' : 'rgba(255, 255, 255, 0.97)',
           backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#f2f4f0' : '#1a2620',
+          color: props.colorMode === 'dark' ? '#eff4f1' : '#17201c',
           borderRadius: '18px',
           border: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(244, 246, 242, 0.18)'
-            : 'rgba(26, 38, 32, 0.18)',
-          boxShadow: '0 32px 90px -28px rgba(0, 0, 0, 0.72)',
+            ? 'rgba(232, 242, 237, 0.17)'
+            : 'rgba(24, 81, 62, 0.23)',
+          boxShadow: props.colorMode === 'dark'
+            ? '0 32px 90px -28px rgba(0, 0, 0, 0.78)'
+            : '0 28px 80px -28px rgba(18, 45, 36, 0.28)',
           overflow: 'hidden',
         },
         overlay: {
-          bg: 'rgba(0, 0, 0, 0.82)',
+          bg: props.colorMode === 'dark'
+            ? 'rgba(2, 4, 3, 0.76)'
+            : 'rgba(23, 32, 28, 0.30)',
           backdropFilter: 'blur(18px) saturate(115%)',
         },
         header: {
@@ -200,8 +210,8 @@ const theme = extendTheme({
         footer: {
           borderTop: '1px solid',
           borderColor: props.colorMode === 'dark'
-            ? 'rgba(244, 246, 242, 0.10)'
-            : 'rgba(26, 38, 32, 0.12)',
+            ? 'rgba(232, 242, 237, 0.09)'
+            : 'rgba(23, 32, 28, 0.11)',
         },
       }),
     },
