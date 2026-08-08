@@ -18,6 +18,7 @@ export { default as DateBasisToggle } from './DateBasisToggle'
 export type { DateBasisToggleProps } from './DateBasisToggle'
 export { default as BankLogo, getBankMeta, UK_BANKS } from './BankLogo'
 export { default as BankCombobox } from './BankCombobox'
+export { default as MerchantLogo, getMerchantLogoDomain } from './MerchantLogo'
 
 // UI Utilities - General UI utilities and responsive styles
 export * from './ui'
