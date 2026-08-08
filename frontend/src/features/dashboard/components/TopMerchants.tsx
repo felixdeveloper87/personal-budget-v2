@@ -75,7 +75,6 @@ export default function TopMerchants({ transactions }: TopMerchantsProps) {
                 count={merchant.count}
                 total={merchant.total}
                 share={merchantTotal > 0 ? merchant.total / merchantTotal : 0}
-                isLeading={index === 0}
               />
             ))}
           </VStack>
@@ -92,20 +91,17 @@ interface MerchantRowProps {
   total: number
   /** 0-1, share of all variable merchant spending in the period. */
   share: number
-  isLeading: boolean
 }
 
-function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRowProps) {
+function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
   const percentage = Math.round(share * 100)
 
   return (
     <Box
       px={{ base: 2.5, md: 3 }}
-      py={isLeading ? 2.75 : 1.75}
+      py={1.75}
       borderRadius="14px"
-      bg={isLeading ? 'var(--pb-tint-green)' : 'transparent'}
-      border="1px solid"
-      borderColor={isLeading ? 'var(--pb-hair-2)' : 'transparent'}
+      bg="transparent"
     >
       <HStack align="flex-start" spacing={3}>
         <Box position="relative" w="36px" h="36px" flexShrink={0}>
@@ -120,10 +116,10 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
             display="grid"
             placeItems="center"
             borderRadius="full"
-            bg={isLeading ? 'var(--pb-forest-2)' : 'var(--pb-surface)'}
-            color={isLeading ? 'var(--pb-on-accent)' : 'var(--pb-ink-faint)'}
+            bg="var(--pb-surface)"
+            color="var(--pb-ink-faint)"
             border="1px solid"
-            borderColor={isLeading ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)'}
+            borderColor="var(--pb-hair-2)"
             boxShadow="0 1px 4px rgba(0,0,0,0.18)"
           >
             <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} lineHeight={1}>
@@ -137,7 +133,7 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
             <Box minW={0}>
               <Text
                 fontFamily="var(--pb-serif)"
-                fontSize={isLeading ? 'lg' : 'md'}
+                fontSize="md"
                 fontWeight={500}
                 lineHeight={1.15}
                 color="var(--pb-ink)"
@@ -153,7 +149,7 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
             <VStack align="flex-end" spacing={0.5} flexShrink={0}>
               <Text
                 fontFamily="var(--pb-serif)"
-                fontSize={isLeading ? 'lg' : 'md'}
+                fontSize="md"
                 fontWeight={600}
                 lineHeight={1.1}
                 color="var(--pb-ink)"
@@ -161,7 +157,7 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
               >
                 {fmtCurrency(total)}
               </Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="8.5px" color={isLeading ? 'var(--pb-forest-2)' : 'var(--pb-ink-faint)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <Text fontFamily="var(--pb-mono)" fontSize="8.5px" color="var(--pb-ink-faint)" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {percentage}% of total
               </Text>
             </VStack>
@@ -174,7 +170,7 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
             aria-valuemax={100}
             aria-valuenow={percentage}
             mt={2}
-            h={isLeading ? '5px' : '4px'}
+            h="4px"
             borderRadius="full"
             bg="var(--pb-surface-3)"
             overflow="hidden"
@@ -183,10 +179,8 @@ function MerchantRow({ rank, name, count, total, share, isLeading }: MerchantRow
               h="full"
               w={`max(${percentage}%, 8px)`}
               borderRadius="full"
-              bgGradient={isLeading
-                ? 'linear(to-r, var(--pb-forest-2), var(--pb-line))'
-                : 'linear(to-r, var(--pb-forest), var(--pb-forest-2))'}
-              opacity={isLeading ? 1 : 0.78}
+              bgGradient="linear(to-r, var(--pb-forest), var(--pb-forest-2))"
+              opacity={0.78}
               transition="width 0.5s ease"
             />
           </Box>
