@@ -95,28 +95,50 @@ export default function GoogleSignInSection() {
     if (!clientId || !buttonHost) return
 
     let cancelled = false
+    let resizeObserver: ResizeObserver | undefined
+    let renderFrame = 0
+    let renderedWidth = 0
     setStatus('loading')
 
     loadGisScript()
       .then(() => {
         if (cancelled || !window.google?.accounts?.id) return
         const googleIdentity = window.google.accounts.id
-        buttonHost.innerHTML = ''
         googleIdentity.initialize({
           client_id: clientId,
           callback: (response) => {
             void onCredential(response.credential)
           },
         })
-        googleIdentity.renderButton(buttonHost, {
-          theme: 'filled_black',
-          size: 'large',
-          text: 'continue_with',
-          shape: 'pill',
-          width: buttonHost.offsetWidth || 400,
-          logo_alignment: 'left',
-        })
-        setStatus('ready')
+
+        const renderAtCurrentWidth = () => {
+          window.cancelAnimationFrame(renderFrame)
+          renderFrame = window.requestAnimationFrame(() => {
+            if (cancelled) return
+
+            const availableWidth = Math.floor(buttonHost.getBoundingClientRect().width)
+            if (availableWidth < 200) return
+
+            const nextWidth = Math.min(400, availableWidth)
+            if (nextWidth === renderedWidth && buttonHost.childElementCount > 0) return
+
+            renderedWidth = nextWidth
+            buttonHost.innerHTML = ''
+            googleIdentity.renderButton(buttonHost, {
+              theme: 'filled_black',
+              size: 'large',
+              text: 'continue_with',
+              shape: 'pill',
+              width: nextWidth,
+              logo_alignment: 'left',
+            })
+            setStatus('ready')
+          })
+        }
+
+        resizeObserver = new ResizeObserver(renderAtCurrentWidth)
+        resizeObserver.observe(buttonHost)
+        renderAtCurrentWidth()
       })
       .catch(() => {
         if (!cancelled) setStatus('error')
@@ -124,6 +146,8 @@ export default function GoogleSignInSection() {
 
     return () => {
       cancelled = true
+      window.cancelAnimationFrame(renderFrame)
+      resizeObserver?.disconnect()
       buttonHost.innerHTML = ''
     }
   }, [clientId, buttonHost, onCredential])
@@ -137,34 +161,41 @@ export default function GoogleSignInSection() {
       <Box
         position="relative"
         display="flex"
-        h="50px"
+        h="44px"
         w="full"
+        maxW="400px"
+        mx="auto"
         alignItems="center"
         justifyContent="center"
         overflow="hidden"
-        border="1px solid"
+        border={status === 'ready' ? '0' : '1px solid'}
         borderColor={unavailable ? C.line : C.lineStrong}
         borderRadius="999px"
-        bg={C.panelSoft}
-        boxShadow="inset 0 1px 0 rgba(255,255,255,0.025)"
+        bg={status === 'ready' ? 'transparent' : C.panelSoft}
+        boxShadow={status === 'ready' ? 'none' : 'inset 0 1px 0 rgba(255,255,255,0.025)'}
       >
         <Box
           ref={setButtonHost}
           w="full"
-          minH="44px"
+          h="44px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          overflow="hidden"
+          borderRadius="999px"
           opacity={status === 'ready' && !busy ? 1 : 0}
           pointerEvents={status === 'ready' && !busy ? 'auto' : 'none'}
           transition="opacity 0.18s ease"
           sx={{
             '& > div': {
               display: 'flex !important',
-              width: '100% !important',
               justifyContent: 'center !important',
+              maxWidth: '100% !important',
             },
             '& iframe': {
-              width: '100% !important',
               maxWidth: '100% !important',
               height: '44px !important',
+              display: 'block !important',
             },
           }}
         />
