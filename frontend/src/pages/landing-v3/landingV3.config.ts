@@ -5,7 +5,6 @@ export const NAV_LINKS = [
 ] as const
 
 export const HERO = {
-  eyebrow: 'Personal finance, without the noise',
   line1: 'Know where you stand.',
   line2: 'Choose what comes next.',
   subtitle:

@@ -13,9 +13,11 @@ import {
   Download,
   FileText,
   LockKeyhole,
+  Menu,
   Search,
   ShieldCheck,
   UsersRound,
+  X,
 } from 'lucide-react'
 import { guilloche } from '../../features/dashboard/components/guilloche'
 import './LandingV3.css'
@@ -54,19 +56,27 @@ function useReducedMotion() {
 }
 
 function BrandSeal({ className = '' }: { className?: string }) {
-  const ringA = useMemo(() => guilloche(58, 19, 62), [])
-  const ringB = useMemo(() => guilloche(58, 27, 44), [])
-
   return (
     <svg
       className={`pbv3-seal ${className}`}
-      viewBox="-108 -108 216 216"
+      viewBox="0 0 48 48"
       aria-hidden="true"
     >
-      <circle className="pbv3-seal__rim" r="102" />
-      <path className="pbv3-seal__jade" d={ringA} />
-      <path className="pbv3-seal__gold" d={ringB} />
-      <circle className="pbv3-seal__core" r="6" />
+      <circle className="pbv3-seal__plate" cx="24" cy="24" r="23" />
+      <circle className="pbv3-seal__rim" cx="24" cy="24" r="21.75" />
+      <circle className="pbv3-seal__gold-arc" cx="24" cy="24" r="21.75" pathLength="1" />
+      <circle className="pbv3-seal__field" cx="24" cy="24" r="18.2" />
+      <path
+        className="pbv3-seal__letter pbv3-seal__letter--p"
+        fillRule="evenodd"
+        d="M8.5 35.5v-23h7.2c5.6 0 8.9 2.9 8.9 7.6 0 5-3.4 7.9-8.9 7.9h-2.8v7.5H8.5Zm4.4-11.4h2.5c3.1 0 4.7-1.3 4.7-3.9 0-2.5-1.6-3.8-4.7-3.8h-2.5v7.7Z"
+      />
+      <path
+        className="pbv3-seal__letter pbv3-seal__letter--b"
+        fillRule="evenodd"
+        d="M24.5 35.5v-23h7.6c5 0 8 2.4 8 6.3 0 2.6-1.4 4.5-3.7 5.4 2.8.7 4.5 2.6 4.5 5.4 0 4.2-3.2 6.9-8.4 6.9h-8Zm4.4-13h2.7c2.7 0 4.1-1.1 4.1-3.1s-1.4-3-4.1-3h-2.7v6.1Zm0 9.1H32c3 0 4.5-1.2 4.5-3.3 0-2.2-1.5-3.3-4.5-3.3h-3.1v6.6Z"
+      />
+      <circle className="pbv3-seal__core" cx="39" cy="38" r="1.65" />
     </svg>
   )
 }
@@ -76,10 +86,14 @@ function BrandLockup({ footer = false }: { footer?: boolean }) {
     <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
       <BrandSeal />
       <span className="pbv3-brand__words">
-        <strong>
-          Personal <em>Budget</em>
-        </strong>
-        <small>Clarity for money</small>
+        <span className="pbv3-brand__wordmark">
+          <strong>Personal</strong>
+          <em>Budget</em>
+        </span>
+        <small>
+          <i aria-hidden="true" />
+          Clarity for your money
+        </small>
       </span>
     </span>
   )
@@ -508,15 +522,56 @@ function HouseholdPreview() {
 
 export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props) {
   const rootRef = useRef<HTMLDivElement>(null)
+  const navToggleRef = useRef<HTMLButtonElement>(null)
   const reducedMotion = useReducedMotion()
   const [navElevated, setNavElevated] = useState(false)
+  const [navMenuOpen, setNavMenuOpen] = useState(false)
+  const [activeSection, setActiveSection] = useState('')
 
   useEffect(() => {
-    const update = () => setNavElevated(window.scrollY > 24)
+    const update = () => {
+      setNavElevated(window.scrollY > 24)
+
+      const activationLine = window.innerHeight * 0.36
+      let nextActive = ''
+      NAV_LINKS.forEach(({ id }) => {
+        const section = document.getElementById(id)
+        if (!section) return
+        const bounds = section.getBoundingClientRect()
+        if (bounds.top <= activationLine && bounds.bottom > activationLine) {
+          nextActive = id
+        }
+      })
+      setActiveSection(nextActive)
+    }
     update()
     window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
+    window.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
   }, [])
+
+  useEffect(() => {
+    if (!navMenuOpen) return
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      setNavMenuOpen(false)
+      window.requestAnimationFrame(() => navToggleRef.current?.focus())
+    }
+    const closeAtDesktop = () => {
+      if (window.innerWidth > 1080) setNavMenuOpen(false)
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+    window.addEventListener('resize', closeAtDesktop)
+    return () => {
+      window.removeEventListener('keydown', closeOnEscape)
+      window.removeEventListener('resize', closeAtDesktop)
+    }
+  }, [navMenuOpen])
 
   useEffect(() => {
     const targetId = decodeURIComponent(window.location.hash.slice(1))
@@ -572,29 +627,102 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         Skip to content
       </a>
 
-      <nav className={`pbv3-nav${navElevated ? ' is-elevated' : ''}`} aria-label="Main navigation">
+      <nav
+        className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}`}
+        aria-label="Main navigation"
+      >
         <div className="pbv3-shell pbv3-nav__inner">
-          <a className="pbv3-nav__brand" href="#top" aria-label="Personal Budget home">
+          <a
+            className="pbv3-nav__brand"
+            href="#top"
+            aria-label="Personal Budget home"
+            onClick={() => setNavMenuOpen(false)}
+          >
             <BrandLockup />
           </a>
 
-          <div className="pbv3-nav__links">
-            {NAV_LINKS.map((link) => (
-              <a href={`#${link.id}`} key={link.id}>
-                {link.label}
+          <div className="pbv3-nav__links" aria-label="Page sections">
+            {NAV_LINKS.map((link, index) => (
+              <a
+                className={activeSection === link.id ? 'is-active' : ''}
+                href={`#${link.id}`}
+                aria-current={activeSection === link.id ? 'location' : undefined}
+                key={link.id}
+              >
+                <span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                <b>{link.label}</b>
               </a>
             ))}
           </div>
 
           <div className="pbv3-nav__actions">
-            <button className="pbv3-text-button" type="button" onClick={onSignIn}>
+            <button className="pbv3-nav__signin" type="button" onClick={onSignIn}>
               {HERO.signInCta}
             </button>
-            <button className="pbv3-button pbv3-button--small" type="button" onClick={onRequestAccess}>
-              Request access
-              <ArrowRight size={15} aria-hidden="true" />
+            <button className="pbv3-nav__cta" type="button" onClick={onRequestAccess}>
+              <span>Request access</span>
+              <i aria-hidden="true">
+                <ArrowRight size={15} />
+              </i>
+            </button>
+            <button
+              ref={navToggleRef}
+              className="pbv3-nav__menu-toggle"
+              type="button"
+              aria-controls="pbv3-navigation-menu"
+              aria-expanded={navMenuOpen}
+              aria-label={navMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              onClick={() => setNavMenuOpen((open) => !open)}
+            >
+              <span>Menu</span>
+              {navMenuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
             </button>
           </div>
+
+          {navMenuOpen && (
+            <div className="pbv3-nav-menu" id="pbv3-navigation-menu">
+              <div className="pbv3-nav-menu__heading">
+                <span>Explore Personal Budget</span>
+                <small>Clarity for your money</small>
+              </div>
+              <div className="pbv3-nav-menu__links">
+                {NAV_LINKS.map((link, index) => (
+                  <a
+                    className={activeSection === link.id ? 'is-active' : ''}
+                    href={`#${link.id}`}
+                    aria-current={activeSection === link.id ? 'location' : undefined}
+                    onClick={() => setNavMenuOpen(false)}
+                    key={link.id}
+                  >
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    <b>{link.label}</b>
+                    <ArrowRight size={16} aria-hidden="true" />
+                  </a>
+                ))}
+              </div>
+              <div className="pbv3-nav-menu__actions">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNavMenuOpen(false)
+                    onSignIn()
+                  }}
+                >
+                  {HERO.signInCta}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNavMenuOpen(false)
+                    onRequestAccess()
+                  }}
+                >
+                  Request access
+                  <ArrowRight size={15} aria-hidden="true" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -620,10 +748,6 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
 
           <div className="pbv3-shell pbv3-hero__grid">
             <div className="pbv3-hero__copy">
-              <span className="pbv3-eyebrow pbv3-hero__eyebrow">
-                <i />
-                {HERO.eyebrow}
-              </span>
               <h1>
                 <span>{HERO.line1}</span>
                 <em>{HERO.line2}</em>
