@@ -194,60 +194,53 @@
   transition: transform 350ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.pbv3-seal path,
-.pbv3-seal circle {
+.pbv3 .pbv3-seal path,
+.pbv3 .pbv3-seal circle {
   vector-effect: non-scaling-stroke;
 }
 
-.pbv3-seal__plate {
-  fill: rgba(6, 16, 11, 0.98);
-  stroke: rgba(244, 246, 242, 0.08);
+.pbv3 .pbv3-seal__plate {
+  fill: #06110d;
+}
+
+.pbv3 .pbv3-seal__rim {
+  fill: none;
+  stroke: var(--jade);
+  stroke-opacity: 0.34;
   stroke-width: 0.7;
 }
 
-.pbv3-seal__rim {
-  fill: none;
-  stroke: var(--jade);
-  stroke-opacity: 0.88;
-  stroke-width: 1.25;
-}
-
-.pbv3-seal__gold-arc {
+.pbv3 .pbv3-seal__gold-accent {
   fill: none;
   stroke: var(--gold);
-  stroke-dasharray: 0.12 0.38;
   stroke-linecap: round;
-  stroke-opacity: 0.9;
-  stroke-width: 1.35;
-  transform: rotate(-18deg);
-  transform-box: fill-box;
-  transform-origin: center;
+  stroke-width: 1.15;
 }
 
-.pbv3-seal__field {
-  fill: #09120e;
-  stroke: rgba(244, 246, 242, 0.17);
-  stroke-width: 0.78;
+.pbv3 .pbv3-seal__field {
+  fill: #07110d;
+  stroke: rgba(242, 244, 240, 0.26);
+  stroke-width: 0.72;
 }
 
-.pbv3-seal__letter {
+.pbv3 .pbv3-seal__letter {
   stroke: none;
 }
 
-.pbv3-seal__letter--p {
+.pbv3 .pbv3-seal__letter--p {
   fill: var(--cream);
   fill-opacity: 0.96;
 }
 
-.pbv3-seal__letter--b {
+.pbv3 .pbv3-seal__letter--b {
   fill: var(--jade);
   fill-opacity: 0.98;
 }
 
-.pbv3-seal__core {
+.pbv3 .pbv3-seal__core {
   fill: var(--gold);
-  stroke: #09120e;
-  stroke-width: 0.8;
+  stroke: #07110d;
+  stroke-width: 0.65;
 }
 
 @media (hover: hover) {

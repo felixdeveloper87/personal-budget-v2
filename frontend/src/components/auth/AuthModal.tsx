@@ -2,7 +2,6 @@ import {
   lazy,
   Suspense,
   useEffect,
-  useMemo,
   useState,
   type KeyboardEvent,
 } from 'react'
@@ -18,7 +17,7 @@ import {
 import { Check, Download, Lock, ShieldCheck } from '../ui/icons'
 import { AppCloseButton, PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
-import { guilloche } from '../../features/dashboard/components/guilloche'
+import BrandMark from '../brand/BrandMark'
 import LoginForm from './LoginForm'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
 
@@ -67,55 +66,14 @@ interface AuthModalProps {
 }
 
 function AuthSeal({ size = 52 }: { size?: number }) {
-  const ringA = useMemo(() => guilloche(58, 19, 62), [])
-  const ringB = useMemo(() => guilloche(58, 27, 44), [])
-
   return (
-    <Box
-      as="svg"
-      viewBox="-108 -108 216 216"
-      w={`${size}px`}
-      h={`${size}px`}
-      flexShrink={0}
-      aria-hidden
-      sx={{
-        '.auth-seal-jade': {
-          transformBox: 'fill-box',
-          transformOrigin: 'center',
-          animation: 'authSealSpin 52s linear infinite',
-        },
-        '.auth-seal-gold': {
-          transformBox: 'fill-box',
-          transformOrigin: 'center',
-          animation: 'authSealSpin 68s linear infinite reverse',
-        },
-        '@keyframes authSealSpin': {
-          to: { transform: 'rotate(360deg)' },
-        },
-        '@media (prefers-reduced-motion: reduce)': {
-          '.auth-seal-jade, .auth-seal-gold': { animation: 'none' },
-        },
-      }}
-    >
-      <circle r="102" fill="rgba(11,11,12,0.62)" stroke={C.lineStrong} strokeWidth="4" />
-      <path
-        className="auth-seal-jade"
-        d={ringA}
-        fill="none"
-        stroke={C.jade}
-        strokeWidth="1.6"
-        strokeOpacity="0.74"
-      />
-      <path
-        className="auth-seal-gold"
-        d={ringB}
-        fill="none"
-        stroke={C.gold}
-        strokeWidth="1.6"
-        strokeOpacity="0.64"
-      />
-      <circle r="6" fill={C.gold} />
-    </Box>
+    <BrandMark
+      size={size}
+      cream={C.cream}
+      jade={C.jade}
+      gold={C.gold}
+      style={{ flexShrink: 0, filter: 'drop-shadow(0 8px 14px rgba(0, 0, 0, 0.24))' }}
+    />
   )
 }
 

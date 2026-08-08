@@ -20,6 +20,7 @@ import {
   X,
 } from 'lucide-react'
 import { guilloche } from '../../features/dashboard/components/guilloche'
+import BrandMark from '../../components/brand/BrandMark'
 import './LandingV3.css'
 import {
   FEATURE_CARDS,
@@ -56,29 +57,7 @@ function useReducedMotion() {
 }
 
 function BrandSeal({ className = '' }: { className?: string }) {
-  return (
-    <svg
-      className={`pbv3-seal ${className}`}
-      viewBox="0 0 48 48"
-      aria-hidden="true"
-    >
-      <circle className="pbv3-seal__plate" cx="24" cy="24" r="23" />
-      <circle className="pbv3-seal__rim" cx="24" cy="24" r="21.75" />
-      <circle className="pbv3-seal__gold-arc" cx="24" cy="24" r="21.75" pathLength="1" />
-      <circle className="pbv3-seal__field" cx="24" cy="24" r="18.2" />
-      <path
-        className="pbv3-seal__letter pbv3-seal__letter--p"
-        fillRule="evenodd"
-        d="M8.5 35.5v-23h7.2c5.6 0 8.9 2.9 8.9 7.6 0 5-3.4 7.9-8.9 7.9h-2.8v7.5H8.5Zm4.4-11.4h2.5c3.1 0 4.7-1.3 4.7-3.9 0-2.5-1.6-3.8-4.7-3.8h-2.5v7.7Z"
-      />
-      <path
-        className="pbv3-seal__letter pbv3-seal__letter--b"
-        fillRule="evenodd"
-        d="M24.5 35.5v-23h7.6c5 0 8 2.4 8 6.3 0 2.6-1.4 4.5-3.7 5.4 2.8.7 4.5 2.6 4.5 5.4 0 4.2-3.2 6.9-8.4 6.9h-8Zm4.4-13h2.7c2.7 0 4.1-1.1 4.1-3.1s-1.4-3-4.1-3h-2.7v6.1Zm0 9.1H32c3 0 4.5-1.2 4.5-3.3 0-2.2-1.5-3.3-4.5-3.3h-3.1v6.6Z"
-      />
-      <circle className="pbv3-seal__core" cx="39" cy="38" r="1.65" />
-    </svg>
-  )
+  return <BrandMark className={`pbv3-seal ${className}`} />
 }
 
 function BrandLockup({ footer = false }: { footer?: boolean }) {
