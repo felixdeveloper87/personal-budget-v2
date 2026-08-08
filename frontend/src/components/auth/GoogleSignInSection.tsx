@@ -2,17 +2,24 @@ import { useCallback, useEffect, useState } from 'react'
 import { Box, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthContext'
-import { ToastService } from '../../services/toast'
+import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
 
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
+
+type GoogleStatus = 'loading' | 'ready' | 'error'
+
+interface GoogleNotice {
+  tone: 'info' | 'error'
+  message: string
+}
 
 function GoogleG() {
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
-      <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      <path d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" />
+      <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853" />
+      <path d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" />
+      <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335" />
     </svg>
   )
 }
@@ -24,18 +31,22 @@ function loadGisScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${GIS_SCRIPT_SRC}"]`)
     if (existing) {
-      if (window.google?.accounts?.id) { resolve(); return }
-      existing.addEventListener('load', () => resolve())
-      existing.addEventListener('error', () => reject(new Error('Google script failed')))
+      if (window.google?.accounts?.id) {
+        resolve()
+        return
+      }
+      existing.addEventListener('load', () => resolve(), { once: true })
+      existing.addEventListener('error', () => reject(new Error('Google script failed')), { once: true })
       return
     }
-    const s = document.createElement('script')
-    s.src = GIS_SCRIPT_SRC
-    s.async = true
-    s.defer = true
-    s.onload = () => resolve()
-    s.onerror = () => reject(new Error('Google script failed'))
-    document.head.appendChild(s)
+
+    const script = document.createElement('script')
+    script.src = GIS_SCRIPT_SRC
+    script.async = true
+    script.defer = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Google script failed'))
+    document.head.appendChild(script)
   })
 }
 
@@ -43,88 +54,72 @@ export default function GoogleSignInSection() {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const { loginWithGoogle } = useAuth()
   const [busy, setBusy] = useState(false)
+  const [status, setStatus] = useState<GoogleStatus>('loading')
+  const [notice, setNotice] = useState<GoogleNotice>()
   const [buttonHost, setButtonHost] = useState<HTMLDivElement | null>(null)
-
-  const btnBg = 'rgba(22, 24, 30, 0.6)'
-  const btnBorder = 'rgba(239, 234, 224, 0.18)'
-  const btnText = '#efeae0'
-  const btnShadow = '0 1px 4px rgba(0,0,0,0.25)'
-  const dividerColor = '#60a5fa'
-  const muted = '#94a398'
 
   const onCredential = useCallback(
     async (credential: string | undefined) => {
       if (!credential) return
       setBusy(true)
+      setNotice(undefined)
       try {
         const outcome = await loginWithGoogle(credential)
         if (outcome.status === 'pending') {
-          ToastService.info({
-            title: 'Registration received',
-            description:
+          setNotice({
+            tone: 'info',
+            message:
               outcome.message ??
-              'An administrator must approve your account before you can sign in.',
-            duration: 6000,
-            dedupeKey: 'google-registration-pending',
-          })
-        } else {
-          ToastService.success({
-            title: 'Signed in with Google',
-            duration: 2000,
-            dedupeKey: 'google-login-success',
+              'Registration received. Your account must be approved before you can sign in.',
           })
         }
       } catch (error: unknown) {
-        let message = 'Google sign-in failed'
+        let message = 'Google sign-in could not be completed. Please try again or use email.'
         if (axios.isAxiosError(error)) {
-          const body = error.response?.data as { error?: string } | undefined
-          if (body?.error) message = body.error
+          const body = error.response?.data as { error?: string; message?: string } | undefined
+          if (body?.message) message = body.message
+          else if (body?.error) message = body.error
           if (error.response?.status === 503) {
-            message = 'Google sign-in is not enabled on the server.'
+            message = 'Google sign-in is not enabled on the server. Continue with email instead.'
           }
         }
-        ToastService.error({
-          title: 'Google sign-in failed',
-          description: message,
-          duration: 4000,
-          dedupeKey: 'google-login-failed',
-        })
+        setNotice({ tone: 'error', message })
       } finally {
         setBusy(false)
       }
     },
-    [loginWithGoogle]
+    [loginWithGoogle],
   )
 
   useEffect(() => {
     if (!clientId || !buttonHost) return
 
     let cancelled = false
+    setStatus('loading')
 
     loadGisScript()
       .then(() => {
         if (cancelled || !window.google?.accounts?.id) return
-        const gid = window.google.accounts.id
+        const googleIdentity = window.google.accounts.id
         buttonHost.innerHTML = ''
-        gid.initialize({
+        googleIdentity.initialize({
           client_id: clientId,
-          callback: (res) => { void onCredential(res.credential) },
+          callback: (response) => {
+            void onCredential(response.credential)
+          },
         })
-        gid.renderButton(buttonHost, {
-          theme: 'outline',
+        googleIdentity.renderButton(buttonHost, {
+          theme: 'filled_black',
           size: 'large',
           text: 'continue_with',
-          shape: 'rectangular',
+          shape: 'pill',
           width: buttonHost.offsetWidth || 400,
+          logo_alignment: 'left',
         })
+        setStatus('ready')
       })
       .catch(() => {
-        ToastService.error({
-          title: 'Google sign-in',
-          description: 'Could not load Google script. Check your connection.',
-          duration: 4000,
-          dedupeKey: 'google-script-load-failed',
-        })
+        if (!cancelled) setStatus('error')
       })
 
     return () => {
@@ -135,61 +130,95 @@ export default function GoogleSignInSection() {
 
   if (!clientId) return null
 
+  const unavailable = status === 'error'
+
   return (
     <VStack spacing={4} align="stretch" w="full">
-      {/*
-       * Custom-styled button layered over the invisible GIS iframe.
-       * The GIS iframe (opacity 0, z-index 1) handles the actual click/credential flow.
-       * overflow:hidden clips the iframe visually while pointer-events still fire within bounds.
-       */}
-      <Box position="relative" h="44px" w="full" borderRadius="xl" overflow="hidden">
-        {/* Visible layer — no pointer events so clicks fall through to GIS iframe */}
-        <HStack
-          position="absolute"
-          inset={0}
-          justify="center"
-          spacing={3}
-          bg={btnBg}
-          border="1px solid"
-          borderColor={btnBorder}
-          borderRadius="xl"
-          boxShadow={btnShadow}
-          pointerEvents="none"
-          opacity={busy ? 0.55 : 1}
-          transition="opacity 0.2s"
-        >
-          {busy ? <Spinner size="xs" thickness="2px" /> : <GoogleG />}
-          <Text fontSize="sm" fontWeight={600} color={btnText} letterSpacing="-0.01em">
-            Continue with Google
-          </Text>
-        </HStack>
-
-        {/* GIS iframe — invisible, handles all click + credential events */}
+      <Box
+        position="relative"
+        display="flex"
+        h="50px"
+        w="full"
+        alignItems="center"
+        justifyContent="center"
+        overflow="hidden"
+        border="1px solid"
+        borderColor={unavailable ? C.line : C.lineStrong}
+        borderRadius="999px"
+        bg={C.panelSoft}
+        boxShadow="inset 0 1px 0 rgba(255,255,255,0.025)"
+      >
         <Box
           ref={setButtonHost}
-          position="absolute"
-          inset={0}
-          opacity={0}
-          zIndex={1}
-          pointerEvents={busy ? 'none' : 'auto'}
+          w="full"
+          minH="44px"
+          opacity={status === 'ready' && !busy ? 1 : 0}
+          pointerEvents={status === 'ready' && !busy ? 'auto' : 'none'}
+          transition="opacity 0.18s ease"
           sx={{
-            '& > div': { width: '100% !important' },
-            '& iframe': { width: '100% !important', height: '44px !important' },
+            '& > div': {
+              display: 'flex !important',
+              width: '100% !important',
+              justifyContent: 'center !important',
+            },
+            '& iframe': {
+              width: '100% !important',
+              maxWidth: '100% !important',
+              height: '44px !important',
+            },
           }}
         />
+
+        {(status === 'loading' || busy) && (
+          <HStack position="absolute" inset={0} justify="center" spacing={3} color={C.muted}>
+            <Spinner size="xs" thickness="2px" color={C.jade} />
+            <Text fontFamily={F.body} fontSize="sm" fontWeight={600}>
+              {busy ? 'Completing sign in' : 'Loading Google'}
+            </Text>
+          </HStack>
+        )}
+
+        {unavailable && (
+          <HStack position="absolute" inset={0} justify="center" spacing={3} color={C.mutedDim}>
+            <GoogleG />
+            <Text fontFamily={F.body} fontSize="sm" fontWeight={600}>
+              Google sign-in unavailable
+            </Text>
+          </HStack>
+        )}
       </Box>
 
-      <Text
-        fontSize="xs"
-        fontWeight={600}
-        textAlign="center"
-        color={muted}
-        textTransform="uppercase"
-        letterSpacing="0.08em"
-      >
-        <Text as="span" color={dividerColor}>or</Text>{' '}
-        continue with email
-      </Text>
+      {notice && (
+        <Box
+          role={notice.tone === 'error' ? 'alert' : 'status'}
+          px={3.5}
+          py={3}
+          border="1px solid"
+          borderColor={notice.tone === 'error' ? 'rgba(255,154,144,0.22)' : 'rgba(232,196,119,0.2)'}
+          borderRadius="12px"
+          bg={notice.tone === 'error' ? C.coralSoft : C.goldSoft}
+          color={notice.tone === 'error' ? C.coral : C.gold}
+        >
+          <Text fontFamily={F.body} fontSize="xs" lineHeight={1.5}>
+            {notice.message}
+          </Text>
+        </Box>
+      )}
+
+      <HStack spacing={3} aria-hidden="true">
+        <Box h="1px" flex={1} bg={C.line} />
+        <Text
+          color={C.mutedDim}
+          fontFamily={F.mono}
+          fontSize="8px"
+          fontWeight={500}
+          letterSpacing="0.12em"
+          textTransform="uppercase"
+        >
+          or continue with email
+        </Text>
+        <Box h="1px" flex={1} bg={C.line} />
+      </HStack>
     </VStack>
   )
 }

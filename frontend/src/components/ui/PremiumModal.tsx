@@ -7,7 +7,7 @@ import {
     Box,
     ModalProps,
 } from '@chakra-ui/react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { useEd } from '../../editorial'
 import { safariStyles, getResponsiveStyles } from './ui'
@@ -31,6 +31,7 @@ export default function PremiumModal({
     ...props
 }: PremiumModalProps) {
     const ed = useEd()
+    const reduceMotion = useReducedMotion()
     const responsiveStyles = getResponsiveStyles()
     const {
         sx: contentSx,
@@ -75,10 +76,12 @@ export default function PremiumModal({
             />
 
             <MotionModalContent
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                initial={reduceMotion ? false : { opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+                exit={reduceMotion ? { opacity: 1 } : { opacity: 0, scale: 0.95, y: 20 }}
+                transition={reduceMotion
+                    ? { duration: 0 }
+                    : { duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
                 bg={resolvedContentBg}
                 color={ed?.cream}
                 textStyle={ed ? 'body' : undefined}

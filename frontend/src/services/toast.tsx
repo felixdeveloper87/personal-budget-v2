@@ -274,9 +274,9 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
   if (status === 403) {
     return {
       title: 'Access restricted',
-      description: 'You do not have permission to perform this action.',
+      description: serverMessage ?? 'You do not have permission to perform this action.',
       status: 'warning',
-      dedupeKey: 'http-403',
+      dedupeKey: `http-403:${serverMessage ?? ''}`,
     }
   }
 

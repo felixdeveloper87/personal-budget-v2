@@ -2,17 +2,19 @@ import { useRef, useState } from 'react'
 import {
   Box,
   Button,
+  HStack,
   Icon,
   IconButton,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { ArrowRight, Eye, EyeOff, Lock, Mail } from '../ui/icons'
+import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
 import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
+import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -29,6 +31,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<LoginErrors>({})
+  const [submitError, setSubmitError] = useState<string>()
 
   const emailRef = useRef<HTMLInputElement>(null)
   const passwordRef = useRef<HTMLInputElement>(null)
@@ -56,6 +59,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (loading) return
+    setSubmitError(undefined)
     if (!validate()) return
 
     setLoading(true)
@@ -71,20 +75,14 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       const message = apiMessage.dedupeKey === 'http-401'
         ? 'Invalid email or password'
         : apiMessage.description
-      setErrors({ password: message })
-      ToastService.error({
-        title: 'Sign in failed',
-        description: message,
-        duration: 3000,
-        dedupeKey: 'login-failed',
-      })
+      setSubmitError(message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <VStack spacing={4} align="stretch">
+    <VStack spacing={5} align="stretch">
       <GoogleSignInSection />
       <Box as="form" onSubmit={handleSubmit} noValidate>
         <VStack spacing={4} align="stretch">
@@ -98,6 +96,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             onChange={(v) => {
               setEmail(v)
               if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
+              if (submitError) setSubmitError(undefined)
             }}
             placeholder="you@example.com"
             autoComplete="email"
@@ -110,11 +109,12 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             label="Password"
             icon={Lock}
             type={showPassword ? 'text' : 'password'}
-            name="current-password"
+            name="password"
             value={password}
             onChange={(v) => {
               setPassword(v)
               if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
+              if (submitError) setSubmitError(undefined)
             }}
             placeholder="Your password"
             autoComplete="current-password"
@@ -124,52 +124,87 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               <IconButton
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                 icon={<Icon as={showPassword ? EyeOff : Eye} boxSize={4} />}
+                type="button"
                 variant="ghost"
                 size="sm"
-                color="#94a398"
-                _hover={{ color: '#efeae0', bg: 'rgba(239,234,224,0.06)' }}
+                color={C.muted}
+                borderRadius="full"
+                _hover={{ color: C.jade, bg: C.jadeSoft }}
+                _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
                 onClick={() => setShowPassword((s) => !s)}
-                tabIndex={-1}
               />
             }
           />
+
+          {submitError && (
+            <HStack
+              role="alert"
+              align="flex-start"
+              spacing={2.5}
+              p={3.5}
+              border="1px solid"
+              borderColor="rgba(255, 154, 144, 0.22)"
+              borderRadius="12px"
+              bg={C.coralSoft}
+              color={C.coral}
+            >
+              <Icon as={AlertCircle} boxSize="16px" mt="1px" flexShrink={0} />
+              <Text fontFamily={F.body} fontSize="xs" lineHeight={1.5}>
+                {submitError}
+              </Text>
+            </HStack>
+          )}
 
           <Button
             type="submit"
             isLoading={loading}
             loadingText="Signing in"
             rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
-            h="48px"
+            h="50px"
             w="full"
-            mt={2}
+            mt={1}
             fontSize="sm"
+            fontFamily={F.body}
             fontWeight={700}
-            color="#060d14"
+            color={C.bg}
             borderRadius="999px"
-            bg="#60a5fa"
-            border="1px solid #60a5fa"
-            boxShadow="0 8px 24px -10px rgba(96, 165, 250, 0.4)"
+            bg={C.jade}
+            border="1px solid"
+            borderColor={C.jade}
+            boxShadow="0 12px 28px -16px rgba(127, 230, 179, 0.72)"
             transition="transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease"
             _hover={{
-              bg: '#93c5fd',
+              bg: C.jadeStrong,
+              borderColor: C.jadeStrong,
               transform: 'translateY(-1px)',
-              boxShadow: '0 12px 30px -10px rgba(96, 165, 250, 0.55)',
+              boxShadow: '0 16px 34px -16px rgba(127, 230, 179, 0.82)',
             }}
-            _active={{ transform: 'translateY(0)', bg: '#3b82f6' }}
+            _active={{ transform: 'translateY(0)', bg: C.jadeStrong }}
+            _focusVisible={{ boxShadow: `0 0 0 4px ${C.jade}28` }}
             _loading={{ opacity: 0.7 }}
           >
             Sign in
           </Button>
 
-          <Text textAlign="center" color="#94a398" fontSize="sm" pt={1}>
+          <HStack justify="center" spacing={2} color={C.mutedDim}>
+            <Icon as={ShieldCheck} boxSize="14px" />
+            <Text fontFamily={F.mono} fontSize="9px" letterSpacing="0.08em" textTransform="uppercase">
+              Secure account access
+            </Text>
+          </HStack>
+
+          <Text textAlign="center" color={C.muted} fontFamily={F.body} fontSize="sm" pt={1}>
             Don't have an account?{' '}
             <Button
+              type="button"
               variant="link"
-              color="#60a5fa"
+              color={C.jade}
+              fontFamily={F.body}
               fontWeight={600}
               fontSize="sm"
               onClick={onSwitchToRegister}
-              _hover={{ color: '#93c5fd', textDecoration: 'none' }}
+              _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
+              _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
             >
               Create one
             </Button>

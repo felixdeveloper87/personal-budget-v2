@@ -1,117 +1,159 @@
-/**
- * Landing v3 — "Editorial · guilloché" edition.
- * Deep ink-green + luminous jade + giant editorial serif.
- * All copy is English. Ported from docs/personal-budget-landing-v3-editorial.md.
- */
-
 export const NAV_LINKS = [
-  { id: 'product', label: 'Product' },
-  { id: 'manifesto', label: 'Manifesto' },
-  { id: 'voices', label: 'Voices' },
+  { id: 'overview', label: 'Overview' },
+  { id: 'features', label: 'Features' },
+  { id: 'household', label: 'Household' },
 ] as const
 
 export const HERO = {
-  /** Massive serif headline. The accent word renders in jade italic. */
-  line1: 'Clarity',
-  line2is: 'is',
-  line2accent: 'wealth.',
+  eyebrow: 'Personal finance, without the noise',
+  line1: 'Know where you stand.',
+  line2: 'Choose what comes next.',
   subtitle:
-    'Personal Budget turns a thousand small money decisions into one calm, honest picture — your transactions, budgets and trends, plus shared bills when life is shared.',
-  primaryCta: 'Start free',
-  secondaryCta: 'See it move',
+    'Personal Budget brings accounts, everyday spending, commitments, plans and shared household costs into one calm view.',
+  primaryCta: 'Request free access',
+  secondaryCta: 'Explore the product',
+  signInCta: 'Sign in',
+  accessNote: 'Free access · No card required · New accounts are reviewed before activation',
 } as const
 
-/** Ticker stats — marquee that skews with scroll velocity. */
-export const TICKER = [
-  '£0 forever',
-  '60s to set up',
-  '100% exportable',
-  '0 trackers',
-  '⌘K search',
-  '∞ categories',
-  'Shared bills, settled',
-  'Weekly home rota',
-  'Dark mode that ships',
-  'Private by default',
+export const PROOF_POINTS = [
+  {
+    number: '01',
+    title: 'One financial home',
+    copy: 'Balances, spending, commitments and goals stay connected.',
+  },
+  {
+    number: '02',
+    title: 'Your data, portable',
+    copy: 'Export transactions to CSV and reports to PDF.',
+  },
+  {
+    number: '03',
+    title: 'Built for real life',
+    copy: 'Manage your own money and the costs you share at home.',
+  },
 ] as const
 
-/** Scroll-scrubbed mockup — small data that fills its panels. */
-export const MOCKUP = {
-  balanceLabel: 'Available balance',
-  balance: '£2,287.20',
-  delta: '+£540 this week',
-  /** Live rows that arrive inside the mockup. */
-  feed: [
-    { label: 'Salary · April', amount: '+£3,200', tone: 'jade' as const },
-    { label: 'Groceries · Continente', amount: '−£42.80', tone: 'muted' as const },
-    { label: 'Invoice · Side project', amount: '+£540.00', tone: 'jade' as const },
-    { label: 'Spotify · Family', amount: '−£15.99', tone: 'muted' as const },
+export const PRODUCT_TICKER = [
+  'Dashboard',
+  'Accounts',
+  'Behaviour',
+  'Payments',
+  'Planning',
+  'Goals',
+  'Reports',
+  'Household',
+] as const
+
+export const SNAPSHOT = {
+  period: 'August 2026',
+  greeting: 'Good evening',
+  availableLabel: 'Available now',
+  available: '\u00a32,287.20',
+  delta: '+\u00a3540.00 this month',
+  income: '\u00a34,280.00',
+  expenses: '\u00a31,992.80',
+  forecast: '\u00a32,640.00',
+  transactions: [
+    { label: 'Salary', meta: 'Today', amount: '+\u00a33,200.00', tone: 'income' as const },
+    { label: 'Groceries', meta: 'Continente', amount: '\u2212\u00a342.80', tone: 'expense' as const },
+    { label: 'Side project', meta: 'Invoice', amount: '+\u00a3540.00', tone: 'income' as const },
   ],
-  budgets: [
-    { label: 'Essentials', value: 0.62 },
-    { label: 'Lifestyle', value: 0.41 },
-    { label: 'Savings', value: 0.8 },
+  categories: [
+    { label: 'Essentials', value: 68 },
+    { label: 'Lifestyle', value: 42 },
+    { label: 'Savings', value: 81 },
   ],
 } as const
 
-/** Bento grid — six cells with functional micro-demos. */
-export const BENTO = {
-  searchQuery: 'coffee',
-  searchResults: ['Coffee · Starbucks', 'Coffee beans · Lidl', 'Coffee machine · Amazon'],
-  searchMeta: '3 results · 41ms',
-  recurringMonths: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN'],
-  exportFormats: ['.csv', '.pdf', '.xlsx'],
+export const FEATURE_CARDS = [
+  {
+    kind: 'search',
+    eyebrow: 'Find',
+    title: 'Search without digging',
+    copy: 'Jump from a name, shop or amount straight to the transaction you need.',
+    meta: 'Fast global search',
+  },
+  {
+    kind: 'commitments',
+    eyebrow: 'Remember',
+    title: 'Commitments stay visible',
+    copy: 'Recurring payments and instalments remain part of the picture.',
+    meta: 'Fixed payments + instalments',
+  },
+  {
+    kind: 'reports',
+    eyebrow: 'Explain',
+    title: 'Reports that read clearly',
+    copy: 'Turn a busy month into a useful breakdown, then take it with you.',
+    meta: 'CSV + PDF export',
+  },
+  {
+    kind: 'privacy',
+    eyebrow: 'Own',
+    title: 'Your numbers stay yours',
+    copy: 'A focused finance workspace with portable data and no public profile.',
+    meta: 'Private by default',
+  },
+] as const
+
+export const PLANNING = {
+  eyebrow: '02 — Plan',
+  title: 'Tomorrow, already in view.',
+  copy:
+    'See what is committed, what is flexible and where the month is likely to land before the next payment arrives.',
+  bullets: [
+    'Cash-flow forecast',
+    'Goals and monthly commitments',
+    'A clear view of upcoming payments',
+  ],
+  months: [
+    { label: 'Aug', value: '\u00a32,287', active: true },
+    { label: 'Sep', value: '\u00a32,640', active: false },
+    { label: 'Oct', value: '\u00a32,510', active: false },
+  ],
 } as const
 
-/** Compact Household mention inside the wider product feature grid. */
 export const HOUSEHOLD = {
-  title: 'Household',
-  hint: 'shared bills + home duties',
+  eyebrow: '03 — Share',
+  title: 'Split the cost. Keep the relationship.',
+  copy:
+    'Household keeps shared expenses, balances, repayments and weekly responsibilities in one fair, readable place.',
+  bullets: [
+    'Equal shares calculated for you',
+    'One net balance between each pair',
+    'Settlements and private proof attachments',
+    'A weekly home rota everyone can see',
+  ],
   bill: {
     label: 'Electricity bill',
     meta: 'Paid by Leandro · split 5 ways',
-    amount: '£20 each',
-  },
-  balance: {
-    label: 'Who owes whom',
-    value: 'Aisha → Leandro · £10',
+    amount: '\u00a320 each',
   },
   cleaning: {
     label: 'Cleaning this week',
+    meta: '4–10 August',
     person: 'Tom',
-    dates: '4–10 Aug',
   },
-  footer: 'Bills · balances · repayments · private proofs · weekly rota',
+  balance: {
+    label: 'Net balance',
+    from: 'Aisha',
+    to: 'Leandro',
+    amount: '\u00a310.00',
+  },
 } as const
 
-/**
- * Manifesto — scroll-lit text. Words wrapped in *asterisks* become keywords
- * that ignite in jade italic as the section scrolls.
- */
-export const MANIFESTO =
-  'Money is not the goal. *Clarity* is. ' +
-  'When you *see* every flow, anxiety becomes *arithmetic*. ' +
-  'One calm, honest *picture* — kept sharp.'
-
-export const TESTIMONIALS = [
-  { quote: 'I finally see my month before it happens.', name: 'Marina', role: 'Designer' },
-  { quote: 'It reads like a magazine and works like a spreadsheet.', name: 'Tomás', role: 'Engineer' },
-  { quote: 'The first budgeting app I did not abandon in a week.', name: 'Aisha', role: 'Founder' },
-  { quote: 'Calm, fast, and it never tries to sell me anything.', name: 'Lukas', role: 'Teacher' },
-  { quote: 'We stopped doing bill maths in the group chat.', name: 'Sofia', role: 'Nurse' },
-  { quote: 'My spending finally has a shape I can read.', name: 'Daniel', role: 'Writer' },
-] as const
-
-export const CTA = {
-  eyebrow: 'You vs. the spreadsheet',
-  title: 'Open the dashboard you’ve been meaning to build.',
-  subtitle:
-    'Two minutes from now, your first month is logged. If money is shared at home, Household keeps the bills and responsibilities clear too.',
-  button: 'Start free',
+export const FINAL_CTA = {
+  eyebrow: 'A calmer money habit starts here',
+  title: 'Make your money easier to read.',
+  copy:
+    'Create your account for free. Once approved, you can build your first clear financial picture.',
+  button: 'Request free access',
+  note: 'No card required · Export when you want',
 } as const
 
 export const FOOTER = {
   wordmark: 'PERSONAL BUDGET',
   tagline: 'Clarity for your money.',
-  note: 'No ads · No trackers · No card on file',
+  note: 'Designed for everyday decisions.',
 } as const

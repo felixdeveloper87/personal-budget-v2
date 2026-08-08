@@ -60,9 +60,19 @@ function pageFromBrowserLocation(): AppPage {
     : 'dashboard'
 }
 
+function authTabFromBrowserLocation(): 'signIn' | 'signUp' | null {
+  const value = new URLSearchParams(window.location.search).get('auth')
+  if (value === 'signup') return 'signUp'
+  if (value === 'signin') return 'signIn'
+  return null
+}
+
 function AppContent() {
   const { user, loading } = useAuth()
-  const [showAuth, setShowAuth] = useState(false)
+  const [showAuth, setShowAuth] = useState(() => authTabFromBrowserLocation() !== null)
+  const [authTab, setAuthTab] = useState<'signIn' | 'signUp'>(
+    () => authTabFromBrowserLocation() ?? 'signIn',
+  )
   const [currentPage, setCurrentPage] = useState<AppPage>(pageFromBrowserLocation)
   const [cardStatementTarget, setCardStatementTarget] = useState<CardStatementTarget | null>(null)
 
@@ -80,6 +90,19 @@ function AppContent() {
   const openCardStatement = (target: CardStatementTarget) => {
     setCardStatementTarget(target)
     navigateToPage('cards')
+  }
+
+  const openAuth = (tab: 'signIn' | 'signUp') => {
+    setAuthTab(tab)
+    setShowAuth(true)
+  }
+
+  const closeAuth = () => {
+    setShowAuth(false)
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has('auth')) return
+    url.searchParams.delete('auth')
+    window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`)
   }
 
   useEffect(() => {
@@ -108,10 +131,10 @@ function AppContent() {
   }, [user, currentPage])
 
   useEffect(() => {
-    if (!user && !loading) {
+    if (user) {
       setShowAuth(false)
     }
-  }, [user, loading])
+  }, [user])
 
   if (loading) {
     return (
@@ -164,10 +187,14 @@ function AppContent() {
   if (!showAuth) {
     return (
       <>
-        <LandingV3 onGetStarted={() => setShowAuth(true)} />
+        <LandingV3
+          onRequestAccess={() => openAuth('signUp')}
+          onSignIn={() => openAuth('signIn')}
+        />
         <AuthModal 
           isOpen={showAuth} 
-          onClose={() => setShowAuth(false)} 
+          onClose={closeAuth}
+          initialTab={authTab}
         />
       </>
     )
@@ -176,10 +203,14 @@ function AppContent() {
   // Se clicou em "Começar", mostrar modal de login/cadastro
   return (
     <>
-      <LandingV3 onGetStarted={() => setShowAuth(true)} />
+      <LandingV3
+        onRequestAccess={() => openAuth('signUp')}
+        onSignIn={() => openAuth('signIn')}
+      />
       <AuthModal 
         isOpen={showAuth} 
-        onClose={() => setShowAuth(false)} 
+        onClose={closeAuth}
+        initialTab={authTab}
       />
     </>
   )

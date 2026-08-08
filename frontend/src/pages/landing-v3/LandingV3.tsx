@@ -1,683 +1,805 @@
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import Lenis from 'lenis'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
+import {
+  ArrowRight,
+  CalendarClock,
+  Check,
+  Download,
+  FileText,
+  LockKeyhole,
+  Search,
+  ShieldCheck,
+  UsersRound,
+} from 'lucide-react'
+import { guilloche } from '../../features/dashboard/components/guilloche'
 import './LandingV3.css'
 import {
-  BENTO,
-  CTA,
+  FEATURE_CARDS,
+  FINAL_CTA,
   FOOTER,
   HERO,
   HOUSEHOLD,
-  MANIFESTO,
-  MOCKUP,
   NAV_LINKS,
-  TESTIMONIALS,
-  TICKER,
+  PLANNING,
+  PRODUCT_TICKER,
+  PROOF_POINTS,
+  SNAPSHOT,
 } from './landingV3.config'
 
 interface LandingV3Props {
-  onGetStarted: () => void
+  onRequestAccess: () => void
+  onSignIn: () => void
 }
 
-const prefersReduced = () =>
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+type FeatureKind = (typeof FEATURE_CARDS)[number]['kind']
 
-const CHART_PATH = 'M0,64 C40,60 60,26 110,36 C150,44 175,14 220,20 C260,25 285,6 330,10'
+function useReducedMotion() {
+  const [reduced, setReduced] = useState(false)
 
-/* ========================================================================== */
-/* Guilloché — n rotated ellipses in two counter-rotating groups               */
-/* ========================================================================== */
-function Guilloche({ n = 30, rx = 280, ry = 110, opacity = 0.5 }: {
-  n?: number
-  rx?: number
-  ry?: number
-  opacity?: number
-}) {
-  const ellipses = useMemo(
-    () =>
-      Array.from({ length: n }, (_, i) => ({
-        angle: (i / n) * 180,
-        gold: i % 5 === 0,
-        group: i % 2,
-      })),
-    [n],
-  )
-  const draw = (group: number) =>
-    ellipses
-      .filter((e) => e.group === group)
-      .map((e, i) => (
-        <ellipse
-          key={i}
-          cx="0"
-          cy="0"
-          rx={rx}
-          ry={ry}
-          transform={`rotate(${e.angle})`}
-          stroke={e.gold ? 'var(--gold)' : 'var(--jade)'}
-        />
-      ))
+  useEffect(() => {
+    const query = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReduced(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
+  return reduced
+}
+
+function BrandSeal({ className = '' }: { className?: string }) {
+  const ringA = useMemo(() => guilloche(58, 19, 62), [])
+  const ringB = useMemo(() => guilloche(58, 27, 44), [])
+
   return (
-    <div className="pbv3-guilloche" aria-hidden style={{ opacity }}>
-      <svg viewBox="-300 -300 600 600" preserveAspectRatio="xMidYMid slice">
-        <g className="spin">{draw(0)}</g>
-        <g className="spinR">{draw(1)}</g>
-      </svg>
+    <svg
+      className={`pbv3-seal ${className}`}
+      viewBox="-108 -108 216 216"
+      aria-hidden="true"
+    >
+      <circle className="pbv3-seal__rim" r="102" />
+      <path className="pbv3-seal__jade" d={ringA} />
+      <path className="pbv3-seal__gold" d={ringB} />
+      <circle className="pbv3-seal__core" r="6" />
+    </svg>
+  )
+}
+
+function BrandLockup({ footer = false }: { footer?: boolean }) {
+  return (
+    <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
+      <BrandSeal />
+      <span className="pbv3-brand__words">
+        <strong>
+          Personal <em>Budget</em>
+        </strong>
+        <small>Clarity for money</small>
+      </span>
+    </span>
+  )
+}
+
+function GuillocheField({ className = '' }: { className?: string }) {
+  const pathA = useMemo(() => guilloche(96, 31, 105), [])
+  const pathB = useMemo(() => guilloche(94, 37, 88), [])
+
+  return (
+    <svg
+      className={`pbv3-guilloche ${className}`}
+      viewBox="-205 -205 410 410"
+      aria-hidden="true"
+    >
+      <g>
+        <path className="pbv3-guilloche__jade" d={pathA} />
+        <path className="pbv3-guilloche__gold" d={pathB} />
+      </g>
+    </svg>
+  )
+}
+
+function TrendChart({ compact = false }: { compact?: boolean }) {
+  return (
+    <svg
+      className={`pbv3-trend${compact ? ' pbv3-trend--compact' : ''}`}
+      viewBox="0 0 460 150"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id={compact ? 'pbv3-area-compact' : 'pbv3-area'} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="currentColor" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <path
+        className="pbv3-trend__area"
+        fill={`url(#${compact ? 'pbv3-area-compact' : 'pbv3-area'})`}
+        d="M0 126 C45 122 54 88 96 94 C135 99 157 63 204 72 C254 82 266 36 316 46 C356 54 382 19 460 22 L460 150 L0 150 Z"
+      />
+      <path
+        className="pbv3-trend__line"
+        pathLength="1"
+        d="M0 126 C45 122 54 88 96 94 C135 99 157 63 204 72 C254 82 266 36 316 46 C356 54 382 19 460 22"
+      />
+      <circle className="pbv3-trend__dot" cx="460" cy="22" r="5" />
+    </svg>
+  )
+}
+
+function HeroSnapshot() {
+  return (
+    <div className="pbv3-hero-stage" aria-hidden="true">
+      <div className="pbv3-hero-stage__halo" />
+      <div className="pbv3-snapshot">
+        <div className="pbv3-snapshot__top">
+          <span className="pbv3-window-dots">
+            <i />
+            <i />
+            <i />
+          </span>
+          <span>PERSONAL BUDGET / AUG</span>
+        </div>
+        <div className="pbv3-snapshot__body">
+          <div className="pbv3-snapshot__label">{SNAPSHOT.availableLabel}</div>
+          <div className="pbv3-snapshot__amount">{SNAPSHOT.available}</div>
+          <div className="pbv3-snapshot__delta">{SNAPSHOT.delta}</div>
+          <TrendChart compact />
+          <div className="pbv3-snapshot__stats">
+            <span>
+              <small>Income</small>
+              <b>{SNAPSHOT.income}</b>
+            </span>
+            <span>
+              <small>Expenses</small>
+              <b>{SNAPSHOT.expenses}</b>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="pbv3-floating-row pbv3-floating-row--transaction">
+        <span className="pbv3-floating-row__icon">
+          <Check size={15} strokeWidth={2} />
+        </span>
+        <span>
+          <small>Transaction added</small>
+          <b>Groceries</b>
+        </span>
+        <strong>−£42.80</strong>
+      </div>
+
+      <div className="pbv3-floating-row pbv3-floating-row--forecast">
+        <span className="pbv3-floating-row__icon pbv3-floating-row__icon--gold">
+          <CalendarClock size={15} strokeWidth={1.8} />
+        </span>
+        <span>
+          <small>End-of-month forecast</small>
+          <b>{SNAPSHOT.forecast}</b>
+        </span>
+      </div>
     </div>
   )
 }
 
-/* ========================================================================== */
-/* Bento micro-demos                                                           */
-/* ========================================================================== */
-function SearchDemo({ reduce }: { reduce: boolean }) {
-  const [typed, setTyped] = useState(reduce ? BENTO.searchQuery : '')
-  const [shown, setShown] = useState(reduce ? BENTO.searchResults.length : 0)
-  const [meta, setMeta] = useState(reduce)
+function DashboardPreview() {
+  return (
+    <div className="pbv3-dashboard pbv3-reveal">
+      <div className="pbv3-dashboard__chrome">
+        <span className="pbv3-window-dots">
+          <i />
+          <i />
+          <i />
+        </span>
+        <span className="pbv3-dashboard__address">personalbudget.co.uk</span>
+        <span className="pbv3-dashboard__demo-label">Illustrative demo</span>
+      </div>
 
-  useEffect(() => {
-    if (reduce) return
-    let timers: number[] = []
-    const run = () => {
-      setTyped('')
-      setShown(0)
-      setMeta(false)
-      const q = BENTO.searchQuery
-      // type letters
-      for (let i = 1; i <= q.length; i++) {
-        timers.push(window.setTimeout(() => setTyped(q.slice(0, i)), 140 * i))
-      }
-      const base = 140 * q.length + 200
-      // cascade results
-      BENTO.searchResults.forEach((_, i) => {
-        timers.push(window.setTimeout(() => setShown(i + 1), base + i * 160))
-      })
-      timers.push(window.setTimeout(() => setMeta(true), base + BENTO.searchResults.length * 160))
-      // restart
-      timers.push(window.setTimeout(run, base + 2600))
-    }
-    run()
-    return () => timers.forEach(clearTimeout)
-  }, [reduce])
+      <div className="pbv3-dashboard__layout">
+        <aside className="pbv3-dashboard__rail" aria-hidden="true">
+          <BrandSeal />
+          {['Overview', 'Behaviour', 'Payments', 'Planning', 'Reports'].map((label, index) => (
+            <span className={index === 0 ? 'is-active' : ''} key={label}>
+              <i />
+              {label}
+            </span>
+          ))}
+          <span className="pbv3-dashboard__rail-bottom">
+            <i />
+            Account
+          </span>
+        </aside>
+
+        <div className="pbv3-dashboard__main">
+          <header className="pbv3-dashboard__heading">
+            <div>
+              <span className="pbv3-kicker">{SNAPSHOT.period}</span>
+              <h3>{SNAPSHOT.greeting}, friend.</h3>
+            </div>
+            <div className="pbv3-period-tabs" aria-hidden="true">
+              <span>Day</span>
+              <span>Week</span>
+              <span className="is-active">Month</span>
+            </div>
+          </header>
+
+          <div className="pbv3-metrics">
+            <article>
+              <small>Income</small>
+              <strong>{SNAPSHOT.income}</strong>
+              <span className="is-positive">Money in</span>
+            </article>
+            <article>
+              <small>Expenses</small>
+              <strong>{SNAPSHOT.expenses}</strong>
+              <span>Money out</span>
+            </article>
+            <article className="is-featured">
+              <small>{SNAPSHOT.availableLabel}</small>
+              <strong>{SNAPSHOT.available}</strong>
+              <span className="is-positive">On track</span>
+            </article>
+          </div>
+
+          <div className="pbv3-dashboard__content">
+            <article className="pbv3-chart-card">
+              <div className="pbv3-card-heading">
+                <span>
+                  <small>Cash flow</small>
+                  <b>Your month at a glance</b>
+                </span>
+                <span className="pbv3-card-heading__value">+£2,287</span>
+              </div>
+              <div className="pbv3-chart-grid">
+                <i />
+                <i />
+                <i />
+                <i />
+              </div>
+              <TrendChart />
+              <div className="pbv3-chart-days" aria-hidden="true">
+                <span>01</span>
+                <span>08</span>
+                <span>15</span>
+                <span>22</span>
+                <span>31</span>
+              </div>
+            </article>
+
+            <article className="pbv3-activity-card">
+              <div className="pbv3-card-heading">
+                <span>
+                  <small>Recent</small>
+                  <b>Activity</b>
+                </span>
+                <span className="pbv3-card-link">View all</span>
+              </div>
+              <div className="pbv3-activity-list">
+                {SNAPSHOT.transactions.map((transaction, index) => (
+                  <div
+                    className="pbv3-activity-row"
+                    style={{ '--row-delay': `${index * 120}ms` } as CSSProperties}
+                    key={transaction.label}
+                  >
+                    <span className={`pbv3-activity-row__mark is-${transaction.tone}`} />
+                    <span>
+                      <b>{transaction.label}</b>
+                      <small>{transaction.meta}</small>
+                    </span>
+                    <strong className={`is-${transaction.tone}`}>{transaction.amount}</strong>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
+
+          <div className="pbv3-budget-row">
+            {SNAPSHOT.categories.map((category) => (
+              <div key={category.label}>
+                <span>
+                  <b>{category.label}</b>
+                  <small>{category.value}%</small>
+                </span>
+                <i>
+                  <b
+                    style={{ '--budget-width': `${category.value}%` } as CSSProperties}
+                  />
+                </i>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FeatureIcon({ kind }: { kind: FeatureKind }) {
+  const props = { size: 20, strokeWidth: 1.7 }
+  if (kind === 'search') return <Search {...props} />
+  if (kind === 'commitments') return <CalendarClock {...props} />
+  if (kind === 'reports') return <FileText {...props} />
+  return <ShieldCheck {...props} />
+}
+
+function FeatureDemo({ kind }: { kind: FeatureKind }) {
+  if (kind === 'search') {
+    return (
+      <div className="pbv3-mini-search" aria-hidden="true">
+        <div>
+          <Search size={14} />
+          <span>groceries</span>
+          <kbd>⌘ K</kbd>
+        </div>
+        <span>
+          <i />
+          Continente
+          <b>−£42.80</b>
+        </span>
+        <span>
+          <i />
+          Lidl
+          <b>−£31.24</b>
+        </span>
+      </div>
+    )
+  }
+
+  if (kind === 'commitments') {
+    return (
+      <div className="pbv3-mini-calendar" aria-hidden="true">
+        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+          <span className={index === 3 ? 'is-active' : ''} key={`${day}-${index}`}>
+            {day}
+            <i />
+          </span>
+        ))}
+        <div>
+          <CalendarClock size={15} />
+          Spotify Family
+          <b>£15.99</b>
+        </div>
+      </div>
+    )
+  }
+
+  if (kind === 'reports') {
+    return (
+      <div className="pbv3-mini-report" aria-hidden="true">
+        <div className="pbv3-mini-report__page">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div>
+          <Download size={15} />
+          <span>Export report</span>
+          <b>PDF</b>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="pbv3-cell__demo">
-      <div className="pbv3-search__box">
-        <span>⌘K</span>
-        <span>{typed}</span>
-        {!reduce && <span className="pbv3-search__caret" />}
+    <div className="pbv3-mini-private" aria-hidden="true">
+      <BrandSeal />
+      <span>
+        <LockKeyhole size={18} />
+      </span>
+      <small>Private workspace</small>
+    </div>
+  )
+}
+
+function PlanningPreview() {
+  return (
+    <div className="pbv3-planning-card pbv3-reveal" aria-label="Illustrative planning preview">
+      <div className="pbv3-planning-card__header">
+        <span>
+          <small>Projected balance</small>
+          <strong>{SNAPSHOT.forecast}</strong>
+        </span>
+        <span className="pbv3-status-pill">
+          <i />
+          On track
+        </span>
       </div>
-      <div className="pbv3-search__results">
-        {BENTO.searchResults.map((r, i) => (
-          <span key={r} className={`pbv3-search__row${i < shown ? ' show' : ''}`}>
-            {r}
+
+      <div className="pbv3-forecast-bars" aria-hidden="true">
+        {[44, 57, 52, 68, 76, 71, 86, 82, 94].map((height, index) => (
+          <span
+            className={index === 8 ? 'is-last' : ''}
+            style={{ '--forecast-height': `${height}%` } as CSSProperties}
+            key={index}
+          />
+        ))}
+        <i className="pbv3-forecast-line" />
+      </div>
+
+      <div className="pbv3-planning-months">
+        {PLANNING.months.map((month) => (
+          <span className={month.active ? 'is-active' : ''} key={month.label}>
+            <small>{month.label}</small>
+            <b>{month.value}</b>
           </span>
         ))}
       </div>
-      <span className={`pbv3-search__meta${meta ? ' show' : ''}`}>{BENTO.searchMeta}</span>
-    </div>
-  )
-}
 
-function RecurringDemo({ reduce }: { reduce: boolean }) {
-  const [idx, setIdx] = useState(0)
-  useEffect(() => {
-    if (reduce) return
-    const id = window.setInterval(
-      () => setIdx((i) => (i + 1) % BENTO.recurringMonths.length),
-      1600,
-    )
-    return () => clearInterval(id)
-  }, [reduce])
-  return (
-    <div className="pbv3-cell__demo pbv3-recur">
-      <span className="pbv3-recur__chip mono">{BENTO.recurringMonths[idx]}</span>
-      <svg className="pbv3-recur__check" viewBox="0 0 24 24">
-        <path d="M5 13l4 4L19 7" />
-      </svg>
-      <span className="pbv3-cell__hint">auto-repeats</span>
-    </div>
-  )
-}
-
-function ExportDemo({ reduce }: { reduce: boolean }) {
-  const [idx, setIdx] = useState(0)
-  useEffect(() => {
-    if (reduce) return
-    const id = window.setInterval(
-      () => setIdx((i) => (i + 1) % BENTO.exportFormats.length),
-      1300,
-    )
-    return () => clearInterval(id)
-  }, [reduce])
-  return (
-    <div className="pbv3-cell__demo">
-      <div className="pbv3-export">{BENTO.exportFormats[idx]}</div>
-    </div>
-  )
-}
-
-/* ========================================================================== */
-/* Magnetic — pulls an element toward the pointer, springs back on leave       */
-/* ========================================================================== */
-function HouseholdDemo() {
-  return (
-    <div className="pbv3-household-mini" aria-label="Household feature preview">
-      <div className="pbv3-household-mini__rows">
-        <div>
-          <span className="pbv3-household-mini__icon" aria-hidden>£</span>
-          <span>
-            <strong>{HOUSEHOLD.bill.label}</strong>
-            <small>{HOUSEHOLD.bill.meta}</small>
-          </span>
-          <b>{HOUSEHOLD.bill.amount}</b>
-        </div>
-        <div>
-          <span className="pbv3-household-mini__icon pbv3-household-mini__icon--home" aria-hidden>⌂</span>
-          <span>
-            <strong>{HOUSEHOLD.cleaning.label}</strong>
-            <small>{HOUSEHOLD.cleaning.dates}</small>
-          </span>
-          <b>{HOUSEHOLD.cleaning.person}</b>
-        </div>
-      </div>
-      <div className="pbv3-household-mini__footer">
-        <span>{HOUSEHOLD.balance.label}</span>
-        <b>{HOUSEHOLD.balance.value}</b>
-        <small>{HOUSEHOLD.footer}</small>
+      <div className="pbv3-planning-card__footer">
+        <CalendarClock size={16} />
+        <span>
+          <small>Next commitment</small>
+          <b>Rent · 01 Sep</b>
+        </span>
+        <strong>£900</strong>
       </div>
     </div>
   )
 }
 
-function useMagnetic<T extends HTMLElement>(strength = 0.3) {
-  const ref = useRef<T>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el || !window.matchMedia('(pointer: fine)').matches || prefersReduced()) return
-    const onMove = (e: PointerEvent) => {
-      const r = el.getBoundingClientRect()
-      el.style.transition = 'none'
-      el.style.transform = `translate3d(${(e.clientX - r.left - r.width / 2) * strength}px, ${
-        (e.clientY - r.top - r.height / 2) * strength
-      }px, 0)`
-    }
-    const onLeave = () => {
-      el.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)'
-      el.style.transform = ''
-    }
-    el.addEventListener('pointermove', onMove)
-    el.addEventListener('pointerleave', onLeave)
-    return () => {
-      el.removeEventListener('pointermove', onMove)
-      el.removeEventListener('pointerleave', onLeave)
-    }
-  }, [strength])
-  return ref
+function HouseholdPreview() {
+  const members = ['L', 'A', 'T', 'S', 'M']
+
+  return (
+    <div className="pbv3-household-card pbv3-reveal" aria-label="Illustrative Household preview">
+      <div className="pbv3-household-card__top">
+        <div>
+          <small>Household</small>
+          <strong>Riverside House</strong>
+        </div>
+        <div className="pbv3-avatars" aria-label="Five household members">
+          {members.map((member, index) => (
+            <span style={{ '--avatar-index': index } as CSSProperties} key={member}>
+              {member}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="pbv3-household-card__grid">
+        <div className="pbv3-shared-list">
+          <div>
+            <span className="pbv3-shared-icon">£</span>
+            <span>
+              <b>{HOUSEHOLD.bill.label}</b>
+              <small>{HOUSEHOLD.bill.meta}</small>
+            </span>
+            <strong>{HOUSEHOLD.bill.amount}</strong>
+          </div>
+          <div>
+            <span className="pbv3-shared-icon">
+              <UsersRound size={16} />
+            </span>
+            <span>
+              <b>{HOUSEHOLD.cleaning.label}</b>
+              <small>{HOUSEHOLD.cleaning.meta}</small>
+            </span>
+            <strong>{HOUSEHOLD.cleaning.person}</strong>
+          </div>
+        </div>
+
+        <div className="pbv3-settlement">
+          <small>{HOUSEHOLD.balance.label}</small>
+          <div className="pbv3-settlement__people">
+            <span>A</span>
+            <i>
+              <ArrowRight size={18} />
+            </i>
+            <span>L</span>
+          </div>
+          <strong>{HOUSEHOLD.balance.amount}</strong>
+          <p>
+            {HOUSEHOLD.balance.from} owes {HOUSEHOLD.balance.to}
+          </p>
+          <button type="button" tabIndex={-1}>
+            Settle balance
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
-/* ========================================================================== */
-/* Main                                                                        */
-/* ========================================================================== */
-export default function LandingV3({ onGetStarted }: LandingV3Props) {
-  const reduce = useMemo(prefersReduced, [])
-
+export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props) {
   const rootRef = useRef<HTMLDivElement>(null)
-  const navRef = useRef<HTMLElement>(null)
-  const tickerRef = useRef<HTMLDivElement>(null)
-  const voicesARef = useRef<HTMLDivElement>(null)
-  const voicesBRef = useRef<HTMLDivElement>(null)
-  const mockupSectionRef = useRef<HTMLDivElement>(null)
-  const mockupRef = useRef<HTMLDivElement>(null)
-  const budgetsRef = useRef<HTMLDivElement>(null)
+  const reducedMotion = useReducedMotion()
+  const [navElevated, setNavElevated] = useState(false)
 
-  const navCtaRef = useMagnetic<HTMLButtonElement>()
-  const heroPrimaryRef = useMagnetic<HTMLButtonElement>()
-  const heroSecondaryRef = useMagnetic<HTMLButtonElement>()
-  const ctaButtonRef = useMagnetic<HTMLButtonElement>()
-
-  /* manifesto word tokens */
-  const words = useMemo(() => {
-    return MANIFESTO.split(/\s+/).map((w) => {
-      const key = w.startsWith('*') && w.endsWith('*')
-      return { text: key ? w.slice(1, -1) : w, key }
-    })
-  }, [])
-
-  /* -------------------------------------------------- nav scrolled toggle -- */
   useEffect(() => {
-    const onScroll = () => navRef.current?.classList.toggle('scrolled', window.scrollY > 12)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const update = () => setNavElevated(window.scrollY > 24)
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    return () => window.removeEventListener('scroll', update)
   }, [])
 
-  /* ----------------------------------------------------- reveal on scroll -- */
+  useEffect(() => {
+    const targetId = decodeURIComponent(window.location.hash.slice(1))
+    if (!targetId) return
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'auto', block: 'start' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [])
+
   useEffect(() => {
     const root = rootRef.current
     if (!root) return
     const targets = root.querySelectorAll<HTMLElement>('.pbv3-reveal')
-    if (reduce) {
-      targets.forEach((t) => t.classList.add('in'))
+
+    if (reducedMotion) {
+      targets.forEach((target) => target.classList.add('is-visible'))
       return
     }
-    const io = new IntersectionObserver(
-      (es) =>
-        es.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add('in')
-            io.unobserve(e.target)
-          }
-        }),
-      { rootMargin: '-60px' },
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return
+          entry.target.classList.add('is-visible')
+          observer.unobserve(entry.target)
+        })
+      },
+      { threshold: 0.12, rootMargin: '0px 0px -8% 0px' },
     )
-    targets.forEach((t) => io.observe(t))
-    return () => io.disconnect()
-  }, [reduce])
 
-  /* ----------------------------------------------- budget bars fill on IO -- */
-  useEffect(() => {
-    const el = budgetsRef.current
-    if (!el) return
-    const fills = el.querySelectorAll<HTMLElement>('.pbv3-mbudget__fill')
-    const fill = () => fills.forEach((f) => (f.style.width = f.dataset.w ?? '0%'))
-    if (reduce) {
-      fill()
-      return
-    }
-    const io = new IntersectionObserver(
-      (es) => es.some((e) => e.isIntersecting) && (fill(), io.disconnect()),
-      { threshold: 0.3 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [reduce])
+    targets.forEach((target) => observer.observe(target))
+    return () => observer.disconnect()
+  }, [reducedMotion])
 
-  /* ----------------------------------------- single master rAF loop -------- */
-  useEffect(() => {
-    if (reduce) return
-    const ticker = tickerRef.current
-    const rowA = voicesARef.current
-    const rowB = voicesBRef.current
-    const mockup = mockupRef.current
-    const mockupSection = mockupSectionRef.current
+  const handleHeroPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
+    if (reducedMotion || !window.matchMedia('(pointer: fine)').matches) return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5
+    rootRef.current?.style.setProperty('--hero-x', `${x * 16}px`)
+    rootRef.current?.style.setProperty('--hero-y', `${y * 12}px`)
+  }
 
-    // Smooth, eased native scroll — the marquees/mockup below read window.scrollY,
-    // which Lenis keeps updating (it eases real scroll, not a virtual proxy).
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-    })
-
-    let sy = window.scrollY
-    let lastSy = sy
-    let velS = 0
-    let scrub = 0
-    let tx = 0
-    let ax = 0
-    let bx = 0
-
-    const tickerHalf = ticker ? ticker.scrollWidth / 2 : 0
-    const aHalf = rowA ? rowA.scrollWidth / 2 : 0
-    const bHalf = rowB ? rowB.scrollWidth / 2 : 0
-    bx = -bHalf
-
-    const onScroll = () => (sy = window.scrollY)
-    window.addEventListener('scroll', onScroll, { passive: true })
-
-    let raf = 0
-    const vh = () => window.innerHeight
-    const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v))
-
-    const master = (time: number) => {
-      lenis.raf(time)
-
-      // velocity (smoothed)
-      const vel = sy - lastSy
-      lastSy = sy
-      velS += (vel - velS) * 0.1
-
-      // ticker — base drift + velocity, skew with velocity
-      if (ticker && tickerHalf) {
-        tx -= 0.6 + Math.abs(velS) * 0.5
-        if (tx <= -tickerHalf) tx += tickerHalf
-        ticker.style.transform = `translateX(${tx}px) skewX(${velS * -0.25}deg)`
-      }
-
-      // testimonials — opposite directions, velocity-reactive
-      if (rowA && aHalf) {
-        ax -= 0.4 + velS * 0.3
-        if (ax <= -aHalf) ax += aHalf
-        if (ax > 0) ax -= aHalf
-        rowA.style.transform = `translateX(${ax}px)`
-      }
-      if (rowB && bHalf) {
-        bx += 0.4 + velS * 0.3
-        if (bx >= 0) bx -= bHalf
-        if (bx < -bHalf) bx += bHalf
-        rowB.style.transform = `translateX(${bx}px)`
-      }
-
-      // scrub mockup upright
-      if (mockup && mockupSection) {
-        const r = mockupSection.getBoundingClientRect()
-        const p = clamp(1 - (r.top - vh() * 0.15) / (vh() * 0.6), 0, 1)
-        scrub += (p - scrub) * 0.1
-        const rotX = 24 * (1 - scrub)
-        const ty = 70 * (1 - scrub)
-        const sc = 0.94 + 0.06 * scrub
-        mockup.style.transform = `rotateX(${rotX}deg) translateY(${ty}px) scale(${sc})`
-      }
-
-      raf = requestAnimationFrame(master)
-    }
-    raf = requestAnimationFrame(master)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      window.removeEventListener('scroll', onScroll)
-      lenis.destroy()
-    }
-  }, [reduce])
-
-  const scrollTo = (id: string) =>
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  const resetHeroPointer = () => {
+    rootRef.current?.style.setProperty('--hero-x', '0px')
+    rootRef.current?.style.setProperty('--hero-y', '0px')
+  }
 
   return (
     <div className="pbv3" ref={rootRef}>
-      <div className="pbv3-grain" aria-hidden />
+      <a className="pbv3-skip-link" href="#main-content">
+        Skip to content
+      </a>
 
-      {/* nav */}
-      <nav className="pbv3-nav" ref={navRef}>
-        <div className="shell">
-          <div className="pbv3-brand">
-            Personal <i>Budget</i>
-          </div>
+      <nav className={`pbv3-nav${navElevated ? ' is-elevated' : ''}`} aria-label="Main navigation">
+        <div className="pbv3-shell pbv3-nav__inner">
+          <a className="pbv3-nav__brand" href="#top" aria-label="Personal Budget home">
+            <BrandLockup />
+          </a>
+
           <div className="pbv3-nav__links">
-            {NAV_LINKS.map((l) => (
-              <a
-                key={l.id}
-                href={`#${l.id}`}
-                onClick={(e) => {
-                  e.preventDefault()
-                  scrollTo(l.id)
-                }}
-              >
-                {l.label}
+            {NAV_LINKS.map((link) => (
+              <a href={`#${link.id}`} key={link.id}>
+                {link.label}
               </a>
             ))}
-            <button
-              type="button"
-              className="pbv3-btn pbv3-btn--sm"
-              onClick={onGetStarted}
-              ref={navCtaRef}
-            >
-              {HERO.primaryCta}
+          </div>
+
+          <div className="pbv3-nav__actions">
+            <button className="pbv3-text-button" type="button" onClick={onSignIn}>
+              {HERO.signInCta}
+            </button>
+            <button className="pbv3-button pbv3-button--small" type="button" onClick={onRequestAccess}>
+              Request access
+              <ArrowRight size={15} aria-hidden="true" />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* hero */}
-      <header className="pbv3-hero">
-        <div className="pbv3-hero__guilloche">
-          <Guilloche n={34} rx={300} ry={120} opacity={0.45} />
-        </div>
-        <div className="shell">
-          <h1 className="pbv3-hero__title">
-            <span className="row">
-              <span style={{ animationDelay: '0.15s' }}>{HERO.line1}</span>
-            </span>
-            <span className="row">
-              <span style={{ animationDelay: '0.3s' }}>
-                {HERO.line2is} <span className="it">{HERO.line2accent}</span>
+      <main id="main-content">
+        <header
+          className="pbv3-hero"
+          id="top"
+          onPointerMove={handleHeroPointerMove}
+          onPointerLeave={resetHeroPointer}
+        >
+          <div className="pbv3-hero__media" aria-hidden="true">
+            <img
+              src="/personal-budget-ledger-hero.webp"
+              alt=""
+              width="1792"
+              height="1024"
+              decoding="async"
+              fetchPriority="high"
+            />
+          </div>
+          <div className="pbv3-hero__wash" aria-hidden="true" />
+          <GuillocheField className="pbv3-hero__guilloche" />
+
+          <div className="pbv3-shell pbv3-hero__grid">
+            <div className="pbv3-hero__copy">
+              <span className="pbv3-eyebrow pbv3-hero__eyebrow">
+                <i />
+                {HERO.eyebrow}
               </span>
-            </span>
-          </h1>
-          <p className="pbv3-hero__sub">{HERO.subtitle}</p>
-          <div className="pbv3-hero__cta">
-            <button
-              type="button"
-              className="pbv3-btn"
-              onClick={onGetStarted}
-              ref={heroPrimaryRef}
-            >
-              {HERO.primaryCta}
-            </button>
-            <button
-              type="button"
-              className="pbv3-btn pbv3-btn--ghost"
-              onClick={() => scrollTo('product')}
-              ref={heroSecondaryRef}
-            >
-              {HERO.secondaryCta}
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* scroll-scrubbed mockup */}
-      <section className="pbv3-mockup-section" id="product" ref={mockupSectionRef}>
-        <div className="shell">
-          <div className="pbv3-mockup" ref={mockupRef}>
-            <div className="pbv3-mockup__frame">
-              <div className="pbv3-mockup__bar">
-                <i />
-                <i />
-                <i />
-                <span className="mono">app.personalbudget.com</span>
+              <h1>
+                <span>{HERO.line1}</span>
+                <em>{HERO.line2}</em>
+              </h1>
+              <p>{HERO.subtitle}</p>
+              <div className="pbv3-hero__actions">
+                <button className="pbv3-button" type="button" onClick={onRequestAccess}>
+                  {HERO.primaryCta}
+                  <ArrowRight size={17} aria-hidden="true" />
+                </button>
+                <a className="pbv3-button pbv3-button--ghost" href="#overview">
+                  {HERO.secondaryCta}
+                </a>
               </div>
-              <div className="pbv3-mockup__body">
-                <div className="pbv3-mpanel">
-                  <div className="pbv3-mpanel__label">{MOCKUP.balanceLabel}</div>
-                  <div className="pbv3-mpanel__balance">{MOCKUP.balance}</div>
-                  <div className="pbv3-mpanel__delta">{MOCKUP.delta}</div>
-                  <div className="pbv3-chart">
-                    <svg viewBox="0 0 330 80">
-                      <path className="line" id="pbv3-chartline" d={CHART_PATH} />
-                      <circle className="dot" r="3.2" cx="0" cy="0">
-                        {!reduce && (
-                          <animateMotion
-                            dur="5s"
-                            repeatCount="indefinite"
-                            keyPoints="0;1;0"
-                            keyTimes="0;0.5;1"
-                            calcMode="linear"
-                          >
-                            <mpath href="#pbv3-chartline" />
-                          </animateMotion>
-                        )}
-                      </circle>
-                    </svg>
-                  </div>
-                  <div className="pbv3-mfeed">
-                    {MOCKUP.feed.map((f) => (
-                      <div className="pbv3-mfeed__row" key={f.label}>
-                        <span>{f.label}</span>
-                        <span className={`pbv3-mfeed__amount ${f.tone}`}>{f.amount}</span>
-                      </div>
-                    ))}
-                  </div>
+              <div className="pbv3-access-note">
+                <Check size={14} aria-hidden="true" />
+                <span>{HERO.accessNote}</span>
+              </div>
+            </div>
+
+            <HeroSnapshot />
+          </div>
+
+          <a className="pbv3-scroll-cue" href="#proof" aria-label="Scroll to learn more">
+            <span>Scroll to read</span>
+            <i />
+          </a>
+        </header>
+
+        <section className="pbv3-proof" id="proof" aria-label="Product principles">
+          <div className="pbv3-shell pbv3-proof__grid">
+            {PROOF_POINTS.map((point) => (
+              <article className="pbv3-reveal" key={point.number}>
+                <span>{point.number}</span>
+                <div>
+                  <h2>{point.title}</h2>
+                  <p>{point.copy}</p>
                 </div>
-                <div className="pbv3-mpanel" ref={budgetsRef}>
-                  <div className="pbv3-mpanel__label">Budgets</div>
-                  <div className="pbv3-mbudget" style={{ marginTop: '0.9rem' }}>
-                    {MOCKUP.budgets.map((b) => (
-                      <div className="pbv3-mbudget__row" key={b.label}>
-                        <div className="top">
-                          <span>{b.label}</span>
-                          <span className="mono">{Math.round(b.value * 100)}%</span>
-                        </div>
-                        <div className="pbv3-mbudget__track">
-                          <div
-                            className="pbv3-mbudget__fill"
-                            data-w={`${Math.round(b.value * 100)}%`}
-                            style={{ '--final-w': `${Math.round(b.value * 100)}%` } as CSSProperties}
-                          />
-                        </div>
-                      </div>
-                    ))}
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="pbv3-overview" id="overview" aria-labelledby="overview-title">
+          <div className="pbv3-shell">
+            <div className="pbv3-section-heading pbv3-reveal">
+              <span className="pbv3-eyebrow">01 — See</span>
+              <h2 id="overview-title">
+                From “I think” to <em>“I know.”</em>
+              </h2>
+              <p>
+                A single place to understand what came in, what went out and what is still ahead.
+              </p>
+            </div>
+            <DashboardPreview />
+          </div>
+        </section>
+
+        <div className="pbv3-ticker" aria-hidden="true">
+          <div className="pbv3-ticker__track">
+            {[...PRODUCT_TICKER, ...PRODUCT_TICKER].map((item, index) => (
+              <span key={`${item}-${index}`}>
+                {item}
+                <i>✦</i>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <section className="pbv3-features" id="features" aria-labelledby="features-title">
+          <div className="pbv3-shell">
+            <div className="pbv3-section-heading pbv3-section-heading--split pbv3-reveal">
+              <span className="pbv3-eyebrow">Useful by design</span>
+              <h2 id="features-title">
+                Less admin.<br />
+                <em>More awareness.</em>
+              </h2>
+              <p>
+                Small, practical tools do the quiet work, so the important part is easier to see.
+              </p>
+            </div>
+
+            <div className="pbv3-feature-grid">
+              {FEATURE_CARDS.map((feature, index) => (
+                <article
+                  className={`pbv3-feature-card pbv3-feature-card--${feature.kind} pbv3-reveal`}
+                  style={{ '--feature-delay': `${index * 70}ms` } as CSSProperties}
+                  key={feature.title}
+                >
+                  <div className="pbv3-feature-card__top">
+                    <span className="pbv3-feature-card__icon">
+                      <FeatureIcon kind={feature.kind} />
+                    </span>
+                    <span>{feature.eyebrow}</span>
                   </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ticker */}
-      <div className="pbv3-ticker" aria-hidden>
-        <div className="pbv3-ticker__track" ref={tickerRef}>
-          {[...TICKER, ...TICKER].map((t, i) => (
-            <span className="pbv3-ticker__item" key={i}>
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
-
-      {/* bento */}
-      <section className="pbv3-section">
-        <div className="shell">
-          <div className="pbv3-reveal">
-            <span className="pbv3-eyebrow">The product</span>
-            <h2 className="pbv3-h2">
-              Small tools that <span className="it">do the work.</span>
-            </h2>
-          </div>
-          <div className="pbv3-bento">
-            <div className="pbv3-cell pbv3-cell--wide pbv3-reveal">
-              <div className="pbv3-cell__title">Search anything</div>
-              <div className="pbv3-cell__hint">⌘K · instant</div>
-              <SearchDemo reduce={reduce} />
-            </div>
-            <div className="pbv3-cell pbv3-reveal">
-              <div className="pbv3-cell__title">Reports</div>
-              <div className="pbv3-cell__hint">PDF export</div>
-              <div className="pbv3-cell__demo pbv3-pdf">
-                <span className="pl" />
-                <span className="pl" />
-                <span className="pl" />
-                <span className="pl" />
-              </div>
-            </div>
-            <div className="pbv3-cell pbv3-reveal">
-              <div className="pbv3-cell__title">Recurring</div>
-              <div className="pbv3-cell__hint">set once</div>
-              <RecurringDemo reduce={reduce} />
-            </div>
-            <div className="pbv3-cell pbv3-reveal">
-              <div className="pbv3-cell__title">Export</div>
-              <div className="pbv3-cell__hint">your data, always</div>
-              <ExportDemo reduce={reduce} />
-            </div>
-            <div className="pbv3-cell pbv3-reveal">
-              <div className="pbv3-cell__title">Private</div>
-              <div className="pbv3-cell__hint">encrypted</div>
-              <div className="pbv3-secure">
-                <div className="pbv3-secure__guilloche">
-                  <Guilloche n={16} rx={120} ry={50} opacity={0.5} />
-                </div>
-                <svg className="pbv3-secure__lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                  <rect x="5" y="11" width="14" height="9" rx="2" />
-                  <path d="M8 11V8a4 4 0 0 1 8 0v3" />
-                </svg>
-              </div>
-            </div>
-            <div className="pbv3-cell pbv3-cell--wide pbv3-cell--household pbv3-reveal">
-              <div className="pbv3-cell__title">{HOUSEHOLD.title}</div>
-              <div className="pbv3-cell__hint">{HOUSEHOLD.hint}</div>
-              <HouseholdDemo />
-            </div>
-            <div className="pbv3-cell pbv3-reveal">
-              <div className="pbv3-cell__title">Planning</div>
-              <div className="pbv3-cell__hint">see the month ahead</div>
-              <div className="pbv3-plan-mini" aria-label="Monthly planning preview">
-                <span style={{ '--plan-height': '44%' } as CSSProperties} />
-                <span style={{ '--plan-height': '62%' } as CSSProperties} />
-                <span style={{ '--plan-height': '52%' } as CSSProperties} />
-                <span className="is-current" style={{ '--plan-height': '82%' } as CSSProperties} />
-                <span style={{ '--plan-height': '70%' } as CSSProperties} />
-                <span style={{ '--plan-height': '90%' } as CSSProperties} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* manifesto */}
-      <section className="pbv3-manifesto" id="manifesto">
-        <div className="pbv3-manifesto__inner">
-          <div className="shell">
-            <p className="pbv3-manifesto__text">
-              {words.map((w, i) => (
-                <span key={i} className={`pbv3-mw${w.key ? ' key' : ''}`}>
-                  {w.text}{' '}
-                </span>
+                  <h3>{feature.title}</h3>
+                  <p>{feature.copy}</p>
+                  <FeatureDemo kind={feature.kind} />
+                  <div className="pbv3-feature-card__meta">{feature.meta}</div>
+                </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="pbv3-planning" aria-labelledby="planning-title">
+          <div className="pbv3-shell pbv3-planning__grid">
+            <div className="pbv3-planning__copy pbv3-reveal">
+              <span className="pbv3-eyebrow">{PLANNING.eyebrow}</span>
+              <h2 id="planning-title">{PLANNING.title}</h2>
+              <p>{PLANNING.copy}</p>
+              <ul>
+                {PLANNING.bullets.map((bullet) => (
+                  <li key={bullet}>
+                    <Check size={15} aria-hidden="true" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <PlanningPreview />
+          </div>
+        </section>
+
+        <section className="pbv3-manifesto" aria-label="Personal Budget manifesto">
+          <div className="pbv3-shell">
+            <BrandSeal />
+            <p className="pbv3-reveal">
+              Money is not the goal. <em>Clarity is.</em>
             </p>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* testimonials */}
-      <section className="pbv3-voices" id="voices">
-        <div className="shell" style={{ marginBottom: '2.5rem' }}>
-          <span className="pbv3-eyebrow">Voices</span>
-          <h2 className="pbv3-h2">
-            Read like a magazine. <span className="it">Works like a spreadsheet.</span>
-          </h2>
-        </div>
-        <div className="pbv3-voices__row" ref={voicesARef}>
-          {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-            <figure className="pbv3-quote" key={`a${i}`}>
-              <p>“{t.quote}”</p>
-              <figcaption className="who">
-                <b>{t.name}</b> · {t.role}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-        <div className="pbv3-voices__row" ref={voicesBRef}>
-          {[...TESTIMONIALS, ...TESTIMONIALS].reverse().map((t, i) => (
-            <figure className="pbv3-quote" key={`b${i}`}>
-              <p>“{t.quote}”</p>
-              <figcaption className="who">
-                <b>{t.name}</b> · {t.role}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      </section>
+        <section className="pbv3-household" id="household" aria-labelledby="household-title">
+          <GuillocheField className="pbv3-household__guilloche" />
+          <div className="pbv3-shell pbv3-household__grid">
+            <div className="pbv3-household__copy pbv3-reveal">
+              <span className="pbv3-eyebrow">{HOUSEHOLD.eyebrow}</span>
+              <h2 id="household-title">{HOUSEHOLD.title}</h2>
+              <p>{HOUSEHOLD.copy}</p>
+              <ul>
+                {HOUSEHOLD.bullets.map((bullet) => (
+                  <li key={bullet}>
+                    <Check size={15} aria-hidden="true" />
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <HouseholdPreview />
+          </div>
+        </section>
 
-      {/* cta */}
-      <section className="pbv3-section pbv3-cta">
-        <div className="pbv3-cta__guilloche">
-          <Guilloche n={30} rx={320} ry={130} opacity={0.4} />
-        </div>
-        <div className="shell">
-          <span className="pbv3-eyebrow">{CTA.eyebrow}</span>
-          <h2 className="pbv3-cta__title">{CTA.title}</h2>
-          <p className="pbv3-cta__sub">{CTA.subtitle}</p>
-          <button
-            type="button"
-            className="pbv3-btn pbv3-btn--pulse"
-            onClick={onGetStarted}
-            ref={ctaButtonRef}
-          >
-            {CTA.button}
-          </button>
-        </div>
-      </section>
+        <section className="pbv3-final-cta" aria-labelledby="final-cta-title">
+          <div className="pbv3-final-cta__media" aria-hidden="true" />
+          <GuillocheField className="pbv3-final-cta__guilloche" />
+          <div className="pbv3-shell pbv3-final-cta__inner pbv3-reveal">
+            <span className="pbv3-eyebrow">{FINAL_CTA.eyebrow}</span>
+            <h2 id="final-cta-title">{FINAL_CTA.title}</h2>
+            <p>{FINAL_CTA.copy}</p>
+            <button className="pbv3-button" type="button" onClick={onRequestAccess}>
+              {FINAL_CTA.button}
+              <ArrowRight size={17} aria-hidden="true" />
+            </button>
+            <small>{FINAL_CTA.note}</small>
+          </div>
+        </section>
+      </main>
 
-      {/* footer */}
       <footer className="pbv3-footer">
-        <div className="pbv3-footer__word">{FOOTER.wordmark}</div>
-        <div className="shell">
+        <div className="pbv3-shell">
+          <BrandLockup footer />
           <div className="pbv3-footer__meta">
             <span>{FOOTER.tagline}</span>
-            <span className="mono">{FOOTER.note}</span>
-            <span className="mono">© {new Date().getFullYear()} Personal Budget</span>
+            <span>{FOOTER.note}</span>
+            <span>© {new Date().getFullYear()} Personal Budget</span>
           </div>
         </div>
       </footer>
