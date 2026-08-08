@@ -27,14 +27,12 @@ function isMerchantTransaction(transaction: Transaction): boolean {
 
 /** Where discretionary money went, grouped by the transaction description. */
 export default function TopMerchants({ transactions }: TopMerchantsProps) {
-  const { rows, merchantTotal, merchantCount, transactionCount } = useMemo(() => {
+  const { rows, merchantTotal } = useMemo(() => {
     const merchantTransactions = transactions.filter(isMerchantTransaction)
     const allMerchants = merchantStats(merchantTransactions)
     return {
       rows: allMerchants.slice(0, MAX_ROWS),
       merchantTotal: allMerchants.reduce((sum, merchant) => sum + merchant.total, 0),
-      merchantCount: allMerchants.length,
-      transactionCount: allMerchants.reduce((sum, merchant) => sum + merchant.count, 0),
     }
   }, [transactions])
 
@@ -49,7 +47,7 @@ export default function TopMerchants({ transactions }: TopMerchantsProps) {
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Top merchants
+            Top 5 merchants
           </Text>
           {rows.length > 0 && (
             <VStack align="flex-end" spacing={0.5}>
@@ -58,9 +56,6 @@ export default function TopMerchants({ transactions }: TopMerchantsProps) {
               </Text>
               <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} lineHeight={1} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {fmtCurrency(merchantTotal)}
-              </Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="8.5px" color="var(--pb-ink-faint)" textAlign="right">
-                {merchantCount} merchant{merchantCount === 1 ? '' : 's'} · {transactionCount} transaction{transactionCount === 1 ? '' : 's'}
               </Text>
             </VStack>
           )}
