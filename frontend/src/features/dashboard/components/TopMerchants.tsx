@@ -131,19 +131,26 @@ function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
         <Box minW={0} flex={1}>
           <HStack justify="space-between" align="flex-start" spacing={4}>
             <Box minW={0}>
-              <Text
-                fontFamily="var(--pb-serif)"
-                fontSize="md"
-                fontWeight={500}
-                lineHeight={1.15}
-                color="var(--pb-ink)"
-                noOfLines={1}
-              >
-                {name}
-              </Text>
-              <Text mt={1} fontFamily="var(--pb-mono)" fontSize="8.5px" color="var(--pb-ink-faint)">
-                {count} transaction{count === 1 ? '' : 's'}
-              </Text>
+              <HStack align="baseline" spacing={2} minW={0}>
+                <Text
+                  fontFamily="var(--pb-serif)"
+                  fontSize="md"
+                  fontWeight={500}
+                  lineHeight={1.15}
+                  color="var(--pb-ink)"
+                  noOfLines={1}
+                >
+                  {name}
+                </Text>
+                <Text
+                  flexShrink={0}
+                  fontFamily="var(--pb-mono)"
+                  fontSize="8.5px"
+                  color="var(--pb-ink-faint)"
+                >
+                  x{count}
+                </Text>
+              </HStack>
             </Box>
 
             <VStack align="flex-end" spacing={0.5} flexShrink={0}>
