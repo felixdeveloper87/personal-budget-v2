@@ -64,7 +64,7 @@ export const EDITORIAL_DARK = {
 
   /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
   bgGradient:
-    'radial-gradient(circle at 88% -12%, rgba(55,150,125,0.08) 0%, transparent 32%), linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
+    'linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
 
   fontDisplay: "'Instrument Serif', Georgia, serif",
 } as const
