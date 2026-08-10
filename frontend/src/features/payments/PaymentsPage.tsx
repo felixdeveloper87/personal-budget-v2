@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -139,23 +139,23 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
 
-        <MotionBox variants={riseV}>
-          <PeriodNavBar
-            selectedPeriod={selectedPeriod}
-            label={periodLabel}
-            isCurrent={isCurrentPeriod}
-            onPeriodChange={onPeriodChange}
-            onNavigate={navigatePeriod}
-            onGoToToday={goToToday}
-          />
-        </MotionBox>
-
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           <PaymentsSummary
             total={periodData.expense}
             paid={paymentStatus.paid}
             upcoming={paymentStatus.upcoming}
             periodLabel={periodLabel}
+            periodNavigator={(
+              <PeriodNavBar
+                embedded
+                selectedPeriod={selectedPeriod}
+                label={periodLabel}
+                isCurrent={isCurrentPeriod}
+                onPeriodChange={onPeriodChange}
+                onNavigate={navigatePeriod}
+                onGoToToday={goToToday}
+              />
+            )}
           />
         </MotionBox>
 
@@ -206,11 +206,13 @@ function PaymentsSummary({
   paid,
   upcoming,
   periodLabel,
+  periodNavigator,
 }: {
   total: number
   paid: number
   upcoming: number
   periodLabel: string
+  periodNavigator: ReactNode
 }) {
   return (
     <Box
@@ -220,6 +222,10 @@ function PaymentsSummary({
       boxShadow="var(--pb-shadow)"
       p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
+      <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
+        {periodNavigator}
+      </Box>
+
       <VStack align="stretch" spacing={4}>
         <VStack align="stretch" spacing={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">

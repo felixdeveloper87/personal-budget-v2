@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Box, Text, VStack } from '@chakra-ui/react'
 import { fmtCurrency } from '../../dashboard/components/format'
 
@@ -5,12 +6,14 @@ interface DayToDaySummaryProps {
   expense: number
   periodLabel: string
   narrativePeriodLabel: string
+  periodNavigator: ReactNode
 }
 
 export default function DayToDaySummary({
   expense,
   periodLabel,
   narrativePeriodLabel,
+  periodNavigator,
 }: DayToDaySummaryProps) {
   return (
     <Box
@@ -20,6 +23,10 @@ export default function DayToDaySummary({
       boxShadow="var(--pb-shadow)"
       p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
+      <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
+        {periodNavigator}
+      </Box>
+
       <VStack align="stretch" spacing={4}>
         <VStack align="stretch" spacing={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">

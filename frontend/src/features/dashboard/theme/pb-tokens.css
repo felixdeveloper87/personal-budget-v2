@@ -44,6 +44,7 @@
   --pb-summary-ink-faint: #5f6d72;
   --pb-summary-line: rgba(47, 75, 89, 0.16);
   --pb-summary-panel: rgba(255, 255, 255, 0.58);
+  --pb-summary-control: rgba(255, 255, 255, 0.82);
   --pb-summary-income: #176f52;
   --pb-summary-coral: #aa4938;
   --pb-summary-gold: #7c6427;
@@ -98,6 +99,7 @@
   --pb-summary-ink-faint: rgba(244, 248, 246, 0.66);
   --pb-summary-line: rgba(220, 235, 239, 0.15);
   --pb-summary-panel: rgba(255, 255, 255, 0.045);
+  --pb-summary-control: rgba(255, 255, 255, 0.10);
   --pb-summary-income: #9de1c3;
   --pb-summary-coral: #f4aaa2;
   --pb-summary-gold: #e4ce91;

@@ -153,23 +153,23 @@ export default function BehaviourPage() {
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
 
-        <MotionBox variants={riseV}>
-          <PeriodNavBar
-            selectedPeriod={selectedPeriod}
-            label={periodLabel}
-            isCurrent={isCurrentPeriod}
-            onPeriodChange={onPeriodChange}
-            onNavigate={navigatePeriod}
-            onGoToToday={goToToday}
-          />
-        </MotionBox>
-
         {/* Day-to-day summary first */}
         <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
           <DayToDaySummary
             expense={periodData.expense}
             periodLabel={periodLabel}
             narrativePeriodLabel={narrativePeriodLabel}
+            periodNavigator={(
+              <PeriodNavBar
+                embedded
+                selectedPeriod={selectedPeriod}
+                label={periodLabel}
+                isCurrent={isCurrentPeriod}
+                onPeriodChange={onPeriodChange}
+                onNavigate={navigatePeriod}
+                onGoToToday={goToToday}
+              />
+            )}
           />
         </MotionBox>
 

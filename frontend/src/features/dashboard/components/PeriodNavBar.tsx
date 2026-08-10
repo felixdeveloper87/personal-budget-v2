@@ -10,13 +10,13 @@ interface PeriodNavBarProps {
   onPeriodChange: (p: PeriodType) => void
   onNavigate: (dir: 'prev' | 'next') => void
   onGoToToday: () => void
+  embedded?: boolean
 }
 
 const PERIOD_OPTIONS: Array<{ value: PeriodType; label: string }> = [
   { value: 'day', label: 'Day' },
   { value: 'week', label: 'Week' },
   { value: 'month', label: 'Month' },
-  { value: 'year', label: 'Year' },
 ]
 
 const navBtnSx = {
@@ -40,19 +40,41 @@ export default function PeriodNavBar({
   onPeriodChange,
   onNavigate,
   onGoToToday,
+  embedded = false,
 }: PeriodNavBarProps) {
   const navSize = { base: '30px', sm: '32px' }
+  const navStyles = embedded
+    ? {
+        variant: 'ghost' as const,
+        color: 'var(--pb-summary-ink-soft)',
+        border: '1px solid var(--pb-summary-line)',
+        bg: 'var(--pb-summary-panel)',
+        borderRadius: '999px',
+        _hover: { bg: 'var(--pb-summary-control)', borderColor: 'var(--pb-summary-ink-faint)' },
+      }
+    : navBtnSx
 
   return (
-    <Flex wrap="wrap" align="center" gap=".7rem" mb="clamp(1.2rem,2.6vw,1.7rem)">
+    <Flex
+      wrap={embedded ? 'nowrap' : 'wrap'}
+      direction={embedded ? { base: 'column', sm: 'row' } : 'row'}
+      align={embedded ? { base: 'stretch', sm: 'center' } : 'center'}
+      justify={embedded ? 'space-between' : 'flex-start'}
+      gap={embedded ? { base: 3, sm: 4 } : '.7rem'}
+      w={embedded ? 'full' : undefined}
+      mb={embedded ? 0 : 'clamp(1.2rem,2.6vw,1.7rem)'}
+    >
       <Segmented
         options={PERIOD_OPTIONS}
         value={selectedPeriod}
         onChange={onPeriodChange}
+        size={embedded ? 'sm' : 'md'}
+        mobileFullWidth={embedded}
+        tone={embedded ? 'summary' : 'default'}
         aria-label="Select period range"
       />
 
-      <HStack spacing={1}>
+      <HStack spacing={1} justify={embedded ? 'center' : undefined} w={embedded ? { base: 'full', sm: 'auto' } : undefined}>
         <IconButton
           aria-label="Previous period"
           icon={<ChevronLeft size={15} />}
@@ -61,7 +83,7 @@ export default function PeriodNavBar({
           w={navSize}
           minW={navSize}
           onClick={() => onNavigate('prev')}
-          {...navBtnSx}
+          {...navStyles}
         />
 
         <HStack spacing={1.5} px={1}>
@@ -70,7 +92,7 @@ export default function PeriodNavBar({
             fontSize={{ base: '11px', sm: '12px' }}
             fontWeight={500}
             letterSpacing="0.1em"
-            color="var(--pb-ink)"
+            color={embedded ? 'var(--pb-summary-ink)' : 'var(--pb-ink)'}
             textTransform="uppercase"
             textAlign="center"
             whiteSpace="nowrap"
@@ -84,9 +106,9 @@ export default function PeriodNavBar({
               px={2}
               py="2px"
               borderRadius="999px"
-              bg="var(--pb-tint-green)"
-              color="var(--pb-forest)"
-              border="1px solid var(--pb-hair)"
+              bg={embedded ? 'var(--pb-summary-panel)' : 'var(--pb-tint-green)'}
+              color={embedded ? 'var(--pb-summary-ink-soft)' : 'var(--pb-forest)'}
+              border={`1px solid ${embedded ? 'var(--pb-summary-line)' : 'var(--pb-hair)'}`}
               fontFamily="var(--pb-mono)"
               fontSize="9.5px"
               letterSpacing="0.1em"
@@ -104,8 +126,8 @@ export default function PeriodNavBar({
               py="2px"
               borderRadius="999px"
               bg="transparent"
-              color="var(--pb-ink-faint)"
-              border="1px solid var(--pb-hair)"
+              color={embedded ? 'var(--pb-summary-ink-faint)' : 'var(--pb-ink-faint)'}
+              border={`1px solid ${embedded ? 'var(--pb-summary-line)' : 'var(--pb-hair)'}`}
               fontFamily="var(--pb-mono)"
               fontSize="9.5px"
               letterSpacing="0.1em"
@@ -113,7 +135,10 @@ export default function PeriodNavBar({
               fontWeight={500}
               whiteSpace="nowrap"
               cursor="pointer"
-              _hover={{ bg: 'var(--pb-surface)', color: 'var(--pb-ink)' }}
+              _hover={{
+                bg: embedded ? 'var(--pb-summary-control)' : 'var(--pb-surface)',
+                color: embedded ? 'var(--pb-summary-ink)' : 'var(--pb-ink)',
+              }}
               onClick={onGoToToday}
             >
               Today
@@ -129,7 +154,7 @@ export default function PeriodNavBar({
           w={navSize}
           minW={navSize}
           onClick={() => onNavigate('next')}
-          {...navBtnSx}
+          {...navStyles}
         />
       </HStack>
     </Flex>

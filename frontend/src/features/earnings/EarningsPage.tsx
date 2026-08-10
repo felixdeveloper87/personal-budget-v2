@@ -1,5 +1,5 @@
 import { Box, Flex, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -81,28 +81,25 @@ export default function EarningsPage() {
   return (
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
       <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
-        <MotionBox variants={riseV}>
-          <PeriodNavBar
-            selectedPeriod={selectedPeriod}
-            label={periodLabel}
-            isCurrent={isCurrentPeriod}
-            onPeriodChange={onPeriodChange}
-            onNavigate={navigatePeriod}
-            onGoToToday={goToToday}
-          />
-        </MotionBox>
-
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          {loading ? (
-            <Skeleton height="180px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <EarningsOverview
-              total={periodData.income}
-              previousTotal={previousPeriodData.income}
-              comparisonCopy={comparisonCopy}
-              periodLabel={periodLabel}
-            />
-          )}
+          <EarningsOverview
+            total={periodData.income}
+            previousTotal={previousPeriodData.income}
+            comparisonCopy={comparisonCopy}
+            periodLabel={periodLabel}
+            loading={loading}
+            periodNavigator={(
+              <PeriodNavBar
+                embedded
+                selectedPeriod={selectedPeriod}
+                label={periodLabel}
+                isCurrent={isCurrentPeriod}
+                onPeriodChange={onPeriodChange}
+                onNavigate={navigatePeriod}
+                onGoToToday={goToToday}
+              />
+            )}
+          />
         </MotionBox>
 
         <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
@@ -198,11 +195,15 @@ function EarningsOverview({
   previousTotal,
   comparisonCopy,
   periodLabel,
+  loading,
+  periodNavigator,
 }: {
   total: number
   previousTotal: number
   comparisonCopy: string
   periodLabel: string
+  loading: boolean
+  periodNavigator: ReactNode
 }) {
   const change = total - previousTotal
   const changeColor = change >= 0 ? 'var(--pb-summary-income)' : 'var(--pb-summary-coral)'
@@ -215,26 +216,34 @@ function EarningsOverview({
       boxShadow="var(--pb-shadow)"
       p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
-      <VStack align="stretch" spacing={4}>
-        <VStack align="stretch" spacing={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-            Earnings - {periodLabel}
+      <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
+        {periodNavigator}
+      </Box>
+
+      {loading ? (
+        <Skeleton height="104px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
+      ) : (
+        <VStack align="stretch" spacing={4}>
+          <VStack align="stretch" spacing={1}>
+            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+              Earnings - {periodLabel}
+            </Text>
+            <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Income by transaction date</Text>
+          </VStack>
+
+          <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
+            {total > 0 ? (
+              <>You earned <Text as="em" color="var(--pb-summary-income)">{fmtCurrency(total)}</Text> in {periodLabel}.</>
+            ) : (
+              <>No earnings recorded in {periodLabel}.</>
+            )}
           </Text>
-          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Income by transaction date</Text>
+
+          <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={changeColor}>
+            {comparisonCopy}
+          </Text>
         </VStack>
-
-        <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
-          {total > 0 ? (
-            <>You earned <Text as="em" color="var(--pb-summary-income)">{fmtCurrency(total)}</Text> in {periodLabel}.</>
-          ) : (
-            <>No earnings recorded in {periodLabel}.</>
-          )}
-        </Text>
-
-        <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={changeColor}>
-          {comparisonCopy}
-        </Text>
-      </VStack>
+      )}
     </Box>
   )
 }
