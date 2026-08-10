@@ -118,6 +118,7 @@ export interface AccountActivityItem {
   amount: number
   status?: TransactionStatus | null
   paymentMethodName?: string | null
+  paymentMethodType?: PaymentMethodType | null
 }
 
 export interface AccountDetails {

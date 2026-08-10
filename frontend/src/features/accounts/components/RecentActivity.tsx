@@ -33,6 +33,7 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
       {items.map((item) => {
         const incoming = isIncoming(item)
         const transfer = item.kind === 'TRANSFER_IN' || item.kind === 'TRANSFER_OUT'
+        const paidByCreditCard = item.paymentMethodType === 'CREDIT_CARD' && Boolean(item.paymentMethodName)
         const tone = incoming ? 'var(--pb-income)' : 'var(--pb-coral)'
         const tint = incoming ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
         return (
@@ -69,15 +70,23 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
                 color="var(--pb-ink)"
                 noOfLines={1}
               >
-                <Text as="span" fontWeight={500}>
-                  {item.description?.trim() || item.category || 'Account activity'}
-                </Text>
-                {' · '}
-                {fmtDate(item.date)}
-                {item.category ? ` · ${item.category}` : ''}
-                {item.paymentMethodName ? (
-                  <Text as="span" color="var(--pb-ink-soft)"> · paid with {item.paymentMethodName}</Text>
-                ) : null}
+                {paidByCreditCard ? (
+                  <Text as="span" fontWeight={500}>
+                    Paid with {item.paymentMethodName} credit card
+                  </Text>
+                ) : (
+                  <>
+                    <Text as="span" fontWeight={500}>
+                      {item.description?.trim() || item.category || 'Account activity'}
+                    </Text>
+                    {' · '}
+                    {fmtDate(item.date)}
+                    {item.category ? ` · ${item.category}` : ''}
+                    {item.paymentMethodName ? (
+                      <Text as="span" color="var(--pb-ink-soft)"> · paid with {item.paymentMethodName}</Text>
+                    ) : null}
+                  </>
+                )}
               </Text>
             </Box>
 

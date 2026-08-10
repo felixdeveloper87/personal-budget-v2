@@ -329,7 +329,8 @@ public class FinancialAccountService {
                 transaction.getCategory(),
                 transaction.getAmount(),
                 transaction.getStatus(),
-                transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().getName() : null);
+                transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().getName() : null,
+                transaction.getPaymentMethod() != null ? transaction.getPaymentMethod().getType() : null);
     }
 
     private AccountActivityItemDTO toTransferActivity(AccountTransfer transfer, boolean incoming) {
@@ -347,6 +348,7 @@ public class FinancialAccountService {
                 "Transfer",
                 transfer.getAmount(),
                 TransactionStatus.CLEARED,
+                null,
                 null);
     }
 }

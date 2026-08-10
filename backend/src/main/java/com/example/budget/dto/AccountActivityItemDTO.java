@@ -1,6 +1,7 @@
 package com.example.budget.dto;
 
 import com.example.budget.model.TransactionStatus;
+import com.example.budget.model.PaymentMethodType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,5 +14,6 @@ public record AccountActivityItemDTO(
         String category,
         BigDecimal amount,
         TransactionStatus status,
-        String paymentMethodName
+        String paymentMethodName,
+        PaymentMethodType paymentMethodType
 ) {}
