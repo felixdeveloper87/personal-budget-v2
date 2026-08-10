@@ -28,12 +28,10 @@ import { fmtCurrency } from '../dashboard/components/format'
 
 import InsightsPanel from './components/InsightsPanel'
 import DayToDaySummary from './components/DayToDaySummary'
-import SoFarBreakdown from './components/SoFarBreakdown'
 import {
   deriveCategoryShift,
   deriveTopCategory,
   periodWord,
-  spendByCategory,
 } from './insights'
 
 function isoOf(d: Date): string {
@@ -128,7 +126,6 @@ export default function BehaviourPage() {
   const momentum = useMemo(() => deriveMomentum(vm), [vm])
   const shift = useMemo(() => deriveCategoryShift(vm, prevVm), [vm, prevVm])
   const topCategory = useMemo(() => deriveTopCategory(vm), [vm])
-  const spendBreakdown = useMemo(() => spendByCategory(vm), [vm])
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const previousExpense = useMemo(
@@ -192,19 +189,6 @@ export default function BehaviourPage() {
               caption="Daily expense intensity"
             />
           )}
-        </MotionBox>
-
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <SoFarBreakdown
-            spend={spendBreakdown}
-            earnings={[]}
-            showEarnings={false}
-            scopeLabel={
-              isCurrentPeriod
-                ? `so far this ${periodWord(selectedPeriod)}`
-                : `in ${periodLabel}`
-            }
-          />
         </MotionBox>
 
         {selectedChartDay && (
