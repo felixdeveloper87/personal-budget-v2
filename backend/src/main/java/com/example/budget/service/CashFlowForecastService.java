@@ -218,12 +218,15 @@ public class CashFlowForecastService {
             LocalDate currentMonthStart,
             LocalDate today,
             LocalDate end) {
-        Set<String> recurringPayments = new HashSet<>();
+        Set<String> recurringOccurrences = new HashSet<>();
         for (Transaction transaction : transactionRepository
                 .findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(user, currentMonthStart, end)) {
             if (transaction.getRecurringTransaction() != null) {
-                recurringPayments.add(recurringPaymentKey(
-                        transaction.getRecurringTransaction().getId(), transaction.getPaymentDate()));
+                LocalDate occurrenceDate = transaction.getTransactionDate() != null
+                        ? transaction.getTransactionDate()
+                        : transaction.getPaymentDate();
+                recurringOccurrences.add(recurringOccurrenceKey(
+                        transaction.getRecurringTransaction().getId(), occurrenceDate));
             }
             if (isSettledBalanceTransaction(transaction, today)) {
                 Map<YearMonth, BigDecimal> actualTarget = transaction.getType() == TransactionType.INCOME
@@ -249,7 +252,7 @@ public class CashFlowForecastService {
                 addAmount(expenses, month, transaction.getAmount());
             }
         }
-        return recurringPayments;
+        return recurringOccurrences;
     }
 
     private void addMissingRecurringTransactions(
@@ -258,7 +261,7 @@ public class CashFlowForecastService {
             User user,
             LocalDate start,
             LocalDate end,
-            Set<String> persistedRecurringPayments) {
+            Set<String> persistedRecurringOccurrences) {
         for (RecurringTransaction recurring : recurringRepository.findByUserOrderByIdDesc(user)) {
             if (!recurring.isActive()
                     || recurring.getAccount() == null
@@ -273,8 +276,8 @@ public class CashFlowForecastService {
                         recurring.getPaymentMethod());
                 if (!paymentDate.isBefore(start)
                         && !paymentDate.isAfter(end)
-                        && !persistedRecurringPayments.contains(
-                                recurringPaymentKey(recurring.getId(), paymentDate))
+                        && !persistedRecurringOccurrences.contains(
+                                recurringOccurrenceKey(recurring.getId(), date))
                         && (recurring.getEndDate() == null || !paymentDate.isAfter(recurring.getEndDate()))) {
                     Map<YearMonth, BigDecimal> target = recurring.getType() == TransactionType.INCOME
                             ? income
@@ -373,8 +376,8 @@ public class CashFlowForecastService {
         amounts.merge(month, amount, BigDecimal::add);
     }
 
-    private String recurringPaymentKey(Long recurringId, LocalDate paymentDate) {
-        return recurringId + ":" + paymentDate;
+    private String recurringOccurrenceKey(Long recurringId, LocalDate occurrenceDate) {
+        return recurringId + ":" + YearMonth.from(occurrenceDate);
     }
 
     private LocalDate nextMonthlyDate(LocalDate currentDate, int targetDay) {
