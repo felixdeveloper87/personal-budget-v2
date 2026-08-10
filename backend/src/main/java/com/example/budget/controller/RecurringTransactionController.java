@@ -65,7 +65,7 @@ public class RecurringTransactionController {
     public RecurringTransactionDTO update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateRecurringTransactionRequest request,
-            @RequestParam(defaultValue = "CURRENT_MONTH") RecurringUpdateScope applyFrom,
+            @RequestParam(name = "applyFrom", defaultValue = "CURRENT_MONTH") RecurringUpdateScope applyFrom,
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
