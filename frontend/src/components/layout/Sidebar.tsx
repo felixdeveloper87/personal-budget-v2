@@ -321,7 +321,7 @@ function SidebarHeader({
     color: 'var(--pb-ink-faint)',
     bg: 'transparent',
     border: '1px solid var(--pb-hair)',
-    _hover: { bg: 'var(--pb-tint-green)', color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' },
+    _hover: { bg: 'var(--pb-sidebar-active-bg)', color: 'var(--pb-ink)', borderColor: 'var(--pb-sidebar-active-border)' },
   } as const
 
   return (
@@ -408,8 +408,8 @@ function ActiveIndicator({
         top={`${top}px`}
         h={`${height}px`}
         borderRadius="12px"
-        bg="var(--pb-tint-green)"
-        border="1px solid var(--pb-hair)"
+        bg="var(--pb-sidebar-active-bg)"
+        border="1px solid var(--pb-sidebar-active-border)"
         opacity={ready ? 1 : 0}
         transition={`top 0.35s cubic-bezier(0.32, 0.72, 0, 1), height 0.25s ease, opacity 0.2s ease`}
         pointerEvents="none"
@@ -424,7 +424,7 @@ function ActiveIndicator({
         h={`${height * 0.56}px`}
         w="3px"
         borderRadius="full"
-        background="linear-gradient(180deg, var(--pb-forest), var(--pb-gold-2))"
+        background="linear-gradient(180deg, var(--pb-sidebar-accent), var(--pb-gold-2))"
         opacity={ready ? 1 : 0}
         transition={`top 0.35s cubic-bezier(0.32, 0.72, 0, 1), height 0.25s ease, opacity 0.2s ease`}
         pointerEvents="none"
@@ -469,7 +469,7 @@ function SidebarItem({
       minH="44px"
       borderRadius="12px"
       bg="transparent"
-      color={isActive ? 'var(--pb-forest)' : 'var(--pb-ink-soft)'}
+      color={isActive ? 'var(--pb-sidebar-accent)' : 'var(--pb-ink-soft)'}
       fontFamily="var(--pb-serif)"
       fontWeight={isActive ? 600 : 400}
       fontSize="0.95rem"
@@ -480,14 +480,14 @@ function SidebarItem({
       justifyContent={isCollapsed ? 'center' : 'flex-start'}
       transition="color 0.2s ease, transform 0.15s ease"
       _hover={{
-        color: isActive ? 'var(--pb-forest)' : 'var(--pb-ink)',
-        bg: isActive ? 'transparent' : 'var(--pb-tint-green)',
+        color: isActive ? 'var(--pb-sidebar-accent)' : 'var(--pb-ink)',
+        bg: isActive ? 'transparent' : 'var(--pb-sidebar-active-bg)',
         transform: isActive ? 'none' : 'translateX(2px)',
       }}
       _active={{ transform: 'translateX(0)' }}
       _focusVisible={{
         outline: 'none',
-        boxShadow: '0 0 0 2px var(--pb-forest)',
+        boxShadow: '0 0 0 2px var(--pb-sidebar-accent)',
       }}
     >
       <Icon
