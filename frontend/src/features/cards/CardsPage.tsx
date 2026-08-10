@@ -236,35 +236,15 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
           ) : (
             <>
               <MotionBox variants={riseV}>
-                <CardsOverview overview={overview} hideValues={hideValues} onToggleHide={toggleValues} />
+                <CardsOverview
+                  overview={overview}
+                  hideValues={hideValues}
+                  onToggleHide={toggleValues}
+                  onAddCard={() => setFormCard(null)}
+                />
               </MotionBox>
               <MotionBox variants={riseV}>
-                <Flex align="baseline" justify="space-between" gap={3}>
-                  <SectionLabel>Your cards</SectionLabel>
-                  <Box
-                    as="button"
-                    type="button"
-                    onClick={() => setFormCard(null)}
-                    display="inline-flex"
-                    alignItems="center"
-                    gap="0.35rem"
-                    fontFamily="var(--pb-mono)"
-                    fontSize="10.5px"
-                    letterSpacing="0.08em"
-                    textTransform="uppercase"
-                    color="var(--pb-ink-soft)"
-                    px="0.7rem"
-                    py="0.32rem"
-                    borderRadius="999px"
-                    border="1px solid var(--pb-hair)"
-                    bg="var(--pb-surface)"
-                    transition="0.18s"
-                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', bg: 'var(--pb-surface-2)' }}
-                  >
-                    <Icon as={Plus} boxSize="0.95em" />
-                    Add card
-                  </Box>
-                </Flex>
+                <SectionLabel>Your cards</SectionLabel>
               </MotionBox>
               <MotionBox variants={riseV}>
                 <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">
@@ -345,10 +325,12 @@ function CardsOverview({
   overview,
   hideValues,
   onToggleHide,
+  onAddCard,
 }: {
   overview: { used: number; limit: number; cardsWithLimit: number; nextPayment: CardTotal | null }
   hideValues: boolean
   onToggleHide: () => void
+  onAddCard: () => void
 }) {
   const available = Math.max(overview.limit - overview.used, 0)
   const utilisation = overview.limit > 0 ? Math.min(100, (overview.used / overview.limit) * 100) : 0
@@ -366,6 +348,7 @@ function CardsOverview({
       <Flex
         position="relative"
         zIndex={1}
+        direction={{ base: 'column', sm: 'row' }}
         align={{ base: 'flex-start', sm: 'center' }}
         justify="space-between"
         gap="1rem"
@@ -387,28 +370,49 @@ function CardsOverview({
             Credit usage and upcoming payments
           </Text>
         </Box>
-        <Button
-          aria-label={hideValues ? 'Show card values' : 'Hide card values'}
-          aria-pressed={hideValues}
-          title={hideValues ? 'Show card values' : 'Hide card values'}
-          onClick={onToggleHide}
-          leftIcon={<Icon as={hideValues ? Eye : EyeOff} boxSize={4} />}
-          flexShrink={0}
-          h="36px"
-          px={3}
-          borderRadius="10px"
-          color="var(--pb-summary-ink-soft)"
-          bg="var(--pb-summary-panel)"
-          border="1px solid var(--pb-summary-line)"
-          fontFamily="var(--pb-mono)"
-          fontSize="9px"
-          fontWeight={600}
-          letterSpacing="0.06em"
-          textTransform="uppercase"
-          _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-        >
-          {hideValues ? 'Show' : 'Hide'}
-        </Button>
+        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
+          <Button
+            onClick={onAddCard}
+            leftIcon={<Icon as={Plus} boxSize={4} />}
+            flex={{ base: 1, sm: 'initial' }}
+            h="36px"
+            px={3}
+            borderRadius="10px"
+            color="var(--pb-summary-ink)"
+            bg="var(--pb-summary-control)"
+            border="1px solid var(--pb-summary-line)"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            _hover={{ borderColor: 'var(--pb-summary-ink-faint)', transform: 'translateY(-1px)' }}
+          >
+            Add card
+          </Button>
+          <Button
+            aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+            aria-pressed={hideValues}
+            title={hideValues ? 'Show card values' : 'Hide card values'}
+            onClick={onToggleHide}
+            leftIcon={<Icon as={hideValues ? Eye : EyeOff} boxSize={4} />}
+            flex={{ base: 1, sm: 'initial' }}
+            h="36px"
+            px={3}
+            borderRadius="10px"
+            color="var(--pb-summary-ink-soft)"
+            bg="var(--pb-summary-panel)"
+            border="1px solid var(--pb-summary-line)"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+          >
+            {hideValues ? 'Show' : 'Hide'}
+          </Button>
+        </Flex>
       </Flex>
       <SimpleGrid
         position="relative"
