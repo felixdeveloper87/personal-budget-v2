@@ -21,8 +21,6 @@ import { listPaymentMethods } from '../../api'
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
 
-import UpcomingPayments from './components/UpcomingPayments'
-
 interface PaymentsPageProps {
   onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
 }
@@ -91,9 +89,6 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
   )
   const previousPeriodData = usePeriodData(transactions, null, selectedPeriod, previousDate, 'cash-flow')
   const vm = useMemo<TxnVM[]>(() => toViewModel(periodData.transactions), [periodData.transactions])
-
-  // Upcoming schedule reads the FULL list (future payment dates fall outside the period).
-  const allVm = useMemo<TxnVM[]>(() => toViewModel(transactions), [transactions])
 
   useEffect(() => {
     setSelectedChartDay(null)
@@ -198,10 +193,6 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
             previousExpense={previousExpense}
             periodLabel={periodLabel}
           />
-        </MotionBox>
-
-        <MotionBox variants={riseV} mt="clamp(1.4rem,3vw,2rem)">
-          <UpcomingPayments allTxns={allVm} />
         </MotionBox>
 
       </MotionBox>
