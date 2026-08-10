@@ -5,6 +5,7 @@ import com.example.budget.cache.CachedRecurringList;
 import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
+import com.example.budget.dto.RecurringUpdateScope;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
 import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
@@ -12,6 +13,7 @@ import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.mapper.RecurringTransactionMapper;
 import com.example.budget.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.TransactionType;
 import com.example.budget.model.User;
 import com.example.budget.repository.RecurringTransactionRepository;
@@ -30,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -143,14 +147,17 @@ class RecurringTransactionServiceTest {
     @Test
     void update_recalculatesRuleFutureTransactionsAndEvictsCaches() {
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        YearMonth nextMonth = YearMonth.from(today).plusMonths(1);
+        int targetDay = Math.min(10, nextMonth.lengthOfMonth());
+        LocalDate expectedDueDate = nextMonth.atDay(targetDay);
         RecurringTransaction recurring = sampleRecurring(owner);
         ReflectionTestUtils.setField(recurring, "id", 72L);
 
         Transaction future = new Transaction();
         future.setUser(owner);
-        future.setDateTime(today.plusDays(3).atTime(12, 0));
-        future.setTransactionDate(today.plusDays(3));
-        future.setPaymentDate(today.plusDays(3));
+        future.setDateTime(nextMonth.atEndOfMonth().atTime(12, 0));
+        future.setTransactionDate(nextMonth.atEndOfMonth());
+        future.setPaymentDate(nextMonth.atEndOfMonth());
         future.setAmount(new BigDecimal("500.00"));
         future.setRecurringTransaction(recurring);
 
@@ -163,22 +170,123 @@ class RecurringTransactionServiceTest {
         UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
                 new BigDecimal("700.00"),
                 today,
-                today.getDayOfMonth());
+                targetDay);
+        request.setApplyFrom(RecurringUpdateScope.NEXT_MONTH);
 
         RecurringTransactionDTO dto = recurringTransactionService.update(72L, request, owner);
 
         assertThat(dto.getAmount()).isEqualByComparingTo("700.00");
         assertThat(dto.getStartDate()).isEqualTo(today);
-        assertThat(dto.getDayOfMonth()).isEqualTo(today.getDayOfMonth());
-        assertThat(dto.getNextRunDate()).isEqualTo(today);
+        assertThat(dto.getDayOfMonth()).isEqualTo(targetDay);
+        assertThat(dto.getNextRunDate()).isEqualTo(expectedDueDate);
         assertThat(future.getAmount()).isEqualByComparingTo("700.00");
-        assertThat(future.getPaymentDate()).isEqualTo(today);
+        assertThat(future.getPaymentDate()).isEqualTo(expectedDueDate);
 
         verify(transactionRepository).saveAll(List.of(future));
-        verify(cacheInvalidation).evictMonthlySummary(owner, today.plusDays(3));
-        verify(cacheInvalidation).evictMonthlySummary(owner, today);
+        verify(cacheInvalidation).evictMonthlySummary(owner, nextMonth.atEndOfMonth());
+        verify(cacheInvalidation).evictMonthlySummary(owner, expectedDueDate);
         verify(cacheInvalidation).evictRecurringList(30L);
         verify(cacheInvalidation).evictTransactionsList(30L);
+    }
+
+    @Test
+    void update_currentMonthChangesClearedOccurrenceWithoutLosingRecurringLink() {
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        YearMonth currentMonth = YearMonth.from(today);
+        LocalDate originalDate = currentMonth.atDay(1);
+        RecurringTransaction recurring = sampleRecurring(owner);
+        ReflectionTestUtils.setField(recurring, "id", 74L);
+
+        Transaction current = new Transaction();
+        current.setUser(owner);
+        current.setDateTime(originalDate.atTime(12, 0));
+        current.setTransactionDate(originalDate);
+        current.setPaymentDate(originalDate);
+        current.setAmount(new BigDecimal("500.00"));
+        current.setStatus(TransactionStatus.CLEARED);
+        current.setRecurringTransaction(recurring);
+
+        when(recurringTransactionRepository.findById(74L)).thenReturn(Optional.of(recurring));
+        when(transactionRepository
+                .findByRecurringTransactionIdAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
+                        74L, currentMonth.atDay(1), currentMonth.atEndOfMonth()))
+                .thenReturn(List.of(current));
+        when(recurringTransactionRepository.save(recurring)).thenReturn(recurring);
+
+        UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
+                new BigDecimal("700.00"),
+                recurring.getStartDate(),
+                recurring.getDayOfMonth());
+
+        recurringTransactionService.update(74L, request, owner);
+
+        assertThat(current.getAmount()).isEqualByComparingTo("700.00");
+        assertThat(current.getTransactionDate()).isEqualTo(originalDate);
+        assertThat(current.getPaymentDate()).isEqualTo(originalDate);
+        assertThat(current.getStatus()).isEqualTo(TransactionStatus.CLEARED);
+        assertThat(current.getRecurringTransaction()).isSameAs(recurring);
+        verify(transactionRepository).saveAll(List.of(current));
+        verify(cacheInvalidation).evictMonthlySummary(owner, originalDate);
+    }
+
+    @Test
+    void update_currentMonthRecreatesMissingLinkedOccurrence() {
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        YearMonth currentMonth = YearMonth.from(today);
+        RecurringTransaction recurring = sampleRecurring(owner);
+        recurring.setStartDate(currentMonth.minusMonths(1).atDay(1));
+        recurring.setDayOfMonth(1);
+        ReflectionTestUtils.setField(recurring, "id", 75L);
+
+        when(recurringTransactionRepository.findById(75L)).thenReturn(Optional.of(recurring));
+        when(transactionRepository
+                .findByRecurringTransactionIdAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
+                        75L, currentMonth.atDay(1), currentMonth.atEndOfMonth()))
+                .thenReturn(List.of());
+        when(transactionRepository.existsByRecurringTransactionIdAndTransactionDateBetween(
+                75L, currentMonth.atDay(1), currentMonth.atEndOfMonth()))
+                .thenReturn(false);
+        when(recurringTransactionRepository.save(recurring)).thenReturn(recurring);
+
+        UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
+                new BigDecimal("700.00"),
+                recurring.getStartDate(),
+                1);
+
+        recurringTransactionService.update(75L, request, owner);
+
+        verify(transactionRepository).save(argThat(transaction ->
+                transaction.getRecurringTransaction() == recurring
+                        && transaction.getTransactionDate().equals(currentMonth.atDay(1))
+                        && transaction.getAmount().compareTo(new BigDecimal("700.00")) == 0));
+    }
+
+    @Test
+    void update_currentMonthRejectsReconciledOccurrence() {
+        LocalDate today = LocalDate.now(ZoneId.systemDefault());
+        YearMonth currentMonth = YearMonth.from(today);
+        RecurringTransaction recurring = sampleRecurring(owner);
+        ReflectionTestUtils.setField(recurring, "id", 76L);
+
+        Transaction reconciled = new Transaction();
+        reconciled.setStatus(TransactionStatus.RECONCILED);
+        reconciled.setTransactionDate(currentMonth.atDay(1));
+        when(recurringTransactionRepository.findById(76L)).thenReturn(Optional.of(recurring));
+        when(transactionRepository
+                .findByRecurringTransactionIdAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
+                        76L, currentMonth.atDay(1), currentMonth.atEndOfMonth()))
+                .thenReturn(List.of(reconciled));
+
+        UpdateRecurringTransactionRequest request = new UpdateRecurringTransactionRequest(
+                new BigDecimal("700.00"),
+                recurring.getStartDate(),
+                recurring.getDayOfMonth());
+
+        assertThatThrownBy(() -> recurringTransactionService.update(76L, request, owner))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("reconciled");
+
+        verify(recurringTransactionRepository, never()).save(any());
     }
 
     @Test

@@ -30,7 +30,12 @@ import {
   listPaymentMethods,
   updateRecurringTransaction,
 } from '../../api'
-import { FinancialAccount, PaymentMethod, RecurringTransaction } from '../../types'
+import {
+  FinancialAccount,
+  PaymentMethod,
+  RecurringTransaction,
+  RecurringUpdateScope,
+} from '../../types'
 import { ToastService } from '../../services/toast'
 import { useEd } from '../../editorial'
 import '../../features/dashboard/theme/pb-tokens.css'
@@ -99,6 +104,7 @@ export default function RecurringTransactionDrawer({
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [draftAccountId, setDraftAccountId] = useState<number | null>(null)
   const [draftPaymentMethodId, setDraftPaymentMethodId] = useState<number | null>(null)
+  const [draftApplyFrom, setDraftApplyFrom] = useState<RecurringUpdateScope>('CURRENT_MONTH')
   const deleteDisclosure = useDisclosure()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
@@ -134,6 +140,7 @@ export default function RecurringTransactionDrawer({
     setDraftDayOfMonth(String(recurringTransaction.dayOfMonth))
     setDraftAccountId(recurringTransaction.accountId ?? null)
     setDraftPaymentMethodId(recurringTransaction.paymentMethodId ?? null)
+    setDraftApplyFrom('CURRENT_MONTH')
   }, [recurringTransaction])
 
   // Load account / card options lazily when editing starts.
@@ -182,6 +189,7 @@ export default function RecurringTransactionDrawer({
     setDraftDayOfMonth(String(r.dayOfMonth))
     setDraftAccountId(r.accountId ?? null)
     setDraftPaymentMethodId(r.paymentMethodId ?? null)
+    setDraftApplyFrom('CURRENT_MONTH')
   }
 
   const handleCancel = async () => {
@@ -235,10 +243,14 @@ export default function RecurringTransactionDrawer({
         dayOfMonth: nextDayOfMonth,
         accountId: draftAccountId,
         paymentMethodId: draftPaymentMethodId,
+        applyFrom: draftApplyFrom,
       })
       ToastService.success({
         title: 'Fixed payment updated',
-        description: 'Future transactions were recalculated.',
+        description:
+          draftApplyFrom === 'CURRENT_MONTH'
+            ? "This month's linked transaction and the future schedule were updated."
+            : 'This month was kept unchanged; the future schedule was updated.',
         duration: 2500,
         dedupeKey: `recurring-amount-updated:${r.id}`,
       })
@@ -413,6 +425,23 @@ export default function RecurringTransactionDrawer({
                   </Select>
                 </FormControl>
               </SimpleGrid>
+              <FormControl>
+                <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>
+                  Apply changes from
+                </FormLabel>
+                <Select
+                  size="sm"
+                  value={draftApplyFrom}
+                  onChange={(e) => setDraftApplyFrom(e.target.value as RecurringUpdateScope)}
+                >
+                  <option value="CURRENT_MONTH">This month and future months</option>
+                  <option value="NEXT_MONTH">Next month onwards</option>
+                </Select>
+                <Text mt={1} fontSize="2xs" color="var(--pb-ink-faint)">
+                  Previous months always stay unchanged. Reconciled payments can only be changed
+                  from next month.
+                </Text>
+              </FormControl>
               <HStack spacing={2}>
                 <Button
                   size="sm"

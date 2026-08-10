@@ -3,6 +3,7 @@ package com.example.budget.controller;
 import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
+import com.example.budget.dto.RecurringUpdateScope;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
 import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.model.User;
@@ -64,9 +65,11 @@ public class RecurringTransactionController {
     public RecurringTransactionDTO update(
             @PathVariable Long id,
             @Valid @RequestBody UpdateRecurringTransactionRequest request,
+            @RequestParam(defaultValue = "CURRENT_MONTH") RecurringUpdateScope applyFrom,
             Authentication authentication
     ) {
         User user = (User) authentication.getPrincipal();
+        request.setApplyFrom(applyFrom);
         return recurringTransactionService.update(id, request, user);
     }
 

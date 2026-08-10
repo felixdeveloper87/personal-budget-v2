@@ -78,10 +78,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     @Param("start") LocalDate start,
                     @Param("end") LocalDate end);
 
-    boolean existsByRecurringTransactionIdAndDateTimeBetween(
+    boolean existsByRecurringTransactionIdAndTransactionDateBetween(
                     Long recurringTransactionId,
-                    LocalDateTime start,
-                    LocalDateTime end);
+                    LocalDate start,
+                    LocalDate end);
+
+    List<Transaction> findByRecurringTransactionIdAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
+                    Long recurringTransactionId,
+                    LocalDate start,
+                    LocalDate end);
 
     List<Transaction> findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
                     Long recurringTransactionId,

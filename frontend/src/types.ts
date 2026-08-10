@@ -344,7 +344,10 @@ export interface UpdateRecurringTransactionRequest {
   dayOfMonth: number
   accountId?: number | null
   paymentMethodId?: number | null
+  applyFrom: RecurringUpdateScope
 }
+
+export type RecurringUpdateScope = 'CURRENT_MONTH' | 'NEXT_MONTH'
 
 export interface SavingsGoal {
   id: number

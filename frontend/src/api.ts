@@ -460,7 +460,10 @@ export async function updateRecurringTransaction(
   id: number,
   request: UpdateRecurringTransactionRequest
 ): Promise<RecurringTransaction> {
-  const { data } = await api.put<RecurringTransaction>(`/recurring-transactions/${id}`, request)
+  const { applyFrom, ...body } = request
+  const { data } = await api.put<RecurringTransaction>(`/recurring-transactions/${id}`, body, {
+    params: { applyFrom },
+  })
   return data
 }
 

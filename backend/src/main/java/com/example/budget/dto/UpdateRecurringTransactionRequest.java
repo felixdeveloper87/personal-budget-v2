@@ -26,6 +26,9 @@ public class UpdateRecurringTransactionRequest {
 
     private Long paymentMethodId;
 
+    @NotNull(message = "Update scope is required")
+    private RecurringUpdateScope applyFrom = RecurringUpdateScope.CURRENT_MONTH;
+
     public UpdateRecurringTransactionRequest() {
     }
 
@@ -65,5 +68,13 @@ public class UpdateRecurringTransactionRequest {
 
     public void setPaymentMethodId(Long paymentMethodId) {
         this.paymentMethodId = paymentMethodId;
+    }
+
+    public RecurringUpdateScope getApplyFrom() {
+        return applyFrom;
+    }
+
+    public void setApplyFrom(RecurringUpdateScope applyFrom) {
+        this.applyFrom = applyFrom;
     }
 }

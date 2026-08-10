@@ -7,6 +7,7 @@ import com.example.budget.config.RedisCacheConfig;
 import com.example.budget.dto.AssignAccountRequest;
 import com.example.budget.dto.CreateRecurringTransactionRequest;
 import com.example.budget.dto.RecurringTransactionDTO;
+import com.example.budget.dto.RecurringUpdateScope;
 import com.example.budget.dto.UpdateRecurringTransactionAmountRequest;
 import com.example.budget.dto.UpdateRecurringTransactionRequest;
 import com.example.budget.exception.AccessDeniedException;
@@ -15,6 +16,7 @@ import com.example.budget.mapper.RecurringTransactionMapper;
 import com.example.budget.model.FinancialAccount;
 import com.example.budget.model.RecurringTransaction;
 import com.example.budget.model.Transaction;
+import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.repository.RecurringTransactionRepository;
 import com.example.budget.repository.TransactionRepository;
@@ -140,23 +142,52 @@ public class RecurringTransactionService {
     public RecurringTransactionDTO update(Long id, UpdateRecurringTransactionRequest request, User user) {
         RecurringTransaction recurringTransaction = getOwnedRecurringTransaction(id, user);
         LocalDate today = LocalDate.now(ZoneId.systemDefault());
-        LocalDateTime firstMomentOfToday = today.atStartOfDay();
+        YearMonth currentMonth = YearMonth.from(today);
+        LocalDate nextMonthStart = currentMonth.plusMonths(1).atDay(1);
+
+        List<Transaction> currentOccurrences = request.getApplyFrom() == RecurringUpdateScope.CURRENT_MONTH
+                ? transactionRepository
+                        .findByRecurringTransactionIdAndTransactionDateBetweenOrderByTransactionDateAscIdAsc(
+                                recurringTransaction.getId(),
+                                currentMonth.atDay(1),
+                                currentMonth.atEndOfMonth())
+                : List.of();
+
+        if (currentOccurrences.stream().anyMatch(
+                transaction -> transaction.getStatus() == TransactionStatus.RECONCILED)) {
+            throw new IllegalArgumentException(
+                    "This month's fixed payment is reconciled. Apply the change from next month instead.");
+        }
 
         List<Transaction> futureGenerated = transactionRepository
                 .findByRecurringTransactionIdAndDateTimeGreaterThanEqualOrderByDateTimeAsc(
                         recurringTransaction.getId(),
-                        firstMomentOfToday);
+                        nextMonthStart.atStartOfDay());
 
         recurringTransaction.setAmount(request.getAmount());
         recurringTransaction.setStartDate(request.getStartDate());
         recurringTransaction.setEndDate(null);
         recurringTransaction.setDayOfMonth(request.getDayOfMonth());
-        recurringTransaction.setNextRunDate(firstFutureDueDate(request.getStartDate(), request.getDayOfMonth(), today));
+        recurringTransaction.setNextRunDate(firstDueDateOnOrAfter(recurringTransaction, nextMonthStart));
         recurringTransaction.setActive(true);
         recurringTransaction.setAccount(financialAccountService.getOwnedAccount(request.getAccountId(), user));
         recurringTransaction.setPaymentMethod(paymentMethodService.getOwnedPaymentMethod(request.getPaymentMethodId(), user));
 
-        LocalDate nextDueDate = recurringTransaction.getNextRunDate();
+        if (request.getApplyFrom() == RecurringUpdateScope.CURRENT_MONTH) {
+            if (currentOccurrences.isEmpty()) {
+                LocalDate currentDueDate = resolveDueDateInMonth(recurringTransaction, currentMonth);
+                if (currentDueDate != null) {
+                    createTransactionIfMissing(recurringTransaction, currentDueDate);
+                }
+            } else {
+                for (Transaction transaction : currentOccurrences) {
+                    updateCurrentOccurrence(transaction, recurringTransaction, currentMonth, today, user);
+                }
+                transactionRepository.saveAll(currentOccurrences);
+            }
+        }
+
+        LocalDate nextDueDate = firstDueDateOnOrAfter(recurringTransaction, nextMonthStart);
         List<Transaction> updatedTransactions = new ArrayList<>();
         for (Transaction transaction : futureGenerated) {
             cacheInvalidation.evictMonthlySummary(user, transaction.getPaymentDate());
@@ -164,20 +195,15 @@ public class RecurringTransactionService {
             LocalDateTime nextDateTime = nextDueDate.atTime(12, 0);
             transaction.setDateTime(nextDateTime);
             transaction.setTransactionDate(nextDueDate);
-            transaction.setAmount(request.getAmount());
-            transaction.setType(recurringTransaction.getType());
-            transaction.setCategory(recurringTransaction.getCategory());
-            transaction.setDescription(recurringTransaction.getDescription());
-            transaction.setAccount(recurringTransaction.getAccount());
-            transaction.setPaymentMethod(recurringTransaction.getPaymentMethod());
+            applyRuleFields(transaction, recurringTransaction);
             LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
                     nextDueDate,
                     recurringTransaction.getPaymentMethod());
             transaction.setPaymentDate(paymentDate);
             if (paymentDate.isAfter(today)) {
-                transaction.setStatus(com.example.budget.model.TransactionStatus.PLANNED);
-            } else if (transaction.getStatus() != com.example.budget.model.TransactionStatus.RECONCILED) {
-                transaction.setStatus(com.example.budget.model.TransactionStatus.CLEARED);
+                transaction.setStatus(TransactionStatus.PLANNED);
+            } else {
+                transaction.setStatus(TransactionStatus.CLEARED);
             }
             updatedTransactions.add(transaction);
             cacheInvalidation.evictMonthlySummary(user, paymentDate);
@@ -194,6 +220,47 @@ public class RecurringTransactionService {
         cacheInvalidation.evictRecurringList(user.getId());
         cacheInvalidation.evictTransactionsList(user.getId());
         return dto;
+    }
+
+    private void updateCurrentOccurrence(
+            Transaction transaction,
+            RecurringTransaction recurringTransaction,
+            YearMonth currentMonth,
+            LocalDate today,
+            User user) {
+        LocalDate previousPaymentDate = transaction.getPaymentDate();
+        TransactionStatus previousStatus = transaction.getStatus();
+
+        applyRuleFields(transaction, recurringTransaction);
+
+        if (previousStatus == TransactionStatus.PLANNED) {
+            LocalDate dueDate = resolveDueDateInMonth(recurringTransaction, currentMonth);
+            if (dueDate != null) {
+                transaction.setDateTime(dueDate.atTime(12, 0));
+                transaction.setTransactionDate(dueDate);
+                LocalDate paymentDate = creditCardBillingService.resolvePaymentDate(
+                        dueDate,
+                        recurringTransaction.getPaymentMethod());
+                transaction.setPaymentDate(paymentDate);
+                transaction.setStatus(paymentDate.isAfter(today)
+                        ? TransactionStatus.PLANNED
+                        : TransactionStatus.CLEARED);
+            }
+        }
+
+        cacheInvalidation.evictMonthlySummary(user, previousPaymentDate);
+        if (!java.util.Objects.equals(previousPaymentDate, transaction.getPaymentDate())) {
+            cacheInvalidation.evictMonthlySummary(user, transaction.getPaymentDate());
+        }
+    }
+
+    private void applyRuleFields(Transaction transaction, RecurringTransaction recurringTransaction) {
+        transaction.setAmount(recurringTransaction.getAmount());
+        transaction.setType(recurringTransaction.getType());
+        transaction.setCategory(recurringTransaction.getCategory());
+        transaction.setDescription(recurringTransaction.getDescription());
+        transaction.setAccount(recurringTransaction.getAccount());
+        transaction.setPaymentMethod(recurringTransaction.getPaymentMethod());
     }
 
     /**
@@ -288,13 +355,12 @@ public class RecurringTransactionService {
     }
 
     private void createTransactionIfMissing(RecurringTransaction recurringTransaction, LocalDate dueDate) {
-        LocalDateTime start = dueDate.atStartOfDay();
-        LocalDateTime end = dueDate.atTime(23, 59, 59);
+        YearMonth occurrenceMonth = YearMonth.from(dueDate);
 
-        boolean exists = transactionRepository.existsByRecurringTransactionIdAndDateTimeBetween(
+        boolean exists = transactionRepository.existsByRecurringTransactionIdAndTransactionDateBetween(
                 recurringTransaction.getId(),
-                start,
-                end
+                occurrenceMonth.atDay(1),
+                occurrenceMonth.atEndOfMonth()
         );
 
         if (exists) {
@@ -332,20 +398,22 @@ public class RecurringTransactionService {
         return nextMonth.withDayOfMonth(day);
     }
 
-    private LocalDate firstFutureDueDate(LocalDate startDate, int dayOfMonth, LocalDate today) {
-        LocalDate dueDate = firstRunDate(startDate, dayOfMonth);
-        while (dueDate.isBefore(today)) {
-            dueDate = nextMonthlyDate(dueDate, dayOfMonth);
+    private LocalDate firstDueDateOnOrAfter(
+            RecurringTransaction recurringTransaction,
+            LocalDate threshold) {
+        YearMonth month = YearMonth.from(threshold);
+        YearMonth startMonth = YearMonth.from(recurringTransaction.getStartDate());
+        if (month.isBefore(startMonth)) {
+            month = startMonth;
         }
-        return dueDate;
-    }
 
-    private LocalDate firstRunDate(LocalDate startDate, int dayOfMonth) {
-        LocalDate firstRunMonth = dateInMonth(YearMonth.from(startDate), dayOfMonth);
-        if (!firstRunMonth.isBefore(startDate)) {
-            return firstRunMonth;
+        while (true) {
+            LocalDate dueDate = resolveDueDateInMonth(recurringTransaction, month);
+            if (dueDate != null && !dueDate.isBefore(threshold)) {
+                return dueDate;
+            }
+            month = month.plusMonths(1);
         }
-        return dateInMonth(YearMonth.from(startDate.plusMonths(1)), dayOfMonth);
     }
 
     private LocalDate dateInMonth(YearMonth month, int targetDayOfMonth) {
