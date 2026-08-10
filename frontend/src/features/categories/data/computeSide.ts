@@ -1,4 +1,3 @@
-import { colorForCategory, iconForCategory } from './categoryMeta'
 import type { Category, CategoryTxn, ComputedCategory } from './types'
 
 /** Rank a side's category totals and calculate each category's share. */
@@ -17,42 +16,6 @@ export function computeSide(
   })
 
   return { rows, total }
-}
-
-/** Keep a donut readable by collecting the long tail into one interactive slice. */
-export function condenseCategories(rows: ComputedCategory[], topCount = 5): ComputedCategory[] {
-  if (rows.length <= topCount + 1) return rows
-
-  const topRows = rows.slice(0, topCount)
-  const rest = rows.slice(topCount)
-  const sample = rest.flatMap((category) => category.sample)
-    .sort((a, b) => b.purchaseDate.localeCompare(a.purchaseDate))
-  const amount = rest.reduce((sum, category) => sum + category.amount, 0)
-  const shownCount = rest.reduce((sum, category) => sum + category.shownCount, 0)
-  const previousAmount = rest.reduce((sum, category) => sum + category.previousAmount, 0)
-
-  return [
-    ...topRows,
-    {
-      id: '__other_categories__',
-      name: 'Other categories',
-      icon: iconForCategory('Other'),
-      color: colorForCategory('Other categories'),
-      kind: rest[0].kind,
-      count: shownCount,
-      total: amount,
-      sample,
-      amount,
-      shownCount,
-      pct: rest.reduce((sum, category) => sum + category.pct, 0),
-      previousAmount,
-      change: amount - previousAmount,
-      changePct: previousAmount > 0 ? ((amount - previousAmount) / previousAmount) * 100 : null,
-      averageAmount: shownCount > 0 ? amount / shownCount : 0,
-      activeDays: new Set(sample.map((transaction) => transaction.purchaseDate)).size,
-      topMerchant: merchantLeader(sample),
-    },
-  ]
 }
 
 function withMetrics(category: Category, previousAmount: number): ComputedCategory {

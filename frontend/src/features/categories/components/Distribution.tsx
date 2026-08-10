@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Flex, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, Layers, ReceiptText } from '../../../components/ui/icons'
-import { condenseCategories, computeSide } from '../data/computeSide'
+import { computeSide } from '../data/computeSide'
 import { gbp, hexA } from '../data/format'
 import type { Category, ComputedCategory, Side } from '../data/types'
 import AllocationDonut from './AllocationDonut'
@@ -30,7 +30,6 @@ export default function Distribution({
   const [pinned, setPinned] = useState<string | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
   const [viewAllCat, setViewAllCat] = useState<ComputedCategory | null>(null)
-  const [showAllCategories, setShowAllCategories] = useState(false)
   const donutRef = useRef<HTMLDivElement>(null)
   const detailsRef = useRef<HTMLDivElement>(null)
 
@@ -40,11 +39,7 @@ export default function Distribution({
     () => computeSide(expense, previousExpense),
     [expense, previousExpense],
   )
-  const displayRows = useMemo(
-    () => showAllCategories ? rows : condenseCategories(rows),
-    [rows, showAllCategories],
-  )
-  const hasHiddenCategories = displayRows.length < rows.length
+  const displayRows = rows
   const spotlight = (activeCat ? displayRows.find((row) => row.id === activeCat) : null) ?? displayRows[0] ?? null
 
   // A view/side swap re-shuffles the donut — drop any lingering highlight/expands.
@@ -136,33 +131,6 @@ export default function Distribution({
                 side={side}
                 onViewAll={() => setViewAllCat(spotlight)}
               />
-            )}
-            {(hasHiddenCategories || showAllCategories && rows.length > 6) && (
-              <Flex
-                as="button"
-                type="button"
-                onClick={() => {
-                  setShowAllCategories((current) => !current)
-                  setPinned(null)
-                  setHovered(null)
-                }}
-                align="center"
-                justify="center"
-                minH="42px"
-                border="1px dashed var(--pb-hair-2)"
-                borderRadius="12px"
-                bg="var(--pb-surface-2)"
-                fontFamily="var(--pb-mono)"
-                fontSize="10px"
-                letterSpacing="0.07em"
-                textTransform="uppercase"
-                color="var(--pb-ink-soft)"
-                cursor="pointer"
-                _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-ink-faint)' }}
-                _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '2px' }}
-              >
-                {showAllCategories ? 'Show top categories' : `Show all ${rows.length} categories`}
-              </Flex>
             )}
           </VStack>
         </MotionGrid>
