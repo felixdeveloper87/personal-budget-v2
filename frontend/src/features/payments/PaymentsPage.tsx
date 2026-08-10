@@ -192,16 +192,16 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
           />
         )}
 
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <UpcomingPayments allTxns={allVm} />
-        </MotionBox>
-
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <Distribution
             expense={expense}
             previousExpense={previousExpense}
             periodLabel={periodLabel}
           />
+        </MotionBox>
+
+        <MotionBox variants={riseV} mt="clamp(1.4rem,3vw,2rem)">
+          <UpcomingPayments allTxns={allVm} />
         </MotionBox>
 
       </MotionBox>
