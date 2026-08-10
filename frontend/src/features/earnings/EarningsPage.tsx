@@ -1,4 +1,4 @@
-import { Box, Grid, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -16,6 +16,7 @@ import ActivityIntensityStrip, { type ChartDay } from '../transactions/component
 import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
+import MerchantLogo from '../../components/ui/MerchantLogo'
 
 function isoOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -239,42 +240,171 @@ function EarningsSources({
   sources: ReturnType<typeof earningsBySource>
   periodLabel: string
 }) {
+  const total = sources.reduce((sum, source) => sum + source.total, 0)
+
   return (
-    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem,2.5vw,1.5rem)">
-      <VStack align="stretch" spacing={4}>
-        <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            Earnings by source
-          </Text>
-          <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
-            Grouped by transaction description in {periodLabel}.
-          </Text>
-        </Box>
+    <Box
+      bg="var(--pb-surface)"
+      border="1px solid var(--pb-hair)"
+      borderRadius="22px"
+      boxShadow="var(--pb-shadow)"
+      p="clamp(1.1rem,2.5vw,1.5rem)"
+      overflow="hidden"
+    >
+      <VStack align="stretch" spacing={5}>
+        <Flex
+          direction={{ base: 'column', sm: 'row' }}
+          justify="space-between"
+          align={{ base: 'flex-start', sm: 'flex-end' }}
+          gap={3}
+          pb={4}
+          borderBottom="1px solid var(--pb-hair)"
+        >
+          <Box>
+            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              Earnings by source
+            </Text>
+            <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
+              Where your income came from in {periodLabel}.
+            </Text>
+          </Box>
+
+          {sources.length > 0 && (
+            <VStack align={{ base: 'flex-start', sm: 'flex-end' }} spacing={0.5}>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                {sources.length} {sources.length === 1 ? 'source' : 'sources'} · total received
+              </Text>
+              <Text
+                fontFamily="var(--pb-serif)"
+                fontSize="1.65rem"
+                fontWeight={500}
+                lineHeight={1}
+                color="var(--pb-income)"
+                style={{ fontVariantNumeric: 'tabular-nums' }}
+              >
+                {fmtCurrency(total)}
+              </Text>
+            </VStack>
+          )}
+        </Flex>
 
         {sources.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)" py={3}>
             No earnings recorded in this period.
           </Text>
         ) : (
-          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap="0.7rem">
-            {sources.map((source) => (
-              <Box key={source.name} bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="14px" p="1rem">
-                <VStack align="stretch" spacing={2}>
-                  <Text fontFamily="var(--pb-serif)" fontSize="lg" color="var(--pb-ink)" noOfLines={1}>
-                    <Text as="span" color="var(--pb-ink-faint)">from </Text>{source.name}
-                  </Text>
-                  <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.1em" color="var(--pb-ink-faint)">
-                    x{source.count}
-                  </Text>
-                  <Text fontFamily="var(--pb-serif)" fontSize="1.45rem" fontWeight={500} color="var(--pb-income)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {fmtCurrency(source.total)}
-                  </Text>
-                </VStack>
-              </Box>
+          <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }} gap={3}>
+            {sources.map((source, index) => (
+              <EarningsSourceCard
+                key={source.name}
+                source={source}
+                rank={index + 1}
+                share={total > 0 ? source.total / total : 0}
+              />
             ))}
           </Grid>
         )}
       </VStack>
+    </Box>
+  )
+}
+
+function EarningsSourceCard({
+  source,
+  rank,
+  share,
+}: {
+  source: ReturnType<typeof earningsBySource>[number]
+  rank: number
+  share: number
+}) {
+  const percentage = Math.round(share * 100)
+  const paymentLabel = `${source.count} ${source.count === 1 ? 'payment' : 'payments'}`
+
+  return (
+    <Box
+      bg="var(--pb-surface-2)"
+      border="1px solid var(--pb-hair)"
+      borderRadius="16px"
+      px={{ base: 3.5, sm: 4 }}
+      py={{ base: 3.5, sm: 4 }}
+      transition="transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease"
+      _hover={{
+        transform: 'translateY(-2px)',
+        borderColor: 'var(--pb-hair-2)',
+        boxShadow: '0 10px 28px rgba(23, 53, 38, 0.08)',
+      }}
+    >
+      <HStack align="center" spacing={3.5}>
+        <Box position="relative" w="46px" h="46px" flexShrink={0}>
+          <MerchantLogo name={source.name} size={46} borderRadius="13px" />
+          <Box
+            position="absolute"
+            right="-5px"
+            bottom="-5px"
+            minW="19px"
+            h="19px"
+            px="4px"
+            display="grid"
+            placeItems="center"
+            borderRadius="full"
+            bg="var(--pb-surface)"
+            border="1px solid var(--pb-hair-2)"
+            boxShadow="0 2px 6px rgba(0,0,0,0.12)"
+          >
+            <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} lineHeight={1} color="var(--pb-ink-faint)">
+              {rank}
+            </Text>
+          </Box>
+        </Box>
+
+        <Box minW={0} flex={1}>
+          <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} lineHeight={1.2} color="var(--pb-ink)" noOfLines={1}>
+            {source.name}
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            {paymentLabel} · {percentage}% of earnings
+          </Text>
+        </Box>
+
+        <VStack align="flex-end" spacing={0.5} flexShrink={0}>
+          <Text
+            fontFamily="var(--pb-serif)"
+            fontSize={{ base: 'lg', sm: 'xl' }}
+            fontWeight={600}
+            lineHeight={1}
+            color="var(--pb-income)"
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {fmtCurrency(source.total)}
+          </Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
+            received
+          </Text>
+        </VStack>
+      </HStack>
+
+      <Box
+        role="progressbar"
+        aria-label={`${source.name}: ${percentage}% of recorded earnings`}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={percentage}
+        mt={3.5}
+        h="4px"
+        borderRadius="full"
+        bg="var(--pb-surface-3)"
+        overflow="hidden"
+      >
+        <Box
+          h="full"
+          w={`max(${percentage}%, 8px)`}
+          borderRadius="full"
+          bgGradient="linear(to-r, var(--pb-income), var(--pb-forest-2))"
+          opacity={0.82}
+          transition="width 0.5s ease"
+        />
+      </Box>
     </Box>
   )
 }
