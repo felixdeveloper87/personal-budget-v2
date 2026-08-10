@@ -29,6 +29,7 @@ import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
+import DescriptionSpendingPaces from './components/DescriptionSpendingPaces'
 import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
@@ -222,6 +223,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         <MotionBox variants={riseV}>
           <CategorySpendingPaces
+            transactions={transactions}
+            selectedDate={selectedDate}
+            dateBasis="activity"
+            userId={user?.id ?? null}
+          />
+        </MotionBox>
+
+        <MotionBox variants={riseV}>
+          <DescriptionSpendingPaces
             transactions={transactions}
             selectedDate={selectedDate}
             dateBasis="activity"

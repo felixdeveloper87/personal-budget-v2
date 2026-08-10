@@ -14,19 +14,19 @@ import {
 } from '@chakra-ui/react'
 import { EyeOff } from '../../../components/ui/icons'
 
-interface HideCategoryChartDialogProps {
+interface HideSpendingPaceDialogProps {
   isOpen: boolean
-  category: string | null
+  itemName: string | null
   onClose: () => void
   onConfirm: () => void
 }
 
-export default function HideCategoryChartDialog({
+export default function HideSpendingPaceDialog({
   isOpen,
-  category,
+  itemName,
   onClose,
   onConfirm,
-}: HideCategoryChartDialogProps) {
+}: HideSpendingPaceDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   return (
@@ -63,7 +63,7 @@ export default function HideCategoryChartDialog({
             </Box>
             <VStack align="flex-start" spacing={0}>
               <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" lineHeight="1.2">
-                Hide {category ?? 'category'} chart?
+                Hide {itemName ?? 'spending pace'} chart?
               </Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)">
                 Personal dashboard preference
@@ -74,8 +74,8 @@ export default function HideCategoryChartDialog({
           <AlertDialogBody px={6} pb={5}>
             <VStack align="stretch" spacing={3}>
               <Text fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.6}>
-                This will remove the {category ?? 'category'} spending pace chart from your dashboard.
-                Your transactions and category data will not be deleted.
+                This will remove the spending pace chart for {itemName ?? 'this item'} from your dashboard.
+                Your transactions and financial data will not be deleted.
               </Text>
               <Box
                 px={4}
