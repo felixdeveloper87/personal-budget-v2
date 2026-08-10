@@ -24,6 +24,8 @@ interface CashPaceProps {
   selectedDate: Date
   dateBasis: TransactionDateBasis
   kind?: PaceKind
+  title?: string
+  includeCommitments?: boolean
 }
 
 /**
@@ -35,6 +37,8 @@ export default function CashPace({
   selectedDate,
   dateBasis,
   kind = 'expense',
+  title: titleOverride,
+  includeCommitments = false,
 }: CashPaceProps) {
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
@@ -57,7 +61,7 @@ export default function CashPace({
     const year = selectedDate.getFullYear()
     const month = selectedDate.getMonth()
     const prev = new Date(year, month - 1, 1)
-    const pacedTransactions = isIncome
+    const pacedTransactions = isIncome || includeCommitments
       ? transactions
       : transactions.filter(
         (t) =>
@@ -101,14 +105,14 @@ export default function CashPace({
       prevTotal: previous[previous.length - 1] ?? 0,
       elapsedDays: shownDays,
     }
-  }, [transactions, selectedDate, dateBasis, isIncome])
+  }, [transactions, selectedDate, dateBasis, isIncome, includeCommitments])
 
   const higherThanPrevious = paceDelta > 0
   const DeltaIcon = higherThanPrevious ? ArrowUpRight : ArrowDownRight
   const deltaColor = isIncome
     ? higherThanPrevious ? 'var(--pb-income-2)' : 'var(--pb-coral)'
     : higherThanPrevious ? 'var(--pb-coral)' : 'var(--pb-income-2)'
-  const title = isIncome ? 'Income pace' : 'Spending pace'
+  const title = titleOverride ?? (isIncome ? 'Income pace' : 'Spending pace')
 
   return (
     <Panel h="full">
@@ -157,7 +161,12 @@ export default function CashPace({
         </HStack>
 
         {/* Chart */}
-        <Box h="180px" w="full">
+        <Box
+          h="180px"
+          w="full"
+          role="img"
+          aria-label={`${title}: ${fmtCurrency(amountSoFar)} by day ${elapsedDays}; ${fmtCurrency(prevTotal)} last month.`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
               <defs>

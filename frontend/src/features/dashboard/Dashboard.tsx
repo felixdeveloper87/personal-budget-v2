@@ -28,6 +28,7 @@ import SectionLabel from './components/SectionLabel'
 import MonthHero from './components/MonthHero'
 import StatCard from './components/StatCard'
 import CashPace from './components/SpendingPace'
+import CategorySpendingPaces from './components/CategorySpendingPaces'
 import TopMerchants from './components/TopMerchants'
 import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
@@ -219,7 +220,18 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
         </Grid>
 
-        {/* Spending mix · Top merchants (Behaviour lens: when purchases happened) */}
+        <MotionBox variants={riseV}>
+          <SectionLabel>Spending pace by category</SectionLabel>
+        </MotionBox>
+        <MotionBox variants={riseV}>
+          <CategorySpendingPaces
+            transactions={transactions}
+            selectedDate={selectedDate}
+            dateBasis="activity"
+          />
+        </MotionBox>
+
+        {/* Spending mix · Top merchants */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <SpendingMix
