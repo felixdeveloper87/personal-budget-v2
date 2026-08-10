@@ -39,7 +39,7 @@ export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
 }
 
-// Shared with AccountsPage / TransfersPage so the privacy toggle stays in sync.
+// Shared with AccountsPage so the balance privacy toggle stays in sync.
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
 export default function Dashboard({ onPageChange }: DashboardProps) {

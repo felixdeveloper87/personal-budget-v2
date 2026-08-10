@@ -9,7 +9,6 @@ import AdminDashboardPage from './pages/AdminDashboardPage'
 import ReportsPage from './pages/ReportsPage'
 import AccountsPage from './pages/AccountsPage'
 import CardsPage from './pages/CardsPage'
-import TransfersPage from './pages/TransfersPage'
 import CommitmentsPage from './pages/CommitmentsPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
@@ -34,11 +33,10 @@ interface CardStatementTarget {
 const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   dashboard: ({ onPageChange }) => <Dashboard onPageChange={onPageChange} />,
   household: () => <HouseholdPage />,
-  accounts: ({ onPageChange }) => <AccountsPage onPageChange={onPageChange} />,
+  accounts: () => <AccountsPage />,
   cards: ({ cardStatementTarget, onCardStatementTargetHandled }) => (
     <CardsPage statementTarget={cardStatementTarget} onStatementTargetHandled={onCardStatementTargetHandled} />
   ),
-  transfers: ({ onPageChange }) => <TransfersPage onPageChange={onPageChange} />,
   installments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="installments" />,
   'fixed-payments': ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} initialTab="fixed" />,
   commitments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} />,

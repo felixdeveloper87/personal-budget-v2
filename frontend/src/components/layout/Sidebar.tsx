@@ -39,7 +39,7 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
   },
   {
     label: 'Planning',
-    itemIds: ['planning', 'commitments', 'transfers', 'goals'],
+    itemIds: ['planning', 'commitments', 'goals'],
   },
   {
     label: 'Reports',

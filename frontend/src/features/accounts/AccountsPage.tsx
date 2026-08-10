@@ -4,7 +4,6 @@ import { Box, Flex, Grid, Icon, Spinner, Text, VStack, useMediaQuery } from '@ch
 import { archiveAccount, getAccountSummary } from '../../api'
 import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
-import type { AppPage } from '../../components/layout/header/navigation.config'
 
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
@@ -16,14 +15,11 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import TotalHero from './components/TotalHero'
 import AccountList from './components/AccountList'
 import AccountDetail from './components/AccountDetail'
+import TransferModal from './components/TransferModal'
 
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
-interface AccountsPageProps {
-  onPageChange?: (page: AppPage) => void
-}
-
-export default function AccountsPage({ onPageChange }: AccountsPageProps) {
+export default function AccountsPage() {
   const [summary, setSummary] = useState<AccountSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -31,6 +27,8 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
   const [formAccount, setFormAccount] = useState<FinancialAccount | null | undefined>(undefined)
   const [accountToDelete, setAccountToDelete] = useState<FinancialAccount | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
+  const [accountDetailVersion, setAccountDetailVersion] = useState(0)
 
   const [isSplit] = useMediaQuery('(min-width: 920px)')
 
@@ -194,11 +192,12 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
                   {showDetail && selectedAccount && (
                     <Box position={{ base: 'static', lg: 'sticky' }} top={{ lg: '1rem' }}>
                       <AccountDetail
+                        key={`${selectedAccount.id}-${accountDetailVersion}`}
                         account={selectedAccount}
                         hideBalances={hideBalances}
                         showBackButton={!isSplit}
                         onBack={() => setDetailOpen(false)}
-                        onTransfer={() => onPageChange?.('transfers')}
+                        onTransfer={() => setTransferOpen(true)}
                       />
                     </Box>
                   )}
@@ -215,6 +214,17 @@ export default function AccountsPage({ onPageChange }: AccountsPageProps) {
         account={formAccount}
         onClose={() => setFormAccount(undefined)}
         onSaved={load}
+      />
+      <TransferModal
+        isOpen={transferOpen}
+        onClose={() => setTransferOpen(false)}
+        accounts={activeAccounts}
+        initialFromAccountId={selectedAccount?.id ?? null}
+        hideBalances={hideBalances}
+        onTransferred={async () => {
+          await load()
+          setAccountDetailVersion((version) => version + 1)
+        }}
       />
       <ConfirmDeleteDialog
         isOpen={accountToDelete !== null}

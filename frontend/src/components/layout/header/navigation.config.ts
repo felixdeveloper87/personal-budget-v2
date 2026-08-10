@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   List,
   ReceiptText,
-  Repeat,
   Shield,
   Wallet,
   Sparkles,
@@ -21,7 +20,6 @@ export type AppPage =
   | 'household'
   | 'accounts'
   | 'cards'
-  | 'transfers'
   | 'installments'
   | 'fixed-payments'
   | 'commitments'
@@ -112,13 +110,6 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'All',
     icon: List,
     description: 'Browse and manage every transaction',
-  },
-  {
-    id: 'transfers',
-    label: 'Transfers',
-    shortLabel: 'Transfers',
-    icon: Repeat,
-    description: 'Move money between accounts',
   },
   {
     id: 'goals',
