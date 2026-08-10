@@ -249,7 +249,7 @@ export default function RecurringTransactionDrawer({
         title: 'Fixed payment updated',
         description:
           draftApplyFrom === 'CURRENT_MONTH'
-            ? "This month's linked transaction and the future schedule were updated."
+            ? 'The rule and the selected current-month schedule were updated.'
             : 'This month was kept unchanged; the future schedule was updated.',
         duration: 2500,
         dedupeKey: `recurring-amount-updated:${r.id}`,
@@ -258,7 +258,7 @@ export default function RecurringTransactionDrawer({
       await Promise.resolve(onChanged())
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not update amount',
+        title: 'Could not update fixed payment',
         duration: 3000,
         dedupeKey: `recurring-amount-update-failed:${r.id}`,
       })
