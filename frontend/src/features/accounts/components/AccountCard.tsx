@@ -2,12 +2,10 @@ import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
 import { ChevronRight, Pencil, Trash2 } from '../../../components/ui/icons'
 import { ACCOUNT_LABELS, money } from '../../../components/accounts/accountMeta'
-import { accountColor } from '../data/accountVisual'
 import AccountAvatar from './AccountAvatar'
 
 interface AccountCardProps {
   account: FinancialAccount
-  share: number // 0..100
   selected: boolean
   hideBalances: boolean
   onSelect: () => void
@@ -49,14 +47,12 @@ const Tool = ({
 
 export default function AccountCard({
   account,
-  share,
   selected,
   hideBalances,
   onSelect,
   onEdit,
   onArchive,
 }: AccountCardProps) {
-  const color = accountColor(account)
   const negative = account.currentBalance < 0
 
   return (
@@ -162,6 +158,38 @@ export default function AccountCard({
         </Text>
       </Box>
 
+      {account.type === 'CURRENT' && account.overdraftLimit > 0 && (
+        <Flex
+          mt="0.7rem"
+          pt="0.6rem"
+          align="center"
+          justify="space-between"
+          gap="0.75rem"
+          borderTop="1px solid var(--pb-hair)"
+        >
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            letterSpacing="0.09em"
+            textTransform="uppercase"
+            color="var(--pb-ink-faint)"
+          >
+            Overdraft remaining
+          </Text>
+          <Text
+            className="num"
+            flexShrink={0}
+            fontFamily="var(--pb-mono)"
+            fontSize="11px"
+            fontWeight={600}
+            color={account.overdraftAvailable > 0 ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {hideBalances ? '••••••' : money(account.overdraftAvailable, account.currency)}
+          </Text>
+        </Flex>
+      )}
+
       {/* Chevron affordance */}
       <Icon
         as={ChevronRight}
@@ -175,10 +203,6 @@ export default function AccountCard({
         transition="0.15s"
       />
 
-      {/* Share bar */}
-      <Box position="absolute" left="1.05rem" right="1.05rem" bottom="0.7rem" h="3px" borderRadius="3px" bg="var(--pb-hair)" overflow="hidden">
-        <Box h="100%" borderRadius="3px" bg={color} w={`${share}%`} transition="width 0.6s cubic-bezier(.2,.7,.2,1)" />
-      </Box>
     </Box>
   )
 }

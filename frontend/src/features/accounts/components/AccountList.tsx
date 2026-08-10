@@ -19,15 +19,12 @@ export default function AccountList({
   onEdit,
   onArchive,
 }: AccountListProps) {
-  const positiveTotal = accounts.reduce((s, a) => s + Math.max(0, a.currentBalance), 0) || 1
-
   return (
     <VStack align="stretch" spacing="0.7rem">
       {accounts.map((account) => (
         <AccountCard
           key={account.id}
           account={account}
-          share={(Math.max(0, account.currentBalance) / positiveTotal) * 100}
           selected={account.id === selectedId}
           hideBalances={hideBalances}
           onSelect={() => onSelect(account.id)}
