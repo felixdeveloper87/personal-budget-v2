@@ -24,7 +24,7 @@ const categoryKey = (category: string): string => category.trim().toLowerCase()
 const isMonth = (date: Date, year: number, month: number): boolean =>
   date.getFullYear() === year && date.getMonth() === month
 
-/** One Spending Pace chart for every expense category active this or last month. */
+/** One Spending Pace chart for every built-in or previously used expense category. */
 export default function CategorySpendingPaces({
   transactions,
   selectedDate,
@@ -50,15 +50,6 @@ export default function CategorySpendingPaces({
     for (const transaction of transactions) {
       if (transaction.type !== 'EXPENSE') continue
 
-      const transactionDate = getTransactionDate(transaction, dateBasis)
-      const isCurrent = isMonth(transactionDate, year, month)
-      const isPrevious = isMonth(
-        transactionDate,
-        previousDate.getFullYear(),
-        previousDate.getMonth(),
-      )
-      if (!isCurrent && !isPrevious) continue
-
       const name = transaction.category.trim() || 'Uncategorised'
       const key = categoryKey(name)
       const existing = groups.get(key)
@@ -69,13 +60,22 @@ export default function CategorySpendingPaces({
         currentTotal: 0,
         previousTotal: 0,
       }
+      groups.set(key, group)
+
+      const transactionDate = getTransactionDate(transaction, dateBasis)
+      const isCurrent = isMonth(transactionDate, year, month)
+      const isPrevious = isMonth(
+        transactionDate,
+        previousDate.getFullYear(),
+        previousDate.getMonth(),
+      )
+      if (!isCurrent && !isPrevious) continue
 
       // Prefer the spelling used in the current month for the visible title.
       if (isCurrent) group.name = name
       group.transactions.push(transaction)
       if (isCurrent) group.currentTotal += transaction.amount
       if (isPrevious) group.previousTotal += transaction.amount
-      groups.set(key, group)
     }
 
     return [...groups.values()].sort(

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useId, useMemo } from 'react'
 import { Box, HStack, Text, VStack, useColorMode } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
@@ -41,6 +41,8 @@ export default function CashPace({
   includeCommitments = false,
 }: CashPaceProps) {
   const reduce = useReducedMotion()
+  const reactId = useId()
+  const gradientId = `pb-${kind}-pace-${reactId.replace(/[^a-zA-Z0-9]/g, '')}`
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
   const isIncome = kind === 'income'
@@ -108,6 +110,7 @@ export default function CashPace({
   }, [transactions, selectedDate, dateBasis, isIncome, includeCommitments])
 
   const higherThanPrevious = paceDelta > 0
+  const hasPaceData = amountSoFar > 0 || prevTotal > 0
   const DeltaIcon = higherThanPrevious ? ArrowUpRight : ArrowDownRight
   const deltaColor = isIncome
     ? higherThanPrevious ? 'var(--pb-income-2)' : 'var(--pb-coral)'
@@ -145,19 +148,21 @@ export default function CashPace({
             </HStack>
           </VStack>
 
-          <HStack
-            spacing={1}
-            px={2}
-            py="2px"
-            borderRadius="999px"
-            color={deltaColor}
-            flexShrink={0}
-          >
-            <DeltaIcon size={12} />
-            <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {fmtCurrency(Math.abs(paceDelta))} vs last month
-            </Text>
-          </HStack>
+          {hasPaceData && (
+            <HStack
+              spacing={1}
+              px={2}
+              py="2px"
+              borderRadius="999px"
+              color={deltaColor}
+              flexShrink={0}
+            >
+              <DeltaIcon size={12} />
+              <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {fmtCurrency(Math.abs(paceDelta))} vs last month
+              </Text>
+            </HStack>
+          )}
         </HStack>
 
         {/* Chart */}
@@ -170,7 +175,7 @@ export default function CashPace({
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
               <defs>
-                <linearGradient id={`pb-${kind}-pace-current`} x1="0" y1="0" x2="0" y2="1">
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={c.current} stopOpacity={0.24} />
                   <stop offset="100%" stopColor={c.current} stopOpacity={0.02} />
                 </linearGradient>
@@ -223,7 +228,7 @@ export default function CashPace({
                 dataKey="current"
                 stroke={c.current}
                 strokeWidth={2}
-                fill={`url(#pb-${kind}-pace-current)`}
+                fill={`url(#${gradientId})`}
                 connectNulls={false}
                 isAnimationActive={!reduce}
               />
@@ -233,13 +238,17 @@ export default function CashPace({
 
         {/* Caption */}
         <Text display={isIncome ? 'none' : undefined} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
-          {projected !== null
+          {!hasPaceData
+            ? 'No spending recorded this or last month.'
+            : projected !== null
             ? `At this pace you'll spend about ${fmtCurrency(projected)} this month — last month closed at ${fmtCurrency(prevTotal)}.`
             : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
         </Text>
         {isIncome && (
           <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
-            {projected !== null
+            {!hasPaceData
+              ? 'No income recorded this or last month.'
+              : projected !== null
               ? `At this pace you'll earn about ${fmtCurrency(projected)} this month. Last month closed at ${fmtCurrency(prevTotal)}.`
               : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
           </Text>
