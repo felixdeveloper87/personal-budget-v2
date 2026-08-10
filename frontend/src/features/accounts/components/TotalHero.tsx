@@ -58,7 +58,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
           aria-pressed={hideBalances}
           title={hideBalances ? 'Show balances' : 'Hide balances'}
           onClick={onToggleHide}
-          leftIcon={<Icon as={hideBalances ? EyeOff : Eye} boxSize={4} />}
+          leftIcon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={4} />}
           flexShrink={0}
           h="36px"
           px={3}

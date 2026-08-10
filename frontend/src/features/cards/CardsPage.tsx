@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Button, Flex, HStack, Icon, IconButton, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 
 import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../../api'
 import type { PaymentMethod, Transaction } from '../../types'
@@ -299,8 +299,46 @@ function EmptyState({ text, onAdd }: { text: string; onAdd?: () => void }) {
   return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">No card activity</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text>{onAdd && <Box mt={5}><ActionButton label="Add card" icon={Plus} primary onClick={onAdd} /></Box>}</Flex>
 }
 
-function Metric({ label, value, note, emphasis }: { label: string; value: string; note?: string; emphasis?: boolean }) {
-  return <Box><Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{label}</Text><Text className="num" fontSize={emphasis ? { base: '2rem', md: '2.3rem' } : '1.45rem'} fontWeight={500} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>{note && <Text fontSize="xs" color="var(--pb-ink-soft)" mt="0.35rem">{note}</Text>}</Box>
+function Metric({ label, value, note, emphasis, summary }: { label: string; value: string; note?: string; emphasis?: boolean; summary?: boolean }) {
+  return (
+    <Box minW={0}>
+      <Text
+        fontFamily="var(--pb-mono)"
+        fontSize={summary ? '8.5px' : '10px'}
+        letterSpacing="0.14em"
+        textTransform="uppercase"
+        color={summary ? 'var(--pb-summary-ink-faint)' : 'var(--pb-ink-faint)'}
+        noOfLines={1}
+      >
+        {label}
+      </Text>
+      <Text
+        className="num"
+        fontSize={summary
+          ? emphasis ? { base: '1.5rem', md: '1.8rem' } : { base: '1.15rem', md: '1.35rem' }
+          : emphasis ? { base: '2rem', md: '2.3rem' } : '1.45rem'}
+        fontWeight={500}
+        lineHeight="1.1"
+        letterSpacing="-0.025em"
+        color={summary ? 'var(--pb-summary-ink)' : 'var(--pb-ink)'}
+        mt="0.35rem"
+        noOfLines={summary ? 1 : undefined}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {value}
+      </Text>
+      {note && (
+        <Text
+          fontSize={summary ? '10px' : 'xs'}
+          color={summary ? 'var(--pb-summary-ink-soft)' : 'var(--pb-ink-soft)'}
+          mt="0.35rem"
+          noOfLines={summary ? 2 : undefined}
+        >
+          {note}
+        </Text>
+      )}
+    </Box>
+  )
 }
 
 function CardsOverview({
@@ -315,27 +353,95 @@ function CardsOverview({
   const available = Math.max(overview.limit - overview.used, 0)
   const utilisation = overview.limit > 0 ? Math.min(100, (overview.used / overview.limit) * 100) : 0
   return (
-    <Box position="relative" overflow="hidden" bg="linear-gradient(168deg, var(--pb-surface), var(--pb-surface-2))" border="1px solid var(--pb-hair)" borderRadius="22px" boxShadow="var(--pb-shadow)" p="clamp(1.2rem, 3vw, 1.7rem)">
-      <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.6)" />
-      <Flex position="relative" zIndex={1} align="flex-start" justify="space-between" gap="1rem" mb={4}>
-        <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-          Cards overview
-        </Text>
-        <IconButton
+    <Box
+      position="relative"
+      overflow="hidden"
+      bg="var(--pb-summary-petrol)"
+      border="1px solid var(--pb-summary-line)"
+      borderRadius="22px"
+      boxShadow="var(--pb-shadow)"
+      p={{ base: 3.5, sm: 'clamp(1.1rem, 2.4vw, 1.45rem)' }}
+    >
+      <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.16)" />
+      <Flex
+        position="relative"
+        zIndex={1}
+        align={{ base: 'flex-start', sm: 'center' }}
+        justify="space-between"
+        gap="1rem"
+        pb={{ base: 3, sm: 3.5 }}
+        borderBottom="1px solid var(--pb-summary-line)"
+      >
+        <Box minW={0}>
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="10px"
+            fontWeight={600}
+            letterSpacing="0.18em"
+            textTransform="uppercase"
+            color="var(--pb-summary-ink-faint)"
+          >
+            Cards overview
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-summary-ink-soft)">
+            Credit usage and upcoming payments
+          </Text>
+        </Box>
+        <Button
           aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+          aria-pressed={hideValues}
           title={hideValues ? 'Show card values' : 'Hide card values'}
-          icon={<Icon as={hideValues ? Eye : EyeOff} boxSize={5} />}
           onClick={onToggleHide}
+          leftIcon={<Icon as={hideValues ? Eye : EyeOff} boxSize={4} />}
           flexShrink={0}
-          variant="ghost"
-          borderRadius="11px"
-          color="var(--pb-ink-soft)"
-          bg="var(--pb-surface)"
-          border="1px solid var(--pb-hair)"
-          _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
-        />
+          h="36px"
+          px={3}
+          borderRadius="10px"
+          color="var(--pb-summary-ink-soft)"
+          bg="var(--pb-summary-panel)"
+          border="1px solid var(--pb-summary-line)"
+          fontFamily="var(--pb-mono)"
+          fontSize="9px"
+          fontWeight={600}
+          letterSpacing="0.06em"
+          textTransform="uppercase"
+          _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+        >
+          {hideValues ? 'Show' : 'Hide'}
+        </Button>
       </Flex>
-      <SimpleGrid position="relative" zIndex={1} columns={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 5, lg: 4 }}><Metric label="Credit in use" value={hideValues ? '••••••' : money.format(overview.used)} emphasis /><Metric label="Available credit" value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'} note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'} /><Metric label="Cards with limits" value={String(overview.cardsWithLimit)} note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'} /><Metric label="Next payment" value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'} note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'} /></SimpleGrid>
+      <SimpleGrid
+        position="relative"
+        zIndex={1}
+        columns={{ base: 2, lg: 4 }}
+        spacing={{ base: 4, lg: 5 }}
+        mt={{ base: 4, sm: 4.5 }}
+      >
+        <Metric
+          label="Credit in use"
+          value={hideValues ? '••••••' : money.format(overview.used)}
+          emphasis
+          summary
+        />
+        <Metric
+          label="Available credit"
+          value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'}
+          note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'}
+          summary
+        />
+        <Metric
+          label="Cards with limits"
+          value={String(overview.cardsWithLimit)}
+          note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'}
+          summary
+        />
+        <Metric
+          label="Next payment"
+          value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'}
+          note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'}
+          summary
+        />
+      </SimpleGrid>
     </Box>
   )
 }
