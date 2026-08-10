@@ -221,13 +221,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </Grid>
 
         <MotionBox variants={riseV}>
-          <SectionLabel>Spending pace by category</SectionLabel>
-        </MotionBox>
-        <MotionBox variants={riseV}>
           <CategorySpendingPaces
             transactions={transactions}
             selectedDate={selectedDate}
             dateBasis="activity"
+            userId={user?.id ?? null}
           />
         </MotionBox>
 

@@ -1,7 +1,7 @@
 import { useId, useMemo } from 'react'
-import { Box, HStack, Text, VStack, useColorMode } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Text, VStack, useColorMode } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
-import { ArrowDownRight, ArrowUpRight } from 'lucide-react'
+import { ArrowDownRight, ArrowUpRight, X } from 'lucide-react'
 import {
   Area,
   AreaChart,
@@ -26,6 +26,7 @@ interface CashPaceProps {
   kind?: PaceKind
   title?: string
   includeCommitments?: boolean
+  onDismiss?: () => void
 }
 
 /**
@@ -39,6 +40,7 @@ export default function CashPace({
   kind = 'expense',
   title: titleOverride,
   includeCommitments = false,
+  onDismiss,
 }: CashPaceProps) {
   const reduce = useReducedMotion()
   const reactId = useId()
@@ -148,19 +150,44 @@ export default function CashPace({
             </HStack>
           </VStack>
 
-          {hasPaceData && (
-            <HStack
-              spacing={1}
-              px={2}
-              py="2px"
-              borderRadius="999px"
-              color={deltaColor}
-              flexShrink={0}
-            >
-              <DeltaIcon size={12} />
-              <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {fmtCurrency(Math.abs(paceDelta))} vs last month
-              </Text>
+          {(hasPaceData || onDismiss) && (
+            <HStack spacing={1} flexShrink={0}>
+              {hasPaceData && (
+                <HStack
+                  spacing={1}
+                  px={2}
+                  py="2px"
+                  borderRadius="999px"
+                  color={deltaColor}
+                >
+                  <DeltaIcon size={12} />
+                  <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {fmtCurrency(Math.abs(paceDelta))} vs last month
+                  </Text>
+                </HStack>
+              )}
+              {onDismiss && (
+                <IconButton
+                  aria-label={`Remove ${title} chart from dashboard`}
+                  title={`Remove ${title} chart from dashboard`}
+                  icon={<X size={14} />}
+                  onClick={onDismiss}
+                  variant="ghost"
+                  size="xs"
+                  minW="28px"
+                  w="28px"
+                  h="28px"
+                  borderRadius="full"
+                  color="var(--pb-ink-faint)"
+                  border="1px solid transparent"
+                  _hover={{
+                    color: 'var(--pb-coral)',
+                    bg: 'var(--pb-surface-2)',
+                    borderColor: 'var(--pb-hair)',
+                  }}
+                  _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-coral)' }}
+                />
+              )}
             </HStack>
           )}
         </HStack>
