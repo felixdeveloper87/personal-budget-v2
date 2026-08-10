@@ -6,6 +6,7 @@ import { getInstallmentPlanTitle } from '../../../utils/installments'
 import { getTransactionDate, type TransactionDateBasis } from '../../../utils/transactionDates'
 import HideSpendingPaceDialog from './HideSpendingPaceDialog'
 import Panel from './Panel'
+import RestoreSpendingPaceDialog from './RestoreSpendingPaceDialog'
 import SectionLabel from './SectionLabel'
 import CashPace from './SpendingPace'
 
@@ -98,6 +99,7 @@ export default function SpendingPaceCollection({
   const storageKey = userId === null ? null : `${config.storagePrefix}:${userId}`
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => readHiddenGroups(storageKey))
   const [pendingGroup, setPendingGroup] = useState<PaceSeries | null>(null)
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
 
   useEffect(() => {
     setHiddenGroups(readHiddenGroups(storageKey))
@@ -169,7 +171,8 @@ export default function SpendingPaceCollection({
   }, [transactions, selectedDate, dateBasis, dimension])
 
   const visibleGroups = groups.filter((group) => !hiddenGroups.has(group.key))
-  const hiddenCount = groups.length - visibleGroups.length
+  const hiddenGroupItems = groups.filter((group) => hiddenGroups.has(group.key))
+  const hiddenCount = hiddenGroupItems.length
 
   const dismissGroup = (key: string) => {
     setHiddenGroups((current) => {
@@ -180,10 +183,14 @@ export default function SpendingPaceCollection({
     })
   }
 
-  const restoreGroups = () => {
-    const next = new Set<string>()
-    setHiddenGroups(next)
-    writeHiddenGroups(storageKey, next)
+  const restoreGroups = (keys: string[]) => {
+    setHiddenGroups((current) => {
+      const next = new Set(current)
+      for (const key of keys) next.delete(key)
+      writeHiddenGroups(storageKey, next)
+      return next
+    })
+    setRestoreDialogOpen(false)
   }
 
   const confirmDismiss = () => {
@@ -200,7 +207,7 @@ export default function SpendingPaceCollection({
         </Box>
         {hiddenCount > 0 && (
           <Button
-            onClick={restoreGroups}
+            onClick={() => setRestoreDialogOpen(true)}
             h="30px"
             px={3}
             flexShrink={0}
@@ -252,6 +259,12 @@ export default function SpendingPaceCollection({
         itemName={pendingGroup?.name ?? null}
         onClose={() => setPendingGroup(null)}
         onConfirm={confirmDismiss}
+      />
+      <RestoreSpendingPaceDialog
+        isOpen={restoreDialogOpen}
+        items={hiddenGroupItems.map(({ key, name }) => ({ key, name }))}
+        onClose={() => setRestoreDialogOpen(false)}
+        onConfirm={restoreGroups}
       />
     </VStack>
   )
