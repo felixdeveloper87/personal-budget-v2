@@ -46,11 +46,11 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
           >
             <Flex
               flexShrink={0}
-              w="36px"
-              h="36px"
+              w="30px"
+              h="30px"
               align="center"
               justify="center"
-              borderRadius="10px"
+              borderRadius="9px"
               color={tone}
               bg={tint}
               border="1px solid"
@@ -58,22 +58,21 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
             >
               <Icon
                 as={transfer ? Repeat : incoming ? ArrowDownRight : ArrowUpRight}
-                boxSize="17px"
+                boxSize="13px"
               />
             </Flex>
 
             <Box minW={0} flex={1}>
-              <Text fontSize="1rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>
-                {item.description?.trim() || item.category || 'Account activity'}
-              </Text>
               <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9.5px"
-                letterSpacing="0.03em"
-                color="var(--pb-ink-faint)"
-                mt="0.18rem"
+                fontFamily="var(--pb-serif)"
+                fontSize="0.94rem"
+                color="var(--pb-ink)"
                 noOfLines={1}
               >
+                <Text as="span" fontWeight={500}>
+                  {item.description?.trim() || item.category || 'Account activity'}
+                </Text>
+                {' · '}
                 {fmtDate(item.date)}
                 {item.category ? ` · ${item.category}` : ''}
                 {item.paymentMethodName ? (

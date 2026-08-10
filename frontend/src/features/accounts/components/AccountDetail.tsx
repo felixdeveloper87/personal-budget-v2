@@ -9,7 +9,7 @@ import { ACCOUNT_LABELS, money } from '../../../components/accounts/accountMeta'
 import AccountAvatar from './AccountAvatar'
 import RecentActivity from './RecentActivity'
 
-const ACTIVITY_PAGE_SIZE = 15
+const ACTIVITY_PAGE_SIZE = 10
 
 const MotionBox = motion(Box)
 
@@ -29,11 +29,9 @@ export default function AccountDetail({
   onTransfer,
 }: AccountDetailProps) {
   const [details, setDetails] = useState<AccountDetails | null>(null)
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     let active = true
-    setLoading(true)
     setDetails(null)
     getAccountDetails(account.id)
       .then((data) => {
@@ -44,9 +42,6 @@ export default function AccountDetail({
           title: 'Could not load account activity',
           dedupeKey: `account-details-load-failed:${account.id}`,
         })
-      })
-      .finally(() => {
-        if (active) setLoading(false)
       })
     return () => {
       active = false
@@ -61,6 +56,7 @@ export default function AccountDetail({
 
   useEffect(() => {
     setActivityPage(0)
+    setActivity(null)
   }, [account.id])
 
   useEffect(() => {
@@ -86,6 +82,14 @@ export default function AccountDetail({
 
   const shown = details?.account ?? account
   const mask = (value: number) => (hideBalances ? '••••••' : money(value, shown.currency))
+  const isCurrentAccount = shown.type === 'CURRENT'
+  const secondaryLabel = isCurrentAccount ? 'Overdraft remaining' : 'Opening balance'
+  const secondaryAmount = isCurrentAccount ? shown.overdraftAvailable : shown.openingBalance
+  const secondaryNote = isCurrentAccount
+    ? shown.overdraftLimit > 0
+      ? `${Math.round(shown.overdraftPercentageUsed)}% of overdraft used`
+      : 'No overdraft facility'
+    : 'Balance when this account was added'
 
   return (
     <Box
@@ -95,179 +99,240 @@ export default function AccountDetail({
       boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
       overflow="hidden"
     >
-      {/* Header band */}
-      <Flex
-        align="center"
-        gap="0.8rem"
-        px="1.15rem"
-        py="1.05rem"
-        borderBottom="1px solid var(--pb-hair)"
-        bg="linear-gradient(180deg, var(--pb-surface), var(--pb-surface-2))"
+      <Box
+        position="relative"
+        bg="var(--pb-summary-petrol)"
+        color="var(--pb-summary-ink)"
+        borderBottom="1px solid var(--pb-summary-line)"
+        p={{ base: 3, sm: 3.5 }}
       >
-        {showBackButton && (
+        <Flex align="center" gap="0.65rem">
+          {showBackButton && (
+            <Box
+              as="button"
+              type="button"
+              aria-label="Back to accounts"
+              onClick={onBack}
+              flexShrink={0}
+              w="32px"
+              h="32px"
+              borderRadius="10px"
+              display="grid"
+              placeItems="center"
+              color="var(--pb-summary-ink-soft)"
+              bg="var(--pb-summary-panel)"
+              border="1px solid var(--pb-summary-line)"
+              _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+            >
+              <Icon as={ChevronLeft} boxSize="16px" />
+            </Box>
+          )}
+
+          <AccountAvatar account={shown} size={40} />
+          <Box flex={1} minW={0}>
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="8.5px"
+              letterSpacing="0.13em"
+              textTransform="uppercase"
+              color="var(--pb-summary-ink-faint)"
+              noOfLines={1}
+            >
+              {shown.institution || ACCOUNT_LABELS[shown.type]}
+            </Text>
+            <Text mt={0.5} fontSize="1.05rem" fontWeight={500} lineHeight="1.1" color="var(--pb-summary-ink)" noOfLines={1}>
+              {shown.name}
+            </Text>
+          </Box>
+
           <Box
             as="button"
             type="button"
-            aria-label="Back to accounts"
-            onClick={onBack}
+            aria-label="Make a transfer"
+            onClick={onTransfer}
+            display="inline-flex"
+            alignItems="center"
+            justifyContent="center"
+            gap="0.4rem"
             flexShrink={0}
-            w="38px"
-            h="38px"
+            minW="32px"
+            h="32px"
+            px={{ base: 2.5, sm: 3 }}
             borderRadius="10px"
-            display="grid"
-            placeItems="center"
-            color="var(--pb-ink-soft)"
-            bg="var(--pb-surface)"
-            border="1px solid var(--pb-hair)"
-            _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
-          >
-            <Icon as={ChevronLeft} boxSize="19px" />
-          </Box>
-        )}
-        <AccountAvatar account={shown} size={46} />
-        <Box flex={1} minW={0}>
-          <Text fontSize="1.25rem" fontWeight={500} lineHeight="1.15" color="var(--pb-ink)" noOfLines={1}>
-            {shown.name}
-          </Text>
-          <Text
+            color="var(--pb-summary-ink-soft)"
+            bg="var(--pb-summary-panel)"
+            border="1px solid var(--pb-summary-line)"
             fontFamily="var(--pb-mono)"
-            fontSize="10.5px"
-            letterSpacing="0.05em"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
             textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-            mt="0.18rem"
-            noOfLines={1}
+            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
           >
-            {shown.institution || ACCOUNT_LABELS[shown.type]}
-          </Text>
-        </Box>
-        <Box
-          as="button"
-          type="button"
-          onClick={onTransfer}
-          display="inline-flex"
-          alignItems="center"
-          gap="0.4rem"
-          flexShrink={0}
-          px="0.8rem"
-          py="0.45rem"
-          fontSize="0.85rem"
-          borderRadius="14px"
-          color="var(--pb-ink-soft)"
-          bg="var(--pb-surface)"
-          border="1px solid var(--pb-hair)"
-          _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
-        >
-          <Icon as={Repeat} boxSize="1.05em" />
-          Transfer
-        </Box>
-      </Flex>
-
-      {/* Body */}
-      {loading || !details ? (
-        <Flex minH="280px" align="center" justify="center">
-          <Spinner color="var(--pb-forest-2)" />
+            <Icon as={Repeat} boxSize="13px" />
+            <Text as="span" display={{ base: 'none', sm: 'inline' }}>Transfer</Text>
+          </Box>
         </Flex>
-      ) : (
-        <MotionBox
-          key={account.id}
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15 }}
-          p="clamp(1rem, 2.5vw, 1.4rem)"
+
+        <Grid
+          mt={3.5}
+          templateColumns={{ base: '1fr', md: 'minmax(0, 1.15fr) minmax(240px, 0.85fr)' }}
+          gap={{ base: 3, md: 4 }}
+          alignItems="stretch"
         >
-          <Grid templateColumns="repeat(3, 1fr)" gap="0.7rem" mb="1.4rem">
-            <StatCard label="Current balance" value={mask(details.account.currentBalance)} />
-            <StatCard
-              label={details.account.type === 'CURRENT' ? 'Overdraft available' : 'Opening balance'}
-              value={mask(
-                details.account.type === 'CURRENT'
-                  ? details.account.overdraftAvailable
-                  : details.account.openingBalance,
-              )}
+          <Flex
+            direction="column"
+            justify="center"
+            minW={0}
+            pr={{ md: 4 }}
+            borderRight={{ base: 'none', md: '1px solid var(--pb-summary-line)' }}
+          >
+            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+              Current balance
+            </Text>
+            <Text
+              className="num"
+              mt={1}
+              fontFamily="var(--pb-serif)"
+              fontSize="clamp(1.65rem, 3.4vw, 2.35rem)"
+              fontWeight={500}
+              lineHeight={0.98}
+              letterSpacing="-0.03em"
+              color={!hideBalances && shown.currentBalance < 0 ? 'var(--pb-summary-coral)' : 'var(--pb-summary-ink)'}
+              noOfLines={1}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {mask(shown.currentBalance)}
+            </Text>
+            <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+              {shown.currency} · Active account
+            </Text>
+          </Flex>
+
+          <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2}>
+            <DetailMetric
+              label={secondaryLabel}
+              value={mask(secondaryAmount)}
+              note={secondaryNote}
+              danger={!hideBalances && isCurrentAccount && secondaryAmount <= 0 && shown.overdraftLimit > 0}
             />
-            <StatCard label="Account type" value={ACCOUNT_LABELS[details.account.type]} small />
+            <DetailMetric
+              label="Account type"
+              value={ACCOUNT_LABELS[shown.type]}
+              note={shown.institution || 'Personal account'}
+              compact
+            />
           </Grid>
+        </Grid>
+      </Box>
 
-          <HStack spacing="0.6rem" mb="0.6rem" justify="space-between">
-            <HStack spacing="0.6rem">
-              <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
-                Recent activity
-              </Text>
-              <Text
-                className="num"
-                fontFamily="var(--pb-mono)"
-                fontSize="10.5px"
-                fontWeight={500}
-                color="var(--pb-forest-2)"
-                bg="var(--pb-tint-green)"
-                border="1px solid var(--pb-hair)"
-                borderRadius="999px"
-                px="0.5rem"
-                py="0.15rem"
-              >
-                Page {activityPage + 1}
-              </Text>
-            </HStack>
+      <MotionBox
+        key={account.id}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.15 }}
+        p="clamp(1rem, 2.5vw, 1.35rem)"
+      >
+        <Flex align="flex-end" justify="space-between" gap={3} mb={3}>
+          <Box>
+            <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
+              Recent activity
+            </Text>
+            <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)">
+              Transactions and transfers linked to this account
+            </Text>
+          </Box>
 
-            <HStack spacing="0.3rem">
-              <IconButton
-                aria-label="Older activity"
-                title="Older activity"
-                icon={<Icon as={ChevronLeft} boxSize="16px" />}
-                size="xs"
-                variant="ghost"
-                borderRadius="8px"
-                color="var(--pb-ink-soft)"
-                bg="var(--pb-surface-2)"
-                border="1px solid var(--pb-hair)"
-                isDisabled={activityPage === 0 || activityLoading}
-                onClick={() => setActivityPage((p) => Math.max(0, p - 1))}
-                _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
-              />
-              <IconButton
-                aria-label="Newer activity"
-                title="Newer activity"
-                icon={<Icon as={ChevronRight} boxSize="16px" />}
-                size="xs"
-                variant="ghost"
-                borderRadius="8px"
-                color="var(--pb-ink-soft)"
-                bg="var(--pb-surface-2)"
-                border="1px solid var(--pb-hair)"
-                isDisabled={!activity?.hasMore || activityLoading}
-                onClick={() => setActivityPage((p) => p + 1)}
-                _hover={{ color: 'var(--pb-forest-2)', borderColor: 'var(--pb-hair-2)' }}
-              />
-            </HStack>
+          <HStack spacing="0.35rem" flexShrink={0}>
+            <IconButton
+              aria-label="Newer activity"
+              title="Newer activity"
+              icon={<Icon as={ChevronLeft} boxSize="15px" />}
+              size="xs"
+              variant="ghost"
+              borderRadius="8px"
+              color="var(--pb-ink-soft)"
+              bg="var(--pb-surface-2)"
+              border="1px solid var(--pb-hair)"
+              isDisabled={activityPage === 0 || activityLoading}
+              onClick={() => setActivityPage((page) => Math.max(0, page - 1))}
+              _hover={{ color: 'var(--pb-sidebar-accent)', borderColor: 'var(--pb-sidebar-active-border)' }}
+            />
+            <Text
+              minW="54px"
+              textAlign="center"
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              color="var(--pb-ink-faint)"
+            >
+              Page {activityPage + 1}
+            </Text>
+            <IconButton
+              aria-label="Older activity"
+              title="Older activity"
+              icon={<Icon as={ChevronRight} boxSize="15px" />}
+              size="xs"
+              variant="ghost"
+              borderRadius="8px"
+              color="var(--pb-ink-soft)"
+              bg="var(--pb-surface-2)"
+              border="1px solid var(--pb-hair)"
+              isDisabled={!activity?.hasMore || activityLoading}
+              onClick={() => setActivityPage((page) => page + 1)}
+              _hover={{ color: 'var(--pb-sidebar-accent)', borderColor: 'var(--pb-sidebar-active-border)' }}
+            />
           </HStack>
+        </Flex>
 
+        <Box position="relative" minH="110px">
           {activityLoading && !activity ? (
-            <Flex minH="120px" align="center" justify="center">
-              <Spinner size="sm" color="var(--pb-forest-2)" />
+            <Flex minH="110px" align="center" justify="center">
+              <Spinner size="sm" color="var(--pb-sidebar-accent)" />
             </Flex>
           ) : (
-            <RecentActivity
-              items={activity?.items ?? []}
-              currency={details.account.currency}
-              hideBalances={hideBalances}
-            />
+            <Box opacity={activityLoading ? 0.45 : 1} transition="opacity 0.15s ease">
+              <RecentActivity
+                items={activity?.items ?? []}
+                currency={shown.currency}
+                hideBalances={hideBalances}
+              />
+            </Box>
           )}
-        </MotionBox>
-      )}
+
+          {activityLoading && activity && (
+            <Flex position="absolute" inset={0} align="center" justify="center" pointerEvents="none">
+              <Spinner size="sm" color="var(--pb-sidebar-accent)" />
+            </Flex>
+          )}
+        </Box>
+      </MotionBox>
     </Box>
   )
 }
 
-function StatCard({ label, value, small }: { label: string; value: string; small?: boolean }) {
+function DetailMetric({
+  label,
+  value,
+  note,
+  danger,
+  compact,
+}: {
+  label: string
+  value: string
+  note: string
+  danger?: boolean
+  compact?: boolean
+}) {
   return (
-    <Box
-      position="relative"
-      bg="var(--pb-surface-2)"
-      border="1px solid var(--pb-hair)"
+    <Flex
+      direction="column"
+      justify="space-between"
+      minW={0}
+      minH="86px"
+      bg="var(--pb-summary-panel)"
+      border="1px solid var(--pb-summary-line)"
       borderRadius="14px"
-      px="0.9rem"
-      py="0.85rem"
+      p={2.5}
       overflow="hidden"
     >
       <Text
@@ -275,8 +340,7 @@ function StatCard({ label, value, small }: { label: string; value: string; small
         fontSize="9px"
         letterSpacing="0.12em"
         textTransform="uppercase"
-        color="var(--pb-ink-faint)"
-        mb="0.35rem"
+        color="var(--pb-summary-ink-faint)"
         lineHeight="1.3"
         noOfLines={1}
       >
@@ -284,15 +348,19 @@ function StatCard({ label, value, small }: { label: string; value: string; small
       </Text>
       <Text
         className="num"
-        fontSize={small ? '1.05rem' : '1.3rem'}
+        mt={1.5}
+        fontSize={compact ? '0.88rem' : '1rem'}
         fontWeight={500}
-        lineHeight="1"
-        color="var(--pb-ink)"
+        lineHeight="1.05"
+        color={danger ? 'var(--pb-summary-coral)' : 'var(--pb-summary-ink)'}
         noOfLines={1}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {value}
       </Text>
-    </Box>
+      <Text mt={1} fontFamily="var(--pb-serif)" fontSize="9px" color="var(--pb-summary-ink-faint)" noOfLines={2}>
+        {note}
+      </Text>
+    </Flex>
   )
 }

@@ -1,6 +1,6 @@
 import { Box, Button, Flex, Grid, Icon, SimpleGrid, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
-import { Eye, EyeOff } from '../../../components/ui/icons'
+import { Eye, EyeOff, Plus } from '../../../components/ui/icons'
 import { money } from '../../../components/accounts/accountMeta'
 import ShareRibbon from './ShareRibbon'
 
@@ -9,9 +9,10 @@ interface TotalHeroProps {
   totalBalance: number
   hideBalances: boolean
   onToggleHide: () => void
+  onAddAccount: () => void
 }
 
-export default function TotalHero({ accounts, totalBalance, hideBalances, onToggleHide }: TotalHeroProps) {
+export default function TotalHero({ accounts, totalBalance, hideBalances, onToggleHide, onAddAccount }: TotalHeroProps) {
   const currentAccounts = accounts.filter((account) => account.type === 'CURRENT')
   const savingsAccounts = accounts.filter((account) => account.type === 'SAVINGS')
   const currentBalance = currentAccounts.reduce((sum, account) => sum + account.currentBalance, 0)
@@ -32,6 +33,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
       <Flex
         position="relative"
         zIndex={2}
+        direction={{ base: 'column', sm: 'row' }}
         align={{ base: 'flex-start', sm: 'center' }}
         justify="space-between"
         gap="1rem"
@@ -53,28 +55,49 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             Your balances at a glance
           </Text>
         </Box>
-        <Button
-          aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
-          aria-pressed={hideBalances}
-          title={hideBalances ? 'Show balances' : 'Hide balances'}
-          onClick={onToggleHide}
-          leftIcon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={4} />}
-          flexShrink={0}
-          h="36px"
-          px={3}
-          borderRadius="10px"
-          color="var(--pb-summary-ink-soft)"
-          bg="var(--pb-summary-panel)"
-          border="1px solid var(--pb-summary-line)"
-          fontFamily="var(--pb-mono)"
-          fontSize="9px"
-          fontWeight={600}
-          letterSpacing="0.06em"
-          textTransform="uppercase"
-          _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-        >
-          {hideBalances ? 'Show' : 'Hide'}
-        </Button>
+        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
+          <Button
+            onClick={onAddAccount}
+            leftIcon={<Icon as={Plus} boxSize={4} />}
+            flex={{ base: 1, sm: 'initial' }}
+            h="36px"
+            px={3}
+            borderRadius="10px"
+            color="var(--pb-summary-ink)"
+            bg="var(--pb-summary-control)"
+            border="1px solid var(--pb-summary-line)"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            _hover={{ borderColor: 'var(--pb-summary-ink-faint)', transform: 'translateY(-1px)' }}
+          >
+            Add account
+          </Button>
+          <Button
+            aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
+            aria-pressed={hideBalances}
+            title={hideBalances ? 'Show balances' : 'Hide balances'}
+            onClick={onToggleHide}
+            leftIcon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={4} />}
+            flex={{ base: 1, sm: 'initial' }}
+            h="36px"
+            px={3}
+            borderRadius="10px"
+            color="var(--pb-summary-ink-soft)"
+            bg="var(--pb-summary-panel)"
+            border="1px solid var(--pb-summary-line)"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+          >
+            {hideBalances ? 'Show' : 'Hide'}
+          </Button>
+        </Flex>
       </Flex>
 
       <Grid
