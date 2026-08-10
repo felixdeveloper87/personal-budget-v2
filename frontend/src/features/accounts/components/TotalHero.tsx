@@ -2,7 +2,6 @@ import { Box, Button, Flex, Grid, Icon, SimpleGrid, Text } from '@chakra-ui/reac
 import type { FinancialAccount } from '../../../types'
 import { Eye, EyeOff, Plus } from '../../../components/ui/icons'
 import { money } from '../../../components/accounts/accountMeta'
-import ShareRibbon from './ShareRibbon'
 
 interface TotalHeroProps {
   accounts: FinancialAccount[]
@@ -158,8 +157,6 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
           />
         </SimpleGrid>
       </Grid>
-
-      {accounts.length > 0 && <ShareRibbon accounts={accounts} hidden={hideBalances} />}
     </Box>
   )
 }
