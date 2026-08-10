@@ -34,6 +34,16 @@
   --pb-gold-2: #806629;
   --pb-tint-gold: rgba(124, 100, 39, 0.10);
 
+  /* Neutral summary-card surface shared across financial pages. */
+  --pb-summary-petrol: #e7eef2;
+  --pb-summary-ink: #17201c;
+  --pb-summary-ink-soft: #4f5d62;
+  --pb-summary-ink-faint: #5f6d72;
+  --pb-summary-line: rgba(47, 75, 89, 0.16);
+  --pb-summary-income: #176f52;
+  --pb-summary-coral: #aa4938;
+  --pb-summary-gold: #7c6427;
+
   --pb-hair: rgba(23, 32, 28, 0.11);
   --pb-hair-2: rgba(24, 81, 62, 0.23);
 
@@ -74,6 +84,15 @@
   --pb-gold: #d0b76f;
   --pb-gold-2: #dfc986;
   --pb-tint-gold: rgba(208, 183, 111, 0.11);
+
+  --pb-summary-petrol: #0b1217;
+  --pb-summary-ink: #f4f8f6;
+  --pb-summary-ink-soft: rgba(244, 248, 246, 0.82);
+  --pb-summary-ink-faint: rgba(244, 248, 246, 0.66);
+  --pb-summary-line: rgba(220, 235, 239, 0.15);
+  --pb-summary-income: #9de1c3;
+  --pb-summary-coral: #f4aaa2;
+  --pb-summary-gold: #e4ce91;
 
   --pb-hair: rgba(232, 242, 237, 0.09);
   --pb-hair-2: rgba(232, 242, 237, 0.17);

@@ -213,24 +213,30 @@ function PaymentsSummary({
   periodLabel: string
 }) {
   return (
-    <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" boxShadow="var(--pb-shadow)" p="clamp(1.1rem, 2.4vw, 1.5rem)">
+    <Box
+      bg="var(--pb-summary-petrol)"
+      border="1px solid var(--pb-summary-line)"
+      borderRadius="18px"
+      boxShadow="var(--pb-shadow)"
+      p="clamp(1.1rem, 2.4vw, 1.5rem)"
+    >
       <VStack align="stretch" spacing={4}>
         <VStack align="stretch" spacing={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
+          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
             Payments - {periodLabel}
           </Text>
-          <Text fontSize="sm" color="var(--pb-ink-soft)">Scheduled cash outflow</Text>
+          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Scheduled cash outflow</Text>
         </VStack>
 
-        <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-ink)" maxW="48ch">
+        <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
           {total > 0 ? (
-            <>You have <Text as="em" color="var(--pb-coral)">{fmtCurrency(total)}</Text> scheduled to leave in {periodLabel}.</>
+            <>You have <Text as="em" color="var(--pb-summary-coral)">{fmtCurrency(total)}</Text> scheduled to leave in {periodLabel}.</>
           ) : (
             <>No payments are scheduled in {periodLabel}.</>
           )}
         </Text>
 
-        <Text pt={3} borderTop="1px solid var(--pb-hair)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={upcoming > 0 ? 'var(--pb-gold-2)' : 'var(--pb-income)'}>
+        <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={upcoming > 0 ? 'var(--pb-summary-gold)' : 'var(--pb-summary-income)'}>
           {total === 0
             ? 'No payments due in this period'
             : upcoming > 0
