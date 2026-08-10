@@ -30,6 +30,18 @@ export interface Transaction {
   isFutureInstallment?: boolean // Indica se é uma parcela futura calculada
 }
 
+export interface UpdateTransactionRequest {
+  dateTime: string
+  transactionDate: string
+  type: TransactionType
+  category: string
+  description: string
+  amount: number
+  paymentMethodId: number | null
+  accountId: number
+  status: TransactionStatus
+}
+
 // DTO do /transactions/search (não retorna userId)
 export type TransactionSearch = Omit<Transaction, 'userId'>
 

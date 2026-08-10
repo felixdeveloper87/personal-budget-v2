@@ -10,7 +10,13 @@ import {
 import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import { listAccounts, listPaymentMethods, updateTransaction } from '../../api'
-import { FinancialAccount, PaymentMethod, Transaction, TransactionStatus } from '../../types'
+import {
+  FinancialAccount,
+  PaymentMethod,
+  Transaction,
+  TransactionStatus,
+  UpdateTransactionRequest,
+} from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
 import { ToastService } from '../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../utils/dateTime'
@@ -102,10 +108,10 @@ export default function EditTransactionModal({
 
     setLoading(true)
     try {
-      const updatedTx: Transaction = {
-        ...transaction,
+      const updatedTx: UpdateTransactionRequest = {
         dateTime: toLocalIsoDateTimeFromYMD(date),
         transactionDate: date,
+        type: transaction.type,
         category,
         description,
         amount: Number(amount),

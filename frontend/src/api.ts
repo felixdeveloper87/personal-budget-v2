@@ -1,6 +1,7 @@
 import axios from 'axios'
 import {
   Transaction,
+  UpdateTransactionRequest,
   MonthlySummary,
   User,
   UserPlan,
@@ -194,7 +195,10 @@ export async function createTransaction(tx: Transaction): Promise<Transaction> {
 }
 
 // Update a transaction → PUT /transactions/:id
-export async function updateTransaction(id: number, tx: Transaction): Promise<Transaction> {
+export async function updateTransaction(
+  id: number,
+  tx: UpdateTransactionRequest,
+): Promise<Transaction> {
   const { data } = await api.put<Transaction>(`/transactions/${id}`, tx)
   return data
 }
