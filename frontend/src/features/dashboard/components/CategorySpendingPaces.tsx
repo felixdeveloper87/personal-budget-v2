@@ -4,6 +4,7 @@ import { getAllExpenseCategoryLabels } from '../../../constants/transactionCateg
 import type { Transaction } from '../../../types'
 import { getTransactionDate, type TransactionDateBasis } from '../../../utils/transactionDates'
 import CashPace from './SpendingPace'
+import HideCategoryChartDialog from './HideCategoryChartDialog'
 import Panel from './Panel'
 import SectionLabel from './SectionLabel'
 
@@ -63,6 +64,7 @@ export default function CategorySpendingPaces({
   const [hiddenCategories, setHiddenCategories] = useState<Set<string>>(
     () => readHiddenCategories(storageKey),
   )
+  const [pendingCategory, setPendingCategory] = useState<CategorySeries | null>(null)
 
   useEffect(() => {
     setHiddenCategories(readHiddenCategories(storageKey))
@@ -142,6 +144,12 @@ export default function CategorySpendingPaces({
     writeHiddenCategories(storageKey, next)
   }
 
+  const confirmDismiss = () => {
+    if (!pendingCategory) return
+    dismissCategory(pendingCategory.key)
+    setPendingCategory(null)
+  }
+
   return (
     <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
       <Flex align="center" justify="space-between" gap={3}>
@@ -191,11 +199,18 @@ export default function CategorySpendingPaces({
               kind="expense"
               title={category.name}
               includeCommitments
-              onDismiss={() => dismissCategory(category.key)}
+              onDismiss={() => setPendingCategory(category)}
             />
           ))}
         </Grid>
       )}
+
+      <HideCategoryChartDialog
+        isOpen={pendingCategory !== null}
+        category={pendingCategory?.name ?? null}
+        onClose={() => setPendingCategory(null)}
+        onConfirm={confirmDismiss}
+      />
     </VStack>
   )
 }
