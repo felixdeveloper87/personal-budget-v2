@@ -122,11 +122,18 @@ public class FinancialAccountService {
             FinancialAccount account, User user, LocalDate today, int limit) {
         PageRequest cap = PageRequest.of(0, limit);
         return Stream.concat(
-                        transactionRepository
-                                .findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
-                                        user, account, today, cap)
-                                .stream()
-                                .map(this::toActivity),
+                        Stream.concat(
+                                transactionRepository
+                                        .findNonCreditCardAccountActivity(
+                                                user, account, today, PaymentMethodType.CREDIT_CARD, cap)
+                                        .stream()
+                                        .map(this::toActivity),
+                                transactionRepository
+                                        .findCreditCardStatementActivity(
+                                                user, account, today, PaymentMethodType.CREDIT_CARD,
+                                                TransactionType.EXPENSE, cap)
+                                        .stream()
+                                        .map(this::toCreditCardStatementActivity)),
                         Stream.concat(
                                 transferRepository
                                         .findByFromAccountAndTransferDateLessThanEqualOrderByTransferDateDescIdDesc(
@@ -142,6 +149,27 @@ public class FinancialAccountService {
                         .thenComparing(AccountActivityItemDTO::id, Comparator.reverseOrder()))
                 .limit(limit)
                 .toList();
+    }
+
+    private AccountActivityItemDTO toCreditCardStatementActivity(Object[] statement) {
+        Long id = (Long) statement[0];
+        LocalDate paymentDate = (LocalDate) statement[1];
+        String paymentMethodName = (String) statement[2];
+        BigDecimal signedAmount = (BigDecimal) statement[3];
+        TransactionType type = signedAmount.signum() < 0
+                ? TransactionType.INCOME
+                : TransactionType.EXPENSE;
+
+        return new AccountActivityItemDTO(
+                id,
+                paymentDate,
+                type.name(),
+                "Paid with " + paymentMethodName + " credit card",
+                "Credit card statement",
+                signedAmount.abs(),
+                null,
+                paymentMethodName,
+                PaymentMethodType.CREDIT_CARD);
     }
 
     @Transactional

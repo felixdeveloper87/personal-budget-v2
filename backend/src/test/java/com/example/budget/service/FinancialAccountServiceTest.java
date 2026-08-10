@@ -149,8 +149,9 @@ class FinancialAccountServiceTest {
         transfer.setTransferDate(LocalDate.now());
 
         when(transactionRepository
-                .findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
-                        eq(user), eq(account), eq(LocalDate.now()), any(Pageable.class)))
+                .findNonCreditCardAccountActivity(
+                        eq(user), eq(account), eq(LocalDate.now()),
+                        eq(PaymentMethodType.CREDIT_CARD), any(Pageable.class)))
                 .thenReturn(List.of(income));
         when(transactionRepository
                 .findTop20ByUserAndAccountAndPaymentDateGreaterThanOrderByPaymentDateAscIdAsc(
@@ -170,6 +171,32 @@ class FinancialAccountServiceTest {
                 .extracting(item -> item.kind())
                 .containsExactly("EXPENSE");
         assertThat(result.upcomingActivity().get(0).status()).isEqualTo(TransactionStatus.PLANNED);
+    }
+
+    @Test
+    void recentActivityGroupsACreditCardStatementIntoOneMovement() {
+        when(accountRepository.findById(10L)).thenReturn(java.util.Optional.of(account));
+        LocalDate paymentDate = LocalDate.now().minusDays(1);
+
+        when(transactionRepository.findCreditCardStatementActivity(
+                eq(user), eq(account), eq(LocalDate.now()),
+                eq(PaymentMethodType.CREDIT_CARD), eq(TransactionType.EXPENSE),
+                any(Pageable.class)))
+                .thenReturn(List.<Object[]>of(new Object[]{
+                        42L,
+                        paymentDate,
+                        "Amex Cashback Everyday",
+                        new BigDecimal("125.50")
+                }));
+
+        var result = service.recentActivityPage(10L, user, 0, 10);
+
+        assertThat(result.items()).hasSize(1);
+        assertThat(result.items().get(0).description())
+                .isEqualTo("Paid with Amex Cashback Everyday credit card");
+        assertThat(result.items().get(0).amount()).isEqualByComparingTo("125.50");
+        assertThat(result.items().get(0).paymentMethodType())
+                .isEqualTo(PaymentMethodType.CREDIT_CARD);
     }
 
     private Transaction transaction(

@@ -5,6 +5,7 @@ import com.example.budget.model.TransactionType;
 import com.example.budget.model.TransactionStatus;
 import com.example.budget.model.User;
 import com.example.budget.model.FinancialAccount;
+import com.example.budget.model.PaymentMethodType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -51,8 +52,37 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
      * instead of being frozen at 20 rows. Used to merge-sort against transfers — see
      * {@link com.example.budget.service.FinancialAccountService#recentActivityPage}.
      */
-    List<Transaction> findByUserAndAccountAndPaymentDateLessThanEqualOrderByPaymentDateDescIdDesc(
-                    User user, FinancialAccount account, LocalDate date, Pageable pageable);
+    @Query("SELECT t FROM Transaction t " +
+                    "LEFT JOIN FETCH t.paymentMethod paymentMethod " +
+                    "WHERE t.user = :user " +
+                    "AND t.account = :account " +
+                    "AND t.paymentDate <= :date " +
+                    "AND (paymentMethod IS NULL OR paymentMethod.type <> :creditCardType) " +
+                    "ORDER BY t.paymentDate DESC, t.id DESC")
+    List<Transaction> findNonCreditCardAccountActivity(
+                    @Param("user") User user,
+                    @Param("account") FinancialAccount account,
+                    @Param("date") LocalDate date,
+                    @Param("creditCardType") PaymentMethodType creditCardType,
+                    Pageable pageable);
+
+    @Query("SELECT MAX(t.id), t.paymentDate, paymentMethod.name, " +
+                    "SUM(CASE WHEN t.type = :expenseType THEN t.amount ELSE (0 - t.amount) END) " +
+                    "FROM Transaction t " +
+                    "JOIN t.paymentMethod paymentMethod " +
+                    "WHERE t.user = :user " +
+                    "AND t.account = :account " +
+                    "AND t.paymentDate <= :date " +
+                    "AND paymentMethod.type = :creditCardType " +
+                    "GROUP BY t.paymentDate, paymentMethod.id, paymentMethod.name " +
+                    "ORDER BY t.paymentDate DESC, MAX(t.id) DESC")
+    List<Object[]> findCreditCardStatementActivity(
+                    @Param("user") User user,
+                    @Param("account") FinancialAccount account,
+                    @Param("date") LocalDate date,
+                    @Param("creditCardType") PaymentMethodType creditCardType,
+                    @Param("expenseType") TransactionType expenseType,
+                    Pageable pageable);
 
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);
