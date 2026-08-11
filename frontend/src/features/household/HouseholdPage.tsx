@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useState } from 'react'
+import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react'
 import {
   Avatar,
   Badge,
@@ -179,6 +179,117 @@ function Surface({
     >
       {children}
     </Box>
+  )
+}
+
+function ActionRequiredBanner({
+  ariaLabel,
+  icon,
+  accent,
+  tint,
+  count,
+  title,
+  detail,
+  actionLabel,
+  targetId,
+}: {
+  ariaLabel: string
+  icon: ReactNode
+  accent: string
+  tint: string
+  count: number
+  title: string
+  detail: string
+  actionLabel: string
+  targetId: string
+}) {
+  return (
+    <Flex
+      role="region"
+      aria-label={ariaLabel}
+      direction={{ base: 'column', sm: 'row' }}
+      align={{ base: 'stretch', sm: 'center' }}
+      justify="space-between"
+      gap={4}
+      h="full"
+      px={{ base: 3.5, sm: 4, md: 5 }}
+      py={{ base: 3.5, md: 4 }}
+      borderRadius={{ base: '16px', md: '18px' }}
+      border="1px solid var(--pb-summary-line)"
+      bg={tint}
+      boxShadow="var(--pb-shadow)"
+    >
+      <HStack align="flex-start" spacing={3.5} minW={0}>
+        <Flex
+          w={11}
+          h={11}
+          flexShrink={0}
+          align="center"
+          justify="center"
+          borderRadius="13px"
+          bg="var(--pb-surface)"
+          color={accent}
+          border="1px solid var(--pb-summary-line)"
+        >
+          {icon}
+        </Flex>
+        <Box minW={0}>
+          <HStack spacing={2} flexWrap="wrap">
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={700}
+              letterSpacing="0.14em"
+              textTransform="uppercase"
+              color={accent}
+            >
+              Action required
+            </Text>
+            <Badge
+              borderRadius="full"
+              px={2}
+              bg="var(--pb-surface)"
+              color={accent}
+              border="1px solid var(--pb-summary-line)"
+              textTransform="none"
+            >
+              {count}
+            </Badge>
+          </HStack>
+          <Text
+            mt={1}
+            fontFamily="var(--pb-serif)"
+            fontSize={{ base: 'lg', md: 'xl' }}
+            fontWeight={500}
+            lineHeight={1.15}
+            color="var(--pb-ink)"
+          >
+            {title}
+          </Text>
+          <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.45}>
+            {detail}
+          </Text>
+        </Box>
+      </HStack>
+      <Button
+        flexShrink={0}
+        h="42px"
+        w={{ base: 'full', sm: 'auto' }}
+        px={4}
+        borderRadius="10px"
+        bg={accent}
+        color="var(--pb-on-accent)"
+        rightIcon={<Icon as={ChevronDown} boxSize={4} weight="bold" />}
+        onClick={() => {
+          document.getElementById(targetId)?.scrollIntoView({ block: 'start' })
+        }}
+        _hover={{ filter: 'brightness(0.96)', transform: 'translateY(-1px)' }}
+        _active={{ transform: 'translateY(0)' }}
+        _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-ink)' }}
+      >
+        {actionLabel}
+      </Button>
+    </Flex>
   )
 }
 
@@ -418,6 +529,22 @@ export default function HouseholdPage() {
   }
 
   const household = page.household
+  const pendingConfirmations = household.settlements.filter(
+    (settlement) => settlement.canConfirm || settlement.canReject,
+  )
+  const pendingConfirmationTotal = pendingConfirmations.reduce(
+    (total, settlement) => total + settlement.amount,
+    0,
+  )
+  const firstPendingConfirmation = pendingConfirmations[0]
+  const debtsYouOwe = household.debts.filter(
+    (debt) => debt.fromMemberId === household.currentMemberId,
+  )
+  const totalYouOwe = debtsYouOwe.reduce(
+    (total, debt) => total + debt.amount,
+    0,
+  )
+  const firstDebtYouOwe = debtsYouOwe[0]
   const attachmentExpense = attachmentTarget?.kind === 'expense'
     ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
     : undefined
@@ -464,6 +591,63 @@ export default function HouseholdPage() {
           onManage={membersModal.onOpen}
         />
 
+        {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
+          <SimpleGrid
+            columns={{
+              base: 1,
+              xl: pendingConfirmations.length > 0 && debtsYouOwe.length > 0 ? 2 : 1,
+            }}
+            spacing={3}
+          >
+            {pendingConfirmations.length > 0 && (
+              <ActionRequiredBanner
+                ariaLabel="Pending payment confirmations"
+                icon={<CheckCircle2 size={20} weight="duotone" />}
+                accent="var(--pb-gold)"
+                tint="var(--pb-tint-gold)"
+                count={pendingConfirmations.length}
+                title={pendingConfirmations.length === 1
+                  ? 'A payment is waiting for your confirmation'
+                  : `${pendingConfirmations.length} payments are waiting for your confirmation`}
+                detail={pendingConfirmations.length === 1 && firstPendingConfirmation
+                  ? `${firstPendingConfirmation.fromMemberName} recorded ${money(
+                      firstPendingConfirmation.amount,
+                      household.currency,
+                    )} paid to you. Review it before your balances change.`
+                  : `${money(
+                      pendingConfirmationTotal,
+                      household.currency,
+                    )} in total is waiting for your review. Only confirmed payments change balances.`}
+                actionLabel="Review payments"
+                targetId="household-payments"
+              />
+            )}
+            {debtsYouOwe.length > 0 && (
+              <ActionRequiredBanner
+                ariaLabel="Outstanding household balances you owe"
+                icon={<Wallet size={20} weight="duotone" />}
+                accent="var(--pb-coral)"
+                tint="var(--pb-tint-coral)"
+                count={debtsYouOwe.length}
+                title={debtsYouOwe.length === 1
+                  ? 'You have a household balance to pay'
+                  : `${debtsYouOwe.length} household balances need your attention`}
+                detail={debtsYouOwe.length === 1 && firstDebtYouOwe
+                  ? `You owe ${money(
+                      firstDebtYouOwe.amount,
+                      household.currency,
+                    )} to ${firstDebtYouOwe.toMemberName}. Record it after you send the payment.`
+                  : `You owe ${money(
+                      totalYouOwe,
+                      household.currency,
+                    )} across ${debtsYouOwe.length} people. Review each balance before recording payment.`}
+                actionLabel="Review balances"
+                targetId="household-balances"
+              />
+            )}
+          </SimpleGrid>
+        )}
+
         <CleaningRotationCard
           rotation={household.cleaningRotation}
           currentMemberId={household.currentMemberId}
@@ -484,7 +668,7 @@ export default function HouseholdPage() {
           )}
         />
 
-        <Surface overflow="hidden">
+        <Surface id="household-balances" overflow="hidden" scrollMarginTop="90px">
           <Grid templateColumns={{ base: '1fr', xl: '1.1fr 0.9fr' }}>
             <Box
               p={{ base: 4, md: 6 }}
@@ -698,7 +882,7 @@ export default function HouseholdPage() {
           )}
         </Surface>
 
-        <Surface overflow="hidden">
+        <Surface id="household-payments" overflow="hidden" scrollMarginTop="90px">
           <HStack justify="space-between" px={{ base: 3, md: 6 }} py={{ base: 4, md: 5 }}>
             <Box>
               <Heading size="md">Payments and confirmations</Heading>
@@ -880,11 +1064,6 @@ function CleaningRotationCard({
         completedAt: null,
       }))
   const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
-  const rotationStatus = !rotation.configured
-    ? 'Not set up'
-    : rotation.active
-      ? 'Active'
-      : 'Paused'
 
   return (
     <Box
@@ -943,52 +1122,28 @@ function CleaningRotationCard({
             </Text>
           </Box>
         </HStack>
-        <Flex gap={2} align="center" w={{ base: 'full', sm: 'auto' }}>
-          <HStack
-            px={3}
+        {rotation.canManage && (
+          <Button
+            leftIcon={<Icon as={Gear} boxSize={4} />}
+            w={{ base: 'full', sm: 'auto' }}
             h="40px"
+            px={3.5}
             borderRadius="10px"
-            bg={rotation.active ? 'var(--pb-tint-income)' : 'var(--pb-surface-2)'}
-            color={rotation.active ? 'var(--pb-income)' : 'var(--pb-ink-soft)'}
+            bg="var(--pb-surface-2)"
+            color="var(--pb-ink-soft)"
             border="1px solid var(--pb-hair)"
-            spacing={2}
-            flex={{ base: 1, sm: 'initial' }}
-            justify="center"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.05em"
+            textTransform="uppercase"
+            onClick={onManage}
+            _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
           >
-            <Box w="6px" h="6px" borderRadius="full" bg="currentColor" />
-            <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={700}
-              letterSpacing="0.08em"
-              textTransform="uppercase"
-            >
-              {rotationStatus}
-            </Text>
-          </HStack>
-          {rotation.canManage && (
-            <Button
-              leftIcon={<Icon as={Gear} boxSize={4} />}
-              h="40px"
-              px={3.5}
-              borderRadius="10px"
-              bg="var(--pb-surface-2)"
-              color="var(--pb-ink-soft)"
-              border="1px solid var(--pb-hair)"
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={600}
-              letterSpacing="0.05em"
-              textTransform="uppercase"
-              flex={{ base: 1.25, sm: 'initial' }}
-              onClick={onManage}
-              _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
-              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
-            >
-              {rotation.configured ? 'Manage' : 'Set up'}
-            </Button>
-          )}
-        </Flex>
+            {rotation.configured ? 'Manage' : 'Set up'}
+          </Button>
+        )}
       </Flex>
 
       {!rotation.configured ? (
@@ -1071,22 +1226,49 @@ function CleaningRotationCard({
             borderBottom={{ base: '1px solid', lg: 'none' }}
             borderRight={{ base: 'none', lg: '1px solid' }}
             borderColor="var(--pb-hair)"
-            bg="var(--pb-summary-petrol)"
+            bg={currentIsUser ? 'var(--pb-tint-income)' : 'var(--pb-summary-petrol)'}
+            boxShadow={currentIsUser
+              ? 'inset 4px 0 0 var(--pb-forest-2)'
+              : 'none'}
+            aria-label={currentIsUser ? 'This is your cleaning week' : undefined}
           >
             {current ? (
               <VStack align="stretch" spacing={4}>
                 <HStack justify="space-between" align="flex-start" spacing={3}>
                   <Box>
-                    <Text
-                      fontFamily="var(--pb-mono)"
-                      fontSize="9px"
-                      fontWeight={600}
-                      letterSpacing="0.15em"
-                      textTransform="uppercase"
-                      color="var(--pb-summary-ink-faint)"
-                    >
-                      On duty this week
-                    </Text>
+                    <HStack spacing={2} flexWrap="wrap">
+                      <Text
+                        fontFamily="var(--pb-mono)"
+                        fontSize="9px"
+                        fontWeight={600}
+                        letterSpacing="0.15em"
+                        textTransform="uppercase"
+                        color="var(--pb-summary-ink-faint)"
+                      >
+                        On duty this week
+                      </Text>
+                      {currentIsUser && (
+                        <HStack
+                          px={2}
+                          py={1}
+                          borderRadius="full"
+                          bg="var(--pb-forest-2)"
+                          color="var(--pb-on-accent)"
+                          spacing={1}
+                        >
+                          <Icon as={Sparkles} boxSize={3} weight="fill" />
+                          <Text
+                            fontFamily="var(--pb-mono)"
+                            fontSize="8px"
+                            fontWeight={700}
+                            letterSpacing="0.06em"
+                            textTransform="uppercase"
+                          >
+                            Your week
+                          </Text>
+                        </HStack>
+                      )}
+                    </HStack>
                     <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)">
                       {dateLabel(current.weekStart)} – {dateLabel(current.weekEnd)}
                     </Text>
@@ -1124,18 +1306,6 @@ function CleaningRotationCard({
                     >
                       {currentIsUser ? 'Your turn' : current.assignedMemberName}
                     </Text>
-                    {currentIsUser && (
-                      <Badge
-                        bg="var(--pb-summary-panel)"
-                        color="var(--pb-summary-ink-soft)"
-                        border="1px solid var(--pb-summary-line)"
-                        borderRadius="full"
-                        px={2}
-                        textTransform="none"
-                      >
-                        You
-                      </Badge>
-                    )}
                   </HStack>
                   <Text mt={1.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
                     {currentIsUser
