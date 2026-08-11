@@ -240,8 +240,9 @@ export default function HouseholdHeader({
               letterSpacing="0.17em"
               textTransform="uppercase"
               color="var(--pb-summary-ink-faint)"
+              noOfLines={1}
             >
-              Household · {household.members.length} active member{household.members.length === 1 ? '' : 's'}
+              {`Household · ${household.members.length} active member${household.members.length === 1 ? '' : 's'}`}
             </Text>
             <Text
               mt={0.5}
