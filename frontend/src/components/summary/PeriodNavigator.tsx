@@ -41,6 +41,13 @@ interface PeriodNavigatorProps {
   /** The currently-selected date — used to show a relative hint. */
   selectedDate: Date
   onDateChange: (date: Date) => void
+  /** Hide the range selector for views that are intentionally month-only. */
+  showPeriodSelector?: boolean
+  /** Optional navigation bounds. Defaults preserve existing consumers. */
+  canNavigatePrevious?: boolean
+  canNavigateNext?: boolean
+  /** Disable dates outside the data range exposed by the current view. */
+  isDateDisabled?: (date: Date) => boolean
 }
 
 interface PeriodOption {
@@ -156,6 +163,10 @@ export default function PeriodNavigator({
   isEmbedded = false,
   selectedDate,
   onDateChange,
+  showPeriodSelector = true,
+  canNavigatePrevious = true,
+  canNavigateNext = true,
+  isDateDisabled,
 }: PeriodNavigatorProps) {
   // Swipe support
   const touchStartX = useRef<number | null>(null)
@@ -167,11 +178,15 @@ export default function PeriodNavigator({
       if (touchStartX.current === null) return
       const diff = e.changedTouches[0].clientX - touchStartX.current
       if (Math.abs(diff) > 50) {
-        onNavigatePeriod(diff > 0 ? 'prev' : 'next')
+        const direction = diff > 0 ? 'prev' : 'next'
+        const canNavigate = direction === 'prev'
+          ? canNavigatePrevious
+          : canNavigateNext
+        if (canNavigate) onNavigatePeriod(direction)
       }
       touchStartX.current = null
     },
-    [onNavigatePeriod],
+    [canNavigateNext, canNavigatePrevious, onNavigatePeriod],
   )
 
   // ── Theme tokens ──────────────────────────────────────────────────────
@@ -233,7 +248,7 @@ export default function PeriodNavigator({
       p={isEmbedded ? 0 : { base: 3, md: 4 }}
     >
       <Flex
-        direction={{ base: 'column', md: 'row' }}
+        direction={{ base: showPeriodSelector ? 'column' : 'row', md: 'row' }}
         align={{ base: 'stretch', md: 'center' }}
         gap={{ base: 2.5, md: 3 }}
         w="full"
@@ -262,6 +277,7 @@ export default function PeriodNavigator({
               aria-label="Previous period"
               icon={<Icon as={ChevronLeft} boxSize={4} />}
               onClick={() => onNavigatePeriod('prev')}
+              isDisabled={!canNavigatePrevious}
               variant="ghost"
               h="full"
               w="42px"
@@ -269,6 +285,7 @@ export default function PeriodNavigator({
               borderRadius="none"
               color={navBtnColor}
               _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
+              _disabled={{ opacity: 0.35, cursor: 'not-allowed' }}
               transition="all 0.15s ease"
             />
 
@@ -280,6 +297,7 @@ export default function PeriodNavigator({
               onDateChange={onDateChange}
               label={formatLabel()}
               hint={hint}
+              isDateDisabled={isDateDisabled}
             />
 
             <Box w="1px" h="50%" bg={capsuleDivider} flexShrink={0} />
@@ -288,6 +306,7 @@ export default function PeriodNavigator({
               aria-label="Next period"
               icon={<Icon as={ChevronRight} boxSize={4} />}
               onClick={() => onNavigatePeriod('next')}
+              isDisabled={!canNavigateNext}
               variant="ghost"
               h="full"
               w="42px"
@@ -295,6 +314,7 @@ export default function PeriodNavigator({
               borderRadius="none"
               color={navBtnColor}
               _hover={{ bg: navBtnHoverBg, color: navBtnHoverColor }}
+              _disabled={{ opacity: 0.35, cursor: 'not-allowed' }}
               transition="all 0.15s ease"
             />
           </HStack>
@@ -342,15 +362,16 @@ export default function PeriodNavigator({
         </HStack>
 
         {/* ── Segmented period control with sliding thumb ──────────── */}
-        <Box
-          order={{ base: 1, md: 2 }}
-          position="relative"
-          bg={trackBg}
-          p="3px"
-          borderRadius="xl"
-          w={{ base: 'full', md: '380px' }}
-          flexShrink={0}
-        >
+        {showPeriodSelector && (
+          <Box
+            order={{ base: 1, md: 2 }}
+            position="relative"
+            bg={trackBg}
+            p="3px"
+            borderRadius="xl"
+            w={{ base: 'full', md: '380px' }}
+            flexShrink={0}
+          >
           {/* Sliding thumb */}
           <Box
             position="absolute"
@@ -410,7 +431,8 @@ export default function PeriodNavigator({
               )
             })}
           </HStack>
-        </Box>
+          </Box>
+        )}
       </Flex>
     </Box>
   )

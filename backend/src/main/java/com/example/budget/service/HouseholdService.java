@@ -493,10 +493,13 @@ public class HouseholdService {
                 .toList();
 
         YearMonth currentMonth = YearMonth.now();
-        BigDecimal monthSpend = state.expenses().stream()
-                .filter(expense -> YearMonth.from(expense.getExpenseDate()).equals(currentMonth))
-                .map(HouseholdExpense::getAmount)
-                .reduce(ZERO, BigDecimal::add);
+        List<HouseholdPageDTO.MonthSummary> monthSummaries =
+                buildMonthSummaries(state.expenses(), currentMonth);
+        BigDecimal monthSpend = monthSummaries.stream()
+                .filter(summary -> summary.month().equals(currentMonth.toString()))
+                .map(HouseholdPageDTO.MonthSummary::spend)
+                .findFirst()
+                .orElse(ZERO);
         HouseholdPageDTO.CleaningRotation cleaningRotation =
                 cleaningService.dashboard(household, current);
 
@@ -508,12 +511,32 @@ public class HouseholdService {
                 current.getRole().name(),
                 amount(balances.getOrDefault(current.getId(), ZERO)),
                 amount(monthSpend),
+                monthSummaries,
                 cleaningRotation,
                 memberDTOs,
                 memberInvitationDTOs,
                 debtDTOs,
                 expenseDTOs,
                 settlementDTOs);
+    }
+
+    static List<HouseholdPageDTO.MonthSummary> buildMonthSummaries(
+            List<HouseholdExpense> expenses,
+            YearMonth currentMonth) {
+        Map<YearMonth, List<HouseholdExpense>> expensesByMonth = expenses.stream()
+                .collect(Collectors.groupingBy(
+                        expense -> YearMonth.from(expense.getExpenseDate())));
+        expensesByMonth.putIfAbsent(currentMonth, List.of());
+
+        return expensesByMonth.entrySet().stream()
+                .sorted(Map.Entry.<YearMonth, List<HouseholdExpense>>comparingByKey().reversed())
+                .map(entry -> new HouseholdPageDTO.MonthSummary(
+                        entry.getKey().toString(),
+                        amount(entry.getValue().stream()
+                                .map(HouseholdExpense::getAmount)
+                                .reduce(ZERO, BigDecimal::add)),
+                        entry.getValue().size()))
+                .toList();
     }
 
     private HouseholdPageDTO.Attachment toAttachmentDTO(
@@ -751,7 +774,7 @@ public class HouseholdService {
         }
     }
 
-    private BigDecimal amount(BigDecimal value) {
+    private static BigDecimal amount(BigDecimal value) {
         return (value == null ? ZERO : value).setScale(2, RoundingMode.HALF_UP);
     }
 

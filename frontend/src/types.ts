@@ -529,6 +529,12 @@ export interface HouseholdCleaningRotation {
   upcomingWeeks: HouseholdCleaningAssignment[]
 }
 
+export interface HouseholdMonthSummary {
+  month: string
+  spend: number
+  expenseCount: number
+}
+
 export interface HouseholdDashboard {
   id: number
   name: string
@@ -537,6 +543,7 @@ export interface HouseholdDashboard {
   currentMemberRole: HouseholdRole
   currentUserBalance: number
   monthSpend: number
+  monthSummaries: HouseholdMonthSummary[]
   cleaningRotation: HouseholdCleaningRotation
   members: HouseholdMember[]
   pendingMemberInvitations: HouseholdMemberInvitation[]

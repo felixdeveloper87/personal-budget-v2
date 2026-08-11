@@ -17,12 +17,19 @@ public record HouseholdPageDTO(
             String currentMemberRole,
             BigDecimal currentUserBalance,
             BigDecimal monthSpend,
+            List<MonthSummary> monthSummaries,
             CleaningRotation cleaningRotation,
             List<Member> members,
             List<MemberInvitation> pendingMemberInvitations,
             List<Debt> debts,
             List<Expense> expenses,
             List<Settlement> settlements
+    ) {}
+
+    public record MonthSummary(
+            String month,
+            BigDecimal spend,
+            long expenseCount
     ) {}
 
     public record Member(

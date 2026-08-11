@@ -84,6 +84,7 @@ import {
   AttachmentGalleryModal,
   AttachmentPicker,
 } from './HouseholdAttachments'
+import HouseholdHeader from './HouseholdHeader'
 
 const CATEGORIES = [
   'Electricity',
@@ -422,123 +423,14 @@ export default function HouseholdPage() {
     return Promise.reject(new Error('No Household record selected'))
   }
 
-  const balance = household.currentUserBalance
-  const balanceLabel = balance > 0
-    ? 'You are owed'
-    : balance < 0
-      ? 'You owe'
-      : 'You are settled'
-  const balanceColor = balance > 0
-    ? (ed?.jade ?? 'green.500')
-    : balance < 0
-      ? (ed?.red ?? 'red.500')
-      : muted
-
   return (
     <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 3, md: 7 }}>
       <VStack align="stretch" spacing={{ base: 3, md: 6 }}>
-        <Stack
-          direction={{ base: 'column', md: 'row' }}
-          align={{ base: 'stretch', md: 'center' }}
-          justify="space-between"
-          spacing={{ base: 3, md: 4 }}
-        >
-          <HStack spacing={{ base: 3, md: 4 }}>
-            <Box
-              w={{ base: 10, md: 13 }}
-              h={{ base: 10, md: 13 }}
-              flexShrink={0}
-              display="grid"
-              placeItems="center"
-              borderRadius={{ base: 'xl', md: '2xl' }}
-              bg={ed?.jadeSoft ?? 'teal.50'}
-              color={ed?.jade ?? 'teal.600'}
-              border="1px solid"
-              borderColor={ed?.line ?? 'teal.100'}
-            >
-              <Home size={22} weight="duotone" />
-            </Box>
-            <Box minW={0}>
-              <Text
-                color={ed?.gold ?? 'orange.500'}
-                fontSize="10px"
-                fontWeight={800}
-                letterSpacing="0.18em"
-                textTransform="uppercase"
-              >
-                Household
-              </Text>
-              <Heading size={{ base: 'md', md: 'xl' }} noOfLines={1}>{household.name}</Heading>
-              <Text color={muted} fontSize="sm">
-                {household.members.length} active member{household.members.length === 1 ? '' : 's'}
-              </Text>
-            </Box>
-          </HStack>
-          <HStack w={{ base: 'full', md: 'auto' }}>
-            {household.currentMemberRole === 'OWNER' && (
-              <Button
-                variant="outline"
-                leftIcon={<Gear size={17} />}
-                onClick={membersModal.onOpen}
-                size={{ base: 'sm', md: 'md' }}
-                flex={{ base: 1, md: 'initial' }}
-              >
-                Manage
-              </Button>
-            )}
-            <Button
-              colorScheme="teal"
-              leftIcon={<Plus size={17} />}
-              onClick={openNewExpense}
-              size={{ base: 'sm', md: 'md' }}
-              flex={{ base: 1, md: 'initial' }}
-            >
-              Add expense
-            </Button>
-          </HStack>
-        </Stack>
-
-        <Surface overflow="hidden">
-          <Grid templateColumns={{ base: 'repeat(2, minmax(0, 1fr))', md: '1.35fr 1fr 1fr' }}>
-            <Box
-              gridColumn={{ base: '1 / -1', md: 'auto' }}
-              p={{ base: 4, md: 5 }}
-              borderBottom={{ base: '1px solid', md: 'none' }}
-              borderRight={{ base: 'none', md: '1px solid' }}
-              borderColor={ed?.line ?? 'blackAlpha.100'}
-            >
-              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-                {balanceLabel}
-              </Text>
-              <Text mt={1} fontSize={{ base: '2xl', md: '3xl' }} fontWeight={800} color={balanceColor}>
-                {money(Math.abs(balance), household.currency)}
-              </Text>
-              <Text color={muted} fontSize="xs">Confirmed balance</Text>
-            </Box>
-            <Box
-              p={{ base: 4, md: 5 }}
-              borderRight="1px solid"
-              borderColor={ed?.line ?? 'blackAlpha.100'}
-            >
-              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-                This month
-              </Text>
-              <Text mt={1} fontSize={{ base: 'xl', md: '3xl' }} fontWeight={800} noOfLines={1}>
-                {money(household.monthSpend, household.currency)}
-              </Text>
-              <Text color={muted} fontSize="xs">Household spend</Text>
-            </Box>
-            <Box p={{ base: 4, md: 5 }}>
-              <Text color={muted} fontSize="xs" fontWeight={800} textTransform="uppercase">
-                Expenses
-              </Text>
-              <Text mt={1} fontSize={{ base: 'xl', md: '3xl' }} fontWeight={800}>
-                {household.expenses.length}
-              </Text>
-              <Text color={muted} fontSize="xs">Active records</Text>
-            </Box>
-          </Grid>
-        </Surface>
+        <HouseholdHeader
+          household={household}
+          onAddExpense={openNewExpense}
+          onManage={membersModal.onOpen}
+        />
 
         <CleaningRotationCard
           rotation={household.cleaningRotation}

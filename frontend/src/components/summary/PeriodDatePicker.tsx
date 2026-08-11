@@ -25,6 +25,7 @@ interface PeriodDatePickerProps {
   onDateChange: (date: Date) => void
   label: string
   hint: string | null
+  isDateDisabled?: (date: Date) => boolean
 }
 
 const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
@@ -77,6 +78,7 @@ export default function PeriodDatePicker({
   onDateChange,
   label,
   hint,
+  isDateDisabled,
 }: PeriodDatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [viewDate, setViewDate] = useState(selectedDate)
@@ -117,6 +119,7 @@ export default function PeriodDatePicker({
   const focusColor = ed?.jade ?? 'blue.300'
 
   const closeWithDate = (date: Date) => {
+    if (isDateDisabled?.(date)) return
     onDateChange(date)
     setIsOpen(false)
   }
@@ -163,6 +166,7 @@ export default function PeriodDatePicker({
             {days.map((date) => {
               const selected = sameDay(date, selectedDate)
               const inMonth = date.getMonth() === viewDate.getMonth()
+              const disabled = isDateDisabled?.(date) ?? false
               return (
                 <Button
                   key={date.toISOString()}
@@ -175,6 +179,7 @@ export default function PeriodDatePicker({
                   bg={selected ? selectedBg : 'transparent'}
                   color={selected ? selectedColor : inMonth ? labelColor : outsideColor}
                   _hover={{ bg: selected ? selectedBg : hoverBg }}
+                  isDisabled={disabled}
                   onClick={() =>
                     closeWithDate(
                       new Date(date.getFullYear(), date.getMonth(), date.getDate()),
@@ -195,6 +200,7 @@ export default function PeriodDatePicker({
         <VStack spacing={1} align="stretch">
           {weeks.map(({ start, end }) => {
             const selected = sameWeek(start, selectedDate)
+            const disabled = isDateDisabled?.(start) ?? false
             const format = (date: Date) =>
               date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
             return (
@@ -206,6 +212,7 @@ export default function PeriodDatePicker({
                 bg={selected ? selectedBg : 'transparent'}
                 color={selected ? selectedColor : labelColor}
                 _hover={{ bg: selected ? selectedBg : hoverBg }}
+                isDisabled={disabled}
                 onClick={() => closeWithDate(start)}
               >
                 <Text>{format(start)}</Text>
@@ -223,9 +230,11 @@ export default function PeriodDatePicker({
       return (
         <SimpleGrid columns={3} spacing={2}>
           {MONTHS.map((month, index) => {
+            const date = new Date(viewDate.getFullYear(), index, 1)
             const selected =
               selectedDate.getFullYear() === viewDate.getFullYear() &&
               selectedDate.getMonth() === index
+            const disabled = isDateDisabled?.(date) ?? false
             return (
               <Button
                 key={month}
@@ -234,7 +243,8 @@ export default function PeriodDatePicker({
                 bg={selected ? selectedBg : 'transparent'}
                 color={selected ? selectedColor : labelColor}
                 _hover={{ bg: selected ? selectedBg : hoverBg }}
-                onClick={() => closeWithDate(new Date(viewDate.getFullYear(), index, 1))}
+                isDisabled={disabled}
+                onClick={() => closeWithDate(date)}
               >
                 {month}
               </Button>
@@ -247,7 +257,9 @@ export default function PeriodDatePicker({
     return (
       <SimpleGrid columns={3} spacing={2}>
         {Array.from({ length: 12 }, (_, index) => firstYear + index).map((year) => {
+          const date = new Date(year, 0, 1)
           const selected = selectedDate.getFullYear() === year
+          const disabled = isDateDisabled?.(date) ?? false
           return (
             <Button
               key={year}
@@ -256,7 +268,8 @@ export default function PeriodDatePicker({
               bg={selected ? selectedBg : 'transparent'}
               color={selected ? selectedColor : labelColor}
               _hover={{ bg: selected ? selectedBg : hoverBg }}
-              onClick={() => closeWithDate(new Date(year, 0, 1))}
+              isDisabled={disabled}
+              onClick={() => closeWithDate(date)}
             >
               {year}
             </Button>
