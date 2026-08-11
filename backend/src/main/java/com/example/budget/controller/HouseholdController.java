@@ -128,6 +128,27 @@ public class HouseholdController {
         return service.page(user);
     }
 
+    @PatchMapping(
+            "/households/{householdId}/cleaning-assignments/{assignmentId}/duties/{dutyKey}")
+    public HouseholdPageDTO updateCleaningDuty(
+            @PathVariable Long householdId,
+            @PathVariable Long assignmentId,
+            @PathVariable String dutyKey,
+            @RequestBody HouseholdRequests.CleaningDutyUpdate request,
+            Authentication authentication) {
+        if (request == null) {
+            throw new IllegalArgumentException("Cleaning duty state is required");
+        }
+        User user = user(authentication);
+        cleaningService.updateDuty(
+                householdId,
+                assignmentId,
+                dutyKey,
+                request.completed(),
+                user);
+        return service.page(user);
+    }
+
     @PostMapping("/households/{householdId}/expenses")
     @ResponseStatus(HttpStatus.CREATED)
     public HouseholdRecordCreatedDTO createExpense(

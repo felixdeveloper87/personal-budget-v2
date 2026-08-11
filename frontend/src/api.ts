@@ -646,6 +646,19 @@ export async function completeHouseholdCleaningAssignment(
   return data
 }
 
+export async function updateHouseholdCleaningDuty(
+  householdId: number,
+  assignmentId: number,
+  dutyKey: string,
+  completed: boolean,
+): Promise<HouseholdPageState> {
+  const { data } = await api.patch<HouseholdPageState>(
+    `/households/${householdId}/cleaning-assignments/${assignmentId}/duties/${dutyKey}`,
+    { completed },
+  )
+  return data
+}
+
 export async function createHouseholdExpense(
   householdId: number,
   request: HouseholdExpenseRequest,

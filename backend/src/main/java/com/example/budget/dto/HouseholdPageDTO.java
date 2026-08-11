@@ -121,6 +121,16 @@ public record HouseholdPageDTO(
             String assignedMemberName,
             String status,
             boolean canComplete,
+            LocalDateTime completedAt,
+            List<CleaningDuty> duties
+    ) {}
+
+    public record CleaningDuty(
+            String key,
+            String label,
+            String schedule,
+            boolean completed,
+            boolean canToggle,
             LocalDateTime completedAt
     ) {}
 

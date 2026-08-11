@@ -517,6 +517,16 @@ export interface HouseholdCleaningAssignment {
   status: HouseholdCleaningStatus
   canComplete: boolean
   completedAt: string | null
+  duties: HouseholdCleaningDuty[]
+}
+
+export interface HouseholdCleaningDuty {
+  key: string
+  label: string
+  schedule: string | null
+  completed: boolean
+  canToggle: boolean
+  completedAt: string | null
 }
 
 export interface HouseholdCleaningRotation {

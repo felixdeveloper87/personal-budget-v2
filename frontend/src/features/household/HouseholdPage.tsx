@@ -37,7 +37,6 @@ import {
 import {
   acceptHouseholdInvitation,
   cancelHouseholdSettlement,
-  completeHouseholdCleaningAssignment,
   confirmHouseholdSettlement,
   createHousehold,
   createHouseholdExpense,
@@ -50,6 +49,7 @@ import {
   removeHouseholdMember,
   revokeHouseholdInvitation,
   updateHousehold,
+  updateHouseholdCleaningDuty,
   updateHouseholdCleaningRotation,
   updateHouseholdExpense,
   uploadHouseholdExpenseAttachments,
@@ -111,18 +111,20 @@ const CATEGORIES = [
 ] as const
 
 const CLEANING_DUTIES: ReadonlyArray<{
+  key: string
   label: string
   schedule?: string
   timed?: boolean
 }> = [
-  { label: 'Clean the shower room' },
-  { label: 'Clean the toilet / WC' },
-  { label: 'Vacuum the upstairs hallway' },
-  { label: 'Vacuum the stairs' },
-  { label: 'Vacuum the downstairs hallway' },
-  { label: 'Clean the living room' },
-  { label: 'Empty all bins' },
+  { key: 'shower_room', label: 'Clean the shower room' },
+  { key: 'toilet_wc', label: 'Clean the toilet / WC' },
+  { key: 'upstairs_hallway', label: 'Vacuum the upstairs hallway' },
+  { key: 'stairs', label: 'Vacuum the stairs' },
+  { key: 'downstairs_hallway', label: 'Vacuum the downstairs hallway' },
+  { key: 'living_room', label: 'Clean the living room' },
+  { key: 'all_bins', label: 'Empty all bins' },
   {
+    key: 'rubbish_out',
     label: 'Put the rubbish out',
     schedule: 'Every Thursday · by 10:00',
     timed: true,
@@ -465,12 +467,20 @@ export default function HouseholdPage() {
         <CleaningRotationCard
           rotation={household.cleaningRotation}
           currentMemberId={household.currentMemberId}
-          busy={busyAction === 'complete-cleaning'}
+          busyDutyKey={
+            busyAction?.startsWith('cleaning-duty:')
+              ? busyAction.slice('cleaning-duty:'.length)
+              : null
+          }
           onManage={cleaningRotationModal.onOpen}
-          onComplete={(assignmentId) => void applyAction(
-            'complete-cleaning',
-            () => completeHouseholdCleaningAssignment(household.id, assignmentId),
-            'Cleaning marked as completed',
+          onToggleDuty={(assignmentId, dutyKey, completed) => void applyAction(
+            `cleaning-duty:${dutyKey}`,
+            () => updateHouseholdCleaningDuty(
+              household.id,
+              assignmentId,
+              dutyKey,
+              completed,
+            ),
           )}
         />
 
@@ -839,23 +849,37 @@ export default function HouseholdPage() {
 function CleaningRotationCard({
   rotation,
   currentMemberId,
-  busy,
+  busyDutyKey,
   onManage,
-  onComplete,
+  onToggleDuty,
 }: {
   rotation: HouseholdCleaningRotation
   currentMemberId: number
-  busy: boolean
+  busyDutyKey: string | null
   onManage: () => void
-  onComplete: (assignmentId: number) => void
+  onToggleDuty: (
+    assignmentId: number,
+    dutyKey: string,
+    completed: boolean,
+  ) => void
 }) {
   const current = rotation.currentWeek
   const firstUpcoming = rotation.upcomingWeeks[0]
-  const canCurrentUserComplete = Boolean(
-    current?.canComplete && current.assignedMemberId === currentMemberId,
-  )
   const currentIsUser = current?.assignedMemberId === currentMemberId
   const currentIsComplete = current?.status === 'COMPLETED'
+  const displayedDuties = current?.duties?.length
+    ? current.duties.map((duty) => ({
+        ...duty,
+        timed: duty.key === 'rubbish_out',
+      }))
+    : CLEANING_DUTIES.map((duty) => ({
+        ...duty,
+        schedule: duty.schedule ?? null,
+        completed: false,
+        canToggle: false,
+        completedAt: null,
+      }))
+  const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
   const rotationStatus = !rotation.configured
     ? 'Not set up'
     : rotation.active
@@ -1115,29 +1139,11 @@ function CleaningRotationCard({
                   </HStack>
                   <Text mt={1.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
                     {currentIsUser
-                      ? 'Keep the shared spaces fresh, then mark the week complete.'
+                      ? 'Mark each task as you finish it. Your progress is saved for the whole week.'
                       : `${current.assignedMemberName} is taking care of the shared spaces.`}
                   </Text>
                 </Box>
 
-                {canCurrentUserComplete && (
-                  <Button
-                    alignSelf={{ base: 'stretch', sm: 'flex-start' }}
-                    h="44px"
-                    px={4}
-                    borderRadius="11px"
-                    bg="var(--pb-forest-2)"
-                    color="var(--pb-on-accent)"
-                    leftIcon={<Icon as={Check} boxSize={4} weight="bold" />}
-                    isLoading={busy}
-                    loadingText="Completing"
-                    onClick={() => onComplete(current.id)}
-                    _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
-                    _active={{ transform: 'translateY(0)' }}
-                  >
-                    Mark this week complete
-                  </Button>
-                )}
                 {currentIsComplete && (
                   <HStack
                     px={3.5}
@@ -1315,29 +1321,71 @@ function CleaningRotationCard({
               This week&apos;s duties
             </Text>
             <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
-              The person on duty completes the full shared-space checklist.
+              {current
+                ? currentIsUser
+                  ? 'Tick off each task as you finish it. Your progress is saved.'
+                  : `Only ${current.assignedMemberName} can update this week's checklist.`
+                : 'The person on duty completes the full shared-space checklist.'}
             </Text>
           </Box>
-          <HStack spacing={1.5} color="var(--pb-ink-faint)">
-            <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
-            <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
-              8 tasks
-            </Text>
-          </HStack>
+          <Box minW={{ base: 'full', sm: '150px' }}>
+            <HStack justify={{ base: 'flex-start', sm: 'flex-end' }} spacing={1.5} color="var(--pb-ink-faint)">
+              <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
+              <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
+                {current
+                  ? `${completedDutyCount} of ${displayedDuties.length} done`
+                  : `${displayedDuties.length} tasks`}
+              </Text>
+            </HStack>
+            <Box
+              mt={2}
+              h="4px"
+              overflow="hidden"
+              borderRadius="full"
+              bg="var(--pb-surface-2)"
+              aria-hidden="true"
+            >
+              <Box
+                h="full"
+                w={`${displayedDuties.length
+                  ? (completedDutyCount / displayedDuties.length) * 100
+                  : 0}%`}
+                borderRadius="full"
+                bg="var(--pb-forest-2)"
+                transition="width 180ms ease"
+              />
+            </Box>
+          </Box>
         </Flex>
 
         <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing={2}>
-          {CLEANING_DUTIES.map((duty, index) => (
+          {displayedDuties.map((duty, index) => (
             <Flex
-              key={duty.label}
-              minH={{ base: '52px', md: '58px' }}
+              key={duty.key}
+              as="label"
+              minH={{ base: '58px', md: '62px' }}
               align="center"
               gap={2.5}
               px={3}
               py={2.5}
               borderRadius="12px"
               border="1px solid var(--pb-hair)"
-              bg={duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface-2)'}
+              bg={
+                duty.completed
+                  ? 'var(--pb-tint-income)'
+                  : duty.timed
+                    ? 'var(--pb-tint-gold)'
+                    : 'var(--pb-surface-2)'
+              }
+              cursor={duty.canToggle && busyDutyKey === null ? 'pointer' : 'default'}
+              transition="background 140ms ease, border-color 140ms ease, transform 140ms ease"
+              _hover={duty.canToggle && busyDutyKey === null
+                ? { borderColor: 'var(--pb-hair-2)', transform: 'translateY(-1px)' }
+                : undefined}
+              _focusWithin={{
+                boxShadow: '0 0 0 2px var(--pb-forest)',
+                outline: 'none',
+              }}
             >
               <Flex
                 w={8}
@@ -1346,30 +1394,59 @@ function CleaningRotationCard({
                 align="center"
                 justify="center"
                 borderRadius="10px"
-                bg={duty.timed ? 'var(--pb-surface)' : 'var(--pb-tint-green)'}
-                color={duty.timed ? 'var(--pb-gold)' : 'var(--pb-forest-2)'}
-                border="1px solid var(--pb-hair)"
+                bg={duty.completed ? 'var(--pb-forest-2)' : 'var(--pb-surface)'}
+                color={duty.completed ? 'var(--pb-on-accent)' : 'var(--pb-forest-2)'}
               >
-                <Icon
-                  as={duty.timed ? Trash2 : Check}
-                  boxSize={4}
-                  weight={duty.timed ? 'duotone' : 'bold'}
-                />
+                {busyDutyKey === duty.key ? (
+                  <Spinner size="sm" thickness="2px" />
+                ) : (
+                  <Checkbox
+                    isChecked={duty.completed}
+                    isDisabled={!duty.canToggle || busyDutyKey !== null}
+                    colorScheme="green"
+                    size="lg"
+                    aria-label={
+                      duty.completed
+                        ? `Mark ${duty.label} as not done`
+                        : `Mark ${duty.label} as done`
+                    }
+                    onChange={(event) => {
+                      if (!current || !duty.canToggle) return
+                      onToggleDuty(current.id, duty.key, event.target.checked)
+                    }}
+                  />
+                )}
               </Flex>
               <Box minW={0}>
-                <Text color="var(--pb-ink)" fontSize="sm" fontWeight={600} lineHeight={1.25}>
+                <Text
+                  color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
+                  fontSize="sm"
+                  fontWeight={600}
+                  lineHeight={1.25}
+                  textDecoration={duty.completed ? 'line-through' : 'none'}
+                >
                   {duty.label}
                 </Text>
                 {duty.schedule ? (
-                  <HStack mt={1} spacing={1.5} color="var(--pb-gold)">
+                  <HStack
+                    mt={1}
+                    spacing={1.5}
+                    color={duty.completed ? 'var(--pb-income)' : 'var(--pb-gold)'}
+                  >
                     <Icon as={Clock} boxSize={3} weight="bold" />
                     <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
                       {duty.schedule}
                     </Text>
                   </HStack>
                 ) : (
-                  <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="2xs">
-                    Task {String(index + 1).padStart(2, '0')}
+                  <Text
+                    mt={0.5}
+                    color={duty.completed ? 'var(--pb-income)' : 'var(--pb-ink-faint)'}
+                    fontSize="2xs"
+                  >
+                    {duty.completed
+                      ? 'Completed'
+                      : `Task ${String(index + 1).padStart(2, '0')}`}
                   </Text>
                 )}
               </Box>

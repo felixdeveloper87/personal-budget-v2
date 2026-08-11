@@ -21,4 +21,5 @@ public final class HouseholdRequests {
             LocalDate startDate,
             boolean active,
             List<Long> participantMemberIds) {}
+    public record CleaningDutyUpdate(boolean completed) {}
 }
