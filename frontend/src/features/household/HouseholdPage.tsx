@@ -6,7 +6,9 @@ import {
   Button,
   Checkbox,
   Divider,
+  Flex,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Grid,
   Heading,
@@ -25,6 +27,7 @@ import {
   SimpleGrid,
   Spinner,
   Stack,
+  Switch,
   Text,
   VStack,
   useColorModeValue,
@@ -65,8 +68,11 @@ import type {
 import {
   Check,
   Calendar,
+  CalendarCheck,
   ChevronDown,
   ChevronUp,
+  CheckCircle2,
+  Clock,
   Gear,
   Home,
   Mail,
@@ -74,12 +80,17 @@ import {
   Plus,
   ReceiptText,
   RefreshCw,
+  Repeat,
   Sparkles,
   Trash2,
   Upload,
   Wallet,
   X,
 } from '../../components/ui/icons'
+import {
+  ModalHeader as AppModalHeader,
+  PremiumModal,
+} from '../../components/ui'
 import {
   AttachmentGalleryModal,
   AttachmentPicker,
@@ -98,6 +109,25 @@ const CATEGORIES = [
   'Repairs',
   'Other',
 ] as const
+
+const CLEANING_DUTIES: ReadonlyArray<{
+  label: string
+  schedule?: string
+  timed?: boolean
+}> = [
+  { label: 'Clean the shower room' },
+  { label: 'Clean the toilet / WC' },
+  { label: 'Vacuum the upstairs hallway' },
+  { label: 'Vacuum the stairs' },
+  { label: 'Vacuum the downstairs hallway' },
+  { label: 'Clean the living room' },
+  { label: 'Empty all bins' },
+  {
+    label: 'Put the rubbish out',
+    schedule: 'Every Thursday · by 10:00',
+    timed: true,
+  },
+]
 
 type AttachmentTarget =
   | { kind: 'expense'; id: number }
@@ -819,207 +849,535 @@ function CleaningRotationCard({
   onManage: () => void
   onComplete: (assignmentId: number) => void
 }) {
-  const ed = useEd()
-  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
-  const muted = ed?.muted ?? mutedFallback
   const current = rotation.currentWeek
   const firstUpcoming = rotation.upcomingWeeks[0]
   const canCurrentUserComplete = Boolean(
     current?.canComplete && current.assignedMemberId === currentMemberId,
   )
+  const currentIsUser = current?.assignedMemberId === currentMemberId
+  const currentIsComplete = current?.status === 'COMPLETED'
+  const rotationStatus = !rotation.configured
+    ? 'Not set up'
+    : rotation.active
+      ? 'Active'
+      : 'Paused'
 
   return (
-    <Surface overflow="hidden">
-      <Stack
-        direction={{ base: 'column', md: 'row' }}
+    <Box
+      overflow="hidden"
+      bg="var(--pb-surface)"
+      border="1px solid var(--pb-hair)"
+      borderRadius={{ base: '18px', md: '22px' }}
+      boxShadow="var(--pb-shadow)"
+    >
+      <Flex
+        direction={{ base: 'column', sm: 'row' }}
         justify="space-between"
-        align={{ base: 'stretch', md: 'center' }}
-        spacing={3}
-        px={{ base: 4, md: 6 }}
-        py={{ base: 4, md: 5 }}
-        borderBottom={rotation.configured && rotation.active ? '1px solid' : 'none'}
-        borderColor={ed?.line ?? 'blackAlpha.100'}
+        align={{ base: 'stretch', sm: 'center' }}
+        gap={{ base: 3, sm: 4 }}
+        px={{ base: 3.5, sm: 4, md: 5 }}
+        py={{ base: 3.5, md: 4 }}
+        borderBottom="1px solid var(--pb-hair)"
       >
-        <HStack spacing={3}>
-          <Box
-            w={10}
-            h={10}
+        <HStack spacing={3} minW={0}>
+          <Flex
+            w={{ base: 10, md: 11 }}
+            h={{ base: 10, md: 11 }}
             flexShrink={0}
-            display="grid"
-            placeItems="center"
-            borderRadius="xl"
-            bg={ed?.controlBg ?? 'orange.50'}
-            color={ed?.gold ?? 'orange.500'}
+            align="center"
+            justify="center"
+            borderRadius="13px"
+            bg="var(--pb-tint-gold)"
+            color="var(--pb-gold)"
+            border="1px solid var(--pb-hair)"
           >
-            <Sparkles size={21} weight="duotone" />
-          </Box>
-          <Box>
-            <Heading size="md">Weekly cleaning</Heading>
-            <Text color={muted} fontSize="sm">
-              One person takes care of the house each week.
+            <Icon as={Sparkles} boxSize={5} weight="duotone" />
+          </Flex>
+          <Box minW={0}>
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={600}
+              letterSpacing="0.16em"
+              textTransform="uppercase"
+              color="var(--pb-ink-faint)"
+            >
+              Shared routine
+            </Text>
+            <Text
+              mt={0.5}
+              fontFamily="var(--pb-serif)"
+              fontSize={{ base: 'lg', md: 'xl' }}
+              fontWeight={500}
+              lineHeight={1.1}
+              color="var(--pb-ink)"
+            >
+              Weekly cleaning
+            </Text>
+            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+              A fair, repeating turn for everyone at home.
             </Text>
           </Box>
         </HStack>
-        {rotation.canManage && (
-          <Button
-            size="sm"
-            variant="outline"
-            leftIcon={<Gear size={16} />}
-            alignSelf={{ base: 'stretch', md: 'center' }}
-            onClick={onManage}
+        <Flex gap={2} align="center" w={{ base: 'full', sm: 'auto' }}>
+          <HStack
+            px={3}
+            h="40px"
+            borderRadius="10px"
+            bg={rotation.active ? 'var(--pb-tint-income)' : 'var(--pb-surface-2)'}
+            color={rotation.active ? 'var(--pb-income)' : 'var(--pb-ink-soft)'}
+            border="1px solid var(--pb-hair)"
+            spacing={2}
+            flex={{ base: 1, sm: 'initial' }}
+            justify="center"
           >
-            {rotation.configured ? 'Manage rotation' : 'Set up rotation'}
-          </Button>
-        )}
-      </Stack>
+            <Box w="6px" h="6px" borderRadius="full" bg="currentColor" />
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={700}
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+            >
+              {rotationStatus}
+            </Text>
+          </HStack>
+          {rotation.canManage && (
+            <Button
+              leftIcon={<Icon as={Gear} boxSize={4} />}
+              h="40px"
+              px={3.5}
+              borderRadius="10px"
+              bg="var(--pb-surface-2)"
+              color="var(--pb-ink-soft)"
+              border="1px solid var(--pb-hair)"
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={600}
+              letterSpacing="0.05em"
+              textTransform="uppercase"
+              flex={{ base: 1.25, sm: 'initial' }}
+              onClick={onManage}
+              _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            >
+              {rotation.configured ? 'Manage' : 'Set up'}
+            </Button>
+          )}
+        </Flex>
+      </Flex>
 
       {!rotation.configured ? (
-        <Box px={{ base: 4, md: 6 }} pb={{ base: 4, md: 5 }}>
-          <Text color={muted} fontSize="sm">
-            {rotation.canManage
-              ? 'Choose the members and the weekly order to start the cleaning rota.'
-              : 'The household owner has not set up the cleaning rota yet.'}
-          </Text>
-        </Box>
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          align={{ base: 'stretch', md: 'center' }}
+          justify="space-between"
+          gap={4}
+          p={{ base: 4, md: 5 }}
+          bg="var(--pb-surface-2)"
+        >
+          <Box maxW="620px">
+            <Text
+              fontFamily="var(--pb-serif)"
+              fontSize={{ base: 'lg', md: 'xl' }}
+              fontWeight={500}
+              color="var(--pb-ink)"
+            >
+              Create a rhythm that feels fair.
+            </Text>
+            <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.5}>
+              {rotation.canManage
+                ? 'Choose who takes part, set the first Monday and arrange the order once. The rota repeats automatically.'
+                : 'The household owner has not set up the weekly cleaning rotation yet.'}
+            </Text>
+          </Box>
+          <HStack spacing={2} flexWrap="wrap">
+            {['Pick members', 'Choose Monday', 'Set the order'].map((step, index) => (
+              <HStack
+                key={step}
+                px={3}
+                py={2}
+                borderRadius="10px"
+                bg="var(--pb-surface)"
+                border="1px solid var(--pb-hair)"
+                spacing={2}
+              >
+                <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-gold)">
+                  0{index + 1}
+                </Text>
+                <Text fontSize="xs" color="var(--pb-ink-soft)">{step}</Text>
+              </HStack>
+            ))}
+          </HStack>
+        </Flex>
       ) : !rotation.active ? (
-        <HStack px={{ base: 4, md: 6 }} pb={{ base: 4, md: 5 }} spacing={2}>
-          <Badge colorScheme="gray">Paused</Badge>
-          <Text color={muted} fontSize="sm">The weekly cleaning rotation is paused.</Text>
-        </HStack>
+        <Flex
+          direction={{ base: 'column', sm: 'row' }}
+          align={{ base: 'stretch', sm: 'center' }}
+          gap={3}
+          p={{ base: 4, md: 5 }}
+          bg="var(--pb-surface-2)"
+        >
+          <Flex
+            w={11}
+            h={11}
+            flexShrink={0}
+            align="center"
+            justify="center"
+            borderRadius="full"
+            bg="var(--pb-tint-gold)"
+            color="var(--pb-gold)"
+          >
+            <Icon as={Clock} boxSize={5} weight="duotone" />
+          </Flex>
+          <Box minW={0}>
+            <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
+              Rotation paused
+            </Text>
+            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="sm">
+              The order is saved for {rotation.participantMemberIds.length} member
+              {rotation.participantMemberIds.length === 1 ? '' : 's'}. Resume it anytime from Manage.
+            </Text>
+          </Box>
+        </Flex>
       ) : (
-        <Grid templateColumns={{ base: '1fr', lg: '1.2fr 0.8fr' }}>
+        <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)' }}>
           <Box
-            p={{ base: 4, md: 6 }}
+            p={{ base: 4, md: 5 }}
             borderBottom={{ base: '1px solid', lg: 'none' }}
             borderRight={{ base: 'none', lg: '1px solid' }}
-            borderColor={ed?.line ?? 'blackAlpha.100'}
+            borderColor="var(--pb-hair)"
+            bg="var(--pb-summary-petrol)"
           >
             {current ? (
-              <Stack
-                direction={{ base: 'column', sm: 'row' }}
-                justify="space-between"
-                align={{ base: 'stretch', sm: 'center' }}
-                spacing={4}
-              >
-                <HStack spacing={3} minW={0}>
-                  <Avatar
-                    size="md"
-                    name={current.assignedMemberName}
-                    bg={ed?.jadeSoft ?? 'teal.100'}
-                    color={ed?.jade ?? 'teal.700'}
-                  />
-                  <Box minW={0}>
-                    <HStack spacing={2} flexWrap="wrap">
-                      <Text
-                        color={muted}
-                        fontSize="10px"
-                        fontWeight={800}
-                        letterSpacing="0.12em"
-                        textTransform="uppercase"
-                      >
-                        This week
-                      </Text>
-                      <Badge
-                        colorScheme={current.status === 'COMPLETED' ? 'green' : 'orange'}
-                        variant="subtle"
-                      >
-                        {current.status === 'COMPLETED' ? 'Completed' : 'Pending'}
-                      </Badge>
-                    </HStack>
-                    <Heading mt={1} size="md" noOfLines={1}>
-                      {current.assignedMemberId === currentMemberId
-                        ? 'Your turn'
-                        : current.assignedMemberName}
-                    </Heading>
-                    <HStack mt={1} color={muted} spacing={1}>
-                      <Calendar size={14} />
-                      <Text fontSize="xs">
-                        {dateLabel(current.weekStart)} – {dateLabel(current.weekEnd)}
-                      </Text>
-                    </HStack>
+              <VStack align="stretch" spacing={4}>
+                <HStack justify="space-between" align="flex-start" spacing={3}>
+                  <Box>
+                    <Text
+                      fontFamily="var(--pb-mono)"
+                      fontSize="9px"
+                      fontWeight={600}
+                      letterSpacing="0.15em"
+                      textTransform="uppercase"
+                      color="var(--pb-summary-ink-faint)"
+                    >
+                      On duty this week
+                    </Text>
+                    <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)">
+                      {dateLabel(current.weekStart)} – {dateLabel(current.weekEnd)}
+                    </Text>
                   </Box>
+                  <HStack
+                    px={2.5}
+                    py={1.5}
+                    borderRadius="full"
+                    bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--pb-tint-gold)'}
+                    color={currentIsComplete ? 'var(--pb-summary-income)' : 'var(--pb-summary-gold)'}
+                    border="1px solid var(--pb-summary-line)"
+                    spacing={1.5}
+                  >
+                    <Icon
+                      as={currentIsComplete ? CheckCircle2 : Clock}
+                      boxSize={3.5}
+                      weight="duotone"
+                    />
+                    <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} textTransform="uppercase">
+                      {currentIsComplete ? 'Completed' : 'In progress'}
+                    </Text>
+                  </HStack>
                 </HStack>
+
+                <Box minW={0}>
+                  <HStack spacing={2} flexWrap="wrap">
+                    <Text
+                      fontFamily="var(--pb-serif)"
+                      fontSize={{ base: '2xl', md: '3xl' }}
+                      fontWeight={500}
+                      lineHeight={1}
+                      letterSpacing="-0.03em"
+                      color="var(--pb-summary-ink)"
+                      noOfLines={1}
+                    >
+                      {currentIsUser ? 'Your turn' : current.assignedMemberName}
+                    </Text>
+                    {currentIsUser && (
+                      <Badge
+                        bg="var(--pb-summary-panel)"
+                        color="var(--pb-summary-ink-soft)"
+                        border="1px solid var(--pb-summary-line)"
+                        borderRadius="full"
+                        px={2}
+                        textTransform="none"
+                      >
+                        You
+                      </Badge>
+                    )}
+                  </HStack>
+                  <Text mt={1.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
+                    {currentIsUser
+                      ? 'Keep the shared spaces fresh, then mark the week complete.'
+                      : `${current.assignedMemberName} is taking care of the shared spaces.`}
+                  </Text>
+                </Box>
 
                 {canCurrentUserComplete && (
                   <Button
-                    colorScheme="teal"
-                    leftIcon={<Check size={17} weight="bold" />}
+                    alignSelf={{ base: 'stretch', sm: 'flex-start' }}
+                    h="44px"
+                    px={4}
+                    borderRadius="11px"
+                    bg="var(--pb-forest-2)"
+                    color="var(--pb-on-accent)"
+                    leftIcon={<Icon as={Check} boxSize={4} weight="bold" />}
                     isLoading={busy}
+                    loadingText="Completing"
                     onClick={() => onComplete(current.id)}
+                    _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
+                    _active={{ transform: 'translateY(0)' }}
                   >
-                    Mark as completed
+                    Mark this week complete
                   </Button>
                 )}
-                {current.status === 'COMPLETED' && (
+                {currentIsComplete && (
                   <HStack
-                    px={3}
-                    py={2}
-                    borderRadius="lg"
-                    bg={ed?.jadeSoft ?? 'green.50'}
-                    color={ed?.jade ?? 'green.700'}
+                    px={3.5}
+                    py={3}
+                    borderRadius="12px"
+                    bg="var(--pb-tint-income)"
+                    color="var(--pb-summary-income)"
+                    border="1px solid var(--pb-summary-line)"
+                    spacing={2.5}
                   >
-                    <Check size={17} weight="bold" />
-                    <Text fontSize="sm" fontWeight={800}>Done for this week</Text>
+                    <Icon as={CheckCircle2} boxSize={5} weight="fill" />
+                    <Box>
+                      <Text fontSize="sm" fontWeight={600}>All done for this week</Text>
+                      <Text mt={0.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
+                        The next person takes over on Monday.
+                      </Text>
+                    </Box>
                   </HStack>
                 )}
-              </Stack>
+              </VStack>
             ) : (
-              <Box>
+              <VStack align="stretch" spacing={3}>
                 <Text
-                  color={muted}
-                  fontSize="10px"
-                  fontWeight={800}
-                  letterSpacing="0.12em"
+                  color="var(--pb-summary-ink-faint)"
+                  fontFamily="var(--pb-mono)"
+                  fontSize="9px"
+                  fontWeight={600}
+                  letterSpacing="0.15em"
                   textTransform="uppercase"
                 >
                   Rotation scheduled
                 </Text>
-                <Heading mt={1} size="md">
+                <Text
+                  fontFamily="var(--pb-serif)"
+                  fontSize={{ base: 'xl', md: '2xl' }}
+                  fontWeight={500}
+                  color="var(--pb-summary-ink)"
+                >
                   Starts {dateLabel(firstUpcoming?.weekStart ?? rotation.startDate ?? today())}
-                </Heading>
-                <Text mt={1} color={muted} fontSize="sm">
-                  The first weekly assignment is ready.
                 </Text>
-              </Box>
+                <Text color="var(--pb-summary-ink-soft)" fontSize="sm">
+                  The first assignment is ready. The current-week view appears when the rotation begins.
+                </Text>
+              </VStack>
             )}
           </Box>
 
-          <Box p={{ base: 4, md: 6 }}>
-            <Text
-              color={muted}
-              fontSize="10px"
-              fontWeight={800}
-              letterSpacing="0.12em"
-              textTransform="uppercase"
-              mb={3}
-            >
-              Coming next
-            </Text>
+          <Box p={{ base: 4, md: 5 }} bg="var(--pb-surface-2)">
+            <HStack justify="space-between" mb={3.5} spacing={3}>
+              <Box>
+                <Text
+                  fontFamily="var(--pb-mono)"
+                  color="var(--pb-ink-faint)"
+                  fontSize="9px"
+                  fontWeight={600}
+                  letterSpacing="0.15em"
+                  textTransform="uppercase"
+                >
+                  Coming next
+                </Text>
+                <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+                  The next three weekly turns
+                </Text>
+              </Box>
+              <Flex
+                w={8}
+                h={8}
+                flexShrink={0}
+                align="center"
+                justify="center"
+                borderRadius="full"
+                bg="var(--pb-surface)"
+                color="var(--pb-forest-2)"
+                border="1px solid var(--pb-hair)"
+              >
+                <Icon as={Repeat} boxSize={4} weight="duotone" />
+              </Flex>
+            </HStack>
             {rotation.upcomingWeeks.length === 0 ? (
-              <Text color={muted} fontSize="sm">No upcoming weeks scheduled.</Text>
+              <Box
+                px={3.5}
+                py={4}
+                borderRadius="12px"
+                border="1px dashed var(--pb-hair-2)"
+                bg="var(--pb-surface)"
+              >
+                <Text color="var(--pb-ink-soft)" fontSize="sm">
+                  No upcoming weeks are scheduled yet.
+                </Text>
+              </Box>
             ) : (
-              <VStack align="stretch" spacing={3}>
-                {rotation.upcomingWeeks.map((assignment) => (
-                  <HStack key={assignment.id} justify="space-between" spacing={3}>
-                    <HStack minW={0}>
-                      <Avatar size="xs" name={assignment.assignedMemberName} />
-                      <Text fontSize="sm" fontWeight={800} noOfLines={1}>
-                        {assignment.assignedMemberId === currentMemberId
-                          ? 'You'
-                          : assignment.assignedMemberName}
-                      </Text>
+              <VStack align="stretch" spacing={2}>
+                {rotation.upcomingWeeks.map((assignment, index) => (
+                  <Flex
+                    key={assignment.id}
+                    align="center"
+                    justify="space-between"
+                    gap={3}
+                    px={3}
+                    py={2.5}
+                    borderRadius="12px"
+                    bg="var(--pb-surface)"
+                    border="1px solid var(--pb-hair)"
+                  >
+                    <HStack minW={0} spacing={2.5}>
+                      <Flex
+                        w={7}
+                        h={7}
+                        flexShrink={0}
+                        align="center"
+                        justify="center"
+                        borderRadius="full"
+                        bg="var(--pb-tint-green)"
+                        color="var(--pb-forest-2)"
+                        fontFamily="var(--pb-mono)"
+                        fontSize="8px"
+                        fontWeight={700}
+                      >
+                        {index + 1}
+                      </Flex>
+                      <Avatar size="sm" name={assignment.assignedMemberName} />
+                      <Box minW={0}>
+                        <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
+                          {assignment.assignedMemberId === currentMemberId
+                            ? 'You'
+                            : assignment.assignedMemberName}
+                        </Text>
+                        <Text color="var(--pb-ink-faint)" fontSize="2xs">
+                          {dateLabel(assignment.weekStart)}
+                        </Text>
+                      </Box>
                     </HStack>
-                    <Text color={muted} fontSize="xs" flexShrink={0}>
-                      {dateLabel(assignment.weekStart)}
-                    </Text>
-                  </HStack>
+                    {assignment.assignedMemberId === currentMemberId && (
+                      <Badge
+                        flexShrink={0}
+                        bg="var(--pb-tint-income)"
+                        color="var(--pb-income)"
+                        borderRadius="full"
+                        px={2}
+                        textTransform="none"
+                      >
+                        Your turn
+                      </Badge>
+                    )}
+                  </Flex>
                 ))}
               </VStack>
             )}
           </Box>
         </Grid>
       )}
-    </Surface>
+
+      <Box
+        px={{ base: 3.5, sm: 4, md: 5 }}
+        py={{ base: 4, md: 5 }}
+        borderTop="1px solid var(--pb-hair)"
+        bg="var(--pb-surface)"
+      >
+        <Flex
+          direction={{ base: 'column', sm: 'row' }}
+          align={{ base: 'stretch', sm: 'flex-end' }}
+          justify="space-between"
+          gap={2}
+          mb={3.5}
+        >
+          <Box>
+            <Text
+              fontFamily="var(--pb-mono)"
+              color="var(--pb-ink-faint)"
+              fontSize="9px"
+              fontWeight={600}
+              letterSpacing="0.15em"
+              textTransform="uppercase"
+            >
+              This week&apos;s duties
+            </Text>
+            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+              The person on duty completes the full shared-space checklist.
+            </Text>
+          </Box>
+          <HStack spacing={1.5} color="var(--pb-ink-faint)">
+            <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
+            <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
+              8 tasks
+            </Text>
+          </HStack>
+        </Flex>
+
+        <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing={2}>
+          {CLEANING_DUTIES.map((duty, index) => (
+            <Flex
+              key={duty.label}
+              minH={{ base: '52px', md: '58px' }}
+              align="center"
+              gap={2.5}
+              px={3}
+              py={2.5}
+              borderRadius="12px"
+              border="1px solid var(--pb-hair)"
+              bg={duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface-2)'}
+            >
+              <Flex
+                w={8}
+                h={8}
+                flexShrink={0}
+                align="center"
+                justify="center"
+                borderRadius="10px"
+                bg={duty.timed ? 'var(--pb-surface)' : 'var(--pb-tint-green)'}
+                color={duty.timed ? 'var(--pb-gold)' : 'var(--pb-forest-2)'}
+                border="1px solid var(--pb-hair)"
+              >
+                <Icon
+                  as={duty.timed ? Trash2 : Check}
+                  boxSize={4}
+                  weight={duty.timed ? 'duotone' : 'bold'}
+                />
+              </Flex>
+              <Box minW={0}>
+                <Text color="var(--pb-ink)" fontSize="sm" fontWeight={600} lineHeight={1.25}>
+                  {duty.label}
+                </Text>
+                {duty.schedule ? (
+                  <HStack mt={1} spacing={1.5} color="var(--pb-gold)">
+                    <Icon as={Clock} boxSize={3} weight="bold" />
+                    <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
+                      {duty.schedule}
+                    </Text>
+                  </HStack>
+                ) : (
+                  <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="2xs">
+                    Task {String(index + 1).padStart(2, '0')}
+                  </Text>
+                )}
+              </Box>
+            </Flex>
+          ))}
+        </SimpleGrid>
+      </Box>
+    </Box>
   )
 }
 
@@ -1036,9 +1394,6 @@ function CleaningRotationModal({
   rotation: HouseholdCleaningRotation
   onChanged: (page: HouseholdPageState) => void
 }) {
-  const ed = useEd()
-  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
-  const muted = ed?.muted ?? mutedFallback
   const [startDate, setStartDate] = useState(currentMonday())
   const [active, setActive] = useState(true)
   const [participantIds, setParticipantIds] = useState<number[]>([])
@@ -1062,6 +1417,27 @@ function CleaningRotationModal({
   const availableMembers = household.members.filter(
     (member) => !participantIds.includes(member.id),
   )
+  const parsedStartDate = new Date(`${startDate}T12:00:00`)
+  const startDateIsMonday = !Number.isNaN(parsedStartDate.getTime())
+    && parsedStartDate.getDay() === 1
+  const canSave = participantIds.length > 0 && startDateIsMonday
+  const previewWeeks = canSave
+    ? Array.from({ length: 3 }, (_, index) => {
+        const weekStart = new Date(parsedStartDate)
+        weekStart.setDate(parsedStartDate.getDate() + index * 7)
+        const weekEnd = new Date(weekStart)
+        weekEnd.setDate(weekStart.getDate() + 6)
+        const member = participants[index % participants.length]
+        const shortDate = (date: Date) => date.toLocaleDateString('en-GB', {
+          day: 'numeric',
+          month: 'short',
+        })
+        return {
+          member,
+          range: `${shortDate(weekStart)} – ${shortDate(weekEnd)}`,
+        }
+      })
+    : []
 
   const moveParticipant = (index: number, distance: number) => {
     setParticipantIds((current) => {
@@ -1079,8 +1455,7 @@ function CleaningRotationModal({
       ToastService.warning({ title: 'Select at least one member' })
       return
     }
-    const selectedDate = new Date(`${startDate}T12:00:00`)
-    if (Number.isNaN(selectedDate.getTime()) || selectedDate.getDay() !== 1) {
+    if (!startDateIsMonday) {
       ToastService.warning({ title: 'The rotation must start on a Monday' })
       return
     }
@@ -1104,157 +1479,439 @@ function CleaningRotationModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
-      <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
-      <ModalContent
-        bg={ed?.modal}
-        color={ed?.cream}
-        borderColor={ed?.lineStrong}
-        borderWidth={ed ? '1px' : 0}
-        maxW={{ base: '100vw', md: 'lg' }}
-        minH={{ base: '100dvh', md: 'auto' }}
-        maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
-        my={{ base: 0, md: 16 }}
-        borderRadius={{ base: 0, md: 'md' }}
-      >
-        <ModalHeader>Manage cleaning rotation</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody as="form" id="household-cleaning-form" onSubmit={submit}>
-          <VStack align="stretch" spacing={5}>
-            <Box>
-              <Heading size="sm">Schedule</Heading>
-              <Text mt={1} color={muted} fontSize="sm">
-                Each assignment runs from Monday to Sunday.
-              </Text>
-            </Box>
-
-            <FormControl isRequired>
-              <FormLabel>First week starts</FormLabel>
-              <Input
-                type="date"
-                min="2020-01-06"
-                step={7}
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-              />
-              <Text mt={1} color={muted} fontSize="xs">Choose a Monday.</Text>
-            </FormControl>
-
-            <Checkbox
-              isChecked={active}
-              onChange={(event) => setActive(event.target.checked)}
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', md: '2xl' }}
+      header={
+        <AppModalHeader
+          icon={Sparkles}
+          title={rotation.configured ? 'Manage cleaning rotation' : 'Set up cleaning rotation'}
+          caption="Choose the schedule, members and recurring order"
+          onClose={onClose}
+          accent="green"
+          rightSlot={
+            <Badge
+              bg={active ? 'var(--pb-tint-income)' : 'var(--pb-surface-3)'}
+              color={active ? 'var(--pb-income)' : 'var(--pb-ink-soft)'}
+              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              px={3}
+              py={1}
             >
-              <Text fontWeight={800}>Rotation active</Text>
-              <Text color={muted} fontSize="xs">
-                Turn this off to pause all weekly cleaning assignments.
-              </Text>
-            </Checkbox>
-
-            <Divider borderColor={ed?.line} />
-
-            <Box>
-              <Heading size="sm">Weekly order</Heading>
-              <Text mt={1} color={muted} fontSize="sm">
-                The order repeats after the last selected member.
-              </Text>
-            </Box>
-
-            <VStack align="stretch" spacing={2}>
-              {participants.map((member, index) => (
-                <HStack
-                  key={member.id}
-                  p={3}
-                  borderRadius="xl"
-                  bg={ed?.panelRaised ?? 'blackAlpha.50'}
-                  border="1px solid"
-                  borderColor={ed?.line ?? 'blackAlpha.100'}
-                  justify="space-between"
-                >
-                  <HStack minW={0}>
-                    <Badge
-                      minW={7}
-                      textAlign="center"
-                      colorScheme="teal"
-                      variant="subtle"
-                    >
-                      {index + 1}
-                    </Badge>
-                    <Avatar size="sm" name={member.name} />
-                    <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
-                  </HStack>
-                  <HStack spacing={1}>
-                    <IconButton
-                      aria-label={`Move ${member.name} earlier`}
-                      icon={<ChevronUp size={16} />}
-                      size="sm"
-                      variant="ghost"
-                      isDisabled={index === 0}
-                      onClick={() => moveParticipant(index, -1)}
-                    />
-                    <IconButton
-                      aria-label={`Move ${member.name} later`}
-                      icon={<ChevronDown size={16} />}
-                      size="sm"
-                      variant="ghost"
-                      isDisabled={index === participants.length - 1}
-                      onClick={() => moveParticipant(index, 1)}
-                    />
-                    <IconButton
-                      aria-label={`Remove ${member.name} from the rotation`}
-                      icon={<X size={16} />}
-                      size="sm"
-                      variant="ghost"
-                      colorScheme="red"
-                      onClick={() => setParticipantIds((current) =>
-                        current.filter((memberId) => memberId !== member.id))}
-                    />
-                  </HStack>
-                </HStack>
-              ))}
-            </VStack>
-
-            {availableMembers.length > 0 && (
-              <Box>
-                <Text color={muted} fontSize="xs" fontWeight={800} mb={2}>
-                  Add another member
-                </Text>
-                <HStack flexWrap="wrap">
-                  {availableMembers.map((member) => (
-                    <Button
-                      key={member.id}
-                      size="sm"
-                      variant="outline"
-                      leftIcon={<Plus size={15} />}
-                      onClick={() => setParticipantIds((current) => [...current, member.id])}
-                    >
-                      {member.name}
-                    </Button>
-                  ))}
-                </HStack>
-              </Box>
-            )}
-          </VStack>
-        </ModalBody>
-        <ModalFooter gap={2}>
+              {active ? 'Active' : 'Paused'}
+            </Badge>
+          }
+        />
+      }
+      footer={
+        <Flex justify="flex-end" gap={2} w="full">
           <Button
+            type="button"
             flex={{ base: 1, sm: 'initial' }}
+            h="44px"
             variant="ghost"
+            color="var(--pb-ink-soft)"
             onClick={onClose}
           >
             Cancel
           </Button>
           <Button
-            flex={{ base: 1, sm: 'initial' }}
+            flex={{ base: 1.35, sm: 'initial' }}
+            h="44px"
             type="submit"
             form="household-cleaning-form"
-            colorScheme="teal"
+            leftIcon={<Icon as={Check} boxSize={4} weight="bold" />}
+            bg="var(--pb-forest-2)"
+            color="var(--pb-on-accent)"
+            borderRadius="11px"
             isLoading={saving}
+            loadingText="Saving"
+            isDisabled={!canSave}
+            _hover={{ bg: 'var(--pb-forest)' }}
           >
             Save rotation
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </Flex>
+      }
+    >
+      <Box
+        as="form"
+        id="household-cleaning-form"
+        onSubmit={submit}
+        px={{ base: 4, sm: 5, md: 6 }}
+        py={{ base: 4, md: 5 }}
+      >
+        <VStack align="stretch" spacing={5}>
+          <Flex
+            align="center"
+            justify="space-between"
+            gap={4}
+            p={{ base: 3.5, md: 4 }}
+            borderRadius="14px"
+            bg={active ? 'var(--pb-tint-income)' : 'var(--pb-surface-2)'}
+            border="1px solid var(--pb-hair)"
+          >
+            <HStack spacing={3} minW={0}>
+              <Flex
+                w={10}
+                h={10}
+                flexShrink={0}
+                align="center"
+                justify="center"
+                borderRadius="full"
+                bg="var(--pb-surface)"
+                color={active ? 'var(--pb-income)' : 'var(--pb-gold)'}
+                border="1px solid var(--pb-hair)"
+              >
+                <Icon as={active ? Repeat : Clock} boxSize={4.5} weight="duotone" />
+              </Flex>
+              <Box minW={0}>
+                <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)">
+                  {active ? 'Rotation active' : 'Rotation paused'}
+                </Text>
+                <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
+                  {active
+                    ? 'Weekly assignments will continue in the order below.'
+                    : 'The order stays saved, but no active assignments are shown.'}
+                </Text>
+              </Box>
+            </HStack>
+            <Switch
+              aria-label="Toggle cleaning rotation"
+              isChecked={active}
+              onChange={(event) => setActive(event.target.checked)}
+              colorScheme="green"
+              size="lg"
+              flexShrink={0}
+            />
+          </Flex>
+
+          <Grid
+            templateColumns={{ base: '1fr', md: 'minmax(0, 1.15fr) minmax(230px, 0.85fr)' }}
+            gap={{ base: 5, md: 6 }}
+            alignItems="start"
+          >
+            <VStack align="stretch" spacing={5} minW={0}>
+              <Box>
+                <HStack spacing={2.5} mb={3}>
+                  <Flex
+                    w={8}
+                    h={8}
+                    align="center"
+                    justify="center"
+                    borderRadius="10px"
+                    bg="var(--pb-tint-green)"
+                    color="var(--pb-forest-2)"
+                  >
+                    <Icon as={CalendarCheck} boxSize={4} weight="duotone" />
+                  </Flex>
+                  <Box>
+                    <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
+                      Schedule
+                    </Text>
+                    <Text fontSize="xs" color="var(--pb-ink-soft)">
+                      Every turn runs from Monday to Sunday.
+                    </Text>
+                  </Box>
+                </HStack>
+
+                <FormControl isRequired isInvalid={Boolean(startDate) && !startDateIsMonday}>
+                  <FormLabel
+                    fontFamily="var(--pb-mono)"
+                    fontSize="9px"
+                    letterSpacing="0.08em"
+                    textTransform="uppercase"
+                    color="var(--pb-ink-faint)"
+                  >
+                    First week starts
+                  </FormLabel>
+                  <Input
+                    type="date"
+                    min="2020-01-06"
+                    step={7}
+                    h="44px"
+                    borderRadius="11px"
+                    bg="var(--pb-surface-2)"
+                    borderColor="var(--pb-hair)"
+                    value={startDate}
+                    onChange={(event) => setStartDate(event.target.value)}
+                    _hover={{ borderColor: 'var(--pb-hair-2)' }}
+                    _focusVisible={{ borderColor: 'var(--pb-forest-2)', boxShadow: '0 0 0 1px var(--pb-forest-2)' }}
+                  />
+                  <FormErrorMessage fontSize="xs">
+                    Choose a Monday so every week stays aligned.
+                  </FormErrorMessage>
+                  {startDateIsMonday && (
+                    <Text mt={1.5} fontSize="xs" color="var(--pb-income)">
+                      Monday selected · weeks will end on Sunday.
+                    </Text>
+                  )}
+                </FormControl>
+              </Box>
+
+              <Divider borderColor="var(--pb-hair)" />
+
+              <Box>
+                <Flex justify="space-between" align="flex-end" gap={3} mb={3}>
+                  <Box>
+                    <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
+                      Weekly order
+                    </Text>
+                    <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
+                      Use the arrows to set who follows whom.
+                    </Text>
+                  </Box>
+                  <Badge
+                    flexShrink={0}
+                    bg="var(--pb-surface-2)"
+                    color="var(--pb-ink-soft)"
+                    border="1px solid var(--pb-hair)"
+                    borderRadius="full"
+                    px={2.5}
+                    py={1}
+                  >
+                    {participants.length} selected
+                  </Badge>
+                </Flex>
+
+                {participants.length === 0 ? (
+                  <Box
+                    p={4}
+                    borderRadius="12px"
+                    border="1px dashed var(--pb-coral)"
+                    bg="var(--pb-tint-coral)"
+                  >
+                    <Text fontSize="sm" color="var(--pb-coral)">
+                      Add at least one household member to create the rotation.
+                    </Text>
+                  </Box>
+                ) : (
+                  <VStack align="stretch" spacing={2}>
+                    {participants.map((member, index) => (
+                      <Flex
+                        key={member.id}
+                        direction={{ base: 'column', sm: 'row' }}
+                        align={{ base: 'stretch', sm: 'center' }}
+                        justify="space-between"
+                        gap={2}
+                        p={2.5}
+                        borderRadius="12px"
+                        bg="var(--pb-surface-2)"
+                        border="1px solid var(--pb-hair)"
+                      >
+                        <HStack minW={0} spacing={2.5} flex={1}>
+                          <Flex
+                            w={7}
+                            h={7}
+                            flexShrink={0}
+                            align="center"
+                            justify="center"
+                            borderRadius="full"
+                            bg="var(--pb-tint-green)"
+                            color="var(--pb-forest-2)"
+                            fontFamily="var(--pb-mono)"
+                            fontSize="8px"
+                            fontWeight={700}
+                          >
+                            {index + 1}
+                          </Flex>
+                          <Avatar size="sm" name={member.name} />
+                          <Box minW={0}>
+                            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
+                              {member.name}
+                            </Text>
+                            <Text fontSize="2xs" color="var(--pb-ink-faint)">
+                              Week {index + 1} of the cycle
+                            </Text>
+                          </Box>
+                        </HStack>
+                        <HStack
+                          spacing={1}
+                          flexShrink={0}
+                          justify="flex-end"
+                          w={{ base: 'full', sm: 'auto' }}
+                        >
+                          <IconButton
+                            type="button"
+                            aria-label={`Move ${member.name} earlier`}
+                            icon={<Icon as={ChevronUp} boxSize={4} />}
+                            h="40px"
+                            w="40px"
+                            minW="40px"
+                            borderRadius="10px"
+                            variant="ghost"
+                            color="var(--pb-ink-soft)"
+                            isDisabled={index === 0}
+                            onClick={() => moveParticipant(index, -1)}
+                          />
+                          <IconButton
+                            type="button"
+                            aria-label={`Move ${member.name} later`}
+                            icon={<Icon as={ChevronDown} boxSize={4} />}
+                            h="40px"
+                            w="40px"
+                            minW="40px"
+                            borderRadius="10px"
+                            variant="ghost"
+                            color="var(--pb-ink-soft)"
+                            isDisabled={index === participants.length - 1}
+                            onClick={() => moveParticipant(index, 1)}
+                          />
+                          <IconButton
+                            type="button"
+                            aria-label={`Remove ${member.name} from the rotation`}
+                            icon={<Icon as={X} boxSize={4} />}
+                            h="40px"
+                            w="40px"
+                            minW="40px"
+                            borderRadius="10px"
+                            variant="ghost"
+                            color="var(--pb-coral)"
+                            onClick={() => setParticipantIds((current) =>
+                              current.filter((memberId) => memberId !== member.id))}
+                          />
+                        </HStack>
+                      </Flex>
+                    ))}
+                  </VStack>
+                )}
+
+                {availableMembers.length > 0 && (
+                  <Box mt={4}>
+                    <Text
+                      mb={2}
+                      fontFamily="var(--pb-mono)"
+                      fontSize="9px"
+                      letterSpacing="0.08em"
+                      textTransform="uppercase"
+                      color="var(--pb-ink-faint)"
+                    >
+                      Add to the rotation
+                    </Text>
+                    <Flex flexWrap="wrap" gap={2}>
+                      {availableMembers.map((member) => (
+                        <Button
+                          key={member.id}
+                          type="button"
+                          h="40px"
+                          px={3}
+                          borderRadius="10px"
+                          bg="var(--pb-surface-2)"
+                          color="var(--pb-ink-soft)"
+                          border="1px solid var(--pb-hair)"
+                          leftIcon={<Icon as={Plus} boxSize={3.5} />}
+                          onClick={() => setParticipantIds((current) => [...current, member.id])}
+                          _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+                        >
+                          {member.name}
+                        </Button>
+                      ))}
+                    </Flex>
+                  </Box>
+                )}
+              </Box>
+            </VStack>
+
+            <Box
+              position={{ base: 'static', md: 'sticky' }}
+              top={{ md: 0 }}
+              p={{ base: 3.5, md: 4 }}
+              borderRadius="15px"
+              bg="var(--pb-summary-petrol)"
+              border="1px solid var(--pb-summary-line)"
+              minW={0}
+            >
+              <HStack justify="space-between" spacing={3} mb={4}>
+                <Box>
+                  <Text
+                    fontFamily="var(--pb-mono)"
+                    fontSize="9px"
+                    fontWeight={600}
+                    letterSpacing="0.14em"
+                    textTransform="uppercase"
+                    color="var(--pb-summary-ink-faint)"
+                  >
+                    Live preview
+                  </Text>
+                  <Text mt={0.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
+                    First three weeks
+                  </Text>
+                </Box>
+                <Icon as={Repeat} boxSize={5} color="var(--pb-summary-income)" weight="duotone" />
+              </HStack>
+
+              {previewWeeks.length === 0 ? (
+                <Box
+                  py={6}
+                  px={3}
+                  textAlign="center"
+                  borderRadius="12px"
+                  bg="var(--pb-summary-panel)"
+                  border="1px dashed var(--pb-summary-line)"
+                >
+                  <Icon as={Calendar} boxSize={6} color="var(--pb-summary-ink-faint)" />
+                  <Text mt={2} fontSize="sm" color="var(--pb-summary-ink-soft)">
+                    Choose a Monday and at least one member to see the schedule.
+                  </Text>
+                </Box>
+              ) : (
+                <VStack align="stretch" spacing={2}>
+                  {previewWeeks.map((week, index) => (
+                    <Flex
+                      key={`${week.member.id}-${index}`}
+                      align="center"
+                      gap={2.5}
+                      p={2.5}
+                      borderRadius="11px"
+                      bg="var(--pb-summary-panel)"
+                      border="1px solid var(--pb-summary-line)"
+                    >
+                      <Flex
+                        w={7}
+                        h={7}
+                        flexShrink={0}
+                        align="center"
+                        justify="center"
+                        borderRadius="full"
+                        bg="var(--pb-tint-green)"
+                        color="var(--pb-summary-income)"
+                        fontFamily="var(--pb-mono)"
+                        fontSize="8px"
+                        fontWeight={700}
+                      >
+                        {index + 1}
+                      </Flex>
+                      <Box minW={0} flex={1}>
+                        <Text fontSize="sm" fontWeight={600} color="var(--pb-summary-ink)" noOfLines={1}>
+                          {week.member.name}
+                        </Text>
+                        <Text fontSize="2xs" color="var(--pb-summary-ink-faint)">
+                          {week.range}
+                        </Text>
+                      </Box>
+                    </Flex>
+                  ))}
+                </VStack>
+              )}
+
+              <Text
+                mt={4}
+                pt={3}
+                borderTop="1px solid var(--pb-summary-line)"
+                fontSize="xs"
+                color="var(--pb-summary-ink-soft)"
+                lineHeight={1.45}
+              >
+                {participants.length > 0
+                  ? `The ${participants.length}-week order repeats after the final person.`
+                  : 'The cycle length updates as members are added.'}
+              </Text>
+            </Box>
+          </Grid>
+        </VStack>
+      </Box>
+    </PremiumModal>
   )
 }
 

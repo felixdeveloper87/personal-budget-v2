@@ -417,7 +417,7 @@ export default function HouseholdHeader({
               color={position.color}
               border="1px solid var(--pb-summary-line)"
             >
-              <Icon as={PositionIcon} boxSize={4.5} weight="duotone" />
+              <PositionIcon size={19} weight="duotone" aria-hidden="true" />
             </Flex>
           </HStack>
 
