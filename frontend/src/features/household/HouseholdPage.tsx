@@ -293,6 +293,95 @@ function ActionRequiredBanner({
   )
 }
 
+function HouseholdSectionHeader({
+  eyebrow,
+  title,
+  description,
+  icon,
+  accent,
+  tint,
+  stat,
+}: {
+  eyebrow: string
+  title: string
+  description: string
+  icon: ReactNode
+  accent: string
+  tint: string
+  stat: string
+}) {
+  return (
+    <Flex
+      direction={{ base: 'column', sm: 'row' }}
+      align={{ base: 'stretch', sm: 'center' }}
+      justify="space-between"
+      gap={3}
+      px={{ base: 3.5, sm: 4, md: 5 }}
+      py={{ base: 3.5, md: 4 }}
+      borderBottom="1px solid var(--pb-hair)"
+      bg="var(--pb-surface)"
+    >
+      <HStack spacing={3} minW={0}>
+        <Flex
+          w={{ base: 10, md: 11 }}
+          h={{ base: 10, md: 11 }}
+          flexShrink={0}
+          align="center"
+          justify="center"
+          borderRadius="13px"
+          bg={tint}
+          color={accent}
+          border="1px solid var(--pb-hair)"
+        >
+          {icon}
+        </Flex>
+        <Box minW={0}>
+          <Text
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.15em"
+            textTransform="uppercase"
+            color="var(--pb-ink-faint)"
+          >
+            {eyebrow}
+          </Text>
+          <Text
+            mt={0.5}
+            fontFamily="var(--pb-serif)"
+            fontSize={{ base: 'lg', md: 'xl' }}
+            fontWeight={500}
+            lineHeight={1.1}
+            color="var(--pb-ink)"
+          >
+            {title}
+          </Text>
+          <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+            {description}
+          </Text>
+        </Box>
+      </HStack>
+      <Text
+        alignSelf={{ base: 'flex-start', sm: 'center' }}
+        px={2.5}
+        py={1.5}
+        borderRadius="full"
+        bg={tint}
+        color={accent}
+        border="1px solid var(--pb-hair)"
+        fontFamily="var(--pb-mono)"
+        fontSize="8px"
+        fontWeight={700}
+        letterSpacing="0.05em"
+        textTransform="uppercase"
+        whiteSpace="nowrap"
+      >
+        {stat}
+      </Text>
+    </Flex>
+  )
+}
+
 export default function HouseholdPage() {
   const ed = useEd()
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
@@ -545,6 +634,13 @@ export default function HouseholdPage() {
     0,
   )
   const firstDebtYouOwe = debtsYouOwe[0]
+  const outstandingHouseholdTotal = household.debts.reduce(
+    (total, debt) => total + debt.amount,
+    0,
+  )
+  const pendingSettlementCount = household.settlements.filter(
+    (settlement) => settlement.status === 'PENDING',
+  ).length
   const attachmentExpense = attachmentTarget?.kind === 'expense'
     ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
     : undefined
@@ -668,71 +764,79 @@ export default function HouseholdPage() {
           )}
         />
 
-        <Surface id="household-balances" overflow="hidden" scrollMarginTop="90px">
-          <Grid templateColumns={{ base: '1fr', xl: '1.1fr 0.9fr' }}>
-            <Box
-              p={{ base: 4, md: 6 }}
-              borderBottom={{ base: '1px solid', xl: 'none' }}
-              borderRight={{ base: 'none', xl: '1px solid' }}
-              borderColor={ed?.line ?? 'blackAlpha.100'}
-            >
-              <HStack justify="space-between" mb={4}>
-                <Box>
-                  <Heading size="md">Who owes whom</Heading>
-                  <Text color={muted} fontSize="sm">Bilateral balances after confirmed payments.</Text>
-                </Box>
-                <Wallet size={22} color={ed?.gold ?? undefined} />
-              </HStack>
+        <Grid templateColumns={{ base: '1fr', xl: '1.08fr 0.92fr' }} gap={{ base: 3, md: 4 }}>
+          <Box
+            id="household-balances"
+            overflow="hidden"
+            scrollMarginTop="90px"
+            bg="var(--pb-surface)"
+            border="1px solid var(--pb-hair)"
+            borderRadius={{ base: '18px', md: '22px' }}
+            boxShadow="var(--pb-shadow)"
+          >
+            <HouseholdSectionHeader
+              eyebrow="Open balances"
+              title="Who owes whom"
+              description="Bilateral balances after confirmed payments."
+              icon={<Wallet size={20} weight="duotone" />}
+              accent={household.debts.length ? 'var(--pb-coral)' : 'var(--pb-income)'}
+              tint={household.debts.length ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
+              stat={household.debts.length
+                ? `${money(outstandingHouseholdTotal, household.currency)} open`
+                : 'All settled'}
+            />
+            <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
               {household.debts.length === 0 ? (
-                <VStack py={8} spacing={3}>
-                  <Box
-                    w={10}
-                    h={10}
-                    display="grid"
-                    placeItems="center"
-                    borderRadius="full"
-                    bg={ed?.jadeSoft ?? 'green.50'}
-                    color={ed?.jade ?? 'green.600'}
-                  >
+                <VStack py={8} px={4} spacing={3} border="1px dashed var(--pb-hair-2)" borderRadius="14px" bg="var(--pb-surface)">
+                  <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-income)" color="var(--pb-income)">
                     <Check size={20} weight="bold" />
-                  </Box>
-                  <Text fontWeight={800}>Everyone is settled</Text>
-                  <Text color={muted} fontSize="sm">There are no outstanding household debts.</Text>
+                  </Flex>
+                  <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>Everyone is settled</Text>
+                  <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">There are no outstanding household debts.</Text>
                 </VStack>
               ) : (
-                <VStack align="stretch" spacing={0}>
-                  {household.debts.map((debt, index) => {
+                <VStack align="stretch" spacing={2.5}>
+                  {household.debts.map((debt) => {
                     const youPay = debt.fromMemberId === household.currentMemberId
                     const youReceive = debt.toMemberId === household.currentMemberId
+                    const accent = youPay ? 'var(--pb-coral)' : youReceive ? 'var(--pb-income)' : 'var(--pb-ink-soft)'
+                    const tint = youPay ? 'var(--pb-tint-coral)' : youReceive ? 'var(--pb-tint-income)' : 'var(--pb-surface)'
                     return (
                       <Stack
                         key={`${debt.fromMemberId}-${debt.toMemberId}`}
                         direction={{ base: 'column', sm: 'row' }}
                         align={{ base: 'stretch', sm: 'center' }}
                         justify="space-between"
-                        py={3}
-                        borderTop={index === 0 ? 'none' : '1px solid'}
-                        borderColor={ed?.line ?? 'blackAlpha.100'}
+                        gap={3}
+                        p={3}
+                        borderRadius="14px"
+                        border="1px solid var(--pb-hair)"
+                        bg="var(--pb-surface)"
                       >
-                        <HStack>
-                          <Avatar size={{ base: 'xs', md: 'sm' }} name={debt.fromMemberName} />
-                          <Box>
-                            <Text fontWeight={800}>
-                              {youPay ? 'You' : debt.fromMemberName}
-                              {' owe '}
-                              {youReceive ? 'you' : debt.toMemberName}
-                            </Text>
-                            <Text color={muted} fontSize="sm">
-                              {youPay ? 'Record a payment after you send it.' : 'Outstanding balance'}
+                        <HStack minW={0} spacing={3}>
+                          <Avatar size="sm" name={debt.fromMemberName} />
+                          <Box minW={0}>
+                            <HStack spacing={2} flexWrap="wrap">
+                              <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
+                                {youPay ? 'You' : debt.fromMemberName}{' owe '}{youReceive ? 'you' : debt.toMemberName}
+                              </Text>
+                              {(youPay || youReceive) && (
+                                <Badge borderRadius="full" px={2} bg={tint} color={accent} textTransform="none">
+                                  {youPay ? 'You pay' : 'You receive'}
+                                </Badge>
+                              )}
+                            </HStack>
+                            <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">
+                              {youPay ? 'Record a payment after you send it.' : youReceive ? 'Waiting for payment.' : 'Outstanding between household members.'}
                             </Text>
                           </Box>
                         </HStack>
-                        <HStack justify={{ base: 'space-between', sm: 'flex-end' }}>
-                          <Text fontWeight={900} fontSize="lg">
+                        <HStack justify={{ base: 'space-between', sm: 'flex-end' }} spacing={3}>
+                          <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
                             {money(debt.amount, household.currency)}
                           </Text>
                           {youPay && (
-                            <Button size="sm" colorScheme="teal" onClick={() => openSettlement(debt)}>
+                            <Button h="38px" px={3.5} borderRadius="10px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" onClick={() => openSettlement(debt)} _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}>
                               Record payment
                             </Button>
                           )}
@@ -743,250 +847,223 @@ export default function HouseholdPage() {
                 </VStack>
               )}
             </Box>
+          </Box>
 
-          <Box p={{ base: 4, md: 6 }}>
-            <Heading size="md">Members</Heading>
-            <Text color={muted} fontSize="sm" mb={4}>Paid, assigned share, and net position.</Text>
-            <VStack align="stretch" spacing={0}>
-              {household.members.map((member, index) => (
-                <Box
-                  key={member.id}
-                  py={3}
-                  borderTop={index === 0 ? 'none' : '1px solid'}
-                  borderColor={ed?.line ?? 'blackAlpha.100'}
-                >
-                  <HStack justify="space-between" align="flex-start">
-                    <HStack minW={0}>
-                      <Avatar size={{ base: 'xs', md: 'sm' }} name={member.name} />
-                      <Box minW={0}>
-                        <HStack>
-                          <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
-                        </HStack>
-                        <Text color={muted} fontSize="xs" noOfLines={1}>{member.email}</Text>
-                      </Box>
-                    </HStack>
-                    <Text
-                      fontWeight={900}
-                      fontSize={{ base: 'sm', md: 'md' }}
-                      flexShrink={0}
-                      color={member.balance > 0
-                        ? (ed?.jade ?? 'green.500')
-                        : member.balance < 0
-                          ? (ed?.red ?? 'red.500')
-                          : muted}
+          <Box overflow="hidden" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
+            <HouseholdSectionHeader
+              eyebrow="Household roster"
+              title="Members"
+              description="Paid, assigned share, and net position."
+              icon={<Home size={20} weight="duotone" />}
+              accent="var(--pb-forest-2)"
+              tint="var(--pb-tint-green)"
+              stat={`${household.members.length} member${household.members.length === 1 ? '' : 's'}`}
+            />
+            <VStack align="stretch" spacing={2.5} p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
+              {household.members.map((member) => {
+                const isCurrentMember = member.id === household.currentMemberId
+                const balanceAccent = member.balance > 0 ? 'var(--pb-income)' : member.balance < 0 ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
+                return (
+                  <Box key={member.id} p={3} borderRadius="14px" border="1px solid var(--pb-hair)" bg={isCurrentMember ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}>
+                    <Flex
+                      direction={{ base: 'column', sm: 'row' }}
+                      align={{ base: 'stretch', sm: 'flex-start' }}
+                      justify="space-between"
+                      gap={3}
                     >
-                      {member.balance > 0 ? '+' : ''}
-                      {money(member.balance, household.currency)}
-                    </Text>
-                  </HStack>
-                  <HStack
-                    mt={2}
-                    pl={{ base: 8, md: 10 }}
-                    color={muted}
-                    fontSize="xs"
-                    justify="space-between"
-                    flexWrap="wrap"
-                  >
-                    <Text>Paid {money(member.totalPaid, household.currency)}</Text>
-                    <Text>Share {money(member.totalShare, household.currency)}</Text>
-                  </HStack>
-                </Box>
-              ))}
+                      <HStack minW={0} spacing={3}>
+                        <Avatar size="sm" name={member.name} />
+                        <Box minW={0}>
+                          <HStack spacing={1.5} flexWrap="wrap">
+                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
+                            {isCurrentMember && <Badge borderRadius="full" px={2} bg="var(--pb-surface)" textTransform="none">You</Badge>}
+                            {member.role === 'OWNER' && <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">Owner</Badge>}
+                          </HStack>
+                          <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>{member.email}</Text>
+                        </Box>
+                      </HStack>
+                      <Box flexShrink={0} textAlign={{ base: 'left', sm: 'right' }}>
+                        <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color={balanceAccent} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {member.balance > 0 ? '+' : ''}{money(member.balance, household.currency)}
+                        </Text>
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Net position</Text>
+                      </Box>
+                    </Flex>
+                    <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2} mt={3}>
+                      <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Paid</Text>
+                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{money(member.totalPaid, household.currency)}</Text>
+                      </Box>
+                      <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Assigned share</Text>
+                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{money(member.totalShare, household.currency)}</Text>
+                      </Box>
+                    </Grid>
+                  </Box>
+                )
+              })}
             </VStack>
           </Box>
-          </Grid>
-        </Surface>
+        </Grid>
 
-        <Surface overflow="hidden">
-          <HStack justify="space-between" px={{ base: 3, md: 6 }} py={{ base: 4, md: 5 }}>
-            <Box>
-              <Heading size="md">Recent expenses</Heading>
-              <Text color={muted} fontSize="sm">Each split is saved with the expense.</Text>
-            </Box>
-            <ReceiptText size={22} color={ed?.gold ?? undefined} />
-          </HStack>
-          <Divider borderColor={ed?.line} />
-          {household.expenses.length === 0 ? (
-            <VStack py={12} spacing={3}>
-              <ReceiptText size={28} color={muted} />
-              <Text fontWeight={800}>No shared expenses yet</Text>
-              <Button size="sm" leftIcon={<Plus size={16} />} onClick={openNewExpense}>
-                Add the first expense
-              </Button>
-            </VStack>
-          ) : (
-            <VStack align="stretch" spacing={0}>
-              {household.expenses.map((expense, index) => (
-                <HStack
-                  key={expense.id}
-                  px={{ base: 3, md: 6 }}
-                  py={3}
-                  justify="space-between"
-                  borderTop={index === 0 ? 'none' : '1px solid'}
-                  borderColor={ed?.line ?? 'blackAlpha.100'}
-                >
-                  <HStack minW={0}>
-                    <Box
-                      w={{ base: 9, md: 10 }}
-                      h={{ base: 9, md: 10 }}
-                      flexShrink={0}
-                      display="grid"
-                      placeItems="center"
-                      borderRadius="xl"
-                      bg={ed?.jadeSoft ?? 'teal.50'}
-                      color={ed?.jade ?? 'teal.600'}
+        <Box overflow="hidden" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
+          <HouseholdSectionHeader
+            eyebrow="Shared ledger"
+            title="Recent expenses"
+            description="Each split is saved with the expense."
+            icon={<ReceiptText size={20} weight="duotone" />}
+            accent="var(--pb-forest-2)"
+            tint="var(--pb-tint-green)"
+            stat={`${household.expenses.length} expense${household.expenses.length === 1 ? '' : 's'}`}
+          />
+          <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
+            {household.expenses.length === 0 ? (
+              <VStack py={9} spacing={3} border="1px dashed var(--pb-hair-2)" borderRadius="14px" bg="var(--pb-surface)">
+                <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
+                  <ReceiptText size={22} weight="duotone" />
+                </Flex>
+                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>No shared expenses yet</Text>
+                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">Add the first purchase and split it fairly with the household.</Text>
+                <Button h="40px" leftIcon={<Plus size={16} />} bg="var(--pb-forest-2)" color="var(--pb-on-accent)" onClick={openNewExpense}>Add the first expense</Button>
+              </VStack>
+            ) : (
+              <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+                {household.expenses.map((expense) => (
+                  <Stack key={expense.id} direction="column" justify="space-between" gap={3} minH="132px" p={3} borderRadius="14px" border="1px solid var(--pb-hair)" bg="var(--pb-surface)">
+                    <Flex
+                      direction={{ base: 'column', sm: 'row' }}
+                      align={{ base: 'stretch', sm: 'flex-start' }}
+                      justify="space-between"
+                      gap={3}
                     >
-                      <ReceiptText size={18} weight="duotone" />
-                    </Box>
-                    <Box minW={0}>
-                      <Text fontWeight={800} noOfLines={1}>{expense.description}</Text>
-                      <Text color={muted} fontSize="xs" noOfLines={1}>
-                        {expense.category} · paid by {expense.payerName} · {dateLabel(expense.expenseDate)}
-                      </Text>
-                    </Box>
-                  </HStack>
-                  <HStack flexShrink={0}>
-                    <Box textAlign="right">
-                      <Text fontWeight={900} fontSize={{ base: 'sm', md: 'md' }}>
+                      <HStack minW={0} spacing={3}>
+                        <Flex w={10} h={10} flexShrink={0} align="center" justify="center" borderRadius="12px" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
+                          <ReceiptText size={18} weight="duotone" />
+                        </Flex>
+                        <Box minW={0}>
+                          <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{expense.description}</Text>
+                          <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>Paid by {expense.payerName}</Text>
+                        </Box>
+                      </HStack>
+                      <Text flexShrink={0} fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
                         {money(expense.amount, household.currency)}
                       </Text>
-                      <Text color={muted} fontSize="xs" display={{ base: 'none', sm: 'block' }}>
-                        {expense.shares.length} shares
-                      </Text>
-                    </Box>
-                    {((expense.attachments ?? []).length > 0 || expense.canEdit) && (
-                      <Button
-                        aria-label={`Proof images for ${expense.description}`}
-                        size="xs"
-                        variant="ghost"
-                        leftIcon={<Upload size={14} />}
-                        px={2}
-                        onClick={() => openAttachments({ kind: 'expense', id: expense.id })}
-                      >
-                        {(expense.attachments ?? []).length}
-                      </Button>
-                    )}
-                    {expense.canEdit && (
-                      <IconButton
-                        aria-label={`Edit ${expense.description}`}
-                        icon={<Pencil size={16} />}
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => openEditExpense(expense)}
-                      />
-                    )}
-                  </HStack>
-                </HStack>
-              ))}
-            </VStack>
-          )}
-        </Surface>
+                    </Flex>
+                    <Flex align="center" justify="space-between" gap={3} flexWrap="wrap">
+                      <HStack spacing={1.5} flexWrap="wrap">
+                        <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">{expense.category}</Badge>
+                        <Text color="var(--pb-ink-faint)" fontSize="xs">
+                          {dateLabel(expense.expenseDate)} · {expense.shares.length} share{expense.shares.length === 1 ? '' : 's'}
+                        </Text>
+                      </HStack>
+                      <HStack spacing={1}>
+                        {((expense.attachments ?? []).length > 0 || expense.canEdit) && (
+                          <Button aria-label={`Proof images for ${expense.description}`} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} color="var(--pb-ink-soft)" onClick={() => openAttachments({ kind: 'expense', id: expense.id })}>
+                            Proof {(expense.attachments ?? []).length}
+                          </Button>
+                        )}
+                        {expense.canEdit && (
+                          <IconButton aria-label={`Edit ${expense.description}`} icon={<Pencil size={16} />} h="34px" minW="34px" borderRadius="9px" variant="ghost" onClick={() => openEditExpense(expense)} />
+                        )}
+                      </HStack>
+                    </Flex>
+                  </Stack>
+                ))}
+              </SimpleGrid>
+            )}
+          </Box>
+        </Box>
 
-        <Surface id="household-payments" overflow="hidden" scrollMarginTop="90px">
-          <HStack justify="space-between" px={{ base: 3, md: 6 }} py={{ base: 4, md: 5 }}>
-            <Box>
-              <Heading size="md">Payments and confirmations</Heading>
-              <Text color={muted} fontSize="sm">Only confirmed payments change balances.</Text>
-            </Box>
-            <Mail size={22} color={ed?.gold ?? undefined} />
-          </HStack>
-          <Divider borderColor={ed?.line} />
-          {household.settlements.length === 0 ? (
-            <Text color={muted} textAlign="center" py={10}>No payments recorded yet.</Text>
-          ) : (
-            <VStack align="stretch" spacing={0}>
-              {household.settlements.map((settlement, index) => (
-                <Stack
-                  key={settlement.id}
-                  direction={{ base: 'column', md: 'row' }}
-                  align={{ base: 'stretch', md: 'center' }}
-                  justify="space-between"
-                  px={{ base: 3, md: 6 }}
-                  py={3}
-                  borderTop={index === 0 ? 'none' : '1px solid'}
-                  borderColor={ed?.line ?? 'blackAlpha.100'}
-                >
-                  <HStack>
-                    <Avatar size="sm" name={settlement.fromMemberName} />
-                    <Box>
-                      <Text fontWeight={800}>
-                        {settlement.fromMemberName} paid {settlement.toMemberName}
-                      </Text>
-                      <Text color={muted} fontSize="xs">{dateLabel(settlement.settlementDate)}</Text>
-                    </Box>
-                  </HStack>
-                  <HStack justify={{ base: 'space-between', md: 'flex-end' }} flexWrap="wrap">
-                    <Text fontWeight={900}>{money(settlement.amount, household.currency)}</Text>
-                    <Badge colorScheme={
-                      settlement.status === 'CONFIRMED'
-                        ? 'green'
-                        : settlement.status === 'PENDING'
-                          ? 'orange'
-                          : 'gray'
-                    }>
-                      {settlement.status.toLowerCase()}
-                    </Badge>
-                    {((settlement.attachments ?? []).length > 0 || settlement.canAttach) && (
-                      <Button
-                        aria-label={`Proof images for payment from ${settlement.fromMemberName}`}
-                        size="xs"
-                        variant="ghost"
-                        leftIcon={<Upload size={14} />}
-                        px={2}
-                        onClick={() => openAttachments({
-                          kind: 'settlement',
-                          id: settlement.id,
-                        })}
+        <Box id="household-payments" overflow="hidden" scrollMarginTop="90px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
+          <HouseholdSectionHeader
+            eyebrow="Settlement history"
+            title="Payments and confirmations"
+            description="Only confirmed payments change balances."
+            icon={<Mail size={20} weight="duotone" />}
+            accent={pendingSettlementCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
+            tint={pendingSettlementCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
+            stat={pendingSettlementCount ? `${pendingSettlementCount} pending` : `${household.settlements.length} payment${household.settlements.length === 1 ? '' : 's'}`}
+          />
+          <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
+            {household.settlements.length === 0 ? (
+              <VStack py={9} spacing={3} border="1px dashed var(--pb-hair-2)" borderRadius="14px" bg="var(--pb-surface)">
+                <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
+                  <Mail size={22} weight="duotone" />
+                </Flex>
+                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>No payments recorded yet</Text>
+                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">Payments will appear here when members settle their balances.</Text>
+              </VStack>
+            ) : (
+              <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+                {household.settlements.map((settlement) => {
+                  const needsCurrentUserAction = settlement.canConfirm || settlement.canReject
+                  const statusAccent = settlement.status === 'CONFIRMED' ? 'var(--pb-income)' : settlement.status === 'PENDING' ? 'var(--pb-gold)' : 'var(--pb-ink-faint)'
+                  const statusTint = settlement.status === 'CONFIRMED' ? 'var(--pb-tint-income)' : settlement.status === 'PENDING' ? 'var(--pb-tint-gold)' : 'var(--pb-surface-3)'
+                  return (
+                    <Stack
+                      key={settlement.id}
+                      direction="column"
+                      justify="space-between"
+                      gap={3}
+                      minH="142px"
+                      p={3}
+                      borderRadius="14px"
+                      border="1px solid"
+                      borderColor={needsCurrentUserAction ? 'var(--pb-gold)' : 'var(--pb-hair)'}
+                      bg={needsCurrentUserAction ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
+                    >
+                      <Flex
+                        direction={{ base: 'column', sm: 'row' }}
+                        align={{ base: 'stretch', sm: 'flex-start' }}
+                        justify="space-between"
+                        gap={3}
                       >
-                        {(settlement.attachments ?? []).length}
-                      </Button>
-                    )}
-                    {settlement.canConfirm && (
-                      <Button
-                        size="xs"
-                        colorScheme="green"
-                        isLoading={busyAction === `confirm-${settlement.id}`}
-                        onClick={() => void applyAction(
-                          `confirm-${settlement.id}`,
-                          () => confirmHouseholdSettlement(household.id, settlement.id),
-                          'Payment confirmed',
-                        )}
-                      >
-                        Confirm
-                      </Button>
-                    )}
-                    {settlement.canReject && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        isLoading={busyAction === `reject-${settlement.id}`}
-                        onClick={() => void applyAction(
-                          `reject-${settlement.id}`,
-                          () => rejectHouseholdSettlement(household.id, settlement.id),
-                        )}
-                      >
-                        Reject
-                      </Button>
-                    )}
-                    {settlement.canCancel && (
-                      <Button
-                        size="xs"
-                        variant="ghost"
-                        isLoading={busyAction === `cancel-${settlement.id}`}
-                        onClick={() => void applyAction(
-                          `cancel-${settlement.id}`,
-                          () => cancelHouseholdSettlement(household.id, settlement.id),
-                        )}
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </HStack>
-                </Stack>
-              ))}
-            </VStack>
-          )}
-        </Surface>
+                        <HStack minW={0} spacing={3}>
+                          <Avatar size="sm" name={settlement.fromMemberName} />
+                          <Box minW={0}>
+                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{settlement.fromMemberName} paid {settlement.toMemberName}</Text>
+                            <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">{dateLabel(settlement.settlementDate)}</Text>
+                          </Box>
+                        </HStack>
+                        <Text flexShrink={0} fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {money(settlement.amount, household.currency)}
+                        </Text>
+                      </Flex>
+                      <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
+                        <HStack spacing={1.5} flexWrap="wrap">
+                          <Badge borderRadius="full" px={2.5} py={1} bg={statusTint} color={statusAccent} textTransform="capitalize">{settlement.status.toLowerCase()}</Badge>
+                          {needsCurrentUserAction && <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} color="var(--pb-gold)" textTransform="uppercase">Your review</Text>}
+                        </HStack>
+                        <HStack spacing={1} flexWrap="wrap" justify="flex-end">
+                          {((settlement.attachments ?? []).length > 0 || settlement.canAttach) && (
+                            <Button aria-label={`Proof images for payment from ${settlement.fromMemberName}`} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} onClick={() => openAttachments({ kind: 'settlement', id: settlement.id })}>
+                              Proof {(settlement.attachments ?? []).length}
+                            </Button>
+                          )}
+                          {settlement.canConfirm && (
+                            <Button h="34px" px={3} borderRadius="9px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" isLoading={busyAction === `confirm-${settlement.id}`} onClick={() => void applyAction(`confirm-${settlement.id}`, () => confirmHouseholdSettlement(household.id, settlement.id), 'Payment confirmed')}>
+                              Confirm
+                            </Button>
+                          )}
+                          {settlement.canReject && (
+                            <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" color="var(--pb-coral)" isLoading={busyAction === `reject-${settlement.id}`} onClick={() => void applyAction(`reject-${settlement.id}`, () => rejectHouseholdSettlement(household.id, settlement.id))}>
+                              Reject
+                            </Button>
+                          )}
+                          {settlement.canCancel && (
+                            <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" isLoading={busyAction === `cancel-${settlement.id}`} onClick={() => void applyAction(`cancel-${settlement.id}`, () => cancelHouseholdSettlement(household.id, settlement.id))}>
+                              Cancel
+                            </Button>
+                          )}
+                        </HStack>
+                      </Flex>
+                    </Stack>
+                  )
+                })}
+              </SimpleGrid>
+            )}
+          </Box>
+        </Box>
       </VStack>
 
       <ExpenseModal
