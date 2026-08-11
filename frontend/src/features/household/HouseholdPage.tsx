@@ -1362,7 +1362,6 @@ function CleaningRotationCard({
           {displayedDuties.map((duty, index) => (
             <Flex
               key={duty.key}
-              as="label"
               minH={{ base: '58px', md: '62px' }}
               align="center"
               gap={2.5}
@@ -1377,7 +1376,6 @@ function CleaningRotationCard({
                     ? 'var(--pb-tint-gold)'
                     : 'var(--pb-surface-2)'
               }
-              cursor={duty.canToggle && busyDutyKey === null ? 'pointer' : 'default'}
               transition="background 140ms ease, border-color 140ms ease, transform 140ms ease"
               _hover={duty.canToggle && busyDutyKey === null
                 ? { borderColor: 'var(--pb-hair-2)', transform: 'translateY(-1px)' }
@@ -1417,7 +1415,7 @@ function CleaningRotationCard({
                   />
                 )}
               </Flex>
-              <Box minW={0}>
+              <Box minW={0} flex={1}>
                 <Text
                   color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
                   fontSize="sm"
@@ -1450,6 +1448,32 @@ function CleaningRotationCard({
                   </Text>
                 )}
               </Box>
+              {duty.completed && duty.canToggle && (
+                <Button
+                  flexShrink={0}
+                  h="30px"
+                  minW="54px"
+                  px={2.5}
+                  borderRadius="8px"
+                  bg="var(--pb-surface)"
+                  color="var(--pb-ink-soft)"
+                  border="1px solid var(--pb-hair)"
+                  fontFamily="var(--pb-mono)"
+                  fontSize="8px"
+                  fontWeight={700}
+                  textTransform="uppercase"
+                  isDisabled={busyDutyKey !== null}
+                  aria-label={`Undo ${duty.label}`}
+                  onClick={() => {
+                    if (!current) return
+                    onToggleDuty(current.id, duty.key, false)
+                  }}
+                  _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+                  _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
+                >
+                  Undo
+                </Button>
+              )}
             </Flex>
           ))}
         </SimpleGrid>
