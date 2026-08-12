@@ -9,10 +9,17 @@ import {
   useColorModeValue,
   type StackProps,
 } from '@chakra-ui/react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { NAV_ITEMS, navItemIdFor, type AppPage, type NavItem } from './navigation.config'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import {
+  NAV_ITEMS,
+  localizeNavigationItems,
+  navItemIdFor,
+  type AppPage,
+  type NavItem,
+} from './navigation.config'
 import { ChevronLeft, ChevronRight } from '../../ui/icons'
 import { useEd } from '../../../editorial'
+import { useI18n } from '../../../i18n'
 
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
   currentPage: AppPage
@@ -38,6 +45,11 @@ export default function NavBar({
   variant = 'desktop',
   ...stackProps
 }: NavBarProps) {
+  const { t } = useI18n()
+  const localizedItems = useMemo(
+    () => localizeNavigationItems(items, (key, fallback) => t(key, undefined, fallback)),
+    [items, t],
+  )
   const isMobile = variant === 'mobile'
   // Mobile shows every destination in a horizontally scrollable carousel
   // (no "More" overflow menu); desktop lays them out inline.
@@ -171,7 +183,7 @@ export default function NavBar({
       ref={containerRef}
       as="nav"
       role="tablist"
-      aria-label="Primary"
+      aria-label={t('header.nav.primary')}
       spacing={1}
       p={1}
       borderRadius={isMobile ? '2xl' : 'xl'}
@@ -242,7 +254,7 @@ export default function NavBar({
         pointerEvents="none"
       />
 
-      {items.map((item) => (
+      {localizedItems.map((item) => (
         <NavBarItem
           key={item.id}
           item={item}
@@ -273,7 +285,7 @@ export default function NavBar({
       <Box
         as="button"
         type="button"
-        aria-label="Previous pages"
+        aria-label={t('header.nav.previous')}
         tabIndex={interacting && edges.start ? 0 : -1}
         onClick={() => nudge(-1)}
         position="absolute"
@@ -301,7 +313,7 @@ export default function NavBar({
       <Box
         as="button"
         type="button"
-        aria-label="More pages"
+        aria-label={t('header.nav.more')}
         tabIndex={interacting && edges.end ? 0 : -1}
         onClick={() => nudge(1)}
         position="absolute"

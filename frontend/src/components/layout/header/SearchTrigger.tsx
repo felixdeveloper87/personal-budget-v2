@@ -8,6 +8,7 @@ import {
   Tooltip,
 } from '@chakra-ui/react'
 import { Search } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
 
 interface SearchTriggerProps {
   onOpen: () => void
@@ -24,6 +25,7 @@ interface SearchTriggerProps {
  * flip with the color mode).
  */
 export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
+  const { t } = useI18n()
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
   const shortcut = isMac ? '⌘K' : 'Ctrl K'
 
@@ -45,9 +47,9 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
 
   if (variant === 'compact') {
     return (
-      <Tooltip label="Search (Ctrl+K)" hasArrow openDelay={300}>
+      <Tooltip label={t('header.search.tooltip', { shortcut })} hasArrow openDelay={300}>
         <IconButton
-          aria-label="Open search"
+          aria-label={t('header.search.open')}
           icon={<Icon as={Search} boxSize={4} weight="bold" />}
           onClick={onOpen}
           variant="ghost"
@@ -82,7 +84,7 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
             letterSpacing="0.04em"
             color="inherit"
           >
-            Search transactions
+            {t('header.search.transactions')}
           </Text>
           <Box
             display="inline-flex"

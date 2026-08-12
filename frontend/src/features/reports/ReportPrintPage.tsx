@@ -21,6 +21,8 @@ import ReportPaymentMethodList from '../../components/reports/ReportPaymentMetho
 import ReportMovementList from '../../components/reports/ReportMovementList'
 import PrintActionBar from '../../components/reports/PrintActionBar'
 import type { PeriodType, ReportResponse } from '../../types'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from '../../components/reports/useReportFormat'
 
 const VALID_PERIODS: PeriodType[] = ['day', 'week', 'month', 'year']
 
@@ -37,19 +39,21 @@ function readParams() {
 }
 
 function ReportContent({ report, userName }: { report: ReportResponse; userName?: string }) {
+  const { t } = useI18n()
+  const { insights } = useReportFormat()
   return (
     <VStack align="stretch" spacing={6}>
       <ReportHeader report={report} userName={userName} />
       <ReportKpiGrid report={report} />
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-        <ReportInsights insights={report.insights} />
+        <ReportInsights insights={insights(report)} />
         <ReportCommitments report={report} />
       </SimpleGrid>
 
       <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={6}>
-        <ReportCategoryList title="Expense categories" items={report.expenseCategories} tone="expense" />
-        <ReportCategoryList title="Income categories" items={report.incomeCategories} tone="income" />
+        <ReportCategoryList title={t('reports.expenseCategories')} items={report.expenseCategories} tone="expense" />
+        <ReportCategoryList title={t('reports.incomeCategories')} items={report.incomeCategories} tone="income" />
       </SimpleGrid>
 
       <ReportPaymentMethodList items={report.paymentMethods} />
@@ -76,6 +80,7 @@ function LoadingState() {
 }
 
 export default function ReportPrintPage() {
+  const { t } = useI18n()
   const [params] = useState(readParams)
   const { report, isLoading, error } = useReport(params.period, params.date)
   const { user } = useAuth()
@@ -98,9 +103,9 @@ export default function ReportPrintPage() {
             <Alert status="error" borderRadius="xl" variant="subtle">
               <AlertIcon />
               <Box>
-                <AlertTitle>Could not load report</AlertTitle>
+                <AlertTitle>{t('reports.loadError')}</AlertTitle>
                 <AlertDescription fontSize="sm">
-                  Make sure you are signed in and try again.
+                  {t('reports.retryHint')}
                 </AlertDescription>
               </Box>
             </Alert>
@@ -109,7 +114,7 @@ export default function ReportPrintPage() {
           ) : (
             <Alert status="info" borderRadius="xl" variant="subtle">
               <AlertIcon />
-              No report data available.
+              {t('reports.noData')}
             </Alert>
           )}
         </Box>

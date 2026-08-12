@@ -5,6 +5,8 @@ export type Side = 'expense' | 'income'
 export interface CategoryTxn {
   id: string
   merchant: string
+  /** True when the merchant label falls back to the raw category value. */
+  merchantIsCategory?: boolean
   amount: number
   purchaseDate: string
   settlesDate: string

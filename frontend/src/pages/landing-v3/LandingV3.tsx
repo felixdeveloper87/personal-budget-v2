@@ -21,26 +21,19 @@ import {
 } from 'lucide-react'
 import { guilloche } from '../../features/dashboard/components/guilloche'
 import BrandMark from '../../components/brand/BrandMark'
+import LanguageToggle from '../../components/layout/header/LanguageToggle'
+import { useI18n } from '../../i18n'
 import './LandingV3.css'
 import {
-  FEATURE_CARDS,
-  FINAL_CTA,
-  FOOTER,
-  HERO,
-  HOUSEHOLD,
-  NAV_LINKS,
-  PLANNING,
-  PRODUCT_TICKER,
-  PROOF_POINTS,
-  SNAPSHOT,
+  createLandingV3Config,
+  type LandingFeatureKind,
+  type LandingV3Content,
 } from './landingV3.config'
 
 interface LandingV3Props {
   onRequestAccess: () => void
   onSignIn: () => void
 }
-
-type FeatureKind = (typeof FEATURE_CARDS)[number]['kind']
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -61,6 +54,8 @@ function BrandSeal({ className = '' }: { className?: string }) {
 }
 
 function BrandLockup({ footer = false }: { footer?: boolean }) {
+  const { t } = useI18n()
+
   return (
     <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
       <BrandSeal />
@@ -71,7 +66,7 @@ function BrandLockup({ footer = false }: { footer?: boolean }) {
         </span>
         <small>
           <i aria-hidden="true" />
-          Clarity for your money
+          {t('landing.brand.tagline')}
         </small>
       </span>
     </span>
@@ -125,7 +120,9 @@ function TrendChart({ compact = false }: { compact?: boolean }) {
   )
 }
 
-function HeroSnapshot() {
+function HeroSnapshot({ snapshot }: { snapshot: LandingV3Content['snapshot'] }) {
+  const { t, formatCurrency } = useI18n()
+
   return (
     <div className="pbv3-hero-stage" aria-hidden="true">
       <div className="pbv3-hero-stage__halo" />
@@ -136,21 +133,21 @@ function HeroSnapshot() {
             <i />
             <i />
           </span>
-          <span>PERSONAL BUDGET / AUG</span>
+          <span>{t('landing.snapshot.windowTitle')}</span>
         </div>
         <div className="pbv3-snapshot__body">
-          <div className="pbv3-snapshot__label">{SNAPSHOT.availableLabel}</div>
-          <div className="pbv3-snapshot__amount">{SNAPSHOT.available}</div>
-          <div className="pbv3-snapshot__delta">{SNAPSHOT.delta}</div>
+          <div className="pbv3-snapshot__label">{snapshot.availableLabel}</div>
+          <div className="pbv3-snapshot__amount">{snapshot.available}</div>
+          <div className="pbv3-snapshot__delta">{snapshot.delta}</div>
           <TrendChart compact />
           <div className="pbv3-snapshot__stats">
             <span>
-              <small>Income</small>
-              <b>{SNAPSHOT.income}</b>
+              <small>{t('landing.snapshot.income')}</small>
+              <b>{snapshot.income}</b>
             </span>
             <span>
-              <small>Expenses</small>
-              <b>{SNAPSHOT.expenses}</b>
+              <small>{t('landing.snapshot.expenses')}</small>
+              <b>{snapshot.expenses}</b>
             </span>
           </div>
         </div>
@@ -161,10 +158,10 @@ function HeroSnapshot() {
           <Check size={15} strokeWidth={2} />
         </span>
         <span>
-          <small>Transaction added</small>
-          <b>Groceries</b>
+          <small>{t('landing.snapshot.transactionAdded')}</small>
+          <b>{t('landing.snapshot.transaction.groceries')}</b>
         </span>
-        <strong>−£42.80</strong>
+        <strong>−{formatCurrency(42.8)}</strong>
       </div>
 
       <div className="pbv3-floating-row pbv3-floating-row--forecast">
@@ -172,15 +169,24 @@ function HeroSnapshot() {
           <CalendarClock size={15} strokeWidth={1.8} />
         </span>
         <span>
-          <small>End-of-month forecast</small>
-          <b>{SNAPSHOT.forecast}</b>
+          <small>{t('landing.snapshot.forecastLabel')}</small>
+          <b>{snapshot.forecast}</b>
         </span>
       </div>
     </div>
   )
 }
 
-function DashboardPreview() {
+function DashboardPreview({ snapshot }: { snapshot: LandingV3Content['snapshot'] }) {
+  const { t, formatCurrency } = useI18n()
+  const railItems = [
+    t('landing.nav.overview'),
+    t('landing.product.behaviour'),
+    t('landing.product.payments'),
+    t('landing.product.planning'),
+    t('landing.product.reports'),
+  ]
+
   return (
     <div className="pbv3-dashboard pbv3-reveal">
       <div className="pbv3-dashboard__chrome">
@@ -190,13 +196,15 @@ function DashboardPreview() {
           <i />
         </span>
         <span className="pbv3-dashboard__address">personalbudget.co.uk</span>
-        <span className="pbv3-dashboard__demo-label">Illustrative demo</span>
+        <span className="pbv3-dashboard__demo-label">
+          {t('landing.snapshot.illustrativeDemo')}
+        </span>
       </div>
 
       <div className="pbv3-dashboard__layout">
         <aside className="pbv3-dashboard__rail" aria-hidden="true">
           <BrandSeal />
-          {['Overview', 'Behaviour', 'Payments', 'Planning', 'Reports'].map((label, index) => (
+          {railItems.map((label, index) => (
             <span className={index === 0 ? 'is-active' : ''} key={label}>
               <i />
               {label}
@@ -204,38 +212,38 @@ function DashboardPreview() {
           ))}
           <span className="pbv3-dashboard__rail-bottom">
             <i />
-            Account
+            {t('landing.product.account')}
           </span>
         </aside>
 
         <div className="pbv3-dashboard__main">
           <header className="pbv3-dashboard__heading">
             <div>
-              <span className="pbv3-kicker">{SNAPSHOT.period}</span>
-              <h3>{SNAPSHOT.greeting}, friend.</h3>
+              <span className="pbv3-kicker">{snapshot.period}</span>
+              <h3>{snapshot.greeting}</h3>
             </div>
             <div className="pbv3-period-tabs" aria-hidden="true">
-              <span>Day</span>
-              <span>Week</span>
-              <span className="is-active">Month</span>
+              <span>{t('landing.snapshot.day')}</span>
+              <span>{t('landing.snapshot.week')}</span>
+              <span className="is-active">{t('landing.snapshot.month')}</span>
             </div>
           </header>
 
           <div className="pbv3-metrics">
             <article>
-              <small>Income</small>
-              <strong>{SNAPSHOT.income}</strong>
-              <span className="is-positive">Money in</span>
+              <small>{t('landing.snapshot.income')}</small>
+              <strong>{snapshot.income}</strong>
+              <span className="is-positive">{t('landing.snapshot.moneyIn')}</span>
             </article>
             <article>
-              <small>Expenses</small>
-              <strong>{SNAPSHOT.expenses}</strong>
-              <span>Money out</span>
+              <small>{t('landing.snapshot.expenses')}</small>
+              <strong>{snapshot.expenses}</strong>
+              <span>{t('landing.snapshot.moneyOut')}</span>
             </article>
             <article className="is-featured">
-              <small>{SNAPSHOT.availableLabel}</small>
-              <strong>{SNAPSHOT.available}</strong>
-              <span className="is-positive">On track</span>
+              <small>{snapshot.availableLabel}</small>
+              <strong>{snapshot.available}</strong>
+              <span className="is-positive">{t('landing.snapshot.onTrack')}</span>
             </article>
           </div>
 
@@ -243,10 +251,12 @@ function DashboardPreview() {
             <article className="pbv3-chart-card">
               <div className="pbv3-card-heading">
                 <span>
-                  <small>Cash flow</small>
-                  <b>Your month at a glance</b>
+                  <small>{t('landing.snapshot.cashFlow')}</small>
+                  <b>{t('landing.snapshot.monthAtGlance')}</b>
                 </span>
-                <span className="pbv3-card-heading__value">+£2,287</span>
+                <span className="pbv3-card-heading__value">
+                  +{formatCurrency(2287, { maximumFractionDigits: 0 })}
+                </span>
               </div>
               <div className="pbv3-chart-grid">
                 <i />
@@ -267,13 +277,13 @@ function DashboardPreview() {
             <article className="pbv3-activity-card">
               <div className="pbv3-card-heading">
                 <span>
-                  <small>Recent</small>
-                  <b>Activity</b>
+                  <small>{t('landing.snapshot.recent')}</small>
+                  <b>{t('landing.snapshot.activity')}</b>
                 </span>
-                <span className="pbv3-card-link">View all</span>
+                <span className="pbv3-card-link">{t('landing.snapshot.viewAll')}</span>
               </div>
               <div className="pbv3-activity-list">
-                {SNAPSHOT.transactions.map((transaction, index) => (
+                {snapshot.transactions.map((transaction, index) => (
                   <div
                     className="pbv3-activity-row"
                     style={{ '--row-delay': `${index * 120}ms` } as CSSProperties}
@@ -292,7 +302,7 @@ function DashboardPreview() {
           </div>
 
           <div className="pbv3-budget-row">
-            {SNAPSHOT.categories.map((category) => (
+            {snapshot.categories.map((category) => (
               <div key={category.label}>
                 <span>
                   <b>{category.label}</b>
@@ -312,7 +322,7 @@ function DashboardPreview() {
   )
 }
 
-function FeatureIcon({ kind }: { kind: FeatureKind }) {
+function FeatureIcon({ kind }: { kind: LandingFeatureKind }) {
   const props = { size: 20, strokeWidth: 1.7 }
   if (kind === 'search') return <Search {...props} />
   if (kind === 'commitments') return <CalendarClock {...props} />
@@ -320,24 +330,26 @@ function FeatureIcon({ kind }: { kind: FeatureKind }) {
   return <ShieldCheck {...props} />
 }
 
-function FeatureDemo({ kind }: { kind: FeatureKind }) {
+function FeatureDemo({ kind }: { kind: LandingFeatureKind }) {
+  const { t, formatCurrency } = useI18n()
+
   if (kind === 'search') {
     return (
       <div className="pbv3-mini-search" aria-hidden="true">
         <div>
           <Search size={14} />
-          <span>groceries</span>
+          <span>{t('landing.feature.demo.searchTerm')}</span>
           <kbd>⌘ K</kbd>
         </div>
         <span>
           <i />
           Continente
-          <b>−£42.80</b>
+          <b>−{formatCurrency(42.8)}</b>
         </span>
         <span>
           <i />
           Lidl
-          <b>−£31.24</b>
+          <b>−{formatCurrency(31.24)}</b>
         </span>
       </div>
     )
@@ -346,7 +358,15 @@ function FeatureDemo({ kind }: { kind: FeatureKind }) {
   if (kind === 'commitments') {
     return (
       <div className="pbv3-mini-calendar" aria-hidden="true">
-        {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+        {[
+          t('landing.day.monday.short'),
+          t('landing.day.tuesday.short'),
+          t('landing.day.wednesday.short'),
+          t('landing.day.thursday.short'),
+          t('landing.day.friday.short'),
+          t('landing.day.saturday.short'),
+          t('landing.day.sunday.short'),
+        ].map((day, index) => (
           <span className={index === 3 ? 'is-active' : ''} key={`${day}-${index}`}>
             {day}
             <i />
@@ -355,7 +375,7 @@ function FeatureDemo({ kind }: { kind: FeatureKind }) {
         <div>
           <CalendarClock size={15} />
           Spotify Family
-          <b>£15.99</b>
+          <b>{formatCurrency(15.99)}</b>
         </div>
       </div>
     )
@@ -372,7 +392,7 @@ function FeatureDemo({ kind }: { kind: FeatureKind }) {
         </div>
         <div>
           <Download size={15} />
-          <span>Export report</span>
+          <span>{t('landing.feature.demo.exportReport')}</span>
           <b>PDF</b>
         </div>
       </div>
@@ -385,22 +405,33 @@ function FeatureDemo({ kind }: { kind: FeatureKind }) {
       <span>
         <LockKeyhole size={18} />
       </span>
-      <small>Private workspace</small>
+      <small>{t('landing.feature.demo.privateWorkspace')}</small>
     </div>
   )
 }
 
-function PlanningPreview() {
+function PlanningPreview({
+  planning,
+  snapshot,
+}: {
+  planning: LandingV3Content['planning']
+  snapshot: LandingV3Content['snapshot']
+}) {
+  const { t, formatCurrency } = useI18n()
+
   return (
-    <div className="pbv3-planning-card pbv3-reveal" aria-label="Illustrative planning preview">
+    <div
+      className="pbv3-planning-card pbv3-reveal"
+      aria-label={t('landing.a11y.planningPreview')}
+    >
       <div className="pbv3-planning-card__header">
         <span>
-          <small>Projected balance</small>
-          <strong>{SNAPSHOT.forecast}</strong>
+          <small>{t('landing.planning.preview.projectedBalance')}</small>
+          <strong>{snapshot.forecast}</strong>
         </span>
         <span className="pbv3-status-pill">
           <i />
-          On track
+          {t('landing.snapshot.onTrack')}
         </span>
       </div>
 
@@ -416,7 +447,7 @@ function PlanningPreview() {
       </div>
 
       <div className="pbv3-planning-months">
-        {PLANNING.months.map((month) => (
+        {planning.months.map((month) => (
           <span className={month.active ? 'is-active' : ''} key={month.label}>
             <small>{month.label}</small>
             <b>{month.value}</b>
@@ -427,26 +458,33 @@ function PlanningPreview() {
       <div className="pbv3-planning-card__footer">
         <CalendarClock size={16} />
         <span>
-          <small>Next commitment</small>
-          <b>Rent · 01 Sep</b>
+          <small>{t('landing.planning.preview.nextCommitment')}</small>
+          <b>{t('landing.planning.preview.rentDate')}</b>
         </span>
-        <strong>£900</strong>
+        <strong>{formatCurrency(900, { maximumFractionDigits: 0 })}</strong>
       </div>
     </div>
   )
 }
 
-function HouseholdPreview() {
+function HouseholdPreview({ household }: { household: LandingV3Content['household'] }) {
+  const { t } = useI18n()
   const members = ['L', 'A', 'T', 'S', 'M']
 
   return (
-    <div className="pbv3-household-card pbv3-reveal" aria-label="Illustrative Household preview">
+    <div
+      className="pbv3-household-card pbv3-reveal"
+      aria-label={t('landing.a11y.householdPreview')}
+    >
       <div className="pbv3-household-card__top">
         <div>
-          <small>Household</small>
-          <strong>Riverside House</strong>
+          <small>{t('landing.household.preview.label')}</small>
+          <strong>{t('landing.household.preview.name')}</strong>
         </div>
-        <div className="pbv3-avatars" aria-label="Five household members">
+        <div
+          className="pbv3-avatars"
+          aria-label={t('landing.a11y.householdMembers', { count: members.length })}
+        >
           {members.map((member, index) => (
             <span style={{ '--avatar-index': index } as CSSProperties} key={member}>
               {member}
@@ -460,25 +498,25 @@ function HouseholdPreview() {
           <div>
             <span className="pbv3-shared-icon">£</span>
             <span>
-              <b>{HOUSEHOLD.bill.label}</b>
-              <small>{HOUSEHOLD.bill.meta}</small>
+              <b>{household.bill.label}</b>
+              <small>{household.bill.meta}</small>
             </span>
-            <strong>{HOUSEHOLD.bill.amount}</strong>
+            <strong>{household.bill.amount}</strong>
           </div>
           <div>
             <span className="pbv3-shared-icon">
               <UsersRound size={16} />
             </span>
             <span>
-              <b>{HOUSEHOLD.cleaning.label}</b>
-              <small>{HOUSEHOLD.cleaning.meta}</small>
+              <b>{household.cleaning.label}</b>
+              <small>{household.cleaning.meta}</small>
             </span>
-            <strong>{HOUSEHOLD.cleaning.person}</strong>
+            <strong>{household.cleaning.person}</strong>
           </div>
         </div>
 
         <div className="pbv3-settlement">
-          <small>{HOUSEHOLD.balance.label}</small>
+          <small>{household.balance.label}</small>
           <div className="pbv3-settlement__people">
             <span>A</span>
             <i>
@@ -486,12 +524,15 @@ function HouseholdPreview() {
             </i>
             <span>L</span>
           </div>
-          <strong>{HOUSEHOLD.balance.amount}</strong>
+          <strong>{household.balance.amount}</strong>
           <p>
-            {HOUSEHOLD.balance.from} owes {HOUSEHOLD.balance.to}
+            {t('landing.household.preview.owes', {
+              from: household.balance.from,
+              to: household.balance.to,
+            })}
           </p>
           <button type="button" tabIndex={-1}>
-            Settle balance
+            {t('landing.household.preview.settle')}
           </button>
         </div>
       </div>
@@ -500,6 +541,23 @@ function HouseholdPreview() {
 }
 
 export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props) {
+  const { t, formatCurrency } = useI18n()
+  const content = useMemo(
+    () => createLandingV3Config(t, formatCurrency),
+    [formatCurrency, t],
+  )
+  const {
+    featureCards,
+    finalCta,
+    footer,
+    hero,
+    household,
+    navLinks,
+    planning,
+    productTicker,
+    proofPoints,
+    snapshot,
+  } = content
   const rootRef = useRef<HTMLDivElement>(null)
   const navToggleRef = useRef<HTMLButtonElement>(null)
   const reducedMotion = useReducedMotion()
@@ -513,7 +571,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
 
       const activationLine = window.innerHeight * 0.36
       let nextActive = ''
-      NAV_LINKS.forEach(({ id }) => {
+      navLinks.forEach(({ id }) => {
         const section = document.getElementById(id)
         if (!section) return
         const bounds = section.getBoundingClientRect()
@@ -530,7 +588,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
       window.removeEventListener('scroll', update)
       window.removeEventListener('resize', update)
     }
-  }, [])
+  }, [navLinks])
 
   useEffect(() => {
     if (!navMenuOpen) return
@@ -603,25 +661,25 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
   return (
     <div className="pbv3" ref={rootRef}>
       <a className="pbv3-skip-link" href="#main-content">
-        Skip to content
+        {t('landing.a11y.skipContent')}
       </a>
 
       <nav
         className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}`}
-        aria-label="Main navigation"
+        aria-label={t('landing.a11y.mainNavigation')}
       >
         <div className="pbv3-shell pbv3-nav__inner">
           <a
             className="pbv3-nav__brand"
             href="#top"
-            aria-label="Personal Budget home"
+            aria-label={t('landing.a11y.home')}
             onClick={() => setNavMenuOpen(false)}
           >
             <BrandLockup />
           </a>
 
-          <div className="pbv3-nav__links" aria-label="Page sections">
-            {NAV_LINKS.map((link, index) => (
+          <div className="pbv3-nav__links" aria-label={t('landing.a11y.pageSections')}>
+            {navLinks.map((link, index) => (
               <a
                 className={activeSection === link.id ? 'is-active' : ''}
                 href={`#${link.id}`}
@@ -635,11 +693,12 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           </div>
 
           <div className="pbv3-nav__actions">
+            <LanguageToggle />
             <button className="pbv3-nav__signin" type="button" onClick={onSignIn}>
-              {HERO.signInCta}
+              {hero.signInCta}
             </button>
             <button className="pbv3-nav__cta" type="button" onClick={onRequestAccess}>
-              <span>Request access</span>
+              <span>{t('landing.nav.requestAccess')}</span>
               <i aria-hidden="true">
                 <ArrowRight size={15} />
               </i>
@@ -650,10 +709,14 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
               type="button"
               aria-controls="pbv3-navigation-menu"
               aria-expanded={navMenuOpen}
-              aria-label={navMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-label={
+                navMenuOpen
+                  ? t('landing.a11y.closeNavigation')
+                  : t('landing.a11y.openNavigation')
+              }
               onClick={() => setNavMenuOpen((open) => !open)}
             >
-              <span>Menu</span>
+              <span>{t('landing.nav.menu')}</span>
               {navMenuOpen ? <X size={18} aria-hidden="true" /> : <Menu size={18} aria-hidden="true" />}
             </button>
           </div>
@@ -661,11 +724,11 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           {navMenuOpen && (
             <div className="pbv3-nav-menu" id="pbv3-navigation-menu">
               <div className="pbv3-nav-menu__heading">
-                <span>Explore Personal Budget</span>
-                <small>Clarity for your money</small>
+                <span>{t('landing.nav.explore')}</span>
+                <small>{t('landing.brand.tagline')}</small>
               </div>
               <div className="pbv3-nav-menu__links">
-                {NAV_LINKS.map((link, index) => (
+                {navLinks.map((link, index) => (
                   <a
                     className={activeSection === link.id ? 'is-active' : ''}
                     href={`#${link.id}`}
@@ -687,7 +750,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
                     onSignIn()
                   }}
                 >
-                  {HERO.signInCta}
+                  {hero.signInCta}
                 </button>
                 <button
                   type="button"
@@ -696,7 +759,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
                     onRequestAccess()
                   }}
                 >
-                  Request access
+                  {t('landing.nav.requestAccess')}
                   <ArrowRight size={15} aria-hidden="true" />
                 </button>
               </div>
@@ -728,37 +791,45 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           <div className="pbv3-shell pbv3-hero__grid">
             <div className="pbv3-hero__copy">
               <h1>
-                <span>{HERO.line1}</span>
-                <em>{HERO.line2}</em>
+                <span>{hero.line1}</span>
+                <em>{hero.line2}</em>
               </h1>
-              <p>{HERO.subtitle}</p>
+              <p>{hero.subtitle}</p>
               <div className="pbv3-hero__actions">
                 <button className="pbv3-button" type="button" onClick={onRequestAccess}>
-                  {HERO.primaryCta}
+                  {hero.primaryCta}
                   <ArrowRight size={17} aria-hidden="true" />
                 </button>
                 <a className="pbv3-button pbv3-button--ghost" href="#overview">
-                  {HERO.secondaryCta}
+                  {hero.secondaryCta}
                 </a>
               </div>
               <div className="pbv3-access-note">
                 <Check size={14} aria-hidden="true" />
-                <span>{HERO.accessNote}</span>
+                <span>{hero.accessNote}</span>
               </div>
             </div>
 
-            <HeroSnapshot />
+            <HeroSnapshot snapshot={snapshot} />
           </div>
 
-          <a className="pbv3-scroll-cue" href="#proof" aria-label="Scroll to learn more">
-            <span>Scroll to read</span>
+          <a
+            className="pbv3-scroll-cue"
+            href="#proof"
+            aria-label={t('landing.a11y.scrollToLearn')}
+          >
+            <span>{t('landing.hero.scrollCue')}</span>
             <i />
           </a>
         </header>
 
-        <section className="pbv3-proof" id="proof" aria-label="Product principles">
+        <section
+          className="pbv3-proof"
+          id="proof"
+          aria-label={t('landing.a11y.productPrinciples')}
+        >
           <div className="pbv3-shell pbv3-proof__grid">
-            {PROOF_POINTS.map((point) => (
+            {proofPoints.map((point) => (
               <article className="pbv3-reveal" key={point.number}>
                 <span>{point.number}</span>
                 <div>
@@ -773,21 +844,19 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         <section className="pbv3-overview" id="overview" aria-labelledby="overview-title">
           <div className="pbv3-shell">
             <div className="pbv3-section-heading pbv3-reveal">
-              <span className="pbv3-eyebrow">01 — See</span>
+              <span className="pbv3-eyebrow">{t('landing.overview.eyebrow')}</span>
               <h2 id="overview-title">
-                From “I think” to <em>“I know.”</em>
+                {t('landing.overview.titleLead')} <em>{t('landing.overview.titleEmphasis')}</em>
               </h2>
-              <p>
-                A single place to understand what came in, what went out and what is still ahead.
-              </p>
+              <p>{t('landing.overview.copy')}</p>
             </div>
-            <DashboardPreview />
+            <DashboardPreview snapshot={snapshot} />
           </div>
         </section>
 
         <div className="pbv3-ticker" aria-hidden="true">
           <div className="pbv3-ticker__track">
-            {[...PRODUCT_TICKER, ...PRODUCT_TICKER].map((item, index) => (
+            {[...productTicker, ...productTicker].map((item, index) => (
               <span key={`${item}-${index}`}>
                 {item}
                 <i>✦</i>
@@ -799,18 +868,16 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         <section className="pbv3-features" id="features" aria-labelledby="features-title">
           <div className="pbv3-shell">
             <div className="pbv3-section-heading pbv3-section-heading--split pbv3-reveal">
-              <span className="pbv3-eyebrow">Useful by design</span>
+              <span className="pbv3-eyebrow">{t('landing.features.eyebrow')}</span>
               <h2 id="features-title">
-                Less admin.<br />
-                <em>More awareness.</em>
+                {t('landing.features.titleLead')}<br />
+                <em>{t('landing.features.titleEmphasis')}</em>
               </h2>
-              <p>
-                Small, practical tools do the quiet work, so the important part is easier to see.
-              </p>
+              <p>{t('landing.features.copy')}</p>
             </div>
 
             <div className="pbv3-feature-grid">
-              {FEATURE_CARDS.map((feature, index) => (
+              {featureCards.map((feature, index) => (
                 <article
                   className={`pbv3-feature-card pbv3-feature-card--${feature.kind} pbv3-reveal`}
                   style={{ '--feature-delay': `${index * 70}ms` } as CSSProperties}
@@ -835,11 +902,11 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         <section className="pbv3-planning" aria-labelledby="planning-title">
           <div className="pbv3-shell pbv3-planning__grid">
             <div className="pbv3-planning__copy pbv3-reveal">
-              <span className="pbv3-eyebrow">{PLANNING.eyebrow}</span>
-              <h2 id="planning-title">{PLANNING.title}</h2>
-              <p>{PLANNING.copy}</p>
+              <span className="pbv3-eyebrow">{planning.eyebrow}</span>
+              <h2 id="planning-title">{planning.title}</h2>
+              <p>{planning.copy}</p>
               <ul>
-                {PLANNING.bullets.map((bullet) => (
+                {planning.bullets.map((bullet) => (
                   <li key={bullet}>
                     <Check size={15} aria-hidden="true" />
                     {bullet}
@@ -847,15 +914,15 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
                 ))}
               </ul>
             </div>
-            <PlanningPreview />
+            <PlanningPreview planning={planning} snapshot={snapshot} />
           </div>
         </section>
 
-        <section className="pbv3-manifesto" aria-label="Personal Budget manifesto">
+        <section className="pbv3-manifesto" aria-label={t('landing.a11y.manifesto')}>
           <div className="pbv3-shell">
             <BrandSeal />
             <p className="pbv3-reveal">
-              Money is not the goal. <em>Clarity is.</em>
+              {t('landing.manifesto.lead')} <em>{t('landing.manifesto.emphasis')}</em>
             </p>
           </div>
         </section>
@@ -864,11 +931,11 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           <GuillocheField className="pbv3-household__guilloche" />
           <div className="pbv3-shell pbv3-household__grid">
             <div className="pbv3-household__copy pbv3-reveal">
-              <span className="pbv3-eyebrow">{HOUSEHOLD.eyebrow}</span>
-              <h2 id="household-title">{HOUSEHOLD.title}</h2>
-              <p>{HOUSEHOLD.copy}</p>
+              <span className="pbv3-eyebrow">{household.eyebrow}</span>
+              <h2 id="household-title">{household.title}</h2>
+              <p>{household.copy}</p>
               <ul>
-                {HOUSEHOLD.bullets.map((bullet) => (
+                {household.bullets.map((bullet) => (
                   <li key={bullet}>
                     <Check size={15} aria-hidden="true" />
                     {bullet}
@@ -876,7 +943,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
                 ))}
               </ul>
             </div>
-            <HouseholdPreview />
+            <HouseholdPreview household={household} />
           </div>
         </section>
 
@@ -884,14 +951,14 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           <div className="pbv3-final-cta__media" aria-hidden="true" />
           <GuillocheField className="pbv3-final-cta__guilloche" />
           <div className="pbv3-shell pbv3-final-cta__inner pbv3-reveal">
-            <span className="pbv3-eyebrow">{FINAL_CTA.eyebrow}</span>
-            <h2 id="final-cta-title">{FINAL_CTA.title}</h2>
-            <p>{FINAL_CTA.copy}</p>
+            <span className="pbv3-eyebrow">{finalCta.eyebrow}</span>
+            <h2 id="final-cta-title">{finalCta.title}</h2>
+            <p>{finalCta.copy}</p>
             <button className="pbv3-button" type="button" onClick={onRequestAccess}>
-              {FINAL_CTA.button}
+              {finalCta.button}
               <ArrowRight size={17} aria-hidden="true" />
             </button>
-            <small>{FINAL_CTA.note}</small>
+            <small>{finalCta.note}</small>
           </div>
         </section>
       </main>
@@ -900,9 +967,9 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         <div className="pbv3-shell">
           <BrandLockup footer />
           <div className="pbv3-footer__meta">
-            <span>{FOOTER.tagline}</span>
-            <span>{FOOTER.note}</span>
-            <span>© {new Date().getFullYear()} Personal Budget</span>
+            <span>{footer.tagline}</span>
+            <span>{footer.note}</span>
+            <span>{t('landing.footer.copyright', { year: new Date().getFullYear() })}</span>
           </div>
         </div>
       </footer>

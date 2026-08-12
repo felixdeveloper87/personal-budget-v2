@@ -1,5 +1,6 @@
 import { Box, Flex, HStack, SimpleGrid, Text } from '@chakra-ui/react'
-import { formatCurrency, pluralize } from './format'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from './useReportFormat'
 import type { ReportPaymentMethodBreakdown } from '../../types'
 
 export default function ReportPaymentMethodList({
@@ -7,6 +8,8 @@ export default function ReportPaymentMethodList({
 }: {
   items: ReportPaymentMethodBreakdown[]
 }) {
+  const { t } = useI18n()
+  const { currency, count } = useReportFormat()
   return (
     <Box
       className="avoid-break"
@@ -17,12 +20,12 @@ export default function ReportPaymentMethodList({
       p={6}
     >
       <Text fontSize="sm" fontWeight={800} color="gray.900" mb={4}>
-        Payment breakdown
+        {t('reports.paymentBreakdown')}
       </Text>
 
       {items.length === 0 ? (
         <Text fontSize="sm" color="gray.500">
-          No expense payment methods in this period.
+          {t('reports.noPaymentMethods')}
         </Text>
       ) : (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacingX={8} spacingY={4}>
@@ -41,10 +44,10 @@ export default function ReportPaymentMethodList({
               </Box>
               <Flex justify="space-between" mt={1.5}>
                 <Text fontSize="xs" color="gray.500">
-                  {formatCurrency(item.amount)}
+                  {currency(item.amount)}
                 </Text>
                 <Text fontSize="xs" color="gray.500">
-                  {pluralize(item.transactionCount, 'payment')}
+                  {count(item.transactionCount, 'payment')}
                 </Text>
               </Flex>
             </Box>

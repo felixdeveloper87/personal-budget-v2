@@ -3,9 +3,7 @@ import { Badge, Box, Flex, HStack, Icon, IconButton, Text, VStack } from '@chakr
 import type { PaymentMethod } from '../../types'
 import { BankLogo, getBankMeta } from '../ui'
 import { CreditCard, Pencil, Trash2 } from '../ui/icons'
-
-const money = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
-const date = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' })
+import { useI18n } from '../../i18n'
 
 export interface CreditCardTileProps {
   card: PaymentMethod
@@ -32,6 +30,7 @@ export default function CreditCardTile({
   onEdit,
   onDelete,
 }: CreditCardTileProps) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const limit = card.creditLimit ?? 0
   const used = usedCredit ?? currentTotal
   const hasLimit = limit > 0
@@ -76,49 +75,51 @@ export default function CreditCardTile({
             )}
             <Box minW={0}>
               <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt="1px" noOfLines={1}>{card.issuer || 'Credit card'}</Text>
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
             </Box>
           </HStack>
           <HStack spacing={1} flexShrink={0}>
-            {!card.active && <Badge color="var(--pb-ink-soft)" bg="var(--pb-surface-3)" borderRadius="999px" textTransform="uppercase" fontSize="9px" letterSpacing="0.08em">Inactive</Badge>}
-            {onEdit && <TileAction label={`Edit ${card.name}`} icon={Pencil} onClick={onEdit} />}
-            {onDelete && <TileAction label={`Delete ${card.name}`} icon={Trash2} danger onClick={onDelete} />}
+            {!card.active && <Badge color="var(--pb-ink-soft)" bg="var(--pb-surface-3)" borderRadius="999px" textTransform="uppercase" fontSize="9px" letterSpacing="0.08em">{t('cards.inactive')}</Badge>}
+            {onEdit && <TileAction label={t('cards.action.editNamed', { name: card.name })} icon={Pencil} onClick={onEdit} />}
+            {onDelete && <TileAction label={t('cards.action.deleteNamed', { name: card.name })} icon={Trash2} danger onClick={onDelete} />}
           </HStack>
         </HStack>
 
         <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">Current statement</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.currentStatement')}</Text>
           <Text className="num" fontSize="2rem" fontWeight={500} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {hideValues ? '••••••' : money.format(currentTotal)}
+            {hideValues ? '••••••' : formatCurrency(currentTotal)}
           </Text>
         </Box>
 
         <Flex justify="space-between" align="center" pt={3} borderTop="1px solid var(--pb-hair)" gap={3}>
           <Box>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">Statement cycle</Text>
-            <Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">Closes {card.statementClosingDay} · pays {card.paymentDay}</Text>
+            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.statementCycle')}</Text>
+            <Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.closesPays', { closingDay: card.statementClosingDay ?? '—', paymentDay: card.paymentDay ?? '—' })}</Text>
           </Box>
-          <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right">{statementCount} statement{statementCount !== 1 ? 's' : ''}</Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right">
+            {t(statementCount === 1 ? 'cards.statementCount.one' : 'cards.statementCount.other', { count: statementCount })}
+          </Text>
         </Flex>
 
         {nextPaymentDate && (
           <Flex justify="space-between" align="center" bg="var(--pb-surface-2)" borderRadius="12px" px={3} py={2.5}>
-            <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">Next payment</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">Due {date.format(nextPaymentDate)}</Text></Box>
-            <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : money.format(nextPaymentAmount)}</Text>
+            <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.nextPayment')}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.dueDate', { date: formatDate(nextPaymentDate, { day: 'numeric', month: 'short' }) })}</Text></Box>
+            <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : formatCurrency(nextPaymentAmount)}</Text>
           </Flex>
         )}
 
         {hasLimit && (
           <Box>
             <Flex justify="space-between" align="baseline" mb={1.5} gap={2}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">{hideValues ? '••••' : `${Math.round(usedPct)}% of limit`}</Text>
-              <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : `${money.format(remaining)} available`}</Text>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">{hideValues ? '••••' : t('cards.percentOfLimit', { percentage: Math.round(usedPct) })}</Text>
+              <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : t('cards.amountAvailable', { amount: formatCurrency(remaining) })}</Text>
             </Flex>
             <Box h="6px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${usedPct}%`} bg={utilisationColour} borderRadius="full" transition="width .4s ease" /></Box>
           </Box>
         )}
 
-        {card.settlementAccountName && <Text fontSize="xs" color="var(--pb-ink-faint)" noOfLines={1}>Paid from {card.settlementAccountName}</Text>}
+        {card.settlementAccountName && <Text fontSize="xs" color="var(--pb-ink-faint)" noOfLines={1}>{t('cards.paidFrom', { account: card.settlementAccountName })}</Text>}
       </VStack>
     </Box>
   )

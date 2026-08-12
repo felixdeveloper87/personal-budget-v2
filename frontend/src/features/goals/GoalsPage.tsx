@@ -24,6 +24,7 @@ import {
 } from '../../api'
 import { SavingsGoal } from '../../types'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../../components/charts/modal/BalanceBreakEvenPanel'
@@ -38,12 +39,10 @@ import {
   isPennyChallengeGoal,
 } from '../../utils/pennyChallenge'
 
-const money = (value: number) =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
-
 const CHALLENGE_COLLAPSED_KEY = 'goals:challenge-collapsed'
 
 export default function GoalsPage() {
+  const { t, formatCurrency, formatDate } = useI18n()
   const [goals, setGoals] = useState<SavingsGoal[]>([])
   const [contributions, setContributions] = useState<Record<number, number>>({})
   const [challengeBusyId, setChallengeBusyId] = useState<number | null>(null)
@@ -79,9 +78,9 @@ export default function GoalsPage() {
     try {
       setGoals(await listSavingsGoals())
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not load goals', dedupeKey: 'goals-load-failed' })
+      ToastService.apiError(err, { title: t('goals.toast.loadFailed'), dedupeKey: 'goals-load-failed' })
     }
-  }, [])
+  }, [t])
 
   useEffect(() => { void load() }, [load])
 
@@ -92,9 +91,9 @@ export default function GoalsPage() {
       await contributeToSavingsGoal(goal.id, amount)
       setContributions((current) => ({ ...current, [goal.id]: 0 }))
       await load()
-      ToastService.success({ title: amount > 0 ? 'Contribution added' : 'Withdrawal recorded', dedupeKey: `goal-contribution:${goal.id}` })
+      ToastService.success({ title: amount > 0 ? t('goals.toast.contributionAdded') : t('goals.toast.withdrawalRecorded'), dedupeKey: `goal-contribution:${goal.id}` })
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not update goal', dedupeKey: `goal-contribution-failed:${goal.id}` })
+      ToastService.apiError(err, { title: t('goals.toast.updateFailed'), dedupeKey: `goal-contribution-failed:${goal.id}` })
     }
   }
 
@@ -103,7 +102,7 @@ export default function GoalsPage() {
       await archiveSavingsGoal(goal.id)
       await load()
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not archive goal', dedupeKey: `goal-archive-failed:${goal.id}` })
+      ToastService.apiError(err, { title: t('goals.toast.archiveFailed'), dedupeKey: `goal-archive-failed:${goal.id}` })
     }
   }
 
@@ -134,10 +133,10 @@ export default function GoalsPage() {
     try {
       await contributeToSavingsGoal(goal.id, rounded)
       await load()
-      ToastService.success({ title: 'Challenge updated', dedupeKey: `challenge-contribution:${goal.id}` })
+      ToastService.success({ title: t('goals.challenge.toast.updated'), dedupeKey: `challenge-contribution:${goal.id}` })
     } catch (err) {
       ToastService.apiError(err, {
-        title: 'Could not update challenge',
+        title: t('goals.challenge.toast.updateFailed'),
         dedupeKey: `challenge-contribution-failed:${goal.id}`,
       })
     } finally {
@@ -160,9 +159,9 @@ export default function GoalsPage() {
       })
       await load()
       setConfirmStartOpen(false)
-      ToastService.success({ title: 'Challenge started', dedupeKey: 'challenge-started' })
+      ToastService.success({ title: t('goals.challenge.toast.started'), dedupeKey: 'challenge-started' })
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not start challenge', dedupeKey: 'challenge-start-failed' })
+      ToastService.apiError(err, { title: t('goals.challenge.toast.startFailed'), dedupeKey: 'challenge-start-failed' })
     } finally {
       setStartingChallenge(false)
     }
@@ -189,7 +188,7 @@ export default function GoalsPage() {
         <VStack align="stretch" spacing={3}>
           <HStack justify="space-between" px={1}>
             <Text fontSize="2xs" fontWeight={800} color={muted} textTransform="uppercase" letterSpacing="0.08em">
-              Savings challenge
+              {t('goals.challenge.sectionTitle')}
             </Text>
             {challengeGoals.length === 0 ? (
               <Button
@@ -199,7 +198,7 @@ export default function GoalsPage() {
                 leftIcon={<Sparkles size={16} weight="duotone" />}
                 onClick={() => setConfirmStartOpen(true)}
               >
-                Start penny-a-day challenge
+                {t('goals.challenge.start')}
               </Button>
             ) : (
               <Button
@@ -209,7 +208,7 @@ export default function GoalsPage() {
                 rightIcon={<Icon as={challengeCollapsed ? ChevronDown : ChevronUp} boxSize={4} />}
                 onClick={toggleChallengeCollapsed}
               >
-                {challengeCollapsed ? 'Expand' : 'Collapse'}
+                {challengeCollapsed ? t('goals.challenge.expand') : t('goals.challenge.collapse')}
               </Button>
             )}
           </HStack>
@@ -217,9 +216,11 @@ export default function GoalsPage() {
             <Card borderStyle="dashed" borderWidth="1px">
               <CardBody>
                 <Text fontSize="sm" color={muted}>
-                  Save £0.01 on Jan 1, £0.02 on Jan 2, increasing by a penny every day up to
-                  the last day of the year — {money(challengeYearTotal(new Date().getFullYear()))} saved
-                  in total. Starting today seeds it caught up to the current day.
+                  {t('goals.challenge.description', {
+                    first: formatCurrency(0.01),
+                    second: formatCurrency(0.02),
+                    total: formatCurrency(challengeYearTotal(new Date().getFullYear())),
+                  })}
                 </Text>
               </CardBody>
             </Card>
@@ -267,17 +268,19 @@ export default function GoalsPage() {
                   />
                   <HStack justify="space-between">
                     <Box>
-                      <Text fontSize="xs" color={muted}>Saved</Text>
-                      <Text fontWeight={800}>{money(goal.currentAmount)}</Text>
+                      <Text fontSize="xs" color={muted}>{t('goals.saved')}</Text>
+                      <Text fontWeight={800}>{formatCurrency(goal.currentAmount)}</Text>
                     </Box>
                     <Box textAlign="right">
-                      <Text fontSize="xs" color={muted}>Target</Text>
-                      <Text fontWeight={800}>{money(goal.targetAmount)}</Text>
+                      <Text fontSize="xs" color={muted}>{t('goals.target')}</Text>
+                      <Text fontWeight={800}>{formatCurrency(goal.targetAmount)}</Text>
                     </Box>
                   </HStack>
                   <Text fontSize="sm" color={muted}>
-                    {money(goal.remainingAmount)} remaining
-                    {goal.targetDate ? ` - target ${new Date(`${goal.targetDate}T12:00:00`).toLocaleDateString('en-GB')}` : ''}
+                    {t('goals.remaining', { amount: formatCurrency(goal.remainingAmount) })}
+                    {goal.targetDate
+                      ? ` · ${t('goals.targetDate', { date: formatDate(goal.targetDate) })}`
+                      : ''}
                   </Text>
                   <HStack>
                     <NumberInput
@@ -286,12 +289,12 @@ export default function GoalsPage() {
                       value={contributions[goal.id] ?? 0}
                       onChange={(_, value) => setContributions((current) => ({ ...current, [goal.id]: value || 0 }))}
                     >
-                      <NumberInputField placeholder="Contribution" />
+                      <NumberInputField placeholder={t('goals.contributionPlaceholder')} />
                     </NumberInput>
-                    <Button colorScheme="teal" onClick={() => contribute(goal)}>Apply</Button>
+                    <Button colorScheme="teal" onClick={() => contribute(goal)}>{t('goals.apply')}</Button>
                   </HStack>
                   <Button size="sm" variant="ghost" colorScheme="red" onClick={() => archive(goal)}>
-                    Archive goal
+                    {t('goals.archive')}
                   </Button>
                 </VStack>
               </CardBody>

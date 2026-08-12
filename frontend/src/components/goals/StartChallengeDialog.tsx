@@ -15,9 +15,7 @@ import {
 } from '@chakra-ui/react'
 import { Sparkles } from '../ui/icons'
 import { challengeYearTotal, expectedCumulativeToday } from '../../utils/pennyChallenge'
-
-const money = (value: number) =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+import { useI18n } from '../../i18n'
 
 export interface StartChallengeDialogProps {
   isOpen: boolean
@@ -37,6 +35,7 @@ export default function StartChallengeDialog({
   onConfirm,
   isLoading = false,
 }: StartChallengeDialogProps) {
+  const { t, formatCurrency } = useI18n()
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
   const surfaceBg = 'var(--pb-surface)'
@@ -85,7 +84,7 @@ export default function StartChallengeDialog({
             </Box>
             <VStack align="flex-start" spacing={0}>
               <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
-                Start penny-a-day challenge
+                {t('goals.challenge.start')}
               </Text>
               <Text fontSize="xs" color={captionColor}>
                 {year}
@@ -96,21 +95,23 @@ export default function StartChallengeDialog({
           <AlertDialogBody px={6} pb={4}>
             <VStack align="stretch" spacing={3}>
               <Text fontSize="sm" color={captionColor}>
-                Save £0.01 on Jan 1, £0.02 on Jan 2, increasing by a penny every day up to the
-                last day of the year — {money(total)} in total.
+                {t('goals.challenge.dialog.description', {
+                  first: formatCurrency(0.01),
+                  second: formatCurrency(0.02),
+                  total: formatCurrency(total),
+                })}
               </Text>
               <Box p={4} bg={previewBg} border="1px solid" borderColor={previewBorder} borderRadius="lg">
                 <HStack justify="space-between">
                   <Text fontSize="sm" color={captionColor}>
-                    Starts caught up to today
+                    {t('goals.challenge.dialog.seedLabel')}
                   </Text>
                   <Text fontSize="md" fontWeight={800} color={titleColor}>
-                    {money(seed)}
+                    {formatCurrency(seed)}
                   </Text>
                 </HStack>
                 <Text fontSize="xs" color={captionColor} mt={1}>
-                  A goal will be created already holding this amount. You can adjust or archive it
-                  anytime.
+                  {t('goals.challenge.dialog.seedDescription')}
                 </Text>
               </Box>
             </VStack>
@@ -118,18 +119,18 @@ export default function StartChallengeDialog({
 
           <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={previewBorder} gap={2}>
             <Button ref={cancelRef} onClick={onClose} variant="ghost" fontSize="sm" fontWeight={600}>
-              Cancel
+              {t('goals.challenge.dialog.cancel')}
             </Button>
             <Button
               onClick={onConfirm}
               isLoading={isLoading}
-              loadingText="Starting…"
+              loadingText={t('goals.challenge.dialog.starting')}
               colorScheme="orange"
               fontSize="sm"
               fontWeight={700}
               leftIcon={<Icon as={Sparkles} boxSize={4} />}
             >
-              Start challenge
+              {t('goals.challenge.dialog.start')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

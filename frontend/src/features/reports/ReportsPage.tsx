@@ -34,27 +34,8 @@ import type {
   ReportTransactionItem,
 } from '../../types'
 import { ToastService } from '../../services/toast'
-import { formatAccountMovement } from '../../components/reports/format'
-
-const currencyFormatter = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-})
-
-const numberFormatter = new Intl.NumberFormat('en-GB')
-
-function formatCurrency(value: number) {
-  return currencyFormatter.format(Number(value) || 0)
-}
-
-function formatDate(value: string) {
-  if (!value) return '-'
-  return new Date(`${value}T00:00:00`).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
-}
+import { useI18n } from '../../i18n'
+import { useReportFormat } from '../../components/reports/useReportFormat'
 
 function fileDate(date: Date) {
   const year = date.getFullYear()
@@ -147,6 +128,8 @@ function CategoryBars({
   items: ReportCategoryBreakdown[]
   tone: 'income' | 'expense'
 }) {
+  const { t } = useI18n()
+  const { categoryLabel, currency } = useReportFormat()
   const fillColor = REPORT_TONES[tone].strong
 
   return (
@@ -156,17 +139,17 @@ function CategoryBars({
       </Text>
       {items.length === 0 ? (
         <Text fontSize="sm" color="var(--pb-ink-soft)">
-          No data for this period.
+          {t('reports.noPeriodData')}
         </Text>
       ) : (
         items.slice(0, 6).map((item) => (
           <Box key={item.category}>
             <HStack justify="space-between" spacing={3} mb={1}>
               <Text fontSize="sm" color="var(--pb-ink)" fontWeight={600} noOfLines={1}>
-                {item.category}
+                {categoryLabel(item.category)}
               </Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
-                {formatCurrency(item.amount)} - {item.percentage}%
+                {currency(item.amount)} — {item.percentage}%
               </Text>
             </HStack>
             <Box h="8px" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
@@ -180,12 +163,14 @@ function CategoryBars({
 }
 
 function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] }) {
+  const { t } = useI18n()
+  const { currency, count } = useReportFormat()
   if (items.length === 0) return null
 
   return (
     <VStack align="stretch" spacing={3}>
       <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
-        Payment methods
+        {t('reports.paymentMethods')}
       </Text>
       {items.slice(0, 6).map((item) => (
         <Box key={item.name}>
@@ -195,7 +180,7 @@ function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] })
             </Text>
             <HStack spacing={2} flexShrink={0}>
               <Text fontSize="xs" color="var(--pb-ink)" fontWeight={700}>
-                {formatCurrency(item.amount)}
+                {currency(item.amount)}
               </Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)">
                 {item.percentage}%
@@ -211,7 +196,7 @@ function PaymentMethodBars({ items }: { items: ReportPaymentMethodBreakdown[] })
             />
           </Box>
           <Text fontSize="xs" color="var(--pb-ink-soft)" mt={0.5}>
-            {item.transactionCount} {item.transactionCount === 1 ? 'transaction' : 'transactions'}
+            {count(item.transactionCount, 'transaction')}
           </Text>
         </Box>
       ))}
@@ -228,6 +213,8 @@ function TransactionTable({
   transactions: ReportTransactionItem[]
   tone: 'income' | 'expense'
 }) {
+  const { t } = useI18n()
+  const { accountMovement, categoryLabel, currency, date } = useReportFormat()
   const amountColor = REPORT_TONES[tone].color
 
   return (
@@ -237,7 +224,7 @@ function TransactionTable({
       </Text>
       {transactions.length === 0 ? (
         <Text fontSize="sm" color="var(--pb-ink-soft)">
-          No transactions for this period.
+          {t('reports.noTransactions')}
         </Text>
       ) : (
         <VStack
@@ -263,19 +250,19 @@ function TransactionTable({
             >
               <VStack align="flex-start" spacing={0} minW={0}>
                 <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
-                  {tx.description || tx.category}
+                  {tx.description || categoryLabel(tx.category)}
                 </Text>
                 <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
-                  {formatDate(tx.paymentDate)} - {tx.category}
+                  {date(tx.paymentDate)} — {categoryLabel(tx.category)}
                 </Text>
-                {formatAccountMovement(tx) ? (
+                {accountMovement(tx) ? (
                   <Text fontSize="xs" color="var(--pb-forest-2)" noOfLines={1}>
-                    {formatAccountMovement(tx)}
+                    {accountMovement(tx)}
                   </Text>
                 ) : null}
               </VStack>
               <Text fontSize="sm" fontWeight={800} color={amountColor} flexShrink={0}>
-                {formatCurrency(tx.amount)}
+                {currency(tx.amount)}
               </Text>
             </Flex>
           ))}
@@ -294,6 +281,7 @@ function ReportsPageHeader({
   onGoToToday: () => void
   onExport: () => void
 }) {
+  const { t } = useI18n()
   return (
     <Flex w="full" minW={0} justify={{ base: 'stretch', sm: 'flex-end' }} px={{ base: 1, sm: 2 }}>
         <HStack spacing={2} justify={{ base: 'flex-start', sm: 'flex-end' }}>
@@ -326,7 +314,7 @@ function ReportsPageHeader({
             _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
             onClick={onGoToToday}
           >
-            Today
+            {t('reports.today')}
           </Button>
           <Button
             size="sm"
@@ -342,7 +330,7 @@ function ReportsPageHeader({
             _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
             onClick={onExport}
           >
-            Export PDF
+            {t('reports.exportPdf')}
           </Button>
         </HStack>
       </Flex>
@@ -350,6 +338,8 @@ function ReportsPageHeader({
 }
 
 export default function ReportsPage() {
+  const { t, formatNumber } = useI18n()
+  const { currency, date, insights, periodLabel: localizedPeriodLabel } = useReportFormat()
   const {
     selectedDate,
     selectedPeriod,
@@ -373,7 +363,7 @@ export default function ReportsPage() {
         if (active) {
           setReport(null)
           ToastService.apiError(err, {
-            title: 'Could not load report',
+            title: t('reports.loadError'),
             dedupeKey: 'report-load-failed',
           })
         }
@@ -384,7 +374,7 @@ export default function ReportsPage() {
     return () => {
       active = false
     }
-  }, [selectedPeriod, selectedDate])
+  }, [selectedPeriod, selectedDate, t])
 
   const handleExport = useCallback(() => {
     const params = new URLSearchParams({
@@ -405,37 +395,43 @@ export default function ReportsPage() {
 
     return [
       {
-        label: 'Income',
-        value: formatCurrency(report.totalIncome),
-        detail: `${numberFormatter.format(report.incomeCount)} incoming records`,
+        label: t('reports.income'),
+        value: currency(report.totalIncome),
+        detail: t(`reports.incomingRecords_${report.incomeCount === 1 ? 'one' : 'other'}`, {
+          count: formatNumber(report.incomeCount),
+        }),
         icon: TrendingUp,
         accent: 'income' as const,
       },
       {
-        label: 'Expenses',
-        value: formatCurrency(report.totalExpense),
-        detail: `${numberFormatter.format(report.expenseCount)} outgoing records`,
+        label: t('reports.expenses'),
+        value: currency(report.totalExpense),
+        detail: t(`reports.outgoingRecords_${report.expenseCount === 1 ? 'one' : 'other'}`, {
+          count: formatNumber(report.expenseCount),
+        }),
         icon: TrendingDown,
         accent: 'expense' as const,
       },
       {
-        label: 'Balance',
-        value: formatCurrency(report.balance),
-        detail: 'Income minus expenses',
+        label: t('reports.balance'),
+        value: currency(report.balance),
+        detail: t('reports.incomeMinusExpenses'),
         icon: DollarSign,
         accent: balanceTone,
       },
       {
-        label: 'Average expense',
-        value: formatCurrency(report.averageExpense),
-        detail: `${numberFormatter.format(report.transactionCount)} total transactions`,
+        label: t('reports.averageExpense'),
+        value: currency(report.averageExpense),
+        detail: t(`reports.totalTransactions_${report.transactionCount === 1 ? 'one' : 'other'}`, {
+          count: formatNumber(report.transactionCount),
+        }),
         icon: Wallet,
         accent: 'brand' as const,
       },
     ]
-  }, [report])
+  }, [currency, formatNumber, report, t])
 
-  const periodLabel = report?.periodLabel || formatLabel()
+  const periodLabel = report ? localizedPeriodLabel(report) : formatLabel()
 
   return (
     <Box
@@ -474,7 +470,7 @@ export default function ReportsPage() {
                 <VStack py={14} spacing={3}>
                   <Spinner color="var(--pb-forest-2)" />
                   <Text fontSize="sm" color="var(--pb-ink-soft)">
-                    Preparing report...
+                    {t('reports.preparing')}
                   </Text>
                 </VStack>
               ) : report ? (
@@ -490,12 +486,12 @@ export default function ReportsPage() {
                       <VStack align="stretch" spacing={4}>
                         <SectionHeader
                           icon={CalendarClock}
-                          title="Executive summary"
-                          caption={`${formatDate(report.startDate)} - ${formatDate(report.endDate)}`}
+                          title={t('reports.executiveSummary')}
+                          caption={`${date(report.startDate)} — ${date(report.endDate)}`}
                           accent="teal"
                         />
                         <VStack align="stretch" spacing={2}>
-                          {report.insights.map((insight) => (
+                          {insights(report).map((insight) => (
                             <HStack key={insight} spacing={2} align="flex-start">
                               <Badge
                                 bg="var(--pb-tint-green)"
@@ -520,22 +516,22 @@ export default function ReportsPage() {
                       <VStack align="stretch" spacing={4}>
                         <SectionHeader
                           icon={Wallet}
-                          title="Commitments"
-                          caption="Installment and recurring impact"
+                          title={t('reports.commitments')}
+                          caption={t('reports.commitmentsCaption')}
                           accent="amber"
                         />
                         <SimpleGrid columns={2} spacing={3}>
                           <MetricCard
-                            label="Installments"
-                            value={formatCurrency(report.installmentExpenseTotal)}
-                            detail="Expense total from installments"
+                            label={t('reports.installments')}
+                            value={currency(report.installmentExpenseTotal)}
+                            detail={t('reports.installmentExpense')}
                             icon={CalendarClock}
                             accent="commitment"
                           />
                           <MetricCard
-                            label="Recurring"
-                            value={formatCurrency(report.recurringExpenseTotal)}
-                            detail="Expense total from fixed payments"
+                            label={t('reports.recurring')}
+                            value={currency(report.recurringExpenseTotal)}
+                            detail={t('reports.fixedExpense')}
                             icon={Wallet}
                             accent="commitment"
                           />
@@ -545,8 +541,8 @@ export default function ReportsPage() {
                   </SimpleGrid>
 
                   <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={5}>
-                    <CategoryBars title="Expense categories" items={report.expenseCategories} tone="expense" />
-                    <CategoryBars title="Income categories" items={report.incomeCategories} tone="income" />
+                    <CategoryBars title={t('reports.expenseCategories')} items={report.expenseCategories} tone="expense" />
+                    <CategoryBars title={t('reports.incomeCategories')} items={report.incomeCategories} tone="income" />
                   </SimpleGrid>
 
                   {report.paymentMethods.length > 0 && (
@@ -558,13 +554,13 @@ export default function ReportsPage() {
                   )}
 
                   <SimpleGrid columns={{ base: 1, lg: 2 }} spacing={5}>
-                    <TransactionTable title="Largest expenses" transactions={report.topExpenses} tone="expense" />
-                    <TransactionTable title="Largest income" transactions={report.topIncome} tone="income" />
+                    <TransactionTable title={t('reports.largestExpenses')} transactions={report.topExpenses} tone="expense" />
+                    <TransactionTable title={t('reports.largestIncome')} transactions={report.topIncome} tone="income" />
                   </SimpleGrid>
                 </VStack>
               ) : (
                 <Text fontSize="sm" color="var(--pb-ink-soft)">
-                  No report data available.
+                  {t('reports.noData')}
                 </Text>
               )}
             </Box>

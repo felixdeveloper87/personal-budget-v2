@@ -1,6 +1,7 @@
 import { Box, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { formatCurrency } from './format'
 import type { ReportResponse } from '../../types'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from './useReportFormat'
 
 function CommitmentTile({
   label,
@@ -29,6 +30,8 @@ function CommitmentTile({
 }
 
 export default function ReportCommitments({ report }: { report: ReportResponse }) {
+  const { t } = useI18n()
+  const { currency } = useReportFormat()
   return (
     <Box
       className="avoid-break"
@@ -42,23 +45,23 @@ export default function ReportCommitments({ report }: { report: ReportResponse }
       <VStack align="stretch" spacing={4}>
         <Box>
           <Text fontSize="sm" fontWeight={800} color="gray.900">
-            Commitments
+            {t('reports.commitments')}
           </Text>
           <Text fontSize="xs" color="gray.500" mt={0.5}>
-            Installments and fixed payments
+            {t('reports.installmentsAndFixed')}
           </Text>
         </Box>
         <SimpleGrid columns={2} spacing={3}>
           <CommitmentTile
-            label="Installments"
-            value={formatCurrency(report.installmentExpenseTotal)}
-            caption="Expense from installments"
+            label={t('reports.installments')}
+            value={currency(report.installmentExpenseTotal)}
+            caption={t('reports.expenseFromInstallments')}
             accent="purple.600"
           />
           <CommitmentTile
-            label="Recurring"
-            value={formatCurrency(report.recurringExpenseTotal)}
-            caption="Expense from fixed payments"
+            label={t('reports.recurring')}
+            value={currency(report.recurringExpenseTotal)}
+            caption={t('reports.expenseFromFixed')}
             accent="blue.600"
           />
         </SimpleGrid>

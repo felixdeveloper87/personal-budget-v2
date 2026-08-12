@@ -13,12 +13,9 @@ import { ToastService } from '../../services/toast'
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import Segmented from '../dashboard/components/Segmented'
+import { useI18n } from '../../i18n'
 
 type InstallmentView = 'plans' | 'statements'
-const INSTALLMENT_VIEWS: Array<{ value: InstallmentView; label: string }> = [
-  { value: 'plans', label: 'Plans' },
-  { value: 'statements', label: 'Statements' },
-]
 
 interface InstallmentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -27,8 +24,6 @@ interface InstallmentsPageProps {
   /** Notify the host so a shared summary can refresh after a reload/edit. */
   onDataChange?: () => void
 }
-
-const money = (value: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
 
 /**
  * Total installment amount actually due in the current calendar month — sums the
@@ -53,6 +48,11 @@ export function currentMonthInstallmentTotal(plans: InstallmentPlan[]): number {
 }
 
 export default function InstallmentsPage({ onPageChange, embedded = false, onDataChange }: InstallmentsPageProps) {
+  const { t } = useI18n()
+  const installmentViews: Array<{ value: InstallmentView; label: string }> = [
+    { value: 'plans', label: t('installments.views.plans') },
+    { value: 'statements', label: t('installments.views.statements') },
+  ]
   const [plans, setPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
@@ -64,11 +64,11 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
       setPlans(await listInstallmentPlans())
       onDataChange?.()
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not load installment plans', dedupeKey: 'installments-page-load-failed' })
+      ToastService.apiError(err, { title: t('installments.toast.loadFailed'), dedupeKey: 'installments-page-load-failed' })
     } finally {
       setLoading(false)
     }
-  }, [onDataChange])
+  }, [onDataChange, t])
 
   useEffect(() => { void load() }, [load])
 
@@ -87,7 +87,10 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
     return { active, completed, remaining, paid, monthly }
   }, [plans])
 
-  const statements = useMemo<StatementMonth[]>(() => buildStatements(summary.active), [summary.active])
+  const statements = useMemo<StatementMonth[]>(
+    () => buildStatements(summary.active, t('installments.planFallback')),
+    [summary.active, t],
+  )
 
   const body = (
     <>
@@ -99,7 +102,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
 
             <MotionBox variants={riseV}>
               <Flex justify="center">
-                <Segmented options={INSTALLMENT_VIEWS} value={view} onChange={setView} aria-label="Installments view" />
+                <Segmented options={installmentViews} value={view} onChange={setView} aria-label={t('installments.viewLabel')} />
               </Flex>
             </MotionBox>
 
@@ -108,7 +111,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
                 {summary.active.length || summary.completed.length ? (
                   <InstallmentPlansBoard active={summary.active} completed={summary.completed} onOpenPlan={setSelectedPlan} />
                 ) : (
-                  <EmptyState title="No active installments" body="New plans created from a transaction will appear here with their remaining payments." />
+                  <EmptyState title={t('installments.empty.plansTitle')} body={t('installments.empty.plansBody')} />
                 )}
               </MotionBox>
             ) : (
@@ -116,7 +119,7 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
                 {statements.length > 0 ? (
                   <InstallmentStatements months={statements} />
                 ) : (
-                  <EmptyState title="No upcoming statements" body="Monthly statements appear here once you have active plans with payments ahead." />
+                  <EmptyState title={t('installments.empty.statementsTitle')} body={t('installments.empty.statementsBody')} />
                 )}
               </MotionBox>
             )}
@@ -139,14 +142,15 @@ export default function InstallmentsPage({ onPageChange, embedded = false, onDat
 }
 
 function InstallmentsHero({ summary }: { summary: { active: InstallmentPlan[]; remaining: number; paid: number; monthly: number } }) {
-  return <Box overflow="hidden" position="relative" borderRadius="14px" bg="var(--pb-hero)" color="var(--pb-hero-ink)" boxShadow="var(--pb-shadow-lift)" border="1px solid var(--pb-hero-line)" px="clamp(1rem, 2.4vw, 1.4rem)" py="clamp(0.65rem, 1.5vw, 0.95rem)"><Box position="absolute" w="180px" h="180px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="-55px" top="-105px" /><Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={3} align={{ lg: 'center' }}><HStack spacing={3} align="baseline"><Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" opacity={0.76} whiteSpace="nowrap">Monthly load</Text><Text className="num" fontSize={{ base: '1.5rem', md: '1.85rem' }} fontWeight={500} lineHeight="1" letterSpacing="-0.035em" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(summary.monthly)}</Text></HStack><SimpleGrid columns={{ base: 2, lg: 3 }} spacing={{ base: 2, md: 3.5 }} minW={{ lg: '300px' }}><HeroMetric label="Active plans" value={String(summary.active.length)} /><HeroMetric label="Still to pay" value={money(summary.remaining)} /><HeroMetric label="Already paid" value={money(summary.paid)} /></SimpleGrid></Flex></Box>
+  const { t, formatCurrency } = useI18n()
+  return <Box overflow="hidden" position="relative" borderRadius="14px" bg="var(--pb-hero)" color="var(--pb-hero-ink)" boxShadow="var(--pb-shadow-lift)" border="1px solid var(--pb-hero-line)" px="clamp(1rem, 2.4vw, 1.4rem)" py="clamp(0.65rem, 1.5vw, 0.95rem)"><Box position="absolute" w="180px" h="180px" border="1px solid var(--pb-hero-line)" borderRadius="full" right="-55px" top="-105px" /><Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={3} align={{ lg: 'center' }}><HStack spacing={3} align="baseline"><Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" opacity={0.76} whiteSpace="nowrap">{t('installments.hero.monthlyLoad')}</Text><Text className="num" fontSize={{ base: '1.5rem', md: '1.85rem' }} fontWeight={500} lineHeight="1" letterSpacing="-0.035em" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(summary.monthly)}</Text></HStack><SimpleGrid columns={{ base: 2, lg: 3 }} spacing={{ base: 2, md: 3.5 }} minW={{ lg: '300px' }}><HeroMetric label={t('installments.hero.activePlans')} value={String(summary.active.length)} /><HeroMetric label={t('installments.hero.stillToPay')} value={formatCurrency(summary.remaining)} /><HeroMetric label={t('installments.hero.alreadyPaid')} value={formatCurrency(summary.paid)} /></SimpleGrid></Flex></Box>
 }
 
 function HeroMetric({ label, value }: { label: string; value: string }) { return <Box><Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" opacity={0.68}>{label}</Text><Text className="num" fontSize={{ base: 'md', md: 'lg' }} fontWeight={500} mt="1px" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text></Box> }
 
-function planTitleOf(plan: InstallmentPlan): string {
+function planTitleOf(plan: InstallmentPlan, fallback: string): string {
   const first = plan.transactions[0]
-  return first?.description ? getInstallmentPlanTitle(first.description) : 'Installment plan'
+  return first?.description ? getInstallmentPlanTitle(first.description) : fallback
 }
 
 /** Master-detail board for installment plans — a sidebar menu of plans on the
@@ -160,6 +164,7 @@ function InstallmentPlansBoard({
   completed: InstallmentPlan[]
   onOpenPlan: (plan: InstallmentPlan) => void
 }) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const plans = useMemo(() => [...active, ...completed], [active, completed])
   const [selectedId, setSelectedId] = useState<number>(() => plans[0]?.id ?? -1)
 
@@ -176,7 +181,7 @@ function InstallmentPlansBoard({
   const paidIn = (plan: InstallmentPlan) => plan.transactions.filter((t) => new Date(`${t.date}T00:00:00`).getTime() < now).length
   const selectedPaid = paidIn(selected)
   const selectedProgress = selected.totalInstallments > 0 ? Math.min(100, Math.round((selectedPaid / selected.totalInstallments) * 100)) : 0
-  const selectedCaption = [selected.transactions[0]?.category, selected.paymentMethodName ?? 'No card', selected.accountName ?? 'No account'].filter(Boolean).join(' · ')
+  const selectedCaption = [selected.transactions[0]?.category ? categoryLabel(selected.transactions[0].category) : '', selected.paymentMethodName ?? t('installments.noCard'), selected.accountName ?? t('installments.noAccount')].filter(Boolean).join(' · ')
   const rows = [...selected.transactions].sort((a, b) => a.date.localeCompare(b.date))
 
   return (
@@ -186,8 +191,8 @@ function InstallmentPlansBoard({
           <Icon as={CreditCard} boxSize={4} weight="duotone" />
         </Flex>
         <Box>
-          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">Installment plans</Text>
-          <Text fontSize="xs" color="var(--pb-ink-soft)">Select a plan to see its schedule</Text>
+          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">{t('installments.plans.title')}</Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)">{t('installments.plans.select')}</Text>
         </Box>
       </HStack>
 
@@ -195,7 +200,7 @@ function InstallmentPlansBoard({
         {/* Plan menu */}
         <Flex
           as="nav"
-          aria-label="Installment plans"
+          aria-label={t('installments.plans.title')}
           direction={{ base: 'row', md: 'column' }}
           gap={1.5}
           flexShrink={0}
@@ -230,7 +235,7 @@ function InstallmentPlansBoard({
                 <HStack spacing={1.5} minW={0}>
                   {past && <Icon as={CheckCircle2} boxSize={3} color="var(--pb-income)" flexShrink={0} />}
                   <Text fontSize="sm" fontWeight={isSel ? 600 : 500} color={isSel ? 'var(--pb-ink)' : 'var(--pb-ink-soft)'} noOfLines={1}>
-                    {planTitleOf(plan)}
+                    {planTitleOf(plan, t('installments.planFallback'))}
                   </Text>
                 </HStack>
                 <Flex justify="space-between" align="baseline" gap={2} mt={0.5}>
@@ -238,7 +243,7 @@ function InstallmentPlansBoard({
                     {paidIn(plan)}/{plan.totalInstallments}
                   </Text>
                   <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {money(plan.installmentValue)}
+                    {formatCurrency(plan.installmentValue)}
                   </Text>
                 </Flex>
               </Box>
@@ -248,16 +253,16 @@ function InstallmentPlansBoard({
 
         {/* Selected plan detail */}
         <Box flex={1} minW={0} borderRadius="13px" border="1px solid var(--pb-hair)" bg="var(--pb-surface-2)" overflow="hidden">
-          <Box as="button" type="button" onClick={() => onOpenPlan(selected)} w="full" textAlign="left" _hover={{ bg: 'var(--pb-surface-3)' }} transition="background .16s ease" aria-label="Open plan details">
+          <Box as="button" type="button" onClick={() => onOpenPlan(selected)} w="full" textAlign="left" _hover={{ bg: 'var(--pb-surface-3)' }} transition="background .16s ease" aria-label={t('installments.openDetails')}>
             <Flex justify="space-between" align="center" gap={3} px={3.5} py={3} borderBottom="1px solid var(--pb-hair)">
               <Box minW={0}>
-                <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{planTitleOf(selected)}</Text>
+                <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{planTitleOf(selected, t('installments.planFallback'))}</Text>
                 <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{selectedCaption}</Text>
               </Box>
               <HStack spacing={2} flexShrink={0}>
                 <VStack align="flex-end" spacing={0}>
-                  <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">Per month</Text>
-                  <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(selected.installmentValue)}</Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('installments.perMonth')}</Text>
+                  <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(selected.installmentValue)}</Text>
                 </VStack>
                 <Icon as={ChevronRight} boxSize={4} color="var(--pb-ink-faint)" />
               </HStack>
@@ -267,7 +272,7 @@ function InstallmentPlansBoard({
           {/* Progress */}
           <Box px={3.5} pt={3} pb={1}>
             <Flex justify="space-between" align="baseline" mb="4px">
-              <Text fontSize="xs" color="var(--pb-ink-soft)">{selectedPaid}/{selected.totalInstallments} paid</Text>
+              <Text fontSize="xs" color="var(--pb-ink-soft)">{t('installments.paidProgress', { paid: selectedPaid, total: selected.totalInstallments })}</Text>
               <Text fontSize="xs" fontWeight={700} color="var(--pb-forest-2)">{selectedProgress}%</Text>
             </Flex>
             <Box h="5px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
@@ -284,15 +289,15 @@ function InstallmentPlansBoard({
                 <Flex key={tx.id} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop="1px solid var(--pb-hair)">
                   <HStack spacing={3} minW={0}>
                     <Box w={9} flexShrink={0} textAlign="center" borderRight="1px solid var(--pb-hair)" pr={2}>
-                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{due.toLocaleDateString('en-GB', { month: 'short' })}</Text>
+                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{formatDate(due, { month: 'short' })}</Text>
                       <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>{due.getDate()}</Text>
                     </Box>
                     <VStack align="stretch" spacing={0} minW={0}>
-                      <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>Installment {tx.installmentNumber}/{selected.totalInstallments}</Text>
-                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color={isPaid ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} letterSpacing="0.06em" noOfLines={1}>{isPaid ? 'Paid' : 'Upcoming'} · {due.toLocaleDateString('en-GB', { year: 'numeric' })}</Text>
+                      <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>{t('installments.installmentProgress', { number: tx.installmentNumber, total: selected.totalInstallments })}</Text>
+                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color={isPaid ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} letterSpacing="0.06em" noOfLines={1}>{isPaid ? t('installments.status.paid') : t('installments.status.upcoming')} · {formatDate(due, { year: 'numeric' })}</Text>
                     </VStack>
                   </HStack>
-                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color={isPaid ? 'var(--pb-ink-faint)' : 'var(--pb-ink-soft)'} flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(tx.amount)}</Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color={isPaid ? 'var(--pb-ink-faint)' : 'var(--pb-ink-soft)'} flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(tx.amount)}</Text>
                 </Flex>
               )
             })}
@@ -327,13 +332,13 @@ interface StatementMonth {
 
 /** Group active-plan installments by the calendar month they fall due, from the
  *  current month onward. Each month becomes a "statement" of what is owed. */
-function buildStatements(plans: InstallmentPlan[]): StatementMonth[] {
+function buildStatements(plans: InstallmentPlan[], fallbackPlanLabel: string): StatementMonth[] {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
   const map = new Map<string, StatementMonth>()
 
   for (const plan of plans) {
-    const planLabel = plan.paymentMethodName ?? plan.accountName ?? 'Plan'
+    const planLabel = plan.paymentMethodName ?? plan.accountName ?? fallbackPlanLabel
     for (const tx of plan.transactions) {
       const due = new Date(`${tx.date}T00:00:00`)
       const monthStart = new Date(due.getFullYear(), due.getMonth(), 1)
@@ -358,6 +363,7 @@ function buildStatements(plans: InstallmentPlan[]): StatementMonth[] {
 }
 
 function InstallmentStatements({ months }: { months: StatementMonth[] }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const [selectedKey, setSelectedKey] = useState<string>(() => months[0]?.key ?? '')
 
   // Keep the selection valid as data loads/changes; fall back to the first month.
@@ -377,8 +383,8 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
           <Icon as={CalendarClock} boxSize={4} weight="duotone" />
         </Flex>
         <Box>
-          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">Monthly statements</Text>
-          <Text fontSize="xs" color="var(--pb-ink-soft)">Installments grouped by the month they fall due</Text>
+          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">{t('installments.statements.title')}</Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)">{t('installments.statements.subtitle')}</Text>
         </Box>
       </HStack>
 
@@ -386,7 +392,7 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
         {/* Month menu */}
         <Flex
           as="nav"
-          aria-label="Statement months"
+          aria-label={t('installments.statements.monthsAria')}
           direction={{ base: 'row', md: 'column' }}
           gap={1.5}
           flexShrink={0}
@@ -417,14 +423,14 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
                 transition="all .15s ease"
               >
                 <Text fontSize="sm" fontWeight={isActive ? 600 : 500} color={isActive ? 'var(--pb-ink)' : 'var(--pb-ink-soft)'} noOfLines={1}>
-                  {month.date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}
+                  {formatDate(month.date, { month: 'short', year: 'numeric' })}
                 </Text>
                 <Flex justify="space-between" align="baseline" gap={2} mt={0.5}>
                   <Text fontFamily="var(--pb-mono)" fontSize="9px" color="var(--pb-ink-faint)" letterSpacing="0.06em" whiteSpace="nowrap">
-                    {month.items.length} payment{month.items.length !== 1 ? 's' : ''}
+                    {t(month.items.length === 1 ? 'installments.paymentCount.one' : 'installments.paymentCount.other', { count: month.items.length })}
                   </Text>
                   <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {money(month.total)}
+                    {formatCurrency(month.total)}
                   </Text>
                 </Flex>
               </Box>
@@ -436,10 +442,10 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
         <Box flex={1} minW={0} borderRadius="13px" border="1px solid var(--pb-hair)" bg="var(--pb-surface-2)" overflow="hidden">
           <Flex justify="space-between" align="center" gap={3} px={3.5} py={3} borderBottom="1px solid var(--pb-hair)">
             <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)">
-              {selected.date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}
+              {formatDate(selected.date, { month: 'long', year: 'numeric' })}
             </Text>
             <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {money(selected.total)}
+              {formatCurrency(selected.total)}
             </Text>
           </Flex>
           <VStack align="stretch" spacing={0}>
@@ -449,7 +455,7 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
                 <Flex key={item.id} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop={index > 0 ? '1px solid var(--pb-hair)' : undefined}>
                   <HStack spacing={3} minW={0}>
                     <Box w={9} flexShrink={0} textAlign="center" borderRight="1px solid var(--pb-hair)" pr={2}>
-                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{due.toLocaleDateString('en-GB', { month: 'short' })}</Text>
+                      <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">{formatDate(due, { month: 'short' })}</Text>
                       <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>{due.getDate()}</Text>
                     </Box>
                     <VStack align="stretch" spacing={0} minW={0}>
@@ -457,7 +463,7 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
                       <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>{item.label}</Text>
                     </VStack>
                   </HStack>
-                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color="var(--pb-ink-soft)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{money(item.amount)}</Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="13px" fontWeight={500} color="var(--pb-ink-soft)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(item.amount)}</Text>
                 </Flex>
               )
             })}

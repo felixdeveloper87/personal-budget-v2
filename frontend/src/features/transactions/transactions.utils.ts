@@ -1,5 +1,6 @@
 import type { Transaction } from '../../types'
 import { getTransactionDateSource } from '../../utils/transactionDates'
+import type { AppLocale } from '../../i18n'
 import type {
   HabitInsight,
   IconKey,
@@ -159,17 +160,29 @@ export function groupKey(t: TxnVM, view: TxView): string {
 /** Month name / abbreviation → month index (0 = January). */
 const MONTH_TOKENS: Record<string, number> = {
   jan: 0, january: 0,
+  janeiro: 0,
   feb: 1, february: 1,
+  fev: 1, fevereiro: 1,
   mar: 2, march: 2,
+  março: 2, marco: 2,
   apr: 3, april: 3,
+  abr: 3, abril: 3,
   may: 4,
+  maio: 4,
   jun: 5, june: 5,
+  junho: 5,
   jul: 6, july: 6,
+  julho: 6,
   aug: 7, august: 7,
+  ago: 7, agosto: 7,
   sep: 8, sept: 8, september: 8,
+  set: 8, setembro: 8,
   oct: 9, october: 9,
+  out: 9, outubro: 9,
   nov: 10, november: 10,
+  novembro: 10,
   dec: 11, december: 11,
+  dez: 11, dezembro: 11,
 }
 
 export interface ParsedQuery {
@@ -335,15 +348,14 @@ export function parseISO(iso: string): Date {
   return iso.length === 10 ? new Date(`${iso}T00:00:00`) : new Date(iso)
 }
 
-const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
-export function weekdayName(weekday: number): string {
-  return WEEKDAYS[weekday] ?? ''
+export function weekdayName(weekday: number, locale: AppLocale = 'en-GB'): string {
+  if (weekday < 0 || weekday > 6) return ''
+  return new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 7 + weekday))
 }
 
 /** "Tuesday 11 June" */
-export function fmtDayLong(iso: string): string {
-  return parseISO(iso).toLocaleDateString('en-GB', {
+export function fmtDayLong(iso: string, locale: AppLocale = 'en-GB'): string {
+  return parseISO(iso).toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -351,13 +363,13 @@ export function fmtDayLong(iso: string): string {
 }
 
 /** "11 Jun" */
-export function fmtShort(iso: string): string {
-  return parseISO(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+export function fmtShort(iso: string, locale: AppLocale = 'en-GB'): string {
+  return parseISO(iso).toLocaleDateString(locale, { day: 'numeric', month: 'short' })
 }
 
 /** "11 June 2026" */
-export function fmtLong(iso: string): string {
-  return parseISO(iso).toLocaleDateString('en-GB', {
+export function fmtLong(iso: string, locale: AppLocale = 'en-GB'): string {
+  return parseISO(iso).toLocaleDateString(locale, {
     day: 'numeric',
     month: 'long',
     year: 'numeric',

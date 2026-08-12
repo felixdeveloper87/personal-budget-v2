@@ -3,6 +3,7 @@ import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { CheckCircle2, ChevronRight, CreditCard } from '../ui/icons'
 import { InstallmentPlan } from '../../types'
 import { getInstallmentPlanTitle } from '../../utils/installments'
+import { useI18n } from '../../i18n'
 
 interface InstallmentPlanCardProps {
   plan: InstallmentPlan
@@ -15,8 +16,6 @@ interface InstallmentPlanCardProps {
    */
   variant?: 'active' | 'past'
 }
-
-const money = (value: number) => `£${value.toFixed(2)}`
 
 /**
  * True when every installment in the plan has a date in the past — i.e. all
@@ -37,16 +36,17 @@ export default function InstallmentPlanCard({
   onOpen,
   variant = 'active',
 }: InstallmentPlanCardProps) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const isPast = variant === 'past'
   const firstTransaction = plan.transactions[0]
   const title = firstTransaction?.description
     ? getInstallmentPlanTitle(firstTransaction.description)
-    : 'Installment plan'
+    : t('installments.plan.fallbackTitle')
 
   const caption = [
-    firstTransaction?.category,
-    plan.paymentMethodName ?? 'No card',
-    plan.accountName ?? 'No account',
+    firstTransaction?.category ? categoryLabel(firstTransaction.category) : undefined,
+    plan.paymentMethodName ?? t('installments.plan.noCard'),
+    plan.accountName ?? t('installments.plan.noAccount'),
   ]
     .filter(Boolean)
     .join(' · ')
@@ -65,6 +65,7 @@ export default function InstallmentPlanCard({
       as="button"
       type="button"
       onClick={() => onOpen(plan)}
+      aria-label={t('installments.plan.openAria', { title })}
       textAlign="left"
       w="full"
       position="relative"
@@ -105,10 +106,10 @@ export default function InstallmentPlanCard({
         {/* Per-installment amount */}
         <VStack align="flex-end" spacing={0} flexShrink={0} display={{ base: 'none', sm: 'flex' }}>
           <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            Per month
+            {t('installments.plan.perMonth')}
           </Text>
           <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.1" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {money(plan.installmentValue)}
+            {formatCurrency(plan.installmentValue)}
           </Text>
         </VStack>
 
@@ -126,7 +127,7 @@ export default function InstallmentPlanCard({
             >
               <Icon as={CheckCircle2} boxSize={3} strokeWidth={2.5} />
               <Text fontSize="2xs" fontWeight={700} textTransform="uppercase" letterSpacing="0.04em">
-                Completed
+                {t('installments.status.completed')}
               </Text>
             </HStack>
           ) : (

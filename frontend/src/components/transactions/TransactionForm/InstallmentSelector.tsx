@@ -20,6 +20,7 @@ import { useThemeColors } from '../../../hooks/useThemeColors'
 import type { PaymentMethod } from '../../../types'
 import { resolveCardPaymentDate } from '../../../utils/creditCardStatements'
 import ChipCarousel from './ChipCarousel'
+import { useI18n } from '../../../i18n'
 
 interface InstallmentSelectorProps {
   enabled: boolean
@@ -84,6 +85,7 @@ export default function InstallmentSelector({
   showToggle = true,
   card = null,
 }: InstallmentSelectorProps) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const colors = useThemeColors()
   const accentBorder = 'red.400'
   const focusWithinShadow = '0 0 0 3px #f8717120'
@@ -96,7 +98,7 @@ export default function InstallmentSelector({
 
   const formatDue = (date: Date | null) =>
     date
-      ? date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+      ? formatDate(date, { day: '2-digit', month: 'short', year: 'numeric' })
       : '—'
 
   const firstDueDate = (() => {
@@ -199,7 +201,7 @@ export default function InstallmentSelector({
                     lineHeight="1.2"
                     whiteSpace="nowrap"
                   >
-                    Installment plan
+                    {t('form.installmentPlan')}
                   </Text>
                 </Flex>
                 {showToggle && (
@@ -209,7 +211,7 @@ export default function InstallmentSelector({
                     colorScheme="red"
                     size="md"
                     flexShrink={0}
-                    aria-label="Split into installments"
+                    aria-label={t('form.splitInstallmentsAria')}
                   />
                 )}
               </Flex>
@@ -233,7 +235,7 @@ export default function InstallmentSelector({
                     '::-webkit-scrollbar': { display: 'none' },
                   }}
                 >
-                  <InlineField label="Months" w="74px" colors={colors}>
+                  <InlineField label={t('form.months')} w="74px" colors={colors}>
                     <NumberInput
                       value={installments}
                       onChange={(_, val) => onInstallmentsChange(val || 2)}
@@ -262,7 +264,7 @@ export default function InstallmentSelector({
                   </InlineField>
 
                   {!cardSchedule && (
-                    <InlineField label="First payment" w="150px" colors={colors}>
+                    <InlineField label={t('form.firstPayment')} w="150px" colors={colors}>
                       <Input
                         type="date"
                         value={firstInstallmentDate}
@@ -276,7 +278,7 @@ export default function InstallmentSelector({
                     </InlineField>
                   )}
 
-                  <InlineField label="Per month" w="96px" colors={colors}>
+                  <InlineField label={t('form.perMonth')} w="96px" colors={colors}>
                     <Flex
                       align="center"
                       justify="center"
@@ -286,11 +288,11 @@ export default function InstallmentSelector({
                       color={colors.text.primary}
                       {...readOnlyField}
                     >
-                      £{installmentAmount.toFixed(2)}
+                      {formatCurrency(installmentAmount)}
                     </Flex>
                   </InlineField>
 
-                  <InlineField label="Total" w="96px" colors={colors}>
+                  <InlineField label={t('form.total')} w="96px" colors={colors}>
                     <Flex
                       align="center"
                       justify="center"
@@ -300,7 +302,7 @@ export default function InstallmentSelector({
                       color={colors.text.primary}
                       {...readOnlyField}
                     >
-                      £{totalAmount.toFixed(2)}
+                      {formatCurrency(totalAmount)}
                     </Flex>
                   </InlineField>
                 </Flex>
@@ -342,8 +344,11 @@ export default function InstallmentSelector({
                   <HStack spacing={2} align="center">
                     <Icon as={CreditCard} boxSize={3.5} color={accentBorder} flexShrink={0} />
                     <Text fontSize="2xs" color={colors.text.secondary} lineHeight="1.4">
-                      Billed by {cardSchedule.name} · first due {formatDue(firstDueDate)}, then monthly
-                      on day {cardSchedule.paymentDay}.
+                      {t('form.cardInstallmentSchedule', {
+                        card: cardSchedule.name,
+                        date: formatDue(firstDueDate),
+                        day: cardSchedule.paymentDay ?? '—',
+                      })}
                     </Text>
                   </HStack>
                 )}

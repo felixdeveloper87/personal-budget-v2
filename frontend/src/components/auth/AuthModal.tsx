@@ -2,6 +2,7 @@ import {
   lazy,
   Suspense,
   useEffect,
+  useMemo,
   useState,
   type KeyboardEvent,
 } from 'react'
@@ -20,6 +21,7 @@ import { BRAND } from '../layout/header/brand.config'
 import BrandMark from '../brand/BrandMark'
 import LoginForm from './LoginForm'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
+import { useI18n } from '../../i18n'
 
 const RegisterForm = lazy(() => import('./RegisterForm'))
 
@@ -35,29 +37,7 @@ interface AuthTabConfig {
   asideDescription: string
 }
 
-const TABS: ReadonlyArray<AuthTabConfig> = [
-  {
-    id: 'signIn',
-    label: 'Sign in',
-    kicker: 'Welcome back',
-    title: 'Your clear picture is waiting.',
-    description: 'Sign in to continue from exactly where you left your money.',
-    asideTitle: 'Clarity builds over time.',
-    asideDescription:
-      'Every transaction, plan and commitment stays connected in one calm financial record.',
-  },
-  {
-    id: 'signUp',
-    label: 'Create account',
-    kicker: 'Request free access',
-    title: 'Start with a place for every decision.',
-    description:
-      'Create your account now. New accounts are reviewed before they can be activated.',
-    asideTitle: 'A quieter way to know your money.',
-    asideDescription:
-      'Bring personal finances and shared household costs into a view you can actually read.',
-  },
-]
+const TABS: ReadonlyArray<AuthTab> = ['signIn', 'signUp']
 
 interface AuthModalProps {
   isOpen: boolean
@@ -78,6 +58,7 @@ function AuthSeal({ size = 52 }: { size?: number }) {
 }
 
 function BrandLockup({ compact = false }: { compact?: boolean }) {
+  const { t } = useI18n()
   return (
     <HStack spacing={3} minW={0}>
       <AuthSeal size={compact ? 38 : 52} />
@@ -102,7 +83,7 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
           textTransform="uppercase"
           noOfLines={1}
         >
-          {BRAND.tagline}
+          {t('brand.tagline', undefined, BRAND.tagline)}
         </Text>
       </VStack>
     </HStack>
@@ -110,17 +91,18 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
 }
 
 function AuthAside({ tab }: { tab: AuthTabConfig }) {
+  const { t } = useI18n()
   const isSignUp = tab.id === 'signUp'
   const details = isSignUp
     ? [
-        { icon: Check, label: 'Free access, no card required' },
-        { icon: ShieldCheck, label: 'Account review before activation' },
-        { icon: Download, label: 'CSV and PDF exports' },
+        { icon: Check, label: t('auth.aside.freeAccess') },
+        { icon: ShieldCheck, label: t('auth.aside.review') },
+        { icon: Download, label: t('auth.aside.exports') },
       ]
     : [
-        { icon: Lock, label: 'A private financial workspace' },
-        { icon: Check, label: 'Your plans stay connected' },
-        { icon: Download, label: 'Your data stays portable' },
+        { icon: Lock, label: t('auth.aside.privateWorkspace') },
+        { icon: Check, label: t('auth.aside.connectedPlans') },
+        { icon: Download, label: t('auth.aside.portableData') },
       ]
 
   return (
@@ -241,32 +223,46 @@ function AuthAside({ tab }: { tab: AuthTabConfig }) {
         letterSpacing="0.15em"
         textTransform="uppercase"
       >
-        Personal Budget · Private ledger
+        {t('auth.privateLedger')}
       </Text>
     </Flex>
   )
 }
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: AuthModalProps) {
+  const { t } = useI18n()
   const [tab, setTab] = useState<AuthTab>(initialTab)
+
+  const tabs = useMemo(
+    () => TABS.map((id): AuthTabConfig => ({
+      id,
+      label: t(`auth.tab.${id}.label`),
+      kicker: t(`auth.tab.${id}.kicker`),
+      title: t(`auth.tab.${id}.title`),
+      description: t(`auth.tab.${id}.description`),
+      asideTitle: t(`auth.tab.${id}.asideTitle`),
+      asideDescription: t(`auth.tab.${id}.asideDescription`),
+    })),
+    [t],
+  )
 
   useEffect(() => {
     if (isOpen) setTab(initialTab)
   }, [initialTab, isOpen])
 
-  const activeTab = TABS.find((item) => item.id === tab) ?? TABS[0]
+  const activeTab = tabs.find((item) => item.id === tab) ?? tabs[0]
 
   const moveTabFocus = (event: KeyboardEvent<HTMLDivElement>) => {
-    const currentIndex = TABS.findIndex((item) => item.id === tab)
+    const currentIndex = tabs.findIndex((item) => item.id === tab)
     let nextIndex = currentIndex
-    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TABS.length
-    else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + TABS.length) % TABS.length
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length
+    else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
     else if (event.key === 'Home') nextIndex = 0
-    else if (event.key === 'End') nextIndex = TABS.length - 1
+    else if (event.key === 'End') nextIndex = tabs.length - 1
     else return
 
     event.preventDefault()
-    const nextTab = TABS[nextIndex].id
+    const nextTab = tabs[nextIndex].id
     setTab(nextTab)
     window.requestAnimationFrame(() => document.getElementById(`auth-tab-${nextTab}`)?.focus())
   }
@@ -325,7 +321,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
               letterSpacing="0.16em"
               textTransform="uppercase"
             >
-              Secure account access
+              {t('auth.secureAccess')}
             </Text>
             <AppCloseButton
               onClick={onClose}
@@ -341,7 +337,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
           <Box px={{ base: 5, sm: 7, md: 8 }} pt={{ base: 5, md: 6 }}>
             <HStack
               role="tablist"
-              aria-label="Authentication"
+              aria-label={t('auth.authentication')}
               onKeyDown={moveTabFocus}
               spacing={1}
               p={1}
@@ -350,7 +346,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
               borderRadius="999px"
               bg="rgba(244,246,242,0.035)"
             >
-              {TABS.map((item) => {
+              {tabs.map((item) => {
                 const isActive = item.id === tab
                 return (
                   <Button

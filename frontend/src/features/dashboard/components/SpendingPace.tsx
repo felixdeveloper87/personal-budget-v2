@@ -15,7 +15,7 @@ import type { Transaction } from '../../../types'
 import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { cumulativeDailyAmount, daysInMonth } from '../insights'
 import Panel from './Panel'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 type PaceKind = 'expense' | 'income'
 
@@ -42,6 +42,7 @@ export default function CashPace({
   includeCommitments = false,
   onDismiss,
 }: CashPaceProps) {
+  const { t, formatCurrency } = useI18n()
   const reduce = useReducedMotion()
   const reactId = useId()
   const gradientId = `pb-${kind}-pace-${reactId.replace(/[^a-zA-Z0-9]/g, '')}`
@@ -117,7 +118,7 @@ export default function CashPace({
   const deltaColor = isIncome
     ? higherThanPrevious ? 'var(--pb-income-2)' : 'var(--pb-coral)'
     : higherThanPrevious ? 'var(--pb-coral)' : 'var(--pb-income-2)'
-  const title = titleOverride ?? (isIncome ? 'Income pace' : 'Spending pace')
+  const title = titleOverride ?? t(isIncome ? 'dashboard.incomePace' : 'dashboard.spendingPace')
 
   return (
     <Panel h="full">
@@ -142,10 +143,10 @@ export default function CashPace({
                 color="var(--pb-ink)"
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {fmtCurrency(amountSoFar)}
+                {formatCurrency(amountSoFar)}
               </Text>
               <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.08em">
-                BY DAY {elapsedDays}
+                {t('dashboard.byDay', { day: elapsedDays })}
               </Text>
             </HStack>
           </VStack>
@@ -162,14 +163,14 @@ export default function CashPace({
                 >
                   <DeltaIcon size={12} />
                   <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {fmtCurrency(Math.abs(paceDelta))} vs last month
+                    {t('dashboard.vsLastMonth', { amount: formatCurrency(Math.abs(paceDelta)) })}
                   </Text>
                 </HStack>
               )}
               {onDismiss && (
                 <IconButton
-                  aria-label={`Remove ${title} chart from dashboard`}
-                  title={`Remove ${title} chart from dashboard`}
+                  aria-label={t('dashboard.removeChart', { title })}
+                  title={t('dashboard.removeChart', { title })}
                   icon={<X size={14} />}
                   onClick={onDismiss}
                   variant="ghost"
@@ -197,7 +198,12 @@ export default function CashPace({
           h="180px"
           w="full"
           role="img"
-          aria-label={`${title}: ${fmtCurrency(amountSoFar)} by day ${elapsedDays}; ${fmtCurrency(prevTotal)} last month.`}
+          aria-label={t('dashboard.paceChartAria', {
+            title,
+            current: formatCurrency(amountSoFar),
+            day: elapsedDays,
+            previous: formatCurrency(prevTotal),
+          })}
         >
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
@@ -221,7 +227,7 @@ export default function CashPace({
                 axisLine={false}
                 tickLine={false}
                 width={48}
-                tickFormatter={(v: number) => fmtCurrency(v, { notation: 'compact' })}
+                tickFormatter={(v: number) => formatCurrency(v, { notation: 'compact' })}
               />
               <Tooltip
                 cursor={{ stroke: c.tooltipBorder, strokeWidth: 1 }}
@@ -235,10 +241,10 @@ export default function CashPace({
                 }}
                 labelStyle={{ color: c.tooltipText, fontSize: '11px', marginBottom: '4px' }}
                 itemStyle={{ color: c.tooltipText }}
-                labelFormatter={(day) => `Day ${day}`}
+                labelFormatter={(day) => t('dashboard.chartDay', { day: Number(day) })}
                 formatter={(value: number | string, name: string) => [
-                  fmtCurrency(Number(value), { minimumFractionDigits: 2 }),
-                  name === 'current' ? 'This month' : 'Last month',
+                  formatCurrency(Number(value), { minimumFractionDigits: 2 }),
+                  name === 'current' ? t('period.thisMonth') : t('period.lastMonth'),
                 ]}
               />
               <Area
@@ -266,18 +272,18 @@ export default function CashPace({
         {/* Caption */}
         <Text display={isIncome ? 'none' : undefined} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
           {!hasPaceData
-            ? 'No spending recorded this or last month.'
+            ? t('dashboard.noSpendingPace')
             : projected !== null
-            ? `At this pace you'll spend about ${fmtCurrency(projected)} this month — last month closed at ${fmtCurrency(prevTotal)}.`
-            : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
+            ? t('dashboard.spendingProjection', { projected: formatCurrency(projected), previous: formatCurrency(prevTotal) })
+            : t('dashboard.previousPace', { previous: formatCurrency(prevTotal) })}
         </Text>
         {isIncome && (
           <Text fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.5}>
             {!hasPaceData
-              ? 'No income recorded this or last month.'
+              ? t('dashboard.noIncomePace')
               : projected !== null
-              ? `At this pace you'll earn about ${fmtCurrency(projected)} this month. Last month closed at ${fmtCurrency(prevTotal)}.`
-              : `Last month closed at ${fmtCurrency(prevTotal)}. The dashed line is last month's running total.`}
+              ? t('dashboard.incomeProjection', { projected: formatCurrency(projected), previous: formatCurrency(prevTotal) })
+              : t('dashboard.previousPace', { previous: formatCurrency(prevTotal) })}
           </Text>
         )}
       </VStack>

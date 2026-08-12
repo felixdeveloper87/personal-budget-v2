@@ -10,13 +10,12 @@ import CreditCardTile from '../../components/cards/CreditCardTile'
 import CardFormModal from '../../components/cards/CardFormModal'
 import StatementCard from '../../components/cards/StatementCard'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
-const money = new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
-const date = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' })
 
 type CardTotal = {
   total: number
@@ -35,6 +34,7 @@ const isoDate = (value: Date) =>
   `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
 
 export default function CardsPage({ statementTarget = null, onStatementTargetHandled }: CardsPageProps) {
+  const { t } = useI18n()
   const [cards, setCards] = useState<PaymentMethod[]>([])
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -58,11 +58,11 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
       setCards(methods.filter((method) => method.type === 'CREDIT_CARD'))
       setTransactions(txs)
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not load cards', dedupeKey: 'cards-page-load-failed' })
+      ToastService.apiError(err, { title: t('cards.toast.loadFailed'), dedupeKey: 'cards-page-load-failed' })
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
@@ -156,12 +156,12 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
     setDeleting(true)
     try {
       await deletePaymentMethod(cardToDelete.id)
-      ToastService.success({ title: 'Card deleted', dedupeKey: `card-deleted:${cardToDelete.id}` })
+      ToastService.success({ title: t('cards.toast.deleted'), dedupeKey: `card-deleted:${cardToDelete.id}` })
       if (selectedId === cardToDelete.id) setSelectedId(null)
       setCardToDelete(null)
       await load()
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not delete card', dedupeKey: `card-delete-failed:${cardToDelete.id}` })
+      ToastService.apiError(err, { title: t('cards.toast.deleteFailed'), dedupeKey: `card-delete-failed:${cardToDelete.id}` })
     } finally {
       setDeleting(false)
     }
@@ -175,9 +175,9 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
         onClose={() => setCardToDelete(null)}
         onConfirm={confirmDelete}
         isLoading={deleting}
-        title="Delete card"
+        title={t('cards.delete.title')}
         itemName={cardToDelete?.name}
-        description="Removes the card and its statement settings. Transactions are kept."
+        description={t('cards.delete.description')}
       />
     </>
   )
@@ -193,22 +193,22 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
           <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
             <MotionBox variants={riseV}>
               <Button variant="ghost" size="sm" leftIcon={<Icon as={ArrowLeft} boxSize={4} />} onClick={() => setSelectedId(null)} color="var(--pb-ink-soft)" _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }} pl={1}>
-                All cards
+                {t('cards.action.all')}
               </Button>
             </MotionBox>
 
             <MotionBox variants={riseV}><CardFocus card={selectedCard} info={currentTotals.get(selectedCard.id)} hideValues={hideValues} /></MotionBox>
             <MotionBox variants={riseV}>
               <Flex justify="space-between" align="center" gap={3}>
-                <SectionLabel>Statements</SectionLabel>
+                <SectionLabel>{t('cards.statements')}</SectionLabel>
                 <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                  {statements.length} available
+                  {t('cards.availableCount', { count: statements.length })}
                 </Text>
               </Flex>
             </MotionBox>
 
             {statements.length === 0 ? (
-              <MotionBox variants={riseV}><EmptyState text="No charges on this card yet." /></MotionBox>
+              <MotionBox variants={riseV}><EmptyState text={t('cards.empty.noCharges')} /></MotionBox>
             ) : (
               <MotionBox variants={riseV}>
                 <VStack align="stretch" spacing="0.7rem">
@@ -231,7 +231,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
         <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
           {cards.length === 0 ? (
             <MotionBox variants={riseV}>
-              <EmptyState text="No credit cards yet. Add your first card to start tracking statements." onAdd={() => setFormCard(null)} />
+              <EmptyState text={t('cards.empty.noCards')} onAdd={() => setFormCard(null)} />
             </MotionBox>
           ) : (
             <>
@@ -244,7 +244,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
                 />
               </MotionBox>
               <MotionBox variants={riseV}>
-                <SectionLabel>Your cards</SectionLabel>
+                <SectionLabel>{t('cards.yourCards')}</SectionLabel>
               </MotionBox>
               <MotionBox variants={riseV}>
                 <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing="0.9rem">
@@ -276,7 +276,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 function EmptyState({ text, onAdd }: { text: string; onAdd?: () => void }) {
-  return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">No card activity</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text>{onAdd && <Box mt={5}><ActionButton label="Add card" icon={Plus} primary onClick={onAdd} /></Box>}</Flex>
+  const { t } = useI18n()
+  return <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px"><Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={CreditCard} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" /></Flex><Text fontSize="md" fontWeight={500} color="var(--pb-ink)">{t('cards.empty.title')}</Text><Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="390px">{text}</Text>{onAdd && <Box mt={5}><ActionButton label={t('cards.action.add')} icon={Plus} primary onClick={onAdd} /></Box>}</Flex>
 }
 
 function Metric({ label, value, note, emphasis, summary }: { label: string; value: string; note?: string; emphasis?: boolean; summary?: boolean }) {
@@ -332,6 +333,7 @@ function CardsOverview({
   onToggleHide: () => void
   onAddCard: () => void
 }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const available = Math.max(overview.limit - overview.used, 0)
   const utilisation = overview.limit > 0 ? Math.min(100, (overview.used / overview.limit) * 100) : 0
   return (
@@ -364,10 +366,10 @@ function CardsOverview({
             textTransform="uppercase"
             color="var(--pb-summary-ink-faint)"
           >
-            Cards overview
+            {t('cards.overview.title')}
           </Text>
           <Text mt={1} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-summary-ink-soft)">
-            Credit usage and upcoming payments
+            {t('cards.overview.subtitle')}
           </Text>
         </Box>
         <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
@@ -388,12 +390,12 @@ function CardsOverview({
             textTransform="uppercase"
             _hover={{ borderColor: 'var(--pb-summary-ink-faint)', transform: 'translateY(-1px)' }}
           >
-            Add card
+            {t('cards.action.add')}
           </Button>
           <Button
-            aria-label={hideValues ? 'Show card values' : 'Hide card values'}
+            aria-label={hideValues ? t('cards.action.showValues') : t('cards.action.hideValues')}
             aria-pressed={hideValues}
-            title={hideValues ? 'Show card values' : 'Hide card values'}
+            title={hideValues ? t('cards.action.showValues') : t('cards.action.hideValues')}
             onClick={onToggleHide}
             leftIcon={<Icon as={hideValues ? Eye : EyeOff} boxSize={4} />}
             flex={{ base: 1, sm: 'initial' }}
@@ -410,7 +412,7 @@ function CardsOverview({
             textTransform="uppercase"
             _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
           >
-            {hideValues ? 'Show' : 'Hide'}
+            {hideValues ? t('cards.action.show') : t('cards.action.hide')}
           </Button>
         </Flex>
       </Flex>
@@ -422,27 +424,31 @@ function CardsOverview({
         mt={{ base: 4, sm: 4.5 }}
       >
         <Metric
-          label="Credit in use"
-          value={hideValues ? '••••••' : money.format(overview.used)}
+          label={t('cards.creditInUse')}
+          value={hideValues ? '••••••' : formatCurrency(overview.used)}
           emphasis
           summary
         />
         <Metric
-          label="Available credit"
-          value={hideValues ? '••••••' : overview.cardsWithLimit ? money.format(available) : '—'}
-          note={overview.cardsWithLimit ? `${Math.round(utilisation)}% of recorded limits used` : 'Add limits to track availability'}
+          label={t('cards.availableCredit')}
+          value={hideValues ? '••••••' : overview.cardsWithLimit ? formatCurrency(available) : '—'}
+          note={overview.cardsWithLimit
+            ? t('cards.recordedLimitsUsed', { percentage: Math.round(utilisation) })
+            : t('cards.addLimits')}
           summary
         />
         <Metric
-          label="Cards with limits"
+          label={t('cards.cardsWithLimits')}
           value={String(overview.cardsWithLimit)}
-          note={overview.cardsWithLimit ? 'available credit being tracked' : 'limits not set yet'}
+          note={overview.cardsWithLimit ? t('cards.creditTracked') : t('cards.limitsNotSet')}
           summary
         />
         <Metric
-          label="Next payment"
-          value={hideValues ? '••••••' : overview.nextPayment ? money.format(overview.nextPayment.nextPaymentAmount) : '—'}
-          note={overview.nextPayment?.nextPaymentDate ? `due ${date.format(overview.nextPayment.nextPaymentDate)}` : 'nothing scheduled'}
+          label={t('cards.nextPayment')}
+          value={hideValues ? '••••••' : overview.nextPayment ? formatCurrency(overview.nextPayment.nextPaymentAmount) : '—'}
+          note={overview.nextPayment?.nextPaymentDate
+            ? t('cards.dueDateLower', { date: formatDate(overview.nextPayment.nextPaymentDate, { day: 'numeric', month: 'short' }) })
+            : t('cards.nothingScheduled')}
           summary
         />
       </SimpleGrid>
@@ -451,6 +457,7 @@ function CardsOverview({
 }
 
 function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: CardTotal; hideValues: boolean }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const limit = card.creditLimit ?? 0
   const used = info?.outstanding ?? 0
   const available = Math.max(limit - used, 0)
@@ -479,30 +486,47 @@ function CardFocus({ card, info, hideValues }: { card: PaymentMethod; info?: Car
               </Flex>
             )}
             <Box minW={0}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.7}>Card account</Text>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.18em" textTransform="uppercase" opacity={0.7}>{t('cards.cardAccount')}</Text>
               <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={500} letterSpacing="-0.02em" noOfLines={1}>{card.name}</Text>
-              <Text fontSize="sm" opacity={0.78} mt="1px">{card.issuer || 'Credit card'} · closes on day {card.statementClosingDay}</Text>
+              <Text fontSize="sm" opacity={0.78} mt="1px">
+                {t('cards.issuerAndClosingDay', {
+                  issuer: card.issuer || t('cards.creditCard'),
+                  day: card.statementClosingDay ?? '—',
+                })}
+              </Text>
             </Box>
           </HStack>
           <Box textAlign="right" flexShrink={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.15em" textTransform="uppercase" opacity={0.7}>Current statement</Text>
-            <Text className="num" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={500} lineHeight="1.15" letterSpacing="-0.025em" mt="0.25rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : money.format(info?.total ?? 0)}</Text>
+            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.15em" textTransform="uppercase" opacity={0.7}>{t('cards.currentStatement')}</Text>
+            <Text className="num" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={500} lineHeight="1.15" letterSpacing="-0.025em" mt="0.25rem" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : formatCurrency(info?.total ?? 0)}</Text>
           </Box>
         </Flex>
       </Box>
 
       <Box p="clamp(1.2rem, 3vw, 1.7rem)">
         <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={{ base: 5, sm: 4 }}>
-          <Metric label="Payment due" value={hideValues ? '••••••' : info?.nextPaymentDate ? money.format(info.nextPaymentAmount) : '—'} note={info?.nextPaymentDate ? `due ${date.format(info.nextPaymentDate)}` : 'nothing scheduled'} />
-          <Metric label={limit > 0 ? 'Available credit' : 'Credit limit'} value={hideValues ? '••••••' : limit > 0 ? money.format(available) : 'Not recorded'} note={limit > 0 ? `${Math.round(utilised)}% of limit in use` : 'Set a limit to track usage'} />
-          <Metric label="Statement history" value={String(info?.count ?? 0)} note="cycles currently available" />
+          <Metric
+            label={t('cards.paymentDue')}
+            value={hideValues ? '••••••' : info?.nextPaymentDate ? formatCurrency(info.nextPaymentAmount) : '—'}
+            note={info?.nextPaymentDate
+              ? t('cards.dueDateLower', { date: formatDate(info.nextPaymentDate, { day: 'numeric', month: 'short' }) })
+              : t('cards.nothingScheduled')}
+          />
+          <Metric
+            label={limit > 0 ? t('cards.availableCredit') : t('cards.creditLimit')}
+            value={hideValues ? '••••••' : limit > 0 ? formatCurrency(available) : t('cards.notRecorded')}
+            note={limit > 0
+              ? t('cards.percentOfLimitInUse', { percentage: Math.round(utilised) })
+              : t('cards.setLimit')}
+          />
+          <Metric label={t('cards.statementHistory')} value={String(info?.count ?? 0)} note={t('cards.cyclesAvailable')} />
         </SimpleGrid>
 
         {limit > 0 && (
           <Box mt={6} pt={5} borderTop="1px solid var(--pb-hair)">
             <Flex justify="space-between" align="baseline" mb={2} gap={3}>
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">Credit utilisation</Text>
-              <Text fontSize="xs" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••' : `${money.format(used)} of ${money.format(limit)}`}</Text>
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.creditUtilisation')}</Text>
+              <Text fontSize="xs" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••' : t('cards.amountOfLimit', { amount: formatCurrency(used), limit: formatCurrency(limit) })}</Text>
             </Flex>
             <Box h="7px" borderRadius="full" bg="var(--pb-surface-3)" overflow="hidden"><Box h="full" w={`${utilised}%`} borderRadius="full" bg={utilisationColour} transition="width .4s ease" /></Box>
           </Box>

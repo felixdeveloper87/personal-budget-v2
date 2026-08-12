@@ -7,6 +7,7 @@ import { getTransactionDate, type TransactionDateBasis } from '../../../utils/tr
 import HideSpendingPaceDialog from './HideSpendingPaceDialog'
 import Panel from './Panel'
 import RestoreSpendingPaceDialog from './RestoreSpendingPaceDialog'
+import { useI18n } from '../../../i18n'
 import SectionLabel from './SectionLabel'
 import CashPace from './SpendingPace'
 
@@ -30,16 +31,16 @@ interface PaceSeries {
 
 const CONFIG = {
   category: {
-    sectionTitle: 'Spending pace by category',
+    sectionTitleKey: 'dashboard.paceByCategory',
     storagePrefix: 'dashboard:hidden-category-paces',
-    emptyMessage: 'No expense categories are available.',
-    allHiddenMessage: 'All category charts are hidden. Use “Show hidden” to restore them.',
+    emptyMessageKey: 'dashboard.noExpenseCategories',
+    allHiddenMessageKey: 'dashboard.allCategoryChartsHidden',
   },
   description: {
-    sectionTitle: 'Spending pace by description',
+    sectionTitleKey: 'dashboard.paceByDescription',
     storagePrefix: 'dashboard:hidden-description-paces',
-    emptyMessage: 'No expense descriptions were recorded this or last month.',
-    allHiddenMessage: 'All description charts are hidden. Use “Show hidden” to restore them.',
+    emptyMessageKey: 'dashboard.noExpenseDescriptions',
+    allHiddenMessageKey: 'dashboard.allDescriptionChartsHidden',
   },
 } as const
 
@@ -95,6 +96,7 @@ export default function SpendingPaceCollection({
   userId,
   dimension,
 }: SpendingPaceCollectionProps) {
+  const { t, categoryLabel } = useI18n()
   const config = CONFIG[dimension]
   const storageKey = userId === null ? null : `${config.storagePrefix}:${userId}`
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => readHiddenGroups(storageKey))
@@ -203,7 +205,7 @@ export default function SpendingPaceCollection({
     <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
       <Flex align="center" justify="space-between" gap={3}>
         <Box flex={1} minW={0}>
-          <SectionLabel>{config.sectionTitle}</SectionLabel>
+          <SectionLabel>{t(config.sectionTitleKey)}</SectionLabel>
         </Box>
         {hiddenCount > 0 && (
           <Button
@@ -222,7 +224,7 @@ export default function SpendingPaceCollection({
             textTransform="uppercase"
             _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)', borderColor: 'var(--pb-hair-2)' }}
           >
-            Show hidden ({hiddenCount})
+            {t('dashboard.showHidden', { count: hiddenCount })}
           </Button>
         )}
       </Flex>
@@ -230,7 +232,7 @@ export default function SpendingPaceCollection({
       {groups.length === 0 || visibleGroups.length === 0 ? (
         <Panel>
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6} textAlign="center">
-            {groups.length === 0 ? config.emptyMessage : config.allHiddenMessage}
+            {t(groups.length === 0 ? config.emptyMessageKey : config.allHiddenMessageKey)}
           </Text>
         </Panel>
       ) : (
@@ -246,7 +248,7 @@ export default function SpendingPaceCollection({
               selectedDate={selectedDate}
               dateBasis={dateBasis}
               kind="expense"
-              title={group.name}
+              title={dimension === 'category' ? categoryLabel(group.name) : group.name}
               includeCommitments
               onDismiss={() => setPendingGroup(group)}
             />
@@ -256,13 +258,16 @@ export default function SpendingPaceCollection({
 
       <HideSpendingPaceDialog
         isOpen={pendingGroup !== null}
-        itemName={pendingGroup?.name ?? null}
+        itemName={pendingGroup ? (dimension === 'category' ? categoryLabel(pendingGroup.name) : pendingGroup.name) : null}
         onClose={() => setPendingGroup(null)}
         onConfirm={confirmDismiss}
       />
       <RestoreSpendingPaceDialog
         isOpen={restoreDialogOpen}
-        items={hiddenGroupItems.map(({ key, name }) => ({ key, name }))}
+        items={hiddenGroupItems.map(({ key, name }) => ({
+          key,
+          name: dimension === 'category' ? categoryLabel(name) : name,
+        }))}
         onClose={() => setRestoreDialogOpen(false)}
         onConfirm={restoreGroups}
       />

@@ -40,6 +40,25 @@ export interface NavItem {
   description: string
 }
 
+type NavigationTranslator = (key: string, fallback: string) => string
+
+/**
+ * Keeps page ids and icons static while resolving only the user-facing copy.
+ * Consumers can therefore localise any subset (including the admin item)
+ * without duplicating or rebuilding the navigation configuration.
+ */
+export function localizeNavigationItems(
+  items: ReadonlyArray<NavItem>,
+  translate: NavigationTranslator,
+): ReadonlyArray<NavItem> {
+  return items.map((item) => ({
+    ...item,
+    label: translate(`nav.${item.id}.label`, item.label),
+    shortLabel: translate(`nav.${item.id}.short`, item.shortLabel),
+    description: translate(`nav.${item.id}.description`, item.description),
+  }))
+}
+
 export const NAV_ITEMS: ReadonlyArray<NavItem> = [
   {
     id: 'dashboard',

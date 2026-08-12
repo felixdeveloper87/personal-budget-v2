@@ -5,10 +5,10 @@ import { useReducedMotion } from 'framer-motion'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { getPreviousPeriodDate, usePeriodData } from '../../hooks/usePeriodData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
+import { useI18n } from '../../i18n'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
@@ -17,6 +17,32 @@ import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
 import MerchantLogo from '../../components/ui/MerchantLogo'
+
+type I18nApi = ReturnType<typeof useI18n>
+
+function periodNavigationLabel(
+  date: Date,
+  period: 'day' | 'week' | 'month' | 'year',
+  locale: I18nApi['locale'],
+  formatDate: I18nApi['formatDate'],
+): string {
+  if (period === 'month') {
+    return formatDate(date, { month: 'short', year: 'numeric' }).toLocaleUpperCase(locale)
+  }
+  if (period === 'day') {
+    return formatDate(date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  }
+  if (period === 'week') {
+    const start = new Date(date)
+    const day = start.getDay()
+    start.setDate(start.getDate() - day + (day === 0 ? -6 : 1))
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    const shortDate = (value: Date) => formatDate(value, { day: '2-digit', month: '2-digit' })
+    return `${shortDate(start)} – ${shortDate(end)}`
+  }
+  return String(date.getFullYear())
+}
 
 function isoOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -34,6 +60,7 @@ function buildDays(start: Date, end: Date): ChartDay[] {
 }
 
 export default function EarningsPage() {
+  const { locale, t, formatCurrency, formatDate } = useI18n()
   const reduce = useReducedMotion() ?? false
   const {
     selectedDate,
@@ -41,7 +68,6 @@ export default function EarningsPage() {
     onPeriodChange,
     navigatePeriod,
     goToToday,
-    formatLabel,
     isCurrentPeriod,
   } = usePeriodNavigator()
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
@@ -70,13 +96,16 @@ export default function EarningsPage() {
     [incomeTransactions, selectedDay],
   )
 
-  const periodLabel = formatLabel()
+  const periodLabel = periodNavigationLabel(selectedDate, selectedPeriod, locale, formatDate)
   const difference = periodData.income - previousPeriodData.income
   const comparisonCopy = previousPeriodData.income === 0
-    ? 'No earnings recorded in the previous period.'
+    ? t('earnings.comparison.none')
     : difference === 0
-      ? `The same as the previous period: ${fmtCurrency(previousPeriodData.income)}.`
-      : `${fmtCurrency(Math.abs(difference))} ${difference > 0 ? 'more' : 'less'} than the previous period.`
+      ? t('earnings.comparison.same', { amount: formatCurrency(previousPeriodData.income) })
+      : t(
+          difference > 0 ? 'earnings.comparison.more' : 'earnings.comparison.less',
+          { amount: formatCurrency(Math.abs(difference)) },
+        )
 
   return (
     <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
@@ -114,8 +143,8 @@ export default function EarningsPage() {
               periodLabel={periodLabel}
               tone="income"
               dateKey="purchaseDate"
-              title="Income activity"
-              caption="Daily income intensity"
+              title={t('earnings.activity.title')}
+              caption={t('earnings.activity.caption')}
             />
           )}
         </MotionBox>
@@ -152,8 +181,9 @@ function SelectedDayIncomes({
   incomes: TxnVM[]
   onClose: () => void
 }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const total = incomes.reduce((sum, income) => sum + income.amount, 0)
-  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+  const dayLabel = formatDate(day, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -163,19 +193,19 @@ function SelectedDayIncomes({
     <ActivityDayModal
       isOpen
       onClose={onClose}
-      label={`Earnings on ${dayLabel}`}
+      label={t('earnings.day.label', { date: dayLabel })}
       tone="income"
       title={dayLabel}
-      totalLabel="Received"
-      total={fmtCurrency(total)}
+      totalLabel={t('earnings.day.total')}
+      total={formatCurrency(total)}
       count={incomes.length}
-      dateContext="Activity date"
+      dateContext={t('earnings.day.dateContext')}
     >
       <VStack align="stretch" spacing={2}>
         {incomes.length === 0 ? (
           <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
             <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
-              No earnings recorded on this day.
+              {t('earnings.day.empty')}
             </Text>
           </Box>
         ) : (
@@ -205,6 +235,7 @@ function EarningsOverview({
   loading: boolean
   periodNavigator: ReactNode
 }) {
+  const { t, formatCurrency } = useI18n()
   const change = total - previousTotal
   const changeColor = change >= 0 ? 'var(--pb-summary-income)' : 'var(--pb-summary-coral)'
 
@@ -226,16 +257,20 @@ function EarningsOverview({
         <VStack align="stretch" spacing={4}>
           <VStack align="stretch" spacing={1}>
             <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-              Earnings - {periodLabel}
+              {t('earnings.summary.heading', { period: periodLabel })}
             </Text>
-            <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Income by transaction date</Text>
+            <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('earnings.summary.subtitle')}</Text>
           </VStack>
 
           <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
             {total > 0 ? (
-              <>You earned <Text as="em" color="var(--pb-summary-income)">{fmtCurrency(total)}</Text> in {periodLabel}.</>
+              <>
+                {t('earnings.summary.earnedPrefix')}{' '}
+                <Text as="em" color="var(--pb-summary-income)">{formatCurrency(total)}</Text>{' '}
+                {t('earnings.summary.earnedSuffix', { period: periodLabel })}
+              </>
             ) : (
-              <>No earnings recorded in {periodLabel}.</>
+              <>{t('earnings.summary.empty', { period: periodLabel })}</>
             )}
           </Text>
 
@@ -255,6 +290,7 @@ function EarningsSources({
   sources: ReturnType<typeof earningsBySource>
   periodLabel: string
 }) {
+  const { t, formatCurrency, formatNumber } = useI18n()
   const total = sources.reduce((sum, source) => sum + source.total, 0)
 
   return (
@@ -277,17 +313,22 @@ function EarningsSources({
         >
           <Box>
             <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-              Earnings by source
+              {t('earnings.sources.title')}
             </Text>
             <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
-              Where your income came from in {periodLabel}.
+              {t('earnings.sources.description', { period: periodLabel })}
             </Text>
           </Box>
 
           {sources.length > 0 && (
             <VStack align={{ base: 'flex-start', sm: 'flex-end' }} spacing={0.5}>
               <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                {sources.length} {sources.length === 1 ? 'source' : 'sources'} · total received
+                {t(
+                  sources.length === 1
+                    ? 'earnings.sources.count.one'
+                    : 'earnings.sources.count.other',
+                  { count: formatNumber(sources.length) },
+                )}
               </Text>
               <Text
                 fontFamily="var(--pb-serif)"
@@ -297,7 +338,7 @@ function EarningsSources({
                 color="var(--pb-income)"
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {fmtCurrency(total)}
+                {formatCurrency(total)}
               </Text>
             </VStack>
           )}
@@ -305,7 +346,7 @@ function EarningsSources({
 
         {sources.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)" py={3}>
-            No earnings recorded in this period.
+            {t('earnings.sources.empty')}
           </Text>
         ) : (
           <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }} gap={3}>
@@ -333,8 +374,13 @@ function EarningsSourceCard({
   rank: number
   share: number
 }) {
+  const { t, formatCurrency, formatNumber } = useI18n()
   const percentage = Math.round(share * 100)
-  const paymentLabel = `${source.count} ${source.count === 1 ? 'payment' : 'payments'}`
+  const formattedPercentage = formatNumber(percentage)
+  const paymentLabel = t(
+    source.count === 1 ? 'earnings.source.payment.one' : 'earnings.source.payment.other',
+    { count: formatNumber(source.count) },
+  )
 
   return (
     <Box
@@ -378,7 +424,10 @@ function EarningsSourceCard({
             {source.name}
           </Text>
           <Text mt={1} fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            {paymentLabel} · {percentage}% of earnings
+            {t('earnings.source.share', {
+              payments: paymentLabel,
+              percentage: formattedPercentage,
+            })}
           </Text>
         </Box>
 
@@ -391,17 +440,20 @@ function EarningsSourceCard({
             color="var(--pb-income)"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {fmtCurrency(source.total)}
+            {formatCurrency(source.total)}
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            received
+            {t('earnings.source.received')}
           </Text>
         </VStack>
       </HStack>
 
       <Box
         role="progressbar"
-        aria-label={`${source.name}: ${percentage}% of recorded earnings`}
+        aria-label={t('earnings.source.progress', {
+          source: source.name,
+          percentage: formattedPercentage,
+        })}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percentage}

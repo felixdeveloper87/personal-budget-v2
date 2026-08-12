@@ -1,6 +1,7 @@
 import { Box, Grid, Text } from '@chakra-ui/react'
 import type { TxnVM } from '../transactions.types'
 import { daysBetween, fmtShort } from '../transactions.utils'
+import { useI18n } from '../../../i18n'
 
 function Node({
   label,
@@ -54,10 +55,13 @@ function Node({
 }
 
 export default function SettlementTimeline({ txn }: { txn: TxnVM }) {
+  const { t, locale } = useI18n()
   const days = daysBetween(txn.purchaseDate, txn.settlementDate)
   const rightColor = txn.deferred ? 'var(--pb-gold)' : 'var(--pb-forest-2)'
-  const rightLabel = txn.type === 'in' ? 'Received' : 'Pays'
-  const gapLabel = txn.deferred ? `${days} day${days === 1 ? '' : 's'}` : 'Same day'
+  const rightLabel = t(txn.type === 'in' ? 'transactions.received' : 'transactions.pays')
+  const gapLabel = txn.deferred
+    ? t(days === 1 ? 'transactions.days' : 'transactions.daysPlural', { count: days })
+    : t('transactions.sameDay')
 
   return (
     <Grid
@@ -68,7 +72,7 @@ export default function SettlementTimeline({ txn }: { txn: TxnVM }) {
       alignItems="center"
       py=".4rem"
     >
-      <Node label="Bought" date={fmtShort(txn.purchaseDate)} color="var(--pb-forest-2)" align="start" />
+      <Node label={t('transactions.bought')} date={fmtShort(txn.purchaseDate, locale)} color="var(--pb-forest-2)" align="start" />
 
       {/* Gap label */}
       <Text
@@ -96,7 +100,7 @@ export default function SettlementTimeline({ txn }: { txn: TxnVM }) {
         opacity={txn.deferred ? 0.8 : 0.4}
       />
 
-      <Node label={rightLabel} date={fmtShort(txn.settlementDate)} color={rightColor} align="end" />
+      <Node label={rightLabel} date={fmtShort(txn.settlementDate, locale)} color={rightColor} align="end" />
     </Grid>
   )
 }

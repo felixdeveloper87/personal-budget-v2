@@ -38,6 +38,7 @@ import {
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
+import { translateNow } from './i18n'
 
 function mapAuthToUser(payload: Record<string, unknown>): User {
   const userId =
@@ -110,8 +111,8 @@ api.interceptors.response.use(
       if (!isPublicAuthAttempt) {
         localStorage.removeItem('user')
         ToastService.warning({
-          title: 'Session expired',
-          description: 'Please sign in again to continue.',
+          title: translateNow('error.session.title'),
+          description: translateNow('error.session.description'),
           dedupeKey: 'session-expired',
         })
         window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT))

@@ -35,7 +35,7 @@ import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
 import CommitmentCard from './components/CommitmentCard'
-import { fmtCurrency } from './components/format'
+import { useI18n } from '../../i18n'
 
 export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
@@ -46,6 +46,7 @@ const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
+  const { t, formatCurrency, formatDate } = useI18n()
 
   // Dashboard is a snapshot of the current month — period browsing lives on the
   // Behaviour / Payments / Reports pages, so there's no navigator here.
@@ -133,11 +134,11 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const forecastInfo = useMemo(() => {
     if (!forecast || forecast.months.length === 0) return null
     const m = forecast.months[0]
-    const label = new Date(`${m.month}-01T00:00:00`).toLocaleDateString('en-GB', {
+    const label = formatDate(new Date(`${m.month}-01T00:00:00`), {
       month: 'long',
     })
     return { projected: m.projectedClosingBalance, label, negative: m.negative }
-  }, [forecast])
+  }, [forecast, formatDate])
 
   /* ── Computed commitments ── */
   const commitments = useMemo(() => {
@@ -257,7 +258,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         {/* Cash flow chart (same period and payments lens as the hero) */}
         {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
-          <SectionLabel>Monthly commitments</SectionLabel>
+          <SectionLabel>{t('dashboard.monthlyCommitments')}</SectionLabel>
         </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
@@ -281,15 +282,15 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </Grid>
 
         <MotionBox variants={riseV}>
-          <SectionLabel>Balance &amp; forecast</SectionLabel>
+          <SectionLabel>{t('dashboard.balanceForecast')}</SectionLabel>
         </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
             <StatCard
-              eyebrow="Net available money"
-              figure={netAvailable !== null ? fmtCurrency(netAvailable) : '—'}
-              caption="Balance across your current, cash and savings accounts."
-              deltaLabel={`${netDeltaPositive ? '+' : '−'}${fmtCurrency(Math.abs(periodData.balance), { minimumFractionDigits: 2 })}`}
+              eyebrow={t('dashboard.netAvailable')}
+              figure={netAvailable !== null ? formatCurrency(netAvailable) : '—'}
+              caption={t('dashboard.netAvailableCaption')}
+              deltaLabel={`${netDeltaPositive ? '+' : '−'}${formatCurrency(Math.abs(periodData.balance), { minimumFractionDigits: 2 })}`}
               deltaPositive={netDeltaPositive}
               masked={hideBalances}
               onToggleMask={toggleHideBalances}
@@ -297,12 +298,12 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           </MotionBox>
           <MotionBox variants={riseV}>
             <StatCard
-              eyebrow="Month forecast"
-              figure={forecastInfo ? fmtCurrency(forecastInfo.projected) : '—'}
+              eyebrow={t('dashboard.monthForecast')}
+              figure={forecastInfo ? formatCurrency(forecastInfo.projected) : '—'}
               caption={
                 forecastInfo
-                  ? `Projected balance at the end of ${forecastInfo.label}.`
-                  : 'Add fixed payments and income to see a projection.'
+                  ? t('dashboard.forecastCaption', { month: forecastInfo.label })
+                  : t('dashboard.forecastEmpty')
               }
               accent="gold"
               masked={hideBalances}

@@ -3,11 +3,12 @@ import { Box, Flex, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, CalendarDays, Layers, ReceiptText } from '../../../components/ui/icons'
 import { computeSide } from '../data/computeSide'
-import { gbp, hexA } from '../data/format'
+import { hexA } from '../data/format'
 import type { Category, ComputedCategory, Side } from '../data/types'
 import AllocationDonut from './AllocationDonut'
 import CategoryTransactionsModal from './CategoryTransactionsModal'
 import CategoryTxnRow from './CategoryTxnRow'
+import { useI18n } from '../../../i18n'
 
 const MotionGrid = motion(Grid)
 const TRANSACTION_LIMIT = 5
@@ -23,6 +24,7 @@ export default function Distribution({
   previousExpense = [],
   periodLabel,
 }: DistributionProps) {
+  const { t } = useI18n()
   // Payments is an outflow-only lens — lock to expense and hide the income tab.
   const side: Side = 'expense'
   // `pinned` is a click-selected category that persists; `hovered` is a transient
@@ -93,10 +95,10 @@ export default function Distribution({
       >
         <VStack align="flex-start" spacing="0.15rem">
           <Text fontWeight={500} fontSize="1.2rem" letterSpacing="-0.01em" color="var(--pb-ink)">
-            {side === 'expense' ? 'Expense distribution' : 'Income distribution'}
+            {t(side === 'expense' ? 'categories.expenseDistribution' : 'categories.incomeDistribution')}
           </Text>
           <Text fontStyle="italic" color="var(--pb-ink-faint)" fontSize="0.9rem">
-            {side === 'expense' ? 'Share of spending by category' : 'Share of income by source'}
+            {t(side === 'expense' ? 'categories.spendingShare' : 'categories.incomeShare')}
           </Text>
         </VStack>
       </Flex>
@@ -157,6 +159,7 @@ function CategorySpotlight({
   side: Side
   onViewAll: () => void
 }) {
+  const { t, formatCurrency, formatNumber, categoryLabel } = useI18n()
   const isExpense = side === 'expense'
   const amountColor = isExpense ? 'var(--pb-coral)' : 'var(--pb-income)'
   const changeColor = cat.change > 0
@@ -164,8 +167,11 @@ function CategorySpotlight({
     : cat.change < 0 ? isExpense ? 'var(--pb-income)' : 'var(--pb-coral)'
       : 'var(--pb-ink-faint)'
   const comparison = cat.changePct === null
-    ? 'New in this period'
-    : `${cat.change >= 0 ? '+' : '−'}${gbp(Math.abs(cat.change))} · ${Math.abs(cat.changePct).toFixed(0)}% vs previous`
+    ? t('categories.newThisPeriod')
+    : t('categories.vsPrevious', {
+        amount: `${cat.change >= 0 ? '+' : '−'}${formatCurrency(Math.abs(cat.change))}`,
+        percentage: formatNumber(Math.abs(cat.changePct), { maximumFractionDigits: 0 }),
+      })
   const shownTransactions = cat.sample.slice(0, TRANSACTION_LIMIT)
   const moreTransactions = Math.max(0, cat.shownCount - shownTransactions.length)
 
@@ -180,13 +186,13 @@ function CategorySpotlight({
             <Icon as={cat.icon} boxSize="20px" color={cat.color} weight="duotone" />
           </Flex>
           <Box minW={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">Category spotlight</Text>
-            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem,2vw,1.45rem)" lineHeight="1.08" color="var(--pb-ink)" noOfLines={1}>{cat.name}</Text>
+            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('categories.spotlight')}</Text>
+            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem,2vw,1.45rem)" lineHeight="1.08" color="var(--pb-ink)" noOfLines={1}>{cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}</Text>
           </Box>
         </HStack>
         <Box textAlign="right" flexShrink={0}>
-          <Text className="num" fontFamily="var(--pb-serif)" fontSize="clamp(1.45rem,2.4vw,1.85rem)" fontWeight={500} lineHeight="0.95" color={amountColor}>{gbp(cat.amount)}</Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt={1}>{cat.pct.toFixed(1)}% of total</Text>
+          <Text className="num" fontFamily="var(--pb-serif)" fontSize="clamp(1.45rem,2.4vw,1.85rem)" fontWeight={500} lineHeight="0.95" color={amountColor}>{formatCurrency(cat.amount)}</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt={1}>{t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}</Text>
         </Box>
       </Flex>
 
@@ -196,14 +202,14 @@ function CategorySpotlight({
       </HStack>
 
       <Grid position="relative" templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={3.5}>
-        <Metric icon={ReceiptText} label="Transactions" value={String(cat.shownCount)} />
-        <Metric icon={CalendarDays} label="Active days" value={String(cat.activeDays)} />
-        <Metric icon={cat.icon} label="Avg. spend" value={gbp(cat.averageAmount)} />
+        <Metric icon={ReceiptText} label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
+        <Metric icon={CalendarDays} label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
+        <Metric icon={cat.icon} label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
       </Grid>
 
       {cat.topMerchant && (
         <Flex position="relative" mt={3} align="baseline" gap={1.5} fontSize="sm" noOfLines={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">Top merchant</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('categories.topMerchant')}</Text>
           <Text fontFamily="var(--pb-serif)" fontSize="1rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{cat.topMerchant}</Text>
         </Flex>
       )}
@@ -211,10 +217,10 @@ function CategorySpotlight({
       <Box position="relative" mt={4} pt={3.5} borderTop="1px solid var(--pb-hair)">
         <Flex align="center" justify="space-between" mb={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            Recent transactions
+            {t('categories.recentTransactions')}
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.06em" color="var(--pb-ink-faint)">
-            {cat.shownCount} total
+            {t('categories.transactionTotal', { count: formatNumber(cat.shownCount) })}
           </Text>
         </Flex>
         <VStack align="stretch" spacing={0}>
@@ -246,7 +252,9 @@ function CategorySpotlight({
             _hover={{ bg: hexA(cat.color, 0.16), transform: 'translateY(-1px)' }}
             _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '2px' }}
           >
-            View {moreTransactions} more transaction{moreTransactions !== 1 ? 's' : ''}
+            {t(moreTransactions === 1 ? 'categories.viewMore' : 'categories.viewMorePlural', {
+              count: formatNumber(moreTransactions),
+            })}
           </Flex>
         )}
       </Box>
@@ -268,6 +276,7 @@ function Metric({ icon, label, value }: { icon: ComputedCategory['icon']; label:
 }
 
 function EmptyState({ side }: { side: Side }) {
+  const { t } = useI18n()
   return (
     <VStack position="relative" zIndex={2} spacing={3} py={14} align="center">
       <Flex
@@ -283,10 +292,10 @@ function EmptyState({ side }: { side: Side }) {
       </Flex>
       <VStack spacing={1}>
         <Text fontSize="md" fontWeight={500} color="var(--pb-ink)">
-          No {side === 'expense' ? 'spending' : 'income'} for this period
+          {t(side === 'expense' ? 'categories.noSpending' : 'categories.noIncome')}
         </Text>
         <Text fontSize="sm" color="var(--pb-ink-soft)" maxW="340px" textAlign="center">
-          Add transactions in this date range to see how your {side === 'expense' ? 'money' : 'income'} breaks down by category.
+          {t(side === 'expense' ? 'categories.emptySpendingHelp' : 'categories.emptyIncomeHelp')}
         </Text>
       </VStack>
     </VStack>

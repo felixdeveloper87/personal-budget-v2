@@ -12,8 +12,9 @@ import { Search, Calendar, X } from '../../../components/ui/icons'
 import Panel from '../../dashboard/components/Panel'
 import type { TxFilter, TxnVM, TxState } from '../transactions.types'
 import type { LedgerGroup } from '../transactions.utils'
-import { FILTER_LABELS, fmtDayLong } from '../transactions.utils'
+import { fmtDayLong } from '../transactions.utils'
 import Ledger from './Ledger'
+import { useI18n } from '../../../i18n'
 
 interface ActivityPaneProps {
   state: TxState
@@ -46,6 +47,7 @@ function Chip({
   active: boolean
   onClick: () => void
 }) {
+  const { t } = useI18n()
   const dot = DOT_COLOR[value]
   return (
     <HStack
@@ -74,7 +76,7 @@ function Chip({
         textTransform="uppercase"
         fontWeight={active ? 500 : 400}
       >
-        {FILTER_LABELS[value]}
+        {t(`transactions.${value === 'in' ? 'income' : value === 'out' ? 'expenses' : value}`)}
       </Text>
     </HStack>
   )
@@ -89,6 +91,7 @@ export default function ActivityPane({
   onOpen,
   reduce,
 }: ActivityPaneProps) {
+  const { t, locale } = useI18n()
   return (
     <Panel>
       {/* Search */}
@@ -99,7 +102,7 @@ export default function ActivityPane({
         <Input
           value={state.q}
           onChange={(e) => onSetQuery(e.target.value)}
-          placeholder="Search merchant or category…"
+          placeholder={t('transactions.searchPlaceholder')}
           fontFamily="var(--pb-serif)"
           fontSize=".95rem"
           bg="var(--pb-surface)"
@@ -119,7 +122,7 @@ export default function ActivityPane({
         gap=".45rem"
         flexWrap="wrap"
         role="radiogroup"
-        aria-label="Filter transactions"
+        aria-label={t('transactions.filterAria')}
         mb=".9rem"
       >
         {FILTERS_BY_VIEW[state.view].map((f) => (
@@ -143,7 +146,7 @@ export default function ActivityPane({
           <HStack spacing=".5rem" minW={0}>
             <Icon as={Calendar} boxSize="15px" color="var(--pb-forest-2)" flexShrink={0} />
             <Text fontFamily="var(--pb-serif)" fontSize=".95rem" color="var(--pb-ink)" noOfLines={1}>
-              Showing {fmtDayLong(state.selectedDay)}
+              {t('transactions.showingDay', { date: fmtDayLong(state.selectedDay, locale) })}
             </Text>
           </HStack>
           <HStack
@@ -163,7 +166,7 @@ export default function ActivityPane({
             _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
           >
             <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.06em" textTransform="uppercase">
-              Clear
+              {t('common.clear')}
             </Text>
             <Icon as={X} boxSize="11px" />
           </HStack>

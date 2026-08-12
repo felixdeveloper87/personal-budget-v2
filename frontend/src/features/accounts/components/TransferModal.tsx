@@ -20,8 +20,8 @@ import {
 } from '@chakra-ui/react'
 import { createAccountTransfer } from '../../../api'
 import type { FinancialAccount } from '../../../types'
-import { money } from '../../../components/accounts/accountMeta'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { useI18n } from '../../../i18n'
 import {
   AlertTriangle,
   ArrowRight,
@@ -56,6 +56,7 @@ export default function TransferModal({
   hideBalances,
   onTransferred,
 }: TransferModalProps) {
+  const { t, formatCurrency } = useI18n()
   const [fromAccountId, setFromAccountId] = useState<number | null>(null)
   const [toAccountId, setToAccountId] = useState<number | null>(null)
   const [amount, setAmount] = useState('')
@@ -79,8 +80,8 @@ export default function TransferModal({
     setSaving(false)
   }, [activeAccounts, initialFromAccountId, isOpen])
 
-  const displayMoney = (value: number, currency = 'GBP') =>
-    hideBalances ? '••••••' : money(value, currency)
+  const displayMoney = (value: number) =>
+    hideBalances ? '••••••' : formatCurrency(value)
 
   const parsedAmount = Number(amount)
   const sameAccount = fromAccountId !== null && fromAccountId === toAccountId
@@ -106,13 +107,13 @@ export default function TransferModal({
       })
       await onTransferred()
       ToastService.success({
-        title: 'Transfer recorded',
+        title: t('accounts.transfer.toast.success'),
         dedupeKey: 'account-transfer-created',
       })
       onClose()
     } catch (err) {
       ToastService.apiError(err, {
-        title: 'Could not transfer',
+        title: t('accounts.transfer.toast.failed'),
         dedupeKey: 'account-transfer-failed',
       })
     } finally {
@@ -128,8 +129,8 @@ export default function TransferModal({
       header={
         <ModalHeader
           icon={Repeat}
-          title="Transfer between accounts"
-          caption="Move money without counting it as income or spending"
+          title={t('accounts.transfer.title')}
+          caption={t('accounts.transfer.caption')}
           onClose={onClose}
           accent="blue"
         />
@@ -137,7 +138,7 @@ export default function TransferModal({
       footer={
         <HStack justify="flex-end" spacing={2}>
           <Button variant="ghost" onClick={onClose} isDisabled={saving}>
-            Cancel
+            {t('accounts.transfer.cancel')}
           </Button>
           <Button
             colorScheme="blue"
@@ -146,19 +147,21 @@ export default function TransferModal({
             isLoading={saving}
             isDisabled={!canSubmit}
           >
-            {parsedAmount > 0 ? `Transfer ${money(parsedAmount)}` : 'Record transfer'}
+            {parsedAmount > 0
+              ? t('accounts.transfer.amountCta', { amount: formatCurrency(parsedAmount) })
+              : t('accounts.transfer.record')}
           </Button>
         </HStack>
       }
     >
       <Box p={{ base: 4, md: 6 }}>
         {activeAccounts.length < 2 ? (
-          <Notice>Create at least two active accounts before recording a transfer.</Notice>
+          <Notice>{t('accounts.transfer.needTwoAccounts')}</Notice>
         ) : (
           <VStack align="stretch" spacing={5}>
             <SimpleGrid columns={{ base: 1, sm: 7 }} spacing={3} alignItems="end">
               <FormControl gridColumn={{ sm: 'span 3' }}>
-                <FormLabel fontSize="sm">From account</FormLabel>
+                <FormLabel fontSize="sm">{t('accounts.transfer.from')}</FormLabel>
                 <TransferAccountSelect
                   accounts={activeAccounts}
                   value={fromAccountId}
@@ -183,7 +186,7 @@ export default function TransferModal({
               </Flex>
 
               <FormControl gridColumn={{ sm: 'span 3' }} isInvalid={sameAccount}>
-                <FormLabel fontSize="sm">To account</FormLabel>
+                <FormLabel fontSize="sm">{t('accounts.transfer.to')}</FormLabel>
                 <TransferAccountSelect
                   accounts={activeAccounts}
                   value={toAccountId}
@@ -194,14 +197,14 @@ export default function TransferModal({
               </FormControl>
             </SimpleGrid>
 
-            {sameAccount && <Notice>Choose two different accounts.</Notice>}
+            {sameAccount && <Notice>{t('accounts.transfer.differentAccounts')}</Notice>}
 
             <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
               <FormControl isRequired>
                 <FormLabel fontSize="sm">
                   <HStack spacing={1.5}>
                     <Icon as={DollarSign} boxSize={3.5} />
-                    <Text as="span">Amount</Text>
+                    <Text as="span">{t('accounts.transfer.amount')}</Text>
                   </HStack>
                 </FormLabel>
                 <NumberInput min={0} precision={2} value={amount} onChange={setAmount}>
@@ -214,7 +217,7 @@ export default function TransferModal({
                 </NumberInput>
               </FormControl>
               <FormControl isRequired>
-                <FormLabel fontSize="sm">Transfer date</FormLabel>
+                <FormLabel fontSize="sm">{t('accounts.transfer.date')}</FormLabel>
                 <Input
                   type="date"
                   value={transferDate}
@@ -229,15 +232,15 @@ export default function TransferModal({
 
             <FormControl>
               <FormLabel fontSize="sm">
-                Reference{' '}
+                {t('accounts.transfer.reference')}{' '}
                 <Text as="span" color="var(--pb-ink-faint)" fontWeight={400}>
-                  (optional)
+                  {t('accounts.transfer.optional')}
                 </Text>
               </FormLabel>
               <Input
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="e.g. Monthly savings"
+                placeholder={t('accounts.transfer.referencePlaceholder')}
                 bg="var(--pb-surface-2)"
                 borderColor="var(--pb-hair)"
                 borderRadius="12px"
@@ -255,7 +258,7 @@ interface TransferAccountSelectProps {
   accounts: FinancialAccount[]
   value: number | null
   onChange: (accountId: number) => void
-  formatBalance: (value: number, currency?: string) => string
+  formatBalance: (value: number) => string
   icon: typeof Wallet
 }
 
@@ -266,6 +269,7 @@ function TransferAccountSelect({
   formatBalance,
   icon,
 }: TransferAccountSelectProps) {
+  const { t } = useI18n()
   const selected = accounts.find((account) => account.id === value)
 
   return (
@@ -295,11 +299,11 @@ function TransferAccountSelect({
             )}
             <Box minW={0} textAlign="left">
               <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
-                {selected?.name ?? 'Select account'}
+                {selected?.name ?? t('accounts.transfer.selectAccount')}
               </Text>
               {selected && (
                 <Text className="num" fontSize="10.5px" color="var(--pb-ink-soft)">
-                  {formatBalance(selected.currentBalance, selected.currency)}
+                  {formatBalance(selected.currentBalance)}
                 </Text>
               )}
             </Box>
@@ -332,7 +336,7 @@ function TransferAccountSelect({
                 </Text>
               </HStack>
               <Text className="num" fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
-                {formatBalance(account.currentBalance, account.currency)}
+                {formatBalance(account.currentBalance)}
               </Text>
             </HStack>
           </MenuItem>

@@ -4,7 +4,8 @@ import { useReducedMotion } from 'framer-motion'
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import type { Transaction } from '../../../types'
 import Panel from './Panel'
-import { categoryColor, fmtCurrency } from './format'
+import { categoryColor } from './format'
+import { useI18n } from '../../../i18n'
 
 interface SpendingMixProps {
   transactions: Transaction[]
@@ -21,6 +22,7 @@ interface MixSlice {
 const MAX_SLICES = 6
 
 export default function SpendingMix({ transactions, previousTransactions = [] }: SpendingMixProps) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
@@ -54,7 +56,7 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
       ? [
           ...sorted.slice(0, MAX_SLICES - 1),
           {
-            category: 'Other',
+            category: t('dashboard.other'),
             amount: sorted.slice(MAX_SLICES - 1).reduce((sum, item) => sum + item.amount, 0),
             delta: null,
           },
@@ -62,7 +64,7 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
       : sorted
 
     return { slices: result, total: result.reduce((sum, item) => sum + item.amount, 0) }
-  }, [transactions, previousTransactions])
+  }, [transactions, previousTransactions, t])
 
   const hasData = slices.length > 0 && total > 0
 
@@ -77,15 +79,15 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Spending mix
+            {t('dashboard.spendingMix')}
           </Text>
           {hasData && (
             <VStack align="flex-end" spacing={0}>
               <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                Total spent
+                {t('dashboard.totalSpent')}
               </Text>
               <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {fmtCurrency(total)}
+                {formatCurrency(total)}
               </Text>
             </VStack>
           )}
@@ -93,7 +95,7 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
 
         {!hasData ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
-            No expenses recorded for this period.
+            {t('dashboard.noExpensesPeriod')}
           </Text>
         ) : (
           <Grid templateColumns={{ base: '1fr', sm: '180px minmax(0, 1fr)' }} gap={{ base: 5, sm: 6 }} alignItems="center" flex={1}>
@@ -128,13 +130,13 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
                     }}
                     labelStyle={{ color: tooltipText }}
                     itemStyle={{ color: tooltipText }}
-                    formatter={(value: number | string, name: string) => [fmtCurrency(Number(value)), name]}
+                    formatter={(value: number | string, name: string) => [formatCurrency(Number(value)), categoryLabel(name)]}
                   />
                 </PieChart>
               </ResponsiveContainer>
               <VStack position="absolute" inset={0} justify="center" spacing={0} pointerEvents="none">
                 <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.16em" color="var(--pb-ink-faint)" textTransform="uppercase">
-                  Categories
+                  {t('dashboard.categories')}
                 </Text>
                 <Text fontFamily="var(--pb-serif)" fontSize="2xl" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
                   {slices.length}
@@ -155,6 +157,7 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
 }
 
 function MixRow({ slice, total, color }: { slice: MixSlice; total: number; color: string }) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const percentage = Math.round((slice.amount / total) * 100)
 
   return (
@@ -163,7 +166,7 @@ function MixRow({ slice, total, color }: { slice: MixSlice; total: number; color
         <HStack spacing={2} minW={0}>
           <Box w={2.5} h={2.5} borderRadius="full" bg={color} flexShrink={0} />
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
-            {slice.category}
+            {categoryLabel(slice.category)}
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" color="var(--pb-ink-faint)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {percentage}%
@@ -176,13 +179,13 @@ function MixRow({ slice, total, color }: { slice: MixSlice; total: number; color
               fontSize="9px"
               color={slice.delta > 0 ? 'var(--pb-coral)' : 'var(--pb-income-2)'}
               style={{ fontVariantNumeric: 'tabular-nums' }}
-              title="Change vs previous period"
+              title={t('dashboard.changePreviousPeriod')}
             >
-              {slice.delta > 0 ? '+' : '−'}{fmtCurrency(Math.abs(slice.delta))}
+              {slice.delta > 0 ? '+' : '−'}{formatCurrency(Math.abs(slice.delta))}
             </Text>
           )}
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(slice.amount)}
+            {formatCurrency(slice.amount)}
           </Text>
         </HStack>
       </HStack>

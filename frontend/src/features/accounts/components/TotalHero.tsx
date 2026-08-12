@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Grid, Icon, SimpleGrid, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
 import { Eye, EyeOff, Plus } from '../../../components/ui/icons'
-import { money } from '../../../components/accounts/accountMeta'
+import { useI18n } from '../../../i18n'
 
 interface TotalHeroProps {
   accounts: FinancialAccount[]
@@ -12,11 +12,12 @@ interface TotalHeroProps {
 }
 
 export default function TotalHero({ accounts, totalBalance, hideBalances, onToggleHide, onAddAccount }: TotalHeroProps) {
+  const { t, formatCurrency } = useI18n()
   const currentAccounts = accounts.filter((account) => account.type === 'CURRENT')
   const savingsAccounts = accounts.filter((account) => account.type === 'SAVINGS')
   const currentBalance = currentAccounts.reduce((sum, account) => sum + account.currentBalance, 0)
   const savingsBalance = savingsAccounts.reduce((sum, account) => sum + account.currentBalance, 0)
-  const display = (amount: number) => hideBalances ? '••••••' : money(amount)
+  const display = (amount: number) => hideBalances ? '••••••' : formatCurrency(amount)
 
   return (
     <Box
@@ -48,10 +49,10 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             textTransform="uppercase"
             color="var(--pb-summary-ink-faint)"
           >
-            Accounts overview
+            {t('accounts.overview.title')}
           </Text>
           <Text mt={1} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-summary-ink-soft)">
-            Your balances at a glance
+            {t('accounts.overview.subtitle')}
           </Text>
         </Box>
         <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
@@ -72,12 +73,12 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             textTransform="uppercase"
             _hover={{ borderColor: 'var(--pb-summary-ink-faint)', transform: 'translateY(-1px)' }}
           >
-            Add account
+            {t('accounts.action.add')}
           </Button>
           <Button
-            aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
+            aria-label={hideBalances ? t('accounts.action.showBalances') : t('accounts.action.hideBalances')}
             aria-pressed={hideBalances}
-            title={hideBalances ? 'Show balances' : 'Hide balances'}
+            title={hideBalances ? t('accounts.action.showBalances') : t('accounts.action.hideBalances')}
             onClick={onToggleHide}
             leftIcon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={4} />}
             flex={{ base: 1, sm: 'initial' }}
@@ -94,7 +95,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             textTransform="uppercase"
             _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
           >
-            {hideBalances ? 'Show' : 'Hide'}
+            {hideBalances ? t('accounts.action.show') : t('accounts.action.hide')}
           </Button>
         </Flex>
       </Flex>
@@ -121,7 +122,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             textTransform="uppercase"
             color="var(--pb-summary-ink-faint)"
           >
-            Total balance
+            {t('accounts.totalBalance')}
           </Text>
           <Text
             className="num"
@@ -138,19 +139,24 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
             {display(totalBalance)}
           </Text>
           <Text mt={2} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-summary-ink-soft)">
-            Combined position across {accounts.length} active account{accounts.length !== 1 ? 's' : ''}.
+            {t(
+              accounts.length === 1
+                ? 'accounts.overview.position.one'
+                : 'accounts.overview.position.other',
+              { count: accounts.length },
+            )}
           </Text>
         </Flex>
 
         <SimpleGrid columns={2} spacing={{ base: 2, sm: 3 }}>
           <BalanceBlock
-            label="Current accounts"
+            label={t('accounts.group.CURRENT')}
             amount={currentBalance}
             count={currentAccounts.length}
             hidden={hideBalances}
           />
           <BalanceBlock
-            label="Savings"
+            label={t('accounts.group.SAVINGS')}
             amount={savingsBalance}
             count={savingsAccounts.length}
             hidden={hideBalances}
@@ -172,6 +178,8 @@ function BalanceBlock({
   count: number
   hidden: boolean
 }) {
+  const { t, formatCurrency } = useI18n()
+
   return (
     <Flex
       direction="column"
@@ -203,10 +211,10 @@ function BalanceBlock({
         color={!hidden && amount < 0 ? 'var(--pb-summary-coral)' : 'var(--pb-summary-ink)'}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
-        {hidden ? '••••••' : money(amount)}
+        {hidden ? '••••••' : formatCurrency(amount)}
       </Text>
       <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-summary-ink-faint)">
-        {count} account{count !== 1 ? 's' : ''}
+        {t(count === 1 ? 'accounts.count.one' : 'accounts.count.other', { count })}
       </Text>
     </Flex>
   )

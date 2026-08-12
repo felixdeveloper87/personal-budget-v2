@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Box, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Text } from '@chakra-ui/react'
+import { useI18n } from '../../../i18n'
 
 type ActivityDayModalProps = {
   isOpen: boolean
@@ -26,6 +27,7 @@ export default function ActivityDayModal({
   dateContext,
   children,
 }: ActivityDayModalProps) {
+  const { t } = useI18n()
   const isIncome = tone === 'income'
   const tint = isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
   const accent = isIncome ? 'var(--pb-income)' : 'var(--pb-coral)'
@@ -57,7 +59,7 @@ export default function ActivityDayModal({
             <Flex justify="space-between" align={{ base: 'flex-start', sm: 'center' }} gap={4} direction={{ base: 'column', sm: 'row' }}>
               <Box>
                 <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                  Selected day
+                  {t('transactions.selectedDay')}
                 </Text>
                 <Text mt={1} fontFamily="var(--pb-serif)" fontSize="clamp(1.5rem, 4vw, 1.9rem)" lineHeight={1.05} color="var(--pb-ink)">
                   {title}
@@ -66,7 +68,7 @@ export default function ActivityDayModal({
                   <HStack spacing={1.5} px={2.5} py="4px" borderRadius="full" bg={tint} color={accent}>
                     <Box w="5px" h="5px" borderRadius="full" bg={accent} />
                     <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={600} letterSpacing="0.07em" textTransform="uppercase">
-                      {count} {count === 1 ? 'transaction' : 'transactions'}
+                      {t(count === 1 ? 'transactions.count' : 'transactions.countPlural', { count })}
                     </Text>
                   </HStack>
                   <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)">

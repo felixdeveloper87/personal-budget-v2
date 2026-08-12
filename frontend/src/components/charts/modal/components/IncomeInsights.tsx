@@ -2,38 +2,22 @@ import { useMemo } from 'react'
 import { Box, Divider, HStack, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import type { Transaction } from '../../../../types'
 import ChartPlotShell from './ChartPlotShell'
+import { useI18n } from '../../../../i18n'
 
 interface IncomeInsightsProps {
   transactions: Transaction[]
   compact?: boolean
 }
 
-const WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
-const moneyFormatter = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-})
-
-const moneyFormatterExact = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-})
-
 function dayKey(date: Date): string {
   return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
-}
-
-function formatDayLabel(date: Date): string {
-  return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
 }
 
 export default function IncomeInsights({
   transactions,
   compact = false,
 }: IncomeInsightsProps) {
+  const { t, locale, formatCurrency, formatDate } = useI18n()
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const cardBg = useColorModeValue('white', 'whiteAlpha.50')
@@ -75,22 +59,24 @@ export default function IncomeInsights({
     const topDayMax = topDays.length > 0 ? topDays[0].total : 0
 
     return {
-      bestWeekday: hasWeekday ? WEEKDAY_LONG[bestWeekday] : null,
+      bestWeekday: hasWeekday
+        ? new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(new Date(2024, 0, 7 + bestWeekday))
+        : null,
       bestWeekdayTotal: weekdayTotals[bestWeekday],
       avgPerDay,
       incomeDays,
       topDays,
       topDayMax,
     }
-  }, [transactions])
+  }, [transactions, locale])
 
   if (!insights) return null
 
   if (compact) {
     return (
       <ChartPlotShell
-        title="Income insights"
-        caption="Patterns from this period"
+        title={t('charts.incomeInsights')}
+        caption={t('charts.patternsPeriod')}
         showPeriodBadge={false}
         compact
       >
@@ -107,14 +93,14 @@ export default function IncomeInsights({
           >
             <VStack align="flex-start" spacing={0} flex={1} minW={0}>
               <Text fontSize="3xs" fontWeight={700} color={mutedColor} textTransform="uppercase">
-                Best weekday
+                {t('charts.bestWeekday')}
               </Text>
               <HStack spacing={2}>
                 <Text fontSize="md" fontWeight={800} color={titleColor}>
                   {insights.bestWeekday ?? '--'}
                 </Text>
                 <Text fontSize="2xs" color={greenColor} fontWeight={700}>
-                  {moneyFormatter.format(insights.bestWeekdayTotal)}
+                  {formatCurrency(insights.bestWeekdayTotal)}
                 </Text>
               </HStack>
             </VStack>
@@ -123,14 +109,14 @@ export default function IncomeInsights({
 
             <VStack align="flex-start" spacing={0} flex={1} minW={0}>
               <Text fontSize="3xs" fontWeight={700} color={mutedColor} textTransform="uppercase">
-                Avg per income day
+                {t('charts.avgIncomeDay')}
               </Text>
               <HStack spacing={2}>
                 <Text fontSize="md" fontWeight={800} color={titleColor}>
-                  {moneyFormatterExact.format(insights.avgPerDay)}
+                  {formatCurrency(insights.avgPerDay)}
                 </Text>
                 <Text fontSize="2xs" color={mutedColor} fontWeight={600}>
-                  {insights.incomeDays} days
+                  {t('charts.daysCount', { count: insights.incomeDays })}
                 </Text>
               </HStack>
             </VStack>
@@ -164,10 +150,10 @@ export default function IncomeInsights({
                   {index + 1}
                 </Box>
                 <Text fontSize="xs" fontWeight={600} color={titleColor} noOfLines={1} flex={1}>
-                  {formatDayLabel(day.date)}
+                  {formatDate(day.date, { weekday: 'short', day: 'numeric', month: 'short' })}
                 </Text>
                 <Text fontSize="xs" fontWeight={800} color={greenColor}>
-                  {moneyFormatter.format(day.total)}
+                  {formatCurrency(day.total)}
                 </Text>
               </HStack>
             ))}
@@ -179,8 +165,8 @@ export default function IncomeInsights({
 
   return (
     <ChartPlotShell
-      title="Income insights"
-      caption="Patterns from this period"
+      title={t('charts.incomeInsights')}
+      caption={t('charts.patternsPeriod')}
       showPeriodBadge={false}
       compact={compact}
     >
@@ -194,13 +180,15 @@ export default function IncomeInsights({
             p={{ base: 4, sm: 5 }}
           >
             <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
-              Best weekday
+              {t('charts.bestWeekday')}
             </Text>
             <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1} lineHeight="1.1" noOfLines={1}>
               {insights.bestWeekday ?? '--'}
             </Text>
             <Text fontSize="xs" color={greenColor} fontWeight={600} mt={0.5} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-              {insights.bestWeekday ? `${moneyFormatterExact.format(insights.bestWeekdayTotal)} earned` : 'No income yet'}
+              {insights.bestWeekday
+                ? t('charts.earned', { amount: formatCurrency(insights.bestWeekdayTotal) })
+                : t('charts.noIncomeYet')}
             </Text>
           </Box>
 
@@ -212,13 +200,13 @@ export default function IncomeInsights({
             p={{ base: 4, sm: 5 }}
           >
             <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
-              Avg per income day
+              {t('charts.avgIncomeDay')}
             </Text>
             <Text fontSize={{ base: 'xl', sm: '2xl' }} fontWeight={800} color={titleColor} mt={1} lineHeight="1.1" letterSpacing="-0.02em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-              {moneyFormatterExact.format(insights.avgPerDay)}
+              {formatCurrency(insights.avgPerDay)}
             </Text>
             <Text fontSize="xs" color={mutedColor} fontWeight={600} mt={0.5}>
-              across {insights.incomeDays} day{insights.incomeDays === 1 ? '' : 's'}
+              {t(insights.incomeDays === 1 ? 'charts.acrossDay' : 'charts.acrossDays', { count: insights.incomeDays })}
             </Text>
           </Box>
         </SimpleGrid>
@@ -231,7 +219,7 @@ export default function IncomeInsights({
           p={{ base: 4, sm: 5 }}
         >
           <Text fontSize="2xs" fontWeight={700} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em" mb={3}>
-            Top earning days
+            {t('charts.topEarningDays')}
           </Text>
           <VStack align="stretch" spacing={{ base: 3, sm: 3.5 }}>
             {insights.topDays.map((day, index) => {
@@ -256,10 +244,10 @@ export default function IncomeInsights({
                   <VStack align="stretch" spacing={1.5} flex={1} minW={0}>
                     <HStack justify="space-between" spacing={2}>
                       <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight={600} color={titleColor} noOfLines={1}>
-                        {formatDayLabel(day.date)}
+                        {formatDate(day.date, { weekday: 'short', day: 'numeric', month: 'short' })}
                       </Text>
                       <Text fontSize={{ base: 'xs', sm: 'sm' }} fontWeight={800} color={greenColor} flexShrink={0} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {moneyFormatter.format(day.total)}
+                        {formatCurrency(day.total)}
                       </Text>
                     </HStack>
                     <Box h="6px" borderRadius="full" bg={trackBg} overflow="hidden">

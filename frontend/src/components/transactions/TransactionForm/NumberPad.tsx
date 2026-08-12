@@ -1,6 +1,7 @@
 import { Box, Button, Grid, HStack, Icon, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useCallback, useEffect, useState } from 'react'
 import { Backspace, Check } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
 
 interface NumberPadProps {
   value: number
@@ -47,6 +48,7 @@ function NumberKey({
 }
 
 export default function NumberPad({ value, onValueChange, onDone }: NumberPadProps) {
+  const { t, formatCurrency, formatNumber } = useI18n()
   const [displayValue, setDisplayValue] = useState<string>('0.00')
 
   useEffect(() => {
@@ -147,10 +149,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
     return val
   }
 
-  const currencySymbol =
-    new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' })
-      .formatToParts(0)
-      .find((part) => part.type === 'currency')?.value ?? 'GBP'
+  const decimalSeparator = formatNumber(1.1).replace(/[\d\s]/g, '').slice(0, 1) || '.'
 
   const shellBg = useColorModeValue('white', 'gray.950')
   const displayBg = useColorModeValue('gray.50', 'whiteAlpha.50')
@@ -196,9 +195,6 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
           justifyContent="center"
         >
           <HStack spacing={2} align="baseline" maxW="full">
-            <Text fontSize={{ base: '2xl', sm: 'xl' }} fontWeight={700} color={mutedText}>
-              {currencySymbol}
-            </Text>
             <Text
               fontSize={{ base: '4xl', sm: '3xl' }}
               fontWeight={800}
@@ -207,7 +203,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
               noOfLines={1}
               sx={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {formatDisplayValue(displayValue)}
+              {formatCurrency(Number(formatDisplayValue(displayValue)) || 0)}
             </Text>
           </HStack>
         </Box>
@@ -233,7 +229,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
             _hover={{ bg: keyHoverBg }}
             _active={{ bg: actionBg }}
           >
-            .
+            {decimalSeparator}
           </Button>
           <NumberKey {...numberKeyProps} onClick={() => handleNumberClick('0')}>0</NumberKey>
           <Button
@@ -242,7 +238,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
             bg={actionBg}
             color={dangerColor}
             onClick={handleBackspace}
-            aria-label="Delete last digit"
+            aria-label={t('form.deleteLastDigit')}
             _hover={{ bg: keyHoverBg }}
             _active={{ bg: actionBg }}
           >
@@ -262,7 +258,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
             _hover={{ bg: keyHoverBg }}
             _active={{ bg: actionBg }}
           >
-            Clear
+            {t('common.clear')}
           </Button>
 
           {onDone && (
@@ -279,7 +275,7 @@ export default function NumberPad({ value, onValueChange, onDone }: NumberPadPro
               _active={{ transform: 'translateY(0)' }}
               transition="filter 0.15s ease, transform 0.15s ease"
             >
-              Done
+              {t('form.done')}
             </Button>
           )}
         </HStack>

@@ -1,5 +1,6 @@
 import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { useI18n } from '../../../i18n'
 
 export type ExpenseMode = 'single' | 'fixed' | 'installment'
 
@@ -11,20 +12,20 @@ interface ExpenseModeSelectorProps {
 const MODES = [
   {
     value: 'single' as const,
-    title: 'One-off',
-    caption: 'A regular expense',
+    titleKey: 'form.oneOff',
+    captionKey: 'form.regularExpense',
     accent: '#ef4444',
   },
   {
     value: 'fixed' as const,
-    title: 'Fixed monthly',
-    caption: 'Rent, bills, subscriptions',
+    titleKey: 'form.fixedMonthly',
+    captionKey: 'form.fixedExpenseCaption',
     accent: '#14b8a6',
   },
   {
     value: 'installment' as const,
-    title: 'Installments',
-    caption: 'Split a purchase',
+    titleKey: 'dashboard.installments',
+    captionKey: 'form.installmentsCaption',
     accent: '#6366f1',
   },
 ]
@@ -34,11 +35,12 @@ export default function ExpenseModeSelector({
   onChange,
 }: ExpenseModeSelectorProps) {
   const colors = useThemeColors()
+  const { t } = useI18n()
 
   return (
     <Box>
       <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-        How should this expense work?
+        {t('form.expenseModeQuestion')}
       </Text>
 
       {/* Mobile: a single horizontal row that scrolls (carousel) so all three
@@ -94,7 +96,7 @@ export default function ExpenseModeSelector({
                     fontSize="sm"
                     _groupHover={{ textDecoration: 'underline' }}
                   >
-                    {mode.title}
+                    {t(mode.titleKey)}
                   </Text>
                   <Box
                     w={2.5}
@@ -113,7 +115,7 @@ export default function ExpenseModeSelector({
                   lineHeight="short"
                   noOfLines={{ base: 1, sm: 2 }}
                 >
-                  {mode.caption}
+                  {t(mode.captionKey)}
                 </Text>
               </VStack>
             </Box>

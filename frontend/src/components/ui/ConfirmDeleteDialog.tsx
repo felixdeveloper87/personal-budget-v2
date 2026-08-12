@@ -16,6 +16,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { AlertTriangle } from './icons'
+import { useI18n } from '../../i18n'
 
 export interface ConfirmDeleteDialogProps {
   isOpen: boolean
@@ -44,9 +45,11 @@ export default function ConfirmDeleteDialog({
   title,
   itemName,
   description,
-  confirmWord = 'DELETE',
+  confirmWord: confirmWordProp,
   isLoading = false,
 }: ConfirmDeleteDialogProps) {
+  const { t } = useI18n()
+  const confirmWord = confirmWordProp ?? t('common.deleteConfirmWord')
   const cancelRef = React.useRef<HTMLButtonElement>(null)
   const [typed, setTyped] = useState('')
 
@@ -106,7 +109,7 @@ export default function ConfirmDeleteDialog({
                 {title}
               </Text>
               <Text fontSize="xs" color={captionColor}>
-                This cannot be undone.
+                {t('common.cannotUndo')}
               </Text>
             </VStack>
           </AlertDialogHeader>
@@ -130,7 +133,9 @@ export default function ConfirmDeleteDialog({
 
               <FormControl>
                 <Text fontSize="sm" color={captionColor} mb={2}>
-                  Type <Code fontWeight={700} colorScheme="red">{confirmWord}</Code> to confirm.
+                  {t('common.typeToConfirmBefore')}{' '}
+                  <Code fontWeight={700} colorScheme="red">{confirmWord}</Code>
+                  {' '}{t('common.typeToConfirmAfter')}
                 </Text>
                 <Input
                   value={typed}
@@ -147,12 +152,12 @@ export default function ConfirmDeleteDialog({
 
           <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={previewBorder} gap={2}>
             <Button ref={cancelRef} onClick={onClose} variant="ghost" fontSize="sm" fontWeight={600}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleConfirm}
               isLoading={isLoading}
-              loadingText="Deleting…"
+              loadingText={t('common.deleting')}
               isDisabled={!confirmed}
               fontSize="sm"
               fontWeight={700}
@@ -170,7 +175,7 @@ export default function ConfirmDeleteDialog({
               _disabled={{ opacity: 0.45, cursor: 'not-allowed', _hover: { transform: 'none' } }}
               transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

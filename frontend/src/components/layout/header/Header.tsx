@@ -2,6 +2,7 @@ import { Box, Container, Flex, Text, useBreakpointValue, useColorModeValue, useD
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
+import { useI18n } from '../../../i18n'
 import SpotlightSearch from '../../search/SpotlightSearch'
 import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
@@ -35,6 +36,7 @@ export default function Header({
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const ed = useEd()
+  const { formatDate } = useI18n()
   const navItems = useMemo(
     () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
     [user?.admin]
@@ -216,9 +218,9 @@ export default function Header({
                   color="var(--pb-ink-faint)"
                   whiteSpace="nowrap"
                 >
-                  {new Date().toLocaleDateString('en-GB', { weekday: 'long' })}
+                  {formatDate(new Date(), { weekday: 'long' })}
                   {' · '}
-                  {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  {formatDate(new Date(), { day: 'numeric', month: 'long', year: 'numeric' })}
                 </Text>
               </Box>
             )}

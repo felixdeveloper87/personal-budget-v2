@@ -1,7 +1,7 @@
 import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 
-import { fmtCurrency } from '../../dashboard/components/format'
 import type { TxnVM } from '../transactions.types'
+import { useI18n } from '../../../i18n'
 
 type ActivityDayTransactionRowProps = {
   transaction: TxnVM
@@ -12,6 +12,7 @@ export default function ActivityDayTransactionRow({
   transaction,
   tone,
 }: ActivityDayTransactionRowProps) {
+  const { formatCurrency, categoryLabel } = useI18n()
   const isIncome = tone === 'income'
   const tint = isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
   const accent = isIncome ? 'var(--pb-income)' : 'var(--pb-coral)'
@@ -50,12 +51,12 @@ export default function ActivityDayTransactionRow({
             {transaction.merchant}
           </Text>
           <Text mt="1px" fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-ink-faint)" noOfLines={1}>
-            {transaction.category}
+            {categoryLabel(transaction.category)}
           </Text>
         </Box>
       </HStack>
       <Text fontFamily="var(--pb-mono)" fontSize=".95rem" fontWeight={600} color={accent} flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
-        {fmtCurrency(transaction.amount)}
+        {formatCurrency(transaction.amount)}
       </Text>
     </Flex>
   )

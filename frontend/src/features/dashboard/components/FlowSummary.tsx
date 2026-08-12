@@ -1,5 +1,5 @@
 import { Box, Grid, Text } from '@chakra-ui/react'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 export interface FlowMetric {
   label: string
@@ -18,11 +18,12 @@ interface FlowSummaryProps {
 /** Three-up summary triad. Defaults to Income / Spending / Net flow (Behaviour);
  * callers can pass their own `metrics` for an outflow-focused breakdown. */
 export default function FlowSummary({ income, expense, balance, metrics }: FlowSummaryProps) {
+  const { t, formatCurrency } = useI18n()
   const triad: FlowMetric[] = metrics ?? [
-    { label: 'Income', value: income, accent: 'var(--pb-income)' },
-    { label: 'Spending', value: expense, accent: 'var(--pb-coral)' },
+    { label: t('dashboard.income'), value: income, accent: 'var(--pb-income)' },
+    { label: t('dashboard.spending'), value: expense, accent: 'var(--pb-coral)' },
     {
-      label: 'Net flow',
+      label: t('dashboard.netFlow'),
       value: balance,
       accent: balance >= 0 ? 'var(--pb-income)' : 'var(--pb-coral)',
     },
@@ -65,7 +66,7 @@ export default function FlowSummary({ income, expense, balance, metrics }: FlowS
             noOfLines={1}
           >
             {metric.value < 0 ? '−' : ''}
-            {fmtCurrency(Math.abs(metric.value))}
+            {formatCurrency(Math.abs(metric.value))}
           </Text>
         </Box>
       ))}

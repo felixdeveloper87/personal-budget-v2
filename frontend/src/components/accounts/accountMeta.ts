@@ -31,9 +31,6 @@ const ACCOUNT_NAME_SUFFIX: Record<AccountType, string> = {
   CREDIT_CARD: 'Credit',
 }
 
-export const money = (value: number, currency = 'GBP') =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
-
 /** Generate the account display name from issuer + type. */
 export const accountName = (institution: string, type: AccountType) => {
   const issuer = institution.trim()

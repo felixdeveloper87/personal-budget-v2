@@ -1,6 +1,7 @@
 import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
-import { formatCurrency, pluralize } from './format'
 import type { ReportCategoryBreakdown } from '../../types'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from './useReportFormat'
 
 interface ReportCategoryListProps {
   title: string
@@ -9,6 +10,8 @@ interface ReportCategoryListProps {
 }
 
 export default function ReportCategoryList({ title, items, tone }: ReportCategoryListProps) {
+  const { t } = useI18n()
+  const { categoryLabel, count, currency } = useReportFormat()
   const fill = tone === 'income' ? 'green.400' : 'red.400'
 
   return (
@@ -27,7 +30,7 @@ export default function ReportCategoryList({ title, items, tone }: ReportCategor
 
       {items.length === 0 ? (
         <Text fontSize="sm" color="gray.500">
-          No data for this period.
+          {t('reports.noPeriodData')}
         </Text>
       ) : (
         <VStack align="stretch" spacing={4}>
@@ -35,7 +38,7 @@ export default function ReportCategoryList({ title, items, tone }: ReportCategor
             <Box key={item.category}>
               <HStack justify="space-between" align="baseline" spacing={3} mb={1.5}>
                 <Text fontSize="sm" fontWeight={700} color="gray.800" noOfLines={1}>
-                  {item.category}
+                  {categoryLabel(item.category)}
                 </Text>
                 <Text fontSize="sm" fontWeight={700} color="gray.900" flexShrink={0}>
                   {item.percentage}%
@@ -46,10 +49,10 @@ export default function ReportCategoryList({ title, items, tone }: ReportCategor
               </Box>
               <Flex justify="space-between" mt={1.5}>
                 <Text fontSize="xs" color="gray.500">
-                  {formatCurrency(item.amount)}
+                  {currency(item.amount)}
                 </Text>
                 <Text fontSize="xs" color="gray.500">
-                  {pluralize(item.transactionCount, 'record')}
+                  {count(item.transactionCount, 'record')}
                 </Text>
               </Flex>
             </Box>

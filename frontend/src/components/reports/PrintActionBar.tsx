@@ -1,11 +1,13 @@
 import { Box, Button, Flex, HStack, Text } from '@chakra-ui/react'
 import { Printer, X } from 'lucide-react'
+import { useI18n } from '../../i18n'
 
 /**
  * On-screen only action bar (hidden in print via the `no-print` class).
  * "Close" works because the page is opened in a script-spawned tab.
  */
 export default function PrintActionBar() {
+  const { t } = useI18n()
   return (
     <Box
       className="no-print"
@@ -19,7 +21,7 @@ export default function PrintActionBar() {
     >
       <Flex maxW="880px" mx="auto" align="center" justify="space-between" px={{ base: 3, md: 4 }} py={3} gap={3}>
         <Text fontSize="sm" fontWeight={700} color="gray.600">
-          Report preview
+          {t('reports.preview')}
         </Text>
         <HStack spacing={2}>
           <Button
@@ -29,7 +31,7 @@ export default function PrintActionBar() {
             leftIcon={<X size={15} />}
             onClick={() => window.close()}
           >
-            Close
+            {t('reports.close')}
           </Button>
           <Button
             size="sm"
@@ -37,7 +39,7 @@ export default function PrintActionBar() {
             leftIcon={<Printer size={15} />}
             onClick={() => window.print()}
           >
-            Print / Save as PDF
+            {t('reports.print')}
           </Button>
         </HStack>
       </Flex>

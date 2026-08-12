@@ -4,6 +4,7 @@ import type { PeriodType, Transaction } from '../../../types'
 import { Calculator, CheckCircle2, Wallet } from '../../ui/icons'
 import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
+import { useI18n } from '../../../i18n'
 
 interface BalanceBreakEvenPanelProps {
   currentBalance: number
@@ -12,17 +13,8 @@ interface BalanceBreakEvenPanelProps {
   transactions?: Transaction[]
 }
 
-const moneyFormatter = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-})
-
 const SAVINGS_TARGET_OPTIONS = [100, 200, 500, 1000] as const
 const MONTHLY_SAVINGS_MILESTONES = [100, 200, 500, 1000, 1200, 1500, 1700, 2000] as const
-
-function formatMoney(value: number): string {
-  return moneyFormatter.format(value)
-}
 
 function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -102,6 +94,7 @@ export default function BalanceBreakEvenPanel({
   periodType = 'month',
   transactions = [],
 }: BalanceBreakEvenPanelProps) {
+  const { t, formatCurrency } = useI18n()
   const [savingsTarget, setSavingsTarget] = useState(0)
   const { isOpen: isNumberPadOpen, onOpen: openNumberPad, onClose: closeNumberPad } = useDisclosure()
 
@@ -162,31 +155,33 @@ export default function BalanceBreakEvenPanel({
   const targetColor = neededToBreakEven > 0 ? orangeColor : greenColor
   const balanceColor = currentBalance >= 0 ? greenColor : redColor
 
-  const heroSubtitle = neededToBreakEven > 0
-    ? 'to clear this period · Tuesdays off excluded'
-    : "you're already above zero this period"
-
   const caption = remainingDays > 0
-    ? `${earningDays} earning day${earningDays === 1 ? '' : 's'} left from today after excluding ${daysOff} Tuesday${daysOff === 1 ? '' : 's'} off.`
-    : 'No remaining days in this selected period.'
+    ? t('charts.breakEven.remainingCaption', { earningDays, daysOff })
+    : t('charts.breakEven.noRemainingDays')
 
   const savingsGoalCaption = savingsTarget > 0
     ? isPositiveBalance
-      ? `Save another ${formatMoney(savingsTarget)} to finish this period with ${formatMoney(savingsGoalBalance)}.`
-      : `To finish this period with ${formatMoney(savingsTarget)} left, earn ${formatMoney(dailySavingsTarget)} per earning day.`
+      ? t('charts.breakEven.saveAnother', {
+          amount: formatCurrency(savingsTarget),
+          total: formatCurrency(savingsGoalBalance),
+        })
+      : t('charts.breakEven.finishWith', {
+          amount: formatCurrency(savingsTarget),
+          daily: formatCurrency(dailySavingsTarget),
+        })
     : isPositiveBalance
-      ? 'Choose how much more you want to save this period.'
-      : 'Set a target surplus to calculate the daily earning goal.'
+      ? t('charts.breakEven.chooseMore')
+      : t('charts.breakEven.setSurplus')
 
   if (isPastPeriod) {
     return (
-      <ChartPlotShell title="Period summary" caption="Closed period — no remaining days" showPeriodBadge={false}>
+      <ChartPlotShell title={t('charts.periodSummary')} caption={t('charts.closedPeriod')} showPeriodBadge={false}>
         <VStack align="stretch" spacing={0}>
-          <StatRow label="Total income" value={formatMoney(totalIncome)} color={greenColor} />
+          <StatRow label={t('charts.totalIncome')} value={formatCurrency(totalIncome)} color={greenColor} />
           <Divider borderColor={borderColor} />
-          <StatRow label="Total expenses" value={formatMoney(totalExpenses)} color={redColor} />
+          <StatRow label={t('charts.totalExpenses')} value={formatCurrency(totalExpenses)} color={redColor} />
           <Divider borderColor={borderColor} />
-          <StatRow label="Closing balance" value={formatMoney(currentBalance)} color={balanceColor} />
+          <StatRow label={t('charts.closingBalance')} value={formatCurrency(currentBalance)} color={balanceColor} />
         </VStack>
       </ChartPlotShell>
     )
@@ -194,12 +189,12 @@ export default function BalanceBreakEvenPanel({
 
   return (
     <ChartPlotShell
-      title={isBalancedOrBetter ? 'Monthly savings progress' : 'Break-even target'}
+      title={isBalancedOrBetter ? t('charts.breakEven.savingsProgress') : t('charts.breakEven.target')}
       caption={isBalancedOrBetter
         ? isBalanced
-          ? 'Your monthly income and spending are now balanced'
-          : 'Track the savings milestones reached from this month\'s surplus'
-        : 'Daily earning target for the selected period'}
+          ? t('charts.breakEven.balancedCaption')
+          : t('charts.breakEven.milestonesCaption')
+        : t('charts.breakEven.dailyTargetCaption')}
       showPeriodBadge={false}
     >
       <VStack align="stretch" spacing={3}>
@@ -229,29 +224,32 @@ export default function BalanceBreakEvenPanel({
                   </Box>
                   <Box minW={0}>
                     <Text fontSize="xs" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.05em">
-                      {isBalanced ? 'Monthly result' : 'Saved this month'}
+                      {isBalanced ? t('charts.breakEven.monthlyResult') : t('charts.breakEven.savedThisMonth')}
                     </Text>
                     <Text fontSize={{ base: '2xl', sm: '3xl' }} fontWeight={900} color={greenColor} lineHeight="1.1" letterSpacing="-0.03em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {formatMoney(currentBalance)}
+                      {formatCurrency(currentBalance)}
                     </Text>
                   </Box>
                 </HStack>
                 <Text display={{ base: 'none', sm: 'block' }} maxW="320px" textAlign="right" fontSize="xs" color={mutedColor}>
                   {isBalanced
-                    ? 'Income now covers this month\'s spending.'
+                    ? t('charts.breakEven.incomeCoversSpending')
                     : nextMilestone
-                    ? `${formatMoney(nextMilestone - currentBalance)} away from your next milestone.`
-                    : 'Every monthly savings milestone has been achieved.'}
+                    ? t('charts.breakEven.awayFromMilestone', { amount: formatCurrency(nextMilestone - currentBalance) })
+                    : t('charts.breakEven.allMilestonesAchieved')}
                 </Text>
               </HStack>
 
               <Box>
                 <HStack justify="space-between" mb={2.5}>
                   <Text fontSize="xs" fontWeight={800} color={titleColor}>
-                    Monthly milestones
+                    {t('charts.breakEven.monthlyMilestones')}
                   </Text>
                   <Text fontSize="xs" fontWeight={700} color={greenColor}>
-                    {achievedMilestones.length} of {MONTHLY_SAVINGS_MILESTONES.length} achieved
+                    {t('charts.breakEven.achievedCount', {
+                      achieved: achievedMilestones.length,
+                      total: MONTHLY_SAVINGS_MILESTONES.length,
+                    })}
                   </Text>
                 </HStack>
                 <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
@@ -272,7 +270,7 @@ export default function BalanceBreakEvenPanel({
                         color={achieved ? greenColor : mutedColor}
                       >
                         <Text fontSize="xs" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {formatMoney(milestone)}
+                          {formatCurrency(milestone)}
                         </Text>
                         {achieved && (
                           <Icon as={CheckCircle2} boxSize={4} weight="fill" flexShrink={0} />
@@ -294,10 +292,17 @@ export default function BalanceBreakEvenPanel({
                 <Icon as={CheckCircle2} boxSize={4} weight="fill" flexShrink={0} />
                 <Text fontSize="xs" fontWeight={700}>
                   {isBalanced
-                    ? 'Monthly balance restored. You are ready to start building a surplus.'
+                    ? t('charts.breakEven.balanceRestored')
                     : achievedMilestones.length > 0
-                    ? `Excellent progress. You have already reached ${achievedMilestones.length} monthly savings ${achievedMilestones.length === 1 ? 'goal' : 'goals'}.`
-                    : `You are in surplus. Keep going to unlock your first ${formatMoney(MONTHLY_SAVINGS_MILESTONES[0])} milestone.`}
+                    ? t(
+                        achievedMilestones.length === 1
+                          ? 'charts.breakEven.progressOneGoal'
+                          : 'charts.breakEven.progressGoals',
+                        { count: achievedMilestones.length },
+                      )
+                    : t('charts.breakEven.unlockFirstMilestone', {
+                        amount: formatCurrency(MONTHLY_SAVINGS_MILESTONES[0]),
+                      })}
                 </Text>
               </HStack>
             </VStack>
@@ -322,18 +327,18 @@ export default function BalanceBreakEvenPanel({
                 <HStack justify="space-between" align="flex-start" spacing={3}>
                   <VStack align="stretch" spacing={1.5}>
                     <Text fontSize="xs" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
-                      Daily break-even pace
+                      {t('charts.breakEven.dailyPace')}
                     </Text>
                     <HStack align="baseline" spacing={1}>
                       <Text fontSize={{ base: '3xl', sm: '4xl' }} fontWeight={800} color={targetColor} lineHeight="1" letterSpacing="-0.035em" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {formatMoney(dailyTarget)}
+                        {formatCurrency(dailyTarget)}
                       </Text>
                       <Text fontSize="xs" fontWeight={700} color={mutedColor}>
-                        / day
+                        {t('charts.breakEven.perDayShort')}
                       </Text>
                     </HStack>
                     <Text fontSize="xs" color={mutedColor}>
-                      {earningDays} earning days remaining
+                      {t('charts.breakEven.earningDaysRemaining', { count: earningDays })}
                     </Text>
                   </VStack>
                   <Box color={targetColor} pt={0.5}>
@@ -350,19 +355,19 @@ export default function BalanceBreakEvenPanel({
                 borderColor={borderColor}
               >
                 <CompactMetric
-                  label="Gap to zero"
-                  value={formatMoney(neededToBreakEven)}
+                  label={t('charts.breakEven.gapToZero')}
+                  value={formatCurrency(neededToBreakEven)}
                   color={targetColor}
                 />
                 <CompactMetric
-                  label="Days left"
+                  label={t('charts.breakEven.daysLeft')}
                   value={earningDays.toString()}
                   color={titleColor}
                   withBorder
                 />
                 <CompactMetric
-                  label="Current balance"
-                  value={formatMoney(currentBalance)}
+                  label={t('charts.breakEven.currentBalance')}
+                  value={formatCurrency(currentBalance)}
                   color={balanceColor}
                   withBorder
                 />
@@ -392,10 +397,10 @@ export default function BalanceBreakEvenPanel({
             <VStack align="stretch" spacing={3}>
               <Box>
                 <Text fontSize="sm" fontWeight={800} color={titleColor}>
-                  Monthly savings goals
+                  {t('charts.breakEven.monthlySavingsGoals')}
                 </Text>
                 <Text fontSize="xs" color={mutedColor} mt={0.5}>
-                  First close the {formatMoney(neededToBreakEven)} gap, then start unlocking these milestones.
+                  {t('charts.breakEven.closeGapFirst', { amount: formatCurrency(neededToBreakEven) })}
                 </Text>
               </Box>
               <SimpleGrid columns={{ base: 2, sm: 4 }} spacing={2}>
@@ -413,7 +418,7 @@ export default function BalanceBreakEvenPanel({
                     color={mutedColor}
                   >
                     <Text fontSize="xs" fontWeight={800} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {formatMoney(milestone)}
+                      {formatCurrency(milestone)}
                     </Text>
                   </HStack>
                 ))}
@@ -448,18 +453,18 @@ export default function BalanceBreakEvenPanel({
                   </Box>
                   <Box minW={0}>
                     <Text fontSize="sm" fontWeight={800} color={titleColor}>
-                      {isPositiveBalance ? 'Savings challenge' : 'Build a surplus'}
+                      {isPositiveBalance ? t('charts.breakEven.savingsChallenge') : t('charts.breakEven.buildSurplus')}
                     </Text>
                     <Text fontSize="xs" color={mutedColor} noOfLines={1}>
                       {isPositiveBalance
-                        ? 'Add more to this month’s positive balance.'
-                        : 'Set what you want left after reaching zero.'}
+                        ? t('charts.breakEven.addToBalance')
+                        : t('charts.breakEven.setAmountAfterZero')}
                     </Text>
                   </Box>
                 </HStack>
                 {savingsTarget > 0 && (
                   <Text flexShrink={0} fontSize="sm" fontWeight={800} color={purpleColor} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {isPositiveBalance ? '+' : ''}{formatMoney(savingsTarget)}
+                    {isPositiveBalance ? '+' : ''}{formatCurrency(savingsTarget)}
                   </Text>
                 )}
               </HStack>
@@ -484,7 +489,7 @@ export default function BalanceBreakEvenPanel({
                       onClick={() => setSavingsTarget(value)}
                       _hover={{ borderColor: activeButtonBorder, bg: activeButtonBg }}
                     >
-                      {formatMoney(value)}
+                      {formatCurrency(value)}
                     </Button>
                   )
                 })}
@@ -508,10 +513,10 @@ export default function BalanceBreakEvenPanel({
                   rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
                 >
                   <Text as="span" fontSize="xs">
-                    {isPositiveBalance ? 'Custom challenge' : 'Custom surplus'}
+                    {isPositiveBalance ? t('charts.breakEven.customChallenge') : t('charts.breakEven.customSurplus')}
                   </Text>
                   <Text as="span" fontSize="xs" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {savingsTarget > 0 ? formatMoney(savingsTarget) : 'Enter amount'}
+                    {savingsTarget > 0 ? formatCurrency(savingsTarget) : t('charts.breakEven.enterAmount')}
                   </Text>
                 </Button>
 
@@ -527,7 +532,7 @@ export default function BalanceBreakEvenPanel({
                 >
                   <Box minW={0}>
                     <Text fontSize="10px" fontWeight={800} color={mutedColor} textTransform="uppercase" letterSpacing="0.06em">
-                      Daily target
+                      {t('charts.breakEven.dailyTarget')}
                     </Text>
                     <Text fontSize="xs" color={mutedColor} noOfLines={1}>
                       {savingsGoalCaption}
@@ -535,10 +540,10 @@ export default function BalanceBreakEvenPanel({
                   </Box>
                   <Box textAlign="right" flexShrink={0}>
                     <Text fontSize="lg" fontWeight={800} color={savingsTarget > 0 ? purpleColor : mutedColor} lineHeight="1" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {savingsTarget > 0 ? formatMoney(dailySavingsTarget) : '--'}
+                      {savingsTarget > 0 ? formatCurrency(dailySavingsTarget) : '--'}
                     </Text>
                     <Text fontSize="10px" fontWeight={700} color={mutedColor}>
-                      per day
+                      {t('charts.breakEven.perDay')}
                     </Text>
                   </Box>
                 </HStack>

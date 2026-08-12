@@ -10,6 +10,7 @@ import {
 import AccountAvatar from '../../../features/accounts/components/AccountAvatar'
 import ChipCarousel from './ChipCarousel'
 import { FinancialAccount } from '../../../types'
+import { useI18n } from '../../../i18n'
 
 interface AccountSelectorProps {
   value: number | null
@@ -24,6 +25,7 @@ export default function AccountSelector({
   accounts,
   loading = false,
 }: AccountSelectorProps) {
+  const { t, formatCurrency } = useI18n()
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
   const cardBg = useColorModeValue('white', 'whiteAlpha.50')
@@ -36,12 +38,12 @@ export default function AccountSelector({
 
   return (
     <FormControl isRequired minW={0}>
-      <FormLabel fontSize="sm" fontWeight={700}>Balance account</FormLabel>
+      <FormLabel fontSize="sm" fontWeight={700}>{t('form.balanceAccount')}</FormLabel>
 
       {loading || activeAccounts.length === 0 ? (
         <Box border="1px solid" borderColor={borderColor} borderRadius="lg" p={3}>
           <Text fontSize="sm" color={captionColor}>
-            {loading ? 'Loading accounts…' : 'Create an account first'}
+            {loading ? t('form.loadingAccounts') : t('form.createAccountFirst')}
           </Text>
         </Box>
       ) : (
@@ -86,7 +88,7 @@ export default function AccountSelector({
                       {account.name}
                     </Text>
                     <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                      {account.currency} {account.currentBalance.toFixed(2)}
+                      {formatCurrency(account.currentBalance)}
                     </Text>
                   </VStack>
                 </HStack>
@@ -98,8 +100,11 @@ export default function AccountSelector({
 
       <Text mt={2} fontSize="xs" color={captionColor}>
         {selected
-          ? `${selected.institution || selected.type} · current balance ${selected.currency} ${selected.currentBalance.toFixed(2)}`
-          : 'Where this transaction changes the balance. Choose the payment method separately below.'}
+          ? t('form.currentBalance', {
+              institution: selected.institution || selected.type,
+              balance: formatCurrency(selected.currentBalance),
+            })
+          : t('form.accountHelp')}
       </Text>
     </FormControl>
   )

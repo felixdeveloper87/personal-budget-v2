@@ -27,6 +27,7 @@ import DescriptionInput from './TransactionForm/DescriptionInput'
 import PaymentMethodSelector from './TransactionForm/PaymentMethodSelector'
 import AccountSelector from './TransactionForm/AccountSelector'
 import { useEditorialPalette } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 interface EditTransactionModalProps {
   isOpen: boolean
@@ -42,6 +43,7 @@ export default function EditTransactionModal({
   onTransactionUpdated,
 }: EditTransactionModalProps) {
   const { user } = useAuth()
+  const { t } = useI18n()
   const ed = useEditorialPalette()
 
   const type = transaction?.type || 'EXPENSE'
@@ -84,7 +86,7 @@ export default function EditTransactionModal({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load payment methods',
+          title: t('transactions.paymentMethodsLoadFailed'),
           dedupeKey: 'edit-payment-methods-load-failed',
         })
       })
@@ -100,7 +102,7 @@ export default function EditTransactionModal({
     if (!user?.token || !transaction?.id || loading) return
     if (!accountId) {
       ToastService.warning({
-        title: 'Select an account',
+        title: t('transactions.selectAccount'),
         dedupeKey: 'edit-transaction-account-required',
       })
       return
@@ -123,7 +125,7 @@ export default function EditTransactionModal({
       await updateTransaction(transaction.id, updatedTx)
 
       ToastService.success({
-        title: 'Transaction updated',
+        title: t('transactions.updated'),
         duration: 2000,
         dedupeKey: `transaction-updated:${transaction.id}`,
       })
@@ -132,7 +134,7 @@ export default function EditTransactionModal({
       onClose()
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not update transaction',
+        title: t('transactions.updateFailed'),
         duration: 3000,
         dedupeKey: `transaction-update-failed:${transaction.id}`,
       })
@@ -164,8 +166,8 @@ export default function EditTransactionModal({
       header={
         <ModalHeader
           icon={Pencil}
-          title="Edit transaction"
-          caption={`Update this ${isIncome ? 'income' : 'expense'}`}
+          title={t('transactions.editTitle')}
+          caption={t(isIncome ? 'transactions.editCaptionIncome' : 'transactions.editCaptionExpense')}
           onClose={onClose}
           accent={isIncome ? 'green' : 'red'}
         />
@@ -198,16 +200,16 @@ export default function EditTransactionModal({
           />
           <Box>
             <Box as="label" display="block" fontSize="sm" fontWeight={700} mb={2}>
-              Status
+              {t('transactions.status')}
             </Box>
             <Select
               value={status}
               onChange={(event) => setStatus(event.target.value as TransactionStatus)}
             >
-              <option value="PLANNED">Planned</option>
-              <option value="PENDING">Pending</option>
-              <option value="CLEARED">Cleared</option>
-              <option value="RECONCILED">Reconciled</option>
+              <option value="PLANNED">{t('transactions.planned')}</option>
+              <option value="PENDING">{t('transactions.pending')}</option>
+              <option value="CLEARED">{t('transactions.cleared')}</option>
+              <option value="RECONCILED">{t('transactions.reconciled')}</option>
             </Select>
           </Box>
 
@@ -235,7 +237,7 @@ export default function EditTransactionModal({
             onClick={handleSubmit}
             isLoading={loading}
             isDisabled={!accountId}
-            loadingText="Updating…"
+            loadingText={t('transactions.updating')}
             _hover={{
               bgPosition: '100% 50%',
               transform: 'translateY(-1px)',
@@ -246,7 +248,7 @@ export default function EditTransactionModal({
             _active={{ transform: 'translateY(0)' }}
             transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
           >
-            Save changes
+            {t('transactions.saveChanges')}
           </Button>
         </VStack>
       </Box>

@@ -1,5 +1,6 @@
 import { IconButton, IconButtonProps, useBreakpointValue, useColorMode } from '@chakra-ui/react'
 import { editorialPalette, useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 import { X } from './icons'
 
 type AppCloseButtonProps = Omit<IconButtonProps, 'aria-label' | 'icon'> & {
@@ -7,17 +8,18 @@ type AppCloseButtonProps = Omit<IconButtonProps, 'aria-label' | 'icon'> & {
 }
 
 export default function AppCloseButton({
-  'aria-label': ariaLabel = 'Close',
+  'aria-label': ariaLabel,
   size = 'md',
   ...props
 }: AppCloseButtonProps) {
+  const { t } = useI18n()
   const { colorMode } = useColorMode()
   const ed = useEd() ?? editorialPalette(colorMode)
   const iconSize = useBreakpointValue({ base: 24, sm: 26 }) ?? 26
 
   return (
     <IconButton
-      aria-label={ariaLabel}
+      aria-label={ariaLabel ?? t('common.close')}
       icon={<X size={iconSize} weight="bold" />}
       size={size}
       variant="ghost"

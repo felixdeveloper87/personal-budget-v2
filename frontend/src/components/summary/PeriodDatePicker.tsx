@@ -18,6 +18,7 @@ import {
 import { ChevronDown, ChevronLeft, ChevronRight } from '../ui/icons'
 import { PeriodType } from '../../types'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 interface PeriodDatePickerProps {
   selectedDate: Date
@@ -27,11 +28,6 @@ interface PeriodDatePickerProps {
   hint: string | null
   isDateDisabled?: (date: Date) => boolean
 }
-
-const WEEKDAYS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-const MONTHS = Array.from({ length: 12 }, (_, month) =>
-  new Date(2020, month, 1).toLocaleDateString('en-GB', { month: 'short' }),
-)
 
 function startOfWeek(date: Date) {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -80,6 +76,7 @@ export default function PeriodDatePicker({
   hint,
   isDateDisabled,
 }: PeriodDatePickerProps) {
+  const { t, formatDate } = useI18n()
   const [isOpen, setIsOpen] = useState(false)
   const [viewDate, setViewDate] = useState(selectedDate)
 
@@ -89,6 +86,14 @@ export default function PeriodDatePicker({
 
   const days = useMemo(() => calendarDays(viewDate), [viewDate])
   const weeks = useMemo(() => calendarWeeks(viewDate), [viewDate])
+  const weekdays = useMemo(
+    () => Array.from({ length: 7 }, (_, index) => formatDate(new Date(2024, 0, 1 + index), { weekday: 'narrow' })),
+    [formatDate],
+  )
+  const months = useMemo(
+    () => Array.from({ length: 12 }, (_, month) => formatDate(new Date(2020, month, 1), { month: 'short' })),
+    [formatDate],
+  )
 
   const ed = useEd()
   const contentBgBase = useColorModeValue('white', 'gray.900')
@@ -142,14 +147,14 @@ export default function PeriodDatePicker({
       ? `${firstYear} - ${firstYear + 11}`
       : selectedPeriod === 'month'
         ? viewDate.getFullYear().toString()
-        : viewDate.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+        : formatDate(viewDate, { month: 'long', year: 'numeric' })
 
   const renderPicker = () => {
     if (selectedPeriod === 'day') {
       return (
         <>
           <SimpleGrid columns={7} spacing={1} mb={1}>
-            {WEEKDAYS.map((weekday, index) => (
+            {weekdays.map((weekday, index) => (
               <Text
                 key={`${weekday}-${index}`}
                 textAlign="center"
@@ -202,7 +207,7 @@ export default function PeriodDatePicker({
             const selected = sameWeek(start, selectedDate)
             const disabled = isDateDisabled?.(start) ?? false
             const format = (date: Date) =>
-              date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+              formatDate(date, { day: 'numeric', month: 'short' })
             return (
               <Button
                 key={start.toISOString()}
@@ -229,7 +234,7 @@ export default function PeriodDatePicker({
     if (selectedPeriod === 'month') {
       return (
         <SimpleGrid columns={3} spacing={2}>
-          {MONTHS.map((month, index) => {
+          {months.map((month, index) => {
             const date = new Date(viewDate.getFullYear(), index, 1)
             const selected =
               selectedDate.getFullYear() === viewDate.getFullYear() &&
@@ -297,7 +302,7 @@ export default function PeriodDatePicker({
           px={2}
           variant="ghost"
           borderRadius="none"
-          aria-label={`Choose ${selectedPeriod}`}
+          aria-label={t('period.choose', { period: t(`period.${selectedPeriod}`) })}
           _hover={{ bg: triggerHoverBg }}
           _focusVisible={{
             outline: '2px solid',
@@ -348,7 +353,7 @@ export default function PeriodDatePicker({
         <PopoverBody p={3}>
           <HStack justify="space-between" mb={3}>
             <IconButton
-              aria-label="Previous picker page"
+              aria-label={t('period.previousPickerPage')}
               icon={<Icon as={ChevronLeft} boxSize={4} />}
               size="sm"
               variant="ghost"
@@ -358,7 +363,7 @@ export default function PeriodDatePicker({
               {headerLabel}
             </Text>
             <IconButton
-              aria-label="Next picker page"
+              aria-label={t('period.nextPickerPage')}
               icon={<Icon as={ChevronRight} boxSize={4} />}
               size="sm"
               variant="ghost"

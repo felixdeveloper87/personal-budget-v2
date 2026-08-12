@@ -5,7 +5,8 @@ import { getAccountDetails, getAccountActivityPage } from '../../../api'
 import type { AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { ChevronLeft, ChevronRight, Repeat } from '../../../components/ui/icons'
-import { ACCOUNT_LABELS, money } from '../../../components/accounts/accountMeta'
+import { ACCOUNT_LABELS } from '../../../components/accounts/accountMeta'
+import { useI18n } from '../../../i18n'
 import AccountAvatar from './AccountAvatar'
 import RecentActivity from './RecentActivity'
 
@@ -28,6 +29,7 @@ export default function AccountDetail({
   onBack,
   onTransfer,
 }: AccountDetailProps) {
+  const { t, formatCurrency } = useI18n()
   const [details, setDetails] = useState<AccountDetails | null>(null)
 
   useEffect(() => {
@@ -39,14 +41,14 @@ export default function AccountDetail({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load account activity',
+          title: t('accounts.toast.activityLoadFailed'),
           dedupeKey: `account-details-load-failed:${account.id}`,
         })
       })
     return () => {
       active = false
     }
-  }, [account.id])
+  }, [account.id, t])
 
   // Recent activity is paged independently of the balance/overview fetch above
   // — switching accounts (or pages) always jumps back to the most recent page.
@@ -68,7 +70,7 @@ export default function AccountDetail({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load account activity',
+          title: t('accounts.toast.activityLoadFailed'),
           dedupeKey: `account-activity-load-failed:${account.id}`,
         })
       })
@@ -78,18 +80,20 @@ export default function AccountDetail({
     return () => {
       active = false
     }
-  }, [account.id, activityPage])
+  }, [account.id, activityPage, t])
 
   const shown = details?.account ?? account
-  const mask = (value: number) => (hideBalances ? '••••••' : money(value, shown.currency))
+  const mask = (value: number) => (hideBalances ? '••••••' : formatCurrency(value))
   const isCurrentAccount = shown.type === 'CURRENT'
-  const secondaryLabel = isCurrentAccount ? 'Overdraft remaining' : 'Opening balance'
+  const secondaryLabel = isCurrentAccount
+    ? t('accounts.overdraftRemaining')
+    : t('accounts.openingBalance')
   const secondaryAmount = isCurrentAccount ? shown.overdraftAvailable : shown.openingBalance
   const secondaryNote = isCurrentAccount
     ? shown.overdraftLimit > 0
-      ? `${Math.round(shown.overdraftPercentageUsed)}% of overdraft used`
-      : 'No overdraft facility'
-    : 'Balance when this account was added'
+      ? t('accounts.overdraftUsed', { percentage: Math.round(shown.overdraftPercentageUsed) })
+      : t('accounts.noOverdraft')
+    : t('accounts.openingBalanceNote')
 
   return (
     <Box
@@ -111,7 +115,7 @@ export default function AccountDetail({
             <Box
               as="button"
               type="button"
-              aria-label="Back to accounts"
+              aria-label={t('accounts.action.back')}
               onClick={onBack}
               flexShrink={0}
               w="32px"
@@ -138,7 +142,7 @@ export default function AccountDetail({
               color="var(--pb-summary-ink-faint)"
               noOfLines={1}
             >
-              {shown.institution || ACCOUNT_LABELS[shown.type]}
+              {shown.institution || t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])}
             </Text>
             <Text mt={0.5} fontSize="1.05rem" fontWeight={500} lineHeight="1.1" color="var(--pb-summary-ink)" noOfLines={1}>
               {shown.name}
@@ -148,7 +152,7 @@ export default function AccountDetail({
           <Box
             as="button"
             type="button"
-            aria-label="Make a transfer"
+            aria-label={t('accounts.transfer.action')}
             onClick={onTransfer}
             display="inline-flex"
             alignItems="center"
@@ -170,7 +174,9 @@ export default function AccountDetail({
             _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
           >
             <Icon as={Repeat} boxSize="13px" />
-            <Text as="span" display={{ base: 'none', sm: 'inline' }}>Transfer</Text>
+            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
+              {t('accounts.transfer.short')}
+            </Text>
           </Box>
         </Flex>
 
@@ -188,7 +194,7 @@ export default function AccountDetail({
             borderRight={{ base: 'none', md: '1px solid var(--pb-summary-line)' }}
           >
             <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-              Current balance
+              {t('accounts.currentBalance')}
             </Text>
             <Text
               className="num"
@@ -205,7 +211,7 @@ export default function AccountDetail({
               {mask(shown.currentBalance)}
             </Text>
             <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-              {shown.currency} · Active account
+              GBP · {t('accounts.activeAccount')}
             </Text>
           </Flex>
 
@@ -217,9 +223,9 @@ export default function AccountDetail({
               danger={!hideBalances && isCurrentAccount && secondaryAmount <= 0 && shown.overdraftLimit > 0}
             />
             <DetailMetric
-              label="Account type"
-              value={ACCOUNT_LABELS[shown.type]}
-              note={shown.institution || 'Personal account'}
+              label={t('accounts.accountType')}
+              value={t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])}
+              note={shown.institution || t('accounts.personalAccount')}
               compact
             />
           </Grid>
@@ -236,17 +242,17 @@ export default function AccountDetail({
         <Flex align="flex-end" justify="space-between" gap={3} mb={3}>
           <Box>
             <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
-              Recent activity
+              {t('accounts.activity.title')}
             </Text>
             <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)">
-              Transactions and transfers linked to this account
+              {t('accounts.activity.description')}
             </Text>
           </Box>
 
           <HStack spacing="0.35rem" flexShrink={0}>
             <IconButton
-              aria-label="Newer activity"
-              title="Newer activity"
+              aria-label={t('accounts.activity.newer')}
+              title={t('accounts.activity.newer')}
               icon={<Icon as={ChevronLeft} boxSize="15px" />}
               size="xs"
               variant="ghost"
@@ -265,11 +271,11 @@ export default function AccountDetail({
               fontSize="9px"
               color="var(--pb-ink-faint)"
             >
-              Page {activityPage + 1}
+              {t('accounts.activity.page', { page: activityPage + 1 })}
             </Text>
             <IconButton
-              aria-label="Older activity"
-              title="Older activity"
+              aria-label={t('accounts.activity.older')}
+              title={t('accounts.activity.older')}
               icon={<Icon as={ChevronRight} boxSize="15px" />}
               size="xs"
               variant="ghost"
@@ -293,7 +299,6 @@ export default function AccountDetail({
             <Box opacity={activityLoading ? 0.45 : 1} transition="opacity 0.15s ease">
               <RecentActivity
                 items={activity?.items ?? []}
-                currency={shown.currency}
                 hideBalances={hideBalances}
               />
             </Box>

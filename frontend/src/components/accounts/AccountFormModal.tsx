@@ -27,6 +27,7 @@ import type { AccountType, FinancialAccount } from '../../types'
 import { BankCombobox, BankLogo, ModalHeader, PremiumModal, getBankMeta } from '../ui'
 import { Pencil, Plus, Wallet } from '../ui/icons'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 import { ACCOUNT_HELP, ACCOUNT_LABELS, CREATABLE_ACCOUNT_TYPES, accountName } from './accountMeta'
 
 export interface AccountFormModalProps {
@@ -38,6 +39,7 @@ export interface AccountFormModalProps {
 }
 
 export default function AccountFormModal({ isOpen, onClose, account, onSaved }: AccountFormModalProps) {
+  const { t } = useI18n()
   const isEditing = Boolean(account)
 
   const [institution, setInstitution] = useState('')
@@ -74,8 +76,8 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
     const parsedOpeningBalance = Number(openingBalance)
     if (openingBalance.trim() === '' || openingBalance === '-' || !Number.isFinite(parsedOpeningBalance)) {
       ToastService.error({
-        title: 'Invalid current balance',
-        description: 'Enter a valid number, for example -250.00.',
+        title: t('accounts.form.invalidBalance.title'),
+        description: t('accounts.form.invalidBalance.description'),
         dedupeKey: 'invalid-account-balance',
       })
       return
@@ -97,14 +99,14 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
         await createAccount(request)
       }
       ToastService.success({
-        title: isEditing ? 'Account updated' : 'Account created',
+        title: isEditing ? t('accounts.toast.updated') : t('accounts.toast.created'),
         dedupeKey: isEditing ? 'account-updated' : 'account-created',
       })
       onSaved()
       onClose()
     } catch (err) {
       ToastService.apiError(err, {
-        title: isEditing ? 'Could not update account' : 'Could not create account',
+        title: isEditing ? t('accounts.toast.updateFailed') : t('accounts.toast.createFailed'),
         dedupeKey: isEditing ? 'account-update-failed' : 'account-create-failed',
       })
     } finally {
@@ -126,11 +128,11 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
       header={
         <ModalHeader
           icon={isEditing ? Pencil : Plus}
-          title={isEditing ? 'Edit account' : 'Add a new account'}
+          title={isEditing ? t('accounts.form.editTitle') : t('accounts.form.addTitle')}
           caption={
             isEditing
               ? account?.name
-              : 'Connect the places where you keep or manage money'
+              : t('accounts.form.caption')
           }
           onClose={onClose}
           accent="blue"
@@ -139,7 +141,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
       footer={
         <HStack justify="flex-end" spacing={2}>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t('accounts.form.cancel')}
           </Button>
           <Button
             colorScheme="blue"
@@ -148,7 +150,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
             isLoading={saving}
             isDisabled={!generatedAccountName}
           >
-            {isEditing ? 'Save changes' : 'Create account'}
+            {isEditing ? t('accounts.form.saveChanges') : t('accounts.form.create')}
           </Button>
         </HStack>
       }
@@ -158,17 +160,16 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
           <Alert status="info" variant="left-accent" borderRadius="xl" bg={blueSoftBg} alignItems="flex-start">
             <AlertIcon mt={0.5} />
             <Box>
-              <AlertTitle fontSize="sm">Balance accounts only</AlertTitle>
+              <AlertTitle fontSize="sm">{t('accounts.form.balanceOnly.title')}</AlertTitle>
               <AlertDescription fontSize="sm" color={muted}>
-                Credit cards belong under Cards. Add here the current, savings or
-                cash account that settles those payments.
+                {t('accounts.form.balanceOnly.description')}
               </AlertDescription>
             </Box>
           </Alert>
 
           <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
             <FormControl isRequired={type !== 'CASH'}>
-              <FormLabel>Bank or issuer</FormLabel>
+              <FormLabel>{t('accounts.form.institution')}</FormLabel>
               <HStack>
                 {getBankMeta(institution) && <BankLogo issuer={institution} size={34} borderRadius="9px" />}
                 <Box flex={1}>
@@ -176,18 +177,18 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
                     value={institution}
                     onChange={setInstitution}
                     size="md"
-                    placeholder="Select bank or issuer"
+                    placeholder={t('accounts.form.selectInstitution')}
                   />
                 </Box>
               </HStack>
               <FormHelperText>
                 {type === 'CASH'
-                  ? 'Optional for physical cash.'
-                  : 'Used together with the account type to generate its name.'}
+                  ? t('accounts.form.institutionHelp.cash')
+                  : t('accounts.form.institutionHelp.default')}
               </FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel>Type</FormLabel>
+              <FormLabel>{t('accounts.form.type')}</FormLabel>
               <Select
                 bg={fieldBg}
                 value={type}
@@ -199,14 +200,16 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
               >
                 {typeOptions.map((value) => (
                   <option key={value} value={value}>
-                    {ACCOUNT_LABELS[value]}
+                    {t(`accounts.type.${value}`, undefined, ACCOUNT_LABELS[value])}
                   </option>
                 ))}
               </Select>
-              <FormHelperText>{ACCOUNT_HELP[type]}</FormHelperText>
+              <FormHelperText>
+                {t(`accounts.typeHelp.${type}`, undefined, ACCOUNT_HELP[type])}
+              </FormHelperText>
             </FormControl>
             <FormControl gridColumn={{ sm: '1 / -1' }}>
-              <FormLabel>Account name</FormLabel>
+              <FormLabel>{t('accounts.form.name')}</FormLabel>
               <InputGroup>
                 <InputLeftElement pointerEvents="none">
                   <Icon as={Wallet} color={muted} boxSize={4} />
@@ -214,15 +217,15 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
                 <Input
                   bg={softBg}
                   value={generatedAccountName}
-                  placeholder="Select a bank or issuer"
+                  placeholder={t('accounts.form.selectInstitution')}
                   isReadOnly
                   fontWeight={700}
                 />
               </InputGroup>
-              <FormHelperText>Generated automatically from the bank or issuer and account type.</FormHelperText>
+              <FormHelperText>{t('accounts.form.nameHelp')}</FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel>Current balance</FormLabel>
+              <FormLabel>{t('accounts.form.currentBalance')}</FormLabel>
               <InputGroup>
                 <InputLeftElement pointerEvents="none" color={muted} fontWeight={700}>
                   £
@@ -243,13 +246,13 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
               </InputGroup>
               <FormHelperText>
                 {isEditing
-                  ? 'Updates the current balance without changing existing transactions or transfers.'
-                  : 'Negative values are supported, for example -250 when using overdraft.'}
+                  ? t('accounts.form.balanceHelp.edit')
+                  : t('accounts.form.balanceHelp.create')}
               </FormHelperText>
             </FormControl>
             {type === 'CURRENT' && (
               <FormControl>
-                <FormLabel>Overdraft limit</FormLabel>
+                <FormLabel>{t('accounts.form.overdraftLimit')}</FormLabel>
                 <NumberInput
                   min={0}
                   precision={2}
@@ -258,7 +261,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
                 >
                   <NumberInputField bg={fieldBg} pl={8} />
                 </NumberInput>
-                <FormHelperText>Use 0 when the account has no overdraft facility.</FormHelperText>
+                <FormHelperText>{t('accounts.form.overdraftHelp')}</FormHelperText>
               </FormControl>
             )}
           </SimpleGrid>

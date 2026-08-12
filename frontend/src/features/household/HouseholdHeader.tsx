@@ -23,6 +23,7 @@ import type {
   HouseholdDashboard,
   HouseholdMonthSummary,
 } from '../../types'
+import { useI18n } from '../../i18n'
 
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
@@ -43,21 +44,12 @@ const parseMonth = (value: string) => {
   return new Date(Number(match[1]), month - 1, 1)
 }
 
-const money = (value: number, currency: string) =>
-  new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(value)
-
-const monthLabel = (date: Date) =>
-  date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
-
 export default function HouseholdHeader({
   household,
   onAddExpense,
   onManage,
 }: HouseholdHeaderProps) {
+  const { formatCurrency, formatDate, formatNumber, locale, t } = useI18n()
   const currentMonthKey = monthKey(new Date())
   const currentMonth = useMemo(
     () => parseMonth(currentMonthKey) ?? monthStart(new Date()),
@@ -132,9 +124,9 @@ export default function HouseholdHeader({
 
     if (toReceive === 0 && toPay === 0) {
       return {
-        title: 'All settled',
-        value: money(0, household.currency),
-        detail: 'Nothing to pay or collect.',
+        title: t('household.header.position.settled'),
+        value: formatCurrency(0),
+        detail: t('household.header.position.settledDetail'),
         icon: CheckCircle2,
         color: 'var(--pb-summary-income)',
         tint: 'var(--pb-tint-income)',
@@ -143,11 +135,11 @@ export default function HouseholdHeader({
 
     if (toReceive > 0 && toPay === 0) {
       const detail = owedToUser.length === 1
-        ? `${owedToUser[0].fromMemberName} owes you.`
-        : `${owedToUser.length} people owe you.`
+        ? t('household.header.position.owedByOne', { name: owedToUser[0].fromMemberName })
+        : t('household.header.position.owedByMany', { count: formatNumber(owedToUser.length) })
       return {
-        title: "You're owed",
-        value: money(toReceive, household.currency),
+        title: t('household.header.position.owed'),
+        value: formatCurrency(toReceive),
         detail,
         icon: TrendingUp,
         color: 'var(--pb-summary-income)',
@@ -157,11 +149,11 @@ export default function HouseholdHeader({
 
     if (toPay > 0 && toReceive === 0) {
       const detail = owedByUser.length === 1
-        ? `You owe ${owedByUser[0].toMemberName}.`
-        : `You owe ${owedByUser.length} people.`
+        ? t('household.header.position.oweOne', { name: owedByUser[0].toMemberName })
+        : t('household.header.position.oweMany', { count: formatNumber(owedByUser.length) })
       return {
-        title: 'You owe',
-        value: money(toPay, household.currency),
+        title: t('household.header.position.youOwe'),
+        value: formatCurrency(toPay),
         detail,
         icon: TrendingDown,
         color: 'var(--pb-summary-coral)',
@@ -171,24 +163,33 @@ export default function HouseholdHeader({
 
     const net = household.currentUserBalance
     const netDetail = Math.abs(net) < 0.005
-      ? 'Even overall, with payments still outstanding.'
+      ? t('household.header.position.evenWithOutstanding')
       : net > 0
-        ? `Net ${money(net, household.currency)} to receive.`
-        : `Net ${money(Math.abs(net), household.currency)} to pay.`
+        ? t('household.header.position.netReceive', { amount: formatCurrency(net) })
+        : t('household.header.position.netPay', { amount: formatCurrency(Math.abs(net)) })
     return {
-      title: 'Money moves both ways',
-      value: `${money(toReceive, household.currency)} in · ${money(toPay, household.currency)} out`,
+      title: t('household.header.position.bothWays'),
+      value: t('household.header.position.bothWaysValue', {
+        incoming: formatCurrency(toReceive),
+        outgoing: formatCurrency(toPay),
+      }),
       detail: netDetail,
       icon: Wallet,
       color: 'var(--pb-summary-gold)',
       tint: 'var(--pb-tint-gold)',
     }
-  }, [household.currency, household.currentMemberId, household.currentUserBalance, household.debts])
+  }, [formatCurrency, formatNumber, household.currentMemberId, household.currentUserBalance, household.debts, t])
 
   const PositionIcon = position.icon
   const expenseCountCopy = selectedSummary.expenseCount === 0
-    ? 'No shared expenses recorded'
-    : `${selectedSummary.expenseCount} shared expense${selectedSummary.expenseCount === 1 ? '' : 's'}`
+    ? t('household.header.expenses.none')
+    : t(
+      selectedSummary.expenseCount === 1
+        ? 'household.header.expenses.one'
+        : 'household.header.expenses.other',
+      { count: formatNumber(selectedSummary.expenseCount) },
+    )
+  const selectedMonthLabel = formatDate(selectedMonth, { month: 'long', year: 'numeric' })
 
   return (
     <Box
@@ -242,7 +243,12 @@ export default function HouseholdHeader({
               color="var(--pb-summary-ink-faint)"
               noOfLines={1}
             >
-              {`Household · ${household.members.length} active member${household.members.length === 1 ? '' : 's'}`}
+              {t(
+                household.members.length === 1
+                  ? 'household.header.activeMembers.one'
+                  : 'household.header.activeMembers.other',
+                { count: formatNumber(household.members.length) },
+              )}
             </Text>
             <Text
               mt={0.5}
@@ -262,7 +268,7 @@ export default function HouseholdHeader({
         <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
           {household.currentMemberRole === 'OWNER' && (
             <Button
-              aria-label={`Manage ${household.name}`}
+              aria-label={t('household.header.manageAria', { name: household.name })}
               leftIcon={<Icon as={Gear} boxSize={4} />}
               onClick={onManage}
               flex={{ base: 1, sm: 'initial' }}
@@ -280,7 +286,7 @@ export default function HouseholdHeader({
               _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
               _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
             >
-              Manage
+              {t('household.header.manage')}
             </Button>
           )}
           <Button
@@ -302,7 +308,7 @@ export default function HouseholdHeader({
             _active={{ transform: 'translateY(0)' }}
             _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
           >
-            Add expense
+            {t('household.header.addExpense')}
           </Button>
         </Flex>
       </Flex>
@@ -325,7 +331,7 @@ export default function HouseholdHeader({
           onPeriodChange={() => undefined}
           onNavigatePeriod={navigateMonth}
           onGoToToday={() => setSelectedMonth(currentMonth)}
-          formatLabel={() => monthLabel(selectedMonth).toUpperCase()}
+          formatLabel={() => selectedMonthLabel.toLocaleUpperCase(locale)}
           isEmbedded
           showPeriodSelector={false}
           canNavigatePrevious={canNavigatePrevious}
@@ -361,7 +367,7 @@ export default function HouseholdHeader({
             textTransform="uppercase"
             color="var(--pb-summary-ink-faint)"
           >
-            Household spent · {monthLabel(selectedMonth)}
+            {t('household.header.spent', { month: selectedMonthLabel })}
           </Text>
           <Text
             mt={1.5}
@@ -374,10 +380,10 @@ export default function HouseholdHeader({
             noOfLines={1}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {money(selectedSummary.spend, household.currency)}
+            {formatCurrency(selectedSummary.spend)}
           </Text>
           <Text mt={2} fontSize="xs" color="var(--pb-summary-ink-soft)">
-            {expenseCountCopy} in this month.
+            {expenseCountCopy}
           </Text>
         </Flex>
 
@@ -400,7 +406,7 @@ export default function HouseholdHeader({
                 textTransform="uppercase"
                 color="var(--pb-summary-ink-faint)"
               >
-                Your position · all time
+                {t('household.header.positionEyebrow')}
               </Text>
               <Text mt={1.5} fontSize="sm" fontWeight={500} color={position.color}>
                 {position.title}

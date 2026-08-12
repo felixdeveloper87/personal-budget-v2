@@ -5,10 +5,10 @@ import { useReducedMotion } from 'framer-motion'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { getPreviousPeriodDate, usePeriodData } from '../../hooks/usePeriodData'
+import { useI18n } from '../../i18n'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import { fmtCurrency } from '../dashboard/components/format'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
@@ -23,6 +23,32 @@ import Distribution from '../categories/components/Distribution'
 
 interface PaymentsPageProps {
   onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
+}
+
+type I18nApi = ReturnType<typeof useI18n>
+
+function periodNavigationLabel(
+  date: Date,
+  period: 'day' | 'week' | 'month' | 'year',
+  locale: I18nApi['locale'],
+  formatDate: I18nApi['formatDate'],
+): string {
+  if (period === 'month') {
+    return formatDate(date, { month: 'short', year: 'numeric' }).toLocaleUpperCase(locale)
+  }
+  if (period === 'day') {
+    return formatDate(date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  }
+  if (period === 'week') {
+    const start = new Date(date)
+    const day = start.getDay()
+    start.setDate(start.getDate() - day + (day === 0 ? -6 : 1))
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    const shortDate = (value: Date) => formatDate(value, { day: '2-digit', month: '2-digit' })
+    return `${shortDate(start)} – ${shortDate(end)}`
+  }
+  return String(date.getFullYear())
 }
 
 function isoOf(d: Date): string {
@@ -45,6 +71,7 @@ function buildDays(start: Date, end: Date): ChartDay[] {
 }
 
 export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps) {
+  const { locale, t, formatDate } = useI18n()
   const reduce = useReducedMotion() ?? false
 
   // Credit-card id → name, used to fold a card's charges into one fatura row.
@@ -74,7 +101,6 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
     onPeriodChange,
     navigatePeriod,
     goToToday,
-    formatLabel,
     isCurrentPeriod,
   } = usePeriodNavigator()
 
@@ -129,7 +155,7 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
     )[0]?.rows ?? []
   }, [cardNames, selectedChartDay, vm])
 
-  const periodLabel = formatLabel()
+  const periodLabel = periodNavigationLabel(selectedDate, selectedPeriod, locale, formatDate)
 
   const selectDay = (iso: string) => {
     setSelectedChartDay((current) => current === iso ? null : iso)
@@ -172,8 +198,8 @@ export default function PaymentsPage({ onOpenCardStatement }: PaymentsPageProps)
               periodLabel={periodLabel}
               tone="expense"
               dateKey="settlementDate"
-              title="Payment activity"
-              caption="Daily payment intensity"
+              title={t('payments.activity.title')}
+              caption={t('payments.activity.caption')}
             />
           )}
         </MotionBox>
@@ -214,6 +240,7 @@ function PaymentsSummary({
   periodLabel: string
   periodNavigator: ReactNode
 }) {
+  const { t, formatCurrency } = useI18n()
   return (
     <Box
       bg="var(--pb-summary-petrol)"
@@ -229,25 +256,32 @@ function PaymentsSummary({
       <VStack align="stretch" spacing={4}>
         <VStack align="stretch" spacing={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-            Payments - {periodLabel}
+            {t('payments.summary.heading', { period: periodLabel })}
           </Text>
-          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Scheduled cash outflow</Text>
+          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('payments.summary.subtitle')}</Text>
         </VStack>
 
         <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
           {total > 0 ? (
-            <>You have <Text as="em" color="var(--pb-summary-coral)">{fmtCurrency(total)}</Text> scheduled to leave in {periodLabel}.</>
+            <>
+              {t('payments.summary.scheduledPrefix')}{' '}
+              <Text as="em" color="var(--pb-summary-coral)">{formatCurrency(total)}</Text>{' '}
+              {t('payments.summary.scheduledSuffix', { period: periodLabel })}
+            </>
           ) : (
-            <>No payments are scheduled in {periodLabel}.</>
+            <>{t('payments.summary.empty', { period: periodLabel })}</>
           )}
         </Text>
 
         <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={upcoming > 0 ? 'var(--pb-summary-gold)' : 'var(--pb-summary-income)'}>
           {total === 0
-            ? 'No payments due in this period'
+            ? t('payments.summary.noneDue')
             : upcoming > 0
-              ? `${fmtCurrency(upcoming)} remaining · ${fmtCurrency(paid)} paid`
-              : `All payments settled · ${fmtCurrency(paid)} paid`}
+              ? t('payments.summary.remaining', {
+                  remaining: formatCurrency(upcoming),
+                  paid: formatCurrency(paid),
+                })
+              : t('payments.summary.settled', { paid: formatCurrency(paid) })}
         </Text>
       </VStack>
     </Box>
@@ -265,8 +299,9 @@ function SelectedDayPayments({
   onClose: () => void
   onOpenCardStatement?: (target: { cardId: number; paymentDate: string }) => void
 }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const total = payments.reduce((sum, payment) => sum + payment.amount, 0)
-  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+  const dayLabel = formatDate(day, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -276,19 +311,19 @@ function SelectedDayPayments({
     <ActivityDayModal
       isOpen
       onClose={onClose}
-      label={`Payments on ${dayLabel}`}
+      label={t('payments.day.label', { date: dayLabel })}
       tone="expense"
       title={dayLabel}
-      totalLabel="Paid"
-      total={fmtCurrency(total)}
+      totalLabel={t('payments.day.total')}
+      total={formatCurrency(total)}
       count={payments.length}
-      dateContext="Settlement date"
+      dateContext={t('payments.day.dateContext')}
     >
       <VStack align="stretch" spacing={2}>
         {payments.length === 0 ? (
           <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
             <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
-              No payments recorded on this day.
+              {t('payments.day.empty')}
             </Text>
           </Box>
         ) : (
@@ -316,7 +351,8 @@ function SelectedDayPayments({
 }
 
 function StatementPaymentRow({ payment, onOpen }: { payment: TxnVM; onOpen: () => void }) {
-  const statementMonth = new Date(`${payment.settlementDate}T00:00:00`).toLocaleDateString('en-GB', {
+  const { t, formatCurrency, formatDate } = useI18n()
+  const statementMonth = formatDate(payment.settlementDate, {
     month: 'long',
     year: 'numeric',
   })
@@ -343,14 +379,14 @@ function StatementPaymentRow({ payment, onOpen }: { payment: TxnVM; onOpen: () =
     >
       <Box minW={0}>
         <Text fontFamily="var(--pb-serif)" color="var(--pb-ink)" noOfLines={1}>
-          {payment.merchant} statement
+          {t('payments.statement.title', { merchant: payment.merchant })}
         </Text>
         <Text mt={0.5} fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" noOfLines={1}>
-          {statementMonth} statement · View card statement
+          {t('payments.statement.description', { month: statementMonth })}
         </Text>
       </Box>
       <Text fontFamily="var(--pb-mono)" fontSize=".95rem" color="var(--pb-coral)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
-        {fmtCurrency(payment.amount)}
+        {formatCurrency(payment.amount)}
       </Text>
     </Box>
   )

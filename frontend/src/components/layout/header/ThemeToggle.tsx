@@ -1,5 +1,6 @@
 import { Icon, IconButton, Tooltip, useColorMode, useColorModeValue } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
+import { useI18n } from '../../../i18n'
 import { Sun, Moon } from '../../ui/icons'
 
 interface ThemeToggleProps {
@@ -10,6 +11,7 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
   const { colorMode, toggleColorMode } = useColorMode()
   const isLight = colorMode === 'light'
   const ed = useEd()
+  const { t } = useI18n()
 
   const bgBase = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
   const bg = ed ? ed.controlBg : bgBase
@@ -43,9 +45,13 @@ export default function ThemeToggle({ size = 'md' }: ThemeToggleProps) {
   const dimensions = size === 'sm' ? '36px' : '40px'
 
   return (
-    <Tooltip label={`Switch to ${isLight ? 'dark' : 'light'} mode`} hasArrow openDelay={300}>
+    <Tooltip
+      label={t(isLight ? 'header.theme.switchToDark' : 'header.theme.switchToLight')}
+      hasArrow
+      openDelay={300}
+    >
       <IconButton
-        aria-label="Toggle color mode"
+        aria-label={t('header.theme.toggle')}
         icon={
           isLight
             ? <Icon as={Moon} weight="duotone" boxSize={size === 'sm' ? 4 : '18px'} />

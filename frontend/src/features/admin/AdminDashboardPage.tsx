@@ -39,12 +39,14 @@ import {
 import type { AdminUserRow, UserPlan } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 interface AdminDashboardPageProps {
   onPageChange?: (page: AppPage) => void
 }
 
 export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageProps) {
+  const { t } = useI18n()
   const { user } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [rows, setRows] = useState<AdminUserRow[]>([])
@@ -65,17 +67,17 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       const data = await listAdminUsers()
       setRows(data)
     } catch {
-      setError('Could not load users.')
+      setError(t('admin.loadError'))
       ToastService.error({
-        title: 'Failed to load',
-        description: 'Could not fetch user list.',
+        title: t('admin.toast.loadFailed'),
+        description: t('admin.toast.loadDescription'),
         duration: 4000,
         dedupeKey: 'admin-users-load-failed',
       })
     } finally {
       setLoading(false)
     }
-  }, [user?.admin])
+  }, [t, user?.admin])
 
   useEffect(() => {
     load()
@@ -105,16 +107,16 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       await deleteAdminUser(id)
       setRows((prev) => prev.filter((r) => r.id !== id))
       ToastService.success({
-        title: wasPending ? 'Registration rejected' : 'User deleted',
+        title: wasPending ? t('admin.toast.registrationRejected') : t('admin.toast.userDeleted'),
         description: wasPending
-          ? 'That sign-up request was removed.'
-          : 'The account and its data were removed.',
+          ? t('admin.toast.registrationRemoved')
+          : t('admin.toast.accountRemoved'),
         duration: 3500,
         dedupeKey: `admin-user-deleted:${id}`,
       })
     } catch {
       ToastService.error({
-        title: wasPending ? 'Reject failed' : 'Delete failed',
+        title: wasPending ? t('admin.toast.rejectFailed') : t('admin.toast.deleteFailed'),
         duration: 3000,
         dedupeKey: `admin-user-delete-failed:${id}`,
       })
@@ -128,14 +130,14 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       const updated = await approveAdminUser(id)
       setRows((prev) => prev.map((r) => (r.id === id ? updated : r)))
       ToastService.success({
-        title: 'User approved',
-        description: 'They can sign in now.',
+        title: t('admin.toast.userApproved'),
+        description: t('admin.toast.canSignIn'),
         duration: 3000,
         dedupeKey: `admin-user-approved:${id}`,
       })
     } catch {
       ToastService.error({
-        title: 'Approve failed',
+        title: t('admin.toast.approveFailed'),
         duration: 3000,
         dedupeKey: `admin-user-approve-failed:${id}`,
       })
@@ -147,13 +149,13 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       const updated = await updateAdminUserPlan(id, plan)
       setRows((prev) => prev.map((r) => (r.id === id ? updated : r)))
       ToastService.success({
-        title: 'Plan updated',
+        title: t('admin.toast.planUpdated'),
         duration: 2000,
         dedupeKey: `admin-plan-updated:${id}`,
       })
     } catch {
       ToastService.error({
-        title: 'Could not update plan',
+        title: t('admin.toast.planUpdateFailed'),
         duration: 3000,
         dedupeKey: `admin-plan-update-failed:${id}`,
       })
@@ -165,7 +167,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       <Container maxW="container.lg" py={10}>
         <Alert status="warning" borderRadius="lg">
           <AlertIcon />
-          You do not have access to the admin panel.
+          {t('admin.noAccess')}
         </Alert>
       </Container>
     )
@@ -180,28 +182,29 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
         <AlertDialogOverlay />
         <AlertDialogContent mx={3}>
           <AlertDialogHeader>
-            {pendingDelete && !pendingDelete.approved ? 'Reject sign-up?' : 'Delete user?'}
+            {pendingDelete && !pendingDelete.approved
+              ? t('admin.dialog.rejectTitle')
+              : t('admin.dialog.deleteTitle')}
           </AlertDialogHeader>
           <AlertDialogBody>
             {pendingDelete &&
               (!pendingDelete.approved ? (
-                <Text>
-                  Remove <strong>{pendingDelete.email}</strong> — they will not be able to sign in with
-                  this registration.
-                </Text>
+                <Text>{t('admin.dialog.rejectDescription', { email: pendingDelete.email })}</Text>
               ) : (
                 <Text>
-                  Permanently delete <strong>{pendingDelete.name}</strong> ({pendingDelete.email})?
-                  Their transactions and related data will be removed.
+                  {t('admin.dialog.deleteDescription', {
+                    name: pendingDelete.name,
+                    email: pendingDelete.email,
+                  })}
                 </Text>
               ))}
           </AlertDialogBody>
           <AlertDialogFooter>
             <Button ref={cancelRef} variant="ghost" mr={3} onClick={closeRemoveDialog}>
-              Cancel
+              {t('admin.cancel')}
             </Button>
             <Button colorScheme="red" onClick={() => void confirmRemove()}>
-              {pendingDelete && !pendingDelete.approved ? 'Reject' : 'Delete'}
+              {pendingDelete && !pendingDelete.approved ? t('admin.reject') : t('admin.delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -212,7 +215,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
         {loading ? (
           <HStack spacing={3} py={10} justify="center">
             <Spinner />
-            <Text color={muted}>Loading users…</Text>
+            <Text color={muted}>{t('admin.loadingUsers')}</Text>
           </HStack>
         ) : error ? (
           <Alert status="error" borderRadius="lg" maxW="md">
@@ -224,7 +227,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
             {pending.length > 0 && (
               <Box>
                 <Heading size="sm" mb={3} color="orange.500">
-                  Pending approval ({pending.length})
+                  {t('admin.pendingApproval', { count: pending.length })}
                 </Heading>
                 <UserTable
                   rows={pending}
@@ -241,7 +244,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
 
             <Box>
               <Heading size="sm" mb={3}>
-                All users ({rows.length})
+                {t('admin.allUsers', { count: rows.length })}
               </Heading>
               <UserTable
                 rows={rows}
@@ -259,16 +262,6 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       </Container>
     </Box>
   )
-}
-
-function formatJoined(iso: string) {
-  try {
-    const d = new Date(iso)
-    if (Number.isNaN(d.getTime())) return iso
-    return d.toLocaleString()
-  } catch {
-    return iso
-  }
 }
 
 function UserTable({
@@ -290,7 +283,14 @@ function UserTable({
   onRemove: (row: AdminUserRow) => void
   showApproveActions: boolean
 }) {
+  const { t, formatDate } = useI18n()
   const isSelf = (row: AdminUserRow) => row.id === currentUserId
+  const joined = (iso: string) => {
+    const date = new Date(iso)
+    return Number.isNaN(date.getTime())
+      ? iso
+      : formatDate(date, { dateStyle: 'medium', timeStyle: 'short' })
+  }
 
   return (
     <>
@@ -305,12 +305,12 @@ function UserTable({
         <Table size="sm" variant="simple">
           <Thead bg="blackAlpha.50" _dark={{ bg: 'whiteAlpha.50' }}>
             <Tr>
-              <Th>Name</Th>
-              <Th>Email</Th>
-              <Th>Joined</Th>
-              <Th>Status</Th>
-              <Th>Plan</Th>
-              <Th>Actions</Th>
+              <Th>{t('admin.table.name')}</Th>
+              <Th>{t('admin.table.email')}</Th>
+              <Th>{t('admin.table.joined')}</Th>
+              <Th>{t('admin.table.status')}</Th>
+              <Th>{t('admin.table.plan')}</Th>
+              <Th>{t('admin.table.actions')}</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -319,19 +319,19 @@ function UserTable({
                 <Td fontWeight="600">{row.name}</Td>
                 <Td fontSize="sm">{row.email}</Td>
                 <Td fontSize="xs" whiteSpace="nowrap">
-                  {formatJoined(row.createdAt)}
+                  {joined(row.createdAt)}
                 </Td>
                 <Td>
                   <HStack spacing={2} flexWrap="wrap">
                     {isSelf(row) && (
-                      <Badge colorScheme="cyan">You</Badge>
+                      <Badge colorScheme="cyan">{t('admin.status.you')}</Badge>
                     )}
                     {!row.approved ? (
-                      <Badge colorScheme="orange">Pending</Badge>
+                      <Badge colorScheme="orange">{t('admin.status.pending')}</Badge>
                     ) : (
-                      <Badge colorScheme="green">Approved</Badge>
+                      <Badge colorScheme="green">{t('admin.status.approved')}</Badge>
                     )}
-                    {row.admin && <Badge colorScheme="purple">Admin</Badge>}
+                    {row.admin && <Badge colorScheme="purple">{t('admin.status.admin')}</Badge>}
                   </HStack>
                 </Td>
                 <Td>
@@ -342,8 +342,8 @@ function UserTable({
                     onChange={(e) => onPlanChange(row.id, e.target.value as UserPlan)}
                     isDisabled={row.admin}
                   >
-                    <option value="STANDARD">Standard</option>
-                    <option value="PREMIUM">Premium</option>
+                    <option value="STANDARD">{t('admin.plan.standard')}</option>
+                    <option value="PREMIUM">{t('admin.plan.premium')}</option>
                   </Select>
                 </Td>
                 <Td>
@@ -356,7 +356,7 @@ function UserTable({
                           onClick={() => onApprove(row.id)}
                           isDisabled={isSelf(row)}
                         >
-                          Approve
+                          {t('admin.approve')}
                         </Button>
                         <Button
                           size="sm"
@@ -366,7 +366,7 @@ function UserTable({
                           onClick={() => onRemove(row)}
                           isDisabled={isSelf(row)}
                         >
-                          Reject
+                          {t('admin.reject')}
                         </Button>
                       </>
                     )}
@@ -379,7 +379,7 @@ function UserTable({
                         onClick={() => onRemove(row)}
                         isDisabled={isSelf(row)}
                       >
-                        Delete
+                        {t('admin.delete')}
                       </Button>
                     )}
                   </HStack>
@@ -405,16 +405,16 @@ function UserTable({
               {row.email}
             </Text>
             <Text fontSize="xs" mt={1} color="gray.500">
-              {formatJoined(row.createdAt)}
+              {joined(row.createdAt)}
             </Text>
             <HStack mt={2} spacing={2} flexWrap="wrap">
-              {isSelf(row) && <Badge colorScheme="cyan">You</Badge>}
+              {isSelf(row) && <Badge colorScheme="cyan">{t('admin.status.you')}</Badge>}
               {!row.approved ? (
-                <Badge colorScheme="orange">Pending</Badge>
+                <Badge colorScheme="orange">{t('admin.status.pending')}</Badge>
               ) : (
-                <Badge colorScheme="green">Approved</Badge>
+                <Badge colorScheme="green">{t('admin.status.approved')}</Badge>
               )}
-              {row.admin && <Badge colorScheme="purple">Admin</Badge>}
+              {row.admin && <Badge colorScheme="purple">{t('admin.status.admin')}</Badge>}
             </HStack>
             <Stack mt={3} spacing={2}>
               <Select
@@ -423,8 +423,8 @@ function UserTable({
                 onChange={(e) => onPlanChange(row.id, e.target.value as UserPlan)}
                 isDisabled={row.admin}
               >
-                <option value="STANDARD">Standard</option>
-                <option value="PREMIUM">Premium</option>
+                <option value="STANDARD">{t('admin.plan.standard')}</option>
+                <option value="PREMIUM">{t('admin.plan.premium')}</option>
               </Select>
               {showApproveActions && !row.approved && (
                 <HStack spacing={2}>
@@ -435,7 +435,7 @@ function UserTable({
                     onClick={() => onApprove(row.id)}
                     isDisabled={isSelf(row)}
                   >
-                    Approve
+                    {t('admin.approve')}
                   </Button>
                   <Button
                     size="sm"
@@ -445,7 +445,7 @@ function UserTable({
                     onClick={() => onRemove(row)}
                     isDisabled={isSelf(row)}
                   >
-                    Reject
+                    {t('admin.reject')}
                   </Button>
                 </HStack>
               )}
@@ -459,7 +459,7 @@ function UserTable({
                   isDisabled={isSelf(row)}
                   w="full"
                 >
-                  Delete account
+                  {t('admin.deleteAccount')}
                 </Button>
               )}
             </Stack>

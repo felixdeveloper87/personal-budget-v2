@@ -1,9 +1,9 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import { CalendarClock } from '../../../components/ui/icons'
-import { fmtCurrency } from '../../dashboard/components/format'
 import { parseISO } from '../../transactions/transactions.utils'
 import type { TxnVM } from '../../transactions/transactions.types'
+import { useI18n } from '../../../i18n'
 
 interface UpcomingPaymentsProps {
   /** View-model of the FULL transaction list (not period-sliced). */
@@ -23,9 +23,8 @@ function todayIso(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-const dayLabel = (d: Date) => d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-
 export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
+  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
   const carouselRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const dragRef = useRef({ startX: 0, scrollLeft: 0 })
@@ -76,15 +75,15 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
         <HStack spacing={2.5} align="baseline" minW={0}>
           <Icon as={CalendarClock} boxSize="15px" color="var(--pb-forest-2)" />
           <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-forest-2)" whiteSpace="nowrap">
-            Upcoming
+            {t('payments.upcoming.eyebrow')}
           </Text>
           <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
-            Payments ahead
+            {t('payments.upcoming.title')}
           </Text>
         </HStack>
         {grandTotal > 0 && (
           <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" whiteSpace="nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(grandTotal)}
+            {formatCurrency(grandTotal)}
           </Text>
         )}
       </Flex>
@@ -92,7 +91,7 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
       {buckets.length === 0 ? (
         <Box py={6} textAlign="center">
           <Text fontFamily="var(--pb-serif)" fontStyle="italic" fontSize=".95rem" color="var(--pb-ink-faint)">
-            No upcoming payments scheduled.
+            {t('payments.upcoming.empty')}
           </Text>
         </Box>
       ) : (
@@ -124,15 +123,17 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
             >
               <Flex justify="space-between" align="baseline" gap={2}>
                 <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)" noOfLines={1}>
-                  {dayLabel(bucket.date)}
+                  {formatDate(bucket.date, { weekday: 'short', day: 'numeric', month: 'short' })}
                 </Text>
                 <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {fmtCurrency(bucket.total)}
+                  {formatCurrency(bucket.total)}
                 </Text>
               </Flex>
               <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
                 {bucket.topMerchant}
-                {bucket.count > 1 ? ` +${bucket.count - 1} more` : ''}
+                {bucket.count > 1
+                  ? ` ${t('payments.upcoming.more', { count: formatNumber(bucket.count - 1) })}`
+                  : ''}
               </Text>
             </Box>
           ))}

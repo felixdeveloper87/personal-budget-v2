@@ -9,17 +9,23 @@ import {
   useColorMode,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { useCallback, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
 import BrandMark from '../brand/BrandMark'
 import {
   CaretDoubleLeft,
 } from '../ui/icons'
-import { navItemIdFor, type AppPage, type NavItem } from './header/navigation.config'
+import {
+  localizeNavigationItems,
+  navItemIdFor,
+  type AppPage,
+  type NavItem,
+} from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
 import ThemeToggle from './header/ThemeToggle'
 import UserMenu from './header/UserMenu'
+import { useI18n } from '../../i18n'
 
 /* -------------------------------------------------------------------------- */
 /* Constants                                                                   */
@@ -30,28 +36,35 @@ export const SIDEBAR_COLLAPSED_W = 72
 const TRANSITION = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
 
 const NAVIGATION_GROUPS: ReadonlyArray<{
-  label: string
+  labelKey: string
+  fallbackLabel: string
   itemIds: ReadonlyArray<AppPage>
 }> = [
   {
-    label: 'General view',
+    labelKey: 'sidebar.group.general',
+    fallbackLabel: 'General view',
     itemIds: ['dashboard', 'behaviour', 'earnings', 'payments', 'accounts', 'cards', 'all-transactions'],
   },
   {
-    label: 'Planning',
+    labelKey: 'sidebar.group.planning',
+    fallbackLabel: 'Planning',
     itemIds: ['planning', 'commitments', 'goals'],
   },
   {
-    label: 'Reports',
+    labelKey: 'sidebar.group.reports',
+    fallbackLabel: 'Reports',
     itemIds: ['reports'],
   },
 ]
 
-function groupNavigationItems(items: ReadonlyArray<NavItem>) {
+function groupNavigationItems(
+  items: ReadonlyArray<NavItem>,
+  translate: (key: string, fallback: string) => string,
+) {
   const groupedIds = new Set(NAVIGATION_GROUPS.flatMap((group) => group.itemIds))
   const groups = NAVIGATION_GROUPS
     .map((group) => ({
-      label: group.label,
+      label: translate(group.labelKey, group.fallbackLabel),
       items: group.itemIds
         .map((id) => items.find((item) => item.id === id))
         .filter((item): item is NavItem => Boolean(item)),
@@ -60,7 +73,10 @@ function groupNavigationItems(items: ReadonlyArray<NavItem>) {
 
   const ungroupedItems = items.filter((item) => !groupedIds.has(item.id))
   return ungroupedItems.length > 0
-    ? [...groups, { label: 'Administration', items: ungroupedItems }]
+    ? [...groups, {
+        label: translate('sidebar.group.administration', 'Administration'),
+        items: ungroupedItems,
+      }]
     : groups
 }
 
@@ -88,12 +104,20 @@ export default function Sidebar({
   onOpenSettings,
 }: SidebarProps) {
   const { user, logout } = useAuth()
+  const { t } = useI18n()
   const ed = useEd()
   const { colorMode } = useColorMode()
   // Editorial light stays close to the page canvas, with just enough glass and
   // edge depth to preserve the navigation hierarchy.
   const isEdLight = !!ed && colorMode === 'light'
-  const navigationGroups = groupNavigationItems(items)
+  const localizedItems = useMemo(
+    () => localizeNavigationItems(items, (key, fallback) => t(key, undefined, fallback)),
+    [items, t],
+  )
+  const navigationGroups = groupNavigationItems(
+    localizedItems,
+    (key, fallback) => t(key, undefined, fallback),
+  )
 
   /* ---- Surface tokens (glass stays tied to the editorial palette so the
          rail sits flush with the page in light mode) ---- */
@@ -150,7 +174,7 @@ export default function Sidebar({
   return (
     <Box
       as="aside"
-      aria-label="Sidebar navigation"
+      aria-label={t('sidebar.navigation')}
       position="fixed"
       top={0}
       left={0}
@@ -251,11 +275,12 @@ export default function Sidebar({
 
 /** Editorial brand lockup: engraved mini seal + serif wordmark + mono tagline. */
 function SidebarBrand({ onClick }: { onClick?: () => void }) {
+  const { t } = useI18n()
   return (
     <Flex
       as="button"
       type="button"
-      aria-label="Personal Budget — go to dashboard"
+      aria-label={t('sidebar.brand.goToDashboard')}
       onClick={onClick}
       align="center"
       gap={2.5}
@@ -301,7 +326,7 @@ function SidebarBrand({ onClick }: { onClick?: () => void }) {
           color="var(--pb-ink-faint)"
           noOfLines={1}
         >
-          Clarity for your money
+          {t('brand.tagline')}
         </Text>
       </VStack>
     </Flex>
@@ -317,6 +342,7 @@ function SidebarHeader({
   onToggle: () => void
   onPageChange?: (page: AppPage) => void
 }) {
+  const { t } = useI18n()
   const toggleStyles = {
     color: 'var(--pb-ink-faint)',
     bg: 'transparent',
@@ -337,9 +363,9 @@ function SidebarHeader({
     >
       {isCollapsed ? (
         <Flex justify="center">
-          <Tooltip label="Expand sidebar" hasArrow placement="right" openDelay={200}>
+          <Tooltip label={t('sidebar.expand')} hasArrow placement="right" openDelay={200}>
             <IconButton
-              aria-label="Expand sidebar"
+              aria-label={t('sidebar.expand')}
               icon={<BrandMark size={36} />}
               size="sm"
               variant="ghost"
@@ -362,9 +388,9 @@ function SidebarHeader({
             <SidebarBrand onClick={() => onPageChange?.('dashboard')} />
           </Box>
 
-          <Tooltip label="Collapse sidebar" hasArrow placement="right" openDelay={400}>
+          <Tooltip label={t('sidebar.collapse')} hasArrow placement="right" openDelay={400}>
             <IconButton
-              aria-label="Collapse sidebar"
+              aria-label={t('sidebar.collapse')}
               icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} />}
               size="xs"
               variant="ghost"

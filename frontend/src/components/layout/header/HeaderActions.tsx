@@ -1,9 +1,10 @@
 import { Box, Button, HStack, Icon, IconButton, useBreakpointValue } from '@chakra-ui/react'
 import { ArrowRight, Home } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
+import LanguageToggle from './LanguageToggle'
 import SearchTrigger from './SearchTrigger'
 import ThemeToggle from './ThemeToggle'
 import UserMenu from './UserMenu'
-import { BRAND } from './brand.config'
 
 interface HeaderActionsProps {
   user?: any
@@ -32,12 +33,13 @@ export default function HeaderActions({
   onOpenSettings,
   onLogout,
 }: HeaderActionsProps) {
+  const { t } = useI18n()
   const ctaLabel =
     useBreakpointValue({
-      base: BRAND.cta.headerCompact,
-      sm: BRAND.cta.headerShort,
-      lg: BRAND.cta.headerLong,
-    }) ?? BRAND.cta.headerShort
+      base: t('header.cta.compact'),
+      sm: t('header.cta.short'),
+      lg: t('header.cta.long'),
+    }) ?? t('header.cta.short')
   const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   return (
@@ -52,7 +54,7 @@ export default function HeaderActions({
 
       {user && onHouseholdOpen && (
         <IconButton
-          aria-label="Open Household"
+          aria-label={t('header.openHousehold')}
           aria-current={householdActive ? 'page' : undefined}
           icon={<Home size={19} weight={householdActive ? 'fill' : 'duotone'} />}
           display={{ base: 'inline-flex', md: 'none' }}
@@ -67,6 +69,8 @@ export default function HeaderActions({
           onClick={onHouseholdOpen}
         />
       )}
+
+      <LanguageToggle />
 
       {!hideUserControls && <ThemeToggle />}
 

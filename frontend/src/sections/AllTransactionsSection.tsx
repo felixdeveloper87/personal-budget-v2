@@ -15,6 +15,7 @@ import {
   getTransactionDate,
   type TransactionDateBasis,
 } from '../utils/transactionDates'
+import { useI18n } from '../i18n'
 
 interface AllTransactionsSectionProps {
   transactions: Transaction[]
@@ -27,6 +28,7 @@ export default function AllTransactionsSection({
   hasFilters,
   onRefresh,
 }: AllTransactionsSectionProps) {
+  const { t } = useI18n()
   const [groupByMonth, setGroupByMonth] = useState(true)
   // All-transactions is a management view — fixed to the purchase-date basis;
   // the Behaviour/Payments lens split lives on its own pages now.
@@ -109,7 +111,9 @@ export default function AllTransactionsSection({
               borderColor={countBorder}
             >
               <Text fontSize="xs" fontWeight={800} color={countColor} lineHeight={1}>
-                {transactions.length} transactions
+                {t(transactions.length === 1 ? 'transactions.count' : 'transactions.countPlural', {
+                  count: transactions.length,
+                })}
               </Text>
             </Box>
 
@@ -125,7 +129,7 @@ export default function AllTransactionsSection({
               >
                 <Icon as={Filter} boxSize={3} color={filterColor} weight="bold" />
                 <Text fontSize="xs" fontWeight={700} color={filterColor} lineHeight={1}>
-                  Filtered
+                  {t('transactions.filtered')}
                 </Text>
               </HStack>
             )}
@@ -144,7 +148,7 @@ export default function AllTransactionsSection({
                 _hover={{ textDecoration: 'none', color: 'var(--pb-forest)' }}
                 display={{ base: 'none', lg: 'inline-flex' }}
               >
-                Jump to Current Month
+                {t('transactions.jumpToCurrentMonth')}
               </Button>
             )}
 
@@ -159,7 +163,7 @@ export default function AllTransactionsSection({
             >
               <ViewToggleButton
                 icon={List}
-                label="List"
+                label={t('transactions.listView')}
                 isActive={!groupByMonth}
                 onClick={() => setGroupByMonth(false)}
                 activeBg={tabActiveBg}
@@ -170,7 +174,7 @@ export default function AllTransactionsSection({
               />
               <ViewToggleButton
                 icon={Calendar}
-                label="Grouped"
+                label={t('transactions.groupedView')}
                 isActive={groupByMonth}
                 onClick={() => setGroupByMonth(true)}
                 activeBg={tabActiveBg}
@@ -267,6 +271,7 @@ function ViewToggleButton({
 }
 
 function EmptyState() {
+  const { t } = useI18n()
   const textColor = 'var(--pb-ink-soft)'
   const iconColor = 'var(--pb-ink-faint)'
 
@@ -285,10 +290,10 @@ function EmptyState() {
       </Flex>
       <VStack spacing={1}>
         <Text fontSize="md" fontWeight={700} color={textColor}>
-          No transactions yet
+          {t('transactions.emptyTitle')}
         </Text>
         <Text fontSize="sm" color={textColor} opacity={0.7} maxW="320px" textAlign="center">
-          Your transaction history will appear here once you start adding entries.
+          {t('transactions.emptyHistory')}
         </Text>
       </VStack>
     </VStack>

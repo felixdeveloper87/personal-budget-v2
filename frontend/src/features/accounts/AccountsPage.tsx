@@ -4,6 +4,7 @@ import { Box, Flex, Grid, Icon, Spinner, Text, VStack, useMediaQuery } from '@ch
 import { archiveAccount, getAccountSummary } from '../../api'
 import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AccountFormModal from '../../components/accounts/AccountFormModal'
@@ -20,6 +21,7 @@ import TransferModal from './components/TransferModal'
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
 export default function AccountsPage() {
+  const { t, locale } = useI18n()
   const [summary, setSummary] = useState<AccountSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<number | null>(null)
@@ -46,13 +48,13 @@ export default function AccountsPage() {
       setSummary(await getAccountSummary())
     } catch (err) {
       ToastService.apiError(err, {
-        title: 'Could not load accounts',
+        title: t('accounts.toast.loadFailed'),
         dedupeKey: 'accounts-page-load-failed',
       })
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void load()
@@ -62,8 +64,8 @@ export default function AccountsPage() {
     () =>
       (summary?.accounts ?? [])
         .filter((a) => a.active)
-        .sort((a, b) => a.name.localeCompare(b.name, 'en-GB')),
-    [summary],
+        .sort((a, b) => a.name.localeCompare(b.name, locale)),
+    [locale, summary],
   )
 
   // Keep a valid selection as the list loads / changes.
@@ -112,13 +114,13 @@ export default function AccountsPage() {
       }
       await load()
       ToastService.success({
-        title: 'Account deleted',
+        title: t('accounts.toast.deleted'),
         dedupeKey: `account-archived:${accountToDelete.id}`,
       })
       setAccountToDelete(null)
     } catch (err) {
       ToastService.apiError(err, {
-        title: 'Could not delete account',
+        title: t('accounts.toast.deleteFailed'),
         dedupeKey: `account-archive-failed:${accountToDelete.id}`,
       })
     } finally {
@@ -167,7 +169,7 @@ export default function AccountsPage() {
                     color="var(--pb-ink-faint)"
                     pl="0.15rem"
                   >
-                    Your accounts
+                    {t('accounts.list.title')}
                   </Text>
                 </MotionBox>
               )}
@@ -231,9 +233,9 @@ export default function AccountsPage() {
         onClose={() => setAccountToDelete(null)}
         onConfirm={archive}
         isLoading={deleting}
-        title="Remove account?"
+        title={t('accounts.delete.title')}
         itemName={accountToDelete?.name}
-        description="Removes the account from your active accounts. Existing transactions are kept."
+        description={t('accounts.delete.description')}
       />
     </Box>
   )
@@ -286,6 +288,8 @@ function HeaderButton({
 }
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
+  const { t } = useI18n()
+
   return (
     <Flex
       direction="column"
@@ -301,13 +305,13 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
         <Icon as={Wallet} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" />
       </Flex>
       <Text fontSize="md" fontWeight={500} color="var(--pb-ink)">
-        No accounts yet
+        {t('accounts.empty.title')}
       </Text>
       <Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="340px">
-        Add your first account to start tracking balances and connected institutions.
+        {t('accounts.empty.description')}
       </Text>
       <Box mt={5}>
-        <HeaderButton label="Add account" icon={Plus} primary onClick={onAdd} />
+        <HeaderButton label={t('accounts.action.add')} icon={Plus} primary onClick={onAdd} />
       </Box>
     </Flex>
   )

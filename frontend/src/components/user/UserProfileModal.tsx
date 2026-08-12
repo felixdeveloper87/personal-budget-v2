@@ -14,6 +14,7 @@ import { User as UserIcon, Mail, Shield } from '../ui/icons'
 import PaymentMethodsSection from '../../sections/PaymentMethodsSection'
 import type { User, UserPlan } from '../../types'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 interface UserProfileModalProps {
   isOpen: boolean
@@ -21,12 +22,13 @@ interface UserProfileModalProps {
   user: User | null
 }
 
-const PLAN_META: Record<UserPlan, { label: string; colorScheme: string; description: string }> = {
-  STANDARD: { label: 'Standard', colorScheme: 'gray', description: 'Free tier — all core features included' },
-  PREMIUM: { label: 'Premium', colorScheme: 'yellow', description: 'Full access to all features and reports' },
+const PLAN_META: Record<UserPlan, { colorScheme: string }> = {
+  STANDARD: { colorScheme: 'gray' },
+  PREMIUM: { colorScheme: 'yellow' },
 }
 
 export default function UserProfileModal({ isOpen, onClose, user }: UserProfileModalProps) {
+  const { t } = useI18n()
   const ed = useEd()
   const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
   const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
@@ -66,8 +68,17 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
   if (!user) return null
 
   const plan = user.plan ?? 'STANDARD'
-  const planMeta = PLAN_META[plan]
-  const displayName = user.name || 'Budget User'
+  const planStyle = PLAN_META[plan]
+  const planMeta = {
+    ...planStyle,
+    label: t(plan === 'PREMIUM' ? 'plan.premium' : 'plan.standard'),
+    description: t(
+      plan === 'PREMIUM'
+        ? 'profile.plan.premiumDescription'
+        : 'profile.plan.standardDescription',
+    ),
+  }
+  const displayName = user.name || t('user.defaultName')
 
   return (
     <PremiumModal
@@ -77,8 +88,8 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
       header={
         <ModalHeader
           icon={UserIcon}
-          title="Profile"
-          caption="Account details and payment methods"
+          title={t('profile.title')}
+          caption={t('profile.caption')}
           onClose={onClose}
           accent="blue"
         />
@@ -167,7 +178,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
               textTransform="uppercase"
               mb={2}
             >
-              Account details
+              {t('profile.accountDetails')}
             </Text>
             <VStack spacing={0} align="stretch" border="1px solid" borderColor={borderColor} borderRadius="xl" overflow="hidden">
               <HStack
@@ -189,7 +200,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                   <Icon as={UserIcon} boxSize={3.5} color={mutedColor} />
                 </Box>
                 <Box flex={1} minW={0}>
-                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">Full name</Text>
+                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">{t('profile.fullName')}</Text>
                   <Text fontSize="sm" fontWeight={600} color={fieldValueColor} noOfLines={1}>{displayName}</Text>
                 </Box>
               </HStack>
@@ -212,7 +223,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                   <Icon as={Mail} boxSize={3.5} color={mutedColor} />
                 </Box>
                 <Box flex={1} minW={0}>
-                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">Email</Text>
+                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">{t('profile.email')}</Text>
                   <Text fontSize="sm" fontWeight={600} color={fieldValueColor} noOfLines={1}>{user.email}</Text>
                 </Box>
               </HStack>
@@ -228,7 +239,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
                   <Icon as={Shield} boxSize={3.5} color={mutedColor} />
                 </Box>
                 <Box flex={1} minW={0}>
-                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">Plan</Text>
+                  <Text fontSize="2xs" fontWeight={600} color={fieldLabelColor} letterSpacing="0.04em" textTransform="uppercase">{t('profile.plan')}</Text>
                   <HStack spacing={2}>
                     <Text fontSize="sm" fontWeight={600} color={fieldValueColor}>{planMeta.label}</Text>
                     <Badge
@@ -260,7 +271,7 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
               textTransform="uppercase"
               mb={2}
             >
-              Payment methods
+              {t('profile.paymentMethods')}
             </Text>
             <PaymentMethodsSection />
           </Box>

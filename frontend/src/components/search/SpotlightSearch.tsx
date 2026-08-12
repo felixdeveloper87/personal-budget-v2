@@ -24,10 +24,10 @@ import { PremiumModal } from '../ui'
 import { Guilloche, useEd } from '../../editorial'
 
 import '../../features/dashboard/theme/pb-tokens.css'
-import { toViewModel, buildLedger, parseISO, parseSearchQuery, FILTER_LABELS, type LedgerGroup } from '../../features/transactions/transactions.utils'
+import { toViewModel, buildLedger, parseSearchQuery, type LedgerGroup } from '../../features/transactions/transactions.utils'
 import { initialTxState, type TxFilter } from '../../features/transactions/transactions.types'
-import { fmtCurrency } from '../../features/dashboard/components/format'
 import TxnRow from '../../features/transactions/components/TxnRow'
+import { useI18n } from '../../i18n'
 
 interface SpotlightSearchProps {
   isOpen: boolean
@@ -59,6 +59,7 @@ function Chip({
   active: boolean
   onClick: () => void
 }) {
+  const { t } = useI18n()
   const dot = DOT_COLOR[value]
   return (
     <HStack
@@ -87,7 +88,7 @@ function Chip({
         textTransform="uppercase"
         fontWeight={active ? 500 : 400}
       >
-        {FILTER_LABELS[value]}
+        {t(`transactions.${value === 'in' ? 'income' : value === 'out' ? 'expenses' : value}`)}
       </Text>
     </HStack>
   )
@@ -101,6 +102,7 @@ function Chip({
  * client-side over it — so typing and chip toggles are instant.
  */
 export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProps) {
+  const { t } = useI18n()
   const ed = useEd()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<TxFilter>('all')
@@ -150,7 +152,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
         if (id === reqId.current) {
           setRaw([])
           ToastService.apiError(err, {
-            title: 'Could not load transactions',
+            title: t('search.loadFailed'),
             dedupeKey: 'spotlight-search-failed',
           })
         }
@@ -158,7 +160,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
         if (id === reqId.current) setLoading(false)
       }
     })()
-  }, [isOpen])
+  }, [isOpen, t])
 
   const vm = useMemo(() => toViewModel(raw), [raw])
 
@@ -258,7 +260,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search transactions…"
+                placeholder={t('search.placeholder')}
                 fontFamily="var(--pb-serif)"
                 fontSize="1.05rem"
                 h="48px"
@@ -277,7 +279,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
               {q && (
                 <InputRightElement h="full" pr="6px">
                   <IconButton
-                    aria-label="Clear search"
+                    aria-label={t('search.clear')}
                     icon={<Icon as={X} boxSize="14px" />}
                     size="xs"
                     variant="ghost"
@@ -294,7 +296,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
             </InputGroup>
 
             <IconButton
-              aria-label="Close search"
+              aria-label={t('search.close')}
               icon={<Icon as={X} boxSize="18px" />}
               onClick={onClose}
               h="48px"
@@ -315,7 +317,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
             flexWrap="wrap"
             mt={3}
             role="radiogroup"
-            aria-label="Filter results"
+            aria-label={t('search.filterResults')}
           >
             {FILTERS.map((f) => (
               <Chip key={f} value={f} active={filter === f} onClick={() => setFilter(f)} />
@@ -332,7 +334,7 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
             <Flex direction="column" align="center" justify="center" py="3rem" gap="0.9rem">
               <Spinner size="md" color="var(--pb-forest-2)" thickness="2px" speed="0.7s" />
               <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                Searching…
+                {t('search.searching')}
               </Text>
             </Flex>
           ) : (
@@ -353,8 +355,8 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                     color="var(--pb-ink-faint)"
                   >
                     {summary.count > PAGE_SIZE
-                      ? `Showing ${summary.from}–${summary.to} of ${summary.count}`
-                      : `${summary.count} result${summary.count === 1 ? '' : 's'}`}
+                      ? t('search.showingRange', { from: summary.from, to: summary.to, total: summary.count })
+                      : t(summary.count === 1 ? 'search.results' : 'search.resultsPlural', { count: summary.count })}
                   </Text>
                   <HStack spacing=".4rem">
                     {summary.inTotal > 0 && (
@@ -382,27 +384,18 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
   )
 }
 
-/** "Tuesday 11 June 2024" — search spans years, so the year is always shown. */
-function fmtDayHeader(iso: string): string {
-  return parseISO(iso).toLocaleDateString('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-}
-
 /**
  * Results grouped by day, styled like the Transactions ledger but with a
  * year-aware day header (the search crosses years). Rows reuse the shared
  * TxnRow so the look stays identical.
  */
 function ResultsList({ groups }: { groups: LedgerGroup[] }) {
+  const { t, formatDate } = useI18n()
   if (groups.length === 0) {
     return (
       <Box py="2.5rem" textAlign="center">
         <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
-          No transactions match your search.
+          {t('search.noResults')}
         </Text>
       </Box>
     )
@@ -414,7 +407,7 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
         <Box key={g.key} mt={gi === 0 ? 0 : '1.4rem'}>
           <Flex align="center" justify="space-between" gap=".5rem" mb=".4rem">
             <Text fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)">
-              {fmtDayHeader(g.key)}
+              {formatDate(g.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </Text>
             <Text
               fontFamily="var(--pb-mono)"
@@ -423,7 +416,7 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              {g.rows.length} transaction{g.rows.length === 1 ? '' : 's'}
+              {t(g.rows.length === 1 ? 'transactions.count' : 'transactions.countPlural', { count: g.rows.length })}
             </Text>
           </Flex>
           <Divider borderColor="var(--pb-hair)" mb=".2rem" />
@@ -446,6 +439,7 @@ function Pager({
   totalPages: number
   onChange: (p: number) => void
 }) {
+  const { t } = useI18n()
   // Window of page numbers around the current page, always including first/last.
   const pages: Array<number | '…'> = []
   const push = (n: number | '…') => pages.push(n)
@@ -475,7 +469,7 @@ function Pager({
   return (
     <Flex align="center" justify="center" gap=".4rem" mt="1.4rem" flexWrap="wrap">
       <IconButton
-        aria-label="Previous page"
+        aria-label={t('transactions.previousPage')}
         icon={<Icon as={ChevronLeft} boxSize="15px" />}
         onClick={() => onChange(page - 1)}
         isDisabled={page === 0}
@@ -518,7 +512,7 @@ function Pager({
         ),
       )}
       <IconButton
-        aria-label="Next page"
+        aria-label={t('transactions.nextPage')}
         icon={<Icon as={ChevronRight} boxSize="15px" />}
         onClick={() => onChange(page + 1)}
         isDisabled={page >= totalPages - 1}
@@ -533,6 +527,7 @@ function Pager({
 }
 
 function SummaryPill({ kind, value }: { kind: 'in' | 'out'; value: number }) {
+  const { formatCurrency } = useI18n()
   const isIn = kind === 'in'
   return (
     <HStack
@@ -552,13 +547,14 @@ function SummaryPill({ kind, value }: { kind: 'in' | 'out'; value: number }) {
         fontWeight={500}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
-        {fmtCurrency(value, { minimumFractionDigits: 2 })}
+        {formatCurrency(value, { minimumFractionDigits: 2 })}
       </Text>
     </HStack>
   )
 }
 
 function IdleHint() {
+  const { t } = useI18n()
   return (
     <VStack spacing="0.9rem" py="3rem" textAlign="center">
       <Box
@@ -575,7 +571,7 @@ function IdleHint() {
       </Box>
       <Box>
         <Text fontFamily="var(--pb-serif)" fontSize="1.1rem" fontWeight={500} color="var(--pb-ink)">
-          Search your transactions
+          {t('search.idleTitle')}
         </Text>
         <Text
           fontFamily="var(--pb-mono)"
@@ -584,7 +580,7 @@ function IdleHint() {
           color="var(--pb-ink-faint)"
           mt="0.35rem"
         >
-          Try a merchant, category, or month — e.g. “Lidl june”
+          {t('search.idleHint')}
         </Text>
       </Box>
     </VStack>

@@ -15,6 +15,7 @@ import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
+import { useI18n } from '../../i18n'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
@@ -26,6 +27,7 @@ interface LoginErrors {
 }
 
 export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -41,12 +43,12 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const validate = (): boolean => {
     const next: LoginErrors = {}
     if (!email.trim()) {
-      next.email = 'Email is required'
+      next.email = t('auth.validation.emailRequired')
     } else if (!EMAIL_REGEX.test(email)) {
-      next.email = 'Enter a valid email address'
+      next.email = t('auth.validation.emailInvalid')
     }
     if (!password) {
-      next.password = 'Password is required'
+      next.password = t('auth.validation.passwordRequired')
     }
     setErrors(next)
 
@@ -66,14 +68,14 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     try {
       await login({ email: email.trim(), password })
       ToastService.success({
-        title: 'Welcome back',
+        title: t('auth.login.welcome'),
         duration: 1000,
         dedupeKey: 'login-success',
       })
     } catch (error: unknown) {
       const apiMessage = getApiErrorMessage(error)
       const message = apiMessage.dedupeKey === 'http-401'
-        ? 'Invalid email or password'
+        ? t('auth.validation.invalidCredentials')
         : apiMessage.description
       setSubmitError(message)
     } finally {
@@ -88,7 +90,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         <VStack spacing={4} align="stretch">
           <AuthField
             ref={emailRef}
-            label="Email"
+            label={t('auth.email')}
             icon={Mail}
             type="email"
             name="email"
@@ -106,7 +108,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
           <AuthField
             ref={passwordRef}
-            label="Password"
+            label={t('auth.password')}
             icon={Lock}
             type={showPassword ? 'text' : 'password'}
             name="password"
@@ -116,13 +118,16 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
               if (submitError) setSubmitError(undefined)
             }}
-            placeholder="Your password"
+            placeholder={t('auth.yourPassword')}
             autoComplete="current-password"
             error={errors.password}
             isDisabled={loading}
             rightElement={
               <IconButton
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={t(
+                  showPassword ? 'auth.password.hide' : 'auth.password.show',
+                  { field: t('auth.password.field') },
+                )}
                 icon={<Icon as={showPassword ? EyeOff : Eye} boxSize={4} />}
                 type="button"
                 variant="ghost"
@@ -158,7 +163,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
           <Button
             type="submit"
             isLoading={loading}
-            loadingText="Signing in"
+            loadingText={t('auth.login.loading')}
             rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
             h="50px"
             w="full"
@@ -183,18 +188,18 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             _focusVisible={{ boxShadow: `0 0 0 4px ${C.jade}28` }}
             _loading={{ opacity: 0.7 }}
           >
-            Sign in
+            {t('auth.login.submit')}
           </Button>
 
           <HStack justify="center" spacing={2} color={C.mutedDim}>
             <Icon as={ShieldCheck} boxSize="14px" />
             <Text fontFamily={F.mono} fontSize="9px" letterSpacing="0.08em" textTransform="uppercase">
-              Secure account access
+              {t('auth.login.secure')}
             </Text>
           </HStack>
 
           <Text textAlign="center" color={C.muted} fontFamily={F.body} fontSize="sm" pt={1}>
-            Don't have an account?{' '}
+            {t('auth.login.noAccount')}{' '}
             <Button
               type="button"
               variant="link"
@@ -206,7 +211,7 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
               _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
             >
-              Create one
+              {t('auth.login.create')}
             </Button>
           </Text>
         </VStack>

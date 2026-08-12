@@ -12,6 +12,7 @@ import { CreditCard, Wallet } from '../../ui/icons'
 import { BankLogo, getBankMeta } from '../../ui'
 import ChipCarousel from './ChipCarousel'
 import { PaymentMethod, PaymentMethodType } from '../../../types'
+import { useI18n } from '../../../i18n'
 
 interface PaymentMethodSelectorProps {
   value: number | null
@@ -20,11 +21,11 @@ interface PaymentMethodSelectorProps {
   loading?: boolean
 }
 
-const TYPE_LABEL: Record<PaymentMethodType, string> = {
-  CASH: 'Cash',
-  DEBIT_CARD: 'Debit card',
-  CREDIT_CARD: 'Credit card',
-  BANK_TRANSFER: 'Bank transfer',
+const TYPE_LABEL_KEY: Record<PaymentMethodType, string> = {
+  CASH: 'form.cash',
+  DEBIT_CARD: 'form.debitCard',
+  CREDIT_CARD: 'form.creditCard',
+  BANK_TRANSFER: 'form.bankTransfer',
 }
 
 export default function PaymentMethodSelector({
@@ -33,6 +34,7 @@ export default function PaymentMethodSelector({
   paymentMethods,
   loading = false,
 }: PaymentMethodSelectorProps) {
+  const { t } = useI18n()
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
   const cardBg = useColorModeValue('white', 'whiteAlpha.50')
@@ -68,12 +70,12 @@ export default function PaymentMethodSelector({
   return (
     <FormControl minW={0}>
       <FormLabel fontSize="sm" fontWeight={700}>
-        Payment method (how you paid)
+        {t('form.paymentMethod')}
       </FormLabel>
 
       {loading ? (
         <Box border="1px solid" borderColor={borderColor} borderRadius="lg" p={3}>
-          <Text fontSize="sm" color={captionColor}>Loading payment methods…</Text>
+          <Text fontSize="sm" color={captionColor}>{t('form.loadingPaymentMethods')}</Text>
         </Box>
       ) : (
         // Single horizontal line of real-icon method chips; scrolls (carousel)
@@ -100,10 +102,10 @@ export default function PaymentMethodSelector({
                   color={nameColor}
                   _groupHover={{ textDecoration: 'underline' }}
                 >
-                  Debit card
+                  {t('form.debitCard')}
                 </Text>
                 <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                  Default
+                  {t('form.default')}
                 </Text>
               </VStack>
             </HStack>
@@ -143,7 +145,7 @@ export default function PaymentMethodSelector({
                       {method.name}
                     </Text>
                     <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                      {method.issuer || TYPE_LABEL[method.type]}
+                      {method.issuer || t(TYPE_LABEL_KEY[method.type])}
                     </Text>
                   </VStack>
                 </HStack>
@@ -155,12 +157,15 @@ export default function PaymentMethodSelector({
 
       {selected?.type === 'CREDIT_CARD' && (
         <Text mt={2} fontSize="xs" color={captionColor}>
-          Closes on day {selected.statementClosingDay} · paid on day {selected.paymentDay}
+          {t('form.cardDates', {
+            closing: selected.statementClosingDay ?? '—',
+            payment: selected.paymentDay ?? '—',
+          })}
         </Text>
       )}
       {!selected && (
         <Text mt={2} fontSize="xs" color={captionColor}>
-          Defaults to debit card. The balance account above is still required.
+          {t('form.paymentMethodHelp')}
         </Text>
       )}
     </FormControl>

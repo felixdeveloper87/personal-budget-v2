@@ -6,7 +6,7 @@ import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { getTransactionDate } from '../../../utils/transactionDates'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 import Panel from './Panel'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 interface RecentActivityProps {
   transactions: Transaction[]
@@ -21,6 +21,7 @@ export default function RecentActivity({
   onPageChange,
   limit = 6,
 }: RecentActivityProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const items = useMemo(() => {
     // "Recent" means activity that has already happened — exclude future-dated
     // entries (scheduled installments/recurring) so they don't crowd out the
@@ -53,13 +54,13 @@ export default function RecentActivity({
           textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
-          Recent activity
+          {t('dashboard.recentActivity')}
         </Text>
 
         <VStack align="stretch" spacing={0} divider={<Box borderBottom="1px solid var(--pb-hair)" />}>
           {items.length === 0 ? (
             <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={4}>
-              No activity yet.
+              {t('dashboard.noActivity')}
             </Text>
           ) : (
             items.map((t) => {
@@ -87,7 +88,7 @@ export default function RecentActivity({
                         {t.description || t.category}
                       </Text>
                       <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>
-                        {t.category} · {date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                        {categoryLabel(t.category)} · {formatDate(date, { day: 'numeric', month: 'short' })}
                       </Text>
                     </VStack>
                   </HStack>
@@ -100,7 +101,7 @@ export default function RecentActivity({
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
                     {income ? '+' : '−'}
-                    {fmtCurrency(t.amount, { minimumFractionDigits: 2 })}
+                    {formatCurrency(t.amount, { minimumFractionDigits: 2 })}
                   </Text>
                 </HStack>
               )

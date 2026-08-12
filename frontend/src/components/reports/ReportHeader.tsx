@@ -1,7 +1,8 @@
 import { Box, Divider, Flex, HStack, Text, VStack } from '@chakra-ui/react'
-import { formatDate, formatDateTime } from './format'
 import type { ReportResponse } from '../../types'
 import BrandMark from '../brand/BrandMark'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from './useReportFormat'
 
 interface ReportHeaderProps {
   report: ReportResponse
@@ -9,6 +10,8 @@ interface ReportHeaderProps {
 }
 
 export default function ReportHeader({ report, userName }: ReportHeaderProps) {
+  const { t } = useI18n()
+  const { count, date, dateTime, periodLabel } = useReportFormat()
   return (
     <Box
       className="avoid-break"
@@ -43,26 +46,23 @@ export default function ReportHeader({ report, userName }: ReportHeaderProps) {
                 </Text>
               </HStack>
               <Text fontSize="10px" color="gray.500" letterSpacing="0.04em" fontWeight={500}>
-                Clarity for your money
+                {t('app.meta.title').replace('Personal Budget — ', '')}
               </Text>
             </VStack>
           </HStack>
 
           <VStack align="flex-start" spacing={1.5}>
             <Text fontSize={{ base: '2xl', md: '3xl' }} fontWeight={800} color="gray.900" lineHeight={1.05}>
-              Financial report
+              {t('reports.financialReport')}
             </Text>
             <Text fontSize="sm" color="gray.500" maxW="md">
-              Overview based on payment dates, card impact dates, installments and recurring expenses.
+              {t('reports.reportDescription')}
             </Text>
           </VStack>
 
           {userName ? (
             <Text fontSize="sm" color="gray.600">
-              Prepared for{' '}
-              <Text as="span" fontWeight={700} color="gray.800">
-                {userName}
-              </Text>
+              {t('reports.preparedFor', { name: userName })}
             </Text>
           ) : null}
         </VStack>
@@ -83,20 +83,20 @@ export default function ReportHeader({ report, userName }: ReportHeaderProps) {
             textTransform="uppercase"
             color="gray.500"
           >
-            Report period
+            {t('reports.reportPeriod')}
           </Text>
           <Text fontSize="lg" fontWeight={800} color="gray.900" mt={1} noOfLines={2}>
-            {report.periodLabel}
+            {periodLabel(report)}
           </Text>
           <Text fontSize="sm" color="gray.600" mt={1}>
-            {formatDate(report.startDate)} &ndash; {formatDate(report.endDate)}
+            {date(report.startDate)} &ndash; {date(report.endDate)}
           </Text>
           <Divider my={3} borderColor="gray.200" />
           <Text fontSize="xs" color="gray.500">
-            Generated {formatDateTime(report.generatedAt)}
+            {t('reports.generated', { date: dateTime(report.generatedAt) })}
           </Text>
           <Text fontSize="xs" color="gray.500" mt={0.5}>
-            {report.transactionCount} transactions
+            {count(report.transactionCount, 'transaction')}
           </Text>
         </Box>
       </Flex>

@@ -1,6 +1,7 @@
 import { Box, Text, Input, HStack, Icon, VStack } from '@chakra-ui/react'
 import { FileText } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { useI18n } from '../../../i18n'
 
 interface DescriptionInputProps {
   value: string
@@ -18,6 +19,7 @@ export default function DescriptionInput({
   type,
   loading = false,
 }: DescriptionInputProps) {
+  const { t } = useI18n()
   const colors = useThemeColors()
   const accentBorder = type === 'INCOME' ? 'green.400' : 'red.400'
   const focusWithinShadow =
@@ -29,8 +31,8 @@ export default function DescriptionInput({
 
   const placeholder =
     type === 'INCOME'
-      ? 'e.g. bonus, tips'
-      : 'e.g. food, uber'
+      ? t('form.incomeDetailsPlaceholder')
+      : t('form.expenseDetailsPlaceholder')
 
   return (
     <VStack spacing={3} align="stretch">
@@ -81,14 +83,14 @@ export default function DescriptionInput({
               flexShrink={0}
               whiteSpace="nowrap"
             >
-              Details
+              {t('form.details')}
             </Text>
             <Input
               type="text"
               value={value}
               onChange={handleChange}
               placeholder={placeholder}
-              aria-label="Transaction details"
+              aria-label={t('form.transactionDetailsAria')}
               flex={1}
               minW={0}
               h="auto"

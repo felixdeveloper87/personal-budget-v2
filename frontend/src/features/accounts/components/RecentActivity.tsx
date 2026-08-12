@@ -1,29 +1,23 @@
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import type { AccountActivityItem } from '../../../types'
 import { ArrowDownRight, ArrowUpRight, Repeat } from '../../../components/ui/icons'
-import { money } from '../../../components/accounts/accountMeta'
-
-const fmtDate = (value: string) =>
-  new Date(`${value.slice(0, 10)}T00:00:00`).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
+import { useI18n } from '../../../i18n'
 
 const isIncoming = (item: AccountActivityItem) =>
   item.kind === 'INCOME' || item.kind === 'TRANSFER_IN'
 
 interface RecentActivityProps {
   items: AccountActivityItem[]
-  currency: string
   hideBalances: boolean
 }
 
-export default function RecentActivity({ items, currency, hideBalances }: RecentActivityProps) {
+export default function RecentActivity({ items, hideBalances }: RecentActivityProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
+
   if (items.length === 0) {
     return (
       <Text fontSize="sm" color="var(--pb-ink-soft)" py={3}>
-        No recent transactions for this account.
+        {t('accounts.activity.empty')}
       </Text>
     )
   }
@@ -72,18 +66,20 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
               >
                 {paidByCreditCard ? (
                   <Text as="span" fontWeight={500}>
-                    Paid with {item.paymentMethodName} credit card
+                    {t('accounts.activity.paidWithCard', { name: item.paymentMethodName ?? '' })}
                   </Text>
                 ) : (
                   <>
                     <Text as="span" fontWeight={500}>
-                      {item.description?.trim() || item.category || 'Account activity'}
+                      {item.description?.trim() || (item.category ? categoryLabel(item.category) : t('accounts.activity.fallback'))}
                     </Text>
                     {' · '}
-                    {fmtDate(item.date)}
-                    {item.category ? ` · ${item.category}` : ''}
+                    {formatDate(item.date, { day: '2-digit', month: 'short', year: 'numeric' })}
+                    {item.category ? ` · ${categoryLabel(item.category)}` : ''}
                     {item.paymentMethodName ? (
-                      <Text as="span" color="var(--pb-ink-soft)"> · paid with {item.paymentMethodName}</Text>
+                      <Text as="span" color="var(--pb-ink-soft)">
+                        {' · '}{t('accounts.activity.paidWith', { name: item.paymentMethodName })}
+                      </Text>
                     ) : null}
                   </>
                 )}
@@ -108,7 +104,7 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
                   px="0.32rem"
                   py="0.06rem"
                 >
-                  {item.status.toLowerCase()}
+                  {t(`status.${item.status}`, undefined, item.status.toLowerCase())}
                 </Text>
               ) : null}
               <Text
@@ -118,7 +114,7 @@ export default function RecentActivity({ items, currency, hideBalances }: Recent
                 color={tone}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {hideBalances ? '••••••' : `${incoming ? '+' : '−'}${money(item.amount, currency)}`}
+                {hideBalances ? '••••••' : `${incoming ? '+' : '−'}${formatCurrency(Math.abs(item.amount))}`}
               </Text>
             </HStack>
           </Flex>

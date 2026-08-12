@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Box, Flex, HStack, Text, useColorMode } from '@chakra-ui/react'
 
-import { fmtCurrency } from '../../dashboard/components/format'
 import type { TxnVM } from '../transactions.types'
+import { useI18n } from '../../../i18n'
 
 type ActivityTone = 'income' | 'expense'
 type ActivityDateKey = 'purchaseDate' | 'settlementDate'
@@ -24,8 +24,8 @@ interface ActivityIntensityStripProps {
   caption: string
 }
 
-function dayLabel(day: ChartDay): string {
-  return day.date.toLocaleDateString('en-GB', {
+function dayLabel(day: ChartDay, locale: string): string {
+  return day.date.toLocaleDateString(locale, {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
@@ -43,6 +43,7 @@ export default function ActivityIntensityStrip({
   title,
   caption,
 }: ActivityIntensityStripProps) {
+  const { t, locale, formatCurrency } = useI18n()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
   const isIncome = tone === 'income'
@@ -113,15 +114,17 @@ export default function ActivityIntensityStrip({
             {title}
           </Text>
           <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
-            {caption} in {periodLabel}
+            {t('transactions.activityInPeriod', { caption, period: periodLabel })}
           </Text>
         </Box>
         <Box minW={{ base: 'full', sm: '142px' }} px={3.5} py={2.5} bg={tint} border={`1px solid ${tint}`} borderRadius="13px" textAlign={{ base: 'left', sm: 'right' }}>
           <Text fontFamily="var(--pb-serif)" fontSize="1.35rem" lineHeight={1} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {fmtCurrency(summary.total)}
+            {formatCurrency(summary.total)}
           </Text>
           <Text mt={1} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            {summary.activeDays === 1 ? '1 active day' : `${summary.activeDays} active days`}
+            {summary.activeDays === 1
+              ? t('transactions.activeDay')
+              : t('transactions.activeDays', { count: summary.activeDays })}
           </Text>
         </Box>
       </Flex>
@@ -130,7 +133,10 @@ export default function ActivityIntensityStrip({
         <HStack mt={4} spacing={2} w="fit-content" px={2.5} py={1.5} borderRadius="full" bg={tint}>
           <Box w="6px" h="6px" borderRadius="full" bg={accent} />
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing=".025em" color="var(--pb-ink-soft)">
-            Highest day: <Text as="span" color={accent} fontWeight={600}>{fmtCurrency(summary.peak.amount)}</Text> on {dayLabel(summary.peak.day)}
+            {t('transactions.highestDay', {
+              amount: formatCurrency(summary.peak.amount),
+              date: dayLabel(summary.peak.day, locale),
+            })}
           </Text>
         </HStack>
       )}
@@ -152,9 +158,12 @@ export default function ActivityIntensityStrip({
                 key={day.iso}
                 as="button"
                 type="button"
-                aria-label={`${dayLabel(day)}: ${fmtCurrency(amount)}. Select to view transactions.`}
+                aria-label={t('transactions.selectDayAria', {
+                  date: dayLabel(day, locale),
+                  amount: formatCurrency(amount),
+                })}
                 aria-pressed={selected}
-                title={`${dayLabel(day)} · ${fmtCurrency(amount)}`}
+                title={`${dayLabel(day, locale)} · ${formatCurrency(amount)}`}
                 onClick={() => onSelectDay(day.iso)}
                 minW="38px"
                 p={1}
@@ -168,7 +177,7 @@ export default function ActivityIntensityStrip({
                 _focusVisible={{ outline: `2px solid ${accent}`, outlineOffset: '2px' }}
               >
                 <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing=".04em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                  {day.date.toLocaleDateString('en-GB', { weekday: 'narrow' })}
+                  {day.date.toLocaleDateString(locale, { weekday: 'narrow' })}
                 </Text>
                 <Text mt="1px" fontFamily="var(--pb-mono)" fontSize="10px" color={active ? 'var(--pb-ink)' : 'var(--pb-ink-faint)'}>
                   {day.date.getDate()}
@@ -181,7 +190,7 @@ export default function ActivityIntensityStrip({
       </Box>
 
       <Flex mt={4} pt={3} borderTop="1px solid var(--pb-hair)" align="center" gap={2} flexWrap="wrap">
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">Lower</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('transactions.lower')}</Text>
         {[0.24, 0.42, 0.62, 0.9].map((intensity) => (
           <Box
             key={intensity}
@@ -193,9 +202,9 @@ export default function ActivityIntensityStrip({
               : dark ? `rgba(255, 154, 144, ${intensity})` : `rgba(184, 69, 47, ${intensity})`}
           />
         ))}
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">Higher</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('transactions.higher')}</Text>
         <Text ml={{ base: 0, sm: 'auto' }} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".05em" textTransform="uppercase" color="var(--pb-ink-faint)">
-          Select a day for details
+          {t('transactions.selectDayDetails')}
         </Text>
       </Flex>
     </Box>

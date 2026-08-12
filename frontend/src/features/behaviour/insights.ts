@@ -153,18 +153,3 @@ export function earningsBySource(txns: TxnVM[]): BreakdownItem[] {
   }
   return [...map.values()].sort((a, b) => b.total - a.total)
 }
-
-/** Word used in insight copy for the active period ("month", "week", …). */
-export function periodWord(period: string): string {
-  switch (period) {
-    case 'day':
-      return 'day'
-    case 'week':
-      return 'week'
-    case 'year':
-      return 'year'
-    case 'month':
-    default:
-      return 'month'
-  }
-}

@@ -2,7 +2,7 @@ import { Button, Grid, Text, VStack } from '@chakra-ui/react'
 import { Plus } from 'lucide-react'
 import Panel from './Panel'
 import FlowBars from './FlowBars'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 interface MonthHeroProps {
   income: number
@@ -19,8 +19,9 @@ export default function MonthHero({
   onAddIncome,
   onAddExpense,
 }: MonthHeroProps) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const deficit = expense > income
-  const monthName = (date ?? new Date()).toLocaleDateString('en-GB', { month: 'long' })
+  const monthName = formatDate(date ?? new Date(), { month: 'long' })
 
   return (
     <Panel
@@ -42,7 +43,7 @@ export default function MonthHero({
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Cash flow · {monthName}
+            {t('dashboard.cashFlowMonth', { month: monthName })}
           </Text>
 
           <Text
@@ -55,27 +56,27 @@ export default function MonthHero({
           >
             {deficit ? (
               <>
-                You are{' '}
+                {t('dashboard.youAre')}{' '}
                 <Text as="em" color="var(--pb-coral)">
-                  {fmtCurrency(expense - income)} over
+                  {t('dashboard.overIncome', { amount: formatCurrency(expense - income) })}
                 </Text>{' '}
-                this month’s income.
+                {t('dashboard.thisMonthsIncome')}
               </>
             ) : (
               <>
-                You have{' '}
+                {t('dashboard.youHave')}{' '}
                 <Text as="em" color="var(--pb-income-2)">
-                  {fmtCurrency(income - expense)} left
+                  {t('dashboard.leftAfterSpending', { amount: formatCurrency(income - expense) })}
                 </Text>{' '}
-                after spending.
+                {t('dashboard.afterSpending')}
               </>
             )}
           </Text>
 
           <Text fontFamily="var(--pb-serif)" fontSize="md" color="var(--pb-ink-soft)" lineHeight={1.5}>
             {deficit
-              ? 'Add income to close the gap, or keep an eye on further spending.'
-              : 'Your income is covering spending for this month.'}
+              ? t('dashboard.deficitGuidance')
+              : t('dashboard.coveredGuidance')}
           </Text>
 
           <FlowBars income={income} expense={expense} />
@@ -100,15 +101,15 @@ export default function MonthHero({
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              Quick add
+              {t('dashboard.quickAdd')}
             </Text>
 
             <Text fontFamily="var(--pb-serif)" fontSize="xl" color="var(--pb-ink)" lineHeight={1.15}>
-              Add a transaction
+              {t('dashboard.addTransaction')}
             </Text>
 
             <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.55}>
-              Keep {monthName}'s ledger current.
+              {t('dashboard.keepLedgerCurrent', { month: monthName })}
             </Text>
 
             <Grid
@@ -135,7 +136,7 @@ export default function MonthHero({
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddIncome}
                 >
-                  Income
+                  {t('dashboard.income')}
                 </Button>
               )}
               {onAddExpense && (
@@ -155,7 +156,7 @@ export default function MonthHero({
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddExpense}
                 >
-                  Expense
+                  {t('dashboard.expense')}
                 </Button>
               )}
             </Grid>

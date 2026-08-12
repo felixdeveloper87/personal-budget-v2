@@ -15,9 +15,7 @@ import {
 import type { SavingsGoal } from '../../types'
 import { getChallengeStatus } from '../../utils/pennyChallenge'
 import { Sparkles, Trash2 } from '../ui/icons'
-
-const money = (value: number) =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+import { useI18n } from '../../i18n'
 
 export interface PennyChallengeCardProps {
   goal: SavingsGoal
@@ -33,6 +31,7 @@ export default function PennyChallengeCard({
   onArchive,
   busy = false,
 }: PennyChallengeCardProps) {
+  const { t, formatCurrency } = useI18n()
   const muted = 'var(--pb-ink-soft)'
   const border = 'var(--pb-hair-2)'
   const accentBg = 'var(--pb-tint-gold)'
@@ -44,12 +43,12 @@ export default function PennyChallengeCard({
   const behind = status.catchUp > 0.0049
   const ahead = status.catchUp < -0.0049
   const statusLabel = status.finished
-    ? 'Finished'
+    ? t('goals.challenge.status.finished')
     : behind
-      ? `Behind ${money(status.catchUp)}`
+      ? t('goals.challenge.status.behind', { amount: formatCurrency(status.catchUp) })
       : ahead
-        ? `Ahead ${money(-status.catchUp)}`
-        : 'Up to date'
+        ? t('goals.challenge.status.ahead', { amount: formatCurrency(-status.catchUp) })
+        : t('goals.challenge.status.upToDate')
   const statusScheme = behind ? 'red' : ahead ? 'purple' : 'green'
 
   return (
@@ -77,7 +76,7 @@ export default function PennyChallengeCard({
                   {goal.name}
                 </Heading>
                 <Text fontSize="2xs" color={muted}>
-                  Day {status.todayDay}/{status.daysInYear} · {status.year}
+                  {t('goals.challenge.dayProgress', { day: status.todayDay, days: status.daysInYear, year: status.year })}
                 </Text>
               </Box>
             </HStack>
@@ -86,7 +85,7 @@ export default function PennyChallengeCard({
                 {statusLabel}
               </Badge>
               <IconButton
-                aria-label="Archive challenge"
+                aria-label={t('goals.challenge.archive')}
                 icon={<Icon as={Trash2} boxSize={3.5} />}
                 size="xs"
                 variant="ghost"
@@ -101,11 +100,11 @@ export default function PennyChallengeCard({
             <HStack justify="space-between" mb={1}>
               <Text fontSize="xs">
                 <Text as="span" fontWeight={800}>
-                  {money(status.saved)}
+                  {formatCurrency(status.saved)}
                 </Text>
                 <Text as="span" color={muted}>
                   {' '}
-                  / {money(status.total)}
+                  / {formatCurrency(status.total)}
                 </Text>
               </Text>
               <Text fontSize="xs" color={muted}>
@@ -123,15 +122,15 @@ export default function PennyChallengeCard({
           {/* Key figures */}
           <HStack justify="space-between" fontSize="xs" color={muted}>
             <Text>
-              Today{' '}
+              {t('goals.challenge.today')}{' '}
               <Text as="span" fontWeight={700} color={accentFg}>
-                {money(status.todayAmount)}
+                {formatCurrency(status.todayAmount)}
               </Text>
             </Text>
             <Text>
-              Expected today{' '}
+              {t('goals.challenge.expectedToday')}{' '}
               <Text as="span" fontWeight={700} color="inherit">
-                {money(status.expectedByToday)}
+                {formatCurrency(status.expectedByToday)}
               </Text>
             </Text>
           </HStack>
@@ -146,7 +145,9 @@ export default function PennyChallengeCard({
               isLoading={busy}
               isDisabled={!behind}
             >
-              {behind ? `Catch up ${money(status.catchUp)}` : 'Up to date'}
+              {behind
+                ? t('goals.challenge.catchUp', { amount: formatCurrency(status.catchUp) })
+                : t('goals.challenge.status.upToDate')}
             </Button>
             <Button
               flex={1}
@@ -156,7 +157,7 @@ export default function PennyChallengeCard({
               isLoading={busy}
               isDisabled={status.finished || status.todayAmount <= 0}
             >
-              Log today {money(status.todayAmount)}
+              {t('goals.challenge.logToday', { amount: formatCurrency(status.todayAmount) })}
             </Button>
           </HStack>
         </VStack>

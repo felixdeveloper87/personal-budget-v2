@@ -22,6 +22,7 @@ import type { FinancialAccount, PaymentMethod, PaymentMethodRequest } from '../.
 import { BankCombobox, ModalHeader, PremiumModal } from '../ui'
 import { Check, CreditCard, Plus } from '../ui/icons'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 export interface CardFormModalProps {
   isOpen: boolean
@@ -52,6 +53,7 @@ const DEFAULT_STATE: FormState = {
 }
 
 export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFormModalProps) {
+  const { t } = useI18n()
   const isEditing = Boolean(card)
   const [state, setState] = useState<FormState>(DEFAULT_STATE)
   const [saving, setSaving] = useState(false)
@@ -82,11 +84,11 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
       .then(setAccounts)
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load accounts',
+          title: t('cards.toast.accountsLoadFailed'),
           dedupeKey: 'card-form-accounts-load-failed',
         })
       })
-  }, [isOpen])
+  }, [isOpen, t])
 
   const patch = (partial: Partial<FormState>) => setState((prev) => ({ ...prev, ...partial }))
 
@@ -111,14 +113,14 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
         await createPaymentMethod(request)
       }
       ToastService.success({
-        title: isEditing ? 'Card updated' : 'Card added',
+        title: isEditing ? t('cards.toast.updated') : t('cards.toast.added'),
         dedupeKey: isEditing ? `card-updated:${card?.id}` : 'card-added',
       })
       onSaved()
       onClose()
     } catch (err) {
       ToastService.apiError(err, {
-        title: isEditing ? 'Could not update card' : 'Could not save card',
+        title: isEditing ? t('cards.toast.updateFailed') : t('cards.toast.saveFailed'),
         dedupeKey: 'card-save-failed',
       })
     } finally {
@@ -134,8 +136,8 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
       header={
         <ModalHeader
           icon={CreditCard}
-          title={isEditing ? 'Edit card' : 'Add credit card'}
-          caption={isEditing ? card?.name : 'Store statement closing and payment dates'}
+          title={isEditing ? t('cards.form.editTitle') : t('cards.form.addTitle')}
+          caption={isEditing ? card?.name : t('cards.form.caption')}
           onClose={onClose}
           accent="blue"
         />
@@ -143,7 +145,7 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
       footer={
         <HStack justify="flex-end" spacing={2}>
           <Button variant="ghost" onClick={onClose}>
-            Cancel
+            {t('cards.form.cancel')}
           </Button>
           <Button
             colorScheme="blue"
@@ -152,7 +154,7 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
             isLoading={saving}
             isDisabled={!state.name.trim()}
           >
-            {isEditing ? 'Save changes' : 'Add card'}
+            {isEditing ? t('cards.form.saveChanges') : t('cards.form.add')}
           </Button>
         </HStack>
       }
@@ -161,20 +163,24 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
         <VStack align="stretch" spacing={4}>
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
             <FormControl isRequired>
-              <FormLabel fontSize="sm">Card name</FormLabel>
+              <FormLabel fontSize="sm">{t('cards.form.name')}</FormLabel>
               <Input
                 value={state.name}
                 onChange={(e) => patch({ name: e.target.value })}
-                placeholder="NatWest Rewards"
+                placeholder={t('cards.form.namePlaceholder')}
                 autoFocus
               />
             </FormControl>
             <FormControl>
-              <FormLabel fontSize="sm">Issuer</FormLabel>
-              <BankCombobox value={state.issuer} onChange={(v) => patch({ issuer: v })} />
+              <FormLabel fontSize="sm">{t('cards.form.issuer')}</FormLabel>
+              <BankCombobox
+                value={state.issuer}
+                onChange={(v) => patch({ issuer: v })}
+                placeholder={t('cards.form.issuerPlaceholder')}
+              />
             </FormControl>
             <FormControl>
-              <FormLabel fontSize="sm">Statement closing day</FormLabel>
+              <FormLabel fontSize="sm">{t('cards.form.closingDay')}</FormLabel>
               <NumberInput
                 min={1}
                 max={31}
@@ -183,10 +189,10 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
               >
                 <NumberInputField />
               </NumberInput>
-              <FormHelperText>Day the statement closes (1–31).</FormHelperText>
+              <FormHelperText>{t('cards.form.closingDayHelp')}</FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel fontSize="sm">Payment day</FormLabel>
+              <FormLabel fontSize="sm">{t('cards.form.paymentDay')}</FormLabel>
               <NumberInput
                 min={1}
                 max={31}
@@ -195,10 +201,10 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
               >
                 <NumberInputField />
               </NumberInput>
-              <FormHelperText>Day the balance is due (1–31).</FormHelperText>
+              <FormHelperText>{t('cards.form.paymentDayHelp')}</FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel fontSize="sm">Credit limit</FormLabel>
+              <FormLabel fontSize="sm">{t('cards.form.creditLimit')}</FormLabel>
               <InputGroup>
                 <InputLeftElement pointerEvents="none" color="var(--pb-ink-faint)">
                   £
@@ -214,14 +220,14 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
                   placeholder="5000"
                 />
               </InputGroup>
-              <FormHelperText>Optional. Used to show how much of the card is in use.</FormHelperText>
+              <FormHelperText>{t('cards.form.creditLimitHelp')}</FormHelperText>
             </FormControl>
             <FormControl>
-              <FormLabel fontSize="sm">Settlement account</FormLabel>
+              <FormLabel fontSize="sm">{t('cards.form.settlementAccount')}</FormLabel>
               <Select
                 value={state.settlementAccountId ?? ''}
                 onChange={(e) => patch({ settlementAccountId: e.target.value ? Number(e.target.value) : null })}
-                placeholder="No account linked"
+                placeholder={t('cards.form.noAccountLinked')}
               >
                 {accounts.filter((account) => account.active).map((account) => (
                   <option key={account.id} value={account.id}>
@@ -229,13 +235,13 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
                   </option>
                 ))}
               </Select>
-              <FormHelperText>Pick any of your current accounts — e.g. a Tesco card paid from your NatWest account.</FormHelperText>
+              <FormHelperText>{t('cards.form.settlementHelp')}</FormHelperText>
             </FormControl>
           </SimpleGrid>
 
           <FormControl display="flex" alignItems="center" justifyContent="space-between">
             <FormLabel fontSize="sm" mb={0}>
-              Active
+              {t('cards.form.active')}
             </FormLabel>
             <Switch
               isChecked={state.active}

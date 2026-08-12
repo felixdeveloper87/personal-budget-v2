@@ -19,6 +19,7 @@ import { useThemeColors } from '../../hooks/useThemeColors'
 import { deleteTransaction } from '../../api'
 import { Transaction } from '../../types'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 interface DeleteTransactionDialogProps {
   transaction: Transaction | null
@@ -39,6 +40,7 @@ export default function DeleteTransactionDialog({
   onClose,
   onDeleted,
 }: DeleteTransactionDialogProps) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const colors = useThemeColors()
   const [isDeleting, setIsDeleting] = useState(false)
   const cancelRef = React.useRef<HTMLButtonElement>(null)
@@ -57,8 +59,10 @@ export default function DeleteTransactionDialog({
     try {
       await deleteTransaction(transaction.id)
       ToastService.success({
-        title: 'Transaction deleted',
-        description: `${transaction.description || 'Transaction'} has been removed`,
+        title: t('transaction.delete.success'),
+        description: t('transaction.delete.removed', {
+          description: transaction.description || t('transaction.fallbackName'),
+        }),
         duration: 2000,
         dedupeKey: `transaction-deleted:${transaction.id}`,
       })
@@ -66,7 +70,7 @@ export default function DeleteTransactionDialog({
       onClose()
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not delete transaction',
+        title: t('transaction.delete.error'),
         duration: 3000,
         dedupeKey: `transaction-delete-failed:${transaction.id}`,
       })
@@ -120,10 +124,10 @@ export default function DeleteTransactionDialog({
             </Box>
             <VStack align="flex-start" spacing={0}>
               <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
-                Delete transaction
+                {t('transaction.delete.title')}
               </Text>
               <Text fontSize="xs" color={captionColor}>
-                This cannot be undone.
+                {t('common.cannotUndo')}
               </Text>
             </VStack>
           </AlertDialogHeader>
@@ -157,10 +161,10 @@ export default function DeleteTransactionDialog({
                     color={titleColor}
                     noOfLines={1}
                   >
-                    {transaction.description || 'No description'}
+                    {transaction.description || t('transaction.noDescription')}
                   </Text>
                   <Text fontSize="xs" color={captionColor} noOfLines={1}>
-                    {isIncome ? 'Income' : 'Expense'} · {transaction.category}
+                    {t(isIncome ? 'type.INCOME' : 'type.EXPENSE')} · {categoryLabel(transaction.category)}
                   </Text>
                 </VStack>
                 <Text
@@ -169,7 +173,7 @@ export default function DeleteTransactionDialog({
                   color={isIncome ? 'green.500' : 'red.500'}
                   flexShrink={0}
                 >
-                  {isIncome ? '+' : '−'}£{transaction.amount.toFixed(2)}
+                  {isIncome ? '+' : '−'}{formatCurrency(transaction.amount)}
                 </Text>
               </HStack>
             </Box>
@@ -191,12 +195,12 @@ export default function DeleteTransactionDialog({
               color={colors.text.secondary}
               _hover={{ bg: previewBg }}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleDelete}
               isLoading={isDeleting}
-              loadingText="Deleting…"
+              loadingText={t('common.deleting')}
               fontSize="sm"
               fontWeight={700}
               color="white"
@@ -212,7 +216,7 @@ export default function DeleteTransactionDialog({
               _active={{ transform: 'translateY(0)' }}
               transition="background-position 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease"
             >
-              Delete
+              {t('common.delete')}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -24,7 +24,6 @@ import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
 import { useMemo, useState, useEffect } from 'react'
-import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
@@ -37,6 +36,7 @@ import {
   type TransactionDateBasis,
 } from '../../utils/transactionDates'
 import { formatTransactionAccount } from '../../utils/transactionAccount'
+import { useI18n } from '../../i18n'
 
 interface TransactionListProps {
   transactions: Transaction[]
@@ -49,6 +49,7 @@ export default function TransactionList({
   onTransactionDeleted,
   dateBasis = 'activity',
 }: TransactionListProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
   const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -123,7 +124,7 @@ export default function TransactionList({
   if (totalItems === 0) {
     return (
       <Box p={6} textAlign="center">
-        <Text color="gray.500">No transactions found</Text>
+        <Text color="gray.500">{t('transactions.noneFound')}</Text>
       </Box>
     )
   }
@@ -142,12 +143,12 @@ export default function TransactionList({
         >
           <Thead>
             <Tr>
-              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
-              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>Type</Th>
-              <Th fontSize={{ base: "xs", md: "sm" }}>Category</Th>
-              <Th fontSize={{ base: "xs", md: "sm" }}>Description</Th>
-              <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>Amount</Th>
-              <Th fontSize={{ base: "xs", md: "sm" }}>Actions</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>{t('transactions.dateTime')}</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }} display={{ base: 'none', md: 'table-cell' }}>{t('transactions.type')}</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>{t('transactions.category')}</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>{t('transactions.description')}</Th>
+              <Th isNumeric fontSize={{ base: "xs", md: "sm" }}>{t('transactions.amount')}</Th>
+              <Th fontSize={{ base: "xs", md: "sm" }}>{t('transactions.actions')}</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -158,14 +159,15 @@ export default function TransactionList({
                 <Td display={{ base: 'none', md: 'table-cell' }}>
                   <VStack spacing={{ base: 0.5, md: 1 }} align="start">
                     <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
-                      {formatTransactionDateTime(getTransactionDateSource(tx, dateBasis)).date}
+                      {formatDate(getTransactionDateSource(tx, dateBasis), { day: '2-digit', month: 'short', year: 'numeric' })}
                     </Text>
                     <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
-                      {formatTransactionDateTime(tx.dateTime).time}
+                      {formatDate(tx.dateTime, { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                     {dateHint && (
                       <Text fontSize={{ base: "2xs", md: "xs" }} color="gray.500">
-                        {dateHint.prefix} {formatDateBR(dateHint.date)}
+                        {t(dateBasis === 'activity' ? 'transactions.paysOn' : 'transactions.purchasedOn')}{' '}
+                        {formatDate(dateHint.date, { day: '2-digit', month: 'short', year: 'numeric' })}
                       </Text>
                     )}
                   </VStack>
@@ -176,12 +178,12 @@ export default function TransactionList({
                     variant="subtle"
                     fontSize={{ base: "2xs", md: "xs" }}
                   >
-                    {tx.type}
+                    {t(tx.type === 'INCOME' ? 'transactions.income' : 'transactions.expenses')}
                   </Badge>
                 </Td>
                 <Td>
                   <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
-                    {tx.category}
+                    {categoryLabel(tx.category)}
                   </Text>
                 </Td>
                 <Td>
@@ -203,7 +205,7 @@ export default function TransactionList({
                         </Badge>
                       )}
                       {tx.isInstallment && (
-                        <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
+                        <Tooltip label={t(tx.isFutureInstallment ? 'transactions.futureInstallment' : 'transactions.installment')} hasArrow>
                           <span>
                             <Icon
                               as={FiCreditCard}
@@ -229,15 +231,15 @@ export default function TransactionList({
                     fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                     whiteSpace="nowrap"
                   >
-                    £{tx.amount.toFixed(2)}
-                    {tx.isFutureInstallment && " (future)"}
+                    {formatCurrency(tx.amount)}
+                    {tx.isFutureInstallment && ` (${t('transactions.future')})`}
                   </Text>
                 </Td>
                 <Td>
                   {tx.id && !tx.isFutureInstallment && (
                     <HStack spacing={0}>
                       <IconButton
-                        aria-label="Edit transaction"
+                        aria-label={t('transactions.editAria')}
                         icon={<EditIcon />}
                         size={{ base: "xs", md: "sm" }}
                         colorScheme="blue"
@@ -248,7 +250,7 @@ export default function TransactionList({
                         }}
                       />
                       <IconButton
-                        aria-label="Delete transaction"
+                        aria-label={t('transactions.deleteAria')}
                         icon={<DeleteIcon />}
                         size={{ base: "xs", md: "sm" }}
                         colorScheme="red"
@@ -280,7 +282,7 @@ export default function TransactionList({
           {/* Items per page selector */}
           <HStack spacing={2}>
             <Text fontSize="xs" fontWeight="500" color="gray.500">
-              Show
+              {t('transactions.show')}
             </Text>
             <Select
               size="xs"
@@ -300,20 +302,23 @@ export default function TransactionList({
               <option value={100}>100</option>
             </Select>
             <Text fontSize="xs" fontWeight="500" color="gray.500">
-              per page
+              {t('transactions.perPage')}
             </Text>
           </HStack>
 
           {/* Page Info */}
           <Text fontSize="xs" fontWeight="500" color="gray.500">
-            Showing {Math.min((activePage - 1) * pageSize + 1, totalItems)} to{' '}
-            {Math.min(activePage * pageSize, totalItems)} of {totalItems} entries
+            {t('transactions.entriesRange', {
+              from: Math.min((activePage - 1) * pageSize + 1, totalItems),
+              to: Math.min(activePage * pageSize, totalItems),
+              total: totalItems,
+            })}
           </Text>
 
           {/* Navigation Controls */}
           <HStack spacing={1}>
             <IconButton
-              aria-label="Previous page"
+              aria-label={t('transactions.previousPage')}
               icon={<Icon as={ChevronLeft} boxSize={4} />}
               size="sm"
               variant="outline"
@@ -358,7 +363,7 @@ export default function TransactionList({
             })}
 
             <IconButton
-              aria-label="Next page"
+              aria-label={t('transactions.nextPage')}
               icon={<Icon as={ChevronRight} boxSize={4} />}
               size="sm"
               variant="outline"

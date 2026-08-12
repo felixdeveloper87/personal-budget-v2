@@ -5,11 +5,11 @@ import { listInstallmentPlans, listRecurringTransactions } from '../../api'
 import type { InstallmentPlan, RecurringTransaction } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { useAuth } from '../../contexts/AuthContext'
+import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import Segmented from '../dashboard/components/Segmented'
-import { fmtCurrency } from '../dashboard/components/format'
 
 import FixedPaymentsPage from '../../pages/FixedPaymentsPage'
 import InstallmentsPage, { currentMonthInstallmentTotal } from '../../pages/InstallmentsPage'
@@ -21,11 +21,6 @@ interface CommitmentsPageProps {
   /** Which tab to open on first render (used by legacy deep links). */
   initialTab?: CommitmentsTab
 }
-
-const TAB_OPTIONS: Array<{ value: CommitmentsTab; label: string }> = [
-  { value: 'fixed', label: 'Fixed payments' },
-  { value: 'installments', label: 'Installments' },
-]
 
 export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: CommitmentsPageProps) {
   const { user } = useAuth()
@@ -101,6 +96,11 @@ function SummaryBar({
   tab: CommitmentsTab
   onTabChange: (tab: CommitmentsTab) => void
 }) {
+  const { t, formatCurrency } = useI18n()
+  const tabOptions: Array<{ value: CommitmentsTab; label: string }> = [
+    { value: 'fixed', label: t('commitments.fixedPayments') },
+    { value: 'installments', label: t('commitments.instalments') },
+  ]
   // Full-width segmented control on phones so the two options are easy to tap.
   const fullWidthToggle = useBreakpointValue({ base: true, md: false }) ?? false
   return (
@@ -126,7 +126,7 @@ function SummaryBar({
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Committed monthly
+            {t('commitments.monthly')}
           </Text>
           <Text
             fontFamily="var(--pb-serif)"
@@ -136,16 +136,16 @@ function SummaryBar({
             color="var(--pb-ink)"
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {fmtCurrency(summary.total, { minimumFractionDigits: 2 })}
+            {formatCurrency(summary.total, { minimumFractionDigits: 2 })}
           </Text>
         </Box>
 
         <Segmented
-          options={TAB_OPTIONS}
+          options={tabOptions}
           value={tab}
           onChange={onTabChange}
           fullWidth={fullWidthToggle}
-          aria-label="Commitments view"
+          aria-label={t('commitments.view')}
         />
 
         <HStack
@@ -153,8 +153,8 @@ function SummaryBar({
           justify={{ base: 'space-between', md: 'flex-start' }}
           w={{ base: 'full', md: 'auto' }}
         >
-          <Stat label="Fixed payments" value={fmtCurrency(summary.fixedMonthly, { minimumFractionDigits: 2 })} />
-          <Stat label="Installments" value={fmtCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} align={{ base: 'right', md: 'left' }} />
+          <Stat label={t('commitments.fixedPayments')} value={formatCurrency(summary.fixedMonthly, { minimumFractionDigits: 2 })} />
+          <Stat label={t('commitments.instalments')} value={formatCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} align={{ base: 'right', md: 'left' }} />
         </HStack>
       </Flex>
     </Box>

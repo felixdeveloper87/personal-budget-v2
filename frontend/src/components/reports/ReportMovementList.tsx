@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Badge, Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
-import { formatAccountMovement, formatCurrency, formatDate } from './format'
+import { useI18n } from '../../i18n'
+import { useReportFormat } from './useReportFormat'
 import type { ReportResponse, ReportTransactionItem } from '../../types'
 
 function useTopMovements(report: ReportResponse): ReportTransactionItem[] {
@@ -14,6 +15,8 @@ function useTopMovements(report: ReportResponse): ReportTransactionItem[] {
 }
 
 export default function ReportMovementList({ report }: { report: ReportResponse }) {
+  const { t } = useI18n()
+  const { accountMovement, categoryLabel, currency, date } = useReportFormat()
   const movements = useTopMovements(report)
 
   return (
@@ -27,22 +30,22 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
     >
       <HStack justify="space-between" align="baseline" mb={4}>
         <Text fontSize="sm" fontWeight={800} color="gray.900">
-          Top movements
+          {t('reports.topMovements')}
         </Text>
         <Text fontSize="xs" color="gray.500">
-          Largest income and expenses
+          {t('reports.topMovementsCaption')}
         </Text>
       </HStack>
 
       {movements.length === 0 ? (
         <Text fontSize="sm" color="gray.500">
-          No income or expense movement in this period.
+          {t('reports.noMovements')}
         </Text>
       ) : (
         <VStack align="stretch" spacing={0}>
           {movements.map((transaction, index) => {
             const isIncome = transaction.type === 'INCOME'
-            const accountMovement = formatAccountMovement(transaction)
+            const movementLabel = accountMovement(transaction)
             return (
               <Flex
                 key={transaction.id}
@@ -64,25 +67,25 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
                   <VStack align="flex-start" spacing={0.5} minW={0}>
                     <HStack spacing={2} minW={0}>
                       <Text fontSize="sm" fontWeight={700} color="gray.800" noOfLines={1}>
-                        {transaction.description?.trim() || transaction.category}
+                        {transaction.description?.trim() || categoryLabel(transaction.category)}
                       </Text>
                       {transaction.installment ? (
                         <Badge colorScheme="purple" variant="subtle" fontSize="9px" borderRadius="md">
-                          Installment
+                          {t('reports.installment')}
                         </Badge>
                       ) : null}
                       {transaction.recurring ? (
                         <Badge colorScheme="blue" variant="subtle" fontSize="9px" borderRadius="md">
-                          Recurring
+                          {t('reports.recurring')}
                         </Badge>
                       ) : null}
                     </HStack>
                     <Text fontSize="xs" color="gray.500" noOfLines={1}>
-                      {formatDate(transaction.paymentDate)} - {transaction.category}
+                      {date(transaction.paymentDate)} — {categoryLabel(transaction.category)}
                     </Text>
-                    {accountMovement ? (
+                    {movementLabel ? (
                       <Text fontSize="xs" color="blue.600" noOfLines={1}>
-                        {accountMovement}
+                        {movementLabel}
                       </Text>
                     ) : null}
                   </VStack>
@@ -94,7 +97,7 @@ export default function ReportMovementList({ report }: { report: ReportResponse 
                   color={isIncome ? 'green.600' : 'red.600'}
                 >
                   {isIncome ? '+' : '-'}
-                  {formatCurrency(transaction.amount)}
+                  {currency(transaction.amount)}
                 </Text>
               </Flex>
             )

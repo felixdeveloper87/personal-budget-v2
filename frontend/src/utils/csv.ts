@@ -1,4 +1,5 @@
 import { TransactionType } from '../types'
+import { translateNow } from '../i18n'
 
 /**
  * CSV columns, in order. Header row uses these exact labels — the backend export
@@ -151,7 +152,7 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     .filter((l, idx) => !(idx > 0 && l.trim() === '') || idx === 0)
 
   if (lines.length === 0 || lines.every((l) => l.trim() === '')) {
-    return { rows, errors: [{ line: 0, message: 'The file is empty.' }], fullDataRows }
+    return { rows, errors: [{ line: 0, message: translateNow('import.csvEmpty') }], fullDataRows }
   }
 
   // Detect header row.
@@ -224,13 +225,19 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
 
     const date = toIsoDate(dateRaw)
     if (!date) {
-      errors.push({ line: lineNo, message: `Invalid date "${dateRaw}" (expected YYYY-MM-DD).` })
+      errors.push({
+        line: lineNo,
+        message: translateNow('import.invalidDate', { value: dateRaw }),
+      })
       continue
     }
     // Strip currency symbols / thousands separators, keep digits, sign and decimal point.
     const amount = Number(amountRaw.replace(/[^0-9.-]/g, ''))
     if (!amountRaw.trim() || !Number.isFinite(amount)) {
-      errors.push({ line: lineNo, message: `Invalid amount "${amountRaw}".` })
+      errors.push({
+        line: lineNo,
+        message: translateNow('import.invalidAmount', { value: amountRaw }),
+      })
       continue
     }
     // Bank exports carry a transaction-code column (POS/D-D/BAC…) instead of INCOME/EXPENSE,
@@ -242,14 +249,20 @@ export function parseTransactionsCsv(text: string): CsvParseResult {
     if (paymentDateRaw) {
       const iso = toIsoDate(paymentDateRaw)
       if (!iso) {
-        errors.push({ line: lineNo, message: `Invalid payment date "${paymentDateRaw}" (expected YYYY-MM-DD).` })
+        errors.push({
+          line: lineNo,
+          message: translateNow('import.invalidPaymentDate', { value: paymentDateRaw }),
+        })
         continue
       }
       paymentDate = iso
     }
     const validStatuses = ['PLANNED', 'PENDING', 'CLEARED', 'RECONCILED'] as const
     if (statusRaw && !validStatuses.includes(statusRaw as typeof validStatuses[number])) {
-      errors.push({ line: lineNo, message: `Invalid status "${statusRaw}".` })
+      errors.push({
+        line: lineNo,
+        message: translateNow('import.invalidStatus', { value: statusRaw }),
+      })
       continue
     }
     rows.push({

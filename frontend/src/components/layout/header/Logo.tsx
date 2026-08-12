@@ -1,5 +1,6 @@
 import { Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
+import { useI18n } from '../../../i18n'
 import BrandMark from '../../brand/BrandMark'
 import { BRAND } from './brand.config'
 
@@ -271,6 +272,7 @@ export function LogoIconWallet({ boxSize }: { boxSize?: number } = {}) {
 
 export default function Logo({ user, onClick }: LogoProps) {
   const ed = useEd()
+  const { t } = useI18n()
   const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
   const wordMuted = ed ? ed.cream : wordMutedBase
   const wordBudgetGradientBase = useColorModeValue(
@@ -294,7 +296,7 @@ export default function Logo({ user, onClick }: LogoProps) {
     <HStack
       as="button"
       type="button"
-      aria-label={`${BRAND.nameFull} — go to top`}
+      aria-label={t('header.logo.goToTop')}
       onClick={handleClick}
       spacing={{ base: 2, md: 2.5 }}
       role="group"
@@ -379,7 +381,7 @@ export default function Logo({ user, onClick }: LogoProps) {
           display={{ base: 'none', lg: 'block' }}
           _dark={{ color: 'gray.500' }}
         >
-          {BRAND.tagline}
+          {t('brand.tagline')}
         </Text>
       </VStack>
     </HStack>

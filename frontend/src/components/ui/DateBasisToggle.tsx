@@ -1,15 +1,16 @@
 import { Box, Button, HStack, useColorModeValue } from '@chakra-ui/react'
 import type { TransactionDateBasis } from '../../utils/transactionDates'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 export interface DateBasisToggleProps {
   value: TransactionDateBasis
   onChange: (basis: TransactionDateBasis) => void
 }
 
-const OPTIONS: { value: TransactionDateBasis; label: string }[] = [
-  { value: 'activity', label: 'Behaviour' },
-  { value: 'cash-flow', label: 'Payments' },
+const OPTIONS: { value: TransactionDateBasis; labelKey: string }[] = [
+  { value: 'activity', labelKey: 'dateBasis.activity' },
+  { value: 'cash-flow', labelKey: 'dateBasis.cashFlow' },
 ]
 
 /**
@@ -20,6 +21,7 @@ const OPTIONS: { value: TransactionDateBasis; label: string }[] = [
  *    account, including card bills from last month's purchases.
  */
 export default function DateBasisToggle({ value, onChange }: DateBasisToggleProps) {
+  const { t } = useI18n()
   const ed = useEd()
   const trackBgBase = useColorModeValue('gray.100', 'whiteAlpha.100')
   const trackBg = ed ? ed.trackBg : trackBgBase
@@ -61,7 +63,7 @@ export default function DateBasisToggle({ value, onChange }: DateBasisToggleProp
               onClick={() => onChange(option.value)}
               aria-pressed={active}
             >
-              {option.label}
+              {t(option.labelKey)}
             </Button>
           )
         })}

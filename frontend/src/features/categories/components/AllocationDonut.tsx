@@ -1,6 +1,6 @@
 import { Box, Icon, Text, VStack } from '@chakra-ui/react'
-import { gbp } from '../data/format'
 import type { ComputedCategory, Side } from '../data/types'
+import { useI18n } from '../../../i18n'
 
 /** SVG arc path between two angles for a donut segment. */
 function arc(cx: number, cy: number, rO: number, rI: number, a0: number, a1: number): string {
@@ -35,6 +35,7 @@ export default function AllocationDonut({
   onActive,
   onSegmentClick,
 }: AllocationDonutProps) {
+  const { t, formatCurrency, formatNumber, categoryLabel } = useI18n()
   const cx = 120
   const cy = 120
   const rO = 100
@@ -58,7 +59,7 @@ export default function AllocationDonut({
         as="svg"
         viewBox="0 0 240 240"
         role="img"
-        aria-label={`${side} distribution by category`}
+        aria-label={t(`categories.distributionAria.${side}`)}
         display="block"
         w="100%"
         h="auto"
@@ -81,7 +82,9 @@ export default function AllocationDonut({
               }}
               role="button"
               tabIndex={0}
-              aria-label={`Show ${rows.find((row) => row.id === s.id)?.name ?? 'category'}`}
+              aria-label={t('categories.showCategory', {
+                category: categoryLabel(rows.find((row) => row.id === s.id)?.name ?? t('categories.category')),
+              })}
               aria-pressed={activeCat === s.id}
               onMouseEnter={() => onActive(s.id)}
               onMouseLeave={() => onActive(null)}
@@ -126,7 +129,9 @@ export default function AllocationDonut({
           lineHeight="1.25"
           noOfLines={2}
         >
-          {active ? active.name : `Total · ${side === 'expense' ? 'Spending' : 'Income'}`}
+          {active
+            ? active.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(active.name)
+            : t(side === 'expense' ? 'categories.totalSpending' : 'categories.totalIncome')}
         </Text>
         <Text
           className="num"
@@ -136,7 +141,7 @@ export default function AllocationDonut({
           color="var(--pb-ink)"
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
-          {gbp(active ? active.amount : total)}
+          {formatCurrency(active ? active.amount : total)}
         </Text>
         <Text
           fontFamily="var(--pb-mono)"
@@ -145,7 +150,12 @@ export default function AllocationDonut({
           color="var(--pb-ink-faint)"
           mt="0.3rem"
         >
-          {active ? `${active.pct.toFixed(1)}% · ${active.shownCount} txns` : periodLabel}
+          {active
+            ? t('categories.shareTransactions', {
+                percentage: formatNumber(active.pct, { maximumFractionDigits: 1 }),
+                count: active.shownCount,
+              })
+            : periodLabel}
         </Text>
       </VStack>
     </Box>

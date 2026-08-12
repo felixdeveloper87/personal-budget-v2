@@ -5,6 +5,7 @@ import { useReducedMotion } from 'framer-motion'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { usePeriodData, getPreviousPeriodDate } from '../../hooks/usePeriodData'
+import { useI18n } from '../../i18n'
 import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -24,14 +25,12 @@ import type { TxnVM } from '../transactions/transactions.types'
 
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
-import { fmtCurrency } from '../dashboard/components/format'
 
 import InsightsPanel from './components/InsightsPanel'
 import DayToDaySummary from './components/DayToDaySummary'
 import {
   deriveCategoryShift,
   deriveTopCategory,
-  periodWord,
 } from './insights'
 
 function isoOf(d: Date): string {
@@ -53,9 +52,40 @@ function buildDays(start: Date, end: Date): ChartDay[] {
   return days
 }
 
-function selectedDateLabel(date: Date, period: 'day' | 'week' | 'month' | 'year'): string {
+type I18nApi = ReturnType<typeof useI18n>
+
+function periodNavigationLabel(
+  date: Date,
+  period: 'day' | 'week' | 'month' | 'year',
+  locale: I18nApi['locale'],
+  formatDate: I18nApi['formatDate'],
+): string {
   if (period === 'month') {
-    return date.toLocaleDateString('en-GB', { month: 'long' })
+    return formatDate(date, { month: 'short', year: 'numeric' }).toLocaleUpperCase(locale)
+  }
+  if (period === 'day') {
+    return formatDate(date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  }
+  if (period === 'week') {
+    const start = new Date(date)
+    const day = start.getDay()
+    start.setDate(start.getDate() - day + (day === 0 ? -6 : 1))
+    const end = new Date(start)
+    end.setDate(start.getDate() + 6)
+    const shortDate = (value: Date) => formatDate(value, { day: '2-digit', month: '2-digit' })
+    return `${shortDate(start)} – ${shortDate(end)}`
+  }
+  return String(date.getFullYear())
+}
+
+function selectedDateLabel(
+  date: Date,
+  period: 'day' | 'week' | 'month' | 'year',
+  formatDate: I18nApi['formatDate'],
+  t: I18nApi['t'],
+): string {
+  if (period === 'month') {
+    return formatDate(date, { month: 'long' })
   }
 
   if (period === 'week') {
@@ -64,17 +94,18 @@ function selectedDateLabel(date: Date, period: 'day' | 'week' | 'month' | 'year'
     utcDate.setUTCDate(utcDate.getUTCDate() + 4 - weekday)
     const yearStart = new Date(Date.UTC(utcDate.getUTCFullYear(), 0, 1))
     const week = Math.ceil(((utcDate.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7)
-    return `Week ${week}`
+    return t('cashflow.weekNumber', { week })
   }
 
   if (period === 'day') {
-    return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+    return formatDate(date, { day: '2-digit', month: '2-digit' })
   }
 
   return String(date.getFullYear())
 }
 
 export default function BehaviourPage() {
+  const { locale, t, formatDate } = useI18n()
   const reduce = useReducedMotion() ?? false
 
   const {
@@ -83,7 +114,6 @@ export default function BehaviourPage() {
     onPeriodChange,
     navigatePeriod,
     goToToday,
-    formatLabel,
     isCurrentPeriod,
   } = usePeriodNavigator()
 
@@ -142,8 +172,8 @@ export default function BehaviourPage() {
     [vm, selectedChartDay],
   )
 
-  const periodLabel = formatLabel()
-  const narrativePeriodLabel = selectedDateLabel(selectedDate, selectedPeriod)
+  const periodLabel = periodNavigationLabel(selectedDate, selectedPeriod, locale, formatDate)
+  const narrativePeriodLabel = selectedDateLabel(selectedDate, selectedPeriod, formatDate, t)
 
   const selectDay = (iso: string) => {
     setSelectedChartDay((current) => current === iso ? null : iso)
@@ -185,8 +215,8 @@ export default function BehaviourPage() {
               periodLabel={periodLabel}
               tone="expense"
               dateKey="purchaseDate"
-              title="Spending activity"
-              caption="Daily expense intensity"
+              title={t('behaviour.activity.title')}
+              caption={t('behaviour.activity.caption')}
             />
           )}
         </MotionBox>
@@ -218,7 +248,7 @@ export default function BehaviourPage() {
         {/* Pattern insights close the page, just before the footer */}
         <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
           <InsightsPanel
-            periodWord={periodWord(selectedPeriod)}
+            periodWord={t(`cashflow.periodWord.${selectedPeriod}`)}
             shift={shift}
             topCategory={topCategory}
             rhythm={rhythm}
@@ -242,8 +272,9 @@ function SelectedDayExpenses({
   expenses: TxnVM[]
   onClose: () => void
 }) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const total = expenses.reduce((sum, expense) => sum + expense.amount, 0)
-  const dayLabel = new Date(`${day}T00:00:00`).toLocaleDateString('en-GB', {
+  const dayLabel = formatDate(day, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -253,19 +284,19 @@ function SelectedDayExpenses({
     <ActivityDayModal
       isOpen
       onClose={onClose}
-      label={`Expenses on ${dayLabel}`}
+      label={t('behaviour.day.label', { date: dayLabel })}
       tone="expense"
       title={dayLabel}
-      totalLabel="Spent"
-      total={fmtCurrency(total)}
+      totalLabel={t('behaviour.day.total')}
+      total={formatCurrency(total)}
       count={expenses.length}
-      dateContext="Activity date"
+      dateContext={t('behaviour.day.dateContext')}
     >
       <VStack align="stretch" spacing={2}>
         {expenses.length === 0 ? (
           <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
             <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
-              No expenses recorded on this day.
+              {t('behaviour.day.empty')}
             </Text>
           </Box>
         ) : (

@@ -41,6 +41,7 @@ import QuickExpensePresets from './QuickExpensePresets'
 import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
+import { useI18n } from '../../../i18n'
 
 /** Calendar date in local TZ (avoid UTC drift from `toISOString().slice`). */
 function toLocalYYYYMMDD(d = new Date()): string {
@@ -48,13 +49,6 @@ function toLocalYYYYMMDD(d = new Date()): string {
   const m = String(d.getMonth() + 1).padStart(2, '0')
   const day = String(d.getDate()).padStart(2, '0')
   return `${y}-${m}-${day}`
-}
-
-/** Readable date from `YYYY-MM-DD` (local TZ) for the review summary. */
-function formatYMD(ymd: string): string {
-  const d = new Date(`${ymd}T00:00:00`)
-  if (Number.isNaN(d.getTime())) return ymd
-  return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 /** Day-of-month part of `YYYY-MM-DD`, clamped — matches the transaction calendar date picker. */
@@ -89,7 +83,9 @@ export default function TransactionForm({
   compact = false,
 }: TransactionFormProps) {
   const { user } = useAuth()
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const colors = useThemeColors()
+  const formatYMD = (ymd: string) => formatDate(ymd, { day: '2-digit', month: 'short', year: 'numeric' })
 
   // 🗓️ Controlled form states
   const [date, setDate] = useState(() => toLocalYYYYMMDD())
@@ -128,7 +124,7 @@ export default function TransactionForm({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load payment methods',
+          title: t('transactions.paymentMethodsLoadFailed'),
           dedupeKey: 'payment-methods-load-failed',
         })
       })
@@ -152,7 +148,7 @@ export default function TransactionForm({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load accounts',
+          title: t('form.accountsLoadFailed'),
           dedupeKey: 'accounts-load-failed',
         })
       })
@@ -215,8 +211,8 @@ export default function TransactionForm({
       if (loading) return false
       if (!accountId) {
         ToastService.warning({
-          title: 'Select an account',
-          description: 'Create an account from the Accounts page before adding transactions.',
+          title: t('transactions.selectAccount'),
+          description: t('form.accountRequiredDescription'),
           dedupeKey: 'transaction-account-required',
         })
         return false
@@ -224,8 +220,8 @@ export default function TransactionForm({
       const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
       if (isInstallment && !paymentMethodId) {
         ToastService.warning({
-          title: 'Select a credit card',
-          description: 'Installments must be linked to the credit card they were charged on.',
+          title: t('form.selectCreditCard'),
+          description: t('form.creditCardRequiredDescription'),
           dedupeKey: 'installment-card-required',
         })
         return false
@@ -247,8 +243,8 @@ export default function TransactionForm({
           })
 
           ToastService.success({
-            title: 'Fixed expense created',
-            description: 'Due transactions will be generated automatically.',
+            title: t('form.fixedExpenseCreated'),
+            description: t('form.fixedExpenseCreatedDescription'),
             duration: 3000,
             dedupeKey: 'fixed-expense-created',
           })
@@ -265,8 +261,8 @@ export default function TransactionForm({
           })
 
           ToastService.success({
-            title: 'Fixed income created',
-            description: 'Monthly income will be generated automatically.',
+            title: t('form.fixedIncomeCreated'),
+            description: t('form.fixedIncomeCreatedDescription'),
             duration: 3000,
             dedupeKey: 'fixed-income-created',
           })
@@ -294,8 +290,11 @@ export default function TransactionForm({
           })
 
           ToastService.success({
-            title: 'Installment plan created',
-            description: `${installments}x of £${(Number(amount) / installments).toFixed(2)}`,
+            title: t('form.installmentPlanCreated'),
+            description: t('form.installmentPlanSummary', {
+              count: installments,
+              amount: formatCurrency(Number(amount) / installments),
+            }),
             duration: 3000,
             dedupeKey: 'installment-plan-created',
           })
@@ -316,7 +315,7 @@ export default function TransactionForm({
           onCreated(created)
 
           ToastService.success({
-            title: 'Transaction saved',
+            title: t('form.transactionSaved'),
             duration: 2000,
             dedupeKey: 'transaction-saved',
           })
@@ -335,7 +334,7 @@ export default function TransactionForm({
         return true
       } catch (err: unknown) {
         ToastService.apiError(err, {
-          title: 'Could not save transaction',
+          title: t('form.transactionSaveFailed'),
           duration: 3000,
           dedupeKey: 'transaction-save-failed',
         })
@@ -368,16 +367,16 @@ export default function TransactionForm({
   const canReview = (): boolean => {
     if (!accountId) {
       ToastService.warning({
-        title: 'Select an account',
-        description: 'Create an account from the Accounts page before adding transactions.',
+        title: t('transactions.selectAccount'),
+        description: t('form.accountRequiredDescription'),
         dedupeKey: 'transaction-account-required',
       })
       return false
     }
     if (!amount || Number(amount) <= 0) {
       ToastService.warning({
-        title: 'Enter an amount',
-        description: 'Add a value greater than zero before saving.',
+        title: t('form.enterAmount'),
+        description: t('form.enterAmountDescription'),
         dedupeKey: 'transaction-amount-required',
       })
       return false
@@ -385,8 +384,8 @@ export default function TransactionForm({
     const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
     if (isInstallment && !paymentMethodId) {
       ToastService.warning({
-        title: 'Select a credit card',
-        description: 'Installments must be linked to the credit card they were charged on.',
+        title: t('form.selectCreditCard'),
+        description: t('form.creditCardRequiredDescription'),
         dedupeKey: 'installment-card-required',
       })
       return false
@@ -407,52 +406,56 @@ export default function TransactionForm({
   const modeLabel =
     type === 'EXPENSE'
       ? expenseMode === 'fixed'
-        ? 'Fixed monthly'
+        ? t('form.fixedMonthly')
         : expenseMode === 'installment'
-          ? 'Installments'
-          : 'One-off'
+          ? t('dashboard.installments')
+          : t('form.oneOff')
       : incomeMode === 'fixed'
-        ? 'Fixed monthly'
-        : 'One-off'
+        ? t('form.fixedMonthly')
+        : t('form.oneOff')
 
   const isInstallmentReview =
     type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
 
   const reviewItems: Array<{ label: string; value: string }> = [
-    { label: 'How it works', value: modeLabel },
+    { label: t('form.howItWorks'), value: modeLabel },
     {
-      label: 'Amount',
+      label: t('transactions.amount'),
       value: isInstallmentReview
-        ? `£${Number(amount).toFixed(2)} · ${installments}× £${(Number(amount) / installments).toFixed(2)}`
-        : `£${Number(amount).toFixed(2)}`,
+        ? t('form.amountSummary', {
+            total: formatCurrency(Number(amount)),
+            count: installments,
+            installment: formatCurrency(Number(amount) / installments),
+          })
+        : formatCurrency(Number(amount)),
     },
-    { label: 'Category', value: category || '—' },
-    { label: 'Account', value: selectedAccount ? selectedAccount.name : '—' },
+    { label: t('transactions.category'), value: category ? categoryLabel(category) : '—' },
+    { label: t('transactions.account'), value: selectedAccount ? selectedAccount.name : '—' },
   ]
   if (type === 'EXPENSE') {
     reviewItems.push({
-      label: 'Payment method',
-      value: selectedCard ? selectedCard.name : 'Debit card (default)',
+      label: t('form.paymentMethod'),
+      value: selectedCard ? selectedCard.name : t('form.debitDefault'),
     })
   }
   if (
     (type === 'EXPENSE' && expenseMode === 'single') ||
     (type === 'INCOME' && incomeMode === 'single')
   ) {
-    reviewItems.push({ label: 'Date', value: formatYMD(date) })
+    reviewItems.push({ label: t('form.date'), value: formatYMD(date) })
   } else if (type === 'EXPENSE' && expenseMode === 'fixed') {
     reviewItems.push({
-      label: 'Schedule',
-      value: `Every month on day ${recurringDayOfMonth} · from ${formatYMD(recurringStartDate)}`,
+      label: t('form.schedule'),
+      value: t('form.everyMonthFrom', { day: recurringDayOfMonth, date: formatYMD(recurringStartDate) }),
     })
   } else if (type === 'INCOME' && incomeMode === 'fixed') {
-    reviewItems.push({ label: 'Schedule', value: `Every month on day ${recurringDayOfMonth}` })
+    reviewItems.push({ label: t('form.schedule'), value: t('form.everyMonth', { day: recurringDayOfMonth }) })
   } else if (type === 'EXPENSE' && expenseMode === 'installment') {
-    reviewItems.push({ label: 'Purchase date', value: formatYMD(date) })
-    reviewItems.push({ label: 'First installment', value: formatYMD(firstInstallmentDate) })
+    reviewItems.push({ label: t('form.purchaseDate'), value: formatYMD(date) })
+    reviewItems.push({ label: t('form.firstInstallment'), value: formatYMD(firstInstallmentDate) })
   }
   if (description.trim()) {
-    reviewItems.push({ label: 'Description', value: description.trim() })
+    reviewItems.push({ label: t('transactions.description'), value: description.trim() })
   }
 
   const isIncome = type === 'INCOME'
@@ -474,7 +477,7 @@ export default function TransactionForm({
               align="stretch"
               w="full"
               minW={0}
-              aria-label="Add transaction form" // ♿ Accessibility
+              aria-label={t('form.addTransactionAria')} // ♿ Accessibility
             >
           {type === 'INCOME' && (
             <IncomeModeSelector
@@ -522,12 +525,12 @@ export default function TransactionForm({
             <DateSelector
               date={date}
               onChange={onTransactionDateChange}
-              label={expenseMode === 'installment' ? 'Purchase date' : undefined}
+              label={expenseMode === 'installment' ? t('form.purchaseDate') : undefined}
             />
           )}
           {type === 'EXPENSE' && expenseMode === 'fixed' && (
               <RecurringSelector
-                title="Fixed expense schedule"
+                title={t('form.fixedExpenseSchedule')}
                 type={type}
                 startDate={recurringStartDate}
                 onStartDateChange={setRecurringStartDate}
@@ -538,7 +541,7 @@ export default function TransactionForm({
           )}
           {type === 'INCOME' && incomeMode === 'fixed' && (
               <RecurringSelector
-                title="Fixed income schedule"
+                title={t('form.fixedIncomeSchedule')}
                 type={type}
                 dayOfMonth={recurringDayOfMonth}
                 onDayOfMonthChange={setRecurringDayOfMonth}
@@ -596,14 +599,14 @@ export default function TransactionForm({
               isDisabled={!accountId}
               loadingText={
                 type === 'INCOME' && incomeMode === 'fixed'
-                  ? 'Creating fixed income...'
+                  ? t('form.creatingFixedIncome')
                   : expenseMode === 'fixed' && type === 'EXPENSE'
-                  ? 'Creating fixed expense...'
+                  ? t('form.creatingFixedExpense')
                   : expenseMode === 'installment' && type === 'EXPENSE'
-                    ? 'Creating installment plan...'
+                    ? t('form.creatingInstallment')
                   : type === 'INCOME'
-                    ? 'Adding income...'
-                    : 'Adding expense...'
+                    ? t('form.addingIncome')
+                    : t('form.addingExpense')
               }
               _hover={{
                 bgPosition: '100% 50%',
@@ -614,14 +617,14 @@ export default function TransactionForm({
               transition="background-position 0.3s ease, box-shadow 0.2s ease"
             >
               {type === 'INCOME' && incomeMode === 'fixed'
-                ? 'Create fixed income'
+                ? t('form.createFixedIncome')
                 : expenseMode === 'fixed' && type === 'EXPENSE'
-                ? 'Create fixed expense'
+                ? t('form.createFixedExpense')
                 : expenseMode === 'installment' && type === 'EXPENSE'
-                  ? 'Create installment plan'
+                  ? t('form.createInstallment')
                 : type === 'INCOME'
-                  ? 'Add income'
-                  : 'Add expense'}
+                  ? t('form.addIncome')
+                  : t('form.addExpense')}
             </Button>
           )}
         </VStack>
@@ -638,7 +641,7 @@ export default function TransactionForm({
           borderColor={colors.border}
           w="full"
           role="region" // ♿ Accessibility: marks card as a section
-          aria-label="Transaction entry form"
+          aria-label={t('form.entryAria')}
         >
           <CardBody p={{ base: 4, sm: 6, md: 8 }}>
             <VStack
@@ -692,12 +695,12 @@ export default function TransactionForm({
                 <DateSelector
                   date={date}
                   onChange={onTransactionDateChange}
-                  label={expenseMode === 'installment' ? 'Purchase date' : undefined}
+                  label={expenseMode === 'installment' ? t('form.purchaseDate') : undefined}
                 />
               )}
               {type === 'EXPENSE' && expenseMode === 'fixed' && (
                   <RecurringSelector
-                    title="Fixed expense schedule"
+                    title={t('form.fixedExpenseSchedule')}
                     type={type}
                     startDate={recurringStartDate}
                     onStartDateChange={setRecurringStartDate}
@@ -708,7 +711,7 @@ export default function TransactionForm({
               )}
               {type === 'INCOME' && incomeMode === 'fixed' && (
                   <RecurringSelector
-                    title="Fixed income schedule"
+                    title={t('form.fixedIncomeSchedule')}
                     type={type}
                     dayOfMonth={recurringDayOfMonth}
                     onDayOfMonthChange={setRecurringDayOfMonth}
@@ -770,14 +773,14 @@ export default function TransactionForm({
             <VStack align="stretch" spacing={1}>
               <HStack spacing={2}>
                 <Badge colorScheme={accentScheme} borderRadius="full" px={2.5} py={0.5}>
-                  {isIncome ? 'Income' : 'Expense'}
+                  {t(isIncome ? 'dashboard.income' : 'dashboard.expense')}
                 </Badge>
                 <Text fontSize="md" fontWeight={700} color={colors.text.primary}>
-                  Review before saving
+                  {t('form.reviewTitle')}
                 </Text>
               </HStack>
               <Text fontSize="xs" color={colors.text.secondary} fontWeight={500}>
-                Check the details — nothing is saved until you confirm.
+                {t('form.reviewCaption')}
               </Text>
             </VStack>
           </ModalHeader>
@@ -809,7 +812,7 @@ export default function TransactionForm({
               flex={1}
               borderRadius="xl"
             >
-              Back
+              {t('form.back')}
             </Button>
             <Button
               flex={1}
@@ -818,10 +821,10 @@ export default function TransactionForm({
               bg={confirmGradient}
               onClick={handleConfirmSave}
               isLoading={loading}
-              loadingText="Saving…"
+              loadingText={t('form.saving')}
               _hover={{ filter: 'brightness(1.06)' }}
             >
-              Confirm &amp; save
+              {t('form.confirmSave')}
             </Button>
           </ModalFooter>
         </ModalContent>

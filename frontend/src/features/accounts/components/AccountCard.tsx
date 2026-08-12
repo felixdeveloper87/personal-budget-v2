@@ -1,7 +1,8 @@
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
 import { ChevronRight, Pencil, Trash2 } from '../../../components/ui/icons'
-import { ACCOUNT_LABELS, money } from '../../../components/accounts/accountMeta'
+import { ACCOUNT_LABELS } from '../../../components/accounts/accountMeta'
+import { useI18n } from '../../../i18n'
 import AccountAvatar from './AccountAvatar'
 
 interface AccountCardProps {
@@ -53,6 +54,7 @@ export default function AccountCard({
   onEdit,
   onArchive,
 }: AccountCardProps) {
+  const { t, formatCurrency } = useI18n()
   const negative = account.currentBalance < 0
 
   return (
@@ -103,7 +105,7 @@ export default function AccountCard({
             mt="0.2rem"
             noOfLines={1}
           >
-            {ACCOUNT_LABELS[account.type]}
+            {t(`accounts.type.${account.type}`, undefined, ACCOUNT_LABELS[account.type])}
             {account.institution ? ` · ${account.institution}` : ''}
           </Text>
         </Box>
@@ -115,7 +117,7 @@ export default function AccountCard({
           transition="opacity 0.15s"
         >
           <Tool
-            label={`Edit ${account.name}`}
+            label={t('accounts.action.editNamed', { name: account.name })}
             icon={Pencil}
             onClick={(e) => {
               e.stopPropagation()
@@ -123,7 +125,7 @@ export default function AccountCard({
             }}
           />
           <Tool
-            label={`Remove ${account.name}`}
+            label={t('accounts.action.removeNamed', { name: account.name })}
             icon={Trash2}
             danger
             onClick={(e) => {
@@ -142,7 +144,7 @@ export default function AccountCard({
           textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
-          Balance
+          {t('accounts.balance')}
         </Text>
         <Text
           className="num"
@@ -154,7 +156,7 @@ export default function AccountCard({
           color={!hideBalances && negative ? 'var(--pb-coral)' : 'var(--pb-ink)'}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
-          {hideBalances ? '••••••' : money(account.currentBalance, account.currency)}
+          {hideBalances ? '••••••' : formatCurrency(account.currentBalance)}
         </Text>
       </Box>
 
@@ -174,7 +176,7 @@ export default function AccountCard({
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Overdraft remaining
+            {t('accounts.overdraftRemaining')}
           </Text>
           <Text
             className="num"
@@ -185,7 +187,7 @@ export default function AccountCard({
             color={account.overdraftAvailable > 0 ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >
-            {hideBalances ? '••••••' : money(account.overdraftAvailable, account.currency)}
+            {hideBalances ? '••••••' : formatCurrency(account.overdraftAvailable)}
           </Text>
         </Flex>
       )}

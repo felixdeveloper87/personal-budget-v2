@@ -1,8 +1,8 @@
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
-import { gbp } from '../data/format'
 import type { ComputedCategory, Side } from '../data/types'
 import CategoryTxnRow from './CategoryTxnRow'
+import { useI18n } from '../../../i18n'
 
 interface CategoryTransactionsModalProps {
   /** The category to show in full. `null` keeps the modal mounted but closed. */
@@ -21,6 +21,7 @@ export default function CategoryTransactionsModal({
   periodLabel,
   onClose,
 }: CategoryTransactionsModalProps) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const sign = side === 'expense' ? '−' : '+'
   const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
 
@@ -34,8 +35,11 @@ export default function CategoryTransactionsModal({
         cat && (
           <ModalHeader
             icon={cat.icon}
-            title={cat.name}
-            caption={`${cat.shownCount} transaction${cat.shownCount !== 1 ? 's' : ''} · ${periodLabel}`}
+            title={cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
+            caption={t(cat.shownCount === 1 ? 'categories.modalCaption' : 'categories.modalCaptionPlural', {
+              count: cat.shownCount,
+              period: periodLabel,
+            })}
             onClose={onClose}
             accent={side === 'expense' ? 'red' : 'green'}
           />
@@ -52,7 +56,7 @@ export default function CategoryTransactionsModal({
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              Total
+              {t('categories.total')}
             </Text>
             <Text
               fontWeight={500}
@@ -61,7 +65,7 @@ export default function CategoryTransactionsModal({
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
               {sign}
-              {gbp(cat.amount, 2)}
+              {formatCurrency(cat.amount)}
             </Text>
           </Flex>
           {cat.sample.map((txn) => (

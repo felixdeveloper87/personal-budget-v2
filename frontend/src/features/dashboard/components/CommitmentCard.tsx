@@ -1,7 +1,7 @@
 import { Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { ArrowUpRight, Repeat2, Rows3 } from 'lucide-react'
 import Panel from './Panel'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 type CommitmentKind = 'installments' | 'fixed'
 
@@ -15,17 +15,17 @@ interface CommitmentCardProps {
 
 const CONTENT = {
   installments: {
-    label: 'Installments',
-    inactiveLabel: 'completed',
-    description: 'Active purchase plans due each month.',
+    labelKey: 'dashboard.installments',
+    inactiveLabelKey: 'dashboard.completed',
+    descriptionKey: 'dashboard.installmentsDescription',
     color: 'var(--pb-forest-2)',
     tint: 'var(--pb-tint-green)',
     Icon: Rows3,
   },
   fixed: {
-    label: 'Fixed payments',
-    inactiveLabel: 'cancelled',
-    description: 'Recurring expense payments due each month.',
+    labelKey: 'dashboard.fixedPayments',
+    inactiveLabelKey: 'dashboard.cancelled',
+    descriptionKey: 'dashboard.fixedPaymentsDescription',
     color: 'var(--pb-gold-2)',
     tint: 'var(--pb-tint-gold)',
     Icon: Repeat2,
@@ -33,6 +33,7 @@ const CONTENT = {
 } as const
 
 export default function CommitmentCard({ kind, monthly, active, inactive, onManage }: CommitmentCardProps) {
+  const { t, formatCurrency } = useI18n()
   const content = CONTENT[kind]
   const Icon = content.Icon
 
@@ -59,11 +60,11 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              {content.label}
+              {t(content.labelKey)}
             </Text>
           </HStack>
           <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)">
-            {active} active
+            {t('dashboard.activeCount', { count: active })}
           </Text>
         </HStack>
 
@@ -76,20 +77,20 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
             color={content.color}
             style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
           >
-            {fmtCurrency(monthly)}
+            {formatCurrency(monthly)}
           </Text>
           <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" color="var(--pb-ink-faint)">
-            / MO
+            {t('dashboard.perMonth')}
           </Text>
         </HStack>
 
         <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.5}>
-          {content.description}
+          {t(content.descriptionKey)}
         </Text>
 
         <HStack justify="space-between" mt="auto" pt={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.06em" color="var(--pb-ink-faint)">
-            {inactive} {content.inactiveLabel}
+            {inactive} {t(content.inactiveLabelKey)}
           </Text>
           {onManage && (
             <Button
@@ -106,7 +107,7 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
               rightIcon={<ArrowUpRight size={13} />}
               _hover={{ bg: 'transparent', textDecoration: 'underline' }}
             >
-              Manage
+              {t('dashboard.manage')}
             </Button>
           )}
         </HStack>

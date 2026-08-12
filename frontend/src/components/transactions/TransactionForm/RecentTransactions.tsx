@@ -2,12 +2,12 @@ import { Box, Text, VStack, HStack, Badge, Divider, useColorModeValue, IconButto
 import { DeleteIcon } from '@chakra-ui/icons'
 import { Transaction } from '../../../types'
 import { useMemo } from 'react'
-import { formatTransactionDateTime } from '../../../utils/dateTime'
 import { DeleteTransactionDialog } from '../../ui'
 import { useDeleteTransaction } from '../../../hooks/useDeleteTransaction'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { getResponsiveStyles } from '../../ui'
 import { formatTransactionAccount } from '../../../utils/transactionAccount'
+import { useI18n } from '../../../i18n'
 
 interface RecentTransactionsProps {
   transactions: Transaction[]
@@ -23,6 +23,7 @@ interface RecentTransactionsProps {
  * - Uses consistent theming and responsive design
  */
 export default function RecentTransactions({ transactions, type, limit = 5, onTransactionDeleted }: RecentTransactionsProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const colors = useThemeColors()
   const responsiveStyles = getResponsiveStyles()
   const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
@@ -40,7 +41,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
     return (
       <Box>
         <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-          Recent {type === 'INCOME' ? 'Income' : 'Expenses'}
+          {t(type === 'INCOME' ? 'form.recentIncome' : 'form.recentExpenses')}
         </Text>
         <Box
           p={6}
@@ -51,7 +52,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
           textAlign="center"
         >
           <Text fontSize="sm" color={colors.text.secondary}>
-            No recent {type.toLowerCase()}s found
+            {t(type === 'INCOME' ? 'form.noRecentIncome' : 'form.noRecentExpenses')}
           </Text>
         </Box>
       </Box>
@@ -61,7 +62,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
   return (
     <Box>
       <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-        Recent {type === 'INCOME' ? 'Income' : 'Expenses'}
+        {t(type === 'INCOME' ? 'form.recentIncome' : 'form.recentExpenses')}
       </Text>
       
       <Box
@@ -94,7 +95,7 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
               <HStack justify="space-between" fontSize="sm" py={2}>
                 <VStack align="start" spacing={1} flex="1">
                   <Text fontWeight="semibold" color={colors.text.primary}>
-                    {tx.category}
+                    {categoryLabel(tx.category)}
                   </Text>
                   {tx.description && (
                     <Text fontSize="xs" color={colors.text.secondary} noOfLines={1} maxW="200px">
@@ -109,10 +110,10 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                   {/* Exibe data e horário */}
                   <VStack align="start" spacing={0}>
                     <Text fontSize="xs" color={colors.text.secondary}>
-                      {formatTransactionDateTime(tx.dateTime).shortDate}
+                      {formatDate(tx.dateTime, { day: '2-digit', month: 'short', year: 'numeric' })}
                     </Text>
                     <Text fontSize="xs" color={colors.text.secondary} opacity={0.7}>
-                      {formatTransactionDateTime(tx.dateTime).time}
+                      {formatDate(tx.dateTime, { hour: '2-digit', minute: '2-digit' })}
                     </Text>
                   </VStack>
                 </VStack>
@@ -127,11 +128,11 @@ export default function RecentTransactions({ transactions, type, limit = 5, onTr
                     borderRadius="xl"
                     fontWeight="bold"
                   >
-                    £{tx.amount.toFixed(2)}
+                    {formatCurrency(tx.amount)}
                   </Badge>
                   {tx.id && (
                     <IconButton
-                      aria-label="Delete transaction"
+                      aria-label={t('transactions.deleteAria')}
                       icon={<DeleteIcon />}
                       size="xs"
                       colorScheme="red"

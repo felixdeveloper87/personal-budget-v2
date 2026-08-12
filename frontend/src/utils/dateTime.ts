@@ -1,21 +1,24 @@
+import { getCurrentLocale, translateNow } from '../i18n'
+
 /**
  * Formats a Java LocalDateTime string from the backend without applying UTC conversion.
  */
 export function formatTransactionDateTime(dateTimeString: string) {
     const date = new Date(dateTimeString)
+    const locale = getCurrentLocale()
   
     return {
-      date: date.toLocaleDateString('en-GB', {
+      date: date.toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       }),
-      time: date.toLocaleTimeString('en-GB', {
+      time: date.toLocaleTimeString(locale, {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true,
       }),
-      shortDate: date.toLocaleDateString('en-GB', {
+      shortDate: date.toLocaleDateString(locale, {
         month: 'short',
         day: 'numeric',
       }),
@@ -57,28 +60,29 @@ export function formatTransactionDateTime(dateTimeString: string) {
   }
 
   /**
-   * Formats date string to Brazilian format (DD/MM/YYYY)
-   * Handles both YYYY-MM-DD backend format and other date formats
+   * Formats a backend date using the currently selected display locale.
+   * The legacy name is retained because it is part of the existing utility API.
    */
   export const formatDateBR = (dateString: string): string => {
+    const locale = getCurrentLocale()
     try {
       // Handle YYYY-MM-DD format from backend
       if (dateString && dateString.includes('-')) {
         const date = new Date(dateString + 'T00:00:00')
         if (!isNaN(date.getTime())) {
-          return date.toLocaleDateString('pt-BR')
+          return date.toLocaleDateString(locale)
         }
       }
       
       // Fallback for other formats
       const date = new Date(dateString)
       if (!isNaN(date.getTime())) {
-        return date.toLocaleDateString('pt-BR')
+        return date.toLocaleDateString(locale)
       }
       
-      return 'Invalid Date'
+      return translateNow('date.invalid', undefined, 'Invalid date')
     } catch (error) {
-      return 'Invalid Date'
+      return translateNow('date.invalid', undefined, 'Invalid date')
     }
   }
   

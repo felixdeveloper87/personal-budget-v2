@@ -2,6 +2,7 @@ import { Box, Flex, HStack, IconButton, Text } from '@chakra-ui/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { PeriodType } from '../../../types'
 import Segmented from './Segmented'
+import { useI18n } from '../../../i18n'
 
 interface PeriodNavBarProps {
   selectedPeriod: PeriodType
@@ -12,12 +13,6 @@ interface PeriodNavBarProps {
   onGoToToday: () => void
   embedded?: boolean
 }
-
-const PERIOD_OPTIONS: Array<{ value: PeriodType; label: string }> = [
-  { value: 'day', label: 'Day' },
-  { value: 'week', label: 'Week' },
-  { value: 'month', label: 'Month' },
-]
 
 const navBtnSx = {
   variant: 'ghost' as const,
@@ -42,6 +37,12 @@ export default function PeriodNavBar({
   onGoToToday,
   embedded = false,
 }: PeriodNavBarProps) {
+  const { t } = useI18n()
+  const periodOptions: Array<{ value: PeriodType; label: string }> = [
+    { value: 'day', label: t('period.day') },
+    { value: 'week', label: t('period.week') },
+    { value: 'month', label: t('period.month') },
+  ]
   const navSize = { base: '30px', sm: '32px' }
   const navStyles = embedded
     ? {
@@ -65,18 +66,18 @@ export default function PeriodNavBar({
       mb={embedded ? 0 : 'clamp(1.2rem,2.6vw,1.7rem)'}
     >
       <Segmented
-        options={PERIOD_OPTIONS}
+        options={periodOptions}
         value={selectedPeriod}
         onChange={onPeriodChange}
         size={embedded ? 'sm' : 'md'}
         mobileFullWidth={embedded}
         tone={embedded ? 'summary' : 'default'}
-        aria-label="Select period range"
+        aria-label={t('period.selectRange')}
       />
 
       <HStack spacing={1} justify={embedded ? 'center' : undefined} w={embedded ? { base: 'full', sm: 'auto' } : undefined}>
         <IconButton
-          aria-label="Previous period"
+          aria-label={t('period.previous')}
           icon={<ChevronLeft size={15} />}
           size="sm"
           h={navSize}
@@ -116,7 +117,7 @@ export default function PeriodNavBar({
               fontWeight={500}
               whiteSpace="nowrap"
             >
-              Now
+              {t('common.now')}
             </Box>
           ) : (
             <Box
@@ -141,13 +142,13 @@ export default function PeriodNavBar({
               }}
               onClick={onGoToToday}
             >
-              Today
+              {t('common.today')}
             </Box>
           )}
         </HStack>
 
         <IconButton
-          aria-label="Next period"
+          aria-label={t('period.next')}
           icon={<ChevronRight size={15} />}
           size="sm"
           h={navSize}

@@ -41,6 +41,7 @@ import {
   ShieldCheck,
   GraduationCap,
 } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
 
 const incomeCategories: ReadonlyArray<{ name: string; icon: LucideIcon }> = [
   { name: 'Salary', icon: Briefcase },
@@ -117,6 +118,7 @@ export default function CategorySelector({
   onChange,
 }: CategorySelectorProps) {
   const colors = useThemeColors()
+  const { t, categoryLabel } = useI18n()
   const isIncome = type === 'INCOME'
 
   // Every category — primary + the former "Others" bucket — lives in one carousel.
@@ -150,7 +152,7 @@ export default function CategorySelector({
     type === 'INCOME' ? '0 0 0 3px #4ade8020' : '0 0 0 3px #f8717120'
   const accentBorder = isIncome ? 'green.400' : 'red.400'
 
-  const kindWord = isIncome ? 'income' : 'expense'
+  const kindWord = t(isIncome ? 'form.incomeKind' : 'form.expenseKind')
 
   return (
     <VStack spacing={3} align="stretch">
@@ -207,10 +209,10 @@ export default function CategorySelector({
                   as="span"
                 >
                   <Box as="span" display={{ base: 'inline', sm: 'none' }}>
-                    What?
+                    {t('form.what')}
                   </Box>
                   <Box as="span" display={{ base: 'none', sm: 'inline' }}>
-                    What category?
+                    {t('form.whatCategory')}
                   </Box>
                 </Text>
               </HStack>
@@ -226,7 +228,7 @@ export default function CategorySelector({
                       whiteSpace="nowrap"
                       flexShrink={0}
                     >
-                      Selected:
+                      {t('form.selected')}
                     </Text>
                     <Text
                       as="span"
@@ -240,7 +242,7 @@ export default function CategorySelector({
                       textDecoration="underline"
                       textUnderlineOffset="3px"
                     >
-                      {category}
+                      {categoryLabel(category)}
                     </Text>
                   </HStack>
                 ) : (
@@ -253,7 +255,7 @@ export default function CategorySelector({
                     textAlign="right"
                     sx={{ opacity: 0.88 }}
                   >
-                    Pick one
+                    {t('form.pickOne')}
                   </Text>
                 )}
               </Flex>
@@ -267,7 +269,10 @@ export default function CategorySelector({
                   <Box key={cat.name} flexShrink={0} sx={{ scrollSnapAlign: 'start' }}>
                     <Button
                       variant="ghost"
-                      aria-label={`Select ${cat.name} ${kindWord} category`}
+                      aria-label={t('form.selectCategoryAria', {
+                        category: categoryLabel(cat.name),
+                        kind: kindWord,
+                      })}
                       onClick={() => onChange(cat.name)}
                       leftIcon={
                         <Icon
@@ -290,7 +295,7 @@ export default function CategorySelector({
                       _active={{ bg: colors.bgSecondary }}
                       _focusVisible={{ boxShadow: focusRing }}
                     >
-                      {cat.name}
+                      {categoryLabel(cat.name)}
                     </Button>
                   </Box>
                 )
@@ -300,7 +305,7 @@ export default function CategorySelector({
             {/* Custom category — always available, no expanding needed. */}
             <VStack spacing={2} align="stretch">
               <Text fontSize="2xs" color={colors.text.secondary}>
-                Or write your own
+                {t('form.customCategory')}
               </Text>
               <HStack spacing={2} align="stretch">
                 <Input
@@ -310,7 +315,7 @@ export default function CategorySelector({
                   borderColor={colors.border}
                   bg={colors.bgSecondary}
                   color={colors.text.primary}
-                  placeholder="Anything you like…"
+                  placeholder={t('form.customCategoryPlaceholder')}
                   onChange={(e) => setCustomDraft(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') applyCustomCategory()

@@ -32,9 +32,11 @@ export function aggregateSide(transactions: Transaction[], side: Side): Category
     cat.count += 1
     cat.total += tx.amount
 
+    const description = tx.description?.trim()
     const sampleTxn: CategoryTxn = {
       id: String(tx.id ?? `${key}-${cat.sample.length}`),
-      merchant: tx.description?.trim() || name,
+      merchant: description || name,
+      merchantIsCategory: !description,
       amount: tx.amount,
       purchaseDate: getTransactionDateSource(tx, 'activity').slice(0, 10),
       settlesDate: getTransactionDateSource(tx, 'cash-flow').slice(0, 10),

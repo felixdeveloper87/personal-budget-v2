@@ -1,6 +1,5 @@
-import { FormEvent, useCallback, useEffect, useState, type ReactNode } from 'react'
+import { FormEvent, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import {
-  Avatar,
   Badge,
   Box,
   Button,
@@ -56,6 +55,7 @@ import {
   uploadHouseholdSettlementAttachments,
 } from '../../api'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 import { ToastService } from '../../services/toast'
 import type {
   HouseholdDashboard,
@@ -151,16 +151,6 @@ const currentMonday = () => {
   return `${value.getFullYear()}-${month}-${day}`
 }
 
-const money = (value: number, currency = 'GBP') =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency }).format(value)
-
-const dateLabel = (value: string) =>
-  new Date(`${value}T12:00:00`).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  })
-
 function Surface({
   children,
   ...props
@@ -203,6 +193,7 @@ function ActionRequiredBanner({
   actionLabel: string
   targetId: string
 }) {
+  const { formatNumber, t } = useI18n()
   return (
     <Flex
       role="region"
@@ -243,7 +234,7 @@ function ActionRequiredBanner({
               textTransform="uppercase"
               color={accent}
             >
-              Action required
+              {t('household.common.actionRequired')}
             </Text>
             <Badge
               borderRadius="full"
@@ -253,7 +244,7 @@ function ActionRequiredBanner({
               border="1px solid var(--pb-summary-line)"
               textTransform="none"
             >
-              {count}
+              {formatNumber(count)}
             </Badge>
           </HStack>
           <Text
@@ -384,13 +375,16 @@ function HouseholdSectionHeader({
 
 export default function HouseholdPage() {
   const ed = useEd()
+  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
+  const translateRef = useRef(t)
+  translateRef.current = t
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
   const muted = ed?.muted ?? mutedFallback
   const [page, setPage] = useState<HouseholdPageState | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadFailed, setLoadFailed] = useState(false)
   const [busyAction, setBusyAction] = useState<string | null>(null)
-  const [householdName, setHouseholdName] = useState('Our home')
+  const [householdName, setHouseholdName] = useState(() => t('household.create.defaultName'))
   const [editingExpense, setEditingExpense] = useState<HouseholdExpense | null>(null)
   const [settlingDebt, setSettlingDebt] = useState<HouseholdDebt | null>(null)
   const [attachmentTarget, setAttachmentTarget] = useState<AttachmentTarget | null>(null)
@@ -408,7 +402,7 @@ export default function HouseholdPage() {
     } catch (error) {
       setLoadFailed(true)
       ToastService.apiError(error, {
-        title: 'Could not load your household',
+        title: translateRef.current('household.load.failedToast'),
         dedupeKey: 'household-load',
       })
     } finally {
@@ -435,7 +429,7 @@ export default function HouseholdPage() {
       return true
     } catch (error) {
       ToastService.apiError(error, {
-        title: 'Could not complete that household action',
+        title: t('household.action.failedToast'),
         dedupeKey: `household:${key}:failed`,
       })
       return false
@@ -464,7 +458,7 @@ export default function HouseholdPage() {
       <Box minH="55vh" display="grid" placeItems="center">
         <VStack spacing={3}>
           <Spinner color={ed?.jade ?? 'teal.500'} thickness="3px" />
-          <Text color={muted} fontSize="sm">Loading household…</Text>
+          <Text color={muted} fontSize="sm">{t('household.loading')}</Text>
         </VStack>
       </Box>
     )
@@ -476,10 +470,10 @@ export default function HouseholdPage() {
         <Surface p={8} textAlign="center">
           <VStack spacing={4}>
             <Icon as={Home} boxSize={9} color={muted} />
-            <Heading size="md">We could not open Household</Heading>
-            <Text color={muted}>Try loading the shared ledger again.</Text>
+            <Heading size="md">{t('household.load.failedTitle')}</Heading>
+            <Text color={muted}>{t('household.load.failedDescription')}</Text>
             <Button leftIcon={<RefreshCw size={17} />} onClick={() => void load()}>
-              Try again
+              {t('household.load.retry')}
             </Button>
           </VStack>
         </Surface>
@@ -499,21 +493,20 @@ export default function HouseholdPage() {
               letterSpacing="0.16em"
               textTransform="uppercase"
             >
-              Shared living
+              {t('household.create.eyebrow')}
             </Text>
             <Heading mt={2} size={{ base: 'xl', md: '2xl' }}>
-              Create your Household
+              {t('household.create.title')}
             </Heading>
             <Text mt={3} color={muted} maxW="620px">
-              Split home expenses, see exactly who owes whom, and record payments without
-              mixing reimbursements into personal income.
+              {t('household.create.description')}
             </Text>
           </Box>
 
           {page.pendingInvitations.length > 0 && (
             <Surface p={{ base: 4, md: 6 }}>
               <VStack align="stretch" spacing={4}>
-                <Heading size="sm">Household invitations</Heading>
+                <Heading size="sm">{t('household.invitations.title')}</Heading>
                 {page.pendingInvitations.map((invitation) => (
                   <Stack
                     key={invitation.id}
@@ -527,7 +520,7 @@ export default function HouseholdPage() {
                     <Box>
                       <Text fontWeight={800}>{invitation.householdName}</Text>
                       <Text color={muted} fontSize="sm">
-                        Invited by {invitation.invitedByName}
+                        {t('household.invitations.invitedBy', { name: invitation.invitedByName })}
                       </Text>
                     </Box>
                     <HStack>
@@ -538,10 +531,10 @@ export default function HouseholdPage() {
                         onClick={() => void applyAction(
                           `accept-${invitation.id}`,
                           () => acceptHouseholdInvitation(invitation.id),
-                          'Household joined',
+                          t('household.invitations.joined'),
                         )}
                       >
-                        Accept
+                        {t('household.invitations.accept')}
                       </Button>
                       <Button
                         size="sm"
@@ -552,7 +545,7 @@ export default function HouseholdPage() {
                           () => declineHouseholdInvitation(invitation.id),
                         )}
                       >
-                        Decline
+                        {t('household.invitations.decline')}
                       </Button>
                     </HStack>
                   </Stack>
@@ -571,7 +564,7 @@ export default function HouseholdPage() {
                 void applyAction(
                   'create-household',
                   () => createHousehold(householdName),
-                  'Household created',
+                  t('household.create.created'),
                 )
               }}
             >
@@ -588,17 +581,17 @@ export default function HouseholdPage() {
                   <Home size={22} weight="duotone" />
                 </Box>
                 <Box>
-                  <Heading size="md">Start a household</Heading>
-                  <Text color={muted} fontSize="sm">You will be the owner.</Text>
+                  <Heading size="md">{t('household.create.formTitle')}</Heading>
+                  <Text color={muted} fontSize="sm">{t('household.create.ownerHint')}</Text>
                 </Box>
               </HStack>
               <FormControl isRequired>
-                <FormLabel>Household name</FormLabel>
+                <FormLabel>{t('household.create.name')}</FormLabel>
                 <Input
                   value={householdName}
                   maxLength={120}
                   onChange={(event) => setHouseholdName(event.target.value)}
-                  placeholder="e.g. Our home"
+                  placeholder={t('household.create.placeholder')}
                 />
               </FormControl>
               <Button
@@ -608,7 +601,7 @@ export default function HouseholdPage() {
                 leftIcon={<Plus size={17} />}
                 isLoading={busyAction === 'create-household'}
               >
-                Create Household
+                {t('household.create.submit')}
               </Button>
             </VStack>
           </Surface>
@@ -652,8 +645,11 @@ export default function HouseholdPage() {
   const canAttach = attachmentExpense?.canEdit ?? attachmentSettlement?.canAttach ?? false
   const attachmentTitle = attachmentExpense?.description
     ?? (attachmentSettlement
-      ? `${attachmentSettlement.fromMemberName} paid ${attachmentSettlement.toMemberName}`
-      : 'Household record')
+      ? t('household.record.paymentTitle', {
+          from: attachmentSettlement.fromMemberName,
+          to: attachmentSettlement.toMemberName,
+        })
+      : t('household.record.fallback'))
 
   const openAttachments = (target: AttachmentTarget) => {
     setAttachmentTarget(target)
@@ -675,7 +671,7 @@ export default function HouseholdPage() {
         files,
       )
     }
-    return Promise.reject(new Error('No Household record selected'))
+    return Promise.reject(new Error(t('household.record.noneSelected')))
   }
 
   return (
@@ -697,47 +693,50 @@ export default function HouseholdPage() {
           >
             {pendingConfirmations.length > 0 && (
               <ActionRequiredBanner
-                ariaLabel="Pending payment confirmations"
+                ariaLabel={t('household.banner.confirmationsAria')}
                 icon={<CheckCircle2 size={20} weight="duotone" />}
                 accent="var(--pb-gold)"
                 tint="var(--pb-tint-gold)"
                 count={pendingConfirmations.length}
                 title={pendingConfirmations.length === 1
-                  ? 'A payment is waiting for your confirmation'
-                  : `${pendingConfirmations.length} payments are waiting for your confirmation`}
+                  ? t('household.banner.confirmations.one')
+                  : t('household.banner.confirmations.other', {
+                      count: formatNumber(pendingConfirmations.length),
+                    })}
                 detail={pendingConfirmations.length === 1 && firstPendingConfirmation
-                  ? `${firstPendingConfirmation.fromMemberName} recorded ${money(
-                      firstPendingConfirmation.amount,
-                      household.currency,
-                    )} paid to you. Review it before your balances change.`
-                  : `${money(
-                      pendingConfirmationTotal,
-                      household.currency,
-                    )} in total is waiting for your review. Only confirmed payments change balances.`}
-                actionLabel="Review payments"
+                  ? t('household.banner.confirmationDetail.one', {
+                      name: firstPendingConfirmation.fromMemberName,
+                      amount: formatCurrency(firstPendingConfirmation.amount),
+                    })
+                  : t('household.banner.confirmationDetail.other', {
+                      amount: formatCurrency(pendingConfirmationTotal),
+                    })}
+                actionLabel={t('household.banner.reviewPayments')}
                 targetId="household-payments"
               />
             )}
             {debtsYouOwe.length > 0 && (
               <ActionRequiredBanner
-                ariaLabel="Outstanding household balances you owe"
+                ariaLabel={t('household.banner.debtsAria')}
                 icon={<Wallet size={20} weight="duotone" />}
                 accent="var(--pb-coral)"
                 tint="var(--pb-tint-coral)"
                 count={debtsYouOwe.length}
                 title={debtsYouOwe.length === 1
-                  ? 'You have a household balance to pay'
-                  : `${debtsYouOwe.length} household balances need your attention`}
+                  ? t('household.banner.debts.one')
+                  : t('household.banner.debts.other', {
+                      count: formatNumber(debtsYouOwe.length),
+                    })}
                 detail={debtsYouOwe.length === 1 && firstDebtYouOwe
-                  ? `You owe ${money(
-                      firstDebtYouOwe.amount,
-                      household.currency,
-                    )} to ${firstDebtYouOwe.toMemberName}. Record it after you send the payment.`
-                  : `You owe ${money(
-                      totalYouOwe,
-                      household.currency,
-                    )} across ${debtsYouOwe.length} people. Review each balance before recording payment.`}
-                actionLabel="Review balances"
+                  ? t('household.banner.debtDetail.one', {
+                      amount: formatCurrency(firstDebtYouOwe.amount),
+                      name: firstDebtYouOwe.toMemberName,
+                    })
+                  : t('household.banner.debtDetail.other', {
+                      amount: formatCurrency(totalYouOwe),
+                      count: formatNumber(debtsYouOwe.length),
+                    })}
+                actionLabel={t('household.banner.reviewBalances')}
                 targetId="household-balances"
               />
             )}
@@ -775,15 +774,17 @@ export default function HouseholdPage() {
             boxShadow="var(--pb-shadow)"
           >
             <HouseholdSectionHeader
-              eyebrow="Open balances"
-              title="Who owes whom"
-              description="Bilateral balances after confirmed payments."
+              eyebrow={t('household.balances.eyebrow')}
+              title={t('household.balances.title')}
+              description={t('household.balances.description')}
               icon={<Wallet size={20} weight="duotone" />}
               accent={household.debts.length ? 'var(--pb-coral)' : 'var(--pb-income)'}
               tint={household.debts.length ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
               stat={household.debts.length
-                ? `${money(outstandingHouseholdTotal, household.currency)} open`
-                : 'All settled'}
+                ? t('household.balances.open', {
+                    amount: formatCurrency(outstandingHouseholdTotal),
+                  })
+                : t('household.balances.allSettled')}
             />
             <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
               {household.debts.length === 0 ? (
@@ -791,8 +792,8 @@ export default function HouseholdPage() {
                   <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-income)" color="var(--pb-income)">
                     <Check size={20} weight="bold" />
                   </Flex>
-                  <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>Everyone is settled</Text>
-                  <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">There are no outstanding household debts.</Text>
+                  <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>{t('household.balances.everyoneSettled')}</Text>
+                  <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">{t('household.balances.noDebts')}</Text>
                 </VStack>
               ) : (
                 <VStack align="stretch" spacing={2.5}>
@@ -813,31 +814,47 @@ export default function HouseholdPage() {
                         border="1px solid var(--pb-hair)"
                         bg="var(--pb-surface)"
                       >
-                        <HStack minW={0} spacing={3}>
-                          <Avatar size="sm" name={debt.fromMemberName} />
+                        <HStack minW={0} spacing={0}>
                           <Box minW={0}>
                             <HStack spacing={2} flexWrap="wrap">
                               <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
-                                {youPay ? 'You' : debt.fromMemberName}{' owe '}{youReceive ? 'you' : debt.toMemberName}
+                                {youPay
+                                  ? t('household.balances.youOweName', {
+                                      name: debt.toMemberName,
+                                    })
+                                  : youReceive
+                                    ? t('household.balances.owesYou', {
+                                        name: debt.fromMemberName,
+                                      })
+                                    : t('household.balances.memberOwes', {
+                                        from: debt.fromMemberName,
+                                        to: debt.toMemberName,
+                                      })}
                               </Text>
                               {(youPay || youReceive) && (
                                 <Badge borderRadius="full" px={2} bg={tint} color={accent} textTransform="none">
-                                  {youPay ? 'You pay' : 'You receive'}
+                                  {youPay
+                                    ? t('household.balances.youPay')
+                                    : t('household.balances.youReceive')}
                                 </Badge>
                               )}
                             </HStack>
                             <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">
-                              {youPay ? 'Record a payment after you send it.' : youReceive ? 'Waiting for payment.' : 'Outstanding between household members.'}
+                              {youPay
+                                ? t('household.balances.payHint')
+                                : youReceive
+                                  ? t('household.balances.receiveHint')
+                                  : t('household.balances.otherHint')}
                             </Text>
                           </Box>
                         </HStack>
                         <HStack justify={{ base: 'space-between', sm: 'flex-end' }} spacing={3}>
                           <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                            {money(debt.amount, household.currency)}
+                            {formatCurrency(debt.amount)}
                           </Text>
                           {youPay && (
                             <Button h="38px" px={3.5} borderRadius="10px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" onClick={() => openSettlement(debt)} _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}>
-                              Record payment
+                              {t('household.balances.recordPayment')}
                             </Button>
                           )}
                         </HStack>
@@ -851,13 +868,18 @@ export default function HouseholdPage() {
 
           <Box overflow="hidden" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
             <HouseholdSectionHeader
-              eyebrow="Household roster"
-              title="Members"
-              description="Paid, assigned share, and net position."
+              eyebrow={t('household.members.eyebrow')}
+              title={t('household.members.title')}
+              description={t('household.members.description')}
               icon={<Home size={20} weight="duotone" />}
               accent="var(--pb-forest-2)"
               tint="var(--pb-tint-green)"
-              stat={`${household.members.length} member${household.members.length === 1 ? '' : 's'}`}
+              stat={t(
+                household.members.length === 1
+                  ? 'household.members.count.one'
+                  : 'household.members.count.other',
+                { count: formatNumber(household.members.length) },
+              )}
             />
             <VStack align="stretch" spacing={2.5} p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
               {household.members.map((member) => {
@@ -871,32 +893,31 @@ export default function HouseholdPage() {
                       justify="space-between"
                       gap={3}
                     >
-                      <HStack minW={0} spacing={3}>
-                        <Avatar size="sm" name={member.name} />
+                      <HStack minW={0} spacing={0}>
                         <Box minW={0}>
                           <HStack spacing={1.5} flexWrap="wrap">
                             <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
-                            {isCurrentMember && <Badge borderRadius="full" px={2} bg="var(--pb-surface)" textTransform="none">You</Badge>}
-                            {member.role === 'OWNER' && <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">Owner</Badge>}
+                            {isCurrentMember && <Badge borderRadius="full" px={2} bg="var(--pb-surface)" textTransform="none">{t('household.common.you')}</Badge>}
+                            {member.role === 'OWNER' && <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">{t('household.common.owner')}</Badge>}
                           </HStack>
                           <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>{member.email}</Text>
                         </Box>
                       </HStack>
                       <Box flexShrink={0} textAlign={{ base: 'left', sm: 'right' }}>
                         <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color={balanceAccent} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {member.balance > 0 ? '+' : ''}{money(member.balance, household.currency)}
+                          {member.balance > 0 ? '+' : ''}{formatCurrency(member.balance)}
                         </Text>
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Net position</Text>
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.netPosition')}</Text>
                       </Box>
                     </Flex>
                     <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2} mt={3}>
                       <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Paid</Text>
-                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{money(member.totalPaid, household.currency)}</Text>
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.paid')}</Text>
+                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{formatCurrency(member.totalPaid)}</Text>
                       </Box>
                       <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">Assigned share</Text>
-                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{money(member.totalShare, household.currency)}</Text>
+                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.assignedShare')}</Text>
+                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{formatCurrency(member.totalShare)}</Text>
                       </Box>
                     </Grid>
                   </Box>
@@ -908,13 +929,18 @@ export default function HouseholdPage() {
 
         <Box overflow="hidden" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
           <HouseholdSectionHeader
-            eyebrow="Shared ledger"
-            title="Recent expenses"
-            description="Each split is saved with the expense."
+            eyebrow={t('household.expenses.eyebrow')}
+            title={t('household.expenses.title')}
+            description={t('household.expenses.description')}
             icon={<ReceiptText size={20} weight="duotone" />}
             accent="var(--pb-forest-2)"
             tint="var(--pb-tint-green)"
-            stat={`${household.expenses.length} expense${household.expenses.length === 1 ? '' : 's'}`}
+            stat={t(
+              household.expenses.length === 1
+                ? 'household.expenses.count.one'
+                : 'household.expenses.count.other',
+              { count: formatNumber(household.expenses.length) },
+            )}
           />
           <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
             {household.expenses.length === 0 ? (
@@ -922,9 +948,9 @@ export default function HouseholdPage() {
                 <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
                   <ReceiptText size={22} weight="duotone" />
                 </Flex>
-                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>No shared expenses yet</Text>
-                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">Add the first purchase and split it fairly with the household.</Text>
-                <Button h="40px" leftIcon={<Plus size={16} />} bg="var(--pb-forest-2)" color="var(--pb-on-accent)" onClick={openNewExpense}>Add the first expense</Button>
+                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>{t('household.expenses.emptyTitle')}</Text>
+                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">{t('household.expenses.emptyDescription')}</Text>
+                <Button h="40px" leftIcon={<Plus size={16} />} bg="var(--pb-forest-2)" color="var(--pb-on-accent)" onClick={openNewExpense}>{t('household.expenses.addFirst')}</Button>
               </VStack>
             ) : (
               <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
@@ -942,28 +968,42 @@ export default function HouseholdPage() {
                         </Flex>
                         <Box minW={0}>
                           <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{expense.description}</Text>
-                          <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>Paid by {expense.payerName}</Text>
+                          <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>{t('household.expenses.paidBy', { name: expense.payerName })}</Text>
                         </Box>
                       </HStack>
                       <Text flexShrink={0} fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {money(expense.amount, household.currency)}
+                        {formatCurrency(expense.amount)}
                       </Text>
                     </Flex>
                     <Flex align="center" justify="space-between" gap={3} flexWrap="wrap">
                       <HStack spacing={1.5} flexWrap="wrap">
-                        <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">{expense.category}</Badge>
+                        <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">{t(`household.category.${expense.category}`, undefined, expense.category)}</Badge>
                         <Text color="var(--pb-ink-faint)" fontSize="xs">
-                          {dateLabel(expense.expenseDate)} · {expense.shares.length} share{expense.shares.length === 1 ? '' : 's'}
+                          {t(
+                            expense.shares.length === 1
+                              ? 'household.expenses.shares.one'
+                              : 'household.expenses.shares.other',
+                            {
+                              date: formatDate(expense.expenseDate, {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                              }),
+                              count: formatNumber(expense.shares.length),
+                            },
+                          )}
                         </Text>
                       </HStack>
                       <HStack spacing={1}>
                         {((expense.attachments ?? []).length > 0 || expense.canEdit) && (
-                          <Button aria-label={`Proof images for ${expense.description}`} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} color="var(--pb-ink-soft)" onClick={() => openAttachments({ kind: 'expense', id: expense.id })}>
-                            Proof {(expense.attachments ?? []).length}
+                          <Button aria-label={t('household.expenses.proofAria', { description: expense.description })} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} color="var(--pb-ink-soft)" onClick={() => openAttachments({ kind: 'expense', id: expense.id })}>
+                            {t('household.expenses.proof', {
+                              count: formatNumber((expense.attachments ?? []).length),
+                            })}
                           </Button>
                         )}
                         {expense.canEdit && (
-                          <IconButton aria-label={`Edit ${expense.description}`} icon={<Pencil size={16} />} h="34px" minW="34px" borderRadius="9px" variant="ghost" onClick={() => openEditExpense(expense)} />
+                          <IconButton aria-label={t('household.expenses.editAria', { description: expense.description })} icon={<Pencil size={16} />} h="34px" minW="34px" borderRadius="9px" variant="ghost" onClick={() => openEditExpense(expense)} />
                         )}
                       </HStack>
                     </Flex>
@@ -976,13 +1016,22 @@ export default function HouseholdPage() {
 
         <Box id="household-payments" overflow="hidden" scrollMarginTop="90px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius={{ base: '18px', md: '22px' }} boxShadow="var(--pb-shadow)">
           <HouseholdSectionHeader
-            eyebrow="Settlement history"
-            title="Payments and confirmations"
-            description="Only confirmed payments change balances."
+            eyebrow={t('household.settlements.eyebrow')}
+            title={t('household.settlements.title')}
+            description={t('household.settlements.description')}
             icon={<Mail size={20} weight="duotone" />}
             accent={pendingSettlementCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
             tint={pendingSettlementCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
-            stat={pendingSettlementCount ? `${pendingSettlementCount} pending` : `${household.settlements.length} payment${household.settlements.length === 1 ? '' : 's'}`}
+            stat={pendingSettlementCount
+              ? t('household.settlements.pending', {
+                  count: formatNumber(pendingSettlementCount),
+                })
+              : t(
+                  household.settlements.length === 1
+                    ? 'household.settlements.count.one'
+                    : 'household.settlements.count.other',
+                  { count: formatNumber(household.settlements.length) },
+                )}
           />
           <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
             {household.settlements.length === 0 ? (
@@ -990,8 +1039,8 @@ export default function HouseholdPage() {
                 <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
                   <Mail size={22} weight="duotone" />
                 </Flex>
-                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>No payments recorded yet</Text>
-                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">Payments will appear here when members settle their balances.</Text>
+                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>{t('household.settlements.emptyTitle')}</Text>
+                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">{t('household.settlements.emptyDescription')}</Text>
               </VStack>
             ) : (
               <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
@@ -1018,41 +1067,42 @@ export default function HouseholdPage() {
                         justify="space-between"
                         gap={3}
                       >
-                        <HStack minW={0} spacing={3}>
-                          <Avatar size="sm" name={settlement.fromMemberName} />
+                        <HStack minW={0} spacing={0}>
                           <Box minW={0}>
-                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{settlement.fromMemberName} paid {settlement.toMemberName}</Text>
-                            <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">{dateLabel(settlement.settlementDate)}</Text>
+                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{t('household.record.paymentTitle', { from: settlement.fromMemberName, to: settlement.toMemberName })}</Text>
+                            <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">{formatDate(settlement.settlementDate, { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
                           </Box>
                         </HStack>
                         <Text flexShrink={0} fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {money(settlement.amount, household.currency)}
+                          {formatCurrency(settlement.amount)}
                         </Text>
                       </Flex>
                       <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
                         <HStack spacing={1.5} flexWrap="wrap">
-                          <Badge borderRadius="full" px={2.5} py={1} bg={statusTint} color={statusAccent} textTransform="capitalize">{settlement.status.toLowerCase()}</Badge>
-                          {needsCurrentUserAction && <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} color="var(--pb-gold)" textTransform="uppercase">Your review</Text>}
+                          <Badge borderRadius="full" px={2.5} py={1} bg={statusTint} color={statusAccent} textTransform="capitalize">{t(`household.status.${settlement.status}`, undefined, settlement.status)}</Badge>
+                          {needsCurrentUserAction && <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} color="var(--pb-gold)" textTransform="uppercase">{t('household.settlements.review')}</Text>}
                         </HStack>
                         <HStack spacing={1} flexWrap="wrap" justify="flex-end">
                           {((settlement.attachments ?? []).length > 0 || settlement.canAttach) && (
-                            <Button aria-label={`Proof images for payment from ${settlement.fromMemberName}`} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} onClick={() => openAttachments({ kind: 'settlement', id: settlement.id })}>
-                              Proof {(settlement.attachments ?? []).length}
+                            <Button aria-label={t('household.settlements.proofAria', { name: settlement.fromMemberName })} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} onClick={() => openAttachments({ kind: 'settlement', id: settlement.id })}>
+                              {t('household.settlements.proof', {
+                                count: formatNumber((settlement.attachments ?? []).length),
+                              })}
                             </Button>
                           )}
                           {settlement.canConfirm && (
-                            <Button h="34px" px={3} borderRadius="9px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" isLoading={busyAction === `confirm-${settlement.id}`} onClick={() => void applyAction(`confirm-${settlement.id}`, () => confirmHouseholdSettlement(household.id, settlement.id), 'Payment confirmed')}>
-                              Confirm
+                            <Button h="34px" px={3} borderRadius="9px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" isLoading={busyAction === `confirm-${settlement.id}`} onClick={() => void applyAction(`confirm-${settlement.id}`, () => confirmHouseholdSettlement(household.id, settlement.id), t('household.settlements.confirmedToast'))}>
+                              {t('household.common.confirm')}
                             </Button>
                           )}
                           {settlement.canReject && (
                             <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" color="var(--pb-coral)" isLoading={busyAction === `reject-${settlement.id}`} onClick={() => void applyAction(`reject-${settlement.id}`, () => rejectHouseholdSettlement(household.id, settlement.id))}>
-                              Reject
+                              {t('household.common.reject')}
                             </Button>
                           )}
                           {settlement.canCancel && (
                             <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" isLoading={busyAction === `cancel-${settlement.id}`} onClick={() => void applyAction(`cancel-${settlement.id}`, () => cancelHouseholdSettlement(household.id, settlement.id))}>
-                              Cancel
+                              {t('household.common.cancel')}
                             </Button>
                           )}
                         </HStack>
@@ -1124,6 +1174,7 @@ function CleaningRotationCard({
     completed: boolean,
   ) => void
 }) {
+  const { formatDate, formatNumber, t } = useI18n()
   const current = rotation.currentWeek
   const firstUpcoming = rotation.upcomingWeeks[0]
   const currentIsUser = current?.assignedMemberId === currentMemberId
@@ -1141,6 +1192,17 @@ function CleaningRotationCard({
         completedAt: null,
       }))
   const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
+  const displayDutyLabel = (duty: { key: string; label: string }) =>
+    t(`household.cleaning.duty.${duty.key}`, undefined, duty.label)
+  const displayDutySchedule = (duty: { key: string; schedule?: string | null }) =>
+    duty.key === 'rubbish_out'
+      ? t('household.cleaning.rubbishSchedule')
+      : duty.schedule
+  const displayDate = (value: string) => formatDate(value, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 
   return (
     <Box
@@ -1182,7 +1244,7 @@ function CleaningRotationCard({
               textTransform="uppercase"
               color="var(--pb-ink-faint)"
             >
-              Shared routine
+              {t('household.cleaning.eyebrow')}
             </Text>
             <Text
               mt={0.5}
@@ -1192,10 +1254,10 @@ function CleaningRotationCard({
               lineHeight={1.1}
               color="var(--pb-ink)"
             >
-              Weekly cleaning
+              {t('household.cleaning.title')}
             </Text>
             <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
-              A fair, repeating turn for everyone at home.
+              {t('household.cleaning.description')}
             </Text>
           </Box>
         </HStack>
@@ -1218,7 +1280,9 @@ function CleaningRotationCard({
             _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
             _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
           >
-            {rotation.configured ? 'Manage' : 'Set up'}
+            {rotation.configured
+              ? t('household.common.manage')
+              : t('household.common.setUp')}
           </Button>
         )}
       </Flex>
@@ -1239,18 +1303,22 @@ function CleaningRotationCard({
               fontWeight={500}
               color="var(--pb-ink)"
             >
-              Create a rhythm that feels fair.
+              {t('household.cleaning.createRhythm')}
             </Text>
             <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.5}>
               {rotation.canManage
-                ? 'Choose who takes part, set the first Monday and arrange the order once. The rota repeats automatically.'
-                : 'The household owner has not set up the weekly cleaning rotation yet.'}
+                ? t('household.cleaning.setupOwner')
+                : t('household.cleaning.setupMember')}
             </Text>
           </Box>
           <HStack spacing={2} flexWrap="wrap">
-            {['Pick members', 'Choose Monday', 'Set the order'].map((step, index) => (
+            {[
+              'household.cleaning.step.members',
+              'household.cleaning.step.monday',
+              'household.cleaning.step.order',
+            ].map((stepKey, index) => (
               <HStack
-                key={step}
+                key={stepKey}
                 px={3}
                 py={2}
                 borderRadius="10px"
@@ -1259,9 +1327,9 @@ function CleaningRotationCard({
                 spacing={2}
               >
                 <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-gold)">
-                  0{index + 1}
+                  {formatNumber(index + 1, { minimumIntegerDigits: 2, useGrouping: false })}
                 </Text>
-                <Text fontSize="xs" color="var(--pb-ink-soft)">{step}</Text>
+                <Text fontSize="xs" color="var(--pb-ink-soft)">{t(stepKey)}</Text>
               </HStack>
             ))}
           </HStack>
@@ -1288,11 +1356,15 @@ function CleaningRotationCard({
           </Flex>
           <Box minW={0}>
             <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
-              Rotation paused
+              {t('household.cleaning.paused')}
             </Text>
             <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="sm">
-              The order is saved for {rotation.participantMemberIds.length} member
-              {rotation.participantMemberIds.length === 1 ? '' : 's'}. Resume it anytime from Manage.
+              {t(
+                rotation.participantMemberIds.length === 1
+                  ? 'household.cleaning.pausedDetail.one'
+                  : 'household.cleaning.pausedDetail.other',
+                { count: formatNumber(rotation.participantMemberIds.length) },
+              )}
             </Text>
           </Box>
         </Flex>
@@ -1307,7 +1379,7 @@ function CleaningRotationCard({
             boxShadow={currentIsUser
               ? 'inset 4px 0 0 var(--pb-forest-2)'
               : 'none'}
-            aria-label={currentIsUser ? 'This is your cleaning week' : undefined}
+            aria-label={currentIsUser ? t('household.cleaning.yourWeekAria') : undefined}
           >
             {current ? (
               <VStack align="stretch" spacing={4}>
@@ -1322,7 +1394,7 @@ function CleaningRotationCard({
                         textTransform="uppercase"
                         color="var(--pb-summary-ink-faint)"
                       >
-                        On duty this week
+                        {t('household.cleaning.onDuty')}
                       </Text>
                       {currentIsUser && (
                         <HStack
@@ -1341,13 +1413,13 @@ function CleaningRotationCard({
                             letterSpacing="0.06em"
                             textTransform="uppercase"
                           >
-                            Your week
+                            {t('household.cleaning.yourWeek')}
                           </Text>
                         </HStack>
                       )}
                     </HStack>
                     <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)">
-                      {dateLabel(current.weekStart)} – {dateLabel(current.weekEnd)}
+                      {displayDate(current.weekStart)} – {displayDate(current.weekEnd)}
                     </Text>
                   </Box>
                   <HStack
@@ -1365,7 +1437,9 @@ function CleaningRotationCard({
                       weight="duotone"
                     />
                     <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} textTransform="uppercase">
-                      {currentIsComplete ? 'Completed' : 'In progress'}
+                      {currentIsComplete
+                        ? t('household.cleaning.completed')
+                        : t('household.cleaning.inProgress')}
                     </Text>
                   </HStack>
                 </HStack>
@@ -1381,13 +1455,15 @@ function CleaningRotationCard({
                       color="var(--pb-summary-ink)"
                       noOfLines={1}
                     >
-                      {currentIsUser ? 'Your turn' : current.assignedMemberName}
+                      {currentIsUser ? t('household.cleaning.yourTurn') : current.assignedMemberName}
                     </Text>
                   </HStack>
                   <Text mt={1.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
                     {currentIsUser
-                      ? 'Mark each task as you finish it. Your progress is saved for the whole week.'
-                      : `${current.assignedMemberName} is taking care of the shared spaces.`}
+                      ? t('household.cleaning.yourTurnDetail')
+                      : t('household.cleaning.memberTurnDetail', {
+                          name: current.assignedMemberName,
+                        })}
                   </Text>
                 </Box>
 
@@ -1403,9 +1479,9 @@ function CleaningRotationCard({
                   >
                     <Icon as={CheckCircle2} boxSize={5} weight="fill" />
                     <Box>
-                      <Text fontSize="sm" fontWeight={600}>All done for this week</Text>
+                      <Text fontSize="sm" fontWeight={600}>{t('household.cleaning.allDone')}</Text>
                       <Text mt={0.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
-                        The next person takes over on Monday.
+                        {t('household.cleaning.nextMonday')}
                       </Text>
                     </Box>
                   </HStack>
@@ -1421,7 +1497,7 @@ function CleaningRotationCard({
                   letterSpacing="0.15em"
                   textTransform="uppercase"
                 >
-                  Rotation scheduled
+                  {t('household.cleaning.scheduled')}
                 </Text>
                 <Text
                   fontFamily="var(--pb-serif)"
@@ -1429,10 +1505,12 @@ function CleaningRotationCard({
                   fontWeight={500}
                   color="var(--pb-summary-ink)"
                 >
-                  Starts {dateLabel(firstUpcoming?.weekStart ?? rotation.startDate ?? today())}
+                  {t('household.cleaning.starts', {
+                    date: displayDate(firstUpcoming?.weekStart ?? rotation.startDate ?? today()),
+                  })}
                 </Text>
                 <Text color="var(--pb-summary-ink-soft)" fontSize="sm">
-                  The first assignment is ready. The current-week view appears when the rotation begins.
+                  {t('household.cleaning.startsDetail')}
                 </Text>
               </VStack>
             )}
@@ -1449,10 +1527,10 @@ function CleaningRotationCard({
                   letterSpacing="0.15em"
                   textTransform="uppercase"
                 >
-                  Coming next
+                  {t('household.cleaning.comingNext')}
                 </Text>
                 <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
-                  The next three weekly turns
+                  {t('household.cleaning.nextThree')}
                 </Text>
               </Box>
               <Flex
@@ -1478,7 +1556,7 @@ function CleaningRotationCard({
                 bg="var(--pb-surface)"
               >
                 <Text color="var(--pb-ink-soft)" fontSize="sm">
-                  No upcoming weeks are scheduled yet.
+                  {t('household.cleaning.noUpcoming')}
                 </Text>
               </Box>
             ) : (
@@ -1509,17 +1587,16 @@ function CleaningRotationCard({
                         fontSize="8px"
                         fontWeight={700}
                       >
-                        {index + 1}
+                        {formatNumber(index + 1)}
                       </Flex>
-                      <Avatar size="sm" name={assignment.assignedMemberName} />
                       <Box minW={0}>
                         <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
                           {assignment.assignedMemberId === currentMemberId
-                            ? 'You'
+                            ? t('household.common.you')
                             : assignment.assignedMemberName}
                         </Text>
                         <Text color="var(--pb-ink-faint)" fontSize="2xs">
-                          {dateLabel(assignment.weekStart)}
+                          {displayDate(assignment.weekStart)}
                         </Text>
                       </Box>
                     </HStack>
@@ -1532,7 +1609,7 @@ function CleaningRotationCard({
                         px={2}
                         textTransform="none"
                       >
-                        Your turn
+                        {t('household.cleaning.yourTurn')}
                       </Badge>
                     )}
                   </Flex>
@@ -1565,14 +1642,14 @@ function CleaningRotationCard({
               letterSpacing="0.15em"
               textTransform="uppercase"
             >
-              This week&apos;s duties
+              {t('household.cleaning.dutiesTitle')}
             </Text>
             <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
               {current
                 ? currentIsUser
-                  ? 'Tick off each task as you finish it. Your progress is saved.'
-                  : `Only ${current.assignedMemberName} can update this week's checklist.`
-                : 'The person on duty completes the full shared-space checklist.'}
+                  ? t('household.cleaning.dutiesCurrentUser')
+                  : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
+                : t('household.cleaning.dutiesGeneric')}
             </Text>
           </Box>
           <Box minW={{ base: 'full', sm: '150px' }}>
@@ -1580,8 +1657,16 @@ function CleaningRotationCard({
               <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
               <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
                 {current
-                  ? `${completedDutyCount} of ${displayedDuties.length} done`
-                  : `${displayedDuties.length} tasks`}
+                  ? t('household.cleaning.progress', {
+                      completed: formatNumber(completedDutyCount),
+                      total: formatNumber(displayedDuties.length),
+                    })
+                  : t(
+                      displayedDuties.length === 1
+                        ? 'household.cleaning.tasks.one'
+                        : 'household.cleaning.tasks.other',
+                      { count: formatNumber(displayedDuties.length) },
+                    )}
               </Text>
             </HStack>
             <Box
@@ -1652,8 +1737,12 @@ function CleaningRotationCard({
                     size="lg"
                     aria-label={
                       duty.completed
-                        ? `Mark ${duty.label} as not done`
-                        : `Mark ${duty.label} as done`
+                        ? t('household.cleaning.markNotDone', {
+                            duty: displayDutyLabel(duty),
+                          })
+                        : t('household.cleaning.markDone', {
+                            duty: displayDutyLabel(duty),
+                          })
                     }
                     onChange={(event) => {
                       if (!current || !duty.canToggle) return
@@ -1670,7 +1759,7 @@ function CleaningRotationCard({
                   lineHeight={1.25}
                   textDecoration={duty.completed ? 'line-through' : 'none'}
                 >
-                  {duty.label}
+                  {displayDutyLabel(duty)}
                 </Text>
                 {duty.schedule ? (
                   <HStack
@@ -1680,7 +1769,7 @@ function CleaningRotationCard({
                   >
                     <Icon as={Clock} boxSize={3} weight="bold" />
                     <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
-                      {duty.schedule}
+                      {displayDutySchedule(duty)}
                     </Text>
                   </HStack>
                 ) : (
@@ -1690,8 +1779,13 @@ function CleaningRotationCard({
                     fontSize="2xs"
                   >
                     {duty.completed
-                      ? 'Completed'
-                      : `Task ${String(index + 1).padStart(2, '0')}`}
+                      ? t('household.cleaning.completed')
+                      : t('household.cleaning.taskNumber', {
+                          number: formatNumber(index + 1, {
+                            minimumIntegerDigits: 2,
+                            useGrouping: false,
+                          }),
+                        })}
                   </Text>
                 )}
               </Box>
@@ -1710,7 +1804,9 @@ function CleaningRotationCard({
                   fontWeight={700}
                   textTransform="uppercase"
                   isDisabled={busyDutyKey !== null}
-                  aria-label={`Undo ${duty.label}`}
+                  aria-label={t('household.cleaning.undoAria', {
+                    duty: displayDutyLabel(duty),
+                  })}
                   onClick={() => {
                     if (!current) return
                     onToggleDuty(current.id, duty.key, false)
@@ -1718,7 +1814,7 @@ function CleaningRotationCard({
                   _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
                   _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
                 >
-                  Undo
+                  {t('household.cleaning.undo')}
                 </Button>
               )}
             </Flex>
@@ -1742,6 +1838,7 @@ function CleaningRotationModal({
   rotation: HouseholdCleaningRotation
   onChanged: (page: HouseholdPageState) => void
 }) {
+  const { formatDate, formatNumber, t } = useI18n()
   const [startDate, setStartDate] = useState(currentMonday())
   const [active, setActive] = useState(true)
   const [participantIds, setParticipantIds] = useState<number[]>([])
@@ -1776,7 +1873,7 @@ function CleaningRotationModal({
         const weekEnd = new Date(weekStart)
         weekEnd.setDate(weekStart.getDate() + 6)
         const member = participants[index % participants.length]
-        const shortDate = (date: Date) => date.toLocaleDateString('en-GB', {
+        const shortDate = (date: Date) => formatDate(date, {
           day: 'numeric',
           month: 'short',
         })
@@ -1800,11 +1897,11 @@ function CleaningRotationModal({
   const submit = async (event: FormEvent) => {
     event.preventDefault()
     if (participantIds.length === 0) {
-      ToastService.warning({ title: 'Select at least one member' })
+      ToastService.warning({ title: t('household.cleaning.toast.selectMember') })
       return
     }
     if (!startDateIsMonday) {
-      ToastService.warning({ title: 'The rotation must start on a Monday' })
+      ToastService.warning({ title: t('household.cleaning.toast.startMonday') })
       return
     }
 
@@ -1816,11 +1913,13 @@ function CleaningRotationModal({
         participantMemberIds: participantIds,
       }))
       ToastService.success({
-        title: rotation.configured ? 'Cleaning rotation updated' : 'Cleaning rotation created',
+        title: rotation.configured
+          ? t('household.cleaning.toast.updated')
+          : t('household.cleaning.toast.created'),
       })
       onClose()
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not save the cleaning rotation' })
+      ToastService.apiError(error, { title: t('household.cleaning.toast.failed') })
     } finally {
       setSaving(false)
     }
@@ -1834,8 +1933,10 @@ function CleaningRotationModal({
       header={
         <AppModalHeader
           icon={Sparkles}
-          title={rotation.configured ? 'Manage cleaning rotation' : 'Set up cleaning rotation'}
-          caption="Choose the schedule, members and recurring order"
+          title={rotation.configured
+            ? t('household.cleaning.modal.manageTitle')
+            : t('household.cleaning.modal.setupTitle')}
+          caption={t('household.cleaning.modal.caption')}
           onClose={onClose}
           accent="green"
           rightSlot={
@@ -1847,7 +1948,9 @@ function CleaningRotationModal({
               px={3}
               py={1}
             >
-              {active ? 'Active' : 'Paused'}
+              {active
+                ? t('household.cleaning.modal.active')
+                : t('household.cleaning.modal.paused')}
             </Badge>
           }
         />
@@ -1862,7 +1965,7 @@ function CleaningRotationModal({
             color="var(--pb-ink-soft)"
             onClick={onClose}
           >
-            Cancel
+            {t('household.common.cancel')}
           </Button>
           <Button
             flex={{ base: 1.35, sm: 'initial' }}
@@ -1874,11 +1977,11 @@ function CleaningRotationModal({
             color="var(--pb-on-accent)"
             borderRadius="11px"
             isLoading={saving}
-            loadingText="Saving"
+            loadingText={t('household.common.saving')}
             isDisabled={!canSave}
             _hover={{ bg: 'var(--pb-forest)' }}
           >
-            Save rotation
+            {t('household.cleaning.modal.save')}
           </Button>
         </Flex>
       }
@@ -1916,17 +2019,19 @@ function CleaningRotationModal({
               </Flex>
               <Box minW={0}>
                 <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)">
-                  {active ? 'Rotation active' : 'Rotation paused'}
+                  {active
+                    ? t('household.cleaning.modal.rotationActive')
+                    : t('household.cleaning.modal.rotationPaused')}
                 </Text>
                 <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
                   {active
-                    ? 'Weekly assignments will continue in the order below.'
-                    : 'The order stays saved, but no active assignments are shown.'}
+                    ? t('household.cleaning.modal.activeDetail')
+                    : t('household.cleaning.modal.pausedDetail')}
                 </Text>
               </Box>
             </HStack>
             <Switch
-              aria-label="Toggle cleaning rotation"
+              aria-label={t('household.cleaning.modal.toggleAria')}
               isChecked={active}
               onChange={(event) => setActive(event.target.checked)}
               colorScheme="green"
@@ -1956,10 +2061,10 @@ function CleaningRotationModal({
                   </Flex>
                   <Box>
                     <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
-                      Schedule
+                      {t('household.cleaning.modal.schedule')}
                     </Text>
                     <Text fontSize="xs" color="var(--pb-ink-soft)">
-                      Every turn runs from Monday to Sunday.
+                      {t('household.cleaning.modal.scheduleDetail')}
                     </Text>
                   </Box>
                 </HStack>
@@ -1972,7 +2077,7 @@ function CleaningRotationModal({
                     textTransform="uppercase"
                     color="var(--pb-ink-faint)"
                   >
-                    First week starts
+                    {t('household.cleaning.modal.firstWeek')}
                   </FormLabel>
                   <Input
                     type="date"
@@ -1988,11 +2093,11 @@ function CleaningRotationModal({
                     _focusVisible={{ borderColor: 'var(--pb-forest-2)', boxShadow: '0 0 0 1px var(--pb-forest-2)' }}
                   />
                   <FormErrorMessage fontSize="xs">
-                    Choose a Monday so every week stays aligned.
+                    {t('household.cleaning.modal.mondayError')}
                   </FormErrorMessage>
                   {startDateIsMonday && (
                     <Text mt={1.5} fontSize="xs" color="var(--pb-income)">
-                      Monday selected · weeks will end on Sunday.
+                      {t('household.cleaning.modal.mondaySelected')}
                     </Text>
                   )}
                 </FormControl>
@@ -2004,10 +2109,10 @@ function CleaningRotationModal({
                 <Flex justify="space-between" align="flex-end" gap={3} mb={3}>
                   <Box>
                     <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)">
-                      Weekly order
+                      {t('household.cleaning.modal.order')}
                     </Text>
                     <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
-                      Use the arrows to set who follows whom.
+                      {t('household.cleaning.modal.orderDetail')}
                     </Text>
                   </Box>
                   <Badge
@@ -2019,7 +2124,9 @@ function CleaningRotationModal({
                     px={2.5}
                     py={1}
                   >
-                    {participants.length} selected
+                    {t('household.cleaning.modal.selected', {
+                      count: formatNumber(participants.length),
+                    })}
                   </Badge>
                 </Flex>
 
@@ -2031,7 +2138,7 @@ function CleaningRotationModal({
                     bg="var(--pb-tint-coral)"
                   >
                     <Text fontSize="sm" color="var(--pb-coral)">
-                      Add at least one household member to create the rotation.
+                      {t('household.cleaning.modal.noMembers')}
                     </Text>
                   </Box>
                 ) : (
@@ -2062,15 +2169,16 @@ function CleaningRotationModal({
                             fontSize="8px"
                             fontWeight={700}
                           >
-                            {index + 1}
+                            {formatNumber(index + 1)}
                           </Flex>
-                          <Avatar size="sm" name={member.name} />
                           <Box minW={0}>
                             <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
                               {member.name}
                             </Text>
                             <Text fontSize="2xs" color="var(--pb-ink-faint)">
-                              Week {index + 1} of the cycle
+                              {t('household.cleaning.modal.cycleWeek', {
+                                week: formatNumber(index + 1),
+                              })}
                             </Text>
                           </Box>
                         </HStack>
@@ -2082,7 +2190,9 @@ function CleaningRotationModal({
                         >
                           <IconButton
                             type="button"
-                            aria-label={`Move ${member.name} earlier`}
+                            aria-label={t('household.cleaning.modal.moveEarlier', {
+                              name: member.name,
+                            })}
                             icon={<Icon as={ChevronUp} boxSize={4} />}
                             h="40px"
                             w="40px"
@@ -2095,7 +2205,9 @@ function CleaningRotationModal({
                           />
                           <IconButton
                             type="button"
-                            aria-label={`Move ${member.name} later`}
+                            aria-label={t('household.cleaning.modal.moveLater', {
+                              name: member.name,
+                            })}
                             icon={<Icon as={ChevronDown} boxSize={4} />}
                             h="40px"
                             w="40px"
@@ -2108,7 +2220,9 @@ function CleaningRotationModal({
                           />
                           <IconButton
                             type="button"
-                            aria-label={`Remove ${member.name} from the rotation`}
+                            aria-label={t('household.cleaning.modal.removeMember', {
+                              name: member.name,
+                            })}
                             icon={<Icon as={X} boxSize={4} />}
                             h="40px"
                             w="40px"
@@ -2135,7 +2249,7 @@ function CleaningRotationModal({
                       textTransform="uppercase"
                       color="var(--pb-ink-faint)"
                     >
-                      Add to the rotation
+                      {t('household.cleaning.modal.addMember')}
                     </Text>
                     <Flex flexWrap="wrap" gap={2}>
                       {availableMembers.map((member) => (
@@ -2180,10 +2294,10 @@ function CleaningRotationModal({
                     textTransform="uppercase"
                     color="var(--pb-summary-ink-faint)"
                   >
-                    Live preview
+                    {t('household.cleaning.modal.preview')}
                   </Text>
                   <Text mt={0.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
-                    First three weeks
+                    {t('household.cleaning.modal.firstThree')}
                   </Text>
                 </Box>
                 <Icon as={Repeat} boxSize={5} color="var(--pb-summary-income)" weight="duotone" />
@@ -2200,7 +2314,7 @@ function CleaningRotationModal({
                 >
                   <Icon as={Calendar} boxSize={6} color="var(--pb-summary-ink-faint)" />
                   <Text mt={2} fontSize="sm" color="var(--pb-summary-ink-soft)">
-                    Choose a Monday and at least one member to see the schedule.
+                    {t('household.cleaning.modal.previewEmpty')}
                   </Text>
                 </Box>
               ) : (
@@ -2228,7 +2342,7 @@ function CleaningRotationModal({
                         fontSize="8px"
                         fontWeight={700}
                       >
-                        {index + 1}
+                        {formatNumber(index + 1)}
                       </Flex>
                       <Box minW={0} flex={1}>
                         <Text fontSize="sm" fontWeight={600} color="var(--pb-summary-ink)" noOfLines={1}>
@@ -2252,8 +2366,10 @@ function CleaningRotationModal({
                 lineHeight={1.45}
               >
                 {participants.length > 0
-                  ? `The ${participants.length}-week order repeats after the final person.`
-                  : 'The cycle length updates as members are added.'}
+                  ? t('household.cleaning.modal.cycleDetail', {
+                      count: formatNumber(participants.length),
+                    })
+                  : t('household.cleaning.modal.cycleEmpty')}
               </Text>
             </Box>
           </Grid>
@@ -2277,6 +2393,7 @@ function ExpenseModal({
   onChanged: (page: HouseholdPageState) => void
 }) {
   const ed = useEd()
+  const { formatCurrency, formatNumber, t } = useI18n()
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
   const muted = ed?.muted ?? mutedFallback
   const [description, setDescription] = useState('')
@@ -2305,7 +2422,7 @@ function ExpenseModal({
     event.preventDefault()
     const numericAmount = Number(amount)
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-      ToastService.warning({ title: 'Enter a valid expense amount' })
+      ToastService.warning({ title: t('household.expenseModal.invalidAmount') })
       return
     }
     const request: HouseholdExpenseRequest = {
@@ -2328,7 +2445,7 @@ function ExpenseModal({
       }
       if (files.length > 0) {
         if (!targetId) {
-          throw new Error('The saved expense could not be selected for image upload')
+          throw new Error(t('household.expenseModal.uploadTargetError'))
         }
         savedPage = await uploadHouseholdExpenseAttachments(
           household.id,
@@ -2337,17 +2454,21 @@ function ExpenseModal({
         )
       }
       onChanged(savedPage)
-      ToastService.success({ title: expense ? 'Expense updated' : 'Expense added' })
+      ToastService.success({
+        title: expense
+          ? t('household.expenseModal.updatedToast')
+          : t('household.expenseModal.addedToast'),
+      })
       onClose()
     } catch (error) {
       if (savedPage) {
         onChanged(savedPage)
         ToastService.apiError(error, {
-          title: 'Expense saved, but the images could not be uploaded',
+          title: t('household.expenseModal.imagesFailed'),
         })
         onClose()
       } else {
-        ToastService.apiError(error, { title: 'Could not save household expense' })
+        ToastService.apiError(error, { title: t('household.expenseModal.saveFailed') })
       }
     } finally {
       setSaving(false)
@@ -2355,14 +2476,14 @@ function ExpenseModal({
   }
 
   const remove = async () => {
-    if (!expense || !window.confirm('Remove this expense from the Household ledger?')) return
+    if (!expense || !window.confirm(t('household.expenseModal.removeConfirm'))) return
     setDeleting(true)
     try {
       onChanged(await deleteHouseholdExpense(household.id, expense.id))
-      ToastService.success({ title: 'Expense removed' })
+      ToastService.success({ title: t('household.expenseModal.removedToast') })
       onClose()
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not remove household expense' })
+      ToastService.apiError(error, { title: t('household.expenseModal.removeFailed') })
     } finally {
       setDeleting(false)
     }
@@ -2386,28 +2507,36 @@ function ExpenseModal({
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
       >
-        <ModalHeader>{expense ? 'Edit household expense' : 'Add household expense'}</ModalHeader>
-        <ModalCloseButton />
+        <ModalHeader>
+          {expense
+            ? t('household.expenseModal.editTitle')
+            : t('household.expenseModal.addTitle')}
+        </ModalHeader>
+        <ModalCloseButton aria-label={t('household.common.close')} />
         <ModalBody as="form" id="household-expense-form" onSubmit={submit}>
           <VStack align="stretch" spacing={4}>
             <FormControl isRequired>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t('household.expenseModal.description')}</FormLabel>
               <Input
                 value={description}
                 maxLength={255}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="e.g. Electricity bill"
+                placeholder={t('household.expenseModal.descriptionPlaceholder')}
               />
             </FormControl>
             <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
               <FormControl isRequired>
-                <FormLabel>Category</FormLabel>
+                <FormLabel>{t('household.expenseModal.category')}</FormLabel>
                 <Select value={category} onChange={(event) => setCategory(event.target.value)}>
-                  {CATEGORIES.map((item) => <option key={item} value={item}>{item}</option>)}
+                  {CATEGORIES.map((item) => (
+                    <option key={item} value={item}>
+                      {t(`household.category.${item}`, undefined, item)}
+                    </option>
+                  ))}
                 </Select>
               </FormControl>
               <FormControl isRequired>
-                <FormLabel>Amount</FormLabel>
+                <FormLabel>{t('household.expenseModal.amount')}</FormLabel>
                 <Input
                   type="number"
                   min="0.01"
@@ -2415,16 +2544,16 @@ function ExpenseModal({
                   inputMode="decimal"
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
-                  placeholder="0.00"
+                  placeholder={t('household.expenseModal.amountPlaceholder')}
                 />
               </FormControl>
             </SimpleGrid>
             <FormControl isRequired>
-              <FormLabel>Date</FormLabel>
+              <FormLabel>{t('household.expenseModal.date')}</FormLabel>
               <Input type="date" value={expenseDate} onChange={(event) => setExpenseDate(event.target.value)} />
             </FormControl>
             <FormControl>
-              <FormLabel>Split between</FormLabel>
+              <FormLabel>{t('household.expenseModal.splitBetween')}</FormLabel>
               <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
                 {household.members.map((member) => {
                   const isPayer = member.id === (expense?.payerMemberId ?? household.currentMemberId)
@@ -2442,14 +2571,16 @@ function ExpenseModal({
                         })
                       }}
                     >
-                      {member.name}{isPayer ? ' (payer)' : ''}
+                      {member.name}{isPayer ? ` (${t('household.expenseModal.payer')})` : ''}
                     </Checkbox>
                   )
                 })}
               </SimpleGrid>
               <Text mt={2} color={muted} fontSize="xs">
-                {participantIds.size} members · approximately {money(preview, household.currency)} each.
-                Final penny allocation is calculated by the server.
+                {t('household.expenseModal.splitPreview', {
+                  count: formatNumber(participantIds.size),
+                  amount: formatCurrency(preview),
+                })}
               </Text>
             </FormControl>
             <Divider borderColor={ed?.line} />
@@ -2478,12 +2609,12 @@ function ExpenseModal({
                 onClick={() => void remove()}
                 w={{ base: 'full', sm: 'auto' }}
               >
-                Remove
+                {t('household.common.remove')}
               </Button>
             )}
           </Box>
           <HStack w={{ base: 'full', sm: 'auto' }}>
-            <Button flex={1} variant="ghost" onClick={onClose}>Cancel</Button>
+            <Button flex={1} variant="ghost" onClick={onClose}>{t('household.common.cancel')}</Button>
             <Button
               flex={1}
               type="submit"
@@ -2491,7 +2622,9 @@ function ExpenseModal({
               colorScheme="teal"
               isLoading={saving}
             >
-              {expense ? 'Save changes' : 'Add expense'}
+              {expense
+                ? t('household.expenseModal.saveChanges')
+                : t('household.expenseModal.addExpense')}
             </Button>
           </HStack>
         </ModalFooter>
@@ -2514,6 +2647,7 @@ function SettlementModal({
   onChanged: (page: HouseholdPageState) => void
 }) {
   const ed = useEd()
+  const { formatCurrency, t } = useI18n()
   const [amount, setAmount] = useState('')
   const [settlementDate, setSettlementDate] = useState(today())
   const [files, setFiles] = useState<File[]>([])
@@ -2531,7 +2665,7 @@ function SettlementModal({
     if (!debt) return
     const numericAmount = Number(amount)
     if (!Number.isFinite(numericAmount) || numericAmount <= 0 || numericAmount > debt.amount) {
-      ToastService.warning({ title: 'Enter an amount up to the current debt' })
+      ToastService.warning({ title: t('household.settlementModal.invalidAmount') })
       return
     }
     setSaving(true)
@@ -2546,7 +2680,7 @@ function SettlementModal({
       const settlementId = created.recordId
       if (files.length > 0) {
         if (!settlementId) {
-          throw new Error('The saved payment could not be selected for image upload')
+          throw new Error(t('household.settlementModal.uploadTargetError'))
         }
         savedPage = await uploadHouseholdSettlementAttachments(
           household.id,
@@ -2556,19 +2690,21 @@ function SettlementModal({
       }
       onChanged(savedPage)
       ToastService.success({
-        title: 'Payment sent for confirmation',
-        description: `${debt.toMemberName} needs to confirm it before balances change.`,
+        title: t('household.settlementModal.sentToast'),
+        description: t('household.settlementModal.confirmHint', {
+          name: debt.toMemberName,
+        }),
       })
       onClose()
     } catch (error) {
       if (savedPage) {
         onChanged(savedPage)
         ToastService.apiError(error, {
-          title: 'Payment saved, but the images could not be uploaded',
+          title: t('household.settlementModal.imagesFailed'),
         })
         onClose()
       } else {
-        ToastService.apiError(error, { title: 'Could not record payment' })
+        ToastService.apiError(error, { title: t('household.settlementModal.saveFailed') })
       }
     } finally {
       setSaving(false)
@@ -2589,17 +2725,21 @@ function SettlementModal({
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
       >
-        <ModalHeader>Record payment</ModalHeader>
-        <ModalCloseButton />
+        <ModalHeader>{t('household.settlementModal.title')}</ModalHeader>
+        <ModalCloseButton aria-label={t('household.common.close')} />
         <ModalBody as="form" id="household-settlement-form" onSubmit={submit}>
           <VStack align="stretch" spacing={4}>
             <Box p={4} borderRadius="xl" bg={ed?.panelRaised ?? 'blackAlpha.50'}>
-              <Text fontSize="sm">Paying</Text>
+              <Text fontSize="sm">{t('household.settlementModal.paying')}</Text>
               <Text fontSize="xl" fontWeight={900}>{debt?.toMemberName}</Text>
-              <Text fontSize="sm">Current debt: {money(debt?.amount ?? 0, household.currency)}</Text>
+              <Text fontSize="sm">
+                {t('household.settlementModal.currentDebt', {
+                  amount: formatCurrency(debt?.amount ?? 0),
+                })}
+              </Text>
             </Box>
             <FormControl isRequired>
-              <FormLabel>Amount sent</FormLabel>
+              <FormLabel>{t('household.settlementModal.amountSent')}</FormLabel>
               <Input
                 type="number"
                 min="0.01"
@@ -2611,7 +2751,7 @@ function SettlementModal({
               />
             </FormControl>
             <FormControl isRequired>
-              <FormLabel>Payment date</FormLabel>
+              <FormLabel>{t('household.settlementModal.date')}</FormLabel>
               <Input type="date" value={settlementDate} onChange={(event) => setSettlementDate(event.target.value)} />
             </FormControl>
             <Divider borderColor={ed?.line} />
@@ -2619,7 +2759,7 @@ function SettlementModal({
           </VStack>
         </ModalBody>
         <ModalFooter gap={2}>
-          <Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button flex={{ base: 1, sm: 'initial' }} variant="ghost" onClick={onClose}>{t('household.common.cancel')}</Button>
           <Button
             flex={{ base: 1, sm: 'initial' }}
             type="submit"
@@ -2627,7 +2767,7 @@ function SettlementModal({
             colorScheme="teal"
             isLoading={saving}
           >
-            Send for confirmation
+            {t('household.settlementModal.submit')}
           </Button>
         </ModalFooter>
       </ModalContent>
@@ -2647,6 +2787,7 @@ function MembersModal({
   onChanged: (page: HouseholdPageState) => void
 }) {
   const ed = useEd()
+  const { t } = useI18n()
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
   const muted = ed?.muted ?? mutedFallback
   const [name, setName] = useState(household.name)
@@ -2668,7 +2809,7 @@ function MembersModal({
       if (success) ToastService.success({ title: success })
       return true
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not update household' })
+      ToastService.apiError(error, { title: t('household.manage.updateFailed') })
       return false
     } finally {
       setBusy(null)
@@ -2680,7 +2821,7 @@ function MembersModal({
     const saved = await act(
       'invite',
       () => inviteHouseholdMember(household.id, email),
-      'Invitation created',
+      t('household.manage.invitedToast'),
     )
     if (saved) setEmail('')
   }
@@ -2699,18 +2840,18 @@ function MembersModal({
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
       >
-        <ModalHeader>Manage Household</ModalHeader>
-        <ModalCloseButton />
+        <ModalHeader>{t('household.manage.title')}</ModalHeader>
+        <ModalCloseButton aria-label={t('household.common.close')} />
         <ModalBody>
           <VStack align="stretch" spacing={6}>
             <Box>
-              <Heading size="sm" mb={3}>Household details</Heading>
+              <Heading size="sm" mb={3}>{t('household.manage.details')}</Heading>
               <Stack
                 direction={{ base: 'column', sm: 'row' }}
                 align={{ base: 'stretch', sm: 'flex-end' }}
               >
                 <FormControl>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>{t('household.manage.name')}</FormLabel>
                   <Input value={name} maxLength={120} onChange={(event) => setName(event.target.value)} />
                 </FormControl>
                 <Button
@@ -2718,10 +2859,10 @@ function MembersModal({
                   onClick={() => void act(
                     'rename',
                     () => updateHousehold(household.id, name),
-                    'Household renamed',
+                    t('household.manage.renamedToast'),
                   )}
                 >
-                  Save
+                  {t('household.common.save')}
                 </Button>
               </Stack>
             </Box>
@@ -2729,9 +2870,9 @@ function MembersModal({
             <Divider borderColor={ed?.line} />
 
             <Box>
-              <Heading size="sm" mb={1}>Invite a member</Heading>
+              <Heading size="sm" mb={1}>{t('household.manage.inviteTitle')}</Heading>
               <Text color={muted} fontSize="sm" mb={3}>
-                The person needs an approved Personal Budget account.
+                {t('household.manage.inviteHint')}
               </Text>
               <Stack
                 as="form"
@@ -2740,23 +2881,23 @@ function MembersModal({
                 onSubmit={(event) => void invite(event)}
               >
                 <FormControl isRequired>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t('household.manage.email')}</FormLabel>
                   <Input
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
-                    placeholder="member@example.com"
+                    placeholder={t('household.manage.emailPlaceholder')}
                   />
                 </FormControl>
                 <Button type="submit" colorScheme="teal" isLoading={busy === 'invite'}>
-                  Invite
+                  {t('household.manage.invite')}
                 </Button>
               </Stack>
             </Box>
 
             {household.pendingMemberInvitations.length > 0 && (
               <Box>
-                <Heading size="xs" mb={3}>Pending invitations</Heading>
+                <Heading size="xs" mb={3}>{t('household.manage.pendingInvitations')}</Heading>
                 <VStack align="stretch" spacing={2}>
                   {household.pendingMemberInvitations.map((invitation) => (
                     <HStack
@@ -2771,7 +2912,9 @@ function MembersModal({
                         <Text color={muted} fontSize="xs" noOfLines={1}>{invitation.targetEmail}</Text>
                       </Box>
                       <IconButton
-                        aria-label={`Revoke invitation for ${invitation.targetName}`}
+                        aria-label={t('household.manage.revokeAria', {
+                          name: invitation.targetName,
+                        })}
                         icon={<X size={16} />}
                         size="sm"
                         variant="ghost"
@@ -2790,7 +2933,7 @@ function MembersModal({
             <Divider borderColor={ed?.line} />
 
             <Box>
-              <Heading size="sm" mb={3}>Active members</Heading>
+              <Heading size="sm" mb={3}>{t('household.manage.activeMembers')}</Heading>
               <VStack align="stretch" spacing={2}>
                 {household.members.map((member) => (
                   <HStack
@@ -2800,8 +2943,7 @@ function MembersModal({
                     borderRadius="lg"
                     bg={ed?.panelRaised ?? 'blackAlpha.50'}
                   >
-                    <HStack minW={0}>
-                      <Avatar size="sm" name={member.name} />
+                    <HStack minW={0} spacing={0}>
                       <Box minW={0}>
                         <HStack>
                           <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
@@ -2811,18 +2953,20 @@ function MembersModal({
                     </HStack>
                     {member.role !== 'OWNER' && (
                       <IconButton
-                        aria-label={`Remove ${member.name}`}
+                        aria-label={t('household.manage.removeAria', { name: member.name })}
                         icon={<Trash2 size={16} />}
                         size="sm"
                         variant="ghost"
                         colorScheme="red"
                         isLoading={busy === `remove-${member.id}`}
                         onClick={() => {
-                          if (!window.confirm(`Remove ${member.name} from this household?`)) return
+                          if (!window.confirm(t('household.manage.removeConfirm', {
+                            name: member.name,
+                          }))) return
                           void act(
                             `remove-${member.id}`,
                             () => removeHouseholdMember(household.id, member.id),
-                            'Member removed',
+                            t('household.manage.removedToast'),
                           )
                         }}
                       />
@@ -2834,7 +2978,7 @@ function MembersModal({
           </VStack>
         </ModalBody>
         <ModalFooter>
-          <Button onClick={onClose}>Done</Button>
+          <Button onClick={onClose}>{t('household.common.done')}</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

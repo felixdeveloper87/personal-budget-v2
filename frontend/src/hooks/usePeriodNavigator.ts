@@ -1,7 +1,9 @@
 import { useState, useCallback } from 'react'
 import { PeriodType } from '../types'
+import { useI18n } from '../i18n'
 
 export function usePeriodNavigator() {
+  const { locale, t } = useI18n()
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month')
 
@@ -72,13 +74,13 @@ export function usePeriodNavigator() {
 
   const formatLabel = useCallback(() => {
     if (selectedPeriod === 'month') {
-      return selectedDate.toLocaleString('en-GB', {
+      return selectedDate.toLocaleString(locale, {
         month: 'short',
         year: 'numeric',
       }).toUpperCase()
     }
     if (selectedPeriod === 'day') {
-      return selectedDate.toLocaleDateString('en-GB', {
+      return selectedDate.toLocaleDateString(locale, {
         weekday: 'short',
         day: 'numeric',
         month: 'short',
@@ -93,14 +95,14 @@ export function usePeriodNavigator() {
       const end = new Date(start)
       end.setDate(start.getDate() + 6)
       const fmt = (d: Date) =>
-        d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit' })
+        d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' })
       return `${fmt(start)} - ${fmt(end)}`
     }
     if (selectedPeriod === 'year') {
       return selectedDate.getFullYear().toString()
     }
-    return 'Unknown Period'
-  }, [selectedPeriod, selectedDate])
+    return t('period.unknown', undefined, 'Unknown period')
+  }, [locale, selectedPeriod, selectedDate, t])
 
   return {
     selectedDate,

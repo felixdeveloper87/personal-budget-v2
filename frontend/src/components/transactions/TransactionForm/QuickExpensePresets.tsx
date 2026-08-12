@@ -30,6 +30,7 @@ import {
   Zap,
   type LucideIcon,
 } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
 
 interface ExpensePreset {
   label: string
@@ -239,6 +240,7 @@ export default function QuickExpensePresets({
   transactionType,
   onSelect,
 }: QuickExpensePresetsProps) {
+  const { t, categoryLabel } = useI18n()
   const labelColor = useColorModeValue('gray.500', 'gray.400')
   const chipBg = useColorModeValue('white', 'whiteAlpha.50')
   const chipBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
@@ -270,7 +272,7 @@ export default function QuickExpensePresets({
         textTransform="uppercase"
         letterSpacing="0.05em"
       >
-        Quick add for {category}
+        {t('form.quickAddCategory', { category: categoryLabel(category) })}
       </Text>
 
       <ChipCarousel>
@@ -295,7 +297,7 @@ export default function QuickExpensePresets({
               onClick={() => applyPreset(preset)}
               _hover={{ bg: chipHoverBg, borderColor: 'red.200' }}
             >
-              {preset.label}
+              {t(`preset.${preset.label}`, undefined, preset.label)}
             </Button>
           )
         })}

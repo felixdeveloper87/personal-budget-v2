@@ -1,6 +1,7 @@
 import { HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { ArrowDownRight, ArrowUpRight, Eye, EyeOff } from 'lucide-react'
 import Panel from './Panel'
+import { useI18n } from '../../../i18n'
 
 export const MASK = '••••••'
 
@@ -29,6 +30,7 @@ export default function StatCard({
   masked = false,
   onToggleMask,
 }: StatCardProps) {
+  const { t } = useI18n()
   const figureColor = accent === 'gold' ? 'var(--pb-gold-2)' : 'var(--pb-forest)'
   const deltaColor = deltaPositive ? 'var(--pb-income-2)' : 'var(--pb-coral)'
   const DeltaIcon = deltaPositive ? ArrowUpRight : ArrowDownRight
@@ -49,8 +51,8 @@ export default function StatCard({
 
           {onToggleMask && (
             <IconButton
-              aria-label={masked ? 'Show value' : 'Hide value'}
-              title={masked ? 'Show value' : 'Hide value'}
+              aria-label={masked ? t('dashboard.showValue') : t('dashboard.hideValue')}
+              title={masked ? t('dashboard.showValue') : t('dashboard.hideValue')}
               icon={masked ? <Eye size={14} /> : <EyeOff size={14} />}
               onClick={onToggleMask}
               variant="ghost"

@@ -3,6 +3,7 @@ import { Box, HStack, Spinner, Text, VStack } from '@chakra-ui/react'
 import axios from 'axios'
 import { useAuth } from '../../contexts/AuthContext'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
+import { useI18n } from '../../i18n'
 
 const GIS_SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
 
@@ -51,6 +52,7 @@ function loadGisScript(): Promise<void> {
 }
 
 export default function GoogleSignInSection() {
+  const { locale, t } = useI18n()
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const { loginWithGoogle } = useAuth()
   const [busy, setBusy] = useState(false)
@@ -69,18 +71,18 @@ export default function GoogleSignInSection() {
           setNotice({
             tone: 'info',
             message:
-              outcome.message ??
-              'Registration received. Your account must be approved before you can sign in.',
+              (locale === 'en-GB' ? outcome.message : undefined) ??
+              t('auth.google.pendingFallback'),
           })
         }
       } catch (error: unknown) {
-        let message = 'Google sign-in could not be completed. Please try again or use email.'
+        let message = t('auth.google.failed')
         if (axios.isAxiosError(error)) {
           const body = error.response?.data as { error?: string; message?: string } | undefined
-          if (body?.message) message = body.message
-          else if (body?.error) message = body.error
+          if (locale === 'en-GB' && body?.message) message = body.message
+          else if (locale === 'en-GB' && body?.error) message = body.error
           if (error.response?.status === 503) {
-            message = 'Google sign-in is not enabled on the server. Continue with email instead.'
+            message = t('auth.google.notEnabled')
           }
         }
         setNotice({ tone: 'error', message })
@@ -88,7 +90,7 @@ export default function GoogleSignInSection() {
         setBusy(false)
       }
     },
-    [loginWithGoogle],
+    [locale, loginWithGoogle, t],
   )
 
   useEffect(() => {
@@ -204,7 +206,7 @@ export default function GoogleSignInSection() {
           <HStack position="absolute" inset={0} justify="center" spacing={3} color={C.muted}>
             <Spinner size="xs" thickness="2px" color={C.jade} />
             <Text fontFamily={F.body} fontSize="sm" fontWeight={600}>
-              {busy ? 'Completing sign in' : 'Loading Google'}
+              {busy ? t('auth.google.completing') : t('auth.google.loading')}
             </Text>
           </HStack>
         )}
@@ -213,7 +215,7 @@ export default function GoogleSignInSection() {
           <HStack position="absolute" inset={0} justify="center" spacing={3} color={C.mutedDim}>
             <GoogleG />
             <Text fontFamily={F.body} fontSize="sm" fontWeight={600}>
-              Google sign-in unavailable
+              {t('auth.google.unavailable')}
             </Text>
           </HStack>
         )}
@@ -246,7 +248,7 @@ export default function GoogleSignInSection() {
           letterSpacing="0.12em"
           textTransform="uppercase"
         >
-          or continue with email
+          {t('auth.google.orEmail')}
         </Text>
         <Box h="1px" flex={1} bg={C.line} />
       </HStack>

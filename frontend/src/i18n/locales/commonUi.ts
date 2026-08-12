@@ -1,0 +1,36 @@
+import type { TranslationBundle } from '../types'
+
+export const commonUiTranslations: TranslationBundle = {
+  'en-GB': {
+    'common.deleting': 'Deleting…',
+    'common.cannotUndo': 'This cannot be undone.',
+    'common.deleteConfirmWord': 'DELETE',
+    'common.typeToConfirmBefore': 'Type',
+    'common.typeToConfirmAfter': 'to confirm.',
+    'common.selectBank': 'Select bank',
+    'dateBasis.activity': 'Behaviour',
+    'dateBasis.cashFlow': 'Payments',
+    'transaction.delete.title': 'Delete transaction',
+    'transaction.delete.success': 'Transaction deleted',
+    'transaction.delete.removed': '{{description}} has been removed',
+    'transaction.delete.error': 'Could not delete transaction',
+    'transaction.fallbackName': 'Transaction',
+    'transaction.noDescription': 'No description',
+  },
+  'pt-BR': {
+    'common.deleting': 'Excluindo…',
+    'common.cannotUndo': 'Esta ação não pode ser desfeita.',
+    'common.deleteConfirmWord': 'EXCLUIR',
+    'common.typeToConfirmBefore': 'Digite',
+    'common.typeToConfirmAfter': 'para confirmar.',
+    'common.selectBank': 'Selecione o banco',
+    'dateBasis.activity': 'Comportamento',
+    'dateBasis.cashFlow': 'Pagamentos',
+    'transaction.delete.title': 'Excluir transação',
+    'transaction.delete.success': 'Transação excluída',
+    'transaction.delete.removed': '{{description}} foi removida',
+    'transaction.delete.error': 'Não foi possível excluir a transação',
+    'transaction.fallbackName': 'Transação',
+    'transaction.noDescription': 'Sem descrição',
+  },
+}

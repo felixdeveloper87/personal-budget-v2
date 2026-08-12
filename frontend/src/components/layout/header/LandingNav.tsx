@@ -1,6 +1,7 @@
 import { Box, Button, HStack, useColorModeValue } from '@chakra-ui/react'
 import { useEffect, useState } from 'react'
 import { LANDING_SECTIONS, type LandingSectionId } from './navigation.config'
+import { useI18n } from '../../../i18n'
 
 const scrollToSection = (id: LandingSectionId) => {
   const section = document.getElementById(id)
@@ -9,6 +10,7 @@ const scrollToSection = (id: LandingSectionId) => {
 }
 
 export default function LandingNav() {
+  const { t } = useI18n()
   const [activeSection, setActiveSection] = useState<LandingSectionId | null>(null)
 
   const color = useColorModeValue('gray.600', 'gray.300')
@@ -86,7 +88,7 @@ export default function LandingNav() {
             transition="all 0.2s ease"
             _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px rgba(59,130,246,0.4)' }}
           >
-            {section.label}
+            {t(`header.landing.${section.id}`, undefined, section.label)}
             <Box
               position="absolute"
               bottom="5px"

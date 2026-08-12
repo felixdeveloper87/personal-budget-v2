@@ -19,19 +19,11 @@ import {
   ArrowUpRight,
   ReceiptText,
 } from '../../../ui/icons'
+import { useI18n } from '../../../../i18n'
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
-
-const moneyFormatter = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-})
-
-function formatMoney(value: number): string {
-  return moneyFormatter.format(value)
-}
 
 interface DayGroup {
   key: string
@@ -74,6 +66,7 @@ export default function ActivityLedger({
   hasSelection,
   dateBasis = 'activity',
 }: ActivityLedgerProps) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const groups = useMemo<DayGroup[]>(() => {
     const map = new Map<string, DayGroup>()
     for (const transaction of transactions) {
@@ -141,12 +134,12 @@ export default function ActivityLedger({
           <Icon as={ReceiptText} boxSize={5} color={mutedColor} />
         </Flex>
         <Text fontSize="sm" fontWeight={700} color={titleColor}>
-          {hasSelection ? `No transactions in ${title}` : 'Click a bar to see its transactions'}
+          {hasSelection ? t('charts.noTransactionsIn', { title }) : t('charts.clickBar')}
         </Text>
         <Text mt={1} fontSize="xs" color={mutedColor}>
           {hasSelection
-            ? 'Choose another bar to inspect the activity for that slot.'
-            : 'Hover still shows totals; click opens the exact entries behind that bar.'}
+            ? t('charts.chooseAnotherBar')
+            : t('charts.clickBarHelp')}
         </Text>
       </Box>
     )
@@ -180,13 +173,13 @@ export default function ActivityLedger({
             textTransform="uppercase"
             letterSpacing="0.08em"
           >
-            Activity
+            {t('charts.activity')}
           </Text>
           <Text fontSize="md" fontWeight={800} color={titleColor} noOfLines={1}>
             {title}
           </Text>
           <Text fontSize="xs" color={mutedColor}>
-            {totalRows} transaction{totalRows === 1 ? '' : 's'}
+            {t(totalRows === 1 ? 'transactions.count' : 'transactions.countPlural', { count: totalRows })}
           </Text>
         </Box>
 
@@ -202,7 +195,7 @@ export default function ActivityLedger({
             >
               <Icon as={ArrowUpRight} boxSize={3} weight="bold" />
               <Text fontSize="xs" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatMoney(income)}
+                {formatCurrency(income)}
               </Text>
             </HStack>
           )}
@@ -217,7 +210,7 @@ export default function ActivityLedger({
             >
               <Icon as={ArrowDownRight} boxSize={3} weight="bold" />
               <Text fontSize="xs" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatMoney(expense)}
+                {formatCurrency(expense)}
               </Text>
             </HStack>
           )}
@@ -226,9 +219,7 @@ export default function ActivityLedger({
 
       {/* ── Rows grouped by day ──────────────────────────────────────── */}
       {groups.map((group) => {
-        const dayLabel = group.date
-          .toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })
-          .toUpperCase()
+        const dayLabel = formatDate(group.date, { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 
         return (
           <Box key={group.key}>
@@ -256,7 +247,7 @@ export default function ActivityLedger({
                   sx={{ fontVariantNumeric: 'tabular-nums' }}
                 >
                   {group.net >= 0 ? '+' : '-'}
-                  {formatMoney(Math.abs(group.net))}
+                  {formatCurrency(Math.abs(group.net))}
                 </Text>
               </HStack>
             )}

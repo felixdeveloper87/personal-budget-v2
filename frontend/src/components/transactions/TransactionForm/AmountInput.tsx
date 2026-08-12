@@ -2,6 +2,7 @@ import { Box, Text, HStack, useDisclosure, VStack, Wrap, WrapItem, Button, Icon 
 import { Calculator } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import NumberPad from './NumberPad'
+import { useI18n } from '../../../i18n'
 
 interface AmountInputProps {
   amount: number
@@ -15,6 +16,7 @@ interface AmountInputProps {
  * - Opens number pad from the keypad icon or displayed value
  */
 export default function AmountInput({ amount, onChange, type }: AmountInputProps) {
+  const { t, formatCurrency } = useI18n()
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
 
@@ -26,25 +28,19 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
     onChange(value)
   }
 
-  const formatDisplayValue = (value: number) => {
-    if (value === 0) return ''
-    return value.toString()
-  }
-
   const getQuickAmountOptions = () => {
     return [
-      { label: '£5', value: 5, color: 'green' },
-      { label: '£10', value: 10, color: 'blue' },
-      { label: '£20', value: 20, color: 'purple' },
-      { label: '£50', value: 50, color: 'orange' },
-      { label: '£100', value: 100, color: 'teal' },
-      { label: '£500', value: 500, color: 'pink' },
+      { value: 5, color: 'green' },
+      { value: 10, color: 'blue' },
+      { value: 20, color: 'purple' },
+      { value: 50, color: 'orange' },
+      { value: 100, color: 'teal' },
+      { value: 500, color: 'pink' },
     ]
   }
 
   const quickAmountOptions = getQuickAmountOptions()
-  const amountLabel =
-    amount !== 0 ? formatDisplayValue(amount) : '0.00'
+  const amountLabel = formatCurrency(amount)
   const focusRing =
     type === 'INCOME'
       ? '0 0 0 2px rgba(74, 222, 128, 0.2)'
@@ -110,7 +106,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
                       lineHeight="1.1"
                       noOfLines={1}
                     >
-                      How much?
+                      {t('form.howMuch')}
                     </Text>
                   </HStack>
 
@@ -144,7 +140,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
                       }}
                       _focusVisible={{ boxShadow: focusRing }}
                     >
-                      £{amountLabel}
+                      {amountLabel}
                     </Text>
                   </Box>
                 </HStack>
@@ -180,7 +176,7 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
                         _active={{ bg: colors.bgSecondary }}
                         _focusVisible={{ boxShadow: focusRing }}
                       >
-                        {option.label}
+                        {formatCurrency(option.value, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </Button>
                     </WrapItem>
                   ))}

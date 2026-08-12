@@ -1,3 +1,5 @@
+import { formatGbp, getCurrentLocale } from '../../../i18n'
+
 /** Banknote palette for category slices (forest-green led, with gold + coral accents). */
 export const CATEGORY_COLORS = [
   '#2d7a57',
@@ -28,5 +30,5 @@ export const fmtCurrency = (amount: number, opts: Intl.NumberFormatOptions = {})
   ) {
     merged.maximumFractionDigits = merged.minimumFractionDigits
   }
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', ...merged }).format(amount)
+  return formatGbp(amount, getCurrentLocale(), merged)
 }

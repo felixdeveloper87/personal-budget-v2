@@ -5,7 +5,7 @@ import type { Transaction } from '../../../types'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 import { getTransactionDate } from '../../../utils/transactionDates'
 import Panel from './Panel'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 interface UpcomingPaymentsProps {
   transactions: Transaction[]
@@ -40,6 +40,7 @@ export default function UpcomingPayments({
   onPageChange,
   limit = 6,
 }: UpcomingPaymentsProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const { items, total } = useMemo(() => {
     const now = new Date()
     now.setHours(0, 0, 0, 0)
@@ -68,7 +69,7 @@ export default function UpcomingPayments({
           date: settlementDate(t),
           total: t.amount,
           title: t.description || t.category,
-          subtitle: t.category,
+          subtitle: categoryLabel(t.category),
         })
       }
     }
@@ -79,8 +80,8 @@ export default function UpcomingPayments({
         key: `stmt-${k}`,
         date: settlementDate(txs[0]),
         total: txs.reduce((s, t) => s + t.amount, 0),
-        title: cardNames?.get(cardId) ?? 'Credit card',
-        subtitle: 'Credit card statement',
+        title: cardNames?.get(cardId) ?? t('dashboard.creditCard'),
+        subtitle: t('dashboard.creditCardStatement'),
       })
     }
 
@@ -89,7 +90,7 @@ export default function UpcomingPayments({
 
     const sum = future.reduce((s, t) => s + t.amount, 0)
     return { items: list.slice(0, limit), total: sum }
-  }, [transactions, cardNames, limit])
+  }, [transactions, cardNames, limit, t, categoryLabel])
 
   const clickable = !!onPageChange
 
@@ -108,7 +109,7 @@ export default function UpcomingPayments({
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Upcoming payments
+            {t('dashboard.upcomingPayments')}
           </Text>
           {total > 0 && (
             <Text
@@ -117,7 +118,7 @@ export default function UpcomingPayments({
               color="var(--pb-ink-soft)"
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {fmtCurrency(total, { minimumFractionDigits: 2 })}
+              {formatCurrency(total, { minimumFractionDigits: 2 })}
             </Text>
           )}
         </HStack>
@@ -127,7 +128,7 @@ export default function UpcomingPayments({
             <HStack spacing={3} py={4} color="var(--pb-ink-faint)">
               <CalendarClock size={16} />
               <Text fontFamily="var(--pb-serif)" fontSize="sm">
-                Nothing scheduled ahead.
+                {t('dashboard.nothingScheduled')}
               </Text>
             </HStack>
           ) : (
@@ -142,7 +143,7 @@ export default function UpcomingPayments({
                     pr={2}
                   >
                     <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">
-                      {item.date.toLocaleDateString('en-GB', { month: 'short' })}
+                      {formatDate(item.date, { month: 'short' })}
                     </Text>
                     <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
                       {item.date.getDate()}
@@ -165,7 +166,7 @@ export default function UpcomingPayments({
                   flexShrink={0}
                   style={{ fontVariantNumeric: 'tabular-nums' }}
                 >
-                  {fmtCurrency(item.total, { minimumFractionDigits: 2 })}
+                  {formatCurrency(item.total, { minimumFractionDigits: 2 })}
                 </Text>
               </HStack>
             ))

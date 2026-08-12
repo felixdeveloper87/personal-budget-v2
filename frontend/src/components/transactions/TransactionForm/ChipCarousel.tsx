@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Box, Flex, Icon, useColorModeValue } from '@chakra-ui/react'
 import { ChevronLeft, ChevronRight } from '../../ui/icons'
+import { useI18n } from '../../../i18n'
 
 /**
  * Horizontal, snap-scrolling row of chips. On wider screens it adds left/right
@@ -8,6 +9,7 @@ import { ChevronLeft, ChevronRight } from '../../ui/icons'
  * user can page through the carousel; touch users just swipe.
  */
 export default function ChipCarousel({ children }: { children: ReactNode }) {
+  const { t } = useI18n()
   const scrollerRef = useRef<HTMLDivElement>(null)
   const [edges, setEdges] = useState({ start: false, end: false })
 
@@ -87,7 +89,7 @@ export default function ChipCarousel({ children }: { children: ReactNode }) {
       <Flex
         as="button"
         type="button"
-        aria-label="Scroll left"
+        aria-label={t('form.scrollLeft')}
         onClick={() => nudge(-1)}
         left="-2px"
         {...chevronProps(edges.start)}
@@ -97,7 +99,7 @@ export default function ChipCarousel({ children }: { children: ReactNode }) {
       <Flex
         as="button"
         type="button"
-        aria-label="Scroll right"
+        aria-label={t('form.scrollRight')}
         onClick={() => nudge(1)}
         right="-2px"
         {...chevronProps(edges.end)}

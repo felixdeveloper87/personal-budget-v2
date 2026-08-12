@@ -43,6 +43,7 @@ import {
   X,
 } from '../../components/ui/icons'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 import { ToastService } from '../../services/toast'
 import type {
   HouseholdAttachment,
@@ -69,6 +70,7 @@ export function AttachmentPicker({
   existingCount?: number
 }) {
   const ed = useEd()
+  const { formatNumber, t } = useI18n()
   const inputRef = useRef<HTMLInputElement>(null)
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
   const muted = ed?.muted ?? mutedFallback
@@ -88,16 +90,16 @@ export function AttachmentPicker({
     const valid = selected.filter((file) => {
       if (!ALLOWED_TYPES.has(file.type)) {
         ToastService.warning({
-          title: 'Unsupported image',
-          description: 'Use JPEG, PNG, or WebP.',
+          title: t('household.attachments.unsupported'),
+          description: t('household.attachments.useFormats'),
           dedupeKey: 'household-attachment-type',
         })
         return false
       }
       if (file.size > MAX_FILE_SIZE) {
         ToastService.warning({
-          title: `${file.name} is too large`,
-          description: 'Each image must be 5 MB or smaller.',
+          title: t('household.attachments.tooLarge', { filename: file.name }),
+          description: t('household.attachments.maxSize'),
           dedupeKey: `household-attachment-size:${file.name}`,
         })
         return false
@@ -108,8 +110,13 @@ export function AttachmentPicker({
     const availableSlots = Math.max(0, MAX_FILES - existingCount - files.length)
     if (valid.length > availableSlots) {
       ToastService.warning({
-        title: `Up to ${MAX_FILES} images per record`,
-        description: `You can add ${availableSlots} more image${availableSlots === 1 ? '' : 's'}.`,
+        title: t('household.attachments.limit', { maximum: formatNumber(MAX_FILES) }),
+        description: t(
+          availableSlots === 1
+            ? 'household.attachments.slots.one'
+            : 'household.attachments.slots.other',
+          { count: formatNumber(availableSlots) },
+        ),
         dedupeKey: 'household-attachment-count',
       })
     }
@@ -122,9 +129,12 @@ export function AttachmentPicker({
     <Box>
       <HStack justify="space-between" align="center">
         <Box>
-          <Text fontWeight={800} fontSize="sm">Proof images</Text>
+          <Text fontWeight={800} fontSize="sm">{t('household.attachments.title')}</Text>
           <Text color={muted} fontSize="xs">
-            {total}/{MAX_FILES} · JPEG, PNG, or WebP · 5 MB each
+            {t('household.attachments.formats', {
+              current: formatNumber(total),
+              maximum: formatNumber(MAX_FILES),
+            })}
           </Text>
         </Box>
         <Button
@@ -134,7 +144,7 @@ export function AttachmentPicker({
           isDisabled={total >= MAX_FILES}
           onClick={() => inputRef.current?.click()}
         >
-          Add photos
+          {t('household.attachments.addPhotos')}
         </Button>
       </HStack>
       <Input
@@ -158,7 +168,7 @@ export function AttachmentPicker({
               >
                 <Image src={url} alt={file.name} w="full" h="full" objectFit="cover" />
                 <IconButton
-                  aria-label={`Remove ${file.name}`}
+                  aria-label={t('household.attachments.removeAria', { filename: file.name })}
                   icon={<X size={14} />}
                   size="xs"
                   colorScheme="blackAlpha"
@@ -190,6 +200,7 @@ function AttachmentLightbox({
   selectedId: number | null
   onSelect: (attachmentId: number) => void
 }) {
+  const { formatNumber, t } = useI18n()
   const prefersReducedMotion = usePrefersReducedMotion()
   const dragStartRef = useRef<{
     pointerId: number
@@ -416,13 +427,13 @@ function AttachmentLightbox({
                 fontSize="sm"
                 fontWeight={800}
               >
-                {selectedIndex + 1} / {images.length}
+                {formatNumber(selectedIndex + 1)} / {formatNumber(images.length)}
               </Text>
             )}
           </Box>
 
           <IconButton
-            aria-label="Close image viewer"
+            aria-label={t('household.attachments.closeViewer')}
             icon={<X size={24} weight="bold" />}
             position="absolute"
             top="calc(env(safe-area-inset-top, 0px) + 12px)"
@@ -476,7 +487,7 @@ function AttachmentLightbox({
           {hasCarousel && (
             <>
               <IconButton
-                aria-label="Previous image"
+                aria-label={t('household.attachments.previous')}
                 icon={<ChevronLeft size={28} weight="bold" />}
                 position="absolute"
                 left={{ base: 2, sm: 4, lg: 6 }}
@@ -496,7 +507,7 @@ function AttachmentLightbox({
                 _focusVisible={{ boxShadow: '0 0 0 3px rgba(255, 255, 255, 0.7)' }}
               />
               <IconButton
-                aria-label="Next image"
+                aria-label={t('household.attachments.next')}
                 icon={<ChevronRight size={28} weight="bold" />}
                 position="absolute"
                 right={{ base: 2, sm: 4, lg: 6 }}
@@ -568,7 +579,10 @@ function AttachmentLightbox({
                         borderColor={isSelected ? 'white' : 'whiteAlpha.400'}
                         opacity={isSelected ? 1 : 0.62}
                         boxShadow={isSelected ? '0 0 0 2px rgba(0, 0, 0, 0.75)' : 'none'}
-                        aria-label={`View image ${index + 1}: ${attachment.originalFilename}`}
+                        aria-label={t('household.attachments.viewAria', {
+                          index: formatNumber(index + 1),
+                          filename: attachment.originalFilename,
+                        })}
                         aria-current={isSelected ? 'true' : undefined}
                         onClick={() => onSelect(attachment.id)}
                         _hover={{ opacity: 1 }}
@@ -615,6 +629,7 @@ export function AttachmentGalleryModal({
   onChanged: (page: HouseholdPageState) => void
 }) {
   const ed = useEd()
+  const { formatNumber, t } = useI18n()
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
   const muted = ed?.muted ?? mutedFallback
   const [files, setFiles] = useState<File[]>([])
@@ -696,23 +711,30 @@ export function AttachmentGalleryModal({
       onChanged(await onUpload(files))
       setFiles([])
       ToastService.success({
-        title: `${files.length} image${files.length === 1 ? '' : 's'} added`,
+        title: t(
+          files.length === 1
+            ? 'household.attachments.added.one'
+            : 'household.attachments.added.other',
+          { count: formatNumber(files.length) },
+        ),
       })
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not upload the images' })
+      ToastService.apiError(error, { title: t('household.attachments.uploadFailed') })
     } finally {
       setUploading(false)
     }
   }
 
   const remove = async (attachment: HouseholdAttachment) => {
-    if (!window.confirm(`Remove ${attachment.originalFilename}?`)) return
+    if (!window.confirm(t('household.attachments.removeConfirm', {
+      filename: attachment.originalFilename,
+    }))) return
     setDeletingId(attachment.id)
     try {
       onChanged(await deleteHouseholdAttachment(householdId, attachment.id))
-      ToastService.success({ title: 'Image removed' })
+      ToastService.success({ title: t('household.attachments.removed') })
     } catch (error) {
-      ToastService.apiError(error, { title: 'Could not remove the image' })
+      ToastService.apiError(error, { title: t('household.attachments.removeFailed') })
     } finally {
       setDeletingId(null)
     }
@@ -734,10 +756,10 @@ export function AttachmentGalleryModal({
           borderRadius={{ base: 0, md: 'md' }}
         >
           <ModalHeader>
-            <Text fontSize="lg">Proof images</Text>
+            <Text fontSize="lg">{t('household.attachments.title')}</Text>
             <Text color={muted} fontSize="sm" fontWeight={500} noOfLines={1}>{title}</Text>
           </ModalHeader>
-          <ModalCloseButton />
+          <ModalCloseButton aria-label={t('household.common.close')} />
           <ModalBody>
             <Stack spacing={5}>
               {attachments.length === 0 ? (
@@ -749,7 +771,7 @@ export function AttachmentGalleryModal({
                   borderRadius="xl"
                 >
                   <ReceiptText size={26} color={muted} />
-                  <Text mt={2} fontWeight={800}>No proof images yet</Text>
+                  <Text mt={2} fontWeight={800}>{t('household.attachments.empty')}</Text>
                 </Center>
               ) : (
                 <SimpleGrid columns={{ base: 2, sm: 3 }} spacing={3}>
@@ -770,14 +792,14 @@ export function AttachmentGalleryModal({
                             {expired ? (
                               <Center flexDirection="column" color={muted} textAlign="center" p={3}>
                                 <ReceiptText size={24} />
-                                <Badge mt={2}>Expired</Badge>
+                                <Badge mt={2}>{t('household.attachments.expired')}</Badge>
                               </Center>
                             ) : url === undefined ? (
                               <Spinner size="sm" />
                             ) : url === null ? (
                               <Center flexDirection="column" color={muted} textAlign="center" p={3}>
                                 <ReceiptText size={22} />
-                                <Text mt={1} fontSize="xs">Unavailable</Text>
+                                <Text mt={1} fontSize="xs">{t('household.attachments.unavailable')}</Text>
                               </Center>
                             ) : (
                               <Box
@@ -788,7 +810,9 @@ export function AttachmentGalleryModal({
                                 h="full"
                                 p={0}
                                 cursor="zoom-in"
-                                aria-label={`Open ${attachment.originalFilename}`}
+                                aria-label={t('household.attachments.openAria', {
+                                  filename: attachment.originalFilename,
+                                })}
                                 aria-haspopup="dialog"
                                 onClick={() => setSelectedImageId(attachment.id)}
                                 _focusVisible={{
@@ -809,7 +833,9 @@ export function AttachmentGalleryModal({
                             )}
                             {attachment.canDelete && !expired && (
                               <IconButton
-                                aria-label={`Remove ${attachment.originalFilename}`}
+                                aria-label={t('household.attachments.removeAria', {
+                                  filename: attachment.originalFilename,
+                                })}
                                 icon={<Trash2 size={14} />}
                                 size="xs"
                                 colorScheme="red"
@@ -828,7 +854,7 @@ export function AttachmentGalleryModal({
                           {attachment.originalFilename}
                         </Text>
                         <Text color={muted} fontSize="10px" noOfLines={1}>
-                          Added by {attachment.uploadedByName}
+                          {t('household.attachments.addedBy', { name: attachment.uploadedByName })}
                         </Text>
                       </Box>
                     )
@@ -852,7 +878,12 @@ export function AttachmentGalleryModal({
                       isLoading={uploading}
                       onClick={() => void upload()}
                     >
-                      Upload {files.length} image{files.length === 1 ? '' : 's'}
+                      {t(
+                        files.length === 1
+                          ? 'household.attachments.upload.one'
+                          : 'household.attachments.upload.other',
+                        { count: formatNumber(files.length) },
+                      )}
                     </Button>
                   )}
                 </Box>
@@ -860,7 +891,7 @@ export function AttachmentGalleryModal({
             </Stack>
           </ModalBody>
           <ModalFooter>
-            <Button onClick={closeGallery}>Done</Button>
+            <Button onClick={closeGallery}>{t('household.common.done')}</Button>
           </ModalFooter>
         </ModalContent>
       </Modal>

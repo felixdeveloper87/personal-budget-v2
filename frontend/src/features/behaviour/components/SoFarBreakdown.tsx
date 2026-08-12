@@ -1,6 +1,6 @@
 import { Box, Grid, HStack, Text, VStack } from '@chakra-ui/react'
-import { fmtCurrency } from '../../dashboard/components/format'
 import type { BreakdownItem } from '../insights'
+import { useI18n } from '../../../i18n'
 
 interface SoFarBreakdownProps {
   spend: BreakdownItem[]
@@ -18,26 +18,27 @@ const MAX_ROWS = 6
  * Deliveroo, …). Everything is already day-to-day-filtered upstream.
  */
 export default function SoFarBreakdown({ spend, earnings, showEarnings = true, scopeLabel }: SoFarBreakdownProps) {
+  const { t, categoryLabel } = useI18n()
   return (
     <Grid templateColumns={{ base: '1fr', md: showEarnings ? '1fr 1fr' : '1fr' }} gap="0.7rem" alignItems="stretch">
       <BreakdownPanel
-        title="You spent"
+        title={t('behaviour.breakdown.spent')}
         scopeLabel={scopeLabel}
-        items={spend}
+        items={spend.map((item) => ({ ...item, name: categoryLabel(item.name) }))}
         accent="var(--pb-coral)"
         barGradient="linear-gradient(to right, var(--pb-coral), var(--pb-coral-2))"
-        preposition="on"
-        emptyText="No day-to-day expenses yet."
+        preposition={t('behaviour.breakdown.on')}
+        emptyText={t('behaviour.breakdown.emptyExpenses')}
       />
       {showEarnings && (
         <BreakdownPanel
-          title="You earned"
+          title={t('behaviour.breakdown.earned')}
           scopeLabel={scopeLabel}
           items={earnings}
           accent="var(--pb-income)"
           barGradient="linear-gradient(to right, var(--pb-income), var(--pb-income-2))"
-          preposition="from"
-          emptyText="No earnings logged yet."
+          preposition={t('behaviour.breakdown.from')}
+          emptyText={t('behaviour.breakdown.emptyEarnings')}
         />
       )}
     </Grid>
@@ -50,7 +51,7 @@ interface BreakdownPanelProps {
   items: BreakdownItem[]
   accent: string
   barGradient: string
-  preposition: 'on' | 'from'
+  preposition: string
   emptyText: string
 }
 
@@ -63,6 +64,7 @@ function BreakdownPanel({
   preposition,
   emptyText,
 }: BreakdownPanelProps) {
+  const { t, formatCurrency, formatNumber } = useI18n()
   // Top rows + a folded "everything else" so the panel never grows unbounded.
   let rows = items
   if (items.length > MAX_ROWS) {
@@ -71,7 +73,7 @@ function BreakdownPanel({
     rows = [
       ...head,
       {
-        name: `Everything else (${rest.length})`,
+        name: t('behaviour.breakdown.everythingElse', { count: formatNumber(rest.length) }),
         total: rest.reduce((s, r) => s + r.total, 0),
         count: rest.reduce((s, r) => s + r.count, 0),
       },
@@ -127,7 +129,7 @@ function BreakdownPanel({
                     flexShrink={0}
                     style={{ fontVariantNumeric: 'tabular-nums' }}
                   >
-                    {fmtCurrency(item.total)}
+                    {formatCurrency(item.total)}
                   </Text>
                 </HStack>
                 <Box h="5px" borderRadius="3px" bg="var(--pb-surface-3)" overflow="hidden">

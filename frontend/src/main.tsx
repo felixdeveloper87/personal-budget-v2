@@ -12,6 +12,7 @@ import theme from './theme'
 import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
 import { AppToastContainer } from './services/toast'
+import { I18nProvider } from './i18n'
 
 // The print/export page is a standalone route (no app shell). The project has no
 // router, so we branch on the pathname — nginx already falls back to index.html.
@@ -26,25 +27,29 @@ const printTheme = extendTheme(
 const printColorModeManager = createLocalStorageManager('pbudget-print-color-mode')
 
 const printRoot = (
-  <ChakraProvider theme={printTheme} colorModeManager={printColorModeManager}>
-    <ColorModeScript initialColorMode="light" />
-    <AuthProvider>
-      <ReportPrintPage />
-    </AuthProvider>
-    <AppToastContainer />
-  </ChakraProvider>
+  <I18nProvider>
+    <ChakraProvider theme={printTheme} colorModeManager={printColorModeManager}>
+      <ColorModeScript initialColorMode="light" />
+      <AuthProvider>
+        <ReportPrintPage />
+      </AuthProvider>
+      <AppToastContainer />
+    </ChakraProvider>
+  </I18nProvider>
 )
 
 const appRoot = (
-  <ChakraProvider theme={theme}>
-    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-    <AuthProvider>
-      <SearchProvider>
-        <App />
-      </SearchProvider>
-    </AuthProvider>
-    <AppToastContainer />
-  </ChakraProvider>
+  <I18nProvider>
+    <ChakraProvider theme={theme}>
+      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+      <AuthProvider>
+        <SearchProvider>
+          <App />
+        </SearchProvider>
+      </AuthProvider>
+      <AppToastContainer />
+    </ChakraProvider>
+  </I18nProvider>
 )
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

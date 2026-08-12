@@ -6,9 +6,9 @@ import type {
   RhythmInsight,
   TxState,
 } from '../transactions.types'
-import { fmtCurrency } from '../../dashboard/components/format'
 import { weekdayName } from '../transactions.utils'
 import PatternCard from './PatternCard'
+import { useI18n } from '../../../i18n'
 
 interface PatternsAsideProps {
   state: TxState
@@ -29,6 +29,7 @@ export default function PatternsAside({
   onToggleHabit,
   onToggleMomentum,
 }: PatternsAsideProps) {
+  const { t, locale, formatCurrency, categoryLabel } = useI18n()
   const hasAny = rhythm || habit || momentum
 
   return (
@@ -46,7 +47,7 @@ export default function PatternsAside({
           textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
-          Behavioral patterns
+          {t('transactions.behaviouralPatterns')}
         </Text>
       </HStack>
 
@@ -56,10 +57,13 @@ export default function PatternsAside({
             icon={TrendingUp}
             tileBg="var(--pb-tint-green)"
             tileColor="var(--pb-forest-2)"
-            tag="Spending rhythm"
-            title={`Most money leaves on ${weekdayName(rhythm.weekday)}`}
-            value={`${fmtCurrency(rhythm.total)} across ${rhythm.count} expense${rhythm.count === 1 ? '' : 's'}`}
-            hint="↑ Tap to highlight on the pulse"
+            tag={t('transactions.spendingRhythm')}
+            title={t('transactions.rhythmTitle', { weekday: weekdayName(rhythm.weekday, locale) })}
+            value={t(rhythm.count === 1 ? 'transactions.rhythmValue' : 'transactions.rhythmValuePlural', {
+              amount: formatCurrency(rhythm.total),
+              count: rhythm.count,
+            })}
+            hint={t('transactions.rhythmHint')}
             active={state.hlRhythm}
             onToggle={onToggleRhythm}
           />
@@ -70,10 +74,13 @@ export default function PatternsAside({
             icon={Search}
             tileBg="var(--pb-tint-gold)"
             tileColor="var(--pb-gold)"
-            tag="Repeated habit"
-            title={`${habit.category} appears ${habit.count} time${habit.count === 1 ? '' : 's'}`}
-            value={`${fmtCurrency(habit.total)} total in this category`}
-            hint="🔍 Tap to filter the ledger"
+            tag={t('transactions.repeatedHabit')}
+            title={t(habit.count === 1 ? 'transactions.habitTitle' : 'transactions.habitTitlePlural', {
+              category: categoryLabel(habit.category),
+              count: habit.count,
+            })}
+            value={t('transactions.habitValue', { amount: formatCurrency(habit.total) })}
+            hint={t('transactions.habitHint')}
             active={state.habitActive}
             onToggle={() => onToggleHabit(habit.category)}
           />
@@ -84,10 +91,10 @@ export default function PatternsAside({
             icon={TrendingUp}
             tileBg="var(--pb-tint-coral)"
             tileColor="var(--pb-coral)"
-            tag="Momentum"
-            title={`${momentum.category} accelerated`}
-            value={`${fmtCurrency(momentum.diff)} more in the second half of the period`}
-            hint="↑ Tap to mark the second half"
+            tag={t('transactions.momentum')}
+            title={t('transactions.momentumTitle', { category: categoryLabel(momentum.category) })}
+            value={t('transactions.momentumValue', { amount: formatCurrency(momentum.diff) })}
+            hint={t('transactions.momentumHint')}
             active={state.hlMomentum}
             onToggle={onToggleMomentum}
           />
@@ -101,7 +108,7 @@ export default function PatternsAside({
             p="1rem"
           >
             <Text fontFamily="var(--pb-serif)" fontStyle="italic" fontSize=".95rem" color="var(--pb-ink-faint)">
-              Patterns appear once there are a few expenses in this period.
+              {t('transactions.patternsEmpty')}
             </Text>
           </Box>
         )}

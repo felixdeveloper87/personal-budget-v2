@@ -47,6 +47,7 @@ import {
 import { ToastService } from '../../services/toast'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 interface InstallmentPlanDrawerProps {
   plan: InstallmentPlan | null
@@ -54,8 +55,6 @@ interface InstallmentPlanDrawerProps {
   /** Reload the list after the plan is edited or deleted. */
   onChanged: () => void
 }
-
-const money = (value: number) => `£${value.toFixed(2)}`
 
 function getPlanStartDate(plan: InstallmentPlan): string {
   return plan.transactions
@@ -96,6 +95,7 @@ function DetailRow({ k, v }: { k: string; v: string }) {
  */
 export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: InstallmentPlanDrawerProps) {
   const ed = useEd()
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const open = plan != null
   const [displayPlan, setDisplayPlan] = useState<InstallmentPlan | null>(plan)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -161,11 +161,11 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load account options',
+          title: t('installments.drawer.loadOptionsError'),
           dedupeKey: `installment-options-load-failed:${displayPlan.id}`,
         })
       })
-  }, [editDisclosure.isOpen, displayPlan])
+  }, [editDisclosure.isOpen, displayPlan, t])
 
   // Escape to close + focus management.
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const firstTransaction = p.transactions[0]
   const title = firstTransaction?.description
     ? getInstallmentPlanTitle(firstTransaction.description)
-    : 'Installment plan'
+    : t('installments.plan.fallbackTitle')
   const progressPct = p.totalInstallments > 0
     ? Math.min(100, Math.round((paidCount / p.totalInstallments) * 100))
     : 0
@@ -218,8 +218,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
     try {
       await deleteInstallmentPlan(p.id)
       ToastService.success({
-        title: 'Installment plan deleted',
-        description: 'All installments have been removed',
+        title: t('installments.drawer.deletedTitle'),
+        description: t('installments.drawer.deletedDescription'),
         duration: 2000,
         dedupeKey: `installment-plan-deleted:${p.id}`,
       })
@@ -228,7 +228,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       onClose()
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not delete installment plan',
+        title: t('installments.drawer.deleteError'),
         duration: 3000,
         dedupeKey: `installment-plan-delete-failed:${p.id}`,
       })
@@ -242,7 +242,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
     const nextTotal = Number(draftTotalAmount)
     if (nextTotal <= 0 || Number.isNaN(nextTotal) || nextValue <= 0 || Number.isNaN(nextValue) || !draftStartDate || !draftAccountId) {
       ToastService.warning({
-        title: 'Enter a valid total, installment amount and date',
+        title: t('installments.drawer.invalidPlan'),
         duration: 2500,
         dedupeKey: `installment-plan-invalid:${p.id}`,
       })
@@ -259,8 +259,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
         paymentMethodId: draftPaymentMethodId,
       })
       ToastService.success({
-        title: 'Installment plan updated',
-        description: 'Installments were recalculated.',
+        title: t('installments.drawer.updatedTitle'),
+        description: t('installments.drawer.updatedDescription'),
         duration: 2500,
         dedupeKey: `installment-plan-updated:${p.id}`,
       })
@@ -268,7 +268,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       onChanged()
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not update installment plan',
+        title: t('installments.drawer.updateError'),
         duration: 3000,
         dedupeKey: `installment-plan-update-failed:${p.id}`,
       })
@@ -310,7 +310,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       <Box
         role="dialog"
         aria-modal={open ? 'true' : undefined}
-        aria-label={`Installment plan detail: ${title}`}
+        aria-label={t('installments.drawer.detailAria', { title })}
         position="absolute"
         bg="var(--pb-surface)"
         boxShadow="var(--pb-shadow-lift)"
@@ -359,13 +359,13 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               {title}
             </Text>
             <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.06em">
-              {firstTransaction?.category ?? 'Installment plan'}
+              {firstTransaction?.category ? categoryLabel(firstTransaction.category) : t('installments.plan.fallbackTitle')}
             </Text>
           </Box>
           <VStack spacing="0.4rem" align="flex-end">
             <IconButton
               ref={closeRef}
-              aria-label="Close installment detail"
+              aria-label={t('installments.drawer.closeAria')}
               icon={<Icon as={X} boxSize="18px" />}
               size="sm"
               variant="ghost"
@@ -382,7 +382,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               style={{ fontVariantNumeric: 'tabular-nums' }}
               whiteSpace="nowrap"
             >
-              {money(p.installmentValue)}
+              {formatCurrency(p.installmentValue)}
             </Text>
           </VStack>
         </Flex>
@@ -402,15 +402,15 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             >
               <HStack spacing="0.5rem">
                 <Icon as={CheckCircle2} boxSize="16px" />
-                <Text fontSize=".9rem" fontWeight={600}>Completed plan</Text>
+                <Text fontSize=".9rem" fontWeight={600}>{t('installments.drawer.completedPlan')}</Text>
               </HStack>
-              <Text fontSize=".9rem">{p.totalInstallments} of {p.totalInstallments} paid</Text>
+              <Text fontSize=".9rem">{t('installments.progress.paid', { paid: p.totalInstallments, total: p.totalInstallments })}</Text>
             </HStack>
           ) : (
             <Box>
               <Flex justify="space-between" align="baseline" mb="0.5rem">
                 <Text fontSize=".85rem" fontWeight={600} color="var(--pb-ink-soft)">
-                  {paidCount} of {p.totalInstallments} paid
+                  {t('installments.progress.paid', { paid: paidCount, total: p.totalInstallments })}
                 </Text>
                 <Text fontSize="1rem" fontWeight={700} color="var(--pb-forest-2)">{progressPct}%</Text>
               </Flex>
@@ -422,11 +422,11 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
 
           {/* Detail rows */}
           <Box mt="1.1rem" borderTop="1px solid var(--pb-hair)">
-            <DetailRow k="Per installment" v={money(p.installmentValue)} />
-            <DetailRow k="Total" v={money(p.totalAmount)} />
-            <DetailRow k="Installments" v={`${p.totalInstallments}`} />
-            <DetailRow k="Card" v={p.paymentMethodName ?? 'No card linked'} />
-            <DetailRow k="Account" v={p.accountName ?? 'Not linked'} />
+            <DetailRow k={t('installments.drawer.perInstallment')} v={formatCurrency(p.installmentValue)} />
+            <DetailRow k={t('installments.drawer.total')} v={formatCurrency(p.totalAmount)} />
+            <DetailRow k={t('installments.drawer.installments')} v={`${p.totalInstallments}`} />
+            <DetailRow k={t('installments.drawer.card')} v={p.paymentMethodName ?? t('installments.drawer.noCardLinked')} />
+            <DetailRow k={t('installments.drawer.account')} v={p.accountName ?? t('installments.drawer.notLinked')} />
           </Box>
 
           {/* Action buttons */}
@@ -444,7 +444,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               _hover={{ bg: 'var(--pb-surface-3)' }}
               onClick={editDisclosure.onOpen}
             >
-              Edit plan
+              {t('installments.drawer.editPlan')}
             </Button>
             <Button
               h="42px"
@@ -459,7 +459,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               _hover={{ bg: 'var(--pb-tint-coral)', borderColor: 'var(--pb-coral)' }}
               onClick={deleteDisclosure.onOpen}
             >
-              Delete
+              {t('installments.drawer.delete')}
             </Button>
           </HStack>
 
@@ -473,12 +473,12 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             mt="1.4rem"
             mb="0.6rem"
           >
-            Schedule
+            {t('installments.drawer.schedule')}
           </Text>
           <VStack align="stretch" spacing="0.5rem">
             {sortedTransactions.map((transaction) => {
               const isPaid = new Date(transaction.date) < new Date()
-              const formattedDate = new Date(transaction.date).toLocaleDateString('en-GB', {
+              const formattedDate = formatDate(new Date(transaction.date), {
                 day: '2-digit',
                 month: 'short',
                 year: 'numeric',
@@ -506,7 +506,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                   </HStack>
                   <HStack spacing="0.55rem" flexShrink={0}>
                     <Text fontSize=".9rem" fontWeight={700} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {money(transaction.amount)}
+                      {formatCurrency(transaction.amount)}
                     </Text>
                     <Text
                       fontSize="10px"
@@ -517,7 +517,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                       bg={isPaid ? 'var(--pb-tint-income)' : 'var(--pb-surface-3)'}
                       color={isPaid ? 'var(--pb-income)' : 'var(--pb-ink-soft)'}
                     >
-                      {isPaid ? 'Paid' : 'Pending'}
+                      {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
                     </Text>
                   </HStack>
                 </HStack>
@@ -548,10 +548,10 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </Box>
               <VStack align="flex-start" spacing={0}>
                 <Text fontWeight={700} fontSize="md" color={titleColor}>
-                  Edit installment plan
+                  {t('installments.drawer.editModal.title')}
                 </Text>
                 <Text fontSize="xs" color={captionColor}>
-                  Recalculate all installments.
+                  {t('installments.drawer.editModal.subtitle')}
                 </Text>
               </VStack>
             </HStack>
@@ -560,13 +560,13 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             <VStack align="stretch" spacing={4}>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  Account
+                  {t('installments.drawer.account')}
                 </FormLabel>
                 <Select
                   size="sm"
                   value={draftAccountId ?? ''}
                   onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
-                  placeholder="Select account"
+                  placeholder={t('installments.drawer.editModal.selectAccount')}
                 >
                   {accounts.filter((account) => account.active).map((account) => (
                     <option key={account.id} value={account.id}>{account.name}</option>
@@ -575,7 +575,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </FormControl>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  Payment method
+                  {t('installments.drawer.editModal.paymentMethod')}
                 </FormLabel>
                 <Select
                   size="sm"
@@ -589,7 +589,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                     }
                   }}
                 >
-                  <option value="">No payment method</option>
+                  <option value="">{t('installments.drawer.editModal.noPaymentMethod')}</option>
                   {paymentMethods.filter((method) => method.active).map((method) => (
                     <option key={method.id} value={method.id}>{method.name}</option>
                   ))}
@@ -597,7 +597,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </FormControl>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  First installment date
+                  {t('installments.drawer.editModal.firstDate')}
                 </FormLabel>
                 <Input
                   type="date"
@@ -608,7 +608,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </FormControl>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  Purchase total
+                  {t('installments.drawer.editModal.purchaseTotal')}
                 </FormLabel>
                 <Input
                   type="number"
@@ -621,7 +621,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </FormControl>
               <FormControl>
                 <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  Amount per installment
+                  {t('installments.drawer.editModal.amountPerInstallment')}
                 </FormLabel>
                 <Input
                   type="number"
@@ -636,10 +636,10 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
           </ModalBody>
           <ModalFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
             <Button variant="ghost" fontSize="sm" color={captionColor} onClick={editDisclosure.onClose}>
-              Cancel
+              {t('installments.drawer.cancel')}
             </Button>
             <Button colorScheme="blue" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
-              Save changes
+              {t('installments.drawer.editModal.save')}
             </Button>
           </ModalFooter>
         </ModalContent>
@@ -678,18 +678,17 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </Box>
               <VStack align="flex-start" spacing={0}>
                 <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
-                  Delete installment plan
+                  {t('installments.drawer.deleteModal.title')}
                 </Text>
                 <Text fontSize="xs" color={captionColor}>
-                  This cannot be undone.
+                  {t('installments.drawer.deleteModal.subtitle')}
                 </Text>
               </VStack>
             </AlertDialogHeader>
 
             <AlertDialogBody px={6} pb={4}>
               <Text fontSize="sm" color={captionColor}>
-                All <Text as="span" fontWeight={700} color={titleColor}>{p.totalInstallments}</Text>{' '}
-                installments will be permanently removed.
+                {t('installments.drawer.deleteModal.body', { count: p.totalInstallments })}
               </Text>
             </AlertDialogBody>
 
@@ -702,17 +701,17 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                 fontWeight={600}
                 color={captionColor}
               >
-                Cancel
+                {t('installments.drawer.cancel')}
               </Button>
               <Button
                 onClick={handleDelete}
                 isLoading={isDeleting}
-                loadingText="Deleting…"
+                loadingText={t('installments.drawer.deleteModal.deleting')}
                 fontSize="sm"
                 fontWeight={700}
                 colorScheme="red"
               >
-                Delete
+                {t('installments.drawer.delete')}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

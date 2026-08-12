@@ -3,6 +3,7 @@ import { Transaction } from '../types'
 import { searchTransactions } from '../api'
 import { useAuth } from './AuthContext'
 import { ToastService } from '../services/toast'
+import { translateNow } from '../i18n'
 
 export interface SearchFilters {
   text?: string
@@ -39,7 +40,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     } catch (err) {
       console.error('Erro ao buscar transações', err)
       ToastService.apiError(err, {
-        title: 'Could not run search',
+        title: translateNow('search.runFailed'),
         dedupeKey: 'search-failed',
       })
       setResults([])

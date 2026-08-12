@@ -1,4 +1,5 @@
 import type { Transaction } from '../types'
+import { translateNow } from '../i18n'
 import { formatDateBR } from './dateTime'
 
 function localDateKey(date = new Date()): string {
@@ -22,14 +23,23 @@ export function formatTransactionAccount(
     transaction.status === 'PENDING' ||
     Boolean(transaction.paymentDate && transaction.paymentDate > localDateKey())
 
-  const onDate =
-    transaction.paymentDate && formatDateBR(transaction.paymentDate) !== 'Invalid Date'
-      ? ` on ${formatDateBR(transaction.paymentDate)}`
-      : ''
+  const formattedDate = transaction.paymentDate
+    ? formatDateBR(transaction.paymentDate)
+    : null
+  const invalidDate = translateNow('date.invalid', undefined, 'Invalid date')
+  const onDate = formattedDate && formattedDate !== invalidDate
+    ? translateNow('transaction.account.onDate', { date: formattedDate })
+    : ''
 
   if (transaction.type === 'INCOME') {
-    return `${scheduled ? 'Will be paid' : 'Paid'} into ${transaction.accountName}${onDate}`
+    return translateNow(
+      scheduled ? 'transaction.account.income.scheduled' : 'transaction.account.income.paid',
+      { account: transaction.accountName, date: onDate },
+    )
   }
 
-  return `${scheduled ? 'Will be debited' : 'Debited'} from ${transaction.accountName}${onDate}`
+  return translateNow(
+    scheduled ? 'transaction.account.expense.scheduled' : 'transaction.account.expense.paid',
+    { account: transaction.accountName, date: onDate },
+  )
 }

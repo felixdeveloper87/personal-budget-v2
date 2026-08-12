@@ -8,6 +8,7 @@ import {
 } from '@chakra-ui/react'
 import type { LucideIcon } from '../../../ui/icons'
 import { BarChart3 } from '../../../ui/icons'
+import { useI18n } from '../../../../i18n'
 
 export interface ChartEmptyStateProps {
   title?: string
@@ -20,10 +21,13 @@ export interface ChartEmptyStateProps {
  * copy that was misleading for empty datasets.
  */
 export default function ChartEmptyState({
-  title = 'No data for this period',
-  description = 'Try another date range or add a transaction.',
+  title,
+  description,
   icon: IconComponent = BarChart3,
 }: ChartEmptyStateProps) {
+  const { t } = useI18n()
+  const displayTitle = title ?? t('charts.noDataPeriod')
+  const displayDescription = description ?? t('charts.emptyHelp')
   const surfaceBg = useColorModeValue('gray.50', 'whiteAlpha.50')
   const surfaceBorder = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const iconBg = useColorModeValue('white', 'whiteAlpha.100')
@@ -55,10 +59,10 @@ export default function ChartEmptyState({
           <Icon as={IconComponent} boxSize={6} color={iconColor} strokeWidth={1.75} />
         </Box>
         <Text fontSize="sm" fontWeight={700} color={titleColor}>
-          {title}
+          {displayTitle}
         </Text>
         <Text fontSize="xs" color={descColor} lineHeight="1.5">
-          {description}
+          {displayDescription}
         </Text>
       </VStack>
     </Center>

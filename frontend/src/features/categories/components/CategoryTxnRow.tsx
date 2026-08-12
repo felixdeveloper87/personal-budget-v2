@@ -1,7 +1,8 @@
 import { Box, Flex, Icon, Text } from '@chakra-ui/react'
 import { type LucideIcon } from '../../../components/ui/icons'
-import { gbp, hexA, shortDate } from '../data/format'
+import { hexA } from '../data/format'
 import type { CategoryTxn, Side } from '../data/types'
+import { useI18n } from '../../../i18n'
 
 interface CategoryTxnRowProps {
   txn: CategoryTxn
@@ -12,6 +13,7 @@ interface CategoryTxnRowProps {
 
 /** A single sample transaction inside a category's expanded row. */
 export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRowProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const sign = side === 'expense' ? '−' : '+'
   const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
 
@@ -44,7 +46,9 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
 
       <Box minW={0} flex={1}>
         <Text fontSize="0.98rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>
-          {txn.merchant}
+          {txn.merchantIsCategory
+            ? txn.merchant === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(txn.merchant)
+            : txn.merchant}
         </Text>
         <Text
           fontFamily="var(--pb-mono)"
@@ -54,7 +58,7 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
           mt="0.12rem"
           noOfLines={1}
         >
-          {shortDate(txn.purchaseDate)} · {txn.account}
+          {formatDate(txn.purchaseDate, { day: 'numeric', month: 'short' })} · {txn.account}
         </Text>
       </Box>
 
@@ -67,7 +71,7 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {sign}
-          {gbp(txn.amount, 2)}
+          {formatCurrency(txn.amount)}
         </Text>
         <Text
           mt="0.18rem"
@@ -77,7 +81,9 @@ export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRo
           textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
-          Paid {shortDate(txn.settlesDate)}
+          {t('categories.paidDate', {
+            date: formatDate(txn.settlesDate, { day: 'numeric', month: 'short' }),
+          })}
         </Text>
       </Box>
     </Flex>

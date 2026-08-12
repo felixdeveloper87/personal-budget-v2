@@ -10,8 +10,10 @@ import { ArrowUp } from '../ui/icons'
 import { useEd } from '../../editorial'
 import { FOOTER } from '../../pages/landing-v3/landingV3.config'
 import BrandMark from '../brand/BrandMark'
+import { useI18n } from '../../i18n'
 
 export default function Footer() {
+  const { t } = useI18n()
   const ed = useEd()
   const fallbackBg = useColorModeValue('#f5f1e8', '#070a08')
   const fallbackText = useColorModeValue('#16241c', '#efeae0')
@@ -75,9 +77,9 @@ export default function Footer() {
           letterSpacing="-0.04em"
           color={text}
         >
-          Money is not the goal.{' '}
+          {t('footer.statement')}{' '}
           <Text as="span" color={jade} fontStyle="italic" fontWeight={400}>
-            Clarity is.
+            {t('footer.statementAccent')}
           </Text>
         </Text>
       </Flex>
@@ -124,7 +126,7 @@ export default function Footer() {
           color={muted}
         >
           <Text fontSize={{ base: 'sm', md: 'md' }}>
-            {FOOTER.tagline}
+            {t('footer.tagline', undefined, FOOTER.tagline)}
           </Text>
 
           <Flex
@@ -135,11 +137,11 @@ export default function Footer() {
             letterSpacing="0.04em"
             flexWrap="wrap"
           >
-            <Text>{FOOTER.note}</Text>
-            <Text>© {year} Personal Budget</Text>
-            <Tooltip label="Back to top" hasArrow placement="top" openDelay={250}>
+            <Text>{t('footer.note', undefined, FOOTER.note)}</Text>
+            <Text>{t('footer.copyright', { year })}</Text>
+            <Tooltip label={t('footer.backToTop')} hasArrow placement="top" openDelay={250}>
               <IconButton
-                aria-label="Scroll to top"
+                aria-label={t('footer.scrollToTop')}
                 icon={<ArrowUp size={14} strokeWidth={2} />}
                 size="sm"
                 variant="ghost"

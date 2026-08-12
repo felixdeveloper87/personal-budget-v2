@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { Transaction, MonthlySummary } from '../types'
 import { PeriodType } from '../types'
 import { getTransactionDate, type TransactionDateBasis } from '../utils/transactionDates'
+import { useI18n } from '../i18n'
 
 export function getPreviousPeriodDate(date: Date, period: PeriodType): Date {
   const prev = new Date(date)
@@ -40,6 +41,7 @@ export function usePeriodData(
   selectedDate: Date,
   dateBasis: TransactionDateBasis = 'cash-flow',
 ): PeriodData {
+  const { locale, t } = useI18n()
   return useMemo(() => {
     // Force recalculation by creating new date objects
     const now = new Date(selectedDate.getTime())
@@ -51,7 +53,7 @@ export function usePeriodData(
       case 'day':
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
         endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59)
-        label = now.toLocaleDateString('en-GB', { 
+        label = now.toLocaleDateString(locale, {
           weekday: 'long', 
           year: 'numeric', 
           month: 'long', 
@@ -70,13 +72,16 @@ export function usePeriodData(
         endOfWeek.setDate(startOfWeek.getDate() + 6)
         endDate = new Date(endOfWeek.getFullYear(), endOfWeek.getMonth(), endOfWeek.getDate(), 23, 59, 59)
         
-        label = `Week of ${startDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}`
+        label = t('period.weekOf', {
+          start: startDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+          end: endDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' }),
+        })
         break
 
       case 'month':
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-        label = now.toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
+        label = now.toLocaleDateString(locale, { year: 'numeric', month: 'long' })
         break
 
       case 'year':
@@ -88,7 +93,7 @@ export function usePeriodData(
       default:
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
-        label = now.toLocaleDateString('en-GB', { year: 'numeric', month: 'long' })
+        label = now.toLocaleDateString(locale, { year: 'numeric', month: 'long' })
     }
 
     // ✅ Filtro ajustado: trabalha apenas com "tx.dateTime"
@@ -118,5 +123,5 @@ export function usePeriodData(
       expense,
       balance
     }
-  }, [transactions, selectedPeriod, selectedDate, dateBasis])
+  }, [transactions, selectedPeriod, selectedDate, dateBasis, locale, t])
 }

@@ -1,6 +1,7 @@
 import { Box, Text, Input, HStack, Icon, Button, VStack, Wrap, WrapItem } from '@chakra-ui/react'
 import { Calendar, Clock, CalendarCheck } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { useI18n } from '../../../i18n'
 
 interface DateSelectorProps {
   date: string
@@ -14,8 +15,10 @@ interface DateSelectorProps {
  * - Uses HTML5 date input for native date picker
  * - Handles date formatting and validation
  */
-export default function DateSelector({ date, onChange, label = 'What date?' }: DateSelectorProps) {
+export default function DateSelector({ date, onChange, label }: DateSelectorProps) {
+  const { t, formatDate } = useI18n()
   const colors = useThemeColors()
+  const displayLabel = label ?? t('form.whatDate')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value)
@@ -31,19 +34,19 @@ export default function DateSelector({ date, onChange, label = 'What date?' }: D
     
     return [
       {
-        label: 'Today',
+        label: t('common.today'),
         value: today.toISOString().slice(0, 10),
         icon: CalendarCheck,
         color: 'green'
       },
       {
-        label: 'Tomorrow',
+        label: t('form.tomorrow'),
         value: tomorrow.toISOString().slice(0, 10),
         icon: CalendarCheck,
         color: 'green'
       },
       {
-        label: 'Yesterday',
+        label: t('form.yesterday'),
         value: yesterday.toISOString().slice(0, 10),
         icon: Clock,
         color: 'blue'
@@ -94,7 +97,7 @@ export default function DateSelector({ date, onChange, label = 'What date?' }: D
                   zIndex={2}
                   cursor="pointer"
                   fontSize="16px"
-                  aria-label={label}
+                  aria-label={displayLabel}
                   sx={{
                     '&::-webkit-calendar-picker-indicator': {
                       position: 'absolute',
@@ -140,7 +143,7 @@ export default function DateSelector({ date, onChange, label = 'What date?' }: D
                       lineHeight="1.1"
                       noOfLines={1}
                     >
-                      {label}
+                      {displayLabel}
                     </Text>
                   </HStack>
 
@@ -157,7 +160,7 @@ export default function DateSelector({ date, onChange, label = 'What date?' }: D
                     textUnderlineOffset="3px"
                     textAlign="right"
                   >
-                    {new Date(`${date}T00:00:00`).toLocaleDateString('en-GB')}
+                    {date ? formatDate(date) : '—'}
                   </Text>
                 </HStack>
               </Box>

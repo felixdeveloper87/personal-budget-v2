@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Box, Text, VStack } from '@chakra-ui/react'
-import { fmtCurrency } from '../../dashboard/components/format'
+import { useI18n } from '../../../i18n'
 
 interface DayToDaySummaryProps {
   expense: number
@@ -15,6 +15,7 @@ export default function DayToDaySummary({
   narrativePeriodLabel,
   periodNavigator,
 }: DayToDaySummaryProps) {
+  const { t, formatCurrency } = useI18n()
   return (
     <Box
       bg="var(--pb-summary-petrol)"
@@ -30,21 +31,25 @@ export default function DayToDaySummary({
       <VStack align="stretch" spacing={4}>
         <VStack align="stretch" spacing={1}>
           <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-            Spending - {periodLabel}
+            {t('behaviour.summary.heading', { period: periodLabel })}
           </Text>
-          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">Expenses by transaction date</Text>
+          <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('behaviour.summary.subtitle')}</Text>
         </VStack>
 
         <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
           {expense > 0 ? (
-            <>You spent <Text as="em" color="var(--pb-summary-coral)">{fmtCurrency(expense)}</Text> in {narrativePeriodLabel}.</>
+            <>
+              {t('behaviour.summary.spentPrefix')}{' '}
+              <Text as="em" color="var(--pb-summary-coral)">{formatCurrency(expense)}</Text>{' '}
+              {t('behaviour.summary.spentSuffix', { period: narrativePeriodLabel })}
+            </>
           ) : (
-            <>No expenses recorded in {narrativePeriodLabel}.</>
+            <>{t('behaviour.summary.empty', { period: narrativePeriodLabel })}</>
           )}
         </Text>
 
         <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-          Installments are shown in Payments and Commitments
+          {t('behaviour.summary.installmentsNote')}
         </Text>
       </VStack>
     </Box>

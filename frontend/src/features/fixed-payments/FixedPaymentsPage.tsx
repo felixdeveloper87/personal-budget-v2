@@ -20,6 +20,7 @@ import {
   TrendingUp,
 } from '../../components/ui/icons'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
@@ -30,18 +31,11 @@ interface FixedPaymentsPageProps {
   onDataChange?: () => void
 }
 
-const money = (value: number) =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
-
-function formatDate(value?: string) {
-  if (!value) return 'Not scheduled'
-  return new Date(value).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-}
-
 export default function FixedPaymentsPage({
   embedded = false,
   onDataChange,
 }: FixedPaymentsPageProps) {
+  const { t, locale } = useI18n()
   const [items, setItems] = useState<RecurringTransaction[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedItem, setSelectedItem] = useState<RecurringTransaction | null>(null)
@@ -53,13 +47,13 @@ export default function FixedPaymentsPage({
       onDataChange?.()
     } catch (err) {
       ToastService.apiError(err, {
-        title: 'Could not load fixed payments',
+        title: t('fixedPayments.toast.loadFailed'),
         dedupeKey: 'fixed-payments-page-load-failed',
       })
     } finally {
       setLoading(false)
     }
-  }, [onDataChange])
+  }, [onDataChange, t])
 
   useEffect(() => { void load() }, [load])
 
@@ -82,9 +76,9 @@ export default function FixedPaymentsPage({
       }
     }
     active.sort((a, b) => b.amount - a.amount)
-    cancelled.sort((a, b) => a.description.localeCompare(b.description))
+    cancelled.sort((a, b) => a.description.localeCompare(b.description, locale))
     return { active, cancelled, income, expenses, net: income - expenses }
-  }, [items])
+  }, [items, locale])
 
   const body = (
     <>
@@ -138,6 +132,7 @@ export default function FixedPaymentsPage({
 /* -------------------------------------------------------------------------- */
 
 function FixedPaymentsHero({ summary }: { summary: { active: RecurringTransaction[]; income: number; expenses: number; net: number } }) {
+  const { t, formatCurrency } = useI18n()
   return (
     <Box
       overflow="hidden"
@@ -154,16 +149,16 @@ function FixedPaymentsHero({ summary }: { summary: { active: RecurringTransactio
       <Flex position="relative" zIndex={1} direction={{ base: 'column', lg: 'row' }} justify="space-between" gap={3} align={{ lg: 'center' }}>
         <HStack spacing={3} align="baseline">
           <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" opacity={0.76} whiteSpace="nowrap">
-            Monthly expenses
+            {t('fixedPayments.hero.monthlyExpenses')}
           </Text>
           <Text className="num" fontSize={{ base: '1.5rem', md: '1.85rem' }} fontWeight={500} lineHeight="1" letterSpacing="-0.035em" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {money(summary.expenses)}
+            {formatCurrency(summary.expenses)}
           </Text>
         </HStack>
         <SimpleGrid columns={{ base: 2, lg: 3 }} spacing={{ base: 2, md: 3.5 }} minW={{ lg: '300px' }}>
-          <HeroMetric label="Active rules" value={String(summary.active.length)} />
-          <HeroMetric label="Fixed income" value={money(summary.income)} />
-          <HeroMetric label="Monthly net" value={money(summary.net)} />
+          <HeroMetric label={t('fixedPayments.hero.activeRules')} value={String(summary.active.length)} />
+          <HeroMetric label={t('fixedPayments.hero.fixedIncome')} value={formatCurrency(summary.income)} />
+          <HeroMetric label={t('fixedPayments.hero.monthlyNet')} value={formatCurrency(summary.net)} />
         </SimpleGrid>
       </Flex>
     </Box>
@@ -192,6 +187,7 @@ function FixedPaymentsBoard({
   cancelled: RecurringTransaction[]
   onOpenItem: (item: RecurringTransaction) => void
 }) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const items = useMemo(() => [...active, ...cancelled], [active, cancelled])
   const [selectedId, setSelectedId] = useState<number>(() => items[0]?.id ?? -1)
 
@@ -206,7 +202,10 @@ function FixedPaymentsBoard({
 
   const isIncome = selected.type === 'INCOME'
   const amountColor = isIncome ? 'var(--pb-income-2)' : 'var(--pb-coral)'
-  const caption = [selected.category, selected.accountName ?? 'No account'].filter(Boolean).join(' · ')
+  const caption = [categoryLabel(selected.category), selected.accountName ?? t('fixedPayments.noAccount')].filter(Boolean).join(' · ')
+  const displayDate = (value?: string) => value
+    ? formatDate(value, { day: '2-digit', month: 'short', year: 'numeric' })
+    : t('fixedPayments.notScheduled')
 
   return (
     <Box p={{ base: 3, md: 3.5 }} borderRadius="16px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)">
@@ -216,8 +215,8 @@ function FixedPaymentsBoard({
           <Icon as={CalendarClock} boxSize={4} weight="duotone" />
         </Flex>
         <Box>
-          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">Fixed payments</Text>
-          <Text fontSize="xs" color="var(--pb-ink-soft)">Select a rule to see its details</Text>
+          <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" lineHeight="1.2">{t('fixedPayments.title')}</Text>
+          <Text fontSize="xs" color="var(--pb-ink-soft)">{t('fixedPayments.selectRule')}</Text>
         </Box>
       </HStack>
 
@@ -225,7 +224,7 @@ function FixedPaymentsBoard({
         {/* ── Left nav panel ── */}
         <Flex
           as="nav"
-          aria-label="Fixed payments"
+          aria-label={t('fixedPayments.title')}
           direction={{ base: 'row', md: 'column' }}
           gap={1.5}
           flexShrink={0}
@@ -266,10 +265,10 @@ function FixedPaymentsBoard({
                 </HStack>
                 <Flex justify="space-between" align="baseline" gap={2} mt={0.5}>
                   <Text fontFamily="var(--pb-mono)" fontSize="9px" color="var(--pb-ink-faint)" letterSpacing="0.06em" whiteSpace="nowrap">
-                    {isCancelled ? 'Cancelled' : `Day ${item.dayOfMonth}`}
+                    {isCancelled ? t('fixedPayments.status.cancelled') : t('fixedPayments.day', { day: item.dayOfMonth })}
                   </Text>
                   <Text fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={500} color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {money(item.amount)}
+                    {formatCurrency(item.amount)}
                   </Text>
                 </Flex>
               </Box>
@@ -288,7 +287,7 @@ function FixedPaymentsBoard({
             textAlign="left"
             _hover={{ bg: 'var(--pb-surface-3)' }}
             transition="background .16s ease"
-            aria-label="Open payment details"
+            aria-label={t('fixedPayments.openDetails')}
           >
             <Flex justify="space-between" align="center" gap={3} px={3.5} py={3} borderBottom="1px solid var(--pb-hair)">
               <Box minW={0}>
@@ -297,9 +296,9 @@ function FixedPaymentsBoard({
               </Box>
               <HStack spacing={2} flexShrink={0}>
                 <VStack align="flex-end" spacing={0}>
-                  <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">Monthly</Text>
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('fixedPayments.monthly')}</Text>
                   <Text fontSize="sm" fontWeight={600} color={amountColor} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {isIncome ? '+' : '−'}{money(selected.amount)}
+                    {isIncome ? '+' : '−'}{formatCurrency(selected.amount)}
                   </Text>
                 </VStack>
                 <Icon as={ChevronRight} boxSize={4} color="var(--pb-ink-faint)" />
@@ -310,13 +309,13 @@ function FixedPaymentsBoard({
           {/* Detail rows */}
           <VStack align="stretch" spacing={0} pt={2}>
             {[
-              { label: 'Type', value: selected.type === 'INCOME' ? 'Income' : 'Expense' },
-              { label: 'Status', value: selected.active ? 'Active' : 'Cancelled' },
-              { label: 'Payment day', value: `Day ${selected.dayOfMonth}` },
-              { label: 'Next payment', value: formatDate(selected.nextRunDate) },
-              { label: 'Start date', value: formatDate(selected.startDate) },
-              { label: 'Account', value: selected.accountName ?? 'Not linked' },
-              { label: 'Card', value: selected.paymentMethodName ?? 'No card' },
+              { label: t('fixedPayments.detail.type'), value: t(`type.${selected.type}`) },
+              { label: t('fixedPayments.detail.status'), value: selected.active ? t('fixedPayments.status.active') : t('fixedPayments.status.cancelled') },
+              { label: t('fixedPayments.detail.paymentDay'), value: t('fixedPayments.day', { day: selected.dayOfMonth }) },
+              { label: t('fixedPayments.detail.nextPayment'), value: displayDate(selected.nextRunDate) },
+              { label: t('fixedPayments.detail.startDate'), value: displayDate(selected.startDate) },
+              { label: t('fixedPayments.detail.account'), value: selected.accountName ?? t('fixedPayments.notLinked') },
+              { label: t('fixedPayments.detail.card'), value: selected.paymentMethodName ?? t('fixedPayments.noCard') },
             ].map((row) => (
               <Flex key={row.label} justify="space-between" align="center" gap={3} px={3.5} py={2.5} borderTop="1px solid var(--pb-hair)">
                 <HStack spacing={3} minW={0}>
@@ -342,14 +341,15 @@ function FixedPaymentsBoard({
 }
 
 function EmptyState() {
+  const { t } = useI18n()
   return (
     <Flex direction="column" align="center" textAlign="center" py={9} px={4} border="1px dashed var(--pb-hair-2)" borderRadius="15px">
       <Flex w={11} h={11} align="center" justify="center" borderRadius="12px" bg="var(--pb-surface-2)" color="var(--pb-ink-faint)" mb={3}>
         <Icon as={CalendarClock} boxSize={5} weight="duotone" />
       </Flex>
-      <Text fontWeight={600} color="var(--pb-ink)">No fixed payments yet</Text>
+      <Text fontWeight={600} color="var(--pb-ink)">{t('fixedPayments.empty.title')}</Text>
       <Text fontSize="sm" color="var(--pb-ink-soft)" maxW="430px" mt={1}>
-        Fixed payment rules created from a transaction will appear here.
+        {t('fixedPayments.empty.description')}
       </Text>
     </Flex>
   )

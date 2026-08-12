@@ -1,7 +1,9 @@
 import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { Sparkle } from 'lucide-react'
+import { useI18n } from '../../i18n'
 
 export default function ReportInsights({ insights }: { insights: string[] }) {
+  const { t } = useI18n()
   return (
     <Box
       className="avoid-break"
@@ -13,12 +15,12 @@ export default function ReportInsights({ insights }: { insights: string[] }) {
       p={6}
     >
       <Text fontSize="sm" fontWeight={800} color="gray.900" mb={4}>
-        Executive summary
+        {t('reports.executiveSummary')}
       </Text>
 
       {insights.length === 0 ? (
         <Text fontSize="sm" color="gray.500">
-          No insights are available for this period yet.
+          {t('reports.noInsights')}
         </Text>
       ) : (
         <VStack align="stretch" spacing={3.5}>

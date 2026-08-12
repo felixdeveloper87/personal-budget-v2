@@ -10,9 +10,7 @@ import {
 import type { SavingsGoal } from '../../types'
 import { getChallengeStatus } from '../../utils/pennyChallenge'
 import { ChevronDown, Sparkles } from '../ui/icons'
-
-const money = (value: number) =>
-  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP' }).format(value)
+import { useI18n } from '../../i18n'
 
 export interface PennyChallengeSummaryRowProps {
   goal: SavingsGoal
@@ -25,6 +23,7 @@ export interface PennyChallengeSummaryRowProps {
  * (saved, progress, status, day) without taking the full card's vertical space.
  */
 export default function PennyChallengeSummaryRow({ goal, onExpand }: PennyChallengeSummaryRowProps) {
+  const { t, formatCurrency } = useI18n()
   const muted = 'var(--pb-ink-soft)'
   const border = 'var(--pb-hair-2)'
   const accentBg = 'var(--pb-tint-gold)'
@@ -37,12 +36,12 @@ export default function PennyChallengeSummaryRow({ goal, onExpand }: PennyChalle
   const behind = status.catchUp > 0.0049
   const ahead = status.catchUp < -0.0049
   const statusLabel = status.finished
-    ? 'Finished'
+    ? t('goals.challenge.status.finished')
     : behind
-      ? `Behind ${money(status.catchUp)}`
+      ? t('goals.challenge.status.behind', { amount: formatCurrency(status.catchUp) })
       : ahead
-        ? `Ahead ${money(-status.catchUp)}`
-        : 'Up to date'
+        ? t('goals.challenge.status.ahead', { amount: formatCurrency(-status.catchUp) })
+        : t('goals.challenge.status.upToDate')
   const statusScheme = behind ? 'red' : ahead ? 'purple' : 'green'
 
   return (
@@ -78,8 +77,13 @@ export default function PennyChallengeSummaryRow({ goal, onExpand }: PennyChalle
               {goal.name}
             </Text>
             <Text fontSize="xs" color={muted} noOfLines={1}>
-              {money(status.saved)} of {money(status.total)} · Day {status.todayDay}/{status.daysInYear} ·{' '}
-              {progress.toFixed(0)}%
+              {t('goals.challenge.summary', {
+                saved: formatCurrency(status.saved),
+                total: formatCurrency(status.total),
+                day: status.todayDay,
+                days: status.daysInYear,
+                percentage: progress.toFixed(0),
+              })}
             </Text>
           </Box>
 

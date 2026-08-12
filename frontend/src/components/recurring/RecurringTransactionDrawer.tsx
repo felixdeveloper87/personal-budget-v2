@@ -38,6 +38,7 @@ import {
 } from '../../types'
 import { ToastService } from '../../services/toast'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 import '../../features/dashboard/theme/pb-tokens.css'
 
 interface RecurringTransactionDrawerProps {
@@ -45,17 +46,6 @@ interface RecurringTransactionDrawerProps {
   onClose: () => void
   /** Reload the list after the rule is edited or cancelled. */
   onChanged: () => void | Promise<void>
-}
-
-const money = (value: number) => `£${value.toFixed(2)}`
-
-function formatDate(value?: string) {
-  if (!value) return 'Not scheduled'
-  return new Date(value).toLocaleDateString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  })
 }
 
 function DetailRow({ k, v }: { k: string; v: string }) {
@@ -89,6 +79,7 @@ export default function RecurringTransactionDrawer({
   onChanged,
 }: RecurringTransactionDrawerProps) {
   const ed = useEd()
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const open = recurringTransaction != null
   const [displayItem, setDisplayItem] = useState<RecurringTransaction | null>(recurringTransaction)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -153,11 +144,11 @@ export default function RecurringTransactionDrawer({
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load account options',
+          title: t('recurring.optionsLoadFailed'),
           dedupeKey: `recurring-options-load-failed:${displayItem.id}`,
         })
       })
-  }, [isEditing, displayItem])
+  }, [isEditing, displayItem, t])
 
   // Escape to close + focus management.
   useEffect(() => {
@@ -197,7 +188,7 @@ export default function RecurringTransactionDrawer({
     try {
       await cancelRecurringTransaction(r.id)
       ToastService.success({
-        title: 'Fixed payment cancelled',
+        title: t('recurring.cancelledToast'),
         duration: 2000,
         dedupeKey: `recurring-cancelled:${r.id}`,
       })
@@ -206,7 +197,7 @@ export default function RecurringTransactionDrawer({
       onClose()
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not cancel fixed payment',
+        title: t('recurring.cancelFailed'),
         duration: 3000,
         dedupeKey: `recurring-cancel-failed:${r.id}`,
       })
@@ -228,7 +219,7 @@ export default function RecurringTransactionDrawer({
       !draftAccountId
     ) {
       ToastService.warning({
-        title: 'Enter a valid amount and date',
+        title: t('recurring.invalidAmountDate'),
         duration: 2500,
         dedupeKey: `recurring-invalid-amount:${r.id}`,
       })
@@ -246,11 +237,11 @@ export default function RecurringTransactionDrawer({
         applyFrom: draftApplyFrom,
       })
       ToastService.success({
-        title: 'Fixed payment updated',
+        title: t('recurring.updatedToast'),
         description:
           draftApplyFrom === 'CURRENT_MONTH'
-            ? 'The rule and the selected current-month schedule were updated.'
-            : 'This month was kept unchanged; the future schedule was updated.',
+            ? t('recurring.updatedCurrentSchedule')
+            : t('recurring.updatedFutureSchedule'),
         duration: 2500,
         dedupeKey: `recurring-amount-updated:${r.id}`,
       })
@@ -258,7 +249,7 @@ export default function RecurringTransactionDrawer({
       await Promise.resolve(onChanged())
     } catch (err: unknown) {
       ToastService.apiError(err, {
-        title: 'Could not update fixed payment',
+        title: t('recurring.updateFailed'),
         duration: 3000,
         dedupeKey: `recurring-amount-update-failed:${r.id}`,
       })
@@ -284,7 +275,7 @@ export default function RecurringTransactionDrawer({
       <Box
         role="dialog"
         aria-modal={open ? 'true' : undefined}
-        aria-label={`Fixed payment detail: ${r.description}`}
+        aria-label={t('recurring.detailAria', { description: r.description })}
         position="absolute"
         bg="var(--pb-surface)"
         boxShadow="var(--pb-shadow-lift)"
@@ -333,13 +324,13 @@ export default function RecurringTransactionDrawer({
               {r.description}
             </Text>
             <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.06em">
-              {r.category}
+              {categoryLabel(r.category)}
             </Text>
           </Box>
           <VStack spacing="0.4rem" align="flex-end">
             <IconButton
               ref={closeRef}
-              aria-label="Close fixed payment detail"
+              aria-label={t('recurring.closeDetail')}
               icon={<Icon as={X} boxSize="18px" />}
               size="sm"
               variant="ghost"
@@ -356,7 +347,7 @@ export default function RecurringTransactionDrawer({
               style={{ fontVariantNumeric: 'tabular-nums' }}
               whiteSpace="nowrap"
             >
-              {isIncome ? '+' : '−'}{money(r.amount)}
+              {isIncome ? '+' : '−'}{formatCurrency(r.amount)}
             </Text>
           </VStack>
         </Flex>
@@ -374,10 +365,10 @@ export default function RecurringTransactionDrawer({
             color={r.active ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
           >
             <Text fontSize=".9rem" fontWeight={600}>
-              {r.active ? 'Active fixed rule' : 'Cancelled'}
+              {r.active ? t('recurring.activeRule') : t('recurring.cancelled')}
             </Text>
             <Text fontSize=".85rem" color="var(--pb-ink-soft)">
-              {isIncome ? 'Income' : 'Expense'} · Monthly
+              {t(isIncome ? 'type.INCOME' : 'type.EXPENSE')} · {t('recurring.monthly')}
             </Text>
           </HStack>
 
@@ -385,26 +376,26 @@ export default function RecurringTransactionDrawer({
             <VStack align="stretch" spacing={3} mt="1.1rem">
               <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
                 <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>Amount</FormLabel>
+                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.amount')}</FormLabel>
                   <Input value={draftAmount} onChange={(e) => setDraftAmount(e.target.value)} type="number" min={0} step="0.01" size="sm" fontWeight={700} />
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>Start date</FormLabel>
+                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.startDate')}</FormLabel>
                   <Input value={draftStartDate} onChange={(e) => setDraftStartDate(e.target.value)} type="date" size="sm" />
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>Payment day</FormLabel>
+                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.paymentDay')}</FormLabel>
                   <Input value={draftDayOfMonth} onChange={(e) => setDraftDayOfMonth(e.target.value)} type="number" min={1} max={31} step={1} size="sm" />
                 </FormControl>
               </SimpleGrid>
               <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
                 <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>Account</FormLabel>
+                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.account')}</FormLabel>
                   <Select
                     size="sm"
                     value={draftAccountId ?? ''}
                     onChange={(e) => setDraftAccountId(e.target.value ? Number(e.target.value) : null)}
-                    placeholder="Select account"
+                    placeholder={t('recurring.selectAccount')}
                   >
                     {accounts.filter((a) => a.active).map((a) => (
                       <option key={a.id} value={a.id}>{a.name}</option>
@@ -412,13 +403,13 @@ export default function RecurringTransactionDrawer({
                   </Select>
                 </FormControl>
                 <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>Payment method</FormLabel>
+                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.paymentMethod')}</FormLabel>
                   <Select
                     size="sm"
                     value={draftPaymentMethodId ?? ''}
                     onChange={(e) => setDraftPaymentMethodId(e.target.value ? Number(e.target.value) : null)}
                   >
-                    <option value="">No payment method</option>
+                    <option value="">{t('recurring.noPaymentMethod')}</option>
                     {paymentMethods.filter((m) => m.active).map((m) => (
                       <option key={m.id} value={m.id}>{m.name}</option>
                     ))}
@@ -427,19 +418,18 @@ export default function RecurringTransactionDrawer({
               </SimpleGrid>
               <FormControl>
                 <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>
-                  Apply changes from
+                  {t('recurring.applyChangesFrom')}
                 </FormLabel>
                 <Select
                   size="sm"
                   value={draftApplyFrom}
                   onChange={(e) => setDraftApplyFrom(e.target.value as RecurringUpdateScope)}
                 >
-                  <option value="CURRENT_MONTH">This month and future months</option>
-                  <option value="NEXT_MONTH">Next month onwards</option>
+                  <option value="CURRENT_MONTH">{t('recurring.currentAndFuture')}</option>
+                  <option value="NEXT_MONTH">{t('recurring.nextMonthOnwards')}</option>
                 </Select>
                 <Text mt={1} fontSize="2xs" color="var(--pb-ink-faint)">
-                  Previous months always stay unchanged. Reconciled payments can only be changed
-                  from next month.
+                  {t('recurring.applyHelp')}
                 </Text>
               </FormControl>
               <HStack spacing={2}>
@@ -451,7 +441,7 @@ export default function RecurringTransactionDrawer({
                   isDisabled={!draftAccountId}
                   leftIcon={<Icon as={Check} boxSize={3.5} />}
                 >
-                  Save
+                  {t('common.save')}
                 </Button>
                 <Button
                   size="sm"
@@ -462,7 +452,7 @@ export default function RecurringTransactionDrawer({
                     setIsEditing(false)
                   }}
                 >
-                  Cancel
+                  {t('common.cancel')}
                 </Button>
               </HStack>
             </VStack>
@@ -470,12 +460,14 @@ export default function RecurringTransactionDrawer({
             <>
               {/* Detail rows */}
               <Box mt="1.1rem" borderTop="1px solid var(--pb-hair)">
-                <DetailRow k="Monthly amount" v={money(r.amount)} />
-                <DetailRow k="Payment day" v={`Day ${r.dayOfMonth}`} />
-                <DetailRow k="Next payment" v={formatDate(r.nextRunDate)} />
-                <DetailRow k="Start date" v={formatDate(r.startDate)} />
-                <DetailRow k="Account" v={r.accountName ?? 'Not linked'} />
-                <DetailRow k="Card" v={r.paymentMethodName ?? 'No card linked'} />
+                <DetailRow k={t('recurring.monthlyAmount')} v={formatCurrency(r.amount)} />
+                <DetailRow k={t('recurring.paymentDay')} v={t('recurring.dayNumber', { day: r.dayOfMonth })} />
+                <DetailRow k={t('recurring.nextPayment')} v={r.nextRunDate
+                  ? formatDate(r.nextRunDate, { day: '2-digit', month: 'short', year: 'numeric' })
+                  : t('recurring.notScheduled')} />
+                <DetailRow k={t('recurring.startDate')} v={formatDate(r.startDate, { day: '2-digit', month: 'short', year: 'numeric' })} />
+                <DetailRow k={t('recurring.account')} v={r.accountName ?? t('recurring.notLinked')} />
+                <DetailRow k={t('recurring.card')} v={r.paymentMethodName ?? t('recurring.noCardLinked')} />
               </Box>
 
               {/* Actions */}
@@ -494,7 +486,7 @@ export default function RecurringTransactionDrawer({
                     _hover={{ bg: 'var(--pb-surface-3)' }}
                     onClick={() => setIsEditing(true)}
                   >
-                    Edit
+                    {t('common.edit')}
                   </Button>
                   <Button
                     h="42px"
@@ -509,7 +501,7 @@ export default function RecurringTransactionDrawer({
                     _hover={{ bg: 'var(--pb-tint-coral)', borderColor: 'var(--pb-coral)' }}
                     onClick={deleteDisclosure.onOpen}
                   >
-                    Cancel rule
+                    {t('recurring.cancelRule')}
                   </Button>
                 </HStack>
               )}
@@ -544,27 +536,27 @@ export default function RecurringTransactionDrawer({
               </Box>
               <VStack align="flex-start" spacing={0}>
                 <Text fontWeight={700} fontSize="md" color={titleColor}>
-                  Cancel fixed payment
+                  {t('recurring.cancelTitle')}
                 </Text>
                 <Text fontSize="xs" color={captionColor}>
-                  Existing transactions will stay in your history.
+                  {t('recurring.cancelCaption')}
                 </Text>
               </VStack>
             </AlertDialogHeader>
 
             <AlertDialogBody px={6} pb={4}>
               <Text fontSize="sm" color={captionColor}>
-                Future payments for <Text as="span" fontWeight={700} color={titleColor}>{r.description}</Text>{' '}
-                will stop being generated.
+                {t('recurring.cancelBodyBefore')} <Text as="span" fontWeight={700} color={titleColor}>{r.description}</Text>{' '}
+                {t('recurring.cancelBodyAfter')}
               </Text>
             </AlertDialogBody>
 
             <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
               <Button ref={cancelRef} onClick={deleteDisclosure.onClose} variant="ghost" fontSize="sm" color={captionColor}>
-                Keep active
+                {t('recurring.keepActive')}
               </Button>
               <Button colorScheme="red" onClick={handleCancel} isLoading={isCancelling} fontSize="sm">
-                Cancel payment
+                {t('recurring.cancelPayment')}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

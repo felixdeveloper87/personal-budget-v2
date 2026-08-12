@@ -1,9 +1,9 @@
 import { Box, Grid, GridItem, HStack, Icon, Text } from '@chakra-ui/react'
 import type { TxnVM, TxView } from '../transactions.types'
 import { fmtShort } from '../transactions.utils'
-import { fmtCurrency } from '../../dashboard/components/format'
 import CategoryIcon, { Clock } from './CategoryIcon'
 import { Check, CreditCard, ChevronRight } from '../../../components/ui/icons'
+import { useI18n } from '../../../i18n'
 
 interface TxnRowProps {
   txn: TxnVM
@@ -12,6 +12,7 @@ interface TxnRowProps {
 }
 
 export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
+  const { t, locale, formatCurrency, categoryLabel } = useI18n()
   const isIn = txn.type === 'in'
   const amountColor = isIn ? 'var(--pb-income-2)' : 'var(--pb-coral)'
   const sign = isIn ? '+' : '−'
@@ -21,10 +22,12 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
   const settle = (() => {
     if (txn.deferred) {
       const label =
-        view === 'behaviour' ? `Pays ${fmtShort(txn.settlementDate)}` : `Bought ${fmtShort(txn.purchaseDate)}`
+        view === 'behaviour'
+          ? t('transactions.paysDate', { date: fmtShort(txn.settlementDate, locale) })
+          : t('transactions.boughtDate', { date: fmtShort(txn.purchaseDate, locale) })
       return { label, gold: true }
     }
-    return { label: 'Settled', gold: false }
+    return { label: t('transactions.settled'), gold: false }
   })()
 
   return (
@@ -84,7 +87,7 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
           color="var(--pb-ink)"
           noOfLines={1}
         >
-          {txn.merchant}
+          {txn.merchant === txn.category ? categoryLabel(txn.merchant) : txn.merchant}
         </Text>
         <Text
           fontFamily="var(--pb-mono)"
@@ -92,7 +95,7 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
           color="var(--pb-ink-faint)"
           noOfLines={1}
         >
-          {txn.category} · {fmtShort(txn.purchaseDate)} · {txn.account}
+          {categoryLabel(txn.category)} · {fmtShort(txn.purchaseDate, locale)} · {txn.account === 'Unassigned' ? t('transactions.unassigned') : txn.account}
         </Text>
       </GridItem>
 
@@ -107,7 +110,7 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
           whiteSpace="nowrap"
         >
           {sign}
-          {fmtCurrency(txn.amount, { minimumFractionDigits: 2 })}
+          {formatCurrency(txn.amount, { minimumFractionDigits: 2 })}
         </Text>
         <HStack
           spacing="3px"
@@ -137,6 +140,7 @@ export default function TxnRow({ txn, view, onOpen }: TxnRowProps) {
  * on the Cards page, so the row reads as a link there rather than a drawer.
  */
 function StatementRow({ txn, onOpen }: { txn: TxnVM; onOpen: (txn: TxnVM) => void }) {
+  const { t, locale, formatCurrency } = useI18n()
   const count = txn.statement?.count ?? 0
   return (
     <Grid
@@ -181,7 +185,7 @@ function StatementRow({ txn, onOpen }: { txn: TxnVM; onOpen: (txn: TxnVM) => voi
           color="var(--pb-ink)"
           noOfLines={1}
         >
-          {txn.merchant} statement
+          {t('transactions.cardStatementTitle', { name: txn.merchant })}
         </Text>
         <Text
           fontFamily="var(--pb-mono)"
@@ -189,7 +193,10 @@ function StatementRow({ txn, onOpen }: { txn: TxnVM; onOpen: (txn: TxnVM) => voi
           color="var(--pb-ink-faint)"
           noOfLines={1}
         >
-          Credit card · {count} charge{count === 1 ? '' : 's'} · due {fmtShort(txn.settlementDate)}
+          {t(count === 1 ? 'transactions.cardChargesDue' : 'transactions.cardChargesDuePlural', {
+            count,
+            date: fmtShort(txn.settlementDate, locale),
+          })}
         </Text>
       </GridItem>
 
@@ -202,7 +209,7 @@ function StatementRow({ txn, onOpen }: { txn: TxnVM; onOpen: (txn: TxnVM) => voi
           style={{ fontVariantNumeric: 'tabular-nums' }}
           whiteSpace="nowrap"
         >
-          −{fmtCurrency(txn.amount, { minimumFractionDigits: 2 })}
+          −{formatCurrency(txn.amount, { minimumFractionDigits: 2 })}
         </Text>
         <HStack spacing="2px" justify="flex-end" mt="2px" color="var(--pb-forest-2)">
           <Text
@@ -212,7 +219,7 @@ function StatementRow({ txn, onOpen }: { txn: TxnVM; onOpen: (txn: TxnVM) => voi
             textTransform="uppercase"
             whiteSpace="nowrap"
           >
-            View on Cards
+            {t('transactions.viewOnCards')}
           </Text>
           <Icon as={ChevronRight} boxSize="11px" />
         </HStack>

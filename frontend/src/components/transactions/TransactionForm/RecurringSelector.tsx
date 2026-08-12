@@ -14,6 +14,7 @@ import {
 import type { ReactNode } from 'react'
 import { CalendarClock } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { useI18n } from '../../../i18n'
 
 interface RecurringSelectorProps {
   title?: string
@@ -62,13 +63,15 @@ function InlineField({
 }
 
 export default function RecurringSelector({
-  title = 'Fixed payment schedule',
+  title,
   type = 'EXPENSE',
   startDate,
   onStartDateChange,
   dayOfMonth,
   onDayOfMonthChange,
 }: RecurringSelectorProps) {
+  const { t } = useI18n()
+  const displayTitle = title ?? t('form.fixedPaymentSchedule')
   const colors = useThemeColors()
   const isIncome = type === 'INCOME'
   const accentBorder = isIncome ? 'green.400' : 'red.400'
@@ -139,7 +142,7 @@ export default function RecurringSelector({
                   lineHeight="1.2"
                   whiteSpace="nowrap"
                 >
-                  {title}
+                  {displayTitle}
                 </Text>
               </Flex>
 
@@ -162,7 +165,7 @@ export default function RecurringSelector({
                 }}
               >
                 {showStartAndRhythm && (
-                  <InlineField label="First payment" minW="150px" colors={colors}>
+                  <InlineField label={t('form.firstPayment')} minW="150px" colors={colors}>
                     <Input
                       type="date"
                       value={startDate ?? ''}
@@ -176,7 +179,7 @@ export default function RecurringSelector({
                 )}
 
                 {showStartAndRhythm && (
-                  <InlineField label="Frequency" minW="104px" colors={colors}>
+                  <InlineField label={t('form.frequency')} minW="104px" colors={colors}>
                     <Flex
                       align="center"
                       justify="center"
@@ -189,13 +192,13 @@ export default function RecurringSelector({
                       borderStyle="solid"
                       {...fieldShell}
                     >
-                      Monthly
+                      {t('form.monthly')}
                     </Flex>
                   </InlineField>
                 )}
 
                 <InlineField
-                  label={isIncome ? 'Payment day' : 'Due day'}
+                  label={t(isIncome ? 'form.paymentDay' : 'form.dueDay')}
                   minW="90px"
                   colors={colors}
                 >

@@ -4,7 +4,7 @@ import MerchantLogo from '../../../components/ui/MerchantLogo'
 import type { Transaction } from '../../../types'
 import { merchantStats } from '../insights'
 import Panel from './Panel'
-import { fmtCurrency } from './format'
+import { useI18n } from '../../../i18n'
 
 interface TopMerchantsProps {
   transactions: Transaction[]
@@ -27,6 +27,7 @@ function isMerchantTransaction(transaction: Transaction): boolean {
 
 /** Where discretionary money went, grouped by the transaction description. */
 export default function TopMerchants({ transactions }: TopMerchantsProps) {
+  const { t, formatCurrency } = useI18n()
   const { rows, merchantTotal } = useMemo(() => {
     const merchantTransactions = transactions.filter(isMerchantTransaction)
     const allMerchants = merchantStats(merchantTransactions)
@@ -47,15 +48,15 @@ export default function TopMerchants({ transactions }: TopMerchantsProps) {
             textTransform="uppercase"
             color="var(--pb-ink-faint)"
           >
-            Top 5 merchants
+            {t('dashboard.topMerchants')}
           </Text>
           {rows.length > 0 && (
             <VStack align="flex-end" spacing={0.5}>
               <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                Tracked spend
+                {t('dashboard.trackedSpend')}
               </Text>
               <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} lineHeight={1} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {fmtCurrency(merchantTotal)}
+                {formatCurrency(merchantTotal)}
               </Text>
             </VStack>
           )}
@@ -63,7 +64,7 @@ export default function TopMerchants({ transactions }: TopMerchantsProps) {
 
         {rows.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
-            No merchants recorded for this month.
+            {t('dashboard.noMerchants')}
           </Text>
         ) : (
           <VStack align="stretch" spacing={0.75} flex={1}>
@@ -94,6 +95,7 @@ interface MerchantRowProps {
 }
 
 function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
+  const { t, formatCurrency } = useI18n()
   const percentage = Math.round(share * 100)
 
   return (
@@ -162,17 +164,17 @@ function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
                 color="var(--pb-ink)"
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {fmtCurrency(total)}
+                {formatCurrency(total)}
               </Text>
               <Text fontFamily="var(--pb-mono)" fontSize="8.5px" color="var(--pb-ink-faint)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {percentage}% of total
+                {t('dashboard.shareOfTotal', { percentage })}
               </Text>
             </VStack>
           </HStack>
 
           <Box
             role="progressbar"
-            aria-label={`${name}: ${percentage}% of tracked merchant spending`}
+            aria-label={t('dashboard.merchantShareAria', { name, percentage })}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percentage}

@@ -16,6 +16,7 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { Eye } from '../../../components/ui/icons'
+import { useI18n } from '../../../i18n'
 
 export interface HiddenSpendingPace {
   key: string
@@ -35,6 +36,7 @@ export default function RestoreSpendingPaceDialog({
   onClose,
   onConfirm,
 }: RestoreSpendingPaceDialogProps) {
+  const { t } = useI18n()
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set())
 
   useEffect(() => {
@@ -84,10 +86,10 @@ export default function RestoreSpendingPaceDialog({
             </Box>
             <VStack align="flex-start" spacing={0}>
               <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" lineHeight="1.2">
-                Show hidden charts
+                {t('dashboard.showHiddenCharts')}
               </Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)" fontWeight={400}>
-                Select only the charts you want back
+                {t('dashboard.selectCharts')}
               </Text>
             </VStack>
           </HStack>
@@ -121,7 +123,7 @@ export default function RestoreSpendingPaceDialog({
 
         <ModalFooter px={6} py={4} borderTop="1px solid var(--pb-hair)" gap={2}>
           <Button onClick={onClose} variant="ghost" fontSize="sm" fontWeight={600}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={confirmSelection}
@@ -134,7 +136,9 @@ export default function RestoreSpendingPaceDialog({
             _active={{ transform: 'translateY(0)' }}
             _disabled={{ opacity: 0.45, cursor: 'not-allowed', _hover: { transform: 'none' } }}
           >
-            Show selected{selectedKeys.size > 0 ? ` (${selectedKeys.size})` : ''}
+            {selectedKeys.size > 0
+              ? t('dashboard.showSelectedCount', { count: selectedKeys.size })
+              : t('dashboard.showSelected')}
           </Button>
         </ModalFooter>
       </ModalContent>

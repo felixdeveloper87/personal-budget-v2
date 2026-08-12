@@ -4,9 +4,9 @@ import { Box, Flex, HStack, Icon, IconButton, Text, VStack } from '@chakra-ui/re
 import { X, Clock, AlertCircle } from '../../../components/ui/icons'
 import type { TxnVM } from '../transactions.types'
 import { daysBetween, fmtLong } from '../transactions.utils'
-import { fmtCurrency } from '../../dashboard/components/format'
 import CategoryIcon from './CategoryIcon'
 import SettlementTimeline from './SettlementTimeline'
+import { useI18n } from '../../../i18n'
 
 interface TransactionDrawerProps {
   txn: TxnVM | null
@@ -34,6 +34,7 @@ function DetailRow({ k, v }: { k: string; v: string }) {
 }
 
 export default function TransactionDrawer({ txn, onClose }: TransactionDrawerProps) {
+  const { t: translate, locale, formatCurrency, categoryLabel } = useI18n()
   const open = txn != null
   const [displayTxn, setDisplayTxn] = useState<TxnVM | null>(txn)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -93,7 +94,7 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
       <Box
         role="dialog"
         aria-modal={open ? 'true' : undefined}
-        aria-label={`Transaction detail: ${t.merchant}`}
+        aria-label={translate('transactions.detailAria', { merchant: t.merchant })}
         position="absolute"
         bg="var(--pb-surface)"
         boxShadow="var(--pb-shadow-lift)"
@@ -143,13 +144,13 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
               {t.merchant}
             </Text>
             <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.06em">
-              {t.category}
+              {categoryLabel(t.category)}
             </Text>
           </Box>
           <VStack spacing="0.4rem" align="flex-end">
             <IconButton
               ref={closeRef}
-              aria-label="Close transaction detail"
+              aria-label={translate('transactions.closeDetail')}
               icon={<Icon as={X} boxSize="18px" />}
               size="sm"
               variant="ghost"
@@ -167,7 +168,7 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
               whiteSpace="nowrap"
             >
               {isIn ? '+' : '−'}
-              {fmtCurrency(t.amount, { minimumFractionDigits: 2 })}
+              {formatCurrency(t.amount, { minimumFractionDigits: 2 })}
             </Text>
           </VStack>
         </Flex>
@@ -179,11 +180,11 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
 
           {/* Detail rows */}
           <Box mt="1.1rem" borderTop="1px solid var(--pb-hair)">
-            <DetailRow k="Category" v={t.category} />
-            <DetailRow k="Account" v={t.account} />
-            <DetailRow k="Bought on" v={fmtLong(t.purchaseDate)} />
-            <DetailRow k={isIn ? 'Credited on' : 'Debits on'} v={fmtLong(t.settlementDate)} />
-            <DetailRow k="Type" v={t.deferred ? 'Deferred · card' : 'Immediate'} />
+            <DetailRow k={translate('transactions.category')} v={categoryLabel(t.category)} />
+            <DetailRow k={translate('transactions.account')} v={t.account === 'Unassigned' ? translate('transactions.unassigned') : t.account} />
+            <DetailRow k={translate('transactions.boughtOn')} v={fmtLong(t.purchaseDate, locale)} />
+            <DetailRow k={translate(isIn ? 'transactions.creditedOn' : 'transactions.debitsOn')} v={fmtLong(t.settlementDate, locale)} />
+            <DetailRow k={translate('transactions.type')} v={translate(t.deferred ? 'transactions.deferredCard' : 'transactions.immediate')} />
           </Box>
 
           {/* Contextual note */}
@@ -206,14 +207,14 @@ export default function TransactionDrawer({ txn, onClose }: TransactionDrawerPro
             />
             <Text fontSize=".9rem" lineHeight="1.45">
               {t.deferred
-                ? `Bought on ${fmtLong(t.purchaseDate)}, this will be ${
-                    isIn ? 'credited to' : 'debited from'
-                  } ${t.account} on ${fmtLong(t.settlementDate)} — ${days} day${
-                    days === 1 ? '' : 's'
-                  } later. In Payments view it sits on its settlement date.`
-                : `Money ${
-                    isIn ? 'arrived' : 'left'
-                  } on the day of the transaction — it reads the same in Behaviour and Payments views.`}
+                ? translate(days === 1 ? 'transactions.deferredNote' : 'transactions.deferredNotePlural', {
+                    purchaseDate: fmtLong(t.purchaseDate, locale),
+                    action: translate(isIn ? 'transactions.creditedTo' : 'transactions.debitedFrom'),
+                    account: t.account === 'Unassigned' ? translate('transactions.unassigned') : t.account,
+                    settlementDate: fmtLong(t.settlementDate, locale),
+                    days,
+                  })
+                : translate(isIn ? 'transactions.immediateNoteIncome' : 'transactions.immediateNoteExpense')}
             </Text>
           </HStack>
         </Box>

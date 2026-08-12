@@ -8,8 +8,10 @@ import { listTransactions, searchTransactions, listInstallmentPlans } from '../.
 import { Transaction, InstallmentPlan } from '../../types'
 import { mergeTransactionsWithFutureInstallments } from '../../utils/installments'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 export default function AllTransactionsPage() {
+  const { t } = useI18n()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
   const [loading, setLoading] = useState(false)
@@ -41,7 +43,7 @@ export default function AllTransactionsPage() {
     } catch (err) {
       console.error(err)
       ToastService.apiError(err, {
-        title: 'Could not load transactions',
+        title: t('transactions.loadFailed'),
         dedupeKey: 'transactions-load-failed',
       })
       setTransactions([])
@@ -72,7 +74,7 @@ export default function AllTransactionsPage() {
               speed="0.8s"
             />
             <Text fontSize="sm" fontWeight={500} color={textColor}>
-              Loading transactions...
+              {t('transactions.loading')}
             </Text>
           </VStack>
         </VStack>

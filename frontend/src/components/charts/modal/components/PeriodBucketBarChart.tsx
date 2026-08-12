@@ -22,6 +22,7 @@ import {
   type PeriodBucket,
   type PeriodFilter,
 } from '../utils/periodBuckets'
+import { useI18n } from '../../../../i18n'
 
 export type PeriodBucketAccent = 'blue' | 'green' | 'red' | 'violet'
 
@@ -94,12 +95,13 @@ export default function PeriodBucketBarChart({
   periodType,
   filter = 'ALL',
   title,
-  currency = '£',
+  currency: _currency = '£',
   height = 140,
   accent = 'violet',
   dateBasis = 'cash-flow',
   onBucketClick,
 }: PeriodBucketBarChartProps) {
+  const { t, locale, formatCurrency } = useI18n()
   const buckets = useMemo(
     () =>
       bucketTransactionsByPeriod(
@@ -108,8 +110,9 @@ export default function PeriodBucketBarChart({
         selectedDate,
         filter,
         dateBasis,
+        locale,
       ),
-    [transactions, periodType, selectedDate, filter, dateBasis],
+    [transactions, periodType, selectedDate, filter, dateBasis, locale],
   )
 
   const total = useMemo(
@@ -147,7 +150,7 @@ export default function PeriodBucketBarChart({
   const tooltipBorder = useColorModeValue('rgba(0,0,0,0.08)', 'rgba(255,255,255,0.08)')
   const tooltipText = useColorModeValue('#0f172a', '#f8fafc')
 
-  const headline = title ?? getPeriodHeadline(periodType, selectedDate)
+  const headline = title ?? getPeriodHeadline(periodType, selectedDate, locale)
   const handleBarClick = (bucket: PeriodBucket) => {
     onBucketClick?.(bucket)
   }
@@ -178,11 +181,7 @@ export default function PeriodBucketBarChart({
           color={valueColor}
           letterSpacing="-0.01em"
         >
-          {currency}
-          {total.toLocaleString('en-GB', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })}
+          {formatCurrency(total)}
         </Text>
       </HStack>
 
@@ -224,10 +223,7 @@ export default function PeriodBucketBarChart({
                   ?.tooltip ?? ''
               }
               formatter={(value: number | string, name: string) => [
-                `${currency}${Number(value).toLocaleString('en-GB', {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}`,
+                formatCurrency(Number(value)),
                 isStackedByType ? name : '',
               ]}
               separator=""
@@ -236,7 +232,7 @@ export default function PeriodBucketBarChart({
               <>
                 <Bar
                   dataKey="expense"
-                  name="Expense"
+                  name={t('dashboard.expense')}
                   stackId="type"
                   fill={expenseFill}
                   radius={[0, 0, 4, 4]}
@@ -247,7 +243,7 @@ export default function PeriodBucketBarChart({
                 />
                 <Bar
                   dataKey="income"
-                  name="Income"
+                  name={t('dashboard.income')}
                   stackId="type"
                   fill={incomeFill}
                   radius={[6, 6, 0, 0]}

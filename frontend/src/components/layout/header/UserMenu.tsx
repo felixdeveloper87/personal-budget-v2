@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronRight, LogOut, Settings, User } from '../../ui/icons'
 import { editorialPalette, useEd } from '../../../editorial'
+import { useI18n } from '../../../i18n'
 import type { UserPlan } from '../../../types'
 
 interface UserMenuProps {
@@ -30,11 +31,6 @@ interface UserMenuProps {
   sidebar?: boolean
 }
 
-const PLAN_LABEL: Record<UserPlan, string> = {
-  STANDARD: 'Standard',
-  PREMIUM: 'Premium',
-}
-
 export default function UserMenu({
   user,
   onOpenProfile,
@@ -44,11 +40,13 @@ export default function UserMenu({
   compact = false,
   sidebar = false,
 }: UserMenuProps) {
+  const { t } = useI18n()
   const { colorMode } = useColorMode()
   const ed = useEd() ?? editorialPalette(colorMode)
   const plan: UserPlan = user?.plan ?? 'STANDARD'
-  const displayName = user?.name || 'Budget User'
+  const displayName = user?.name || t('user.defaultName')
   const displayEmail = user?.email || ''
+  const planLabel = t(plan === 'PREMIUM' ? 'plan.premium' : 'plan.standard')
 
   const {
     solid: surface,
@@ -83,7 +81,7 @@ export default function UserMenu({
       <MenuButton
         as={Box}
         role="button"
-        aria-label="Open user menu"
+        aria-label={t('userMenu.open')}
         cursor="pointer"
         h="40px"
         px={1.5}
@@ -186,7 +184,7 @@ export default function UserMenu({
             letterSpacing="0.14em"
             textTransform="uppercase"
           >
-            Your account
+            {t('userMenu.yourAccount')}
           </Text>
           <HStack spacing={3}>
             <Box p="2px" borderRadius="full" background={avatarGradient} flexShrink={0}>
@@ -218,7 +216,7 @@ export default function UserMenu({
                   textTransform="uppercase"
                   letterSpacing="0.06em"
                 >
-                  {PLAN_LABEL[plan]}
+                  {planLabel}
                 </Badge>
               </HStack>
               {displayEmail && (
@@ -249,7 +247,7 @@ export default function UserMenu({
             letterSpacing="0.1em"
             textTransform="uppercase"
           >
-            Account
+            {t('userMenu.account')}
           </Text>
           <MenuItem
             {...menuItem}
@@ -270,9 +268,9 @@ export default function UserMenu({
                 <Icon as={User} boxSize={4} />
               </Flex>
               <Box flex={1} minW={0}>
-                <Text lineHeight={1.15}>Profile</Text>
+                <Text lineHeight={1.15}>{t('userMenu.profile')}</Text>
                 <Text mt={0.5} fontSize="xs" fontWeight={400} color={muted} lineHeight={1.1}>
-                  Personal details
+                  {t('userMenu.profileDescription')}
                 </Text>
               </Box>
               <Icon as={ChevronRight} boxSize={3.5} color={muted} flexShrink={0} />
@@ -297,9 +295,9 @@ export default function UserMenu({
                 <Icon as={Settings} boxSize={4} />
               </Flex>
               <Box flex={1} minW={0}>
-                <Text lineHeight={1.15}>Settings</Text>
+                <Text lineHeight={1.15}>{t('userMenu.settings')}</Text>
                 <Text mt={0.5} fontSize="xs" fontWeight={400} color={muted} lineHeight={1.1}>
-                  Preferences and security
+                  {t('userMenu.settingsDescription')}
                 </Text>
               </Box>
               <Icon as={ChevronRight} boxSize={3.5} color={muted} flexShrink={0} />
@@ -329,7 +327,7 @@ export default function UserMenu({
               >
                 <Icon as={LogOut} boxSize={4} />
               </Flex>
-              <Text flex={1}>Sign out</Text>
+              <Text flex={1}>{t('userMenu.signOut')}</Text>
               <Icon as={ChevronRight} boxSize={3.5} color={red} />
             </Flex>
           </MenuItem>

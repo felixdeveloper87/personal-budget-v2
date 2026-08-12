@@ -3,6 +3,7 @@ import {
   getTransactionDate,
   type TransactionDateBasis,
 } from '../../../../utils/transactionDates'
+import type { AppLocale } from '../../../../i18n'
 
 /**
  * A single bar slot in a period-bucket chart.
@@ -25,39 +26,17 @@ export interface PeriodBucket {
 
 export type PeriodFilter = 'INCOME' | 'EXPENSE' | 'ALL'
 
-const DAY_BLOCKS: ReadonlyArray<{ start: number; end: number; label: string; tooltip: string }> = [
-  { start: 0, end: 4, label: '12a', tooltip: '12am – 4am' },
-  { start: 4, end: 8, label: '4a', tooltip: '4am – 8am' },
-  { start: 8, end: 12, label: '8a', tooltip: '8am – 12pm' },
-  { start: 12, end: 16, label: '12p', tooltip: '12pm – 4pm' },
-  { start: 16, end: 20, label: '4p', tooltip: '4pm – 8pm' },
-  { start: 20, end: 24, label: '8p', tooltip: '8pm – 12am' },
+const DAY_BLOCKS: ReadonlyArray<{ start: number; end: number }> = [
+  { start: 0, end: 4 },
+  { start: 4, end: 8 },
+  { start: 8, end: 12 },
+  { start: 12, end: 16 },
+  { start: 16, end: 20 },
+  { start: 20, end: 24 },
 ]
 
-const WEEK_LABELS: ReadonlyArray<{ short: string; long: string }> = [
-  { short: 'M', long: 'Monday' },
-  { short: 'T', long: 'Tuesday' },
-  { short: 'W', long: 'Wednesday' },
-  { short: 'T', long: 'Thursday' },
-  { short: 'F', long: 'Friday' },
-  { short: 'S', long: 'Saturday' },
-  { short: 'S', long: 'Sunday' },
-]
-
-const MONTH_LABELS: ReadonlyArray<{ short: string; long: string }> = [
-  { short: 'J', long: 'January' },
-  { short: 'F', long: 'February' },
-  { short: 'M', long: 'March' },
-  { short: 'A', long: 'April' },
-  { short: 'M', long: 'May' },
-  { short: 'J', long: 'June' },
-  { short: 'J', long: 'July' },
-  { short: 'A', long: 'August' },
-  { short: 'S', long: 'September' },
-  { short: 'O', long: 'October' },
-  { short: 'N', long: 'November' },
-  { short: 'D', long: 'December' },
-]
+const formatHour = (hour: number, locale: AppLocale): string =>
+  new Intl.DateTimeFormat(locale, { hour: 'numeric' }).format(new Date(2024, 0, 1, hour))
 
 function applyFilter(transactions: Transaction[], filter: PeriodFilter): Transaction[] {
   if (filter === 'ALL') return transactions
@@ -79,11 +58,12 @@ function bucketByHourBlocks(
   txs: Transaction[],
   selectedDate: Date,
   dateBasis: TransactionDateBasis,
+  locale: AppLocale,
 ): PeriodBucket[] {
   const buckets: PeriodBucket[] = DAY_BLOCKS.map((b, i) => ({
     key: `h${i}`,
-    label: b.label,
-    tooltip: b.tooltip,
+    label: formatHour(b.start, locale),
+    tooltip: `${formatHour(b.start, locale)} – ${formatHour(b.end, locale)}`,
     value: 0,
     income: 0,
     expense: 0,
@@ -113,16 +93,20 @@ function bucketByDayOfWeek(
   txs: Transaction[],
   selectedDate: Date,
   dateBasis: TransactionDateBasis,
+  locale: AppLocale,
 ): PeriodBucket[] {
-  const buckets: PeriodBucket[] = WEEK_LABELS.map((w, i) => ({
+  const buckets: PeriodBucket[] = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date(2024, 0, 1 + i)
+    return {
     key: `d${i}`,
-    label: w.short,
-    tooltip: w.long,
+    label: new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(date),
+    tooltip: new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(date),
     value: 0,
     income: 0,
     expense: 0,
     transactions: [],
-  }))
+    }
+  })
 
   // Monday-first week: shift selectedDate to start of its ISO week.
   const start = new Date(selectedDate)
@@ -148,12 +132,11 @@ function bucketByDayOfMonth(
   txs: Transaction[],
   selectedDate: Date,
   dateBasis: TransactionDateBasis,
+  locale: AppLocale,
 ): PeriodBucket[] {
   const year = selectedDate.getFullYear()
   const month = selectedDate.getMonth()
   const daysInMonth = new Date(year, month + 1, 0).getDate()
-  const monthName = MONTH_LABELS[month].long
-
   // Reduce label clutter on small screens: only show every 5th day plus the
   // first and last. The other ticks are still rendered (so the chart aligns
   // perfectly with the underlying data) but with empty label strings.
@@ -163,7 +146,7 @@ function bucketByDayOfMonth(
     return {
       key: `m${day}`,
       label: showLabel ? String(day) : '',
-      tooltip: `${monthName} ${day}`,
+      tooltip: new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long' }).format(new Date(year, month, day)),
       value: 0,
       income: 0,
       expense: 0,
@@ -184,17 +167,21 @@ function bucketByMonthOfYear(
   txs: Transaction[],
   selectedDate: Date,
   dateBasis: TransactionDateBasis,
+  locale: AppLocale,
 ): PeriodBucket[] {
   const year = selectedDate.getFullYear()
-  const buckets: PeriodBucket[] = MONTH_LABELS.map((m, i) => ({
+  const buckets: PeriodBucket[] = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(year, i, 1)
+    return {
     key: `mo${i}`,
-    label: m.short,
-    tooltip: `${m.long} ${year}`,
+    label: new Intl.DateTimeFormat(locale, { month: 'narrow' }).format(date),
+    tooltip: new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date),
     value: 0,
     income: 0,
     expense: 0,
     transactions: [],
-  }))
+    }
+  })
   for (const tx of txs) {
     const txDate = getTransactionDate(tx, dateBasis)
     if (txDate.getFullYear() !== year) continue
@@ -223,17 +210,18 @@ export function bucketTransactionsByPeriod(
   selectedDate: Date,
   filter: PeriodFilter = 'ALL',
   dateBasis: TransactionDateBasis = 'cash-flow',
+  locale: AppLocale = 'en-GB',
 ): PeriodBucket[] {
   const filtered = applyFilter(transactions, filter)
   switch (periodType) {
     case 'day':
-      return bucketByHourBlocks(filtered, selectedDate, dateBasis)
+      return bucketByHourBlocks(filtered, selectedDate, dateBasis, locale)
     case 'week':
-      return bucketByDayOfWeek(filtered, selectedDate, dateBasis)
+      return bucketByDayOfWeek(filtered, selectedDate, dateBasis, locale)
     case 'month':
-      return bucketByDayOfMonth(filtered, selectedDate, dateBasis)
+      return bucketByDayOfMonth(filtered, selectedDate, dateBasis, locale)
     case 'year':
-      return bucketByMonthOfYear(filtered, selectedDate, dateBasis)
+      return bucketByMonthOfYear(filtered, selectedDate, dateBasis, locale)
     default:
       return []
   }
@@ -246,6 +234,7 @@ export function bucketTransactionsByPeriod(
 export function getPeriodHeadline(
   periodType: PeriodType,
   selectedDate: Date,
+  locale: AppLocale = 'en-GB',
 ): string {
   const today = new Date()
   const sameDay =
@@ -256,9 +245,9 @@ export function getPeriodHeadline(
   switch (periodType) {
     case 'day':
       return sameDay
-        ? 'TODAY'
+        ? locale === 'pt-BR' ? 'HOJE' : 'TODAY'
         : selectedDate
-            .toLocaleDateString('en-GB', {
+            .toLocaleDateString(locale, {
               weekday: 'short',
               day: 'numeric',
               month: 'short',
@@ -275,12 +264,12 @@ export function getPeriodHeadline(
       const sDow = selStart.getDay()
       selStart.setDate(selStart.getDate() + (sDow === 0 ? -6 : 1 - sDow))
       return refStart.getTime() === selStart.getTime()
-        ? 'THIS WEEK'
-        : 'WEEK'
+        ? locale === 'pt-BR' ? 'ESTA SEMANA' : 'THIS WEEK'
+        : locale === 'pt-BR' ? 'SEMANA' : 'WEEK'
     }
     case 'month':
       return selectedDate
-        .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+        .toLocaleDateString(locale, { month: 'long', year: 'numeric' })
         .toUpperCase()
     case 'year':
       return selectedDate.getFullYear().toString()

@@ -3,10 +3,10 @@ import { Box, Divider, Flex, HStack, Text } from '@chakra-ui/react'
 import type { TxnVM, TxView } from '../transactions.types'
 import type { LedgerGroup } from '../transactions.utils'
 import { fmtDayLong } from '../transactions.utils'
-import { fmtCurrency } from '../../dashboard/components/format'
 import { MotionBox } from '../../dashboard/components/motion'
 import TxnRow from './TxnRow'
 import './Ledger.css'
+import { useI18n } from '../../../i18n'
 
 interface LedgerProps {
   groups: LedgerGroup[]
@@ -16,6 +16,7 @@ interface LedgerProps {
 }
 
 function GroupTotalPill({ kind, value }: { kind: 'in' | 'out'; value: number }) {
+  const { formatCurrency } = useI18n()
   const isIn = kind === 'in'
   return (
     <HStack
@@ -35,18 +36,19 @@ function GroupTotalPill({ kind, value }: { kind: 'in' | 'out'; value: number }) 
         fontWeight={500}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
-        {fmtCurrency(value, { minimumFractionDigits: 2 })}
+        {formatCurrency(value, { minimumFractionDigits: 2 })}
       </Text>
     </HStack>
   )
 }
 
 export default function Ledger({ groups, view, onOpen, reduce }: LedgerProps) {
+  const { t, locale } = useI18n()
   if (groups.length === 0) {
     return (
       <Box py="2.5rem" textAlign="center">
         <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
-          No transactions match these filters.
+          {t('transactions.noneMatch')}
         </Text>
       </Box>
     )
@@ -73,7 +75,7 @@ export default function Ledger({ groups, view, onOpen, reduce }: LedgerProps) {
                 fontWeight={500}
                 color="var(--pb-ink)"
               >
-                {fmtDayLong(g.key)}
+                {fmtDayLong(g.key, locale)}
               </Text>
               <Text
                 fontFamily="var(--pb-mono)"
@@ -82,7 +84,9 @@ export default function Ledger({ groups, view, onOpen, reduce }: LedgerProps) {
                 textTransform="uppercase"
                 color="var(--pb-ink-faint)"
               >
-                {g.rows.length} transaction{g.rows.length === 1 ? '' : 's'}
+                {t(g.rows.length === 1 ? 'transactions.count' : 'transactions.countPlural', {
+                  count: g.rows.length,
+                })}
               </Text>
             </Box>
             <HStack spacing=".4rem">

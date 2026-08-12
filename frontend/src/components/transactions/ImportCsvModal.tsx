@@ -42,6 +42,7 @@ import {
   PaymentMethodRequest,
 } from '../../types'
 import { ToastService } from '../../services/toast'
+import { useI18n } from '../../i18n'
 
 interface ImportCsvModalProps {
   isOpen: boolean
@@ -53,6 +54,7 @@ interface ImportCsvModalProps {
 const TEMPLATE_ROW = ['2026-01-15', 'EXPENSE', 'Groceries', 'Weekly shop', '54.20', 'Monzo']
 
 export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCsvModalProps) {
+  const { t, formatCurrency, categoryLabel } = useI18n()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [result, setResult] = useState<CsvParseResult | null>(null)
@@ -87,11 +89,11 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       })
       .catch((err) => {
         ToastService.apiError(err, {
-          title: 'Could not load accounts',
+          title: t('import.accountsLoadFailed'),
           dedupeKey: 'csv-accounts-load-failed',
         })
       })
-  }, [isOpen])
+  }, [isOpen, t])
 
   const reset = useCallback(() => {
     setFileName(null)
@@ -123,8 +125,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       // fixed-payments exports start with "Description" and can't be imported here.
       if (!looksLikeTransactions && !looksLikeFullExport && parsed.rows.length === 0) {
         ToastService.error({
-          title: 'Wrong file format',
-          description: 'This looks like an installments or fixed-payments export. Import the transactions CSV (transactions-*.csv) instead.',
+          title: t('import.wrongFormat'),
+          description: t('import.wrongFormatDescription'),
           dedupeKey: 'csv-wrong-format',
         })
         setFileName(null)
@@ -136,17 +138,17 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       setResult(parsed)
     }
     reader.onerror = () => {
-      ToastService.error({ title: 'Could not read file', dedupeKey: 'csv-read-failed' })
+      ToastService.error({ title: t('import.readFailed'), dedupeKey: 'csv-read-failed' })
     }
     reader.readAsText(file)
-  }, [])
+  }, [t])
 
   const onFilePicked = (file?: File | null) => {
     if (!file) return
     if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') {
       ToastService.error({
-        title: 'Unsupported file',
-        description: 'Please choose a .csv file.',
+        title: t('import.unsupportedFile'),
+        description: t('import.chooseCsv'),
         dedupeKey: 'csv-bad-type',
       })
       return
@@ -270,8 +272,14 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
           : { imported: 0, failed: 0, errors: [] }
 
         ToastService.success({
-          title: 'Data imported',
-          description: `${accountByName.size} accounts available, ${methodByName.size} cards/payment methods available, ${installmentsImported} installment plans, ${fixedPaymentsImported} fixed payments and ${transactionOutcome.imported} standalone transactions imported.`,
+          title: t('import.dataImported'),
+          description: t('import.fullSuccess', {
+            accounts: accountByName.size,
+            methods: methodByName.size,
+            installments: installmentsImported,
+            fixed: fixedPaymentsImported,
+            transactions: transactionOutcome.imported,
+          }),
           dedupeKey: 'csv-full-import-done',
         })
         onImported()
@@ -298,8 +306,10 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
 
       if (outcome.imported > 0) {
         ToastService.success({
-          title: `Imported ${outcome.imported} transaction${outcome.imported === 1 ? '' : 's'}`,
-          description: outcome.failed > 0 ? `${outcome.failed} row${outcome.failed === 1 ? '' : 's'} skipped.` : undefined,
+          title: t(outcome.imported === 1 ? 'import.transactionsImported' : 'import.transactionsImportedPlural', { count: outcome.imported }),
+          description: outcome.failed > 0
+            ? t(outcome.failed === 1 ? 'import.rowsSkipped' : 'import.rowsSkippedPlural', { count: outcome.failed })
+            : undefined,
           dedupeKey: 'csv-import-done',
         })
         onImported()
@@ -307,13 +317,13 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
         onClose()
       } else {
         ToastService.error({
-          title: 'Import failed',
-          description: 'None of the rows could be saved.',
+          title: t('import.failed'),
+          description: t('import.noneSaved'),
           dedupeKey: 'csv-import-failed',
         })
       }
     } catch (err) {
-      ToastService.apiError(err, { title: 'Import failed', dedupeKey: 'csv-import-failed' })
+      ToastService.apiError(err, { title: t('import.failed'), dedupeKey: 'csv-import-failed' })
     } finally {
       setImporting(false)
     }
@@ -333,8 +343,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       header={
         <ModalHeader
           icon={Upload}
-          title="Import data"
-          caption="Restore a full data export or import transactions in bulk"
+          title={t('import.title')}
+          caption={t('import.caption')}
           accent="blue"
           onClose={handleClose}
         />
@@ -342,36 +352,37 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       footer={
         <HStack justify="space-between" w="full">
           <Button variant="ghost" onClick={handleClose} isDisabled={importing}>
-            Cancel
+            {t('common.cancel')}
           </Button>
           <Button
             colorScheme="blue"
             leftIcon={<Icon as={Upload} boxSize={4} />}
             onClick={runImport}
             isLoading={importing}
-            loadingText="Importing…"
+            loadingText={t('import.importing')}
             isDisabled={!result || importCount === 0 || importing}
           >
-            Import {importCount > 0 ? `${importCount} row${importCount === 1 ? '' : 's'}` : ''}
+            {importCount > 0
+              ? t(importCount === 1 ? 'import.buttonRows' : 'import.buttonRowsPlural', { count: importCount })
+              : t('import.button')}
           </Button>
         </HStack>
       }
     >
       <VStack align="stretch" spacing={4} px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }}>
         <FormControl>
-          <FormLabel fontSize="sm">Import into account (optional)</FormLabel>
+          <FormLabel fontSize="sm">{t('import.accountLabel')}</FormLabel>
           <Select
             value={accountId ?? ''}
             onChange={(event) => setAccountId(event.target.value ? Number(event.target.value) : null)}
-            placeholder="No account — associate later"
+            placeholder={t('import.noAccount')}
           >
             {accounts.filter((account) => account.active).map((account) => (
               <option key={account.id} value={account.id}>{account.name}</option>
             ))}
           </Select>
           <Text fontSize="xs" color={subColor} mt={1}>
-            Leave empty to match each row by the Account column. Unmatched or blank account
-            names are imported without an account.
+            {t('import.accountHelp')}
           </Text>
         </FormControl>
 
@@ -404,10 +415,10 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
           <VStack spacing={2}>
             <Icon as={fileName ? FileText : Upload} boxSize={7} color={dropActiveBorder} weight="duotone" />
             <Text fontSize="sm" fontWeight={700} color={dropTextColor}>
-              {fileName ?? 'Click to choose a CSV, or drag & drop'}
+              {fileName ?? t('import.chooseFile')}
             </Text>
             <Text fontSize="xs" color={subColor}>
-              Columns: {CSV_HEADERS.join(', ')}
+              {t('import.columns', { columns: t('import.columnList') })}
             </Text>
           </VStack>
         </Box>
@@ -433,7 +444,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             fontWeight={600}
           >
             <Icon as={Download} boxSize={3.5} />
-            <Text>Download template</Text>
+            <Text>{t('import.downloadTemplate')}</Text>
           </HStack>
         </HStack>
 
@@ -451,7 +462,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             >
               <Icon as={CheckCircle2} boxSize={4} color={validColor} weight="fill" />
               <Text fontSize="sm" fontWeight={700} color={validColor}>
-                {rows.length} ready
+                {t('import.ready', { count: rows.length })}
               </Text>
             </HStack>
             <HStack
@@ -466,7 +477,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             >
               <Icon as={AlertTriangle} boxSize={4} color={errorColor} weight="fill" />
               <Text fontSize="sm" fontWeight={700} color={errorColor}>
-                {errors.length} skipped
+                {t('import.skipped', { count: errors.length })}
               </Text>
             </HStack>
           </HStack>
@@ -482,7 +493,7 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
               <Table size="sm" variant="simple">
                 <Thead>
                   <Tr>
-                    {['Date', 'Type', 'Category', 'Description', 'Amount', 'Method'].map((h) => (
+                    {[t('import.date'), t('transactions.type'), t('transactions.category'), t('transactions.description'), t('transactions.amount'), t('import.method')].map((h) => (
                       <Th key={h} color={tableHeadColor} fontSize="2xs" borderColor={tableBorder}>
                         {h}
                       </Th>
@@ -493,13 +504,13 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
                   {previewRows.map((r) => (
                     <Tr key={r.line}>
                       <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{r.date}</Td>
-                      <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{r.type}</Td>
-                      <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{r.category}</Td>
+                      <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{t(r.type === 'INCOME' ? 'transactions.income' : 'transactions.expenses')}</Td>
+                      <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{categoryLabel(r.category)}</Td>
                       <Td color={cellColor} borderColor={tableBorder} fontSize="xs" maxW="160px" isTruncated>
                         {r.description}
                       </Td>
                       <Td color={cellColor} borderColor={tableBorder} fontSize="xs" isNumeric>
-                        {r.amount.toFixed(2)}
+                        {formatCurrency(r.amount)}
                       </Td>
                       <Td color={cellColor} borderColor={tableBorder} fontSize="xs">{r.paymentMethodName || '—'}</Td>
                     </Tr>
@@ -509,7 +520,9 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
             </TableContainer>
             {rows.length > previewRows.length && (
               <Text fontSize="xs" color={subColor} px={3} py={2}>
-                + {rows.length - previewRows.length} more row{rows.length - previewRows.length === 1 ? '' : 's'}
+                {t(rows.length - previewRows.length === 1 ? 'import.moreRows' : 'import.moreRowsPlural', {
+                  count: rows.length - previewRows.length,
+                })}
               </Text>
             )}
           </Box>
@@ -519,17 +532,17 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
         {errors.length > 0 && (
           <Box bg={errorPanelBg} borderRadius="xl" px={4} py={3}>
             <Text fontSize="xs" fontWeight={700} color={errorColor} mb={1.5}>
-              Skipped rows
+              {t('import.skippedRows')}
             </Text>
             <VStack align="stretch" spacing={1} maxH="120px" overflowY="auto">
               {errors.slice(0, 20).map((e, i) => (
                 <Text key={i} fontSize="xs" color={errorColor}>
-                  Line {e.line}: {e.message}
+                  {t('import.lineError', { line: e.line, message: e.message })}
                 </Text>
               ))}
               {errors.length > 20 && (
                 <Text fontSize="xs" color={errorColor} opacity={0.7}>
-                  + {errors.length - 20} more…
+                  {t('import.moreErrors', { count: errors.length - 20 })}
                 </Text>
               )}
             </VStack>

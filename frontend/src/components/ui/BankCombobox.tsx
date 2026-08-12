@@ -1,5 +1,6 @@
 import { Select } from '@chakra-ui/react'
 import { UK_BANKS } from './BankLogo'
+import { useI18n } from '../../i18n'
 
 interface BankComboboxProps {
   value: string
@@ -8,7 +9,8 @@ interface BankComboboxProps {
   placeholder?: string
 }
 
-export default function BankCombobox({ value, onChange, size = 'sm', placeholder = 'Select bank' }: BankComboboxProps) {
+export default function BankCombobox({ value, onChange, size = 'sm', placeholder }: BankComboboxProps) {
+  const { t } = useI18n()
   const hasCustomValue = value.trim() !== '' && !UK_BANKS.includes(value)
 
   return (
@@ -16,7 +18,7 @@ export default function BankCombobox({ value, onChange, size = 'sm', placeholder
       size={size}
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
+      placeholder={placeholder ?? t('common.selectBank')}
     >
       {hasCustomValue && <option value={value}>{value}</option>}
       {UK_BANKS.map((bank) => (

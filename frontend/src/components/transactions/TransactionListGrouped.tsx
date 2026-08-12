@@ -23,7 +23,6 @@ import { DeleteIcon, EditIcon } from '@chakra-ui/icons'
 import { FiCreditCard } from 'react-icons/fi'
 import { Transaction } from '../../types'
 import { useMemo, useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { formatDateBR, formatTransactionDateTime } from '../../utils/dateTime'
 import { DeleteTransactionDialog } from '../ui'
 import { useDeleteTransaction } from '../../hooks/useDeleteTransaction'
 import { normalizeInstallmentDescription } from '../../utils/installments'
@@ -36,6 +35,7 @@ import {
   type TransactionDateBasis,
 } from '../../utils/transactionDates'
 import { formatTransactionAccount } from '../../utils/transactionAccount'
+import { useI18n } from '../../i18n'
 
 interface TransactionListGroupedProps {
   transactions: Transaction[]
@@ -59,6 +59,7 @@ export interface TransactionListGroupedRef {
 
 const TransactionListGrouped = forwardRef<TransactionListGroupedRef, TransactionListGroupedProps>(
   ({ transactions, onTransactionDeleted, dateBasis = 'activity' }, ref) => {
+    const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
     const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
     const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
     const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
@@ -74,7 +75,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
     transactions.forEach(transaction => {
       const date = getTransactionDate(transaction, dateBasis)
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-      const monthName = date.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+      const monthName = formatDate(date, { month: 'long', year: 'numeric' })
       
       if (!groups[monthKey]) {
         groups[monthKey] = {
@@ -109,7 +110,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
 
     // Sort groups by month (newest first)
     return Object.values(groups).sort((a, b) => b.monthKey.localeCompare(a.monthKey))
-  }, [transactions, dateBasis])
+  }, [transactions, dateBasis, formatDate])
 
   // Find current month key and index
   const currentMonthKey = useMemo(() => {
@@ -223,7 +224,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
   if (totalItems === 0) {
     return (
       <Box p={6} textAlign="center">
-        <Text color="var(--pb-ink-soft)">No transactions found</Text>
+        <Text color="var(--pb-ink-soft)">{t('transactions.noneFound')}</Text>
       </Box>
     )
   }
@@ -235,7 +236,6 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
         {paginatedMonthGroups.map((group) => {
           const isExpanded = expandedMonths[group.monthKey] || false
           const transactionCount = group.transactions.length
-          const [mName, mYear] = group.monthName.split(' ')
           const isCurrentMonth = group.monthKey === currentMonthKey
 
           return (
@@ -280,13 +280,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         noOfLines={1}
                         minW={0}
                       >
-                        {mName}{' '}
-                        <Text as="span" fontWeight="500" color="var(--pb-ink-soft)">
-                          {mYear}
-                        </Text>
+                        {group.monthName}
                       </Text>
                       <Text fontSize="xs" color="var(--pb-ink-soft)" fontWeight="500" flexShrink={0}>
-                        • {transactionCount} {transactionCount === 1 ? 'transaction' : 'transactions'}
+                        • {t(transactionCount === 1 ? 'transactions.count' : 'transactions.countPlural', { count: transactionCount })}
                       </Text>
                       {isCurrentMonth && (
                         <Badge
@@ -303,7 +300,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                           border="1px solid"
                           borderColor="var(--pb-hair-2)"
                         >
-                          Current
+                          {t('transactions.current')}
                         </Badge>
                       )}
                     </HStack>
@@ -318,15 +315,15 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                       align="center"
                     >
                       <Text color="var(--pb-income-2)">
-                        In: £{group.totalIncome.toFixed(0)}
+                        {t('transactions.inShort')}: {formatCurrency(group.totalIncome, { maximumFractionDigits: 0 })}
                       </Text>
                       <Text opacity={0.3} fontSize="xs">•</Text>
                       <Text color="var(--pb-coral)">
-                        Out: £{group.totalExpense.toFixed(0)}
+                        {t('transactions.outShort')}: {formatCurrency(group.totalExpense, { maximumFractionDigits: 0 })}
                       </Text>
                       <Text opacity={0.3} fontSize="xs">•</Text>
                       <Text color={group.netAmount >= 0 ? 'var(--pb-income-2)' : 'var(--pb-coral)'} fontWeight="700">
-                        Net: {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(0)}
+                        {t('transactions.netShort')}: {group.netAmount >= 0 ? '+' : ''}{formatCurrency(group.netAmount, { maximumFractionDigits: 0 })}
                       </Text>
                     </HStack>
                   </VStack>
@@ -352,10 +349,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         </Box>
                         <VStack spacing={0} align="start">
                           <Text fontSize="3xs" fontWeight="700" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
-                            Income
+                            {t('transactions.income')}
                           </Text>
                           <Text fontSize="sm" fontWeight="700" color="var(--pb-ink)">
-                            £{group.totalIncome.toFixed(2)}
+                            {formatCurrency(group.totalIncome)}
                           </Text>
                         </VStack>
                       </HStack>
@@ -377,10 +374,10 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         </Box>
                         <VStack spacing={0} align="start">
                           <Text fontSize="3xs" fontWeight="700" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.05em" lineHeight={1}>
-                            Expense
+                            {t('dashboard.expense')}
                           </Text>
                           <Text fontSize="sm" fontWeight="700" color="var(--pb-ink)">
-                            £{group.totalExpense.toFixed(2)}
+                            {formatCurrency(group.totalExpense)}
                           </Text>
                         </VStack>
                       </HStack>
@@ -400,7 +397,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         textAlign="center"
                       >
                         <Text fontSize="3xs" fontWeight="700" color={group.netAmount >= 0 ? 'var(--pb-income-2)' : 'var(--pb-coral)'} textTransform="uppercase" letterSpacing="0.05em" mb={0.5} lineHeight={1}>
-                          Net Balance
+                          {t('transactions.netBalance')}
                         </Text>
                         <Text 
                           fontSize="sm" 
@@ -410,7 +407,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             : 'var(--pb-coral)'}
                           lineHeight={1.1}
                         >
-                          {group.netAmount >= 0 ? '+' : ''}£{group.netAmount.toFixed(2)}
+                          {group.netAmount >= 0 ? '+' : ''}{formatCurrency(group.netAmount)}
                         </Text>
                       </Box>
                     </HStack>
@@ -458,12 +455,12 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                     >
                       <Thead>
                         <Tr>
-                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Date & Time</Th>
-                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>Type</Th>
-                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Category</Th>
-                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Description</Th>
-                          <Th isNumeric fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">Amount</Th>
-                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w={{ base: "60px", md: "80px" }}>Actions</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>{t('transactions.dateTime')}</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" display={{ base: 'none', md: 'table-cell' }}>{t('transactions.type')}</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">{t('transactions.category')}</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">{t('transactions.description')}</Th>
+                          <Th isNumeric fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em">{t('transactions.amount')}</Th>
+                          <Th fontSize="2xs" color="var(--pb-ink-faint)" fontWeight="700" textTransform="uppercase" letterSpacing="0.05em" w={{ base: "60px", md: "80px" }}>{t('transactions.actions')}</Th>
                         </Tr>
                       </Thead>
                       <Tbody>
@@ -474,14 +471,15 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                             <Td display={{ base: 'none', md: 'table-cell' }}>
                               <VStack spacing={1} align="start">
                                 <Text fontSize="sm" fontWeight="600" color={textColor}>
-                                  {formatTransactionDateTime(getTransactionDateSource(tx, dateBasis)).date}
+                                  {formatDate(getTransactionDateSource(tx, dateBasis), { day: '2-digit', month: 'short', year: 'numeric' })}
                                 </Text>
                                 <Text fontSize="xs" color="var(--pb-ink-faint)" fontWeight="500">
-                                  {formatTransactionDateTime(tx.dateTime).time}
+                                  {formatDate(tx.dateTime, { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                                 {dateHint && (
                                   <Text fontSize="xs" color="var(--pb-ink-faint)">
-                                    {dateHint.prefix} {formatDateBR(dateHint.date)}
+                                    {t(dateBasis === 'activity' ? 'transactions.paysOn' : 'transactions.purchasedOn')}{' '}
+                                    {formatDate(dateHint.date, { day: '2-digit', month: 'short', year: 'numeric' })}
                                   </Text>
                                 )}
                               </VStack>
@@ -494,12 +492,12 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                 color={tx.type === 'INCOME' ? 'var(--pb-income-2)' : 'var(--pb-coral)'}
                                 border="1px solid var(--pb-hair)"
                               >
-                                {tx.type}
+                                {t(tx.type === 'INCOME' ? 'transactions.income' : 'transactions.expenses')}
                               </Badge>
                             </Td>
                             <Td>
                               <Text fontSize={{ base: "xs", md: "sm" }} fontWeight="medium">
-                                {tx.category}
+                                {categoryLabel(tx.category)}
                               </Text>
                             </Td>
                             <Td>
@@ -528,7 +526,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                     </Badge>
                                   )}
                                   {tx.isInstallment && (
-                                    <Tooltip label={tx.isFutureInstallment ? "Future Installment" : "Installment"} hasArrow>
+                                    <Tooltip label={t(tx.isFutureInstallment ? 'transactions.futureInstallment' : 'transactions.installment')} hasArrow>
                                       <span>
                                         <Icon
                                           as={FiCreditCard}
@@ -554,15 +552,15 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                 fontStyle={tx.isFutureInstallment ? "italic" : "normal"}
                                 whiteSpace="nowrap"
                               >
-                                £{tx.amount.toFixed(2)}
-                                {tx.isFutureInstallment && " (future)"}
+                                {formatCurrency(tx.amount)}
+                                {tx.isFutureInstallment && ` (${t('transactions.future')})`}
                               </Text>
                             </Td>
                             <Td>
                               {tx.id && !tx.isFutureInstallment && (
                                 <HStack spacing={0}>
                                   <IconButton
-                                    aria-label="Edit transaction"
+                                    aria-label={t('transactions.editAria')}
                                     icon={<EditIcon />}
                                     size={{ base: "xs", md: "sm" }}
                                     variant="ghost"
@@ -574,7 +572,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                                     }}
                                   />
                                   <IconButton
-                                    aria-label="Delete transaction"
+                                    aria-label={t('transactions.deleteAria')}
                                     icon={<DeleteIcon />}
                                     size={{ base: "xs", md: "sm" }}
                                     variant="ghost"
@@ -613,7 +611,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
           {/* Items per page selector */}
           <HStack spacing={2}>
             <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
-              Show
+              {t('transactions.show')}
             </Text>
             <Select
               size="xs"
@@ -628,26 +626,29 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               color="var(--pb-ink)"
               _focus={{ borderColor: 'var(--pb-forest-2)', boxShadow: 'none' }}
             >
-              <option value={3}>3 months</option>
-              <option value={6}>6 months</option>
-              <option value={12}>12 months</option>
-              <option value={24}>24 months</option>
+              <option value={3}>{t('transactions.monthsOption', { count: 3 })}</option>
+              <option value={6}>{t('transactions.monthsOption', { count: 6 })}</option>
+              <option value={12}>{t('transactions.monthsOption', { count: 12 })}</option>
+              <option value={24}>{t('transactions.monthsOption', { count: 24 })}</option>
             </Select>
             <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
-              per page
+              {t('transactions.perPage')}
             </Text>
           </HStack>
 
           {/* Page Info */}
           <Text fontSize="xs" fontWeight="500" color="var(--pb-ink-soft)">
-            Showing {Math.min((activePage - 1) * pageSize + 1, totalItems)} to{' '}
-            {Math.min(activePage * pageSize, totalItems)} of {totalItems} months
+            {t('transactions.monthsRange', {
+              from: Math.min((activePage - 1) * pageSize + 1, totalItems),
+              to: Math.min(activePage * pageSize, totalItems),
+              total: totalItems,
+            })}
           </Text>
 
           {/* Navigation Controls */}
           <HStack spacing={1}>
             <IconButton
-              aria-label="Previous page"
+              aria-label={t('transactions.previousPage')}
               icon={<Icon as={ChevronLeft} boxSize={4} />}
               size="sm"
               variant="outline"
@@ -694,7 +695,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
             })}
 
             <IconButton
-              aria-label="Next page"
+              aria-label={t('transactions.nextPage')}
               icon={<Icon as={ChevronRight} boxSize={4} />}
               size="sm"
               variant="outline"

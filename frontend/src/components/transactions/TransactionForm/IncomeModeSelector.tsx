@@ -1,5 +1,6 @@
 import { Box, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
+import { useI18n } from '../../../i18n'
 
 export type IncomeMode = 'single' | 'fixed'
 
@@ -11,25 +12,26 @@ interface IncomeModeSelectorProps {
 const MODES = [
   {
     value: 'single' as const,
-    title: 'One-off',
-    caption: 'Bonus, refund, freelance',
+    titleKey: 'form.oneOff',
+    captionKey: 'form.incomeOneOffCaption',
     accent: '#10b981',
   },
   {
     value: 'fixed' as const,
-    title: 'Fixed income',
-    caption: 'Salary or recurring pay',
+    titleKey: 'form.fixedIncome',
+    captionKey: 'form.fixedIncomeCaption',
     accent: '#0ea5e9',
   },
 ]
 
 export default function IncomeModeSelector({ value, onChange }: IncomeModeSelectorProps) {
   const colors = useThemeColors()
+  const { t } = useI18n()
 
   return (
     <Box>
       <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
-        How does this income repeat?
+        {t('form.incomeModeQuestion')}
       </Text>
 
       <SimpleGrid columns={{ base: 2 }} spacing={3}>
@@ -66,7 +68,7 @@ export default function IncomeModeSelector({ value, onChange }: IncomeModeSelect
                     fontSize="sm"
                     _groupHover={{ textDecoration: 'underline' }}
                   >
-                    {mode.title}
+                    {t(mode.titleKey)}
                   </Text>
                   <Box
                     w={2.5}
@@ -80,7 +82,7 @@ export default function IncomeModeSelector({ value, onChange }: IncomeModeSelect
                   />
                 </HStack>
                 <Text color={colors.text.secondary} fontSize="xs" lineHeight="short" noOfLines={2}>
-                  {mode.caption}
+                  {t(mode.captionKey)}
                 </Text>
               </VStack>
             </Box>

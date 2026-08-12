@@ -39,6 +39,7 @@ import {
   Upload,
 } from '../ui/icons'
 import { useEd } from '../../editorial'
+import { useI18n } from '../../i18n'
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -46,12 +47,11 @@ interface UserSettingsModalProps {
 }
 
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
+  const { locale, setLocale, t } = useI18n()
   const ed = useEd()
   const { colorMode, setColorMode } = useColorMode()
   const toast = useToast()
 
-  const [language, setLanguage] = useState('en')
-  const [currency, setCurrency] = useState('USD')
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
@@ -59,6 +59,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const [exporting, setExporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmText, setConfirmText] = useState('')
+  const deleteConfirmWord = t('settings.deleteConfirmWord')
   const deleteDialog = useDisclosure()
   const importDialog = useDisclosure()
   const cancelDeleteRef = useRef<HTMLButtonElement>(null)
@@ -101,12 +102,12 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     try {
       await exportAllData()
       ToastService.success({
-        title: 'Export ready',
-        description: 'One CSV containing all of your data was downloaded.',
+        title: t('settings.exportReady'),
+        description: t('settings.exportReadyDescription'),
         dedupeKey: 'csv-export-done',
       })
     } catch (err) {
-      ToastService.apiError(err, { title: 'Export failed', dedupeKey: 'csv-export-failed' })
+      ToastService.apiError(err, { title: t('settings.exportFailed'), dedupeKey: 'csv-export-failed' })
     } finally {
       setExporting(false)
     }
@@ -117,22 +118,22 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     try {
       await deleteAllUserData()
       ToastService.success({
-        title: 'All data deleted',
-        description: 'Your account was kept. Reloading…',
+        title: t('settings.deleted'),
+        description: t('settings.deletedDescription'),
         dedupeKey: 'user-data-deleted',
       })
       deleteDialog.onClose()
       setTimeout(() => window.location.reload(), 800)
     } catch (err) {
-      ToastService.apiError(err, { title: 'Could not delete data', dedupeKey: 'user-data-delete-failed' })
+      ToastService.apiError(err, { title: t('settings.deleteFailed'), dedupeKey: 'user-data-delete-failed' })
       setDeleting(false)
     }
   }
 
   const showComingSoon = () => {
     toast({
-      title: 'Coming soon',
-      description: 'This setting will be available in a future update.',
+      title: t('settings.comingSoon'),
+      description: t('settings.comingSoonDescription'),
       status: 'info',
       duration: 2500,
       isClosable: true,
@@ -205,8 +206,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       header={
         <ModalHeader
           icon={Settings}
-          title="Settings"
-          caption="Preferences, appearance and privacy"
+          title={t('settings.title')}
+          caption={t('settings.caption')}
           onClose={onClose}
           accent="blue"
         />
@@ -222,7 +223,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
           {/* Preferences */}
           <Box>
-            <SectionTitle icon={Globe} label="Preferences" />
+            <SectionTitle icon={Globe} label={t('settings.preferences')} />
             <VStack
               spacing={0}
               align="stretch"
@@ -232,45 +233,36 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               overflow="hidden"
             >
               <SettingRow
-                label="Language"
-                description="Interface display language"
+                label={t('language.label')}
+                description={t('language.description')}
               >
                 <Select
                   size="sm"
-                  value={language}
-                  onChange={(e) => { setLanguage(e.target.value); showComingSoon() }}
-                  w="140px"
+                  value={locale}
+                  onChange={(event) => {
+                    const nextLocale = event.target.value
+                    if (nextLocale === 'en-GB' || nextLocale === 'pt-BR') {
+                      setLocale(nextLocale)
+                    }
+                  }}
+                  w="180px"
                   borderRadius="lg"
                 >
-                  <option value="en">English</option>
-                  <option value="pt">Português</option>
-                  <option value="es">Español</option>
-                  <option value="fr">Français</option>
-                  <option value="de">Deutsch</option>
+                  <option value="en-GB">{t('language.english')}</option>
+                  <option value="pt-BR">{t('language.portuguese')}</option>
                 </Select>
               </SettingRow>
               <SettingRow
-                label="Currency"
-                description="Default currency for display"
+                label={t('currency.label')}
+                description={t('currency.description')}
               >
-                <Select
-                  size="sm"
-                  value={currency}
-                  onChange={(e) => { setCurrency(e.target.value); showComingSoon() }}
-                  w="140px"
-                  borderRadius="lg"
-                >
-                  <option value="USD">USD – US Dollar</option>
-                  <option value="EUR">EUR – Euro</option>
-                  <option value="GBP">GBP – Pound</option>
-                  <option value="BRL">BRL – Real</option>
-                  <option value="CAD">CAD – Canadian Dollar</option>
-                  <option value="AUD">AUD – Australian Dollar</option>
-                </Select>
+                <Text fontSize="sm" fontWeight={700} color={textColor} whiteSpace="nowrap">
+                  {t('currency.pound')}
+                </Text>
               </SettingRow>
               <SettingRow
-                label="Date format"
-                description="How dates are displayed across the app"
+                label={t('settings.dateFormat')}
+                description={t('settings.dateFormatDescription')}
                 noBorder
               >
                 <Select
@@ -290,7 +282,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
           {/* Appearance */}
           <Box>
-            <SectionTitle icon={Sun} label="Appearance" />
+            <SectionTitle icon={Sun} label={t('settings.appearance')} />
             <VStack
               spacing={0}
               align="stretch"
@@ -300,13 +292,13 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               overflow="hidden"
             >
               <Box px={4} py={3.5} bg={rowBg}>
-                <Text fontSize="sm" fontWeight={600} color={textColor} mb={3}>Theme</Text>
+                <Text fontSize="sm" fontWeight={600} color={textColor} mb={3}>{t('settings.theme')}</Text>
                 <HStack spacing={2}>
                   {(['light', 'dark', 'system'] as const).map((mode) => {
                     const isActive = mode === 'system'
                       ? false
                       : colorMode === mode
-                    const label = mode.charAt(0).toUpperCase() + mode.slice(1)
+                    const label = t(`settings.theme.${mode}`)
                     const ModeIcon = mode === 'dark' ? Moon : Sun
                     return (
                       <Button
@@ -339,7 +331,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
           {/* Notifications */}
           <Box>
-            <SectionTitle icon={Bell} label="Notifications" />
+            <SectionTitle icon={Bell} label={t('settings.notifications')} />
             <VStack
               spacing={0}
               align="stretch"
@@ -349,8 +341,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               overflow="hidden"
             >
               <SettingRow
-                label="Email reports"
-                description="Weekly spending digest sent to your inbox"
+                label={t('settings.emailReports')}
+                description={t('settings.emailReportsDescription')}
               >
                 <Switch
                   isChecked={emailReports}
@@ -360,8 +352,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 />
               </SettingRow>
               <SettingRow
-                label="Monthly summary"
-                description="End-of-month totals and category breakdown"
+                label={t('settings.monthlySummary')}
+                description={t('settings.monthlySummaryDescription')}
               >
                 <Switch
                   isChecked={monthlySummary}
@@ -371,8 +363,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 />
               </SettingRow>
               <SettingRow
-                label="Budget alerts"
-                description="Notify when spending exceeds 80% of a category"
+                label={t('settings.budgetAlerts')}
+                description={t('settings.budgetAlertsDescription')}
                 noBorder
               >
                 <Switch
@@ -387,7 +379,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
           {/* Privacy & Data */}
           <Box>
-            <SectionTitle icon={Shield} label="Privacy & data" />
+            <SectionTitle icon={Shield} label={t('settings.privacyData')} />
             <VStack
               spacing={0}
               align="stretch"
@@ -397,8 +389,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               overflow="hidden"
             >
               <SettingRow
-                label="Export all data"
-                description="Download one CSV containing transactions, accounts, cards, installments, fixed payments and planning data"
+                label={t('settings.exportAll')}
+                description={t('settings.exportDescription')}
               >
                 <Button
                   size="sm"
@@ -407,14 +399,14 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   borderRadius="lg"
                   onClick={handleExport}
                   isLoading={exporting}
-                  loadingText="Exporting"
+                  loadingText={t('settings.exporting')}
                 >
-                  Export
+                  {t('settings.export')}
                 </Button>
               </SettingRow>
               <SettingRow
-                label="Import data"
-                description="Restore accounts, cards, installments, fixed payments and transactions from the full data CSV"
+                label={t('settings.importData')}
+                description={t('settings.importDescription')}
                 noBorder
               >
                 <Button
@@ -424,7 +416,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   borderRadius="lg"
                   onClick={importDialog.onOpen}
                 >
-                  Import
+                  {t('settings.import')}
                 </Button>
               </SettingRow>
             </VStack>
@@ -442,10 +434,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
           >
             <HStack spacing={2} mb={1}>
               <Icon as={AlertTriangle} boxSize={4} color="red.500" />
-              <Text fontSize="sm" fontWeight={700} color="red.600">Danger zone</Text>
+              <Text fontSize="sm" fontWeight={700} color="red.600">{t('settings.dangerZone')}</Text>
             </HStack>
             <Text fontSize="xs" color={mutedColor} mb={3}>
-              These actions are irreversible. Please proceed with caution.
+              {t('settings.dangerWarning')}
             </Text>
             <Button
               size="sm"
@@ -455,11 +447,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               leftIcon={<Icon as={Trash2} boxSize={3.5} />}
               onClick={() => { setConfirmText(''); deleteDialog.onOpen() }}
             >
-              Delete all data
+              {t('settings.deleteAll')}
             </Button>
             <Text fontSize="xs" color={mutedColor} mt={2}>
-              Removes all transactions, installments, fixed payments, accounts, payment
-              methods, goals and budgets. Your login is kept.
+              {t('settings.deleteSummary')}
             </Text>
           </Box>
 
@@ -488,35 +479,34 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               >
                 <Icon as={AlertTriangle} boxSize={4} />
               </Box>
-              <Text fontWeight={800} color={textColor}>Delete all data</Text>
+              <Text fontWeight={800} color={textColor}>{t('settings.deleteAll')}</Text>
             </AlertDialogHeader>
             <AlertDialogBody>
               <Text fontSize="sm" color={mutedColor} mb={3}>
-                This permanently deletes every transaction, installment plan, fixed payment,
-                account, payment method, goal and budget. This cannot be undone.
+                {t('settings.deleteDescription')}
               </Text>
               <Text fontSize="sm" color={textColor} fontWeight={600} mb={2}>
-                Type <Text as="span" color="red.500">DELETE</Text> to confirm:
+                {t('settings.deletePrompt', { word: deleteConfirmWord })}
               </Text>
               <Input
                 value={confirmText}
                 onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="DELETE"
+                placeholder={deleteConfirmWord}
                 autoFocus
               />
             </AlertDialogBody>
             <AlertDialogFooter gap={2}>
               <Button ref={cancelDeleteRef} variant="ghost" onClick={deleteDialog.onClose} isDisabled={deleting}>
-                Cancel
+                {t('settings.cancel')}
               </Button>
               <Button
                 colorScheme="red"
                 onClick={handleDeleteAll}
                 isLoading={deleting}
-                loadingText="Deleting…"
-                isDisabled={confirmText.trim().toUpperCase() !== 'DELETE'}
+                loadingText={t('settings.deleting')}
+                isDisabled={confirmText.trim().toLocaleUpperCase(locale) !== deleteConfirmWord.toLocaleUpperCase(locale)}
               >
-                Delete everything
+                {t('settings.deleteEverything')}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>

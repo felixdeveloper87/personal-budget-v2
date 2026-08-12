@@ -9,7 +9,6 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import type { Transaction } from '../../types'
-import { formatDateBR } from '../../utils/dateTime'
 import { formatTransactionAccount } from '../../utils/transactionAccount'
 import {
   getCounterpartDateHint,
@@ -37,6 +36,7 @@ import {
   Zap,
   type LucideIcon,
 } from '../ui/icons'
+import { useI18n } from '../../i18n'
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   salary: Briefcase,
@@ -59,11 +59,6 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
   education: GraduationCap,
 }
 
-const moneyFormatter = new Intl.NumberFormat('en-GB', {
-  style: 'currency',
-  currency: 'GBP',
-})
-
 function getCategoryIcon(category?: string): LucideIcon {
   return CATEGORY_ICONS[category?.trim().toLowerCase() ?? ''] ?? Wallet
 }
@@ -85,6 +80,7 @@ export default function TransactionLedgerRow({
   withTopBorder = false,
   hideAmount = false,
 }: TransactionLedgerRowProps) {
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const textColor = useColorModeValue('gray.800', 'gray.100')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
   const rowBorder = useColorModeValue('blackAlpha.50', 'whiteAlpha.50')
@@ -148,30 +144,30 @@ export default function TransactionLedgerRow({
       <VStack spacing={0.5} align="stretch" flex="1" minW={0}>
         <HStack spacing={1.5} minW={0}>
           <Text fontSize="sm" fontWeight={700} color={textColor} noOfLines={1}>
-            {transaction.description || transaction.category || 'Transaction'}
+            {transaction.description || categoryLabel(transaction.category) || t('transactions.transaction')}
           </Text>
           {transaction.isInstallment && (
             <Badge colorScheme="purple" variant="subtle" fontSize="9px" borderRadius="md">
               {transaction.installmentNumber
-                ? `Inst. ${transaction.installmentNumber}`
-                : 'Installment'}
+                ? t('transactions.installmentNumber', { number: transaction.installmentNumber })
+                : t('transactions.installment')}
             </Badge>
           )}
           {transaction.isRecurring && (
             <Badge colorScheme="blue" variant="subtle" fontSize="9px" borderRadius="md">
-              Recurring
+              {t('transactions.recurring')}
             </Badge>
           )}
         </HStack>
 
         <HStack spacing={1.5} color={mutedColor} fontSize="xs" minW={0}>
           {showCategory && (
-            <Text noOfLines={1}>{transaction.category || 'Uncategorized'}</Text>
+            <Text noOfLines={1}>{transaction.category ? categoryLabel(transaction.category) : t('transactions.uncategorised')}</Text>
           )}
           {showCategory && showDate && <Text opacity={0.45}>·</Text>}
           {showDate && (
             <Text flexShrink={0}>
-              {getTransactionDate(transaction, dateBasis).toLocaleDateString('en-GB', {
+              {formatDate(getTransactionDate(transaction, dateBasis), {
                 day: '2-digit',
                 month: 'short',
               })}
@@ -206,18 +202,19 @@ export default function TransactionLedgerRow({
         >
           {hideAmount
             ? '••••••'
-            : `${isIncome ? '+' : '-'}${moneyFormatter.format(transaction.amount)}`}
+            : `${isIncome ? '+' : '-'}${formatCurrency(transaction.amount)}`}
         </Text>
         {isScheduled ? (
           <HStack spacing={1} color={scheduledColor}>
             <Icon as={Clock} boxSize={2.5} />
             <Text fontSize="2xs" fontWeight={600}>
-              Scheduled
+              {t('transactions.scheduled')}
             </Text>
           </HStack>
         ) : dateHint ? (
           <Text fontSize="2xs" color={mutedColor}>
-            {dateHint.prefix} {formatDateBR(dateHint.date)}
+            {t(dateBasis === 'activity' ? 'transactions.paysOn' : 'transactions.purchasedOn')}{' '}
+            {formatDate(dateHint.date, { day: '2-digit', month: 'short', year: 'numeric' })}
           </Text>
         ) : null}
       </VStack>

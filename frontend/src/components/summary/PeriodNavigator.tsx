@@ -22,6 +22,7 @@ import {
 import { PeriodType } from '../../types'
 import { useEd } from '../../editorial'
 import PeriodDatePicker from './PeriodDatePicker'
+import { useI18n } from '../../i18n'
 
 /* -------------------------------------------------------------------------- */
 /* Types & config                                                              */
@@ -52,15 +53,15 @@ interface PeriodNavigatorProps {
 
 interface PeriodOption {
   type: PeriodType
-  label: string
+  labelKey: string
   icon: typeof Calendar
 }
 
 const PERIODS: PeriodOption[] = [
-  { type: 'day', label: 'Day', icon: Calendar },
-  { type: 'week', label: 'Week', icon: CalendarDays },
-  { type: 'month', label: 'Month', icon: CalendarRange },
-  { type: 'year', label: 'Year', icon: Activity },
+  { type: 'day', labelKey: 'period.day', icon: Calendar },
+  { type: 'week', labelKey: 'period.week', icon: CalendarDays },
+  { type: 'month', labelKey: 'period.month', icon: CalendarRange },
+  { type: 'year', labelKey: 'period.year', icon: Activity },
 ]
 
 /* -------------------------------------------------------------------------- */
@@ -68,15 +69,15 @@ const PERIODS: PeriodOption[] = [
 /* -------------------------------------------------------------------------- */
 
 /** Returns a short relative hint like "Today", "Yesterday", "This month" etc. */
-function getRelativeHint(date: Date | undefined, period: PeriodType): string | null {
+function getRelativeHintKey(date: Date | undefined, period: PeriodType): string | null {
   if (!date) return null
   const now = new Date()
 
   if (period === 'day') {
     const diff = dayDiff(date, now)
-    if (diff === 0) return 'Today'
-    if (diff === 1) return 'Yesterday'
-    if (diff === -1) return 'Tomorrow'
+    if (diff === 0) return 'common.today'
+    if (diff === 1) return 'form.yesterday'
+    if (diff === -1) return 'form.tomorrow'
     return null
   }
   if (period === 'week') {
@@ -85,25 +86,25 @@ function getRelativeHint(date: Date | undefined, period: PeriodType): string | n
     const weekDiff = Math.round(
       (thisWeekStart.getTime() - selectedWeekStart.getTime()) / (7 * 86400000),
     )
-    if (weekDiff === 0) return 'This week'
-    if (weekDiff === 1) return 'Last week'
-    if (weekDiff === -1) return 'Next week'
+    if (weekDiff === 0) return 'period.thisWeek'
+    if (weekDiff === 1) return 'period.lastWeek'
+    if (weekDiff === -1) return 'period.nextWeek'
     return null
   }
   if (period === 'month') {
     const mDiff =
       (now.getFullYear() - date.getFullYear()) * 12 +
       (now.getMonth() - date.getMonth())
-    if (mDiff === 0) return 'This month'
-    if (mDiff === 1) return 'Last month'
-    if (mDiff === -1) return 'Next month'
+    if (mDiff === 0) return 'period.thisMonth'
+    if (mDiff === 1) return 'period.lastMonth'
+    if (mDiff === -1) return 'period.nextMonth'
     return null
   }
   if (period === 'year') {
     const yDiff = now.getFullYear() - date.getFullYear()
-    if (yDiff === 0) return 'This year'
-    if (yDiff === 1) return 'Last year'
-    if (yDiff === -1) return 'Next year'
+    if (yDiff === 0) return 'period.thisYear'
+    if (yDiff === 1) return 'period.lastYear'
+    if (yDiff === -1) return 'period.nextYear'
     return null
   }
   return null
@@ -168,6 +169,7 @@ export default function PeriodNavigator({
   canNavigateNext = true,
   isDateDisabled,
 }: PeriodNavigatorProps) {
+  const { t } = useI18n()
   // Swipe support
   const touchStartX = useRef<number | null>(null)
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -231,7 +233,8 @@ export default function PeriodNavigator({
 
   // ── Derived state ─────────────────────────────────────────────────────
   const isCurrent = isCurrentPeriod(selectedDate, selectedPeriod)
-  const hint = getRelativeHint(selectedDate, selectedPeriod)
+  const hintKey = getRelativeHintKey(selectedDate, selectedPeriod)
+  const hint = hintKey ? t(hintKey) : null
   const activeIndex = Math.max(
     0,
     PERIODS.findIndex((period) => period.type === selectedPeriod),
@@ -274,7 +277,7 @@ export default function PeriodNavigator({
             bg="transparent"
           >
             <IconButton
-              aria-label="Previous period"
+              aria-label={t('period.previous')}
               icon={<Icon as={ChevronLeft} boxSize={4} />}
               onClick={() => onNavigatePeriod('prev')}
               isDisabled={!canNavigatePrevious}
@@ -303,7 +306,7 @@ export default function PeriodNavigator({
             <Box w="1px" h="50%" bg={capsuleDivider} flexShrink={0} />
 
             <IconButton
-              aria-label="Next period"
+              aria-label={t('period.next')}
               icon={<Icon as={ChevronRight} boxSize={4} />}
               onClick={() => onNavigatePeriod('next')}
               isDisabled={!canNavigateNext}
@@ -338,12 +341,12 @@ export default function PeriodNavigator({
                 transition="all 0.15s ease"
                 flexShrink={0}
               >
-                Today
+                {t('common.today')}
               </Button>
-              <Tooltip label="Jump to today" hasArrow placement="top" openDelay={200}>
+              <Tooltip label={t('period.jumpToToday')} hasArrow placement="top" openDelay={200}>
                 <IconButton
                   display={{ base: 'inline-flex', md: 'none' }}
-                  aria-label="Go to today"
+                  aria-label={t('period.goToToday')}
                   icon={<Icon as={RotateCcw} boxSize={4} weight="duotone" />}
                   onClick={onGoToToday}
                   h="42px"
@@ -389,7 +392,7 @@ export default function PeriodNavigator({
           />
 
           <HStack spacing={0} position="relative">
-            {PERIODS.map(({ type, label, icon: PeriodIcon }) => {
+            {PERIODS.map(({ type, labelKey, icon: PeriodIcon }) => {
               const selected = selectedPeriod === type
               return (
                 <Button
@@ -424,7 +427,7 @@ export default function PeriodNavigator({
                       opacity={selected ? 1 : 0.7}
                     />
                     <Text as="span" noOfLines={1}>
-                      {label}
+                      {t(labelKey)}
                     </Text>
                   </HStack>
                 </Button>

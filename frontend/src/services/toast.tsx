@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from '../components/ui/icons'
 import theme from '../theme'
+import { getCurrentLocale, translateNow } from '../i18n'
 
 type ToastStatus = 'success' | 'error' | 'warning' | 'info' | 'loading'
 
@@ -190,7 +191,7 @@ function PremiumToast({
 
         {isClosable && (
           <CloseButton
-            aria-label="Dismiss notification"
+            aria-label={translateNow('toast.dismiss')}
             size="sm"
             mt={-1}
             mr={-1}
@@ -235,8 +236,8 @@ function parseServerMessage(error: AxiosError): string | undefined {
 export function getApiErrorMessage(error: unknown): ApiErrorMessage {
   if (!axios.isAxiosError(error)) {
     return {
-      title: 'Something went wrong',
-      description: 'We could not complete that action. Please try again.',
+      title: translateNow('error.unknown.title'),
+      description: translateNow('error.unknown.description'),
       status: 'error',
       dedupeKey: 'unknown-error',
     }
@@ -244,8 +245,8 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   if (!error.response) {
     return {
-      title: 'Connection problem',
-      description: 'Check your internet connection and try again.',
+      title: translateNow('error.network.title'),
+      description: translateNow('error.network.description'),
       status: 'error',
       dedupeKey: 'network-error',
     }
@@ -253,11 +254,15 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   const status = error.response.status
   const serverMessage = parseServerMessage(error)
+  // The current backend returns prose in English. Preserve its detail in the
+  // English UI, but use reviewed local copy in Portuguese until the API exposes
+  // language-neutral error codes.
+  const displayServerMessage = getCurrentLocale() === 'en-GB' ? serverMessage : undefined
 
   if (status === 401) {
     return {
-      title: 'Session expired',
-      description: 'Please sign in again to continue.',
+      title: translateNow('error.session.title'),
+      description: translateNow('error.session.description'),
       status: 'warning',
       dedupeKey: 'http-401',
     }
@@ -265,8 +270,8 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   if (status === 403) {
     return {
-      title: 'Access restricted',
-      description: serverMessage ?? 'You do not have permission to perform this action.',
+      title: translateNow('error.forbidden.title'),
+      description: displayServerMessage ?? translateNow('error.forbidden.description'),
       status: 'warning',
       dedupeKey: `http-403:${serverMessage ?? ''}`,
     }
@@ -274,8 +279,8 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   if (status === 404) {
     return {
-      title: 'Item not found',
-      description: 'This record may have been moved or deleted.',
+      title: translateNow('error.notFound.title'),
+      description: translateNow('error.notFound.description'),
       status: 'warning',
       dedupeKey: 'http-404',
     }
@@ -283,8 +288,8 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   if (status === 409) {
     return {
-      title: 'Could not save changes',
-      description: serverMessage ?? 'This conflicts with another update. Refresh and try again.',
+      title: translateNow('error.conflict.title'),
+      description: displayServerMessage ?? translateNow('error.conflict.description'),
       status: 'warning',
       dedupeKey: `http-409:${serverMessage ?? ''}`,
     }
@@ -292,16 +297,16 @@ export function getApiErrorMessage(error: unknown): ApiErrorMessage {
 
   if (status >= 500) {
     return {
-      title: 'Service temporarily unavailable',
-      description: 'Our server could not complete the request. Please try again in a moment.',
+      title: translateNow('error.server.title'),
+      description: translateNow('error.server.description'),
       status: 'error',
       dedupeKey: `http-${status}`,
     }
   }
 
   return {
-    title: 'Could not complete action',
-    description: serverMessage ?? 'Please review the information and try again.',
+    title: translateNow('error.action.title'),
+    description: displayServerMessage ?? translateNow('error.action.description'),
     status: 'error',
     dedupeKey: `http-${status}:${serverMessage ?? ''}`,
   }

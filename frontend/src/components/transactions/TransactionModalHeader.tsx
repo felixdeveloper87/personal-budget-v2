@@ -7,30 +7,23 @@ import {
 } from '@chakra-ui/react'
 import { editorialPalette, useEd } from '../../editorial'
 import { AppCloseButton } from '../ui'
+import { useI18n } from '../../i18n'
 
 interface TransactionModalHeaderProps {
   type: 'INCOME' | 'EXPENSE'
   onClose: () => void
 }
 
-const HEADER_COPY = {
-  INCOME: {
-    title: 'Income',
-    caption: 'Track salary, transfers and one-off payments.',
-  },
-  EXPENSE: {
-    title: 'Expense',
-    caption: 'Track spending, bills and monthly commitments.',
-  },
-} as const
-
 export default function TransactionModalHeader({
   type,
   onClose,
 }: TransactionModalHeaderProps) {
   const { colorMode } = useColorMode()
+  const { t } = useI18n()
   const ed = useEd() ?? editorialPalette(colorMode)
-  const copy = HEADER_COPY[type]
+  const copy = type === 'INCOME'
+    ? { title: t('dashboard.income'), caption: t('transactions.incomeModalCaption') }
+    : { title: t('dashboard.expense'), caption: t('transactions.expenseModalCaption') }
 
   return (
     <Box

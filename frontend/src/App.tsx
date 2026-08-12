@@ -17,6 +17,7 @@ import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
 import { useState, useEffect, useCallback } from 'react'
 import type { AppPage } from './components/layout/header/navigation.config'
+import { useI18n } from './i18n'
 
 interface PageRenderArgs {
   onPageChange: (page: AppPage) => void
@@ -67,6 +68,7 @@ function authTabFromBrowserLocation(): 'signIn' | 'signUp' | null {
 
 function AppContent() {
   const { user, loading } = useAuth()
+  const { t } = useI18n()
   const [showAuth, setShowAuth] = useState(() => authTabFromBrowserLocation() !== null)
   const [authTab, setAuthTab] = useState<'signIn' | 'signUp'>(
     () => authTabFromBrowserLocation() ?? 'signIn',
@@ -147,7 +149,7 @@ function AppContent() {
             _dark={{ emptyColor: "gray.700" }}
           />
           <Text color="gray.600" _dark={{ color: "gray.400" }} fontSize="sm">
-            Loading your dashboard...
+            {t('common.loadingDashboard')}
           </Text>
         </VStack>
       </Center>
