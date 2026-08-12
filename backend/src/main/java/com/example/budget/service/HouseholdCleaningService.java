@@ -38,6 +38,8 @@ public class HouseholdCleaningService {
                     "Vacuum the downstairs hallway",
                     null),
             new CleaningDutyDefinition("living_room", "Clean the living room", null),
+            new CleaningDutyDefinition("tea_towels", "Wash the tea towels", null),
+            new CleaningDutyDefinition("cleaning_cloths", "Wash the cleaning cloths", null),
             new CleaningDutyDefinition("all_bins", "Empty all bins", null),
             new CleaningDutyDefinition(
                     "rubbish_out",

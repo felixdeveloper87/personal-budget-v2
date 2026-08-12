@@ -59,6 +59,8 @@ import { useI18n } from '../../i18n'
 import { ToastService } from '../../services/toast'
 import type {
   HouseholdDashboard,
+  HouseholdCleaningAssignment,
+  HouseholdCleaningDuty,
   HouseholdCleaningRotation,
   HouseholdDebt,
   HouseholdExpense,
@@ -75,6 +77,7 @@ import {
   Clock,
   Gear,
   Home,
+  List,
   Mail,
   Pencil,
   Plus,
@@ -122,6 +125,8 @@ const CLEANING_DUTIES: ReadonlyArray<{
   { key: 'stairs', label: 'Vacuum the stairs' },
   { key: 'downstairs_hallway', label: 'Vacuum the downstairs hallway' },
   { key: 'living_room', label: 'Clean the living room' },
+  { key: 'tea_towels', label: 'Wash the tea towels' },
+  { key: 'cleaning_cloths', label: 'Wash the cleaning cloths' },
   { key: 'all_bins', label: 'Empty all bins' },
   {
     key: 'rubbish_out',
@@ -130,6 +135,10 @@ const CLEANING_DUTIES: ReadonlyArray<{
     timed: true,
   },
 ]
+
+type DisplayedCleaningDuty = HouseholdCleaningDuty & {
+  timed?: boolean
+}
 
 type AttachmentTarget =
   | { kind: 'expense'; id: number }
@@ -1175,11 +1184,12 @@ function CleaningRotationCard({
   ) => void
 }) {
   const { formatDate, formatNumber, t } = useI18n()
+  const dutiesModal = useDisclosure()
   const current = rotation.currentWeek
   const firstUpcoming = rotation.upcomingWeeks[0]
   const currentIsUser = current?.assignedMemberId === currentMemberId
   const currentIsComplete = current?.status === 'COMPLETED'
-  const displayedDuties = current?.duties?.length
+  const displayedDuties: DisplayedCleaningDuty[] = current?.duties?.length
     ? current.duties.map((duty) => ({
         ...duty,
         timed: duty.key === 'rubbish_out',
@@ -1192,12 +1202,6 @@ function CleaningRotationCard({
         completedAt: null,
       }))
   const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
-  const displayDutyLabel = (duty: { key: string; label: string }) =>
-    t(`household.cleaning.duty.${duty.key}`, undefined, duty.label)
-  const displayDutySchedule = (duty: { key: string; schedule?: string | null }) =>
-    duty.key === 'rubbish_out'
-      ? t('household.cleaning.rubbishSchedule')
-      : duty.schedule
   const displayDate = (value: string) => formatDate(value, {
     day: 'numeric',
     month: 'short',
@@ -1205,13 +1209,14 @@ function CleaningRotationCard({
   })
 
   return (
-    <Box
-      overflow="hidden"
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      borderRadius={{ base: '18px', md: '22px' }}
-      boxShadow="var(--pb-shadow)"
-    >
+    <>
+      <Box
+        overflow="hidden"
+        bg="var(--pb-surface)"
+        border="1px solid var(--pb-hair)"
+        borderRadius={{ base: '18px', md: '22px' }}
+        boxShadow="var(--pb-shadow)"
+      >
       <Flex
         direction={{ base: 'column', sm: 'row' }}
         justify="space-between"
@@ -1620,81 +1625,245 @@ function CleaningRotationCard({
         </Grid>
       )}
 
-      <Box
-        px={{ base: 3.5, sm: 4, md: 5 }}
-        py={{ base: 4, md: 5 }}
-        borderTop="1px solid var(--pb-hair)"
-        bg="var(--pb-surface)"
-      >
-        <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          align={{ base: 'stretch', sm: 'flex-end' }}
-          justify="space-between"
-          gap={2}
-          mb={3.5}
+        <Box
+          px={{ base: 3.5, sm: 4, md: 5 }}
+          py={{ base: 4, md: 4.5 }}
+          borderTop="1px solid var(--pb-hair)"
+          bg="var(--pb-surface)"
         >
-          <Box>
-            <Text
-              fontFamily="var(--pb-mono)"
-              color="var(--pb-ink-faint)"
-              fontSize="9px"
-              fontWeight={600}
-              letterSpacing="0.15em"
-              textTransform="uppercase"
-            >
-              {t('household.cleaning.dutiesTitle')}
-            </Text>
-            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
-              {current
-                ? currentIsUser
-                  ? t('household.cleaning.dutiesCurrentUser')
-                  : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
-                : t('household.cleaning.dutiesGeneric')}
-            </Text>
-          </Box>
-          <Box minW={{ base: 'full', sm: '150px' }}>
-            <HStack justify={{ base: 'flex-start', sm: 'flex-end' }} spacing={1.5} color="var(--pb-ink-faint)">
-              <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
-              <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
+          <Flex
+            direction={{ base: 'column', sm: 'row' }}
+            align={{ base: 'stretch', sm: 'center' }}
+            justify="space-between"
+            gap={{ base: 3.5, sm: 5 }}
+          >
+            <Box minW={0} flex={1}>
+              <Text
+                fontFamily="var(--pb-mono)"
+                color="var(--pb-ink-faint)"
+                fontSize="9px"
+                fontWeight={600}
+                letterSpacing="0.15em"
+                textTransform="uppercase"
+              >
+                {t('household.cleaning.dutiesTitle')}
+              </Text>
+              <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
                 {current
-                  ? t('household.cleaning.progress', {
-                      completed: formatNumber(completedDutyCount),
-                      total: formatNumber(displayedDuties.length),
-                    })
-                  : t(
-                      displayedDuties.length === 1
-                        ? 'household.cleaning.tasks.one'
-                        : 'household.cleaning.tasks.other',
-                      { count: formatNumber(displayedDuties.length) },
-                    )}
+                  ? currentIsUser
+                    ? t('household.cleaning.dutiesCurrentUser')
+                    : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
+                  : t('household.cleaning.dutiesGeneric')}
+              </Text>
+              <HStack mt={2.5} spacing={1.5} color="var(--pb-ink-faint)">
+                <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
+                <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
+                  {current
+                    ? t('household.cleaning.progress', {
+                        completed: formatNumber(completedDutyCount),
+                        total: formatNumber(displayedDuties.length),
+                      })
+                    : t(
+                        displayedDuties.length === 1
+                          ? 'household.cleaning.tasks.one'
+                          : 'household.cleaning.tasks.other',
+                        { count: formatNumber(displayedDuties.length) },
+                      )}
+                </Text>
+              </HStack>
+              <Box
+                mt={2}
+                h="4px"
+                maxW={{ base: 'full', sm: '280px' }}
+                overflow="hidden"
+                borderRadius="full"
+                bg="var(--pb-surface-2)"
+                aria-hidden="true"
+              >
+                <Box
+                  h="full"
+                  w={`${displayedDuties.length
+                    ? (completedDutyCount / displayedDuties.length) * 100
+                    : 0}%`}
+                  borderRadius="full"
+                  bg="var(--pb-forest-2)"
+                  transition="width 180ms ease"
+                />
+              </Box>
+            </Box>
+            <Button
+              h="44px"
+              w={{ base: 'full', sm: 'auto' }}
+              flexShrink={0}
+              px={4}
+              borderRadius="11px"
+              bg="var(--pb-forest-2)"
+              color="var(--pb-on-accent)"
+              leftIcon={<Icon as={List} boxSize={4} weight="bold" />}
+              aria-label={t('household.cleaning.openDutiesAria')}
+              onClick={dutiesModal.onOpen}
+              _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
+              _active={{ transform: 'translateY(0)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
+            >
+              {t('household.cleaning.openDuties')}
+            </Button>
+          </Flex>
+        </Box>
+      </Box>
+
+      <CleaningDutiesModal
+        isOpen={dutiesModal.isOpen}
+        onClose={dutiesModal.onClose}
+        current={current}
+        currentIsUser={currentIsUser}
+        duties={displayedDuties}
+        busyDutyKey={busyDutyKey}
+        onToggleDuty={onToggleDuty}
+      />
+    </>
+  )
+}
+
+function CleaningDutiesModal({
+  isOpen,
+  onClose,
+  current,
+  currentIsUser,
+  duties,
+  busyDutyKey,
+  onToggleDuty,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  current: HouseholdCleaningAssignment | null
+  currentIsUser: boolean
+  duties: DisplayedCleaningDuty[]
+  busyDutyKey: string | null
+  onToggleDuty: (
+    assignmentId: number,
+    dutyKey: string,
+    completed: boolean,
+  ) => void
+}) {
+  const { formatNumber, t } = useI18n()
+  const completedDutyCount = duties.filter((duty) => duty.completed).length
+  const progressLabel = current
+    ? t('household.cleaning.progress', {
+        completed: formatNumber(completedDutyCount),
+        total: formatNumber(duties.length),
+      })
+    : t(
+        duties.length === 1
+          ? 'household.cleaning.tasks.one'
+          : 'household.cleaning.tasks.other',
+        { count: formatNumber(duties.length) },
+      )
+  const guidance = current
+    ? currentIsUser
+      ? t('household.cleaning.dutiesCurrentUser')
+      : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
+    : t('household.cleaning.dutiesGeneric')
+  const displayDutyLabel = (duty: { key: string; label: string }) =>
+    t(`household.cleaning.duty.${duty.key}`, undefined, duty.label)
+  const displayDutySchedule = (duty: { key: string; schedule?: string | null }) =>
+    duty.key === 'rubbish_out'
+      ? t('household.cleaning.rubbishSchedule')
+      : duty.schedule
+
+  return (
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', md: '2xl' }}
+      header={
+        <AppModalHeader
+          icon={List}
+          title={t('household.cleaning.dutiesModalTitle')}
+          caption={t('household.cleaning.dutiesModalCaption')}
+          onClose={onClose}
+          accent="green"
+          rightSlot={
+            <Badge
+              bg="var(--pb-tint-income)"
+              color="var(--pb-income)"
+              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              px={3}
+              py={1}
+              textTransform="none"
+            >
+              {progressLabel}
+            </Badge>
+          }
+        />
+      }
+      footer={
+        <Flex justify="flex-end" w="full">
+          <Button
+            h="44px"
+            w={{ base: 'full', sm: 'auto' }}
+            px={5}
+            borderRadius="11px"
+            bg="var(--pb-forest-2)"
+            color="var(--pb-on-accent)"
+            onClick={onClose}
+            _hover={{ bg: 'var(--pb-forest)' }}
+          >
+            {t('household.common.done')}
+          </Button>
+        </Flex>
+      }
+    >
+      <Box px={{ base: 4, sm: 5, md: 6 }} py={{ base: 4, md: 5 }}>
+        <Box
+          mb={4}
+          p={{ base: 3.5, md: 4 }}
+          borderRadius="14px"
+          bg="var(--pb-surface-2)"
+          border="1px solid var(--pb-hair)"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <Flex
+            direction={{ base: 'column', sm: 'row' }}
+            align={{ base: 'stretch', sm: 'center' }}
+            justify="space-between"
+            gap={3}
+          >
+            <Text color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.5}>
+              {guidance}
+            </Text>
+            <HStack flexShrink={0} spacing={1.5} color="var(--pb-forest-2)">
+              <Icon as={CheckCircle2} boxSize={4} weight="duotone" />
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" textTransform="uppercase">
+                {progressLabel}
               </Text>
             </HStack>
+          </Flex>
+          <Box
+            mt={3}
+            h="5px"
+            overflow="hidden"
+            borderRadius="full"
+            bg="var(--pb-surface)"
+            aria-hidden="true"
+          >
             <Box
-              mt={2}
-              h="4px"
-              overflow="hidden"
+              h="full"
+              w={`${duties.length ? (completedDutyCount / duties.length) * 100 : 0}%`}
               borderRadius="full"
-              bg="var(--pb-surface-2)"
-              aria-hidden="true"
-            >
-              <Box
-                h="full"
-                w={`${displayedDuties.length
-                  ? (completedDutyCount / displayedDuties.length) * 100
-                  : 0}%`}
-                borderRadius="full"
-                bg="var(--pb-forest-2)"
-                transition="width 180ms ease"
-              />
-            </Box>
+              bg="var(--pb-forest-2)"
+              transition="width 180ms ease"
+            />
           </Box>
-        </Flex>
+        </Box>
 
-        <SimpleGrid columns={{ base: 1, sm: 2, xl: 4 }} spacing={2}>
-          {displayedDuties.map((duty, index) => (
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2.5}>
+          {duties.map((duty, index) => (
             <Flex
               key={duty.key}
-              minH={{ base: '58px', md: '62px' }}
+              minH={{ base: '64px', md: '68px' }}
               align="center"
               gap={2.5}
               px={3}
@@ -1718,8 +1887,8 @@ function CleaningRotationCard({
               }}
             >
               <Flex
-                w={8}
-                h={8}
+                w={9}
+                h={9}
                 flexShrink={0}
                 align="center"
                 justify="center"
@@ -1728,7 +1897,11 @@ function CleaningRotationCard({
                 color={duty.completed ? 'var(--pb-on-accent)' : 'var(--pb-forest-2)'}
               >
                 {busyDutyKey === duty.key ? (
-                  <Spinner size="sm" thickness="2px" />
+                  <Spinner
+                    size="sm"
+                    thickness="2px"
+                    aria-label={t('household.cleaning.updatingDuty')}
+                  />
                 ) : (
                   <Checkbox
                     isChecked={duty.completed}
@@ -1792,7 +1965,7 @@ function CleaningRotationCard({
               {duty.completed && duty.canToggle && (
                 <Button
                   flexShrink={0}
-                  h="30px"
+                  h="32px"
                   minW="54px"
                   px={2.5}
                   borderRadius="8px"
@@ -1821,7 +1994,7 @@ function CleaningRotationCard({
           ))}
         </SimpleGrid>
       </Box>
-    </Box>
+    </PremiumModal>
   )
 }
 

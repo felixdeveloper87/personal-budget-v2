@@ -152,11 +152,21 @@ class HouseholdCleaningServiceTest {
         verify(assignment).setCompletedBy(user);
         verify(assignment).setCompletedAt(any(LocalDateTime.class));
         verify(dutyCompletionRepository).saveAll(argThat(completions -> {
-            int count = 0;
-            for (HouseholdCleaningDutyCompletion ignored : completions) {
-                count++;
+            List<String> dutyKeys = new ArrayList<>();
+            for (HouseholdCleaningDutyCompletion completion : completions) {
+                dutyKeys.add(completion.getDutyKey());
             }
-            return count == 8;
+            return dutyKeys.equals(List.of(
+                    "shower_room",
+                    "toilet_wc",
+                    "upstairs_hallway",
+                    "stairs",
+                    "downstairs_hallway",
+                    "living_room",
+                    "tea_towels",
+                    "cleaning_cloths",
+                    "all_bins",
+                    "rubbish_out"));
         }));
         verify(assignmentRepository).save(assignment);
     }
@@ -188,6 +198,8 @@ class HouseholdCleaningServiceTest {
                 completion("stairs"),
                 completion("downstairs_hallway"),
                 completion("living_room"),
+                completion("tea_towels"),
+                completion("cleaning_cloths"),
                 completion("all_bins"));
         when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment))
                 .thenReturn(existing);
@@ -212,6 +224,8 @@ class HouseholdCleaningServiceTest {
                         completion("stairs"),
                         completion("downstairs_hallway"),
                         completion("living_room"),
+                        completion("tea_towels"),
+                        completion("cleaning_cloths"),
                         completion("all_bins"),
                         completion("rubbish_out")));
         when(assignment.getCompletedAt()).thenReturn(LocalDateTime.now());
