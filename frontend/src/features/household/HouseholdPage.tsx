@@ -72,6 +72,7 @@ import {
   Calendar,
   CalendarCheck,
   ChevronDown,
+  ChevronRight,
   ChevronUp,
   CheckCircle2,
   Clock,
@@ -402,6 +403,7 @@ export default function HouseholdPage() {
   const settlementModal = useDisclosure()
   const attachmentsModal = useDisclosure()
   const cleaningRotationModal = useDisclosure()
+  const membersOverviewModal = useDisclosure()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -772,7 +774,11 @@ export default function HouseholdPage() {
           )}
         />
 
-        <Grid templateColumns={{ base: '1fr', xl: '1.08fr 0.92fr' }} gap={{ base: 3, md: 4 }}>
+        <Grid
+          templateColumns={{ base: '1fr', xl: '1.08fr 0.92fr' }}
+          alignItems="start"
+          gap={{ base: 3, md: 4 }}
+        >
           <Box
             id="household-balances"
             overflow="hidden"
@@ -890,49 +896,23 @@ export default function HouseholdPage() {
                 { count: formatNumber(household.members.length) },
               )}
             />
-            <VStack align="stretch" spacing={2.5} p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
-              {household.members.map((member) => {
-                const isCurrentMember = member.id === household.currentMemberId
-                const balanceAccent = member.balance > 0 ? 'var(--pb-income)' : member.balance < 0 ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
-                return (
-                  <Box key={member.id} p={3} borderRadius="14px" border="1px solid var(--pb-hair)" bg={isCurrentMember ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}>
-                    <Flex
-                      direction={{ base: 'column', sm: 'row' }}
-                      align={{ base: 'stretch', sm: 'flex-start' }}
-                      justify="space-between"
-                      gap={3}
-                    >
-                      <HStack minW={0} spacing={0}>
-                        <Box minW={0}>
-                          <HStack spacing={1.5} flexWrap="wrap">
-                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
-                            {isCurrentMember && <Badge borderRadius="full" px={2} bg="var(--pb-surface)" textTransform="none">{t('household.common.you')}</Badge>}
-                            {member.role === 'OWNER' && <Badge borderRadius="full" px={2} bg="var(--pb-tint-gold)" color="var(--pb-gold)" textTransform="none">{t('household.common.owner')}</Badge>}
-                          </HStack>
-                          <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>{member.email}</Text>
-                        </Box>
-                      </HStack>
-                      <Box flexShrink={0} textAlign={{ base: 'left', sm: 'right' }}>
-                        <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color={balanceAccent} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {member.balance > 0 ? '+' : ''}{formatCurrency(member.balance)}
-                        </Text>
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.netPosition')}</Text>
-                      </Box>
-                    </Flex>
-                    <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2} mt={3}>
-                      <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.paid')}</Text>
-                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{formatCurrency(member.totalPaid)}</Text>
-                      </Box>
-                      <Box px={2.5} py={2} borderRadius="10px" bg="var(--pb-surface-2)">
-                        <Text fontFamily="var(--pb-mono)" fontSize="8px" color="var(--pb-ink-faint)" textTransform="uppercase">{t('household.members.assignedShare')}</Text>
-                        <Text mt={0.5} fontSize="sm" fontWeight={700} color="var(--pb-ink)">{formatCurrency(member.totalShare)}</Text>
-                      </Box>
-                    </Grid>
-                  </Box>
-                )
-              })}
-            </VStack>
+            <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
+              <Button
+                w="full"
+                h={{ base: '48px', md: '52px' }}
+                borderRadius="12px"
+                bg="var(--pb-forest-2)"
+                color="var(--pb-on-accent)"
+                rightIcon={<Icon as={ChevronRight} boxSize={4} weight="bold" />}
+                aria-label={t('household.members.openAria')}
+                onClick={membersOverviewModal.onOpen}
+                _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
+                _active={{ transform: 'translateY(0)' }}
+                _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
+              >
+                {t('household.members.open')}
+              </Button>
+            </Box>
           </Box>
         </Grid>
 
@@ -1145,6 +1125,11 @@ export default function HouseholdPage() {
         household={household}
         onChanged={setPage}
       />
+      <MembersOverviewModal
+        isOpen={membersOverviewModal.isOpen}
+        onClose={membersOverviewModal.onClose}
+        household={household}
+      />
       <CleaningRotationModal
         isOpen={cleaningRotationModal.isOpen}
         onClose={cleaningRotationModal.onClose}
@@ -1163,6 +1148,171 @@ export default function HouseholdPage() {
         onChanged={setPage}
       />
     </Box>
+  )
+}
+
+function MembersOverviewModal({
+  isOpen,
+  onClose,
+  household,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  household: HouseholdDashboard
+}) {
+  const { formatCurrency, formatNumber, t } = useI18n()
+
+  return (
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', md: 'lg' }}
+      header={
+        <AppModalHeader
+          icon={Home}
+          title={t('household.members.title')}
+          caption={t('household.members.modalCaption')}
+          onClose={onClose}
+          accent="green"
+          rightSlot={
+            <Badge
+              bg="var(--pb-tint-green)"
+              color="var(--pb-forest-2)"
+              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              px={3}
+              py={1}
+              textTransform="none"
+            >
+              {t(
+                household.members.length === 1
+                  ? 'household.members.count.one'
+                  : 'household.members.count.other',
+                { count: formatNumber(household.members.length) },
+              )}
+            </Badge>
+          }
+        />
+      }
+      footer={
+        <Flex justify="flex-end" w="full">
+          <Button
+            h="44px"
+            w={{ base: 'full', sm: 'auto' }}
+            px={5}
+            borderRadius="11px"
+            bg="var(--pb-forest-2)"
+            color="var(--pb-on-accent)"
+            onClick={onClose}
+            _hover={{ bg: 'var(--pb-forest)' }}
+          >
+            {t('household.common.close')}
+          </Button>
+        </Flex>
+      }
+    >
+      <VStack
+        align="stretch"
+        spacing={2.5}
+        p={{ base: 3, sm: 4, md: 5 }}
+        bg="var(--pb-surface-2)"
+      >
+        {household.members.map((member) => {
+          const isCurrentMember = member.id === household.currentMemberId
+          const isReceiving = member.balance > 0
+          const isPaying = member.balance < 0
+          const balanceAccent = isReceiving
+            ? 'var(--pb-income)'
+            : isPaying
+              ? 'var(--pb-coral)'
+              : 'var(--pb-ink-soft)'
+          const balanceTint = isReceiving
+            ? 'var(--pb-tint-income)'
+            : isPaying
+              ? 'var(--pb-tint-coral)'
+              : 'var(--pb-surface-2)'
+          const balanceLabel = isReceiving
+            ? t('household.members.toReceive')
+            : isPaying
+              ? t('household.members.toPay')
+              : t('household.members.settled')
+
+          return (
+            <Flex
+              key={member.id}
+              direction={{ base: 'column', sm: 'row' }}
+              align={{ base: 'stretch', sm: 'center' }}
+              justify="space-between"
+              gap={3}
+              p={{ base: 3.5, sm: 4 }}
+              borderRadius="14px"
+              border="1px solid var(--pb-hair)"
+              bg={isCurrentMember ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
+            >
+              <HStack minW={0} spacing={1.5} flexWrap="wrap">
+                <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
+                  {member.name}
+                </Text>
+                {isCurrentMember && (
+                  <Badge
+                    borderRadius="full"
+                    px={2}
+                    bg="var(--pb-surface)"
+                    textTransform="none"
+                  >
+                    {t('household.common.you')}
+                  </Badge>
+                )}
+                {member.role === 'OWNER' && (
+                  <Badge
+                    borderRadius="full"
+                    px={2}
+                    bg="var(--pb-tint-gold)"
+                    color="var(--pb-gold)"
+                    textTransform="none"
+                  >
+                    {t('household.common.owner')}
+                  </Badge>
+                )}
+              </HStack>
+
+              <Flex
+                align="center"
+                justify="space-between"
+                gap={3}
+                minW={{ base: 'full', sm: '190px' }}
+                px={3}
+                py={2.5}
+                borderRadius="11px"
+                bg={balanceTint}
+                border="1px solid var(--pb-hair)"
+              >
+                <Text
+                  fontFamily="var(--pb-mono)"
+                  fontSize="8px"
+                  fontWeight={700}
+                  color={balanceAccent}
+                  letterSpacing="0.06em"
+                  textTransform="uppercase"
+                >
+                  {balanceLabel}
+                </Text>
+                <Text
+                  flexShrink={0}
+                  fontFamily="var(--pb-serif)"
+                  fontSize="xl"
+                  fontWeight={500}
+                  color={balanceAccent}
+                  style={{ fontVariantNumeric: 'tabular-nums' }}
+                >
+                  {formatCurrency(Math.abs(member.balance))}
+                </Text>
+              </Flex>
+            </Flex>
+          )
+        })}
+      </VStack>
+    </PremiumModal>
   )
 }
 
