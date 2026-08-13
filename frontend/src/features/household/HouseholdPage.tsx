@@ -192,6 +192,7 @@ function ActionRequiredBanner({
   detail,
   actionLabel,
   targetId,
+  onAction,
 }: {
   ariaLabel: string
   icon: ReactNode
@@ -201,7 +202,8 @@ function ActionRequiredBanner({
   title: string
   detail: string
   actionLabel: string
-  targetId: string
+  targetId?: string
+  onAction?: () => void
 }) {
   const { formatNumber, t } = useI18n()
   return (
@@ -280,9 +282,21 @@ function ActionRequiredBanner({
         borderRadius="10px"
         bg={accent}
         color="var(--pb-on-accent)"
-        rightIcon={<Icon as={ChevronDown} boxSize={4} weight="bold" />}
+        rightIcon={(
+          <Icon
+            as={onAction ? ChevronRight : ChevronDown}
+            boxSize={4}
+            weight="bold"
+          />
+        )}
         onClick={() => {
-          document.getElementById(targetId)?.scrollIntoView({ block: 'start' })
+          if (onAction) {
+            onAction()
+            return
+          }
+          if (targetId) {
+            document.getElementById(targetId)?.scrollIntoView({ block: 'start' })
+          }
         }}
         _hover={{ filter: 'brightness(0.96)', transform: 'translateY(-1px)' }}
         _active={{ transform: 'translateY(0)' }}
@@ -385,7 +399,7 @@ function HouseholdSectionHeader({
 
 export default function HouseholdPage() {
   const ed = useEd()
-  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
+  const { formatCurrency, formatNumber, t } = useI18n()
   const translateRef = useRef(t)
   translateRef.current = t
   const mutedFallback = useColorModeValue('gray.600', 'gray.400')
@@ -405,6 +419,7 @@ export default function HouseholdPage() {
   const cleaningRotationModal = useDisclosure()
   const membersOverviewModal = useDisclosure()
   const recentExpensesModal = useDisclosure()
+  const paymentsOverviewModal = useDisclosure()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -722,9 +737,9 @@ export default function HouseholdPage() {
                     })
                   : t('household.banner.confirmationDetail.other', {
                       amount: formatCurrency(pendingConfirmationTotal),
-                    })}
+                })}
                 actionLabel={t('household.banner.reviewPayments')}
-                targetId="household-payments"
+                onAction={paymentsOverviewModal.onOpen}
               />
             )}
             {debtsYouOwe.length > 0 && (
@@ -971,84 +986,21 @@ export default function HouseholdPage() {
                 )}
           />
           <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
-            {household.settlements.length === 0 ? (
-              <VStack py={9} spacing={3} border="1px dashed var(--pb-hair-2)" borderRadius="14px" bg="var(--pb-surface)">
-                <Flex w={11} h={11} align="center" justify="center" borderRadius="full" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
-                  <Mail size={22} weight="duotone" />
-                </Flex>
-                <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500}>{t('household.settlements.emptyTitle')}</Text>
-                <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">{t('household.settlements.emptyDescription')}</Text>
-              </VStack>
-            ) : (
-              <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
-                {household.settlements.map((settlement) => {
-                  const needsCurrentUserAction = settlement.canConfirm || settlement.canReject
-                  const statusAccent = settlement.status === 'CONFIRMED' ? 'var(--pb-income)' : settlement.status === 'PENDING' ? 'var(--pb-gold)' : 'var(--pb-ink-faint)'
-                  const statusTint = settlement.status === 'CONFIRMED' ? 'var(--pb-tint-income)' : settlement.status === 'PENDING' ? 'var(--pb-tint-gold)' : 'var(--pb-surface-3)'
-                  return (
-                    <Stack
-                      key={settlement.id}
-                      direction="column"
-                      justify="space-between"
-                      gap={3}
-                      minH="142px"
-                      p={3}
-                      borderRadius="14px"
-                      border="1px solid"
-                      borderColor={needsCurrentUserAction ? 'var(--pb-gold)' : 'var(--pb-hair)'}
-                      bg={needsCurrentUserAction ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
-                    >
-                      <Flex
-                        direction={{ base: 'column', sm: 'row' }}
-                        align={{ base: 'stretch', sm: 'flex-start' }}
-                        justify="space-between"
-                        gap={3}
-                      >
-                        <HStack minW={0} spacing={0}>
-                          <Box minW={0}>
-                            <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{t('household.record.paymentTitle', { from: settlement.fromMemberName, to: settlement.toMemberName })}</Text>
-                            <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">{formatDate(settlement.settlementDate, { day: 'numeric', month: 'short', year: 'numeric' })}</Text>
-                          </Box>
-                        </HStack>
-                        <Text flexShrink={0} fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {formatCurrency(settlement.amount)}
-                        </Text>
-                      </Flex>
-                      <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
-                        <HStack spacing={1.5} flexWrap="wrap">
-                          <Badge borderRadius="full" px={2.5} py={1} bg={statusTint} color={statusAccent} textTransform="capitalize">{t(`household.status.${settlement.status}`, undefined, settlement.status)}</Badge>
-                          {needsCurrentUserAction && <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} color="var(--pb-gold)" textTransform="uppercase">{t('household.settlements.review')}</Text>}
-                        </HStack>
-                        <HStack spacing={1} flexWrap="wrap" justify="flex-end">
-                          {((settlement.attachments ?? []).length > 0 || settlement.canAttach) && (
-                            <Button aria-label={t('household.settlements.proofAria', { name: settlement.fromMemberName })} h="34px" px={2.5} borderRadius="9px" variant="ghost" leftIcon={<Upload size={14} />} onClick={() => openAttachments({ kind: 'settlement', id: settlement.id })}>
-                              {t('household.settlements.proof', {
-                                count: formatNumber((settlement.attachments ?? []).length),
-                              })}
-                            </Button>
-                          )}
-                          {settlement.canConfirm && (
-                            <Button h="34px" px={3} borderRadius="9px" bg="var(--pb-forest-2)" color="var(--pb-on-accent)" isLoading={busyAction === `confirm-${settlement.id}`} onClick={() => void applyAction(`confirm-${settlement.id}`, () => confirmHouseholdSettlement(household.id, settlement.id), t('household.settlements.confirmedToast'))}>
-                              {t('household.common.confirm')}
-                            </Button>
-                          )}
-                          {settlement.canReject && (
-                            <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" color="var(--pb-coral)" isLoading={busyAction === `reject-${settlement.id}`} onClick={() => void applyAction(`reject-${settlement.id}`, () => rejectHouseholdSettlement(household.id, settlement.id))}>
-                              {t('household.common.reject')}
-                            </Button>
-                          )}
-                          {settlement.canCancel && (
-                            <Button h="34px" px={2.5} borderRadius="9px" variant="ghost" isLoading={busyAction === `cancel-${settlement.id}`} onClick={() => void applyAction(`cancel-${settlement.id}`, () => cancelHouseholdSettlement(household.id, settlement.id))}>
-                              {t('household.common.cancel')}
-                            </Button>
-                          )}
-                        </HStack>
-                      </Flex>
-                    </Stack>
-                  )
-                })}
-              </SimpleGrid>
-            )}
+            <Button
+              w="full"
+              h={{ base: '48px', md: '52px' }}
+              borderRadius="12px"
+              bg="var(--pb-forest-2)"
+              color="var(--pb-on-accent)"
+              rightIcon={<Icon as={ChevronRight} boxSize={4} weight="bold" />}
+              aria-label={t('household.settlements.openAria')}
+              onClick={paymentsOverviewModal.onOpen}
+              _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
+              _active={{ transform: 'translateY(0)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
+            >
+              {t('household.settlements.open')}
+            </Button>
           </Box>
         </Box>
       </VStack>
@@ -1094,6 +1046,29 @@ export default function HouseholdPage() {
           recentExpensesModal.onClose()
           openAttachments({ kind: 'expense', id: expenseId })
         }}
+      />
+      <PaymentsOverviewModal
+        isOpen={paymentsOverviewModal.isOpen}
+        onClose={paymentsOverviewModal.onClose}
+        household={household}
+        busyAction={busyAction}
+        onOpenAttachments={(settlementId) => {
+          paymentsOverviewModal.onClose()
+          openAttachments({ kind: 'settlement', id: settlementId })
+        }}
+        onConfirm={(settlementId) => void applyAction(
+          `confirm-${settlementId}`,
+          () => confirmHouseholdSettlement(household.id, settlementId),
+          t('household.settlements.confirmedToast'),
+        )}
+        onReject={(settlementId) => void applyAction(
+          `reject-${settlementId}`,
+          () => rejectHouseholdSettlement(household.id, settlementId),
+        )}
+        onCancel={(settlementId) => void applyAction(
+          `cancel-${settlementId}`,
+          () => cancelHouseholdSettlement(household.id, settlementId),
+        )}
       />
       <CleaningRotationModal
         isOpen={cleaningRotationModal.isOpen}
@@ -1515,6 +1490,279 @@ function RecentExpensesModal({
                 </Flex>
               </Stack>
             ))}
+          </SimpleGrid>
+        )}
+      </Box>
+    </PremiumModal>
+  )
+}
+
+function PaymentsOverviewModal({
+  isOpen,
+  onClose,
+  household,
+  busyAction,
+  onOpenAttachments,
+  onConfirm,
+  onReject,
+  onCancel,
+}: {
+  isOpen: boolean
+  onClose: () => void
+  household: HouseholdDashboard
+  busyAction: string | null
+  onOpenAttachments: (settlementId: number) => void
+  onConfirm: (settlementId: number) => void
+  onReject: (settlementId: number) => void
+  onCancel: (settlementId: number) => void
+}) {
+  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
+  const pendingCount = household.settlements.filter(
+    (settlement) => settlement.status === 'PENDING',
+  ).length
+
+  return (
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', md: '2xl' }}
+      header={
+        <AppModalHeader
+          icon={Mail}
+          title={t('household.settlements.title')}
+          caption={t('household.settlements.description')}
+          onClose={onClose}
+          accent={pendingCount ? 'violet' : 'green'}
+          rightSlot={
+            <Badge
+              bg={pendingCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
+              color={pendingCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
+              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              px={3}
+              py={1}
+              textTransform="none"
+            >
+              {pendingCount
+                ? t('household.settlements.pending', {
+                    count: formatNumber(pendingCount),
+                  })
+                : t(
+                    household.settlements.length === 1
+                      ? 'household.settlements.count.one'
+                      : 'household.settlements.count.other',
+                    { count: formatNumber(household.settlements.length) },
+                  )}
+            </Badge>
+          }
+        />
+      }
+      footer={
+        <Flex justify="flex-end" w="full">
+          <Button
+            h="44px"
+            w={{ base: 'full', sm: 'auto' }}
+            px={5}
+            borderRadius="11px"
+            bg="var(--pb-forest-2)"
+            color="var(--pb-on-accent)"
+            onClick={onClose}
+            _hover={{ bg: 'var(--pb-forest)' }}
+          >
+            {t('household.common.close')}
+          </Button>
+        </Flex>
+      }
+    >
+      <Box p={{ base: 3, sm: 4, md: 5 }} bg="var(--pb-surface-2)">
+        {household.settlements.length === 0 ? (
+          <VStack
+            py={9}
+            px={4}
+            spacing={3}
+            border="1px dashed var(--pb-hair-2)"
+            borderRadius="14px"
+            bg="var(--pb-surface)"
+          >
+            <Flex
+              w={11}
+              h={11}
+              align="center"
+              justify="center"
+              borderRadius="full"
+              bg="var(--pb-tint-green)"
+              color="var(--pb-forest-2)"
+            >
+              <Mail size={22} weight="duotone" />
+            </Flex>
+            <Text
+              fontFamily="var(--pb-serif)"
+              fontSize="lg"
+              fontWeight={500}
+              textAlign="center"
+            >
+              {t('household.settlements.emptyTitle')}
+            </Text>
+            <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">
+              {t('household.settlements.emptyDescription')}
+            </Text>
+          </VStack>
+        ) : (
+          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+            {household.settlements.map((settlement) => {
+              const needsCurrentUserAction = settlement.canConfirm || settlement.canReject
+              const statusAccent = settlement.status === 'CONFIRMED'
+                ? 'var(--pb-income)'
+                : settlement.status === 'PENDING'
+                  ? 'var(--pb-gold)'
+                  : 'var(--pb-ink-faint)'
+              const statusTint = settlement.status === 'CONFIRMED'
+                ? 'var(--pb-tint-income)'
+                : settlement.status === 'PENDING'
+                  ? 'var(--pb-tint-gold)'
+                  : 'var(--pb-surface-3)'
+
+              return (
+                <Stack
+                  key={settlement.id}
+                  direction="column"
+                  justify="space-between"
+                  gap={3}
+                  minH="142px"
+                  p={3}
+                  borderRadius="14px"
+                  border="1px solid"
+                  borderColor={needsCurrentUserAction
+                    ? 'var(--pb-gold)'
+                    : 'var(--pb-hair)'}
+                  bg={needsCurrentUserAction
+                    ? 'var(--pb-tint-gold)'
+                    : 'var(--pb-surface)'}
+                >
+                  <Flex
+                    direction={{ base: 'column', sm: 'row' }}
+                    align={{ base: 'stretch', sm: 'flex-start' }}
+                    justify="space-between"
+                    gap={3}
+                  >
+                    <Box minW={0}>
+                      <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
+                        {t('household.record.paymentTitle', {
+                          from: settlement.fromMemberName,
+                          to: settlement.toMemberName,
+                        })}
+                      </Text>
+                      <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">
+                        {formatDate(settlement.settlementDate, {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </Text>
+                    </Box>
+                    <Text
+                      flexShrink={0}
+                      fontFamily="var(--pb-serif)"
+                      fontSize="xl"
+                      fontWeight={500}
+                      color="var(--pb-ink)"
+                      style={{ fontVariantNumeric: 'tabular-nums' }}
+                    >
+                      {formatCurrency(settlement.amount)}
+                    </Text>
+                  </Flex>
+
+                  <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
+                    <HStack spacing={1.5} flexWrap="wrap">
+                      <Badge
+                        borderRadius="full"
+                        px={2.5}
+                        py={1}
+                        bg={statusTint}
+                        color={statusAccent}
+                        textTransform="capitalize"
+                      >
+                        {t(
+                          `household.status.${settlement.status}`,
+                          undefined,
+                          settlement.status,
+                        )}
+                      </Badge>
+                      {needsCurrentUserAction && (
+                        <Text
+                          fontFamily="var(--pb-mono)"
+                          fontSize="8px"
+                          fontWeight={700}
+                          color="var(--pb-gold)"
+                          textTransform="uppercase"
+                        >
+                          {t('household.settlements.review')}
+                        </Text>
+                      )}
+                    </HStack>
+
+                    <HStack spacing={1} flexWrap="wrap" justify="flex-end">
+                      {((settlement.attachments ?? []).length > 0
+                        || settlement.canAttach) && (
+                        <Button
+                          aria-label={t('household.settlements.proofAria', {
+                            name: settlement.fromMemberName,
+                          })}
+                          h="34px"
+                          px={2.5}
+                          borderRadius="9px"
+                          variant="ghost"
+                          leftIcon={<Upload size={14} />}
+                          onClick={() => onOpenAttachments(settlement.id)}
+                        >
+                          {t('household.settlements.proof', {
+                            count: formatNumber((settlement.attachments ?? []).length),
+                          })}
+                        </Button>
+                      )}
+                      {settlement.canConfirm && (
+                        <Button
+                          h="34px"
+                          px={3}
+                          borderRadius="9px"
+                          bg="var(--pb-forest-2)"
+                          color="var(--pb-on-accent)"
+                          isLoading={busyAction === `confirm-${settlement.id}`}
+                          onClick={() => onConfirm(settlement.id)}
+                        >
+                          {t('household.common.confirm')}
+                        </Button>
+                      )}
+                      {settlement.canReject && (
+                        <Button
+                          h="34px"
+                          px={2.5}
+                          borderRadius="9px"
+                          variant="ghost"
+                          color="var(--pb-coral)"
+                          isLoading={busyAction === `reject-${settlement.id}`}
+                          onClick={() => onReject(settlement.id)}
+                        >
+                          {t('household.common.reject')}
+                        </Button>
+                      )}
+                      {settlement.canCancel && (
+                        <Button
+                          h="34px"
+                          px={2.5}
+                          borderRadius="9px"
+                          variant="ghost"
+                          isLoading={busyAction === `cancel-${settlement.id}`}
+                          onClick={() => onCancel(settlement.id)}
+                        >
+                          {t('household.common.cancel')}
+                        </Button>
+                      )}
+                    </HStack>
+                  </Flex>
+                </Stack>
+              )
+            })}
           </SimpleGrid>
         )}
       </Box>
