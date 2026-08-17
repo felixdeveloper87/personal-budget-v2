@@ -1521,65 +1521,73 @@ function RecentExpensesModal({
           </VStack>
         ) : (
           <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
-            {household.expenses.map((expense) => (
-              <Stack
-                key={expense.id}
-                direction="column"
-                justify="space-between"
-                gap={3}
-                minH="132px"
-                p={3}
-                borderRadius="14px"
-                border="1px solid var(--pb-hair)"
-                bg="var(--pb-surface)"
-              >
-                <Flex
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'stretch', sm: 'flex-start' }}
-                  justify="space-between"
-                  gap={3}
+            {household.expenses.map((expense) => {
+              const currentShare = expense.shares.find(
+                (share) => share.memberId === household.currentMemberId,
+              )
+              const attachmentCount = (expense.attachments ?? []).length
+              const canOpenProof = attachmentCount > 0 || expense.canEdit
+              const hasFooter = Boolean(currentShare || canOpenProof || expense.canEdit)
+
+              return (
+                <Stack
+                  key={expense.id}
+                  direction="column"
+                  gap={0}
+                  h="full"
+                  p={{ base: 3.5, sm: 4 }}
+                  borderRadius="14px"
+                  border="1px solid var(--pb-hair)"
+                  bg="var(--pb-surface)"
                 >
-                  <HStack minW={0} spacing={3}>
-                    <Flex
-                      w={10}
-                      h={10}
-                      flexShrink={0}
-                      align="center"
-                      justify="center"
-                      borderRadius="12px"
-                      bg="var(--pb-tint-green)"
-                      color="var(--pb-forest-2)"
-                    >
-                      <ReceiptText size={18} weight="duotone" />
-                    </Flex>
+                  <Flex align="flex-start" justify="space-between" gap={4} pb={3}>
                     <Box minW={0}>
-                      <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
+                      <Text
+                        fontSize="md"
+                        fontWeight={700}
+                        lineHeight={1.25}
+                        color="var(--pb-ink)"
+                        noOfLines={2}
+                      >
                         {expense.description}
                       </Text>
-                      <Text
-                        mt={0.5}
-                        color="var(--pb-ink-faint)"
-                        fontSize="xs"
-                        noOfLines={1}
-                      >
+                      <Text mt={1} color="var(--pb-ink-faint)" fontSize="xs" noOfLines={1}>
                         {t('household.expenses.paidBy', { name: expense.payerName })}
                       </Text>
                     </Box>
-                  </HStack>
-                  <Text
-                    flexShrink={0}
-                    fontFamily="var(--pb-serif)"
-                    fontSize="xl"
-                    fontWeight={500}
-                    color="var(--pb-ink)"
-                    style={{ fontVariantNumeric: 'tabular-nums' }}
+                    <Box flexShrink={0} textAlign="right">
+                      <Text
+                        fontFamily="var(--pb-mono)"
+                        fontSize="8px"
+                        fontWeight={700}
+                        letterSpacing="0.08em"
+                        textTransform="uppercase"
+                        color="var(--pb-ink-faint)"
+                      >
+                        {t('household.expenses.total')}
+                      </Text>
+                      <Text
+                        mt={0.5}
+                        fontFamily="var(--pb-serif)"
+                        fontSize="xl"
+                        fontWeight={500}
+                        lineHeight={1}
+                        color="var(--pb-ink)"
+                        style={{ fontVariantNumeric: 'tabular-nums' }}
+                      >
+                        {formatCurrency(expense.amount)}
+                      </Text>
+                    </Box>
+                  </Flex>
+
+                  <HStack
+                    spacing={2}
+                    py={2.5}
+                    borderTop="1px solid var(--pb-hair)"
+                    flexWrap="wrap"
                   >
-                    {formatCurrency(expense.amount)}
-                  </Text>
-                </Flex>
-                <Flex align="center" justify="space-between" gap={3} flexWrap="wrap">
-                  <HStack spacing={1.5} flexWrap="wrap">
                     <Badge
+                      flexShrink={0}
                       borderRadius="full"
                       px={2}
                       bg="var(--pb-tint-gold)"
@@ -1592,7 +1600,7 @@ function RecentExpensesModal({
                         expense.category,
                       )}
                     </Badge>
-                    <Text color="var(--pb-ink-faint)" fontSize="xs">
+                    <Text color="var(--pb-ink-faint)" fontSize="xs" lineHeight={1.4}>
                       {t(
                         expense.shares.length === 1
                           ? 'household.expenses.shares.one'
@@ -1608,42 +1616,81 @@ function RecentExpensesModal({
                       )}
                     </Text>
                   </HStack>
-                  <HStack spacing={1}>
-                    {((expense.attachments ?? []).length > 0 || expense.canEdit) && (
-                      <Button
-                        aria-label={t('household.expenses.proofAria', {
-                          description: expense.description,
-                        })}
-                        h="34px"
-                        px={2.5}
-                        borderRadius="9px"
-                        variant="ghost"
-                        leftIcon={<Upload size={14} />}
-                        color="var(--pb-ink-soft)"
-                        onClick={() => onOpenAttachments(expense.id)}
-                      >
-                        {t('household.expenses.proof', {
-                          count: formatNumber((expense.attachments ?? []).length),
-                        })}
-                      </Button>
-                    )}
-                    {expense.canEdit && (
-                      <IconButton
-                        aria-label={t('household.expenses.editAria', {
-                          description: expense.description,
-                        })}
-                        icon={<Pencil size={16} />}
-                        h="34px"
-                        minW="34px"
-                        borderRadius="9px"
-                        variant="ghost"
-                        onClick={() => onEditExpense(expense)}
-                      />
-                    )}
-                  </HStack>
-                </Flex>
-              </Stack>
-            ))}
+
+                  {hasFooter && (
+                    <Flex
+                      align="center"
+                      justify="space-between"
+                      gap={3}
+                      pt={2.5}
+                      mt="auto"
+                      borderTop="1px solid var(--pb-hair)"
+                    >
+                      {currentShare ? (
+                        <HStack spacing={2} minW={0}>
+                          <Text
+                            fontFamily="var(--pb-mono)"
+                            fontSize="8px"
+                            fontWeight={700}
+                            letterSpacing="0.06em"
+                            textTransform="uppercase"
+                            color="var(--pb-ink-faint)"
+                          >
+                            {t('household.expenses.yourShare')}
+                          </Text>
+                          <Text
+                            flexShrink={0}
+                            fontFamily="var(--pb-serif)"
+                            fontSize="md"
+                            fontWeight={500}
+                            color="var(--pb-forest-2)"
+                            style={{ fontVariantNumeric: 'tabular-nums' }}
+                          >
+                            {formatCurrency(currentShare.amount)}
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Box />
+                      )}
+                      <HStack spacing={1} flexShrink={0}>
+                        {canOpenProof && (
+                          <Button
+                            aria-label={t('household.expenses.proofAria', {
+                              description: expense.description,
+                            })}
+                            h="32px"
+                            px={2.5}
+                            borderRadius="9px"
+                            variant="ghost"
+                            leftIcon={<Upload size={14} />}
+                            color="var(--pb-ink-soft)"
+                            fontSize="xs"
+                            onClick={() => onOpenAttachments(expense.id)}
+                          >
+                            {t('household.expenses.proof', {
+                              count: formatNumber(attachmentCount),
+                            })}
+                          </Button>
+                        )}
+                        {expense.canEdit && (
+                          <IconButton
+                            aria-label={t('household.expenses.editAria', {
+                              description: expense.description,
+                            })}
+                            icon={<Pencil size={15} />}
+                            h="32px"
+                            minW="32px"
+                            borderRadius="9px"
+                            variant="ghost"
+                            onClick={() => onEditExpense(expense)}
+                          />
+                        )}
+                      </HStack>
+                    </Flex>
+                  )}
+                </Stack>
+              )
+            })}
           </SimpleGrid>
         )}
       </Box>
