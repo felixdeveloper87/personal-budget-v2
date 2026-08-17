@@ -324,6 +324,7 @@ export default function Logo({ user, onClick }: LogoProps) {
       </Box>
 
       <VStack
+        display={{ base: 'none', md: 'flex' }}
         align="flex-start"
         spacing={0}
         minW={0}

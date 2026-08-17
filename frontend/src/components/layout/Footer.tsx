@@ -9,7 +9,6 @@ import {
 import { ArrowUp } from '../ui/icons'
 import { useEd } from '../../editorial'
 import { FOOTER } from '../../pages/landing-v3/landingV3.config'
-import BrandMark from '../brand/BrandMark'
 import { useI18n } from '../../i18n'
 
 export default function Footer() {
@@ -43,48 +42,7 @@ export default function Footer() {
       bg={bg}
       color={text}
     >
-      <Flex
-        maxW="appContent"
-        mx="auto"
-        px={{ base: 5, md: 8 }}
-        py={{ base: 12, md: 16, lg: 20 }}
-        align={{ base: 'flex-start', sm: 'center' }}
-        direction={{ base: 'column', sm: 'row' }}
-        gap={{ base: 6, md: 10, lg: 14 }}
-      >
-        <Box
-          flexShrink={0}
-          w={{ base: 20, md: 24, lg: 28 }}
-          h={{ base: 20, md: 24, lg: 28 }}
-          sx={{ filter: 'drop-shadow(0 12px 18px rgba(0, 0, 0, 0.20))' }}
-        >
-          <BrandMark
-            size="100%"
-            cream="#f2f4f0"
-            jade={jade}
-            gold={ed?.gold ?? '#c18b35'}
-          />
-        </Box>
-
-        <Text
-          as="p"
-          m={0}
-          maxW="1100px"
-          fontFamily={ed?.fontDisplay ?? "'Instrument Serif', Georgia, serif"}
-          fontSize={{ base: '2.6rem', sm: 'clamp(3rem, 6vw, 6.2rem)' }}
-          fontWeight={400}
-          lineHeight={{ base: 0.98, md: 0.94 }}
-          letterSpacing="-0.04em"
-          color={text}
-        >
-          {t('footer.statement')}{' '}
-          <Text as="span" color={jade} fontStyle="italic" fontWeight={400}>
-            {t('footer.statementAccent')}
-          </Text>
-        </Text>
-      </Flex>
-
-      <Box borderTop="1px solid" borderColor={line} pt={{ base: 8, md: 12 }}>
+      <Box pt={{ base: 8, md: 12 }}>
         <Text
           aria-hidden
           textStyle="display"
