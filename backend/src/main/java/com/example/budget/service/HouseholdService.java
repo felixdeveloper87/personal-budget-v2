@@ -261,7 +261,10 @@ public class HouseholdService {
         BigDecimal amount = money(request.amount(), "Settlement amount");
         LedgerState state = loadLedger(from.getHousehold());
         BigDecimal due = debtAmount(
-                calculateDebts(state.shares(), state.settlements()), from.getId(), to.getId());
+                calculateDebtsThroughMonth(
+                        state.shares(), state.settlements(), YearMonth.now()),
+                from.getId(),
+                to.getId());
         BigDecimal reserved = state.settlements().stream()
                 .filter(settlement -> settlement.getStatus() == HouseholdSettlementStatus.PENDING)
                 .filter(settlement -> settlement.getFromMember().getId().equals(from.getId()))
@@ -305,7 +308,8 @@ public class HouseholdService {
 
         LedgerState state = loadLedger(recipient.getHousehold());
         BigDecimal due = debtAmount(
-                calculateDebts(state.shares(), state.settlements()),
+                calculateDebtsThroughMonth(
+                        state.shares(), state.settlements(), YearMonth.now()),
                 settlement.getFromMember().getId(),
                 settlement.getToMember().getId());
         if (settlement.getAmount().compareTo(due) > 0) {
@@ -356,7 +360,15 @@ public class HouseholdService {
         List<HouseholdMember> members =
                 memberRepository.findByHouseholdAndActiveTrueOrderByIdAsc(household);
         LedgerState state = loadLedger(household);
-        List<DebtPosition> debts = calculateDebts(state.shares(), state.settlements());
+        YearMonth currentMonth = YearMonth.now();
+        List<HouseholdExpense> activeExpenses = state.expenses().stream()
+                .filter(expense -> isExpenseActiveThroughMonth(expense, currentMonth))
+                .toList();
+        List<HouseholdExpenseShare> activeShares = state.shares().stream()
+                .filter(share -> isExpenseActiveThroughMonth(share.getExpense(), currentMonth))
+                .toList();
+        List<DebtPosition> debts = calculateDebtPositions(
+                activeShares, state.settlements());
 
         Map<Long, HouseholdMember> memberById = members.stream()
                 .collect(Collectors.toMap(HouseholdMember::getId, Function.identity()));
@@ -364,11 +376,11 @@ public class HouseholdService {
         Map<Long, BigDecimal> assigned = zeroMap(members);
         Map<Long, BigDecimal> balances = zeroMap(members);
 
-        for (HouseholdExpense expense : state.expenses()) {
+        for (HouseholdExpense expense : activeExpenses) {
             paid.computeIfPresent(expense.getPayer().getId(), (id, value) ->
                     value.add(expense.getAmount()));
         }
-        for (HouseholdExpenseShare share : state.shares()) {
+        for (HouseholdExpenseShare share : activeShares) {
             assigned.computeIfPresent(share.getMember().getId(), (id, value) ->
                     value.add(share.getAmount()));
         }
@@ -492,7 +504,6 @@ public class HouseholdService {
                 })
                 .toList();
 
-        YearMonth currentMonth = YearMonth.now();
         List<HouseholdPageDTO.MonthSummary> monthSummaries =
                 buildMonthSummaries(state.expenses(), currentMonth);
         BigDecimal monthSpend = monthSummaries.stream()
@@ -580,18 +591,41 @@ public class HouseholdService {
     private List<DebtPosition> calculateDebts(
             List<HouseholdExpenseShare> shares,
             List<HouseholdSettlement> settlements) {
+        return calculateDebtPositions(shares, settlements);
+    }
+
+    static List<DebtPosition> calculateDebtsThroughMonth(
+            List<HouseholdExpenseShare> shares,
+            List<HouseholdSettlement> settlements,
+            YearMonth activeThroughMonth) {
+        List<HouseholdExpenseShare> activeShares = shares.stream()
+                .filter(share -> isExpenseActiveThroughMonth(
+                        share.getExpense(), activeThroughMonth))
+                .toList();
+        return calculateDebtPositions(activeShares, settlements);
+    }
+
+    private static boolean isExpenseActiveThroughMonth(
+            HouseholdExpense expense,
+            YearMonth activeThroughMonth) {
+        return !YearMonth.from(expense.getExpenseDate()).isAfter(activeThroughMonth);
+    }
+
+    private static List<DebtPosition> calculateDebtPositions(
+            List<HouseholdExpenseShare> shares,
+            List<HouseholdSettlement> settlements) {
         Map<PairKey, BigDecimal> signedByPair = new HashMap<>();
 
         for (HouseholdExpenseShare share : shares) {
             Long debtor = share.getMember().getId();
             Long creditor = share.getExpense().getPayer().getId();
             if (!debtor.equals(creditor)) {
-                mergeDirection(signedByPair, debtor, creditor, share.getAmount());
+                mergeDebtDirection(signedByPair, debtor, creditor, share.getAmount());
             }
         }
         for (HouseholdSettlement settlement : settlements) {
             if (settlement.getStatus() == HouseholdSettlementStatus.CONFIRMED) {
-                mergeDirection(
+                mergeDebtDirection(
                         signedByPair,
                         settlement.getFromMember().getId(),
                         settlement.getToMember().getId(),
@@ -613,7 +647,7 @@ public class HouseholdService {
                 .toList();
     }
 
-    private void mergeDirection(
+    private static void mergeDebtDirection(
             Map<PairKey, BigDecimal> signedByPair,
             Long fromId,
             Long toId,
@@ -787,7 +821,7 @@ public class HouseholdService {
     }
 
     private record PairKey(Long lowId, Long highId) {}
-    private record DebtPosition(Long fromId, Long toId, BigDecimal amount) {}
+    record DebtPosition(Long fromId, Long toId, BigDecimal amount) {}
     private record LedgerState(
             List<HouseholdExpense> expenses,
             List<HouseholdExpenseShare> shares,
