@@ -9,6 +9,9 @@ Base URL: `http://localhost:8080` (dev) or your deployed backend URL. All endpoi
 - `POST /api/auth/login`
   - Body: `{ "email": "string", "password": "string" }`
   - Response: `{ user: { id, name, email }, token }`
+- `POST /api/auth/reset-password`
+  - Body: `{ "email": "string", "password": "string" }`
+  - Response: `204 No Content`
 
 ## Transactions
 - `GET /api/transactions` — list authenticated user's transactions.

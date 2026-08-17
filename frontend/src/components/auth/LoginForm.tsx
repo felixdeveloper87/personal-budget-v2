@@ -19,6 +19,7 @@ import { useI18n } from '../../i18n'
 
 interface LoginFormProps {
   onSwitchToRegister: () => void
+  onForgotPassword: () => void
 }
 
 interface LoginErrors {
@@ -26,7 +27,7 @@ interface LoginErrors {
   password?: string
 }
 
-export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+export default function LoginForm({ onSwitchToRegister, onForgotPassword }: LoginFormProps) {
   const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -140,6 +141,21 @@ export default function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               />
             }
           />
+
+          <Button
+            type="button"
+            variant="link"
+            alignSelf="flex-end"
+            color={C.jade}
+            fontFamily={F.body}
+            fontWeight={600}
+            fontSize="xs"
+            onClick={onForgotPassword}
+            _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
+            _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+          >
+            {t('auth.login.forgotPassword')}
+          </Button>
 
           {submitError && (
             <HStack

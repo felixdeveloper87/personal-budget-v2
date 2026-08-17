@@ -202,6 +202,7 @@ All routes below require a JWT, except `/api/auth/**` and `/health`.
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/google`
+- `POST /api/auth/reset-password`
 - `GET /api/transactions`
 - `POST /api/transactions`
 - `PUT /api/transactions/{id}`

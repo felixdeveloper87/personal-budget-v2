@@ -26,6 +26,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -86,7 +87,7 @@ class AuthServiceTest {
         assertThat(result.getPendingApproval()).isTrue();
         assertThat(result.getToken()).isNull();
         assertThat(result.getEmail()).isEqualTo("a@b.com");
-        verify(jwtUtil, never()).generateToken(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }
 
     @Test
@@ -112,7 +113,7 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(com.example.budget.exception.InvalidCredentialsException.class);
 
-        verify(jwtUtil, never()).generateToken(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }
 
     @Test
@@ -130,7 +131,7 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.login(request))
                 .isInstanceOf(AccountPendingApprovalException.class);
 
-        verify(jwtUtil, never()).generateToken(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }
 
     @Test
@@ -146,7 +147,7 @@ class AuthServiceTest {
         user.setAdmin(false);
         when(userRepository.findByEmail("x@y.com")).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("right", "encoded-hash")).thenReturn(true);
-        when(jwtUtil.generateToken("x@y.com", 2L)).thenReturn("token2");
+        when(jwtUtil.generateToken("x@y.com", 2L, 0)).thenReturn("token2");
 
         AuthResponse expected = new AuthResponse(2L, "Bob", "x@y.com", "token2", UserPlan.STANDARD, false);
         when(userMapper.toAuthResponse(user, "token2")).thenReturn(expected);
@@ -196,7 +197,7 @@ class AuthServiceTest {
         assertThat(r.getToken()).isNull();
         assertThat(r.getEmail()).isEqualTo("new@gmail.com");
         assertThat(r.getUserId()).isEqualTo(9L);
-        verify(jwtUtil, never()).generateToken(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }
 
     @Test
@@ -215,7 +216,7 @@ class AuthServiceTest {
         user.setPlan(UserPlan.STANDARD);
         user.setAdmin(false);
         when(userRepository.findByEmailIgnoreCase("ok@gmail.com")).thenReturn(Optional.of(user));
-        when(jwtUtil.generateToken("ok@gmail.com", 3L)).thenReturn("jwt");
+        when(jwtUtil.generateToken("ok@gmail.com", 3L, 0)).thenReturn("jwt");
         AuthResponse expected = new AuthResponse(3L, "Ok", "ok@gmail.com", "jwt", UserPlan.STANDARD, false);
         when(userMapper.toAuthResponse(user, "jwt")).thenReturn(expected);
 
@@ -236,6 +237,6 @@ class AuthServiceTest {
         assertThatThrownBy(() -> authService.loginWithGoogle("t"))
                 .isInstanceOf(AccountPendingApprovalException.class);
 
-        verify(jwtUtil, never()).generateToken(any(), any());
+        verify(jwtUtil, never()).generateToken(any(), any(), anyInt());
     }
 }

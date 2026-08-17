@@ -263,6 +263,11 @@ export interface RegisterRequest {
   password: string
 }
 
+export interface ResetPasswordRequest {
+  email: string
+  password: string
+}
+
 // Plano de parcelamento
 export interface InstallmentPlan {
   id: number

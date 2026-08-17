@@ -41,6 +41,10 @@ public class User {
     @Column(nullable = false)
     private boolean admin = false;
 
+    /** Incremented after a credential reset so previously issued JWTs become invalid. */
+    @Column(name = "auth_version", nullable = false)
+    private int authVersion = 0;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private UserPlan plan = UserPlan.STANDARD;
@@ -133,6 +137,14 @@ public class User {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public int getAuthVersion() {
+        return authVersion;
+    }
+
+    public void setAuthVersion(int authVersion) {
+        this.authVersion = authVersion;
     }
 
     public UserPlan getPlan() {

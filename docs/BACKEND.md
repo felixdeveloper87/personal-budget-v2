@@ -44,6 +44,7 @@ mvn spring-boot:run
 See `docs/API.md` for detailed request/response shapes.
 - `POST /api/auth/register` — create account
 - `POST /api/auth/login` — authenticate, returns JWT
+- `POST /api/auth/reset-password` — replace a forgotten password using the account email
 - `GET /api/transactions` — list user transactions
 - `POST /api/transactions` — create transaction
 - `PUT /api/transactions/{id}` — update transaction

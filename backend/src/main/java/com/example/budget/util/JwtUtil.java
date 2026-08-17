@@ -52,15 +52,17 @@ public class JwtUtil {
      * 
      * @param email User's email address (used as subject)
      * @param userId User's ID (stored as claim)
+     * @param authVersion Current credential version; password resets increment it
      * @return JWT token string
      */
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, int authVersion) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expiration);
 
         return Jwts.builder()
                 .setSubject(email)
                 .claim("userId", userId)
+                .claim("authVersion", authVersion)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
@@ -97,6 +99,17 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody();
         return claims.get("userId", Long.class);
+    }
+
+    /** Returns zero for tokens created before credential-version support was added. */
+    public int getAuthVersionFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        Object authVersion = claims.get("authVersion");
+        return authVersion instanceof Number number ? number.intValue() : 0;
     }
 
     /**

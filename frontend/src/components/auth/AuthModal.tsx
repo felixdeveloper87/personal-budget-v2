@@ -20,15 +20,17 @@ import { AppCloseButton, PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
 import BrandMark from '../brand/BrandMark'
 import LoginForm from './LoginForm'
+import PasswordResetForm from './PasswordResetForm'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
 import { useI18n } from '../../i18n'
 
 const RegisterForm = lazy(() => import('./RegisterForm'))
 
 export type AuthTab = 'signIn' | 'signUp'
+type AuthView = AuthTab | 'forgotPassword'
 
 interface AuthTabConfig {
-  id: AuthTab
+  id: AuthView
   label: string
   kicker: string
   title: string
@@ -229,9 +231,13 @@ function AuthAside({ tab }: { tab: AuthTabConfig }) {
   )
 }
 
-export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: AuthModalProps) {
+export default function AuthModal({
+  isOpen,
+  onClose,
+  initialTab = 'signIn',
+}: AuthModalProps) {
   const { t } = useI18n()
-  const [tab, setTab] = useState<AuthTab>(initialTab)
+  const [view, setView] = useState<AuthView>(initialTab)
 
   const tabs = useMemo(
     () => TABS.map((id): AuthTabConfig => ({
@@ -247,13 +253,30 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
   )
 
   useEffect(() => {
-    if (isOpen) setTab(initialTab)
+    if (isOpen) setView(initialTab)
   }, [initialTab, isOpen])
 
-  const activeTab = tabs.find((item) => item.id === tab) ?? tabs[0]
+  const recoveryView = useMemo<AuthTabConfig | null>(() => {
+    if (view === 'forgotPassword') {
+      return {
+        id: view,
+        label: '',
+        kicker: t('auth.forgot.kicker'),
+        title: t('auth.forgot.title'),
+        description: t('auth.forgot.description'),
+        asideTitle: t('auth.forgot.asideTitle'),
+        asideDescription: t('auth.forgot.asideDescription'),
+      }
+    }
+    return null
+  }, [t, view])
+
+  const activeTab = recoveryView ?? tabs.find((item) => item.id === view) ?? tabs[0]
+  const isAuthTab = view === 'signIn' || view === 'signUp'
 
   const moveTabFocus = (event: KeyboardEvent<HTMLDivElement>) => {
-    const currentIndex = tabs.findIndex((item) => item.id === tab)
+    if (!isAuthTab) return
+    const currentIndex = tabs.findIndex((item) => item.id === view)
     let nextIndex = currentIndex
     if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length
     else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
@@ -263,7 +286,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
 
     event.preventDefault()
     const nextTab = tabs[nextIndex].id
-    setTab(nextTab)
+    setView(nextTab)
     window.requestAnimationFrame(() => document.getElementById(`auth-tab-${nextTab}`)?.focus())
   }
 
@@ -279,11 +302,11 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
         maxW: { base: '100vw', sm: 'calc(100vw - 32px)', md: '920px' },
         h: {
           base: '100dvh',
-          sm: tab === 'signUp'
+          sm: view === 'signUp'
             ? 'min(840px, calc(100dvh - 32px))'
             : 'min(720px, calc(100dvh - 32px))',
         },
-        maxH: { base: '100dvh', sm: tab === 'signUp' ? '840px' : '720px' },
+        maxH: { base: '100dvh', sm: view === 'signUp' ? '840px' : '720px' },
         borderRadius: { base: 0, sm: '24px' },
         borderColor: C.lineStrong,
         boxShadow: '0 48px 120px -34px rgba(0,0,0,0.92), 0 0 0 1px rgba(127,230,179,0.025)',
@@ -336,6 +359,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
 
           <Box px={{ base: 5, sm: 7, md: 8 }} pt={{ base: 5, md: 6 }}>
             <HStack
+              display={isAuthTab ? 'flex' : 'none'}
               role="tablist"
               aria-label={t('auth.authentication')}
               onKeyDown={moveTabFocus}
@@ -347,7 +371,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
               bg="rgba(244,246,242,0.035)"
             >
               {tabs.map((item) => {
-                const isActive = item.id === tab
+                const isActive = item.id === view
                 return (
                   <Button
                     key={item.id}
@@ -357,7 +381,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
                     aria-selected={isActive}
                     aria-controls="auth-panel"
                     tabIndex={isActive ? 0 : -1}
-                    onClick={() => setTab(item.id)}
+                    onClick={() => setView(item.id)}
                     variant="unstyled"
                     flex={1}
                     h="38px"
@@ -397,10 +421,11 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
             }}
           >
             <Box
-              key={tab}
+              key={view}
               role="tabpanel"
               id="auth-panel"
-              aria-labelledby={`auth-tab-${tab}`}
+              aria-labelledby={isAuthTab ? `auth-tab-${view}` : undefined}
+              aria-label={!isAuthTab ? activeTab.title : undefined}
               sx={{
                 animation: 'authPanelIn 260ms cubic-bezier(0.22, 1, 0.36, 1)',
                 '@keyframes authPanelIn': {
@@ -446,12 +471,19 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'signIn' }: Au
                 {activeTab.description}
               </Text>
 
-              {tab === 'signIn' ? (
-                <LoginForm onSwitchToRegister={() => setTab('signUp')} />
-              ) : (
+              {view === 'signIn' && (
+                <LoginForm
+                  onSwitchToRegister={() => setView('signUp')}
+                  onForgotPassword={() => setView('forgotPassword')}
+                />
+              )}
+              {view === 'signUp' && (
                 <Suspense fallback={<RegisterFormFallback />}>
-                  <RegisterForm onSwitchToLogin={() => setTab('signIn')} />
+                  <RegisterForm onSwitchToLogin={() => setView('signIn')} />
                 </Suspense>
+              )}
+              {view === 'forgotPassword' && (
+                <PasswordResetForm onBackToLogin={() => setView('signIn')} />
               )}
             </Box>
           </Box>

@@ -7,6 +7,7 @@ import {
   UserPlan,
   LoginRequest,
   RegisterRequest,
+  ResetPasswordRequest,
   InstallmentPlan,
   CreateInstallmentPlanRequest,
   UpdateInstallmentPlanRequest,
@@ -107,7 +108,8 @@ api.interceptors.response.use(
       const isPublicAuthAttempt =
         url.includes('/auth/login') ||
         url.includes('/auth/register') ||
-        url.includes('/auth/google')
+        url.includes('/auth/google') ||
+        url.includes('/auth/reset-password')
       if (!isPublicAuthAttempt) {
         localStorage.removeItem('user')
         ToastService.warning({
@@ -154,6 +156,10 @@ export async function register(payload: RegisterRequest): Promise<RegisterOutcom
     }
   }
   return { status: 'active', user: mapAuthToUser(data) }
+}
+
+export async function resetPassword(payload: ResetPasswordRequest): Promise<void> {
+  await api.post('/auth/reset-password', payload)
 }
 
 // ----------------------------------------------------

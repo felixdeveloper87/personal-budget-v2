@@ -4,7 +4,9 @@ import com.example.budget.dto.AuthResponse;
 import com.example.budget.dto.GoogleLoginRequest;
 import com.example.budget.dto.LoginRequest;
 import com.example.budget.dto.RegisterRequest;
+import com.example.budget.dto.ResetPasswordRequest;
 import com.example.budget.service.AuthService;
+import com.example.budget.service.PasswordResetService;
 
 import jakarta.validation.Valid;
 
@@ -26,9 +28,11 @@ import java.security.GeneralSecurityException;
 @CrossOrigin
 public class AuthController {
     private final AuthService authService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.passwordResetService = passwordResetService;
     }
 
     /**
@@ -57,6 +61,15 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    /**
+     * Replaces the password for the account identified by email.
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request.getEmail(), request.getPassword());
+        return ResponseEntity.noContent().build();
     }
 
     /**

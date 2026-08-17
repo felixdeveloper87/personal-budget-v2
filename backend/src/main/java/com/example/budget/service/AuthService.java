@@ -97,7 +97,7 @@ public class AuthService {
             throw new AccountPendingApprovalException();
         }
 
-        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getAuthVersion());
 
         return userMapper.toAuthResponse(user, token);
     }
@@ -131,7 +131,7 @@ public class AuthService {
             if (!user.isApproved()) {
                 throw new AccountPendingApprovalException();
             }
-            String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+            String token = jwtUtil.generateToken(user.getEmail(), user.getId(), user.getAuthVersion());
             return userMapper.toAuthResponse(user, token);
         }
 

@@ -80,6 +80,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     if (user != null) {
                         if (!user.isApproved()) {
                             logger.debug("Skipping JWT auth for unapproved user: {}", email);
+                        } else if (jwtUtil.getAuthVersionFromToken(token) != user.getAuthVersion()) {
+                            logger.debug("Skipping JWT auth with stale credential version for user: {}", email);
                         } else {
                             UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                     user,
