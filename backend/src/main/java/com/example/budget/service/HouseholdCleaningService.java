@@ -55,18 +55,21 @@ public class HouseholdCleaningService {
     private final HouseholdCleaningAssignmentRepository assignmentRepository;
     private final HouseholdCleaningDutyCompletionRepository dutyCompletionRepository;
     private final HouseholdMemberRepository memberRepository;
+    private final HouseholdNotificationService notificationService;
 
     public HouseholdCleaningService(
             HouseholdCleaningRotationRepository rotationRepository,
             HouseholdCleaningRotationMemberRepository rotationMemberRepository,
             HouseholdCleaningAssignmentRepository assignmentRepository,
             HouseholdCleaningDutyCompletionRepository dutyCompletionRepository,
-            HouseholdMemberRepository memberRepository) {
+            HouseholdMemberRepository memberRepository,
+            HouseholdNotificationService notificationService) {
         this.rotationRepository = rotationRepository;
         this.rotationMemberRepository = rotationMemberRepository;
         this.assignmentRepository = assignmentRepository;
         this.dutyCompletionRepository = dutyCompletionRepository;
         this.memberRepository = memberRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -145,6 +148,7 @@ public class HouseholdCleaningService {
         HouseholdCleaningAssignment assignment = requireCurrentAssignment(
                 assignmentId,
                 current);
+        boolean alreadyCompleted = assignment.getCompletedAt() != null;
         List<HouseholdCleaningDutyCompletion> existing =
                 dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment);
         Set<String> completedKeys = existing.stream()
@@ -161,6 +165,16 @@ public class HouseholdCleaningService {
         assignment.setCompletedBy(user);
         assignment.setCompletedAt(completedAt);
         assignmentRepository.save(assignment);
+        if (!alreadyCompleted) {
+            notificationService.notifyHouseholdOnce(
+                    current.getHousehold(),
+                    current,
+                    HouseholdNotificationType.CLEANING_WEEK_COMPLETED,
+                    assignment.getId(),
+                    assignment.getWeekStart().toString(),
+                    null,
+                    "cleaning-week-completed:" + assignment.getId());
+        }
     }
 
     @Transactional
@@ -185,6 +199,7 @@ public class HouseholdCleaningService {
                 .filter(item -> item.getDutyKey().equals(duty.key()))
                 .findFirst();
         int completedCount = existing.size();
+        boolean newlyCompleted = completed && currentCompletion.isEmpty();
 
         if (completed && currentCompletion.isEmpty()) {
             dutyCompletionRepository.save(completion(
@@ -209,6 +224,24 @@ public class HouseholdCleaningService {
             assignment.setCompletedAt(null);
         }
         assignmentRepository.save(assignment);
+        if (newlyCompleted) {
+            boolean weekCompleted = completedCount == DUTIES.size();
+            notificationService.notifyHouseholdOnce(
+                    current.getHousehold(),
+                    current,
+                    weekCompleted
+                            ? HouseholdNotificationType.CLEANING_WEEK_COMPLETED
+                            : HouseholdNotificationType.CLEANING_DUTY_COMPLETED,
+                    assignment.getId(),
+                    weekCompleted ? assignment.getWeekStart().toString() : duty.key(),
+                    null,
+                    weekCompleted
+                            ? "cleaning-week-completed:" + assignment.getId()
+                            : "cleaning-duty-completed:"
+                                    + assignment.getId()
+                                    + ":"
+                                    + duty.key());
+        }
     }
 
     @Transactional
@@ -263,6 +296,18 @@ public class HouseholdCleaningService {
 
         Map<LocalDate, HouseholdCleaningAssignment> assignments =
                 ensureAssignments(rotation, participants, visibleWeeks);
+        HouseholdCleaningAssignment currentAssignment =
+                firstVisibleWeek.equals(thisWeek) ? assignments.get(thisWeek) : null;
+        if (currentAssignment != null && currentAssignment.getCompletedAt() == null) {
+            notificationService.notifyMemberOnce(
+                    currentAssignment.getAssignedMember(),
+                    null,
+                    HouseholdNotificationType.CLEANING_WEEK_ASSIGNED,
+                    currentAssignment.getId(),
+                    currentAssignment.getWeekStart().toString(),
+                    null,
+                    "cleaning-week-assigned:" + currentAssignment.getId());
+        }
         Map<Long, List<HouseholdCleaningDutyCompletion>> completionsByAssignment =
                 dutyCompletionRepository.findByAssignmentIn(assignments.values())
                         .stream()
@@ -271,7 +316,7 @@ public class HouseholdCleaningService {
         HouseholdPageDTO.CleaningAssignment currentWeekDTO =
                 firstVisibleWeek.equals(thisWeek)
                         ? toDTO(
-                                assignments.get(thisWeek),
+                                currentAssignment,
                                 completionsByAssignment,
                                 current,
                                 thisWeek,

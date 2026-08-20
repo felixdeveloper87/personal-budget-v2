@@ -107,6 +107,15 @@ public class HouseholdController {
         return service.page(user);
     }
 
+    @PostMapping("/households/{householdId}/notifications/read")
+    public HouseholdPageDTO markNotificationsRead(
+            @PathVariable Long householdId,
+            Authentication authentication) {
+        User user = user(authentication);
+        service.markNotificationsRead(householdId, user);
+        return service.page(user);
+    }
+
     @PutMapping("/households/{householdId}/cleaning-rotation")
     public HouseholdPageDTO configureCleaningRotation(
             @PathVariable Long householdId,

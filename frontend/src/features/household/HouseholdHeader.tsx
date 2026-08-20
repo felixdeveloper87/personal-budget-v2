@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react'
 import PeriodNavigator from '../../components/summary/PeriodNavigator'
 import {
+  Bell,
   CheckCircle2,
   Gear,
   Home,
@@ -29,6 +30,7 @@ interface HouseholdHeaderProps {
   household: HouseholdDashboard
   onAddExpense: () => void
   onManage: () => void
+  onNotifications: () => void
 }
 
 const monthStart = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1)
@@ -48,6 +50,7 @@ export default function HouseholdHeader({
   household,
   onAddExpense,
   onManage,
+  onNotifications,
 }: HouseholdHeaderProps) {
   const { formatCurrency, formatDate, formatNumber, locale, t } = useI18n()
   const currentMonthKey = monthKey(new Date())
@@ -266,6 +269,55 @@ export default function HouseholdHeader({
         </HStack>
 
         <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
+          <Button
+            aria-label={t('household.notifications.openAria', {
+              count: formatNumber(household.unreadNotificationCount),
+            })}
+            leftIcon={<Icon as={Bell} boxSize={4} weight="duotone" />}
+            onClick={onNotifications}
+            position="relative"
+            h="44px"
+            px={3.5}
+            borderRadius="11px"
+            bg="var(--pb-summary-panel)"
+            color="var(--pb-summary-ink-soft)"
+            border="1px solid var(--pb-summary-line)"
+            fontFamily="var(--pb-mono)"
+            fontSize="9px"
+            fontWeight={600}
+            letterSpacing="0.06em"
+            textTransform="uppercase"
+            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+          >
+            <Text display={{ base: 'none', lg: 'inline' }}>
+              {t('household.notifications.shortTitle')}
+            </Text>
+            {household.unreadNotificationCount > 0 && (
+              <Flex
+                position="absolute"
+                top="-7px"
+                right="-7px"
+                minW="21px"
+                h="21px"
+                px={1.5}
+                align="center"
+                justify="center"
+                borderRadius="full"
+                bg="var(--pb-coral)"
+                color="white"
+                border="2px solid var(--pb-summary-petrol)"
+                fontFamily="var(--pb-mono)"
+                fontSize="8px"
+                fontWeight={800}
+                lineHeight={1}
+              >
+                {household.unreadNotificationCount > 99
+                  ? '99+'
+                  : formatNumber(household.unreadNotificationCount)}
+              </Flex>
+            )}
+          </Button>
           {household.currentMemberRole === 'OWNER' && (
             <Button
               aria-label={t('household.header.manageAria', { name: household.name })}

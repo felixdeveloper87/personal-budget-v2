@@ -44,6 +44,7 @@ import {
   deleteHouseholdExpense,
   getHouseholdPage,
   inviteHouseholdMember,
+  markHouseholdNotificationsRead,
   rejectHouseholdSettlement,
   removeHouseholdMember,
   revokeHouseholdInvitation,
@@ -100,6 +101,10 @@ import {
   AttachmentPicker,
 } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
+import {
+  HouseholdNotificationsCard,
+  HouseholdNotificationsModal,
+} from './HouseholdNotifications'
 
 const CATEGORIES = [
   'Electricity',
@@ -421,6 +426,7 @@ export default function HouseholdPage() {
   const membersOverviewModal = useDisclosure()
   const recentExpensesModal = useDisclosure()
   const paymentsOverviewModal = useDisclosure()
+  const notificationsModal = useDisclosure()
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -684,6 +690,31 @@ export default function HouseholdPage() {
     attachmentsModal.onOpen()
   }
 
+  const openNotificationExpenses = () => {
+    notificationsModal.onClose()
+    recentExpensesModal.onOpen()
+  }
+
+  const openNotificationPayments = () => {
+    notificationsModal.onClose()
+    paymentsOverviewModal.onOpen()
+  }
+
+  const openNotificationCleaning = () => {
+    notificationsModal.onClose()
+    requestAnimationFrame(() => {
+      document.getElementById('household-cleaning')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }
+
+  const markNotificationsRead = () => void applyAction(
+    'notifications-read',
+    () => markHouseholdNotificationsRead(household.id),
+  )
+
   const uploadTargetAttachments = (files: File[]) => {
     if (attachmentTarget?.kind === 'expense') {
       return uploadHouseholdExpenseAttachments(
@@ -709,6 +740,18 @@ export default function HouseholdPage() {
           household={household}
           onAddExpense={openNewExpense}
           onManage={membersModal.onOpen}
+          onNotifications={notificationsModal.onOpen}
+        />
+
+        <HouseholdNotificationsCard
+          notifications={household.notifications}
+          unreadCount={household.unreadNotificationCount}
+          onOpenAll={notificationsModal.onOpen}
+          onMarkAllRead={markNotificationsRead}
+          isMarkingRead={busyAction === 'notifications-read'}
+          onOpenExpenses={openNotificationExpenses}
+          onOpenPayments={openNotificationPayments}
+          onOpenCleaning={openNotificationCleaning}
         />
 
         {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
@@ -771,25 +814,27 @@ export default function HouseholdPage() {
           </SimpleGrid>
         )}
 
-        <CleaningRotationCard
-          rotation={household.cleaningRotation}
-          currentMemberId={household.currentMemberId}
-          busyDutyKey={
-            busyAction?.startsWith('cleaning-duty:')
-              ? busyAction.slice('cleaning-duty:'.length)
-              : null
-          }
-          onManage={cleaningRotationModal.onOpen}
-          onToggleDuty={(assignmentId, dutyKey, completed) => void applyAction(
-            `cleaning-duty:${dutyKey}`,
-            () => updateHouseholdCleaningDuty(
-              household.id,
-              assignmentId,
-              dutyKey,
-              completed,
-            ),
-          )}
-        />
+        <Box id="household-cleaning" scrollMarginTop="90px">
+          <CleaningRotationCard
+            rotation={household.cleaningRotation}
+            currentMemberId={household.currentMemberId}
+            busyDutyKey={
+              busyAction?.startsWith('cleaning-duty:')
+                ? busyAction.slice('cleaning-duty:'.length)
+                : null
+            }
+            onManage={cleaningRotationModal.onOpen}
+            onToggleDuty={(assignmentId, dutyKey, completed) => void applyAction(
+              `cleaning-duty:${dutyKey}`,
+              () => updateHouseholdCleaningDuty(
+                household.id,
+                assignmentId,
+                dutyKey,
+                completed,
+              ),
+            )}
+          />
+        </Box>
 
         <Grid
           templateColumns={{ base: '1fr', xl: '1.08fr 0.92fr' }}
@@ -1025,6 +1070,17 @@ export default function HouseholdPage() {
         household={household}
         rotation={household.cleaningRotation}
         onChanged={setPage}
+      />
+      <HouseholdNotificationsModal
+        isOpen={notificationsModal.isOpen}
+        onClose={notificationsModal.onClose}
+        notifications={household.notifications}
+        unreadCount={household.unreadNotificationCount}
+        onMarkAllRead={markNotificationsRead}
+        isMarkingRead={busyAction === 'notifications-read'}
+        onOpenExpenses={openNotificationExpenses}
+        onOpenPayments={openNotificationPayments}
+        onOpenCleaning={openNotificationCleaning}
       />
       <AttachmentGalleryModal
         isOpen={attachmentsModal.isOpen}

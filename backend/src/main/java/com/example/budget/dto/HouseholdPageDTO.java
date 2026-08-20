@@ -23,7 +23,9 @@ public record HouseholdPageDTO(
             List<MemberInvitation> pendingMemberInvitations,
             List<Debt> debts,
             List<Expense> expenses,
-            List<Settlement> settlements
+            List<Settlement> settlements,
+            long unreadNotificationCount,
+            List<Notification> notifications
     ) {}
 
     public record MonthSummary(
@@ -101,6 +103,19 @@ public record HouseholdPageDTO(
             boolean canAttach,
             List<Attachment> attachments,
             LocalDateTime createdAt
+    ) {}
+
+    public record Notification(
+            Long id,
+            String type,
+            Long actorMemberId,
+            String actorName,
+            Long referenceId,
+            String subject,
+            BigDecimal amount,
+            BigDecimal recipientAmount,
+            LocalDateTime createdAt,
+            LocalDateTime readAt
     ) {}
 
     public record CleaningRotation(

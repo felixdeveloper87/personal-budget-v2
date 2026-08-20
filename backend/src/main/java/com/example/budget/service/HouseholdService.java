@@ -30,6 +30,7 @@ public class HouseholdService {
     private final HouseholdSettlementRepository settlementRepository;
     private final HouseholdAttachmentRepository attachmentRepository;
     private final HouseholdCleaningService cleaningService;
+    private final HouseholdNotificationService notificationService;
     private final UserRepository userRepository;
 
     public HouseholdService(
@@ -41,6 +42,7 @@ public class HouseholdService {
             HouseholdSettlementRepository settlementRepository,
             HouseholdAttachmentRepository attachmentRepository,
             HouseholdCleaningService cleaningService,
+            HouseholdNotificationService notificationService,
             UserRepository userRepository) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -50,6 +52,7 @@ public class HouseholdService {
         this.settlementRepository = settlementRepository;
         this.attachmentRepository = attachmentRepository;
         this.cleaningService = cleaningService;
+        this.notificationService = notificationService;
         this.userRepository = userRepository;
     }
 
@@ -151,6 +154,13 @@ public class HouseholdService {
         invitation.setStatus(HouseholdInvitationStatus.ACCEPTED);
         invitation.setRespondedAt(LocalDateTime.now());
         invitationRepository.save(invitation);
+        notificationService.notifyHousehold(
+                invitation.getHousehold(),
+                member,
+                HouseholdNotificationType.MEMBER_JOINED,
+                member.getId(),
+                user.getName(),
+                null);
     }
 
     @Transactional
@@ -206,6 +216,13 @@ public class HouseholdService {
         target.setActive(false);
         target.setDeactivatedAt(LocalDateTime.now());
         memberRepository.save(target);
+        notificationService.notifyHousehold(
+                owner.getHousehold(),
+                owner,
+                HouseholdNotificationType.MEMBER_REMOVED,
+                target.getId(),
+                target.getUser().getName(),
+                null);
     }
 
     @Transactional
@@ -218,7 +235,15 @@ public class HouseholdService {
         expense.setCreatedBy(user);
         applyExpense(expense, request, payer);
         expenseRepository.save(expense);
-        replaceShares(expense, request.participantMemberIds(), payer);
+        List<HouseholdExpenseShare> shares = replaceShares(
+                expense,
+                request.participantMemberIds(),
+                payer);
+        notificationService.notifyExpense(
+                expense,
+                payer,
+                HouseholdNotificationType.EXPENSE_CREATED,
+                shares);
         return expense.getId();
     }
 
@@ -232,7 +257,15 @@ public class HouseholdService {
         requireExpenseEditor(expense, current);
         applyExpense(expense, request, expense.getPayer());
         expenseRepository.save(expense);
-        replaceShares(expense, request.participantMemberIds(), expense.getPayer());
+        List<HouseholdExpenseShare> shares = replaceShares(
+                expense,
+                request.participantMemberIds(),
+                expense.getPayer());
+        notificationService.notifyExpense(
+                expense,
+                current,
+                HouseholdNotificationType.EXPENSE_UPDATED,
+                shares);
     }
 
     @Transactional
@@ -244,6 +277,11 @@ public class HouseholdService {
         requireExpenseEditor(expense, current);
         expense.setVoidedAt(LocalDateTime.now());
         expenseRepository.save(expense);
+        notificationService.notifyExpense(
+                expense,
+                current,
+                HouseholdNotificationType.EXPENSE_VOIDED,
+                shareRepository.findByExpenseIn(List.of(expense)));
     }
 
     @Transactional
@@ -286,6 +324,13 @@ public class HouseholdService {
         settlement.setStatus(HouseholdSettlementStatus.PENDING);
         settlement.setCreatedBy(user);
         settlementRepository.save(settlement);
+        notificationService.notifyMember(
+                to,
+                from,
+                HouseholdNotificationType.SETTLEMENT_CREATED,
+                settlement.getId(),
+                null,
+                settlement.getAmount());
         return settlement.getId();
     }
 
@@ -321,6 +366,13 @@ public class HouseholdService {
         settlement.setConfirmedBy(user);
         settlement.setConfirmedAt(LocalDateTime.now());
         settlementRepository.save(settlement);
+        notificationService.notifyMember(
+                settlement.getFromMember(),
+                recipient,
+                HouseholdNotificationType.SETTLEMENT_CONFIRMED,
+                settlement.getId(),
+                null,
+                settlement.getAmount());
     }
 
     @Transactional
@@ -337,6 +389,13 @@ public class HouseholdService {
         settlement.setStatus(HouseholdSettlementStatus.REJECTED);
         settlement.setCancelledAt(LocalDateTime.now());
         settlementRepository.save(settlement);
+        notificationService.notifyMember(
+                settlement.getFromMember(),
+                recipient,
+                HouseholdNotificationType.SETTLEMENT_REJECTED,
+                settlement.getId(),
+                null,
+                settlement.getAmount());
     }
 
     @Transactional
@@ -353,6 +412,18 @@ public class HouseholdService {
         settlement.setStatus(HouseholdSettlementStatus.CANCELLED);
         settlement.setCancelledAt(LocalDateTime.now());
         settlementRepository.save(settlement);
+        notificationService.notifyMember(
+                settlement.getToMember(),
+                payer,
+                HouseholdNotificationType.SETTLEMENT_CANCELLED,
+                settlement.getId(),
+                null,
+                settlement.getAmount());
+    }
+
+    @Transactional
+    public void markNotificationsRead(Long householdId, User user) {
+        notificationService.markAllRead(requireMember(householdId, user));
     }
 
     private HouseholdPageDTO.Dashboard buildDashboard(HouseholdMember current) {
@@ -513,6 +584,8 @@ public class HouseholdService {
                 .orElse(ZERO);
         HouseholdPageDTO.CleaningRotation cleaningRotation =
                 cleaningService.dashboard(household, current);
+        HouseholdNotificationService.Inbox notificationInbox =
+                notificationService.inbox(current);
 
         return new HouseholdPageDTO.Dashboard(
                 household.getId(),
@@ -528,7 +601,9 @@ public class HouseholdService {
                 memberInvitationDTOs,
                 debtDTOs,
                 expenseDTOs,
-                settlementDTOs);
+                settlementDTOs,
+                notificationInbox.unreadCount(),
+                notificationInbox.notifications());
     }
 
     static List<HouseholdPageDTO.MonthSummary> buildMonthSummaries(
@@ -683,7 +758,7 @@ public class HouseholdService {
         }
     }
 
-    private void replaceShares(
+    private List<HouseholdExpenseShare> replaceShares(
             HouseholdExpense expense,
             List<Long> requestedParticipantIds,
             HouseholdMember payer) {
@@ -731,6 +806,7 @@ public class HouseholdService {
             shares.add(share);
         }
         shareRepository.saveAll(shares);
+        return shares;
     }
 
     private HouseholdMember requireMember(Long householdId, User user) {

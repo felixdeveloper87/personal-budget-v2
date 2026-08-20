@@ -632,6 +632,15 @@ export async function removeHouseholdMember(
   return data
 }
 
+export async function markHouseholdNotificationsRead(
+  householdId: number,
+): Promise<HouseholdPageState> {
+  const { data } = await api.post<HouseholdPageState>(
+    `/households/${householdId}/notifications/read`,
+  )
+  return data
+}
+
 export async function updateHouseholdCleaningRotation(
   householdId: number,
   request: HouseholdCleaningRotationRequest,

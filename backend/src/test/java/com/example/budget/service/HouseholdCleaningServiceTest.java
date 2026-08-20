@@ -41,6 +41,8 @@ class HouseholdCleaningServiceTest {
     @Mock
     private HouseholdMemberRepository memberRepository;
     @Mock
+    private HouseholdNotificationService notificationService;
+    @Mock
     private User user;
     @Mock
     private Household household;
@@ -62,7 +64,8 @@ class HouseholdCleaningServiceTest {
                 rotationMemberRepository,
                 assignmentRepository,
                 dutyCompletionRepository,
-                memberRepository);
+                memberRepository,
+                notificationService);
     }
 
     @Test
@@ -144,6 +147,7 @@ class HouseholdCleaningServiceTest {
         when(rotation.isActive()).thenReturn(true);
         when(assignmentRepository.findByIdAndRotation(30L, rotation))
                 .thenReturn(Optional.of(assignment));
+        when(assignment.getId()).thenReturn(30L);
         when(assignment.getWeekStart()).thenReturn(monday());
         when(assignment.getAssignedMember()).thenReturn(current);
 
@@ -169,11 +173,20 @@ class HouseholdCleaningServiceTest {
                     "rubbish_out"));
         }));
         verify(assignmentRepository).save(assignment);
+        verify(notificationService).notifyHouseholdOnce(
+                eq(household),
+                eq(current),
+                eq(HouseholdNotificationType.CLEANING_WEEK_COMPLETED),
+                eq(30L),
+                eq(monday().toString()),
+                isNull(),
+                eq("cleaning-week-completed:30"));
     }
 
     @Test
     void assignedMemberCanCompleteOneDutyAndLeaveTheWeekInProgress() {
         stubCurrentAssignment();
+        when(assignment.getId()).thenReturn(30L);
         when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment))
                 .thenReturn(List.of());
 
@@ -186,11 +199,20 @@ class HouseholdCleaningServiceTest {
         assertThat(captor.getValue().getCompletedBy()).isSameAs(user);
         verify(assignment, never()).setCompletedAt(any());
         verify(assignmentRepository).save(assignment);
+        verify(notificationService).notifyHouseholdOnce(
+                eq(household),
+                eq(current),
+                eq(HouseholdNotificationType.CLEANING_DUTY_COMPLETED),
+                eq(30L),
+                eq("shower_room"),
+                isNull(),
+                eq("cleaning-duty-completed:30:shower_room"));
     }
 
     @Test
     void completingTheLastDutyCompletesTheWeekAutomatically() {
         stubCurrentAssignment();
+        when(assignment.getId()).thenReturn(30L);
         List<HouseholdCleaningDutyCompletion> existing = List.of(
                 completion("shower_room"),
                 completion("toilet_wc"),

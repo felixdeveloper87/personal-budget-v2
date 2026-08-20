@@ -429,6 +429,19 @@ export type HouseholdRole = 'OWNER' | 'MEMBER'
 export type HouseholdSettlementStatus = 'PENDING' | 'CONFIRMED' | 'REJECTED' | 'CANCELLED'
 export type HouseholdAttachmentStatus = 'AVAILABLE' | 'EXPIRED' | 'REMOVED'
 export type HouseholdCleaningStatus = 'PENDING' | 'UPCOMING' | 'COMPLETED' | 'MISSED'
+export type HouseholdNotificationType =
+  | 'EXPENSE_CREATED'
+  | 'EXPENSE_UPDATED'
+  | 'EXPENSE_VOIDED'
+  | 'SETTLEMENT_CREATED'
+  | 'SETTLEMENT_CONFIRMED'
+  | 'SETTLEMENT_REJECTED'
+  | 'SETTLEMENT_CANCELLED'
+  | 'MEMBER_JOINED'
+  | 'MEMBER_REMOVED'
+  | 'CLEANING_WEEK_ASSIGNED'
+  | 'CLEANING_DUTY_COMPLETED'
+  | 'CLEANING_WEEK_COMPLETED'
 
 export interface HouseholdMember {
   id: number
@@ -550,6 +563,19 @@ export interface HouseholdMonthSummary {
   expenseCount: number
 }
 
+export interface HouseholdNotification {
+  id: number
+  type: HouseholdNotificationType
+  actorMemberId: number | null
+  actorName: string | null
+  referenceId: number | null
+  subject: string | null
+  amount: number | null
+  recipientAmount: number | null
+  createdAt: string
+  readAt: string | null
+}
+
 export interface HouseholdDashboard {
   id: number
   name: string
@@ -565,6 +591,8 @@ export interface HouseholdDashboard {
   debts: HouseholdDebt[]
   expenses: HouseholdExpense[]
   settlements: HouseholdSettlement[]
+  unreadNotificationCount: number
+  notifications: HouseholdNotification[]
 }
 
 export interface HouseholdPageState {
