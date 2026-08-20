@@ -742,27 +742,6 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
                   </a>
                 ))}
               </div>
-              <div className="pbv3-nav-menu__actions">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNavMenuOpen(false)
-                    onSignIn()
-                  }}
-                >
-                  {hero.signInCta}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNavMenuOpen(false)
-                    onRequestAccess()
-                  }}
-                >
-                  {t('landing.nav.requestAccess')}
-                  <ArrowRight size={15} aria-hidden="true" />
-                </button>
-              </div>
             </div>
           )}
         </div>

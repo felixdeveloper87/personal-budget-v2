@@ -675,35 +675,6 @@
   color: var(--jade);
 }
 
-.pbv3-nav-menu__actions {
-  display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
-  gap: 8px;
-  padding-top: 13px;
-  border-top: 1px solid var(--line-dark);
-}
-
-.pbv3-nav-menu__actions button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 46px;
-  border: 1px solid rgba(244, 246, 242, 0.14);
-  border-radius: 12px;
-  background: rgba(244, 246, 242, 0.035);
-  color: var(--cream);
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 650;
-}
-
-.pbv3-nav-menu__actions button:last-child {
-  border-color: var(--cta-green);
-  background: var(--cta-green);
-  color: var(--cream);
-}
-
 @keyframes pbv3-nav-menu-in {
   from {
     opacity: 0;
@@ -2905,7 +2876,11 @@
   }
 
   .pbv3-nav__signin {
-    display: none;
+    display: inline-flex;
+    min-height: 42px;
+    padding-inline: 9px;
+    border-color: rgba(244, 246, 242, 0.12);
+    border-radius: 11px;
   }
 
   .pbv3-nav__cta {
@@ -3180,6 +3155,11 @@
     display: none;
   }
 
+  .pbv3-nav__signin {
+    padding-inline: 8px;
+    font-size: 0.72rem;
+  }
+
   .pbv3-hero-stage {
     height: 395px;
   }
@@ -3218,9 +3198,9 @@
   }
 }
 
-@media (max-width: 360px) {
-  .pbv3-nav-menu__actions {
-    grid-template-columns: 1fr;
+@media (max-width: 350px) {
+  .pbv3-nav .pbv3-brand__words {
+    display: none;
   }
 }
 
