@@ -11,16 +11,14 @@ import {
   Switch,
   Text,
   useColorModeValue,
-  useDisclosure,
   VStack,
 } from '@chakra-ui/react'
-import { ArrowRight, ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
+import { ChevronDown, CreditCard, Wallet, CheckCircle2 } from '../ui/icons'
 import { useThemeColors } from '../../hooks/useThemeColors'
 import InstallmentPlanCard, { isInstallmentPlanCompleted } from './InstallmentPlanCard'
+import InstallmentPlanDrawer from './InstallmentPlanDrawer'
 import { InstallmentPlan } from '../../types'
 import { ModalHeader, PremiumModal } from '../ui'
-import AccountAssignmentWizard, { type AssignableItem } from '../accounts/AccountAssignmentWizard'
-import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 
 interface InstallmentPlansModalProps {
@@ -42,6 +40,7 @@ export default function InstallmentPlansModal({
 }: InstallmentPlansModalProps) {
   const colors = useThemeColors()
   const [hideActiveList, setHideActiveList] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
 
   useEffect(() => {
     if (!isOpen) setHideActiveList(false)
@@ -95,31 +94,6 @@ export default function InstallmentPlansModal({
     }
     return { activePlans: active, pastPlans: past, activeTotal: activeAmount, remainingTotal: remaining, paidTotal: paid }
   }, [plans])
-
-  const wizard = useDisclosure()
-  const assignmentItems = useMemo<AssignableItem[]>(
-    () =>
-      activePlans
-        .filter((plan) => !plan.accountId)
-        .map((plan) => {
-          const first = plan.transactions[0]
-          return {
-            id: plan.id,
-            title: first?.description
-              ? getInstallmentPlanTitle(first.description)
-              : 'Installment plan',
-            subtitle: first?.category,
-            amountLabel: `${formatCurrency(plan.installmentValue)} per installment`,
-            metaLabel: `${plan.totalInstallments} months`,
-          }
-        }),
-    [activePlans],
-  )
-
-  const bannerBg = useColorModeValue('orange.50', 'rgba(249,115,22,0.14)')
-  const bannerBorder = useColorModeValue('orange.200', 'rgba(249,115,22,0.35)')
-  const bannerTitle = useColorModeValue('orange.800', 'orange.200')
-  const bannerText = useColorModeValue('orange.700', 'orange.300')
 
   return (
     <>
@@ -179,51 +153,6 @@ export default function InstallmentPlansModal({
             </Box>
           ) : (
             <VStack spacing={6} align="stretch">
-              {assignmentItems.length > 0 && (
-                <HStack
-                  bg={bannerBg}
-                  border="1px solid"
-                  borderColor={bannerBorder}
-                  borderRadius="xl"
-                  p={{ base: 3, md: 4 }}
-                  justify="space-between"
-                  align={{ base: 'flex-start', sm: 'center' }}
-                  spacing={4}
-                  flexWrap="wrap"
-                >
-                  <HStack spacing={3} align="flex-start" minW={0}>
-                    <Box
-                      w={9}
-                      h={9}
-                      borderRadius="lg"
-                      bg="whiteAlpha.500"
-                      color={bannerTitle}
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="center"
-                      flexShrink={0}
-                    >
-                      <Icon as={Wallet} boxSize={5} weight="duotone" />
-                    </Box>
-                    <VStack align="flex-start" spacing={0} minW={0}>
-                      <Text fontWeight={800} color={bannerTitle}>
-                        {assignmentItems.length} active plan{assignmentItems.length === 1 ? '' : 's'} without an account
-                      </Text>
-                      <Text fontSize="sm" color={bannerText}>
-                        Associate each one with a current account so its installments move the balance.
-                      </Text>
-                    </VStack>
-                  </HStack>
-                  <Button
-                    colorScheme="orange"
-                    rightIcon={<Icon as={ArrowRight} boxSize={4} />}
-                    onClick={wizard.onOpen}
-                    flexShrink={0}
-                  >
-                    Associate now
-                  </Button>
-                </HStack>
-              )}
               <Box
                 bg={heroBg}
                 color="white"
@@ -307,7 +236,7 @@ export default function InstallmentPlansModal({
                 emptyMessage="No active plans right now."
                 plans={activePlans}
                 variant="active"
-                onDeleted={onPlanDeleted}
+                onOpen={setSelectedPlan}
                 labelColor={sectionLabelColor}
                 dividerColor={dividerColor}
                 showPlans={!hideActiveList}
@@ -336,7 +265,7 @@ export default function InstallmentPlansModal({
                   count={pastPlans.length}
                   plans={pastPlans}
                   variant="past"
-                  onDeleted={onPlanDeleted}
+                  onOpen={setSelectedPlan}
                   labelColor={sectionLabelColor}
                   dividerColor={dividerColor}
                   collapsible
@@ -348,13 +277,16 @@ export default function InstallmentPlansModal({
         </Box>
       </PremiumModal>
 
-      <AccountAssignmentWizard
-        isOpen={wizard.isOpen}
-        onClose={wizard.onClose}
-        kind="installment"
-        items={assignmentItems}
-        onAssigned={onPlanDeleted}
-      />
+      {selectedPlan && (
+        <InstallmentPlanDrawer
+          plan={selectedPlan}
+          onClose={() => setSelectedPlan(null)}
+          onChanged={() => {
+            setSelectedPlan(null)
+            onPlanDeleted()
+          }}
+        />
+      )}
     </>
   )
 }
@@ -419,7 +351,7 @@ interface PlansSectionProps {
   count: number
   plans: InstallmentPlan[]
   variant: 'active' | 'past'
-  onDeleted: () => void
+  onOpen: (plan: InstallmentPlan) => void
   emptyMessage?: string
   labelColor: string
   dividerColor: string
@@ -439,7 +371,7 @@ function PlansSection({
   count,
   plans,
   variant,
-  onDeleted,
+  onOpen,
   emptyMessage,
   labelColor,
   dividerColor,
@@ -567,7 +499,7 @@ function PlansSection({
                 <InstallmentPlanCard
                   key={plan.id}
                   plan={plan}
-                  onDeleted={onDeleted}
+                  onOpen={onOpen}
                   variant={variant}
                 />
               ))}
