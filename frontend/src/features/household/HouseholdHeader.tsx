@@ -256,7 +256,7 @@ export default function HouseholdHeader({
               >
                 {household.name}
               </Text>
-              <HStack 
+              <HStack
                 as="button"
                 onClick={onMembersOverview}
                 mt={1.5}
