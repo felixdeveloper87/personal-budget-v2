@@ -533,18 +533,43 @@ export default function HouseholdHeader({
             justify="space-between"
             gap={{ base: 2, sm: 3 }}
           >
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="clamp(1.8rem, 5vw, 3rem)"
-              fontWeight={500}
-              lineHeight={0.95}
-              letterSpacing="-0.04em"
-              color="var(--pb-summary-coral)"
-              noOfLines={1}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-            >
-              {formatCurrency(selectedSummary.spend)}
-            </Text>
+            <HStack spacing={2} align="center" minW={0}>
+              <Text
+                fontFamily="var(--pb-serif)"
+                fontSize="clamp(1.8rem, 5vw, 3rem)"
+                fontWeight={500}
+                lineHeight={0.95}
+                letterSpacing="-0.04em"
+                color="var(--pb-summary-coral)"
+                noOfLines={1}
+                style={{ fontVariantNumeric: 'tabular-nums' }}
+              >
+                {formatCurrency(selectedSummary.spend)}
+              </Text>
+
+              <Flex
+                align="center"
+                gap={0.5}
+                px={2}
+                py={0.5}
+                borderRadius="full"
+                bg="var(--pb-summary-panel)"
+                border="1px solid var(--pb-summary-line)"
+                color="var(--pb-summary-ink-soft)"
+                fontFamily="var(--pb-mono)"
+                fontSize="10px"
+                fontWeight={700}
+                lineHeight={1}
+                boxShadow="0 1px 3px rgba(0,0,0,0.08)"
+                title={expenseCountCopy}
+                aria-label={expenseCountCopy}
+              >
+                <Text as="span" opacity={0.6} fontWeight={400} fontSize="9px">
+                  ×
+                </Text>
+                {formatNumber(selectedSummary.expenseCount)}
+              </Flex>
+            </HStack>
 
             <Box minW={0} maxW="190px" flexShrink={0}>
               <PeriodNavigator
@@ -566,9 +591,6 @@ export default function HouseholdHeader({
               />
             </Box>
           </Flex>
-          <Text mt={1.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
-            {expenseCountCopy}
-          </Text>
         </Flex>
 
         <Flex
