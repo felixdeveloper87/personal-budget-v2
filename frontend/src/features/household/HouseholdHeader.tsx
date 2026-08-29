@@ -32,6 +32,16 @@ const pulseAnim = keyframes`
   50% { opacity: 1; transform: translateX(2px); }
 `
 
+const shimmerAnim = keyframes`
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+`
+
+const floatAnim = keyframes`
+  0%, 100% { transform: translateY(0px); box-shadow: 0 3px 14px rgba(71,112,148,0.25); }
+  50% { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(71,112,148,0.38); }
+`
+
 const AVATAR_GRADIENTS = [
   'linear(to-br, #EAB308, #B45309)', // Colonel Mustard
   'linear(to-br, #94A3B8, #475569)', // Mrs. White
@@ -485,17 +495,28 @@ export default function HouseholdHeader({
             h="44px"
             px={4}
             borderRadius="11px"
-            bg="var(--pb-forest-2)"
-            color="var(--pb-on-accent)"
-            border="1px solid var(--pb-forest-2)"
+            bgGradient="linear(135deg, #4F7396, #3D6080, #5D849F, #4F7396)"
+            backgroundSize="200% auto"
+            color="rgba(235,242,248,0.95)"
+            border="1px solid rgba(71,112,148,0.45)"
             fontFamily="var(--pb-mono)"
             fontSize="9px"
             fontWeight={700}
             letterSpacing="0.06em"
             textTransform="uppercase"
-            _hover={{ bg: 'var(--pb-forest)', borderColor: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
-            _active={{ transform: 'translateY(0)' }}
-            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            boxShadow="0 3px 14px rgba(71,112,148,0.25)"
+            animation={`${floatAnim} 4s ease-in-out infinite`}
+            transition="all 0.3s ease"
+            _hover={{
+              bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
+              backgroundSize: '200% auto',
+              animation: `${shimmerAnim} 1.4s linear infinite`,
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
+              borderColor: 'rgba(123,163,192,0.7)',
+            }}
+            _active={{ transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
+            _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
           >
             {t('household.header.addExpense')}
           </Button>

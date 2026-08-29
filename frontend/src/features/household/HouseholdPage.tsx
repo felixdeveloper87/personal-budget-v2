@@ -1345,7 +1345,7 @@ function BalancesOverviewModal({
 
 const AVATAR_GRADIENTS = [
   'linear(to-br, #EAB308, #B45309)', // Colonel Mustard
-  'linear(to-br, #94A3B8, #475569)', // Mrs. White
+  'linear(to-br, #b7c0cbff, #aeb7c2ff)', // Mrs. White
   'linear(to-br, #10B981, #064E3B)', // Mr. Green
   'linear(to-br, #0EA5E9, #1E3A8A)', // Mrs. Peacock
   'linear(to-br, #A855F7, #581C87)', // Professor Plum
