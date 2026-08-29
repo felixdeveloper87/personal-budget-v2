@@ -7,7 +7,6 @@ import {
   HStack,
   Icon,
   Text,
-  VStack,
 } from '@chakra-ui/react'
 import PeriodNavigator from '../../components/summary/PeriodNavigator'
 import {
@@ -506,15 +505,15 @@ export default function HouseholdHeader({
         position="relative"
         zIndex={1}
         templateColumns={{ base: '1fr', md: 'minmax(0, 1.05fr) minmax(320px, 0.95fr)' }}
-        gap={{ base: 3.5, md: 5 }}
-        pt={{ base: 4, md: 5 }}
-        alignItems="stretch"
+        gap={{ base: 2.5, md: 4 }}
+        pt={{ base: 3, md: 4 }}
+        alignItems="center"
       >
         <Flex
           minW={0}
           direction="column"
           justify="center"
-          pr={{ md: 5 }}
+          pr={{ md: 4 }}
           borderRight={{ base: 'none', md: '1px solid var(--pb-summary-line)' }}
           aria-live="polite"
           aria-atomic="true"
@@ -529,15 +528,14 @@ export default function HouseholdHeader({
             {t('household.header.spentTitle', { defaultValue: 'GASTOS DA CASA' })}
           </Text>
           <Flex
-            mt={1.5}
+            mt={1}
             align="center"
             justify="space-between"
-            wrap="wrap"
-            gap={3}
+            gap={{ base: 2, sm: 3 }}
           >
             <Text
               fontFamily="var(--pb-serif)"
-              fontSize="clamp(2rem, 5vw, 3.45rem)"
+              fontSize="clamp(1.8rem, 5vw, 3rem)"
               fontWeight={500}
               lineHeight={0.95}
               letterSpacing="-0.04em"
@@ -548,7 +546,7 @@ export default function HouseholdHeader({
               {formatCurrency(selectedSummary.spend)}
             </Text>
 
-            <Box maxW="190px">
+            <Box minW={0} maxW="190px" flexShrink={0}>
               <PeriodNavigator
                 selectedPeriod="month"
                 selectedDate={selectedMonth}
@@ -568,66 +566,64 @@ export default function HouseholdHeader({
               />
             </Box>
           </Flex>
-          <Text mt={2} fontSize="xs" color="var(--pb-summary-ink-soft)">
+          <Text mt={1.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
             {expenseCountCopy}
           </Text>
         </Flex>
 
         <Flex
           minW={0}
-          minH={{ base: '132px', md: '148px' }}
-          direction="column"
+          align="center"
           justify="space-between"
-          p={{ base: 3.5, md: 4 }}
+          gap={3}
+          p={{ base: 3, md: 3.5 }}
           borderRadius="15px"
           bg="var(--pb-summary-panel)"
           border="1px solid var(--pb-summary-line)"
         >
-          <HStack justify="space-between" align="flex-start" spacing={3}>
-            <Box minW={0}>
-              <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9px"
-                letterSpacing="0.14em"
-                textTransform="uppercase"
-                color="var(--pb-summary-ink-faint)"
-              >
-                {t('household.header.positionEyebrow')}
-              </Text>
-              <Text mt={1.5} fontSize="sm" fontWeight={500} color={position.color}>
+          <Box minW={0} flex={1}>
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              letterSpacing="0.14em"
+              textTransform="uppercase"
+              color="var(--pb-summary-ink-faint)"
+            >
+              {t('household.header.positionEyebrow')}
+            </Text>
+            <Flex mt={1} align="baseline" gap={2.5} wrap="wrap">
+              <Text fontSize="sm" fontWeight={500} color={position.color}>
                 {position.title}
               </Text>
-            </Box>
-            <Flex
-              w={9}
-              h={9}
-              flexShrink={0}
-              align="center"
-              justify="center"
-              borderRadius="full"
-              bg={position.tint}
-              color={position.color}
-              border="1px solid var(--pb-summary-line)"
-            >
-              <PositionIcon size={19} weight="duotone" aria-hidden="true" />
+              <Text
+                fontFamily="var(--pb-serif)"
+                fontSize={{ base: 'xl', sm: '2xl' }}
+                fontWeight={500}
+                lineHeight={1}
+                color={position.color}
+                style={{ fontVariantNumeric: 'tabular-nums' }}
+              >
+                {position.value}
+              </Text>
             </Flex>
-          </HStack>
-
-          <VStack align="stretch" spacing={1} mt={3}>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize={{ base: 'xl', sm: '2xl' }}
-              fontWeight={500}
-              lineHeight={1.05}
-              color={position.color}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-            >
-              {position.value}
-            </Text>
-            <Text fontSize="xs" color="var(--pb-summary-ink-soft)">
+            <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)" noOfLines={2}>
               {position.detail}
             </Text>
-          </VStack>
+          </Box>
+
+          <Flex
+            w={{ base: 8, sm: 9 }}
+            h={{ base: 8, sm: 9 }}
+            flexShrink={0}
+            align="center"
+            justify="center"
+            borderRadius="full"
+            bg={position.tint}
+            color={position.color}
+            border="1px solid var(--pb-summary-line)"
+          >
+            <PositionIcon size={18} weight="duotone" aria-hidden="true" />
+          </Flex>
         </Flex>
       </Grid>
     </Box>
