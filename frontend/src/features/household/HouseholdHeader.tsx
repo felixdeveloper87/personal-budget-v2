@@ -211,54 +211,126 @@ export default function HouseholdHeader({
         pb={{ base: 3.5, md: 4 }}
         borderBottom="1px solid var(--pb-summary-line)"
       >
-        <HStack spacing={3} minW={0} align="center">
-          <Flex
-            w={{ base: 10, md: 11 }}
-            h={{ base: 10, md: 11 }}
-            flexShrink={0}
-            align="center"
-            justify="center"
-            borderRadius="13px"
-            bg="var(--pb-summary-panel)"
-            color="var(--pb-summary-income)"
-            border="1px solid var(--pb-summary-line)"
-          >
-            <Icon as={Home} boxSize={5} weight="duotone" />
-          </Flex>
-          <Box minW={0}>
-            <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={600}
-              letterSpacing="0.17em"
-              textTransform="uppercase"
-              color="var(--pb-summary-ink-faint)"
-              noOfLines={1}
+        <Flex justify="space-between" align="center" w={{ base: 'full', sm: 'auto' }} minW={0} gap={2}>
+          <HStack spacing={3} minW={0} align="center">
+            <Flex
+              w={{ base: 10, md: 11 }}
+              h={{ base: 10, md: 11 }}
+              flexShrink={0}
+              align="center"
+              justify="center"
+              borderRadius="13px"
+              bg="var(--pb-summary-panel)"
+              color="var(--pb-summary-income)"
+              border="1px solid var(--pb-summary-line)"
             >
-              {t(
-                household.members.length === 1
-                  ? 'household.header.activeMembers.one'
-                  : 'household.header.activeMembers.other',
-                { count: formatNumber(household.members.length) },
+              <Icon as={Home} boxSize={5} weight="duotone" />
+            </Flex>
+            <Box minW={0}>
+              <Text
+                fontFamily="var(--pb-mono)"
+                fontSize="9px"
+                fontWeight={600}
+                letterSpacing="0.17em"
+                textTransform="uppercase"
+                color="var(--pb-summary-ink-faint)"
+                noOfLines={1}
+              >
+                {t(
+                  household.members.length === 1
+                    ? 'household.header.activeMembers.one'
+                    : 'household.header.activeMembers.other',
+                  { count: formatNumber(household.members.length) },
+                )}
+              </Text>
+              <Text
+                mt={0.5}
+                fontFamily="var(--pb-serif)"
+                fontSize={{ base: 'xl', md: '2xl' }}
+                fontWeight={500}
+                lineHeight={1.1}
+                letterSpacing="-0.025em"
+                color="var(--pb-summary-ink)"
+                noOfLines={2}
+              >
+                {household.name}
+              </Text>
+            </Box>
+          </HStack>
+
+          {/* Mobile Buttons */}
+          <HStack spacing={2} display={{ base: 'flex', sm: 'none' }} flexShrink={0}>
+            <Flex
+              as="button"
+              aria-label={t('household.notifications.openAria', {
+                count: formatNumber(household.unreadNotificationCount),
+              })}
+              onClick={onNotifications}
+              position="relative"
+              w="40px"
+              h="40px"
+              align="center"
+              justify="center"
+              borderRadius="11px"
+              bg="var(--pb-summary-panel)"
+              color="var(--pb-summary-ink-soft)"
+              border="1px solid var(--pb-summary-line)"
+              transition="all 0.2s"
+              _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            >
+              <Icon as={Bell} boxSize={5} weight="duotone" />
+              {household.unreadNotificationCount > 0 && (
+                <Flex
+                  position="absolute"
+                  top="-5px"
+                  right="-5px"
+                  minW="18px"
+                  h="18px"
+                  px={1}
+                  align="center"
+                  justify="center"
+                  borderRadius="full"
+                  bg="var(--pb-coral)"
+                  color="white"
+                  border="2px solid var(--pb-summary-petrol)"
+                  fontFamily="var(--pb-mono)"
+                  fontSize="7px"
+                  fontWeight={800}
+                  lineHeight={1}
+                >
+                  {household.unreadNotificationCount > 99
+                    ? '99+'
+                    : formatNumber(household.unreadNotificationCount)}
+                </Flex>
               )}
-            </Text>
-            <Text
-              mt={0.5}
-              fontFamily="var(--pb-serif)"
-              fontSize={{ base: 'xl', md: '2xl' }}
-              fontWeight={500}
-              lineHeight={1.1}
-              letterSpacing="-0.025em"
-              color="var(--pb-summary-ink)"
-              noOfLines={2}
-            >
-              {household.name}
-            </Text>
-          </Box>
-        </HStack>
+            </Flex>
+            {household.currentMemberRole === 'OWNER' && (
+              <Flex
+                as="button"
+                aria-label={t('household.header.manageAria', { name: household.name })}
+                onClick={onManage}
+                w="40px"
+                h="40px"
+                align="center"
+                justify="center"
+                borderRadius="11px"
+                bg="var(--pb-summary-panel)"
+                color="var(--pb-summary-ink-soft)"
+                border="1px solid var(--pb-summary-line)"
+                transition="all 0.2s"
+                _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+                _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+              >
+                <Icon as={Gear} boxSize={5} />
+              </Flex>
+            )}
+          </HStack>
+        </Flex>
 
         <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
           <Button
+            display={{ base: 'none', sm: 'inline-flex' }}
             aria-label={t('household.notifications.openAria', {
               count: formatNumber(household.unreadNotificationCount),
             })}
@@ -309,10 +381,10 @@ export default function HouseholdHeader({
           </Button>
           {household.currentMemberRole === 'OWNER' && (
             <Button
+              display={{ base: 'none', sm: 'inline-flex' }}
               aria-label={t('household.header.manageAria', { name: household.name })}
               leftIcon={<Icon as={Gear} boxSize={4} />}
               onClick={onManage}
-              flex={{ base: 1, sm: 'initial' }}
               h="44px"
               px={3.5}
               borderRadius="11px"
@@ -333,7 +405,7 @@ export default function HouseholdHeader({
           <Button
             leftIcon={<Icon as={Plus} boxSize={4} />}
             onClick={onAddExpense}
-            flex={{ base: household.currentMemberRole === 'OWNER' ? 1.35 : 1, sm: 'initial' }}
+            flex={{ base: 1, sm: 'initial' }}
             h="44px"
             px={4}
             borderRadius="11px"

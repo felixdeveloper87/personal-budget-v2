@@ -2160,54 +2160,59 @@ function CleaningRotationCard({
         overflow="hidden"
         bg="var(--pb-surface)"
         border="1px solid var(--pb-hair)"
-        borderRadius={{ base: '18px', md: '22px' }}
-        boxShadow="var(--pb-shadow)"
+        borderRadius={{ base: '24px', md: '28px' }}
+        boxShadow="0 10px 40px -10px rgba(0,0,0,0.08)"
+        transition="transform 0.2s, box-shadow 0.2s"
+        _hover={{ transform: 'translateY(-2px)', boxShadow: '0 12px 48px -12px rgba(0,0,0,0.12)' }}
       >
       <Flex
         direction={{ base: 'column', sm: 'row' }}
         justify="space-between"
         align={{ base: 'stretch', sm: 'center' }}
-        gap={{ base: 3, sm: 4 }}
-        px={{ base: 3.5, sm: 4, md: 5 }}
-        py={{ base: 3.5, md: 4 }}
-        borderBottom="1px solid var(--pb-hair)"
+        gap={{ base: 4, sm: 4 }}
+        px={{ base: 5, md: 6 }}
+        py={{ base: 5, md: 5 }}
+        bgGradient="linear(to-br, var(--pb-forest-2), var(--pb-forest))"
+        color="white"
       >
-        <HStack spacing={3} minW={0}>
+        <HStack spacing={4} minW={0}>
           <Flex
-            w={{ base: 10, md: 11 }}
-            h={{ base: 10, md: 11 }}
+            w={{ base: 12, md: 14 }}
+            h={{ base: 12, md: 14 }}
             flexShrink={0}
             align="center"
             justify="center"
-            borderRadius="13px"
-            bg="var(--pb-tint-gold)"
+            borderRadius="16px"
+            bg="rgba(255,255,255,0.15)"
             color="var(--pb-gold)"
-            border="1px solid var(--pb-hair)"
+            backdropFilter="blur(10px)"
+            boxShadow="0 4px 12px rgba(0,0,0,0.1)"
           >
-            <Icon as={Sparkles} boxSize={5} weight="duotone" />
+            <Icon as={Sparkles} boxSize={6} weight="duotone" />
           </Flex>
           <Box minW={0}>
             <Text
               fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={600}
+              fontSize="10px"
+              fontWeight={700}
               letterSpacing="0.16em"
               textTransform="uppercase"
-              color="var(--pb-ink-faint)"
+              color="rgba(255,255,255,0.7)"
             >
               {t('household.cleaning.eyebrow')}
             </Text>
             <Text
               mt={0.5}
               fontFamily="var(--pb-serif)"
-              fontSize={{ base: 'lg', md: 'xl' }}
-              fontWeight={500}
+              fontSize={{ base: 'xl', md: '2xl' }}
+              fontWeight={600}
               lineHeight={1.1}
-              color="var(--pb-ink)"
+              color="white"
+              textShadow="0 1px 2px rgba(0,0,0,0.1)"
             >
               {t('household.cleaning.title')}
             </Text>
-            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+            <Text mt={1} color="rgba(255,255,255,0.85)" fontSize="sm" noOfLines={1}>
               {t('household.cleaning.description')}
             </Text>
           </Box>
@@ -2216,20 +2221,21 @@ function CleaningRotationCard({
           <Button
             leftIcon={<Icon as={Gear} boxSize={4} />}
             w={{ base: 'full', sm: 'auto' }}
-            h="40px"
-            px={3.5}
-            borderRadius="10px"
-            bg="var(--pb-surface-2)"
-            color="var(--pb-ink-soft)"
-            border="1px solid var(--pb-hair)"
+            h="44px"
+            px={4}
+            borderRadius="12px"
+            bg="rgba(255,255,255,0.15)"
+            color="white"
             fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={600}
+            fontSize="10px"
+            fontWeight={700}
             letterSpacing="0.05em"
             textTransform="uppercase"
+            backdropFilter="blur(10px)"
+            border="none"
             onClick={onManage}
-            _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
-            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            _hover={{ bg: 'rgba(255,255,255,0.25)' }}
+            _active={{ bg: 'rgba(255,255,255,0.3)' }}
           >
             {rotation.configured
               ? t('household.common.manage')
@@ -2322,11 +2328,11 @@ function CleaningRotationCard({
       ) : (
         <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)' }}>
           <Box
-            p={{ base: 4, md: 5 }}
+            p={{ base: 5, md: 6 }}
             borderBottom={{ base: '1px solid', lg: 'none' }}
             borderRight={{ base: 'none', lg: '1px solid' }}
             borderColor="var(--pb-hair)"
-            bg={currentIsUser ? 'var(--pb-tint-income)' : 'var(--pb-summary-petrol)'}
+            bg={currentIsUser ? 'var(--pb-tint-income)' : 'var(--pb-surface)'}
             boxShadow={currentIsUser
               ? 'inset 4px 0 0 var(--pb-forest-2)'
               : 'none'}
@@ -2572,38 +2578,37 @@ function CleaningRotationCard({
       )}
 
         <Box
-          px={{ base: 3.5, sm: 4, md: 5 }}
-          py={{ base: 4, md: 4.5 }}
-          borderTop="1px solid var(--pb-hair)"
-          bg="var(--pb-surface)"
+          px={{ base: 5, md: 6 }}
+          py={{ base: 5, md: 6 }}
+          bg="var(--pb-surface-2)"
         >
           <Flex
             direction={{ base: 'column', sm: 'row' }}
             align={{ base: 'stretch', sm: 'center' }}
             justify="space-between"
-            gap={{ base: 3.5, sm: 5 }}
+            gap={{ base: 5, sm: 6 }}
           >
             <Box minW={0} flex={1}>
               <Text
                 fontFamily="var(--pb-mono)"
-                color="var(--pb-ink-faint)"
-                fontSize="9px"
-                fontWeight={600}
+                color="var(--pb-ink-soft)"
+                fontSize="10px"
+                fontWeight={700}
                 letterSpacing="0.15em"
                 textTransform="uppercase"
               >
                 {t('household.cleaning.dutiesTitle')}
               </Text>
-              <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+              <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm">
                 {current
                   ? currentIsUser
                     ? t('household.cleaning.dutiesCurrentUser')
                     : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
                   : t('household.cleaning.dutiesGeneric')}
               </Text>
-              <HStack mt={2.5} spacing={1.5} color="var(--pb-ink-faint)">
-                <Icon as={CheckCircle2} boxSize={3.5} weight="duotone" />
-                <Text fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase">
+              <HStack mt={3.5} spacing={2} color="var(--pb-ink-soft)">
+                <Icon as={CheckCircle2} boxSize={4} weight="duotone" />
+                <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} textTransform="uppercase">
                   {current
                     ? t('household.cleaning.progress', {
                         completed: formatNumber(completedDutyCount),
@@ -2618,12 +2623,13 @@ function CleaningRotationCard({
                 </Text>
               </HStack>
               <Box
-                mt={2}
-                h="4px"
+                mt={2.5}
+                h="6px"
                 maxW={{ base: 'full', sm: '280px' }}
                 overflow="hidden"
                 borderRadius="full"
-                bg="var(--pb-surface-2)"
+                bg="var(--pb-surface)"
+                border="1px solid var(--pb-hair)"
                 aria-hidden="true"
               >
                 <Box
@@ -2632,25 +2638,28 @@ function CleaningRotationCard({
                     ? (completedDutyCount / displayedDuties.length) * 100
                     : 0}%`}
                   borderRadius="full"
-                  bg="var(--pb-forest-2)"
-                  transition="width 180ms ease"
+                  bgGradient="linear(to-r, var(--pb-forest-2), var(--pb-forest))"
+                  transition="width 400ms cubic-bezier(0.4, 0, 0.2, 1)"
                 />
               </Box>
             </Box>
             <Button
-              h="44px"
+              h="52px"
               w={{ base: 'full', sm: 'auto' }}
               flexShrink={0}
-              px={4}
-              borderRadius="11px"
+              px={6}
+              borderRadius="16px"
               bg="var(--pb-forest-2)"
               color="var(--pb-on-accent)"
-              leftIcon={<Icon as={List} boxSize={4} weight="bold" />}
+              fontSize="md"
+              fontWeight={600}
+              leftIcon={<Icon as={List} boxSize={5} weight="bold" />}
               aria-label={t('household.cleaning.openDutiesAria')}
               onClick={dutiesModal.onOpen}
               _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}
               _active={{ transform: 'translateY(0)' }}
               _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
+              boxShadow="0 4px 12px rgba(0,0,0,0.15)"
             >
               {t('household.cleaning.openDuties')}
             </Button>
@@ -2763,11 +2772,12 @@ function CleaningDutiesModal({
     >
       <Box px={{ base: 4, sm: 5, md: 6 }} py={{ base: 4, md: 5 }}>
         <Box
-          mb={4}
-          p={{ base: 3.5, md: 4 }}
-          borderRadius="14px"
-          bg="var(--pb-surface-2)"
-          border="1px solid var(--pb-hair)"
+          mb={6}
+          p={{ base: 5, md: 6 }}
+          borderRadius="24px"
+          bgGradient="linear(to-br, var(--pb-forest-2), var(--pb-forest))"
+          color="white"
+          boxShadow="0 8px 32px -8px rgba(0,0,0,0.15)"
           aria-live="polite"
           aria-atomic="true"
         >
@@ -2775,170 +2785,207 @@ function CleaningDutiesModal({
             direction={{ base: 'column', sm: 'row' }}
             align={{ base: 'stretch', sm: 'center' }}
             justify="space-between"
-            gap={3}
+            gap={4}
           >
-            <Text color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.5}>
-              {guidance}
-            </Text>
-            <HStack flexShrink={0} spacing={1.5} color="var(--pb-forest-2)">
-              <Icon as={CheckCircle2} boxSize={4} weight="duotone" />
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" textTransform="uppercase">
+            <Box>
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="rgba(255,255,255,0.7)">
+                {t('household.cleaning.dutiesTitle')}
+              </Text>
+              <Text mt={1} color="white" fontSize="md" fontWeight={500} lineHeight={1.4}>
+                {guidance}
+              </Text>
+            </Box>
+            <HStack flexShrink={0} spacing={2} px={3.5} py={2} bg="rgba(255,255,255,0.15)" borderRadius="full" backdropFilter="blur(10px)">
+              <Icon as={CheckCircle2} boxSize={4} weight="fill" color="var(--pb-gold)" />
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} textTransform="uppercase">
                 {progressLabel}
               </Text>
             </HStack>
           </Flex>
           <Box
-            mt={3}
-            h="5px"
+            mt={5}
+            h="6px"
             overflow="hidden"
             borderRadius="full"
-            bg="var(--pb-surface)"
+            bg="rgba(0,0,0,0.2)"
             aria-hidden="true"
           >
             <Box
               h="full"
               w={`${duties.length ? (completedDutyCount / duties.length) * 100 : 0}%`}
               borderRadius="full"
-              bg="var(--pb-forest-2)"
-              transition="width 180ms ease"
+              bg="var(--pb-gold)"
+              transition="width 400ms cubic-bezier(0.4, 0, 0.2, 1)"
             />
           </Box>
         </Box>
 
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2.5}>
-          {duties.map((duty, index) => (
-            <Flex
-              key={duty.key}
-              minH={{ base: '64px', md: '68px' }}
-              align="center"
-              gap={2.5}
-              px={3}
-              py={2.5}
-              borderRadius="12px"
-              border="1px solid var(--pb-hair)"
-              bg={
-                duty.completed
-                  ? 'var(--pb-tint-income)'
-                  : duty.timed
-                    ? 'var(--pb-tint-gold)'
-                    : 'var(--pb-surface-2)'
-              }
-              transition="background 140ms ease, border-color 140ms ease, transform 140ms ease"
-              _hover={duty.canToggle && busyDutyKey === null
-                ? { borderColor: 'var(--pb-hair-2)', transform: 'translateY(-1px)' }
-                : undefined}
-              _focusWithin={{
-                boxShadow: '0 0 0 2px var(--pb-forest)',
-                outline: 'none',
-              }}
-            >
-              <Flex
-                w={9}
-                h={9}
-                flexShrink={0}
-                align="center"
-                justify="center"
-                borderRadius="10px"
-                bg={duty.completed ? 'var(--pb-forest-2)' : 'var(--pb-surface)'}
-                color={duty.completed ? 'var(--pb-on-accent)' : 'var(--pb-forest-2)'}
-              >
-                {busyDutyKey === duty.key ? (
-                  <Spinner
-                    size="sm"
-                    thickness="2px"
-                    aria-label={t('household.cleaning.updatingDuty')}
-                  />
-                ) : (
-                  <Checkbox
-                    isChecked={duty.completed}
-                    isDisabled={!duty.canToggle || busyDutyKey !== null}
-                    colorScheme="green"
-                    size="lg"
-                    aria-label={
-                      duty.completed
-                        ? t('household.cleaning.markNotDone', {
-                            duty: displayDutyLabel(duty),
-                          })
-                        : t('household.cleaning.markDone', {
-                            duty: displayDutyLabel(duty),
-                          })
-                    }
-                    onChange={(event) => {
-                      if (!current || !duty.canToggle) return
-                      onToggleDuty(current.id, duty.key, event.target.checked)
+        <VStack spacing={6} align="stretch">
+          {duties.filter(d => !d.completed).length > 0 && (
+            <Box>
+              <Text mb={3} fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                {t('household.cleaning.inProgress')}
+              </Text>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+                {duties.filter(d => !d.completed).map((duty, index) => (
+                  <Box
+                    as={duty.canToggle && busyDutyKey === null ? 'button' : 'div'}
+                    key={duty.key}
+                    w="full"
+                    textAlign="left"
+                    onClick={() => {
+                      if (!current || !duty.canToggle || busyDutyKey !== null) return
+                      onToggleDuty(current.id, duty.key, true)
                     }}
-                  />
-                )}
-              </Flex>
-              <Box minW={0} flex={1}>
-                <Text
-                  color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
-                  fontSize="sm"
-                  fontWeight={600}
-                  lineHeight={1.25}
-                  textDecoration={duty.completed ? 'line-through' : 'none'}
-                >
-                  {displayDutyLabel(duty)}
-                </Text>
-                {duty.schedule ? (
-                  <HStack
-                    mt={1}
-                    spacing={1.5}
-                    color={duty.completed ? 'var(--pb-income)' : 'var(--pb-gold)'}
+                    minH={{ base: '72px', md: '76px' }}
+                    display="flex"
+                    alignItems="center"
+                    gap={3.5}
+                    px={4}
+                    py={3}
+                    borderRadius="16px"
+                    border="1px solid"
+                    borderColor={duty.timed ? 'var(--pb-gold)' : 'var(--pb-hair)'}
+                    bg={duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
+                    boxShadow="0 4px 12px rgba(0,0,0,0.03)"
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _hover={duty.canToggle && busyDutyKey === null
+                      ? { transform: 'translateY(-2px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', borderColor: 'var(--pb-hair-2)' }
+                      : undefined}
+                    _focusVisible={{
+                      boxShadow: '0 0 0 2px var(--pb-forest)',
+                      outline: 'none',
+                    }}
                   >
-                    <Icon as={Clock} boxSize={3} weight="bold" />
-                    <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
-                      {displayDutySchedule(duty)}
-                    </Text>
-                  </HStack>
-                ) : (
-                  <Text
-                    mt={0.5}
-                    color={duty.completed ? 'var(--pb-income)' : 'var(--pb-ink-faint)'}
-                    fontSize="2xs"
+                    <Flex
+                      w={10}
+                      h={10}
+                      flexShrink={0}
+                      align="center"
+                      justify="center"
+                      borderRadius="full"
+                      border="2px solid"
+                      borderColor="var(--pb-hair-2)"
+                      bg="transparent"
+                      color="white"
+                      transition="all 0.2s"
+                    >
+                      {busyDutyKey === duty.key ? (
+                        <Spinner size="sm" thickness="2px" color="var(--pb-forest-2)" />
+                      ) : (
+                        <Icon 
+                          as={Check} 
+                          boxSize={5} 
+                          weight="bold" 
+                          opacity={0} 
+                          transform="scale(0.5)"
+                          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                        />
+                      )}
+                    </Flex>
+                    <Box minW={0} flex={1}>
+                      <Text color="var(--pb-ink)" fontSize="sm" fontWeight={600} lineHeight={1.25}>
+                        {displayDutyLabel(duty)}
+                      </Text>
+                      {duty.schedule ? (
+                        <HStack mt={1} spacing={1.5} color="var(--pb-gold)">
+                          <Icon as={Clock} boxSize={3} weight="bold" />
+                          <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
+                            {displayDutySchedule(duty)}
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="2xs">
+                          {t('household.cleaning.taskNumber', {
+                            number: formatNumber(index + 1, {
+                              minimumIntegerDigits: 2,
+                              useGrouping: false,
+                            }),
+                          })}
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </SimpleGrid>
+            </Box>
+          )}
+
+          {duties.filter(d => d.completed).length > 0 && (
+            <Box>
+              <Text mb={3} fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                {t('household.cleaning.completed')}
+              </Text>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
+                {duties.filter(d => d.completed).map((duty, index) => (
+                  <Box
+                    as={duty.canToggle && busyDutyKey === null ? 'button' : 'div'}
+                    key={duty.key}
+                    w="full"
+                    textAlign="left"
+                    onClick={() => {
+                      if (!current || !duty.canToggle || busyDutyKey !== null) return
+                      onToggleDuty(current.id, duty.key, false)
+                    }}
+                    minH={{ base: '72px', md: '76px' }}
+                    display="flex"
+                    alignItems="center"
+                    gap={3.5}
+                    px={4}
+                    py={3}
+                    borderRadius="16px"
+                    border="1px solid transparent"
+                    bg="var(--pb-surface-2)"
+                    opacity={0.65}
+                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
+                    _hover={duty.canToggle && busyDutyKey === null
+                      ? { opacity: 1, transform: 'translateY(-2px)' }
+                      : undefined}
+                    _focusVisible={{
+                      boxShadow: '0 0 0 2px var(--pb-forest)',
+                      outline: 'none',
+                    }}
                   >
-                    {duty.completed
-                      ? t('household.cleaning.completed')
-                      : t('household.cleaning.taskNumber', {
-                          number: formatNumber(index + 1, {
-                            minimumIntegerDigits: 2,
-                            useGrouping: false,
-                          }),
-                        })}
-                  </Text>
-                )}
-              </Box>
-              {duty.completed && duty.canToggle && (
-                <Button
-                  flexShrink={0}
-                  h="32px"
-                  minW="54px"
-                  px={2.5}
-                  borderRadius="8px"
-                  bg="var(--pb-surface)"
-                  color="var(--pb-ink-soft)"
-                  border="1px solid var(--pb-hair)"
-                  fontFamily="var(--pb-mono)"
-                  fontSize="8px"
-                  fontWeight={700}
-                  textTransform="uppercase"
-                  isDisabled={busyDutyKey !== null}
-                  aria-label={t('household.cleaning.undoAria', {
-                    duty: displayDutyLabel(duty),
-                  })}
-                  onClick={() => {
-                    if (!current) return
-                    onToggleDuty(current.id, duty.key, false)
-                  }}
-                  _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
-                  _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)' }}
-                >
-                  {t('household.cleaning.undo')}
-                </Button>
-              )}
-            </Flex>
-          ))}
-        </SimpleGrid>
+                    <Flex
+                      w={10}
+                      h={10}
+                      flexShrink={0}
+                      align="center"
+                      justify="center"
+                      borderRadius="full"
+                      border="2px solid transparent"
+                      bg="var(--pb-tint-income)"
+                      color="var(--pb-income)"
+                    >
+                      {busyDutyKey === duty.key ? (
+                        <Spinner size="sm" thickness="2px" />
+                      ) : (
+                        <Icon as={Check} boxSize={5} weight="bold" />
+                      )}
+                    </Flex>
+                    <Box minW={0} flex={1}>
+                      <Text color="var(--pb-ink-soft)" fontSize="sm" fontWeight={600} lineHeight={1.25} textDecoration="line-through">
+                        {displayDutyLabel(duty)}
+                      </Text>
+                      {duty.schedule ? (
+                        <HStack mt={1} spacing={1.5} color="var(--pb-income)">
+                          <Icon as={Clock} boxSize={3} weight="bold" />
+                          <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
+                            {displayDutySchedule(duty)}
+                          </Text>
+                        </HStack>
+                      ) : (
+                        <Text mt={0.5} color="var(--pb-income)" fontSize="2xs">
+                          {t('household.cleaning.completed')}
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </SimpleGrid>
+            </Box>
+          )}
+        </VStack>
       </Box>
     </PremiumModal>
   )

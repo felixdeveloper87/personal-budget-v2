@@ -636,7 +636,7 @@ export const householdTranslations: TranslationBundle = {
     'household.cleaning.rubbishSchedule': 'Toda quinta-feira · até 10:00',
     'household.cleaning.eyebrow': 'Rotina compartilhada',
     'household.cleaning.title': 'Limpeza semanal',
-    'household.cleaning.description': 'Um turno justo e recorrente para todos em casa.',
+    'household.cleaning.description': 'Um turno justo e recorrente para todos.',
     'household.cleaning.createRhythm': 'Crie um ritmo que pareça justo.',
     'household.cleaning.setupOwner': 'Escolha quem participa, defina a primeira segunda-feira e organize a ordem uma vez. A escala se repete automaticamente.',
     'household.cleaning.setupMember': 'O responsável pela casa ainda não configurou a escala de limpeza semanal.',
