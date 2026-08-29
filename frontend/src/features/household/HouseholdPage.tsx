@@ -81,6 +81,7 @@ import {
   ChevronUp,
   CheckCircle2,
   Clock,
+  CookingPot,
   Drop,
   Flame,
   Gear,
@@ -95,6 +96,7 @@ import {
   RefreshCw,
   Repeat,
   Sparkles,
+  ToiletPaper,
   Trash2,
   Upload,
   Wallet,
@@ -132,7 +134,7 @@ const CATEGORIES = [
 ] as const
 
 type HouseholdExpensePreset = {
-  key: 'electricity' | 'water' | 'gas' | 'internet' | 'cleaning' | 'garden'
+  key: 'electricity' | 'water' | 'gas' | 'internet' | 'cleaning' | 'garden' | 'kitchen' | 'toilet'
   category: typeof CATEGORIES[number]
   icon: LucideIcon
 }
@@ -144,6 +146,8 @@ const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = [
   { key: 'internet', category: 'Internet', icon: WifiHigh },
   { key: 'cleaning', category: 'Cleaning', icon: Broom },
   { key: 'garden', category: 'Garden', icon: Plant },
+  { key: 'kitchen', category: 'Groceries', icon: CookingPot },
+  { key: 'toilet', category: 'Cleaning', icon: ToiletPaper },
 ]
 
 const CLEANING_DUTIES: ReadonlyArray<{
@@ -172,7 +176,6 @@ const CLEANING_DUTIES: ReadonlyArray<{
 type DisplayedCleaningDuty = HouseholdCleaningDuty & {
   timed?: boolean
 }
-
 type AttachmentTarget =
   | { kind: 'expense'; id: number }
   | { kind: 'settlement'; id: number }
@@ -3666,7 +3669,7 @@ function ExpenseModal({
         as="form"
         id="household-expense-form"
         onSubmit={submit}
-        p={{ base: 3, sm: 4, md: 5 }}
+        p={{ base: 3, sm: 6, md: 8 }}
         bg="var(--pb-surface-2)"
         sx={{
           '.chakra-form__label': {
@@ -3679,47 +3682,90 @@ function ExpenseModal({
             background: 'var(--pb-surface)',
             borderColor: 'var(--pb-hair)',
             color: 'var(--pb-ink)',
+            borderRadius: '12px',
           },
           'input:hover, select:hover': { borderColor: 'var(--pb-hair-2)' },
           'input:focus-visible, select:focus-visible': {
             borderColor: 'var(--pb-forest-2)',
-            boxShadow: '0 0 0 1px var(--pb-forest-2)',
+            boxShadow: '0 0 0 2px var(--pb-tint-green)',
           },
         }}
       >
-        <VStack align="stretch" spacing={4}>
-          {!expense && (
-            <Box
-              p={{ base: 3.5, md: 4 }}
-              bg="var(--pb-surface)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="16px"
+        <VStack align="stretch" spacing={{ base: 4, sm: 6 }}>
+          {/* Main Amount Input (Hero) */}
+          <Box
+            pt={expense ? 2 : 4}
+            pb={{ base: 4, sm: 8 }}
+            textAlign="center"
+            position="relative"
+            bg="linear-gradient(180deg, var(--pb-surface-2) 0%, transparent 100%)"
+            borderRadius="24px"
+          >
+            <Text
+              textTransform="uppercase"
+              letterSpacing="widest"
+              fontSize="xs"
+              fontWeight={800}
+              color="var(--pb-ink-faint)"
+              mb={3}
             >
-              <HStack align="flex-start" spacing={3} mb={3.5}>
-                <Flex
-                  w={10}
-                  h={10}
-                  flexShrink={0}
-                  align="center"
-                  justify="center"
-                  borderRadius="11px"
-                  bg="var(--pb-tint-gold)"
-                  color="var(--pb-gold-2)"
-                  border="1px solid var(--pb-hair)"
+              {t('household.expenseModal.amount')}
+            </Text>
+            <Flex justify="center" align="center">
+              <InputGroup size="lg" maxW="360px" mx="auto">
+                <InputLeftElement
+                  pointerEvents="none"
+                  color="var(--pb-ink-soft)"
+                  fontSize={{ base: '3xl', sm: '4xl' }}
+                  fontWeight={700}
+                  w="60px"
+                  h="full"
+                  justifyContent="center"
+                  pt={1}
                 >
-                  <Icon as={Zap} boxSize={5} weight="fill" />
-                </Flex>
-                <Box>
-                  <Text fontWeight={750} color="var(--pb-ink)" lineHeight={1.25}>
-                    {t('household.expenseModal.quickTitle')}
-                  </Text>
-                  <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)" lineHeight={1.45}>
-                    {t('household.expenseModal.quickDescription')}
-                  </Text>
-                </Box>
+                  {currencyMark}
+                </InputLeftElement>
+                <Input
+                  ref={amountInputRef}
+                  variant="unstyled"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(event) => setAmount(event.target.value)}
+                  placeholder="0.00"
+                  fontSize={{ base: '4xl', sm: '5xl', md: '7xl' }}
+                  fontWeight={800}
+                  color="var(--pb-ink)"
+                  h={{ base: '64px', sm: '80px', md: '100px' }}
+                  pl="60px"
+                  textAlign="center"
+                  letterSpacing="-0.02em"
+                  _placeholder={{ color: 'var(--pb-hair-2)' }}
+                  bg="transparent"
+                  _hover={{ borderColor: 'transparent' }}
+                  _focusVisible={{ boxShadow: 'none' }}
+                />
+              </InputGroup>
+            </Flex>
+            {hasSubmitted && !amountIsValid && (
+              <Text color="var(--pb-coral)" fontSize="sm" fontWeight={600} mt={2}>
+                {t('household.expenseModal.invalidAmount')}
+              </Text>
+            )}
+          </Box>
+
+          {!expense && (
+            <Box>
+              <HStack align="center" spacing={2} mb={3}>
+                <Icon as={Zap} boxSize={4} weight="fill" color="var(--pb-gold-2)" />
+                <Text fontSize="sm" fontWeight={750} color="var(--pb-ink)">
+                  {t('household.expenseModal.quickTitle')}
+                </Text>
               </HStack>
               <HStack
-                spacing={2}
+                spacing={3}
                 mx={-1}
                 px={1}
                 pb={2}
@@ -3728,14 +3774,8 @@ function ExpenseModal({
                 scrollSnapType="x proximity"
                 aria-label={t('household.expenseModal.quickTitle')}
                 sx={{
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'var(--pb-hair-2) transparent',
-                  '&::-webkit-scrollbar': { height: '6px' },
-                  '&::-webkit-scrollbar-track': { background: 'transparent' },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: 'var(--pb-hair-2)',
-                    borderRadius: '999px',
-                  },
+                  scrollbarWidth: 'none',
+                  '&::-webkit-scrollbar': { display: 'none' },
                 }}
               >
                 {HOUSEHOLD_EXPENSE_PRESETS.map((preset) => {
@@ -3750,46 +3790,41 @@ function ExpenseModal({
                       type="button"
                       key={preset.key}
                       flex="0 0 auto"
-                      w={{ base: '148px', sm: '160px' }}
-                      minH="68px"
-                      px={3}
-                      py={2.5}
+                      w={{ base: '100px', sm: '130px' }}
+                      p={{ base: 2.5, sm: 3 }}
                       display="flex"
-                      alignItems="center"
-                      gap={2.5}
+                      flexDirection="column"
+                      alignItems="flex-start"
+                      gap={{ base: 2, sm: 3 }}
                       textAlign="left"
-                      borderRadius="12px"
-                      border="1px solid"
-                      borderColor={selected ? 'var(--pb-forest-2)' : 'var(--pb-hair)'}
-                      bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
+                      borderRadius="16px"
+                      border="2px solid"
+                      borderColor={selected ? 'var(--pb-forest-2)' : 'transparent'}
+                      bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
+                      boxShadow={selected ? '0 4px 12px rgba(38, 115, 90, 0.15)' : '0 2px 6px rgba(0,0,0,0.04)'}
                       color={selected ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
                       aria-pressed={selected}
                       scrollSnapAlign="start"
                       onClick={() => applyPreset(preset)}
-                      transition="background .16s ease, border-color .16s ease, transform .16s ease"
+                      transition="all .2s ease"
                       _hover={{
-                        borderColor: 'var(--pb-forest-2)',
-                        bg: 'var(--pb-tint-green)',
-                        transform: 'translateY(-1px)',
-                      }}
-                      _focusVisible={{
-                        outline: 'none',
-                        boxShadow: '0 0 0 3px var(--pb-tint-green)',
-                        borderColor: 'var(--pb-forest-2)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
                       }}
                     >
                       <Flex
                         w={8}
                         h={8}
-                        flexShrink={0}
                         align="center"
                         justify="center"
-                        borderRadius="10px"
-                        bg={selected ? 'var(--pb-surface)' : 'var(--pb-surface-3)'}
+                        borderRadius="full"
+                        bg={selected ? 'var(--pb-forest-2)' : 'var(--pb-surface-3)'}
+                        color={selected ? 'var(--pb-on-accent)' : 'inherit'}
+                        transition="all .2s ease"
                       >
-                        <Icon as={preset.icon} boxSize={4} weight="duotone" />
+                        <Icon as={preset.icon} boxSize={4} weight={selected ? 'fill' : 'duotone'} />
                       </Flex>
-                      <Text fontSize="xs" fontWeight={700} lineHeight={1.25}>
+                      <Text fontSize="xs" fontWeight={750} lineHeight={1.2}>
                         {t(`household.expenseModal.quick.${preset.key}.label`)}
                       </Text>
                     </Box>
@@ -3800,97 +3835,25 @@ function ExpenseModal({
           )}
 
           <Box
-            p={{ base: 3.5, md: 4 }}
+            p={{ base: 3, sm: 4, md: 5 }}
             bg="var(--pb-surface)"
-            border="1px solid var(--pb-hair)"
-            borderRadius="16px"
+            borderRadius="20px"
+            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
           >
-            <HStack align="flex-start" spacing={3} mb={4}>
-              <Flex
-                w={7}
-                h={7}
-                flexShrink={0}
-                align="center"
-                justify="center"
-                borderRadius="full"
-                bg="var(--pb-forest-2)"
-                color="var(--pb-on-accent)"
-                fontSize="xs"
-                fontWeight={800}
-              >
-                1
-              </Flex>
-              <Box>
-                <Text fontWeight={750} color="var(--pb-ink)" lineHeight={1.2}>
-                  {t('household.expenseModal.detailsTitle')}
-                </Text>
-                <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
-                  {t('household.expenseModal.detailsDescription')}
-                </Text>
-              </Box>
-            </HStack>
-
-            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3.5}>
-              <FormControl isRequired isInvalid={hasSubmitted && !amountIsValid}>
-                <FormLabel>{t('household.expenseModal.amount')}</FormLabel>
-                <InputGroup>
-                  <InputLeftElement
-                    h="48px"
-                    pointerEvents="none"
-                    color="var(--pb-ink-faint)"
-                    fontWeight={700}
-                  >
-                    {currencyMark}
-                  </InputLeftElement>
-                  <Input
-                    ref={amountInputRef}
-                    h="48px"
-                    pl={10}
-                    type="number"
-                    min="0.01"
-                    step="0.01"
-                    inputMode="decimal"
-                    value={amount}
-                    onChange={(event) => setAmount(event.target.value)}
-                    placeholder={t('household.expenseModal.amountPlaceholder')}
-                    fontSize="lg"
-                    fontWeight={750}
-                  />
-                </InputGroup>
-                <FormErrorMessage fontSize="xs">
-                  {t('household.expenseModal.invalidAmount')}
-                </FormErrorMessage>
-              </FormControl>
+            <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
               <FormControl isRequired>
                 <FormLabel>{t('household.expenseModal.date')}</FormLabel>
                 <Input
-                  h="48px"
+                  h="52px"
                   type="date"
                   value={expenseDate}
                   onChange={(event) => setExpenseDate(event.target.value)}
                 />
               </FormControl>
-              <FormControl
-                isRequired
-                isInvalid={hasSubmitted && description.trim().length === 0}
-                gridColumn={{ sm: '1 / -1' }}
-              >
-                <FormLabel>{t('household.expenseModal.description')}</FormLabel>
-                <Input
-                  h="48px"
-                  value={description}
-                  maxLength={255}
-                  onChange={(event) => setDescription(event.target.value)}
-                  placeholder={t('household.expenseModal.descriptionPlaceholder')}
-                />
-                <FormErrorMessage fontSize="xs">
-                  {t('household.expenseModal.descriptionRequired')}
-                </FormErrorMessage>
-              </FormControl>
-              <FormControl isRequired gridColumn={{ sm: '1 / -1' }}>
+              <FormControl isRequired>
                 <FormLabel>{t('household.expenseModal.category')}</FormLabel>
                 <Select
-                  h="48px"
+                  h="52px"
                   value={category}
                   onChange={(event) => setCategory(event.target.value)}
                 >
@@ -3901,55 +3864,77 @@ function ExpenseModal({
                   ))}
                 </Select>
               </FormControl>
+              <FormControl
+                isRequired
+                isInvalid={hasSubmitted && description.trim().length === 0}
+                gridColumn={{ sm: '1 / -1' }}
+              >
+                <FormLabel>{t('household.expenseModal.description')}</FormLabel>
+                <Input
+                  h="52px"
+                  value={description}
+                  maxLength={255}
+                  onChange={(event) => setDescription(event.target.value)}
+                  placeholder={t('household.expenseModal.descriptionPlaceholder')}
+                />
+                <FormErrorMessage fontSize="xs">
+                  {t('household.expenseModal.descriptionRequired')}
+                </FormErrorMessage>
+              </FormControl>
             </SimpleGrid>
           </Box>
 
           <Box
-            p={{ base: 3.5, md: 4 }}
+            p={{ base: 3, sm: 4, md: 5 }}
             bg="var(--pb-surface)"
-            border="1px solid var(--pb-hair)"
-            borderRadius="16px"
+            borderRadius="20px"
+            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
           >
-            <Flex align="flex-start" justify="space-between" gap={3} mb={4}>
-              <HStack align="flex-start" spacing={3}>
-                <Flex
-                  w={7}
-                  h={7}
-                  flexShrink={0}
-                  align="center"
-                  justify="center"
-                  borderRadius="full"
-                  bg="var(--pb-forest-2)"
-                  color="var(--pb-on-accent)"
-                  fontSize="xs"
-                  fontWeight={800}
-                >
-                  2
-                </Flex>
-                <Box>
-                  <Text fontWeight={750} color="var(--pb-ink)" lineHeight={1.2}>
-                    {t('household.expenseModal.splitBetween')}
-                  </Text>
-                  <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
-                    {t('household.expenseModal.splitDescription')}
-                  </Text>
-                </Box>
-              </HStack>
+            <Flex align="flex-start" justify="space-between" gap={3} mb={5}>
+              <Box>
+                <Text fontWeight={800} fontSize="sm" color="var(--pb-ink)" lineHeight={1.2}>
+                  {t('household.expenseModal.splitBetween')}
+                </Text>
+                <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)">
+                  {t('household.expenseModal.splitDescription')}
+                </Text>
+              </Box>
               {participantIds.size < household.members.length && (
                 <Button
-                  size="xs"
+                  size="sm"
                   variant="ghost"
                   color="var(--pb-forest-2)"
                   onClick={selectEveryone}
                   flexShrink={0}
+                  borderRadius="full"
+                  bg="var(--pb-tint-green)"
+                  _hover={{ bg: 'var(--pb-tint-green-hover, #d5ece4)' }}
+                  display={{ base: 'none', sm: 'flex' }}
                 >
                   {t('household.expenseModal.selectEveryone')}
                 </Button>
               )}
             </Flex>
+            
+            {participantIds.size < household.members.length && (
+              <Button
+                size="xs"
+                variant="ghost"
+                color="var(--pb-forest-2)"
+                onClick={selectEveryone}
+                w="full"
+                mb={4}
+                borderRadius="full"
+                bg="var(--pb-tint-green)"
+                _hover={{ bg: 'var(--pb-tint-green-hover, #d5ece4)' }}
+                display={{ base: 'flex', sm: 'none' }}
+              >
+                {t('household.expenseModal.selectEveryone')}
+              </Button>
+            )}
 
             <FormControl isInvalid={hasSubmitted && participantIds.size < 2}>
-              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={2}>
+              <VStack spacing={3} align="stretch">
                 {household.members.map((member) => {
                   const isPayer = member.id === payerMemberId
                   const isSelected = participantIds.has(member.id)
@@ -3957,19 +3942,23 @@ function ExpenseModal({
                     <Flex
                       as="label"
                       key={member.id}
-                      minH="52px"
-                      px={3}
-                      py={2.5}
+                      minH={{ base: '56px', sm: '60px' }}
+                      px={{ base: 3, sm: 4 }}
+                      py={{ base: 2.5, sm: 3 }}
                       align="center"
-                      gap={3}
-                      border="1px solid"
-                      borderColor={isSelected ? 'var(--pb-forest-2)' : 'var(--pb-hair)'}
-                      borderRadius="12px"
+                      gap={{ base: 3, sm: 4 }}
+                      borderRadius="16px"
+                      border="2px solid"
+                      borderColor={isSelected ? 'var(--pb-forest-2)' : 'transparent'}
                       bg={isSelected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
                       cursor={isPayer ? 'default' : 'pointer'}
-                      transition="background .16s ease, border-color .16s ease"
+                      transition="all .2s ease"
+                      _hover={{
+                        transform: isPayer ? 'none' : 'scale(1.01)',
+                      }}
                     >
                       <Checkbox
+                        size="lg"
                         isChecked={isSelected}
                         isDisabled={isPayer}
                         colorScheme="green"
@@ -3981,26 +3970,34 @@ function ExpenseModal({
                             return next
                           })
                         }}
+                        sx={{
+                          '.chakra-checkbox__control': {
+                            borderRadius: 'full',
+                            borderWidth: '2px',
+                          }
+                        }}
                       />
                       <Box minW={0} flex={1}>
-                        <Text color="var(--pb-ink)" fontSize="sm" fontWeight={700} noOfLines={1}>
+                        <Text color="var(--pb-ink)" fontSize="md" fontWeight={750} noOfLines={1}>
                           {member.name}
                         </Text>
                         {isPayer && (
-                          <Text color="var(--pb-ink-soft)" fontSize="2xs">
+                          <Text color="var(--pb-forest-2)" fontSize="xs" fontWeight={600} mt={0.5}>
                             {t('household.expenseModal.payerHint')}
                           </Text>
                         )}
                       </Box>
                       {isPayer && (
                         <Badge
-                          bg="var(--pb-surface)"
-                          color="var(--pb-forest-2)"
-                          border="1px solid var(--pb-hair)"
+                          bg="var(--pb-forest-2)"
+                          color="var(--pb-on-accent)"
                           borderRadius="full"
-                          px={2}
-                          textTransform="none"
+                          px={3}
+                          py={1}
+                          textTransform="uppercase"
                           fontSize="2xs"
+                          fontWeight={800}
+                          letterSpacing="wider"
                         >
                           {t('household.expenseModal.payer')}
                         </Badge>
@@ -4008,49 +4005,46 @@ function ExpenseModal({
                     </Flex>
                   )
                 })}
-              </SimpleGrid>
-              <FormErrorMessage fontSize="xs">
+              </VStack>
+              <FormErrorMessage fontSize="sm" mt={3} fontWeight={600}>
                 {t('household.expenseModal.selectParticipants')}
               </FormErrorMessage>
-              <FormHelperText
-                mt={3}
-                p={3}
-                display="flex"
-                alignItems={{ base: 'flex-start', sm: 'center' }}
-                justifyContent="space-between"
-                flexDirection={{ base: 'column', sm: 'row' }}
-                gap={1}
-                borderRadius="11px"
-                bg="var(--pb-surface-2)"
-                color="var(--pb-ink-soft)"
-                aria-live="polite"
-                aria-atomic="true"
+
+              <Box
+                mt={{ base: 4, sm: 5 }}
+                p={{ base: 3, sm: 4 }}
+                borderRadius="16px"
+                bg="linear-gradient(135deg, var(--pb-forest-2) 0%, var(--pb-forest) 100%)"
+                color="var(--pb-on-accent)"
+                boxShadow="0 4px 14px rgba(38, 115, 90, 0.25)"
               >
-                <Text fontSize="xs">
-                  {t(
-                    participantIds.size === 1
-                      ? 'household.expenseModal.participants.one'
-                      : 'household.expenseModal.participants.other',
-                    { count: formatNumber(participantIds.size) },
-                  )}
+                <Flex align="center" justify="space-between" flexWrap="wrap" gap={2}>
+                  <Text fontSize="sm" fontWeight={600} opacity={0.9}>
+                    {t(
+                      participantIds.size === 1
+                        ? 'household.expenseModal.participants.one'
+                        : 'household.expenseModal.participants.other',
+                      { count: formatNumber(participantIds.size) },
+                    )}
+                  </Text>
+                  <Text fontSize="xl" fontWeight={800}>
+                    {t('household.expenseModal.perPerson', {
+                      amount: formatCurrency(preview),
+                    })}
+                  </Text>
+                </Flex>
+                <Text mt={2} fontSize="2xs" opacity={0.7} lineHeight={1.4} textAlign="right">
+                  {t('household.expenseModal.roundingHint')}
                 </Text>
-                <Text color="var(--pb-ink)" fontSize="sm" fontWeight={750}>
-                  {t('household.expenseModal.perPerson', {
-                    amount: formatCurrency(preview),
-                  })}
-                </Text>
-              </FormHelperText>
-              <Text mt={2} color="var(--pb-ink-faint)" fontSize="2xs" lineHeight={1.45}>
-                {t('household.expenseModal.roundingHint')}
-              </Text>
+              </Box>
             </FormControl>
           </Box>
 
           <Box
-            p={{ base: 3.5, md: 4 }}
+            p={{ base: 3, sm: 4, md: 5 }}
             bg="var(--pb-surface)"
-            border="1px solid var(--pb-hair)"
-            borderRadius="16px"
+            borderRadius="20px"
+            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
           >
             <AttachmentPicker
               files={files}
