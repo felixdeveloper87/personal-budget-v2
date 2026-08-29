@@ -535,7 +535,7 @@ export default function HouseholdPage() {
             <Icon as={Home} boxSize={9} color={muted} />
             <Heading size="md">{t('household.load.failedTitle')}</Heading>
             <Text color={muted}>{t('household.load.failedDescription')}</Text>
-            <Button leftIcon={<RefreshCw size={17} />} onClick={() => void load()}>
+            <Button leftIcon={<Icon as={RefreshCw} boxSize={4} />} onClick={() => void load()}>
               {t('household.load.retry')}
             </Button>
           </VStack>
@@ -641,7 +641,7 @@ export default function HouseholdPage() {
                   bg={ed?.jadeSoft ?? 'teal.50'}
                   color={ed?.jade ?? 'teal.600'}
                 >
-                  <Home size={22} weight="duotone" />
+                  <Icon as={Home} boxSize={6} weight="duotone" />
                 </Box>
                 <Box>
                   <Heading size="md">{t('household.create.formTitle')}</Heading>
@@ -661,7 +661,7 @@ export default function HouseholdPage() {
                 type="submit"
                 alignSelf="flex-start"
                 colorScheme="teal"
-                leftIcon={<Plus size={17} />}
+                leftIcon={<Icon as={Plus} boxSize={4} />}
                 isLoading={busyAction === 'create-household'}
               >
                 {t('household.create.submit')}
@@ -786,7 +786,7 @@ export default function HouseholdPage() {
             {pendingConfirmations.length > 0 && (
               <ActionRequiredBanner
                 ariaLabel={t('household.banner.confirmationsAria')}
-                icon={<CheckCircle2 size={20} weight="duotone" />}
+                icon={<Icon as={CheckCircle2} boxSize={5} weight="duotone" />}
                 accent="var(--pb-gold)"
                 tint="var(--pb-tint-gold)"
                 count={pendingConfirmations.length}
@@ -810,7 +810,7 @@ export default function HouseholdPage() {
             {debtsYouOwe.length > 0 && (
               <ActionRequiredBanner
                 ariaLabel={t('household.banner.debtsAria')}
-                icon={<Wallet size={20} weight="duotone" />}
+                icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
                 accent="var(--pb-coral)"
                 tint="var(--pb-tint-coral)"
                 count={debtsYouOwe.length}
@@ -870,7 +870,7 @@ export default function HouseholdPage() {
             eyebrow={t('household.balances.eyebrow')}
             title={t('household.balances.title')}
             description={t('household.balances.description')}
-            icon={<Wallet size={20} weight="duotone" />}
+            icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
             accent={household.debts.length ? 'var(--pb-coral)' : 'var(--pb-income)'}
             tint={household.debts.length ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
             stat={household.debts.length
@@ -903,7 +903,7 @@ export default function HouseholdPage() {
             eyebrow={t('household.expenses.eyebrow')}
             title={t('household.expenses.title')}
             description={t('household.expenses.description')}
-            icon={<ReceiptText size={20} weight="duotone" />}
+            icon={<Icon as={ReceiptText} boxSize={5} weight="duotone" />}
             accent="var(--pb-forest-2)"
             tint="var(--pb-tint-green)"
             stat={t(
@@ -937,7 +937,7 @@ export default function HouseholdPage() {
             eyebrow={t('household.settlements.eyebrow')}
             title={t('household.settlements.title')}
             description={t('household.settlements.description')}
-            icon={<Mail size={20} weight="duotone" />}
+            icon={<Icon as={Mail} boxSize={5} weight="duotone" />}
             accent={pendingSettlementCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
             tint={pendingSettlementCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
             stat={pendingSettlementCount
@@ -1162,7 +1162,7 @@ function BalancesOverviewModal({
               bg="var(--pb-tint-income)"
               color="var(--pb-income)"
             >
-              <Check size={20} weight="bold" />
+              <Icon as={Check} boxSize={5} weight="bold" />
             </Flex>
             <Text
               fontFamily="var(--pb-serif)"
@@ -1542,7 +1542,7 @@ function RecentExpensesModal({
               bg="var(--pb-tint-green)"
               color="var(--pb-forest-2)"
             >
-              <ReceiptText size={22} weight="duotone" />
+              <Icon as={ReceiptText} boxSize={6} weight="duotone" />
             </Flex>
             <Text
               fontFamily="var(--pb-serif)"
@@ -1557,7 +1557,7 @@ function RecentExpensesModal({
             </Text>
             <Button
               h="40px"
-              leftIcon={<Plus size={16} />}
+              leftIcon={<Icon as={Plus} boxSize={4} />}
               bg="var(--pb-forest-2)"
               color="var(--pb-on-accent)"
               onClick={onAddExpense}
@@ -1728,7 +1728,7 @@ function RecentExpensesModal({
                                     px={2.5}
                                     borderRadius="9px"
                                     variant="ghost"
-                                    leftIcon={<Upload size={14} />}
+                                    leftIcon={<Icon as={Upload} boxSize={3.5} />}
                                     color="var(--pb-ink-soft)"
                                     fontSize="xs"
                                     onClick={() => onOpenAttachments(expense.id)}
@@ -1743,7 +1743,7 @@ function RecentExpensesModal({
                                     aria-label={t('household.expenses.editAria', {
                                       description: expense.description,
                                     })}
-                                    icon={<Pencil size={15} />}
+                                    icon={<Icon as={Pencil} boxSize={3.5} />}
                                     h="32px"
                                     minW="32px"
                                     borderRadius="9px"
@@ -1874,7 +1874,7 @@ function PaymentsOverviewModal({
               bg="var(--pb-tint-green)"
               color="var(--pb-forest-2)"
             >
-              <Mail size={22} weight="duotone" />
+              <Icon as={Mail} boxSize={6} weight="duotone" />
             </Flex>
             <Text
               fontFamily="var(--pb-serif)"
@@ -2012,7 +2012,7 @@ function PaymentsOverviewModal({
                                     px={2.5}
                                     borderRadius="9px"
                                     variant="ghost"
-                                    leftIcon={<Upload size={14} />}
+                                    leftIcon={<Icon as={Upload} boxSize={3.5} />}
                                     onClick={() => onOpenAttachments(settlement.id)}
                                   >
                                     {t('household.settlements.proof', {
@@ -4442,7 +4442,7 @@ function MembersModal({
                         aria-label={t('household.manage.revokeAria', {
                           name: invitation.targetName,
                         })}
-                        icon={<X size={16} />}
+                        icon={<Icon as={X} boxSize={4} />}
                         size="sm"
                         variant="ghost"
                         isLoading={busy === `revoke-${invitation.id}`}
@@ -4495,7 +4495,7 @@ function MembersModal({
                             <IconButton
                               type="button"
                               aria-label={t('household.manage.cancelMemberNameAria')}
-                              icon={<X size={16} />}
+                              icon={<Icon as={X} boxSize={4} />}
                               size="sm"
                               variant="ghost"
                               onClick={() => {
@@ -4507,7 +4507,7 @@ function MembersModal({
                               type="submit"
                               size="sm"
                               colorScheme="teal"
-                              leftIcon={<Check size={16} />}
+                              leftIcon={<Icon as={Check} boxSize={4} />}
                               isLoading={busy === `rename-member-${member.id}`}
                               isDisabled={!memberName.trim()}
                             >
@@ -4526,7 +4526,7 @@ function MembersModal({
                               aria-label={t('household.manage.editNameAria', {
                                 name: member.name,
                               })}
-                              icon={<Pencil size={16} />}
+                              icon={<Icon as={Pencil} boxSize={4} />}
                               size="sm"
                               variant="ghost"
                               onClick={() => {
@@ -4537,7 +4537,7 @@ function MembersModal({
                             {member.role !== 'OWNER' && (
                               <IconButton
                                 aria-label={t('household.manage.removeAria', { name: member.name })}
-                                icon={<Trash2 size={16} />}
+                                icon={<Icon as={Trash2} boxSize={4} />}
                                 size="sm"
                                 variant="ghost"
                                 colorScheme="red"

@@ -644,7 +644,7 @@ export default function HouseholdHeader({
             color={position.color}
             border="1px solid var(--pb-summary-line)"
           >
-            <PositionIcon size={18} weight="duotone" aria-hidden="true" />
+            <Icon as={PositionIcon} boxSize={{ base: '18px', sm: '19px' }} weight="duotone" aria-hidden="true" />
           </Flex>
         </Flex>
       </Grid>
