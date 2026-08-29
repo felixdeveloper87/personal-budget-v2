@@ -1,4 +1,4 @@
-import { FormEvent, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { FormEvent, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Badge,
   Box,
@@ -70,6 +70,7 @@ import type {
   HouseholdExpense,
   HouseholdExpenseRequest,
   HouseholdPageState,
+  HouseholdSettlement,
 } from '../../types'
 import {
   Check,
@@ -1501,6 +1502,16 @@ function RecentExpensesModal({
 }) {
   const { formatCurrency, formatDate, formatNumber, t } = useI18n()
 
+  const expensesByMonth = useMemo(() => {
+    const grouped = new Map<string, HouseholdExpense[]>()
+    for (const expense of household.expenses) {
+      const month = expense.expenseDate.slice(0, 7)
+      if (!grouped.has(month)) grouped.set(month, [])
+      grouped.get(month)!.push(expense)
+    }
+    return Array.from(grouped.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+  }, [household.expenses])
+
   return (
     <PremiumModal
       isOpen={isOpen}
@@ -1594,8 +1605,27 @@ function RecentExpensesModal({
             </Button>
           </VStack>
         ) : (
-          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
-            {household.expenses.map((expense) => {
+          <VStack spacing={6} align="stretch">
+            {expensesByMonth.map(([monthKey, expenses]) => {
+              const [year, month] = monthKey.split('-')
+              const monthDate = new Date(Number(year), Number(month) - 1, 1)
+              const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+
+              return (
+                <Box key={monthKey}>
+                  <Text
+                    fontFamily="var(--pb-mono)"
+                    fontSize="xs"
+                    fontWeight={700}
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    color="var(--pb-ink-faint)"
+                    mb={3}
+                  >
+                    {monthLabel}
+                  </Text>
+                  <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+                    {expenses.map((expense) => {
               const currentShare = expense.shares.find(
                 (share) => share.memberId === household.currentMemberId,
               )
@@ -1764,8 +1794,12 @@ function RecentExpensesModal({
                   )}
                 </Stack>
               )
+                    })}
+                  </SimpleGrid>
+                </Box>
+              )
             })}
-          </SimpleGrid>
+          </VStack>
         )}
       </Box>
     </PremiumModal>
@@ -1795,6 +1829,16 @@ function PaymentsOverviewModal({
   const pendingCount = household.settlements.filter(
     (settlement) => settlement.status === 'PENDING',
   ).length
+
+  const settlementsByMonth = useMemo(() => {
+    const grouped = new Map<string, HouseholdSettlement[]>()
+    for (const settlement of household.settlements) {
+      const month = settlement.settlementDate.slice(0, 7)
+      if (!grouped.has(month)) grouped.set(month, [])
+      grouped.get(month)!.push(settlement)
+    }
+    return Array.from(grouped.entries()).sort((a, b) => b[0].localeCompare(a[0]))
+  }, [household.settlements])
 
   return (
     <PremiumModal
@@ -1883,8 +1927,27 @@ function PaymentsOverviewModal({
             </Text>
           </VStack>
         ) : (
-          <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
-            {household.settlements.map((settlement) => {
+          <VStack spacing={6} align="stretch">
+            {settlementsByMonth.map(([monthKey, settlements]) => {
+              const [year, month] = monthKey.split('-')
+              const monthDate = new Date(Number(year), Number(month) - 1, 1)
+              const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+
+              return (
+                <Box key={monthKey}>
+                  <Text
+                    fontFamily="var(--pb-mono)"
+                    fontSize="xs"
+                    fontWeight={700}
+                    letterSpacing="0.1em"
+                    textTransform="uppercase"
+                    color="var(--pb-ink-faint)"
+                    mb={3}
+                  >
+                    {monthLabel}
+                  </Text>
+                  <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+                    {settlements.map((settlement) => {
               const needsCurrentUserAction = settlement.canConfirm || settlement.canReject
               const statusAccent = settlement.status === 'CONFIRMED'
                 ? 'var(--pb-income)'
@@ -2037,8 +2100,12 @@ function PaymentsOverviewModal({
                   </Flex>
                 </Stack>
               )
+                    })}
+                  </SimpleGrid>
+                </Box>
+              )
             })}
-          </SimpleGrid>
+          </VStack>
         )}
       </Box>
     </PremiumModal>
