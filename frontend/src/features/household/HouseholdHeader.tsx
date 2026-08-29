@@ -26,6 +26,12 @@ import type {
   HouseholdMonthSummary,
 } from '../../types'
 import { useI18n } from '../../i18n'
+import { keyframes } from '@emotion/react'
+
+const pulseAnim = keyframes`
+  0%, 100% { opacity: 0.7; transform: translateX(0); }
+  50% { opacity: 1; transform: translateX(2px); }
+`
 
 const AVATAR_GRADIENTS = [
   'linear(to-br, var(--pb-forest), var(--pb-forest-2))',
@@ -39,7 +45,7 @@ interface HouseholdHeaderProps {
   household: HouseholdDashboard
   onAddExpense: () => void
   onManage: () => void
-  onBalances: () => void
+  onMembersOverview: () => void
   onNotifications: () => void
 }
 
@@ -60,7 +66,7 @@ export default function HouseholdHeader({
   household,
   onAddExpense,
   onManage,
-  onBalances,
+  onMembersOverview,
   onNotifications,
 }: HouseholdHeaderProps) {
   const { formatCurrency, formatDate, formatNumber, locale, t } = useI18n()
@@ -250,15 +256,16 @@ export default function HouseholdHeader({
               >
                 {household.name}
               </Text>
-              <HStack
+              <HStack 
                 as="button"
-                onClick={onBalances}
+                onClick={onMembersOverview}
                 mt={1.5}
                 spacing={-2}
                 cursor="pointer"
                 transition="all 0.2s"
                 _hover={{ transform: 'scale(1.02)' }}
                 _active={{ transform: 'scale(0.98)' }}
+                align="center"
               >
                 {household.members.slice(0, 5).map((member, i) => {
                   const initials = member.name
@@ -310,17 +317,18 @@ export default function HouseholdHeader({
                   </Flex>
                 )}
                 <Flex
-                  ml={3}
-                  w="22px"
-                  h="22px"
+                  ml={2}
+                  w="18px"
+                  h="18px"
                   borderRadius="full"
-                  bg="var(--pb-summary-line)"
-                  color="var(--pb-summary-ink-soft)"
+                  bgGradient="linear(to-br, var(--pb-forest), var(--pb-forest-2))"
+                  color="white"
                   align="center"
                   justify="center"
-                  border="1px solid var(--pb-summary-line)"
+                  boxShadow="0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
+                  animation={`${pulseAnim} 2s infinite ease-in-out`}
                 >
-                  <Icon as={ChevronRight} boxSize={3.5} weight="bold" />
+                  <Icon as={ChevronRight} boxSize={2.5} weight="bold" />
                 </Flex>
               </HStack>
             </Box>

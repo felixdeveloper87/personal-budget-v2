@@ -768,7 +768,7 @@ export default function HouseholdPage() {
           household={household}
           onAddExpense={openNewExpense}
           onManage={membersModal.onOpen}
-          onBalances={balancesOverviewModal.onOpen}
+          onMembersOverview={membersOverviewModal.onOpen}
           onNotifications={notificationsModal.onOpen}
         />
 
