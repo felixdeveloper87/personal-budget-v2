@@ -471,7 +471,7 @@ public class HouseholdCleaningService {
                 assignment.getWeekStart(),
                 assignment.getWeekStart().plusDays(6),
                 assignment.getAssignedMember().getId(),
-                assignment.getAssignedMember().getUser().getName(),
+                assignment.getAssignedMember().getDisplayName(),
                 status,
                 canComplete,
                 assignment.getCompletedAt(),

@@ -101,7 +101,7 @@ public class HouseholdNotificationService {
                                 ? notification.getActor().getId()
                                 : null,
                         notification.getActor() != null
-                                ? notification.getActor().getUser().getName()
+                                ? notification.getActor().getDisplayName()
                                 : null,
                         notification.getReferenceId(),
                         notification.getSubject(),

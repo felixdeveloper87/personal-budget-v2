@@ -632,6 +632,18 @@ export async function removeHouseholdMember(
   return data
 }
 
+export async function updateHouseholdMemberName(
+  householdId: number,
+  memberId: number,
+  name: string,
+): Promise<HouseholdPageState> {
+  const { data } = await api.patch<HouseholdPageState>(
+    `/households/${householdId}/members/${memberId}`,
+    { name },
+  )
+  return data
+}
+
 export async function markHouseholdNotificationsRead(
   householdId: number,
 ): Promise<HouseholdPageState> {

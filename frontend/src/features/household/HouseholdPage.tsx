@@ -52,6 +52,7 @@ import {
   removeHouseholdMember,
   revokeHouseholdInvitation,
   updateHousehold,
+  updateHouseholdMemberName,
   updateHouseholdCleaningDuty,
   updateHouseholdCleaningRotation,
   updateHouseholdExpense,
@@ -4338,9 +4339,15 @@ function MembersModal({
   const [name, setName] = useState(household.name)
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState<string | null>(null)
+  const [editingMemberId, setEditingMemberId] = useState<number | null>(null)
+  const [memberName, setMemberName] = useState('')
 
   useEffect(() => {
-    if (isOpen) setName(household.name)
+    if (isOpen) {
+      setName(household.name)
+      setEditingMemberId(null)
+      setMemberName('')
+    }
   }, [household.name, isOpen])
 
   const act = async (
@@ -4369,6 +4376,21 @@ function MembersModal({
       t('household.manage.invitedToast'),
     )
     if (saved) setEmail('')
+  }
+
+  const renameMember = async (event: FormEvent, memberId: number) => {
+    event.preventDefault()
+    const normalizedName = memberName.trim()
+    if (!normalizedName) return
+    const saved = await act(
+      `rename-member-${memberId}`,
+      () => updateHouseholdMemberName(household.id, memberId, normalizedName),
+      t('household.manage.memberRenamedToast'),
+    )
+    if (saved) {
+      setEditingMemberId(null)
+      setMemberName('')
+    }
   }
 
   return (
@@ -4480,44 +4502,104 @@ function MembersModal({
             <Box>
               <Heading size="sm" mb={3}>{t('household.manage.activeMembers')}</Heading>
               <VStack align="stretch" spacing={2}>
-                {household.members.map((member) => (
-                  <HStack
-                    key={member.id}
-                    justify="space-between"
-                    p={3}
-                    borderRadius="lg"
-                    bg={ed?.panelRaised ?? 'blackAlpha.50'}
-                  >
-                    <HStack minW={0} spacing={0}>
-                      <Box minW={0}>
-                        <HStack>
-                          <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
+                {household.members.map((member) => {
+                  const isEditing = editingMemberId === member.id
+                  return (
+                    <Box
+                      key={member.id}
+                      p={3}
+                      borderRadius="lg"
+                      bg={ed?.panelRaised ?? 'blackAlpha.50'}
+                    >
+                      {isEditing ? (
+                        <Stack
+                          as="form"
+                          direction={{ base: 'column', sm: 'row' }}
+                          align={{ base: 'stretch', sm: 'flex-end' }}
+                          spacing={2}
+                          onSubmit={(event) => void renameMember(event, member.id)}
+                        >
+                          <FormControl isRequired flex={1}>
+                            <FormLabel fontSize="xs">
+                              {t('household.manage.memberNameLabel')}
+                            </FormLabel>
+                            <Input
+                              autoFocus
+                              value={memberName}
+                              maxLength={120}
+                              onChange={(event) => setMemberName(event.target.value)}
+                              placeholder={t('household.manage.memberNamePlaceholder')}
+                            />
+                          </FormControl>
+                          <HStack justify={{ base: 'flex-end', sm: 'initial' }}>
+                            <IconButton
+                              type="button"
+                              aria-label={t('household.manage.cancelMemberNameAria')}
+                              icon={<X size={16} />}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingMemberId(null)
+                                setMemberName('')
+                              }}
+                            />
+                            <Button
+                              type="submit"
+                              size="sm"
+                              colorScheme="teal"
+                              leftIcon={<Check size={16} />}
+                              isLoading={busy === `rename-member-${member.id}`}
+                              isDisabled={!memberName.trim()}
+                            >
+                              {t('household.common.save')}
+                            </Button>
+                          </HStack>
+                        </Stack>
+                      ) : (
+                        <HStack justify="space-between" spacing={3}>
+                          <Box minW={0}>
+                            <Text fontWeight={800} noOfLines={1}>{member.name}</Text>
+                            <Text color={muted} fontSize="xs" noOfLines={1}>{member.email}</Text>
+                          </Box>
+                          <HStack spacing={1} flexShrink={0}>
+                            <IconButton
+                              aria-label={t('household.manage.editNameAria', {
+                                name: member.name,
+                              })}
+                              icon={<Pencil size={16} />}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setEditingMemberId(member.id)
+                                setMemberName(member.name)
+                              }}
+                            />
+                            {member.role !== 'OWNER' && (
+                              <IconButton
+                                aria-label={t('household.manage.removeAria', { name: member.name })}
+                                icon={<Trash2 size={16} />}
+                                size="sm"
+                                variant="ghost"
+                                colorScheme="red"
+                                isLoading={busy === `remove-${member.id}`}
+                                onClick={() => {
+                                  if (!window.confirm(t('household.manage.removeConfirm', {
+                                    name: member.name,
+                                  }))) return
+                                  void act(
+                                    `remove-${member.id}`,
+                                    () => removeHouseholdMember(household.id, member.id),
+                                    t('household.manage.removedToast'),
+                                  )
+                                }}
+                              />
+                            )}
+                          </HStack>
                         </HStack>
-                        <Text color={muted} fontSize="xs" noOfLines={1}>{member.email}</Text>
-                      </Box>
-                    </HStack>
-                    {member.role !== 'OWNER' && (
-                      <IconButton
-                        aria-label={t('household.manage.removeAria', { name: member.name })}
-                        icon={<Trash2 size={16} />}
-                        size="sm"
-                        variant="ghost"
-                        colorScheme="red"
-                        isLoading={busy === `remove-${member.id}`}
-                        onClick={() => {
-                          if (!window.confirm(t('household.manage.removeConfirm', {
-                            name: member.name,
-                          }))) return
-                          void act(
-                            `remove-${member.id}`,
-                            () => removeHouseholdMember(household.id, member.id),
-                            t('household.manage.removedToast'),
-                          )
-                        }}
-                      />
-                    )}
-                  </HStack>
-                ))}
+                      )}
+                    </Box>
+                  )
+                })}
               </VStack>
             </Box>
           </VStack>

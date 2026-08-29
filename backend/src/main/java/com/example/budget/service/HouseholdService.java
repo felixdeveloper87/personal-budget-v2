@@ -221,8 +221,23 @@ public class HouseholdService {
                 owner,
                 HouseholdNotificationType.MEMBER_REMOVED,
                 target.getId(),
-                target.getUser().getName(),
+                target.getDisplayName(),
                 null);
+    }
+
+    @Transactional
+    public void updateMemberName(
+            Long householdId,
+            Long memberId,
+            HouseholdRequests.UpdateMemberName request,
+            User user) {
+        HouseholdMember owner = requireMember(householdId, user);
+        requireOwner(owner);
+        HouseholdMember target = memberRepository
+                .findByHouseholdIdAndIdAndActiveTrue(householdId, memberId)
+                .orElseThrow(() -> new EntityNotFoundException("HouseholdMember", memberId));
+        target.setDisplayName(requiredText(request.name(), "Member name", 120));
+        memberRepository.save(target);
     }
 
     @Transactional
@@ -466,7 +481,7 @@ public class HouseholdService {
                 .map(member -> new HouseholdPageDTO.Member(
                         member.getId(),
                         member.getUser().getId(),
-                        member.getUser().getName(),
+                        member.getDisplayName(),
                         member.getUser().getEmail(),
                         member.getRole().name(),
                         amount(paid.get(member.getId())),
@@ -490,9 +505,9 @@ public class HouseholdService {
                         && memberById.containsKey(debt.toId()))
                 .map(debt -> new HouseholdPageDTO.Debt(
                         debt.fromId(),
-                        memberById.get(debt.fromId()).getUser().getName(),
+                        memberById.get(debt.fromId()).getDisplayName(),
                         debt.toId(),
-                        memberById.get(debt.toId()).getUser().getName(),
+                        memberById.get(debt.toId()).getDisplayName(),
                         amount(debt.amount())))
                 .toList();
 
@@ -519,13 +534,13 @@ public class HouseholdService {
                         amount(expense.getAmount()),
                         expense.getExpenseDate(),
                         expense.getPayer().getId(),
-                        expense.getPayer().getUser().getName(),
+                        expense.getPayer().getDisplayName(),
                         owner || expense.getPayer().getId().equals(current.getId()),
                         sharesByExpense.getOrDefault(expense.getId(), List.of()).stream()
                                 .sorted(Comparator.comparing(share -> share.getMember().getId()))
                                 .map(share -> new HouseholdPageDTO.Share(
                                         share.getMember().getId(),
-                                        share.getMember().getUser().getName(),
+                                        share.getMember().getDisplayName(),
                                         amount(share.getAmount())))
                                 .toList(),
                         attachmentsByExpense
@@ -556,9 +571,9 @@ public class HouseholdService {
                     return new HouseholdPageDTO.Settlement(
                             settlement.getId(),
                             settlement.getFromMember().getId(),
-                            settlement.getFromMember().getUser().getName(),
+                            settlement.getFromMember().getDisplayName(),
                             settlement.getToMember().getId(),
-                            settlement.getToMember().getUser().getName(),
+                            settlement.getToMember().getDisplayName(),
                             amount(settlement.getAmount()),
                             settlement.getSettlementDate(),
                             settlement.getStatus().name(),

@@ -9,6 +9,7 @@ public final class HouseholdRequests {
 
     public record CreateHousehold(String name) {}
     public record UpdateHousehold(String name) {}
+    public record UpdateMemberName(String name) {}
     public record InviteMember(String email) {}
     public record Expense(
             String description,

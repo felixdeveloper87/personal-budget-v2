@@ -36,6 +36,9 @@ public class HouseholdMember {
     @Column(name = "deactivated_at")
     private LocalDateTime deactivatedAt;
 
+    @Column(name = "display_name", length = 120)
+    private String displayName;
+
     @PrePersist
     protected void onCreate() {
         if (joinedAt == null) {
@@ -55,5 +58,10 @@ public class HouseholdMember {
     public LocalDateTime getJoinedAt() { return joinedAt; }
     public LocalDateTime getDeactivatedAt() { return deactivatedAt; }
     public void setDeactivatedAt(LocalDateTime deactivatedAt) { this.deactivatedAt = deactivatedAt; }
+    public String getDisplayName() {
+        return displayName != null && !displayName.isBlank()
+                ? displayName
+                : user.getName();
+    }
+    public void setDisplayName(String displayName) { this.displayName = displayName; }
 }
-

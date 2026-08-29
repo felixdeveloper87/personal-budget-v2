@@ -107,6 +107,17 @@ public class HouseholdController {
         return service.page(user);
     }
 
+    @PatchMapping("/households/{householdId}/members/{memberId}")
+    public HouseholdPageDTO updateMemberName(
+            @PathVariable Long householdId,
+            @PathVariable Long memberId,
+            @RequestBody HouseholdRequests.UpdateMemberName request,
+            Authentication authentication) {
+        User user = user(authentication);
+        service.updateMemberName(householdId, memberId, request, user);
+        return service.page(user);
+    }
+
     @PostMapping("/households/{householdId}/notifications/read")
     public HouseholdPageDTO markNotificationsRead(
             @PathVariable Long householdId,
