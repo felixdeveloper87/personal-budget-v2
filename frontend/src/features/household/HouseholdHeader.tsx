@@ -38,6 +38,7 @@ interface HouseholdHeaderProps {
   household: HouseholdDashboard
   onAddExpense: () => void
   onManage: () => void
+  onBalances: () => void
   onNotifications: () => void
 }
 
@@ -58,6 +59,7 @@ export default function HouseholdHeader({
   household,
   onAddExpense,
   onManage,
+  onBalances,
   onNotifications,
 }: HouseholdHeaderProps) {
   const { formatCurrency, formatDate, formatNumber, locale, t } = useI18n()
@@ -247,7 +249,16 @@ export default function HouseholdHeader({
               >
                 {household.name}
               </Text>
-              <HStack mt={1.5} spacing={-2}>
+              <HStack 
+                as="button"
+                onClick={onBalances}
+                mt={1.5} 
+                spacing={-2}
+                cursor="pointer"
+                transition="all 0.2s"
+                _hover={{ transform: 'scale(1.02)' }}
+                _active={{ transform: 'scale(0.98)' }}
+              >
                 {household.members.slice(0, 5).map((member, i) => {
                   const initials = member.name
                     .split(' ')
@@ -256,7 +267,7 @@ export default function HouseholdHeader({
                     .slice(0, 2)
                     .join('')
                     .toUpperCase()
-                  
+
                   return (
                     <Flex
                       key={member.id}
@@ -495,11 +506,11 @@ export default function HouseholdHeader({
           >
             {t('household.header.spentTitle', { defaultValue: 'GASTOS DA CASA' })}
           </Text>
-          <Flex 
-            mt={1.5} 
-            align="center" 
-            justify="space-between" 
-            wrap="wrap" 
+          <Flex
+            mt={1.5}
+            align="center"
+            justify="space-between"
+            wrap="wrap"
             gap={3}
           >
             <Text
@@ -514,7 +525,7 @@ export default function HouseholdHeader({
             >
               {formatCurrency(selectedSummary.spend)}
             </Text>
-            
+
             <Box maxW="190px">
               <PeriodNavigator
                 selectedPeriod="month"
