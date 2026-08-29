@@ -26,6 +26,14 @@ import type {
 } from '../../types'
 import { useI18n } from '../../i18n'
 
+const AVATAR_GRADIENTS = [
+  'linear(to-br, var(--pb-forest), var(--pb-forest-2))',
+  'linear(to-br, var(--pb-coral), #E53E3E)',
+  'linear(to-br, #3182CE, #2B6CB0)',
+  'linear(to-br, #D69E2E, #DD6B20)',
+  'linear(to-br, #805AD5, #553C9A)',
+]
+
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
   onAddExpense: () => void
@@ -214,47 +222,82 @@ export default function HouseholdHeader({
         <Flex justify="space-between" align="center" w={{ base: 'full', sm: 'auto' }} minW={0} gap={2}>
           <HStack spacing={3} minW={0} align="center">
             <Flex
-              w={{ base: 10, md: 11 }}
-              h={{ base: 10, md: 11 }}
+              w={{ base: 12, md: 14 }}
+              h={{ base: 12, md: 14 }}
               flexShrink={0}
               align="center"
               justify="center"
-              borderRadius="13px"
-              bg="var(--pb-summary-panel)"
-              color="var(--pb-summary-income)"
-              border="1px solid var(--pb-summary-line)"
+              borderRadius={{ base: '16px', md: '18px' }}
+              bgGradient="linear(to-br, var(--pb-forest), var(--pb-forest-2))"
+              color="white"
+              boxShadow="0 4px 10px rgba(0, 0, 0, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.15)"
+              border="1px solid rgba(255, 255, 255, 0.1)"
             >
-              <Icon as={Home} boxSize={5} weight="duotone" />
+              <Icon as={Home} boxSize={{ base: 6, md: 7 }} weight="duotone" />
             </Flex>
             <Box minW={0}>
               <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9px"
-                fontWeight={600}
-                letterSpacing="0.17em"
-                textTransform="uppercase"
-                color="var(--pb-summary-ink-faint)"
-                noOfLines={1}
-              >
-                {t(
-                  household.members.length === 1
-                    ? 'household.header.activeMembers.one'
-                    : 'household.header.activeMembers.other',
-                  { count: formatNumber(household.members.length) },
-                )}
-              </Text>
-              <Text
-                mt={0.5}
                 fontFamily="var(--pb-serif)"
                 fontSize={{ base: 'xl', md: '2xl' }}
                 fontWeight={500}
                 lineHeight={1.1}
                 letterSpacing="-0.025em"
                 color="var(--pb-summary-ink)"
-                noOfLines={2}
+                noOfLines={1}
               >
                 {household.name}
               </Text>
+              <HStack mt={1.5} spacing={-2}>
+                {household.members.slice(0, 4).map((member, i) => {
+                  const initials = member.name
+                    .split(' ')
+                    .filter(Boolean)
+                    .map((n) => n[0])
+                    .slice(0, 2)
+                    .join('')
+                    .toUpperCase()
+                  
+                  return (
+                    <Flex
+                      key={member.id}
+                      w="28px"
+                      h="28px"
+                      borderRadius="full"
+                      bgGradient={AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]}
+                      color="white"
+                      border="2px solid var(--pb-summary-panel)"
+                      boxShadow="0 2px 4px rgba(0,0,0,0.1)"
+                      align="center"
+                      justify="center"
+                      fontSize="10px"
+                      fontWeight={800}
+                      fontFamily="var(--pb-mono)"
+                      zIndex={10 - i}
+                    >
+                      {initials}
+                    </Flex>
+                  )
+                })}
+                {household.members.length > 4 && (
+                  <Flex
+                    w="28px"
+                    h="28px"
+                    borderRadius="full"
+                    bg="var(--pb-summary-line)"
+                    color="var(--pb-summary-ink-soft)"
+                    border="2px solid var(--pb-summary-panel)"
+                    boxShadow="0 2px 4px rgba(0,0,0,0.1)"
+                    align="center"
+                    justify="center"
+                    fontSize="10px"
+                    fontWeight={800}
+                    fontFamily="var(--pb-mono)"
+                    zIndex={0}
+                  >
+                    +{household.members.length - 4}
+                  </Flex>
+                )}
+              </HStack>
             </Box>
           </HStack>
 
@@ -426,37 +469,12 @@ export default function HouseholdHeader({
         </Flex>
       </Flex>
 
-      <Box
-        position="relative"
-        zIndex={1}
-        py={{ base: 3, md: 3.5 }}
-        borderBottom="1px solid var(--pb-summary-line)"
-      >
-        <PeriodNavigator
-          selectedPeriod="month"
-          selectedDate={selectedMonth}
-          onDateChange={(date) => {
-            const candidate = monthStart(date)
-            setSelectedMonth(candidate)
-          }}
-          onPeriodChange={() => undefined}
-          onNavigatePeriod={navigateMonth}
-          onGoToToday={() => setSelectedMonth(currentMonth)}
-          formatLabel={() => selectedMonthLabel.toLocaleUpperCase(locale)}
-          isEmbedded
-          showPeriodSelector={false}
-          canNavigatePrevious={canNavigatePrevious}
-          canNavigateNext={canNavigateNext}
-          isDateDisabled={() => false}
-        />
-      </Box>
-
       <Grid
         position="relative"
         zIndex={1}
         templateColumns={{ base: '1fr', md: 'minmax(0, 1.05fr) minmax(320px, 0.95fr)' }}
         gap={{ base: 3.5, md: 5 }}
-        pt={{ base: 3.5, md: 4.5 }}
+        pt={{ base: 4, md: 5 }}
         alignItems="stretch"
       >
         <Flex
@@ -475,21 +493,48 @@ export default function HouseholdHeader({
             textTransform="uppercase"
             color="var(--pb-summary-ink-faint)"
           >
-            {t('household.header.spent', { month: selectedMonthLabel })}
+            {t('household.header.spentTitle', { defaultValue: 'GASTOS DA CASA' })}
           </Text>
-          <Text
-            mt={1.5}
-            fontFamily="var(--pb-serif)"
-            fontSize="clamp(2.15rem, 5vw, 3.45rem)"
-            fontWeight={500}
-            lineHeight={0.95}
-            letterSpacing="-0.04em"
-            color="var(--pb-summary-coral)"
-            noOfLines={1}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
+          <Flex 
+            mt={1.5} 
+            align="center" 
+            justify="space-between" 
+            wrap="wrap" 
+            gap={3}
           >
-            {formatCurrency(selectedSummary.spend)}
-          </Text>
+            <Text
+              fontFamily="var(--pb-serif)"
+              fontSize="clamp(2rem, 5vw, 3.45rem)"
+              fontWeight={500}
+              lineHeight={0.95}
+              letterSpacing="-0.04em"
+              color="var(--pb-summary-coral)"
+              noOfLines={1}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {formatCurrency(selectedSummary.spend)}
+            </Text>
+            
+            <Box maxW="190px">
+              <PeriodNavigator
+                selectedPeriod="month"
+                selectedDate={selectedMonth}
+                onDateChange={(date) => {
+                  const candidate = monthStart(date)
+                  setSelectedMonth(candidate)
+                }}
+                onPeriodChange={() => undefined}
+                onNavigatePeriod={navigateMonth}
+                onGoToToday={() => setSelectedMonth(currentMonth)}
+                formatLabel={() => selectedMonthLabel.toLocaleUpperCase(locale)}
+                isEmbedded
+                showPeriodSelector={false}
+                canNavigatePrevious={canNavigatePrevious}
+                canNavigateNext={canNavigateNext}
+                isDateDisabled={() => false}
+              />
+            </Box>
+          </Flex>
           <Text mt={2} fontSize="xs" color="var(--pb-summary-ink-soft)">
             {expenseCountCopy}
           </Text>
