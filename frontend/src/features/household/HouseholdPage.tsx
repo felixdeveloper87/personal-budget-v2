@@ -138,17 +138,76 @@ type HouseholdExpensePreset = {
   key: 'electricity' | 'water' | 'gas' | 'internet' | 'cleaning' | 'garden' | 'kitchen' | 'toilet'
   category: typeof CATEGORIES[number]
   icon: LucideIcon
+  color: string
+  tint: string
+  gradient: string
 }
 
 const HOUSEHOLD_EXPENSE_PRESETS: ReadonlyArray<HouseholdExpensePreset> = [
-  { key: 'electricity', category: 'Electricity', icon: Lightbulb },
-  { key: 'water', category: 'Water', icon: Drop },
-  { key: 'gas', category: 'Gas', icon: Flame },
-  { key: 'internet', category: 'Internet', icon: WifiHigh },
-  { key: 'cleaning', category: 'Cleaning', icon: Broom },
-  { key: 'garden', category: 'Garden', icon: Plant },
-  { key: 'kitchen', category: 'Groceries', icon: CookingPot },
-  { key: 'toilet', category: 'Cleaning', icon: ToiletPaper },
+  {
+    key: 'electricity',
+    category: 'Electricity',
+    icon: Lightbulb,
+    color: '#D97706',
+    tint: 'rgba(245, 158, 11, 0.14)',
+    gradient: 'linear(to-br, #F59E0B, #D97706)',
+  },
+  {
+    key: 'water',
+    category: 'Water',
+    icon: Drop,
+    color: '#0284C7',
+    tint: 'rgba(14, 165, 233, 0.14)',
+    gradient: 'linear(to-br, #38BDF8, #0284C7)',
+  },
+  {
+    key: 'gas',
+    category: 'Gas',
+    icon: Flame,
+    color: '#E11D48',
+    tint: 'rgba(244, 63, 94, 0.14)',
+    gradient: 'linear(to-br, #FB7185, #E11D48)',
+  },
+  {
+    key: 'internet',
+    category: 'Internet',
+    icon: WifiHigh,
+    color: '#7C3AED',
+    tint: 'rgba(139, 92, 246, 0.14)',
+    gradient: 'linear(to-br, #A78BFA, #7C3AED)',
+  },
+  {
+    key: 'cleaning',
+    category: 'Cleaning',
+    icon: Broom,
+    color: '#059669',
+    tint: 'rgba(16, 185, 129, 0.14)',
+    gradient: 'linear(to-br, #34D399, #059669)',
+  },
+  {
+    key: 'garden',
+    category: 'Garden',
+    icon: Plant,
+    color: '#65A30D',
+    tint: 'rgba(132, 204, 22, 0.14)',
+    gradient: 'linear(to-br, #A3E635, #65A30D)',
+  },
+  {
+    key: 'kitchen',
+    category: 'Groceries',
+    icon: CookingPot,
+    color: '#EA580C',
+    tint: 'rgba(249, 115, 22, 0.14)',
+    gradient: 'linear(to-br, #FB923C, #EA580C)',
+  },
+  {
+    key: 'toilet',
+    category: 'Cleaning',
+    icon: ToiletPaper,
+    color: '#0D9488',
+    tint: 'rgba(20, 184, 166, 0.14)',
+    gradient: 'linear(to-br, #2DD4BF, #0D9488)',
+  },
 ]
 
 const CLEANING_DUTIES: ReadonlyArray<{
@@ -3949,26 +4008,27 @@ function ExpenseModal({
                       type="button"
                       key={preset.key}
                       flex="0 0 auto"
-                      w={{ base: '100px', sm: '130px' }}
+                      w={{ base: '105px', sm: '130px' }}
                       p={{ base: 2.5, sm: 3 }}
                       display="flex"
                       flexDirection="column"
                       alignItems="flex-start"
-                      gap={{ base: 2, sm: 3 }}
+                      gap={{ base: 2, sm: 2.5 }}
                       textAlign="left"
                       borderRadius="16px"
-                      border="2px solid"
-                      borderColor={selected ? 'var(--pb-forest-2)' : 'transparent'}
-                      bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
-                      boxShadow={selected ? '0 4px 12px rgba(38, 115, 90, 0.15)' : '0 2px 6px rgba(0,0,0,0.04)'}
-                      color={selected ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
+                      border="1.5px solid"
+                      borderColor={selected ? preset.color : 'var(--pb-hair)'}
+                      bg={selected ? preset.tint : 'var(--pb-surface)'}
+                      boxShadow={selected ? `0 4px 14px ${preset.tint}` : '0 2px 6px rgba(0,0,0,0.03)'}
+                      color={selected ? preset.color : 'var(--pb-ink)'}
                       aria-pressed={selected}
                       scrollSnapAlign="start"
                       onClick={() => applyPreset(preset)}
                       transition="all .2s ease"
                       _hover={{
                         transform: 'translateY(-2px)',
-                        boxShadow: '0 6px 16px rgba(0,0,0,0.08)',
+                        borderColor: preset.color,
+                        boxShadow: `0 6px 16px ${preset.tint}`,
                       }}
                     >
                       <Flex
@@ -3976,14 +4036,21 @@ function ExpenseModal({
                         h={8}
                         align="center"
                         justify="center"
-                        borderRadius="full"
-                        bg={selected ? 'var(--pb-forest-2)' : 'var(--pb-surface-3)'}
-                        color={selected ? 'var(--pb-on-accent)' : 'inherit'}
+                        borderRadius="10px"
+                        bgGradient={selected ? preset.gradient : undefined}
+                        bg={selected ? undefined : preset.tint}
+                        color={selected ? 'white' : preset.color}
+                        boxShadow={selected ? `0 2px 8px ${preset.tint}` : 'none'}
                         transition="all .2s ease"
                       >
                         <Icon as={preset.icon} boxSize={4} weight={selected ? 'fill' : 'duotone'} />
                       </Flex>
-                      <Text fontSize="xs" fontWeight={750} lineHeight={1.2}>
+                      <Text
+                        fontSize="xs"
+                        fontWeight={750}
+                        lineHeight={1.2}
+                        color={selected ? preset.color : 'var(--pb-ink)'}
+                      >
                         {t(`household.expenseModal.quick.${preset.key}.label`)}
                       </Text>
                     </Box>
