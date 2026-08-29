@@ -344,7 +344,7 @@ export default function HouseholdHeader({
             </Box>
           </HStack>
 
-          {/* Mobile Buttons */}
+          {/* Mobile: notifications + manage only (Add Expense moved below header) */}
           <HStack spacing={2} display={{ base: 'flex', sm: 'none' }} flexShrink={0}>
             <Flex
               as="button"
@@ -414,9 +414,8 @@ export default function HouseholdHeader({
           </HStack>
         </Flex>
 
-        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
+        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0} display={{ base: 'none', sm: 'flex' }}>
           <Button
-            display={{ base: 'none', sm: 'inline-flex' }}
             aria-label={t('household.notifications.openAria', {
               count: formatNumber(household.unreadNotificationCount),
             })}
@@ -467,7 +466,6 @@ export default function HouseholdHeader({
           </Button>
           {household.currentMemberRole === 'OWNER' && (
             <Button
-              display={{ base: 'none', sm: 'inline-flex' }}
               aria-label={t('household.header.manageAria', { name: household.name })}
               leftIcon={<Icon as={Gear} boxSize={4} />}
               onClick={onManage}
@@ -491,7 +489,6 @@ export default function HouseholdHeader({
           <Button
             leftIcon={<Icon as={Plus} boxSize={4} />}
             onClick={onAddExpense}
-            flex={{ base: 1, sm: 'initial' }}
             h="44px"
             px={4}
             borderRadius="11px"
@@ -522,6 +519,7 @@ export default function HouseholdHeader({
           </Button>
         </Flex>
       </Flex>
+
 
       <Grid
         position="relative"

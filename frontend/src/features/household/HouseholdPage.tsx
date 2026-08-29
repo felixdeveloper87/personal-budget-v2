@@ -834,6 +834,35 @@ export default function HouseholdPage() {
           onNotifications={notificationsModal.onOpen}
         />
 
+        {/* Mobile-only Add Expense button — below the header */}
+        <Button
+          display={{ base: 'flex', sm: 'none' }}
+          leftIcon={<Icon as={Plus} boxSize={5} />}
+          onClick={openNewExpense}
+          w="full"
+          h="48px"
+          borderRadius="14px"
+          bgGradient="linear(135deg, #4F7396, #3D6080, #5D849F, #4F7396)"
+          backgroundSize="200% auto"
+          color="rgba(235,242,248,0.95)"
+          border="1px solid rgba(71,112,148,0.45)"
+          fontFamily="var(--pb-mono)"
+          fontSize="10px"
+          fontWeight={700}
+          letterSpacing="0.08em"
+          textTransform="uppercase"
+          boxShadow="0 3px 14px rgba(71,112,148,0.25)"
+          _hover={{
+            bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
+            boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
+            transform: 'translateY(-1px)',
+          }}
+          _active={{ transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
+          _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
+          transition="all 0.3s ease"
+        >
+          {t('household.header.addExpense')}
+        </Button>
 
 
         {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
@@ -1345,7 +1374,7 @@ function BalancesOverviewModal({
 
 const AVATAR_GRADIENTS = [
   'linear(to-br, #EAB308, #B45309)', // Colonel Mustard
-  'linear(to-br, #b7c0cbff, #aeb7c2ff)', // Mrs. White
+  'linear(to-br, #a6afbcff, #aeb7c2ff)', // Mrs. White
   'linear(to-br, #10B981, #064E3B)', // Mr. Green
   'linear(to-br, #0EA5E9, #1E3A8A)', // Mrs. Peacock
   'linear(to-br, #A855F7, #581C87)', // Professor Plum
