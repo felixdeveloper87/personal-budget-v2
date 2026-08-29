@@ -80,20 +80,11 @@ export default function HouseholdHeader({
     return byMonth
   }, [currentMonthKey, household.expenses, household.monthSpend, household.monthSummaries])
 
-  const oldestMonthKey = useMemo(() => {
-    const keys = [...summaries.keys()]
-      .filter((key) => key <= currentMonthKey)
-      .sort()
-    return keys[0] ?? currentMonthKey
-  }, [currentMonthKey, summaries])
+  // Allow unbounded past navigation
 
   const selectedMonthKey = monthKey(selectedMonth)
 
-  useEffect(() => {
-    if (selectedMonthKey < oldestMonthKey || selectedMonthKey > currentMonthKey) {
-      setSelectedMonth(currentMonth)
-    }
-  }, [currentMonth, currentMonthKey, oldestMonthKey, selectedMonthKey])
+
 
   const selectedSummary = summaries.get(selectedMonthKey) ?? {
     month: selectedMonthKey,
@@ -101,8 +92,8 @@ export default function HouseholdHeader({
     expenseCount: 0,
   }
 
-  const canNavigatePrevious = selectedMonthKey > oldestMonthKey
-  const canNavigateNext = selectedMonthKey < currentMonthKey
+  const canNavigatePrevious = true
+  const canNavigateNext = true
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     const candidate = new Date(
@@ -110,8 +101,6 @@ export default function HouseholdHeader({
       selectedMonth.getMonth() + (direction === 'prev' ? -1 : 1),
       1,
     )
-    const candidateKey = monthKey(candidate)
-    if (candidateKey < oldestMonthKey || candidateKey > currentMonthKey) return
     setSelectedMonth(candidate)
   }
 
@@ -376,8 +365,6 @@ export default function HouseholdHeader({
           selectedDate={selectedMonth}
           onDateChange={(date) => {
             const candidate = monthStart(date)
-            const candidateKey = monthKey(candidate)
-            if (candidateKey < oldestMonthKey || candidateKey > currentMonthKey) return
             setSelectedMonth(candidate)
           }}
           onPeriodChange={() => undefined}
@@ -388,10 +375,7 @@ export default function HouseholdHeader({
           showPeriodSelector={false}
           canNavigatePrevious={canNavigatePrevious}
           canNavigateNext={canNavigateNext}
-          isDateDisabled={(date) => {
-            const candidateKey = monthKey(date)
-            return candidateKey < oldestMonthKey || candidateKey > currentMonthKey
-          }}
+          isDateDisabled={() => false}
         />
       </Box>
 
