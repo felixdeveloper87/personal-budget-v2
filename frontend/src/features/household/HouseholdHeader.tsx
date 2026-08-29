@@ -13,6 +13,7 @@ import PeriodNavigator from '../../components/summary/PeriodNavigator'
 import {
   Bell,
   CheckCircle2,
+  ChevronRight,
   Gear,
   Home,
   Plus,
@@ -249,10 +250,10 @@ export default function HouseholdHeader({
               >
                 {household.name}
               </Text>
-              <HStack 
+              <HStack
                 as="button"
                 onClick={onBalances}
-                mt={1.5} 
+                mt={1.5}
                 spacing={-2}
                 cursor="pointer"
                 transition="all 0.2s"
@@ -308,6 +309,19 @@ export default function HouseholdHeader({
                     +{household.members.length - 5}
                   </Flex>
                 )}
+                <Flex
+                  ml={3}
+                  w="22px"
+                  h="22px"
+                  borderRadius="full"
+                  bg="var(--pb-summary-line)"
+                  color="var(--pb-summary-ink-soft)"
+                  align="center"
+                  justify="center"
+                  border="1px solid var(--pb-summary-line)"
+                >
+                  <Icon as={ChevronRight} boxSize={3.5} weight="bold" />
+                </Flex>
               </HStack>
             </Box>
           </HStack>
