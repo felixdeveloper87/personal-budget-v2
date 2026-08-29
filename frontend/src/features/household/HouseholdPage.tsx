@@ -3774,8 +3774,23 @@ function ExpenseModal({
                 scrollSnapType="x proximity"
                 aria-label={t('household.expenseModal.quickTitle')}
                 sx={{
-                  scrollbarWidth: 'none',
-                  '&::-webkit-scrollbar': { display: 'none' },
+                  /* Elegant thin scrollbar */
+                  '&::-webkit-scrollbar': {
+                    height: '6px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'transparent',
+                    my: 2,
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: 'var(--pb-hair-2)',
+                    borderRadius: '8px',
+                  },
+                  '&::-webkit-scrollbar-thumb:hover': {
+                    background: 'var(--pb-ink-faint)',
+                  },
+                  scrollbarWidth: 'thin',
+                  scrollbarColor: 'var(--pb-hair-2) transparent',
                 }}
               >
                 {HOUSEHOLD_EXPENSE_PRESETS.map((preset) => {
