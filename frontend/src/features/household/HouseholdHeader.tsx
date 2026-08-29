@@ -33,11 +33,12 @@ const pulseAnim = keyframes`
 `
 
 const AVATAR_GRADIENTS = [
-  'linear(to-br, var(--pb-forest), var(--pb-forest-2))',
-  'linear(to-br, var(--pb-coral), #E53E3E)',
-  'linear(to-br, #3182CE, #2B6CB0)',
-  'linear(to-br, #D69E2E, #DD6B20)',
-  'linear(to-br, #805AD5, #553C9A)',
+  'linear(to-br, #EAB308, #B45309)', // Colonel Mustard
+  'linear(to-br, #EF4444, #991B1B)', // Miss Scarlett
+  'linear(to-br, #10B981, #064E3B)', // Mr. Green
+  'linear(to-br, #0EA5E9, #1E3A8A)', // Mrs. Peacock
+  'linear(to-br, #A855F7, #581C87)', // Professor Plum
+  'linear(to-br, #94A3B8, #475569)', // Mrs. White
 ]
 
 interface HouseholdHeaderProps {
