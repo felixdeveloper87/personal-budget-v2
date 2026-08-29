@@ -114,10 +114,7 @@ import {
   AttachmentPicker,
 } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
-import {
-  HouseholdNotificationsCard,
-  HouseholdNotificationsModal,
-} from './HouseholdNotifications'
+import { HouseholdNotificationsModal } from './HouseholdNotifications'
 
 const CATEGORIES = [
   'Electricity',
@@ -773,16 +770,7 @@ export default function HouseholdPage() {
           onNotifications={notificationsModal.onOpen}
         />
 
-        <HouseholdNotificationsCard
-          notifications={household.notifications}
-          unreadCount={household.unreadNotificationCount}
-          onOpenAll={notificationsModal.onOpen}
-          onMarkAllRead={markNotificationsRead}
-          isMarkingRead={busyAction === 'notifications-read'}
-          onOpenExpenses={openNotificationExpenses}
-          onOpenPayments={openNotificationPayments}
-          onOpenCleaning={openNotificationCleaning}
-        />
+
 
         {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
           <SimpleGrid
