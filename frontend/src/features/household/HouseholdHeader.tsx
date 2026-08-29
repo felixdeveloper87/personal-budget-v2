@@ -248,7 +248,7 @@ export default function HouseholdHeader({
                 {household.name}
               </Text>
               <HStack mt={1.5} spacing={-2}>
-                {household.members.slice(0, 4).map((member, i) => {
+                {household.members.slice(0, 5).map((member, i) => {
                   const initials = member.name
                     .split(' ')
                     .filter(Boolean)
@@ -278,7 +278,7 @@ export default function HouseholdHeader({
                     </Flex>
                   )
                 })}
-                {household.members.length > 4 && (
+                {household.members.length > 5 && (
                   <Flex
                     w="28px"
                     h="28px"
@@ -294,7 +294,7 @@ export default function HouseholdHeader({
                     fontFamily="var(--pb-mono)"
                     zIndex={0}
                   >
-                    +{household.members.length - 4}
+                    +{household.members.length - 5}
                   </Flex>
                 )}
               </HStack>
@@ -526,7 +526,7 @@ export default function HouseholdHeader({
                 onPeriodChange={() => undefined}
                 onNavigatePeriod={navigateMonth}
                 onGoToToday={() => setSelectedMonth(currentMonth)}
-                formatLabel={() => selectedMonthLabel.toLocaleUpperCase(locale)}
+                formatLabel={() => formatDate(selectedMonth, { month: 'short', year: '2-digit' }).toLocaleUpperCase(locale)}
                 isEmbedded
                 showPeriodSelector={false}
                 canNavigatePrevious={canNavigatePrevious}

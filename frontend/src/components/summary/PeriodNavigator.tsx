@@ -299,7 +299,7 @@ export default function PeriodNavigator({
               selectedPeriod={selectedPeriod}
               onDateChange={onDateChange}
               label={formatLabel()}
-              hint={hint}
+              hint={isEmbedded ? null : hint}
               isDateDisabled={isDateDisabled}
             />
 
@@ -323,7 +323,7 @@ export default function PeriodNavigator({
           </HStack>
 
           {/* Today — pill with label on desktop, icon-only on mobile */}
-          {!isCurrent && (
+          {!isCurrent && !isEmbedded && (
             <>
               <Button
                 display={{ base: 'none', md: 'inline-flex' }}
