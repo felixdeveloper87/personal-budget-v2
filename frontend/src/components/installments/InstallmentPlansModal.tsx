@@ -143,7 +143,7 @@ export default function InstallmentPlansModal({
             }
           />
         }
-        contentProps={{ bg: surfaceBg }}
+        contentProps={{ bg: bodyBg }}
       >
         <Box flex="1" bg={bodyBg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
           {plans.length === 0 ? (
