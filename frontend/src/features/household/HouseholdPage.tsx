@@ -280,6 +280,7 @@ export default function HouseholdPage() {
         <Box id="household-cleaning" scrollMarginTop="90px">
           <CleaningRotationCard
             rotation={household.cleaningRotation}
+            members={household.members}
             currentMemberId={household.currentMemberId}
             busyDutyKey={
               busyAction?.startsWith('cleaning-duty:')

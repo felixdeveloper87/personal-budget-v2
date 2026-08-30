@@ -1,19 +1,22 @@
 import { Badge, Box, Button, Flex, Grid, HStack, Icon, Text, VStack, useDisclosure } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
-import type { HouseholdCleaningRotation } from '../../../types'
+import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { CheckCircle2, Clock, Gear, List, Repeat, Sparkles } from '../../../components/ui/icons'
 import { CLEANING_DUTIES, type DisplayedCleaningDuty } from './cleaningConfig'
 import { CleaningDutiesModal } from './CleaningDutiesModal'
 import { today } from '../householdDates'
+import { householdAvatarGradient } from '../householdAvatar'
 
 export function CleaningRotationCard({
   rotation,
+  members,
   currentMemberId,
   busyDutyKey,
   onManage,
   onToggleDuty,
 }: {
   rotation: HouseholdCleaningRotation
+  members?: HouseholdMember[]
   currentMemberId: number
   busyDutyKey: string | null
   onManage: () => void
@@ -295,28 +298,61 @@ export function CleaningRotationCard({
                     </HStack>
                   </HStack>
 
-                  <Box minW={0}>
-                    <HStack spacing={2} flexWrap="wrap">
-                      <Text
-                        fontFamily="var(--pb-serif)"
-                        fontSize={{ base: '2xl', md: '3xl' }}
-                        fontWeight={500}
-                        lineHeight={1}
-                        letterSpacing="-0.03em"
-                        color="var(--pb-summary-ink)"
-                        noOfLines={1}
-                      >
-                        {currentIsUser ? t('household.cleaning.yourTurn') : current.assignedMemberName}
-                      </Text>
-                    </HStack>
-                    <Text mt={1.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
-                      {currentIsUser
-                        ? t('household.cleaning.yourTurnDetail')
-                        : t('household.cleaning.memberTurnDetail', {
-                          name: current.assignedMemberName,
-                        })}
-                    </Text>
-                  </Box>
+                  {(() => {
+                    const currentMemberIndex = members?.findIndex(
+                      (member) => member.id === current.assignedMemberId,
+                    ) ?? -1
+                    const currentMemberGradient = householdAvatarGradient(
+                      currentMemberIndex,
+                      current.assignedMemberId,
+                    )
+                    const currentInitial = (current.assignedMemberName || '?').charAt(0).toUpperCase()
+
+                    return (
+                      <HStack spacing={3.5} minW={0} align="center">
+                        <Flex
+                          aria-hidden="true"
+                          w={{ base: '38px', md: '44px' }}
+                          h={{ base: '38px', md: '44px' }}
+                          flexShrink={0}
+                          align="center"
+                          justify="center"
+                          borderRadius="12px"
+                          bgGradient={currentMemberGradient}
+                          color="white"
+                          fontFamily="var(--pb-serif)"
+                          fontWeight={700}
+                          fontSize={{ base: 'md', md: 'lg' }}
+                          border="1px solid rgba(255, 255, 255, 0.24)"
+                          boxShadow="0 2px 8px rgba(0, 0, 0, 0.14)"
+                        >
+                          {currentInitial}
+                        </Flex>
+                        <Box minW={0} flex={1}>
+                          <HStack spacing={2} flexWrap="wrap">
+                            <Text
+                              fontFamily="var(--pb-serif)"
+                              fontSize={{ base: '2xl', md: '3xl' }}
+                              fontWeight={500}
+                              lineHeight={1}
+                              letterSpacing="-0.03em"
+                              color="var(--pb-summary-ink)"
+                              noOfLines={1}
+                            >
+                              {currentIsUser ? t('household.cleaning.yourTurn') : current.assignedMemberName}
+                            </Text>
+                          </HStack>
+                          <Text mt={1} color="var(--pb-summary-ink-soft)" fontSize="sm">
+                            {currentIsUser
+                              ? t('household.cleaning.yourTurnDetail')
+                              : t('household.cleaning.memberTurnDetail', {
+                                name: current.assignedMemberName,
+                              })}
+                          </Text>
+                        </Box>
+                      </HStack>
+                    )
+                  })()}
 
                   {currentIsComplete && (
                     <HStack
@@ -412,59 +448,71 @@ export function CleaningRotationCard({
                 </Box>
               ) : (
                 <VStack align="stretch" spacing={2}>
-                  {rotation.upcomingWeeks.map((assignment, index) => (
-                    <Flex
-                      key={assignment.id}
-                      align="center"
-                      justify="space-between"
-                      gap={3}
-                      px={3}
-                      py={2.5}
-                      borderRadius="12px"
-                      bg="var(--pb-surface)"
-                      border="1px solid var(--pb-hair)"
-                    >
-                      <HStack minW={0} spacing={2.5}>
-                        <Flex
-                          w={7}
-                          h={7}
-                          flexShrink={0}
-                          align="center"
-                          justify="center"
-                          borderRadius="full"
-                          bg="var(--pb-tint-green)"
-                          color="var(--pb-forest-2)"
-                          fontFamily="var(--pb-mono)"
-                          fontSize="8px"
-                          fontWeight={700}
-                        >
-                          {formatNumber(index + 1)}
-                        </Flex>
-                        <Box minW={0}>
-                          <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
-                            {assignment.assignedMemberId === currentMemberId
-                              ? t('household.common.you')
-                              : assignment.assignedMemberName}
-                          </Text>
-                          <Text color="var(--pb-ink-faint)" fontSize="2xs">
-                            {displayDate(assignment.weekStart)}
-                          </Text>
-                        </Box>
-                      </HStack>
-                      {assignment.assignedMemberId === currentMemberId && (
-                        <Badge
-                          flexShrink={0}
-                          bg="var(--pb-tint-income)"
-                          color="var(--pb-income)"
-                          borderRadius="full"
-                          px={2}
-                          textTransform="none"
-                        >
-                          {t('household.cleaning.yourTurn')}
-                        </Badge>
-                      )}
-                    </Flex>
-                  ))}
+                  {rotation.upcomingWeeks.map((assignment, index) => {
+                    const memberIndex = members?.findIndex(
+                      (member) => member.id === assignment.assignedMemberId,
+                    ) ?? -1
+                    const gradient = householdAvatarGradient(
+                      memberIndex,
+                      assignment.assignedMemberId,
+                    )
+
+                    return (
+                      <Flex
+                        key={assignment.id}
+                        align="center"
+                        justify="space-between"
+                        gap={3}
+                        px={3}
+                        py={2.5}
+                        borderRadius="12px"
+                        bg="var(--pb-surface)"
+                        border="1px solid var(--pb-hair)"
+                      >
+                        <HStack minW={0} spacing={2.5}>
+                          <Flex
+                            w={7}
+                            h={7}
+                            flexShrink={0}
+                            align="center"
+                            justify="center"
+                            borderRadius="full"
+                            bgGradient={gradient}
+                            color="white"
+                            border="1px solid rgba(255, 255, 255, 0.24)"
+                            boxShadow="0 1px 4px rgba(0, 0, 0, 0.14)"
+                            fontFamily="var(--pb-mono)"
+                            fontSize="9px"
+                            fontWeight={800}
+                          >
+                            {formatNumber(index + 1)}
+                          </Flex>
+                          <Box minW={0}>
+                            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
+                              {assignment.assignedMemberId === currentMemberId
+                                ? t('household.common.you')
+                                : assignment.assignedMemberName}
+                            </Text>
+                            <Text color="var(--pb-ink-faint)" fontSize="2xs">
+                              {displayDate(assignment.weekStart)}
+                            </Text>
+                          </Box>
+                        </HStack>
+                        {assignment.assignedMemberId === currentMemberId && (
+                          <Badge
+                            flexShrink={0}
+                            bg="var(--pb-tint-income)"
+                            color="var(--pb-income)"
+                            borderRadius="full"
+                            px={2}
+                            textTransform="none"
+                          >
+                            {t('household.cleaning.yourTurn')}
+                          </Badge>
+                        )}
+                      </Flex>
+                    )
+                  })}
                 </VStack>
               )}
             </Box>
