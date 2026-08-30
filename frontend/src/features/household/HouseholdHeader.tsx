@@ -26,6 +26,7 @@ import type {
 } from '../../types'
 import { useI18n } from '../../i18n'
 import { keyframes } from '@emotion/react'
+import { HOUSEHOLD_AVATAR_GRADIENTS } from './householdAvatar'
 
 const pulseAnim = keyframes`
   0%, 100% { opacity: 0.7; transform: translateX(0); }
@@ -41,15 +42,6 @@ const floatAnim = keyframes`
   0%, 100% { transform: translateY(0px); box-shadow: 0 3px 14px rgba(71,112,148,0.25); }
   50% { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(71,112,148,0.38); }
 `
-
-const AVATAR_GRADIENTS = [
-  'linear(to-br, #EAB308, #B45309)', // Colonel Mustard
-  'linear(to-br, #94A3B8, #475569)', // Mrs. White
-  'linear(to-br, #10B981, #064E3B)', // Mr. Green
-  'linear(to-br, #0EA5E9, #1E3A8A)', // Mrs. Peacock
-  'linear(to-br, #A855F7, #581C87)', // Professor Plum
-  'linear(to-br, #EF4444, #991B1B)', // Miss Scarlett
-]
 
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
@@ -292,7 +284,9 @@ export default function HouseholdHeader({
                       w="28px"
                       h="28px"
                       borderRadius="full"
-                      bgGradient={AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length]}
+                      bgGradient={HOUSEHOLD_AVATAR_GRADIENTS[
+                        i % HOUSEHOLD_AVATAR_GRADIENTS.length
+                      ]}
                       color="white"
                       border="2px solid var(--pb-summary-panel)"
                       boxShadow="0 2px 4px rgba(0,0,0,0.1)"
