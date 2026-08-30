@@ -586,7 +586,7 @@ export default function HouseholdHeader({
             </HStack>
 
             <Box minW={0} maxW="190px" flexShrink={0}>
-              <PeriodNavigator
+            <PeriodNavigator
                 selectedPeriod="month"
                 selectedDate={selectedMonth}
                 onDateChange={(date) => {

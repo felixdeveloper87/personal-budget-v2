@@ -64,75 +64,72 @@ export function CleaningRotationCard({
       >
         <Flex
           direction={{ base: 'column', sm: 'row' }}
-          justify="space-between"
           align={{ base: 'stretch', sm: 'center' }}
-          gap={{ base: 4, sm: 4 }}
-          px={{ base: 5, md: 6 }}
-          py={{ base: 5, md: 5 }}
-          bgGradient="linear(to-br, var(--pb-forest-2), var(--pb-forest))"
-          color="white"
+          justify="space-between"
+          gap={3}
+          px={{ base: 3.5, sm: 4, md: 5 }}
+          py={{ base: 3.5, md: 4 }}
+          borderBottom="1px solid var(--pb-hair)"
+          bg="var(--pb-surface)"
         >
-          <HStack spacing={4} minW={0}>
+          <HStack spacing={3} minW={0}>
             <Flex
-              w={{ base: 12, md: 14 }}
-              h={{ base: 12, md: 14 }}
+              w={{ base: 10, md: 11 }}
+              h={{ base: 10, md: 11 }}
               flexShrink={0}
               align="center"
               justify="center"
-              borderRadius="16px"
-              bg="rgba(255,255,255,0.15)"
+              borderRadius="13px"
+              bg="var(--pb-tint-gold)"
               color="var(--pb-gold)"
-              backdropFilter="blur(10px)"
-              boxShadow="0 4px 12px rgba(0,0,0,0.1)"
+              border="1px solid var(--pb-hair)"
             >
-              <Icon as={Sparkles} boxSize={6} weight="duotone" />
+              <Icon as={Sparkles} boxSize={5} weight="duotone" />
             </Flex>
             <Box minW={0}>
               <Text
                 fontFamily="var(--pb-mono)"
-                fontSize="10px"
-                fontWeight={700}
-                letterSpacing="0.16em"
+                fontSize="9px"
+                fontWeight={600}
+                letterSpacing="0.15em"
                 textTransform="uppercase"
-                color="rgba(255,255,255,0.7)"
+                color="var(--pb-ink-faint)"
               >
                 {t('household.cleaning.eyebrow')}
               </Text>
               <Text
                 mt={0.5}
                 fontFamily="var(--pb-serif)"
-                fontSize={{ base: 'xl', md: '2xl' }}
-                fontWeight={600}
+                fontSize={{ base: 'lg', md: 'xl' }}
+                fontWeight={500}
                 lineHeight={1.1}
-                color="white"
-                textShadow="0 1px 2px rgba(0,0,0,0.1)"
+                color="var(--pb-ink)"
               >
                 {t('household.cleaning.title')}
               </Text>
-              <Text mt={1} color="rgba(255,255,255,0.85)" fontSize="sm" noOfLines={1}>
+              <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
                 {t('household.cleaning.description')}
               </Text>
             </Box>
           </HStack>
           {rotation.canManage && (
             <Button
-              leftIcon={<Icon as={Gear} boxSize={4} />}
-              w={{ base: 'full', sm: 'auto' }}
-              h="44px"
-              px={4}
-              borderRadius="12px"
-              bg="rgba(255,255,255,0.15)"
-              color="white"
+              alignSelf={{ base: 'flex-start', sm: 'center' }}
+              leftIcon={<Icon as={Gear} boxSize={3.5} />}
+              h="32px"
+              px={3}
+              borderRadius="full"
+              bg="var(--pb-surface)"
+              color="var(--pb-ink-soft)"
+              border="1px solid var(--pb-hair)"
               fontFamily="var(--pb-mono)"
-              fontSize="10px"
+              fontSize="9px"
               fontWeight={700}
               letterSpacing="0.05em"
               textTransform="uppercase"
-              backdropFilter="blur(10px)"
-              border="none"
               onClick={onManage}
-              _hover={{ bg: 'rgba(255,255,255,0.25)' }}
-              _active={{ bg: 'rgba(255,255,255,0.3)' }}
+              _hover={{ bg: 'var(--pb-surface-2)', color: 'var(--pb-ink)' }}
+              _active={{ bg: 'var(--pb-surface-3)' }}
             >
               {rotation.configured
                 ? t('household.common.manage')
