@@ -220,10 +220,8 @@ export default function HouseholdPage() {
             bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
             animation: `${shimmerAnim} 1.4s linear infinite`,
             boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
-            transform: 'translateY(-1px)',
             transform: 'scale(1.02)',
           }}
-          _active={{ transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
           _active={{ transform: 'scale(0.98)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
           _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
           transition="all 0.3s ease"
