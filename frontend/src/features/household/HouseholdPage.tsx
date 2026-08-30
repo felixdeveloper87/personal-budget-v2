@@ -74,6 +74,7 @@ import type {
   HouseholdSettlement,
 } from '../../types'
 import {
+  Building,
   Check,
   Broom,
   Calendar,
@@ -97,12 +98,15 @@ import {
   ReceiptText,
   RefreshCw,
   Repeat,
+  ShoppingCart,
   Sparkles,
+  Tag,
   ToiletPaper,
   Trash2,
   TrendingDown,
   TrendingUp,
   Upload,
+  Users,
   Wallet,
   WifiHigh,
   X,
@@ -1613,6 +1617,33 @@ function MembersOverviewModal({
   )
 }
 
+function getHouseholdCategoryConfig(category?: string) {
+  switch (category) {
+    case 'Electricity':
+      return { icon: Zap, color: 'var(--pb-gold)', bg: 'var(--pb-tint-gold)' }
+    case 'Water':
+      return { icon: Drop, color: '#0284c7', bg: 'rgba(2, 132, 199, 0.12)' }
+    case 'Gas':
+      return { icon: Flame, color: 'var(--pb-coral)', bg: 'var(--pb-tint-coral)' }
+    case 'Internet':
+      return { icon: WifiHigh, color: '#7c3aed', bg: 'rgba(124, 58, 237, 0.12)' }
+    case 'Groceries':
+      return { icon: ShoppingCart, color: 'var(--pb-forest-2)', bg: 'var(--pb-tint-green)' }
+    case 'Cleaning':
+      return { icon: Broom, color: '#0d9488', bg: 'rgba(13, 148, 136, 0.12)' }
+    case 'Rent':
+      return { icon: Home, color: '#4f46e5', bg: 'rgba(79, 70, 229, 0.12)' }
+    case 'Council tax':
+      return { icon: Building, color: 'var(--pb-ink-soft)', bg: 'var(--pb-surface-3)' }
+    case 'Repairs':
+      return { icon: Gear, color: 'var(--pb-gold)', bg: 'var(--pb-tint-gold)' }
+    case 'Garden':
+      return { icon: Plant, color: 'var(--pb-income)', bg: 'var(--pb-tint-income)' }
+    default:
+      return { icon: Tag, color: 'var(--pb-ink-soft)', bg: 'var(--pb-surface-3)' }
+  }
+}
+
 function RecentExpensesModal({
   isOpen,
   onClose,
@@ -1752,7 +1783,7 @@ function RecentExpensesModal({
                   >
                     {monthLabel}
                   </Text>
-                  <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
+                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
                     {expenses.map((expense) => {
                       const currentShare = expense.shares.find(
                         (share) => share.memberId === household.currentMemberId,
@@ -1768,6 +1799,7 @@ function RecentExpensesModal({
                         expense.payerMemberId,
                       )
                       const payerInitial = (expense.payerName || '?').charAt(0).toUpperCase()
+                      const categoryCfg = getHouseholdCategoryConfig(expense.category)
 
                       return (
                         <Stack
@@ -1777,190 +1809,200 @@ function RecentExpensesModal({
                           direction="column"
                           gap={0}
                           h="full"
-                          p={{ base: 4, sm: 5 }}
-                          pl={{ base: 5, sm: 6 }}
+                          p={{ base: 3.5, sm: 4 }}
+                          pl={{ base: 4, sm: 4.5 }}
                           borderRadius="16px"
                           border="1px solid var(--pb-hair)"
                           bg="var(--pb-surface)"
-                          boxShadow="var(--pb-shadow)"
-                          transition="border-color 0.2s ease, box-shadow 0.2s ease"
+                          boxShadow="0 1px 3px rgba(18, 45, 36, 0.04)"
+                          transition="all 0.2s cubic-bezier(0.16, 1, 0.3, 1)"
                           _hover={{
                             borderColor: 'var(--pb-hair-2)',
-                            boxShadow: '0 8px 24px -18px rgba(15, 23, 42, 0.48)',
+                            boxShadow: '0 8px 24px -8px rgba(18, 45, 36, 0.12)',
+                            transform: 'translateY(-1px)',
                           }}
                         >
                           <Box
                             aria-hidden="true"
                             position="absolute"
-                            insetInlineStart={0}
-                            top={0}
-                            bottom={0}
-                            w="3px"
+                            left="0"
+                            top="12px"
+                            bottom="12px"
+                            w="3.5px"
+                            borderRadius="full"
                             bgGradient={payerGradient}
                           />
-                          <Flex align="flex-start" justify="space-between" gap={4} pb={3}>
-                            <Box minW={0} flex={1}>
-                              <HStack spacing={2} minW={0} align="center">
+
+                          {/* Header: Category Icon + Description & Payer + Total */}
+                          <Flex align="flex-start" justify="space-between" gap={3}>
+                            <HStack spacing={3} minW={0} flex={1} align="center">
+                              <Flex
+                                w="38px"
+                                h="38px"
+                                flexShrink={0}
+                                align="center"
+                                justify="center"
+                                borderRadius="11px"
+                                bg={categoryCfg.bg}
+                                color={categoryCfg.color}
+                                border="1px solid var(--pb-hair)"
+                              >
+                                <Icon as={categoryCfg.icon} boxSize={5} weight="duotone" />
+                              </Flex>
+                              <Box minW={0} flex={1}>
                                 <Text
-                                  minW={0}
-                                  flexShrink={1}
-                                  fontSize="md"
-                                  fontWeight={700}
-                                  lineHeight={1.25}
+                                  fontSize="sm"
+                                  fontWeight={600}
+                                  lineHeight="1.25"
                                   color="var(--pb-ink)"
                                   noOfLines={1}
                                 >
                                   {expense.description}
                                 </Text>
-                                <HStack
-                                  spacing={1.5}
-                                  minW={0}
-                                  maxW={{ base: '145px', sm: '200px' }}
-                                  flexShrink={1}
-                                  py={0.5}
-                                  pe={2}
-                                  ps={0.5}
-                                  borderRadius="full"
-                                  border="1px solid var(--pb-hair)"
-                                  bg="var(--pb-surface-2)"
-                                >
-                                  <Flex
-                                    aria-hidden="true"
-                                    w="20px"
-                                    h="20px"
-                                    flexShrink={0}
-                                    align="center"
-                                    justify="center"
+                                <HStack spacing={1.5} mt={0.5} align="center" minW={0}>
+                                  <HStack
+                                    spacing={1}
+                                    py="1px"
+                                    px={1.5}
                                     borderRadius="full"
-                                    bgGradient={payerGradient}
-                                    color="white"
-                                    border="1px solid rgba(255, 255, 255, 0.24)"
-                                    boxShadow="0 1px 4px rgba(0, 0, 0, 0.14)"
-                                    fontFamily="var(--pb-mono)"
-                                    fontSize="8px"
-                                    fontWeight={800}
+                                    bg="var(--pb-surface-2)"
+                                    border="1px solid var(--pb-hair)"
+                                    maxW="140px"
                                   >
-                                    {payerInitial}
-                                  </Flex>
-                                  <Text
-                                    minW={0}
-                                    color="var(--pb-ink-soft)"
-                                    fontSize="xs"
-                                    fontWeight={700}
-                                    noOfLines={1}
-                                  >
-                                    {t('household.expenses.paidBy', {
-                                      name: expense.payerName,
-                                    })}
-                                  </Text>
+                                    <Flex
+                                      aria-hidden="true"
+                                      w="14px"
+                                      h="14px"
+                                      flexShrink={0}
+                                      align="center"
+                                      justify="center"
+                                      borderRadius="full"
+                                      bgGradient={payerGradient}
+                                      color="white"
+                                      fontFamily="var(--pb-mono)"
+                                      fontSize="7px"
+                                      fontWeight={800}
+                                    >
+                                      {payerInitial}
+                                    </Flex>
+                                    <Text
+                                      color="var(--pb-ink-soft)"
+                                      fontSize="2xs"
+                                      fontWeight={500}
+                                      noOfLines={1}
+                                    >
+                                      {t('household.expenses.paidBy', {
+                                        name: expense.payerName,
+                                      })}
+                                    </Text>
+                                  </HStack>
                                 </HStack>
-                              </HStack>
-                            </Box>
-                            <Box flexShrink={0} textAlign="right" ps={{ base: 1, sm: 2 }}>
+                              </Box>
+                            </HStack>
+
+                            <VStack align="flex-end" spacing={0} flexShrink={0} ps={1}>
                               <Text
-                                fontFamily="var(--pb-mono)"
-                                fontSize="8px"
-                                fontWeight={700}
-                                letterSpacing="0.08em"
+                                fontSize="2xs"
+                                fontWeight={600}
+                                letterSpacing="0.06em"
                                 textTransform="uppercase"
                                 color="var(--pb-ink-faint)"
                               >
                                 {t('household.expenses.total')}
                               </Text>
                               <Text
-                                mt={1}
-                                fontFamily="var(--pb-serif)"
-                                fontSize={{ base: 'xl', sm: '2xl' }}
-                                fontWeight={500}
-                                lineHeight={1}
+                                mt="1px"
+                                fontSize={{ base: 'md', sm: 'lg' }}
+                                fontWeight={700}
+                                lineHeight={1.15}
                                 color="var(--pb-ink)"
                                 style={{ fontVariantNumeric: 'tabular-nums' }}
                               >
                                 {formatCurrency(expense.amount)}
                               </Text>
-                            </Box>
+                            </VStack>
                           </Flex>
 
-                          <HStack
-                            spacing={2}
-                            py={3}
+                          {/* Middle: Category Pill + Split info with Date */}
+                          <Flex
+                            align="center"
+                            justify="space-between"
+                            gap={2}
+                            mt={2.5}
+                            pt={2.5}
                             borderTop="1px solid var(--pb-hair)"
                             flexWrap="wrap"
                           >
-                            <Badge
-                              flexShrink={0}
-                              borderRadius="full"
-                              px={2.5}
-                              py={0.5}
-                              bg="var(--pb-tint-gold)"
-                              color="var(--pb-gold)"
-                              border="1px solid var(--pb-hair)"
-                              fontSize="10px"
-                              fontWeight={700}
-                              textTransform="none"
-                            >
-                              {t(
-                                `household.category.${expense.category}`,
-                                undefined,
-                                expense.category,
-                              )}
-                            </Badge>
-                            <Text
-                              color="var(--pb-ink-faint)"
-                              fontSize="xs"
-                              fontWeight={500}
-                              lineHeight={1.4}
-                            >
-                              {t(
-                                expense.shares.length === 1
-                                  ? 'household.expenses.shares.one'
-                                  : 'household.expenses.shares.other',
-                                {
-                                  date: formatDate(expense.expenseDate, {
-                                    day: 'numeric',
-                                    month: 'short',
-                                    year: 'numeric',
-                                  }),
-                                  count: formatNumber(expense.shares.length),
-                                },
-                              )}
-                            </Text>
-                          </HStack>
+                            <HStack spacing={2} minW={0} flexWrap="wrap">
+                              <Badge
+                                borderRadius="full"
+                                px={2}
+                                py={0.5}
+                                bg={categoryCfg.bg}
+                                color={categoryCfg.color}
+                                border="1px solid var(--pb-hair)"
+                                fontSize="2xs"
+                                fontWeight={600}
+                                textTransform="none"
+                              >
+                                {t(
+                                  `household.category.${expense.category}`,
+                                  undefined,
+                                  expense.category,
+                                )}
+                              </Badge>
+                              <HStack spacing={1} color="var(--pb-ink-faint)" fontSize="2xs" fontWeight={500}>
+                                <Icon as={Users} boxSize={3} weight="duotone" />
+                                <Text>
+                                  {t(
+                                    expense.shares.length === 1
+                                      ? 'household.expenses.shares.one'
+                                      : 'household.expenses.shares.other',
+                                    {
+                                      date: formatDate(expense.expenseDate, {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                      }),
+                                      count: formatNumber(expense.shares.length),
+                                    },
+                                  )}
+                                </Text>
+                              </HStack>
+                            </HStack>
+                          </Flex>
 
+                          {/* Footer: Your share + Actions */}
                           {hasFooter && (
                             <Flex
                               align="center"
                               justify="space-between"
-                              gap={3}
-                              pt={3}
+                              gap={2}
+                              pt={2.5}
                               mt="auto"
                               borderTop="1px solid var(--pb-hair)"
                             >
                               {currentShare ? (
                                 <HStack
-                                  spacing={2}
-                                  minW={0}
+                                  spacing={1.5}
                                   px={2.5}
-                                  py={1.5}
-                                  borderRadius="10px"
-                                  border="1px solid var(--pb-hair)"
+                                  py={1}
+                                  borderRadius="8px"
+                                  border="1px solid rgba(38, 115, 90, 0.18)"
                                   bg="var(--pb-tint-green)"
                                 >
                                   <Text
-                                    fontFamily="var(--pb-mono)"
-                                    fontSize="8px"
-                                    fontWeight={700}
-                                    letterSpacing="0.06em"
+                                    fontSize="2xs"
+                                    fontWeight={600}
+                                    letterSpacing="0.04em"
                                     textTransform="uppercase"
-                                    color="var(--pb-ink-faint)"
+                                    color="var(--pb-forest-2)"
                                   >
                                     {t('household.expenses.yourShare')}
                                   </Text>
                                   <Text
-                                    flexShrink={0}
-                                    fontFamily="var(--pb-serif)"
-                                    fontSize="md"
-                                    fontWeight={500}
+                                    fontSize="xs"
+                                    fontWeight={700}
                                     color="var(--pb-forest-2)"
                                     style={{ fontVariantNumeric: 'tabular-nums' }}
                                   >
@@ -1970,26 +2012,38 @@ function RecentExpensesModal({
                               ) : (
                                 <Box />
                               )}
-                              <HStack spacing={1} flexShrink={0}>
+
+                              <HStack spacing={1.5} flexShrink={0}>
                                 {canOpenProof && (
                                   <Button
                                     aria-label={t('household.expenses.proofAria', {
                                       description: expense.description,
                                     })}
-                                    h="34px"
+                                    size="xs"
+                                    h="28px"
                                     px={2.5}
-                                    borderRadius="10px"
-                                    border="1px solid var(--pb-hair)"
-                                    bg="var(--pb-surface-2)"
-                                    leftIcon={<Icon as={Upload} boxSize={3.5} />}
-                                    color="var(--pb-ink-soft)"
-                                    fontSize="xs"
+                                    borderRadius="8px"
+                                    variant="outline"
+                                    borderColor={attachmentCount > 0 ? 'var(--pb-forest-2)' : 'var(--pb-hair)'}
+                                    bg={attachmentCount > 0 ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
+                                    color={attachmentCount > 0 ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
+                                    leftIcon={
+                                      <Icon
+                                        as={attachmentCount > 0 ? ReceiptText : Upload}
+                                        boxSize={3.5}
+                                        weight={attachmentCount > 0 ? 'duotone' : 'bold'}
+                                      />
+                                    }
+                                    fontSize="2xs"
+                                    fontWeight={600}
                                     onClick={() => onOpenAttachments(expense.id)}
                                     _hover={{
-                                      borderColor: 'var(--pb-hair-2)',
+                                      borderColor: 'var(--pb-forest-2)',
                                       bg: 'var(--pb-tint-green)',
                                       color: 'var(--pb-forest-2)',
+                                      transform: 'translateY(-1px)',
                                     }}
+                                    _active={{ transform: 'translateY(0)' }}
                                   >
                                     {t('household.expenses.proof', {
                                       count: formatNumber(attachmentCount),
@@ -2002,18 +2056,23 @@ function RecentExpensesModal({
                                       description: expense.description,
                                     })}
                                     icon={<Icon as={Pencil} boxSize={3.5} />}
-                                    h="34px"
-                                    minW="34px"
-                                    borderRadius="10px"
-                                    border="1px solid var(--pb-hair)"
+                                    size="xs"
+                                    h="28px"
+                                    w="28px"
+                                    minW="28px"
+                                    borderRadius="8px"
+                                    variant="outline"
+                                    borderColor="var(--pb-hair)"
                                     bg="var(--pb-surface-2)"
                                     color="var(--pb-ink-soft)"
                                     onClick={() => onEditExpense(expense)}
                                     _hover={{
-                                      borderColor: 'var(--pb-hair-2)',
+                                      borderColor: 'var(--pb-forest-2)',
                                       bg: 'var(--pb-tint-green)',
                                       color: 'var(--pb-forest-2)',
+                                      transform: 'translateY(-1px)',
                                     }}
+                                    _active={{ transform: 'translateY(0)' }}
                                   />
                                 )}
                               </HStack>
