@@ -131,7 +131,7 @@ export function ExpenseModal({
   const amountIsValid = Number.isFinite(Number(amount)) && Number(amount) > 0
   const payerMemberId = expense?.payerMemberId ?? household.currentMemberId
   const payer = household.members.find((member) => member.id === payerMemberId)
-  const currencyMark = household.currency === 'GBP' ? 'Â£' : household.currency
+  const currencyMark = household.currency === 'GBP' ? '£' : household.currency
   const categoryOptions = CATEGORIES.includes(category as typeof CATEGORIES[number])
     ? CATEGORIES
     : [category, ...CATEGORIES]

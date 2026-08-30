@@ -62,7 +62,7 @@ export function CleaningRotationModal({
       })
       return {
         member,
-        range: `${shortDate(weekStart)} â€“ ${shortDate(weekEnd)}`,
+        range: `${shortDate(weekStart)} – ${shortDate(weekEnd)}`,
       }
     })
     : []

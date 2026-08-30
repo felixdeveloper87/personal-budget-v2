@@ -186,7 +186,7 @@ export default function HouseholdPage() {
           onNotifications={notificationsModal.onOpen}
         />
 
-        {/* Mobile-only Add Expense button â€” below the header */}
+        {/* Mobile-only Add Expense button — below the header */}
         <Button
           display={{ base: 'flex', sm: 'none' }}
           leftIcon={<Icon as={Plus} boxSize={5} />}

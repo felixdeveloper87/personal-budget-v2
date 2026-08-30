@@ -270,7 +270,7 @@ export function CleaningRotationCard({
                         )}
                       </HStack>
                       <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)">
-                        {displayDate(current.weekStart)} â€“ {displayDate(current.weekEnd)}
+                        {displayDate(current.weekStart)} – {displayDate(current.weekEnd)}
                       </Text>
                     </Box>
                     <HStack
