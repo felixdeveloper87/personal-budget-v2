@@ -24,6 +24,17 @@ import { PaymentsOverviewModal } from './settlements/PaymentsOverviewModal'
 import { SettlementModal } from './settlements/SettlementModal'
 import type { AttachmentTarget } from './household.types'
 import { useHouseholdPageController } from './hooks/useHouseholdPageController'
+import { keyframes } from '@emotion/react'
+
+const pulseGlow = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(71,112,148, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(71,112,148, 0); }
+`
+
+const shimmerAnim = keyframes`
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+`
 
 export default function HouseholdPage() {
   const { formatCurrency, formatNumber, t } = useI18n()
@@ -204,12 +215,16 @@ export default function HouseholdPage() {
           letterSpacing="0.08em"
           textTransform="uppercase"
           boxShadow="0 3px 14px rgba(71,112,148,0.25)"
+          animation={`${pulseGlow} 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite`}
           _hover={{
             bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
+            animation: `${shimmerAnim} 1.4s linear infinite`,
             boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
             transform: 'translateY(-1px)',
+            transform: 'scale(1.02)',
           }}
           _active={{ transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
+          _active={{ transform: 'scale(0.98)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
           _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
           transition="all 0.3s ease"
         >

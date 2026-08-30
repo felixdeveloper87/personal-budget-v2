@@ -41,6 +41,9 @@ const shimmerAnim = keyframes`
 const floatAnim = keyframes`
   0%, 100% { transform: translateY(0px); box-shadow: 0 3px 14px rgba(71,112,148,0.25); }
   50% { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(71,112,148,0.38); }
+const pulseGlow = keyframes`
+  0%, 100% { box-shadow: 0 0 0 0 rgba(71,112,148, 0.5); }
+  50% { box-shadow: 0 0 0 8px rgba(71,112,148, 0); }
 `
 
 interface HouseholdHeaderProps {
@@ -497,12 +500,14 @@ export default function HouseholdHeader({
             textTransform="uppercase"
             boxShadow="0 3px 14px rgba(71,112,148,0.25)"
             animation={`${floatAnim} 4s ease-in-out infinite`}
+            animation={`${pulseGlow} 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite`}
             transition="all 0.3s ease"
             _hover={{
               bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
               backgroundSize: '200% auto',
               animation: `${shimmerAnim} 1.4s linear infinite`,
               transform: 'translateY(-2px)',
+              transform: 'scale(1.02)',
               boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
               borderColor: 'rgba(123,163,192,0.7)',
             }}
