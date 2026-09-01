@@ -72,6 +72,7 @@ const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
   { label: 'Amazon Flex', category: 'Salary', icon: ShoppingBag, domain: 'flex.amazon.co.uk' },
   { label: 'Stuart',      category: 'Salary', icon: Car, domain: 'stuart.com' },
   { label: 'Evri',        category: 'Salary', icon: Car, domain: 'evri.com' },
+  { label: 'Royal Mail',  category: 'Salary', icon: Briefcase, domain: 'royalmail.com' },
 
   { label: 'Upwork',       category: 'Freelance', icon: Briefcase, domain: 'upwork.com' },
   { label: 'Fiverr',       category: 'Freelance', icon: Briefcase, domain: 'fiverr.com' },

@@ -54,6 +54,7 @@ const MERCHANT_DOMAINS: readonly MerchantDomainEntry[] = [
   { keys: ['vinted'], domain: 'vinted.co.uk' },
   { keys: ['ebay'], domain: 'ebay.co.uk' },
   { keys: ['etsy'], domain: 'etsy.com' },
+  { keys: ['royal mail', 'royalmail'], domain: 'royalmail.com' },
 ]
 
 const LOGO_DEV_TOKEN = import.meta.env.VITE_LOGO_DEV_TOKEN as string | undefined
