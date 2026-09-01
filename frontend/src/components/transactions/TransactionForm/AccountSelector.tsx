@@ -7,7 +7,7 @@ import {
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
-import AccountAvatar from '../../../features/accounts/components/AccountAvatar'
+import AccountAvatar from '../../accounts/AccountAvatar'
 import ChipCarousel from './ChipCarousel'
 import { FinancialAccount } from '../../../types'
 import { useI18n } from '../../../i18n'

@@ -7,7 +7,7 @@ import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 
 import { ConfirmDeleteDialog } from '../../components/ui'
-import AccountFormModal from '../../components/accounts/AccountFormModal'
+import AccountFormModal from './components/AccountFormModal'
 import { Plus, Wallet } from '../../components/ui/icons'
 
 import '../dashboard/theme/pb-tokens.css'

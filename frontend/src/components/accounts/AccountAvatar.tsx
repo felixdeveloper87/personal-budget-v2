@@ -1,7 +1,7 @@
-import type { FinancialAccount } from '../../../types'
-import { BankLogo, getBankMeta } from '../../../components/ui'
-import { accountColor, monogram } from '../data/accountVisual'
-import MonogramTile from './MonogramTile'
+import type { FinancialAccount } from '../../types'
+import { BankLogo, getBankMeta } from '../ui'
+import { accountColor, monogram } from '../../features/accounts/data/accountVisual'
+import MonogramTile from '../../features/accounts/components/MonogramTile'
 
 interface AccountAvatarProps {
   account: FinancialAccount

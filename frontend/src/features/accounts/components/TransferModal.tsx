@@ -32,7 +32,7 @@ import {
   Wallet,
 } from '../../../components/ui/icons'
 import { ToastService } from '../../../services/toast'
-import AccountAvatar from './AccountAvatar'
+import AccountAvatar from '../../../components/accounts/AccountAvatar'
 
 const today = () => {
   const now = new Date()

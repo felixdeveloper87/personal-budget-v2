@@ -1,4 +1,4 @@
-import type { AccountType } from '../../types'
+import type { AccountType } from '../../../types'
 
 export const ACCOUNT_LABELS: Record<AccountType, string> = {
   CURRENT: 'Current account',

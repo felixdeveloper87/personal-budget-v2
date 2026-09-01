@@ -5,9 +5,9 @@ import { getAccountDetails, getAccountActivityPage } from '../../../api'
 import type { AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { ChevronLeft, ChevronRight, Repeat } from '../../../components/ui/icons'
-import { ACCOUNT_LABELS } from '../../../components/accounts/accountMeta'
+import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
-import AccountAvatar from './AccountAvatar'
+import AccountAvatar from '../../../components/accounts/AccountAvatar'
 import RecentActivity from './RecentActivity'
 
 const ACTIVITY_PAGE_SIZE = 10

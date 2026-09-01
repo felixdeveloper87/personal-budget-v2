@@ -22,13 +22,13 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { createAccount, updateAccount } from '../../api'
-import type { AccountType, FinancialAccount } from '../../types'
-import { BankCombobox, BankLogo, ModalHeader, PremiumModal, getBankMeta } from '../ui'
-import { Pencil, Plus, Wallet } from '../ui/icons'
-import { ToastService } from '../../services/toast'
-import { useI18n } from '../../i18n'
-import { ACCOUNT_HELP, ACCOUNT_LABELS, CREATABLE_ACCOUNT_TYPES, accountName } from './accountMeta'
+import { createAccount, updateAccount } from '../../../api'
+import type { AccountType, FinancialAccount } from '../../../types'
+import { BankCombobox, BankLogo, ModalHeader, PremiumModal, getBankMeta } from '../../../components/ui'
+import { Pencil, Plus, Wallet } from '../../../components/ui/icons'
+import { ToastService } from '../../../services/toast'
+import { useI18n } from '../../../i18n'
+import { ACCOUNT_HELP, ACCOUNT_LABELS, CREATABLE_ACCOUNT_TYPES, accountName } from '../data/accountMeta'
 
 export interface AccountFormModalProps {
   isOpen: boolean

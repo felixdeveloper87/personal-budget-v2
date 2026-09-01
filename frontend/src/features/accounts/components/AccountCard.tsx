@@ -1,9 +1,9 @@
 import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
 import { ChevronRight, Pencil, Trash2 } from '../../../components/ui/icons'
-import { ACCOUNT_LABELS } from '../../../components/accounts/accountMeta'
+import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
-import AccountAvatar from './AccountAvatar'
+import AccountAvatar from '../../../components/accounts/AccountAvatar'
 
 interface AccountCardProps {
   account: FinancialAccount
