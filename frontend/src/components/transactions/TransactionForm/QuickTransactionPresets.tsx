@@ -32,7 +32,7 @@ import {
 } from '../../ui/icons'
 import { useI18n } from '../../../i18n'
 
-interface ExpensePreset {
+interface TransactionPreset {
   label: string
   category: string
   icon: LucideIcon
@@ -63,16 +63,16 @@ function PresetLogo({ domain, FallbackIcon }: { domain?: string; FallbackIcon: L
   )
 }
 
-const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
-  { label: 'Uber Eats',   category: 'Salary', icon: Car, domain: 'ubereats.com' },
+const PRIMARY_PRESETS: ReadonlyArray<TransactionPreset> = [
   { label: 'Deliveroo',   category: 'Salary', icon: Car, domain: 'deliveroo.co.uk' },
+  { label: 'Uber Eats',   category: 'Salary', icon: Car, domain: 'ubereats.com' },
+  { label: 'Royal Mail',  category: 'Salary', icon: Briefcase, domain: 'royalmail.com' },
   { label: 'Uber',        category: 'Salary', icon: Car, domain: 'uber.com' },
   { label: 'Just Eat',    category: 'Salary', icon: Car, domain: 'just-eat.co.uk' },
   { label: 'Bolt',        category: 'Salary', icon: Car, domain: 'bolt.eu' },
   { label: 'Amazon Flex', category: 'Salary', icon: ShoppingBag, domain: 'flex.amazon.co.uk' },
   { label: 'Stuart',      category: 'Salary', icon: Car, domain: 'stuart.com' },
   { label: 'Evri',        category: 'Salary', icon: Car, domain: 'evri.com' },
-  { label: 'Royal Mail',  category: 'Salary', icon: Briefcase, domain: 'royalmail.com' },
 
   { label: 'Upwork',       category: 'Freelance', icon: Briefcase, domain: 'upwork.com' },
   { label: 'Fiverr',       category: 'Freelance', icon: Briefcase, domain: 'fiverr.com' },
@@ -230,17 +230,17 @@ const PRIMARY_PRESETS: ReadonlyArray<ExpensePreset> = [
   { label: 'Miscellaneous', category: 'Others', icon: ShoppingBag, transactionType: 'EXPENSE' },
 ]
 
-interface QuickExpensePresetsProps {
+interface QuickTransactionPresetsProps {
   category: string
   transactionType: 'INCOME' | 'EXPENSE'
   onSelect: (preset: { description: string; category: string }) => void
 }
 
-export default function QuickExpensePresets({
+export default function QuickTransactionPresets({
   category,
   transactionType,
   onSelect,
-}: QuickExpensePresetsProps) {
+}: QuickTransactionPresetsProps) {
   const { t, categoryLabel } = useI18n()
   const labelColor = useColorModeValue('gray.500', 'gray.400')
   const chipBg = useColorModeValue('white', 'whiteAlpha.50')
@@ -248,7 +248,7 @@ export default function QuickExpensePresets({
   const chipColor = useColorModeValue('gray.700', 'gray.200')
   const chipHoverBg = useColorModeValue('gray.50', 'whiteAlpha.100')
 
-  const applyPreset = (preset: ExpensePreset) => {
+  const applyPreset = (preset: TransactionPreset) => {
     onSelect({
       description: preset.label,
       category: preset.category,

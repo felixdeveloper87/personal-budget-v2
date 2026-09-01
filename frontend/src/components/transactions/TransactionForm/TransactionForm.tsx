@@ -37,7 +37,7 @@ import PaymentMethodSelector from './PaymentMethodSelector'
 import AccountSelector from './AccountSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
-import QuickExpensePresets from './QuickExpensePresets'
+import QuickTransactionPresets from './QuickTransactionPresets'
 import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { toLocalIsoDateTimeFromYMD } from '../../../utils/dateTime'
@@ -562,7 +562,7 @@ export default function TransactionForm({
               />
           )}
           <CategorySelector type={type} category={category} onChange={setCategory} />
-          <QuickExpensePresets
+          <QuickTransactionPresets
             category={category}
             transactionType={type}
             onSelect={applyQuickPreset}
@@ -731,7 +731,7 @@ export default function TransactionForm({
                   />
               )}
               <CategorySelector type={type} category={category} onChange={setCategory} />
-              <QuickExpensePresets
+              <QuickTransactionPresets
                 category={category}
                 transactionType={type}
                 onSelect={applyQuickPreset}
