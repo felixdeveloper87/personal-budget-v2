@@ -12,9 +12,12 @@ import {
   Box,
   Button,
   Container,
+  FormControl,
+  FormLabel,
   Heading,
   HStack,
   Icon,
+  Input,
   Select,
   Spinner,
   Stack,
@@ -28,18 +31,21 @@ import {
   useColorModeValue,
   useDisclosure,
 } from '@chakra-ui/react'
-import {  Trash2, X } from '../../components/ui/icons'
+import { Mail, Trash2, X } from '../../components/ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   approveAdminUser,
   deleteAdminUser,
   listAdminUsers,
+  sendCommunicationEmail,
+  updateAdminUserCommunicationEmail,
   updateAdminUserPlan,
 } from '../../api'
 import type { AdminUserRow, UserPlan } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
+import { CommunicationEmailModal } from './CommunicationEmailModal'
 
 interface AdminDashboardPageProps {
   onPageChange?: (page: AppPage) => void
@@ -49,10 +55,16 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
   const { t } = useI18n()
   const { user } = useAuth()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const {
+    isOpen: isCommunicationOpen,
+    onOpen: openCommunication,
+    onClose: closeCommunication,
+  } = useDisclosure()
   const [rows, setRows] = useState<AdminUserRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<AdminUserRow | null>(null)
+  const [communicationEmails, setCommunicationEmails] = useState<Record<number, string>>({})
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   const cardBg = useColorModeValue('white', 'gray.800')
@@ -66,6 +78,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     try {
       const data = await listAdminUsers()
       setRows(data)
+      setCommunicationEmails(Object.fromEntries(data.map((row) => [row.id, row.communicationEmail ?? ''])))
     } catch {
       setError(t('admin.loadError'))
       ToastService.error({
@@ -162,6 +175,25 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     }
   }
 
+  const onCommunicationEmailSave = async (id: number) => {
+    try {
+      const updated = await updateAdminUserCommunicationEmail(id, communicationEmails[id] ?? '')
+      setRows((prev) => prev.map((row) => (row.id === id ? updated : row)))
+      setCommunicationEmails((prev) => ({ ...prev, [id]: updated.communicationEmail ?? '' }))
+      ToastService.success({
+        title: t('admin.toast.communicationEmailSaved'),
+        duration: 2000,
+        dedupeKey: `admin-communication-email-saved:${id}`,
+      })
+    } catch {
+      ToastService.error({
+        title: t('admin.toast.communicationEmailSaveFailed'),
+        duration: 3000,
+        dedupeKey: `admin-communication-email-save-failed:${id}`,
+      })
+    }
+  }
+
   if (!user?.admin) {
     return (
       <Container maxW="container.lg" py={10}>
@@ -174,6 +206,9 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
   }
 
   const pending = rows.filter((r) => !r.approved)
+  const communicationRecipientCount = rows.filter(
+    (row) => row.approved && Boolean(row.communicationEmail?.trim()),
+  ).length
   const currentUserId = user.id
 
   return (
@@ -224,6 +259,24 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
           </Alert>
         ) : (
           <Stack spacing={8}>
+            <Box borderWidth="1px" borderRadius="xl" borderColor={border} bg={cardBg} p={{ base: 4, md: 5 }}>
+              <Stack direction={{ base: 'column', md: 'row' }} justify="space-between" align={{ md: 'center' }} spacing={4}>
+                <Box>
+                  <Heading size="sm">{t('admin.communication.title')}</Heading>
+                  <Text mt={1} color={muted} fontSize="sm">
+                    {t('admin.communication.description', { count: communicationRecipientCount })}
+                  </Text>
+                </Box>
+                <Button
+                  colorScheme="blue"
+                  leftIcon={<Icon as={Mail} boxSize={4} />}
+                  onClick={openCommunication}
+                  isDisabled={communicationRecipientCount === 0}
+                >
+                  {t('admin.communication.compose')}
+                </Button>
+              </Stack>
+            </Box>
             {pending.length > 0 && (
               <Box>
                 <Heading size="sm" mb={3} color="orange.500">
@@ -236,6 +289,9 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
                   currentUserId={currentUserId}
                   onApprove={onApprove}
                   onPlanChange={onPlanChange}
+                  communicationEmails={communicationEmails}
+                  onCommunicationEmailChange={(id, email) => setCommunicationEmails((prev) => ({ ...prev, [id]: email }))}
+                  onCommunicationEmailSave={onCommunicationEmailSave}
                   onRemove={openRemoveDialog}
                   showApproveActions
                 />
@@ -253,6 +309,9 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
                 currentUserId={currentUserId}
                 onApprove={onApprove}
                 onPlanChange={onPlanChange}
+                communicationEmails={communicationEmails}
+                onCommunicationEmailChange={(id, email) => setCommunicationEmails((prev) => ({ ...prev, [id]: email }))}
+                onCommunicationEmailSave={onCommunicationEmailSave}
                 onRemove={openRemoveDialog}
                 showApproveActions
               />
@@ -260,6 +319,20 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
           </Stack>
         )}
       </Container>
+      <CommunicationEmailModal
+        isOpen={isCommunicationOpen}
+        onClose={closeCommunication}
+        recipientCount={communicationRecipientCount}
+        onSend={async (subject, text) => {
+          const result = await sendCommunicationEmail(subject, text)
+          ToastService.success({
+            title: t('admin.toast.communicationSent'),
+            description: t('admin.toast.communicationSentDescription', { count: result.recipientCount }),
+            duration: 4500,
+            dedupeKey: 'admin-communication-sent',
+          })
+        }}
+      />
     </Box>
   )
 }
@@ -271,6 +344,9 @@ function UserTable({
   currentUserId,
   onApprove,
   onPlanChange,
+  communicationEmails,
+  onCommunicationEmailChange,
+  onCommunicationEmailSave,
   onRemove,
   showApproveActions,
 }: {
@@ -280,6 +356,9 @@ function UserTable({
   currentUserId: number
   onApprove: (id: number) => void
   onPlanChange: (id: number, plan: UserPlan) => void
+  communicationEmails: Record<number, string>
+  onCommunicationEmailChange: (id: number, email: string) => void
+  onCommunicationEmailSave: (id: number) => void
   onRemove: (row: AdminUserRow) => void
   showApproveActions: boolean
 }) {
@@ -307,6 +386,7 @@ function UserTable({
             <Tr>
               <Th>{t('admin.table.name')}</Th>
               <Th>{t('admin.table.email')}</Th>
+              <Th>{t('admin.table.communicationEmail')}</Th>
               <Th>{t('admin.table.joined')}</Th>
               <Th>{t('admin.table.status')}</Th>
               <Th>{t('admin.table.plan')}</Th>
@@ -318,6 +398,20 @@ function UserTable({
               <Tr key={row.id}>
                 <Td fontWeight="600">{row.name}</Td>
                 <Td fontSize="sm">{row.email}</Td>
+                <Td minW="260px">
+                  <HStack spacing={2}>
+                    <Input
+                      size="sm"
+                      type="email"
+                      placeholder={t('admin.communication.emailPlaceholder')}
+                      value={communicationEmails[row.id] ?? ''}
+                      onChange={(event) => onCommunicationEmailChange(row.id, event.target.value)}
+                    />
+                    <Button size="sm" onClick={() => void onCommunicationEmailSave(row.id)}>
+                      {t('admin.save')}
+                    </Button>
+                  </HStack>
+                </Td>
                 <Td fontSize="xs" whiteSpace="nowrap">
                   {joined(row.createdAt)}
                 </Td>
@@ -404,6 +498,21 @@ function UserTable({
             <Text fontSize="sm" color="gray.500">
               {row.email}
             </Text>
+            <FormControl mt={3}>
+              <FormLabel fontSize="xs">{t('admin.table.communicationEmail')}</FormLabel>
+              <HStack>
+                <Input
+                  size="sm"
+                  type="email"
+                  placeholder={t('admin.communication.emailPlaceholder')}
+                  value={communicationEmails[row.id] ?? ''}
+                  onChange={(event) => onCommunicationEmailChange(row.id, event.target.value)}
+                />
+                <Button size="sm" onClick={() => void onCommunicationEmailSave(row.id)}>
+                  {t('admin.save')}
+                </Button>
+              </HStack>
+            </FormControl>
             <Text fontSize="xs" mt={1} color="gray.500">
               {joined(row.createdAt)}
             </Text>

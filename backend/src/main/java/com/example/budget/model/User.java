@@ -23,6 +23,13 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    /**
+     * Optional address used only for product communications.  It intentionally
+     * does not participate in authentication, password resets or JWTs.
+     */
+    @Column(name = "communication_email")
+    private String communicationEmail;
+
     @JsonIgnore
     @Column(nullable = false)
     private String password;
@@ -97,6 +104,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCommunicationEmail() {
+        return communicationEmail;
+    }
+
+    public void setCommunicationEmail(String communicationEmail) {
+        this.communicationEmail = communicationEmail;
     }
 
     public String getPassword() {

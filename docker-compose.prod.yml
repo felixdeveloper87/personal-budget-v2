@@ -57,6 +57,8 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - RESEND_API_KEY=${RESEND_API_KEY:-}
+      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-}
       - HOUSEHOLD_ATTACHMENTS_DIR=/app/uploads/household
       - JAVA_TOOL_OPTIONS=-Xms128m -Xmx512m -XX:+UseG1GC
     volumes:

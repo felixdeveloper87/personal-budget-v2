@@ -2,6 +2,7 @@ package com.example.budget.controller;
 
 import com.example.budget.dto.AdminUserResponse;
 import com.example.budget.dto.UpdateUserPlanRequest;
+import com.example.budget.dto.UpdateCommunicationEmailRequest;
 import com.example.budget.model.User;
 import com.example.budget.service.AdminUserService;
 import jakarta.validation.Valid;
@@ -51,6 +52,15 @@ public class AdminUserController {
             Authentication authentication) {
         User admin = (User) authentication.getPrincipal();
         return ResponseEntity.ok(adminUserService.updatePlan(id, request, admin));
+    }
+
+    @PatchMapping("/{id}/communication-email")
+    public ResponseEntity<AdminUserResponse> updateCommunicationEmail(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateCommunicationEmailRequest request,
+            Authentication authentication) {
+        User admin = (User) authentication.getPrincipal();
+        return ResponseEntity.ok(adminUserService.updateCommunicationEmail(id, request, admin));
     }
 
     @DeleteMapping("/{id}")

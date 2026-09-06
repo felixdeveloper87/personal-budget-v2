@@ -244,11 +244,17 @@ export interface User {
 export interface AdminUserRow {
   id: number
   email: string
+  /** Optional address used for communications; never used to sign in. */
+  communicationEmail: string | null
   name: string
   createdAt: string
   approved: boolean
   admin: boolean
   plan: UserPlan
+}
+
+export interface CommunicationEmailSendResponse {
+  recipientCount: number
 }
 
 // Auth Requests
