@@ -419,7 +419,7 @@ function NavBarItem({
       minW={isMobile ? '64px' : 0}
       sx={{
         ...(isMobile ? { scrollSnapAlign: 'center' } : {}),
-        '--pb-control-transition': `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.12s' : '0.2s ease'}, transform 0.15s ease`,
+        '--pb-control-transition': `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.8s' : '0.2s ease'}, transform 0.15s ease`,
       }}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"
@@ -430,7 +430,7 @@ function NavBarItem({
       position="relative"
       zIndex={1}
       cursor="pointer"
-      transition={reducedMotion ? 'none' : `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.12s' : '0.2s ease'}, transform 0.15s ease`}
+      transition={reducedMotion ? 'none' : `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.8s' : '0.2s ease'}, transform 0.15s ease`}
       _hover={{
         color: isActive ? activeColor : hoverColor,
         transform: isActive ? 'none' : 'translateY(-1px)',

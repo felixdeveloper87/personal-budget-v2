@@ -41,7 +41,7 @@ export default function HeaderActions({
   return (
     <HStack spacing={{ base: 1, sm: 2 }} flexShrink={0} sx={{
       '@media (max-width: 479px)': {
-        '& > button, & > [role="button"]': { minWidth: '32px', width: '32px', height: '36px', paddingInline: '2px' },
+        '& > button, & > [role="button"]': { minWidth: '40px', width: '40px', height: '40px', paddingInline: '2px' },
         '& > [role="button"] .chakra-icon:last-child': { display: 'none' },
       },
     }}>
