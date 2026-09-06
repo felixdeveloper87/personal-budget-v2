@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { Badge, Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel, HStack, Icon, Input, InputGroup, InputLeftElement, Select, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, FormLabel, HStack, Icon, Input, InputGroup, InputLeftElement, Select, SimpleGrid, Text, usePrefersReducedMotion, VStack } from '@chakra-ui/react'
 import { createHouseholdExpense, deleteHouseholdExpense, updateHouseholdExpense, uploadHouseholdExpenseAttachments } from '../../../api'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdExpense, HouseholdExpenseRequest, HouseholdPageState } from '../../../types'
-import { Check, Trash2, Zap } from '../../../components/ui/icons'
+import { Check, ChevronLeft, ChevronRight, Trash2 } from '../../../components/ui/icons'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { AttachmentPicker } from '../HouseholdAttachments'
 import { CATEGORIES, HOUSEHOLD_EXPENSE_PRESETS, type HouseholdExpensePreset } from './expenseConfig'
@@ -34,6 +34,8 @@ export function ExpenseModal({
   const [deleting, setDeleting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const amountInputRef = useRef<HTMLInputElement>(null)
+  const quickPresetCarouselRef = useRef<HTMLDivElement>(null)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
     if (!isOpen) return
@@ -140,6 +142,16 @@ export function ExpenseModal({
     setDescription(t(`household.expenseModal.quick.${preset.key}.description`))
     setCategory(preset.category)
     amountInputRef.current?.focus()
+  }
+
+  const scrollQuickPresets = (direction: -1 | 1) => {
+    const carousel = quickPresetCarouselRef.current
+    if (!carousel) return
+    const card = carousel.querySelector<HTMLElement>('[data-quick-preset]')
+    carousel.scrollBy({
+      left: direction * ((card?.offsetWidth ?? carousel.clientWidth * 0.72) + 12),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    })
   }
 
   const selectEveryone = () => {
@@ -322,103 +334,200 @@ export function ExpenseModal({
           </Box>
 
           {!expense && (
-            <Box>
-              <HStack align="center" spacing={2} mb={3}>
-                <Icon as={Zap} boxSize={4} weight="fill" color="var(--pb-gold-2)" />
-                <Text fontSize="sm" fontWeight={750} color="var(--pb-ink)">
-                  {t('household.expenseModal.quickTitle')}
-                </Text>
-              </HStack>
-              <HStack
-                spacing={3}
-                mx={-1}
-                px={1}
-                pb={2}
-                overflowX="auto"
-                align="stretch"
-                scrollSnapType="x proximity"
-                aria-label={t('household.expenseModal.quickTitle')}
-                sx={{
-                  /* Elegant thin scrollbar */
-                  '&::-webkit-scrollbar': {
-                    height: '6px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    background: 'transparent',
-                    my: 2,
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: 'var(--pb-hair-2)',
-                    borderRadius: '8px',
-                  },
-                  '&::-webkit-scrollbar-thumb:hover': {
-                    background: 'var(--pb-ink-faint)',
-                  },
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'var(--pb-hair-2) transparent',
-                }}
-              >
-                {HOUSEHOLD_EXPENSE_PRESETS.map((preset) => {
-                  const presetDescription = t(
-                    `household.expenseModal.quick.${preset.key}.description`,
-                  )
-                  const selected = category === preset.category
-                    && description === presetDescription
-                  return (
-                    <Box
-                      as="button"
-                      type="button"
-                      key={preset.key}
-                      flex="0 0 auto"
-                      w={{ base: '105px', sm: '130px' }}
-                      p={{ base: 2.5, sm: 3 }}
-                      display="flex"
-                      flexDirection="column"
-                      alignItems="flex-start"
-                      gap={{ base: 2, sm: 2.5 }}
-                      textAlign="left"
-                      borderRadius="16px"
-                      border="1.5px solid"
-                      borderColor={selected ? preset.color : 'var(--pb-hair)'}
-                      bg={selected ? preset.tint : 'var(--pb-surface)'}
-                      boxShadow={selected ? `0 4px 14px ${preset.tint}` : '0 2px 6px rgba(0,0,0,0.03)'}
-                      color={selected ? preset.color : 'var(--pb-ink)'}
-                      aria-pressed={selected}
-                      scrollSnapAlign="start"
-                      onClick={() => applyPreset(preset)}
-                      transition="all .2s ease"
-                      _hover={{
-                        transform: 'translateY(-2px)',
-                        borderColor: preset.color,
-                        boxShadow: `0 6px 16px ${preset.tint}`,
-                      }}
-                    >
-                      <Flex
-                        w={8}
-                        h={8}
-                        align="center"
-                        justify="center"
-                        borderRadius="10px"
-                        bgGradient={selected ? preset.gradient : undefined}
-                        bg={selected ? undefined : preset.tint}
-                        color={selected ? 'white' : preset.color}
-                        boxShadow={selected ? `0 2px 8px ${preset.tint}` : 'none'}
-                        transition="all .2s ease"
+            <Box
+              position="relative"
+              overflow="hidden"
+              p={{ base: 3, sm: 4 }}
+              borderRadius="22px"
+              border="1px solid var(--pb-hair)"
+              bg="linear-gradient(135deg, var(--pb-surface) 0%, var(--pb-tint-gold) 160%)"
+              boxShadow="0 12px 30px rgba(21, 47, 37, 0.06)"
+            >
+              <Box
+                position="absolute"
+                top="-64px"
+                right="-38px"
+                w="160px"
+                h="160px"
+                borderRadius="full"
+                bg="var(--pb-tint-gold)"
+                opacity={0.55}
+                pointerEvents="none"
+              />
+              <Flex position="relative" align="center" justify="space-between" gap={3} mb={4}>
+                <HStack align="center" spacing={3} minW={0}>
+                  <Box minW={0}>
+                    <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
+                      {t('household.expenseModal.quickTitle')}
+                    </Text>
+                    <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+                      {t('household.expenseModal.quickDescription')}
+                    </Text>
+                  </Box>
+                </HStack>
+                <HStack spacing={1.5} display={{ base: 'none', sm: 'flex' }}>
+                  <Button
+                    aria-label={t('household.expenseModal.quickPrevious')}
+                    onClick={() => scrollQuickPresets(-1)}
+                    minW="34px"
+                    h="34px"
+                    p={0}
+                    borderRadius="full"
+                    bg="var(--pb-surface)"
+                    color="var(--pb-ink-soft)"
+                    border="1px solid var(--pb-hair)"
+                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', transform: 'translateX(-1px)' }}
+                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-gold)' }}
+                  >
+                    <Icon as={ChevronLeft} boxSize={4} weight="bold" />
+                  </Button>
+                  <Button
+                    aria-label={t('household.expenseModal.quickNext')}
+                    onClick={() => scrollQuickPresets(1)}
+                    minW="34px"
+                    h="34px"
+                    p={0}
+                    borderRadius="full"
+                    bg="var(--pb-surface)"
+                    color="var(--pb-ink-soft)"
+                    border="1px solid var(--pb-hair)"
+                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', transform: 'translateX(1px)' }}
+                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-gold)' }}
+                  >
+                    <Icon as={ChevronRight} boxSize={4} weight="bold" />
+                  </Button>
+                </HStack>
+              </Flex>
+
+              <Box position="relative" mx={{ base: -1, sm: 0 }}>
+                <HStack
+                  ref={quickPresetCarouselRef}
+                  spacing={3}
+                  px={{ base: 1, sm: 0.5 }}
+                  py={1}
+                  overflowX="auto"
+                  align="stretch"
+                  scrollSnapType="x mandatory"
+                  aria-label={t('household.expenseModal.quickTitle')}
+                  sx={{
+                    scrollbarWidth: 'none',
+                    WebkitOverflowScrolling: 'touch',
+                    '&::-webkit-scrollbar': { display: 'none' },
+                  }}
+                >
+                  {HOUSEHOLD_EXPENSE_PRESETS.map((preset) => {
+                    const presetDescription = t(
+                      `household.expenseModal.quick.${preset.key}.description`,
+                    )
+                    const selected = category === preset.category
+                      && description === presetDescription
+                    return (
+                      <Box
+                        as="button"
+                        type="button"
+                        data-quick-preset
+                        key={preset.key}
+                        flex="0 0 auto"
+                        position="relative"
+                        overflow="hidden"
+                        w={{ base: '118px', sm: '142px' }}
+                        minH={{ base: '124px', sm: '136px' }}
+                        p={{ base: 3, sm: 3.5 }}
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="flex-start"
+                        justifyContent="space-between"
+                        textAlign="left"
+                        borderRadius="18px"
+                        border="1.5px solid"
+                        borderColor={selected ? preset.color : 'var(--pb-hair)'}
+                        bg={selected ? preset.gradient : 'var(--pb-surface)'}
+                        boxShadow={selected
+                          ? `0 12px 24px ${preset.tint}, inset 0 1px 0 rgba(255,255,255,.3)`
+                          : '0 4px 12px rgba(21,47,37,.045)'}
+                        color={selected ? 'white' : 'var(--pb-ink)'}
+                        aria-pressed={selected}
+                        scrollSnapAlign="start"
+                        onClick={() => applyPreset(preset)}
+                        transition={prefersReducedMotion ? 'none' : 'transform .22s ease, box-shadow .22s ease, border-color .22s ease'}
+                        _hover={{
+                          transform: 'translateY(-4px)',
+                          borderColor: preset.color,
+                          boxShadow: selected
+                            ? `0 16px 28px ${preset.tint}, inset 0 1px 0 rgba(255,255,255,.3)`
+                            : `0 12px 22px ${preset.tint}`,
+                        }}
+                        _focusVisible={{
+                          outline: 'none',
+                          boxShadow: `0 0 0 3px var(--pb-surface), 0 0 0 5px ${preset.color}`,
+                        }}
                       >
-                        <Icon as={preset.icon} boxSize={4} weight={selected ? 'fill' : 'duotone'} />
-                      </Flex>
-                      <Text
-                        fontSize="xs"
-                        fontWeight={750}
-                        lineHeight={1.2}
-                        color={selected ? preset.color : 'var(--pb-ink)'}
-                      >
-                        {t(`household.expenseModal.quick.${preset.key}.label`)}
-                      </Text>
-                    </Box>
-                  )
-                })}
-              </HStack>
+                        <Box
+                          position="absolute"
+                          top="-34px"
+                          right="-26px"
+                          w="92px"
+                          h="92px"
+                          borderRadius="full"
+                          bg={selected ? 'whiteAlpha.300' : preset.tint}
+                          opacity={selected ? 0.5 : 0.85}
+                        />
+                        <Flex
+                          position="relative"
+                          w="38px"
+                          h="38px"
+                          align="center"
+                          justify="center"
+                          borderRadius="13px"
+                          bg={selected ? 'whiteAlpha.300' : preset.tint}
+                          color={selected ? 'white' : preset.color}
+                          border="1px solid"
+                          borderColor={selected ? 'whiteAlpha.400' : 'transparent'}
+                          boxShadow={selected ? 'inset 0 1px 0 rgba(255,255,255,.24)' : 'none'}
+                        >
+                          <Icon as={preset.icon} boxSize={5} weight={selected ? 'fill' : 'duotone'} />
+                        </Flex>
+                        {selected && (
+                          <Flex
+                            position="absolute"
+                            top={3}
+                            right={3}
+                            w={5}
+                            h={5}
+                            align="center"
+                            justify="center"
+                            borderRadius="full"
+                            bg="whiteAlpha.300"
+                            border="1px solid whiteAlpha.500"
+                          >
+                            <Icon as={Check} boxSize={3} weight="bold" />
+                          </Flex>
+                        )}
+                        <Text
+                          position="relative"
+                          maxW="full"
+                          fontSize={{ base: 'xs', sm: 'sm' }}
+                          fontWeight={800}
+                          lineHeight={1.2}
+                          color="inherit"
+                        >
+                          {t(`household.expenseModal.quick.${preset.key}.label`)}
+                        </Text>
+                      </Box>
+                    )
+                  })}
+                </HStack>
+                <Box
+                  display={{ base: 'block', sm: 'none' }}
+                  position="absolute"
+                  top={0}
+                  right={0}
+                  bottom={0}
+                  w="32px"
+                  bg="linear-gradient(90deg, transparent, var(--pb-surface))"
+                  pointerEvents="none"
+                />
+              </Box>
             </Box>
           )}
 
