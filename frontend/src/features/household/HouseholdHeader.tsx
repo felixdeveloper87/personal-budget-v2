@@ -43,6 +43,11 @@ const pulseGlow = keyframes`
   50% { box-shadow: 0 0 0 8px rgba(71,112,148, 0); }
 `
 
+const unreadNotificationPulse = keyframes`
+  from { transform: scale(1); opacity: 0.7; }
+  to { transform: scale(2.6); opacity: 0; }
+`
+
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
   onAddExpense: () => void
@@ -62,6 +67,55 @@ const parseMonth = (value: string) => {
   const month = Number(match[2])
   if (month < 1 || month > 12) return null
   return new Date(Number(match[1]), month - 1, 1)
+}
+
+function UnreadNotificationIndicator({ count }: { count: string }) {
+  return (
+    <Box
+      aria-hidden="true"
+      position="absolute"
+      top="-7px"
+      right="-7px"
+      minW="19px"
+      h="19px"
+      pointerEvents="none"
+    >
+      <Box
+        position="absolute"
+        inset={0}
+        borderRadius="full"
+        bg="var(--pb-coral)"
+        animation={`${unreadNotificationPulse} 1.8s ease-out infinite`}
+        sx={{
+          '@media (prefers-reduced-motion: reduce)': {
+            animation: 'none',
+            opacity: 0,
+          },
+        }}
+      />
+      <Box
+        position="absolute"
+        inset={0}
+        borderRadius="full"
+        bg="var(--pb-coral)"
+        border="1.5px solid var(--pb-summary-panel)"
+      />
+      <Flex
+        position="absolute"
+        inset={0}
+        align="center"
+        justify="center"
+        px="3px"
+        color="white"
+        fontFamily="var(--pb-mono)"
+        fontSize="7px"
+        fontWeight={800}
+        lineHeight={1}
+      >
+        {count}
+      </Flex>
+    </Box>
+  )
 }
 
 export default function HouseholdHeader({
@@ -361,28 +415,11 @@ export default function HouseholdHeader({
             >
               <Icon as={Bell} boxSize={5} weight="duotone" />
               {household.unreadNotificationCount > 0 && (
-                <Flex
-                  position="absolute"
-                  top="-5px"
-                  right="-5px"
-                  minW="18px"
-                  h="18px"
-                  px={1}
-                  align="center"
-                  justify="center"
-                  borderRadius="full"
-                  bg="var(--pb-coral)"
-                  color="white"
-                  border="2px solid var(--pb-summary-petrol)"
-                  fontFamily="var(--pb-mono)"
-                  fontSize="7px"
-                  fontWeight={800}
-                  lineHeight={1}
-                >
-                  {household.unreadNotificationCount > 99
+                <UnreadNotificationIndicator
+                  count={household.unreadNotificationCount > 99
                     ? '99+'
                     : formatNumber(household.unreadNotificationCount)}
-                </Flex>
+                />
               )}
             </Flex>
             {household.currentMemberRole === 'OWNER' && (
@@ -434,28 +471,11 @@ export default function HouseholdHeader({
               {t('household.notifications.shortTitle')}
             </Text>
             {household.unreadNotificationCount > 0 && (
-              <Flex
-                position="absolute"
-                top="-7px"
-                right="-7px"
-                minW="21px"
-                h="21px"
-                px={1.5}
-                align="center"
-                justify="center"
-                borderRadius="full"
-                bg="var(--pb-coral)"
-                color="white"
-                border="2px solid var(--pb-summary-petrol)"
-                fontFamily="var(--pb-mono)"
-                fontSize="8px"
-                fontWeight={800}
-                lineHeight={1}
-              >
-                {household.unreadNotificationCount > 99
+              <UnreadNotificationIndicator
+                count={household.unreadNotificationCount > 99
                   ? '99+'
                   : formatNumber(household.unreadNotificationCount)}
-              </Flex>
+              />
             )}
           </Button>
           {household.currentMemberRole === 'OWNER' && (
