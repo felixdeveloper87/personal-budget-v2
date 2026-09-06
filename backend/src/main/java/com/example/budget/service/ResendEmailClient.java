@@ -2,6 +2,7 @@ package com.example.budget.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ public class ResendEmailClient {
     private final String apiKey;
     private final String from;
 
+    @Autowired
     public ResendEmailClient(
             ObjectMapper objectMapper,
             @Value("${app.email.resend.api-key:}") String apiKey,
