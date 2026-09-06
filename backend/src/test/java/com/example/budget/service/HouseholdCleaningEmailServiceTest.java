@@ -22,6 +22,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -57,35 +60,39 @@ class HouseholdCleaningEmailServiceTest {
                 resendEmailClient,
                 emailTemplate,
                 "Europe/London");
+    }
+
+    private void stubCurrentAssignment() {
         when(rotationRepository.findByActiveTrue()).thenReturn(List.of(rotation));
         when(rotation.isActive()).thenReturn(true);
         when(rotation.getStartDate()).thenReturn(monday);
-        when(rotation.getHousehold()).thenReturn(household);
-        when(household.getName()).thenReturn("Flat 1");
-        when(household.getId()).thenReturn(1L);
         when(rotationMember.getMember()).thenReturn(member);
         when(member.isActive()).thenReturn(true);
-        when(member.getUser()).thenReturn(user);
-        when(member.getDisplayName()).thenReturn("Leandro");
-        when(member.getId()).thenReturn(2L);
-        when(user.getCommunicationEmail()).thenReturn("leandro@example.com");
-        when(emailTemplate.assigned(any(), any(), any()))
-                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>assigned</html>"));
-        when(emailTemplate.incomplete(any(), any(), any(), any()))
-                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>reminder</html>"));
         when(rotationMemberRepository.findByRotationOrderByPositionAsc(rotation))
                 .thenReturn(List.of(rotationMember));
         when(assignmentRepository.findByRotationAndWeekStartInOrderByWeekStartAsc(
                 rotation, List.of(monday)))
                 .thenReturn(List.of(assignment));
+    }
+
+    private void stubEmailRecipient() {
         when(assignment.getAssignedMember()).thenReturn(member);
         when(assignment.getRotation()).thenReturn(rotation);
-        when(assignment.getWeekStart()).thenReturn(monday);
+        when(rotation.getHousehold()).thenReturn(household);
+        when(household.getName()).thenReturn("Flat 1");
+        when(member.getUser()).thenReturn(user);
+        when(member.getDisplayName()).thenReturn("Leandro");
+        when(user.getCommunicationEmail()).thenReturn("leandro@example.com");
     }
 
     @Test
     void mondaySendsOnlyToTheAssignedMembersCommunicationEmail() {
+        stubCurrentAssignment();
+        stubEmailRecipient();
+        when(assignment.getWeekStart()).thenReturn(monday);
         when(deliveryRepository.existsByAssignmentAndDeliveryType(any(), any())).thenReturn(false);
+        when(emailTemplate.assigned(anyString(), anyString(), any()))
+                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>assigned</html>"));
 
         service.sendMondayAssignmentEmails(monday);
 
@@ -100,6 +107,7 @@ class HouseholdCleaningEmailServiceTest {
     @Test
     void sundayDoesNotEmailWhenTheChecklistIsAlreadyComplete() {
         LocalDate sunday = monday.plusDays(6);
+        stubCurrentAssignment();
         when(assignment.getCompletedAt()).thenReturn(LocalDateTime.now());
 
         service.sendSundayIncompleteReminders(sunday);
@@ -111,9 +119,13 @@ class HouseholdCleaningEmailServiceTest {
     @Test
     void sundayEmailsTheAssignedMemberWhenTasksRemain() {
         LocalDate sunday = monday.plusDays(6);
+        stubCurrentAssignment();
+        stubEmailRecipient();
         when(assignment.getCompletedAt()).thenReturn(null);
         when(deliveryRepository.existsByAssignmentAndDeliveryType(any(), any())).thenReturn(false);
         when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment)).thenReturn(List.of());
+        when(emailTemplate.incomplete(anyString(), anyString(), anyLong(), anyInt()))
+                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>reminder</html>"));
 
         service.sendSundayIncompleteReminders(sunday);
 
