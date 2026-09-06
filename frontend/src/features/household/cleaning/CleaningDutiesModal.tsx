@@ -1,4 +1,5 @@
-import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { useState } from 'react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningAssignment } from '../../../types'
 import { Check, CheckCircle2, Clock, List } from '../../../components/ui/icons'
@@ -44,13 +45,6 @@ export function CleaningDutiesModal({
       ? t('household.cleaning.dutiesCurrentUser')
       : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
     : t('household.cleaning.dutiesGeneric')
-  const displayDutyLabel = (duty: { key: string; label: string }) =>
-    t(`household.cleaning.duty.${duty.key}`, undefined, duty.label)
-  const displayDutySchedule = (duty: { key: string; schedule?: string | null }) =>
-    duty.key === 'rubbish_out'
-      ? t('household.cleaning.rubbishSchedule')
-      : duty.schedule
-
   return (
     <PremiumModal
       isOpen={isOpen}
@@ -152,85 +146,14 @@ export function CleaningDutiesModal({
                 {t('household.cleaning.inProgress')}
               </Text>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                {duties.filter(d => !d.completed).map((duty, index) => (
-                  <Box
-                    as={duty.canToggle && busyDutyKey === null ? 'button' : 'div'}
+                {duties.filter(d => !d.completed).map((duty) => (
+                  <CleaningDutyCard
                     key={duty.key}
-                    w="full"
-                    textAlign="left"
-                    onClick={() => {
-                      if (!current || !duty.canToggle || busyDutyKey !== null) return
-                      onToggleDuty(current.id, duty.key, true)
-                    }}
-                    minH={{ base: '72px', md: '76px' }}
-                    display="flex"
-                    alignItems="center"
-                    gap={3.5}
-                    px={4}
-                    py={3}
-                    borderRadius="16px"
-                    border="1px solid"
-                    borderColor={duty.timed ? 'var(--pb-gold)' : 'var(--pb-hair)'}
-                    bg={duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
-                    boxShadow="0 4px 12px rgba(0,0,0,0.03)"
-                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                    _hover={duty.canToggle && busyDutyKey === null
-                      ? { transform: 'translateY(-2px)', boxShadow: '0 8px 24px rgba(0,0,0,0.08)', borderColor: 'var(--pb-hair-2)' }
-                      : undefined}
-                    _focusVisible={{
-                      boxShadow: '0 0 0 2px var(--pb-forest)',
-                      outline: 'none',
-                    }}
-                  >
-                    <Flex
-                      w={10}
-                      h={10}
-                      flexShrink={0}
-                      align="center"
-                      justify="center"
-                      borderRadius="full"
-                      border="2px solid"
-                      borderColor="var(--pb-hair-2)"
-                      bg="transparent"
-                      color="white"
-                      transition="all 0.2s"
-                    >
-                      {busyDutyKey === duty.key ? (
-                        <Spinner size="sm" thickness="2px" color="var(--pb-forest-2)" />
-                      ) : (
-                        <Icon
-                          as={Check}
-                          boxSize={5}
-                          weight="bold"
-                          opacity={0}
-                          transform="scale(0.5)"
-                          transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                        />
-                      )}
-                    </Flex>
-                    <Box minW={0} flex={1}>
-                      <Text color="var(--pb-ink)" fontSize="sm" fontWeight={600} lineHeight={1.25}>
-                        {displayDutyLabel(duty)}
-                      </Text>
-                      {duty.schedule ? (
-                        <HStack mt={1} spacing={1.5} color="var(--pb-gold)">
-                          <Icon as={Clock} boxSize={3} weight="bold" />
-                          <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
-                            {displayDutySchedule(duty)}
-                          </Text>
-                        </HStack>
-                      ) : (
-                        <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="2xs">
-                          {t('household.cleaning.taskNumber', {
-                            number: formatNumber(index + 1, {
-                              minimumIntegerDigits: 2,
-                              useGrouping: false,
-                            }),
-                          })}
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
+                    duty={duty}
+                    assignmentId={current?.id ?? null}
+                    busyDutyKey={busyDutyKey}
+                    onToggleDuty={onToggleDuty}
+                  />
                 ))}
               </SimpleGrid>
             </Box>
@@ -242,70 +165,14 @@ export function CleaningDutiesModal({
                 {t('household.cleaning.completed')}
               </Text>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                {duties.filter(d => d.completed).map((duty, index) => (
-                  <Box
-                    as={duty.canToggle && busyDutyKey === null ? 'button' : 'div'}
+                {duties.filter(d => d.completed).map((duty) => (
+                  <CleaningDutyCard
                     key={duty.key}
-                    w="full"
-                    textAlign="left"
-                    onClick={() => {
-                      if (!current || !duty.canToggle || busyDutyKey !== null) return
-                      onToggleDuty(current.id, duty.key, false)
-                    }}
-                    minH={{ base: '72px', md: '76px' }}
-                    display="flex"
-                    alignItems="center"
-                    gap={3.5}
-                    px={4}
-                    py={3}
-                    borderRadius="16px"
-                    border="1px solid transparent"
-                    bg="var(--pb-surface-2)"
-                    opacity={0.65}
-                    transition="all 0.2s cubic-bezier(0.4, 0, 0.2, 1)"
-                    _hover={duty.canToggle && busyDutyKey === null
-                      ? { opacity: 1, transform: 'translateY(-2px)' }
-                      : undefined}
-                    _focusVisible={{
-                      boxShadow: '0 0 0 2px var(--pb-forest)',
-                      outline: 'none',
-                    }}
-                  >
-                    <Flex
-                      w={10}
-                      h={10}
-                      flexShrink={0}
-                      align="center"
-                      justify="center"
-                      borderRadius="full"
-                      border="2px solid transparent"
-                      bg="var(--pb-tint-income)"
-                      color="var(--pb-income)"
-                    >
-                      {busyDutyKey === duty.key ? (
-                        <Spinner size="sm" thickness="2px" />
-                      ) : (
-                        <Icon as={Check} boxSize={5} weight="bold" />
-                      )}
-                    </Flex>
-                    <Box minW={0} flex={1}>
-                      <Text color="var(--pb-ink-soft)" fontSize="sm" fontWeight={600} lineHeight={1.25} textDecoration="line-through">
-                        {displayDutyLabel(duty)}
-                      </Text>
-                      {duty.schedule ? (
-                        <HStack mt={1} spacing={1.5} color="var(--pb-income)">
-                          <Icon as={Clock} boxSize={3} weight="bold" />
-                          <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
-                            {displayDutySchedule(duty)}
-                          </Text>
-                        </HStack>
-                      ) : (
-                        <Text mt={0.5} color="var(--pb-income)" fontSize="2xs">
-                          {t('household.cleaning.completed')}
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
+                    duty={duty}
+                    assignmentId={current?.id ?? null}
+                    busyDutyKey={busyDutyKey}
+                    onToggleDuty={onToggleDuty}
+                  />
                 ))}
               </SimpleGrid>
             </Box>
@@ -313,5 +180,139 @@ export function CleaningDutiesModal({
         </VStack>
       </Box>
     </PremiumModal>
+  )
+}
+
+function CleaningDutyCard({
+  duty,
+  assignmentId,
+  busyDutyKey,
+  onToggleDuty,
+}: {
+  duty: DisplayedCleaningDuty
+  assignmentId: number | null
+  busyDutyKey: string | null
+  onToggleDuty: (assignmentId: number, dutyKey: string, completed: boolean) => void
+}) {
+  const { t } = useI18n()
+  const [expanded, setExpanded] = useState(false)
+  const label = t(`household.cleaning.duty.${duty.key}`, undefined, duty.label)
+  const schedule = duty.key === 'rubbish_out'
+    ? t('household.cleaning.rubbishSchedule')
+    : duty.schedule
+  const isBusy = busyDutyKey === duty.key
+  const canToggle = assignmentId !== null && duty.canToggle
+  const detailId = `household-cleaning-duty-${duty.key}`
+
+  return (
+    <Box
+      h={expanded ? 'auto' : { base: '78px', md: '82px' }}
+      overflow="hidden"
+      borderRadius="16px"
+      border="1px solid"
+      borderColor={duty.completed ? 'transparent' : duty.timed ? 'var(--pb-gold)' : 'var(--pb-hair)'}
+      bg={duty.completed ? 'var(--pb-surface-2)' : duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
+      opacity={duty.completed ? 0.7 : 1}
+      boxShadow="0 4px 12px rgba(0,0,0,0.03)"
+      transition="height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)"
+      sx={{ interpolateSize: 'allow-keywords' }}
+    >
+      <Flex
+        as="button"
+        type="button"
+        w="full"
+        h={{ base: '78px', md: '82px' }}
+        px={4}
+        align="center"
+        gap={3.5}
+        textAlign="left"
+        aria-expanded={expanded}
+        aria-controls={detailId}
+        onClick={() => setExpanded((value) => !value)}
+        _focusVisible={{ boxShadow: 'inset 0 0 0 2px var(--pb-forest)', outline: 'none' }}
+      >
+        <Flex
+          w={10}
+          h={10}
+          flexShrink={0}
+          align="center"
+          justify="center"
+          borderRadius="full"
+          border="2px solid"
+          borderColor={duty.completed ? 'transparent' : 'var(--pb-hair-2)'}
+          bg={duty.completed ? 'var(--pb-tint-income)' : 'transparent'}
+          color="var(--pb-income)"
+        >
+          {duty.completed && <Icon as={Check} boxSize={5} weight="bold" />}
+        </Flex>
+        <Box minW={0} flex={1}>
+          <Text
+            color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
+            fontSize="sm"
+            fontWeight={600}
+            lineHeight={1.25}
+            textDecoration={duty.completed ? 'line-through' : undefined}
+          >
+            {label}
+          </Text>
+          <Text mt={0.5} color={duty.completed ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="2xs">
+            {duty.completed ? t('household.cleaning.completed') : t('household.cleaning.tapForInstructions')}
+          </Text>
+        </Box>
+        {!expanded && (
+          <Flex
+            aria-hidden="true"
+            w={4}
+            h={4}
+            flexShrink={0}
+            align="center"
+            justify="center"
+            border="1px solid var(--pb-hair-2)"
+            borderRadius="full"
+            color="var(--pb-ink-faint)"
+            fontFamily="var(--pb-serif)"
+            fontSize="10px"
+            fontStyle="italic"
+            sx={{ '&::before': { content: '"i"' } }}
+          />
+        )}
+      </Flex>
+
+      <Box
+        id={detailId}
+        px={4}
+        pb={4}
+        aria-hidden={!expanded}
+        opacity={expanded ? 1 : 0}
+        pointerEvents={expanded ? 'auto' : 'none'}
+        transition={expanded ? 'opacity 0.18s ease 0.12s' : 'opacity 0.12s ease'}
+      >
+        <Text color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.5}>
+          {t(`household.cleaning.instruction.${duty.key}`)}
+        </Text>
+        {schedule && (
+          <HStack mt={2} spacing={1.5} color={duty.completed ? 'var(--pb-income)' : 'var(--pb-gold)'}>
+            <Icon as={Clock} boxSize={3} weight="bold" />
+            <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700}>
+              {schedule}
+            </Text>
+          </HStack>
+        )}
+        {canToggle && (
+          <Button
+            mt={4}
+            size="sm"
+            h="36px"
+            borderRadius="9px"
+            isLoading={isBusy}
+            isDisabled={busyDutyKey !== null}
+            colorScheme={duty.completed ? 'gray' : 'green'}
+            onClick={() => onToggleDuty(assignmentId, duty.key, !duty.completed)}
+          >
+            {t(duty.completed ? 'household.cleaning.markNotDone' : 'household.cleaning.markDone', { duty: label })}
+          </Button>
+        )}
+      </Box>
+    </Box>
   )
 }

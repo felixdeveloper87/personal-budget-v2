@@ -18,7 +18,7 @@ export const CLEANING_DUTIES: ReadonlyArray<{
     {
       key: 'rubbish_out',
       label: 'Put the rubbish out',
-      schedule: 'Every Thursday · by 10:00',
+      schedule: 'Every Wednesday evening',
       timed: true,
     },
   ]
