@@ -1,8 +1,8 @@
 import { Badge, Box, Button, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard } from '../../../types'
-import { CheckCircle2, Home, TrendingDown, TrendingUp } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { CheckCircle2, TrendingDown, TrendingUp } from '../../../components/ui/icons'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { HOUSEHOLD_AVATAR_GRADIENTS } from '../householdAvatar'
 
 export function MembersOverviewModal({
@@ -22,12 +22,10 @@ export function MembersOverviewModal({
       onClose={onClose}
       size={{ base: 'full', md: 'xl' }}
       header={
-        <AppModalHeader
-          icon={Home}
+        <ModalHeader
           title={t('household.members.title')}
           caption={t('household.members.modalCaption')}
           onClose={onClose}
-          accent="green"
           rightSlot={
             <Badge
               bg="var(--pb-tint-green)"

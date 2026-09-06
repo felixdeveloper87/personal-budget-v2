@@ -18,10 +18,9 @@ import {
   Input,
   Modal,
   ModalBody,
-  ModalCloseButton,
   ModalContent,
   ModalFooter,
-  ModalHeader,
+  ModalHeader as ChakraModalHeader,
   ModalOverlay,
   SimpleGrid,
   Spinner,
@@ -42,6 +41,7 @@ import {
   Upload,
   X,
 } from '../../components/ui/icons'
+import { ModalHeader as AppModalHeader } from '../../components/ui'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import { ToastService } from '../../services/toast'
@@ -755,11 +755,13 @@ export function AttachmentGalleryModal({
           my={{ base: 0, md: 16 }}
           borderRadius={{ base: 0, md: 'md' }}
         >
-          <ModalHeader>
-            <Text fontSize="lg">{t('household.attachments.title')}</Text>
-            <Text color={muted} fontSize="sm" fontWeight={500} noOfLines={1}>{title}</Text>
-          </ModalHeader>
-          <ModalCloseButton aria-label={t('household.common.close')} />
+          <ChakraModalHeader p={0}>
+            <AppModalHeader
+              title={t('household.attachments.title')}
+              caption={title}
+              onClose={closeGallery}
+            />
+          </ChakraModalHeader>
           <ModalBody>
             <Stack spacing={5}>
               {attachments.length === 0 ? (

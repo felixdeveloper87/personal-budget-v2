@@ -2,8 +2,8 @@ import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Text, VStack } from
 import { useState } from 'react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningAssignment } from '../../../types'
-import { Check, CheckCircle2, Clock, List } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { Check, CheckCircle2, Clock } from '../../../components/ui/icons'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 import type { DisplayedCleaningDuty } from './cleaningConfig'
 
 export function CleaningDutiesModal({
@@ -51,12 +51,10 @@ export function CleaningDutiesModal({
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
-        <AppModalHeader
-          icon={List}
+        <ModalHeader
           title={t('household.cleaning.dutiesModalTitle')}
           caption={t('household.cleaning.dutiesModalCaption')}
           onClose={onClose}
-          accent="green"
           rightSlot={
             <Badge
               bg="var(--pb-tint-income)"

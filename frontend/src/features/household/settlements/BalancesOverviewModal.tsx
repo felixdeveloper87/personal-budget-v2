@@ -1,8 +1,8 @@
 import { Badge, Box, Button, Flex, HStack, Icon, Stack, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdDebt } from '../../../types'
-import { Check, Wallet } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { Check } from '../../../components/ui/icons'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 
 export function BalancesOverviewModal({
   isOpen,
@@ -28,12 +28,10 @@ export function BalancesOverviewModal({
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
-        <AppModalHeader
-          icon={Wallet}
+        <ModalHeader
           title={t('household.balances.title')}
           caption={t('household.balances.description')}
           onClose={onClose}
-          accent={hasOpenBalances ? 'red' : 'green'}
           rightSlot={
             <Badge
               bg={hasOpenBalances ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}

@@ -4,8 +4,8 @@ import { createHouseholdExpense, deleteHouseholdExpense, updateHouseholdExpense,
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdExpense, HouseholdExpenseRequest, HouseholdPageState } from '../../../types'
-import { Check, ReceiptText, Trash2, Zap } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { Check, Trash2, Zap } from '../../../components/ui/icons'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { AttachmentPicker } from '../HouseholdAttachments'
 import { CATEGORIES, HOUSEHOLD_EXPENSE_PRESETS, type HouseholdExpensePreset } from './expenseConfig'
 import { today } from '../householdDates'
@@ -207,14 +207,12 @@ export function ExpenseModal({
       onClose={onClose}
       size={{ base: 'full', md: '3xl' }}
       header={
-        <AppModalHeader
-          icon={ReceiptText}
+        <ModalHeader
           title={expense
             ? t('household.expenseModal.editTitle')
             : t('household.expenseModal.addTitle')}
           caption={t('household.expenseModal.caption')}
           onClose={onClose}
-          accent="red"
           rightSlot={
             <Badge
               bg="var(--pb-tint-green)"

@@ -20,7 +20,7 @@ import {
 import { createPaymentMethod, listAccounts, updatePaymentMethod } from '../../api'
 import type { FinancialAccount, PaymentMethod, PaymentMethodRequest } from '../../types'
 import { BankCombobox, ModalHeader, PremiumModal } from '../ui'
-import { Check, CreditCard, Plus } from '../ui/icons'
+import { Check, Plus } from '../ui/icons'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 
@@ -135,11 +135,9 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
       size={{ base: 'full', md: 'lg' }}
       header={
         <ModalHeader
-          icon={CreditCard}
           title={isEditing ? t('cards.form.editTitle') : t('cards.form.addTitle')}
           caption={isEditing ? card?.name : t('cards.form.caption')}
           onClose={onClose}
-          accent="blue"
         />
       }
       footer={

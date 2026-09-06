@@ -205,11 +205,9 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
       header={
         <ModalHeader
-          icon={Settings}
           title={t('settings.title')}
           caption={t('settings.caption')}
           onClose={onClose}
-          accent="blue"
         />
       }
     >

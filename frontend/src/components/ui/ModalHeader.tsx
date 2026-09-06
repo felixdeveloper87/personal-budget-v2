@@ -2,20 +2,15 @@ import type { ReactNode } from 'react'
 import {
   Box,
   HStack,
-  Icon,
   Text,
   VStack,
   useColorMode,
 } from '@chakra-ui/react'
 import { editorialPalette, useEd } from '../../editorial'
 import AppCloseButton from './AppCloseButton'
-import type { LucideIcon } from './icons'
-
-export type ModalHeaderAccent = 'blue' | 'green' | 'red' | 'violet' | 'neutral'
 
 export interface ModalHeaderProps {
   /** Lucide icon rendered inside the accent chip on the left. */
-  icon: LucideIcon
   /** Main title (one short line). */
   title: string
   /** Optional caption rendered under the title. */
@@ -23,7 +18,6 @@ export interface ModalHeaderProps {
   /** Close handler. The X button is placed in the top-right corner. */
   onClose: () => void
   /** Accent palette for the icon chip. Defaults to "blue". */
-  accent?: ModalHeaderAccent
   /**
    * Optional slot rendered between the brand block and the close button —
    * used for badges (e.g. selected period) or extra controls.
@@ -45,27 +39,17 @@ export interface ModalHeaderProps {
  * Pair with `<PremiumModal header={<ModalHeader …/>}>`.
  */
 export default function ModalHeader({
-  icon,
   title,
   caption,
   onClose,
-  accent = 'blue',
   rightSlot,
   hideClose,
 }: ModalHeaderProps) {
   const { colorMode } = useColorMode()
   const ed = useEd() ?? editorialPalette(colorMode)
-  const semanticColor =
-    accent === 'red' ? ed.red :
-    accent === 'violet' ? ed.gold :
-    ed.jade
-  const accentLine = ed.jade
-
   return (
     <Box
-      bg={ed.header}
-      borderBottom="1px solid"
-      borderColor={ed.line}
+      w="full"
       px={{ base: 3.5, sm: 6 }}
       pt={{
         // Always leave breathing room above the close button:
@@ -79,24 +63,8 @@ export default function ModalHeader({
       position="relative"
       overflow="hidden"
     >
-      <Box position="absolute" top={0} left={0} right={0} h="2px" bg={accentLine} />
       <HStack justify="space-between" align="center" spacing={3}>
         <HStack spacing={3} minW={0} flex={1}>
-          <Box
-            w={{ base: 8, sm: 9 }}
-            h={{ base: 8, sm: 9 }}
-            borderRadius="full"
-            bg={ed.panelRaised}
-            color={semanticColor}
-            border="1px solid"
-            borderColor={ed.lineStrong}
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            flexShrink={0}
-          >
-            <Icon as={icon} boxSize={{ base: 3.5, sm: 4 }} weight="duotone" />
-          </Box>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
               textStyle="display"

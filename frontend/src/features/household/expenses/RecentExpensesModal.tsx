@@ -3,7 +3,7 @@ import { Badge, Box, Button, Flex, Icon, SimpleGrid, Text, VStack } from '@chakr
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../../types'
 import { Plus, ReceiptText } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { ExpenseCard } from './ExpenseCard'
 
 export function RecentExpensesModal({
@@ -39,12 +39,10 @@ export function RecentExpensesModal({
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
-        <AppModalHeader
-          icon={ReceiptText}
+        <ModalHeader
           title={t('household.expenses.title')}
           caption={t('household.expenses.description')}
           onClose={onClose}
-          accent="green"
           rightSlot={
             <Badge
               bg="var(--pb-tint-green)"

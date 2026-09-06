@@ -3,7 +3,7 @@ import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Stack, Text, VStack
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdSettlement } from '../../../types'
 import { Mail, Upload } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 
 export function PaymentsOverviewModal({
   isOpen,
@@ -45,12 +45,10 @@ export function PaymentsOverviewModal({
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
-        <AppModalHeader
-          icon={Mail}
+        <ModalHeader
           title={t('household.settlements.title')}
           caption={t('household.settlements.description')}
           onClose={onClose}
-          accent={pendingCount ? 'violet' : 'green'}
           rightSlot={
             <Badge
               bg={pendingCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}

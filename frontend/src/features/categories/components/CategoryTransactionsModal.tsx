@@ -34,14 +34,12 @@ export default function CategoryTransactionsModal({
       header={
         cat && (
           <ModalHeader
-            icon={cat.icon}
             title={cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
             caption={t(cat.shownCount === 1 ? 'categories.modalCaption' : 'categories.modalCaptionPlural', {
               count: cat.shownCount,
               period: periodLabel,
             })}
             onClose={onClose}
-            accent={side === 'expense' ? 'red' : 'green'}
           />
         )
       }

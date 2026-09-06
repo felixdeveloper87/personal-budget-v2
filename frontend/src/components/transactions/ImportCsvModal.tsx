@@ -342,10 +342,8 @@ export default function ImportCsvModal({ isOpen, onClose, onImported }: ImportCs
       size={{ base: 'full', md: '2xl' }}
       header={
         <ModalHeader
-          icon={Upload}
           title={t('import.title')}
           caption={t('import.caption')}
-          accent="blue"
           onClose={handleClose}
         />
       }

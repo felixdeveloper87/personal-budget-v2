@@ -7,7 +7,7 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { Pencil, TrendingDown, TrendingUp } from '../ui/icons'
+import { TrendingDown, TrendingUp } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import { listAccounts, listPaymentMethods, updateTransaction } from '../../api'
 import {
@@ -165,11 +165,9 @@ export default function EditTransactionModal({
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
       header={
         <ModalHeader
-          icon={Pencil}
           title={t('transactions.editTitle')}
           caption={t(isIncome ? 'transactions.editCaptionIncome' : 'transactions.editCaptionExpense')}
           onClose={onClose}
-          accent={isIncome ? 'green' : 'red'}
         />
       }
     >

@@ -128,11 +128,9 @@ export default function TransferModal({
       size={{ base: 'full', md: 'xl' }}
       header={
         <ModalHeader
-          icon={Repeat}
           title={t('accounts.transfer.title')}
           caption={t('accounts.transfer.caption')}
           onClose={onClose}
-          accent="blue"
         />
       }
       footer={

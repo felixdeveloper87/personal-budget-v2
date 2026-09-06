@@ -87,11 +87,9 @@ export default function UserProfileModal({ isOpen, onClose, user }: UserProfileM
       size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
       header={
         <ModalHeader
-          icon={UserIcon}
           title={t('profile.title')}
           caption={t('profile.caption')}
           onClose={onClose}
-          accent="blue"
         />
       }
     >

@@ -103,11 +103,9 @@ export default function InstallmentPlansModal({
         size={{ base: 'full', sm: 'lg', md: 'xl', lg: '5xl' }}
         header={
           <ModalHeader
-            icon={CreditCard}
             title="Installment plans"
             caption="Spread a purchase across monthly installments"
             onClose={onClose}
-            accent="blue"
             rightSlot={
               activePlans.length > 0 ? (
                 <Badge colorScheme="teal" variant="subtle" px={3} py={1} borderRadius="full">

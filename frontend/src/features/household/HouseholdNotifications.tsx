@@ -24,10 +24,7 @@ import {
   Wallet,
   type LucideIcon,
 } from '../../components/ui/icons'
-import {
-  ModalHeader as AppModalHeader,
-  PremiumModal,
-} from '../../components/ui'
+import { ModalHeader, PremiumModal } from '../../components/ui'
 
 type NotificationAction = 'expenses' | 'payments' | 'cleaning' | null
 
@@ -177,11 +174,9 @@ export function HouseholdNotificationsModal({
       onClose={onClose}
       size={{ base: 'full', md: 'xl' }}
       header={(
-        <AppModalHeader
-          icon={Bell}
+        <ModalHeader
           title={t('household.notifications.title')}
           caption={t('household.notifications.historyCaption')}
-          accent="violet"
           onClose={onClose}
           rightSlot={unreadCount > 0 ? (
             <Text

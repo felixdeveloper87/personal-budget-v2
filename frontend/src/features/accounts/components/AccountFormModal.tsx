@@ -127,7 +127,6 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
       size={{ base: 'full', md: 'xl' }}
       header={
         <ModalHeader
-          icon={isEditing ? Pencil : Plus}
           title={isEditing ? t('accounts.form.editTitle') : t('accounts.form.addTitle')}
           caption={
             isEditing
@@ -135,7 +134,6 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
               : t('accounts.form.caption')
           }
           onClose={onClose}
-          accent="blue"
         />
       }
       footer={

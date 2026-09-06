@@ -4,8 +4,8 @@ import { updateHouseholdCleaningRotation } from '../../../api'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdCleaningRotation, HouseholdPageState } from '../../../types'
-import { Check, Calendar, CalendarCheck, ChevronDown, ChevronUp, Clock, Plus, Repeat, Sparkles, X } from '../../../components/ui/icons'
-import { ModalHeader as AppModalHeader, PremiumModal } from '../../../components/ui'
+import { Check, Calendar, CalendarCheck, ChevronDown, ChevronUp, Clock, Plus, Repeat, X } from '../../../components/ui/icons'
+import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { currentMonday } from '../householdDates'
 import { householdAvatarGradient } from '../householdAvatar'
 
@@ -115,14 +115,12 @@ export function CleaningRotationModal({
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
-        <AppModalHeader
-          icon={Sparkles}
+        <ModalHeader
           title={rotation.configured
             ? t('household.cleaning.modal.manageTitle')
             : t('household.cleaning.modal.setupTitle')}
           caption={t('household.cleaning.modal.caption')}
           onClose={onClose}
-          accent="green"
           rightSlot={
             <Badge
               bg={active ? 'var(--pb-tint-income)' : 'var(--pb-surface-3)'}

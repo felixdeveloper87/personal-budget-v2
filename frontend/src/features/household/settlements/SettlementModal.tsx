@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Box, Button, Divider, FormControl, FormLabel, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Divider, FormControl, FormLabel, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader as ChakraModalHeader, ModalOverlay, Text, VStack } from '@chakra-ui/react'
 import { createHouseholdSettlement, uploadHouseholdSettlementAttachments } from '../../../api'
 import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdDebt, HouseholdPageState } from '../../../types'
 import { AttachmentPicker } from '../HouseholdAttachments'
+import { ModalHeader as AppModalHeader } from '../../../components/ui'
 import { today } from '../householdDates'
 
 export function SettlementModal({
@@ -100,8 +101,13 @@ export function SettlementModal({
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
       >
-        <ModalHeader>{t('household.settlementModal.title')}</ModalHeader>
-        <ModalCloseButton aria-label={t('household.common.close')} />
+        <ChakraModalHeader p={0}>
+          <AppModalHeader
+            title={t('household.settlementModal.title')}
+            caption={t('household.settlementModal.paying')}
+            onClose={onClose}
+          />
+        </ChakraModalHeader>
         <ModalBody as="form" id="household-settlement-form" onSubmit={submit}>
           <VStack align="stretch" spacing={4}>
             <Box p={4} borderRadius="xl" bg={ed?.panelRaised ?? 'blackAlpha.50'}>

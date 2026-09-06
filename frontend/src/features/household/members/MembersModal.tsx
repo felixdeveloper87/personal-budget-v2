@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Box, Button, Divider, FormControl, FormLabel, Heading, HStack, Icon, IconButton, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Stack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
+import { Box, Button, Divider, FormControl, FormLabel, Heading, HStack, Icon, IconButton, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader as ChakraModalHeader, ModalOverlay, Stack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { inviteHouseholdMember, removeHouseholdMember, revokeHouseholdInvitation, updateHousehold, updateHouseholdMemberName } from '../../../api'
 import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdPageState } from '../../../types'
 import { Check, Pencil, Trash2, X } from '../../../components/ui/icons'
+import { ModalHeader as AppModalHeader } from '../../../components/ui'
 
 export function MembersModal({
   isOpen,
@@ -93,8 +94,13 @@ export function MembersModal({
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
       >
-        <ModalHeader>{t('household.manage.title')}</ModalHeader>
-        <ModalCloseButton aria-label={t('household.common.close')} />
+        <ChakraModalHeader p={0}>
+          <AppModalHeader
+            title={t('household.manage.title')}
+            caption={household.name}
+            onClose={onClose}
+          />
+        </ChakraModalHeader>
         <ModalBody>
           <VStack align="stretch" spacing={6}>
             <Box>
