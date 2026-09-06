@@ -57,7 +57,7 @@ export function CleaningRotationCard({
         overflow="hidden"
         bg="var(--pb-surface)"
         border="1px solid var(--pb-hair)"
-        borderRadius={{ base: '24px', md: '28px' }}
+        borderRadius={{ base: '20px', md: '24px' }}
         boxShadow="0 10px 40px -10px rgba(0,0,0,0.08)"
         transition="transform 0.2s, box-shadow 0.2s"
         _hover={{ transform: 'translateY(-2px)', boxShadow: '0 12px 48px -12px rgba(0,0,0,0.12)' }}
@@ -66,9 +66,9 @@ export function CleaningRotationCard({
           direction={{ base: 'column', sm: 'row' }}
           align={{ base: 'stretch', sm: 'center' }}
           justify="space-between"
-          gap={3}
+          gap={2}
           px={{ base: 3.5, sm: 4, md: 5 }}
-          py={{ base: 3.5, md: 4 }}
+          py={{ base: 2.5, md: 3 }}
           borderBottom="1px solid var(--pb-hair)"
           bg="var(--pb-surface)"
         >
@@ -101,7 +101,7 @@ export function CleaningRotationCard({
             <Button
               alignSelf={{ base: 'flex-start', sm: 'center' }}
               leftIcon={<Icon as={Gear} boxSize={3.5} />}
-              h="32px"
+              h="30px"
               px={3}
               borderRadius="full"
               bg="var(--pb-surface)"
@@ -207,7 +207,7 @@ export function CleaningRotationCard({
         ) : (
           <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)' }}>
             <Box
-              p={{ base: 5, md: 6 }}
+              p={{ base: 3.5, md: 4.5 }}
               borderBottom={{ base: '1px solid', lg: 'none' }}
               borderRight={{ base: 'none', lg: '1px solid' }}
               borderColor="var(--pb-hair)"
@@ -218,8 +218,13 @@ export function CleaningRotationCard({
               aria-label={currentIsUser ? t('household.cleaning.yourWeekAria') : undefined}
             >
               {current ? (
-                <VStack align="stretch" spacing={4}>
-                  <HStack justify="space-between" align="flex-start" spacing={3}>
+                <VStack align="stretch" spacing={3}>
+                  <Flex
+                    direction={{ base: 'column', sm: 'row' }}
+                    align={{ base: 'flex-start', sm: 'flex-start' }}
+                    justify="space-between"
+                    gap={{ base: 1.5, sm: 3 }}
+                  >
                     <Box>
                       <HStack spacing={2} flexWrap="wrap">
                         <Text
@@ -254,13 +259,14 @@ export function CleaningRotationCard({
                           </HStack>
                         )}
                       </HStack>
-                      <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)">
+                      <Text mt={0.5} fontSize="xs" color="var(--pb-summary-ink-soft)">
                         {displayDate(current.weekStart)} – {displayDate(current.weekEnd)}
                       </Text>
                     </Box>
                     <HStack
                       px={2.5}
                       py={1.5}
+                      alignSelf={{ base: 'flex-start', sm: 'auto' }}
                       borderRadius="full"
                       bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--pb-tint-gold)'}
                       color={currentIsComplete ? 'var(--pb-summary-income)' : 'var(--pb-summary-gold)'}
@@ -278,7 +284,7 @@ export function CleaningRotationCard({
                           : t('household.cleaning.inProgress')}
                       </Text>
                     </HStack>
-                  </HStack>
+                  </Flex>
 
                   {(() => {
                     const currentMemberIndex = members?.findIndex(
@@ -291,11 +297,11 @@ export function CleaningRotationCard({
                     const currentInitial = (current.assignedMemberName || '?').charAt(0).toUpperCase()
 
                     return (
-                      <HStack spacing={3.5} minW={0} align="center">
+                      <HStack spacing={3} minW={0} align="center">
                         <Flex
                           aria-hidden="true"
-                          w={{ base: '38px', md: '44px' }}
-                          h={{ base: '38px', md: '44px' }}
+                          w={{ base: '36px', md: '40px' }}
+                          h={{ base: '36px', md: '40px' }}
                           flexShrink={0}
                           align="center"
                           justify="center"
@@ -314,7 +320,7 @@ export function CleaningRotationCard({
                           <HStack spacing={2} flexWrap="wrap">
                             <Text
                               fontFamily="var(--pb-serif)"
-                              fontSize={{ base: '2xl', md: '3xl' }}
+                              fontSize={{ base: 'xl', md: '2xl' }}
                               fontWeight={500}
                               lineHeight={1}
                               letterSpacing="-0.03em"
@@ -324,7 +330,7 @@ export function CleaningRotationCard({
                               {currentIsUser ? t('household.cleaning.yourTurn') : current.assignedMemberName}
                             </Text>
                           </HStack>
-                          <Text mt={1} color="var(--pb-summary-ink-soft)" fontSize="sm">
+                          <Text mt={0.5} color="var(--pb-summary-ink-soft)" fontSize="sm">
                             {currentIsUser
                               ? t('household.cleaning.yourTurnDetail')
                               : t('household.cleaning.memberTurnDetail', {
@@ -385,8 +391,8 @@ export function CleaningRotationCard({
               )}
             </Box>
 
-            <Box p={{ base: 4, md: 5 }} bg="var(--pb-surface-2)">
-              <HStack justify="space-between" mb={3.5} spacing={3}>
+            <Box p={{ base: 3, md: 4 }} bg="var(--pb-surface-2)">
+              <HStack justify="space-between" mb={2.5} spacing={3}>
                 <Box>
                   <Text
                     fontFamily="var(--pb-mono)"
@@ -398,7 +404,7 @@ export function CleaningRotationCard({
                   >
                     {t('household.cleaning.comingNext')}
                   </Text>
-                  <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+                  <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" display={{ base: 'none', sm: 'block' }}>
                     {t('household.cleaning.nextThree')}
                   </Text>
                 </Box>
@@ -429,7 +435,10 @@ export function CleaningRotationCard({
                   </Text>
                 </Box>
               ) : (
-                <VStack align="stretch" spacing={2}>
+                <Grid
+                  templateColumns={{ base: 'repeat(3, minmax(0, 1fr))', lg: '1fr' }}
+                  gap={2}
+                >
                   {rotation.upcomingWeeks.map((assignment, index) => {
                     const memberIndex = members?.findIndex(
                       (member) => member.id === assignment.assignedMemberId,
@@ -444,17 +453,18 @@ export function CleaningRotationCard({
                         key={assignment.id}
                         align="center"
                         justify="space-between"
-                        gap={3}
-                        px={3}
-                        py={2.5}
+                        gap={{ base: 1, lg: 3 }}
+                        minW={0}
+                        px={2.5}
+                        py={{ base: 1.5, lg: 2.5 }}
                         borderRadius="12px"
                         bg="var(--pb-surface)"
                         border="1px solid var(--pb-hair)"
                       >
-                        <HStack minW={0} spacing={2.5}>
+                        <HStack minW={0} spacing={2}>
                           <Flex
-                            w={7}
-                            h={7}
+                            w={6}
+                            h={6}
                             flexShrink={0}
                             align="center"
                             justify="center"
@@ -470,7 +480,7 @@ export function CleaningRotationCard({
                             {formatNumber(index + 1)}
                           </Flex>
                           <Box minW={0}>
-                            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
+                            <Text fontSize="xs" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
                               {assignment.assignedMemberId === currentMemberId
                                 ? t('household.common.you')
                                 : assignment.assignedMemberName}
@@ -483,6 +493,7 @@ export function CleaningRotationCard({
                         {assignment.assignedMemberId === currentMemberId && (
                           <Badge
                             flexShrink={0}
+                            display={{ base: 'none', lg: 'inline-flex' }}
                             bg="var(--pb-tint-income)"
                             color="var(--pb-income)"
                             borderRadius="full"
@@ -495,22 +506,22 @@ export function CleaningRotationCard({
                       </Flex>
                     )
                   })}
-                </VStack>
+                </Grid>
               )}
             </Box>
           </Grid>
         )}
 
         <Box
-          px={{ base: 5, md: 6 }}
-          py={{ base: 5, md: 6 }}
+          px={{ base: 3.5, md: 4.5 }}
+          py={{ base: 3.5, md: 4.5 }}
           bg="var(--pb-surface-2)"
         >
           <Flex
             direction={{ base: 'column', sm: 'row' }}
             align={{ base: 'stretch', sm: 'center' }}
             justify="space-between"
-            gap={{ base: 5, sm: 6 }}
+            gap={{ base: 3, sm: 5 }}
           >
             <Box minW={0} flex={1}>
               <Text
@@ -523,14 +534,14 @@ export function CleaningRotationCard({
               >
                 {t('household.cleaning.dutiesTitle')}
               </Text>
-              <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm">
+              <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="sm" noOfLines={1}>
                 {current
                   ? currentIsUser
                     ? t('household.cleaning.dutiesCurrentUser')
                     : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
                   : t('household.cleaning.dutiesGeneric')}
               </Text>
-              <HStack mt={3.5} spacing={2} color="var(--pb-ink-soft)">
+              <HStack mt={2} spacing={2} color="var(--pb-ink-soft)">
                 <Icon as={CheckCircle2} boxSize={4} weight="duotone" />
                 <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} textTransform="uppercase">
                   {current
@@ -547,7 +558,7 @@ export function CleaningRotationCard({
                 </Text>
               </HStack>
               <Box
-                mt={2.5}
+                mt={1.5}
                 h="6px"
                 maxW={{ base: 'full', sm: '280px' }}
                 overflow="hidden"
@@ -568,11 +579,11 @@ export function CleaningRotationCard({
               </Box>
             </Box>
             <Button
-              h="52px"
+              h="46px"
               w={{ base: 'full', sm: 'auto' }}
               flexShrink={0}
-              px={6}
-              borderRadius="16px"
+              px={5}
+              borderRadius="13px"
               bg="var(--pb-forest-2)"
               color="var(--pb-on-accent)"
               fontSize="md"
