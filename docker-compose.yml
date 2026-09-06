@@ -43,6 +43,7 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
+      - APP_PUBLIC_URL=${APP_PUBLIC_URL:-https://www.personalbudget.co.uk}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-}
       - HOUSEHOLD_CLEANING_EMAIL_ZONE=${HOUSEHOLD_CLEANING_EMAIL_ZONE:-Europe/London}

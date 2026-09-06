@@ -13,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +45,15 @@ public class ResendEmailClient {
     }
 
     public void sendBatch(List<String> recipients, String subject, String text) {
+        send(recipients, subject, text, null);
+    }
+
+    /** Sends a branded HTML version while retaining a plain-text fallback for mail clients. */
+    public void sendHtmlBatch(List<String> recipients, String subject, String text, String html) {
+        send(recipients, subject, text, html);
+    }
+
+    private void send(List<String> recipients, String subject, String text, String html) {
         if (apiKey.isBlank() || from.isBlank()) {
             throw new IllegalStateException("Outbound email is not configured. Set RESEND_API_KEY and RESEND_FROM_EMAIL.");
         }
@@ -55,11 +65,7 @@ public class ResendEmailClient {
         }
 
         List<Map<String, Object>> messages = recipients.stream()
-                .map(recipient -> Map.<String, Object>of(
-                        "from", from,
-                        "to", List.of(recipient),
-                        "subject", subject.trim(),
-                        "text", text.trim()))
+                .map(recipient -> message(recipient, subject, text, html))
                 .toList();
 
         try {
@@ -82,5 +88,17 @@ public class ResendEmailClient {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Email sending was interrupted. Please try again.", e);
         }
+    }
+
+    private Map<String, Object> message(String recipient, String subject, String text, String html) {
+        Map<String, Object> message = new LinkedHashMap<>();
+        message.put("from", from);
+        message.put("to", List.of(recipient));
+        message.put("subject", subject.trim());
+        message.put("text", text.trim());
+        if (html != null && !html.isBlank()) {
+            message.put("html", html);
+        }
+        return message;
     }
 }

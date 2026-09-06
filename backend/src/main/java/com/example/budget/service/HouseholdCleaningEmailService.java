@@ -36,6 +36,7 @@ public class HouseholdCleaningEmailService {
     private final HouseholdCleaningDutyCompletionRepository dutyCompletionRepository;
     private final HouseholdCleaningEmailDeliveryRepository deliveryRepository;
     private final ResendEmailClient resendEmailClient;
+    private final HouseholdCleaningEmailTemplate emailTemplate;
     private final ZoneId emailZone;
 
     public HouseholdCleaningEmailService(
@@ -45,6 +46,7 @@ public class HouseholdCleaningEmailService {
             HouseholdCleaningDutyCompletionRepository dutyCompletionRepository,
             HouseholdCleaningEmailDeliveryRepository deliveryRepository,
             ResendEmailClient resendEmailClient,
+            HouseholdCleaningEmailTemplate emailTemplate,
             @org.springframework.beans.factory.annotation.Value("${app.household.cleaning.email-zone:Europe/London}") String emailZone) {
         this.rotationRepository = rotationRepository;
         this.rotationMemberRepository = rotationMemberRepository;
@@ -52,6 +54,7 @@ public class HouseholdCleaningEmailService {
         this.dutyCompletionRepository = dutyCompletionRepository;
         this.deliveryRepository = deliveryRepository;
         this.resendEmailClient = resendEmailClient;
+        this.emailTemplate = emailTemplate;
         this.emailZone = ZoneId.of(emailZone);
     }
 
@@ -140,14 +143,15 @@ public class HouseholdCleaningEmailService {
             log.info("Skipping cleaning assignment email for member {}: no communication email", member.getId());
             return;
         }
-        String household = assignment.getRotation().getHousehold().getName();
-        resendEmailClient.sendBatch(
+        HouseholdCleaningEmailTemplate.EmailContent content = emailTemplate.assigned(
+                member.getDisplayName(),
+                assignment.getRotation().getHousehold().getName(),
+                assignment.getWeekStart());
+        resendEmailClient.sendHtmlBatch(
                 List.of(recipient),
                 "Cleaning week: you are responsible",
-                "Hello " + member.getDisplayName() + ",\n\n"
-                        + "You are responsible for the cleaning in " + household + " this week ("
-                        + assignment.getWeekStart() + " to " + assignment.getWeekStart().plusDays(6) + ").\n"
-                        + "Open Personal Budget to see and complete the checklist.\n");
+                content.text(),
+                content.html());
         markDelivered(assignment, HouseholdCleaningEmailDeliveryType.WEEK_ASSIGNED);
     }
 
@@ -166,14 +170,16 @@ public class HouseholdCleaningEmailService {
             log.info("Skipping cleaning completion reminder for member {}: no communication email", member.getId());
             return;
         }
-        String household = assignment.getRotation().getHousehold().getName();
-        resendEmailClient.sendBatch(
+        HouseholdCleaningEmailTemplate.EmailContent content = emailTemplate.incomplete(
+                member.getDisplayName(),
+                assignment.getRotation().getHousehold().getName(),
+                completed,
+                CLEANING_DUTY_COUNT);
+        resendEmailClient.sendHtmlBatch(
                 List.of(recipient),
                 "Cleaning checklist still pending",
-                "Hello " + member.getDisplayName() + ",\n\n"
-                        + "Your cleaning week for " + household + " ends today. You have completed "
-                        + completed + " of " + CLEANING_DUTY_COUNT + " tasks.\n"
-                        + "Please open Personal Budget and complete the remaining checklist items.\n");
+                content.text(),
+                content.html());
         markDelivered(assignment, HouseholdCleaningEmailDeliveryType.INCOMPLETE_REMINDER);
     }
 

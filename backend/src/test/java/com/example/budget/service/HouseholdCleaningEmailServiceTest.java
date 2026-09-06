@@ -35,6 +35,7 @@ class HouseholdCleaningEmailServiceTest {
     @Mock private HouseholdCleaningDutyCompletionRepository dutyCompletionRepository;
     @Mock private HouseholdCleaningEmailDeliveryRepository deliveryRepository;
     @Mock private ResendEmailClient resendEmailClient;
+    @Mock private HouseholdCleaningEmailTemplate emailTemplate;
     @Mock private HouseholdCleaningRotation rotation;
     @Mock private HouseholdCleaningAssignment assignment;
     @Mock private HouseholdCleaningRotationMember rotationMember;
@@ -54,6 +55,7 @@ class HouseholdCleaningEmailServiceTest {
                 dutyCompletionRepository,
                 deliveryRepository,
                 resendEmailClient,
+                emailTemplate,
                 "Europe/London");
         when(rotationRepository.findByActiveTrue()).thenReturn(List.of(rotation));
         when(rotation.isActive()).thenReturn(true);
@@ -67,6 +69,10 @@ class HouseholdCleaningEmailServiceTest {
         when(member.getDisplayName()).thenReturn("Leandro");
         when(member.getId()).thenReturn(2L);
         when(user.getCommunicationEmail()).thenReturn("leandro@example.com");
+        when(emailTemplate.assigned(any(), any(), any()))
+                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>assigned</html>"));
+        when(emailTemplate.incomplete(any(), any(), any(), any()))
+                .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>reminder</html>"));
         when(rotationMemberRepository.findByRotationOrderByPositionAsc(rotation))
                 .thenReturn(List.of(rotationMember));
         when(assignmentRepository.findByRotationAndWeekStartInOrderByWeekStartAsc(
@@ -83,10 +89,11 @@ class HouseholdCleaningEmailServiceTest {
 
         service.sendMondayAssignmentEmails(monday);
 
-        verify(resendEmailClient).sendBatch(
+        verify(resendEmailClient).sendHtmlBatch(
                 eq(List.of("leandro@example.com")),
                 eq("Cleaning week: you are responsible"),
-                org.mockito.ArgumentMatchers.contains("Leandro"));
+                eq("text"),
+                eq("<html>assigned</html>"));
         verify(deliveryRepository).save(any());
     }
 
@@ -97,7 +104,7 @@ class HouseholdCleaningEmailServiceTest {
 
         service.sendSundayIncompleteReminders(sunday);
 
-        verify(resendEmailClient, never()).sendBatch(any(), any(), any());
+        verify(resendEmailClient, never()).sendHtmlBatch(any(), any(), any(), any());
         verify(deliveryRepository, never()).save(any());
     }
 
@@ -110,10 +117,11 @@ class HouseholdCleaningEmailServiceTest {
 
         service.sendSundayIncompleteReminders(sunday);
 
-        verify(resendEmailClient).sendBatch(
+        verify(resendEmailClient).sendHtmlBatch(
                 eq(List.of("leandro@example.com")),
                 eq("Cleaning checklist still pending"),
-                org.mockito.ArgumentMatchers.contains("0 of 10"));
+                eq("text"),
+                eq("<html>reminder</html>"));
         verify(deliveryRepository).save(any());
     }
 }
