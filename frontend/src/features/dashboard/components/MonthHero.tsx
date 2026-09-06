@@ -151,16 +151,15 @@ export default function MonthHero({
                 <Button
                   h="50px"
                   borderRadius="10px"
-                  bg="var(--pb-summary-panel)"
-                  color="var(--pb-summary-coral)"
-                  border="1px solid var(--pb-summary-line)"
+                  bg="red.800"
+                  color="white"
                   fontFamily="var(--pb-mono)"
                   fontSize="12px"
                   fontWeight={600}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
                   leftIcon={<Plus size={14} strokeWidth={2.5} />}
-                  _hover={{ bg: 'var(--pb-summary-control)', borderColor: 'var(--pb-summary-coral)', transform: 'translateY(-1px)' }}
+                  _hover={{ bg: 'red.600', transform: 'translateY(-1px)' }}
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddExpense}
                 >
