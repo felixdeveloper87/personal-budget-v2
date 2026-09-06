@@ -63,16 +63,15 @@ export function CleaningRotationCard({
         _hover={{ transform: 'translateY(-2px)', boxShadow: '0 12px 48px -12px rgba(0,0,0,0.12)' }}
       >
         <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          align={{ base: 'stretch', sm: 'center' }}
+          align="center"
           justify="space-between"
           gap={2}
-          px={{ base: 3.5, sm: 4, md: 5 }}
-          py={{ base: 2.5, md: 3 }}
+          px={{ base: 3, sm: 4, md: 5 }}
+          py={{ base: 2, md: 3 }}
           borderBottom="1px solid var(--pb-hair)"
           bg="var(--pb-surface)"
         >
-          <Box minW={0}>
+          <Box minW={0} flex={1}>
             <Text
               fontFamily="var(--pb-mono)"
               fontSize="9px"
@@ -86,23 +85,23 @@ export function CleaningRotationCard({
             <Text
               mt={0.5}
               fontFamily="var(--pb-serif)"
-              fontSize={{ base: 'lg', md: 'xl' }}
+              fontSize={{ base: 'md', md: 'xl' }}
               fontWeight={500}
               lineHeight={1.1}
               color="var(--pb-ink)"
             >
               {t('household.cleaning.title')}
             </Text>
-            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+            <Text mt={0.5} display={{ base: 'none', sm: 'block' }} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
               {t('household.cleaning.description')}
             </Text>
           </Box>
           {rotation.canManage && (
             <Button
-              alignSelf={{ base: 'flex-start', sm: 'center' }}
+              flexShrink={0}
               leftIcon={<Icon as={Gear} boxSize={3.5} />}
-              h="30px"
-              px={3}
+              h="28px"
+              px={2.5}
               borderRadius="full"
               bg="var(--pb-surface)"
               color="var(--pb-ink-soft)"
@@ -207,7 +206,7 @@ export function CleaningRotationCard({
         ) : (
           <Grid templateColumns={{ base: '1fr', lg: 'minmax(0, 1.15fr) minmax(320px, 0.85fr)' }}>
             <Box
-              p={{ base: 3.5, md: 4.5 }}
+              p={{ base: 3, md: 4.5 }}
               borderBottom={{ base: '1px solid', lg: 'none' }}
               borderRight={{ base: 'none', lg: '1px solid' }}
               borderColor="var(--pb-hair)"
@@ -218,14 +217,13 @@ export function CleaningRotationCard({
               aria-label={currentIsUser ? t('household.cleaning.yourWeekAria') : undefined}
             >
               {current ? (
-                <VStack align="stretch" spacing={3}>
+                <VStack align="stretch" spacing={2.5}>
                   <Flex
-                    direction={{ base: 'column', sm: 'row' }}
-                    align={{ base: 'flex-start', sm: 'flex-start' }}
+                    align="flex-start"
                     justify="space-between"
-                    gap={{ base: 1.5, sm: 3 }}
+                    gap={2}
                   >
-                    <Box>
+                    <Box minW={0}>
                       <HStack spacing={2} flexWrap="wrap">
                         <Text
                           fontFamily="var(--pb-mono)"
@@ -265,20 +263,20 @@ export function CleaningRotationCard({
                     </Box>
                     <HStack
                       px={2.5}
-                      py={1.5}
-                      alignSelf={{ base: 'flex-start', sm: 'auto' }}
+                      py={1}
+                      flexShrink={0}
                       borderRadius="full"
                       bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--pb-tint-gold)'}
                       color={currentIsComplete ? 'var(--pb-summary-income)' : 'var(--pb-summary-gold)'}
                       border="1px solid var(--pb-summary-line)"
-                      spacing={1.5}
+                      spacing={1}
                     >
                       <Icon
                         as={currentIsComplete ? CheckCircle2 : Clock}
-                        boxSize={3.5}
+                        boxSize={3}
                         weight="duotone"
                       />
-                      <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} textTransform="uppercase">
+                      <Text fontFamily="var(--pb-mono)" fontSize="7px" fontWeight={700} textTransform="uppercase">
                         {currentIsComplete
                           ? t('household.cleaning.completed')
                           : t('household.cleaning.inProgress')}
