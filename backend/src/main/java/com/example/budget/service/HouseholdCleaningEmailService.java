@@ -1,6 +1,7 @@
 package com.example.budget.service;
 
 import com.example.budget.model.HouseholdCleaningAssignment;
+import com.example.budget.model.HouseholdCleaningDutyCompletion;
 import com.example.budget.model.HouseholdCleaningEmailDelivery;
 import com.example.budget.model.HouseholdCleaningEmailDeliveryType;
 import com.example.budget.model.HouseholdCleaningRotation;
@@ -23,6 +24,7 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /** Sends the weekly cleaning reminder only to the member assigned to that week. */
 @Service
@@ -160,7 +162,9 @@ public class HouseholdCleaningEmailService {
                 || assignment.getCompletedAt() != null) {
             return;
         }
-        long completed = dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment).size();
+        List<HouseholdCleaningDutyCompletion> completions =
+                dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment);
+        long completed = completions.size();
         if (completed >= CLEANING_DUTY_COUNT) {
             return;
         }
@@ -174,7 +178,10 @@ public class HouseholdCleaningEmailService {
                 member.getDisplayName(),
                 assignment.getRotation().getHousehold().getName(),
                 completed,
-                CLEANING_DUTY_COUNT);
+                CLEANING_DUTY_COUNT,
+                HouseholdCleaningService.incompleteDutyLabels(completions.stream()
+                        .map(HouseholdCleaningDutyCompletion::getDutyKey)
+                        .collect(Collectors.toSet())));
         resendEmailClient.sendHtmlBatch(
                 List.of(recipient),
                 "Cleaning checklist still pending",

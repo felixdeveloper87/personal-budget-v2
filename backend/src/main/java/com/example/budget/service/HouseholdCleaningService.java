@@ -50,6 +50,14 @@ public class HouseholdCleaningService {
                     CleaningDutyDefinition::key,
                     Function.identity()));
 
+    /** Maps stored completion keys to the remaining task labels for reminders. */
+    static List<String> incompleteDutyLabels(Set<String> completedDutyKeys) {
+        return DUTIES.stream()
+                .filter(duty -> !completedDutyKeys.contains(duty.key()))
+                .map(CleaningDutyDefinition::label)
+                .toList();
+    }
+
     private final HouseholdCleaningRotationRepository rotationRepository;
     private final HouseholdCleaningRotationMemberRepository rotationMemberRepository;
     private final HouseholdCleaningAssignmentRepository assignmentRepository;

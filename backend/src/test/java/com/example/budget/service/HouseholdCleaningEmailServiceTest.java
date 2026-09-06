@@ -2,6 +2,7 @@ package com.example.budget.service;
 
 import com.example.budget.model.Household;
 import com.example.budget.model.HouseholdCleaningAssignment;
+import com.example.budget.model.HouseholdCleaningDutyCompletion;
 import com.example.budget.model.HouseholdCleaningRotation;
 import com.example.budget.model.HouseholdCleaningRotationMember;
 import com.example.budget.model.HouseholdMember;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.ArgumentCaptor;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -24,11 +26,13 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class HouseholdCleaningEmailServiceTest {
@@ -121,10 +125,13 @@ class HouseholdCleaningEmailServiceTest {
         LocalDate sunday = monday.plusDays(6);
         stubCurrentAssignment();
         stubEmailRecipient();
+        HouseholdCleaningDutyCompletion completedDuty = new HouseholdCleaningDutyCompletion();
+        completedDuty.setDutyKey("shower_room");
         when(assignment.getCompletedAt()).thenReturn(null);
         when(deliveryRepository.existsByAssignmentAndDeliveryType(any(), any())).thenReturn(false);
-        when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment)).thenReturn(List.of());
-        when(emailTemplate.incomplete(anyString(), anyString(), anyLong(), anyInt()))
+        when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment))
+                .thenReturn(List.of(completedDuty));
+        when(emailTemplate.incomplete(anyString(), anyString(), anyLong(), anyInt(), anyList()))
                 .thenReturn(new HouseholdCleaningEmailTemplate.EmailContent("text", "<html>reminder</html>"));
 
         service.sendSundayIncompleteReminders(sunday);
@@ -135,5 +142,11 @@ class HouseholdCleaningEmailServiceTest {
                 eq("text"),
                 eq("<html>reminder</html>"));
         verify(deliveryRepository).save(any());
+        ArgumentCaptor<List<String>> remainingDuties = ArgumentCaptor.forClass(List.class);
+        verify(emailTemplate).incomplete(
+                eq("Leandro"), eq("Flat 1"), eq(1L), eq(10), remainingDuties.capture());
+        assertThat(remainingDuties.getValue())
+                .contains("Clean the toilet / WC", "Empty all bins")
+                .doesNotContain("Clean the shower room");
     }
 }
