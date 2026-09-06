@@ -31,6 +31,7 @@ public class HouseholdService {
     private final HouseholdAttachmentRepository attachmentRepository;
     private final HouseholdCleaningService cleaningService;
     private final HouseholdNotificationService notificationService;
+    private final HouseholdPaymentEmailService paymentEmailService;
     private final UserRepository userRepository;
 
     public HouseholdService(
@@ -43,6 +44,7 @@ public class HouseholdService {
             HouseholdAttachmentRepository attachmentRepository,
             HouseholdCleaningService cleaningService,
             HouseholdNotificationService notificationService,
+            HouseholdPaymentEmailService paymentEmailService,
             UserRepository userRepository) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -53,6 +55,7 @@ public class HouseholdService {
         this.attachmentRepository = attachmentRepository;
         this.cleaningService = cleaningService;
         this.notificationService = notificationService;
+        this.paymentEmailService = paymentEmailService;
         this.userRepository = userRepository;
     }
 
@@ -346,6 +349,7 @@ public class HouseholdService {
                 settlement.getId(),
                 null,
                 settlement.getAmount());
+        paymentEmailService.sendPendingConfirmation(settlement);
         return settlement.getId();
     }
 
