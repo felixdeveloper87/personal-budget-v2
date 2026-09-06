@@ -1,0 +1,20 @@
+/* Individual scale composes with positioning transforms (menus, chevrons, etc.).
+   A shared transition also reaches native buttons and controls in portals.
+   Components can retain their own color timing with --pb-control-transition. */
+html body :is(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], a.chakra-button, a.pbv3-button):not(:disabled):not([aria-disabled="true"]):not([data-disabled]):not([data-loading]) {
+  scale: 1;
+  transform-origin: center;
+  transition: var(--pb-control-transition, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.15s ease), scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+html body :is(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], a.chakra-button, a.pbv3-button):not(:disabled):not([aria-disabled="true"]):not([data-disabled]):not([data-loading]):active {
+  scale: 0.88;
+  transition: var(--pb-control-transition, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, transform 0.15s ease), scale 0.08s ease-out !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html body :is(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"], a.chakra-button, a.pbv3-button) {
+    scale: 1 !important;
+    transition: none !important;
+  }
+}

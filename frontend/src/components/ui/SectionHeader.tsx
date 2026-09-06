@@ -99,7 +99,7 @@ export default function SectionHeader({
   const ed = useEd()
 
   const titleColorBase = useColorModeValue('gray.900', 'gray.50')
-  const titleColor = ed ? ed.cream : titleColorBase
+  const titleColor = ed ? ed.headerInk : titleColorBase
   const captionColorBase = useColorModeValue('gray.500', 'gray.400')
   const captionColor = ed ? ed.muted : captionColorBase
   const accentColorBase = useColorModeValue(tokens.fgLight, tokens.fgDark)

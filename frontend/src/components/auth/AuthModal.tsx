@@ -51,9 +51,7 @@ function AuthSeal({ size = 52 }: { size?: number }) {
   return (
     <BrandMark
       size={size}
-      cream={C.cream}
-      jade={C.jade}
-      gold={C.gold}
+      colorMode="dark"
       style={{ flexShrink: 0, filter: 'drop-shadow(0 8px 14px rgba(0, 0, 0, 0.24))' }}
     />
   )

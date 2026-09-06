@@ -1,23 +1,16 @@
 import { extendTheme, ThemeConfig } from '@chakra-ui/react'
+import { BRAND_COLORS, DARK_PALETTE, LIGHT_PALETTE, paletteCssVariables } from './palette'
 
 // 🎨 Gradientes centralizados
 const GRADIENTS = {
-  light:
-    'radial-gradient(circle at 12% -8%, rgba(255,255,255,0.96) 0%, transparent 36%), radial-gradient(circle at 100% 0%, rgba(38,115,90,0.035) 0%, transparent 30%), linear-gradient(145deg, #f8f9f7 0%, #f3f4f2 48%, #ecefeb 100%)',
-  dark:
-    'radial-gradient(circle at 88% -12%, rgba(55,150,125,0.08) 0%, transparent 32%), linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
-
-  cardLight: 'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(247,248,246,0.94) 100%)',
-  cardDark: 'linear-gradient(135deg, rgba(15,19,17,0.98) 0%, rgba(10,13,12,0.96) 100%)',
-
-  secondaryLight: 'linear-gradient(135deg, #ffffff 0%, #f3f4f2 100%)',
-  secondaryDark: 'linear-gradient(135deg, #101312 0%, #151a17 100%)',
+  light: LIGHT_PALETTE.canvas,
+  dark: DARK_PALETTE.canvas,
+  cardLight: LIGHT_PALETTE.surface,
+  cardDark: DARK_PALETTE.surface,
+  secondaryLight: LIGHT_PALETTE['surface-2'],
+  secondaryDark: DARK_PALETTE['surface-2'],
 } as const
 
-// 🔤 Fontes da plataforma — fonte única de verdade.
-// Os mesmos valores da skin editorial (ver src/editorial.tsx). Reusados abaixo
-// em `fonts` (defaults do Chakra) e em `textStyles` (tokens reutilizáveis:
-// textStyle="display" | "body" | "mono"), para não repetir a família em cada arquivo.
 const FONTS = {
   display: "'Instrument Serif', Georgia, serif",
   mono: "'Spline Sans Mono', ui-monospace, monospace",
@@ -40,8 +33,15 @@ const theme = extendTheme({
   },
   styles: {
     global: {
+      ':root': paletteCssVariables(LIGHT_PALETTE),
+      '[data-theme="dark"]': paletteCssVariables(DARK_PALETTE),
+      '::selection': {
+        bg: 'var(--pb-sidebar-active-bg)',
+        color: 'var(--pb-ink)',
+      },
       // 👇 Estilos específicos para navegadores móveis (Safari/Chrome no iPhone)
       html: {
+        colorScheme: 'light',
         // Suporte para safe areas em navegadores móveis
         paddingTop: 'env(safe-area-inset-top, 0px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -58,16 +58,14 @@ const theme = extendTheme({
         // Previne scroll horizontal indesejado
         overflowX: 'hidden',
         // Estilos de tema
-        bg: GRADIENTS.light,
+        bg: 'var(--pb-paper)',
+        backgroundImage: 'var(--pb-canvas)',
 
-        color: '#17201c',
+        color: 'var(--pb-ink)',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
       // Estilos para modo escuro
-      '[data-theme="dark"] body': {
-        bg: GRADIENTS.dark,
-        color: '#eff4f1',
-      },
+      'html[data-theme="dark"]': { colorScheme: 'dark' },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
         WebkitOverflowScrolling: 'touch',
@@ -111,114 +109,86 @@ const theme = extendTheme({
     appContent: '1720px',
   },
   colors: {
-    brand: {
-      50: '#eef7f4',
-      100: '#d5ece4',
-      200: '#aad9c9',
-      300: '#5fd0b5',
-      400: '#42bd98',
-      500: '#26735a',
-      600: '#18513e',
-      700: '#144536',
-      800: '#10392d',
-      900: '#0a2a22',
+    brand: BRAND_COLORS,
+  },
+  semanticTokens: {
+    colors: {
+      'chakra-body-bg': { default: LIGHT_PALETTE.paper, _dark: DARK_PALETTE.paper },
+      'chakra-body-text': { default: LIGHT_PALETTE.ink, _dark: DARK_PALETTE.ink },
+      'chakra-border-color': { default: LIGHT_PALETTE.hair, _dark: DARK_PALETTE.hair },
     },
   },
   components: {
     // Apenas componentes essenciais que são realmente usados
     Card: {
-      baseStyle: (props: any) => ({
+      baseStyle: {
         container: {
-          // Card translúcido (igual ao token `panel` do editorial) pra o backdrop
-          // aparecer de leve nos dois modos, mantendo a leitura.
-          bg: props.colorMode === 'dark' ? 'rgba(10, 13, 12, 0.94)' : 'rgba(255, 255, 255, 0.90)',
-          borderColor: props.colorMode === 'dark' ? 'rgba(232, 242, 237, 0.09)' : 'rgba(23, 32, 28, 0.11)',
+          bg: 'var(--pb-surface)',
+          borderColor: 'var(--pb-hair)',
           borderRadius: '2xl',
-          boxShadow: props.colorMode === 'dark'
-            ? '0 1px 2px rgba(0,0,0,0.52), 0 14px 38px rgba(0,0,0,0.40)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.84), 0 1px 2px rgba(18,45,36,0.045), 0 12px 32px rgba(18,45,36,0.07)',
-          backdropFilter: props.colorMode === 'dark'
-            ? 'blur(14px) saturate(112%)'
-            : 'blur(18px) saturate(112%)',
+          boxShadow: 'var(--pb-shadow)',
         },
-      }),
+      },
     },
     Modal: {
-      baseStyle: (props: any) => ({
+      baseStyle: {
         dialog: {
-          // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
-          // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(13, 16, 15, 0.98)' : 'rgba(255, 255, 255, 0.97)',
-          backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#eff4f1' : '#17201c',
+          bg: 'var(--pb-modal)',
+          color: 'var(--pb-ink)',
           borderRadius: '18px',
           border: '1px solid',
-          borderColor: props.colorMode === 'dark'
-            ? 'rgba(232, 242, 237, 0.17)'
-            : 'rgba(24, 81, 62, 0.23)',
-          boxShadow: props.colorMode === 'dark'
-            ? '0 32px 90px -28px rgba(0, 0, 0, 0.78)'
-            : '0 28px 80px -28px rgba(18, 45, 36, 0.28)',
+          borderColor: 'var(--pb-hair-2)',
+          boxShadow: 'var(--pb-modal-shadow)',
           overflow: 'hidden',
         },
         overlay: {
-          bg: props.colorMode === 'dark'
-            ? 'rgba(2, 4, 3, 0.76)'
-            : 'rgba(23, 32, 28, 0.30)',
-          backdropFilter: 'blur(18px) saturate(115%)',
+          bg: 'var(--pb-overlay)',
+          backdropFilter: 'blur(10px)',
         },
         header: {
           fontFamily: FONTS.display,
           fontWeight: 400,
+          bg: 'var(--pb-header)',
+          color: 'var(--pb-header-ink)',
         },
         footer: {
           borderTop: '1px solid',
-          borderColor: props.colorMode === 'dark'
-            ? 'rgba(232, 242, 237, 0.09)'
-            : 'rgba(23, 32, 28, 0.11)',
+          borderColor: 'var(--pb-hair)',
         },
-      }),
+      },
     },
-    AlertDialog: {
-      baseStyle: (props: any) => ({
-        dialog: {
-          // Leve transparência + blur (vidro fosco): deixa o fundo aparecer
-          // sutilmente sem atrapalhar a leitura. Igual ao token `modal` do editorial.
-          bg: props.colorMode === 'dark' ? 'rgba(13, 16, 15, 0.98)' : 'rgba(255, 255, 255, 0.97)',
-          backdropFilter: 'blur(20px) saturate(140%)',
-          color: props.colorMode === 'dark' ? '#eff4f1' : '#17201c',
-          borderRadius: '18px',
-          border: '1px solid',
-          borderColor: props.colorMode === 'dark'
-            ? 'rgba(232, 242, 237, 0.17)'
-            : 'rgba(24, 81, 62, 0.23)',
-          boxShadow: props.colorMode === 'dark'
-            ? '0 32px 90px -28px rgba(0, 0, 0, 0.78)'
-            : '0 28px 80px -28px rgba(18, 45, 36, 0.28)',
-          overflow: 'hidden',
+    Menu: {
+      baseStyle: {
+        list: {
+          bg: 'var(--pb-solid)',
+          color: 'var(--pb-ink)',
+          borderColor: 'var(--pb-hair-2)',
+          boxShadow: 'var(--pb-shadow-lift)',
         },
-        overlay: {
-          bg: props.colorMode === 'dark'
-            ? 'rgba(2, 4, 3, 0.76)'
-            : 'rgba(23, 32, 28, 0.30)',
-          backdropFilter: 'blur(18px) saturate(115%)',
+        item: {
+          bg: 'transparent',
+          _focus: { bg: 'var(--pb-hover)' },
+          _active: { bg: 'var(--pb-tint-green)' },
         },
-        header: {
-          fontFamily: FONTS.display,
-          fontWeight: 400,
+      },
+    },
+    Popover: {
+      baseStyle: {
+        content: {
+          bg: 'var(--pb-solid)',
+          color: 'var(--pb-ink)',
+          borderColor: 'var(--pb-hair-2)',
+          boxShadow: 'var(--pb-shadow-lift)',
         },
-        footer: {
-          borderTop: '1px solid',
-          borderColor: props.colorMode === 'dark'
-            ? 'rgba(232, 242, 237, 0.09)'
-            : 'rgba(23, 32, 28, 0.11)',
-        },
-      }),
+      },
+    },
+    Button: {
+      baseStyle: {
+        _focusVisible: { boxShadow: '0 0 0 3px var(--pb-focus)' },
+      },
     },
   },
 })
 
 export default theme
-
-// Exportar gradientes para uso em outros componentes
 export { GRADIENTS }

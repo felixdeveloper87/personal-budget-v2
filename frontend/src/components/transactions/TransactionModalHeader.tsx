@@ -27,7 +27,7 @@ export default function TransactionModalHeader({
 
   return (
     <Box
-      bg={ed.bg2}
+      bg={ed.header}
       borderBottom="1px solid"
       borderColor={ed.line}
       px={{ base: 3.5, sm: 6 }}
@@ -45,9 +45,7 @@ export default function TransactionModalHeader({
         left={0}
         right={0}
         h="2px"
-        bg={type === 'INCOME'
-          ? `linear-gradient(90deg, ${ed.jade}, ${ed.gold})`
-          : `linear-gradient(90deg, ${ed.red}, ${ed.gold})`}
+        bg={ed.jade}
       />
 
       <VStack align="stretch" spacing={0.5}>
@@ -56,7 +54,7 @@ export default function TransactionModalHeader({
             textStyle="display"
             fontWeight={400}
             fontSize={{ base: 'xl', sm: '2xl' }}
-            color={ed.cream}
+            color={ed.headerInk}
             lineHeight="1"
             noOfLines={1}
           >

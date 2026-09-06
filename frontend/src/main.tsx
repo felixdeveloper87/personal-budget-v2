@@ -9,6 +9,7 @@ import {
 import App from './App'
 import ReportPrintPage from './pages/ReportPrintPage'
 import theme from './theme'
+import './styles/button-motion.css'
 import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
 import { AppToastContainer } from './services/toast'

@@ -7,9 +7,10 @@ import {
   Tooltip,
   useBreakpointValue,
   useColorModeValue,
+  usePrefersReducedMotion,
   type StackProps,
 } from '@chakra-ui/react'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import {
   NAV_ITEMS,
   localizeNavigationItems,
@@ -51,6 +52,7 @@ export default function NavBar({
     [items, t],
   )
   const isMobile = variant === 'mobile'
+  const reducedMotion = usePrefersReducedMotion()
   // Mobile shows every destination in a horizontally scrollable carousel
   // (no "More" overflow menu); desktop lays them out inline.
   const activeNavId = navItemIdFor(currentPage)
@@ -102,14 +104,14 @@ export default function NavBar({
   const trackBorderMobileBase = useColorModeValue('rgba(203,213,225,0.95)', 'rgba(255,255,255,0.16)')
   const trackBorderMobile = ed ? ed.lineStrong : trackBorderMobileBase
   const indicatorBgMobileBase = useColorModeValue('white', 'rgba(255,255,255,0.22)')
-  const indicatorBgMobile = ed ? ed.jadeSoftHover : indicatorBgMobileBase
+  const indicatorBgMobile = ed ? ed.header : indicatorBgMobileBase
   const chevronBgBase = useColorModeValue('rgba(255,255,255,0.96)', 'rgba(18,20,26,0.94)')
   const chevronBg = ed ? ed.glass : chevronBgBase
   const accentBarBase = useColorModeValue(
     'linear-gradient(90deg, #2563eb, #7c3aed)',
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
   )
-  const accentBar = ed ? `linear-gradient(90deg, ${ed.jade}, ${ed.gold})` : accentBarBase
+  const accentBar = ed ? ed.jade : accentBarBase
   const focusShadow = ed
     ? `0 0 0 2px ${ed.bg}, 0 0 0 5px ${ed.jade}`
     : '0 0 0 3px rgba(59, 130, 246, 0.35)'
@@ -118,6 +120,9 @@ export default function NavBar({
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
 
   const [indicator, setIndicator] = useState<IndicatorRect>({ left: 0, width: 0, ready: false })
+  const indicatorTransition = reducedMotion
+    ? 'none'
+    : 'left 0.4s cubic-bezier(0.65, 0, 0.35, 1), width 0.4s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.2s ease'
   // Whether the carousel can still scroll further in each direction — drives the
   // edge chevrons that hint there are more pages off-screen.
   const [edges, setEdges] = useState({ start: false, end: false })
@@ -151,14 +156,20 @@ export default function NavBar({
     if (!el) return
     setIndicator({ left: el.offsetLeft, width: el.offsetWidth, ready: true })
     if (isMobile) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      el.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'nearest', inline: 'center' })
     }
-  }, [activeNavId, isMobile])
+  }, [activeNavId, isMobile, reducedMotion])
+
+  const selectTab = useCallback((page: AppPage, button: HTMLButtonElement) => {
+    // Measure the clicked button in the scroll track's own coordinate space.
+    setIndicator({ left: button.offsetLeft, width: button.offsetWidth, ready: true })
+    onPageChange?.(page)
+  }, [onPageChange])
 
   useLayoutEffect(() => {
     measure()
     updateEdges()
-  }, [measure, updateEdges, variant, isIconOnly])
+  }, [measure, updateEdges, variant, isIconOnly, localizedItems])
 
   useEffect(() => {
     if (!containerRef.current || typeof ResizeObserver === 'undefined') return
@@ -167,14 +178,17 @@ export default function NavBar({
       updateEdges()
     })
     ro.observe(containerRef.current)
+    Object.values(itemRefs.current).forEach((button) => {
+      if (button) ro.observe(button)
+    })
     return () => ro.disconnect()
-  }, [measure, updateEdges])
+  }, [measure, updateEdges, localizedItems])
 
 
   const nudge = (dir: 1 | -1) => {
     const el = containerRef.current
     if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: 'smooth' })
+    el.scrollBy({ left: dir * el.clientWidth * 0.7, behavior: reducedMotion ? 'auto' : 'smooth' })
     flagInteracting()
   }
 
@@ -183,6 +197,7 @@ export default function NavBar({
       ref={containerRef}
       as="nav"
       role="tablist"
+      aria-orientation="horizontal"
       aria-label={t('header.nav.primary')}
       spacing={1}
       p={1}
@@ -199,6 +214,17 @@ export default function NavBar({
       overflowX={isMobile ? 'auto' : 'hidden'}
       overflowY="hidden"
       position="relative"
+      onKeyDown={(event) => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+        const buttons = localizedItems.map((item) => itemRefs.current[item.id]).filter((button): button is HTMLButtonElement => !!button)
+        const index = buttons.indexOf(event.target as HTMLButtonElement)
+        if (index < 0 || !buttons.length) return
+        event.preventDefault()
+        const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length
+        buttons[nextIndex].focus({ preventScroll: true })
+        buttons[nextIndex].click()
+      }}
       onScroll={
         isMobile
           ? () => {
@@ -229,11 +255,12 @@ export default function NavBar({
         bottom="4px"
         left={`${indicator.left}px`}
         width={`${indicator.width}px`}
-        borderRadius={isMobile ? 'xl' : 'lg'}
+        borderRadius={isMobile ? 'full' : 'lg'}
         bg={isMobile ? indicatorBgMobile : indicatorBg}
         boxShadow={`${indicatorShadow}, ${indicatorRing}`}
         opacity={indicator.ready ? 1 : 0}
-        transition="left 0.35s cubic-bezier(0.32, 0.72, 0, 1), width 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease"
+        transition={indicatorTransition}
+        data-nav-indicator="true"
         zIndex={0}
         pointerEvents="none"
       />
@@ -241,6 +268,7 @@ export default function NavBar({
       {/* Accent underline anchored to the indicator */}
       <Box
         aria-hidden
+        display={isMobile ? 'none' : undefined}
         position="absolute"
         bottom={isMobile ? '6px' : '5px'}
         left={`${indicator.left + indicator.width * 0.28}px`}
@@ -249,7 +277,7 @@ export default function NavBar({
         borderRadius="full"
         background={accentBar}
         opacity={indicator.ready ? 0.95 : 0}
-        transition="left 0.35s cubic-bezier(0.32, 0.72, 0, 1), width 0.35s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.2s ease"
+        transition={indicatorTransition}
         zIndex={0}
         pointerEvents="none"
       />
@@ -261,7 +289,8 @@ export default function NavBar({
           isActive={activeNavId === item.id}
           isMobile={isMobile}
           isIconOnly={isIconOnly}
-          onSelect={onPageChange}
+          onSelect={selectTab}
+          reducedMotion={!!reducedMotion}
           inactiveColor={inactiveColor}
           hoverColor={hoverColor}
           activeColor={activeColor}
@@ -347,7 +376,8 @@ interface NavBarItemProps {
   isActive: boolean
   isMobile: boolean
   isIconOnly: boolean
-  onSelect?: (page: AppPage) => void
+  onSelect?: (page: AppPage, button: HTMLButtonElement) => void
+  reducedMotion: boolean
   inactiveColor: string
   hoverColor: string
   activeColor: string
@@ -361,6 +391,7 @@ function NavBarItem({
   isMobile,
   isIconOnly,
   onSelect,
+  reducedMotion,
   inactiveColor,
   hoverColor,
   activeColor,
@@ -375,27 +406,31 @@ function NavBarItem({
       type="button"
       role="tab"
       aria-selected={isActive}
+      tabIndex={isActive ? 0 : -1}
       aria-label={item.label}
       title={isIconOnly ? undefined : item.description}
-      onClick={() => onSelect?.(item.id)}
-      ref={assignRef as unknown as React.Ref<HTMLDivElement>}
+      onClick={(event: MouseEvent<HTMLButtonElement>) => onSelect?.(item.id, event.currentTarget)}
+      ref={assignRef}
       flex={isMobile ? '0 0 auto' : undefined}
       flexShrink={isMobile ? 0 : undefined}
       px={isMobile ? 3.5 : isIconOnly ? 2.5 : 3.5}
       py={isMobile ? 2.5 : 2}
       minH={isMobile ? '52px' : '40px'}
       minW={isMobile ? '64px' : 0}
-      sx={isMobile ? { scrollSnapAlign: 'center' } : undefined}
+      sx={{
+        ...(isMobile ? { scrollSnapAlign: 'center' } : {}),
+        '--pb-control-transition': `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.12s' : '0.2s ease'}, transform 0.15s ease`,
+      }}
       borderRadius={isMobile ? 'xl' : 'lg'}
       bg="transparent"
       color={isActive ? activeColor : inactiveColor}
-      fontWeight={isActive ? 700 : 600}
+      fontWeight={600}
       fontSize={isMobile ? 'xs' : 'sm'}
       letterSpacing={isMobile ? '0.01em' : '0.005em'}
       position="relative"
       zIndex={1}
       cursor="pointer"
-      transition="color 0.2s ease, transform 0.15s ease"
+      transition={reducedMotion ? 'none' : `color ${isActive ? '0.28s cubic-bezier(0.65, 0, 0.35, 1) 0.12s' : '0.2s ease'}, transform 0.15s ease`}
       _hover={{
         color: isActive ? activeColor : hoverColor,
         transform: isActive ? 'none' : 'translateY(-1px)',
@@ -416,7 +451,7 @@ function NavBarItem({
         <Icon
           as={item.icon}
           boxSize={isMobile ? 5 : 4}
-          transition="transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)"
+          transition={reducedMotion ? 'none' : 'transform 0.4s cubic-bezier(0.65, 0, 0.35, 1)'}
           transform={isActive ? 'scale(1.05)' : 'scale(1)'}
           weight={isActive ? 'duotone' : 'regular'}
         />

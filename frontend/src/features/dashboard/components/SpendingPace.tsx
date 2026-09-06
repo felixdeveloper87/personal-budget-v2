@@ -16,6 +16,7 @@ import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { cumulativeDailyAmount, daysInMonth } from '../insights'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { DARK_PALETTE, LIGHT_PALETTE } from '../../../palette'
 
 type PaceKind = 'expense' | 'income'
 
@@ -47,19 +48,19 @@ export default function CashPace({
   const reactId = useId()
   const gradientId = `pb-${kind}-pace-${reactId.replace(/[^a-zA-Z0-9]/g, '')}`
   const { colorMode } = useColorMode()
-  const dark = colorMode === 'dark'
+  const palette = colorMode === 'dark' ? DARK_PALETTE : LIGHT_PALETTE
   const isIncome = kind === 'income'
 
   // recharts writes stroke/fill as SVG attributes, where CSS var() is
   // unreliable — so resolve concrete colours per color mode here.
   const c = {
-    current: isIncome ? (dark ? '#62dca2' : '#1f8a4f') : (dark ? '#ff9a90' : '#b8452f'),
-    previous: dark ? '#8a8f89' : '#84907f',
-    grid: dark ? 'rgba(244,246,242,0.10)' : 'rgba(26,50,38,0.14)',
-    tick: dark ? '#8a8f89' : '#84907f',
-    tooltipBg: dark ? '#151517' : '#faf9f2',
-    tooltipBorder: dark ? 'rgba(244,246,242,0.18)' : 'rgba(26,50,38,0.16)',
-    tooltipText: dark ? '#f2f4f0' : '#1a2620',
+    current: isIncome ? palette.income : palette.coral,
+    previous: palette['ink-faint'],
+    grid: palette.hair,
+    tick: palette['ink-faint'],
+    tooltipBg: palette.solid,
+    tooltipBorder: palette['hair-2'],
+    tooltipText: palette.ink,
   }
 
   const { data, amountSoFar, paceDelta, projected, prevTotal, elapsedDays } = useMemo(() => {

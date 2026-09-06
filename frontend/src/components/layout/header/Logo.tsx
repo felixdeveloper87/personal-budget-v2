@@ -1,8 +1,6 @@
-import { Box, HStack, Text, VStack, useColorModeValue } from '@chakra-ui/react'
-import { useEd } from '../../../editorial'
+import { Box, useColorModeValue } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import BrandMark from '../../brand/BrandMark'
-import { BRAND } from './brand.config'
 
 interface LogoProps {
   user?: any
@@ -270,121 +268,25 @@ export function LogoIconWallet({ boxSize }: { boxSize?: number } = {}) {
   )
 }
 
-export default function Logo({ user, onClick }: LogoProps) {
-  const ed = useEd()
+export default function Logo({ onClick }: LogoProps) {
   const { t } = useI18n()
-  const wordMutedBase = useColorModeValue('gray.700', 'gray.300')
-  const wordMuted = ed ? ed.cream : wordMutedBase
-  const wordBudgetGradientBase = useColorModeValue(
-    'linear(to-r, #237a55, #1e5a41)',
-    'linear(to-r, #7fe6b3, #e8c477)',
-  )
-  const wordBudgetGradient = ed
-    ? `linear(to-r, ${ed.jade}, ${ed.gold})`
-    : wordBudgetGradientBase
-  const subtitleColorBase = useColorModeValue('gray.500', 'gray.500')
-  const subtitleColor = ed ? ed.muted : subtitleColorBase
-
-  const handleClick = () => {
-    if (onClick) return onClick()
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const titleFontSize = { base: 'sm', sm: 'md', md: 'lg', lg: 'xl' } as const
-  const edTitleFontSize = { base: 'md', sm: 'lg', md: 'xl', lg: '2xl' } as const
   return (
-    <HStack
+    <Box
       as="button"
       type="button"
       aria-label={t('header.logo.goToTop')}
-      onClick={handleClick}
-      spacing={{ base: 2, md: 2.5 }}
-      role="group"
-      cursor="pointer"
+      onClick={onClick ?? (() => window.scrollTo({ top: 0, behavior: 'smooth' }))}
+      borderRadius="10px"
       minW={0}
       flexShrink={1}
-      transition="transform 0.25s cubic-bezier(0.32, 0.72, 0, 1)"
-      _hover={{ transform: 'translateY(-1px)' }}
-      _active={{ transform: 'translateY(0)' }}
-      _focusVisible={{ outline: 'none' }}
+      _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '4px' }}
     >
-      <Box
-        flexShrink={0}
-        w={{ base: 10, md: 11 }}
-        h={{ base: 10, md: 11 }}
-        transition="transform 0.35s cubic-bezier(0.22, 1, 0.36, 1)"
-        _groupHover={{
-          transform: 'translateY(-1px) rotate(-2deg)',
-        }}
-      >
-        <BrandMark
-          size="100%"
-          style={{ filter: 'drop-shadow(0 7px 12px rgba(0, 0, 0, 0.22))' }}
-        />
+      <Box display={{ base: 'block', md: 'none' }} w="clamp(112px, 34vw, 165px)">
+        <BrandMark variant="title" size="100%" />
       </Box>
-
-      <VStack
-        display={{ base: 'none', md: 'flex' }}
-        align="flex-start"
-        spacing={0}
-        minW={0}
-        flex={1}
-        overflow="hidden"
-        lineHeight="1.1"
-      >
-        <HStack
-          align="baseline"
-          spacing={1}
-          minW={0}
-          w="100%"
-          flexWrap="nowrap"
-        >
-          <Text
-            as="span"
-            textStyle={ed ? 'display' : undefined}
-            fontSize={ed ? edTitleFontSize : titleFontSize}
-            fontWeight={ed ? 400 : 600}
-            letterSpacing="-0.02em"
-            color={wordMuted}
-            noOfLines={1}
-            minW={0}
-            flexShrink={1}
-          >
-            {BRAND.nameFirst}
-          </Text>
-
-          <Text
-            as="span"
-            textStyle={ed ? 'display' : undefined}
-            fontStyle={ed ? 'italic' : undefined}
-            fontSize={ed ? edTitleFontSize : titleFontSize}
-            fontWeight={ed ? 400 : 800}
-            letterSpacing="-0.03em"
-            bgGradient={wordBudgetGradient}
-            bgClip="text"
-            noOfLines={1}
-            minW={0}
-            flexShrink={1}
-          >
-            {BRAND.nameSecond}
-          </Text>
-
-        </HStack>
-
-        <Text
-          fontSize="2xs"
-          fontWeight={500}
-          color={subtitleColor}
-          letterSpacing="0.04em"
-          lineHeight="1.2"
-          mt={0.5}
-          noOfLines={2}
-          display={{ base: 'none', lg: 'block' }}
-          _dark={{ color: 'gray.500' }}
-        >
-          {t('brand.tagline')}
-        </Text>
-      </VStack>
-    </HStack>
+      <Box display={{ base: 'none', md: 'block' }} w="210px" maxW="full">
+        <BrandMark variant="wordmark" size="100%" />
+      </Box>
+    </Box>
   )
 }

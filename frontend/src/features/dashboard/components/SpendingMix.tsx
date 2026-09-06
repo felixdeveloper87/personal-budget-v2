@@ -6,6 +6,7 @@ import type { Transaction } from '../../../types'
 import Panel from './Panel'
 import { categoryColor } from './format'
 import { useI18n } from '../../../i18n'
+import { DARK_PALETTE, LIGHT_PALETTE } from '../../../palette'
 
 interface SpendingMixProps {
   transactions: Transaction[]
@@ -25,11 +26,11 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
   const { t, formatCurrency, categoryLabel } = useI18n()
   const reduce = useReducedMotion()
   const { colorMode } = useColorMode()
-  const dark = colorMode === 'dark'
-  const sliceStroke = dark ? '#151517' : '#faf9f2'
-  const tooltipBg = dark ? '#151517' : '#faf9f2'
-  const tooltipBorder = dark ? 'rgba(244,246,242,0.18)' : 'rgba(26,50,38,0.16)'
-  const tooltipText = dark ? '#f2f4f0' : '#1a2620'
+  const palette = colorMode === 'dark' ? DARK_PALETTE : LIGHT_PALETTE
+  const sliceStroke = palette.surface
+  const tooltipBg = palette.solid
+  const tooltipBorder = palette['hair-2']
+  const tooltipText = palette.ink
 
   const { slices, total } = useMemo(() => {
     const sumByCategory = (txns: Transaction[]) => {

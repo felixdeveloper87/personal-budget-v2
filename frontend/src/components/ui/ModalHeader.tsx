@@ -59,13 +59,11 @@ export default function ModalHeader({
     accent === 'red' ? ed.red :
     accent === 'violet' ? ed.gold :
     ed.jade
-  const accentLine = accent === 'red'
-    ? `linear-gradient(90deg, ${ed.red}, ${ed.gold})`
-    : `linear-gradient(90deg, ${ed.jade}, ${ed.gold})`
+  const accentLine = ed.jade
 
   return (
     <Box
-      bg={ed.bg2}
+      bg={ed.header}
       borderBottom="1px solid"
       borderColor={ed.line}
       px={{ base: 3.5, sm: 6 }}
@@ -104,7 +102,7 @@ export default function ModalHeader({
               textStyle="display"
               fontWeight={400}
               fontSize={{ base: 'lg', sm: 'xl' }}
-              color={ed.cream}
+              color={ed.headerInk}
               lineHeight="1.05"
               noOfLines={1}
             >

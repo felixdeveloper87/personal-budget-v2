@@ -76,66 +76,36 @@ export default function Header({
   // visually merges with the hero. Once scrolled it transitions to frosted glass.
   const isLanding = !user
   const showGlass = isScrolled || !isLanding
-  // In the desktop app shell, the header belongs to the page canvas rather than
-  // reading as a second chrome layer. It gains its protective surface only once
-  // content scrolls beneath it.
+  // Align the desktop toolbar with the content column. Its matte surface stays
+  // opaque while scrolling so text beneath it never competes with the controls.
   const pageIntegrated = Boolean(user && hasSidebar && ed)
 
   const bgBase = useColorModeValue(
     showGlass ? (isScrolled ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.62)') : 'transparent',
     showGlass ? (isScrolled ? 'rgba(10,10,12,0.78)'    : 'rgba(10,10,12,0.55)')    : 'transparent',
   )
-  const bg = ed ? ed.glass : bgBase
+  const bg = ed ? ed.header : bgBase
   const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
   )
-  const editorialOverlay = useColorModeValue(
-    // A restrained porcelain sheen helps the scrolled glass separate from paper.
-    'linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0) 68%)',
-    'linear-gradient(180deg, rgba(239,244,241,0.035) 0%, rgba(239,244,241,0) 68%)',
-  )
-  const bgOverlay = ed ? editorialOverlay : (showGlass ? bgOverlayVal : 'transparent')
+  const bgOverlay = ed ? 'transparent' : (showGlass ? bgOverlayVal : 'transparent')
   const topHighlightVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0))',
     'linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0))',
   )
-  const editorialTopHighlight = useColorModeValue(
-    // Hairline highlight shared by both editorial variants.
-    'linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0))',
-    'linear-gradient(180deg, rgba(239,244,241,0.07), rgba(239,244,241,0))',
-  )
-  const topHighlight = ed
-    ? editorialTopHighlight
-    : (showGlass ? topHighlightVal : 'transparent')
+  const topHighlight = ed ? 'transparent' : (showGlass ? topHighlightVal : 'transparent')
   const accentBorderBase = useColorModeValue(
     'linear-gradient(90deg, transparent 0%, rgba(37, 99, 235, 0.18) 30%, rgba(124, 58, 237, 0.18) 70%, transparent 100%)',
     'linear-gradient(90deg, transparent 0%, rgba(96, 165, 250, 0.28) 30%, rgba(167, 139, 250, 0.28) 70%, transparent 100%)',
   )
-  const editorialAccentBorder = useColorModeValue(
-    'linear-gradient(90deg, transparent 0%, rgba(38,115,90,0.40) 30%, rgba(124,100,39,0.30) 70%, transparent 100%)',
-    'linear-gradient(90deg, transparent 0%, rgba(95,208,181,0.36) 30%, rgba(208,183,111,0.24) 70%, transparent 100%)',
-  )
-  const accentBorder = ed
-    ? editorialAccentBorder
-    : accentBorderBase
+  const accentBorder = ed ? ed.lineStrong : accentBorderBase
   const shadowBase = useColorModeValue(
     isScrolled ? '0 10px 30px rgba(15, 23, 42, 0.08)' : 'none',
     isScrolled ? '0 14px 36px rgba(0, 0, 0, 0.5)' : 'none',
   )
-  const editorialShadow = useColorModeValue(
-    isScrolled
-      ? '0 14px 40px rgba(18,45,36,0.08), inset 0 -1px 0 rgba(255,255,255,0.72)'
-      : 'none',
-    isScrolled ? '0 14px 36px rgba(0,0,0,0.5)' : 'none',
-  )
-  const shadow = ed ? editorialShadow : shadowBase
-  const integratedBg = pageIntegrated && !isScrolled ? 'transparent' : bg
-  const integratedOverlay = pageIntegrated && !isScrolled ? 'transparent' : bgOverlay
-  const integratedTopHighlight = pageIntegrated && !isScrolled ? 'transparent' : topHighlight
-  const integratedBackdrop = pageIntegrated && !isScrolled
-    ? 'none'
-    : (showGlass ? 'saturate(180%) blur(20px)' : 'none')
+  const shadow = ed ? (isScrolled ? 'var(--pb-shadow)' : 'none') : shadowBase
+  const backdrop = ed ? 'none' : (showGlass ? 'saturate(180%) blur(20px)' : 'none')
   const contentPadding = pageIntegrated
     ? { base: 2, md: 4, lg: 6 }
     : { base: 3, md: 6, lg: 8 }
@@ -147,9 +117,10 @@ export default function Header({
         position="sticky"
         top={0}
         zIndex={1000}
-        bg={integratedBg}
+        bg={bg}
+        borderBottom={ed ? `1px solid ${ed.line}` : undefined}
         boxShadow={shadow}
-        backdropFilter={integratedBackdrop}
+        backdropFilter={backdrop}
         transition="background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease"
         sx={{
           // Top inner highlight (1px) — premium glass top edge
@@ -157,7 +128,7 @@ export default function Header({
             content: '""',
             position: 'absolute',
             inset: 0,
-            background: integratedOverlay,
+            background: bgOverlay,
             pointerEvents: 'none',
             zIndex: 0,
           },
@@ -168,7 +139,7 @@ export default function Header({
             left: 0,
             right: 0,
             height: '1px',
-            background: integratedTopHighlight,
+            background: topHighlight,
             pointerEvents: 'none',
             zIndex: 1,
           },
@@ -188,7 +159,7 @@ export default function Header({
           <Flex
             align="center"
             justify="space-between"
-            gap={{ base: 3, md: 4, lg: 6 }}
+            gap={{ base: 1, sm: 3, md: 4, lg: 6 }}
             h={HEADER_HEIGHT}
             minW={0}
           >

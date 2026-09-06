@@ -1,96 +1,66 @@
-import type { CSSProperties } from 'react'
+import { useId, type CSSProperties } from 'react'
+import { useColorMode } from '@chakra-ui/react'
 
 interface BrandMarkProps {
   size?: number | string
+  variant?: 'mark' | 'wordmark' | 'title'
+  colorMode?: 'light' | 'dark'
   className?: string
   style?: CSSProperties
-  cream?: string
-  jade?: string
-  gold?: string
 }
 
+/** Display the supplied artwork; the viewBox trims its presentation margins.
+ * The compact mark and full lockup use the same original image assets.
+ */
 export default function BrandMark({
   size = 48,
+  variant = 'mark',
+  colorMode: requestedMode,
   className,
   style,
-  cream = '#f2f4f0',
-  jade = '#7fe6b3',
-  gold = '#e8c477',
 }: BrandMarkProps) {
+  const { colorMode } = useColorMode()
+  const dark = (requestedMode ?? colorMode) === 'dark'
+  const wordmark = variant !== 'mark'
+  const source = dark ? '/brandingDark.png' : '/branding.png'
+  const filterId = `brand-background-${useId().replace(/:/g, '')}`
+
   return (
     <svg
       className={className}
-      viewBox="0 0 48 48"
+      viewBox={variant === 'title' ? '0 0 1650 350' : wordmark ? '265 178 1650 350' : '265 178 318 350'}
       width={size}
-      height={size}
-      fill="none"
-      focusable="false"
+      height={wordmark ? undefined : size}
       aria-hidden="true"
-      style={style}
+      focusable="false"
+      style={{
+        display: 'block',
+        flexShrink: 0,
+        maxWidth: '100%',
+        aspectRatio: wordmark ? '1650 / 350' : '1',
+        ...style,
+      }}
     >
-      <circle
-        className="pbv3-seal__plate"
-        cx="24"
-        cy="24"
-        r="23"
-        fill="#06110d"
-      />
-      <circle
-        className="pbv3-seal__rim"
-        cx="24"
-        cy="24"
-        r="22.45"
-        stroke={jade}
-        strokeOpacity="0.34"
-        strokeWidth="0.7"
-      />
-      <path
-        className="pbv3-seal__gold-accent"
-        d="M31.3 3.55c6.8 2.2 11.85 7.35 13.5 14"
-        stroke={gold}
-        strokeLinecap="round"
-        strokeWidth="1.15"
-      />
-      <path
-        className="pbv3-seal__gold-accent"
-        d="M3.6 30.35c2.2 6.8 7.3 11.85 13.95 13.55"
-        stroke={gold}
-        strokeLinecap="round"
-        strokeWidth="1.15"
-      />
-      <circle
-        className="pbv3-seal__field"
-        cx="24"
-        cy="24"
-        r="17.35"
-        fill="#07110d"
-        stroke={cream}
-        strokeOpacity="0.26"
-        strokeWidth="0.72"
-      />
-      <path
-        className="pbv3-seal__letter pbv3-seal__letter--p"
-        fill={cream}
-        fillOpacity="0.96"
-        fillRule="evenodd"
-        d="M8.5 35.5v-23h7.2c5.6 0 8.9 2.9 8.9 7.6 0 5-3.4 7.9-8.9 7.9h-2.8v7.5H8.5Zm4.4-11.4h2.5c3.1 0 4.7-1.3 4.7-3.9 0-2.5-1.6-3.8-4.7-3.8h-2.5v7.7Z"
-      />
-      <path
-        className="pbv3-seal__letter pbv3-seal__letter--b"
-        fill={jade}
-        fillOpacity="0.98"
-        fillRule="evenodd"
-        d="M24.5 35.5v-23h7.6c5 0 8 2.4 8 6.3 0 2.6-1.4 4.5-3.7 5.4 2.8.7 4.5 2.6 4.5 5.4 0 4.2-3.2 6.9-8.4 6.9h-8Zm4.4-13h2.7c2.7 0 4.1-1.1 4.1-3.1s-1.4-3-4.1-3h-2.7v6.1Zm0 9.1H32c3 0 4.5-1.2 4.5-3.3 0-2.2-1.5-3.3-4.5-3.3h-3.1v6.6Z"
-      />
-      <circle
-        className="pbv3-seal__core"
-        cx="38.7"
-        cy="38.55"
-        r="1.8"
-        fill={gold}
-        stroke="#07110d"
-        strokeWidth="0.65"
-      />
+      <defs>
+        {/* Remove the artwork's near-white/near-black matte at render time.
+            Unlike blend modes, this also works inside transformed buttons. */}
+        <filter id={filterId} colorInterpolationFilters="sRGB" x="0" y="0" width="100%" height="100%">
+          <feColorMatrix type="matrix" values={`1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  ${dark ? '10 10 10 0 -2.8' : '-10 -10 -10 0 29'}`} />
+          <feComposite in2="SourceGraphic" operator="in" />
+        </filter>
+      </defs>
+      <g filter={`url(#${filterId})`}>
+      {variant === 'title' ? (
+        <>
+          <svg x="0" y="0" width="318" height="350" viewBox="265 178 318 350">
+            <image href={source} width="2172" height="724" />
+          </svg>
+          <svg x="360" y="82" width="1290" height="185" viewBox="620 246 1295 185">
+            <image href={source} width="2172" height="724" />
+          </svg>
+        </>
+      ) : <image href={source} width="2172" height="724" />}
+      </g>
     </svg>
   )
 }

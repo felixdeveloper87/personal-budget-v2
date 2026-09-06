@@ -25,7 +25,16 @@ export default function MonthHero({
 
   return (
     <Panel
-      background="linear-gradient(135deg, var(--pb-surface) 0%, var(--pb-surface-2) 100%)"
+      background="var(--pb-summary-petrol)"
+      borderColor="var(--pb-summary-line)"
+      sx={{
+        '--pb-ink': 'var(--pb-summary-ink)',
+        '--pb-ink-soft': 'var(--pb-summary-ink-soft)',
+        '--pb-ink-faint': 'var(--pb-summary-ink-faint)',
+        '--pb-income': 'var(--pb-summary-income)',
+        '--pb-income-2': 'var(--pb-summary-income)',
+        '--pb-coral': 'var(--pb-summary-coral)',
+      }}
       p={0}
       overflow="hidden"
     >
@@ -131,8 +140,7 @@ export default function MonthHero({
                   letterSpacing="0.08em"
                   textTransform="uppercase"
                   leftIcon={<Plus size={15} strokeWidth={2.5} />}
-                  boxShadow="var(--pb-shadow)"
-                  _hover={{ bg: 'var(--pb-income-2)', transform: 'translateY(-1px)', boxShadow: 'var(--pb-shadow-lift)' }}
+                  _hover={{ bg: 'var(--pb-income-2)', transform: 'translateY(-1px)' }}
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddIncome}
                 >
@@ -143,16 +151,16 @@ export default function MonthHero({
                 <Button
                   h="50px"
                   borderRadius="10px"
-                  bg="var(--pb-coral)"
-                  color="var(--pb-paper-3)"
-                  boxShadow="var(--pb-shadow)"
+                  bg="var(--pb-summary-panel)"
+                  color="var(--pb-summary-coral)"
+                  border="1px solid var(--pb-summary-line)"
                   fontFamily="var(--pb-mono)"
                   fontSize="12px"
                   fontWeight={600}
                   letterSpacing="0.08em"
                   textTransform="uppercase"
                   leftIcon={<Plus size={14} strokeWidth={2.5} />}
-                  _hover={{ bg: 'var(--pb-coral-2)', transform: 'translateY(-1px)', boxShadow: 'var(--pb-shadow-lift)' }}
+                  _hover={{ bg: 'var(--pb-summary-control)', borderColor: 'var(--pb-summary-coral)', transform: 'translateY(-1px)' }}
                   _active={{ transform: 'translateY(0)' }}
                   onClick={onAddExpense}
                 >

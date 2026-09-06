@@ -182,7 +182,7 @@ export default function Sidebar({
       w={`${width}px`}
       bg={surface}
       backgroundImage={isEdLight ? undefined : sidebarWash}
-      backdropFilter={ed ? 'saturate(112%) blur(18px)' : 'saturate(180%) blur(20px)'}
+      backdropFilter={ed ? undefined : 'saturate(180%) blur(20px)'}
       borderRight="1px solid var(--pb-hair)"
       boxShadow={surfaceShadow}
       zIndex={1100}
@@ -290,45 +290,7 @@ function SidebarBrand({ onClick }: { onClick?: () => void }) {
       textAlign="left"
       _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)', borderRadius: '10px' }}
     >
-      <Box
-        w="38px"
-        h="38px"
-        flexShrink={0}
-        transition="transform 0.6s cubic-bezier(0.32, 0.72, 0, 1)"
-        _groupHover={{ transform: 'translateY(-1px) rotate(-2deg)' }}
-      >
-        <BrandMark
-          size="100%"
-          style={{ filter: 'drop-shadow(0 7px 12px rgba(0, 0, 0, 0.22))' }}
-        />
-      </Box>
-
-      <VStack align="flex-start" spacing="1px" minW={0}>
-        <Text
-          fontFamily="var(--pb-serif)"
-          fontSize="md"
-          fontWeight={500}
-          letterSpacing="-0.01em"
-          color="var(--pb-ink)"
-          lineHeight={1.1}
-          noOfLines={1}
-        >
-          Personal{' '}
-          <Text as="em" color="var(--pb-forest)" fontWeight={500}>
-            Budget
-          </Text>
-        </Text>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="8px"
-          letterSpacing="0.26em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-          noOfLines={1}
-        >
-          {t('brand.tagline')}
-        </Text>
-      </VStack>
+      <BrandMark variant="wordmark" size="174px" />
     </Flex>
   )
 }
@@ -450,7 +412,7 @@ function ActiveIndicator({
         h={`${height * 0.56}px`}
         w="3px"
         borderRadius="full"
-        background="linear-gradient(180deg, var(--pb-sidebar-accent), var(--pb-gold-2))"
+        background="var(--pb-sidebar-accent)"
         opacity={ready ? 1 : 0}
         transition={`top 0.35s cubic-bezier(0.32, 0.72, 0, 1), height 0.25s ease, opacity 0.2s ease`}
         pointerEvents="none"

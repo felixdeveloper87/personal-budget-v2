@@ -1,113 +1,42 @@
-/**
- * Editorial theme — shared "Landing v3" visual identity for the in-app shell.
- *
- * The dashboard (and the chrome around it) borrows the landing's
- * "Editorial · guilloché" language: warm editorial surfaces, jade + gold
- * accents, a giant editorial serif for headings and a mono face for labels.
- *
- * It now ships in TWO variants — a deep ink-green **dark** and a cream-paper
- * **light** — so the dashboard honours the user's color-mode toggle instead of
- * being a forced-dark island.
- *
- * Components opt in by reading {@link useEd}: it returns the palette for the
- * active color mode while editorial mode is on, or `null` otherwise. When it
- * returns `null` they keep their normal light/dark Chakra styling. The provider
- * lives in the Layout and is only active on the dashboard, so every other page
- * is left untouched.
- */
+/** Shared editorial identity, backed by the same palette as Chakra and CSS. */
 import { createContext, useContext, useMemo } from 'react'
 import { Box, useColorMode } from '@chakra-ui/react'
+import { DARK_PALETTE, LIGHT_PALETTE, type Palette } from './palette'
 
-/* ── Dark variant — neutral graphite, cool teal and soft gold ────────────── */
-export const EDITORIAL_DARK = {
-  bg: '#080a09',
-  bg2: '#0c0f0e',
-  /** Brand accent (jade mint) + soft gold. */
-  jade: '#5fd0b5',
-  gold: '#d0b76f',
-  /** Primary text. ~18:1 on `bg`. */
-  cream: '#eff4f1',
-  /** Secondary / muted text. ~11:1 on the matte-black `bg`. */
-  muted: '#a8b5af',
-  red: '#f08f86',
-  /** Dark glyph colour for text sitting on a brand/gold accent fill. */
-  onAccent: '#061a15',
-
-  /** ── Superfícies de card (fonte única) ──────────────────────────────
-   *  `panel`  → card padrão da plataforma (páginas). Leve transparência pro
-   *             backdrop aparecer sem atrapalhar a leitura.
-   *  `modal`  → diálogos/modais. Um pouco mais opaco (conteúdo denso) + o blur
-   *             do PremiumModal dá o efeito de vidro fosco, mantendo legível.
-   *  `solid`  → superfícies que NÃO podem vazar (dropdowns, menus, popovers).
-   *  `panelRaised` → painéis internos (card dentro de card). */
-  panel: 'rgba(10, 13, 12, 0.94)',
-  modal: 'rgba(13, 16, 15, 0.98)',
-  solid: '#101312',
-  panelRaised: 'rgba(16, 20, 18, 0.98)',
-  line: 'rgba(232, 242, 237, 0.09)',
-  lineStrong: 'rgba(232, 242, 237, 0.17)',
-
-  /** Glass surface for the sticky header / sidebar. */
-  glass: 'rgba(8, 10, 9, 0.93)',
-
-  /** Subtle hover wash on a panel. */
-  hoverBg: 'rgba(239, 244, 241, 0.065)',
-  /** Chrome control surface (search pill, theme toggle, user trigger). */
-  controlBg: 'rgba(239, 244, 241, 0.04)',
-  controlHoverBg: 'rgba(239, 244, 241, 0.075)',
-  /** Segmented-control track and its active thumb. */
-  trackBg: 'rgba(239, 244, 241, 0.045)',
-  thumbBg: 'rgba(239, 244, 241, 0.105)',
-  /** Brand-tinted soft fills (Today button, hints). */
-  jadeSoft: 'rgba(95, 208, 181, 0.10)',
-  jadeSoftHover: 'rgba(95, 208, 181, 0.17)',
-
-  /** Full-bleed background for the app shell. Keep in sync with `GRADIENTS.dark`. */
-  bgGradient:
-    'linear-gradient(180deg, #0c0f0e 0%, #080a09 58%, #060807 100%)',
-
-  fontDisplay: "'Instrument Serif', Georgia, serif",
-} as const
-
-export type EditorialTokens = {
-  [Key in keyof typeof EDITORIAL_DARK]: string
+function createEditorialPalette(palette: Palette) {
+  return {
+    bg: palette.paper,
+    bg2: palette['paper-2'],
+    jade: palette['forest-2'],
+    gold: palette.gold,
+    cream: palette.ink,
+    muted: palette['ink-soft'],
+    red: palette.coral,
+    onAccent: palette['on-accent'],
+    panel: palette.surface,
+    modal: palette.modal,
+    solid: palette.solid,
+    panelRaised: palette['panel-raised'],
+    line: palette.hair,
+    lineStrong: palette['hair-2'],
+    glass: palette.glass,
+    header: palette.header,
+    headerInk: palette['header-ink'],
+    hoverBg: palette.hover,
+    controlBg: palette.control,
+    controlHoverBg: palette['control-hover'],
+    trackBg: palette.track,
+    thumbBg: palette.thumb,
+    jadeSoft: palette['tint-green'],
+    jadeSoftHover: palette['tint-green-hover'],
+    bgGradient: palette.canvas,
+    fontDisplay: "'Instrument Serif', Georgia, serif",
+  }
 }
 
-/* ── Light variant — silvered off-white, forest ink and white cards ───────── */
-export const EDITORIAL_LIGHT: EditorialTokens = {
-  bg: '#f3f4f2',
-  bg2: '#e7eae7',
-  /** Brand accent (forest green) + restrained gold. */
-  jade: '#26735a',
-  gold: '#7c6427',
-  /** Primary text → deep green-ink (the "cream" slot, semantically primary). */
-  cream: '#17201c',
-  muted: '#58635e',
-  red: '#aa4938',
-  onAccent: '#f8fbf8',
-
-  panel: 'rgba(255, 255, 255, 0.90)',
-  modal: 'rgba(255, 255, 255, 0.97)',
-  solid: '#ffffff',
-  panelRaised: '#ffffff',
-  line: 'rgba(23, 32, 28, 0.11)',
-  lineStrong: 'rgba(24, 81, 62, 0.23)',
-
-  glass: 'rgba(248, 249, 247, 0.91)',
-
-  hoverBg: 'rgba(24, 81, 62, 0.06)',
-  controlBg: 'rgba(255, 255, 255, 0.70)',
-  controlHoverBg: 'rgba(255, 255, 255, 0.96)',
-  trackBg: 'rgba(23, 32, 28, 0.05)',
-  thumbBg: '#ffffff',
-  jadeSoft: 'rgba(38, 115, 90, 0.09)',
-  jadeSoftHover: 'rgba(38, 115, 90, 0.15)',
-
-  bgGradient:
-    'radial-gradient(circle at 12% -8%, rgba(255,255,255,0.96) 0%, transparent 36%), radial-gradient(circle at 100% 0%, rgba(38,115,90,0.035) 0%, transparent 30%), linear-gradient(145deg, #f8f9f7 0%, #f3f4f2 48%, #ecefeb 100%)',
-
-  fontDisplay: "'Instrument Serif', Georgia, serif",
-}
+export type EditorialTokens = ReturnType<typeof createEditorialPalette>
+export const EDITORIAL_DARK = createEditorialPalette(DARK_PALETTE)
+export const EDITORIAL_LIGHT = createEditorialPalette(LIGHT_PALETTE)
 
 /** Back-compat alias — defaults to the dark palette. */
 export const EDITORIAL = EDITORIAL_DARK
@@ -268,13 +197,13 @@ export function EditorialBackdrop({ opacity }: { opacity?: number }) {
   const ed = useEd()
   const { colorMode } = useColorMode()
   if (!ed) return null
-  // Light mode is a flat metallic surface — no page-background engraving. The
+  // Light mode is a quiet paper surface — no page-background engraving. The
   // guilloché backdrop stays only in dark, where it reads as quiet depth.
   if (colorMode !== 'dark') return null
   // The page texture is deliberately subordinate to dashboard content. At the
   // old opacity it competed with charts and made dense financial data harder to
   // scan, particularly in dark mode.
-  const resolved = opacity ?? 0.10
+  const resolved = opacity ?? 0.06
   return (
     <Box aria-hidden position="absolute" inset={0} pointerEvents="none" zIndex={0}>
       <Box position="sticky" top={0} h="100vh" overflow="hidden">

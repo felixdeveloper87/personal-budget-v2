@@ -39,7 +39,12 @@ export default function HeaderActions({
   const showExpandedSearch = useBreakpointValue({ base: false, lg: true }) ?? false
 
   return (
-    <HStack spacing={2} flexShrink={0}>
+    <HStack spacing={{ base: 1, sm: 2 }} flexShrink={0} sx={{
+      '@media (max-width: 479px)': {
+        '& > button, & > [role="button"]': { minWidth: '32px', width: '32px', height: '36px', paddingInline: '2px' },
+        '& > [role="button"] .chakra-icon:last-child': { display: 'none' },
+      },
+    }}>
       {user && !hideSearch && (
         showExpandedSearch ? (
           <SearchTrigger variant="expanded" onOpen={onSearchOpen} />

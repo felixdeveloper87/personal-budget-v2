@@ -27,6 +27,7 @@ export default function ReportHeader({ report, userName }: ReportHeaderProps) {
           <HStack spacing={3} align="center">
             <BrandMark
               size={40}
+              colorMode="light"
               style={{ flexShrink: 0, filter: 'drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18))' }}
             />
             <VStack align="flex-start" spacing={0}>

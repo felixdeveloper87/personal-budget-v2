@@ -48,10 +48,6 @@ export default function SectionCard({
     '0 6px 24px -8px rgba(0,0,0,0.6)',
   )
   const hoverShadow = ed ? 'var(--pb-shadow-lift)' : hoverShadowBase
-  const editorialFilter = useColorModeValue(
-    'blur(18px) saturate(112%)',
-    'blur(14px) saturate(112%)',
-  )
 
   if (bare) {
     return (
@@ -69,7 +65,6 @@ export default function SectionCard({
       borderColor={borderColor}
       borderRadius="2xl"
       boxShadow={shadow}
-      backdropFilter={ed ? editorialFilter : undefined}
       overflow="hidden"
       transition="border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease"
       _hover={

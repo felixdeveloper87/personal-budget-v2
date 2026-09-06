@@ -138,7 +138,7 @@ function AppContent() {
 
   if (loading) {
     return (
-      <Center minH="100vh" bg="gray.50" _dark={{ bg: "black" }}>
+      <Center minH="100vh" bg="var(--pb-paper)">
         <VStack spacing={4}>
           <Spinner 
             size="xl" 
@@ -148,7 +148,7 @@ function AppContent() {
             emptyColor="gray.200"
             _dark={{ emptyColor: "gray.700" }}
           />
-          <Text color="gray.600" _dark={{ color: "gray.400" }} fontSize="sm">
+          <Text color="var(--pb-ink-soft)" fontSize="sm">
             {t('common.loadingDashboard')}
           </Text>
         </VStack>

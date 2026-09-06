@@ -42,7 +42,7 @@ export default function AppCloseButton({
         transform: 'translateY(0)',
       }}
       _focusVisible={{
-        boxShadow: `0 0 0 3px ${ed.jade}38`,
+        boxShadow: '0 0 0 3px var(--pb-focus)',
       }}
       transition="background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease"
       flexShrink={0}

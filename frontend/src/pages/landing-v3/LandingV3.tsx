@@ -22,6 +22,9 @@ import {
 import { guilloche } from '../../features/dashboard/components/guilloche'
 import BrandMark from '../../components/brand/BrandMark'
 import LanguageToggle from '../../components/layout/header/LanguageToggle'
+import { LightMode } from '@chakra-ui/react'
+import { LIGHT_PALETTE, paletteCssVariables } from '../../palette'
+import { EditorialProvider } from '../../editorial'
 import { useI18n } from '../../i18n'
 import './LandingV3.css'
 import {
@@ -34,6 +37,8 @@ interface LandingV3Props {
   onRequestAccess: () => void
   onSignIn: () => void
 }
+
+const LANDING_STYLE = { ...paletteCssVariables(LIGHT_PALETTE), colorScheme: 'light' } as CSSProperties
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -54,21 +59,10 @@ function BrandSeal({ className = '' }: { className?: string }) {
 }
 
 function BrandLockup({ footer = false }: { footer?: boolean }) {
-  const { t } = useI18n()
-
   return (
     <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
-      <BrandSeal />
-      <span className="pbv3-brand__words">
-        <span className="pbv3-brand__wordmark">
-          <strong>Personal</strong>
-          <em>Budget</em>
-        </span>
-        <small>
-          <i aria-hidden="true" />
-          {t('landing.brand.tagline')}
-        </small>
-      </span>
+      <BrandMark variant="wordmark" size="100%" className="pbv3-brand__artwork" />
+      <BrandMark variant="title" size="100%" className="pbv3-brand__mobile" />
     </span>
   )
 }
@@ -659,7 +653,9 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
   }
 
   return (
-    <div className="pbv3" ref={rootRef}>
+    <LightMode>
+    <EditorialProvider active>
+    <div className="pbv3" ref={rootRef} style={LANDING_STYLE}>
       <a className="pbv3-skip-link" href="#main-content">
         {t('landing.a11y.skipContent')}
       </a>
@@ -953,5 +949,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         </div>
       </footer>
     </div>
+    </EditorialProvider>
+    </LightMode>
   )
 }
