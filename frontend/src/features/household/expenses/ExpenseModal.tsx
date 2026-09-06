@@ -169,9 +169,10 @@ export function ExpenseModal({
       <Box>
         {expense && (
           <Button
-            h="44px"
+            h="46px"
             color="var(--pb-coral)"
             bg="transparent"
+            borderRadius="12px"
             leftIcon={<Icon as={Trash2} boxSize={4} weight="bold" />}
             isLoading={deleting}
             onClick={() => void remove()}
@@ -184,23 +185,25 @@ export function ExpenseModal({
       </Box>
       <HStack w={{ base: 'full', sm: 'auto' }} spacing={2}>
         <Button
-          h="44px"
+          h="46px"
           flex={{ base: 1, sm: 'initial' }}
           variant="ghost"
           color="var(--pb-ink-soft)"
+          borderRadius="12px"
           onClick={onClose}
         >
           {t('household.common.cancel')}
         </Button>
         <Button
-          h="44px"
+          h="46px"
           flex={{ base: 1.35, sm: 'initial' }}
           type="submit"
           form="household-expense-form"
           leftIcon={<Icon as={Check} boxSize={4} weight="bold" />}
           bg="var(--pb-forest-2)"
           color="var(--pb-on-accent)"
-          borderRadius="11px"
+          borderRadius="12px"
+          boxShadow="0 6px 14px rgba(22, 132, 97, 0.16)"
           isLoading={saving}
           loadingText={t('household.common.saving')}
           _hover={{ bg: 'var(--pb-forest)' }}
@@ -246,7 +249,7 @@ export function ExpenseModal({
         as="form"
         id="household-expense-form"
         onSubmit={submit}
-        p={{ base: 3, sm: 6, md: 8 }}
+        p={{ base: 4, sm: 6, md: 7 }}
         bg="var(--pb-surface-2)"
         sx={{
           '.chakra-form__label': {
@@ -268,37 +271,38 @@ export function ExpenseModal({
           },
         }}
       >
-        <VStack align="stretch" spacing={{ base: 4, sm: 6 }}>
+        <VStack align="stretch" spacing={{ base: 5, sm: 6 }}>
           {/* Main Amount Input (Hero) */}
           <Box
-            pt={expense ? 2 : 4}
-            pb={{ base: 4, sm: 8 }}
-            textAlign="center"
+            px={{ base: 3, sm: 4 }}
+            py={{ base: 3, sm: 3.5 }}
             position="relative"
-            bg="linear-gradient(180deg, var(--pb-surface-2) 0%, transparent 100%)"
-            borderRadius="24px"
+            bg="var(--pb-surface)"
+            border="1px solid var(--pb-hair)"
+            borderRadius="16px"
+            boxShadow="0 6px 16px rgba(21, 47, 37, 0.03)"
           >
-            <Text
-              textTransform="uppercase"
-              letterSpacing="widest"
-              fontSize="xs"
-              fontWeight={800}
-              color="var(--pb-ink-faint)"
-              mb={3}
-            >
-              {t('household.expenseModal.amount')}
-            </Text>
-            <Flex justify="center" align="center">
-              <InputGroup size="lg" maxW="360px" mx="auto">
+            <Flex align="center" gap={{ base: 2, sm: 4 }}>
+              <Text
+                flexShrink={0}
+                textTransform="uppercase"
+                letterSpacing="widest"
+                fontSize="xs"
+                fontWeight={800}
+                color="var(--pb-ink-faint)"
+                whiteSpace="nowrap"
+              >
+                {t('household.expenseModal.amount')}
+              </Text>
+              <InputGroup size="lg" flex={1} minW={0} maxW="280px" ml="auto">
                 <InputLeftElement
                   pointerEvents="none"
                   color="var(--pb-ink-soft)"
-                  fontSize={{ base: '3xl', sm: '4xl' }}
-                  fontWeight={700}
-                  w="60px"
+                  fontSize={{ base: 'xl', sm: '2xl' }}
+                  fontWeight={650}
+                  w="42px"
                   h="full"
                   justifyContent="center"
-                  pt={1}
                 >
                   {currencyMark}
                 </InputLeftElement>
@@ -312,13 +316,15 @@ export function ExpenseModal({
                   value={amount}
                   onChange={(event) => setAmount(event.target.value)}
                   placeholder="0.00"
-                  fontSize={{ base: '4xl', sm: '5xl', md: '7xl' }}
-                  fontWeight={800}
+                  fontSize={{ base: '2xl', sm: '3xl' }}
+                  fontWeight={750}
                   color="var(--pb-ink)"
-                  h={{ base: '64px', sm: '80px', md: '100px' }}
-                  pl="60px"
-                  textAlign="center"
+                  h={{ base: '50px', sm: '54px' }}
+                  pl="42px"
+                  pr={2}
+                  textAlign="right"
                   letterSpacing="-0.02em"
+                  whiteSpace="nowrap"
                   _placeholder={{ color: 'var(--pb-hair-2)' }}
                   bg="transparent"
                   _hover={{ borderColor: 'transparent' }}
@@ -336,25 +342,13 @@ export function ExpenseModal({
           {!expense && (
             <Box
               position="relative"
-              overflow="hidden"
               p={{ base: 3, sm: 4 }}
-              borderRadius="22px"
+              borderRadius="20px"
               border="1px solid var(--pb-hair)"
-              bg="linear-gradient(135deg, var(--pb-surface) 0%, var(--pb-tint-gold) 160%)"
-              boxShadow="0 12px 30px rgba(21, 47, 37, 0.06)"
+              bg="var(--pb-surface)"
+              boxShadow="0 8px 20px rgba(21, 47, 37, 0.035)"
             >
-              <Box
-                position="absolute"
-                top="-64px"
-                right="-38px"
-                w="160px"
-                h="160px"
-                borderRadius="full"
-                bg="var(--pb-tint-gold)"
-                opacity={0.55}
-                pointerEvents="none"
-              />
-              <Flex position="relative" align="center" justify="space-between" gap={3} mb={4}>
+              <Flex align="center" justify="space-between" gap={3} mb={3.5}>
                 <HStack align="center" spacing={3} minW={0}>
                   <Box minW={0}>
                     <Text fontSize="sm" fontWeight={800} color="var(--pb-ink)">
@@ -376,8 +370,8 @@ export function ExpenseModal({
                     bg="var(--pb-surface)"
                     color="var(--pb-ink-soft)"
                     border="1px solid var(--pb-hair)"
-                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', transform: 'translateX(-1px)' }}
-                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-gold)' }}
+                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-green)' }}
                   >
                     <Icon as={ChevronLeft} boxSize={4} weight="bold" />
                   </Button>
@@ -391,8 +385,8 @@ export function ExpenseModal({
                     bg="var(--pb-surface)"
                     color="var(--pb-ink-soft)"
                     border="1px solid var(--pb-hair)"
-                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)', transform: 'translateX(1px)' }}
-                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-gold)' }}
+                    _hover={{ color: 'var(--pb-ink)', borderColor: 'var(--pb-hair-2)' }}
+                    _focusVisible={{ boxShadow: '0 0 0 3px var(--pb-tint-green)' }}
                   >
                     <Icon as={ChevronRight} boxSize={4} weight="bold" />
                   </Button>
@@ -451,7 +445,7 @@ export function ExpenseModal({
                         onClick={() => applyPreset(preset)}
                         transition={prefersReducedMotion ? 'none' : 'transform .22s ease, box-shadow .22s ease, border-color .22s ease'}
                         _hover={{
-                          transform: 'translateY(-4px)',
+                          transform: 'translateY(-3px)',
                           borderColor: preset.color,
                           boxShadow: selected
                             ? `0 16px 28px ${preset.tint}, inset 0 1px 0 rgba(255,255,255,.3)`
@@ -532,10 +526,11 @@ export function ExpenseModal({
           )}
 
           <Box
-            p={{ base: 3, sm: 4, md: 5 }}
+            p={{ base: 4, sm: 5 }}
             bg="var(--pb-surface)"
-            borderRadius="20px"
-            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
+            border="1px solid var(--pb-hair)"
+            borderRadius="18px"
+            boxShadow="0 8px 20px rgba(21, 47, 37, 0.035)"
           >
             <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
               <FormControl isRequired>
@@ -582,10 +577,11 @@ export function ExpenseModal({
           </Box>
 
           <Box
-            p={{ base: 3, sm: 4, md: 5 }}
+            p={{ base: 4, sm: 5 }}
             bg="var(--pb-surface)"
-            borderRadius="20px"
-            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
+            border="1px solid var(--pb-hair)"
+            borderRadius="18px"
+            boxShadow="0 8px 20px rgba(21, 47, 37, 0.035)"
           >
             <Flex align="flex-start" justify="space-between" gap={3} mb={5}>
               <Box>
@@ -644,14 +640,14 @@ export function ExpenseModal({
                       py={{ base: 2.5, sm: 3 }}
                       align="center"
                       gap={{ base: 3, sm: 4 }}
-                      borderRadius="16px"
-                      border="2px solid"
-                      borderColor={isSelected ? 'var(--pb-forest-2)' : 'transparent'}
+                      borderRadius="14px"
+                      border="1px solid"
+                      borderColor={isSelected ? 'var(--pb-forest-2)' : 'var(--pb-hair)'}
                       bg={isSelected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
                       cursor={isPayer ? 'default' : 'pointer'}
-                      transition="all .2s ease"
+                      transition={prefersReducedMotion ? 'none' : 'border-color .2s ease, background .2s ease'}
                       _hover={{
-                        transform: isPayer ? 'none' : 'scale(1.01)',
+                        borderColor: isPayer ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)',
                       }}
                     >
                       <Checkbox
@@ -710,13 +706,13 @@ export function ExpenseModal({
               <Box
                 mt={{ base: 4, sm: 5 }}
                 p={{ base: 3, sm: 4 }}
-                borderRadius="16px"
-                bg="linear-gradient(135deg, var(--pb-forest-2) 0%, var(--pb-forest) 100%)"
-                color="var(--pb-on-accent)"
-                boxShadow="0 4px 14px rgba(38, 115, 90, 0.25)"
+                borderRadius="14px"
+                bg="var(--pb-tint-green)"
+                border="1px solid rgba(22, 132, 97, 0.18)"
+                color="var(--pb-ink)"
               >
                 <Flex align="center" justify="space-between" flexWrap="wrap" gap={2}>
-                  <Text fontSize="sm" fontWeight={600} opacity={0.9}>
+                  <Text fontSize="sm" fontWeight={650} color="var(--pb-ink-soft)">
                     {t(
                       participantIds.size === 1
                         ? 'household.expenseModal.participants.one'
@@ -724,13 +720,13 @@ export function ExpenseModal({
                       { count: formatNumber(participantIds.size) },
                     )}
                   </Text>
-                  <Text fontSize="xl" fontWeight={800}>
+                  <Text fontSize="xl" fontWeight={800} color="var(--pb-forest-2)">
                     {t('household.expenseModal.perPerson', {
                       amount: formatCurrency(preview),
                     })}
                   </Text>
                 </Flex>
-                <Text mt={2} fontSize="2xs" opacity={0.7} lineHeight={1.4} textAlign="right">
+                <Text mt={2} fontSize="2xs" color="var(--pb-ink-soft)" lineHeight={1.4} textAlign="right">
                   {t('household.expenseModal.roundingHint')}
                 </Text>
               </Box>
@@ -738,10 +734,11 @@ export function ExpenseModal({
           </Box>
 
           <Box
-            p={{ base: 3, sm: 4, md: 5 }}
+            p={{ base: 4, sm: 5 }}
             bg="var(--pb-surface)"
-            borderRadius="20px"
-            boxShadow="0 2px 8px rgba(0,0,0,0.03)"
+            border="1px solid var(--pb-hair)"
+            borderRadius="18px"
+            boxShadow="0 8px 20px rgba(21, 47, 37, 0.035)"
           >
             <AttachmentPicker
               files={files}
