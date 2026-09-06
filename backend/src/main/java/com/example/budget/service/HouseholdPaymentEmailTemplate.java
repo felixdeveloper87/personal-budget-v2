@@ -9,7 +9,7 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
 
-/** Branded e-mails for Household settlement confirmation and payment reminders. */
+/** Branded e-mails for Household payment reminders. */
 @Component
 public class HouseholdPaymentEmailTemplate {
     private final String publicUrl;
@@ -17,25 +17,6 @@ public class HouseholdPaymentEmailTemplate {
     public HouseholdPaymentEmailTemplate(
             @Value("${app.web.public-url:https://www.personalbudget.co.uk}") String publicUrl) {
         this.publicUrl = publicUrl.replaceAll("/+$", "");
-    }
-
-    public EmailContent pendingConfirmation(
-            String recipientName,
-            String payerName,
-            String householdName,
-            BigDecimal amount,
-            String currency) {
-        String formattedAmount = money(amount, currency);
-        String text = "Hello " + recipientName + ",\n\n" + payerName
-                + " has registered a payment of " + formattedAmount + " to you for "
-                + householdName + ". Please open Personal Budget and confirm or reject it.";
-        return new EmailContent(text, layout(
-                "Payment awaiting confirmation",
-                "Please confirm a payment",
-                "Hi " + escape(recipientName) + ", <strong>" + escape(payerName)
-                        + "</strong> says they have paid you.",
-                "Payment received", formattedAmount,
-                "Review payment"));
     }
 
     public EmailContent paymentReminder(

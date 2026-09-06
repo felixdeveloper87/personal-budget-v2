@@ -23,9 +23,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,29 +54,7 @@ class HouseholdPaymentEmailServiceTest {
     }
 
     @Test
-    void sendsConfirmationRequestToRecipientWhenPaymentIsRegistered() {
-        Household household = household("Flat 1");
-        HouseholdMember payer = member(1L, household, "Leandro", "leandro@example.com");
-        HouseholdMember recipient = member(2L, household, "Maria", "maria@example.com");
-        HouseholdSettlement settlement = new HouseholdSettlement();
-        settlement.setHousehold(household);
-        settlement.setFromMember(payer);
-        settlement.setToMember(recipient);
-        settlement.setAmount(new BigDecimal("20.00"));
-        when(emailTemplate.pendingConfirmation("Maria", "Leandro", "Flat 1", new BigDecimal("20.00"), "GBP"))
-                .thenReturn(new HouseholdPaymentEmailTemplate.EmailContent("text", "<html>confirm</html>"));
-
-        service.sendPendingConfirmation(settlement);
-
-        verify(resendEmailClient).sendHtmlBatch(
-                eq(List.of("maria@example.com")),
-                eq("Payment awaiting your confirmation"),
-                eq("text"),
-                eq("<html>confirm</html>"));
-    }
-
-    @Test
-    void reminderUsesOnlyTheAmountThatHasNotAlreadyBeenRegisteredAsPending() {
+    void reminderUsesTheBalanceAfterCompletedPayments() {
         Household household = household("Flat 1");
         HouseholdMember payer = member(1L, household, "Leandro", "leandro@example.com");
         HouseholdMember debtor = member(2L, household, "Maria", "maria@example.com");
@@ -90,11 +66,11 @@ class HouseholdPaymentEmailServiceTest {
         share.setExpense(expense);
         share.setMember(debtor);
         share.setAmount(new BigDecimal("20.00"));
-        HouseholdSettlement pending = new HouseholdSettlement();
-        pending.setFromMember(debtor);
-        pending.setToMember(payer);
-        pending.setAmount(new BigDecimal("5.00"));
-        pending.setStatus(HouseholdSettlementStatus.PENDING);
+        HouseholdSettlement completed = new HouseholdSettlement();
+        completed.setFromMember(debtor);
+        completed.setToMember(payer);
+        completed.setAmount(new BigDecimal("5.00"));
+        completed.setStatus(HouseholdSettlementStatus.CONFIRMED);
         when(householdRepository.findAll()).thenReturn(List.of(household));
         when(memberRepository.findByHouseholdAndActiveTrueOrderByIdAsc(household))
                 .thenReturn(List.of(payer, debtor));
@@ -102,7 +78,7 @@ class HouseholdPaymentEmailServiceTest {
                 .thenReturn(List.of(expense));
         when(shareRepository.findByExpenseIn(List.of(expense))).thenReturn(List.of(share));
         when(settlementRepository.findByHouseholdOrderBySettlementDateDescIdDesc(household))
-                .thenReturn(List.of(pending));
+                .thenReturn(List.of(completed));
         when(emailTemplate.paymentReminder(eq("Maria"), eq("Flat 1"), anyList(), eq("GBP")))
                 .thenReturn(new HouseholdPaymentEmailTemplate.EmailContent("text", "<html>reminder</html>"));
 

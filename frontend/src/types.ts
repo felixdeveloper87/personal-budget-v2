@@ -516,9 +516,6 @@ export interface HouseholdSettlement {
   amount: number
   settlementDate: string
   status: HouseholdSettlementStatus
-  canConfirm: boolean
-  canReject: boolean
-  canCancel: boolean
   canAttach: boolean
   attachments: HouseholdAttachment[]
   createdAt: string

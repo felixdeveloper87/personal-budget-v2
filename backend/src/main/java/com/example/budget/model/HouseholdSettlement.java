@@ -33,7 +33,7 @@ public class HouseholdSettlement {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private HouseholdSettlementStatus status = HouseholdSettlementStatus.PENDING;
+    private HouseholdSettlementStatus status = HouseholdSettlementStatus.CONFIRMED;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
@@ -80,4 +80,3 @@ public class HouseholdSettlement {
     public LocalDateTime getCancelledAt() { return cancelledAt; }
     public void setCancelledAt(LocalDateTime cancelledAt) { this.cancelledAt = cancelledAt; }
 }
-

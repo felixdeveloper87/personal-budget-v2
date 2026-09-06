@@ -1,19 +1,28 @@
-import { Badge, Box, Button, Flex, HStack, Icon, Stack, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
+import { Badge, Box, Button, Flex, HStack, Icon, Stack, Text, VisuallyHidden, VStack } from '@chakra-ui/react'
+import { createHouseholdSettlement } from '../../../api'
 import { useI18n } from '../../../i18n'
-import type { HouseholdDashboard, HouseholdDebt } from '../../../types'
+import { ToastService } from '../../../services/toast'
+import type { HouseholdDashboard, HouseholdDebt, HouseholdPageState } from '../../../types'
 import { Check } from '../../../components/ui/icons'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { today } from '../householdDates'
+
+const HOLD_DURATION_MS = 3_000
+const SUCCESS_FEEDBACK_MS = 900
+
+type PaymentPhase = 'idle' | 'holding' | 'saving' | 'success'
 
 export function BalancesOverviewModal({
   isOpen,
   onClose,
   household,
-  onRecordPayment,
+  onChanged,
 }: {
   isOpen: boolean
   onClose: () => void
   household: HouseholdDashboard
-  onRecordPayment: (debt: HouseholdDebt) => void
+  onChanged: (page: HouseholdPageState) => void
 }) {
   const { formatCurrency, t } = useI18n()
   const outstandingTotal = household.debts.reduce(
@@ -181,20 +190,11 @@ export function BalancesOverviewModal({
                       {formatCurrency(debt.amount)}
                     </Text>
                     {youPay && (
-                      <Button
-                        h="38px"
-                        px={3.5}
-                        borderRadius="10px"
-                        bg="var(--pb-forest-2)"
-                        color="var(--pb-on-accent)"
-                        onClick={() => onRecordPayment(debt)}
-                        _hover={{
-                          bg: 'var(--pb-forest)',
-                          transform: 'translateY(-1px)',
-                        }}
-                      >
-                        {t('household.balances.recordPayment')}
-                      </Button>
+                      <HoldToPayButton
+                        householdId={household.id}
+                        debt={debt}
+                        onChanged={onChanged}
+                      />
                     )}
                   </HStack>
                 </Stack>
@@ -204,5 +204,206 @@ export function BalancesOverviewModal({
         )}
       </Box>
     </PremiumModal>
+  )
+}
+
+function HoldToPayButton({
+  householdId,
+  debt,
+  onChanged,
+}: {
+  householdId: number
+  debt: HouseholdDebt
+  onChanged: (page: HouseholdPageState) => void
+}) {
+  const { formatCurrency, t } = useI18n()
+  const [phase, setPhase] = useState<PaymentPhase>('idle')
+  const phaseRef = useRef<PaymentPhase>('idle')
+  const holdTimerRef = useRef<number | null>(null)
+  const successTimerRef = useRef<number | null>(null)
+  const successPageRef = useRef<HouseholdPageState | null>(null)
+  const onChangedRef = useRef(onChanged)
+  const mountedRef = useRef(true)
+  onChangedRef.current = onChanged
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+      if (holdTimerRef.current !== null) window.clearTimeout(holdTimerRef.current)
+      if (successTimerRef.current !== null) window.clearTimeout(successTimerRef.current)
+      if (successPageRef.current) {
+        const completedPage = successPageRef.current
+        successPageRef.current = null
+        onChangedRef.current(completedPage)
+      }
+    }
+  }, [])
+
+  const changePhase = (nextPhase: PaymentPhase) => {
+    phaseRef.current = nextPhase
+    if (mountedRef.current) setPhase(nextPhase)
+  }
+
+  const clearHoldTimer = () => {
+    if (holdTimerRef.current === null) return
+    window.clearTimeout(holdTimerRef.current)
+    holdTimerRef.current = null
+  }
+
+  const cancelHold = () => {
+    if (phaseRef.current !== 'holding') return
+    clearHoldTimer()
+    changePhase('idle')
+  }
+
+  const confirmPayment = async () => {
+    if (phaseRef.current !== 'holding') return
+    clearHoldTimer()
+    changePhase('saving')
+    try {
+      const created = await createHouseholdSettlement(householdId, {
+        toMemberId: debt.toMemberId,
+        amount: debt.amount,
+        settlementDate: today(),
+      })
+      if (!mountedRef.current) {
+        onChangedRef.current(created.page)
+        return
+      }
+      successPageRef.current = created.page
+      changePhase('success')
+      successTimerRef.current = window.setTimeout(() => {
+        successTimerRef.current = null
+        const completedPage = successPageRef.current
+        successPageRef.current = null
+        if (completedPage) onChangedRef.current(completedPage)
+      }, SUCCESS_FEEDBACK_MS)
+    } catch (error) {
+      changePhase('idle')
+      ToastService.apiError(error, { title: t('household.balances.paymentFailed') })
+    }
+  }
+
+  const beginHold = () => {
+    if (phaseRef.current !== 'idle') return
+    changePhase('holding')
+    holdTimerRef.current = window.setTimeout(
+      () => void confirmPayment(),
+      HOLD_DURATION_MS,
+    )
+  }
+
+  const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === 'mouse' && event.button !== 0) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture(event.pointerId)
+    beginHold()
+  }
+
+  const handlePointerMove = (event: PointerEvent<HTMLButtonElement>) => {
+    if (phaseRef.current !== 'holding') return
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const inside = event.clientX >= bounds.left
+      && event.clientX <= bounds.right
+      && event.clientY >= bounds.top
+      && event.clientY <= bounds.bottom
+    if (inside) return
+    cancelHold()
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+  }
+
+  const handlePointerEnd = (event: PointerEvent<HTMLButtonElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+    cancelHold()
+  }
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return
+    event.preventDefault()
+    if (event.repeat) return
+    beginHold()
+  }
+
+  const handleKeyUp = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key !== ' ' && event.key !== 'Enter') return
+    event.preventDefault()
+    cancelHold()
+  }
+
+  const label = phase === 'holding'
+    ? t('household.balances.keepHolding')
+    : phase === 'saving'
+      ? t('household.balances.recordingPayment')
+      : phase === 'success'
+        ? t('household.balances.paymentDone')
+        : t('household.balances.recordPayment')
+  const accessibleLabel = phase === 'idle'
+    ? t('household.balances.holdPaymentAria', {
+      amount: formatCurrency(debt.amount),
+      name: debt.toMemberName,
+    })
+    : label
+
+  return (
+    <>
+      <Button
+        h="38px"
+        minW="132px"
+        px={3.5}
+        position="relative"
+        overflow="hidden"
+        borderRadius="10px"
+        bg={phase === 'success' ? 'var(--pb-income)' : 'var(--pb-forest-2)'}
+        color="var(--pb-on-accent)"
+        aria-label={accessibleLabel}
+        aria-busy={phase === 'saving'}
+        isDisabled={phase === 'saving' || phase === 'success'}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        onLostPointerCapture={cancelHold}
+        onKeyDown={handleKeyDown}
+        onKeyUp={handleKeyUp}
+        onBlur={cancelHold}
+        onClick={(event) => event.preventDefault()}
+        onContextMenu={(event) => event.preventDefault()}
+        touchAction="none"
+        userSelect="none"
+        sx={{ WebkitTouchCallout: 'none' }}
+        _hover={{
+          bg: phase === 'success' ? 'var(--pb-income)' : 'var(--pb-forest)',
+          transform: phase === 'idle' ? 'translateY(-1px)' : 'none',
+        }}
+        _disabled={{ opacity: 1, cursor: 'default' }}
+      >
+        <Box
+          aria-hidden="true"
+          position="absolute"
+          inset={0}
+          bg="whiteAlpha.300"
+          transformOrigin="left center"
+          transform={phase === 'idle' ? 'scaleX(0)' : 'scaleX(1)'}
+          transition={phase === 'holding'
+            ? `transform ${HOLD_DURATION_MS}ms linear`
+            : phase === 'idle'
+              ? 'none'
+              : 'transform 120ms ease-out'}
+          pointerEvents="none"
+        />
+        <HStack as="span" position="relative" zIndex={1} spacing={1.5}>
+          {phase === 'success' && <Icon as={Check} boxSize={4.5} weight="bold" />}
+          <Text as="span" fontSize="sm" fontWeight={700}>{label}</Text>
+        </HStack>
+      </Button>
+      <VisuallyHidden aria-live="polite">
+        {phase === 'success' ? label : ''}
+      </VisuallyHidden>
+    </>
   )
 }

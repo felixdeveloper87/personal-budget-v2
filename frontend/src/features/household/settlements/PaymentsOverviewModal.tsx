@@ -9,25 +9,14 @@ export function PaymentsOverviewModal({
   isOpen,
   onClose,
   household,
-  busyAction,
   onOpenAttachments,
-  onConfirm,
-  onReject,
-  onCancel,
 }: {
   isOpen: boolean
   onClose: () => void
   household: HouseholdDashboard
-  busyAction: string | null
   onOpenAttachments: (settlementId: number) => void
-  onConfirm: (settlementId: number) => void
-  onReject: (settlementId: number) => void
-  onCancel: (settlementId: number) => void
 }) {
   const { formatCurrency, formatDate, formatNumber, t } = useI18n()
-  const pendingCount = household.settlements.filter(
-    (settlement) => settlement.status === 'PENDING',
-  ).length
 
   const settlementsByMonth = useMemo(() => {
     const grouped = new Map<string, HouseholdSettlement[]>()
@@ -51,24 +40,20 @@ export function PaymentsOverviewModal({
           onClose={onClose}
           rightSlot={
             <Badge
-              bg={pendingCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
-              color={pendingCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
+              bg="var(--pb-tint-income)"
+              color="var(--pb-income)"
               border="1px solid var(--pb-hair)"
               borderRadius="full"
               px={3}
               py={1}
               textTransform="none"
             >
-              {pendingCount
-                ? t('household.settlements.pending', {
-                  count: formatNumber(pendingCount),
-                })
-                : t(
-                  household.settlements.length === 1
-                    ? 'household.settlements.count.one'
-                    : 'household.settlements.count.other',
-                  { count: formatNumber(household.settlements.length) },
-                )}
+              {t(
+                household.settlements.length === 1
+                  ? 'household.settlements.count.one'
+                  : 'household.settlements.count.other',
+                { count: formatNumber(household.settlements.length) },
+              )}
             </Badge>
           }
         />
@@ -145,7 +130,6 @@ export function PaymentsOverviewModal({
                   </Text>
                   <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
                     {settlements.map((settlement) => {
-                      const needsCurrentUserAction = settlement.canConfirm || settlement.canReject
                       const statusAccent = settlement.status === 'CONFIRMED'
                         ? 'var(--pb-income)'
                         : settlement.status === 'PENDING'
@@ -167,12 +151,8 @@ export function PaymentsOverviewModal({
                           p={3}
                           borderRadius="14px"
                           border="1px solid"
-                          borderColor={needsCurrentUserAction
-                            ? 'var(--pb-gold)'
-                            : 'var(--pb-hair)'}
-                          bg={needsCurrentUserAction
-                            ? 'var(--pb-tint-gold)'
-                            : 'var(--pb-surface)'}
+                          borderColor="var(--pb-hair)"
+                          bg="var(--pb-surface)"
                         >
                           <Flex
                             direction={{ base: 'column', sm: 'row' }}
@@ -223,17 +203,6 @@ export function PaymentsOverviewModal({
                                   settlement.status,
                                 )}
                               </Badge>
-                              {needsCurrentUserAction && (
-                                <Text
-                                  fontFamily="var(--pb-mono)"
-                                  fontSize="8px"
-                                  fontWeight={700}
-                                  color="var(--pb-gold)"
-                                  textTransform="uppercase"
-                                >
-                                  {t('household.settlements.review')}
-                                </Text>
-                              )}
                             </HStack>
 
                             <HStack spacing={1} flexWrap="wrap" justify="flex-end">
@@ -255,44 +224,6 @@ export function PaymentsOverviewModal({
                                     })}
                                   </Button>
                                 )}
-                              {settlement.canConfirm && (
-                                <Button
-                                  h="34px"
-                                  px={3}
-                                  borderRadius="9px"
-                                  bg="var(--pb-forest-2)"
-                                  color="var(--pb-on-accent)"
-                                  isLoading={busyAction === `confirm-${settlement.id}`}
-                                  onClick={() => onConfirm(settlement.id)}
-                                >
-                                  {t('household.common.confirm')}
-                                </Button>
-                              )}
-                              {settlement.canReject && (
-                                <Button
-                                  h="34px"
-                                  px={2.5}
-                                  borderRadius="9px"
-                                  variant="ghost"
-                                  color="var(--pb-coral)"
-                                  isLoading={busyAction === `reject-${settlement.id}`}
-                                  onClick={() => onReject(settlement.id)}
-                                >
-                                  {t('household.common.reject')}
-                                </Button>
-                              )}
-                              {settlement.canCancel && (
-                                <Button
-                                  h="34px"
-                                  px={2.5}
-                                  borderRadius="9px"
-                                  variant="ghost"
-                                  isLoading={busyAction === `cancel-${settlement.id}`}
-                                  onClick={() => onCancel(settlement.id)}
-                                >
-                                  {t('household.common.cancel')}
-                                </Button>
-                              )}
                             </HStack>
                           </Flex>
                         </Stack>

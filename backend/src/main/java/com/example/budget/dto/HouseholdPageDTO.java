@@ -97,9 +97,6 @@ public record HouseholdPageDTO(
             BigDecimal amount,
             LocalDate settlementDate,
             String status,
-            boolean canConfirm,
-            boolean canReject,
-            boolean canCancel,
             boolean canAttach,
             List<Attachment> attachments,
             LocalDateTime createdAt

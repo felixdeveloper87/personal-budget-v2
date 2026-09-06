@@ -819,34 +819,4 @@ export async function getHouseholdAttachmentBlob(
   return data
 }
 
-export async function confirmHouseholdSettlement(
-  householdId: number,
-  settlementId: number,
-): Promise<HouseholdPageState> {
-  const { data } = await api.post<HouseholdPageState>(
-    `/households/${householdId}/settlements/${settlementId}/confirm`,
-  )
-  return data
-}
-
-export async function rejectHouseholdSettlement(
-  householdId: number,
-  settlementId: number,
-): Promise<HouseholdPageState> {
-  const { data } = await api.post<HouseholdPageState>(
-    `/households/${householdId}/settlements/${settlementId}/reject`,
-  )
-  return data
-}
-
-export async function cancelHouseholdSettlement(
-  householdId: number,
-  settlementId: number,
-): Promise<HouseholdPageState> {
-  const { data } = await api.post<HouseholdPageState>(
-    `/households/${householdId}/settlements/${settlementId}/cancel`,
-  )
-  return data
-}
-
 export default api

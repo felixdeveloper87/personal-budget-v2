@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Box, Button, Icon, SimpleGrid, VStack, useDisclosure } from '@chakra-ui/react'
-import { cancelHouseholdSettlement, confirmHouseholdSettlement, markHouseholdNotificationsRead, rejectHouseholdSettlement, updateHouseholdCleaningDuty, uploadHouseholdExpenseAttachments, uploadHouseholdSettlementAttachments } from '../../api'
+import { Box, Button, Icon, VStack, useDisclosure } from '@chakra-ui/react'
+import { markHouseholdNotificationsRead, updateHouseholdCleaningDuty, uploadHouseholdExpenseAttachments, uploadHouseholdSettlementAttachments } from '../../api'
 import { useI18n } from '../../i18n'
-import type { HouseholdDebt, HouseholdExpense } from '../../types'
-import { CheckCircle2, Plus, Wallet } from '../../components/ui/icons'
+import type { HouseholdExpense } from '../../types'
+import { Plus, Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
@@ -21,7 +21,6 @@ import { MembersModal } from './members/MembersModal'
 import { MembersOverviewModal } from './members/MembersOverviewModal'
 import { BalancesOverviewModal } from './settlements/BalancesOverviewModal'
 import { PaymentsOverviewModal } from './settlements/PaymentsOverviewModal'
-import { SettlementModal } from './settlements/SettlementModal'
 import type { AttachmentTarget } from './household.types'
 import { useHouseholdPageController } from './hooks/useHouseholdPageController'
 import { keyframes } from '@emotion/react'
@@ -49,11 +48,9 @@ export default function HouseholdPage() {
   } = useHouseholdPageController()
   const [householdName, setHouseholdName] = useState(() => t('household.create.defaultName'))
   const [editingExpense, setEditingExpense] = useState<HouseholdExpense | null>(null)
-  const [settlingDebt, setSettlingDebt] = useState<HouseholdDebt | null>(null)
   const [attachmentTarget, setAttachmentTarget] = useState<AttachmentTarget | null>(null)
   const expenseModal = useDisclosure()
   const membersModal = useDisclosure()
-  const settlementModal = useDisclosure()
   const attachmentsModal = useDisclosure()
   const cleaningRotationModal = useDisclosure()
   const balancesOverviewModal = useDisclosure()
@@ -70,11 +67,6 @@ export default function HouseholdPage() {
   const openEditExpense = (expense: HouseholdExpense) => {
     setEditingExpense(expense)
     expenseModal.onOpen()
-  }
-
-  const openSettlement = (debt: HouseholdDebt) => {
-    setSettlingDebt(debt)
-    settlementModal.onOpen()
   }
 
   if (loading) {
@@ -98,14 +90,6 @@ export default function HouseholdPage() {
   }
 
   const household = page.household
-  const pendingConfirmations = household.settlements.filter(
-    (settlement) => settlement.canConfirm || settlement.canReject,
-  )
-  const pendingConfirmationTotal = pendingConfirmations.reduce(
-    (total, settlement) => total + settlement.amount,
-    0,
-  )
-  const firstPendingConfirmation = pendingConfirmations[0]
   const debtsYouOwe = household.debts.filter(
     (debt) => debt.fromMemberId === household.currentMemberId,
   )
@@ -118,9 +102,6 @@ export default function HouseholdPage() {
     (total, debt) => total + debt.amount,
     0,
   )
-  const pendingSettlementCount = household.settlements.filter(
-    (settlement) => settlement.status === 'PENDING',
-  ).length
   const attachmentExpense = attachmentTarget?.kind === 'expense'
     ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
     : undefined
@@ -240,64 +221,30 @@ export default function HouseholdPage() {
         />
 
 
-        {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
-          <SimpleGrid
-            columns={{
-              base: 1,
-              xl: pendingConfirmations.length > 0 && debtsYouOwe.length > 0 ? 2 : 1,
-            }}
-            spacing={3}
-          >
-            {pendingConfirmations.length > 0 && (
-              <ActionRequiredBanner
-                ariaLabel={t('household.banner.confirmationsAria')}
-                icon={<Icon as={CheckCircle2} boxSize={5} weight="duotone" />}
-                accent="var(--pb-gold)"
-                tint="var(--pb-tint-gold)"
-                count={pendingConfirmations.length}
-                title={pendingConfirmations.length === 1
-                  ? t('household.banner.confirmations.one')
-                  : t('household.banner.confirmations.other', {
-                    count: formatNumber(pendingConfirmations.length),
-                  })}
-                detail={pendingConfirmations.length === 1 && firstPendingConfirmation
-                  ? t('household.banner.confirmationDetail.one', {
-                    name: firstPendingConfirmation.fromMemberName,
-                    amount: formatCurrency(firstPendingConfirmation.amount),
-                  })
-                  : t('household.banner.confirmationDetail.other', {
-                    amount: formatCurrency(pendingConfirmationTotal),
-                  })}
-                actionLabel={t('household.banner.reviewPayments')}
-                onAction={paymentsOverviewModal.onOpen}
-              />
-            )}
-            {debtsYouOwe.length > 0 && (
-              <ActionRequiredBanner
-                ariaLabel={t('household.banner.debtsAria')}
-                icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
-                accent="var(--pb-coral)"
-                tint="var(--pb-tint-coral)"
-                count={debtsYouOwe.length}
-                title={debtsYouOwe.length === 1
-                  ? t('household.banner.debts.one')
-                  : t('household.banner.debts.other', {
-                    count: formatNumber(debtsYouOwe.length),
-                  })}
-                detail={debtsYouOwe.length === 1 && firstDebtYouOwe
-                  ? t('household.banner.debtDetail.one', {
-                    amount: formatCurrency(firstDebtYouOwe.amount),
-                    name: firstDebtYouOwe.toMemberName,
-                  })
-                  : t('household.banner.debtDetail.other', {
-                    amount: formatCurrency(totalYouOwe),
-                    count: formatNumber(debtsYouOwe.length),
-                  })}
-                actionLabel={t('household.banner.reviewBalances')}
-                onAction={balancesOverviewModal.onOpen}
-              />
-            )}
-          </SimpleGrid>
+        {debtsYouOwe.length > 0 && (
+          <ActionRequiredBanner
+            ariaLabel={t('household.banner.debtsAria')}
+            icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
+            accent="var(--pb-coral)"
+            tint="var(--pb-tint-coral)"
+            count={debtsYouOwe.length}
+            title={debtsYouOwe.length === 1
+              ? t('household.banner.debts.one')
+              : t('household.banner.debts.other', {
+                count: formatNumber(debtsYouOwe.length),
+              })}
+            detail={debtsYouOwe.length === 1 && firstDebtYouOwe
+              ? t('household.banner.debtDetail.one', {
+                amount: formatCurrency(firstDebtYouOwe.amount),
+                name: firstDebtYouOwe.toMemberName,
+              })
+              : t('household.banner.debtDetail.other', {
+                amount: formatCurrency(totalYouOwe),
+                count: formatNumber(debtsYouOwe.length),
+              })}
+            actionLabel={t('household.banner.reviewBalances')}
+            onAction={balancesOverviewModal.onOpen}
+          />
         )}
 
         <Box id="household-cleaning" scrollMarginTop="90px">
@@ -363,18 +310,14 @@ export default function HouseholdPage() {
           eyebrow={t('household.settlements.eyebrow')}
           title={t('household.settlements.title')}
           description={t('household.settlements.description')}
-          accent={pendingSettlementCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
-          tint={pendingSettlementCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
-          stat={pendingSettlementCount
-            ? t('household.settlements.pending', {
-              count: formatNumber(pendingSettlementCount),
-            })
-            : t(
-              household.settlements.length === 1
-                ? 'household.settlements.count.one'
-                : 'household.settlements.count.other',
-              { count: formatNumber(household.settlements.length) },
-            )}
+          accent="var(--pb-income)"
+          tint="var(--pb-tint-income)"
+          stat={t(
+            household.settlements.length === 1
+              ? 'household.settlements.count.one'
+              : 'household.settlements.count.other',
+            { count: formatNumber(household.settlements.length) },
+          )}
           actionLabel={t('household.settlements.open')}
           actionAriaLabel={t('household.settlements.openAria')}
           onOpen={paymentsOverviewModal.onOpen}
@@ -386,13 +329,6 @@ export default function HouseholdPage() {
         onClose={expenseModal.onClose}
         household={household}
         expense={editingExpense}
-        onChanged={setPage}
-      />
-      <SettlementModal
-        isOpen={settlementModal.isOpen}
-        onClose={settlementModal.onClose}
-        household={household}
-        debt={settlingDebt}
         onChanged={setPage}
       />
       <MembersModal
@@ -410,10 +346,7 @@ export default function HouseholdPage() {
         isOpen={balancesOverviewModal.isOpen}
         onClose={balancesOverviewModal.onClose}
         household={household}
-        onRecordPayment={(debt) => {
-          balancesOverviewModal.onClose()
-          openSettlement(debt)
-        }}
+        onChanged={setPage}
       />
       <RecentExpensesModal
         isOpen={recentExpensesModal.isOpen}
@@ -436,24 +369,10 @@ export default function HouseholdPage() {
         isOpen={paymentsOverviewModal.isOpen}
         onClose={paymentsOverviewModal.onClose}
         household={household}
-        busyAction={busyAction}
         onOpenAttachments={(settlementId) => {
           paymentsOverviewModal.onClose()
           openAttachments({ kind: 'settlement', id: settlementId })
         }}
-        onConfirm={(settlementId) => void applyAction(
-          `confirm-${settlementId}`,
-          () => confirmHouseholdSettlement(household.id, settlementId),
-          t('household.settlements.confirmedToast'),
-        )}
-        onReject={(settlementId) => void applyAction(
-          `reject-${settlementId}`,
-          () => rejectHouseholdSettlement(household.id, settlementId),
-        )}
-        onCancel={(settlementId) => void applyAction(
-          `cancel-${settlementId}`,
-          () => cancelHouseholdSettlement(household.id, settlementId),
-        )}
       />
       <CleaningRotationModal
         isOpen={cleaningRotationModal.isOpen}

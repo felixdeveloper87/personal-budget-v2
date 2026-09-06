@@ -5,7 +5,6 @@ import com.example.budget.model.HouseholdExpense;
 import com.example.budget.model.HouseholdExpenseShare;
 import com.example.budget.model.HouseholdMember;
 import com.example.budget.model.HouseholdSettlement;
-import com.example.budget.model.HouseholdSettlementStatus;
 import com.example.budget.repository.HouseholdExpenseRepository;
 import com.example.budget.repository.HouseholdExpenseShareRepository;
 import com.example.budget.repository.HouseholdMemberRepository;
@@ -17,7 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
@@ -26,7 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Sends settlement confirmation requests and twice-monthly outstanding-payment reminders. */
+/** Sends twice-monthly outstanding Household payment reminders. */
 @Service
 public class HouseholdPaymentEmailService {
     private static final Logger log = LoggerFactory.getLogger(HouseholdPaymentEmailService.class);
@@ -57,30 +55,6 @@ public class HouseholdPaymentEmailService {
         this.resendEmailClient = resendEmailClient;
         this.emailTemplate = emailTemplate;
         this.emailZone = ZoneId.of(emailZone);
-    }
-
-    /** Called after a payer records a settlement; only the recipient is notified. */
-    public void sendPendingConfirmation(HouseholdSettlement settlement) {
-        HouseholdMember recipient = settlement.getToMember();
-        String email = communicationEmail(recipient);
-        if (email == null) {
-            return;
-        }
-        try {
-            HouseholdPaymentEmailTemplate.EmailContent content = emailTemplate.pendingConfirmation(
-                    recipient.getDisplayName(),
-                    settlement.getFromMember().getDisplayName(),
-                    settlement.getHousehold().getName(),
-                    settlement.getAmount(),
-                    settlement.getHousehold().getCurrency());
-            resendEmailClient.sendHtmlBatch(
-                    List.of(email),
-                    "Payment awaiting your confirmation",
-                    content.text(),
-                    content.html());
-        } catch (RuntimeException exception) {
-            log.error("Could not send Household settlement confirmation email for settlement {}", settlement.getId(), exception);
-        }
     }
 
     @Scheduled(
@@ -121,8 +95,7 @@ public class HouseholdPaymentEmailService {
 
         for (HouseholdService.DebtPosition debt :
                 HouseholdService.calculateDebtsThroughMonth(shares, settlements, currentMonth)) {
-            BigDecimal unsettledAmount = debt.amount().subtract(pendingAmount(debt, settlements));
-            if (unsettledAmount.signum() <= 0) {
+            if (debt.amount().signum() <= 0) {
                 continue;
             }
             HouseholdMember debtor = memberById.get(debt.fromId());
@@ -132,7 +105,7 @@ public class HouseholdPaymentEmailService {
             }
             debtsByDebtor.computeIfAbsent(debtor.getId(), ignored -> new ArrayList<>())
                     .add(new HouseholdPaymentEmailTemplate.Debt(
-                            creditor.getDisplayName(), unsettledAmount));
+                            creditor.getDisplayName(), debt.amount()));
         }
 
         debtsByDebtor.forEach((debtorId, debts) -> {
@@ -149,17 +122,6 @@ public class HouseholdPaymentEmailService {
                     content.text(),
                     content.html());
         });
-    }
-
-    private BigDecimal pendingAmount(
-            HouseholdService.DebtPosition debt,
-            List<HouseholdSettlement> settlements) {
-        return settlements.stream()
-                .filter(settlement -> settlement.getStatus() == HouseholdSettlementStatus.PENDING)
-                .filter(settlement -> settlement.getFromMember().getId().equals(debt.fromId()))
-                .filter(settlement -> settlement.getToMember().getId().equals(debt.toId()))
-                .map(HouseholdSettlement::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private String communicationEmail(HouseholdMember member) {

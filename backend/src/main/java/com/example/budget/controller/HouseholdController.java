@@ -238,36 +238,6 @@ public class HouseholdController {
         return service.page(user);
     }
 
-    @PostMapping("/households/{householdId}/settlements/{settlementId}/confirm")
-    public HouseholdPageDTO confirmSettlement(
-            @PathVariable Long householdId,
-            @PathVariable Long settlementId,
-            Authentication authentication) {
-        User user = user(authentication);
-        service.confirmSettlement(householdId, settlementId, user);
-        return service.page(user);
-    }
-
-    @PostMapping("/households/{householdId}/settlements/{settlementId}/reject")
-    public HouseholdPageDTO rejectSettlement(
-            @PathVariable Long householdId,
-            @PathVariable Long settlementId,
-            Authentication authentication) {
-        User user = user(authentication);
-        service.rejectSettlement(householdId, settlementId, user);
-        return service.page(user);
-    }
-
-    @PostMapping("/households/{householdId}/settlements/{settlementId}/cancel")
-    public HouseholdPageDTO cancelSettlement(
-            @PathVariable Long householdId,
-            @PathVariable Long settlementId,
-            Authentication authentication) {
-        User user = user(authentication);
-        service.cancelSettlement(householdId, settlementId, user);
-        return service.page(user);
-    }
-
     @GetMapping("/households/{householdId}/attachments/{attachmentId}/content")
     public ResponseEntity<Resource> attachmentContent(
             @PathVariable Long householdId,

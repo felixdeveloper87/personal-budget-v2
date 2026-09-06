@@ -31,7 +31,6 @@ public class HouseholdService {
     private final HouseholdAttachmentRepository attachmentRepository;
     private final HouseholdCleaningService cleaningService;
     private final HouseholdNotificationService notificationService;
-    private final HouseholdPaymentEmailService paymentEmailService;
     private final UserRepository userRepository;
 
     public HouseholdService(
@@ -44,7 +43,6 @@ public class HouseholdService {
             HouseholdAttachmentRepository attachmentRepository,
             HouseholdCleaningService cleaningService,
             HouseholdNotificationService notificationService,
-            HouseholdPaymentEmailService paymentEmailService,
             UserRepository userRepository) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -55,7 +53,6 @@ public class HouseholdService {
         this.attachmentRepository = attachmentRepository;
         this.cleaningService = cleaningService;
         this.notificationService = notificationService;
-        this.paymentEmailService = paymentEmailService;
         this.userRepository = userRepository;
     }
 
@@ -205,14 +202,9 @@ public class HouseholdService {
         LedgerState state = loadLedger(owner.getHousehold());
         boolean hasDebt = calculateDebts(state.shares(), state.settlements()).stream()
                 .anyMatch(debt -> debt.fromId().equals(memberId) || debt.toId().equals(memberId));
-        boolean hasPendingSettlement = state.settlements().stream()
-                .anyMatch(settlement ->
-                        settlement.getStatus() == HouseholdSettlementStatus.PENDING
-                                && (settlement.getFromMember().getId().equals(memberId)
-                                || settlement.getToMember().getId().equals(memberId)));
-        if (hasDebt || hasPendingSettlement) {
+        if (hasDebt) {
             throw new IllegalArgumentException(
-                    "Settle this member's balance and pending payments before removing them");
+                    "Settle this member's balance before removing them");
         }
 
         cleaningService.removeParticipant(target);
@@ -321,14 +313,7 @@ public class HouseholdService {
                         state.shares(), state.settlements(), YearMonth.now()),
                 from.getId(),
                 to.getId());
-        BigDecimal reserved = state.settlements().stream()
-                .filter(settlement -> settlement.getStatus() == HouseholdSettlementStatus.PENDING)
-                .filter(settlement -> settlement.getFromMember().getId().equals(from.getId()))
-                .filter(settlement -> settlement.getToMember().getId().equals(to.getId()))
-                .map(HouseholdSettlement::getAmount)
-                .reduce(ZERO, BigDecimal::add);
-        BigDecimal available = due.subtract(reserved);
-        if (available.signum() <= 0 || amount.compareTo(available) > 0) {
+        if (due.signum() <= 0 || amount.compareTo(due) > 0) {
             throw new IllegalArgumentException("Settlement exceeds the current amount due");
         }
 
@@ -339,8 +324,10 @@ public class HouseholdService {
         settlement.setAmount(amount);
         settlement.setSettlementDate(
                 request.settlementDate() != null ? request.settlementDate() : LocalDate.now());
-        settlement.setStatus(HouseholdSettlementStatus.PENDING);
+        settlement.setStatus(HouseholdSettlementStatus.CONFIRMED);
         settlement.setCreatedBy(user);
+        settlement.setConfirmedBy(user);
+        settlement.setConfirmedAt(LocalDateTime.now());
         settlementRepository.save(settlement);
         notificationService.notifyMember(
                 to,
@@ -349,95 +336,7 @@ public class HouseholdService {
                 settlement.getId(),
                 null,
                 settlement.getAmount());
-        paymentEmailService.sendPendingConfirmation(settlement);
         return settlement.getId();
-    }
-
-    @Transactional
-    public void confirmSettlement(Long householdId, Long settlementId, User user) {
-        HouseholdMember recipient = requireMember(householdId, user);
-        HouseholdSettlement settlement = settlementRepository
-                .findByIdAndHousehold(settlementId, recipient.getHousehold())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "HouseholdSettlement", settlementId));
-        if (!settlement.getToMember().getId().equals(recipient.getId())) {
-            throw new AccessDeniedException("Only the recipient can confirm this settlement");
-        }
-        if (settlement.getStatus() == HouseholdSettlementStatus.CONFIRMED) {
-            return;
-        }
-        if (settlement.getStatus() != HouseholdSettlementStatus.PENDING) {
-            throw new IllegalArgumentException("This settlement is no longer pending");
-        }
-
-        LedgerState state = loadLedger(recipient.getHousehold());
-        BigDecimal due = debtAmount(
-                calculateDebtsThroughMonth(
-                        state.shares(), state.settlements(), YearMonth.now()),
-                settlement.getFromMember().getId(),
-                settlement.getToMember().getId());
-        if (settlement.getAmount().compareTo(due) > 0) {
-            throw new IllegalArgumentException(
-                    "The balance changed and this settlement now exceeds the amount due");
-        }
-
-        settlement.setStatus(HouseholdSettlementStatus.CONFIRMED);
-        settlement.setConfirmedBy(user);
-        settlement.setConfirmedAt(LocalDateTime.now());
-        settlementRepository.save(settlement);
-        notificationService.notifyMember(
-                settlement.getFromMember(),
-                recipient,
-                HouseholdNotificationType.SETTLEMENT_CONFIRMED,
-                settlement.getId(),
-                null,
-                settlement.getAmount());
-    }
-
-    @Transactional
-    public void rejectSettlement(Long householdId, Long settlementId, User user) {
-        HouseholdMember recipient = requireMember(householdId, user);
-        HouseholdSettlement settlement = settlementRepository
-                .findByIdAndHousehold(settlementId, recipient.getHousehold())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "HouseholdSettlement", settlementId));
-        if (!settlement.getToMember().getId().equals(recipient.getId())) {
-            throw new AccessDeniedException("Only the recipient can reject this settlement");
-        }
-        requirePending(settlement);
-        settlement.setStatus(HouseholdSettlementStatus.REJECTED);
-        settlement.setCancelledAt(LocalDateTime.now());
-        settlementRepository.save(settlement);
-        notificationService.notifyMember(
-                settlement.getFromMember(),
-                recipient,
-                HouseholdNotificationType.SETTLEMENT_REJECTED,
-                settlement.getId(),
-                null,
-                settlement.getAmount());
-    }
-
-    @Transactional
-    public void cancelSettlement(Long householdId, Long settlementId, User user) {
-        HouseholdMember payer = requireMember(householdId, user);
-        HouseholdSettlement settlement = settlementRepository
-                .findByIdAndHousehold(settlementId, payer.getHousehold())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "HouseholdSettlement", settlementId));
-        if (!settlement.getFromMember().getId().equals(payer.getId())) {
-            throw new AccessDeniedException("Only the payer can cancel this settlement");
-        }
-        requirePending(settlement);
-        settlement.setStatus(HouseholdSettlementStatus.CANCELLED);
-        settlement.setCancelledAt(LocalDateTime.now());
-        settlementRepository.save(settlement);
-        notificationService.notifyMember(
-                settlement.getToMember(),
-                payer,
-                HouseholdNotificationType.SETTLEMENT_CANCELLED,
-                settlement.getId(),
-                null,
-                settlement.getAmount());
     }
 
     @Transactional
@@ -569,10 +468,7 @@ public class HouseholdService {
                                 .collect(Collectors.groupingBy(
                                         attachment -> attachment.getSettlement().getId()));
         List<HouseholdPageDTO.Settlement> settlementDTOs = recentSettlements.stream()
-                .map(settlement -> {
-                    boolean pending =
-                            settlement.getStatus() == HouseholdSettlementStatus.PENDING;
-                    return new HouseholdPageDTO.Settlement(
+                .map(settlement -> new HouseholdPageDTO.Settlement(
                             settlement.getId(),
                             settlement.getFromMember().getId(),
                             settlement.getFromMember().getDisplayName(),
@@ -581,17 +477,13 @@ public class HouseholdService {
                             amount(settlement.getAmount()),
                             settlement.getSettlementDate(),
                             settlement.getStatus().name(),
-                            pending && settlement.getToMember().getId().equals(current.getId()),
-                            pending && settlement.getToMember().getId().equals(current.getId()),
-                            pending && settlement.getFromMember().getId().equals(current.getId()),
                             owner || settlement.getFromMember().getId().equals(current.getId()),
                             attachmentsBySettlement
                                     .getOrDefault(settlement.getId(), List.of())
                                     .stream()
                                     .map(attachment -> toAttachmentDTO(attachment, current))
                                     .toList(),
-                            settlement.getCreatedAt());
-                })
+                            settlement.getCreatedAt()))
                 .toList();
 
         List<HouseholdPageDTO.MonthSummary> monthSummaries =
@@ -855,12 +747,6 @@ public class HouseholdService {
     private void requirePending(HouseholdInvitation invitation) {
         if (invitation.getStatus() != HouseholdInvitationStatus.PENDING) {
             throw new IllegalArgumentException("This invitation is no longer pending");
-        }
-    }
-
-    private void requirePending(HouseholdSettlement settlement) {
-        if (settlement.getStatus() != HouseholdSettlementStatus.PENDING) {
-            throw new IllegalArgumentException("This settlement is no longer pending");
         }
     }
 

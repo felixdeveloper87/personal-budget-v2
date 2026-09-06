@@ -38,7 +38,6 @@ class HouseholdMemberNameServiceTest {
     @Mock private HouseholdAttachmentRepository attachmentRepository;
     @Mock private HouseholdCleaningService cleaningService;
     @Mock private HouseholdNotificationService notificationService;
-    @Mock private HouseholdPaymentEmailService paymentEmailService;
     @Mock private UserRepository userRepository;
     @Mock private User user;
     @Mock private Household household;
@@ -59,7 +58,6 @@ class HouseholdMemberNameServiceTest {
                 attachmentRepository,
                 cleaningService,
                 notificationService,
-                paymentEmailService,
                 userRepository);
     }
 
