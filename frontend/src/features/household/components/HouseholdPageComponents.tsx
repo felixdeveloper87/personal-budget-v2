@@ -1,5 +1,5 @@
-import { type ReactNode } from 'react'
-import { Badge, Box, Button, Flex, HStack, Icon, Text, useColorModeValue, type BoxProps } from '@chakra-ui/react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { Badge, Box, Button, Flex, HStack, Icon, Text, useColorModeValue, usePrefersReducedMotion, type BoxProps } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
 import { ChevronDown, ChevronRight } from '../../../components/ui/icons'
@@ -21,6 +21,129 @@ export function Surface({
       {...props}
     >
       {children}
+    </Box>
+  )
+}
+
+type HouseholdSectionNavigationItem = {
+  id: string
+  label: string
+}
+
+/** A compact in-page navigator with a measured, gliding active pill. */
+export function HouseholdSectionNavigation({
+  ariaLabel,
+  items,
+}: {
+  ariaLabel: string
+  items: HouseholdSectionNavigationItem[]
+}) {
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const [activeId, setActiveId] = useState(items[0]?.id ?? '')
+  const tabsRef = useRef<Array<HTMLButtonElement | null>>([])
+  const railRef = useRef<HTMLDivElement | null>(null)
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 })
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeIndex = items.findIndex((item) => item.id === activeId)
+      const activeTab = tabsRef.current[activeIndex]
+      if (!activeTab) return
+      setIndicator({ left: activeTab.offsetLeft, width: activeTab.offsetWidth })
+    }
+
+    const frame = requestAnimationFrame(updateIndicator)
+    const observer = typeof ResizeObserver === 'undefined'
+      ? undefined
+      : new ResizeObserver(updateIndicator)
+    if (railRef.current) observer?.observe(railRef.current)
+    window.addEventListener('resize', updateIndicator)
+
+    return () => {
+      cancelAnimationFrame(frame)
+      observer?.disconnect()
+      window.removeEventListener('resize', updateIndicator)
+    }
+  }, [activeId, items])
+
+  const selectSection = (id: string) => {
+    setActiveId(id)
+    document.getElementById(id)?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    })
+  }
+
+  return (
+    <Box
+      as="nav"
+      aria-label={ariaLabel}
+      overflowX="auto"
+      overflowY="hidden"
+      px={1.5}
+      py={1.5}
+      bg="var(--pb-surface-2)"
+      border="1px solid var(--pb-hair)"
+      borderRadius="16px"
+      boxShadow="inset 0 1px 0 rgba(255,255,255,0.38), 0 8px 20px rgba(23,37,31,0.035)"
+      css={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
+    >
+      <Box ref={railRef} position="relative" display="inline-flex" minW="max-content" gap={1.5}>
+        <Box
+          aria-hidden="true"
+          position="absolute"
+          top={0}
+          bottom={0}
+          left={`${indicator.left}px`}
+          w={`${indicator.width}px`}
+          border="1px solid rgba(22,132,97,0.16)"
+          borderRadius="12px"
+          bg="var(--pb-surface)"
+          boxShadow="0 5px 14px rgba(23,37,31,0.08), inset 0 1px 0 rgba(255,255,255,0.45)"
+          _after={{
+            content: '""',
+            position: 'absolute',
+            left: '50%',
+            bottom: '5px',
+            transform: 'translateX(-50%)',
+            w: '18px',
+            h: '2px',
+            borderRadius: 'full',
+            bg: 'var(--pb-forest-2)',
+          }}
+          transition={prefersReducedMotion
+            ? 'none'
+            : 'left 0.42s cubic-bezier(0.65, 0, 0.35, 1), width 0.42s cubic-bezier(0.65, 0, 0.35, 1)'}
+        />
+        {items.map((item, index) => {
+          const selected = item.id === activeId
+          return (
+            <Button
+              key={item.id}
+              ref={(element) => { tabsRef.current[index] = element }}
+              position="relative"
+              zIndex={1}
+              minH="42px"
+              px={{ base: 3.5, md: 4 }}
+              borderRadius="12px"
+              variant="unstyled"
+              color={selected ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={700}
+              letterSpacing="0.08em"
+              textTransform="uppercase"
+              aria-current={selected ? 'location' : undefined}
+              onClick={() => selectSection(item.id)}
+              transition={prefersReducedMotion ? 'none' : 'color 0.2s ease'}
+              _hover={{ color: selected ? 'var(--pb-forest)' : 'var(--pb-ink)' }}
+              _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '-2px' }}
+            >
+              {item.label}
+            </Button>
+          )
+        })}
+      </Box>
     </Box>
   )
 }
@@ -155,7 +278,6 @@ export function HouseholdSectionHeader({
   eyebrow,
   title,
   description,
-  icon,
   accent,
   tint,
   stat,
@@ -163,7 +285,6 @@ export function HouseholdSectionHeader({
   eyebrow: string
   title: string
   description: string
-  icon: ReactNode
   accent: string
   tint: string
   stat: string
@@ -179,46 +300,31 @@ export function HouseholdSectionHeader({
       borderBottom="1px solid var(--pb-hair)"
       bg="var(--pb-surface)"
     >
-      <HStack spacing={3} minW={0}>
-        <Flex
-          w={{ base: 10, md: 11 }}
-          h={{ base: 10, md: 11 }}
-          flexShrink={0}
-          align="center"
-          justify="center"
-          borderRadius="13px"
-          bg={tint}
-          color={accent}
-          border="1px solid var(--pb-hair)"
+      <Box minW={0}>
+        <Text
+          fontFamily="var(--pb-mono)"
+          fontSize="9px"
+          fontWeight={600}
+          letterSpacing="0.15em"
+          textTransform="uppercase"
+          color="var(--pb-ink-faint)"
         >
-          {icon}
-        </Flex>
-        <Box minW={0}>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={600}
-            letterSpacing="0.15em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            {eyebrow}
-          </Text>
-          <Text
-            mt={0.5}
-            fontFamily="var(--pb-serif)"
-            fontSize={{ base: 'lg', md: 'xl' }}
-            fontWeight={500}
-            lineHeight={1.1}
-            color="var(--pb-ink)"
-          >
-            {title}
-          </Text>
-          <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
-            {description}
-          </Text>
-        </Box>
-      </HStack>
+          {eyebrow}
+        </Text>
+        <Text
+          mt={0.5}
+          fontFamily="var(--pb-serif)"
+          fontSize={{ base: 'lg', md: 'xl' }}
+          fontWeight={500}
+          lineHeight={1.1}
+          color="var(--pb-ink)"
+        >
+          {title}
+        </Text>
+        <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs">
+          {description}
+        </Text>
+      </Box>
       <Text
         alignSelf={{ base: 'flex-start', sm: 'center' }}
         px={2.5}
@@ -245,7 +351,6 @@ export function HouseholdSectionCard({
   eyebrow,
   title,
   description,
-  icon,
   accent,
   tint,
   stat,
@@ -257,7 +362,6 @@ export function HouseholdSectionCard({
   eyebrow: string
   title: string
   description: string
-  icon: ReactNode
   accent: string
   tint: string
   stat: string
@@ -279,7 +383,6 @@ export function HouseholdSectionCard({
         eyebrow={eyebrow}
         title={title}
         description={description}
-        icon={icon}
         accent={accent}
         tint={tint}
         stat={stat}

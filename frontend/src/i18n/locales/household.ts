@@ -86,6 +86,8 @@ export const householdTranslations: TranslationBundle = {
     'household.header.position.bothWays': 'Money moves both ways',
     'household.header.position.bothWaysValue': '{{incoming}} in · {{outgoing}} out',
 
+    'household.navigation.aria': 'Household sections',
+
     'household.notifications.shortTitle': 'Updates',
     'household.notifications.openAria': 'Open notifications, {{count}} unread',
     'household.notifications.newTitle': 'Updates since your last visit',
@@ -503,6 +505,8 @@ export const householdTranslations: TranslationBundle = {
     'household.header.position.netPay': 'Saldo líquido de {{amount}} a pagar.',
     'household.header.position.bothWays': 'O dinheiro circula nos dois sentidos',
     'household.header.position.bothWaysValue': '{{incoming}} a receber · {{outgoing}} a pagar',
+
+    'household.navigation.aria': 'Seções da casa',
 
     'household.notifications.shortTitle': 'Novidades',
     'household.notifications.openAria': 'Abrir notificações, {{count}} não lidas',

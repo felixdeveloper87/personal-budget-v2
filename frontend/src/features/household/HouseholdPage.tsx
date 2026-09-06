@@ -3,11 +3,11 @@ import { Box, Button, Icon, SimpleGrid, VStack, useDisclosure } from '@chakra-ui
 import { cancelHouseholdSettlement, confirmHouseholdSettlement, markHouseholdNotificationsRead, rejectHouseholdSettlement, updateHouseholdCleaningDuty, uploadHouseholdExpenseAttachments, uploadHouseholdSettlementAttachments } from '../../api'
 import { useI18n } from '../../i18n'
 import type { HouseholdDebt, HouseholdExpense } from '../../types'
-import { CheckCircle2, Mail, Plus, ReceiptText, Wallet } from '../../components/ui/icons'
+import { CheckCircle2, Plus, Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
-import { ActionRequiredBanner, HouseholdSectionCard } from './components/HouseholdPageComponents'
+import { ActionRequiredBanner, HouseholdSectionCard, HouseholdSectionNavigation } from './components/HouseholdPageComponents'
 import {
   HouseholdLoadingState,
   HouseholdLoadError,
@@ -229,6 +229,16 @@ export default function HouseholdPage() {
           {t('household.header.addExpense')}
         </Button>
 
+        <HouseholdSectionNavigation
+          ariaLabel={t('household.navigation.aria')}
+          items={[
+            { id: 'household-cleaning', label: t('household.cleaning.title') },
+            { id: 'household-balances', label: t('household.balances.title') },
+            { id: 'household-expenses', label: t('household.expenses.title') },
+            { id: 'household-payments', label: t('household.settlements.title') },
+          ]}
+        />
+
 
         {(pendingConfirmations.length > 0 || debtsYouOwe.length > 0) && (
           <SimpleGrid
@@ -318,7 +328,6 @@ export default function HouseholdPage() {
           eyebrow={t('household.balances.eyebrow')}
           title={t('household.balances.title')}
           description={t('household.balances.description')}
-          icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
           accent={household.debts.length ? 'var(--pb-coral)' : 'var(--pb-income)'}
           tint={household.debts.length ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
           stat={household.debts.length
@@ -332,10 +341,10 @@ export default function HouseholdPage() {
         />
 
         <HouseholdSectionCard
+          id="household-expenses"
           eyebrow={t('household.expenses.eyebrow')}
           title={t('household.expenses.title')}
           description={t('household.expenses.description')}
-          icon={<Icon as={ReceiptText} boxSize={5} weight="duotone" />}
           accent="var(--pb-forest-2)"
           tint="var(--pb-tint-green)"
           stat={t(
@@ -354,7 +363,6 @@ export default function HouseholdPage() {
           eyebrow={t('household.settlements.eyebrow')}
           title={t('household.settlements.title')}
           description={t('household.settlements.description')}
-          icon={<Icon as={Mail} boxSize={5} weight="duotone" />}
           accent={pendingSettlementCount ? 'var(--pb-gold)' : 'var(--pb-income)'}
           tint={pendingSettlementCount ? 'var(--pb-tint-gold)' : 'var(--pb-tint-income)'}
           stat={pendingSettlementCount

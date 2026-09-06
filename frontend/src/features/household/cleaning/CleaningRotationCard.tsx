@@ -72,46 +72,31 @@ export function CleaningRotationCard({
           borderBottom="1px solid var(--pb-hair)"
           bg="var(--pb-surface)"
         >
-          <HStack spacing={3} minW={0}>
-            <Flex
-              w={{ base: 10, md: 11 }}
-              h={{ base: 10, md: 11 }}
-              flexShrink={0}
-              align="center"
-              justify="center"
-              borderRadius="13px"
-              bg="var(--pb-tint-gold)"
-              color="var(--pb-gold)"
-              border="1px solid var(--pb-hair)"
+          <Box minW={0}>
+            <Text
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={600}
+              letterSpacing="0.15em"
+              textTransform="uppercase"
+              color="var(--pb-ink-faint)"
             >
-              <Icon as={Sparkles} boxSize={5} weight="duotone" />
-            </Flex>
-            <Box minW={0}>
-              <Text
-                fontFamily="var(--pb-mono)"
-                fontSize="9px"
-                fontWeight={600}
-                letterSpacing="0.15em"
-                textTransform="uppercase"
-                color="var(--pb-ink-faint)"
-              >
-                {t('household.cleaning.eyebrow')}
-              </Text>
-              <Text
-                mt={0.5}
-                fontFamily="var(--pb-serif)"
-                fontSize={{ base: 'lg', md: 'xl' }}
-                fontWeight={500}
-                lineHeight={1.1}
-                color="var(--pb-ink)"
-              >
-                {t('household.cleaning.title')}
-              </Text>
-              <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
-                {t('household.cleaning.description')}
-              </Text>
-            </Box>
-          </HStack>
+              {t('household.cleaning.eyebrow')}
+            </Text>
+            <Text
+              mt={0.5}
+              fontFamily="var(--pb-serif)"
+              fontSize={{ base: 'lg', md: 'xl' }}
+              fontWeight={500}
+              lineHeight={1.1}
+              color="var(--pb-ink)"
+            >
+              {t('household.cleaning.title')}
+            </Text>
+            <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+              {t('household.cleaning.description')}
+            </Text>
+          </Box>
           {rotation.canManage && (
             <Button
               alignSelf={{ base: 'flex-start', sm: 'center' }}
