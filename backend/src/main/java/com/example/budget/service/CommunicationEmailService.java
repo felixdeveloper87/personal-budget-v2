@@ -7,7 +7,9 @@ import com.example.budget.model.User;
 import com.example.budget.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class CommunicationEmailService {
@@ -20,10 +22,21 @@ public class CommunicationEmailService {
         this.resendEmailClient = resendEmailClient;
     }
 
-    /** Sends only to approved accounts that have an administrator-entered communication address. */
+    /** Sends only to administrator-selected, approved accounts with a communication address. */
     public CommunicationEmailSendResponse sendToConfiguredRecipients(SendCommunicationEmailRequest request, User principal) {
         requireAdmin(principal);
-        List<String> recipients = userRepository.findAllByApprovedTrueAndCommunicationEmailIsNotNull().stream()
+        Set<Long> selectedUserIds = new LinkedHashSet<>(request.getRecipientUserIds());
+        if (selectedUserIds.size() != request.getRecipientUserIds().size()) {
+            throw new IllegalArgumentException("Each communication recipient may only be selected once.");
+        }
+        List<User> selectedUsers = userRepository.findAllByApprovedTrueAndCommunicationEmailIsNotNull().stream()
+                .filter(user -> selectedUserIds.contains(user.getId()))
+                .toList();
+        if (selectedUsers.size() != selectedUserIds.size()) {
+            throw new IllegalArgumentException(
+                    "Every selected recipient must be approved and have a communication email configured.");
+        }
+        List<String> recipients = selectedUsers.stream()
                 .map(User::getCommunicationEmail)
                 .map(String::trim)
                 .filter(email -> !email.isEmpty())

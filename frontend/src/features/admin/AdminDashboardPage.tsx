@@ -11,6 +11,7 @@ import {
   Badge,
   Box,
   Button,
+  Checkbox,
   Container,
   FormControl,
   FormLabel,
@@ -65,6 +66,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
   const [error, setError] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<AdminUserRow | null>(null)
   const [communicationEmails, setCommunicationEmails] = useState<Record<number, string>>({})
+  const [selectedCommunicationUserIds, setSelectedCommunicationUserIds] = useState<Set<number>>(new Set())
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   const cardBg = useColorModeValue('white', 'gray.800')
@@ -79,6 +81,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       const data = await listAdminUsers()
       setRows(data)
       setCommunicationEmails(Object.fromEntries(data.map((row) => [row.id, row.communicationEmail ?? ''])))
+      setSelectedCommunicationUserIds(new Set())
     } catch {
       setError(t('admin.loadError'))
       ToastService.error({
@@ -180,6 +183,11 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       const updated = await updateAdminUserCommunicationEmail(id, communicationEmails[id] ?? '')
       setRows((prev) => prev.map((row) => (row.id === id ? updated : row)))
       setCommunicationEmails((prev) => ({ ...prev, [id]: updated.communicationEmail ?? '' }))
+      setSelectedCommunicationUserIds((previous) => {
+        const next = new Set(previous)
+        if (!updated.approved || !updated.communicationEmail?.trim()) next.delete(id)
+        return next
+      })
       ToastService.success({
         title: t('admin.toast.communicationEmailSaved'),
         duration: 2000,
@@ -206,9 +214,30 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
   }
 
   const pending = rows.filter((r) => !r.approved)
-  const communicationRecipientCount = rows.filter(
+  const communicationRecipients = rows.filter(
     (row) => row.approved && Boolean(row.communicationEmail?.trim()),
-  ).length
+  )
+  const selectedCommunicationRecipients = communicationRecipients.filter(
+    (row) => selectedCommunicationUserIds.has(row.id),
+  )
+  const selectedCommunicationRecipientIds = selectedCommunicationRecipients.map((row) => row.id)
+  const allCommunicationRecipientsSelected = communicationRecipients.length > 0
+    && selectedCommunicationRecipients.length === communicationRecipients.length
+  const toggleCommunicationRecipient = (id: number) => {
+    setSelectedCommunicationUserIds((previous) => {
+      const next = new Set(previous)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+  const toggleAllCommunicationRecipients = () => {
+    setSelectedCommunicationUserIds(
+      allCommunicationRecipientsSelected
+        ? new Set()
+        : new Set(communicationRecipients.map((row) => row.id)),
+    )
+  }
   const currentUserId = user.id
 
   return (
@@ -264,17 +293,31 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
                 <Box>
                   <Heading size="sm">{t('admin.communication.title')}</Heading>
                   <Text mt={1} color={muted} fontSize="sm">
-                    {t('admin.communication.description', { count: communicationRecipientCount })}
+                    {t('admin.communication.description', { count: communicationRecipients.length })}
+                  </Text>
+                  <Text mt={1} color={muted} fontSize="sm" fontWeight={600}>
+                    {t('admin.communication.selected', { count: selectedCommunicationRecipients.length })}
                   </Text>
                 </Box>
-                <Button
-                  colorScheme="blue"
-                  leftIcon={<Icon as={Mail} boxSize={4} />}
-                  onClick={openCommunication}
-                  isDisabled={communicationRecipientCount === 0}
-                >
-                  {t('admin.communication.compose')}
-                </Button>
+                <HStack flexWrap="wrap" spacing={2}>
+                  <Button
+                    variant="outline"
+                    onClick={toggleAllCommunicationRecipients}
+                    isDisabled={communicationRecipients.length === 0}
+                  >
+                    {allCommunicationRecipientsSelected
+                      ? t('admin.communication.clearSelection')
+                      : t('admin.communication.selectAll')}
+                  </Button>
+                  <Button
+                    colorScheme="blue"
+                    leftIcon={<Icon as={Mail} boxSize={4} />}
+                    onClick={openCommunication}
+                    isDisabled={selectedCommunicationRecipients.length === 0}
+                  >
+                    {t('admin.communication.compose')}
+                  </Button>
+                </HStack>
               </Stack>
             </Box>
             {pending.length > 0 && (
@@ -294,6 +337,10 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
                   onCommunicationEmailSave={onCommunicationEmailSave}
                   onRemove={openRemoveDialog}
                   showApproveActions
+                  showCommunicationSelection={false}
+                  selectedCommunicationUserIds={selectedCommunicationUserIds}
+                  onToggleCommunicationRecipient={toggleCommunicationRecipient}
+                  onToggleAllCommunicationRecipients={toggleAllCommunicationRecipients}
                 />
               </Box>
             )}
@@ -314,6 +361,10 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
                 onCommunicationEmailSave={onCommunicationEmailSave}
                 onRemove={openRemoveDialog}
                 showApproveActions
+                showCommunicationSelection
+                selectedCommunicationUserIds={selectedCommunicationUserIds}
+                onToggleCommunicationRecipient={toggleCommunicationRecipient}
+                onToggleAllCommunicationRecipients={toggleAllCommunicationRecipients}
               />
             </Box>
           </Stack>
@@ -322,9 +373,9 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
       <CommunicationEmailModal
         isOpen={isCommunicationOpen}
         onClose={closeCommunication}
-        recipientCount={communicationRecipientCount}
+        recipientCount={selectedCommunicationRecipients.length}
         onSend={async (subject, text) => {
-          const result = await sendCommunicationEmail(subject, text)
+          const result = await sendCommunicationEmail(subject, text, selectedCommunicationRecipientIds)
           ToastService.success({
             title: t('admin.toast.communicationSent'),
             description: t('admin.toast.communicationSentDescription', { count: result.recipientCount }),
@@ -349,6 +400,10 @@ function UserTable({
   onCommunicationEmailSave,
   onRemove,
   showApproveActions,
+  showCommunicationSelection,
+  selectedCommunicationUserIds,
+  onToggleCommunicationRecipient,
+  onToggleAllCommunicationRecipients,
 }: {
   rows: AdminUserRow[]
   cardBg: string
@@ -361,6 +416,10 @@ function UserTable({
   onCommunicationEmailSave: (id: number) => void
   onRemove: (row: AdminUserRow) => void
   showApproveActions: boolean
+  showCommunicationSelection: boolean
+  selectedCommunicationUserIds: ReadonlySet<number>
+  onToggleCommunicationRecipient: (id: number) => void
+  onToggleAllCommunicationRecipients: () => void
 }) {
   const { t, formatDate } = useI18n()
   const isSelf = (row: AdminUserRow) => row.id === currentUserId
@@ -370,6 +429,13 @@ function UserTable({
       ? iso
       : formatDate(date, { dateStyle: 'medium', timeStyle: 'short' })
   }
+  const canReceiveCommunication = (row: AdminUserRow) => (
+    row.approved && Boolean(row.communicationEmail?.trim())
+  )
+  const selectableRows = rows.filter(canReceiveCommunication)
+  const selectedSelectableCount = selectableRows.filter((row) => selectedCommunicationUserIds.has(row.id)).length
+  const allSelectableRowsSelected = selectableRows.length > 0
+    && selectedSelectableCount === selectableRows.length
 
   return (
     <>
@@ -384,6 +450,17 @@ function UserTable({
         <Table size="sm" variant="simple">
           <Thead bg="blackAlpha.50" _dark={{ bg: 'whiteAlpha.50' }}>
             <Tr>
+              {showCommunicationSelection && (
+                <Th>
+                  <Checkbox
+                    aria-label={t('admin.communication.selectAll')}
+                    isChecked={allSelectableRowsSelected}
+                    isIndeterminate={selectedSelectableCount > 0 && !allSelectableRowsSelected}
+                    isDisabled={selectableRows.length === 0}
+                    onChange={onToggleAllCommunicationRecipients}
+                  />
+                </Th>
+              )}
               <Th>{t('admin.table.name')}</Th>
               <Th>{t('admin.table.email')}</Th>
               <Th>{t('admin.table.communicationEmail')}</Th>
@@ -396,6 +473,16 @@ function UserTable({
           <Tbody>
             {rows.map((row) => (
               <Tr key={row.id}>
+                {showCommunicationSelection && (
+                  <Td>
+                    <Checkbox
+                      aria-label={t('admin.communication.selectRecipient')}
+                      isChecked={selectedCommunicationUserIds.has(row.id)}
+                      isDisabled={!canReceiveCommunication(row)}
+                      onChange={() => onToggleCommunicationRecipient(row.id)}
+                    />
+                  </Td>
+                )}
                 <Td fontWeight="600">{row.name}</Td>
                 <Td fontSize="sm">{row.email}</Td>
                 <Td minW="260px">
@@ -498,6 +585,15 @@ function UserTable({
             <Text fontSize="sm" color="gray.500">
               {row.email}
             </Text>
+            {showCommunicationSelection && canReceiveCommunication(row) && (
+              <Checkbox
+                mt={3}
+                isChecked={selectedCommunicationUserIds.has(row.id)}
+                onChange={() => onToggleCommunicationRecipient(row.id)}
+              >
+                {t('admin.communication.selectRecipient')}
+              </Checkbox>
+            )}
             <FormControl mt={3}>
               <FormLabel fontSize="xs">{t('admin.table.communicationEmail')}</FormLabel>
               <HStack>

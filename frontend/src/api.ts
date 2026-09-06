@@ -195,10 +195,12 @@ export async function updateAdminUserCommunicationEmail(
 export async function sendCommunicationEmail(
   subject: string,
   text: string,
+  recipientUserIds: number[],
 ): Promise<CommunicationEmailSendResponse> {
   const { data } = await api.post<CommunicationEmailSendResponse>('/admin/communications/email', {
     subject,
     text,
+    recipientUserIds,
   })
   return data
 }
