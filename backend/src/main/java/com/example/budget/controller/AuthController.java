@@ -1,7 +1,6 @@
 package com.example.budget.controller;
 
 import com.example.budget.dto.AuthResponse;
-import com.example.budget.dto.GoogleLoginRequest;
 import com.example.budget.dto.LoginRequest;
 import com.example.budget.dto.RegisterRequest;
 import com.example.budget.dto.ResetPasswordRequest;
@@ -13,9 +12,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
 
 /**
  * REST controller for authentication endpoints.
@@ -70,22 +66,6 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         passwordResetService.resetPassword(request.getEmail(), request.getPassword());
         return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * Sign in or register with Google (ID token from Google Identity Services in the browser).
-     */
-    @PostMapping("/google")
-    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest request) {
-        try {
-            AuthResponse body = authService.loginWithGoogle(request.getIdToken());
-            if (Boolean.TRUE.equals(body.getPendingApproval())) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(body);
-            }
-            return ResponseEntity.ok(body);
-        } catch (GeneralSecurityException | IOException e) {
-            throw new IllegalArgumentException("Could not verify Google sign-in.");
-        }
     }
 
 }

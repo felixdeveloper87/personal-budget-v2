@@ -8,13 +8,12 @@ import {
   useMemo,
 } from 'react'
 import { User, LoginRequest, RegisterRequest } from '../types'
-import { login, loginWithGoogle, register, type RegisterOutcome } from '../api'
+import { login, register, type RegisterOutcome } from '../api'
 import { isJwtExpired, AUTH_SESSION_INVALID_EVENT } from '../utils/jwtExpiry'
 
 interface AuthContextType {
   user: User | null
   login: (credentials: LoginRequest) => Promise<void>
-  loginWithGoogle: (idToken: string) => Promise<RegisterOutcome>
   register: (data: RegisterRequest) => Promise<RegisterOutcome>
   logout: () => void
   loading: boolean
@@ -76,15 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const handleLoginWithGoogle = useCallback(async (idToken: string) => {
-    const outcome = await loginWithGoogle(idToken)
-    if (outcome.status === 'active') {
-      setUser(outcome.user)
-      localStorage.setItem('user', JSON.stringify(outcome.user))
-    }
-    return outcome
-  }, [])
-
   // --- Register handler (creates user + stores locally) ---
   const handleRegister = useCallback(async (data: RegisterRequest) => {
     const outcome = await register(data)
@@ -106,7 +96,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       login: handleLogin,
-      loginWithGoogle: handleLoginWithGoogle,
       register: handleRegister,
       logout,
       loading,

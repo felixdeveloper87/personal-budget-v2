@@ -10,7 +10,7 @@ Live site: https://personalbudget.co.uk
 - Backend built with Spring Boot 3.3, Java 17, Spring Security, JWT, Spring Data JPA, Flyway and PostgreSQL.
 - Redis cache for user lists, instalment plans, recurring transactions and financial summaries.
 - Containerised deployment with Docker, Docker Compose and Nginx.
-- Email/password and Google Sign-In authentication, with administrator approval for new accounts.
+- Email/password authentication, with administrator approval for new accounts.
 
 ## Key Features
 
@@ -60,7 +60,6 @@ Live site: https://personalbudget.co.uk
 - Flyway
 - Redis + Spring Cache
 - Springdoc OpenAPI
-- Google API Client for Google Sign-In
 - Apache PDFBox for PDF generation
 - JUnit/Spring Boot Test
 
@@ -116,8 +115,6 @@ DB_USER=postgres
 DB_PASSWORD=change-me
 JWT_SECRET=change-me
 JWT_EXPIRATION=86400000
-GOOGLE_OAUTH_CLIENT_ID=
-VITE_GOOGLE_CLIENT_ID=
 REDIS_HOST=redis
 REDIS_PORT=6379
 ```
@@ -152,7 +149,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-The backend reads `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `REDIS_HOST`, `REDIS_PORT` and `GOOGLE_OAUTH_CLIENT_ID`.
+The backend reads `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `JWT_EXPIRATION`, `REDIS_HOST` and `REDIS_PORT`.
 
 ### Frontend
 
@@ -201,7 +198,6 @@ All routes below require a JWT, except `/api/auth/**` and `/health`.
 
 - `POST /api/auth/register`
 - `POST /api/auth/login`
-- `POST /api/auth/google`
 - `POST /api/auth/reset-password`
 - `GET /api/transactions`
 - `POST /api/transactions`

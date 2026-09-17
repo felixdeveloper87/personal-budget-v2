@@ -11,7 +11,6 @@ import {
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
-import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
@@ -86,7 +85,6 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
 
   return (
     <VStack spacing={5} align="stretch">
-      <GoogleSignInSection />
       <Box as="form" onSubmit={handleSubmit} noValidate>
         <VStack spacing={4} align="stretch">
           <AuthField

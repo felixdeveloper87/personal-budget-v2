@@ -22,7 +22,6 @@ import {
 } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
-import GoogleSignInSection from './GoogleSignInSection'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
@@ -139,8 +138,6 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   return (
     <VStack spacing={5} align="stretch">
-      <GoogleSignInSection />
-
       <Box as="form" onSubmit={handleSubmit} noValidate>
         <VStack spacing={4} align="stretch">
           <AuthField

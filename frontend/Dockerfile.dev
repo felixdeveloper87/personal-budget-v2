@@ -7,7 +7,7 @@ WORKDIR /app
 # Copiar arquivos de dependências
 COPY package*.json ./
 
-# Instalar dependências — npm install quando o lock ainda não inclui novas deps (ex.: @react-oauth/google)
+# Instalar dependências
 RUN npm install
 
 # Copiar código fonte

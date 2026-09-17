@@ -42,7 +42,6 @@ services:
       - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-}
       - APP_PUBLIC_URL=${APP_PUBLIC_URL:-https://www.personalbudget.co.uk}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL:-}
@@ -67,7 +66,6 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
         VITE_API_URL: ${VITE_API_URL:-}
         VITE_LOGO_DEV_TOKEN: ${VITE_LOGO_DEV_TOKEN:-}
     ports:
