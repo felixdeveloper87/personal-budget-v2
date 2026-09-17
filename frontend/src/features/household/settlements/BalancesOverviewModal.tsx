@@ -373,9 +373,11 @@ function HoldToPayButton({
         onBlur={cancelHold}
         onClick={(event) => event.preventDefault()}
         onContextMenu={(event) => event.preventDefault()}
-        touchAction="none"
-        userSelect="none"
-        sx={{ WebkitTouchCallout: 'none' }}
+        sx={{
+          touchAction: 'none',
+          userSelect: 'none',
+          WebkitTouchCallout: 'none',
+        }}
         _hover={{
           bg: phase === 'success' ? 'var(--pb-income)' : 'var(--pb-forest)',
           transform: phase === 'idle' ? 'translateY(-1px)' : 'none',
