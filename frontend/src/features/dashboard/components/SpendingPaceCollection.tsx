@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Box, Button, Flex, Grid, Text, VStack } from '@chakra-ui/react'
-import { getAllExpenseCategoryLabels } from '../../../constants/transactionCategories'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Box, Button, Flex, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { Transaction } from '../../../types'
 import { getInstallmentPlanTitle } from '../../../utils/installments'
 import { getTransactionDate, type TransactionDateBasis } from '../../../utils/transactionDates'
@@ -29,6 +29,8 @@ interface PaceSeries {
   previousTotal: number
 }
 
+const MAX_VISIBLE_DOTS = 7
+
 const CONFIG = {
   category: {
     sectionTitleKey: 'dashboard.paceByCategory',
@@ -53,6 +55,12 @@ const groupKey = (name: string, dimension: SpendingPaceDimension): string => {
 
 const isMonth = (date: Date, year: number, month: number): boolean =>
   date.getFullYear() === year && date.getMonth() === month
+
+const isPaceExpense = (transaction: Transaction): boolean =>
+  !transaction.isInstallment
+  && transaction.installmentPlanId == null
+  && !transaction.isRecurring
+  && transaction.recurringTransactionId == null
 
 function readHiddenGroups(storageKey: string | null): Set<string> {
   if (!storageKey) return new Set()
@@ -102,6 +110,11 @@ export default function SpendingPaceCollection({
   const [hiddenGroups, setHiddenGroups] = useState<Set<string>>(() => readHiddenGroups(storageKey))
   const [pendingGroup, setPendingGroup] = useState<PaceSeries | null>(null)
   const [restoreDialogOpen, setRestoreDialogOpen] = useState(false)
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [visibleCardCount, setVisibleCardCount] = useState(1)
+  const [canScrollPrevious, setCanScrollPrevious] = useState(false)
+  const [canScrollNext, setCanScrollNext] = useState(false)
 
   useEffect(() => {
     setHiddenGroups(readHiddenGroups(storageKey))
@@ -113,21 +126,8 @@ export default function SpendingPaceCollection({
     const previousDate = new Date(year, month - 1, 1)
     const grouped = new Map<string, PaceSeries>()
 
-    if (dimension === 'category') {
-      for (const name of getAllExpenseCategoryLabels()) {
-        const key = groupKey(name, dimension)
-        grouped.set(key, {
-          key,
-          name,
-          transactions: [],
-          currentTotal: 0,
-          previousTotal: 0,
-        })
-      }
-    }
-
     for (const transaction of transactions) {
-      if (transaction.type !== 'EXPENSE') continue
+      if (transaction.type !== 'EXPENSE' || !isPaceExpense(transaction)) continue
 
       const name = transactionGroupName(transaction, dimension)
       if (!name) continue
@@ -140,9 +140,7 @@ export default function SpendingPaceCollection({
         previousDate.getMonth(),
       )
 
-      // Categories are persistent dashboard choices; descriptions stay scoped
-      // to the two periods represented by their pace chart.
-      if (dimension === 'description' && !isCurrent && !isPrevious) continue
+      if (!isCurrent && !isPrevious) continue
 
       const key = groupKey(name, dimension)
       const existing = grouped.get(key)
@@ -154,8 +152,6 @@ export default function SpendingPaceCollection({
         previousTotal: 0,
       }
       grouped.set(key, group)
-
-      if (!isCurrent && !isPrevious) continue
 
       // Prefer the spelling used in the current month for the visible title.
       if (isCurrent) group.name = name
@@ -175,6 +171,68 @@ export default function SpendingPaceCollection({
   const visibleGroups = groups.filter((group) => !hiddenGroups.has(group.key))
   const hiddenGroupItems = groups.filter((group) => hiddenGroups.has(group.key))
   const hiddenCount = hiddenGroupItems.length
+
+  const carouselStep = useCallback((): number => {
+    const carousel = carouselRef.current
+    if (!carousel) return 0
+    const cards = carousel.querySelectorAll<HTMLElement>('[data-pace-carousel-card]')
+    if (cards.length > 1) return cards[1].offsetLeft - cards[0].offsetLeft
+    return cards[0]?.getBoundingClientRect().width ?? carousel.clientWidth
+  }, [])
+
+  const syncCarouselPosition = useCallback(() => {
+    const carousel = carouselRef.current
+    if (!carousel) return
+    const step = carouselStep()
+    const nextVisibleCardCount = step > 0
+      ? Math.max(1, Math.round(carousel.clientWidth / step))
+      : 1
+    const lastPosition = Math.max(visibleGroups.length - nextVisibleCardCount, 0)
+    const nextIndex = step > 0 ? Math.round(carousel.scrollLeft / step) : 0
+    setVisibleCardCount(nextVisibleCardCount)
+    setActiveIndex(Math.min(Math.max(nextIndex, 0), lastPosition))
+    setCanScrollPrevious(carousel.scrollLeft > 2)
+    setCanScrollNext(carousel.scrollLeft + carousel.clientWidth < carousel.scrollWidth - 2)
+  }, [carouselStep, visibleGroups.length])
+
+  const scrollCarousel = useCallback((direction: -1 | 1) => {
+    const carousel = carouselRef.current
+    if (!carousel) return
+    carousel.scrollBy({ left: direction * carouselStep(), behavior: 'smooth' })
+  }, [carouselStep])
+
+  useEffect(() => {
+    const carousel = carouselRef.current
+    if (!carousel) return
+
+    const maxScrollLeft = Math.max(carousel.scrollWidth - carousel.clientWidth, 0)
+    if (carousel.scrollLeft > maxScrollLeft) carousel.scrollTo({ left: maxScrollLeft })
+
+    const frame = window.requestAnimationFrame(syncCarouselPosition)
+    const observer = typeof ResizeObserver === 'undefined'
+      ? null
+      : new ResizeObserver(syncCarouselPosition)
+    observer?.observe(carousel)
+
+    return () => {
+      window.cancelAnimationFrame(frame)
+      observer?.disconnect()
+    }
+  }, [syncCarouselPosition, visibleGroups.length])
+
+  const pageCount = Math.max(visibleGroups.length - visibleCardCount + 1, 1)
+
+  const visibleDotIndexes = useMemo(() => {
+    if (pageCount <= MAX_VISIBLE_DOTS) {
+      return Array.from({ length: pageCount }, (_, index) => index)
+    }
+    const halfWindow = Math.floor(MAX_VISIBLE_DOTS / 2)
+    const start = Math.min(
+      Math.max(activeIndex - halfWindow, 0),
+      pageCount - MAX_VISIBLE_DOTS,
+    )
+    return Array.from({ length: MAX_VISIBLE_DOTS }, (_, index) => start + index)
+  }, [activeIndex, pageCount])
 
   const dismissGroup = (key: string) => {
     setHiddenGroups((current) => {
@@ -203,30 +261,76 @@ export default function SpendingPaceCollection({
 
   return (
     <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-      <Flex align="center" justify="space-between" gap={3}>
+      <Flex
+        align={{ base: 'stretch', sm: 'center' }}
+        direction={{ base: 'column', sm: 'row' }}
+        justify="space-between"
+        gap={3}
+      >
         <Box flex={1} minW={0}>
           <SectionLabel>{t(config.sectionTitleKey)}</SectionLabel>
         </Box>
-        {hiddenCount > 0 && (
-          <Button
-            onClick={() => setRestoreDialogOpen(true)}
-            h="30px"
-            px={3}
-            flexShrink={0}
-            borderRadius="full"
-            border="1px solid var(--pb-hair)"
-            bg="var(--pb-surface)"
-            color="var(--pb-ink-soft)"
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={600}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)', borderColor: 'var(--pb-hair-2)' }}
-          >
-            {t('dashboard.showHidden', { count: hiddenCount })}
-          </Button>
-        )}
+        <HStack spacing={2} flexShrink={0} justify={{ base: 'flex-end', sm: 'initial' }}>
+          {hiddenCount > 0 && (
+            <Button
+              onClick={() => setRestoreDialogOpen(true)}
+              h="30px"
+              px={3}
+              borderRadius="full"
+              border="1px solid var(--pb-hair)"
+              bg="var(--pb-surface)"
+              color="var(--pb-ink-soft)"
+              fontFamily="var(--pb-mono)"
+              fontSize="9px"
+              fontWeight={600}
+              letterSpacing="0.06em"
+              textTransform="uppercase"
+              _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)', borderColor: 'var(--pb-hair-2)' }}
+            >
+              {t('dashboard.showHidden', { count: hiddenCount })}
+            </Button>
+          )}
+          {visibleGroups.length > 0 && (
+            <>
+              <IconButton
+                aria-label={`${t('common.previous')}: ${t(config.sectionTitleKey)}`}
+                icon={<ChevronLeft size={16} />}
+                onClick={() => scrollCarousel(-1)}
+                isDisabled={!canScrollPrevious}
+                size="sm"
+                variant="outline"
+                borderRadius="full"
+                borderColor="var(--pb-hair)"
+                color="var(--pb-ink-soft)"
+                bg="var(--pb-surface)"
+                _hover={{ bg: 'var(--pb-surface-2)', color: 'var(--pb-ink)' }}
+              />
+              <Text
+                minW="42px"
+                textAlign="center"
+                fontFamily="var(--pb-mono)"
+                fontSize="10px"
+                color="var(--pb-ink-faint)"
+                style={{ fontVariantNumeric: 'tabular-nums' }}
+              >
+                {activeIndex + 1} / {pageCount}
+              </Text>
+              <IconButton
+                aria-label={`${t('common.next')}: ${t(config.sectionTitleKey)}`}
+                icon={<ChevronRight size={16} />}
+                onClick={() => scrollCarousel(1)}
+                isDisabled={!canScrollNext}
+                size="sm"
+                variant="outline"
+                borderRadius="full"
+                borderColor="var(--pb-hair)"
+                color="var(--pb-ink-soft)"
+                bg="var(--pb-surface)"
+                _hover={{ bg: 'var(--pb-surface-2)', color: 'var(--pb-ink)' }}
+              />
+            </>
+          )}
+        </HStack>
       </Flex>
 
       {groups.length === 0 || visibleGroups.length === 0 ? (
@@ -236,24 +340,60 @@ export default function SpendingPaceCollection({
           </Text>
         </Panel>
       ) : (
-        <Grid
-          templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }}
+        <Box
+          ref={carouselRef}
+          aria-label={t(config.sectionTitleKey)}
+          role="region"
+          display="flex"
           gap={{ base: 4, md: 5 }}
-          alignItems="stretch"
+          overflowX="auto"
+          overflowY="hidden"
+          onScroll={syncCarouselPosition}
+          pb={2}
+          px="1px"
+          scrollBehavior="smooth"
+          sx={{
+            WebkitOverflowScrolling: 'touch',
+            overscrollBehaviorX: 'contain',
+            scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
+            '&::-webkit-scrollbar': { display: 'none' },
+          }}
         >
           {visibleGroups.map((group) => (
-            <CashPace
+            <Box
+              data-pace-carousel-card
               key={group.key}
-              transactions={group.transactions}
-              selectedDate={selectedDate}
-              dateBasis={dateBasis}
-              kind="expense"
-              title={dimension === 'category' ? categoryLabel(group.name) : group.name}
-              includeCommitments
-              onDismiss={() => setPendingGroup(group)}
+              flex={{ base: '0 0 calc(100% - 16px)', md: '0 0 calc(50% - 10px)' }}
+              minW={0}
+              scrollSnapAlign="start"
+            >
+              <CashPace
+                transactions={group.transactions}
+                selectedDate={selectedDate}
+                dateBasis={dateBasis}
+                kind="expense"
+                title={dimension === 'category' ? categoryLabel(group.name) : group.name}
+                onDismiss={() => setPendingGroup(group)}
+              />
+            </Box>
+          ))}
+        </Box>
+      )}
+
+      {pageCount > 1 && (
+        <HStack spacing={1.5} justify="center" aria-hidden="true">
+          {visibleDotIndexes.map((index) => (
+            <Box
+              key={`pace-page-${index}`}
+              h="5px"
+              w={index === activeIndex ? '18px' : '5px'}
+              borderRadius="full"
+              bg={index === activeIndex ? 'var(--pb-coral)' : 'var(--pb-hair-2)'}
+              transition="width 0.2s ease, background 0.2s ease"
             />
           ))}
-        </Grid>
+        </HStack>
       )}
 
       <HideSpendingPaceDialog
