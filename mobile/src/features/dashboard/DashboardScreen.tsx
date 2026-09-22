@@ -14,13 +14,14 @@ import {
 
 import { CategoryPaceCarousel } from "@/components/dashboard/CategoryPaceCarousel";
 import { DescriptionPaceCarousel } from "@/components/dashboard/DescriptionPaceCarousel";
+import { InstallmentCarousel } from "@/components/dashboard/InstallmentCarousel";
 import { PaceChart } from "@/components/dashboard/PaceChart";
 import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarousel";
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { ApiError, getMonthlySummary, listTransactions } from "@/services/api";
+import { ApiError, getMonthlySummary, listInstallmentPlans, listTransactions } from "@/services/api";
 import { colors } from "@/theme/colors";
-import type { MonthlySummary, Transaction } from "@/types/finance";
+import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finance";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
@@ -145,6 +146,7 @@ export function DashboardScreen() {
   const { user, logout } = useAuth();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -158,12 +160,14 @@ export function DashboardScreen() {
       setError(null);
 
       try {
-        const [nextSummary, nextTransactions] = await Promise.all([
+        const [nextSummary, nextTransactions, nextInstallmentPlans] = await Promise.all([
           getMonthlySummary(user.token, currentDate),
           listTransactions(user.token),
+          listInstallmentPlans(user.token),
         ]);
         setSummary(nextSummary);
         setTransactions(nextTransactions);
+        setInstallmentPlans(nextInstallmentPlans);
       } catch (summaryError) {
         if (summaryError instanceof ApiError && summaryError.status === 401) {
           await logout();
@@ -327,6 +331,7 @@ export function DashboardScreen() {
               userId={user.id}
             />
             <TopMerchantsCarousel date={currentDate} transactions={transactions} />
+            <InstallmentCarousel date={currentDate} plans={installmentPlans} />
           </View>
         ) : null}
       </ScrollView>

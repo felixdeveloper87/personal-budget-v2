@@ -29,6 +29,28 @@ export interface Transaction {
   isRecurring?: boolean;
 }
 
+export interface InstallmentTransaction {
+  id: number;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  installmentNumber: number;
+}
+
+export interface InstallmentPlan {
+  id: number;
+  totalInstallments: number;
+  totalAmount: number;
+  installmentValue: number;
+  purchaseDate?: string | null;
+  accountId?: number | null;
+  accountName?: string | null;
+  paymentMethodId?: number | null;
+  paymentMethodName?: string | null;
+  transactions: InstallmentTransaction[];
+}
+
 export interface FinancialAccount {
   id: number;
   name: string;

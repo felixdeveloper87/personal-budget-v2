@@ -2,6 +2,7 @@ import type { AuthResponse, AuthUser } from "@/types/auth";
 import type {
   CreateTransactionRequest,
   FinancialAccount,
+  InstallmentPlan,
   MonthlySummary,
   Transaction,
 } from "@/types/finance";
@@ -82,6 +83,10 @@ export async function getMonthlySummary(
 
 export async function listTransactions(token: string): Promise<Transaction[]> {
   return request<Transaction[]>("/transactions", { token });
+}
+
+export async function listInstallmentPlans(token: string): Promise<InstallmentPlan[]> {
+  return request<InstallmentPlan[]>("/installment-plans", { token });
 }
 
 interface TransactionFilters {

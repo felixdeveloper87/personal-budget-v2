@@ -12,7 +12,6 @@ import {
   listPaymentMethods,
   listRecurringTransactions,
 } from '../../api'
-import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
 import type {
   AccountSummary,
   CashFlowForecast,
@@ -34,6 +33,7 @@ import TopMerchants from './components/TopMerchants'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
 import CommitmentCard from './components/CommitmentCard'
+import InstallmentCarousel from './components/InstallmentCarousel'
 import { useI18n } from '../../i18n'
 
 export interface DashboardProps {
@@ -128,20 +128,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   /* ── Computed commitments ── */
   const commitments = useMemo(() => {
-    const activePlans = installmentPlans.filter((p) => !isInstallmentPlanCompleted(p))
-    const pastPlans = installmentPlans.filter((p) => isInstallmentPlanCompleted(p))
-    const installMonthly = activePlans.reduce((s, p) => s + p.installmentValue, 0)
-
     const activeFixed = recurringItems.filter((r) => r.active && r.type === 'EXPENSE')
     const cancelledFixed = recurringItems.filter((r) => !r.active)
     const fixedMonthly = activeFixed.reduce((s, r) => s + r.amount, 0)
 
     return {
-      totalMonthly: installMonthly + fixedMonthly,
-      installments: { monthly: installMonthly, active: activePlans.length, past: pastPlans.length },
       fixed: { monthly: fixedMonthly, active: activeFixed.length, cancelled: cancelledFixed.length },
     }
-  }, [installmentPlans, recurringItems])
+  }, [recurringItems])
 
   /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
   const [hideBalances, setHideBalances] = useState(() => {
@@ -242,11 +236,9 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         </MotionBox>
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
           <MotionBox variants={riseV}>
-            <CommitmentCard
-              kind="installments"
-              monthly={commitments.installments.monthly}
-              active={commitments.installments.active}
-              inactive={commitments.installments.past}
+            <InstallmentCarousel
+              plans={installmentPlans}
+              selectedDate={selectedDate}
               onManage={() => onPageChange?.('installments')}
             />
           </MotionBox>
