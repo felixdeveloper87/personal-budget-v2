@@ -101,58 +101,58 @@ export default function TopMerchants({
 
   return (
     <VStack align="stretch" spacing={2.5}>
-        <Box
-          ref={carouselRef}
-          role="region"
-          aria-roledescription="carousel"
-          aria-label={t('dashboard.topMerchants')}
-          display="flex"
-          gap={3}
-          overflowX="auto"
-          overflowY="hidden"
-          onScroll={syncActiveMonth}
-          scrollBehavior="smooth"
-          sx={{
-            WebkitOverflowScrolling: 'touch',
-            overscrollBehaviorX: 'contain',
-            scrollSnapType: 'x mandatory',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': { display: 'none' },
-          }}
-        >
-          {monthlySlides.map((month, index) => (
-            <Box
-              data-merchant-month
-              key={month.key}
-              role="group"
-              aria-label={`${t('dashboard.topMerchants')}, ${index + 1} / ${monthlySlides.length}: ${month.label}`}
-              flex="0 0 100%"
-              minW={0}
-              scrollSnapAlign="start"
-              scrollSnapStop="always"
-            >
-              <MerchantPanel transactions={month.transactions} periodLabel={month.label} />
-            </Box>
-          ))}
-        </Box>
+      <Box
+        ref={carouselRef}
+        role="region"
+        aria-roledescription="carousel"
+        aria-label={t('dashboard.topMerchants')}
+        display="flex"
+        gap={3}
+        overflowX="auto"
+        overflowY="hidden"
+        onScroll={syncActiveMonth}
+        scrollBehavior="smooth"
+        sx={{
+          WebkitOverflowScrolling: 'touch',
+          overscrollBehaviorX: 'contain',
+          scrollSnapType: 'x mandatory',
+          scrollbarWidth: 'none',
+          '&::-webkit-scrollbar': { display: 'none' },
+        }}
+      >
+        {monthlySlides.map((month, index) => (
+          <Box
+            data-merchant-month
+            key={month.key}
+            role="group"
+            aria-label={`${t('dashboard.topMerchants')}, ${index + 1} / ${monthlySlides.length}: ${month.label}`}
+            flex="0 0 100%"
+            minW={0}
+            scrollSnapAlign="start"
+            scrollSnapStop="always"
+          >
+            <MerchantPanel transactions={month.transactions} periodLabel={month.label} />
+          </Box>
+        ))}
+      </Box>
 
-        <HStack justify="center" spacing={2}>
-          {monthlySlides.map((month, index) => (
-            <Box
-              as="button"
-              key={month.key}
-              type="button"
-              aria-label={month.label}
-              aria-current={index === activeMonth ? 'true' : undefined}
-              onClick={() => scrollToMonth(index)}
-              h="7px"
-              w={index === activeMonth ? '22px' : '7px'}
-              borderRadius="full"
-              bg={index === activeMonth ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)'}
-              transition="width 0.2s ease, background 0.2s ease"
-            />
-          ))}
-        </HStack>
+      <HStack justify="center" spacing={2}>
+        {monthlySlides.map((month, index) => (
+          <Box
+            as="button"
+            key={month.key}
+            type="button"
+            aria-label={month.label}
+            aria-current={index === activeMonth ? 'true' : undefined}
+            onClick={() => scrollToMonth(index)}
+            h="7px"
+            w={index === activeMonth ? '22px' : '7px'}
+            borderRadius="full"
+            bg={index === activeMonth ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)'}
+            transition="width 0.2s ease, background 0.2s ease"
+          />
+        ))}
+      </HStack>
     </VStack>
   )
 }
