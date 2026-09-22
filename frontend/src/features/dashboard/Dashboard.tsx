@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Box, Grid, Skeleton, VStack, useDisclosure } from '@chakra-ui/react'
 import { AddTransactionModal } from '../../components/transactions'
 import { useDashboardData } from '../../hooks/useDashboardData'
@@ -6,18 +6,10 @@ import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import { useAuth } from '../../contexts/AuthContext'
 import {
-  getAccountSummary,
-  getCashFlowForecast,
   listInstallmentPlans,
   listPaymentMethods,
-  listRecurringTransactions,
 } from '../../api'
-import type {
-  AccountSummary,
-  CashFlowForecast,
-  InstallmentPlan,
-  RecurringTransaction,
-} from '../../types'
+import type { InstallmentPlan } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
@@ -25,14 +17,12 @@ import './theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from './components/motion'
 import SectionLabel from './components/SectionLabel'
 import MonthHero from './components/MonthHero'
-import StatCard from './components/StatCard'
 import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
 import DescriptionSpendingPaces from './components/DescriptionSpendingPaces'
 import TopMerchants from './components/TopMerchants'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
-import CommitmentCard from './components/CommitmentCard'
 import InstallmentCarousel from './components/InstallmentCarousel'
 import { useI18n } from '../../i18n'
 
@@ -40,12 +30,9 @@ export interface DashboardProps {
   onPageChange?: (page: AppPage) => void
 }
 
-// Shared with AccountsPage so the balance privacy toggle stays in sync.
-const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
-
 export default function Dashboard({ onPageChange }: DashboardProps) {
   const { user } = useAuth()
-  const { t, formatCurrency, formatDate } = useI18n()
+  const { t } = useI18n()
 
   // Dashboard is a snapshot of the current month — period browsing lives on the
   // Behaviour / Payments / Reports pages, so there's no navigator here.
@@ -79,20 +66,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
   // Previous period on the Behaviour lens, so merchant comparisons ("last month
   // you spent £X at Lidl") reflect when purchases actually happened.
-  /* ── Side data: accounts, forecast, installments, recurring ── */
-  const [accountSummary, setAccountSummary] = useState<AccountSummary | null>(null)
-  const [forecast, setForecast] = useState<CashFlowForecast | null>(null)
+  /* ── Side data: installments and credit-card names ── */
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
-  const [recurringItems, setRecurringItems] = useState<RecurringTransaction[]>([])
   // Credit-card id → name, used to fold a card's charges into one fatura row.
   const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
 
   useEffect(() => {
     if (!user?.token) return
-    void getAccountSummary().then(setAccountSummary).catch(() => {})
-    void getCashFlowForecast().then(setForecast).catch(() => {})
     void listInstallmentPlans().then(setInstallmentPlans).catch(() => {})
-    void listRecurringTransactions().then(setRecurringItems).catch(() => {})
     void listPaymentMethods()
       .then((methods) => {
         const map = new Map<number, string>()
@@ -104,67 +85,12 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       .catch(() => {})
   }, [user?.token])
 
-  /* ── Net available money: current + cash + savings (everything but cards) ── */
-  const netAvailable = useMemo(() => {
-    if (!accountSummary) return null
-    return accountSummary.accounts
-      .filter(
-        (a) =>
-          a.active &&
-          (a.type === 'CURRENT' || a.type === 'CASH' || a.type === 'SAVINGS'),
-      )
-      .reduce((s, a) => s + a.currentBalance, 0)
-  }, [accountSummary])
-
-  /* ── Month forecast: first projected month's closing balance ── */
-  const forecastInfo = useMemo(() => {
-    if (!forecast || forecast.months.length === 0) return null
-    const m = forecast.months[0]
-    const label = formatDate(new Date(`${m.month}-01T00:00:00`), {
-      month: 'long',
-    })
-    return { projected: m.projectedClosingBalance, label, negative: m.negative }
-  }, [forecast, formatDate])
-
-  /* ── Computed commitments ── */
-  const commitments = useMemo(() => {
-    const activeFixed = recurringItems.filter((r) => r.active && r.type === 'EXPENSE')
-    const cancelledFixed = recurringItems.filter((r) => !r.active)
-    const fixedMonthly = activeFixed.reduce((s, r) => s + r.amount, 0)
-
-    return {
-      fixed: { monthly: fixedMonthly, active: activeFixed.length, cancelled: cancelledFixed.length },
-    }
-  }, [recurringItems])
-
-  /* ── Balance privacy toggle (shared with Accounts/Transfers pages) ── */
-  const [hideBalances, setHideBalances] = useState(() => {
-    try {
-      return localStorage.getItem(BALANCE_VISIBILITY_KEY) === 'true'
-    } catch {
-      return false
-    }
-  })
-  const toggleHideBalances = useCallback(() => {
-    setHideBalances((current) => {
-      const next = !current
-      try {
-        localStorage.setItem(BALANCE_VISIBILITY_KEY, String(next))
-      } catch {
-        /* noop */
-      }
-      return next
-    })
-  }, [])
-
   /* ── Quick-add modal ── */
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const [modalType, setModalType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
 
   const handleAddIncome = useCallback(() => { setModalType('INCOME'); openModal() }, [openModal])
   const handleAddExpense = useCallback(() => { setModalType('EXPENSE'); openModal() }, [openModal])
-
-  const netDeltaPositive = periodData.balance >= 0
 
   return (
     <Box
@@ -229,60 +155,16 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           />
         </MotionBox>
 
-        {/* Cash flow chart (same period and payments lens as the hero) */}
-        {/* Stat row: Net available · Month forecast */}
         <MotionBox variants={riseV}>
           <SectionLabel>{t('dashboard.monthlyCommitments')}</SectionLabel>
         </MotionBox>
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <InstallmentCarousel
-              plans={installmentPlans}
-              selectedDate={selectedDate}
-              onManage={() => onPageChange?.('installments')}
-            />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <CommitmentCard
-              kind="fixed"
-              monthly={commitments.fixed.monthly}
-              active={commitments.fixed.active}
-              inactive={commitments.fixed.cancelled}
-              onManage={() => onPageChange?.('fixed-payments')}
-            />
-          </MotionBox>
-        </Grid>
-
         <MotionBox variants={riseV}>
-          <SectionLabel>{t('dashboard.balanceForecast')}</SectionLabel>
+          <InstallmentCarousel
+            plans={installmentPlans}
+            selectedDate={selectedDate}
+            onManage={() => onPageChange?.('installments')}
+          />
         </MotionBox>
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <StatCard
-              eyebrow={t('dashboard.netAvailable')}
-              figure={netAvailable !== null ? formatCurrency(netAvailable) : '—'}
-              caption={t('dashboard.netAvailableCaption')}
-              deltaLabel={`${netDeltaPositive ? '+' : '−'}${formatCurrency(Math.abs(periodData.balance), { minimumFractionDigits: 2 })}`}
-              deltaPositive={netDeltaPositive}
-              masked={hideBalances}
-              onToggleMask={toggleHideBalances}
-            />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <StatCard
-              eyebrow={t('dashboard.monthForecast')}
-              figure={forecastInfo ? formatCurrency(forecastInfo.projected) : '—'}
-              caption={
-                forecastInfo
-                  ? t('dashboard.forecastCaption', { month: forecastInfo.label })
-                  : t('dashboard.forecastEmpty')
-              }
-              accent="gold"
-              masked={hideBalances}
-              onToggleMask={toggleHideBalances}
-            />
-          </MotionBox>
-        </Grid>
 
         {/* Upcoming payments · Recent activity */}
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
