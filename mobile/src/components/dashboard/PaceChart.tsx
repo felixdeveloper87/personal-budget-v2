@@ -1,7 +1,7 @@
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
 import { useMemo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
@@ -15,6 +15,12 @@ const trendIcons = {
   down: { ios: "arrow.down.right", android: "south_east", web: "south_east" },
 } satisfies Record<string, SymbolName>;
 
+const hideIcon = {
+  ios: "xmark",
+  android: "close",
+  web: "close",
+} satisfies SymbolName;
+
 const CHART_HEIGHT = 142;
 const PLOT_TOP = 12;
 const PLOT_BOTTOM = 22;
@@ -24,6 +30,8 @@ interface PaceChartProps {
   category?: string;
   date: Date;
   description?: string;
+  interactive?: boolean;
+  onHide?: () => void;
   tone: PaceTone;
   transactions: Transaction[];
 }
@@ -193,8 +201,17 @@ function ChartLine({
   );
 }
 
-export function PaceChart({ category, date, description, tone, transactions }: PaceChartProps) {
+export function PaceChart({
+  category,
+  date,
+  description,
+  interactive = false,
+  onHide,
+  tone,
+  transactions,
+}: PaceChartProps) {
   const [chartWidth, setChartWidth] = useState(0);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const isIncome = tone === "income";
   const accent = isIncome ? colors.income : colors.expense;
   const tint = isIncome ? colors.incomeTint : colors.expenseTint;
@@ -252,6 +269,44 @@ export function PaceChart({ category, date, description, tone, transactions }: P
     : higherThanPrevious ? colors.expense : colors.income;
   const hasData = pace.amountSoFar > 0 || pace.previousTotal > 0;
   const paceTitle = description ?? category ?? (isIncome ? "INCOME PACE" : "EXPENSE PACE");
+  const selectedIndex = selectedDay === null ? null : selectedDay - 1;
+  const selectedCurrent = selectedIndex === null || !pace.current[selectedIndex]?.visible
+    ? null
+    : pace.current[selectedIndex].value;
+  const selectedPrevious = selectedIndex === null || !pace.previous[selectedIndex]?.visible
+    ? null
+    : pace.previous[selectedIndex].value;
+  const selectedX = selectedIndex === null || pace.current.length <= 1
+    ? PLOT_HORIZONTAL
+    : PLOT_HORIZONTAL +
+      (selectedIndex / (pace.current.length - 1)) * (chartWidth - PLOT_HORIZONTAL * 2);
+  const selectedCurrentY = selectedCurrent === null
+    ? null
+    : PLOT_TOP + plotHeight - (selectedCurrent / maxValue) * plotHeight;
+  const selectedPreviousY = selectedPrevious === null
+    ? null
+    : PLOT_TOP + plotHeight - (selectedPrevious / maxValue) * plotHeight;
+
+  const handleChartPress = (locationX: number) => {
+    if (!interactive || chartWidth <= PLOT_HORIZONTAL * 2 || pace.elapsedDays <= 0) return;
+    const plotWidth = chartWidth - PLOT_HORIZONTAL * 2;
+    const relativeX = Math.min(Math.max(locationX - PLOT_HORIZONTAL, 0), plotWidth);
+    const rawIndex = Math.round((relativeX / plotWidth) * (pace.current.length - 1));
+    const nextDay = Math.min(rawIndex + 1, pace.elapsedDays);
+    setSelectedDay((current) => current === nextDay ? null : nextDay);
+  };
+
+  const currentMonthLabel = new Intl.DateTimeFormat("en-GB", { month: "short" })
+    .format(date)
+    .toLocaleUpperCase();
+  const previousMonthLabel = new Intl.DateTimeFormat("en-GB", { month: "short" })
+    .format(new Date(date.getFullYear(), date.getMonth() - 1, 1))
+    .toLocaleUpperCase();
+  const selectedDateLabel = selectedDay === null
+    ? ""
+    : new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" }).format(
+      new Date(date.getFullYear(), date.getMonth(), selectedDay),
+    );
 
   return (
     <View style={[styles.card, { borderColor: tint }]}>
@@ -266,19 +321,32 @@ export function PaceChart({ category, date, description, tone, transactions }: P
           </View>
         </View>
 
-        {hasData ? (
-          <View style={[styles.deltaBadge, { backgroundColor: tint }]}>
-            <SymbolView
-              name={higherThanPrevious ? trendIcons.up : trendIcons.down}
-              size={12}
-              tintColor={deltaColor}
-              weight="bold"
-            />
-            <Text style={[styles.deltaText, { color: deltaColor }]}>
-              {formatCurrency(Math.abs(pace.delta), true)}
-            </Text>
-          </View>
-        ) : null}
+        <View style={styles.headerActions}>
+          {hasData ? (
+            <View style={[styles.deltaBadge, { backgroundColor: tint }]}>
+              <SymbolView
+                name={higherThanPrevious ? trendIcons.up : trendIcons.down}
+                size={12}
+                tintColor={deltaColor}
+                weight="bold"
+              />
+              <Text style={[styles.deltaText, { color: deltaColor }]}>
+                {formatCurrency(Math.abs(pace.delta), true)}
+              </Text>
+            </View>
+          ) : null}
+          {onHide ? (
+            <Pressable
+              accessibilityLabel={`Hide ${paceTitle} chart`}
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={onHide}
+              style={({ pressed }) => [styles.hideButton, pressed && styles.hideButtonPressed]}
+            >
+              <SymbolView name={hideIcon} size={12} tintColor={colors.inkFaint} weight="bold" />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
 
       <View
@@ -324,6 +392,39 @@ export function PaceChart({ category, date, description, tone, transactions }: P
             <Text key={day} style={styles.axisLabel}>{day}</Text>
           ))}
         </View>
+
+        {interactive && hasData ? (
+          <Pressable
+            accessibilityHint="Shows the cumulative value for this month and last month"
+            accessibilityLabel={`Inspect ${paceTitle} by day`}
+            accessibilityRole="button"
+            onPress={(event) => handleChartPress(event.nativeEvent.locationX)}
+            style={styles.interactionLayer}
+          />
+        ) : null}
+
+        {interactive && selectedIndex !== null && chartWidth > 0 ? (
+          <View pointerEvents="none" style={styles.selectionOverlay}>
+            <View style={[styles.selectionGuide, { left: selectedX }]} />
+            {selectedPreviousY !== null ? (
+              <View
+                style={[
+                  styles.selectionDot,
+                  styles.previousSelectionDot,
+                  { left: selectedX - 4, top: selectedPreviousY - 4 },
+                ]}
+              />
+            ) : null}
+            {selectedCurrentY !== null ? (
+              <View
+                style={[
+                  styles.selectionDot,
+                  { backgroundColor: accent, left: selectedX - 5, top: selectedCurrentY - 5 },
+                ]}
+              />
+            ) : null}
+          </View>
+        ) : null}
       </View>
 
       <View style={styles.legend}>
@@ -332,6 +433,29 @@ export function PaceChart({ category, date, description, tone, transactions }: P
         <View style={[styles.legendLine, styles.previousLegendLine]} />
         <Text style={styles.legendText}>Last month</Text>
       </View>
+
+      {interactive && selectedDay !== null ? (
+        <View accessibilityLiveRegion="polite" style={[styles.selectionCard, { borderColor: tint }]}>
+          <Text style={styles.selectionTitle}>CUMULATIVE TO {selectedDateLabel.toLocaleUpperCase()}</Text>
+          <View style={styles.selectionValues}>
+            <View style={styles.selectionValueColumn}>
+              <Text style={styles.selectionLabel}>{currentMonthLabel}</Text>
+              <Text numberOfLines={1} style={[styles.selectionValue, { color: accent }]}>
+                {selectedCurrent === null ? "—" : formatCurrency(selectedCurrent)}
+              </Text>
+            </View>
+            <View style={styles.selectionDivider} />
+            <View style={styles.selectionValueColumn}>
+              <Text style={styles.selectionLabel}>{previousMonthLabel}</Text>
+              <Text numberOfLines={1} style={styles.previousSelectionValue}>
+                {selectedPrevious === null ? "—" : formatCurrency(selectedPrevious)}
+              </Text>
+            </View>
+          </View>
+        </View>
+      ) : interactive && hasData ? (
+        <Text style={styles.interactionHint}>Tap a day on the chart to compare cumulative values.</Text>
+      ) : null}
 
       <Text style={styles.caption}>
         {hasData
@@ -356,6 +480,7 @@ const styles = StyleSheet.create({
   },
   header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between" },
   headerCopy: { flex: 1, minWidth: 0 },
+  headerActions: { alignItems: "center", flexDirection: "row", gap: 5, marginLeft: 8 },
   eyebrow: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
   totalRow: { alignItems: "baseline", flexDirection: "row", gap: 9, marginTop: 7 },
   total: { color: colors.ink, fontSize: 22, fontWeight: "800", letterSpacing: -0.5 },
@@ -365,12 +490,30 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     flexDirection: "row",
     gap: 3,
-    marginLeft: 8,
     paddingHorizontal: 8,
     paddingVertical: 6,
   },
   deltaText: { fontSize: 10, fontWeight: "800" },
+  hideButton: {
+    alignItems: "center",
+    backgroundColor: colors.paperMuted,
+    borderColor: colors.line,
+    borderRadius: 13,
+    borderWidth: 1,
+    height: 26,
+    justifyContent: "center",
+    width: 26,
+  },
+  hideButtonPressed: { opacity: 0.65, transform: [{ scale: 0.94 }] },
   chart: { height: CHART_HEIGHT, marginTop: 13, overflow: "hidden", position: "relative" },
+  interactionLayer: {
+    bottom: PLOT_BOTTOM,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: PLOT_TOP,
+    zIndex: 3,
+  },
   gridLine: {
     backgroundColor: colors.line,
     height: StyleSheet.hairlineWidth,
@@ -390,6 +533,31 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
   currentDot: { borderRadius: 4, height: 8, position: "absolute", width: 8 },
+  selectionOverlay: {
+    bottom: PLOT_BOTTOM,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: PLOT_TOP,
+    zIndex: 4,
+  },
+  selectionGuide: {
+    backgroundColor: colors.inkSoft,
+    bottom: 0,
+    opacity: 0.35,
+    position: "absolute",
+    top: 0,
+    width: StyleSheet.hairlineWidth,
+  },
+  selectionDot: {
+    borderColor: colors.paperRaised,
+    borderRadius: 5,
+    borderWidth: 2,
+    height: 10,
+    position: "absolute",
+    width: 10,
+  },
+  previousSelectionDot: { backgroundColor: colors.inkFaint, height: 8, width: 8 },
   emptyPlot: { alignItems: "center", flex: 1, justifyContent: "center" },
   emptyText: { color: colors.inkFaint, fontSize: 11 },
   axisLabels: {
@@ -405,5 +573,27 @@ const styles = StyleSheet.create({
   legendLine: { borderRadius: 1, height: 2, width: 15 },
   previousLegendLine: { backgroundColor: colors.inkFaint, opacity: 0.55 },
   legendText: { color: colors.inkFaint, fontSize: 9, marginRight: 8 },
+  interactionHint: { color: colors.inkFaint, fontSize: 9, marginTop: 10, textAlign: "center" },
+  selectionCard: {
+    backgroundColor: colors.paperMuted,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginTop: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  selectionTitle: {
+    color: colors.inkFaint,
+    fontSize: 8,
+    fontWeight: "800",
+    letterSpacing: 1.1,
+    textAlign: "center",
+  },
+  selectionValues: { flexDirection: "row", marginTop: 9 },
+  selectionValueColumn: { flex: 1, minWidth: 0 },
+  selectionDivider: { backgroundColor: colors.line, marginHorizontal: 12, width: 1 },
+  selectionLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 0.9 },
+  selectionValue: { fontSize: 14, fontWeight: "800", marginTop: 3 },
+  previousSelectionValue: { color: colors.inkSoft, fontSize: 14, fontWeight: "800", marginTop: 3 },
   caption: { color: colors.inkSoft, fontSize: 11, lineHeight: 17, marginTop: 13 },
 });

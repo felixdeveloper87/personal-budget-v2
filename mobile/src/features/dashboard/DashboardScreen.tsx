@@ -24,6 +24,11 @@ import type { MonthlySummary, Transaction } from "@/types/finance";
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const actionIcons = {
+  calendar: {
+    ios: "calendar",
+    android: "calendar_month",
+    web: "calendar_month",
+  },
   income: {
     ios: "plus.circle.fill",
     android: "add_circle",
@@ -43,31 +48,55 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function monthLabel(date: Date) {
-  const value = new Intl.DateTimeFormat("en-GB", {
-    month: "long",
+function compactMonthLabel(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    month: "short",
     year: "numeric",
-  }).format(date);
-  return value.charAt(0).toUpperCase() + value.slice(1);
+  }).format(date).toLocaleUpperCase();
 }
 
-interface MetricProps {
+function greetingLabel(date: Date) {
+  const hour = date.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+interface ComparisonBarProps {
   label: string;
+  ratio: number;
   value: number;
   tone: "income" | "expense";
 }
 
-function Metric({ label, value, tone }: MetricProps) {
+function ComparisonBar({ label, ratio, value, tone }: ComparisonBarProps) {
+  const isIncome = tone === "income";
+
   return (
-    <View style={styles.metric}>
-      <Text style={styles.metricLabel}>{label}</Text>
-      <Text
-        adjustsFontSizeToFit
-        numberOfLines={1}
-        style={[styles.metricValue, tone === "income" ? styles.incomeValue : styles.expenseValue]}
-      >
-        {formatCurrency(value)}
-      </Text>
+    <View style={styles.comparisonItem}>
+      <View style={styles.comparisonHeader}>
+        <View style={styles.comparisonLabelRow}>
+          <View style={[styles.comparisonDot, isIncome ? styles.incomeDot : styles.expenseDot]} />
+          <Text style={styles.comparisonLabel}>{label}</Text>
+        </View>
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={1}
+          style={[styles.comparisonAmount, isIncome ? styles.incomeValue : styles.expenseValue]}
+        >
+          {formatCurrency(value)}
+        </Text>
+      </View>
+      <View style={styles.comparisonTrack}>
+        <View
+          style={[
+            styles.comparisonFill,
+            isIncome ? styles.incomeFill : styles.expenseFill,
+            { flex: ratio },
+          ]}
+        />
+        <View style={{ flex: 100 - ratio }} />
+      </View>
     </View>
   );
 }
@@ -176,6 +205,14 @@ export function DashboardScreen() {
 
   if (!user) return null;
 
+  const firstName = user.name.split(" ")[0];
+  const positiveFlow = (summary?.balance ?? 0) >= 0;
+  const comparisonMax = summary
+    ? Math.max(summary.totalIncome, summary.totalExpense, 1)
+    : 1;
+  const incomeRatio = summary ? (summary.totalIncome / comparisonMax) * 100 : 0;
+  const expenseRatio = summary ? (summary.totalExpense / comparisonMax) * 100 : 0;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -188,15 +225,28 @@ export function DashboardScreen() {
           />
         }
       >
-        <View style={styles.pageHeading}>
-          <Text style={styles.eyebrow}>DASHBOARD</Text>
-          <Text style={styles.greeting}>Hello, {user.name.split(" ")[0]}</Text>
-          <Text style={styles.period}>{monthLabel(currentDate)}</Text>
-        </View>
-
         <View style={styles.headerCard}>
-          <Text style={styles.headerEyebrow}>MONTH TO DATE</Text>
-          <Text style={styles.headerTitle}>Your money so far</Text>
+          <View pointerEvents="none" style={styles.heroDecoration}>
+            <View style={styles.heroRingLarge} />
+            <View style={styles.heroRingSmall} />
+          </View>
+
+          <View style={styles.heroContent}>
+            <View style={styles.heroIntro}>
+              <View style={styles.greetingRow}>
+                <Text style={styles.greeting}>{greetingLabel(currentDate)}, {firstName}</Text>
+                <View style={styles.inlineDate}>
+                  <SymbolView
+                    name={actionIcons.calendar}
+                    size={12}
+                    tintColor="#DCE9E8"
+                    weight="semibold"
+                  />
+                  <Text style={styles.inlineDateText}>{compactMonthLabel(currentDate)}</Text>
+                </View>
+              </View>
+              <Text style={styles.headerTitle}>Your month, in motion.</Text>
+            </View>
 
           {loading ? (
             <View style={styles.loadingSummary}>
@@ -212,24 +262,34 @@ export function DashboardScreen() {
               </Pressable>
             </View>
           ) : summary ? (
-            <>
-              <View style={styles.metricsRow}>
-                <Metric label="TOTAL EARNED" tone="income" value={summary.totalIncome} />
-                <View style={styles.metricDivider} />
-                <Metric label="EXPENSES SO FAR" tone="expense" value={summary.totalExpense} />
-              </View>
-
-              <View style={styles.balanceRow}>
-                <Text style={styles.balanceLabel}>Current balance</Text>
+            <View style={styles.comparisonPanel}>
+              <ComparisonBar
+                label="INCOME"
+                ratio={incomeRatio}
+                tone="income"
+                value={summary.totalIncome}
+              />
+              <ComparisonBar
+                label="EXPENSE"
+                ratio={expenseRatio}
+                tone="expense"
+                value={summary.totalExpense}
+              />
+              <View style={styles.netRow}>
+                <View>
+                  <Text style={styles.balanceLabel}>NET THIS MONTH</Text>
+                  <Text style={styles.netCaption}>Income minus expenses</Text>
+                </View>
                 <Text
                   adjustsFontSizeToFit
+                  minimumFontScale={0.72}
                   numberOfLines={1}
-                  style={[styles.balanceValue, summary.balance < 0 && styles.negativeBalance]}
+                  style={[styles.balanceValue, !positiveFlow && styles.negativeBalance]}
                 >
                   {formatCurrency(summary.balance)}
                 </Text>
               </View>
-            </>
+            </View>
           ) : null}
 
           <View style={styles.actionsRow}>
@@ -246,16 +306,25 @@ export function DashboardScreen() {
               tone="expense"
             />
           </View>
+          </View>
         </View>
 
         {!loading && !error ? (
           <View style={styles.paceSection}>
             <Text style={styles.sectionEyebrow}>MONTHLY RHYTHM</Text>
             <Text style={styles.sectionTitle}>How this month is moving</Text>
-            <PaceChart date={currentDate} tone="income" transactions={transactions} />
-            <PaceChart date={currentDate} tone="expense" transactions={transactions} />
-            <CategoryPaceCarousel date={currentDate} transactions={transactions} />
-            <DescriptionPaceCarousel date={currentDate} transactions={transactions} />
+            <PaceChart interactive date={currentDate} tone="income" transactions={transactions} />
+            <PaceChart interactive date={currentDate} tone="expense" transactions={transactions} />
+            <CategoryPaceCarousel
+              date={currentDate}
+              transactions={transactions}
+              userId={user.id}
+            />
+            <DescriptionPaceCarousel
+              date={currentDate}
+              transactions={transactions}
+              userId={user.id}
+            />
           </View>
         ) : null}
       </ScrollView>
@@ -274,75 +343,165 @@ export function DashboardScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { padding: 18, paddingBottom: 48 },
-  pageHeading: { marginBottom: 20, paddingHorizontal: 3, paddingTop: 12 },
-  eyebrow: {
-    color: colors.forest,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 1.8,
-    marginBottom: 7,
-  },
-  greeting: { color: colors.ink, fontSize: 30, fontWeight: "700", letterSpacing: -0.8 },
-  period: { color: colors.inkSoft, fontSize: 14, marginTop: 5 },
+  content: { padding: 18, paddingBottom: 48, paddingTop: 14 },
   headerCard: {
     backgroundColor: colors.forest,
-    borderRadius: 26,
-    padding: 20,
+    borderRadius: 30,
+    position: "relative",
     shadowColor: colors.ink,
-    shadowOffset: { height: 8, width: 0 },
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
+    shadowOffset: { height: 10, width: 0 },
+    shadowOpacity: 0.2,
+    shadowRadius: 22,
   },
-  headerEyebrow: {
-    color: "#BFD3D3",
-    fontSize: 10,
+  heroDecoration: {
+    borderRadius: 30,
+    bottom: 0,
+    left: 0,
+    overflow: "hidden",
+    position: "absolute",
+    right: 0,
+    top: 0,
+  },
+  heroRingLarge: {
+    borderColor: "rgba(219, 235, 233, 0.10)",
+    borderRadius: 150,
+    borderWidth: 1,
+    height: 300,
+    position: "absolute",
+    right: -126,
+    top: -112,
+    width: 300,
+  },
+  heroRingSmall: {
+    borderColor: "rgba(219, 235, 233, 0.14)",
+    borderRadius: 92,
+    borderWidth: 1,
+    height: 184,
+    position: "absolute",
+    right: -53,
+    top: -52,
+    width: 184,
+  },
+  heroContent: { padding: 20, position: "relative", zIndex: 1 },
+  heroIntro: { marginTop: 2 },
+  greetingRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  inlineDate: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 5,
+  },
+  inlineDateText: {
+    color: "#DCE9E8",
+    fontSize: 9,
     fontWeight: "800",
-    letterSpacing: 1.8,
+    letterSpacing: 0.7,
+  },
+  greeting: {
+    color: "#C5D7D6",
+    fontSize: 14,
+    fontWeight: "600",
   },
   headerTitle: {
     color: colors.white,
-    fontSize: 24,
-    fontWeight: "700",
-    letterSpacing: -0.5,
-    marginTop: 5,
+    fontSize: 29,
+    fontWeight: "800",
+    letterSpacing: -0.9,
+    marginTop: 3,
   },
-  metricsRow: { flexDirection: "row", marginTop: 26 },
-  metric: { flex: 1, minWidth: 0 },
-  metricDivider: {
-    backgroundColor: "rgba(255,255,255,0.18)",
-    marginHorizontal: 15,
-    width: StyleSheet.hairlineWidth,
+  comparisonPanel: {
+    backgroundColor: "rgba(255,255,255,0.065)",
+    borderColor: "rgba(255,255,255,0.10)",
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 16,
+    marginTop: 24,
+    padding: 14,
   },
-  metricLabel: {
-    color: "#CFE0E0",
+  comparisonItem: { gap: 8 },
+  comparisonHeader: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+  },
+  comparisonLabelRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 7,
+  },
+  comparisonDot: { borderRadius: 4, height: 7, width: 7 },
+  incomeDot: { backgroundColor: "#A9E5CA" },
+  expenseDot: { backgroundColor: "#FFB3A9" },
+  comparisonLabel: {
+    color: "#C5D7D6",
     fontSize: 9,
     fontWeight: "800",
     letterSpacing: 1.15,
-    marginBottom: 8,
   },
-  metricValue: { fontSize: 21, fontWeight: "800", letterSpacing: -0.6 },
+  comparisonAmount: {
+    flexShrink: 1,
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: -0.35,
+    textAlign: "right",
+  },
   incomeValue: { color: "#A9E5CA" },
   expenseValue: { color: "#FFB3A9" },
-  balanceRow: {
-    alignItems: "center",
-    borderTopColor: "rgba(255,255,255,0.16)",
-    borderTopWidth: StyleSheet.hairlineWidth,
+  comparisonTrack: {
+    backgroundColor: "rgba(255,255,255,0.09)",
+    borderRadius: 4,
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 22,
-    paddingTop: 15,
+    height: 7,
+    overflow: "hidden",
   },
-  balanceLabel: { color: "#CFE0E0", fontSize: 12, fontWeight: "600" },
+  comparisonFill: { borderRadius: 4 },
+  incomeFill: { backgroundColor: "#91D2B5" },
+  expenseFill: { backgroundColor: "#EE9489" },
+  netRow: {
+    alignItems: "center",
+    borderTopColor: "rgba(255,255,255,0.10)",
+    borderTopWidth: 1,
+    flexDirection: "row",
+    gap: 12,
+    justifyContent: "space-between",
+    marginTop: 1,
+    paddingTop: 14,
+  },
+  balanceLabel: {
+    color: "#B8CCCB",
+    fontSize: 8,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+  },
+  netCaption: {
+    color: "#8FA9A7",
+    fontSize: 9,
+    marginTop: 3,
+  },
   balanceValue: {
     color: colors.white,
     flexShrink: 1,
-    fontSize: 17,
+    fontSize: 24,
     fontWeight: "800",
-    marginLeft: 12,
+    letterSpacing: -0.7,
+    textAlign: "right",
   },
-  negativeBalance: { color: "#FFB3A9" },
-  actionsRow: { flexDirection: "row", gap: 10, marginTop: 22 },
+  negativeBalance: { color: "#FFC0B8" },
+  actionsRow: {
+    backgroundColor: "rgba(255,255,255,0.055)",
+    borderColor: "rgba(255,255,255,0.08)",
+    borderRadius: 20,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 7,
+    marginTop: 20,
+    padding: 5,
+  },
   actionButton: {
     alignItems: "center",
     borderRadius: 15,
@@ -350,7 +509,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 7,
     justifyContent: "center",
-    minHeight: 50,
+    minHeight: 46,
     paddingHorizontal: 10,
   },
   incomeButton: { backgroundColor: colors.incomeTint },
@@ -359,9 +518,9 @@ const styles = StyleSheet.create({
   actionLabel: { fontSize: 12, fontWeight: "800" },
   incomeActionLabel: { color: colors.income },
   expenseActionLabel: { color: colors.expense },
-  loadingSummary: { alignItems: "center", flexDirection: "row", gap: 10, minHeight: 110 },
+  loadingSummary: { alignItems: "center", flexDirection: "row", gap: 10, minHeight: 176 },
   loadingText: { color: "#CFE0E0", fontSize: 13 },
-  errorSummary: { minHeight: 110, paddingTop: 22 },
+  errorSummary: { minHeight: 176, paddingTop: 28 },
   errorTitle: { color: colors.white, fontSize: 16, fontWeight: "700" },
   errorText: { color: "#CFE0E0", fontSize: 12, lineHeight: 18, marginTop: 5 },
   retryButton: { alignSelf: "flex-start", marginTop: 6, paddingVertical: 8 },

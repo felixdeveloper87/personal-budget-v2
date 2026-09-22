@@ -5,11 +5,13 @@ import { PaceCollectionCarousel } from "./PaceCollectionCarousel";
 interface DescriptionPaceCarouselProps {
   date: Date;
   transactions: Transaction[];
+  userId: number;
 }
 
 export function DescriptionPaceCarousel({
   date,
   transactions,
+  userId,
 }: DescriptionPaceCarouselProps) {
   return (
     <PaceCollectionCarousel
@@ -19,6 +21,7 @@ export function DescriptionPaceCarousel({
       eyebrow="PACE BY DESCRIPTION"
       title="What you're spending on"
       transactions={transactions}
+      userId={userId}
     />
   );
 }

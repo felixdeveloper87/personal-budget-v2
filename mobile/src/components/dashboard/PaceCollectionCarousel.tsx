@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { FlatList, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 
+import { loadHiddenPaceKeys, saveHiddenPaceKeys } from "@/services/pacePreferences";
 import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 
@@ -25,6 +34,7 @@ interface PaceCollectionCarouselProps {
   eyebrow: string;
   title: string;
   transactions: Transaction[];
+  userId: number;
 }
 
 interface PaceCollectionItem {
@@ -45,10 +55,33 @@ export function PaceCollectionCarousel({
   eyebrow,
   title,
   transactions,
+  userId,
 }: PaceCollectionCarouselProps) {
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hiddenKeys, setHiddenKeys] = useState<Set<string>>(() => new Set());
+  const [preferencesReady, setPreferencesReady] = useState(false);
   const cardWidth = Math.max(280, windowWidth - PAGE_HORIZONTAL_PADDING);
+
+  useEffect(() => {
+    let active = true;
+    setPreferencesReady(false);
+
+    void loadHiddenPaceKeys(userId, dimension)
+      .then((keys) => {
+        if (active) setHiddenKeys(keys);
+      })
+      .catch(() => {
+        if (active) setHiddenKeys(new Set());
+      })
+      .finally(() => {
+        if (active) setPreferencesReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [dimension, userId]);
 
   const items = useMemo(() => {
     const year = date.getFullYear();
@@ -95,29 +128,62 @@ export function PaceCollectionCarousel({
     );
   }, [date, dimension, transactions]);
 
+  const visibleItems = useMemo(
+    () => items.filter((item) => !hiddenKeys.has(item.key)),
+    [hiddenKeys, items],
+  );
+  const hiddenCount = items.length - visibleItems.length;
+
   const visibleDotIndexes = useMemo(() => {
-    if (items.length <= MAX_VISIBLE_DOTS) {
-      return items.map((_, index) => index);
+    if (visibleItems.length <= MAX_VISIBLE_DOTS) {
+      return visibleItems.map((_, index) => index);
     }
 
     const halfWindow = Math.floor(MAX_VISIBLE_DOTS / 2);
     const start = Math.min(
       Math.max(activeIndex - halfWindow, 0),
-      items.length - MAX_VISIBLE_DOTS,
+      visibleItems.length - MAX_VISIBLE_DOTS,
     );
     return Array.from({ length: MAX_VISIBLE_DOTS }, (_, index) => start + index);
-  }, [activeIndex, items]);
+  }, [activeIndex, visibleItems]);
 
   const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / (cardWidth + CARD_GAP));
-    setActiveIndex(Math.min(Math.max(nextIndex, 0), items.length - 1));
+    setActiveIndex(Math.min(Math.max(nextIndex, 0), visibleItems.length - 1));
   };
 
   useEffect(() => {
-    setActiveIndex((current) => Math.min(current, Math.max(items.length - 1, 0)));
-  }, [items.length]);
+    setActiveIndex((current) => Math.min(current, Math.max(visibleItems.length - 1, 0)));
+  }, [visibleItems.length]);
 
-  if (items.length === 0) return null;
+  const hideItem = (item: PaceCollectionItem) => {
+    Alert.alert(
+      "Hide this chart?",
+      `${item.label} will be removed from this carousel. Your transactions will not be deleted.`,
+      [
+        { style: "cancel", text: "Cancel" },
+        {
+          onPress: () => {
+            setHiddenKeys((current) => {
+              const next = new Set(current);
+              next.add(item.key);
+              void saveHiddenPaceKeys(userId, dimension, next).catch(() => {});
+              return next;
+            });
+          },
+          style: "destructive",
+          text: "Hide",
+        },
+      ],
+    );
+  };
+
+  const restoreHiddenItems = () => {
+    setHiddenKeys(new Set());
+    void saveHiddenPaceKeys(userId, dimension, new Set()).catch(() => {});
+  };
+
+  if (!preferencesReady || items.length === 0) return null;
 
   return (
     <View style={styles.container}>
@@ -126,48 +192,72 @@ export function PaceCollectionCarousel({
           <Text style={styles.eyebrow}>{eyebrow}</Text>
           <Text numberOfLines={1} style={styles.title}>{title}</Text>
         </View>
-        <Text style={styles.counter}>{activeIndex + 1} / {items.length}</Text>
+        <View style={styles.headingActions}>
+          {hiddenCount > 0 ? (
+            <Pressable
+              accessibilityLabel={`Restore ${hiddenCount} hidden charts`}
+              accessibilityRole="button"
+              onPress={restoreHiddenItems}
+              style={({ pressed }) => [styles.restoreButton, pressed && styles.restoreButtonPressed]}
+            >
+              <Text style={styles.restoreButtonText}>SHOW HIDDEN ({hiddenCount})</Text>
+            </Pressable>
+          ) : null}
+          {visibleItems.length > 0 ? (
+            <Text style={styles.counter}>{activeIndex + 1} / {visibleItems.length}</Text>
+          ) : null}
+        </View>
       </View>
 
-      <FlatList
-        accessibilityLabel={accessibilityLabel}
-        data={items}
-        decelerationRate="fast"
-        getItemLayout={(_, index) => ({
-          index,
-          length: cardWidth + CARD_GAP,
-          offset: (cardWidth + CARD_GAP) * index,
-        })}
-        horizontal
-        initialNumToRender={1}
-        keyExtractor={(item) => item.key}
-        maxToRenderPerBatch={2}
-        onMomentumScrollEnd={handleScrollEnd}
-        renderItem={({ item }) => (
-          <View style={{ marginRight: CARD_GAP, width: cardWidth }}>
-            <PaceChart
-              category={dimension === "category" ? item.label : undefined}
-              date={date}
-              description={dimension === "description" ? item.label : undefined}
-              tone="expense"
-              transactions={transactions}
-            />
-          </View>
-        )}
-        showsHorizontalScrollIndicator={false}
-        snapToAlignment="start"
-        snapToInterval={cardWidth + CARD_GAP}
-        windowSize={3}
-      />
-
-      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.dots}>
-        {visibleDotIndexes.map((index) => (
-          <View
-            key={items[index].key}
-            style={[styles.dot, index === activeIndex && styles.activeDot]}
+      {visibleItems.length > 0 ? (
+        <>
+          <FlatList
+            accessibilityLabel={accessibilityLabel}
+            data={visibleItems}
+            decelerationRate="fast"
+            getItemLayout={(_, index) => ({
+              index,
+              length: cardWidth + CARD_GAP,
+              offset: (cardWidth + CARD_GAP) * index,
+            })}
+            horizontal
+            initialNumToRender={1}
+            keyExtractor={(item) => item.key}
+            maxToRenderPerBatch={2}
+            onMomentumScrollEnd={handleScrollEnd}
+            renderItem={({ item }) => (
+              <View style={{ marginRight: CARD_GAP, width: cardWidth }}>
+                <PaceChart
+                  category={dimension === "category" ? item.label : undefined}
+                  date={date}
+                  description={dimension === "description" ? item.label : undefined}
+                  interactive
+                  onHide={() => hideItem(item)}
+                  tone="expense"
+                  transactions={transactions}
+                />
+              </View>
+            )}
+            showsHorizontalScrollIndicator={false}
+            snapToAlignment="start"
+            snapToInterval={cardWidth + CARD_GAP}
+            windowSize={3}
           />
-        ))}
-      </View>
+
+          <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.dots}>
+            {visibleDotIndexes.map((index) => (
+              <View
+                key={visibleItems[index].key}
+                style={[styles.dot, index === activeIndex && styles.activeDot]}
+              />
+            ))}
+          </View>
+        </>
+      ) : (
+        <View style={styles.allHiddenState}>
+          <Text style={styles.allHiddenText}>All charts in this carousel are hidden.</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -181,6 +271,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   headingCopy: { flex: 1, minWidth: 0, paddingRight: 12 },
+  headingActions: { alignItems: "flex-end", gap: 7 },
   eyebrow: {
     color: colors.forest,
     fontSize: 9,
@@ -195,6 +286,28 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   counter: { color: colors.inkFaint, fontSize: 10, fontWeight: "700", marginBottom: 3 },
+  restoreButton: {
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+  restoreButtonPressed: { opacity: 0.65 },
+  restoreButtonText: { color: colors.forest, fontSize: 8, fontWeight: "800", letterSpacing: 0.7 },
+  allHiddenState: {
+    alignItems: "center",
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    marginTop: 16,
+    minHeight: 110,
+    padding: 20,
+  },
+  allHiddenText: { color: colors.inkFaint, fontSize: 12, textAlign: "center" },
   dots: {
     alignItems: "center",
     flexDirection: "row",

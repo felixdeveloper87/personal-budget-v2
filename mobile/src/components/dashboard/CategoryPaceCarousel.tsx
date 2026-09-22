@@ -5,9 +5,10 @@ import { PaceCollectionCarousel } from "./PaceCollectionCarousel";
 interface CategoryPaceCarouselProps {
   date: Date;
   transactions: Transaction[];
+  userId: number;
 }
 
-export function CategoryPaceCarousel({ date, transactions }: CategoryPaceCarouselProps) {
+export function CategoryPaceCarousel({ date, transactions, userId }: CategoryPaceCarouselProps) {
   return (
     <PaceCollectionCarousel
       accessibilityLabel="Expense pace by category"
@@ -16,6 +17,7 @@ export function CategoryPaceCarousel({ date, transactions }: CategoryPaceCarouse
       eyebrow="PACE BY CATEGORY"
       title="Where your money is going"
       transactions={transactions}
+      userId={userId}
     />
   );
 }
