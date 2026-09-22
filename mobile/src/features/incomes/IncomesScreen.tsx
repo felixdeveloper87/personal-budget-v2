@@ -73,6 +73,41 @@ function formatSelectedDate(value: string) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+interface IncomeDescriptionGroup {
+  category: string;
+  count: number;
+  key: string;
+  name: string;
+  total: number;
+}
+
+function groupIncomesByDescription(incomes: Transaction[]): IncomeDescriptionGroup[] {
+  const grouped = new Map<string, IncomeDescriptionGroup>();
+
+  for (const income of incomes) {
+    const name = income.description.trim().replace(/\s+/g, " ") || income.category;
+    const key = name.toLocaleLowerCase();
+    const current = grouped.get(key);
+
+    if (current) {
+      current.count += 1;
+      current.total += Number(income.amount || 0);
+    } else {
+      grouped.set(key, {
+        category: income.category,
+        count: 1,
+        key,
+        name,
+        total: Number(income.amount || 0),
+      });
+    }
+  }
+
+  return [...grouped.values()].sort(
+    (first, second) => second.total - first.total || first.name.localeCompare(second.name),
+  );
+}
+
 export function IncomesScreen() {
   const { user, logout } = useAuth();
   const period = usePeriodNavigation("month");
@@ -140,6 +175,7 @@ export function IncomesScreen() {
     () => selectedDay ? incomes.filter((income) => transactionDate(income) === selectedDay) : incomes,
     [incomes, selectedDay],
   );
+  const groupedIncomes = useMemo(() => groupIncomesByDescription(incomes), [incomes]);
   const selectedDayTotal = useMemo(
     () => visibleIncomes.reduce((total, income) => total + Number(income.amount || 0), 0),
     [visibleIncomes],
@@ -206,9 +242,9 @@ export function IncomesScreen() {
 
         <View style={styles.sectionHeader}>
           <View>
-            <Text style={styles.sectionEyebrow}>{selectedDay ? "DIA SELECIONADO" : "TRANSAÇÕES"}</Text>
+            <Text style={styles.sectionEyebrow}>{selectedDay ? "DIA SELECIONADO" : "FONTES DE RECEITA"}</Text>
             <Text style={styles.sectionTitle}>
-              {selectedDay ? formatSelectedDate(selectedDay) : "Receitas do período"}
+              {selectedDay ? formatSelectedDate(selectedDay) : "Receitas por descrição"}
             </Text>
             {selectedDay ? (
               <Text style={styles.selectedDayTotal}>
@@ -222,7 +258,7 @@ export function IncomesScreen() {
                 <Text style={styles.clearButtonText}>Ver todas</Text>
               </Pressable>
             ) : (
-              <Text style={styles.countBadge}>{visibleIncomes.length}</Text>
+              <Text style={styles.countBadge}>{groupedIncomes.length}</Text>
             )
           ) : null}
         </View>
@@ -254,27 +290,47 @@ export function IncomesScreen() {
           </View>
         ) : (
           <View style={styles.listCard}>
-            {visibleIncomes.map((income, index) => (
-              <View
-                key={income.id}
-                style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
-              >
-                <View style={styles.rowLogo}>
-                  <MerchantLogo name={income.description || income.category} size={42} />
-                </View>
-                <View style={styles.rowCopy}>
-                  <Text numberOfLines={1} style={styles.rowTitle}>
-                    {income.description || income.category}
+            {selectedDay
+              ? visibleIncomes.map((income, index) => (
+                <View
+                  key={income.id}
+                  style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
+                >
+                  <View style={styles.rowLogo}>
+                    <MerchantLogo name={income.description || income.category} size={42} />
+                  </View>
+                  <View style={styles.rowCopy}>
+                    <Text numberOfLines={1} style={styles.rowTitle}>
+                      {income.description || income.category}
+                    </Text>
+                    <Text numberOfLines={1} style={styles.rowMeta}>
+                      {income.category} · {formatTransactionDate(income.paymentDate ?? income.transactionDate)}
+                    </Text>
+                  </View>
+                  <Text numberOfLines={1} style={styles.rowAmount}>
+                    +{formatCurrency(Number(income.amount))}
                   </Text>
-                  <Text numberOfLines={1} style={styles.rowMeta}>
-                    {income.category} · {formatTransactionDate(income.paymentDate ?? income.transactionDate)}
+                </View>
+              ))
+              : groupedIncomes.map((group, index) => (
+                <View
+                  key={group.key}
+                  style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
+                >
+                  <View style={styles.rowLogo}>
+                    <MerchantLogo name={group.name} size={42} />
+                  </View>
+                  <View style={styles.rowCopy}>
+                    <Text numberOfLines={1} style={styles.rowTitle}>{group.name}</Text>
+                    <Text numberOfLines={1} style={styles.rowMeta}>
+                      {group.count === 1 ? "1 receita" : `${group.count} receitas`} · {group.category}
+                    </Text>
+                  </View>
+                  <Text numberOfLines={1} style={styles.rowAmount}>
+                    +{formatCurrency(group.total)}
                   </Text>
                 </View>
-                <Text numberOfLines={1} style={styles.rowAmount}>
-                  +{formatCurrency(Number(income.amount))}
-                </Text>
-              </View>
-            ))}
+              ))}
           </View>
         )}
       </ScrollView>
