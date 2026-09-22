@@ -3,7 +3,7 @@ import { Box, Grid, Skeleton, VStack, useDisclosure } from '@chakra-ui/react'
 import { AddTransactionModal } from '../../components/transactions'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
-import { usePeriodData, getPreviousPeriodDate } from '../../hooks/usePeriodData'
+import { usePeriodData } from '../../hooks/usePeriodData'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   getAccountSummary,
@@ -31,7 +31,6 @@ import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
 import DescriptionSpendingPaces from './components/DescriptionSpendingPaces'
 import TopMerchants from './components/TopMerchants'
-import SpendingMix from './components/SpendingMix'
 import UpcomingPayments from './components/UpcomingPayments'
 import RecentActivity from './components/RecentActivity'
 import CommitmentCard from './components/CommitmentCard'
@@ -65,19 +64,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
     monthSummary,
     selectedPeriod,
     selectedDate,
-    dateBasis,
-  )
-
-  // Previous period (same basis) so the personalised insight can compare.
-  const previousDate = useMemo(
-    () => getPreviousPeriodDate(selectedDate, selectedPeriod),
-    [selectedDate, selectedPeriod],
-  )
-  const previousPeriodData = usePeriodData(
-    transactions,
-    null,
-    selectedPeriod,
-    previousDate,
     dateBasis,
   )
 
@@ -240,22 +226,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           />
         </MotionBox>
 
-        {/* Spending mix · Top merchants */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <SpendingMix
-              transactions={periodData.transactions}
-              previousTransactions={previousPeriodData.transactions}
-            />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <TopMerchants
-              transactions={behaviourPeriodData.transactions}
-              historyTransactions={transactions}
-              selectedDate={selectedDate}
-            />
-          </MotionBox>
-        </Grid>
+        {/* Top merchants */}
+        <MotionBox variants={riseV}>
+          <TopMerchants
+            transactions={behaviourPeriodData.transactions}
+            historyTransactions={transactions}
+            selectedDate={selectedDate}
+          />
+        </MotionBox>
 
         {/* Cash flow chart (same period and payments lens as the hero) */}
         {/* Stat row: Net available · Month forecast */}

@@ -15,6 +15,7 @@ import {
 import { CategoryPaceCarousel } from "@/components/dashboard/CategoryPaceCarousel";
 import { DescriptionPaceCarousel } from "@/components/dashboard/DescriptionPaceCarousel";
 import { PaceChart } from "@/components/dashboard/PaceChart";
+import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarousel";
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, getMonthlySummary, listTransactions } from "@/services/api";
@@ -325,6 +326,7 @@ export function DashboardScreen() {
               transactions={transactions}
               userId={user.id}
             />
+            <TopMerchantsCarousel date={currentDate} transactions={transactions} />
           </View>
         ) : null}
       </ScrollView>
