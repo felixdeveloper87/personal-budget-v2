@@ -9,13 +9,13 @@ import { useI18n } from '../../../i18n'
 
 interface TopMerchantsProps {
   transactions: Transaction[]
-  /** Full history used to build the mobile monthly carousel. */
+  /** Full history used to build the monthly carousel. */
   historyTransactions?: Transaction[]
   selectedDate?: Date
 }
 
 const MAX_ROWS = 5
-const MOBILE_MONTH_COUNT = 4
+const MONTH_COUNT = 4
 
 function isCommitmentTransaction(transaction: Transaction): boolean {
   return Boolean(transaction.isInstallment)
@@ -52,7 +52,7 @@ export default function TopMerchants({
   const monthlySlides = useMemo(() => {
     if (!historyTransactions || !selectedDate) return []
 
-    return Array.from({ length: MOBILE_MONTH_COUNT }, (_, index) => {
+    return Array.from({ length: MONTH_COUNT }, (_, index) => {
       const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - index, 1)
       return {
         key: `${date.getFullYear()}-${date.getMonth()}`,
@@ -100,12 +100,7 @@ export default function TopMerchants({
   }
 
   return (
-    <>
-      <Box display={{ base: 'none', md: 'block' }} h="full">
-        <MerchantPanel transactions={transactions} />
-      </Box>
-
-      <VStack display={{ base: 'flex', md: 'none' }} align="stretch" spacing={2.5}>
+    <VStack align="stretch" spacing={2.5}>
         <Box
           ref={carouselRef}
           role="region"
@@ -158,8 +153,7 @@ export default function TopMerchants({
             />
           ))}
         </HStack>
-      </VStack>
-    </>
+    </VStack>
   )
 }
 
