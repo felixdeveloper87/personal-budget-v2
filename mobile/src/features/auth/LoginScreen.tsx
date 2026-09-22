@@ -107,23 +107,30 @@ export function LoginScreen() {
               <View
                 style={[
                   styles.inputShell,
-                  focusedField === "email" && styles.inputShellFocused,
                 ]}
               >
                 <TextInput
                   accessibilityLabel="E-mail"
                   autoCapitalize="none"
-                  autoComplete="email"
+                  autoComplete="off"
                   autoCorrect={false}
                   editable={!submitting}
                   inputMode="email"
-                  onBlur={() => setFocusedField(null)}
+                  onBlur={() => {
+                    console.log("[login-focus] email blur", passwordRef.current?.isFocused());
+                  }}
                   onChangeText={(value) => {
                     setEmail(value);
                     if (error) setError(null);
                   }}
-                  onFocus={() => setFocusedField("email")}
-                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  onFocus={() => {
+                    console.log("[login-focus] email focus", passwordRef.current?.isFocused());
+                    setFocusedField("email");
+                  }}
+                  onSubmitEditing={() => {
+                    console.log("[login-focus] email submit");
+                    passwordRef.current?.focus();
+                  }}
                   placeholder="seu@email.com"
                   placeholderTextColor={palette.inkFaint}
                   returnKeyType="next"
@@ -138,21 +145,25 @@ export function LoginScreen() {
               <View
                 style={[
                   styles.inputShell,
-                  focusedField === "password" && styles.inputShellFocused,
                 ]}
               >
                 <TextInput
                   ref={passwordRef}
                   accessibilityLabel="Senha"
                   autoCapitalize="none"
-                  autoComplete="current-password"
+                  autoComplete="off"
                   editable={!submitting}
-                  onBlur={() => setFocusedField(null)}
+                  onBlur={() => {
+                    console.log("[login-focus] password blur", passwordRef.current?.isFocused());
+                  }}
                   onChangeText={(value) => {
                     setPassword(value);
                     if (error) setError(null);
                   }}
-                  onFocus={() => setFocusedField("password")}
+                  onFocus={() => {
+                    console.log("[login-focus] password focus", passwordRef.current?.isFocused());
+                    setFocusedField("password");
+                  }}
                   onSubmitEditing={() => void handleLogin()}
                   placeholder="Digite sua senha"
                   placeholderTextColor={palette.inkFaint}

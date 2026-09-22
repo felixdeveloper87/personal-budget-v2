@@ -251,6 +251,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
           <MotionBox variants={riseV}>
             <TopMerchants
               transactions={behaviourPeriodData.transactions}
+              historyTransactions={transactions}
+              selectedDate={selectedDate}
             />
           </MotionBox>
         </Grid>
