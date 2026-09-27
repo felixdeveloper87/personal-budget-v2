@@ -13,21 +13,21 @@ const icons = {
   previous: { ios: "chevron.left", android: "chevron_left", web: "chevron_left" },
   next: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
   add: { ios: "plus", android: "add", web: "add" },
+  calendar: { ios: "calendar", android: "calendar_month", web: "calendar_month" },
   receive: { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" },
   pay: { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" },
 } satisfies Record<string, SymbolName>;
-
-const SUMMARY_CONTROL_WIDTH = 146;
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
 function formatMonth(date: Date) {
-  return new Intl.DateTimeFormat("pt-BR", {
-    month: "short",
+  const month = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
     year: "numeric",
   }).format(date);
+  return month.charAt(0).toUpperCase() + month.slice(1);
 }
 
 function formatCurrency(amount: number, currency: string) {
@@ -53,6 +53,8 @@ export function HouseholdHero({
 }: HouseholdHeroProps) {
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
+  const heroWidth = width - 32;
+  const heroHeight = isWide ? 500 : Math.min(560, heroWidth * 1.44);
   const today = new Date();
   const isCurrentMonth = monthKey(selectedMonth) === monthKey(today);
   const summary = household.monthSummaries.find(
@@ -75,8 +77,9 @@ export function HouseholdHero({
         onPress={() => shiftMonth(-1)}
         style={styles.monthButton}
       >
-        <SymbolView name={icons.previous} size={14} tintColor={colors.inkSoft} weight="bold" />
+        <SymbolView name={icons.previous} size={14} tintColor="#FFFFFF" weight="bold" />
       </Pressable>
+      <SymbolView name={icons.calendar} size={14} tintColor="#FFFFFF" weight="semibold" />
       <Text style={styles.monthLabel}>{formatMonth(selectedMonth)}</Text>
       <Pressable
         accessibilityLabel="Próximo mês"
@@ -86,13 +89,13 @@ export function HouseholdHero({
         onPress={() => shiftMonth(1)}
         style={[styles.monthButton, isCurrentMonth && styles.monthButtonDisabled]}
       >
-        <SymbolView name={icons.next} size={14} tintColor={colors.inkSoft} weight="bold" />
+        <SymbolView name={icons.next} size={14} tintColor="#FFFFFF" weight="bold" />
       </Pressable>
     </View>
   );
 
   const balanceInfo = () => (
-    <View style={styles.balanceLine}>
+    <View style={styles.balanceInfo}>
       <Text numberOfLines={1} style={[styles.balanceTitle, net > 0 ? styles.receiveText : net < 0 ? styles.payText : null]}>
         {net > 0 ? "Te devem" : net < 0 ? "Você tem que pagar" : "Tudo certo por aqui"}
       </Text>
@@ -104,7 +107,7 @@ export function HouseholdHero({
           <SymbolView
             name={net > 0 ? icons.receive : icons.pay}
             size={12}
-            tintColor={net > 0 ? colors.income : colors.expense}
+            tintColor={net > 0 ? "#A8E8BD" : "#FFC0AA"}
             weight="bold"
           />
         </View>
@@ -125,10 +128,10 @@ export function HouseholdHero({
   );
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, { height: heroHeight }]}>
       <View style={styles.landscape}>
         <View pointerEvents="none" style={styles.landscapeArt}>
-          <HouseholdLandscape />
+          <HouseholdLandscape height={heroHeight} width={heroWidth} />
         </View>
         <View style={styles.identityRow}>
           <View style={styles.householdCopy}>
@@ -145,9 +148,9 @@ export function HouseholdHero({
       <View style={styles.summaryLayer}>
         <View style={styles.summaryBar}>
           <View style={styles.summaryTopRow}>
-            <View style={[styles.spendingSummary, isWide && styles.spendingSummaryWide]}>
+            <View style={styles.spendingSummary}>
               <Text numberOfLines={1} style={styles.sectionTitle}>Gastos do mês</Text>
-              <View style={[styles.spendingValueRow, isWide && styles.spendingValueRowWide]}>
+              <View style={styles.spendingValueRow}>
                 <Text adjustsFontSizeToFit minimumFontScale={0.72} numberOfLines={1} style={styles.spendingAmount}>
                   {formatCurrency(spending, household.currency)}
                 </Text>
@@ -157,27 +160,11 @@ export function HouseholdHero({
               </View>
             </View>
 
-            {monthNavigation}
+            <View style={styles.balanceSummary}>{balanceInfo()}</View>
           </View>
-          <View style={styles.balanceRowBackground}>
-            <View pointerEvents="none" style={styles.balanceRowStripes}>
-              {[0, 1, 2, 3, 4].map((line) => (
-                <View key={"horizontal-" + line} style={[styles.balanceRowHorizontalStripe, { top: 5 + line * 8 }]} />
-              ))}
-              {[
-                { key: "left-1", position: "16.67%" },
-                { key: "left-2", position: "33.33%" },
-                { key: "left-3", position: "50%" },
-                { key: "left-4", position: "66.67%" },
-                { key: "left-5", position: "83.33%" },
-              ].map((line) => (
-                <View key={line.key} style={[styles.balanceRowVerticalStripe, { left: line.position }]} />
-              ))}
-            </View>
-            <View style={styles.summaryBottomRow}>
-              <View style={[styles.balanceSummary, isWide && styles.balanceSummaryWide]}>{balanceInfo()}</View>
-              {addExpenseButton}
-            </View>
+          <View style={styles.summaryBottomColumn}>
+            {addExpenseButton}
+            {monthNavigation}
           </View>
         </View>
       </View>
@@ -187,97 +174,88 @@ export function HouseholdHero({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: colors.paperRaised,
-    borderColor: "rgba(36, 56, 60, 0.08)",
+    backgroundColor: "#194C3F",
     borderRadius: 27,
-    borderWidth: 1,
     overflow: "hidden",
+    position: "relative",
   },
   landscape: {
-    backgroundColor: "#DDEEF1",
-    height: 238,
+    backgroundColor: "#6CB6D5",
+    height: "100%",
     overflow: "hidden",
     position: "relative",
   },
   landscapeArt: {
-    bottom: 0,
-    height: 138,
-    left: 0,
+    ...StyleSheet.absoluteFillObject,
     position: "absolute",
-    right: 0,
+    zIndex: 0,
   },
   identityRow: {
     alignItems: "center",
     flexDirection: "row",
     paddingHorizontal: 19,
-    paddingTop: 20,
-    position: "relative",
+    paddingTop: 85,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
     zIndex: 1,
   },
   householdCopy: { flex: 1, minWidth: 0 },
-  eyebrow: { color: "#52656A", fontSize: 11, fontWeight: "500" },
-  householdName: { color: "#172A2D", fontSize: 19, fontWeight: "800", letterSpacing: -0.4, marginTop: 2 },
+  eyebrow: { color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: "500" },
+  householdName: { color: "#FFFFFF", fontSize: 23, fontWeight: "800", letterSpacing: -0.45, marginTop: 3 },
   memberCount: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.67)",
-    borderColor: "rgba(255,255,255,0.68)",
-    borderRadius: 16,
-    borderWidth: 1,
+    backgroundColor: "rgba(255,255,255,0.82)",
+    borderRadius: 20,
     flexDirection: "row",
     gap: 7,
-    height: 36,
+    height: 38,
     justifyContent: "center",
     marginLeft: 9,
-    paddingHorizontal: 11,
+    paddingHorizontal: 12,
   },
   memberCountText: { color: colors.ink, fontSize: 12, fontWeight: "800" },
-  summaryLayer: { marginTop: -8, position: "relative", zIndex: 2 },
+  summaryLayer: { bottom: 15, left: 15, position: "absolute", right: 15, zIndex: 2 },
   summaryBar: {
-    backgroundColor: colors.paperRaised,
-    gap: 10,
-    paddingHorizontal: 18,
-    paddingBottom: 12,
-    paddingTop: 10,
+    backgroundColor: "rgba(17, 67, 55, 0.78)",
+    borderColor: "rgba(255,255,255,0.10)",
+    borderRadius: 23,
+    borderWidth: 1,
+    gap: 15,
+    padding: 14,
   },
-  summaryTopRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between", minHeight: 36 },
-  balanceRowBackground: { backgroundColor: "#F3F8F3", borderRadius: 13, overflow: "hidden", position: "relative" },
-  balanceRowStripes: { ...StyleSheet.absoluteFillObject },
-  balanceRowHorizontalStripe: { backgroundColor: "#DCEBDD", height: StyleSheet.hairlineWidth, left: 0, opacity: 0.8, position: "absolute", right: 0 },
-  balanceRowVerticalStripe: { backgroundColor: "#DCEBDD", bottom: 0, opacity: 0.8, position: "absolute", top: 0, width: StyleSheet.hairlineWidth },
-  summaryBottomRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between", minHeight: 46, paddingHorizontal: 9, position: "relative", zIndex: 1 },
-  spendingSummary: { alignItems: "center", flex: 1, flexDirection: "row", gap: 4, minWidth: 0 },
-  spendingSummaryWide: { gap: 5 },
-  spendingValueRow: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: 4 },
-  spendingValueRowWide: { marginTop: 0 },
-  balanceSummary: { alignItems: "center", flex: 1, minWidth: 0 },
-  balanceSummaryWide: { flex: 1.1 },
-  balanceLine: { alignItems: "center", flexDirection: "row", gap: 5, minWidth: 0 },
-  balanceTitle: { color: colors.inkSoft, flexShrink: 1, fontSize: 10, fontWeight: "600" },
+  summaryTopRow: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between", minHeight: 50 },
+  summaryBottomColumn: { alignItems: "center", flexDirection: "column", gap: 12, justifyContent: "center", position: "relative", zIndex: 1 },
+  spendingSummary: { flex: 1, minWidth: 0 },
+  spendingValueRow: { alignItems: "center", flexDirection: "row", gap: 7, marginTop: 4 },
+  balanceSummary: { alignItems: "flex-start", flex: 1, minWidth: 0 },
+  balanceInfo: { alignItems: "flex-start", gap: 4, minWidth: 0 },
+  balanceTitle: { color: "rgba(255,255,255,0.9)", flexShrink: 1, fontSize: 11, fontWeight: "600" },
   balanceAmountRow: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 4 },
-  balanceAmount: { color: colors.ink, fontSize: 13, fontWeight: "800" },
-  sectionTitle: { color: colors.inkFaint, flexShrink: 1, fontSize: 8, fontWeight: "600", letterSpacing: 0.05 },
-  spendingAmount: { color: "#172A2D", flexShrink: 1, fontSize: 16, fontWeight: "800", letterSpacing: -0.35 },
-  expenseCountPill: { alignItems: "center", backgroundColor: colors.incomeTint, borderRadius: 8, justifyContent: "center", minWidth: 21, paddingHorizontal: 4, paddingVertical: 4 },
-  expenseCountText: { color: colors.forest, fontSize: 8, fontWeight: "800" },
+  balanceAmount: { color: "#FFFFFF", fontSize: 21, fontWeight: "800" },
+  sectionTitle: { color: "rgba(255,255,255,0.92)", fontSize: 12, fontWeight: "500" },
+  spendingAmount: { color: "#FFFFFF", flexShrink: 1, fontSize: 21, fontWeight: "800", letterSpacing: -0.35 },
+  expenseCountPill: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.17)", borderRadius: 9, justifyContent: "center", minWidth: 26, paddingHorizontal: 6, paddingVertical: 5 },
+  expenseCountText: { color: "#FFFFFF", fontSize: 10, fontWeight: "800" },
   monthControl: {
     alignItems: "center",
-    backgroundColor: colors.paper,
-    borderColor: "rgba(36,56,60,0.08)",
-    borderRadius: 14,
+    backgroundColor: "rgba(232,245,239,0.15)",
+    borderColor: "rgba(255,255,255,0.10)",
+    borderRadius: 18,
     borderWidth: 1,
     flexDirection: "row",
     flexShrink: 0,
-    gap: 4,
-    height: 36,
-    width: SUMMARY_CONTROL_WIDTH,
-    paddingHorizontal: 5,
+    gap: 7,
+    height: 40,
+    paddingHorizontal: 8,
   },
-  monthButton: { alignItems: "center", backgroundColor: "#E8F0E8", borderRadius: 9, height: 28, justifyContent: "center", width: 28 },
+  monthButton: { alignItems: "center", borderRadius: 9, height: 28, justifyContent: "center", width: 24 },
   monthButtonDisabled: { opacity: 0.45 },
-  monthLabel: { color: colors.inkSoft, flexShrink: 1, fontSize: 9, fontWeight: "600", minWidth: 70, textAlign: "center" },
-  receiveText: { color: colors.income },
-  payText: { color: colors.expense },
-  addExpenseButton: { alignItems: "center", backgroundColor: colors.header, borderColor: "rgba(48,94,101,0.10)", borderRadius: 12, borderWidth: 1, flexDirection: "row", gap: 6, justifyContent: "center", minHeight: 36, paddingHorizontal: 10, width: SUMMARY_CONTROL_WIDTH },
-  addExpenseLabel: { color: colors.forest, fontSize: 11, fontWeight: "700" },
-  addExpensePressed: { backgroundColor: "#D2E1E2", transform: [{ scale: 0.98 }] },
+  monthLabel: { color: "rgba(255,255,255,0.95)", flexShrink: 1, fontSize: 11, fontWeight: "600", minWidth: 104, textAlign: "center" },
+  receiveText: { color: "#A8E8BD" },
+  payText: { color: "#FFC0AA" },
+  addExpenseButton: { alignItems: "center", backgroundColor: "#FBFAF4", borderRadius: 17, flexDirection: "row", gap: 9, height: 48, justifyContent: "center", width: "100%" },
+  addExpenseLabel: { color: colors.forest, fontSize: 13, fontWeight: "700" },
+  addExpensePressed: { backgroundColor: "#E6EEE7", transform: [{ scale: 0.98 }] },
 });

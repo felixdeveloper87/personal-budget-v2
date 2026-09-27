@@ -1,47 +1,77 @@
-import Svg, { Circle, Path, Polygon, Rect } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Path, Polygon, Rect, Stop } from "react-native-svg";
 
-/** A small, scalable native illustration used as the Household hero backdrop. */
-export function HouseholdLandscape() {
+/** A warm, layered landscape that fills the mobile Household hero. */
+interface HouseholdLandscapeProps {
+  width: number;
+  height: number;
+}
+
+export function HouseholdLandscape({ width, height }: HouseholdLandscapeProps) {
   return (
-    <Svg
-      height="138"
-      preserveAspectRatio="xMidYMax slice"
-      viewBox="0 0 390 150"
-      width="100%"
-    >
-      <Path d="M0 96 C31 73 63 80 91 99 C119 68 155 76 184 98 C213 73 246 77 277 98 C312 68 350 79 390 99 L390 150 L0 150Z" fill="#C6E4DE" />
-      <Path d="M0 117 C29 96 57 104 86 122 C121 91 151 100 181 121 C214 94 248 105 274 124 C312 91 347 101 390 122 L390 150 L0 150Z" fill="#9CCDB8" />
-      <Path d="M0 132 C34 115 72 118 102 135 C138 112 164 119 197 137 C234 111 269 121 300 138 C334 117 366 122 390 134 L390 150 L0 150Z" fill="#71AE8F" />
+    <Svg height={height} preserveAspectRatio="xMidYMid slice" viewBox="0 0 390 560" width={width}>
+      <Defs>
+        <LinearGradient id="householdSky" x1="0%" y1="0%" x2="20%" y2="100%">
+          <Stop offset="0" stopColor="#59A9D2" />
+          <Stop offset="0.56" stopColor="#B8D9D9" />
+          <Stop offset="1" stopColor="#D4DFBF" />
+        </LinearGradient>
+        <LinearGradient id="householdShade" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0" stopColor="#123E35" stopOpacity="0" />
+          <Stop offset="0.48" stopColor="#123E35" stopOpacity="0.28" />
+          <Stop offset="1" stopColor="#0D3D34" stopOpacity="0.83" />
+        </LinearGradient>
+      </Defs>
 
-      <Path d="M108 28 C116 17 129 18 135 28 C143 27 148 32 148 38 L100 38 C100 32 103 29 108 28Z" fill="#FFFFFF" opacity="0.63" />
-      <Path d="M273 19 C280 10 291 11 297 20 C304 19 309 24 309 29 L267 29 C267 24 269 21 273 19Z" fill="#FFFFFF" opacity="0.58" />
+      <Rect height="560" width="390" fill="url(#householdSky)" />
+      <Circle cx="318" cy="181" fill="#F8D9B3" opacity="0.83" r="39" />
+      <Path d="M207 139c12-21 36-21 48-1 17-2 28 8 28 21h-91c0-10 5-17 15-20Z" fill="#FFF5E6" opacity="0.7" />
+      <Path d="M76 175c9-15 27-15 36 0 12-1 20 6 20 16H65c0-8 4-14 11-16Z" fill="#FFF8EC" opacity="0.64" />
 
-      <Rect fill="#7C9E87" height="57" width="4" x="22" y="75" />
-      <Circle cx="22" cy="73" fill="#4D9874" r="19" />
-      <Circle cx="9" cy="83" fill="#61A57E" r="14" />
-      <Circle cx="34" cy="84" fill="#5BA27A" r="15" />
-      <Path d="M22 91 L22 104 M16 84 L22 91 L27 86" fill="none" stroke="#397756" strokeLinecap="round" strokeWidth="2" />
+      <Path d="M0 251 49 208l42 34 47-64 61 70 56-66 46 57 45-42 44 49v139H0Z" fill="#8CB9B4" />
+      <Path d="m0 277 62-48 54 49 52-45 63 54 51-48 52 45 56-38v111H0Z" fill="#6C9F8D" />
+      <Path d="M0 319c48-39 102-34 148-4 48-45 100-40 150-4 32-23 62-26 92-9v119H0Z" fill="#477E68" />
+      <Path d="M0 355c52-42 109-29 155 2 48-41 102-35 144 0 32-28 59-30 91-12v95H0Z" fill="#75A879" />
+      <Path d="M0 389c44-30 96-28 137 2 49-31 101-24 141 8 38-29 74-25 112-7v73H0Z" fill="#9BB780" />
 
-      <Rect fill="#72957E" height="35" width="3" x="150" y="96" />
-      <Circle cx="151" cy="93" fill="#70B08E" r="13" />
-      <Circle cx="141" cy="98" fill="#83BE9C" r="10" />
-      <Circle cx="160" cy="99" fill="#65A985" r="10" />
+      <Path d="M194 270h151v143H194z" fill="#F5EAD0" />
+      <Path d="M184 279 247 214l110 22 18 43Z" fill="#244A4E" />
+      <Path d="m247 214 110 22 18 43h-72l-28-37-45 37h-46Z" fill="#315C5C" />
+      <Path d="m250 220 13 2 24 55h-16Z" fill="#78989A" opacity="0.76" />
+      <Path d="M312 221v-25h15v28" fill="#294E4F" />
+      <Rect x="208" y="302" width="25" height="25" fill="#D8EAE0" />
+      <Path d="M220.5 302v25m-12.5-12.5h25" stroke="#83AFAA" strokeWidth="3" />
+      <Rect x="276" y="302" width="25" height="25" fill="#D8EAE0" />
+      <Path d="M288.5 302v25M276 314.5h25" stroke="#83AFAA" strokeWidth="3" />
+      <Rect x="255" y="350" width="26" height="63" rx="3" fill="#D98D57" />
+      <Circle cx="274" cy="381" fill="#F4D9A6" r="2.3" />
+      <Path d="M186 414h175" stroke="#D0D2B4" strokeWidth="5" />
+      <Path d="M166 418c42-11 68-12 100-7 35-7 66-5 97 8l-7 22H171Z" fill="#C8C49C" opacity="0.72" />
 
-      <Rect fill="#F8F6EC" height="66" rx="2" width="87" x="226" y="67" />
-      <Polygon fill="#46666A" points="216,72 253,35 320,47 328,72" />
-      <Polygon fill="#38575E" points="253,35 320,47 328,72 275,72" />
-      <Polygon fill="#78949A" points="255,39 266,41 278,70 265,70" />
-      <Rect fill="#D9EBE6" height="14" width="14" x="239" y="79" />
-      <Path d="M246 79 V93 M239 86 H253" stroke="#8DB5AE" strokeWidth="2" />
-      <Rect fill="#D9EBE6" height="14" width="14" x="281" y="79" />
-      <Path d="M288 79 V93 M281 86 H295" stroke="#8DB5AE" strokeWidth="2" />
-      <Rect fill="#D99662" height="31" rx="2" width="15" x="260" y="102" />
-      <Circle cx="271" cy="118" fill="#F4DEAE" r="1.4" />
+      <Path d="M0 236c13-17 32-22 48-8 12-20 36-21 49-2 11-4 23 3 29 17v99H0Z" fill="#43815F" />
+      <Rect x="26" y="217" width="5" height="139" fill="#4D6650" />
+      <Circle cx="25" cy="214" r="29" fill="#3F865F" />
+      <Circle cx="7" cy="234" r="24" fill="#4D9668" />
+      <Circle cx="48" cy="232" r="25" fill="#559B6D" />
+      <Circle cx="69" cy="250" r="22" fill="#498A61" />
+      <Path d="M29 254v37m-12-23 12 14 12-14" fill="none" stroke="#356D50" strokeLinecap="round" strokeWidth="3" />
 
-      <Path d="M0 137 C45 126 78 130 119 140 C160 128 197 131 232 141 C280 128 334 130 390 137 L390 150 L0 150Z" fill="#68A986" />
-      <Path d="M311 102 C326 84 343 82 358 99 C369 87 385 92 390 105 L390 137 C358 132 335 132 306 138Z" fill="#62A77F" />
-      <Circle cx="340" cy="91" fill="#75B68F" r="18" />
-      <Circle cx="369" cy="96" fill="#59A078" r="20" />
+      <Path d="M332 244c14-22 40-22 55-1v130h-81c-13-25-1-55 20-62-13-25-9-48 6-67Z" fill="#508F68" />
+      <Circle cx="340" cy="236" r="31" fill="#72A978" />
+      <Circle cx="373" cy="248" r="29" fill="#4C9268" />
+      <Circle cx="357" cy="277" r="24" fill="#5E9D70" />
+
+      <Path d="M0 428c42-27 86-21 119 9 37-26 74-27 111 0 49-35 100-29 160 4v119H0Z" fill="#437A52" />
+      <Path d="M0 469c56-35 101-20 138 15 47-36 97-31 139 3 34-27 73-32 113-11v84H0Z" fill="#285F45" />
+      <Path d="M0 510c49-23 89-22 130 10 45-29 92-21 129 5 43-31 83-31 131-4v39H0Z" fill="#1B503D" />
+      <Path d="M0 324V0h77C54 48 39 91 48 131c-15 53-26 121-19 193Z" fill="#174D3F" opacity="0.8" />
+      <Path d="M0 0h79C55 33 42 62 37 93 22 71 11 54 0 46Z" fill="#245B42" />
+      <Path d="M0 0c29 4 45 20 55 45M0 26c18 8 30 20 39 38M12 0c9 19 15 34 19 51" fill="none" stroke="#356E4D" strokeLinecap="round" strokeWidth="5" />
+      <Circle cx="9" cy="429" fill="#77955B" r="21" />
+      <Circle cx="38" cy="447" fill="#49794B" r="25" />
+      <Circle cx="353" cy="431" fill="#6B9257" r="26" />
+      <Circle cx="380" cy="455" fill="#386D47" r="24" />
+
+      <Rect height="560" width="390" fill="url(#householdShade)" />
     </Svg>
   );
 }
