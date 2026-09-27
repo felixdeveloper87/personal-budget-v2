@@ -10,11 +10,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Svg, { Circle } from "react-native-svg";
 
 import { CategoryPaceCarousel } from "@/components/dashboard/CategoryPaceCarousel";
 import { DescriptionPaceCarousel } from "@/components/dashboard/DescriptionPaceCarousel";
@@ -83,14 +81,40 @@ function greetingLabel(date: Date) {
   return "Good evening";
 }
 
+function getMetricChange(value: number, previousValue: number | null) {
+  if (previousValue === null) return { label: "Unavailable", direction: 0 };
+
+  const difference = Math.round((value - previousValue) * 100) / 100;
+  if (difference === 0) return { label: "No change", direction: 0 };
+
+  const percentage = previousValue === 0 ? null : Math.abs(difference / previousValue) * 100;
+  const amount = percentage === null
+    ? formatCurrency(Math.abs(difference))
+    : percentage < 0.1
+      ? "<0.1%"
+      : `${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(percentage)}%`;
+
+  return {
+    label: `${amount} ${difference > 0 ? "higher" : "lower"}`,
+    direction: difference > 0 ? 1 : -1,
+  };
+}
+
 interface SummaryMetricProps {
   icon: SymbolName;
   label: string;
   value: number;
+  previousValue?: number | null;
   tone: "income" | "expense" | "net";
 }
 
-function SummaryMetric({ icon, label, value, tone }: SummaryMetricProps) {
+function SummaryMetric({ icon, label, value, previousValue, tone }: SummaryMetricProps) {
+  const change = previousValue === undefined ? null : getMetricChange(value, previousValue);
+  const changeColor = !change || change.direction === 0
+    ? colors.inkSoft
+    : (tone === "income" ? change.direction > 0 : change.direction < 0)
+      ? colors.income
+      : colors.expense;
   const toneStyles = {
     income: {
       card: styles.incomeMetric,
@@ -124,90 +148,76 @@ function SummaryMetric({ icon, label, value, tone }: SummaryMetricProps) {
         >
           {formatCurrency(value)}
         </Text>
+        {change ? (
+          <View style={styles.metricComparison}>
+            <Text style={[styles.metricChange, { color: changeColor }]}>
+              {change.direction > 0 ? "\u2191 " : change.direction < 0 ? "\u2193 " : ""}
+              {change.label}
+            </Text>
+            <Text style={styles.metricComparisonCaption}>vs last month</Text>
+          </View>
+        ) : null}
       </View>
     </View>
   );
 }
 
-interface FlowDonutProps {
+interface IncomeUsageChartProps {
+  elapsedDays: number;
   expense: number;
   income: number;
-  size: number;
 }
 
-function FlowDonut({ expense, income, size }: FlowDonutProps) {
-  const strokeWidth = Math.max(18, Math.round(size * 0.15));
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const total = income + expense;
-  const incomeShare = total > 0 ? income / total : 0;
-  const expenseShare = total > 0 ? expense / total : 0;
-  const expensePercentage = total > 0 ? Math.round(expenseShare * 100) : 0;
+function IncomeUsageChart({ elapsedDays, expense, income }: IncomeUsageChartProps) {
+  const isOverIncome = expense > income;
+  const usage = income > 0 ? expense / income : null;
+  const spentShare = usage === null ? (expense > 0 ? 1 : 0) : Math.min(1, Math.max(0, usage));
+  const remainingShare = income > 0 ? 1 - spentShare : 0;
+  const usageLabel = usage === null ? "No income yet" : "of income spent";
+  const dailyAverage = expense / Math.max(1, elapsedDays);
 
   return (
     <View style={styles.flowCard}>
-      <View style={[styles.donutWrap, { height: size, width: size }]}>
-        <Svg accessibilityLabel="Income versus expense chart" height={size} width={size}>
-          <Circle
-            cx={size / 2}
-            cy={size / 2}
-            fill="none"
-            r={radius}
-            stroke={colors.paperMuted}
-            strokeWidth={strokeWidth}
-          />
-          {total > 0 ? (
-            <>
-              <Circle
-                cx={size / 2}
-                cy={size / 2}
-                fill="none"
-                originX={size / 2}
-                originY={size / 2}
-                r={radius}
-                rotation={-90}
-                stroke="#3E9870"
-                strokeDasharray={`${circumference * incomeShare} ${circumference}`}
-                strokeLinecap="butt"
-                strokeWidth={strokeWidth}
-              />
-              <Circle
-                cx={size / 2}
-                cy={size / 2}
-                fill="none"
-                originX={size / 2}
-                originY={size / 2}
-                r={radius}
-                rotation={-90}
-                stroke="#D05F5B"
-                strokeDasharray={`${circumference * expenseShare} ${circumference}`}
-                strokeDashoffset={-(circumference * incomeShare)}
-                strokeLinecap="butt"
-                strokeWidth={strokeWidth}
-              />
-            </>
-          ) : null}
-        </Svg>
-        <View pointerEvents="none" style={styles.donutCenter}>
-          <Text style={styles.donutPercentage}>{expensePercentage}%</Text>
-          <Text style={styles.donutLabel}>outflow</Text>
-        </View>
+      <Text style={styles.flowTitle}>Income used</Text>
+      <Text
+        adjustsFontSizeToFit
+        numberOfLines={1}
+        style={[styles.usagePercentage, isOverIncome && styles.expenseMetricValue]}
+      >
+        {usage === null ? "\u2014" : `${Math.round(usage * 100)}%`}
+      </Text>
+      <Text style={styles.usageLabel}>{usageLabel}</Text>
+
+      <View
+        accessible
+        accessibilityRole="image"
+        accessibilityLabel={`Income usage: ${formatCurrency(expense)} spent. ${usage === null ? "No income recorded." : `${Math.round(usage * 100)} percent of income spent.`}`}
+        style={styles.usageTrack}
+      >
+        <View style={[styles.spentSegment, { width: `${spentShare * 100}%` }]} />
+        <View style={[styles.remainingSegment, { width: `${remainingShare * 100}%` }]} />
       </View>
 
-      <Text style={styles.flowTitle}>Income vs expense</Text>
       <View style={styles.legend}>
         <View style={styles.legendRow}>
-          <View style={[styles.legendDot, styles.incomeLegendDot]} />
-          <Text style={styles.legendLabel}>Income</Text>
-          <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.legendIncomeValue}>
-            {formatCurrency(income)}
-          </Text>
-        </View>
-        <View style={styles.legendRow}>
           <View style={[styles.legendDot, styles.expenseLegendDot]} />
-          <Text style={styles.legendLabel}>Expense</Text>
+          <Text style={styles.legendLabel}>Spent</Text>
           <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.legendExpenseValue}>
             {formatCurrency(expense)}
+          </Text>
+        </View>
+        <View style={styles.dailyAverageSummary}>
+          <Text style={styles.usageLabel}>Daily average</Text>
+          <Text
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            numberOfLines={1}
+            style={styles.dailyAverageValue}
+          >
+            {formatCurrency(dailyAverage)}
+          </Text>
+          <Text style={styles.dailyAverageCaption}>
+            {elapsedDays} {elapsedDays === 1 ? "day" : "days"} this month
           </Text>
         </View>
       </View>
@@ -256,8 +266,8 @@ function ActionButton({ label, onPress, tone }: ActionButtonProps) {
 export function DashboardScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const { width } = useWindowDimensions();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
+  const [previousSummary, setPreviousSummary] = useState<MonthlySummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -273,12 +283,18 @@ export function DashboardScreen() {
       setError(null);
 
       try {
-        const [nextSummary, nextTransactions, nextInstallmentPlans] = await Promise.all([
+        const previousMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+        const [nextSummary, nextTransactions, nextInstallmentPlans, nextPreviousSummary] = await Promise.all([
           getMonthlySummary(user.token, currentDate),
           listTransactions(user.token),
           listInstallmentPlans(user.token),
+          getMonthlySummary(user.token, previousMonth).catch((comparisonError: unknown) => {
+            if (comparisonError instanceof ApiError && comparisonError.status === 401) throw comparisonError;
+            return null;
+          }),
         ]);
         setSummary(nextSummary);
+        setPreviousSummary(nextPreviousSummary);
         setTransactions(nextTransactions);
         setInstallmentPlans(nextInstallmentPlans);
       } catch (summaryError) {
@@ -330,9 +346,6 @@ export function DashboardScreen() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
-  const columnWidth = (width - 32 - 10) / 2;
-  const donutSize = Math.min(columnWidth - 18, 136);
-  const heroHeight = Math.max(540, Math.min(680, (width - 32) * 1.55));
 
   return (
     <SafeAreaView edges={["top"]} style={styles.safeArea}>
@@ -352,7 +365,7 @@ export function DashboardScreen() {
           style={styles.homeHeader}
         >
           <View pointerEvents="none" style={styles.heroScrim} />
-          <View style={[styles.heroContent, { minHeight: heroHeight }]}>
+          <View style={styles.heroContent}>
             <View style={styles.userRow}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>{initials || "PB"}</Text>
@@ -424,12 +437,14 @@ export function DashboardScreen() {
                     <SummaryMetric
                       icon={actionIcons.income}
                       label="Income"
+                      previousValue={previousSummary?.totalIncome ?? null}
                       tone="income"
                       value={summary.totalIncome}
                     />
                     <SummaryMetric
                       icon={actionIcons.expense}
                       label="Expense"
+                      previousValue={previousSummary?.totalExpense ?? null}
                       tone="expense"
                       value={summary.totalExpense}
                     />
@@ -440,10 +455,10 @@ export function DashboardScreen() {
                       value={summary.balance}
                     />
                   </View>
-                  <FlowDonut
+                  <IncomeUsageChart
+                    elapsedDays={currentDate.getDate()}
                     expense={summary.totalExpense}
                     income={summary.totalIncome}
-                    size={donutSize}
                   />
                 </View>
               ) : null}
@@ -508,7 +523,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   heroContent: {
-    paddingBottom: 28,
+    paddingBottom: 10,
     paddingHorizontal: 16,
     paddingTop: 19,
   },
@@ -565,7 +580,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   monthSubtitle: { color: colors.inkSoft, fontSize: 14, lineHeight: 17, marginTop: -1 },
-  summarySection: { gap: 10, marginTop: "auto", paddingTop: 48 },
+  summarySection: { gap: 10, marginTop: 20 },
   summaryGrid: {
     alignItems: "stretch",
     flexDirection: "row",
@@ -608,6 +623,9 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   incomeMetricValue: { color: colors.income },
+  metricComparison: { marginTop: 4 },
+  metricChange: { fontSize: 10, fontWeight: "700" },
+  metricComparisonCaption: { color: colors.inkSoft, fontSize: 9, marginTop: 1 },
   expenseMetricValue: { color: colors.expense },
   netMetricValue: { color: colors.gold },
   flowCard: {
@@ -623,32 +641,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 9,
   },
-  donutWrap: { alignItems: "center", justifyContent: "center" },
-  donutCenter: {
-    alignItems: "center",
-    bottom: 0,
-    justifyContent: "center",
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: 0,
+  flowTitle: { color: colors.ink, fontSize: 13, fontWeight: "700", alignSelf: "flex-start" },
+  usagePercentage: { color: colors.ink, fontSize: 38, fontWeight: "800", letterSpacing: -1.5, marginTop: 8 },
+  usageLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: "600" },
+  usageTrack: {
+    backgroundColor: "#E4DCCF",
+    borderRadius: 7,
+    flexDirection: "row",
+    height: 14,
+    marginTop: 16,
+    overflow: "hidden",
+    width: "100%",
   },
-  donutPercentage: { color: colors.ink, fontSize: 22, fontWeight: "800", letterSpacing: -0.5 },
-  donutLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: "600", marginTop: 1 },
-  flowTitle: { color: colors.ink, fontSize: 13, fontWeight: "700", marginTop: 10 },
+  spentSegment: { backgroundColor: "#D05F5B", height: "100%" },
+  remainingSegment: { backgroundColor: "#3E9870", height: "100%" },
+  dailyAverageSummary: {
+    borderTopColor: "rgba(36,56,60,0.12)",
+    borderTopWidth: 1,
+    marginTop: 3,
+    paddingTop: 9,
+  },
+  dailyAverageValue: { color: colors.ink, fontSize: 21, fontWeight: "800", marginTop: 2 },
+  dailyAverageCaption: { color: colors.inkSoft, fontSize: 10, marginTop: 2 },
   legend: { gap: 7, marginTop: 11, width: "100%" },
   legendRow: { alignItems: "center", flexDirection: "row", minWidth: 0 },
   legendDot: { borderRadius: 5, height: 10, marginRight: 6, width: 10 },
-  incomeLegendDot: { backgroundColor: "#3E9870" },
   expenseLegendDot: { backgroundColor: "#D05F5B" },
   legendLabel: { color: colors.inkSoft, fontSize: 10, marginRight: 5 },
-  legendIncomeValue: {
-    color: colors.income,
-    flex: 1,
-    fontSize: 11,
-    fontWeight: "800",
-    textAlign: "right",
-  },
   legendExpenseValue: {
     color: colors.expense,
     flex: 1,
