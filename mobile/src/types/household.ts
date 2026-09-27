@@ -22,6 +22,23 @@ export interface HouseholdHeroData {
   monthSummaries: HouseholdMonthSummary[];
   members: Array<{ id: number; name: string }>;
   debts: HouseholdDebt[];
+  expenses: HouseholdExpense[];
+}
+
+export interface HouseholdExpense {
+  id: number;
+  description: string;
+  category: string;
+  amount: number;
+  expenseDate: string;
+  payerMemberId: number;
+  payerName: string;
+}
+
+export interface HouseholdExpenseHistory {
+  expenses: HouseholdExpense[];
+  page: number;
+  hasMore: boolean;
 }
 
 export interface HouseholdPageResponse {

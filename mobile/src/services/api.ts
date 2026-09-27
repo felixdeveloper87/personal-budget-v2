@@ -2,6 +2,7 @@ import type { AuthResponse, AuthUser } from "@/types/auth";
 import type {
   CreateHouseholdExpenseRequest,
   HouseholdExpenseCreatedResponse,
+  HouseholdExpenseHistory,
   HouseholdPageResponse,
 } from "@/types/household";
 import type {
@@ -119,6 +120,14 @@ export async function listAccounts(token: string): Promise<FinancialAccount[]> {
 
 export async function getHouseholdPage(token: string): Promise<HouseholdPageResponse> {
   return request<HouseholdPageResponse>("/households/current", { token });
+}
+
+export async function getHouseholdExpenseHistory(
+  token: string,
+  householdId: number,
+  page = 0,
+): Promise<HouseholdExpenseHistory> {
+  return request<HouseholdExpenseHistory>(`/households/${householdId}/expenses?page=${page}`, { token });
 }
 
 export async function createHouseholdExpense(

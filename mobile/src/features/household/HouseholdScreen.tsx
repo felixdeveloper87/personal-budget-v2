@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { HouseholdHero } from "@/features/household/HouseholdHero";
 import { HouseholdExpenseSheet } from "@/features/household/HouseholdExpenseSheet";
+import { HouseholdRecentActivity } from "@/features/household/HouseholdRecentActivity";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, getHouseholdPage } from "@/services/api";
 import { colors } from "@/theme/colors";
@@ -93,6 +94,7 @@ export function HouseholdScreen() {
               onAddExpense={() => setExpenseSheetVisible(true)}
               selectedMonth={selectedMonth}
             />
+            <HouseholdRecentActivity key={page.household.id} household={page.household} />
           </>
         ) : (
           <View style={styles.emptyState}>

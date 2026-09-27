@@ -1,12 +1,14 @@
 package com.example.budget.service;
 
 import com.example.budget.dto.HouseholdPageDTO;
+import com.example.budget.dto.HouseholdExpenseHistoryDTO;
 import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.*;
 import com.example.budget.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -71,6 +73,27 @@ public class HouseholdService {
             return new HouseholdPageDTO(null, invitations);
         }
         return new HouseholdPageDTO(buildDashboard(current.get()), invitations);
+    }
+
+    @Transactional(readOnly = true)
+    public HouseholdExpenseHistoryDTO expenseHistory(Long householdId, int page, User user) {
+        HouseholdMember member = requireMember(householdId, user);
+        if (page < 0) {
+            throw new IllegalArgumentException("Page must not be negative");
+        }
+        var expenses = expenseRepository.findByHouseholdAndVoidedAtIsNullOrderByExpenseDateDescIdDesc(
+                member.getHousehold(), PageRequest.of(page, 50));
+        var items = expenses.getContent().stream()
+                .map(expense -> new HouseholdExpenseHistoryDTO.Item(
+                        expense.getId(),
+                        expense.getDescription(),
+                        expense.getCategory(),
+                        amount(expense.getAmount()),
+                        expense.getExpenseDate(),
+                        expense.getPayer().getId(),
+                        expense.getPayer().getDisplayName()))
+                .toList();
+        return new HouseholdExpenseHistoryDTO(items, page, expenses.hasNext());
     }
 
     @Transactional

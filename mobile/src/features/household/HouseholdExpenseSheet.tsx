@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -17,8 +18,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 import { useAuth } from "@/contexts/AuthContext";
+import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
+import { HouseholdLandscape } from "@/features/household/HouseholdLandscape";
 import { ApiError, createHouseholdExpense, uploadHouseholdExpenseAttachments } from "@/services/api";
 import { colors } from "@/theme/colors";
 import type { HouseholdHeroData, HouseholdPageResponse } from "@/types/household";
@@ -32,24 +36,11 @@ const icons = {
   check: { ios: "checkmark", android: "check", web: "check" },
   attachment: { ios: "paperclip", android: "attach_file", web: "attach_file" },
   remove: { ios: "xmark.circle.fill", android: "cancel", web: "cancel" },
+  people: { ios: "person.2", android: "group", web: "group" },
 } satisfies Record<string, SymbolName>;
 
 const MAX_ATTACHMENTS = 5;
 const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
-
-const categories = [
-  { value: "Groceries", label: "Mercado", defaultDescription: null, detailPlaceholder: "Ex.: compras da semana" },
-  { value: "Electricity", label: "Luz", defaultDescription: "Conta de luz", detailPlaceholder: null },
-  { value: "Water", label: "Água", defaultDescription: "Conta de água", detailPlaceholder: null },
-  { value: "Gas", label: "Gás", defaultDescription: "Conta de gás", detailPlaceholder: null },
-  { value: "Internet", label: "Internet", defaultDescription: "Conta de internet", detailPlaceholder: null },
-  { value: "Cleaning", label: "Limpeza", defaultDescription: null, detailPlaceholder: "Ex.: faxina ou produtos de limpeza" },
-  { value: "Rent", label: "Aluguel", defaultDescription: "Aluguel", detailPlaceholder: null },
-  { value: "Council tax", label: "Imposto da casa", defaultDescription: "Imposto da casa", detailPlaceholder: null },
-  { value: "Repairs", label: "Reparos", defaultDescription: null, detailPlaceholder: "Ex.: conserto da torneira" },
-  { value: "Garden", label: "Jardim", defaultDescription: null, detailPlaceholder: "Ex.: corte da grama" },
-  { value: "Other", label: "Outro", defaultDescription: null, detailPlaceholder: "Ex.: o que foi comprado ou feito?" },
-] as const;
 
 function currencyMark(currency: string) {
   const marks: Record<string, string> = {
@@ -66,16 +57,6 @@ function formatCurrency(value: number, currency: string) {
     style: "currency",
     currency: currency || "GBP",
   }).format(value);
-}
-
-function dateLabel(isoDate: string | null) {
-  if (!isoDate) return "Escolha a data da despesa";
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(year, month - 1, day));
 }
 
 function parseBrazilianDate(input: string) {
@@ -163,6 +144,7 @@ export function HouseholdExpenseSheet({
     !saving;
   const canSplit = household.members.length >= 2;
   const perPerson = selectedCount > 0 ? parsedAmount / selectedCount : 0;
+  const formLocked = saving || createdExpenseId !== null;
 
   const toggleParticipant = (memberId: number) => {
     if (memberId === household.currentMemberId) return;
@@ -229,7 +211,7 @@ export function HouseholdExpenseSheet({
   };
 
   const submit = async () => {
-    if (!user || (!canSubmit && createdExpenseId === null)) return;
+    if (saving || !user || (!canSubmit && createdExpenseId === null)) return;
     let expenseWasCreated = createdExpenseId !== null;
     setSaving(true);
     setError(null);
@@ -273,7 +255,7 @@ export function HouseholdExpenseSheet({
   return (
     <Modal
       animationType="slide"
-      onRequestClose={onClose}
+      onRequestClose={() => { if (!saving) onClose(); }}
       statusBarTranslucent
       transparent
       visible={visible}
@@ -282,26 +264,48 @@ export function HouseholdExpenseSheet({
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={styles.overlay}
       >
-        <Pressable accessibilityRole="button" onPress={onClose} style={styles.backdrop} />
+        <Pressable accessibilityLabel="Fechar despesa" accessibilityRole="button" disabled={saving} onPress={onClose} style={styles.backdrop} />
         <SafeAreaView edges={["bottom"]} style={styles.sheet}>
-          <View style={styles.handle} />
-          <View style={styles.modalHeader}>
-            <View style={styles.titleIcon}>
-              <SymbolView name={icons.expense} size={20} tintColor={colors.forest} weight="semibold" />
-            </View>
-            <View style={styles.titleCopy}>
-              <Text style={styles.title}>Adicionar despesa</Text>
-              <Text style={styles.dateLabel}>{dateLabel(parsedExpenseDate)}</Text>
-            </View>
-            <Pressable
-              accessibilityLabel="Fechar"
-              accessibilityRole="button"
-              hitSlop={10}
-              onPress={onClose}
-              style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
+          <View style={styles.headerBanner}>
+            <View
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              pointerEvents="none"
+              style={styles.headerArt}
             >
-              <SymbolView name={icons.close} size={18} tintColor={colors.ink} weight="semibold" />
-            </Pressable>
+              <HouseholdLandscape height={170} width={190} />
+              <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
+                <Defs>
+                  <LinearGradient id="expenseHeaderFade" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <Stop offset="0" stopColor="#EDF2E5" stopOpacity="1" />
+                    <Stop offset="0.55" stopColor="#EDF2E5" stopOpacity="0.78" />
+                    <Stop offset="1" stopColor="#EDF2E5" stopOpacity="0.22" />
+                  </LinearGradient>
+                </Defs>
+                <Rect fill="url(#expenseHeaderFade)" height="100%" width="100%" />
+              </Svg>
+            </View>
+            <View style={styles.handle} />
+            <View style={styles.modalHeader}>
+              <View style={styles.titleIcon}>
+                <SymbolView name={icons.expense} size={20} tintColor={colors.forest} weight="semibold" />
+              </View>
+              <View style={styles.titleCopy}>
+                <Text numberOfLines={1} style={styles.householdLabel}>{household.name}</Text>
+                <Text style={styles.title}>Adicionar despesa</Text>
+                <Text style={styles.headerHint}>As contas da casa, juntas.</Text>
+              </View>
+              <Pressable
+                accessibilityLabel="Fechar"
+                accessibilityRole="button"
+                hitSlop={10}
+                disabled={saving}
+                onPress={onClose}
+                style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
+              >
+                <SymbolView name={icons.close} size={18} tintColor={colors.ink} weight="semibold" />
+              </Pressable>
+            </View>
           </View>
 
           <ScrollView
@@ -312,49 +316,69 @@ export function HouseholdExpenseSheet({
           >
             <View style={styles.amountDateRow}>
               <View style={styles.amountColumn}>
-                <Text style={styles.fieldLabel}>VALOR</Text>
+                <Text style={styles.amountLabel}>Valor total da despesa</Text>
                 <View style={styles.amountField}>
                   <Text style={styles.currencyMark}>{currencyMark(household.currency)}</Text>
                   <TextInput
                     accessibilityLabel="Valor da despesa"
+                    editable={!formLocked}
                     keyboardType="decimal-pad"
                     onChangeText={(value) => setAmount(value.replace(/[^0-9.,]/g, ""))}
                     placeholder="0,00"
                     placeholderTextColor={colors.inkFaint}
                     selectionColor={colors.forest}
-                    style={styles.amountInput}
+                    style={[styles.amountInput, { width: Math.max(92, (amount || "0,00").length * 23) }]}
                     value={amount}
                   />
+                  <View style={styles.amountHintRow}>
+                    <SymbolView name={icons.people} size={14} tintColor={colors.income} />
+                    <Text numberOfLines={1} style={styles.amountHint}>
+                      {selectedCount >= 2 ? `Dividido por ${selectedCount} pessoas` : "Selecione quem vai dividir"}
+                    </Text>
+                  </View>
                 </View>
               </View>
               <View style={styles.dateColumn}>
-                <Text style={styles.fieldLabel}>QUANDO FOI?</Text>
-                {Platform.OS === "ios" ? (
-                  <View style={[styles.textField, styles.dateField]}>
-                    <DateTimePicker
-                      accentColor={colors.forest}
-                      disabled={createdExpenseId !== null}
-                      display="compact"
-                      locale="pt_BR"
-                      mode="date"
-                      onValueChange={(_event, date) => updateExpenseDate(date)}
-                      style={styles.nativeDatePicker}
-                      value={datePickerValue}
-                    />
-                  </View>
-                ) : Platform.OS === "android" ? (
+                <Text style={styles.fieldLabel}>Data da despesa</Text>
+                {Platform.OS === "ios" || Platform.OS === "android" ? (
                   <>
                     <Pressable
                       accessibilityLabel={`Data da despesa: ${dateInput}`}
                       accessibilityRole="button"
-                      disabled={createdExpenseId !== null}
-                      onPress={() => setDatePickerVisible(true)}
+                      accessibilityState={{ disabled: formLocked, expanded: datePickerVisible }}
+                      disabled={formLocked}
+                      onPress={() => {
+                        Keyboard.dismiss();
+                        setDatePickerVisible((current) => !current);
+                      }}
                       style={[styles.textField, styles.dateField, styles.dateTrigger]}
                     >
                       <Text style={styles.dateTriggerText}>{dateInput}</Text>
                       <SymbolView name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }} size={17} tintColor={colors.forest} weight="semibold" />
                     </Pressable>
-                    {datePickerVisible ? (
+                    {datePickerVisible && Platform.OS === "ios" ? (
+                      <View style={styles.iosCalendar}>
+                        <DateTimePicker
+                          accentColor={colors.income}
+                          disabled={formLocked}
+                          display="inline"
+                          locale="pt_BR"
+                          mode="date"
+                          onValueChange={(_event, date) => updateExpenseDate(date)}
+                          style={styles.iosDatePicker}
+                          themeVariant="light"
+                          value={datePickerValue}
+                        />
+                        <Pressable
+                          accessibilityLabel={"Fechar calend\u00e1rio"}
+                          accessibilityRole="button"
+                          onPress={() => setDatePickerVisible(false)}
+                          style={styles.calendarCloseButton}
+                        >
+                          <Text style={styles.calendarCloseText}>Fechar</Text>
+                        </Pressable>
+                      </View>
+                    ) : datePickerVisible ? (
                       <DateTimePicker
                         style={styles.nativeDatePicker}
                         mode="date"
@@ -370,7 +394,7 @@ export function HouseholdExpenseSheet({
                 ) : (
                   <TextInput
                     accessibilityLabel="Data da despesa"
-                    editable={createdExpenseId === null}
+                    editable={!formLocked}
                     keyboardType="number-pad"
                     maxLength={10}
                     onChangeText={(value) => setDateInput(formatDateInput(value))}
@@ -386,142 +410,181 @@ export function HouseholdExpenseSheet({
               <Text style={styles.dateError}>Confira o dia, mês e ano.</Text>
             ) : null}
 
-            <Text style={styles.fieldLabel}>CATEGORIA</Text>
-            <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}>
-              {categories.map((item) => {
-                const selected = category === item.value;
-                return (
-                  <Pressable
-                    key={item.value}
-                    accessibilityRole="button"
-                    accessibilityState={{ selected }}
-                    onPress={() => {
-                      if (category !== item.value) setDescription("");
-                      setCategory(item.value);
-                    }}
-                    style={[styles.categoryChip, selected && styles.categoryChipSelected]}
-                  >
-                    <Text style={[styles.categoryText, selected && styles.categoryTextSelected]}>{item.label}</Text>
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            {selectedCategory.detailPlaceholder ? (
-              <View>
-                <Text style={styles.fieldLabel}>O QUE FOI?</Text>
-                <TextInput
-                  accessibilityLabel={`Detalhe de ${selectedCategory.label.toLowerCase()}`}
-                  autoCapitalize="sentences"
-                  maxLength={120}
-                  onChangeText={setDescription}
-                  placeholder={selectedCategory.detailPlaceholder}
-                  placeholderTextColor={colors.inkFaint}
-                  returnKeyType="done"
-                  style={styles.textField}
-                  value={description}
-                />
-              </View>
-            ) : (
-              <View style={styles.autoDescription}>
-                <SymbolView name={icons.check} size={15} tintColor={colors.forest} weight="bold" />
-                <Text style={styles.autoDescriptionCopy}>
-                  Vamos registrar como <Text style={styles.autoDescriptionName}>{selectedCategory.defaultDescription}</Text>
-                </Text>
-              </View>
-            )}
-
-            <View style={styles.splitHeading}>
-              <View>
-                <Text style={styles.fieldLabel}>DIVIDIR COM</Text>
-                <Text style={styles.splitHint}>Todo mundo começa marcado.</Text>
-              </View>
-              <Text style={styles.selectedCount}>{selectedCount}/{household.members.length}</Text>
-            </View>
-
-            <View style={styles.memberList}>
-              {household.members.map((member) => {
-                const selected = participants.includes(member.id);
-                const payer = member.id === household.currentMemberId;
-                return (
-                  <Pressable
-                    key={member.id}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: selected, disabled: payer }}
-                    disabled={payer}
-                    onPress={() => toggleParticipant(member.id)}
-                    style={styles.memberRow}
-                  >
-                    <View style={[styles.memberAvatar, selected && styles.memberAvatarSelected]}>
-                      <Text style={[styles.memberInitial, selected && styles.memberInitialSelected]}>
-                        {member.name.trim().charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <Text numberOfLines={1} style={styles.memberName}>
-                      {payer ? "Você" : member.name}
-                      {payer ? " · pagou" : ""}
-                    </Text>
-                    <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
-                      {selected ? <SymbolView name={icons.check} size={12} tintColor={colors.white} weight="bold" /> : null}
-                    </View>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {selectedCount > 0 && parsedAmount > 0 ? (
-              <View style={styles.splitPreview}>
-                <Text style={styles.splitPreviewLabel}>Fica mais ou menos</Text>
-                <Text style={styles.splitPreviewAmount}>{formatCurrency(perPerson, household.currency)} por pessoa</Text>
-                <Text style={styles.roundingHint}>Os centavos são ajustados ao salvar.</Text>
-              </View>
-            ) : null}
-
-            <View style={styles.attachmentHeading}>
-              <View style={styles.attachmentCopy}>
-                <Text style={styles.fieldLabel}>COMPROVANTE</Text>
-                <Text style={styles.attachmentHint}>JPG, PNG ou WebP · até 5 MB cada</Text>
-              </View>
-              <Text style={styles.selectedCount}>{attachments.length}/{MAX_ATTACHMENTS}</Text>
-            </View>
-            {attachments.length > 0 ? (
-              <ScrollView contentContainerStyle={styles.attachmentList} horizontal showsHorizontalScrollIndicator={false}>
-                {attachments.map((asset, index) => (
-                  <View key={`${asset.uri}-${index}`} style={styles.attachmentPreview}>
-                    <Image source={{ uri: asset.uri }} style={styles.attachmentImage} />
+            <View style={styles.formCard}>
+              <Text style={styles.sectionTitle}>Sobre a despesa</Text>
+              <Text style={styles.sectionHint}>Escolha a categoria que combina com ela.</Text>
+              <View style={styles.chipRow}>
+                {categories.map((item) => {
+                  const selected = category === item.value;
+                  const tone = categoryPalette[categoryTones[item.value]];
+                  return (
                     <Pressable
-                      accessibilityLabel="Remover comprovante"
+                      key={item.value}
                       accessibilityRole="button"
-                      disabled={createdExpenseId !== null}
-                      onPress={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}
-                      style={styles.removeAttachment}
+                      accessibilityState={{ selected, disabled: formLocked }}
+                      disabled={formLocked}
+                      onPress={() => {
+                        if (category !== item.value) setDescription("");
+                        setCategory(item.value);
+                      }}
+                      style={({ pressed }) => [
+                        styles.categoryChip,
+                        selected && styles.categoryChipSelected,
+                        pressed && styles.categoryChipPressed,
+                      ]}
                     >
-                      <SymbolView name={icons.remove} size={20} tintColor={colors.ink} weight="semibold" />
+                      <View style={[
+                        styles.categoryIcon,
+                        { backgroundColor: tone.background },
+                        selected && styles.categoryIconSelected,
+                      ]}>
+                        <SymbolView name={categoryIcons[item.value]} size={16} tintColor={selected ? colors.white : tone.ink} weight="medium" />
+                      </View>
+                      <Text style={[styles.categoryText, selected && styles.categoryTextSelected]}>{item.label}</Text>
+                      {selected ? (
+                        <View style={styles.categoryCheck}>
+                          <SymbolView name={icons.check} size={9} tintColor={colors.income} weight="bold" />
+                        </View>
+                      ) : null}
                     </Pressable>
+                  );
+                })}
+              </View>
+
+              {selectedCategory.detailPlaceholder ? (
+                <View>
+                  <Text style={styles.fieldLabel}>O que foi?</Text>
+                  <TextInput
+                    accessibilityLabel={`Detalhe de ${selectedCategory.label.toLowerCase()}`}
+                    autoCapitalize="sentences"
+                    editable={!formLocked}
+                    maxLength={120}
+                    onChangeText={setDescription}
+                    placeholder={selectedCategory.detailPlaceholder}
+                    placeholderTextColor={colors.inkFaint}
+                    returnKeyType="done"
+                    style={styles.textField}
+                    value={description}
+                  />
+                </View>
+              ) : (
+                <View style={styles.autoDescription}>
+                  <SymbolView name={icons.check} size={15} tintColor={colors.forest} weight="bold" />
+                  <Text style={styles.autoDescriptionCopy}>
+                    Vamos registrar como <Text style={styles.autoDescriptionName}>{selectedCategory.defaultDescription}</Text>
+                  </Text>
+                </View>
+              )}
+            </View>
+
+            <View style={styles.formCard}>
+              <View style={styles.splitHeading}>
+                <View>
+                  <Text style={styles.sectionTitle}>Quem vai dividir?</Text>
+                  <Text style={styles.splitHint}>Selecione os participantes.</Text>
+                </View>
+                <Text style={styles.selectedCount}>{selectedCount}/{household.members.length}</Text>
+              </View>
+
+              <View style={styles.memberList}>
+                {household.members.map((member) => {
+                  const selected = participants.includes(member.id);
+                  const payer = member.id === household.currentMemberId;
+                  return (
+                    <Pressable
+                      key={member.id}
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={`${member.name}${payer ? ", voc\u00ea pagou" : ""}`}
+                      accessibilityState={{ checked: selected, disabled: payer || formLocked }}
+                      disabled={payer || formLocked}
+                      onPress={() => toggleParticipant(member.id)}
+                      style={[styles.memberRow, selected && styles.memberRowSelected]}
+                    >
+                      <View style={[styles.memberAvatar, selected && styles.memberAvatarSelected]}>
+                        <Text style={[styles.memberInitial, selected && styles.memberInitialSelected]}>
+                          {member.name.trim().charAt(0).toUpperCase()}
+                        </Text>
+                      </View>
+                      <Text numberOfLines={1} style={styles.memberName}>
+                        {payer ? "Você" : member.name}
+                        {payer ? " · pagou" : ""}
+                      </Text>
+                      <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
+                        {selected ? <SymbolView name={icons.check} size={12} tintColor={colors.white} weight="bold" /> : null}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {selectedCount >= 2 && parsedAmount > 0 ? (
+                <View style={styles.splitPreview}>
+                  <View style={styles.splitPreviewHeading}>
+                    <SymbolView name={icons.people} size={17} tintColor={colors.income} />
+                    <Text style={styles.splitPreviewLabel}>Por pessoa, aproximadamente</Text>
                   </View>
-                ))}
-              </ScrollView>
-            ) : null}
-            {createdExpenseId === null && attachments.length < MAX_ATTACHMENTS ? (
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => void chooseAttachments()}
-                style={({ pressed }) => [styles.attachmentButton, pressed && styles.pressed]}
-              >
-                <SymbolView name={icons.attachment} size={17} tintColor={colors.forest} weight="semibold" />
-                <Text style={styles.attachmentButtonText}>{attachments.length ? "Adicionar mais fotos" : "Adicionar foto do comprovante"}</Text>
-                <SymbolView name={icons.plus} size={16} tintColor={colors.forest} weight="semibold" />
-              </Pressable>
-            ) : null}
+                  <Text style={styles.splitPreviewAmount}>{formatCurrency(perPerson, household.currency)}</Text>
+                  <Text style={styles.roundingHint}>Os centavos são ajustados ao salvar.</Text>
+                </View>
+              ) : null}
+            </View>
+
+            <View style={styles.formCard}>
+              <View style={styles.attachmentHeading}>
+                <View style={styles.attachmentCopy}>
+                  <Text style={styles.sectionTitle}>Comprovante <Text style={styles.optionalLabel}>opcional</Text></Text>
+                  <Text style={styles.attachmentHint}>JPG, PNG ou WebP · até 5 MB cada</Text>
+                </View>
+                <Text style={styles.selectedCount}>{attachments.length}/{MAX_ATTACHMENTS}</Text>
+              </View>
+              {attachments.length > 0 ? (
+                <ScrollView contentContainerStyle={styles.attachmentList} horizontal showsHorizontalScrollIndicator={false}>
+                  {attachments.map((asset, index) => (
+                    <View key={`${asset.uri}-${index}`} style={styles.attachmentPreview}>
+                      <Image source={{ uri: asset.uri }} style={styles.attachmentImage} />
+                      <Pressable
+                        accessibilityLabel="Remover comprovante"
+                        accessibilityRole="button"
+                        disabled={formLocked}
+                        hitSlop={8}
+                        onPress={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                        style={styles.removeAttachment}
+                      >
+                        <SymbolView name={icons.remove} size={20} tintColor={colors.ink} weight="semibold" />
+                      </Pressable>
+                    </View>
+                  ))}
+                </ScrollView>
+              ) : null}
+              {createdExpenseId === null && attachments.length < MAX_ATTACHMENTS ? (
+                <Pressable
+                  accessibilityRole="button"
+                  disabled={formLocked}
+                  onPress={() => void chooseAttachments()}
+                  style={({ pressed }) => [styles.attachmentButton, pressed && styles.pressed]}
+                >
+                  <SymbolView name={icons.attachment} size={17} tintColor={colors.forest} weight="semibold" />
+                  <Text style={styles.attachmentButtonText}>{attachments.length ? "Adicionar mais fotos" : "Adicionar foto do comprovante"}</Text>
+                  <SymbolView name={icons.plus} size={16} tintColor={colors.forest} weight="semibold" />
+                </Pressable>
+              ) : null}
+            </View>
 
             {!canSplit ? <Text style={styles.errorText}>Adicione mais alguém à casa para dividir uma despesa.</Text> : null}
             {selectedCount < 2 && canSplit ? <Text style={styles.errorText}>Selecione pelo menos mais uma pessoa.</Text> : null}
           </ScrollView>
           <View style={styles.sheetFooter}>
             {error ? <Text style={styles.footerError}>{error}</Text> : null}
+            <View style={styles.footerSummary}>
+              <Text style={styles.footerSummaryLabel}>Total da despesa</Text>
+              <Text adjustsFontSizeToFit numberOfLines={1} style={styles.footerSummaryAmount}>
+                {formatCurrency(parsedAmount, household.currency)}
+              </Text>
+            </View>
             <Pressable
               accessibilityRole="button"
-              disabled={!canSubmit && createdExpenseId === null}
+              accessibilityState={{ busy: saving }}
+              disabled={saving || (!canSubmit && createdExpenseId === null)}
               onPress={() => void submit()}
               style={({ pressed }) => [styles.saveButton, !canSubmit && createdExpenseId === null && styles.saveButtonDisabled, pressed && (canSubmit || createdExpenseId !== null) && styles.pressed]}
             >
@@ -553,71 +616,94 @@ export function HouseholdExpenseSheet({
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
-  backdrop: { backgroundColor: "rgba(17, 31, 34, 0.46)", bottom: 0, left: 0, position: "absolute", right: 0, top: 0 },
-  sheet: { backgroundColor: colors.paper, borderTopLeftRadius: 28, borderTopRightRadius: 28, height: "78%", maxHeight: "78%", overflow: "hidden" },
-  handle: { alignSelf: "center", backgroundColor: colors.line, borderRadius: 2, height: 4, marginTop: 10, width: 38 },
-  modalHeader: { alignItems: "center", borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", paddingHorizontal: 20, paddingVertical: 15 },
-  titleIcon: { alignItems: "center", backgroundColor: colors.header, borderRadius: 14, height: 42, justifyContent: "center", marginRight: 12, width: 42 },
-  titleCopy: { flex: 1 },
-  title: { color: colors.ink, fontSize: 19, fontWeight: "800", letterSpacing: -0.3 },
-  dateLabel: { color: colors.inkSoft, fontSize: 12, marginTop: 3 },
-  closeButton: { alignItems: "center", backgroundColor: colors.paperMuted, borderRadius: 17, height: 34, justifyContent: "center", width: 34 },
+  backdrop: { backgroundColor: "rgba(19, 36, 28, 0.48)", ...StyleSheet.absoluteFill },
+  sheet: { alignSelf: "center", backgroundColor: "#F6F5EF", borderTopLeftRadius: 32, borderTopRightRadius: 32, height: "90%", maxHeight: "90%", maxWidth: 640, overflow: "hidden", width: "100%" },
+  headerBanner: { backgroundColor: "#EDF2E5", borderBottomColor: "#DFE7D6", borderBottomWidth: 1, marginBottom: 14, overflow: "hidden" },
+  headerArt: { bottom: 0, position: "absolute", right: 0, top: 0, width: 190 },
+  handle: { alignSelf: "center", backgroundColor: "#C6D1C1", borderRadius: 3, height: 5, marginTop: 10, width: 36 },
+  modalHeader: { alignItems: "center", flexDirection: "row", paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20 },
+  titleIcon: { alignItems: "center", backgroundColor: "#E3ECD9", borderColor: "#D4DFC9", borderWidth: 1, borderRadius: 17, height: 48, justifyContent: "center", marginRight: 12, width: 48 },
+  titleCopy: { flex: 1, minWidth: 0 },
+  householdLabel: { color: "#60735A", fontSize: 10, fontWeight: "700", letterSpacing: 0.8, marginBottom: 3 },
+  title: { color: colors.ink, fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
+  headerHint: { color: colors.inkSoft, fontSize: 11, marginTop: 4 },
+  closeButton: { alignItems: "center", backgroundColor: "#EAEDE4", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 6, width: 44 },
   formScroll: { flex: 1 },
-  form: { paddingHorizontal: 20, paddingTop: 2, paddingBottom: 22 },
-  sheetFooter: { backgroundColor: colors.paper, borderTopColor: colors.line, borderTopWidth: StyleSheet.hairlineWidth, paddingHorizontal: 20, paddingTop: 10, paddingBottom: 4 },
+  form: { gap: 14, paddingHorizontal: 16, paddingBottom: 22 },
+  formCard: { backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderRadius: 22, borderWidth: 1, padding: 16 },
+  sectionTitle: { color: colors.ink, fontSize: 15, fontWeight: "700", letterSpacing: -0.2 },
+  sectionHint: { color: colors.inkSoft, fontSize: 11, lineHeight: 16, marginTop: 4 },
+  sheetFooter: { backgroundColor: "#F6F5EF", borderTopColor: "#E0E5D9", borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+  footerSummary: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between", marginBottom: 10 },
+  footerSummaryLabel: { color: colors.inkSoft, fontSize: 12 },
+  footerSummaryAmount: { color: colors.ink, flexShrink: 1, fontSize: 17, fontWeight: "800" },
   footerError: { color: colors.danger, fontSize: 11, fontWeight: "600", lineHeight: 15, marginBottom: 7 },
-  amountDateRow: { alignItems: "stretch", flexDirection: "row", gap: 10 },
-  amountColumn: { flex: 1, minWidth: 0 },
-  dateColumn: { flex: 1, minWidth: 0 },
-  fieldLabel: { color: colors.inkSoft, fontSize: 10, fontWeight: "800", letterSpacing: 1.2, marginBottom: 7, marginTop: 16 },
-  amountField: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, flexDirection: "row", height: 56, paddingHorizontal: 11 },
-  currencyMark: { color: colors.forest, fontSize: 20, fontWeight: "800", marginRight: 6 },
-  amountInput: { color: colors.ink, flex: 1, fontSize: 24, fontWeight: "800", minHeight: 54, paddingVertical: 8 },
-  textField: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, color: colors.ink, fontSize: 14, minHeight: 48, paddingHorizontal: 14, paddingVertical: 10 },
-  dateField: { fontSize: 13, height: 56, paddingHorizontal: 9 },
+  amountDateRow: { backgroundColor: "#E8EFDF", borderColor: "#D8E2CE", borderRadius: 24, borderWidth: 1, padding: 18 },
+  amountColumn: { minWidth: 0 },
+  amountLabel: { color: "#52664B", fontSize: 12, fontWeight: "600" },
+  amountHintRow: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 4, marginLeft: 4 },
+  amountHint: { color: "#52664B", fontSize: 11, lineHeight: 16 },
+  dateColumn: { borderTopColor: "#D2DDC8", borderTopWidth: 1, marginTop: 16, minWidth: 0 },
+  fieldLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "600", marginBottom: 8, marginTop: 14 },
+  amountField: { alignItems: "center", flexDirection: "row", minHeight: 68 },
+  currencyMark: { color: "#55764F", fontSize: 28, fontWeight: "600", marginRight: 8 },
+  amountInput: { color: "#284D3C", flexShrink: 1, fontSize: 42, fontWeight: "800", letterSpacing: -1.5, minHeight: 64, minWidth: 0, paddingHorizontal: 0, paddingVertical: 4 },
+  textField: { backgroundColor: "#F8F9F3", borderColor: "#DCE3D5", borderRadius: 14, borderWidth: 1, color: colors.ink, fontSize: 14, minHeight: 50, paddingHorizontal: 14, paddingVertical: 12 },
+  dateField: { backgroundColor: "#F6F9F0", fontSize: 13, minHeight: 50, paddingHorizontal: 12, paddingVertical: 0 },
   dateTrigger: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   dateTriggerText: { color: colors.ink, fontSize: 13, fontWeight: "600" },
-  nativeDatePicker: { height: 54, width: "100%" },
+  nativeDatePicker: { height: 50, width: "100%" },
+  iosCalendar: { backgroundColor: "#F6F9F0", borderColor: "#DCE3D5", borderRadius: 16, borderWidth: 1, marginTop: 10, overflow: "hidden" },
+  iosDatePicker: { minHeight: 320, width: "100%" },
+  calendarCloseButton: { alignItems: "center", borderTopColor: "#DCE3D5", borderTopWidth: StyleSheet.hairlineWidth, justifyContent: "center", minHeight: 44 },
+  calendarCloseText: { color: colors.income, fontSize: 12, fontWeight: "700" },
   invalidField: { borderColor: colors.danger },
-  dateError: { color: colors.danger, fontSize: 11, marginTop: 5 },
-  chipRow: { gap: 7, paddingRight: 3 },
-  categoryChip: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 16, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  categoryChipSelected: { backgroundColor: colors.incomeTint, borderColor: colors.income },
+  dateError: { color: colors.danger, fontSize: 11 },
+  chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
+  categoryChip: { alignItems: "center", backgroundColor: "#FAFBF6", borderColor: "#E4E8DC", borderRadius: 16, borderWidth: 1, flexDirection: "row", gap: 7, minHeight: 48, paddingLeft: 7, paddingRight: 15, paddingVertical: 8 },
+  categoryChipSelected: { backgroundColor: "#E8F0DF", borderColor: "#8FA87B" },
+  categoryChipPressed: { opacity: 0.85, transform: [{ scale: 0.97 }] },
+  categoryIcon: { alignItems: "center", borderRadius: 10, height: 28, justifyContent: "center", width: 28 },
+  categoryIconSelected: { backgroundColor: "#638253" },
+  categoryCheck: { position: "absolute", right: 4, top: 4 },
   categoryText: { color: colors.inkSoft, fontSize: 11, fontWeight: "600" },
   categoryTextSelected: { color: colors.income, fontWeight: "800" },
-  autoDescription: { alignItems: "center", backgroundColor: colors.header, borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 16, paddingHorizontal: 12, paddingVertical: 11 },
+  autoDescription: { alignItems: "center", backgroundColor: "#EFF3E8", borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 16, paddingHorizontal: 12, paddingVertical: 11 },
   autoDescriptionCopy: { color: colors.inkSoft, flex: 1, fontSize: 12, lineHeight: 17 },
-  autoDescriptionName: { color: colors.ink, fontWeight: "800" },
-  splitHeading: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  splitHint: { color: colors.inkFaint, fontSize: 11, marginTop: -3 },
-  selectedCount: { backgroundColor: colors.header, borderRadius: 10, color: colors.forest, fontSize: 11, fontWeight: "800", overflow: "hidden", paddingHorizontal: 9, paddingVertical: 5 },
-  memberList: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 16, borderWidth: 1, marginTop: 8, overflow: "hidden", paddingHorizontal: 12 },
-  memberRow: { alignItems: "center", borderBottomColor: colors.line, borderBottomWidth: StyleSheet.hairlineWidth, flexDirection: "row", minHeight: 48 },
-  memberAvatar: { alignItems: "center", backgroundColor: colors.paperMuted, borderRadius: 14, height: 29, justifyContent: "center", marginRight: 10, width: 29 },
-  memberAvatarSelected: { backgroundColor: colors.header },
-  memberInitial: { color: colors.inkFaint, fontSize: 11, fontWeight: "800" },
-  memberInitialSelected: { color: colors.forest },
+  autoDescriptionName: { color: colors.ink, fontWeight: "700" },
+  splitHeading: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between" },
+  splitHint: { color: colors.inkSoft, fontSize: 11, marginTop: 4 },
+  selectedCount: { backgroundColor: "#EDF2E5", borderRadius: 10, color: colors.income, fontSize: 11, fontWeight: "800", overflow: "hidden", paddingHorizontal: 9, paddingVertical: 6 },
+  memberList: { gap: 6, marginTop: 14 },
+  memberRow: { alignItems: "center", backgroundColor: "#F8F8F3", borderColor: "#E8EBE1", borderRadius: 14, borderWidth: 1, flexDirection: "row", minHeight: 58, paddingHorizontal: 10, paddingVertical: 8 },
+  memberRowSelected: { backgroundColor: "#F0F5E9", borderColor: "#DAE5CE" },
+  memberAvatar: { alignItems: "center", backgroundColor: "#EAEDE4", borderRadius: 18, height: 36, justifyContent: "center", marginRight: 10, width: 36 },
+  memberAvatarSelected: { backgroundColor: "#DCE8D1" },
+  memberInitial: { color: colors.inkFaint, fontSize: 13, fontWeight: "700" },
+  memberInitialSelected: { color: colors.income },
   memberName: { color: colors.ink, flex: 1, fontSize: 13, fontWeight: "600" },
-  checkbox: { alignItems: "center", borderColor: colors.line, borderRadius: 7, borderWidth: 1.5, height: 22, justifyContent: "center", width: 22 },
-  checkboxSelected: { backgroundColor: colors.forest, borderColor: colors.forest },
-  splitPreview: { backgroundColor: colors.incomeTint, borderRadius: 14, marginTop: 12, paddingHorizontal: 13, paddingVertical: 10 },
-  splitPreviewLabel: { color: colors.inkSoft, fontSize: 11 },
-  splitPreviewAmount: { color: colors.income, fontSize: 14, fontWeight: "800", marginTop: 2 },
-  roundingHint: { color: colors.inkFaint, fontSize: 10, marginTop: 2 },
-  attachmentHeading: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginTop: 2 },
+  checkbox: { alignItems: "center", borderColor: "#C9D5C0", borderRadius: 12, borderWidth: 1.5, height: 24, justifyContent: "center", width: 24 },
+  checkboxSelected: { backgroundColor: "#54754B", borderColor: "#54754B" },
+  splitPreview: { backgroundColor: "#E6EFDB", borderRadius: 16, marginTop: 14, padding: 14 },
+  splitPreviewHeading: { alignItems: "center", flexDirection: "row", gap: 7 },
+  splitPreviewLabel: { color: "#52664B", flex: 1, fontSize: 11 },
+  splitPreviewAmount: { color: colors.income, fontSize: 25, fontWeight: "800", letterSpacing: -0.5, marginTop: 6 },
+  roundingHint: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
+  attachmentHeading: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between" },
   attachmentCopy: { flex: 1 },
-  attachmentHint: { color: colors.inkFaint, fontSize: 11, marginTop: -5 },
-  attachmentList: { gap: 10, paddingVertical: 3 },
-  attachmentPreview: { height: 76, position: "relative", width: 76 },
-  attachmentImage: { backgroundColor: colors.header, borderRadius: 13, height: 76, width: 76 },
-  removeAttachment: { backgroundColor: colors.paper, borderRadius: 10, position: "absolute", right: -5, top: -5 },
-  attachmentButton: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 13, borderStyle: "dashed", borderWidth: 1, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 46, marginTop: 9, paddingHorizontal: 12 },
-  attachmentButtonText: { color: colors.forest, flex: 1, fontSize: 12, fontWeight: "700" },
-  errorText: { color: colors.danger, fontSize: 12, fontWeight: "600", lineHeight: 18, marginTop: 12 },
-  saveButton: { alignItems: "center", backgroundColor: colors.forest, borderRadius: 16, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 50 },
-  saveButtonDisabled: { opacity: 0.4 },
-  saveButtonText: { color: colors.white, fontSize: 14, fontWeight: "800" },
-  skipAttachmentButton: { alignItems: "center", minHeight: 38, justifyContent: "center" },
+  optionalLabel: { color: colors.inkFaint, fontSize: 10, fontWeight: "500" },
+  attachmentHint: { color: colors.inkSoft, fontSize: 10, lineHeight: 15, marginTop: 5 },
+  attachmentList: { gap: 12, paddingTop: 14, paddingBottom: 6, paddingRight: 6 },
+  attachmentPreview: { height: 84, position: "relative", width: 84 },
+  attachmentImage: { backgroundColor: colors.header, borderRadius: 14, height: 84, width: 84 },
+  removeAttachment: { alignItems: "center", backgroundColor: "#FFFEFA", borderRadius: 14, height: 28, justifyContent: "center", position: "absolute", right: -5, top: -5, width: 28 },
+  attachmentButton: { alignItems: "center", backgroundColor: "#F7F9F1", borderColor: "#BCCAAD", borderRadius: 15, borderStyle: "dashed", borderWidth: 1, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 64, marginTop: 14, paddingHorizontal: 14 },
+  attachmentButtonText: { color: colors.income, flex: 1, fontSize: 12, fontWeight: "600" },
+  errorText: { color: colors.danger, fontSize: 12, fontWeight: "600", lineHeight: 18 },
+  saveButton: { alignItems: "center", backgroundColor: "#42633D", borderRadius: 17, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 54, paddingHorizontal: 14 },
+  saveButtonDisabled: { backgroundColor: "#9FAC96" },
+  saveButtonText: { color: colors.white, flexShrink: 1, fontSize: 14, fontWeight: "800" },
+  skipAttachmentButton: { alignItems: "center", minHeight: 44, justifyContent: "center" },
   skipAttachmentText: { color: colors.inkSoft, fontSize: 12, fontWeight: "700" },
   pressed: { opacity: 0.78 },
 });

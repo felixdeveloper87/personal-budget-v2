@@ -1,6 +1,7 @@
 package com.example.budget.controller;
 
 import com.example.budget.dto.HouseholdPageDTO;
+import com.example.budget.dto.HouseholdExpenseHistoryDTO;
 import com.example.budget.dto.HouseholdRecordCreatedDTO;
 import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.model.User;
@@ -167,6 +168,14 @@ public class HouseholdController {
                 request.completed(),
                 user);
         return service.page(user);
+    }
+
+    @GetMapping("/households/{householdId}/expenses")
+    public HouseholdExpenseHistoryDTO expenseHistory(
+            @PathVariable Long householdId,
+            @RequestParam(defaultValue = "0") int page,
+            Authentication authentication) {
+        return service.expenseHistory(householdId, page, user(authentication));
     }
 
     @PostMapping("/households/{householdId}/expenses")
