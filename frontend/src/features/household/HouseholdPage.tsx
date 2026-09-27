@@ -7,7 +7,7 @@ import { Plus, Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
-import { ActionRequiredBanner, HouseholdSectionCard, HouseholdSectionNavigation } from './components/HouseholdPageComponents'
+import { ActionRequiredBanner, HouseholdSectionNavigation } from './components/HouseholdPageComponents'
 import {
   HouseholdLoadingState,
   HouseholdLoadError,
@@ -23,6 +23,7 @@ import { BalancesOverviewModal } from './settlements/BalancesOverviewModal'
 import { PaymentsOverviewModal } from './settlements/PaymentsOverviewModal'
 import type { AttachmentTarget } from './household.types'
 import { useHouseholdPageController } from './hooks/useHouseholdPageController'
+import { HouseholdOverview } from './HouseholdOverview'
 import { keyframes } from '@emotion/react'
 
 const pulseGlow = keyframes`
@@ -98,10 +99,6 @@ export default function HouseholdPage() {
     0,
   )
   const firstDebtYouOwe = debtsYouOwe[0]
-  const outstandingHouseholdTotal = household.debts.reduce(
-    (total, debt) => total + debt.amount,
-    0,
-  )
   const attachmentExpense = attachmentTarget?.kind === 'expense'
     ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
     : undefined
@@ -213,10 +210,10 @@ export default function HouseholdPage() {
         <HouseholdSectionNavigation
           ariaLabel={t('household.navigation.aria')}
           items={[
-            { id: 'household-cleaning', label: t('household.cleaning.title') },
             { id: 'household-balances', label: t('household.balances.title') },
+            { id: 'household-members', label: t('household.members.title') },
             { id: 'household-expenses', label: t('household.expenses.title') },
-            { id: 'household-payments', label: t('household.settlements.title') },
+            { id: 'household-cleaning', label: t('household.cleaning.title') },
           ]}
         />
 
@@ -247,6 +244,14 @@ export default function HouseholdPage() {
           />
         )}
 
+        <HouseholdOverview
+          household={household}
+          onViewBalances={balancesOverviewModal.onOpen}
+          onViewMembers={membersOverviewModal.onOpen}
+          onViewExpenses={recentExpensesModal.onOpen}
+          onViewPayments={paymentsOverviewModal.onOpen}
+        />
+
         <Box id="household-cleaning" scrollMarginTop="90px">
           <CleaningRotationCard
             rotation={household.cleaningRotation}
@@ -269,59 +274,6 @@ export default function HouseholdPage() {
             )}
           />
         </Box>
-
-        <HouseholdSectionCard
-          id="household-balances"
-          eyebrow={t('household.balances.eyebrow')}
-          title={t('household.balances.title')}
-          description={t('household.balances.description')}
-          accent={household.debts.length ? 'var(--pb-coral)' : 'var(--pb-income)'}
-          tint={household.debts.length ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
-          stat={household.debts.length
-            ? t('household.balances.open', {
-              amount: formatCurrency(outstandingHouseholdTotal),
-            })
-            : t('household.balances.allSettled')}
-          actionLabel={t('household.balances.view')}
-          actionAriaLabel={t('household.balances.openAria')}
-          onOpen={balancesOverviewModal.onOpen}
-        />
-
-        <HouseholdSectionCard
-          id="household-expenses"
-          eyebrow={t('household.expenses.eyebrow')}
-          title={t('household.expenses.title')}
-          description={t('household.expenses.description')}
-          accent="var(--pb-forest-2)"
-          tint="var(--pb-tint-green)"
-          stat={t(
-            household.expenses.length === 1
-              ? 'household.expenses.count.one'
-              : 'household.expenses.count.other',
-            { count: formatNumber(household.expenses.length) },
-          )}
-          actionLabel={t('household.expenses.open')}
-          actionAriaLabel={t('household.expenses.openAria')}
-          onOpen={recentExpensesModal.onOpen}
-        />
-
-        <HouseholdSectionCard
-          id="household-payments"
-          eyebrow={t('household.settlements.eyebrow')}
-          title={t('household.settlements.title')}
-          description={t('household.settlements.description')}
-          accent="var(--pb-income)"
-          tint="var(--pb-tint-income)"
-          stat={t(
-            household.settlements.length === 1
-              ? 'household.settlements.count.one'
-              : 'household.settlements.count.other',
-            { count: formatNumber(household.settlements.length) },
-          )}
-          actionLabel={t('household.settlements.open')}
-          actionAriaLabel={t('household.settlements.openAria')}
-          onOpen={paymentsOverviewModal.onOpen}
-        />
       </VStack>
 
       <ExpenseModal
