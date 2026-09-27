@@ -90,7 +90,7 @@ class HouseholdExpenseHistoryTest {
         assertThat(result.page()).isEqualTo(2);
         assertThat(result.hasMore()).isTrue();
         assertThat(result.expenses()).hasSize(1);
-        var item = result.expenses().getFirst();
+        var item = result.expenses().get(0);
         assertThat(item.id()).isEqualTo(70L);
         assertThat(item.category()).isEqualTo("Groceries");
         assertThat(item.description()).isEqualTo("Weekly shopping");
