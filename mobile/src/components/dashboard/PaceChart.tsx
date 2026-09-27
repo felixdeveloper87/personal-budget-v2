@@ -181,7 +181,7 @@ function ChartLine({
           from={visiblePoints[index]}
           key={`${point.x}-${point.y}`}
           opacity={opacity}
-          strokeWidth={opacity ? 1.5 : 2.5}
+          strokeWidth={opacity ? 1.75 : 3}
           to={point}
         />
       ))}
@@ -191,8 +191,8 @@ function ChartLine({
             styles.currentDot,
             {
               backgroundColor: color,
-              left: visiblePoints[visiblePoints.length - 1].x - 4,
-              top: visiblePoints[visiblePoints.length - 1].y - 4,
+              left: visiblePoints[visiblePoints.length - 1].x - 5,
+              top: visiblePoints[visiblePoints.length - 1].y - 5,
             },
           ]}
         />
@@ -213,8 +213,7 @@ export function PaceChart({
   const [chartWidth, setChartWidth] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const isIncome = tone === "income";
-  const accent = isIncome ? colors.income : colors.expense;
-  const tint = isIncome ? colors.incomeTint : colors.expenseTint;
+  const accent = isIncome ? "#2D9169" : "#C95750";
   const type = isIncome ? "INCOME" : "EXPENSE";
 
   const pace = useMemo(() => {
@@ -264,9 +263,14 @@ export function PaceChart({
   );
   const plotHeight = CHART_HEIGHT - PLOT_TOP - PLOT_BOTTOM;
   const higherThanPrevious = pace.delta > 0;
+  const usesPositiveSurface = isIncome || pace.delta < 0;
+  const tint = usesPositiveSurface ? "#D9EEE3" : "#F3DCD7";
+  const surface = usesPositiveSurface ? "#FBFDFC" : "#FEFBFA";
+  const chartSurface = usesPositiveSurface ? "#EFF7F2" : "#FAF1EF";
   const deltaColor = isIncome
-    ? higherThanPrevious ? colors.income : colors.expense
-    : higherThanPrevious ? colors.expense : colors.income;
+    ? higherThanPrevious ? "#2D9169" : "#C95750"
+    : higherThanPrevious ? "#C95750" : "#2D9169";
+  const deltaTint = deltaColor === "#2D9169" ? "#D9EEE3" : "#F3DCD7";
   const hasData = pace.amountSoFar > 0 || pace.previousTotal > 0;
   const paceTitle = description ?? category ?? (isIncome ? "INCOME PACE" : "EXPENSE PACE");
   const selectedIndex = selectedDay === null ? null : selectedDay - 1;
@@ -309,21 +313,26 @@ export function PaceChart({
     );
 
   return (
-    <View style={[styles.card, { borderColor: tint }]}>
+    <View style={[styles.card, { backgroundColor: surface, borderColor: tint }]}>
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.eyebrow}>
+          <Text
+            adjustsFontSizeToFit
+            minimumFontScale={0.7}
+            numberOfLines={1}
+            style={[styles.eyebrow, { color: accent }]}
+          >
             {paceTitle.toLocaleUpperCase()}
           </Text>
           <View style={styles.totalRow}>
-            <Text style={styles.total}>{formatCurrency(pace.amountSoFar)}</Text>
+            <Text style={[styles.total, { color: accent }]}>{formatCurrency(pace.amountSoFar)}</Text>
             <Text style={styles.dayLabel}>BY DAY {pace.elapsedDays}</Text>
           </View>
         </View>
 
         <View style={styles.headerActions}>
           {hasData ? (
-            <View style={[styles.deltaBadge, { backgroundColor: tint }]}>
+            <View style={[styles.deltaBadge, { backgroundColor: deltaTint }]}>
               <SymbolView
                 name={higherThanPrevious ? trendIcons.up : trendIcons.down}
                 size={12}
@@ -353,7 +362,7 @@ export function PaceChart({
         accessibilityLabel={`${paceTitle} pace: ${formatCurrency(pace.amountSoFar)} by day ${pace.elapsedDays}. Last month: ${formatCurrency(pace.previousTotal)}.`}
         accessibilityRole="image"
         onLayout={(event) => setChartWidth(event.nativeEvent.layout.width)}
-        style={styles.chart}
+        style={[styles.chart, { backgroundColor: chartSurface }]}
       >
         {[0, 0.5, 1].map((position) => (
           <View
@@ -361,14 +370,16 @@ export function PaceChart({
             style={[styles.gridLine, { top: PLOT_TOP + plotHeight * position }]}
           />
         ))}
-        <Text style={styles.maxLabel}>{formatCurrency(maxValue, true)}</Text>
+        <Text style={[styles.maxLabel, { backgroundColor: chartSurface }]}>
+          {formatCurrency(maxValue, true)}
+        </Text>
 
         {chartWidth > 0 && hasData ? (
           <>
             <ChartLine
-              color={colors.inkFaint}
+              color="#71817E"
               maxValue={maxValue}
-              opacity={0.55}
+              opacity={0.72}
               plotHeight={plotHeight}
               points={pace.previous}
               width={chartWidth}
@@ -405,7 +416,7 @@ export function PaceChart({
 
         {interactive && selectedIndex !== null && chartWidth > 0 ? (
           <View pointerEvents="none" style={styles.selectionOverlay}>
-            <View style={[styles.selectionGuide, { left: selectedX }]} />
+            <View style={[styles.selectionGuide, { backgroundColor: accent, left: selectedX }]} />
             {selectedPreviousY !== null ? (
               <View
                 style={[
@@ -435,7 +446,10 @@ export function PaceChart({
       </View>
 
       {interactive && selectedDay !== null ? (
-        <View accessibilityLiveRegion="polite" style={[styles.selectionCard, { borderColor: tint }]}>
+        <View
+          accessibilityLiveRegion="polite"
+          style={[styles.selectionCard, { backgroundColor: tint, borderColor: accent }]}
+        >
           <Text style={styles.selectionTitle}>CUMULATIVE TO {selectedDateLabel.toLocaleUpperCase()}</Text>
           <View style={styles.selectionValues}>
             <View style={styles.selectionValueColumn}>
@@ -471,11 +485,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.paperRaised,
     borderRadius: 22,
     borderWidth: 1,
+    elevation: 2,
     marginTop: 16,
     padding: 17,
     shadowColor: colors.ink,
     shadowOffset: { height: 4, width: 0 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.09,
     shadowRadius: 12,
   },
   header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between" },
@@ -505,7 +520,13 @@ const styles = StyleSheet.create({
     width: 26,
   },
   hideButtonPressed: { opacity: 0.65, transform: [{ scale: 0.94 }] },
-  chart: { height: CHART_HEIGHT, marginTop: 13, overflow: "hidden", position: "relative" },
+  chart: {
+    borderRadius: 14,
+    height: CHART_HEIGHT,
+    marginTop: 13,
+    overflow: "hidden",
+    position: "relative",
+  },
   interactionLayer: {
     bottom: PLOT_BOTTOM,
     left: 0,
@@ -515,7 +536,7 @@ const styles = StyleSheet.create({
     zIndex: 3,
   },
   gridLine: {
-    backgroundColor: colors.line,
+    backgroundColor: "#BFCBC8",
     height: StyleSheet.hairlineWidth,
     left: 0,
     opacity: 0.75,
@@ -532,7 +553,19 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: 2,
   },
-  currentDot: { borderRadius: 4, height: 8, position: "absolute", width: 8 },
+  currentDot: {
+    borderColor: colors.white,
+    borderRadius: 5,
+    borderWidth: 2,
+    elevation: 2,
+    height: 10,
+    position: "absolute",
+    shadowColor: colors.ink,
+    shadowOffset: { height: 1, width: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 3,
+    width: 10,
+  },
   selectionOverlay: {
     bottom: PLOT_BOTTOM,
     left: 0,
@@ -542,9 +575,8 @@ const styles = StyleSheet.create({
     zIndex: 4,
   },
   selectionGuide: {
-    backgroundColor: colors.inkSoft,
     bottom: 0,
-    opacity: 0.35,
+    opacity: 0.42,
     position: "absolute",
     top: 0,
     width: StyleSheet.hairlineWidth,
@@ -571,7 +603,7 @@ const styles = StyleSheet.create({
   axisLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "600" },
   legend: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 1 },
   legendLine: { borderRadius: 1, height: 2, width: 15 },
-  previousLegendLine: { backgroundColor: colors.inkFaint, opacity: 0.55 },
+  previousLegendLine: { backgroundColor: "#71817E", opacity: 0.72 },
   legendText: { color: colors.inkFaint, fontSize: 9, marginRight: 8 },
   interactionHint: { color: colors.inkFaint, fontSize: 9, marginTop: 10, textAlign: "center" },
   selectionCard: {

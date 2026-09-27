@@ -105,13 +105,14 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         {/* Hero card — current-month snapshot */}
         {loading ? (
-          <Skeleton height="280px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          <Skeleton height={{ base: '900px', md: '620px' }} borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
           <MotionBox variants={riseV}>
             <MonthHero
               income={periodData.income}
               expense={periodData.expense}
               date={selectedDate}
+              userName={user?.name}
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
             />

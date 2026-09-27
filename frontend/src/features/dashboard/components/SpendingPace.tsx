@@ -53,16 +53,6 @@ export default function CashPace({
 
   // recharts writes stroke/fill as SVG attributes, where CSS var() is
   // unreliable — so resolve concrete colours per color mode here.
-  const c = {
-    current: isIncome ? palette.income : palette.coral,
-    previous: palette['ink-faint'],
-    grid: palette.hair,
-    tick: palette['ink-faint'],
-    tooltipBg: palette.solid,
-    tooltipBorder: palette['hair-2'],
-    tooltipText: palette.ink,
-  }
-
   const { data, amountSoFar, paceDelta, projected, prevTotal, elapsedDays } = useMemo(() => {
     const year = selectedDate.getFullYear()
     const month = selectedDate.getMonth()
@@ -87,18 +77,15 @@ export default function CashPace({
       transactionType,
     )
 
-    // Draw the current line only up to today when we're inside the month.
     const now = new Date()
     const isCurrentMonth = now.getFullYear() === year && now.getMonth() === month
     const shownDays = isCurrentMonth ? Math.min(now.getDate(), current.length) : current.length
-
     const totalDays = Math.max(current.length, previous.length)
     const points = Array.from({ length: totalDays }, (_, i) => ({
       day: i + 1,
       current: i < shownDays ? current[i] : null,
       previous: i < previous.length ? previous[i] : null,
     }))
-
     const spent = current[shownDays - 1] ?? 0
     const prevAtSameDay = previous[Math.min(shownDays, previous.length) - 1] ?? 0
     const monthTotal = daysInMonth(year, month)
@@ -113,6 +100,33 @@ export default function CashPace({
     }
   }, [transactions, selectedDate, dateBasis, isIncome, includeCommitments])
 
+  const improvedSpending = !isIncome && paceDelta < 0
+  const positiveSurface = isIncome || improvedSpending
+  const deltaIsPositive = isIncome ? paceDelta > 0 : paceDelta < 0
+  const c = {
+    current: isIncome
+      ? colorMode === 'dark' ? palette.income : '#2d9169'
+      : colorMode === 'dark' ? palette.coral : '#c95750',
+    previous: palette['ink-faint'],
+    grid: palette.hair,
+    tick: palette['ink-faint'],
+    tooltipBg: palette.solid,
+    tooltipBorder: palette['hair-2'],
+    tooltipText: palette.ink,
+    chartBackground: colorMode === 'dark'
+      ? positiveSurface ? '#1c332b' : '#352725'
+      : positiveSurface ? '#eff7f2' : '#faf1ef',
+    panelBackground: colorMode === 'dark'
+      ? positiveSurface ? '#192a25' : '#2a2222'
+      : positiveSurface ? '#fbfdfb' : '#fefbfa',
+    toneBorder: colorMode === 'dark'
+      ? positiveSurface ? '#3b6555' : '#68413d'
+      : positiveSurface ? '#cbe3d4' : '#eacfc8',
+    deltaBackground: colorMode === 'dark'
+      ? deltaIsPositive ? '#234336' : '#492d2a'
+      : deltaIsPositive ? '#d9eee3' : '#f3dcd7',
+  }
+
   const higherThanPrevious = paceDelta > 0
   const hasPaceData = amountSoFar > 0 || prevTotal > 0
   const DeltaIcon = higherThanPrevious ? ArrowUpRight : ArrowDownRight
@@ -122,7 +136,7 @@ export default function CashPace({
   const title = titleOverride ?? t(isIncome ? 'dashboard.incomePace' : 'dashboard.spendingPace')
 
   return (
-    <Panel h="full">
+    <Panel h="full" bg={c.panelBackground} borderColor={c.toneBorder}>
       <VStack align="stretch" spacing={4} h="full">
         {/* Header */}
         <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={2}>
@@ -141,7 +155,7 @@ export default function CashPace({
                 fontFamily="var(--pb-serif)"
                 fontSize="xl"
                 fontWeight={500}
-                color="var(--pb-ink)"
+                color={c.current}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {formatCurrency(amountSoFar)}
@@ -160,6 +174,7 @@ export default function CashPace({
                   px={2}
                   py="2px"
                   borderRadius="999px"
+                  bg={c.deltaBackground}
                   color={deltaColor}
                 >
                   <DeltaIcon size={12} />
@@ -198,6 +213,9 @@ export default function CashPace({
         <Box
           h="180px"
           w="full"
+          p={2}
+          borderRadius="14px"
+          bg={c.chartBackground}
           role="img"
           aria-label={t('dashboard.paceChartAria', {
             title,
@@ -210,8 +228,8 @@ export default function CashPace({
             <AreaChart data={data} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
               <defs>
                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={c.current} stopOpacity={0.24} />
-                  <stop offset="100%" stopColor={c.current} stopOpacity={0.02} />
+                  <stop offset="0%" stopColor={c.current} stopOpacity={0.34} />
+                  <stop offset="100%" stopColor={c.current} stopOpacity={0.04} />
                 </linearGradient>
               </defs>
               <CartesianGrid stroke={c.grid} strokeDasharray="2 4" vertical={false} />
@@ -261,7 +279,7 @@ export default function CashPace({
                 type="monotone"
                 dataKey="current"
                 stroke={c.current}
-                strokeWidth={2}
+                strokeWidth={2.75}
                 fill={`url(#${gradientId})`}
                 connectNulls={false}
                 isAnimationActive={!reduce}

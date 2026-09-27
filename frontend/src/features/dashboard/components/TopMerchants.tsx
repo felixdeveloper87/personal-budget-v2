@@ -16,6 +16,13 @@ interface TopMerchantsProps {
 
 const MAX_ROWS = 5
 const MONTH_COUNT = 4
+const MERCHANT_TONES = [
+  { accent: '#2d8062', tint: '#d9ece2' },
+  { accent: '#bc5d52', tint: '#f1dad5' },
+  { accent: '#98752d', tint: '#eee4c9' },
+  { accent: '#397780', tint: '#d9e9ea' },
+  { accent: '#705e78', tint: '#e7dfe9' },
+] as const
 
 function isCommitmentTransaction(transaction: Transaction): boolean {
   return Boolean(transaction.isInstallment)
@@ -167,8 +174,16 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
   const { rows, merchantTotal } = useMemo(() => {
     const merchantTransactions = transactions.filter(isMerchantTransaction)
     const allMerchants = merchantStats(merchantTransactions)
+    const categoryByMerchant = new Map<string, string>()
+    for (const transaction of merchantTransactions) {
+      const key = transaction.description.trim().toLowerCase().replace(/\s+/g, ' ')
+      if (!categoryByMerchant.has(key)) categoryByMerchant.set(key, transaction.category)
+    }
     return {
-      rows: allMerchants.slice(0, MAX_ROWS),
+      rows: allMerchants.slice(0, MAX_ROWS).map((merchant) => ({
+        ...merchant,
+        category: categoryByMerchant.get(merchant.key),
+      })),
       merchantTotal: allMerchants.reduce((sum, merchant) => sum + merchant.total, 0),
     }
   }, [transactions])
@@ -223,6 +238,7 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
                 key={merchant.key}
                 rank={index + 1}
                 name={merchant.name}
+                category={merchant.category}
                 count={merchant.count}
                 total={merchant.total}
                 share={merchantTotal > 0 ? merchant.total / merchantTotal : 0}
@@ -238,43 +254,45 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
 interface MerchantRowProps {
   rank: number
   name: string
+  category?: string
   count: number
   total: number
   /** 0-1, share of all variable merchant spending in the period. */
   share: number
 }
 
-function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
+function MerchantRow({ rank, name, category, count, total, share }: MerchantRowProps) {
   const { t, formatCurrency } = useI18n()
   const percentage = Math.round(share * 100)
+  const tone = MERCHANT_TONES[(rank - 1) % MERCHANT_TONES.length]
 
   return (
     <Box
       px={{ base: 2.5, md: 3 }}
-      py={1.75}
+      py={2.5}
       borderRadius="14px"
       bg="transparent"
     >
       <HStack align="flex-start" spacing={3}>
-        <Box position="relative" w="36px" h="36px" flexShrink={0}>
-          <MerchantLogo name={name} size={36} borderRadius="11px" />
+        <Box position="relative" w="54px" h="54px" flexShrink={0}>
+          <MerchantLogo name={name} category={category} size={54} borderRadius="14px" />
           <Box
             position="absolute"
-            right="-5px"
-            bottom="-5px"
-            minW="18px"
-            h="18px"
+            right="-4px"
+            bottom="-4px"
+            minW="22px"
+            h="22px"
             px="3px"
             display="grid"
             placeItems="center"
             borderRadius="full"
-            bg="var(--pb-surface)"
-            color="var(--pb-ink-faint)"
+            bg={tone.tint}
+            color={tone.accent}
             border="1px solid"
-            borderColor="var(--pb-hair-2)"
+            borderColor={tone.accent}
             boxShadow="0 1px 4px rgba(0,0,0,0.18)"
           >
-            <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} lineHeight={1}>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} lineHeight={1}>
               {rank}
             </Text>
           </Box>
@@ -311,7 +329,7 @@ function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
                 fontSize="md"
                 fontWeight={600}
                 lineHeight={1.1}
-                color="var(--pb-ink)"
+                color={tone.accent}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {formatCurrency(total)}
@@ -329,7 +347,7 @@ function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
             aria-valuemax={100}
             aria-valuenow={percentage}
             mt={2}
-            h="4px"
+            h="6px"
             borderRadius="full"
             bg="var(--pb-surface-3)"
             overflow="hidden"
@@ -338,8 +356,7 @@ function MerchantRow({ rank, name, count, total, share }: MerchantRowProps) {
               h="full"
               w={`max(${percentage}%, 8px)`}
               borderRadius="full"
-              bgGradient="linear(to-r, var(--pb-forest), var(--pb-forest-2))"
-              opacity={0.78}
+              bg={tone.accent}
               transition="width 0.5s ease"
             />
           </Box>

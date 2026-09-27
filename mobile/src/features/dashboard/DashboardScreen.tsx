@@ -1,16 +1,19 @@
 import { SymbolView } from "expo-symbols";
+import { useRouter } from "expo-router";
 import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Svg, { Circle } from "react-native-svg";
 
 import { CategoryPaceCarousel } from "@/components/dashboard/CategoryPaceCarousel";
 import { DescriptionPaceCarousel } from "@/components/dashboard/DescriptionPaceCarousel";
@@ -26,20 +29,35 @@ import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finan
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const actionIcons = {
-  calendar: {
-    ios: "calendar",
-    android: "calendar_month",
-    web: "calendar_month",
+  notifications: {
+    ios: "bell.fill",
+    android: "notifications",
+    web: "notifications",
+  },
+  settings: {
+    ios: "gearshape.fill",
+    android: "settings",
+    web: "settings",
   },
   income: {
-    ios: "plus.circle.fill",
-    android: "add_circle",
-    web: "add_circle",
+    ios: "arrow.up",
+    android: "arrow_upward",
+    web: "arrow_upward",
   },
   expense: {
-    ios: "minus.circle.fill",
-    android: "remove_circle",
-    web: "remove_circle",
+    ios: "arrow.down",
+    android: "arrow_downward",
+    web: "arrow_downward",
+  },
+  net: {
+    ios: "chart.bar.fill",
+    android: "bar_chart",
+    web: "bar_chart",
+  },
+  plus: {
+    ios: "plus",
+    android: "add",
+    web: "add",
   },
 } satisfies Record<string, SymbolName>;
 
@@ -50,11 +68,11 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function compactMonthLabel(date: Date) {
+function monthLabel(date: Date) {
   return new Intl.DateTimeFormat("en-GB", {
-    month: "short",
+    month: "long",
     year: "numeric",
-  }).format(date).toLocaleUpperCase();
+  }).format(date);
 }
 
 function greetingLabel(date: Date) {
@@ -64,53 +82,145 @@ function greetingLabel(date: Date) {
   return "Good evening";
 }
 
-interface ComparisonBarProps {
+interface SummaryMetricProps {
+  icon: SymbolName;
   label: string;
-  ratio: number;
   value: number;
-  tone: "income" | "expense";
+  tone: "income" | "expense" | "net";
 }
 
-function ComparisonBar({ label, ratio, value, tone }: ComparisonBarProps) {
-  const isIncome = tone === "income";
+function SummaryMetric({ icon, label, value, tone }: SummaryMetricProps) {
+  const toneStyles = {
+    income: {
+      card: styles.incomeMetric,
+      icon: styles.incomeMetricIcon,
+      value: styles.incomeMetricValue,
+    },
+    expense: {
+      card: styles.expenseMetric,
+      icon: styles.expenseMetricIcon,
+      value: styles.expenseMetricValue,
+    },
+    net: {
+      card: styles.netMetric,
+      icon: styles.netMetricIcon,
+      value: value < 0 ? styles.expenseMetricValue : styles.netMetricValue,
+    },
+  }[tone];
 
   return (
-    <View style={styles.comparisonItem}>
-      <View style={styles.comparisonHeader}>
-        <View style={styles.comparisonLabelRow}>
-          <View style={[styles.comparisonDot, isIncome ? styles.incomeDot : styles.expenseDot]} />
-          <Text style={styles.comparisonLabel}>{label}</Text>
-        </View>
+    <View style={[styles.metricCard, toneStyles.card]}>
+      <View style={[styles.metricIcon, toneStyles.icon]}>
+        <SymbolView name={icon} size={25} tintColor={toneStyles.value.color} weight="bold" />
+      </View>
+      <View style={styles.metricCopy}>
+        <Text style={styles.metricLabel}>{label}</Text>
         <Text
           adjustsFontSizeToFit
+          minimumFontScale={0.62}
           numberOfLines={1}
-          style={[styles.comparisonAmount, isIncome ? styles.incomeValue : styles.expenseValue]}
+          style={[styles.metricValue, toneStyles.value]}
         >
           {formatCurrency(value)}
         </Text>
       </View>
-      <View style={styles.comparisonTrack}>
-        <View
-          style={[
-            styles.comparisonFill,
-            isIncome ? styles.incomeFill : styles.expenseFill,
-            { flex: ratio },
-          ]}
-        />
-        <View style={{ flex: 100 - ratio }} />
+    </View>
+  );
+}
+
+interface FlowDonutProps {
+  expense: number;
+  income: number;
+  size: number;
+}
+
+function FlowDonut({ expense, income, size }: FlowDonutProps) {
+  const strokeWidth = Math.max(18, Math.round(size * 0.15));
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const total = income + expense;
+  const incomeShare = total > 0 ? income / total : 0;
+  const expenseShare = total > 0 ? expense / total : 0;
+  const expensePercentage = total > 0 ? Math.round(expenseShare * 100) : 0;
+
+  return (
+    <View style={styles.flowCard}>
+      <View style={[styles.donutWrap, { height: size, width: size }]}>
+        <Svg accessibilityLabel="Income versus expense chart" height={size} width={size}>
+          <Circle
+            cx={size / 2}
+            cy={size / 2}
+            fill="none"
+            r={radius}
+            stroke={colors.paperMuted}
+            strokeWidth={strokeWidth}
+          />
+          {total > 0 ? (
+            <>
+              <Circle
+                cx={size / 2}
+                cy={size / 2}
+                fill="none"
+                originX={size / 2}
+                originY={size / 2}
+                r={radius}
+                rotation={-90}
+                stroke="#3E9870"
+                strokeDasharray={`${circumference * incomeShare} ${circumference}`}
+                strokeLinecap="butt"
+                strokeWidth={strokeWidth}
+              />
+              <Circle
+                cx={size / 2}
+                cy={size / 2}
+                fill="none"
+                originX={size / 2}
+                originY={size / 2}
+                r={radius}
+                rotation={-90}
+                stroke="#D05F5B"
+                strokeDasharray={`${circumference * expenseShare} ${circumference}`}
+                strokeDashoffset={-(circumference * incomeShare)}
+                strokeLinecap="butt"
+                strokeWidth={strokeWidth}
+              />
+            </>
+          ) : null}
+        </Svg>
+        <View pointerEvents="none" style={styles.donutCenter}>
+          <Text style={styles.donutPercentage}>{expensePercentage}%</Text>
+          <Text style={styles.donutLabel}>outflow</Text>
+        </View>
+      </View>
+
+      <Text style={styles.flowTitle}>Income vs expense</Text>
+      <View style={styles.legend}>
+        <View style={styles.legendRow}>
+          <View style={[styles.legendDot, styles.incomeLegendDot]} />
+          <Text style={styles.legendLabel}>Income</Text>
+          <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.legendIncomeValue}>
+            {formatCurrency(income)}
+          </Text>
+        </View>
+        <View style={styles.legendRow}>
+          <View style={[styles.legendDot, styles.expenseLegendDot]} />
+          <Text style={styles.legendLabel}>Expense</Text>
+          <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.legendExpenseValue}>
+            {formatCurrency(expense)}
+          </Text>
+        </View>
       </View>
     </View>
   );
 }
 
 interface ActionButtonProps {
-  icon: SymbolName;
   label: string;
   onPress: () => void;
   tone: "income" | "expense";
 }
 
-function ActionButton({ icon, label, onPress, tone }: ActionButtonProps) {
+function ActionButton({ label, onPress, tone }: ActionButtonProps) {
   const isIncome = tone === "income";
 
   return (
@@ -125,16 +235,16 @@ function ActionButton({ icon, label, onPress, tone }: ActionButtonProps) {
       ]}
     >
       <SymbolView
-        name={icon}
-        size={18}
-        tintColor={isIncome ? colors.income : colors.expense}
-        weight="semibold"
+        name={actionIcons.plus}
+        size={25}
+        tintColor={colors.white}
+        weight="bold"
       />
       <Text
         adjustsFontSizeToFit
         minimumFontScale={0.8}
         numberOfLines={1}
-        style={[styles.actionLabel, isIncome ? styles.incomeActionLabel : styles.expenseActionLabel]}
+        style={styles.actionLabel}
       >
         {label}
       </Text>
@@ -144,6 +254,8 @@ function ActionButton({ icon, label, onPress, tone }: ActionButtonProps) {
 
 export function DashboardScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
+  const { width } = useWindowDimensions();
   const [summary, setSummary] = useState<MonthlySummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([]);
@@ -211,15 +323,19 @@ export function DashboardScreen() {
   if (!user) return null;
 
   const firstName = user.name.split(" ")[0];
-  const positiveFlow = (summary?.balance ?? 0) >= 0;
-  const comparisonMax = summary
-    ? Math.max(summary.totalIncome, summary.totalExpense, 1)
-    : 1;
-  const incomeRatio = summary ? (summary.totalIncome / comparisonMax) * 100 : 0;
-  const expenseRatio = summary ? (summary.totalExpense / comparisonMax) * 100 : 0;
+  const initials = user.name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase())
+    .join("");
+  const compactLayout = width < 390;
+  const donutSize = compactLayout
+    ? Math.min(width - 112, 188)
+    : Math.min((width - 62) * 0.44, 150);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -230,32 +346,61 @@ export function DashboardScreen() {
           />
         }
       >
-        <View style={styles.headerCard}>
-          <View pointerEvents="none" style={styles.heroDecoration}>
-            <View style={styles.heroRingLarge} />
-            <View style={styles.heroRingSmall} />
+        <View style={styles.homeHeader}>
+          <View style={styles.userRow}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials || "PB"}</Text>
+            </View>
+            <View style={styles.greetingCopy}>
+              <Text style={styles.greeting}>{greetingLabel(currentDate)},</Text>
+              <Text adjustsFontSizeToFit numberOfLines={1} style={styles.userName}>
+                {firstName}
+              </Text>
+            </View>
+            <View style={styles.headerActions}>
+              <View
+                accessibilityLabel="Notifications"
+                accessibilityRole="image"
+                style={styles.headerAction}
+              >
+                <SymbolView
+                  name={actionIcons.notifications}
+                  size={23}
+                  tintColor={colors.inkSoft}
+                  weight="semibold"
+                />
+              </View>
+              <Pressable
+                accessibilityLabel="Open settings"
+                accessibilityRole="button"
+                onPress={() => router.navigate("/more")}
+                style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
+              >
+                <SymbolView
+                  name={actionIcons.settings}
+                  size={24}
+                  tintColor={colors.inkSoft}
+                  weight="semibold"
+                />
+              </Pressable>
+            </View>
           </View>
 
-          <View style={styles.heroContent}>
-            <View style={styles.heroIntro}>
-              <View style={styles.greetingRow}>
-                <Text style={styles.greeting}>{greetingLabel(currentDate)}, {firstName}</Text>
-                <View style={styles.inlineDate}>
-                  <SymbolView
-                    name={actionIcons.calendar}
-                    size={12}
-                    tintColor="#DCE9E8"
-                    weight="semibold"
-                  />
-                  <Text style={styles.inlineDateText}>{compactMonthLabel(currentDate)}</Text>
-                </View>
-              </View>
-              <Text style={styles.headerTitle}>Your month, in motion.</Text>
-            </View>
+          <View style={styles.monthBlock}>
+            <Text
+              adjustsFontSizeToFit
+              minimumFontScale={0.76}
+              numberOfLines={1}
+              style={styles.monthTitle}
+            >
+              {monthLabel(currentDate)}
+            </Text>
+            <Text style={styles.monthSubtitle}>Monthly budget snapshot</Text>
+          </View>
 
           {loading ? (
             <View style={styles.loadingSummary}>
-              <ActivityIndicator color={colors.white} />
+              <ActivityIndicator color={colors.forest} />
               <Text style={styles.loadingText}>Loading your totals…</Text>
             </View>
           ) : error ? (
@@ -267,50 +412,46 @@ export function DashboardScreen() {
               </Pressable>
             </View>
           ) : summary ? (
-            <View style={styles.comparisonPanel}>
-              <ComparisonBar
-                label="INCOME"
-                ratio={incomeRatio}
-                tone="income"
-                value={summary.totalIncome}
-              />
-              <ComparisonBar
-                label="EXPENSE"
-                ratio={expenseRatio}
-                tone="expense"
-                value={summary.totalExpense}
-              />
-              <View style={styles.netRow}>
-                <View>
-                  <Text style={styles.balanceLabel}>NET THIS MONTH</Text>
-                  <Text style={styles.netCaption}>Income minus expenses</Text>
-                </View>
-                <Text
-                  adjustsFontSizeToFit
-                  minimumFontScale={0.72}
-                  numberOfLines={1}
-                  style={[styles.balanceValue, !positiveFlow && styles.negativeBalance]}
-                >
-                  {formatCurrency(summary.balance)}
-                </Text>
+            <View style={[styles.summaryGrid, compactLayout && styles.summaryGridCompact]}>
+              <View style={[styles.metricColumn, compactLayout && styles.metricColumnCompact]}>
+                <SummaryMetric
+                  icon={actionIcons.income}
+                  label="Income"
+                  tone="income"
+                  value={summary.totalIncome}
+                />
+                <SummaryMetric
+                  icon={actionIcons.expense}
+                  label="Expense"
+                  tone="expense"
+                  value={summary.totalExpense}
+                />
+                <SummaryMetric
+                  icon={actionIcons.net}
+                  label="Net this month"
+                  tone="net"
+                  value={summary.balance}
+                />
               </View>
+              <FlowDonut
+                expense={summary.totalExpense}
+                income={summary.totalIncome}
+                size={donutSize}
+              />
             </View>
           ) : null}
 
-          <View style={styles.actionsRow}>
+          <View style={[styles.actionsRow, compactLayout && styles.actionsRowCompact]}>
             <ActionButton
-              icon={actionIcons.income}
               label="Add income"
               onPress={() => setEntryType("INCOME")}
               tone="income"
             />
             <ActionButton
-              icon={actionIcons.expense}
               label="Add expense"
               onPress={() => setEntryType("EXPENSE")}
               tone="expense"
             />
-          </View>
           </View>
         </View>
 
@@ -350,188 +491,211 @@ export function DashboardScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { padding: 18, paddingBottom: 48, paddingTop: 14 },
-  headerCard: {
-    backgroundColor: colors.forest,
-    borderRadius: 30,
-    position: "relative",
+  content: { padding: 16, paddingBottom: 48, paddingTop: 12 },
+  homeHeader: {
+    backgroundColor: colors.paperRaised,
+    borderColor: "rgba(36, 56, 60, 0.09)",
+    borderRadius: 28,
+    borderWidth: 1,
+    elevation: 2,
+    padding: 15,
     shadowColor: colors.ink,
-    shadowOffset: { height: 10, width: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 22,
+    shadowOffset: { height: 7, width: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
   },
-  heroDecoration: {
-    borderRadius: 30,
+  userRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    minHeight: 60,
+  },
+  avatar: {
+    alignItems: "center",
+    backgroundColor: colors.forest,
+    borderColor: colors.forestPressed,
+    borderRadius: 28,
+    borderWidth: 1,
+    height: 56,
+    justifyContent: "center",
+    marginRight: 12,
+    width: 56,
+  },
+  avatarText: { color: colors.white, fontSize: 17, fontWeight: "800", letterSpacing: 0.4 },
+  greetingCopy: { flex: 1, minWidth: 0 },
+  greeting: {
+    color: colors.inkSoft,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  userName: {
+    color: colors.ink,
+    fontSize: 25,
+    fontWeight: "800",
+    letterSpacing: -0.6,
+    marginTop: 1,
+  },
+  headerActions: { flexDirection: "row", gap: 7, marginLeft: 7 },
+  headerAction: {
+    alignItems: "center",
+    backgroundColor: colors.paperMuted,
+    borderColor: "rgba(36, 56, 60, 0.08)",
+    borderRadius: 22,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  headerActionPressed: { backgroundColor: colors.header, transform: [{ scale: 0.96 }] },
+  monthBlock: {
+    marginTop: 6,
+  },
+  monthTitle: {
+    color: colors.ink,
+    fontSize: 36,
+    fontWeight: "800",
+    letterSpacing: -1.3,
+  },
+  monthSubtitle: { color: colors.inkSoft, fontSize: 16, lineHeight: 19, marginTop: -1 },
+  summaryGrid: {
+    alignItems: "stretch",
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 18,
+  },
+  summaryGridCompact: { flexDirection: "column" },
+  metricColumn: { flex: 1, gap: 9 },
+  metricColumnCompact: { flex: 0, width: "100%" },
+  metricCard: {
+    alignItems: "center",
+    borderColor: "rgba(36, 56, 60, 0.07)",
+    borderRadius: 20,
+    borderWidth: 1,
+    flexDirection: "row",
+    flex: 1,
+    minHeight: 83,
+    paddingHorizontal: 11,
+    paddingVertical: 10,
+  },
+  incomeMetric: { backgroundColor: "#E5F2EA", borderColor: "#CBE3D4" },
+  expenseMetric: { backgroundColor: "#F7E8E4", borderColor: "#EACFC8" },
+  netMetric: { backgroundColor: "#F0ECD9", borderColor: "#DED6B9" },
+  metricIcon: {
+    alignItems: "center",
+    borderRadius: 22,
+    height: 44,
+    justifyContent: "center",
+    marginRight: 10,
+    width: 44,
+  },
+  incomeMetricIcon: { backgroundColor: "#C9E6D4" },
+  expenseMetricIcon: { backgroundColor: "#F0D1CA" },
+  netMetricIcon: { backgroundColor: "#E4DAB8" },
+  metricCopy: { flex: 1, minWidth: 0 },
+  metricLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "600" },
+  metricValue: {
+    fontSize: 21,
+    fontWeight: "800",
+    letterSpacing: -0.65,
+    marginTop: 3,
+  },
+  incomeMetricValue: { color: colors.income },
+  expenseMetricValue: { color: colors.expense },
+  netMetricValue: { color: colors.gold },
+  flowCard: {
+    alignItems: "center",
+    backgroundColor: "#F7EEE6",
+    borderColor: "#E8D8CC",
+    borderRadius: 22,
+    borderWidth: 1,
+    flex: 0.95,
+    justifyContent: "center",
+    minWidth: 0,
+    paddingHorizontal: 10,
+    paddingVertical: 14,
+  },
+  donutWrap: { alignItems: "center", justifyContent: "center" },
+  donutCenter: {
+    alignItems: "center",
     bottom: 0,
+    justifyContent: "center",
     left: 0,
-    overflow: "hidden",
     position: "absolute",
     right: 0,
     top: 0,
   },
-  heroRingLarge: {
-    borderColor: "rgba(219, 235, 233, 0.10)",
-    borderRadius: 150,
-    borderWidth: 1,
-    height: 300,
-    position: "absolute",
-    right: -126,
-    top: -112,
-    width: 300,
-  },
-  heroRingSmall: {
-    borderColor: "rgba(219, 235, 233, 0.14)",
-    borderRadius: 92,
-    borderWidth: 1,
-    height: 184,
-    position: "absolute",
-    right: -53,
-    top: -52,
-    width: 184,
-  },
-  heroContent: { padding: 20, position: "relative", zIndex: 1 },
-  heroIntro: { marginTop: 2 },
-  greetingRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-  },
-  inlineDate: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5,
-  },
-  inlineDateText: {
-    color: "#DCE9E8",
-    fontSize: 9,
+  donutPercentage: { color: colors.ink, fontSize: 22, fontWeight: "800", letterSpacing: -0.5 },
+  donutLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: "600", marginTop: 1 },
+  flowTitle: { color: colors.ink, fontSize: 13, fontWeight: "700", marginTop: 10 },
+  legend: { gap: 7, marginTop: 11, width: "100%" },
+  legendRow: { alignItems: "center", flexDirection: "row", minWidth: 0 },
+  legendDot: { borderRadius: 5, height: 10, marginRight: 6, width: 10 },
+  incomeLegendDot: { backgroundColor: "#3E9870" },
+  expenseLegendDot: { backgroundColor: "#D05F5B" },
+  legendLabel: { color: colors.inkSoft, fontSize: 10, marginRight: 5 },
+  legendIncomeValue: {
+    color: colors.income,
+    flex: 1,
+    fontSize: 11,
     fontWeight: "800",
-    letterSpacing: 0.7,
-  },
-  greeting: {
-    color: "#C5D7D6",
-    fontSize: 14,
-    fontWeight: "600",
-  },
-  headerTitle: {
-    color: colors.white,
-    fontSize: 29,
-    fontWeight: "800",
-    letterSpacing: -0.9,
-    marginTop: 3,
-  },
-  comparisonPanel: {
-    backgroundColor: "rgba(255,255,255,0.065)",
-    borderColor: "rgba(255,255,255,0.10)",
-    borderRadius: 18,
-    borderWidth: 1,
-    gap: 16,
-    marginTop: 24,
-    padding: 14,
-  },
-  comparisonItem: { gap: 8 },
-  comparisonHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
-  },
-  comparisonLabelRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7,
-  },
-  comparisonDot: { borderRadius: 4, height: 7, width: 7 },
-  incomeDot: { backgroundColor: "#A9E5CA" },
-  expenseDot: { backgroundColor: "#FFB3A9" },
-  comparisonLabel: {
-    color: "#C5D7D6",
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.15,
-  },
-  comparisonAmount: {
-    flexShrink: 1,
-    fontSize: 16,
-    fontWeight: "800",
-    letterSpacing: -0.35,
     textAlign: "right",
   },
-  incomeValue: { color: "#A9E5CA" },
-  expenseValue: { color: "#FFB3A9" },
-  comparisonTrack: {
-    backgroundColor: "rgba(255,255,255,0.09)",
-    borderRadius: 4,
-    flexDirection: "row",
-    height: 7,
-    overflow: "hidden",
-  },
-  comparisonFill: { borderRadius: 4 },
-  incomeFill: { backgroundColor: "#91D2B5" },
-  expenseFill: { backgroundColor: "#EE9489" },
-  netRow: {
-    alignItems: "center",
-    borderTopColor: "rgba(255,255,255,0.10)",
-    borderTopWidth: 1,
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
-    marginTop: 1,
-    paddingTop: 14,
-  },
-  balanceLabel: {
-    color: "#B8CCCB",
-    fontSize: 8,
+  legendExpenseValue: {
+    color: colors.expense,
+    flex: 1,
+    fontSize: 11,
     fontWeight: "800",
-    letterSpacing: 1.2,
-  },
-  netCaption: {
-    color: "#8FA9A7",
-    fontSize: 9,
-    marginTop: 3,
-  },
-  balanceValue: {
-    color: colors.white,
-    flexShrink: 1,
-    fontSize: 24,
-    fontWeight: "800",
-    letterSpacing: -0.7,
     textAlign: "right",
   },
-  negativeBalance: { color: "#FFC0B8" },
   actionsRow: {
-    backgroundColor: "rgba(255,255,255,0.055)",
-    borderColor: "rgba(255,255,255,0.08)",
-    borderRadius: 20,
-    borderWidth: 1,
     flexDirection: "row",
-    gap: 7,
-    marginTop: 20,
-    padding: 5,
+    gap: 10,
+    marginTop: 13,
   },
+  actionsRowCompact: { gap: 8 },
   actionButton: {
     alignItems: "center",
-    borderRadius: 15,
+    borderRadius: 20,
     flex: 1,
     flexDirection: "row",
-    gap: 7,
+    gap: 8,
     justifyContent: "center",
-    minHeight: 46,
-    paddingHorizontal: 10,
+    minHeight: 58,
+    paddingHorizontal: 12,
+    shadowColor: colors.ink,
+    shadowOffset: { height: 5, width: 0 },
+    shadowOpacity: 0.13,
+    shadowRadius: 10,
   },
-  incomeButton: { backgroundColor: colors.incomeTint },
-  expenseButton: { backgroundColor: colors.expenseTint },
+  incomeButton: { backgroundColor: colors.forest },
+  expenseButton: { backgroundColor: colors.expense },
   actionButtonPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
-  actionLabel: { fontSize: 12, fontWeight: "800" },
-  incomeActionLabel: { color: colors.income },
-  expenseActionLabel: { color: colors.expense },
-  loadingSummary: { alignItems: "center", flexDirection: "row", gap: 10, minHeight: 176 },
-  loadingText: { color: "#CFE0E0", fontSize: 13 },
-  errorSummary: { minHeight: 176, paddingTop: 28 },
-  errorTitle: { color: colors.white, fontSize: 16, fontWeight: "700" },
-  errorText: { color: "#CFE0E0", fontSize: 12, lineHeight: 18, marginTop: 5 },
-  retryButton: { alignSelf: "flex-start", marginTop: 6, paddingVertical: 8 },
-  retryText: { color: colors.white, fontSize: 13, fontWeight: "800" },
+  actionLabel: { color: colors.white, fontSize: 14, fontWeight: "800" },
+  loadingSummary: {
+    alignItems: "center",
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 22,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    marginTop: 22,
+    minHeight: 252,
+  },
+  loadingText: { color: colors.inkSoft, fontSize: 13 },
+  errorSummary: {
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 22,
+    borderWidth: 1,
+    marginTop: 22,
+    minHeight: 160,
+    padding: 20,
+  },
+  errorTitle: { color: colors.ink, fontSize: 16, fontWeight: "700" },
+  errorText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
+  retryButton: { alignSelf: "flex-start", marginTop: 8, paddingVertical: 8 },
+  retryText: { color: colors.forest, fontSize: 13, fontWeight: "800" },
   paceSection: { marginTop: 28 },
   sectionEyebrow: {
     color: colors.forest,

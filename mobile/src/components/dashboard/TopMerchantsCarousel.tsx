@@ -19,6 +19,13 @@ const CARD_GAP = 12;
 const PAGE_HORIZONTAL_PADDING = 36;
 const MONTH_COUNT = 4;
 const MAX_MERCHANTS = 5;
+const MERCHANT_TONES = [
+  { accent: "#2D8062", tint: "#D9ECE2" },
+  { accent: "#BC5D52", tint: "#F1DAD5" },
+  { accent: "#98752D", tint: "#EEE4C9" },
+  { accent: "#397780", tint: "#D9E9EA" },
+  { accent: "#705E78", tint: "#E7DFE9" },
+] as const;
 
 interface TopMerchantsCarouselProps {
   date: Date;
@@ -26,6 +33,7 @@ interface TopMerchantsCarouselProps {
 }
 
 interface MerchantStat {
+  category: string;
   count: number;
   key: string;
   name: string;
@@ -93,6 +101,7 @@ function buildMonths(date: Date, transactions: Transaction[]): MerchantMonth[] {
       merchant.total += amount;
     } else {
       month.merchants.set(key, {
+        category: transaction.category,
         count: 1,
         key,
         name: merchantDisplayName(rawName),
@@ -124,6 +133,7 @@ function MerchantRow({ merchant, rank, total }: {
 }) {
   const percentage = total > 0 ? Math.round((merchant.total / total) * 100) : 0;
   const progressWidth = `${Math.max(percentage, 3)}%` as `${number}%`;
+  const tone = MERCHANT_TONES[(rank - 1) % MERCHANT_TONES.length];
 
   return (
     <View
@@ -131,9 +141,9 @@ function MerchantRow({ merchant, rank, total }: {
       style={styles.merchantRow}
     >
       <View style={styles.logoWrap}>
-        <MerchantLogo name={merchant.name} size={38} />
-        <View style={styles.rankBadge}>
-          <Text style={styles.rankText}>{rank}</Text>
+        <MerchantLogo category={merchant.category} name={merchant.name} size={57} />
+        <View style={[styles.rankBadge, { backgroundColor: tone.tint, borderColor: tone.accent }]}>
+          <Text style={[styles.rankText, { color: tone.accent }]}>{rank}</Text>
         </View>
       </View>
 
@@ -144,12 +154,14 @@ function MerchantRow({ merchant, rank, total }: {
             <Text style={styles.merchantCount}>x{merchant.count}</Text>
           </View>
           <View style={styles.merchantValueWrap}>
-            <Text numberOfLines={1} style={styles.merchantValue}>{formatCurrency(merchant.total)}</Text>
+            <Text numberOfLines={1} style={[styles.merchantValue, { color: tone.accent }]}>
+              {formatCurrency(merchant.total)}
+            </Text>
             <Text style={styles.merchantShare}>{percentage}% OF TOTAL</Text>
           </View>
         </View>
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { width: progressWidth }]} />
+          <View style={[styles.progressFill, { backgroundColor: tone.accent, width: progressWidth }]} />
         </View>
       </View>
     </View>
@@ -260,15 +272,16 @@ export function TopMerchantsCarousel({ date, transactions }: TopMerchantsCarouse
 const styles = StyleSheet.create({
   container: { marginTop: 30 },
   card: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: "#FCFBF7",
+    borderColor: "#D7E0DC",
     borderRadius: 22,
     borderWidth: 1,
+    elevation: 2,
     minHeight: 410,
     padding: 20,
     shadowColor: colors.ink,
     shadowOffset: { height: 5, width: 0 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
   },
   cardHeader: {
@@ -279,26 +292,35 @@ const styles = StyleSheet.create({
   },
   cardTitleWrap: { flex: 1, minWidth: 0 },
   eyebrow: {
-    color: colors.inkFaint,
+    color: colors.forest,
     fontSize: 9,
     fontWeight: "800",
     letterSpacing: 1.5,
   },
   monthLabel: {
-    color: colors.inkSoft,
+    color: colors.ink,
     fontSize: 14,
     fontWeight: "700",
     marginTop: 5,
   },
-  totalWrap: { alignItems: "flex-end", maxWidth: "48%" },
+  totalWrap: {
+    alignItems: "flex-end",
+    backgroundColor: "#F1E8D5",
+    borderColor: "#E3D6B8",
+    borderRadius: 13,
+    borderWidth: 1,
+    maxWidth: "48%",
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
   totalLabel: {
-    color: colors.inkFaint,
+    color: colors.gold,
     fontSize: 8,
     fontWeight: "800",
     letterSpacing: 0.9,
   },
   totalValue: {
-    color: colors.ink,
+    color: colors.gold,
     fontSize: 20,
     fontWeight: "800",
     letterSpacing: -0.45,
@@ -310,26 +332,26 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexDirection: "row",
     gap: 12,
-    minHeight: 59,
+    minHeight: 78,
+    borderBottomColor: "rgba(36, 56, 60, 0.055)",
+    borderBottomWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 2,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
-  logoWrap: { height: 38, position: "relative", width: 38 },
+  logoWrap: { height: 57, position: "relative", width: 57 },
   rankBadge: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
     borderRadius: 9,
-    borderWidth: StyleSheet.hairlineWidth,
-    bottom: -5,
-    height: 18,
+    borderWidth: 1,
+    bottom: -4,
+    height: 20,
     justifyContent: "center",
-    minWidth: 18,
+    minWidth: 20,
     paddingHorizontal: 3,
     position: "absolute",
-    right: -5,
+    right: -4,
   },
-  rankText: { color: colors.inkFaint, fontSize: 8, fontWeight: "800" },
+  rankText: { fontSize: 9, fontWeight: "800" },
   merchantDetails: { flex: 1, minWidth: 0 },
   merchantHeading: {
     alignItems: "flex-start",
@@ -361,13 +383,13 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   progressTrack: {
-    backgroundColor: colors.paperMuted,
-    borderRadius: 2,
-    height: 4,
+    backgroundColor: "#E8E4DB",
+    borderRadius: 3,
+    height: 6,
     marginTop: 8,
     overflow: "hidden",
   },
-  progressFill: { backgroundColor: colors.forest, borderRadius: 2, height: 4 },
+  progressFill: { borderRadius: 3, height: 6 },
   emptyState: { alignItems: "center", flex: 1, justifyContent: "center", padding: 24 },
   emptyText: { color: colors.inkFaint, fontSize: 13, textAlign: "center" },
   dots: {
@@ -377,6 +399,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 12,
   },
-  dot: { backgroundColor: colors.line, borderRadius: 4, height: 7, width: 7 },
-  activeDot: { backgroundColor: colors.forest, width: 22 },
+  dot: { backgroundColor: "#C9D2CF", borderRadius: 4, height: 7, width: 7 },
+  activeDot: { backgroundColor: "#2D8062", width: 22 },
 });

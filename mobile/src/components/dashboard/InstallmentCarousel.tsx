@@ -69,29 +69,39 @@ function buildMonths(date: Date, plans: InstallmentPlan[]): InstallmentMonth[] {
 
 function InstallmentMonthCard({ month }: { month: InstallmentMonth }) {
   const paymentLabel = month.count === 1 ? "1 payment" : `${month.count} payments`;
+  const hasPayments = month.count > 0;
 
   return (
     <View
       accessibilityLabel={`${month.label}, ${paymentLabel}, ${formatCurrency(month.total)}`}
-      style={styles.card}
+      style={[styles.card, hasPayments ? styles.scheduledCard : styles.emptyCard]}
     >
       <View style={styles.headerRow}>
         <View style={styles.titleRow}>
-          <View accessibilityElementsHidden style={styles.iconBox}>
-            <View style={styles.iconLineWide} />
-            <View style={styles.iconLine} />
-            <View style={styles.iconLineWide} />
+          <View
+            accessibilityElementsHidden
+            style={[styles.iconBox, hasPayments ? styles.scheduledIconBox : styles.emptyIconBox]}
+          >
+            <View style={[styles.iconLineWide, hasPayments ? styles.scheduledIconLine : styles.emptyIconLine]} />
+            <View style={[styles.iconLine, hasPayments ? styles.scheduledIconLine : styles.emptyIconLine]} />
+            <View style={[styles.iconLineWide, hasPayments ? styles.scheduledIconLine : styles.emptyIconLine]} />
           </View>
           <View style={styles.titleCopy}>
             <Text style={styles.eyebrow}>INSTALLMENTS</Text>
             <Text numberOfLines={1} style={styles.monthLabel}>{month.label}</Text>
           </View>
         </View>
-        <Text style={styles.paymentCount}>{paymentLabel}</Text>
+        <Text style={[styles.paymentCount, hasPayments ? styles.scheduledCount : styles.emptyCount]}>
+          {paymentLabel}
+        </Text>
       </View>
 
       <View style={styles.amountRow}>
-        <Text adjustsFontSizeToFit numberOfLines={1} style={styles.amount}>
+        <Text
+          adjustsFontSizeToFit
+          numberOfLines={1}
+          style={[styles.amount, hasPayments ? styles.scheduledAmount : styles.emptyAmount]}
+        >
           {formatCurrency(month.total)}
         </Text>
         <Text style={styles.perMonth}>/ MONTH</Text>
@@ -103,9 +113,9 @@ function InstallmentMonthCard({ month }: { month: InstallmentMonth }) {
           : `No installments due in ${month.label}.`}
       </Text>
 
-      <View style={styles.statusRow}>
-        <View style={[styles.statusDot, month.count === 0 && styles.statusDotEmpty]} />
-        <Text style={styles.statusText}>
+      <View style={[styles.statusRow, hasPayments ? styles.scheduledStatus : styles.emptyStatus]}>
+        <View style={[styles.statusDot, !hasPayments && styles.statusDotEmpty]} />
+        <Text style={[styles.statusText, !hasPayments && styles.statusTextEmpty]}>
           {month.count > 0 ? "SCHEDULED PAYMENTS" : "NO PAYMENTS"}
         </Text>
       </View>
@@ -200,12 +210,24 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     borderRadius: 22,
     borderWidth: 1,
+    borderTopWidth: 4,
+    elevation: 2,
     minHeight: 230,
     padding: 20,
     shadowColor: colors.ink,
     shadowOffset: { height: 5, width: 0 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.1,
     shadowRadius: 12,
+  },
+  scheduledCard: {
+    backgroundColor: "#FFF9ED",
+    borderColor: "#E8D4A7",
+    borderTopColor: "#C89432",
+  },
+  emptyCard: {
+    backgroundColor: "#F7FAF7",
+    borderColor: "#D6E5DB",
+    borderTopColor: "#4A826B",
   },
   headerRow: {
     alignItems: "flex-start",
@@ -216,27 +238,54 @@ const styles = StyleSheet.create({
   titleRow: { alignItems: "center", flex: 1, flexDirection: "row", gap: 10, minWidth: 0 },
   iconBox: {
     alignItems: "center",
-    backgroundColor: colors.incomeTint,
-    borderRadius: 10,
+    borderRadius: 12,
     gap: 3,
-    height: 34,
+    height: 40,
     justifyContent: "center",
-    width: 34,
+    width: 40,
   },
-  iconLine: { backgroundColor: colors.forest, borderRadius: 1, height: 2, width: 13 },
-  iconLineWide: { backgroundColor: colors.forest, borderRadius: 1, height: 2, width: 17 },
+  scheduledIconBox: { backgroundColor: "#EEDDAF" },
+  emptyIconBox: { backgroundColor: "#DCECE3" },
+  iconLine: { borderRadius: 1, height: 3, width: 15 },
+  iconLineWide: { borderRadius: 1, height: 3, width: 20 },
+  scheduledIconLine: { backgroundColor: "#966F20" },
+  emptyIconLine: { backgroundColor: "#3D765F" },
   titleCopy: { flex: 1, minWidth: 0 },
-  eyebrow: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.3 },
-  monthLabel: { color: colors.inkSoft, fontSize: 13, fontWeight: "700", marginTop: 4 },
-  paymentCount: { color: colors.inkFaint, fontSize: 10, fontWeight: "700", marginTop: 3 },
+  eyebrow: { color: colors.gold, fontSize: 9, fontWeight: "800", letterSpacing: 1.3 },
+  monthLabel: { color: colors.ink, fontSize: 14, fontWeight: "700", marginTop: 4 },
+  paymentCount: {
+    borderRadius: 11,
+    fontSize: 10,
+    fontWeight: "800",
+    marginTop: 3,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+  scheduledCount: { backgroundColor: "#F1DEB2", color: "#855F18" },
+  emptyCount: { backgroundColor: "#DCECE3", color: "#3D765F" },
   amountRow: { alignItems: "baseline", flexDirection: "row", gap: 7, marginTop: 28 },
-  amount: { color: colors.forest, flexShrink: 1, fontSize: 31, fontWeight: "800", letterSpacing: -0.8 },
+  amount: { flexShrink: 1, fontSize: 31, fontWeight: "800", letterSpacing: -0.8 },
+  scheduledAmount: { color: "#A16F19" },
+  emptyAmount: { color: "#3D765F" },
   perMonth: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 0.7 },
   description: { color: colors.inkSoft, fontSize: 13, lineHeight: 19, marginTop: 12 },
-  statusRow: { alignItems: "center", flexDirection: "row", gap: 7, marginTop: 18 },
-  statusDot: { backgroundColor: colors.forest, borderRadius: 4, height: 7, width: 7 },
-  statusDotEmpty: { backgroundColor: colors.line },
-  statusText: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 0.8 },
+  statusRow: {
+    alignItems: "center",
+    alignSelf: "flex-start",
+    borderRadius: 11,
+    flexDirection: "row",
+    gap: 7,
+    marginTop: 18,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+  scheduledStatus: { backgroundColor: "#F4E5C2" },
+  emptyStatus: { backgroundColor: "#E2EFE7" },
+  statusDot: { backgroundColor: "#C89432", borderRadius: 4, height: 7, width: 7 },
+  statusDotEmpty: { backgroundColor: "#4A826B" },
+  statusText: { color: "#855F18", fontSize: 8, fontWeight: "800", letterSpacing: 0.8 },
+  statusTextEmpty: { color: "#3D765F" },
   dots: {
     alignItems: "center",
     flexDirection: "row",
@@ -244,6 +293,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 12,
   },
-  dot: { backgroundColor: colors.line, borderRadius: 4, height: 7, width: 7 },
-  activeDot: { backgroundColor: colors.forest, width: 22 },
+  dot: { backgroundColor: "#D5D0C3", borderRadius: 4, height: 7, width: 7 },
+  activeDot: { backgroundColor: "#C89432", width: 22 },
 });

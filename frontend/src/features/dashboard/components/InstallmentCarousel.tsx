@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, HStack, Text, VStack, useColorMode } from '@chakra-ui/react'
 import { ArrowUpRight, Rows3 } from 'lucide-react'
 import type { InstallmentPlan } from '../../../types'
 import { useI18n } from '../../../i18n'
@@ -31,6 +31,7 @@ export default function InstallmentCarousel({
   onManage,
 }: InstallmentCarouselProps) {
   const { t, formatCurrency, formatDate } = useI18n()
+  const { colorMode } = useColorMode()
   const carouselRef = useRef<HTMLDivElement>(null)
   const [activeMonth, setActiveMonth] = useState(CURRENT_MONTH_INDEX)
 
@@ -121,7 +122,22 @@ export default function InstallmentCarousel({
           '&::-webkit-scrollbar': { display: 'none' },
         }}
       >
-        {months.map((month, index) => (
+        {months.map((month, index) => {
+          const hasPayments = month.count > 0
+          const accent = hasPayments
+            ? colorMode === 'dark' ? '#d5b769' : '#a16f19'
+            : colorMode === 'dark' ? '#8fbea3' : '#3d765f'
+          const tint = hasPayments
+            ? colorMode === 'dark' ? '#392f1d' : '#f4e5c2'
+            : colorMode === 'dark' ? '#20352b' : '#e2efe7'
+          const surface = hasPayments
+            ? colorMode === 'dark' ? '#28241d' : '#fff9ed'
+            : colorMode === 'dark' ? '#1d2923' : '#f7faf7'
+          const border = hasPayments
+            ? colorMode === 'dark' ? '#66542d' : '#e8d4a7'
+            : colorMode === 'dark' ? '#3e5c49' : '#d6e5db'
+
+          return (
           <Box
             data-installment-month
             key={month.key}
@@ -132,7 +148,14 @@ export default function InstallmentCarousel({
             scrollSnapAlign="start"
             scrollSnapStop="always"
           >
-            <Panel h="full">
+            <Panel
+              h="full"
+              bg={surface}
+              borderColor={border}
+              borderTop="4px solid"
+              borderTopColor={accent}
+              boxShadow="var(--pb-shadow-lift)"
+            >
               <VStack align="stretch" spacing={3.5} h="full">
                 <HStack justify="space-between" align="flex-start" spacing={3}>
                   <HStack spacing={2.5} minW={0}>
@@ -141,11 +164,11 @@ export default function InstallmentCarousel({
                       h={8}
                       justify="center"
                       borderRadius="10px"
-                      bg="var(--pb-tint-green)"
-                      color="var(--pb-forest-2)"
+                      bg={tint}
+                      color={accent}
                       flexShrink={0}
                     >
-                      <Rows3 size={15} strokeWidth={1.8} />
+                      <Rows3 size={18} strokeWidth={2.2} />
                     </HStack>
                     <VStack align="flex-start" spacing={0.5} minW={0}>
                       <Text
@@ -153,7 +176,7 @@ export default function InstallmentCarousel({
                         fontSize="10.5px"
                         letterSpacing="0.17em"
                         textTransform="uppercase"
-                        color="var(--pb-ink-faint)"
+                        color={accent}
                       >
                         {t('dashboard.installments')}
                       </Text>
@@ -162,7 +185,17 @@ export default function InstallmentCarousel({
                       </Text>
                     </VStack>
                   </HStack>
-                  <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" whiteSpace="nowrap">
+                  <Text
+                    fontFamily="var(--pb-mono)"
+                    fontSize="10px"
+                    fontWeight={700}
+                    color={accent}
+                    bg={tint}
+                    px={2.5}
+                    py={1.5}
+                    borderRadius="full"
+                    whiteSpace="nowrap"
+                  >
                     {t(month.count === 1 ? 'installments.paymentCount.one' : 'installments.paymentCount.other', { count: month.count })}
                   </Text>
                 </HStack>
@@ -173,7 +206,7 @@ export default function InstallmentCarousel({
                     fontSize="clamp(1.75rem, 3.2vw, 2.15rem)"
                     fontWeight={500}
                     lineHeight={1}
-                    color="var(--pb-forest-2)"
+                    color={accent}
                     style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
                   >
                     {formatCurrency(month.total)}
@@ -187,6 +220,13 @@ export default function InstallmentCarousel({
                   {t(month.count > 0 ? 'dashboard.installmentsMonthDescription' : 'dashboard.installmentsMonthEmpty', { month: month.label })}
                 </Text>
 
+                <HStack align="center" alignSelf="flex-start" spacing={2} bg={tint} px={2.5} py={1.5} borderRadius="full">
+                  <Box w="8px" h="8px" borderRadius="full" bg={accent} />
+                  <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing="0.08em" textTransform="uppercase" color={accent}>
+                    {t(hasPayments ? 'dashboard.scheduledPayments' : 'dashboard.noPayments')}
+                  </Text>
+                </HStack>
+
                 {onManage && (
                   <HStack justify="flex-end" mt="auto" pt={1}>
                     <Button
@@ -195,7 +235,7 @@ export default function InstallmentCarousel({
                       size="xs"
                       h="26px"
                       px={0}
-                      color="var(--pb-forest-2)"
+                      color={accent}
                       fontFamily="var(--pb-mono)"
                       fontSize="10px"
                       letterSpacing="0.08em"
@@ -210,7 +250,8 @@ export default function InstallmentCarousel({
               </VStack>
             </Panel>
           </Box>
-        ))}
+          )
+        })}
       </Box>
 
       <HStack justify="center" spacing={2}>
@@ -225,7 +266,7 @@ export default function InstallmentCarousel({
             h="7px"
             w={index === activeMonth ? '22px' : '7px'}
             borderRadius="full"
-            bg={index === activeMonth ? 'var(--pb-forest-2)' : 'var(--pb-hair-2)'}
+            bg={index === activeMonth ? colorMode === 'dark' ? '#d5b769' : '#a16f19' : 'var(--pb-hair-2)'}
             transition="width 0.2s ease, background 0.2s ease"
           />
         ))}
