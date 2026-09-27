@@ -50,9 +50,9 @@ function MetricCard({
 }: MetricCardProps) {
   return (
     <HStack
-      minH="88px"
-      spacing={3}
-      px={{ base: 3, md: 4 }}
+      minH={{ base: '72px', md: '88px' }}
+      spacing={{ base: 2, md: 3 }}
+      px={{ base: 2, md: 4 }}
       py={3}
       border="1px solid"
       borderColor={borderColor}
@@ -63,22 +63,22 @@ function MetricCard({
         display="grid"
         placeItems="center"
         flexShrink={0}
-        w="46px"
-        h="46px"
-        borderRadius="15px"
+        w={{ base: '34px', md: '46px' }}
+        h={{ base: '34px', md: '46px' }}
+        borderRadius={{ base: '11px', md: '15px' }}
         bg={iconBackground}
         color={valueColor}
       >
-        <Icon size={23} strokeWidth={2.4} />
+        <Icon size={20} strokeWidth={2.4} />
       </Box>
       <Box minW={0} flex={1}>
-        <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)">
+        <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'xs', md: 'sm' }} color="var(--pb-ink-soft)" noOfLines={1}>
           {label}
         </Text>
         <Text
           mt={0.5}
           fontFamily="var(--pb-serif)"
-          fontSize="clamp(1.25rem, 2.2vw, 1.7rem)"
+          fontSize={{ base: 'clamp(0.85rem, 4vw, 1.1rem)', md: 'clamp(1.25rem, 2.2vw, 1.7rem)' }}
           fontWeight={600}
           lineHeight={1.05}
           color={valueColor}
@@ -179,7 +179,7 @@ export default function MonthHero({
         </Box>
 
         <Grid
-          templateColumns={{ base: '1fr', md: 'minmax(0, 1.05fr) minmax(260px, 0.95fr)' }}
+          templateColumns={{ base: 'minmax(0, 1.15fr) minmax(0, 0.85fr)', md: 'minmax(0, 1.05fr) minmax(260px, 0.95fr)' }}
           gap={3}
           alignItems="stretch"
         >
@@ -217,13 +217,14 @@ export default function MonthHero({
             align="stretch"
             justify="center"
             spacing={3}
-            p={{ base: 4, md: 5 }}
+            h="full"
+            p={{ base: 2, md: 5 }}
             border="1px solid"
             borderColor="var(--pb-hair)"
             borderRadius="20px"
             bg="var(--pb-surface-2)"
           >
-            <Box position="relative" h={{ base: '210px', md: '230px' }}>
+            <Box position="relative" h={{ base: '142px', md: '230px' }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -280,7 +281,7 @@ export default function MonthHero({
                       {item.label}
                     </Text>
                   </HStack>
-                  <Text fontFamily="var(--pb-serif)" fontSize="sm" fontWeight={600} color={item.color}>
+                  <Text display={{ base: 'none', sm: 'block' }} fontFamily="var(--pb-serif)" fontSize="sm" fontWeight={600} color={item.color}>
                     {formatCurrency(item.value)}
                   </Text>
                 </HStack>
@@ -290,16 +291,17 @@ export default function MonthHero({
         </Grid>
 
         {(onAddIncome || onAddExpense) && (
-          <Grid templateColumns={{ base: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }} gap={3}>
+          <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={{ base: 2, md: 3 }}>
             {onAddIncome && (
               <Button
-                h="54px"
-                borderRadius="17px"
+                h={{ base: '48px', md: '54px' }}
+                borderRadius={{ base: '13px', md: '17px' }}
                 bg="var(--pb-forest)"
                 color="var(--pb-paper-3)"
                 leftIcon={<Plus size={19} strokeWidth={2.4} />}
                 fontFamily="var(--pb-serif)"
-                fontSize="md"
+                fontSize={{ base: 'sm', md: 'md' }}
+                px={{ base: 2, md: 4 }}
                 fontWeight={600}
                 onClick={onAddIncome}
                 _hover={{ bg: 'var(--pb-forest-2)', transform: 'translateY(-1px)' }}
@@ -310,13 +312,14 @@ export default function MonthHero({
             )}
             {onAddExpense && (
               <Button
-                h="54px"
-                borderRadius="17px"
+                h={{ base: '48px', md: '54px' }}
+                borderRadius={{ base: '13px', md: '17px' }}
                 bg="var(--pb-coral-2)"
                 color="white"
                 leftIcon={<Plus size={19} strokeWidth={2.4} />}
                 fontFamily="var(--pb-serif)"
-                fontSize="md"
+                fontSize={{ base: 'sm', md: 'md' }}
+                px={{ base: 2, md: 4 }}
                 fontWeight={600}
                 onClick={onAddExpense}
                 _hover={{ bg: 'var(--pb-coral)', transform: 'translateY(-1px)' }}
