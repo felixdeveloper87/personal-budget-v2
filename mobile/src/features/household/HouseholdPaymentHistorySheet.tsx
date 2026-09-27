@@ -44,7 +44,7 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
         await logout();
         return;
       }
-      setError("Não foi possível carregar as pagamentos. Tente novamente.");
+      setError("Não foi possível carregar os pagamentos. Tente novamente.");
     } finally {
       if (generation.current === requestGeneration) {
         inFlight.current = false;
