@@ -2,7 +2,7 @@ import { SymbolView } from "expo-symbols";
 import { StyleSheet, Text, View } from "react-native";
 
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
-import { expenseDateLabel, getExpenseShare } from "@/features/household/expenseHistory";
+import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
 import { colors } from "@/theme/colors";
 import type { HouseholdExpense } from "@/types/household";
 
@@ -19,18 +19,28 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId }: {
   const share = getExpenseShare(expense, currentMemberId);
   const shareLabel = share === undefined ? "Parte indisponível" : share === null ? "Não participa" : `Sua parte: ${currencyFormat.format(share)}`;
   const date = expenseDateLabel(expense.expenseDate);
+  const attachmentCount = getExpenseAttachmentCount(expense);
+  const proofLabel = attachmentCount > 0 ? `${attachmentCount} ${attachmentCount === 1 ? "comprovante" : "comprovantes"}.` : "";
 
   return (
     <View
       accessible
-      accessibilityLabel={`${category?.label ?? expense.category}. ${expense.description}. Total: ${amount}. ${shareLabel}. Pago por ${expense.payerName}. ${date}.`}
+      accessibilityLabel={`${category?.label ?? expense.category}. ${expense.description}. Total: ${amount}. ${shareLabel}. Pago por ${expense.payerName}. ${date}. ${proofLabel}`}
       style={styles.card}
     >
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
         <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
       </View>
       <View style={styles.copy}>
-        <Text numberOfLines={1} style={styles.category}>{category?.label ?? expense.category}</Text>
+        <View style={styles.categoryRow}>
+          <Text numberOfLines={1} style={styles.category}>{category?.label ?? expense.category}</Text>
+          {attachmentCount > 0 ? (
+            <View style={styles.proofBadge}>
+              <SymbolView name={{ ios: "paperclip", android: "attach_file", web: "attach_file" }} size={10} tintColor={colors.income} />
+              <Text style={styles.proofCount}>{attachmentCount}</Text>
+            </View>
+          ) : null}
+        </View>
         {expense.description ? <Text numberOfLines={1} style={styles.description}>{expense.description}</Text> : null}
         <Text adjustsFontSizeToFit minimumFontScale={0.8} numberOfLines={1} style={styles.share}>{shareLabel}</Text>
       </View>
@@ -49,6 +59,9 @@ const styles = StyleSheet.create({
   copy: { flex: 1, minWidth: 0 },
   details: { flex: 1.1, minWidth: 0 },
   category: { color: colors.ink, fontSize: 13, fontWeight: "700", flexShrink: 1 },
+  categoryRow: { alignItems: "center", flexDirection: "row", gap: 5 },
+  proofBadge: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 2, backgroundColor: "#E5EDDC", borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2 },
+  proofCount: { color: colors.income, fontSize: 9, fontWeight: "700" },
   amount: { color: colors.ink, fontSize: 14, fontWeight: "800", textAlign: "right" },
   description: { color: colors.inkSoft, fontSize: 11, lineHeight: 15, marginTop: 3 },
   share: { color: colors.income, fontSize: 10, fontWeight: "600", lineHeight: 14, marginTop: 3 },

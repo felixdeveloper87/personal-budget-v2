@@ -4,6 +4,8 @@ import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.model.Household;
 import com.example.budget.model.HouseholdExpense;
 import com.example.budget.model.HouseholdExpenseShare;
+import com.example.budget.model.HouseholdAttachment;
+import com.example.budget.model.HouseholdAttachmentStatus;
 import com.example.budget.model.HouseholdMember;
 import com.example.budget.model.User;
 import com.example.budget.repository.*;
@@ -17,6 +19,7 @@ import org.springframework.data.domain.SliceImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -100,8 +103,10 @@ class HouseholdExpenseHistoryTest {
         assertThat(item.payerMemberId()).isEqualTo(20L);
         assertThat(item.payerName()).isEqualTo("Ana");
         assertThat(item.currentUserShare()).isNull();
+        assertThat(item.attachmentCount()).isZero();
         verify(shareRepository).findByExpenseInAndMember(List.of(expense), member);
-        verifyNoInteractions(settlementRepository, attachmentRepository);
+        verify(attachmentRepository).findByExpenseInOrderByCreatedAtAsc(List.of(expense));
+        verifyNoInteractions(settlementRepository);
     }
 
     @Test
@@ -128,6 +133,36 @@ class HouseholdExpenseHistoryTest {
     }
 
     @Test
+    void countsOnlyAvailableUnexpiredProofImages() {
+        stubMember();
+        HouseholdExpense expense = mock(HouseholdExpense.class);
+        HouseholdMember payer = mock(HouseholdMember.class);
+        when(expense.getId()).thenReturn(70L);
+        when(expense.getAmount()).thenReturn(new BigDecimal("25.00"));
+        when(expense.getPayer()).thenReturn(payer);
+        var pageable = PageRequest.of(0, 50);
+        when(expenseRepository.findByHouseholdAndVoidedAtIsNullOrderByExpenseDateDescIdDesc(household, pageable))
+                .thenReturn(new SliceImpl<>(List.of(expense), pageable, false));
+        HouseholdAttachment available = mock(HouseholdAttachment.class);
+        when(available.getStatus()).thenReturn(HouseholdAttachmentStatus.AVAILABLE);
+        when(available.getExpiresAt()).thenReturn(LocalDateTime.now().plusDays(1));
+        when(available.getExpense()).thenReturn(expense);
+        HouseholdAttachment overdue = mock(HouseholdAttachment.class);
+        when(overdue.getStatus()).thenReturn(HouseholdAttachmentStatus.AVAILABLE);
+        when(overdue.getExpiresAt()).thenReturn(LocalDateTime.now().minusDays(1));
+        HouseholdAttachment expired = mock(HouseholdAttachment.class);
+        when(expired.getStatus()).thenReturn(HouseholdAttachmentStatus.EXPIRED);
+        HouseholdAttachment removed = mock(HouseholdAttachment.class);
+        when(removed.getStatus()).thenReturn(HouseholdAttachmentStatus.REMOVED);
+        when(attachmentRepository.findByExpenseInOrderByCreatedAtAsc(List.of(expense)))
+                .thenReturn(List.of(available, overdue, expired, removed));
+
+        var result = service.expenseHistory(10L, 0, user);
+
+        assertThat(result.expenses().get(0).attachmentCount()).isEqualTo(1);
+    }
+
+    @Test
     void emptyFinalPageHasNoMoreExpenses() {
         stubMember();
         var pageable = PageRequest.of(3, 50);
@@ -138,7 +173,7 @@ class HouseholdExpenseHistoryTest {
 
         assertThat(result.expenses()).isEmpty();
         assertThat(result.hasMore()).isFalse();
-        verifyNoInteractions(shareRepository);
+        verifyNoInteractions(shareRepository, attachmentRepository);
     }
 
     private void stubMember() {

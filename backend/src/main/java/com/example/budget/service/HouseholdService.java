@@ -88,6 +88,13 @@ public class HouseholdService {
                 ? Map.of()
                 : shareRepository.findByExpenseInAndMember(expenses.getContent(), member).stream()
                         .collect(Collectors.toMap(share -> share.getExpense().getId(), HouseholdExpenseShare::getAmount));
+        LocalDateTime now = LocalDateTime.now();
+        Map<Long, Long> attachmentCounts = expenses.isEmpty()
+                ? Map.of()
+                : attachmentRepository.findByExpenseInOrderByCreatedAtAsc(expenses.getContent()).stream()
+                        .filter(attachment -> attachment.getStatus() == HouseholdAttachmentStatus.AVAILABLE
+                                && attachment.getExpiresAt().isAfter(now))
+                        .collect(Collectors.groupingBy(attachment -> attachment.getExpense().getId(), Collectors.counting()));
         var items = expenses.getContent().stream()
                 .map(expense -> new HouseholdExpenseHistoryDTO.Item(
                         expense.getId(),
@@ -97,7 +104,8 @@ public class HouseholdService {
                         expense.getExpenseDate(),
                         expense.getPayer().getId(),
                         expense.getPayer().getDisplayName(),
-                        currentUserShares.get(expense.getId())))
+                        currentUserShares.get(expense.getId()),
+                        attachmentCounts.getOrDefault(expense.getId(), 0L)))
                 .toList();
         return new HouseholdExpenseHistoryDTO(items, page, expenses.hasNext());
     }

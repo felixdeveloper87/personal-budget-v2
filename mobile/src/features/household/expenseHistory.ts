@@ -1,5 +1,9 @@
 import type { HouseholdExpense } from "@/types/household";
 
+export function getExpenseAttachmentCount(expense: HouseholdExpense) {
+  return expense.attachmentCount ?? expense.attachments?.filter((attachment) => attachment.status === "AVAILABLE").length ?? 0;
+}
+
 export function getExpenseShare(expense: HouseholdExpense, currentMemberId: number) {
   if (expense.currentUserShare !== undefined) return expense.currentUserShare;
   if (expense.shares === undefined) return undefined;
