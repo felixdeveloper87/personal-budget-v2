@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { HouseholdPaymentHistorySheet } from "@/features/household/HouseholdPaymentHistorySheet";
 import { HouseholdPaymentRow } from "@/features/household/HouseholdPaymentRow";
@@ -24,9 +24,22 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
           </Pressable>
         ) : null}
       </View>
-      {recentPayments.length > 0 ? recentPayments.map((payment) => (
-        <HouseholdPaymentRow key={payment.id} payment={payment} currency={household.currency} />
-      )) : (
+      {recentPayments.length > 0 ? (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.carousel}
+          snapToInterval={200}
+          snapToAlignment="start"
+          decelerationRate="fast"
+          nestedScrollEnabled
+          directionalLockEnabled
+        >
+          {recentPayments.map((payment) => (
+            <HouseholdPaymentRow key={payment.id} payment={payment} currency={household.currency} variant="carousel" />
+          ))}
+        </ScrollView>
+      ) : (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>Ainda sem pagamentos</Text>
           <Text style={styles.emptyText}>Os pagamentos entre integrantes vão aparecer aqui.</Text>
@@ -47,6 +60,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 20, fontWeight: "700", letterSpacing: -0.4, marginTop: 5 },
   seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 13, minHeight: 44, paddingHorizontal: 12 },
   seeAllText: { color: colors.income, fontSize: 11, fontWeight: "700" },
+  carousel: { gap: 8, paddingBottom: 2 },
   empty: { backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 18, padding: 20 },
   emptyTitle: { color: colors.ink, fontSize: 14, fontWeight: "700" },
   emptyText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },

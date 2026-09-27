@@ -88,46 +88,53 @@ export function HouseholdProofViewer({ expense, householdId, onClose }: ProofVie
   const proof = proofs[index];
 
   return (
-    <SafeAreaView style={styles.viewer}>
-      <View style={styles.header}>
-        <View style={styles.headerCopy}>
-          <Text style={styles.title}>Comprovantes</Text>
-          <Text numberOfLines={1} style={styles.subtitle}>{expense.description}</Text>
-        </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Fechar comprovantes" onPress={onClose} style={styles.close}>
-          <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={21} tintColor="#F6F5EF" />
-        </Pressable>
-      </View>
-      {proof ? <ProofImage key={proof.id} proof={proof} householdId={householdId} /> : (
-        <View style={styles.state}>
-          <Text style={styles.message}>Não há imagens disponíveis. Atualize a página e tente novamente.</Text>
-        </View>
-      )}
-      {proofs.length > 0 ? (
-        <View style={styles.navigation}>
-          <Pressable accessibilityRole="button" accessibilityLabel="Comprovante anterior" disabled={index === 0} onPress={() => setIndex((current) => current - 1)} style={[styles.navButton, index === 0 && styles.disabled]}>
-            <SymbolView name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} size={20} tintColor="#F6F5EF" />
-          </Pressable>
-          <Text accessibilityLiveRegion="polite" style={styles.counter}>{index + 1} de {proofs.length}</Text>
-          <Pressable accessibilityRole="button" accessibilityLabel="Próximo comprovante" disabled={index === proofs.length - 1} onPress={() => setIndex((current) => current + 1)} style={[styles.navButton, index === proofs.length - 1 && styles.disabled]}>
-            <SymbolView name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={20} tintColor="#F6F5EF" />
+    <View style={styles.overlay}>
+      <Pressable accessibilityRole="button" accessibilityLabel="Fechar comprovantes" onPress={onClose} style={styles.backdrop} />
+      <SafeAreaView edges={["bottom"]} style={styles.viewer}>
+        <View style={styles.handle} />
+        <View style={styles.header}>
+          <View style={styles.headerCopy}>
+            <Text style={styles.title}>Comprovantes</Text>
+            <Text numberOfLines={1} style={styles.subtitle}>{expense.description}</Text>
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Fechar comprovantes" onPress={onClose} style={styles.close}>
+            <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={21} tintColor="#F6F5EF" />
           </Pressable>
         </View>
-      ) : null}
-    </SafeAreaView>
+        {proof ? <ProofImage key={proof.id} proof={proof} householdId={householdId} /> : (
+          <View style={styles.state}>
+            <Text style={styles.message}>Não há imagens disponíveis. Atualize a página e tente novamente.</Text>
+          </View>
+        )}
+        {proofs.length > 0 ? (
+          <View style={styles.navigation}>
+            <Pressable accessibilityRole="button" accessibilityLabel="Comprovante anterior" disabled={index === 0} onPress={() => setIndex((current) => current - 1)} style={[styles.navButton, index === 0 && styles.disabled]}>
+              <SymbolView name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} size={20} tintColor="#F6F5EF" />
+            </Pressable>
+            <Text accessibilityLiveRegion="polite" style={styles.counter}>{index + 1} de {proofs.length}</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel="Próximo comprovante" disabled={index === proofs.length - 1} onPress={() => setIndex((current) => current + 1)} style={[styles.navButton, index === proofs.length - 1 && styles.disabled]}>
+              <SymbolView name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={20} tintColor="#F6F5EF" />
+            </Pressable>
+          </View>
+        ) : null}
+      </SafeAreaView>
+    </View>
   );
 }
 
 export function HouseholdProofModal(props: ProofViewerProps) {
   return (
-    <Modal animationType="slide" visible onRequestClose={props.onClose}>
+    <Modal animationType="slide" transparent visible statusBarTranslucent onRequestClose={props.onClose}>
       <HouseholdProofViewer {...props} />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  viewer: { flex: 1, backgroundColor: "#18231E" },
+  overlay: { flex: 1, justifyContent: "flex-end" },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(19,36,28,0.48)" },
+  viewer: { height: "75%", width: "100%", maxWidth: 640, alignSelf: "center", backgroundColor: "#18231E", borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
+  handle: { alignSelf: "center", backgroundColor: "#607365", borderRadius: 3, height: 5, width: 36, marginTop: 10 },
   header: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16 },
   headerCopy: { flex: 1 },
   title: { color: "#F6F5EF", fontSize: 19, fontWeight: "700" },

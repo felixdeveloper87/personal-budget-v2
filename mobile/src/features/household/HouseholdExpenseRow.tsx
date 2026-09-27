@@ -72,6 +72,6 @@ const styles = StyleSheet.create({
   description: { color: colors.inkSoft, fontSize: 11, lineHeight: 15, marginTop: 3 },
   share: { color: colors.income, fontSize: 10, fontWeight: "600", lineHeight: 14, marginTop: 3 },
   payer: { color: colors.inkSoft, fontSize: 10, lineHeight: 14, marginTop: 2, textAlign: "right" },
-  payerName: { color: colors.ink, fontWeight: "600" },
+  payerName: { color: colors.income, fontSize: 12, fontWeight: "800" },
   date: { color: colors.inkFaint, fontSize: 10, lineHeight: 13, marginTop: 1, textAlign: "right" },
 });
