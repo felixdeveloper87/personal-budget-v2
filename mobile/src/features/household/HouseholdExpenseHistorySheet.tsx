@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { HouseholdExpenseRow } from "@/features/household/HouseholdExpenseRow";
+import { HouseholdProofViewer } from "@/features/household/HouseholdProofViewer";
 import { expenseMonthLabel, groupHouseholdExpenses, mergeHouseholdExpenses } from "@/features/household/expenseHistory";
 import { ApiError, getHouseholdExpenseHistory } from "@/services/api";
 import { colors } from "@/theme/colors";
@@ -18,6 +19,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
 }) {
   const { user, logout } = useAuth();
   const [expenses, setExpenses] = useState<HouseholdExpense[]>([]);
+  const [proofExpense, setProofExpense] = useState<HouseholdExpense | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextPage, setNextPage] = useState(0);
@@ -64,8 +66,8 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
   }, [load]);
 
   return (
-    <Modal animationType="slide" transparent visible statusBarTranslucent onRequestClose={onClose}>
-      <View style={styles.overlay}>
+    <Modal animationType="slide" transparent visible statusBarTranslucent onRequestClose={() => proofExpense ? setProofExpense(null) : onClose()}>
+      <View style={[styles.overlay, proofExpense !== null && styles.hidden]}>
         <Pressable accessibilityRole="button" accessibilityLabel="Fechar histórico" onPress={onClose} style={styles.backdrop} />
         <SafeAreaView edges={["bottom"]} style={styles.sheet}>
           <View style={styles.handle} />
@@ -84,7 +86,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
             contentContainerStyle={styles.list}
             stickySectionHeadersEnabled={false}
             renderSectionHeader={({ section }) => <Text style={styles.month}>{expenseMonthLabel(section.month)}</Text>}
-            renderItem={({ item }) => <HouseholdExpenseRow expense={item} currency={currency} currentMemberId={currentMemberId} />}
+            renderItem={({ item }) => <HouseholdExpenseRow expense={item} currency={currency} currentMemberId={currentMemberId} onOpenAttachments={setProofExpense} />}
             ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhuma despesa registrada ainda.</Text> : null}
             ListFooterComponent={
               <View style={styles.footer}>
@@ -103,12 +105,14 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
           />
         </SafeAreaView>
       </View>
+      {proofExpense ? <HouseholdProofViewer key={proofExpense.id} expense={proofExpense} householdId={householdId} onClose={() => setProofExpense(null)} /> : null}
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
+  hidden: { display: "none" },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(19,36,28,0.48)" },
   sheet: { alignSelf: "center", backgroundColor: "#F6F5EF", height: "90%", maxWidth: 640, width: "100%", borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
   handle: { alignSelf: "center", backgroundColor: "#C6D1C1", borderRadius: 3, height: 5, width: 36, marginTop: 10 },

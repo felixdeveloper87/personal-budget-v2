@@ -104,6 +104,7 @@ class HouseholdExpenseHistoryTest {
         assertThat(item.payerName()).isEqualTo("Ana");
         assertThat(item.currentUserShare()).isNull();
         assertThat(item.attachmentCount()).isZero();
+        assertThat(item.attachments()).isEmpty();
         verify(shareRepository).findByExpenseInAndMember(List.of(expense), member);
         verify(attachmentRepository).findByExpenseInOrderByCreatedAtAsc(List.of(expense));
         verifyNoInteractions(settlementRepository);
@@ -144,6 +145,8 @@ class HouseholdExpenseHistoryTest {
         when(expenseRepository.findByHouseholdAndVoidedAtIsNullOrderByExpenseDateDescIdDesc(household, pageable))
                 .thenReturn(new SliceImpl<>(List.of(expense), pageable, false));
         HouseholdAttachment available = mock(HouseholdAttachment.class);
+        when(available.getId()).thenReturn(101L);
+        when(available.getOriginalFilename()).thenReturn("receipt.jpg");
         when(available.getStatus()).thenReturn(HouseholdAttachmentStatus.AVAILABLE);
         when(available.getExpiresAt()).thenReturn(LocalDateTime.now().plusDays(1));
         when(available.getExpense()).thenReturn(expense);
@@ -160,6 +163,11 @@ class HouseholdExpenseHistoryTest {
         var result = service.expenseHistory(10L, 0, user);
 
         assertThat(result.expenses().get(0).attachmentCount()).isEqualTo(1);
+        assertThat(result.expenses().get(0).attachments()).hasSize(1);
+        var proof = result.expenses().get(0).attachments().get(0);
+        assertThat(proof.id()).isEqualTo(101L);
+        assertThat(proof.originalFilename()).isEqualTo("receipt.jpg");
+        assertThat(proof.status()).isEqualTo("AVAILABLE");
     }
 
     @Test

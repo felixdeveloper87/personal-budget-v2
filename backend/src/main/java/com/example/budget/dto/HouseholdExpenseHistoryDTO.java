@@ -14,6 +14,9 @@ public record HouseholdExpenseHistoryDTO(List<Item> expenses, int page, boolean 
             Long payerMemberId,
             String payerName,
             BigDecimal currentUserShare,
-            long attachmentCount
+            long attachmentCount,
+            List<Proof> attachments
     ) {}
+
+    public record Proof(Long id, String originalFilename, String status) {}
 }

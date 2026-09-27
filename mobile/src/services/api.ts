@@ -157,6 +157,33 @@ export interface HouseholdAttachmentFile {
   type: string;
 }
 
+export async function getHouseholdProofImage(
+  token: string,
+  householdId: number,
+  attachmentId: number,
+  signal?: AbortSignal,
+): Promise<string> {
+  const response = await fetch(`${API_BASE_URL}/households/${householdId}/attachments/${attachmentId}/content`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "image/jpeg,image/png,image/webp" },
+    cache: "no-store",
+    signal,
+  });
+  if (!response.ok) {
+    throw new ApiError(response.status === 410
+      ? "Este comprovante expirou e não está mais disponível."
+      : "Não foi possível abrir o comprovante. Tente novamente.", response.status);
+  }
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === "string"
+      ? resolve(reader.result)
+      : reject(new Error("Não foi possível ler a imagem."));
+    reader.onerror = () => reject(new Error("Não foi possível ler a imagem."));
+    reader.readAsDataURL(blob);
+  });
+}
+
 export async function uploadHouseholdExpenseAttachments(
   token: string,
   householdId: number,

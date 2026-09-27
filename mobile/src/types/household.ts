@@ -59,8 +59,14 @@ export interface HouseholdExpense {
   payerName: string;
   shares?: Array<{ memberId: number; amount: number }>;
   currentUserShare?: number | null;
-  attachments?: Array<{ status: "AVAILABLE" | "EXPIRED" | "REMOVED" }>;
+  attachments?: HouseholdProof[];
   attachmentCount?: number;
+}
+
+export interface HouseholdProof {
+  id: number;
+  originalFilename: string;
+  status: "AVAILABLE" | "EXPIRED" | "REMOVED";
 }
 
 export interface HouseholdExpenseHistory {

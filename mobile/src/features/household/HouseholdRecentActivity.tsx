@@ -3,12 +3,14 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { HouseholdExpenseHistorySheet } from "@/features/household/HouseholdExpenseHistorySheet";
 import { HouseholdExpenseRow } from "@/features/household/HouseholdExpenseRow";
+import { HouseholdProofModal } from "@/features/household/HouseholdProofViewer";
 import { sortHouseholdExpenses } from "@/features/household/expenseHistory";
 import { colors } from "@/theme/colors";
-import type { HouseholdHeroData } from "@/types/household";
+import type { HouseholdExpense, HouseholdHeroData } from "@/types/household";
 
 export function HouseholdRecentActivity({ household }: { household: HouseholdHeroData }) {
   const [historyVisible, setHistoryVisible] = useState(false);
+  const [proofExpense, setProofExpense] = useState<HouseholdExpense | null>(null);
   const recentExpenses = useMemo(() => sortHouseholdExpenses(household.expenses).slice(0, 5), [household.expenses]);
 
   return (
@@ -25,7 +27,7 @@ export function HouseholdRecentActivity({ household }: { household: HouseholdHer
         ) : null}
       </View>
       {recentExpenses.length > 0 ? recentExpenses.map((expense) => (
-        <HouseholdExpenseRow key={expense.id} expense={expense} currency={household.currency} currentMemberId={household.currentMemberId} />
+        <HouseholdExpenseRow key={expense.id} expense={expense} currency={household.currency} currentMemberId={household.currentMemberId} onOpenAttachments={setProofExpense} />
       )) : (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>Ainda sem despesas</Text>
@@ -35,6 +37,7 @@ export function HouseholdRecentActivity({ household }: { household: HouseholdHer
       {historyVisible ? (
         <HouseholdExpenseHistorySheet householdId={household.id} currency={household.currency} currentMemberId={household.currentMemberId} onClose={() => setHistoryVisible(false)} />
       ) : null}
+      {proofExpense ? <HouseholdProofModal expense={proofExpense} householdId={household.id} onClose={() => setProofExpense(null)} /> : null}
     </View>
   );
 }

@@ -1,15 +1,16 @@
 import { SymbolView } from "expo-symbols";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
 import { colors } from "@/theme/colors";
 import type { HouseholdExpense } from "@/types/household";
 
-export function HouseholdExpenseRow({ expense, currency, currentMemberId }: {
+export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments }: {
   expense: HouseholdExpense;
   currency: string;
   currentMemberId: number;
+  onOpenAttachments: (expense: HouseholdExpense) => void;
 }) {
   const category = categories.find((item) => item.value === expense.category);
   const key = category?.value ?? "Other";
@@ -23,10 +24,14 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId }: {
   const proofLabel = attachmentCount > 0 ? `${attachmentCount} ${attachmentCount === 1 ? "comprovante" : "comprovantes"}.` : "";
 
   return (
-    <View
+    <Pressable
       accessible
+      accessibilityRole={attachmentCount > 0 ? "button" : undefined}
+      accessibilityHint={attachmentCount > 0 ? "Abre as imagens dos comprovantes" : undefined}
       accessibilityLabel={`${category?.label ?? expense.category}. ${expense.description}. Total: ${amount}. ${shareLabel}. Pago por ${expense.payerName}. ${date}. ${proofLabel}`}
-      style={styles.card}
+      disabled={attachmentCount === 0}
+      onPress={() => onOpenAttachments(expense)}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
         <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
@@ -49,12 +54,13 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId }: {
         <Text numberOfLines={1} style={styles.payer}>Pago por <Text style={styles.payerName}>{expense.payerName}</Text></Text>
         <Text numberOfLines={1} style={styles.date}>{date}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   card: { alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
+  pressed: { backgroundColor: "#EDF3E6" },
   icon: { alignItems: "center", justifyContent: "center", flexShrink: 0, height: 34, width: 34, borderRadius: 11 },
   copy: { flex: 1, minWidth: 0 },
   details: { flex: 1.1, minWidth: 0 },
