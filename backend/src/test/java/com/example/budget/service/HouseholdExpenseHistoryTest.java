@@ -3,6 +3,7 @@ package com.example.budget.service;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.model.Household;
 import com.example.budget.model.HouseholdExpense;
+import com.example.budget.model.HouseholdExpenseShare;
 import com.example.budget.model.HouseholdMember;
 import com.example.budget.model.User;
 import com.example.budget.repository.*;
@@ -47,7 +48,7 @@ class HouseholdExpenseHistoryTest {
 
         assertThatThrownBy(() -> service.expenseHistory(10L, 0, user))
                 .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(expenseRepository);
+        verifyNoInteractions(expenseRepository, shareRepository);
     }
 
     @Test
@@ -56,7 +57,7 @@ class HouseholdExpenseHistoryTest {
 
         assertThatThrownBy(() -> service.expenseHistory(99L, 0, user))
                 .isInstanceOf(AccessDeniedException.class);
-        verifyNoInteractions(expenseRepository);
+        verifyNoInteractions(expenseRepository, shareRepository);
     }
 
     @Test
@@ -98,7 +99,32 @@ class HouseholdExpenseHistoryTest {
         assertThat(item.expenseDate()).isEqualTo(LocalDate.of(2025, 12, 31));
         assertThat(item.payerMemberId()).isEqualTo(20L);
         assertThat(item.payerName()).isEqualTo("Ana");
-        verifyNoInteractions(shareRepository, settlementRepository, attachmentRepository);
+        assertThat(item.currentUserShare()).isNull();
+        verify(shareRepository).findByExpenseInAndMember(List.of(expense), member);
+        verifyNoInteractions(settlementRepository, attachmentRepository);
+    }
+
+    @Test
+    void returnsTheSavedShareIncludingRemainderPennies() {
+        stubMember();
+        HouseholdExpense expense = mock(HouseholdExpense.class);
+        HouseholdMember payer = mock(HouseholdMember.class);
+        HouseholdExpenseShare share = mock(HouseholdExpenseShare.class);
+        when(expense.getId()).thenReturn(70L);
+        when(expense.getAmount()).thenReturn(new BigDecimal("10.00"));
+        when(expense.getPayer()).thenReturn(payer);
+        when(share.getExpense()).thenReturn(expense);
+        when(share.getAmount()).thenReturn(new BigDecimal("3.34"));
+        var pageable = PageRequest.of(0, 50);
+        when(expenseRepository.findByHouseholdAndVoidedAtIsNullOrderByExpenseDateDescIdDesc(household, pageable))
+                .thenReturn(new SliceImpl<>(List.of(expense), pageable, false));
+        when(shareRepository.findByExpenseInAndMember(List.of(expense), member))
+                .thenReturn(List.of(share));
+
+        var result = service.expenseHistory(10L, 0, user);
+
+        assertThat(result.expenses().get(0).currentUserShare()).isEqualByComparingTo("3.34");
+        assertThat(result.expenses().get(0).amount()).isEqualByComparingTo("10.00");
     }
 
     @Test
@@ -112,6 +138,7 @@ class HouseholdExpenseHistoryTest {
 
         assertThat(result.expenses()).isEmpty();
         assertThat(result.hasMore()).isFalse();
+        verifyNoInteractions(shareRepository);
     }
 
     private void stubMember() {

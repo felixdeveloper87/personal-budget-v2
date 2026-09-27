@@ -4,27 +4,27 @@ import { ActivityIndicator, Modal, Pressable, SectionList, StyleSheet, Text, Vie
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { HouseholdExpenseRow } from "@/features/household/HouseholdExpenseRow";
-import { expenseMonthLabel, groupHouseholdExpenses, mergeHouseholdExpenses } from "@/features/household/expenseHistory";
-import { ApiError, getHouseholdExpenseHistory } from "@/services/api";
+import { HouseholdPaymentRow } from "@/features/household/HouseholdPaymentRow";
+import { expenseMonthLabel } from "@/features/household/expenseHistory";
+import { groupHouseholdPayments, mergeHouseholdPayments } from "@/features/household/paymentHistory";
+import { ApiError, getHouseholdPaymentHistory } from "@/services/api";
 import { colors } from "@/theme/colors";
-import type { HouseholdExpense } from "@/types/household";
+import type { HouseholdPayment } from "@/types/household";
 
-export function HouseholdExpenseHistorySheet({ householdId, currency, currentMemberId, onClose }: {
+export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }: {
   householdId: number;
   currency: string;
-  currentMemberId: number;
   onClose: () => void;
 }) {
   const { user, logout } = useAuth();
-  const [expenses, setExpenses] = useState<HouseholdExpense[]>([]);
+  const [payments, setPayments] = useState<HouseholdPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nextPage, setNextPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const generation = useRef(0);
   const inFlight = useRef(false);
-  const sections = useMemo(() => groupHouseholdExpenses(expenses), [expenses]);
+  const sections = useMemo(() => groupHouseholdPayments(payments), [payments]);
 
   const load = useCallback(async (pageNumber: number) => {
     if (!user || inFlight.current) return;
@@ -33,9 +33,9 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
     setLoading(true);
     setError(null);
     try {
-      const result = await getHouseholdExpenseHistory(user.token, householdId, pageNumber);
+      const result = await getHouseholdPaymentHistory(user.token, householdId, pageNumber);
       if (generation.current !== requestGeneration) return;
-      setExpenses((current) => mergeHouseholdExpenses(pageNumber === 0 ? [] : current, result.expenses));
+      setPayments((current) => mergeHouseholdPayments(pageNumber === 0 ? [] : current, result.payments));
       setNextPage(result.page + 1);
       setHasMore(result.hasMore);
     } catch (loadError) {
@@ -44,7 +44,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
         await logout();
         return;
       }
-      setError("Não foi possível carregar as despesas. Tente novamente.");
+      setError("Não foi possível carregar as pagamentos. Tente novamente.");
     } finally {
       if (generation.current === requestGeneration) {
         inFlight.current = false;
@@ -56,7 +56,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
   useEffect(() => {
     generation.current += 1;
     inFlight.current = false;
-    setExpenses([]);
+    setPayments([]);
     setNextPage(0);
     setHasMore(true);
     void load(0);
@@ -71,7 +71,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
           <View style={styles.handle} />
           <View style={styles.header}>
             <View style={styles.headerCopy}>
-              <Text style={styles.title}>Todas as despesas</Text>
+              <Text style={styles.title}>Todos os pagamentos</Text>
               <Text style={styles.subtitle}>O histórico da casa, mês a mês.</Text>
             </View>
             <Pressable accessibilityRole="button" accessibilityLabel="Fechar histórico" onPress={onClose} style={styles.close}>
@@ -84,19 +84,19 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
             contentContainerStyle={styles.list}
             stickySectionHeadersEnabled={false}
             renderSectionHeader={({ section }) => <Text style={styles.month}>{expenseMonthLabel(section.month)}</Text>}
-            renderItem={({ item }) => <HouseholdExpenseRow expense={item} currency={currency} currentMemberId={currentMemberId} />}
-            ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhuma despesa registrada ainda.</Text> : null}
+            renderItem={({ item }) => <HouseholdPaymentRow payment={item} currency={currency} />}
+            ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhum pagamento registrado ainda.</Text> : null}
             ListFooterComponent={
               <View style={styles.footer}>
-                {loading ? <ActivityIndicator accessibilityLabel="Carregando despesas" color={colors.income} /> : null}
+                {loading ? <ActivityIndicator accessibilityLabel="Carregando pagamentos" color={colors.income} /> : null}
                 {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
                 {!loading && (hasMore || error) ? (
                   <Pressable accessibilityRole="button" onPress={() => void load(nextPage)} style={styles.loadMore}>
-                    <Text style={styles.loadMoreText}>{error ? "Tentar novamente" : "Carregar mais despesas"}</Text>
+                    <Text style={styles.loadMoreText}>{error ? "Tentar novamente" : "Carregar mais pagamentos"}</Text>
                   </Pressable>
                 ) : null}
-                {!loading && !error && !hasMore && expenses.length > 0 ? (
-                  <Text style={styles.message}>Você viu todas as despesas.</Text>
+                {!loading && !error && !hasMore && payments.length > 0 ? (
+                  <Text style={styles.message}>Você viu todos os pagamentos.</Text>
                 ) : null}
               </View>
             }

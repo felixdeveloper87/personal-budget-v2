@@ -1,5 +1,11 @@
 import type { HouseholdExpense } from "@/types/household";
 
+export function getExpenseShare(expense: HouseholdExpense, currentMemberId: number) {
+  if (expense.currentUserShare !== undefined) return expense.currentUserShare;
+  if (expense.shares === undefined) return undefined;
+  return expense.shares.find((share) => share.memberId === currentMemberId)?.amount ?? null;
+}
+
 export function sortHouseholdExpenses(expenses: HouseholdExpense[]) {
   return [...expenses].sort((a, b) => b.expenseDate.localeCompare(a.expenseDate) || b.id - a.id);
 }

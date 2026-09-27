@@ -1,39 +1,39 @@
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { HouseholdExpenseHistorySheet } from "@/features/household/HouseholdExpenseHistorySheet";
-import { HouseholdExpenseRow } from "@/features/household/HouseholdExpenseRow";
-import { sortHouseholdExpenses } from "@/features/household/expenseHistory";
+import { HouseholdPaymentHistorySheet } from "@/features/household/HouseholdPaymentHistorySheet";
+import { HouseholdPaymentRow } from "@/features/household/HouseholdPaymentRow";
+import { sortHouseholdPayments } from "@/features/household/paymentHistory";
 import { colors } from "@/theme/colors";
 import type { HouseholdHeroData } from "@/types/household";
 
-export function HouseholdRecentActivity({ household }: { household: HouseholdHeroData }) {
+export function HouseholdPayments({ household }: { household: HouseholdHeroData }) {
   const [historyVisible, setHistoryVisible] = useState(false);
-  const recentExpenses = useMemo(() => sortHouseholdExpenses(household.expenses).slice(0, 5), [household.expenses]);
+  const recentPayments = useMemo(() => sortHouseholdPayments(household.settlements).slice(0, 5), [household.settlements]);
 
   return (
     <View style={styles.section}>
       <View style={styles.heading}>
         <View style={styles.headingCopy}>
-          <Text style={styles.eyebrow}>DESPESAS DA CASA</Text>
-          <Text style={styles.title}>Atividades recentes</Text>
+          <Text style={styles.eyebrow}>ACERTOS DA CASA</Text>
+          <Text style={styles.title}>Pagamentos</Text>
         </View>
-        {recentExpenses.length > 0 ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Ver todas as despesas da casa" onPress={() => setHistoryVisible(true)} style={styles.seeAll}>
-            <Text style={styles.seeAllText}>Ver todas</Text>
+        {recentPayments.length > 0 ? (
+          <Pressable accessibilityRole="button" accessibilityLabel="Ver todos os pagamentos da casa" onPress={() => setHistoryVisible(true)} style={styles.seeAll}>
+            <Text style={styles.seeAllText}>Ver tudo</Text>
           </Pressable>
         ) : null}
       </View>
-      {recentExpenses.length > 0 ? recentExpenses.map((expense) => (
-        <HouseholdExpenseRow key={expense.id} expense={expense} currency={household.currency} currentMemberId={household.currentMemberId} />
+      {recentPayments.length > 0 ? recentPayments.map((payment) => (
+        <HouseholdPaymentRow key={payment.id} payment={payment} currency={household.currency} />
       )) : (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>Ainda sem despesas</Text>
-          <Text style={styles.emptyText}>As últimas despesas da casa vão aparecer aqui.</Text>
+          <Text style={styles.emptyTitle}>Ainda sem pagamentos</Text>
+          <Text style={styles.emptyText}>Os pagamentos entre integrantes vão aparecer aqui.</Text>
         </View>
       )}
       {historyVisible ? (
-        <HouseholdExpenseHistorySheet householdId={household.id} currency={household.currency} currentMemberId={household.currentMemberId} onClose={() => setHistoryVisible(false)} />
+        <HouseholdPaymentHistorySheet householdId={household.id} currency={household.currency} onClose={() => setHistoryVisible(false)} />
       ) : null}
     </View>
   );

@@ -3,6 +3,7 @@ import type {
   CreateHouseholdExpenseRequest,
   HouseholdExpenseCreatedResponse,
   HouseholdExpenseHistory,
+  HouseholdPaymentHistory,
   HouseholdPageResponse,
 } from "@/types/household";
 import type {
@@ -128,6 +129,14 @@ export async function getHouseholdExpenseHistory(
   page = 0,
 ): Promise<HouseholdExpenseHistory> {
   return request<HouseholdExpenseHistory>(`/households/${householdId}/expenses?page=${page}`, { token });
+}
+
+export async function getHouseholdPaymentHistory(
+  token: string,
+  householdId: number,
+  page = 0,
+): Promise<HouseholdPaymentHistory> {
+  return request<HouseholdPaymentHistory>(`/households/${householdId}/settlements?page=${page}`, { token });
 }
 
 export async function createHouseholdExpense(

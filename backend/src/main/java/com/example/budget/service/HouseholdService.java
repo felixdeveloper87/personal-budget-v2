@@ -2,6 +2,7 @@ package com.example.budget.service;
 
 import com.example.budget.dto.HouseholdPageDTO;
 import com.example.budget.dto.HouseholdExpenseHistoryDTO;
+import com.example.budget.dto.HouseholdPaymentHistoryDTO;
 import com.example.budget.dto.HouseholdRequests;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
@@ -83,6 +84,10 @@ public class HouseholdService {
         }
         var expenses = expenseRepository.findByHouseholdAndVoidedAtIsNullOrderByExpenseDateDescIdDesc(
                 member.getHousehold(), PageRequest.of(page, 50));
+        Map<Long, BigDecimal> currentUserShares = expenses.isEmpty()
+                ? Map.of()
+                : shareRepository.findByExpenseInAndMember(expenses.getContent(), member).stream()
+                        .collect(Collectors.toMap(share -> share.getExpense().getId(), HouseholdExpenseShare::getAmount));
         var items = expenses.getContent().stream()
                 .map(expense -> new HouseholdExpenseHistoryDTO.Item(
                         expense.getId(),
@@ -91,9 +96,32 @@ public class HouseholdService {
                         amount(expense.getAmount()),
                         expense.getExpenseDate(),
                         expense.getPayer().getId(),
-                        expense.getPayer().getDisplayName()))
+                        expense.getPayer().getDisplayName(),
+                        currentUserShares.get(expense.getId())))
                 .toList();
         return new HouseholdExpenseHistoryDTO(items, page, expenses.hasNext());
+    }
+
+    @Transactional(readOnly = true)
+    public HouseholdPaymentHistoryDTO paymentHistory(Long householdId, int page, User user) {
+        HouseholdMember member = requireMember(householdId, user);
+        if (page < 0) {
+            throw new IllegalArgumentException("Page must not be negative");
+        }
+        var payments = settlementRepository.findByHouseholdOrderBySettlementDateDescIdDesc(
+                member.getHousehold(), PageRequest.of(page, 50));
+        var items = payments.getContent().stream()
+                .map(payment -> new HouseholdPaymentHistoryDTO.Item(
+                        payment.getId(),
+                        payment.getFromMember().getId(),
+                        payment.getFromMember().getDisplayName(),
+                        payment.getToMember().getId(),
+                        payment.getToMember().getDisplayName(),
+                        amount(payment.getAmount()),
+                        payment.getSettlementDate(),
+                        payment.getStatus().name()))
+                .toList();
+        return new HouseholdPaymentHistoryDTO(items, page, payments.hasNext());
     }
 
     @Transactional

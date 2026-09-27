@@ -12,6 +12,7 @@ public record HouseholdExpenseHistoryDTO(List<Item> expenses, int page, boolean 
             BigDecimal amount,
             LocalDate expenseDate,
             Long payerMemberId,
-            String payerName
+            String payerName,
+            BigDecimal currentUserShare
     ) {}
 }

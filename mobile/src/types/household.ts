@@ -12,6 +12,12 @@ export interface HouseholdDebt {
   amount: number;
 }
 
+export interface HouseholdMember {
+  id: number;
+  name: string;
+  balance: number;
+}
+
 export interface HouseholdHeroData {
   id: number;
   name: string;
@@ -20,9 +26,27 @@ export interface HouseholdHeroData {
   currentUserBalance: number;
   monthSpend: number;
   monthSummaries: HouseholdMonthSummary[];
-  members: Array<{ id: number; name: string }>;
+  members: HouseholdMember[];
   debts: HouseholdDebt[];
   expenses: HouseholdExpense[];
+  settlements: HouseholdPayment[];
+}
+
+export interface HouseholdPayment {
+  id: number;
+  fromMemberId: number;
+  fromMemberName: string;
+  toMemberId: number;
+  toMemberName: string;
+  amount: number;
+  settlementDate: string;
+  status: "PENDING" | "CONFIRMED" | "REJECTED" | "CANCELLED";
+}
+
+export interface HouseholdPaymentHistory {
+  payments: HouseholdPayment[];
+  page: number;
+  hasMore: boolean;
 }
 
 export interface HouseholdExpense {
@@ -33,6 +57,8 @@ export interface HouseholdExpense {
   expenseDate: string;
   payerMemberId: number;
   payerName: string;
+  shares?: Array<{ memberId: number; amount: number }>;
+  currentUserShare?: number | null;
 }
 
 export interface HouseholdExpenseHistory {
