@@ -24,7 +24,7 @@ function monthKey(date: Date) {
 
 function formatMonth(date: Date) {
   const month = new Intl.DateTimeFormat("pt-BR", {
-    month: "long",
+    month: "short",
     year: "numeric",
   }).format(date);
   return month.charAt(0).toUpperCase() + month.slice(1);
@@ -54,7 +54,7 @@ export function HouseholdHero({
   const { width } = useWindowDimensions();
   const isWide = width >= 720;
   const heroWidth = width - 32;
-  const heroHeight = isWide ? 500 : Math.min(560, heroWidth * 1.44);
+  const heroHeight = isWide ? 460 : Math.min(520, heroWidth * 1.3);
   const today = new Date();
   const isCurrentMonth = monthKey(selectedMonth) === monthKey(today);
   const summary = household.monthSummaries.find(
@@ -77,9 +77,9 @@ export function HouseholdHero({
         onPress={() => shiftMonth(-1)}
         style={styles.monthButton}
       >
-        <SymbolView name={icons.previous} size={14} tintColor="#FFFFFF" weight="bold" />
+        <SymbolView name={icons.previous} size={13} tintColor={colors.inkSoft} weight="bold" />
       </Pressable>
-      <SymbolView name={icons.calendar} size={14} tintColor="#FFFFFF" weight="semibold" />
+      <SymbolView name={icons.calendar} size={13} tintColor={colors.inkSoft} weight="semibold" />
       <Text style={styles.monthLabel}>{formatMonth(selectedMonth)}</Text>
       <Pressable
         accessibilityLabel="Próximo mês"
@@ -89,7 +89,7 @@ export function HouseholdHero({
         onPress={() => shiftMonth(1)}
         style={[styles.monthButton, isCurrentMonth && styles.monthButtonDisabled]}
       >
-        <SymbolView name={icons.next} size={14} tintColor="#FFFFFF" weight="bold" />
+        <SymbolView name={icons.next} size={13} tintColor={colors.inkSoft} weight="bold" />
       </Pressable>
     </View>
   );
@@ -133,14 +133,19 @@ export function HouseholdHero({
         <View pointerEvents="none" style={styles.landscapeArt}>
           <HouseholdLandscape height={heroHeight} width={heroWidth} />
         </View>
-        <View style={styles.identityRow}>
-          <View style={styles.householdCopy}>
-            <Text style={styles.eyebrow}>Nosso lar</Text>
-            <Text numberOfLines={1} style={styles.householdName}>{household.name}</Text>
+        <View style={styles.identityContainer}>
+          <View style={styles.memberCountRow}>
+            <View accessibilityLabel={`${household.members.length} integrantes`} style={styles.memberCount}>
+              <SymbolView name={icons.members} size={16} tintColor={colors.ink} weight="semibold" />
+              <Text style={styles.memberCountText}>{household.members.length}</Text>
+            </View>
           </View>
-          <View accessibilityLabel={`${household.members.length} integrantes`} style={styles.memberCount}>
-            <SymbolView name={icons.members} size={16} tintColor={colors.ink} weight="semibold" />
-            <Text style={styles.memberCountText}>{household.members.length}</Text>
+          <View style={styles.identityMonthRow}>
+            <View style={styles.householdCopy}>
+              <Text style={styles.eyebrow}>Nosso lar</Text>
+              <Text numberOfLines={1} style={styles.householdName}>{household.name}</Text>
+            </View>
+            {monthNavigation}
           </View>
         </View>
       </View>
@@ -164,7 +169,6 @@ export function HouseholdHero({
           </View>
           <View style={styles.summaryBottomColumn}>
             {addExpenseButton}
-            {monthNavigation}
           </View>
         </View>
       </View>
@@ -190,20 +194,12 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 0,
   },
-  identityRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 19,
-    paddingTop: 85,
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: 0,
-    zIndex: 1,
-  },
+  identityContainer: { left: 0, paddingHorizontal: 19, paddingTop: 18, position: "absolute", right: 0, top: 0, zIndex: 1 },
+  memberCountRow: { alignItems: "center", flexDirection: "row", justifyContent: "flex-end" },
+  identityMonthRow: { alignItems: "center", flexDirection: "row", gap: 8, marginTop: 8 },
   householdCopy: { flex: 1, minWidth: 0 },
   eyebrow: { color: "rgba(255,255,255,0.9)", fontSize: 12, fontWeight: "500" },
-  householdName: { color: "#FFFFFF", fontSize: 23, fontWeight: "800", letterSpacing: -0.45, marginTop: 3 },
+  householdName: { color: "#FFFFFF", fontSize: 20, fontWeight: "800", letterSpacing: -0.4, marginTop: 3 },
   memberCount: {
     alignItems: "center",
     backgroundColor: "rgba(255,255,255,0.82)",
@@ -218,15 +214,15 @@ const styles = StyleSheet.create({
   memberCountText: { color: colors.ink, fontSize: 12, fontWeight: "800" },
   summaryLayer: { bottom: 15, left: 15, position: "absolute", right: 15, zIndex: 2 },
   summaryBar: {
-    backgroundColor: "rgba(17, 67, 55, 0.78)",
+    backgroundColor: "rgba(17, 67, 55, 0.70)",
     borderColor: "rgba(255,255,255,0.10)",
     borderRadius: 23,
     borderWidth: 1,
-    gap: 15,
-    padding: 14,
+    gap: 10,
+    padding: 10,
   },
-  summaryTopRow: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between", minHeight: 50 },
-  summaryBottomColumn: { alignItems: "center", flexDirection: "column", gap: 12, justifyContent: "center", position: "relative", zIndex: 1 },
+  summaryTopRow: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between", minHeight: 48 },
+  summaryBottomColumn: { alignItems: "center", flexDirection: "column", gap: 8, justifyContent: "center", position: "relative", zIndex: 1 },
   spendingSummary: { flex: 1, minWidth: 0 },
   spendingValueRow: { alignItems: "center", flexDirection: "row", gap: 7, marginTop: 4 },
   balanceSummary: { alignItems: "flex-start", flex: 1, minWidth: 0 },
@@ -240,22 +236,23 @@ const styles = StyleSheet.create({
   expenseCountText: { color: "#FFFFFF", fontSize: 10, fontWeight: "800" },
   monthControl: {
     alignItems: "center",
-    backgroundColor: "rgba(232,245,239,0.15)",
-    borderColor: "rgba(255,255,255,0.10)",
-    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.82)",
+    borderColor: "rgba(255,255,255,0.75)",
+    borderRadius: 15,
     borderWidth: 1,
     flexDirection: "row",
     flexShrink: 0,
-    gap: 7,
-    height: 40,
-    paddingHorizontal: 8,
+    gap: 4,
+    height: 36,
+    paddingHorizontal: 5,
+    width: 158,
   },
-  monthButton: { alignItems: "center", borderRadius: 9, height: 28, justifyContent: "center", width: 24 },
+  monthButton: { alignItems: "center", backgroundColor: "rgba(220,232,232,0.8)", borderRadius: 8, height: 26, justifyContent: "center", width: 22 },
   monthButtonDisabled: { opacity: 0.45 },
-  monthLabel: { color: "rgba(255,255,255,0.95)", flexShrink: 1, fontSize: 11, fontWeight: "600", minWidth: 104, textAlign: "center" },
+  monthLabel: { color: colors.inkSoft, flexShrink: 1, fontSize: 9, fontWeight: "600", minWidth: 68, textAlign: "center" },
   receiveText: { color: "#A8E8BD" },
   payText: { color: "#FFC0AA" },
-  addExpenseButton: { alignItems: "center", backgroundColor: "#FBFAF4", borderRadius: 17, flexDirection: "row", gap: 9, height: 48, justifyContent: "center", width: "100%" },
+  addExpenseButton: { alignItems: "center", backgroundColor: "#FBFAF4", borderRadius: 17, flexDirection: "row", gap: 9, height: 44, justifyContent: "center", width: "100%" },
   addExpenseLabel: { color: colors.forest, fontSize: 13, fontWeight: "700" },
   addExpensePressed: { backgroundColor: "#E6EEE7", transform: [{ scale: 0.98 }] },
 });

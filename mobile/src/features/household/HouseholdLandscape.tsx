@@ -1,4 +1,4 @@
-import Svg, { Circle, Defs, LinearGradient, Path, Polygon, Rect, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, G, LinearGradient, Path, Polygon, Rect, Stop } from "react-native-svg";
 
 /** A warm, layered landscape that fills the mobile Household hero. */
 interface HouseholdLandscapeProps {
@@ -33,6 +33,7 @@ export function HouseholdLandscape({ width, height }: HouseholdLandscapeProps) {
       <Path d="M0 355c52-42 109-29 155 2 48-41 102-35 144 0 32-28 59-30 91-12v95H0Z" fill="#75A879" />
       <Path d="M0 389c44-30 96-28 137 2 49-31 101-24 141 8 38-29 74-25 112-7v73H0Z" fill="#9BB780" />
 
+      <G transform="translate(0 87) scale(1 0.65)">
       <Path d="M194 270h151v143H194z" fill="#F5EAD0" />
       <Path d="M184 279 247 214l110 22 18 43Z" fill="#244A4E" />
       <Path d="m247 214 110 22 18 43h-72l-28-37-45 37h-46Z" fill="#315C5C" />
@@ -46,6 +47,7 @@ export function HouseholdLandscape({ width, height }: HouseholdLandscapeProps) {
       <Circle cx="274" cy="381" fill="#F4D9A6" r="2.3" />
       <Path d="M186 414h175" stroke="#D0D2B4" strokeWidth="5" />
       <Path d="M166 418c42-11 68-12 100-7 35-7 66-5 97 8l-7 22H171Z" fill="#C8C49C" opacity="0.72" />
+      </G>
 
       <Path d="M0 236c13-17 32-22 48-8 12-20 36-21 49-2 11-4 23 3 29 17v99H0Z" fill="#43815F" />
       <Rect x="26" y="217" width="5" height="139" fill="#4D6650" />

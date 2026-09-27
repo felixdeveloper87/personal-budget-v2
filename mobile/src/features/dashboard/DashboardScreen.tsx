@@ -4,6 +4,7 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -329,13 +330,12 @@ export function DashboardScreen() {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
-  const compactLayout = width < 390;
-  const donutSize = compactLayout
-    ? Math.min(width - 112, 188)
-    : Math.min((width - 62) * 0.44, 150);
+  const columnWidth = (width - 32 - 10) / 2;
+  const donutSize = Math.min(columnWidth - 18, 136);
+  const heroHeight = Math.max(540, Math.min(680, (width - 32) * 1.55));
 
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>
+    <SafeAreaView edges={["top"]} style={styles.safeArea}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -346,114 +346,123 @@ export function DashboardScreen() {
           />
         }
       >
-        <View style={styles.homeHeader}>
-          <View style={styles.userRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials || "PB"}</Text>
+        <ImageBackground
+          resizeMode="cover"
+          source={require("../../../assets/images/dashboard-hero-background.png")}
+          style={styles.homeHeader}
+        >
+          <View pointerEvents="none" style={styles.heroScrim} />
+          <View style={[styles.heroContent, { minHeight: heroHeight }]}>
+            <View style={styles.userRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials || "PB"}</Text>
+              </View>
+              <View style={styles.greetingCopy}>
+                <Text style={styles.greeting}>{greetingLabel(currentDate)},</Text>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={styles.userName}>
+                  {firstName}
+                </Text>
+              </View>
+              <View style={styles.headerActions}>
+                <View
+                  accessibilityLabel="Notifications"
+                  accessibilityRole="image"
+                  style={styles.headerAction}
+                >
+                  <SymbolView
+                    name={actionIcons.notifications}
+                    size={23}
+                    tintColor={colors.inkSoft}
+                    weight="semibold"
+                  />
+                </View>
+                <Pressable
+                  accessibilityLabel="Open settings"
+                  accessibilityRole="button"
+                  onPress={() => router.navigate("/more")}
+                  style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
+                >
+                  <SymbolView
+                    name={actionIcons.settings}
+                    size={24}
+                    tintColor={colors.inkSoft}
+                    weight="semibold"
+                  />
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.greetingCopy}>
-              <Text style={styles.greeting}>{greetingLabel(currentDate)},</Text>
-              <Text adjustsFontSizeToFit numberOfLines={1} style={styles.userName}>
-                {firstName}
+
+            <View style={styles.monthBlock}>
+              <Text
+                adjustsFontSizeToFit
+                minimumFontScale={0.76}
+                numberOfLines={1}
+                style={styles.monthTitle}
+              >
+                {monthLabel(currentDate)}
               </Text>
+              <Text style={styles.monthSubtitle}>Monthly budget snapshot</Text>
             </View>
-            <View style={styles.headerActions}>
-              <View
-                accessibilityLabel="Notifications"
-                accessibilityRole="image"
-                style={styles.headerAction}
-              >
-                <SymbolView
-                  name={actionIcons.notifications}
-                  size={23}
-                  tintColor={colors.inkSoft}
-                  weight="semibold"
-                />
-              </View>
-              <Pressable
-                accessibilityLabel="Open settings"
-                accessibilityRole="button"
-                onPress={() => router.navigate("/more")}
-                style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
-              >
-                <SymbolView
-                  name={actionIcons.settings}
-                  size={24}
-                  tintColor={colors.inkSoft}
-                  weight="semibold"
-                />
-              </Pressable>
-            </View>
-          </View>
 
-          <View style={styles.monthBlock}>
-            <Text
-              adjustsFontSizeToFit
-              minimumFontScale={0.76}
-              numberOfLines={1}
-              style={styles.monthTitle}
-            >
-              {monthLabel(currentDate)}
-            </Text>
-            <Text style={styles.monthSubtitle}>Monthly budget snapshot</Text>
-          </View>
+            <View style={styles.summarySection}>
+              {loading ? (
+                <View style={styles.loadingSummary}>
+                  <ActivityIndicator color={colors.forest} />
+                  <Text style={styles.loadingText}>Loading your totals…</Text>
+                </View>
+              ) : error ? (
+                <View style={styles.errorSummary}>
+                  <Text style={styles.errorTitle}>Summary unavailable</Text>
+                  <Text style={styles.errorText}>{error}</Text>
+                  <Pressable onPress={() => void loadSummary()} style={styles.retryButton}>
+                    <Text style={styles.retryText}>Try again</Text>
+                  </Pressable>
+                </View>
+              ) : summary ? (
+                <View style={styles.summaryGrid}>
+                  <View style={styles.metricColumn}>
+                    <SummaryMetric
+                      icon={actionIcons.income}
+                      label="Income"
+                      tone="income"
+                      value={summary.totalIncome}
+                    />
+                    <SummaryMetric
+                      icon={actionIcons.expense}
+                      label="Expense"
+                      tone="expense"
+                      value={summary.totalExpense}
+                    />
+                    <SummaryMetric
+                      icon={actionIcons.net}
+                      label="Net this month"
+                      tone="net"
+                      value={summary.balance}
+                    />
+                  </View>
+                  <FlowDonut
+                    expense={summary.totalExpense}
+                    income={summary.totalIncome}
+                    size={donutSize}
+                  />
+                </View>
+              ) : null}
 
-          {loading ? (
-            <View style={styles.loadingSummary}>
-              <ActivityIndicator color={colors.forest} />
-              <Text style={styles.loadingText}>Loading your totals…</Text>
-            </View>
-          ) : error ? (
-            <View style={styles.errorSummary}>
-              <Text style={styles.errorTitle}>Summary unavailable</Text>
-              <Text style={styles.errorText}>{error}</Text>
-              <Pressable onPress={() => void loadSummary()} style={styles.retryButton}>
-                <Text style={styles.retryText}>Try again</Text>
-              </Pressable>
-            </View>
-          ) : summary ? (
-            <View style={[styles.summaryGrid, compactLayout && styles.summaryGridCompact]}>
-              <View style={[styles.metricColumn, compactLayout && styles.metricColumnCompact]}>
-                <SummaryMetric
-                  icon={actionIcons.income}
-                  label="Income"
+              <View style={styles.actionsRow}>
+                <ActionButton
+                  label="Add income"
+                  onPress={() => setEntryType("INCOME")}
                   tone="income"
-                  value={summary.totalIncome}
                 />
-                <SummaryMetric
-                  icon={actionIcons.expense}
-                  label="Expense"
+                <ActionButton
+                  label="Add expense"
+                  onPress={() => setEntryType("EXPENSE")}
                   tone="expense"
-                  value={summary.totalExpense}
-                />
-                <SummaryMetric
-                  icon={actionIcons.net}
-                  label="Net this month"
-                  tone="net"
-                  value={summary.balance}
                 />
               </View>
-              <FlowDonut
-                expense={summary.totalExpense}
-                income={summary.totalIncome}
-                size={donutSize}
-              />
             </View>
-          ) : null}
-
-          <View style={[styles.actionsRow, compactLayout && styles.actionsRowCompact]}>
-            <ActionButton
-              label="Add income"
-              onPress={() => setEntryType("INCOME")}
-              tone="income"
-            />
-            <ActionButton
-              label="Add expense"
-              onPress={() => setEntryType("EXPENSE")}
-              tone="expense"
-            />
           </View>
-        </View>
+        </ImageBackground>
 
         {!loading && !error ? (
           <View style={styles.paceSection}>
@@ -490,20 +499,20 @@ export function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { padding: 16, paddingBottom: 48, paddingTop: 12 },
+  safeArea: { backgroundColor: "#EAD9BD", flex: 1 },
+  content: { alignItems: "stretch", paddingBottom: 48, paddingTop: 0 },
   homeHeader: {
-    backgroundColor: colors.paperRaised,
-    borderColor: "rgba(36, 56, 60, 0.09)",
+    alignSelf: "stretch",
+    backgroundColor: "#E9D3B0",
     borderRadius: 28,
-    borderWidth: 1,
-    elevation: 2,
-    padding: 15,
-    shadowColor: colors.ink,
-    shadowOffset: { height: 7, width: 0 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
+    overflow: "hidden",
   },
+  heroContent: {
+    paddingBottom: 28,
+    paddingHorizontal: 16,
+    paddingTop: 19,
+  },
+  heroScrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(255,247,230,0.07)" },
   userRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -547,24 +556,23 @@ const styles = StyleSheet.create({
   },
   headerActionPressed: { backgroundColor: colors.header, transform: [{ scale: 0.96 }] },
   monthBlock: {
-    marginTop: 6,
+    marginTop: 20,
   },
   monthTitle: {
     color: colors.ink,
-    fontSize: 36,
+    fontSize: 32,
     fontWeight: "800",
-    letterSpacing: -1.3,
+    letterSpacing: -1,
   },
-  monthSubtitle: { color: colors.inkSoft, fontSize: 16, lineHeight: 19, marginTop: -1 },
+  monthSubtitle: { color: colors.inkSoft, fontSize: 14, lineHeight: 17, marginTop: -1 },
+  summarySection: { gap: 10, marginTop: "auto", paddingTop: 48 },
   summaryGrid: {
     alignItems: "stretch",
     flexDirection: "row",
     gap: 10,
-    marginTop: 18,
+    width: "100%",
   },
-  summaryGridCompact: { flexDirection: "column" },
-  metricColumn: { flex: 1, gap: 9 },
-  metricColumnCompact: { flex: 0, width: "100%" },
+  metricColumn: { flex: 1, gap: 9, minWidth: 0 },
   metricCard: {
     alignItems: "center",
     borderColor: "rgba(36, 56, 60, 0.07)",
@@ -572,28 +580,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: "row",
     flex: 1,
-    minHeight: 83,
-    paddingHorizontal: 11,
-    paddingVertical: 10,
+    minHeight: 70,
+    paddingHorizontal: 8,
+    paddingVertical: 7,
   },
-  incomeMetric: { backgroundColor: "#E5F2EA", borderColor: "#CBE3D4" },
-  expenseMetric: { backgroundColor: "#F7E8E4", borderColor: "#EACFC8" },
-  netMetric: { backgroundColor: "#F0ECD9", borderColor: "#DED6B9" },
+  incomeMetric: { backgroundColor: "rgba(242,249,233,0.85)", borderColor: "rgba(255,255,255,0.6)" },
+  expenseMetric: { backgroundColor: "rgba(255,239,229,0.86)", borderColor: "rgba(255,255,255,0.6)" },
+  netMetric: { backgroundColor: "rgba(250,240,211,0.86)", borderColor: "rgba(255,255,255,0.6)" },
   metricIcon: {
     alignItems: "center",
     borderRadius: 22,
-    height: 44,
+    height: 36,
     justifyContent: "center",
-    marginRight: 10,
-    width: 44,
+    marginRight: 8,
+    flexShrink: 0,
+    width: 36,
   },
   incomeMetricIcon: { backgroundColor: "#C9E6D4" },
   expenseMetricIcon: { backgroundColor: "#F0D1CA" },
   netMetricIcon: { backgroundColor: "#E4DAB8" },
   metricCopy: { flex: 1, minWidth: 0 },
-  metricLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "600" },
+  metricLabel: { color: colors.inkSoft, fontSize: 11, fontWeight: "600" },
   metricValue: {
-    fontSize: 21,
+    fontSize: 19,
     fontWeight: "800",
     letterSpacing: -0.65,
     marginTop: 3,
@@ -603,15 +612,16 @@ const styles = StyleSheet.create({
   netMetricValue: { color: colors.gold },
   flowCard: {
     alignItems: "center",
-    backgroundColor: "#F7EEE6",
-    borderColor: "#E8D8CC",
-    borderRadius: 22,
+    backgroundColor: "rgba(255,248,237,0.86)",
+    borderColor: "rgba(255,255,255,0.68)",
+    borderRadius: 20,
     borderWidth: 1,
-    flex: 0.95,
+    flex: 1,
     justifyContent: "center",
     minWidth: 0,
-    paddingHorizontal: 10,
-    paddingVertical: 14,
+    overflow: "hidden",
+    paddingHorizontal: 8,
+    paddingVertical: 9,
   },
   donutWrap: { alignItems: "center", justifyContent: "center" },
   donutCenter: {
@@ -649,9 +659,7 @@ const styles = StyleSheet.create({
   actionsRow: {
     flexDirection: "row",
     gap: 10,
-    marginTop: 13,
   },
-  actionsRowCompact: { gap: 8 },
   actionButton: {
     alignItems: "center",
     borderRadius: 20,
@@ -659,8 +667,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 8,
     justifyContent: "center",
-    minHeight: 58,
-    paddingHorizontal: 12,
+    minHeight: 52,
+    minWidth: 0,
+    paddingHorizontal: 10,
     shadowColor: colors.ink,
     shadowOffset: { height: 5, width: 0 },
     shadowOpacity: 0.13,
@@ -669,7 +678,7 @@ const styles = StyleSheet.create({
   incomeButton: { backgroundColor: colors.forest },
   expenseButton: { backgroundColor: colors.expense },
   actionButtonPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
-  actionLabel: { color: colors.white, fontSize: 14, fontWeight: "800" },
+  actionLabel: { color: colors.white, flexShrink: 1, fontSize: 13, fontWeight: "800" },
   loadingSummary: {
     alignItems: "center",
     backgroundColor: colors.paperRaised,
@@ -679,7 +688,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     justifyContent: "center",
-    marginTop: 22,
     minHeight: 252,
   },
   loadingText: { color: colors.inkSoft, fontSize: 13 },
@@ -688,7 +696,6 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     borderRadius: 22,
     borderWidth: 1,
-    marginTop: 22,
     minHeight: 160,
     padding: 20,
   },
@@ -696,7 +703,7 @@ const styles = StyleSheet.create({
   errorText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
   retryButton: { alignSelf: "flex-start", marginTop: 8, paddingVertical: 8 },
   retryText: { color: colors.forest, fontSize: 13, fontWeight: "800" },
-  paceSection: { marginTop: 28 },
+  paceSection: { marginTop: 28, paddingHorizontal: 16 },
   sectionEyebrow: {
     color: colors.forest,
     fontSize: 9,
