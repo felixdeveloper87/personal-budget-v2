@@ -1,5 +1,10 @@
 import type { AuthResponse, AuthUser } from "@/types/auth";
 import type {
+  CreateHouseholdExpenseRequest,
+  HouseholdExpenseCreatedResponse,
+  HouseholdPageResponse,
+} from "@/types/household";
+import type {
   CreateTransactionRequest,
   FinancialAccount,
   InstallmentPlan,
@@ -110,6 +115,70 @@ export async function searchTransactions(
 
 export async function listAccounts(token: string): Promise<FinancialAccount[]> {
   return request<FinancialAccount[]>("/accounts", { token });
+}
+
+export async function getHouseholdPage(token: string): Promise<HouseholdPageResponse> {
+  return request<HouseholdPageResponse>("/households/current", { token });
+}
+
+export async function createHouseholdExpense(
+  token: string,
+  householdId: number,
+  expense: CreateHouseholdExpenseRequest,
+): Promise<HouseholdExpenseCreatedResponse> {
+  return request<HouseholdExpenseCreatedResponse>(`/households/${householdId}/expenses`, {
+    method: "POST",
+    body: JSON.stringify(expense),
+    token,
+  });
+}
+
+export interface HouseholdAttachmentFile {
+  uri: string;
+  name: string;
+  type: string;
+}
+
+export async function uploadHouseholdExpenseAttachments(
+  token: string,
+  householdId: number,
+  expenseId: number,
+  files: HouseholdAttachmentFile[],
+): Promise<HouseholdPageResponse> {
+  const form = new FormData();
+  files.forEach((file) => {
+    form.append("files", {
+      uri: file.uri,
+      name: file.name,
+      type: file.type,
+    } as unknown as Blob);
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/households/${householdId}/expenses/${expenseId}/attachments`,
+    {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: form,
+    },
+  );
+
+  if (!response.ok) {
+    let message = "Não foi possível enviar o comprovante.";
+    try {
+      const body = (await response.json()) as Record<string, unknown>;
+      const apiMessage = body.error ?? body.message;
+      if (typeof apiMessage === "string" && apiMessage.trim()) message = apiMessage;
+    } catch {
+      // Keep the friendly fallback when the server returns no JSON body.
+    }
+    throw new ApiError(message, response.status);
+  }
+
+  return (await response.json()) as HouseholdPageResponse;
 }
 
 export async function createTransaction(

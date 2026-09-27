@@ -27,6 +27,12 @@
       "expo-router",
       "expo-secure-store",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita que o app acesse suas fotos para anexar comprovantes às despesas da casa."
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#F4F1EA",
