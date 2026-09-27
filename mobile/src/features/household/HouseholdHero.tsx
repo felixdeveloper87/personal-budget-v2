@@ -1,6 +1,6 @@
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, useWindowDimensions } from "react-native";
 
 import { HouseholdLandscape } from "@/features/household/HouseholdLandscape";
 import type { HouseholdHeroData } from "@/types/household";
@@ -12,10 +12,12 @@ const icons = {
   members: { ios: "person.2.fill", android: "groups", web: "groups" },
   previous: { ios: "chevron.left", android: "chevron_left", web: "chevron_left" },
   next: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
-  receive: { ios: "arrow.down.left", android: "south_west", web: "south_west" },
-  pay: { ios: "arrow.up.right", android: "north_east", web: "north_east" },
-  settled: { ios: "checkmark", android: "check", web: "check" },
+  add: { ios: "plus", android: "add", web: "add" },
+  receive: { ios: "arrow.up", android: "arrow_upward", web: "arrow_upward" },
+  pay: { ios: "arrow.down", android: "arrow_downward", web: "arrow_downward" },
 } satisfies Record<string, SymbolName>;
+
+const SUMMARY_CONTROL_WIDTH = 146;
 
 function monthKey(date: Date) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
@@ -40,13 +42,17 @@ interface HouseholdHeroProps {
   household: HouseholdHeroData;
   selectedMonth: Date;
   onMonthChange: (month: Date) => void;
+  onAddExpense: () => void;
 }
 
 export function HouseholdHero({
   household,
   selectedMonth,
   onMonthChange,
+  onAddExpense,
 }: HouseholdHeroProps) {
+  const { width } = useWindowDimensions();
+  const isWide = width >= 720;
   const today = new Date();
   const isCurrentMonth = monthKey(selectedMonth) === monthKey(today);
   const summary = household.monthSummaries.find(
@@ -59,6 +65,64 @@ export function HouseholdHero({
   const shiftMonth = (amount: number) => {
     onMonthChange(new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + amount, 1));
   };
+
+  const monthNavigation = (
+    <View style={styles.monthControl}>
+      <Pressable
+        accessibilityLabel="Mês anterior"
+        accessibilityRole="button"
+        hitSlop={8}
+        onPress={() => shiftMonth(-1)}
+        style={styles.monthButton}
+      >
+        <SymbolView name={icons.previous} size={14} tintColor={colors.inkSoft} weight="bold" />
+      </Pressable>
+      <Text style={styles.monthLabel}>{formatMonth(selectedMonth)}</Text>
+      <Pressable
+        accessibilityLabel="Próximo mês"
+        accessibilityRole="button"
+        disabled={isCurrentMonth}
+        hitSlop={8}
+        onPress={() => shiftMonth(1)}
+        style={[styles.monthButton, isCurrentMonth && styles.monthButtonDisabled]}
+      >
+        <SymbolView name={icons.next} size={14} tintColor={colors.inkSoft} weight="bold" />
+      </Pressable>
+    </View>
+  );
+
+  const balanceInfo = () => (
+    <View style={styles.balanceLine}>
+      <Text numberOfLines={1} style={[styles.balanceTitle, net > 0 ? styles.receiveText : net < 0 ? styles.payText : null]}>
+        {net > 0 ? "Te devem" : net < 0 ? "Você tem que pagar" : "Tudo certo por aqui"}
+      </Text>
+      {net !== 0 ? (
+        <View style={styles.balanceAmountRow}>
+          <Text adjustsFontSizeToFit minimumFontScale={0.78} numberOfLines={1} style={[styles.balanceAmount, net < 0 && styles.payText]}>
+            {formatCurrency(Math.abs(net), household.currency)}
+          </Text>
+          <SymbolView
+            name={net > 0 ? icons.receive : icons.pay}
+            size={12}
+            tintColor={net > 0 ? colors.income : colors.expense}
+            weight="bold"
+          />
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const addExpenseButton = (
+    <Pressable
+      accessibilityLabel="Adicionar despesa compartilhada"
+      accessibilityRole="button"
+      onPress={onAddExpense}
+      style={({ pressed }) => [styles.addExpenseButton, pressed && styles.addExpensePressed]}
+    >
+      <SymbolView name={icons.add} size={16} tintColor={colors.forest} weight="semibold" />
+      <Text style={styles.addExpenseLabel}>Add despesa</Text>
+    </Pressable>
+  );
 
   return (
     <View style={styles.card}>
@@ -78,60 +142,43 @@ export function HouseholdHero({
         </View>
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.spendingRow}>
-          <Text numberOfLines={1} style={styles.sectionTitle}>Gastos do mês</Text>
-          <Text adjustsFontSizeToFit minimumFontScale={0.72} numberOfLines={1} style={styles.spendingAmount}>
-            {formatCurrency(spending, household.currency)}
-          </Text>
-          <View accessibilityLabel={`${expenseCount} despesas compartilhadas`} style={styles.expenseCountPill}>
-            <Text style={styles.expenseCountText}>+{expenseCount}</Text>
-          </View>
-          <View style={styles.monthControl}>
-            <Pressable
-              accessibilityLabel="Mês anterior"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={() => shiftMonth(-1)}
-              style={styles.monthButton}
-            >
-              <SymbolView name={icons.previous} size={14} tintColor={colors.inkSoft} weight="bold" />
-            </Pressable>
-            <Text style={styles.monthLabel}>{formatMonth(selectedMonth)}</Text>
-            <Pressable
-              accessibilityLabel="Próximo mês"
-              accessibilityRole="button"
-              disabled={isCurrentMonth}
-              hitSlop={8}
-              onPress={() => shiftMonth(1)}
-              style={[styles.monthButton, isCurrentMonth && styles.monthButtonDisabled]}
-            >
-              <SymbolView name={icons.next} size={14} tintColor={colors.inkSoft} weight="bold" />
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.sectionDivider} />
-
-        <View style={[styles.positionHeader, net > 0 ? styles.positionReceive : net < 0 ? styles.positionPay : styles.positionSettled]}>
-          <View style={styles.positionIcon}>
-            <SymbolView
-              name={net > 0 ? icons.receive : net < 0 ? icons.pay : icons.settled}
-              size={16}
-              tintColor={net > 0 ? colors.income : net < 0 ? colors.expense : colors.forest}
-              weight="bold"
-            />
-          </View>
-          <Text adjustsFontSizeToFit minimumFontScale={0.8} numberOfLines={1} style={[styles.positionTitle, net > 0 ? styles.receiveText : net < 0 ? styles.payText : null]}>
-            {net > 0 ? "Estão te devendo" : net < 0 ? "Você tem que pagar" : "Tudo certo por aqui"}
-          </Text>
-          {net !== 0 ? (
-            <View style={[styles.positionAmountPill, net > 0 ? styles.positionAmountReceive : styles.positionAmountPay]}>
-              <Text adjustsFontSizeToFit minimumFontScale={0.78} numberOfLines={1} style={styles.positionAmountText}>
-                {formatCurrency(Math.abs(net), household.currency)}
-              </Text>
+      <View style={styles.summaryLayer}>
+        <View style={styles.summaryBar}>
+          <View style={styles.summaryTopRow}>
+            <View style={[styles.spendingSummary, isWide && styles.spendingSummaryWide]}>
+              <Text numberOfLines={1} style={styles.sectionTitle}>Gastos do mês</Text>
+              <View style={[styles.spendingValueRow, isWide && styles.spendingValueRowWide]}>
+                <Text adjustsFontSizeToFit minimumFontScale={0.72} numberOfLines={1} style={styles.spendingAmount}>
+                  {formatCurrency(spending, household.currency)}
+                </Text>
+                <View accessibilityLabel={`${expenseCount} despesas compartilhadas`} style={styles.expenseCountPill}>
+                  <Text style={styles.expenseCountText}>+{expenseCount}</Text>
+                </View>
+              </View>
             </View>
-          ) : null}
+
+            {monthNavigation}
+          </View>
+          <View style={styles.balanceRowBackground}>
+            <View pointerEvents="none" style={styles.balanceRowStripes}>
+              {[0, 1, 2, 3, 4].map((line) => (
+                <View key={"horizontal-" + line} style={[styles.balanceRowHorizontalStripe, { top: 5 + line * 8 }]} />
+              ))}
+              {[
+                { key: "left-1", position: "16.67%" },
+                { key: "left-2", position: "33.33%" },
+                { key: "left-3", position: "50%" },
+                { key: "left-4", position: "66.67%" },
+                { key: "left-5", position: "83.33%" },
+              ].map((line) => (
+                <View key={line.key} style={[styles.balanceRowVerticalStripe, { left: line.position }]} />
+              ))}
+            </View>
+            <View style={styles.summaryBottomRow}>
+              <View style={[styles.balanceSummary, isWide && styles.balanceSummaryWide]}>{balanceInfo()}</View>
+              {addExpenseButton}
+            </View>
+          </View>
         </View>
       </View>
     </View>
@@ -148,7 +195,7 @@ const styles = StyleSheet.create({
   },
   landscape: {
     backgroundColor: "#DDEEF1",
-    height: 193,
+    height: 238,
     overflow: "hidden",
     position: "relative",
   },
@@ -184,19 +231,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: 11,
   },
   memberCountText: { color: colors.ink, fontSize: 12, fontWeight: "800" },
-  content: {
+  summaryLayer: { marginTop: -8, position: "relative", zIndex: 2 },
+  summaryBar: {
     backgroundColor: colors.paperRaised,
-    borderTopLeftRadius: 25,
-    borderTopRightRadius: 25,
-    marginTop: -1,
+    gap: 10,
     paddingHorizontal: 18,
-    paddingTop: 18,
-    paddingBottom: 18,
+    paddingBottom: 12,
+    paddingTop: 10,
   },
-  sectionTitle: { color: colors.inkFaint, flexShrink: 1, fontSize: 9, fontWeight: "600", letterSpacing: 0.1 },
-  spendingRow: { alignItems: "center", flexDirection: "row", gap: 4 },
-  spendingAmount: { color: "#172A2D", flexShrink: 1, fontSize: 18, fontWeight: "800", letterSpacing: -0.35, marginLeft: 2 },
-  expenseCountPill: { alignItems: "center", backgroundColor: colors.incomeTint, borderRadius: 8, justifyContent: "center", minWidth: 23, marginLeft: 3, paddingHorizontal: 4, paddingVertical: 4 },
+  summaryTopRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between", minHeight: 36 },
+  balanceRowBackground: { backgroundColor: "#F3F8F3", borderRadius: 13, overflow: "hidden", position: "relative" },
+  balanceRowStripes: { ...StyleSheet.absoluteFillObject },
+  balanceRowHorizontalStripe: { backgroundColor: "#DCEBDD", height: StyleSheet.hairlineWidth, left: 0, opacity: 0.8, position: "absolute", right: 0 },
+  balanceRowVerticalStripe: { backgroundColor: "#DCEBDD", bottom: 0, opacity: 0.8, position: "absolute", top: 0, width: StyleSheet.hairlineWidth },
+  summaryBottomRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between", minHeight: 46, paddingHorizontal: 9, position: "relative", zIndex: 1 },
+  spendingSummary: { alignItems: "center", flex: 1, flexDirection: "row", gap: 4, minWidth: 0 },
+  spendingSummaryWide: { gap: 5 },
+  spendingValueRow: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: 4 },
+  spendingValueRowWide: { marginTop: 0 },
+  balanceSummary: { alignItems: "center", flex: 1, minWidth: 0 },
+  balanceSummaryWide: { flex: 1.1 },
+  balanceLine: { alignItems: "center", flexDirection: "row", gap: 5, minWidth: 0 },
+  balanceTitle: { color: colors.inkSoft, flexShrink: 1, fontSize: 10, fontWeight: "600" },
+  balanceAmountRow: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 4 },
+  balanceAmount: { color: colors.ink, fontSize: 13, fontWeight: "800" },
+  sectionTitle: { color: colors.inkFaint, flexShrink: 1, fontSize: 8, fontWeight: "600", letterSpacing: 0.05 },
+  spendingAmount: { color: "#172A2D", flexShrink: 1, fontSize: 16, fontWeight: "800", letterSpacing: -0.35 },
+  expenseCountPill: { alignItems: "center", backgroundColor: colors.incomeTint, borderRadius: 8, justifyContent: "center", minWidth: 21, paddingHorizontal: 4, paddingVertical: 4 },
   expenseCountText: { color: colors.forest, fontSize: 8, fontWeight: "800" },
   monthControl: {
     alignItems: "center",
@@ -205,26 +266,18 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     flexDirection: "row",
-    flexShrink: 1,
-    gap: 3,
+    flexShrink: 0,
+    gap: 4,
     height: 36,
-    marginLeft: "auto",
-    paddingHorizontal: 4,
+    width: SUMMARY_CONTROL_WIDTH,
+    paddingHorizontal: 5,
   },
-  monthButton: { alignItems: "center", height: 28, justifyContent: "center", width: 24 },
+  monthButton: { alignItems: "center", backgroundColor: "#E8F0E8", borderRadius: 9, height: 28, justifyContent: "center", width: 28 },
   monthButtonDisabled: { opacity: 0.45 },
-  monthLabel: { color: colors.inkSoft, flexShrink: 1, fontSize: 10, fontWeight: "600", minWidth: 72, textAlign: "center" },
-  sectionDivider: { backgroundColor: "rgba(36,56,60,0.08)", height: StyleSheet.hairlineWidth, marginTop: 10, marginBottom: 8 },
-  positionHeader: { alignItems: "center", borderRadius: 15, borderWidth: 1, flexDirection: "row", gap: 9, minHeight: 46, paddingHorizontal: 10, paddingVertical: 5 },
-  positionReceive: { backgroundColor: "#E7F2E8", borderColor: "#D6E9D9" },
-  positionPay: { backgroundColor: "#F7EAE5", borderColor: "#EEDBD4" },
-  positionSettled: { backgroundColor: "#EEF1E7", borderColor: "#E2E7D8" },
-  positionIcon: { alignItems: "center", height: 30, justifyContent: "center", width: 30 },
-  positionTitle: { color: colors.inkSoft, flex: 1, fontSize: 14, fontWeight: "700", letterSpacing: -0.15 },
-  positionAmountPill: { borderRadius: 10, maxWidth: 105, paddingHorizontal: 10, paddingVertical: 6 },
-  positionAmountReceive: { backgroundColor: colors.income },
-  positionAmountPay: { backgroundColor: colors.expense },
-  positionAmountText: { color: colors.white, fontSize: 14, fontWeight: "800", letterSpacing: -0.2 },
+  monthLabel: { color: colors.inkSoft, flexShrink: 1, fontSize: 9, fontWeight: "600", minWidth: 70, textAlign: "center" },
   receiveText: { color: colors.income },
   payText: { color: colors.expense },
+  addExpenseButton: { alignItems: "center", backgroundColor: colors.header, borderColor: "rgba(48,94,101,0.10)", borderRadius: 12, borderWidth: 1, flexDirection: "row", gap: 6, justifyContent: "center", minHeight: 36, paddingHorizontal: 10, width: SUMMARY_CONTROL_WIDTH },
+  addExpenseLabel: { color: colors.forest, fontSize: 11, fontWeight: "700" },
+  addExpensePressed: { backgroundColor: "#D2E1E2", transform: [{ scale: 0.98 }] },
 });

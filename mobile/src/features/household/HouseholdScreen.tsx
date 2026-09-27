@@ -10,7 +10,6 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SymbolView } from "expo-symbols";
 
 import { HouseholdHero } from "@/features/household/HouseholdHero";
 import { HouseholdExpenseSheet } from "@/features/household/HouseholdExpenseSheet";
@@ -91,30 +90,9 @@ export function HouseholdScreen() {
             <HouseholdHero
               household={page.household}
               onMonthChange={setSelectedMonth}
+              onAddExpense={() => setExpenseSheetVisible(true)}
               selectedMonth={selectedMonth}
             />
-            <Pressable
-              accessibilityLabel="Adicionar despesa compartilhada"
-              accessibilityRole="button"
-              onPress={() => setExpenseSheetVisible(true)}
-              style={({ pressed }) => [styles.addExpenseButton, pressed && styles.addExpensePressed]}
-            >
-              <View style={styles.addExpenseIcon}>
-                <SymbolView
-                  name={{ ios: "plus", android: "add", web: "add" }}
-                  size={21}
-                  tintColor={colors.white}
-                  weight="bold"
-                />
-              </View>
-              <Text style={styles.addExpenseLabel}>Adicionar despesa</Text>
-              <SymbolView
-                name={{ ios: "arrow.up.right", android: "north_east", web: "north_east" }}
-                size={16}
-                tintColor={colors.inkFaint}
-                weight="semibold"
-              />
-            </Pressable>
           </>
         ) : (
           <View style={styles.emptyState}>
@@ -203,19 +181,4 @@ const styles = StyleSheet.create({
   invitationHint: { alignSelf: "stretch", backgroundColor: colors.header, borderRadius: 16, marginTop: 22, padding: 15 },
   invitationHintTitle: { color: colors.ink, fontSize: 14, fontWeight: "700" },
   invitationHintText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 4 },
-  addExpenseButton: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 18,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 11,
-    marginTop: 13,
-    minHeight: 60,
-    paddingHorizontal: 13,
-  },
-  addExpenseIcon: { alignItems: "center", backgroundColor: colors.forest, borderRadius: 13, height: 36, justifyContent: "center", width: 36 },
-  addExpenseLabel: { color: colors.ink, flex: 1, fontSize: 14, fontWeight: "700" },
-  addExpensePressed: { backgroundColor: colors.header, transform: [{ scale: 0.99 }] },
 });

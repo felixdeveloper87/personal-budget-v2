@@ -38,17 +38,17 @@ const MAX_ATTACHMENTS = 5;
 const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 
 const categories = [
-  { value: "Groceries", label: "Mercado" },
-  { value: "Electricity", label: "Luz" },
-  { value: "Water", label: "Água" },
-  { value: "Gas", label: "Gás" },
-  { value: "Internet", label: "Internet" },
-  { value: "Cleaning", label: "Limpeza" },
-  { value: "Rent", label: "Aluguel" },
-  { value: "Council tax", label: "Imposto da casa" },
-  { value: "Repairs", label: "Reparos" },
-  { value: "Garden", label: "Jardim" },
-  { value: "Other", label: "Outro" },
+  { value: "Groceries", label: "Mercado", defaultDescription: null, detailPlaceholder: "Ex.: compras da semana" },
+  { value: "Electricity", label: "Luz", defaultDescription: "Conta de luz", detailPlaceholder: null },
+  { value: "Water", label: "Água", defaultDescription: "Conta de água", detailPlaceholder: null },
+  { value: "Gas", label: "Gás", defaultDescription: "Conta de gás", detailPlaceholder: null },
+  { value: "Internet", label: "Internet", defaultDescription: "Conta de internet", detailPlaceholder: null },
+  { value: "Cleaning", label: "Limpeza", defaultDescription: null, detailPlaceholder: "Ex.: faxina ou produtos de limpeza" },
+  { value: "Rent", label: "Aluguel", defaultDescription: "Aluguel", detailPlaceholder: null },
+  { value: "Council tax", label: "Imposto da casa", defaultDescription: "Imposto da casa", detailPlaceholder: null },
+  { value: "Repairs", label: "Reparos", defaultDescription: null, detailPlaceholder: "Ex.: conserto da torneira" },
+  { value: "Garden", label: "Jardim", defaultDescription: null, detailPlaceholder: "Ex.: corte da grama" },
+  { value: "Other", label: "Outro", defaultDescription: null, detailPlaceholder: "Ex.: o que foi comprado ou feito?" },
 ] as const;
 
 function currencyMark(currency: string) {
@@ -143,6 +143,8 @@ export function HouseholdExpenseSheet({
     return Number.isFinite(value) ? Math.round(value * 100) / 100 : 0;
   }, [amount]);
   const selectedCount = participants.length;
+  const selectedCategory = categories.find((item) => item.value === category) ?? categories[0];
+  const expenseDescription = selectedCategory.defaultDescription ?? description.trim();
   const parsedExpenseDate = parseBrazilianDate(dateInput);
   const datePickerValue = parsedExpenseDate
     ? (() => {
@@ -152,7 +154,7 @@ export function HouseholdExpenseSheet({
     : new Date();
   const canSubmit =
     Boolean(user) &&
-    description.trim().length > 0 &&
+    expenseDescription.length > 0 &&
     Number.isFinite(parsedAmount) &&
     parsedAmount > 0 &&
     Boolean(parsedExpenseDate) &&
@@ -237,7 +239,7 @@ export function HouseholdExpenseSheet({
         return;
       }
       const result = await createHouseholdExpense(user.token, household.id, {
-        description: description.trim(),
+        description: expenseDescription,
         category,
         amount: parsedAmount,
         expenseDate: parsedExpenseDate!,
@@ -384,19 +386,6 @@ export function HouseholdExpenseSheet({
               <Text style={styles.dateError}>Confira o dia, mês e ano.</Text>
             ) : null}
 
-            <Text style={styles.fieldLabel}>O QUE FOI?</Text>
-            <TextInput
-              accessibilityLabel="Descrição da despesa"
-              autoCapitalize="sentences"
-              maxLength={120}
-              onChangeText={setDescription}
-              placeholder="Ex.: compra da semana"
-              placeholderTextColor={colors.inkFaint}
-              returnKeyType="done"
-              style={styles.textField}
-              value={description}
-            />
-
             <Text style={styles.fieldLabel}>CATEGORIA</Text>
             <ScrollView contentContainerStyle={styles.chipRow} horizontal showsHorizontalScrollIndicator={false}>
               {categories.map((item) => {
@@ -406,7 +395,10 @@ export function HouseholdExpenseSheet({
                     key={item.value}
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
-                    onPress={() => setCategory(item.value)}
+                    onPress={() => {
+                      if (category !== item.value) setDescription("");
+                      setCategory(item.value);
+                    }}
                     style={[styles.categoryChip, selected && styles.categoryChipSelected]}
                   >
                     <Text style={[styles.categoryText, selected && styles.categoryTextSelected]}>{item.label}</Text>
@@ -414,6 +406,30 @@ export function HouseholdExpenseSheet({
                 );
               })}
             </ScrollView>
+
+            {selectedCategory.detailPlaceholder ? (
+              <View>
+                <Text style={styles.fieldLabel}>O QUE FOI?</Text>
+                <TextInput
+                  accessibilityLabel={`Detalhe de ${selectedCategory.label.toLowerCase()}`}
+                  autoCapitalize="sentences"
+                  maxLength={120}
+                  onChangeText={setDescription}
+                  placeholder={selectedCategory.detailPlaceholder}
+                  placeholderTextColor={colors.inkFaint}
+                  returnKeyType="done"
+                  style={styles.textField}
+                  value={description}
+                />
+              </View>
+            ) : (
+              <View style={styles.autoDescription}>
+                <SymbolView name={icons.check} size={15} tintColor={colors.forest} weight="bold" />
+                <Text style={styles.autoDescriptionCopy}>
+                  Vamos registrar como <Text style={styles.autoDescriptionName}>{selectedCategory.defaultDescription}</Text>
+                </Text>
+              </View>
+            )}
 
             <View style={styles.splitHeading}>
               <View>
@@ -569,6 +585,9 @@ const styles = StyleSheet.create({
   categoryChipSelected: { backgroundColor: colors.incomeTint, borderColor: colors.income },
   categoryText: { color: colors.inkSoft, fontSize: 11, fontWeight: "600" },
   categoryTextSelected: { color: colors.income, fontWeight: "800" },
+  autoDescription: { alignItems: "center", backgroundColor: colors.header, borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 16, paddingHorizontal: 12, paddingVertical: 11 },
+  autoDescriptionCopy: { color: colors.inkSoft, flex: 1, fontSize: 12, lineHeight: 17 },
+  autoDescriptionName: { color: colors.ink, fontWeight: "800" },
   splitHeading: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   splitHint: { color: colors.inkFaint, fontSize: 11, marginTop: -3 },
   selectedCount: { backgroundColor: colors.header, borderRadius: 10, color: colors.forest, fontSize: 11, fontWeight: "800", overflow: "hidden", paddingHorizontal: 9, paddingVertical: 5 },
