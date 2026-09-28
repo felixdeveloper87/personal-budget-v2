@@ -1,134 +1,122 @@
-import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { CheckCircle2, Wallet } from '../../components/ui/icons'
+import { Box, Button, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { ReceiptText } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
-import type { HouseholdDashboard } from '../../types'
-import { Surface } from './components/HouseholdPageComponents'
-
-type ActivityItem =
-  | { kind: 'expense'; id: number; date: string; amount: number; title: string; detail: string }
-  | { kind: 'settlement'; id: number; date: string; amount: number; title: string; detail: string }
+import type { HouseholdDashboard, HouseholdExpense } from '../../types'
+import { getHouseholdCategoryConfig } from './expenses/expenseConfig'
 
 export function HouseholdOverview({
   household,
   onViewExpenses,
-  onViewPayments,
 }: {
   household: HouseholdDashboard
   onViewExpenses: () => void
-  onViewPayments: () => void
 }) {
-  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
-  const activities: ActivityItem[] = [
-    ...household.expenses.map((expense) => ({
-      kind: 'expense' as const,
-      id: expense.id,
-      date: expense.expenseDate,
-      amount: expense.amount,
-      title: expense.description,
-      detail: t('household.expenses.paidBy', { name: expense.payerName }),
-    })),
-    ...household.settlements.map((settlement) => ({
-      kind: 'settlement' as const,
-      id: settlement.id,
-      date: settlement.settlementDate,
-      amount: settlement.amount,
-      title: `${settlement.fromMemberName} → ${settlement.toMemberName}`,
-      detail: t(`household.status.${settlement.status}`),
-    })),
-  ].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id).slice(0, 5)
+  const { t } = useI18n()
+  const recentExpenses = [...household.expenses]
+    .sort((a, b) => b.expenseDate.localeCompare(a.expenseDate) || b.id - a.id)
+    .slice(0, 5)
 
   return (
-    <Surface id="household-expenses" scrollMarginTop="90px" p={{ base: 4, md: 5 }}>
-      <Flex align="center" justify="space-between" gap={3}>
-        <SectionHeading
-          eyebrow={t('household.expenses.eyebrow')}
-          title={t('household.activity.title')}
-          detail={t('household.activity.detail')}
-          count={t(
-            activities.length === 1
-              ? 'household.activity.count.one'
-              : 'household.activity.count.other',
-            { count: formatNumber(household.expenses.length + household.settlements.length) },
-          )}
-        />
-        <HStack display={{ base: 'none', sm: 'flex' }} flexShrink={0} spacing={2}>
-          <Button size="sm" variant="outline" borderColor="var(--pb-hair)" onClick={onViewExpenses}>
-            {t('household.expenses.open')}
+    <Box id="household-expenses" scrollMarginTop="90px">
+      <Flex align="center" justify="space-between" gap={3} mb={3.5}>
+        <Box minW={0}>
+          <Text
+            fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={800} letterSpacing="0.12em"
+            textTransform="uppercase" color="var(--pb-income)"
+          >
+            {t('household.expenses.eyebrow')}
+          </Text>
+          <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">
+            {t('household.activity.title')}
+          </Text>
+        </Box>
+        {recentExpenses.length > 0 && (
+          <Button
+            minH="44px" px={{ base: 3, md: 4 }} borderRadius="13px"
+            bg="var(--pb-tint-green)" color="var(--pb-forest-2)"
+            aria-label={t('household.activity.viewAllAria')} onClick={onViewExpenses}
+            _hover={{ bg: 'var(--pb-surface-3)', transform: 'translateY(-1px)' }}
+            _active={{ transform: 'translateY(0)' }}
+          >
+            {t('household.activity.viewAll')}
           </Button>
-          <Button size="sm" variant="outline" borderColor="var(--pb-hair)" onClick={onViewPayments}>
-            {t('household.settlements.open')}
-          </Button>
-        </HStack>
+        )}
       </Flex>
 
-      {activities.length === 0 ? (
-        <Box mt={4} p={4} borderRadius="14px" border="1px dashed var(--pb-hair-2)" textAlign="center" bg="var(--pb-surface-2)">
-          <Text fontSize="sm" color="var(--pb-ink-soft)">{t('household.expenses.emptyTitle')}</Text>
-        </Box>
-      ) : (
-        <VStack mt={3} align="stretch" spacing={0} divider={<Box borderTop="1px solid var(--pb-hair)" />}>
-          {activities.map((activity) => (
-            <Flex key={`${activity.kind}-${activity.id}`} py={3} align="center" justify="space-between" gap={3}>
-              <HStack minW={0} spacing={3}>
-                <Flex
-                  w={9} h={9} flexShrink={0} borderRadius="12px" align="center" justify="center"
-                  bg={activity.kind === 'expense' ? 'var(--pb-tint-green)' : 'var(--pb-tint-income)'}
-                  color={activity.kind === 'expense' ? 'var(--pb-forest-2)' : 'var(--pb-income)'}
-                >
-                  <Icon as={activity.kind === 'expense' ? Wallet : CheckCircle2} boxSize={4.5} weight="duotone" />
-                </Flex>
-                <Box minW={0}>
-                  <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{activity.title}</Text>
-                  <HStack spacing={1.5} color="var(--pb-ink-faint)" fontSize="xs">
-                    <Text noOfLines={1}>{activity.detail}</Text>
-                    <Text aria-hidden="true">·</Text>
-                    <Text flexShrink={0}>{formatDate(activity.date, { day: 'numeric', month: 'short' })}</Text>
-                  </HStack>
-                </Box>
-              </HStack>
-              <Text flexShrink={0} fontSize="sm" fontWeight={700} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatCurrency(activity.amount)}
-              </Text>
-            </Flex>
+      {recentExpenses.length > 0 ? (
+        <VStack align="stretch" spacing={2}>
+          {recentExpenses.map((expense) => (
+            <RecentExpenseRow
+              key={expense.id}
+              expense={expense}
+              household={household}
+            />
           ))}
         </VStack>
+      ) : (
+        <Box p={5} border="1px solid var(--pb-hair)" borderRadius="18px" bg="var(--pb-surface)">
+          <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)">{t('household.expenses.emptyTitle')}</Text>
+          <Text mt={1.5} fontSize="xs" lineHeight={1.5} color="var(--pb-ink-soft)">{t('household.expenses.emptyDescription')}</Text>
+        </Box>
       )}
-
-      <SimpleGrid display={{ base: 'grid', sm: 'none' }} mt={3} columns={2} spacing={2}>
-        <Button h="40px" size="sm" variant="outline" borderColor="var(--pb-hair)" onClick={onViewExpenses}>
-          {t('household.expenses.open')}
-        </Button>
-        <Button h="40px" size="sm" variant="outline" borderColor="var(--pb-hair)" onClick={onViewPayments}>
-          {t('household.settlements.open')}
-        </Button>
-      </SimpleGrid>
-    </Surface>
+    </Box>
   )
 }
 
-function SectionHeading({ eyebrow, title, detail, count }: {
-  eyebrow: string
-  title: string
-  detail: string
-  count: string
+function RecentExpenseRow({ expense, household }: {
+  expense: HouseholdExpense
+  household: HouseholdDashboard
 }) {
+  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
+  const category = getHouseholdCategoryConfig(expense.category)
+  const currentShare = expense.shares.find((share) => share.memberId === household.currentMemberId)
+  const attachmentCount = expense.attachments.filter((attachment) => attachment.status === 'AVAILABLE').length
+  const categoryLabel = t(`household.category.${expense.category}`, undefined, expense.category)
+
   return (
-    <Flex minW={0} align="flex-start" justify="space-between" gap={3}>
-      <Box minW={0}>
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">
-          {eyebrow}
-        </Text>
-        <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize={{ base: 'lg', md: 'xl' }} fontWeight={500} lineHeight={1.1} color="var(--pb-ink)">
-          {title}
-        </Text>
-        <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={2}>{detail}</Text>
-      </Box>
-      <Badge
-        flexShrink={0} mt={1} px={2.5} py={1.5} borderRadius="full" bg="var(--pb-surface-2)"
-        color="var(--pb-ink-soft)" border="1px solid var(--pb-hair)" textTransform="none" fontSize="2xs"
+    <Flex
+      align="center" gap={{ base: 2.5, sm: 3 }} px={{ base: 3, sm: 3.5 }} py={3}
+      border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)"
+      aria-label={`${categoryLabel}. ${expense.description}. ${t('household.expenses.total')}: ${formatCurrency(expense.amount)}. ${t('household.expenses.paidBy', { name: expense.payerName })}.`}
+    >
+      <Flex
+        w="36px" h="36px" flexShrink={0} align="center" justify="center" borderRadius="11px"
+        bg={category.bg} color={category.color}
       >
-        {count}
-      </Badge>
+        <Icon as={category.icon} boxSize={4.5} weight="duotone" />
+      </Flex>
+
+      <Box minW={0} flex={1}>
+        <HStack spacing={1.5} minW={0}>
+          <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{categoryLabel}</Text>
+          {attachmentCount > 0 && (
+            <HStack flexShrink={0} spacing={1} px={1.5} py={0.5} borderRadius="6px" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
+              <Icon as={ReceiptText} boxSize={3} weight="duotone" />
+              <Text fontSize="2xs" fontWeight={700}>{formatNumber(attachmentCount)}</Text>
+            </HStack>
+          )}
+        </HStack>
+        {expense.description && (
+          <Text mt={0.5} fontSize="xs" lineHeight={1.35} color="var(--pb-ink-soft)" noOfLines={1}>{expense.description}</Text>
+        )}
+        <Text mt={0.5} fontSize="2xs" fontWeight={700} color="var(--pb-income)" noOfLines={1}>
+          {currentShare
+            ? `${t('household.expenses.yourShare')}: ${formatCurrency(currentShare.amount)}`
+            : t('household.expenses.notParticipating')}
+        </Text>
+      </Box>
+
+      <VStack minW={0} flex={{ base: '0 1 38%', sm: '0 1 32%' }} align="flex-end" spacing={0.5}>
+        <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={800} color="var(--pb-ink)" noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>
+          {formatCurrency(expense.amount)}
+        </Text>
+        <Text fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1}>
+          {t('household.expenses.paidBy', { name: expense.payerName })}
+        </Text>
+        <Text fontSize="2xs" color="var(--pb-ink-faint)" noOfLines={1}>
+          {formatDate(expense.expenseDate, { day: '2-digit', month: 'short', year: 'numeric' })}
+        </Text>
+      </VStack>
     </Flex>
   )
 }

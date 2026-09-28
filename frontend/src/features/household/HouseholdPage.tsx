@@ -232,7 +232,6 @@ export default function HouseholdPage() {
         <HouseholdOverview
           household={household}
           onViewExpenses={recentExpensesModal.onOpen}
-          onViewPayments={paymentsOverviewModal.onOpen}
         />
 
       </VStack>
