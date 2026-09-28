@@ -72,6 +72,9 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
   const preview = amountIsValid && participantIds.size > 0 ? numericAmount / participantIds.size : 0
   const payerMemberId = expense?.payerMemberId ?? household.currentMemberId
   const requiresDescription = Boolean(expense) || DETAIL_CATEGORIES.has(category)
+  const visibleCategories = expense?.category === 'Rent'
+    ? CATEGORIES
+    : CATEGORIES.filter((item) => item !== 'Rent')
   const mark = ({ GBP: '\u00A3', BRL: 'R$', USD: '$', EUR: '\u20AC' } as Record<string, string>)[household.currency] ?? household.currency
 
   const submit = async (event: FormEvent) => {
@@ -199,7 +202,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
           <FormCard>
             <SectionHeading title={t('household.expenseModal.aboutTitle')} hint={t('household.expenseModal.aboutHint')} />
             <Flex mt={3.5} gap={2} flexWrap="wrap">
-              {CATEGORIES.map((item) => {
+              {visibleCategories.map((item) => {
                 const selected = category === item
                 const CategoryIcon = getHouseholdCategoryConfig(item).icon
                 const tone = CATEGORY_TONES[item] ?? CATEGORY_TONES.Other
