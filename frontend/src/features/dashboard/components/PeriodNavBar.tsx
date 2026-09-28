@@ -12,6 +12,7 @@ interface PeriodNavBarProps {
   onNavigate: (dir: 'prev' | 'next') => void
   onGoToToday: () => void
   embedded?: boolean
+  allowedPeriods?: PeriodType[]
 }
 
 const navBtnSx = {
@@ -36,13 +37,17 @@ export default function PeriodNavBar({
   onNavigate,
   onGoToToday,
   embedded = false,
+  allowedPeriods,
 }: PeriodNavBarProps) {
   const { t } = useI18n()
-  const periodOptions: Array<{ value: PeriodType; label: string }> = [
+  const allPeriodOptions: Array<{ value: PeriodType; label: string }> = [
     { value: 'day', label: t('period.day') },
     { value: 'week', label: t('period.week') },
     { value: 'month', label: t('period.month') },
   ]
+  const periodOptions = allPeriodOptions.filter(
+    (option) => !allowedPeriods || allowedPeriods.includes(option.value),
+  )
   const navSize = { base: '30px', sm: '32px' }
   const navStyles = embedded
     ? {

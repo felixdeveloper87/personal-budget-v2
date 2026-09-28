@@ -122,6 +122,7 @@ export default function EarningsPage() {
             periodNavigator={(
               <PeriodNavBar
                 embedded
+                allowedPeriods={['week', 'month']}
                 selectedPeriod={selectedPeriod}
                 label={periodLabel}
                 isCurrent={isCurrentPeriod}
