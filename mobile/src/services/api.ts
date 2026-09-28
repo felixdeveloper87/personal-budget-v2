@@ -123,6 +123,19 @@ export async function getHouseholdPage(token: string): Promise<HouseholdPageResp
   return request<HouseholdPageResponse>("/households/current", { token });
 }
 
+export async function updateHouseholdCleaningDuty(
+  token: string,
+  householdId: number,
+  assignmentId: number,
+  dutyKey: string,
+  completed: boolean,
+): Promise<HouseholdPageResponse> {
+  return request<HouseholdPageResponse>(
+    `/households/${householdId}/cleaning-assignments/${assignmentId}/duties/${encodeURIComponent(dutyKey)}`,
+    { method: "PATCH", token, body: JSON.stringify({ completed }) },
+  );
+}
+
 export async function getHouseholdExpenseHistory(
   token: string,
   householdId: number,

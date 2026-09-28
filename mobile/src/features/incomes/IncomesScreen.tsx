@@ -3,6 +3,7 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  ImageBackground,
   Pressable,
   RefreshControl,
   SafeAreaView,
@@ -196,35 +197,51 @@ export function IncomesScreen() {
         }
       >
         <View style={styles.hero}>
-          <View>
-            <Text style={styles.eyebrow}>INCOMES</Text>
-            <Text style={styles.heroLabel}>Total income</Text>
-          </View>
+          <ImageBackground
+            source={require("../../../assets/images/incomes-hero-background.png")}
+            resizeMode="cover"
+            style={styles.heroImage}
+          >
+            <View pointerEvents="none" style={styles.heroVeil} />
+            <View style={styles.heroContent}>
+              <View style={styles.heroHeading}>
+                <View style={styles.heroCopy}>
+                  <Text style={styles.eyebrow}>SUAS ENTRADAS</Text>
+                  <Text style={styles.heroLabel}>Receitas</Text>
+                </View>
+                <View style={styles.heroIcon}>
+                  <IncomeTrendIcon color={colors.income} size={23} />
+                </View>
+              </View>
 
-          {loading ? (
-            <View style={styles.loadingValue}>
-              <ActivityIndicator color={colors.white} />
+              <View style={styles.totalBlock}>
+                <Text style={styles.totalLabel}>Total no período</Text>
+                {loading ? (
+                  <View style={styles.loadingValue}>
+                    <ActivityIndicator color={colors.income} />
+                  </View>
+                ) : (
+                  <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.totalValue}>
+                    {error ? "—" : formatCurrency(totalIncome)}
+                  </Text>
+                )}
+                <Text style={styles.totalCaption}>
+                  {loading ? "Carregando suas entradas…" : error ? "Total indisponível no momento" : incomes.length === 1 ? "1 receita no período" : `${incomes.length} receitas no período`}
+                </Text>
+              </View>
+
+              <View style={styles.periodPanel}>
+                <PeriodNavigator
+                  isCurrent={period.isCurrent}
+                  label={period.label}
+                  onChange={period.setSelectedPeriod}
+                  onGoToToday={period.goToToday}
+                  onNavigate={period.navigate}
+                  value={period.selectedPeriod}
+                />
+              </View>
             </View>
-          ) : (
-            <Text adjustsFontSizeToFit numberOfLines={1} style={styles.totalValue}>
-              {formatCurrency(totalIncome)}
-            </Text>
-          )}
-
-          <Text style={styles.totalCaption}>
-            {incomes.length === 1 ? "1 receita no período" : `${incomes.length} receitas no período`}
-          </Text>
-
-          <View style={styles.heroDivider} />
-          <PeriodNavigator
-            isCurrent={period.isCurrent}
-            label={period.label}
-            onChange={period.setSelectedPeriod}
-            onGoToToday={period.goToToday}
-            onNavigate={period.navigate}
-            value={period.selectedPeriod}
-            variant="inverse"
-          />
+          </ImageBackground>
         </View>
 
         {!loading && !error ? (
@@ -342,26 +359,33 @@ const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.paper, flex: 1 },
   content: { padding: 18, paddingBottom: 42 },
   hero: {
-    backgroundColor: colors.forest,
-    borderRadius: 24,
-    padding: 16,
+    backgroundColor: "#EDE9DF",
+    borderRadius: 28,
     shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.16,
-    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.07,
+    shadowRadius: 14,
   },
-  eyebrow: { color: "#BFD3D3", fontSize: 10, fontWeight: "800", letterSpacing: 1.8 },
-  heroLabel: { color: colors.white, fontSize: 16, fontWeight: "600", marginTop: 3 },
-  loadingValue: { alignItems: "flex-start", height: 50, justifyContent: "center" },
+  heroImage: { borderRadius: 28, overflow: "hidden" },
+  heroVeil: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(251,249,244,0.42)" },
+  heroContent: { padding: 16 },
+  heroHeading: { flexDirection: "row", alignItems: "center", gap: 12 },
+  heroCopy: { flex: 1 },
+  heroIcon: { width: 44, height: 44, borderRadius: 16, backgroundColor: "rgba(251,249,244,0.75)", borderWidth: 1, borderColor: "rgba(255,255,255,0.7)", alignItems: "center", justifyContent: "center" },
+  eyebrow: { color: colors.income, fontSize: 9, fontWeight: "800", letterSpacing: 1.7 },
+  heroLabel: { color: colors.ink, fontSize: 27, fontWeight: "700", letterSpacing: -0.7, marginTop: 4 },
+  totalBlock: { marginTop: 18 },
+  totalLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "500" },
+  loadingValue: { alignItems: "flex-start", height: 53, justifyContent: "center" },
   totalValue: {
-    color: colors.white,
-    fontSize: 39,
-    fontWeight: "700",
+    color: "#234D3B",
+    fontSize: 43,
+    fontWeight: "800",
     letterSpacing: -1.5,
-    marginTop: 10,
+    marginTop: 4,
   },
-  totalCaption: { color: "#CFE0E0", fontSize: 11, marginTop: 3 },
-  heroDivider: { backgroundColor: "rgba(255,255,255,0.16)", height: 1, marginVertical: 12 },
+  totalCaption: { color: colors.inkSoft, fontSize: 11, marginTop: 3 },
+  periodPanel: { backgroundColor: "rgba(251,249,244,0.9)", borderRadius: 18, borderWidth: 1, borderColor: "rgba(255,255,255,0.8)", padding: 11, marginTop: 18 },
   sectionHeader: {
     alignItems: "flex-end",
     flexDirection: "row",

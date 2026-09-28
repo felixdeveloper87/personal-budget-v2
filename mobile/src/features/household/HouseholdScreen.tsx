@@ -16,6 +16,7 @@ import { HouseholdExpenseSheet } from "@/features/household/HouseholdExpenseShee
 import { HouseholdRecentActivity } from "@/features/household/HouseholdRecentActivity";
 import { HouseholdMembers } from "@/features/household/HouseholdMembers";
 import { HouseholdPayments } from "@/features/household/HouseholdPayments";
+import { HouseholdCleaning } from "@/features/household/HouseholdCleaning";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, getHouseholdPage } from "@/services/api";
 import { colors } from "@/theme/colors";
@@ -97,6 +98,15 @@ export function HouseholdScreen() {
               selectedMonth={selectedMonth}
             />
             <HouseholdMembers key={`members-${page.household.id}`} household={page.household} />
+            <HouseholdCleaning
+              key={`cleaning-${page.household.id}`}
+              household={page.household}
+              onUpdated={(updated) => setPage((current) => {
+                if (!updated.household) return updated;
+                if (!current?.household || current.household.id !== updated.household.id) return current;
+                return { ...current, household: { ...current.household, cleaningRotation: updated.household.cleaningRotation } };
+              })}
+            />
             <HouseholdRecentActivity key={page.household.id} household={page.household} />
             <HouseholdPayments key={`payments-${page.household.id}`} household={page.household} />
           </>

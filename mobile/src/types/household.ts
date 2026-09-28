@@ -30,6 +30,38 @@ export interface HouseholdHeroData {
   debts: HouseholdDebt[];
   expenses: HouseholdExpense[];
   settlements: HouseholdPayment[];
+  cleaningRotation?: HouseholdCleaningRotation;
+}
+
+export interface HouseholdCleaningDuty {
+  key: string;
+  label: string;
+  schedule: string | null;
+  completed: boolean;
+  canToggle: boolean;
+  completedAt: string | null;
+}
+
+export interface HouseholdCleaningAssignment {
+  id: number;
+  weekStart: string;
+  weekEnd: string;
+  assignedMemberId: number;
+  assignedMemberName: string;
+  status: "PENDING" | "UPCOMING" | "COMPLETED" | "MISSED";
+  canComplete: boolean;
+  completedAt: string | null;
+  duties: HouseholdCleaningDuty[];
+}
+
+export interface HouseholdCleaningRotation {
+  configured: boolean;
+  active: boolean;
+  canManage: boolean;
+  startDate: string | null;
+  participantMemberIds: number[];
+  currentWeek: HouseholdCleaningAssignment | null;
+  upcomingWeeks: HouseholdCleaningAssignment[];
 }
 
 export interface HouseholdPayment {
