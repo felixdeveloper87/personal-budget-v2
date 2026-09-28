@@ -170,12 +170,35 @@ export default function HouseholdPage() {
           onViewBalances={balancesOverviewModal.onOpen}
         />
 
+        <Box id="household-cleaning" scrollMarginTop="90px">
+          <CleaningRotationCard
+            rotation={household.cleaningRotation}
+            members={household.members}
+            currentMemberId={household.currentMemberId}
+            busyDutyKey={
+              busyAction?.startsWith('cleaning-duty:')
+                ? busyAction.slice('cleaning-duty:'.length)
+                : null
+            }
+            onManage={cleaningRotationModal.onOpen}
+            onToggleDuty={(assignmentId, dutyKey, completed) => void applyAction(
+              `cleaning-duty:${dutyKey}`,
+              () => updateHouseholdCleaningDuty(
+                household.id,
+                assignmentId,
+                dutyKey,
+                completed,
+              ),
+            )}
+          />
+        </Box>
+
         <HouseholdSectionNavigation
           ariaLabel={t('household.navigation.aria')}
           items={[
             { id: 'household-members', label: t('household.members.title') },
-            { id: 'household-expenses', label: t('household.expenses.title') },
             { id: 'household-cleaning', label: t('household.cleaning.title') },
+            { id: 'household-expenses', label: t('household.expenses.title') },
           ]}
         />
 
@@ -212,28 +235,6 @@ export default function HouseholdPage() {
           onViewPayments={paymentsOverviewModal.onOpen}
         />
 
-        <Box id="household-cleaning" scrollMarginTop="90px">
-          <CleaningRotationCard
-            rotation={household.cleaningRotation}
-            members={household.members}
-            currentMemberId={household.currentMemberId}
-            busyDutyKey={
-              busyAction?.startsWith('cleaning-duty:')
-                ? busyAction.slice('cleaning-duty:'.length)
-                : null
-            }
-            onManage={cleaningRotationModal.onOpen}
-            onToggleDuty={(assignmentId, dutyKey, completed) => void applyAction(
-              `cleaning-duty:${dutyKey}`,
-              () => updateHouseholdCleaningDuty(
-                household.id,
-                assignmentId,
-                dutyKey,
-                completed,
-              ),
-            )}
-          />
-        </Box>
       </VStack>
 
       <ExpenseModal
