@@ -41,11 +41,11 @@ function MetricCard({ background, borderColor, comparison, icon: Icon, iconBackg
   return (
     <HStack
       flex={1}
-      minH={{ base: '70px', md: '92px' }} spacing={{ base: 2, md: 3 }} px={{ base: 2, md: 4 }} py={{ base: 2, md: 3 }}
+      minH={{ base: '62px', md: '82px' }} spacing={{ base: 1.5, md: 2.5 }} px={{ base: 1.5, md: 3 }} py={{ base: 1.5, md: 2 }}
       border="1px solid" borderColor={borderColor} borderRadius="18px" bg={background} backdropFilter="blur(8px)"
     >
       <Box
-        display="grid" placeItems="center" flexShrink={0} w={{ base: '34px', md: '46px' }} h={{ base: '34px', md: '46px' }}
+        display="grid" placeItems="center" flexShrink={0} w={{ base: '30px', md: '40px' }} h={{ base: '30px', md: '40px' }}
         borderRadius={{ base: '12px', md: '15px' }} bg={iconBackground} color={valueColor}
       >
         <Icon size={20} strokeWidth={2.4} />
@@ -151,7 +151,7 @@ export default function MonthHero({ income, expense, previousIncome, previousExp
           gap={{ base: 2.5, md: 3 }}
           alignItems="stretch"
         >
-          <VStack align="stretch" spacing={2.5} h="full">
+          <VStack align="stretch" spacing={{ base: 1.5, md: 2 }} h="full">
             <MetricCard background="rgba(242,249,233,0.88)" borderColor="rgba(255,255,255,0.66)" icon={ArrowUp}
               iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257"
               comparison={incomeComparison} />
@@ -187,24 +187,13 @@ export default function MonthHero({ income, expense, previousIncome, previousExp
               <Box h="full" w={`${remainingShare * 100}%`} bg="#3E9870" />
             </HStack>
 
-            <Grid templateColumns={{ base: '1fr', sm: '1fr 1fr' }} gap={{ base: 2, sm: 4 }}>
-              <Box>
-                <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.spent')}</Text>
-                <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#A45148">{formatCurrency(expense)}</Text>
-              </Box>
-              <Box
-                borderTop={{ base: '1px solid rgba(36,56,60,0.14)', sm: 'none' }}
-                borderLeft={{ base: 'none', sm: '1px solid rgba(36,56,60,0.14)' }}
-                pt={{ base: 2, sm: 0 }}
-                pl={{ base: 0, sm: 4 }}
-              >
-                <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.dailyAverage')}</Text>
-                <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#24383A">{formatCurrency(dailyAverage)}</Text>
-                <Text mt={1} fontFamily="var(--pb-serif)" fontSize="10px" color="#52635E">
-                  {t(elapsedDays === 1 ? 'dashboard.dayThisMonth' : 'dashboard.daysThisMonth', { count: elapsedDays })}
-                </Text>
-              </Box>
-            </Grid>
+            <Box>
+              <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.dailyAverage')}</Text>
+              <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#24383A">{formatCurrency(dailyAverage)}</Text>
+              <Text mt={1} fontFamily="var(--pb-serif)" fontSize="10px" color="#52635E">
+                {t(elapsedDays === 1 ? 'dashboard.dayThisMonth' : 'dashboard.daysThisMonth', { count: elapsedDays })}
+              </Text>
+            </Box>
           </VStack>
         </Grid>
 
