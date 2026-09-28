@@ -167,7 +167,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
       isOpen={isOpen} onClose={saving ? () => undefined : onClose} size="full" closeOnOverlayClick={!saving} footer={footer}
       contentProps={{
         w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
-        h: { base: '90dvh', md: '90vh' }, maxH: { base: '90dvh', md: '90vh' },
+        h: { base: '80dvh', md: '80vh' }, maxH: { base: '80dvh', md: '80vh' },
         mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', bg: '#F6F5EF',
       }}
       header={<ExpenseSheetHeader householdName={household.name} editing={Boolean(expense)} saving={saving} onClose={onClose} />}
@@ -204,17 +204,17 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
                 const CategoryIcon = getHouseholdCategoryConfig(item).icon
                 const tone = CATEGORY_TONES[item] ?? CATEGORY_TONES.Other
                 return (
-                  <Button key={item} type="button" h="48px" minW={0} pl="7px" pr="15px" py={2} gap={1.75} borderRadius="16px"
+                  <Button key={item} type="button" h="60px" minW={0} pl={2} pr={4.5} py={2.5} gap={2.5} borderRadius="18px"
                     border="1px solid" borderColor={selected ? '#8FA87B' : '#E4E8DC'} bg={selected ? '#E8F0DF' : '#FAFBF6'}
                     color={selected ? 'var(--pb-income)' : 'var(--pb-ink-soft)'} aria-pressed={selected} onClick={() => chooseCategory(item)}
                     transition={prefersReducedMotion ? 'none' : 'transform .16s ease, background .16s ease'}
                     _hover={{ bg: selected ? '#E2ECD8' : '#F3F6ED', transform: 'translateY(-1px)' }}>
-                    <Flex w="28px" h="28px" align="center" justify="center" borderRadius="10px"
+                    <Flex w="36px" h="36px" align="center" justify="center" borderRadius="12px"
                       bg={selected ? '#638253' : tone.background} color={selected ? 'white' : tone.color}>
-                      <CategoryIcon size={16} weight="duotone" aria-hidden="true" />
+                      <CategoryIcon size={20} weight="duotone" aria-hidden="true" />
                     </Flex>
-                    <Text fontSize="11px" fontWeight={selected ? 800 : 600}>{t(`household.category.${item}`, undefined, item)}</Text>
-                    {selected && <Check size={10} weight="bold" aria-hidden="true" />}
+                    <Text fontSize="12px" fontWeight={selected ? 800 : 650}>{t(`household.category.${item}`, undefined, item)}</Text>
+                    {selected && <Check size={12} weight="bold" aria-hidden="true" />}
                   </Button>
                 )
               })}
@@ -244,36 +244,64 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
               </Text>
             </Flex>
             <FormControl mt={3.5} isInvalid={hasSubmitted && !participantsAreValid}>
-              <VStack align="stretch" spacing={1.5}>
-                {household.members.map((member) => {
-                  const isPayer = member.id === payerMemberId
-                  const selected = participantIds.has(member.id)
-                  return (
-                    <Flex as="label" key={member.id} minH="58px" px={2.5} py={2} align="center" border="1px solid"
-                      borderColor={selected ? '#DAE5CE' : '#E8EBE1'} borderRadius="14px" bg={selected ? '#F0F5E9' : '#F8F8F3'} cursor={isPayer ? 'default' : 'pointer'}>
-                      <Flex w="36px" h="36px" mr={2.5} flexShrink={0} align="center" justify="center" borderRadius="full"
-                        bg={selected ? '#DCE8D1' : '#EAEDE4'} color={selected ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="13px" fontWeight={700}>
-                        {member.name.trim().charAt(0).toUpperCase()}
+              <Box
+                overflowX="auto"
+                overscrollBehaviorX="contain"
+                mx={-1}
+                px={1}
+                pb={1}
+                sx={{
+                  scrollSnapType: 'x mandatory',
+                  scrollbarWidth: 'none',
+                  WebkitOverflowScrolling: 'touch',
+                  '&::-webkit-scrollbar': { display: 'none' },
+                }}
+              >
+                <HStack align="stretch" spacing={2} w="max-content">
+                  {household.members.map((member) => {
+                    const isPayer = member.id === payerMemberId
+                    const selected = participantIds.has(member.id)
+                    return (
+                      <Flex
+                        as="label"
+                        key={member.id}
+                        w="174px"
+                        minW="174px"
+                        minH="64px"
+                        px={2.5}
+                        py={2}
+                        align="center"
+                        border="1px solid"
+                        borderColor={selected ? '#DAE5CE' : '#E8EBE1'}
+                        borderRadius="15px"
+                        bg={selected ? '#F0F5E9' : '#F8F8F3'}
+                        cursor={isPayer ? 'default' : 'pointer'}
+                        scrollSnapAlign="start"
+                      >
+                        <Flex w="38px" h="38px" mr={2.5} flexShrink={0} align="center" justify="center" borderRadius="full"
+                          bg={selected ? '#DCE8D1' : '#EAEDE4'} color={selected ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="14px" fontWeight={700}>
+                          {member.name.trim().charAt(0).toUpperCase()}
+                        </Flex>
+                        <Text flex={1} minW={0} color="var(--pb-ink)" fontSize="12px" fontWeight={650} noOfLines={1}>
+                          {isPayer ? `${t('household.common.you')} \u00B7 ${t('household.expenseModal.paid')}` : member.name}
+                        </Text>
+                        <Checkbox isChecked={selected} isDisabled={isPayer} ml={1.5} onChange={(event) => {
+                          setParticipantIds((current) => {
+                            const next = new Set(current)
+                            if (event.target.checked) next.add(member.id)
+                            else next.delete(member.id)
+                            return next
+                          })
+                        }} sx={{
+                          '.chakra-checkbox__control': { w: '24px', h: '24px', borderRadius: '12px', borderWidth: '1.5px', borderColor: '#C9D5C0', bg: selected ? '#54754B' : 'transparent', color: 'white' },
+                          '.chakra-checkbox__control[data-checked]': { bg: '#54754B', borderColor: '#54754B' },
+                          '.chakra-checkbox__control[data-disabled]': { opacity: 1 },
+                        }} />
                       </Flex>
-                      <Text flex={1} minW={0} color="var(--pb-ink)" fontSize="13px" fontWeight={600} noOfLines={1}>
-                        {isPayer ? `${t('household.common.you')} \u00B7 ${t('household.expenseModal.paid')}` : member.name}
-                      </Text>
-                      <Checkbox isChecked={selected} isDisabled={isPayer} onChange={(event) => {
-                        setParticipantIds((current) => {
-                          const next = new Set(current)
-                          if (event.target.checked) next.add(member.id)
-                          else next.delete(member.id)
-                          return next
-                        })
-                      }} sx={{
-                        '.chakra-checkbox__control': { w: '24px', h: '24px', borderRadius: '12px', borderWidth: '1.5px', borderColor: '#C9D5C0', bg: selected ? '#54754B' : 'transparent', color: 'white' },
-                        '.chakra-checkbox__control[data-checked]': { bg: '#54754B', borderColor: '#54754B' },
-                        '.chakra-checkbox__control[data-disabled]': { opacity: 1 },
-                      }} />
-                    </Flex>
-                  )
-                })}
-              </VStack>
+                    )
+                  })}
+                </HStack>
+              </Box>
               <FormErrorMessage fontSize="11px" fontWeight={600}>{t('household.expenseModal.selectParticipants')}</FormErrorMessage>
             </FormControl>
             {participantsAreValid && amountIsValid && (
