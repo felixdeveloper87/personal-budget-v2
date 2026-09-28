@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Grid, HStack, Skeleton, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useReducedMotion } from 'framer-motion'
 
@@ -17,6 +17,7 @@ import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
 import MerchantLogo from '../../components/ui/MerchantLogo'
+import IncomeHeroArtwork from './IncomeHeroArtwork'
 
 type I18nApi = ReturnType<typeof useI18n>
 
@@ -238,47 +239,57 @@ function EarningsOverview({
   const { t, formatCurrency } = useI18n()
   const change = total - previousTotal
   const changeColor = change >= 0 ? 'var(--pb-summary-income)' : 'var(--pb-summary-coral)'
+  const artworkVeil = useColorModeValue('rgba(251,249,244,0.42)', 'rgba(20,35,34,0.58)')
 
   return (
     <Box
-      bg="var(--pb-summary-petrol)"
+      position="relative"
+      overflow="hidden"
+      bg="#EDE9DF"
       border="1px solid var(--pb-summary-line)"
       borderRadius="18px"
       boxShadow="var(--pb-shadow)"
       p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
-      <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
-        {periodNavigator}
+      <Box position="absolute" inset={0} pointerEvents="none">
+        <IncomeHeroArtwork />
       </Box>
+      <Box position="absolute" inset={0} bg={artworkVeil} pointerEvents="none" />
 
-      {loading ? (
-        <Skeleton height="104px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
-      ) : (
-        <VStack align="stretch" spacing={4}>
-          <VStack align="stretch" spacing={1}>
-            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-              {t('earnings.summary.heading', { period: periodLabel })}
+      <Box position="relative" zIndex={1}>
+        <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
+          {periodNavigator}
+        </Box>
+
+        {loading ? (
+          <Skeleton height="104px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
+        ) : (
+          <VStack align="stretch" spacing={4}>
+            <VStack align="stretch" spacing={1}>
+              <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+                {t('earnings.summary.heading', { period: periodLabel })}
+              </Text>
+              <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('earnings.summary.subtitle')}</Text>
+            </VStack>
+
+            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
+              {total > 0 ? (
+                <>
+                  {t('earnings.summary.earnedPrefix')}{' '}
+                  <Text as="em" color="var(--pb-summary-income)">{formatCurrency(total)}</Text>{' '}
+                  {t('earnings.summary.earnedSuffix', { period: periodLabel })}
+                </>
+              ) : (
+                <>{t('earnings.summary.empty', { period: periodLabel })}</>
+              )}
             </Text>
-            <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('earnings.summary.subtitle')}</Text>
+
+            <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={changeColor}>
+              {comparisonCopy}
+            </Text>
           </VStack>
-
-          <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
-            {total > 0 ? (
-              <>
-                {t('earnings.summary.earnedPrefix')}{' '}
-                <Text as="em" color="var(--pb-summary-income)">{formatCurrency(total)}</Text>{' '}
-                {t('earnings.summary.earnedSuffix', { period: periodLabel })}
-              </>
-            ) : (
-              <>{t('earnings.summary.empty', { period: periodLabel })}</>
-            )}
-          </Text>
-
-          <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={changeColor}>
-            {comparisonCopy}
-          </Text>
-        </VStack>
-      )}
+        )}
+      </Box>
     </Box>
   )
 }
