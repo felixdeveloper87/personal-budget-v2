@@ -3,7 +3,6 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
   Pressable,
   RefreshControl,
   SafeAreaView,
@@ -20,6 +19,7 @@ import {
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { PeriodNavigator } from "@/components/period/PeriodNavigator";
 import { useAuth } from "@/contexts/AuthContext";
+import { IncomeHeroArtwork } from "@/features/incomes/IncomeHeroArtwork";
 import { usePeriodNavigation } from "@/hooks/usePeriodNavigation";
 import { ApiError, searchTransactions } from "@/services/api";
 import { colors } from "@/theme/colors";
@@ -197,11 +197,10 @@ export function IncomesScreen() {
         }
       >
         <View style={styles.hero}>
-          <ImageBackground
-            source={require("../../../assets/images/incomes-hero-background.png")}
-            resizeMode="cover"
-            style={styles.heroImage}
-          >
+          <View style={styles.heroImage}>
+            <View pointerEvents="none" style={styles.heroArtwork}>
+              <IncomeHeroArtwork />
+            </View>
             <View pointerEvents="none" style={styles.heroVeil} />
             <View style={styles.heroContent}>
               <View style={styles.heroHeading}>
@@ -241,7 +240,7 @@ export function IncomesScreen() {
                 />
               </View>
             </View>
-          </ImageBackground>
+          </View>
         </View>
 
         {!loading && !error ? (
@@ -367,6 +366,7 @@ const styles = StyleSheet.create({
     shadowRadius: 14,
   },
   heroImage: { borderRadius: 28, overflow: "hidden" },
+  heroArtwork: { ...StyleSheet.absoluteFill },
   heroVeil: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(251,249,244,0.42)" },
   heroContent: { padding: 16 },
   heroHeading: { flexDirection: "row", alignItems: "center", gap: 12 },

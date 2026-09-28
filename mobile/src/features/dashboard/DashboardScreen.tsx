@@ -4,7 +4,6 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  ImageBackground,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -21,6 +20,7 @@ import { PaceChart } from "@/components/dashboard/PaceChart";
 import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarousel";
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { DashboardHeroArtwork } from "@/features/dashboard/DashboardHeroArtwork";
 import { ApiError, getMonthlySummary, listInstallmentPlans, listTransactions } from "@/services/api";
 import { colors } from "@/theme/colors";
 import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finance";
@@ -359,11 +359,10 @@ export function DashboardScreen() {
           />
         }
       >
-        <ImageBackground
-          resizeMode="cover"
-          source={require("../../../assets/images/dashboard-hero-background.png")}
-          style={styles.homeHeader}
-        >
+        <View style={styles.homeHeader}>
+          <View pointerEvents="none" style={styles.heroArtwork}>
+            <DashboardHeroArtwork />
+          </View>
           <View pointerEvents="none" style={styles.heroScrim} />
           <View style={styles.heroContent}>
             <View style={styles.userRow}>
@@ -477,7 +476,7 @@ export function DashboardScreen() {
               </View>
             </View>
           </View>
-        </ImageBackground>
+        </View>
 
         {!loading && !error ? (
           <View style={styles.paceSection}>
@@ -527,6 +526,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 19,
   },
+  heroArtwork: { ...StyleSheet.absoluteFill },
   heroScrim: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(255,247,230,0.07)" },
   userRow: {
     alignItems: "center",
