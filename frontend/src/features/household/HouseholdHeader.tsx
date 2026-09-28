@@ -68,7 +68,8 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
       isolation="isolate"
       borderRadius="27px"
       bg="#194C3F"
-      minH={{ base: 'clamp(430px, 130vw, 520px)', md: '460px' }}
+      minH={{ base: 'clamp(430px, calc(130vw - 42px), 520px)', md: '460px' }}
+      fontFamily="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
       direction="column"
       justify="space-between"
       gap={16}
@@ -98,7 +99,7 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
               {formatNumber(household.members.length)}
             </Button>
           </HStack>
-          <Text as="h1" color="white" fontSize={{ base: '20px', md: '30px' }} fontWeight={800} letterSpacing="-0.4px" lineHeight={1.2} mt={1} overflowWrap="anywhere" textShadow="0 2px 8px rgba(15,48,38,0.45)">
+          <Text as="h1" title={household.name} noOfLines={1} color="white" fontSize={{ base: '20px', md: '30px' }} fontWeight={800} letterSpacing="-0.4px" lineHeight={1.2} mt={1} textShadow="0 2px 8px rgba(15,48,38,0.45)">
             {household.name}
           </Text>
         </Box>
@@ -133,15 +134,17 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
             <Text mt={1} fontSize={{ base: '9px', md: '11px' }} color={muted}>{t(net === 0 && hasOutstanding ? 'household.header.position.evenWithOutstanding' : 'household.header.netBalance')}</Text>
           </Box>
         </Grid>
-        <Flex mt={4} gap={2}>
-          <Button onClick={onAddExpense} leftIcon={<Icon as={Plus} boxSize={4} />} flex={1} minW={0} h="44px" borderRadius="17px" bg={buttonBg} color={ink} fontSize="13px" fontWeight={700} _hover={{ bg: buttonHover }}>
+        <Flex mt={4} gap={2} wrap="wrap">
+          <Button onClick={onAddExpense} leftIcon={<Icon as={Plus} boxSize={4} />} flex={1} minW="170px" h="44px" borderRadius="17px" bg={buttonBg} color={ink} fontSize="13px" fontWeight={700} _hover={{ bg: buttonHover }}>
             {t('household.header.addExpense')}
           </Button>
+          <HStack spacing={2} flexShrink={0} ml="auto">
           <Box position="relative">
             <IconButton aria-label={t('household.notifications.openAria', { count: formatNumber(household.unreadNotificationCount) })} onClick={onNotifications} icon={<Icon as={Bell} boxSize={5} />} w="44px" h="44px" borderRadius="15px" bg={buttonBg} color={ink} _hover={{ bg: buttonHover }} />
             {household.unreadNotificationCount > 0 ? <Flex aria-hidden="true" pointerEvents="none" position="absolute" top="-5px" right="-4px" minW="18px" h="18px" px={1} borderRadius="full" bg="#A44735" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>{household.unreadNotificationCount > 99 ? '99+' : formatNumber(household.unreadNotificationCount)}</Flex> : null}
           </Box>
           {household.currentMemberRole === 'OWNER' ? <IconButton aria-label={t('household.header.manageAria', { name: household.name })} onClick={onManage} icon={<Icon as={Gear} boxSize={5} />} w="44px" h="44px" borderRadius="15px" bg={buttonBg} color={ink} _hover={{ bg: buttonHover }} /> : null}
+          </HStack>
         </Flex>
       </Box>
     </Flex>
