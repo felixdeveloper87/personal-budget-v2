@@ -309,7 +309,7 @@ function ExpenseSheetHeader({ householdName, editing, saving, onClose }: { house
   return (
     <Box position="relative" overflow="hidden" bg="#EDF2E5" borderBottom="1px solid #DFE7D6" px={5} pt={2.5} pb={5}>
       <Box aria-hidden="true" position="absolute" inset="0 0 0 auto" w="190px"
-        bgImage="linear-gradient(90deg, #EDF2E5 0%, rgba(237,242,229,.76) 48%, rgba(237,242,229,.18) 100%), url('/household-landscape.svg')"
+        bgImage="linear-gradient(90deg, #EDF2E5 0%, rgba(237,242,229,.76) 48%, rgba(237,242,229,.18) 100%), url('/household-landscape.svg?v=20260928-2')"
         bgSize="cover" bgPosition="center" pointerEvents="none" />
       <Box w="36px" h="5px" mx="auto" mb={4.5} borderRadius="full" bg="#C6D1C1" />
       <Flex position="relative" align="center" gap={3}>
