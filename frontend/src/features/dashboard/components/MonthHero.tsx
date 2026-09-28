@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, Grid, HStack, Text, VStack } from '@chakra-ui/react'
-import { ArrowDown, ArrowUp, ChartNoAxesColumnIncreasing, Plus, type LucideIcon } from 'lucide-react'
+import { ArrowDown, ArrowDownRight, ArrowUp, ArrowUpRight, ChartNoAxesColumnIncreasing, Minus, Plus, type LucideIcon } from 'lucide-react'
 import { useI18n } from '../../../i18n'
 import DashboardHeroArtwork from './DashboardHeroArtwork'
 import Panel from './Panel'
@@ -7,6 +7,8 @@ import Panel from './Panel'
 interface MonthHeroProps {
   income: number
   expense: number
+  previousIncome?: number | null
+  previousExpense?: number | null
   date?: Date
   userName?: string
   onAddIncome?: () => void
@@ -21,9 +23,21 @@ interface MetricCardProps {
   label: string
   value: string
   valueColor: string
+  comparison?: {
+    caption: string
+    direction: -1 | 0 | 1
+    favourable: boolean
+    label: string
+  }
 }
 
-function MetricCard({ background, borderColor, icon: Icon, iconBackground, label, value, valueColor }: MetricCardProps) {
+function MetricCard({ background, borderColor, comparison, icon: Icon, iconBackground, label, value, valueColor }: MetricCardProps) {
+  const ComparisonIcon = comparison?.direction === 1
+    ? ArrowUpRight
+    : comparison?.direction === -1
+      ? ArrowDownRight
+      : Minus
+
   return (
     <HStack
       flex={1}
@@ -45,13 +59,26 @@ function MetricCard({ background, borderColor, icon: Icon, iconBackground, label
         >
           {value}
         </Text>
+        {comparison && (
+          <Box mt={{ base: 1, md: 1.5 }} minW={0}>
+            <HStack spacing={1} color={comparison.direction === 0 ? '#52635E' : comparison.favourable ? '#2F7257' : '#A45148'}>
+              <ComparisonIcon size={13} strokeWidth={2.4} aria-hidden="true" />
+              <Text fontFamily="var(--pb-serif)" fontSize={{ base: '10px', md: 'xs' }} fontWeight={700} lineHeight={1.1} noOfLines={1}>
+                {comparison.label}
+              </Text>
+            </HStack>
+            <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize={{ base: '9px', md: '10px' }} color="#52635E" lineHeight={1.1} noOfLines={1}>
+              {comparison.caption}
+            </Text>
+          </Box>
+        )}
       </Box>
     </HStack>
   )
 }
 
-export default function MonthHero({ income, expense, date, userName, onAddIncome, onAddExpense }: MonthHeroProps) {
-  const { t, formatCurrency, formatDate } = useI18n()
+export default function MonthHero({ income, expense, previousIncome, previousExpense, date, userName, onAddIncome, onAddExpense }: MonthHeroProps) {
+  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
   const currentDate = date ?? new Date()
   const net = income - expense
   const usage = income > 0 ? expense / income : null
@@ -63,6 +90,27 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
   const hour = new Date().getHours()
   const greeting = t(hour < 12 ? 'dashboard.goodMorning' : hour < 18 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening')
   const monthLabel = formatDate(currentDate, { month: 'long', year: 'numeric' })
+  const getComparison = (value: number, previousValue: number | null | undefined, kind: 'income' | 'expense') => {
+    if (previousValue === null || previousValue === undefined) return undefined
+
+    const difference = Math.round((value - previousValue) * 100) / 100
+    const direction = difference === 0 ? 0 : difference > 0 ? 1 : -1
+    const amount = previousValue === 0 && difference !== 0
+      ? formatCurrency(Math.abs(difference))
+      : `${formatNumber(previousValue === 0 ? 0 : Math.abs(difference / previousValue) * 100, { maximumFractionDigits: 1 })}%`
+
+    return {
+      caption: t('dashboard.vsPreviousMonth'),
+      direction: direction as -1 | 0 | 1,
+      favourable: direction !== 0 && (kind === 'income' ? direction > 0 : direction < 0),
+      label: direction === 0
+        ? t('dashboard.noMonthlyChange')
+        : t(direction > 0 ? 'dashboard.monthlyChangeHigher' : 'dashboard.monthlyChangeLower', { amount }),
+    }
+  }
+
+  const incomeComparison = getComparison(income, previousIncome, 'income')
+  const expenseComparison = getComparison(expense, previousExpense, 'expense')
 
   return (
     <Panel
@@ -105,9 +153,11 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
         >
           <VStack align="stretch" spacing={2.5} h="full">
             <MetricCard background="rgba(242,249,233,0.88)" borderColor="rgba(255,255,255,0.66)" icon={ArrowUp}
-              iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257" />
+              iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257"
+              comparison={incomeComparison} />
             <MetricCard background="rgba(255,239,229,0.9)" borderColor="rgba(255,255,255,0.66)" icon={ArrowDown}
-              iconBackground="#F0D1CA" label={t('dashboard.expense')} value={formatCurrency(expense)} valueColor="#A45148" />
+              iconBackground="#F0D1CA" label={t('dashboard.expense')} value={formatCurrency(expense)} valueColor="#A45148"
+              comparison={expenseComparison} />
             <MetricCard background="rgba(250,240,211,0.9)" borderColor="rgba(255,255,255,0.66)" icon={ChartNoAxesColumnIncreasing}
               iconBackground="#E4DAB8" label={t('dashboard.netThisMonth')} value={formatCurrency(net)} valueColor={net < 0 ? '#A45148' : '#806832'} />
           </VStack>

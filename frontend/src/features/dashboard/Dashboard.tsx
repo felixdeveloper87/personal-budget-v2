@@ -6,10 +6,11 @@ import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import { useAuth } from '../../contexts/AuthContext'
 import {
+  getMonthlySummary,
   listInstallmentPlans,
   listPaymentMethods,
 } from '../../api'
-import type { InstallmentPlan } from '../../types'
+import type { InstallmentPlan, MonthlySummary } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
@@ -68,6 +69,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   // you spent £X at Lidl") reflect when purchases actually happened.
   /* ── Side data: installments and credit-card names ── */
   const [installmentPlans, setInstallmentPlans] = useState<InstallmentPlan[]>([])
+  const [previousSummary, setPreviousSummary] = useState<MonthlySummary | null>(null)
+  const [summaryRefresh, setSummaryRefresh] = useState(0)
   // Credit-card id → name, used to fold a card's charges into one fatura row.
   const [cardNames, setCardNames] = useState<Map<number, string>>(() => new Map())
 
@@ -84,6 +87,26 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       })
       .catch(() => {})
   }, [user?.token])
+
+  useEffect(() => {
+    let active = true
+
+    if (!user?.token) {
+      setPreviousSummary(null)
+      return () => { active = false }
+    }
+
+    const previousMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1, 1)
+    void getMonthlySummary(previousMonth)
+      .then((summary) => {
+        if (active) setPreviousSummary(summary)
+      })
+      .catch(() => {
+        if (active) setPreviousSummary(null)
+      })
+
+    return () => { active = false }
+  }, [selectedDate, summaryRefresh, user?.token])
 
   /* ── Quick-add modal ── */
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
@@ -111,6 +134,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
             <MonthHero
               income={periodData.income}
               expense={periodData.expense}
+              previousIncome={previousSummary?.totalIncome ?? null}
+              previousExpense={previousSummary?.totalExpense ?? null}
               date={selectedDate}
               userName={user?.name}
               onAddIncome={handleAddIncome}
@@ -186,8 +211,8 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         onClose={closeModal}
         type={modalType}
         transactions={transactions}
-        onTransactionCreated={() => { closeModal(); void loadData() }}
-        onRefresh={() => void loadData()}
+        onTransactionCreated={() => { closeModal(); setSummaryRefresh((value) => value + 1); void loadData() }}
+        onRefresh={() => { setSummaryRefresh((value) => value + 1); void loadData() }}
       />
     </Box>
   )
