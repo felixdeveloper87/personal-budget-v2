@@ -1,4 +1,4 @@
-import { Box, Button, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { ReceiptText } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../types'
@@ -72,6 +72,7 @@ function RecentExpenseRow({ expense, household }: {
   const currentShare = expense.shares.find((share) => share.memberId === household.currentMemberId)
   const attachmentCount = expense.attachments.filter((attachment) => attachment.status === 'AVAILABLE').length
   const categoryLabel = t(`household.category.${expense.category}`, undefined, expense.category)
+  const CategoryIcon = category.icon
 
   return (
     <Flex
@@ -83,7 +84,7 @@ function RecentExpenseRow({ expense, household }: {
         w="36px" h="36px" flexShrink={0} align="center" justify="center" borderRadius="11px"
         bg={category.bg} color={category.color}
       >
-        <Icon as={category.icon} boxSize={4.5} weight="duotone" />
+        <CategoryIcon size={18} weight="duotone" aria-hidden="true" />
       </Flex>
 
       <Box minW={0} flex={1}>
@@ -91,7 +92,7 @@ function RecentExpenseRow({ expense, household }: {
           <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{categoryLabel}</Text>
           {attachmentCount > 0 && (
             <HStack flexShrink={0} spacing={1} px={1.5} py={0.5} borderRadius="6px" bg="var(--pb-tint-green)" color="var(--pb-forest-2)">
-              <Icon as={ReceiptText} boxSize={3} weight="duotone" />
+              <ReceiptText size={12} weight="duotone" aria-hidden="true" />
               <Text fontSize="2xs" fontWeight={700}>{formatNumber(attachmentCount)}</Text>
             </HStack>
           )}

@@ -22,6 +22,7 @@ import { MembersModal } from './members/MembersModal'
 import { MembersOverviewModal } from './members/MembersOverviewModal'
 import { BalancesOverviewModal } from './settlements/BalancesOverviewModal'
 import { PaymentsOverviewModal } from './settlements/PaymentsOverviewModal'
+import { HouseholdPayments } from './settlements/HouseholdPayments'
 import type { AttachmentTarget } from './household.types'
 import { useHouseholdPageController } from './hooks/useHouseholdPageController'
 import { HouseholdOverview } from './HouseholdOverview'
@@ -222,6 +223,11 @@ export default function HouseholdPage() {
         <HouseholdOverview
           household={household}
           onViewExpenses={recentExpensesModal.onOpen}
+        />
+
+        <HouseholdPayments
+          household={household}
+          onViewPayments={paymentsOverviewModal.onOpen}
         />
 
       </VStack>
