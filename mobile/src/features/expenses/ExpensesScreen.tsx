@@ -61,8 +61,8 @@ function formatTransactionDate(value?: string | null) {
 }
 
 function transactionDate(expense: Transaction) {
-  // Use the real purchase date — never paymentDate.
-  return (expense.transactionDate ?? expense.dateTime).slice(0, 10);
+  // Prefer the real purchase date; fall back to paymentDate then dateTime.
+  return (expense.transactionDate ?? expense.paymentDate ?? expense.dateTime).slice(0, 10);
 }
 
 
@@ -136,15 +136,15 @@ export function ExpensesScreen() {
         });
 
         if (sequence === requestSequence.current) {
-          // Require a real transactionDate (purchase date). Fixed/recurring
-          // expenses are included — only skip entries with no transaction date.
-          const filtered = result.filter((t) => Boolean(t.transactionDate));
           setExpenses(
-            [...filtered].sort((a, b) =>
-              (b.transactionDate ?? b.dateTime).localeCompare(a.transactionDate ?? a.dateTime),
+            [...result].sort((a, b) =>
+              (b.transactionDate ?? b.paymentDate ?? b.dateTime).localeCompare(
+                a.transactionDate ?? a.paymentDate ?? a.dateTime,
+              ),
             ),
           );
         }
+
 
       } catch (loadError) {
         if (loadError instanceof ApiError && loadError.status === 401) {
@@ -332,7 +332,7 @@ export function ExpensesScreen() {
                       {expense.description || expense.category}
                     </Text>
                     <Text numberOfLines={1} style={styles.rowMeta}>
-                      {expense.category} · {formatTransactionDate(expense.transactionDate)}
+                      {expense.category} · {formatTransactionDate(expense.transactionDate ?? expense.paymentDate)}
                     </Text>
 
                   </View>
