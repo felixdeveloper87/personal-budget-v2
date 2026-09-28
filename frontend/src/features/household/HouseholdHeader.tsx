@@ -1,52 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  HStack,
-  Icon,
-  Text,
-} from '@chakra-ui/react'
-import PeriodNavigator from '../../components/summary/PeriodNavigator'
-import {
-  Bell,
-  CheckCircle2,
-  ChevronRight,
-  Gear,
-  Home,
-  Plus,
-  TrendingDown,
-  TrendingUp,
-  Wallet,
-} from '../../components/ui/icons'
-import type {
-  HouseholdDashboard,
-  HouseholdMonthSummary,
-} from '../../types'
+import { useState } from 'react'
+import { Box, Button, Flex, Grid, HStack, Icon, IconButton, Text, useColorModeValue } from '@chakra-ui/react'
+import { Bell, Calendar, ChevronLeft, ChevronRight, Gear, Plus, TrendingDown, TrendingUp, Users } from '../../components/ui/icons'
+import type { HouseholdDashboard } from '../../types'
 import { useI18n } from '../../i18n'
-import { keyframes } from '@emotion/react'
-import { HOUSEHOLD_AVATAR_GRADIENTS } from './householdAvatar'
-
-const pulseAnim = keyframes`
-  0%, 100% { opacity: 0.7; transform: translateX(0); }
-  50% { opacity: 1; transform: translateX(2px); }
-`
-
-const shimmerAnim = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
-
-const pulseGlow = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(71,112,148, 0.5); }
-  50% { box-shadow: 0 0 0 8px rgba(71,112,148, 0); }
-`
-
-const unreadNotificationPulse = keyframes`
-  from { transform: scale(1); opacity: 0.7; }
-  to { transform: scale(2.6); opacity: 0; }
-`
 
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
@@ -56,632 +12,138 @@ interface HouseholdHeaderProps {
   onNotifications: () => void
 }
 
-const monthStart = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1)
+const monthKey = (date: Date) => date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
 
-const monthKey = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-
-const parseMonth = (value: string) => {
-  const match = /^(\d{4})-(\d{2})$/.exec(value)
-  if (!match) return null
-  const month = Number(match[2])
-  if (month < 1 || month > 12) return null
-  return new Date(Number(match[1]), month - 1, 1)
-}
-
-function UnreadNotificationIndicator({ count }: { count: string }) {
-  return (
-    <Box
-      aria-hidden="true"
-      position="absolute"
-      top="-7px"
-      right="-7px"
-      minW="19px"
-      h="19px"
-      pointerEvents="none"
-    >
-      <Box
-        position="absolute"
-        inset={0}
-        borderRadius="full"
-        bg="var(--pb-coral)"
-        animation={`${unreadNotificationPulse} 1.8s ease-out infinite`}
-        sx={{
-          '@media (prefers-reduced-motion: reduce)': {
-            animation: 'none',
-            opacity: 0,
-          },
-        }}
-      />
-      <Box
-        position="absolute"
-        inset={0}
-        borderRadius="full"
-        bg="var(--pb-coral)"
-        border="1.5px solid var(--pb-summary-panel)"
-      />
-      <Flex
-        position="absolute"
-        inset={0}
-        align="center"
-        justify="center"
-        px="3px"
-        color="white"
-        fontFamily="var(--pb-mono)"
-        fontSize="7px"
-        fontWeight={800}
-        lineHeight={1}
-      >
-        {count}
-      </Flex>
-    </Box>
-  )
-}
-
-export default function HouseholdHeader({
-  household,
-  onAddExpense,
-  onManage,
-  onMembersOverview,
-  onNotifications,
-}: HouseholdHeaderProps) {
-  const { formatCurrency, formatDate, formatNumber, locale, t } = useI18n()
+export default function HouseholdHeader({ household, onAddExpense, onManage, onMembersOverview, onNotifications }: HouseholdHeaderProps) {
+  const { formatDate, formatNumber, t } = useI18n()
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date()
+    return new Date(now.getFullYear(), now.getMonth(), 1)
+  })
   const currentMonthKey = monthKey(new Date())
-  const currentMonth = useMemo(
-    () => parseMonth(currentMonthKey) ?? monthStart(new Date()),
-    [currentMonthKey],
-  )
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
-
-  const summaries = useMemo(() => {
-    const byMonth = new Map<string, HouseholdMonthSummary>()
-
-    for (const summary of household.monthSummaries ?? []) {
-      if (parseMonth(summary.month)) byMonth.set(summary.month, summary)
-    }
-
-    if (!byMonth.has(currentMonthKey)) {
-      byMonth.set(currentMonthKey, {
-        month: currentMonthKey,
-        spend: household.monthSpend,
-        expenseCount: household.expenses.filter(
-          (expense) => expense.expenseDate.slice(0, 7) === currentMonthKey,
-        ).length,
-      })
-    }
-
-    return byMonth
-  }, [currentMonthKey, household.expenses, household.monthSpend, household.monthSummaries])
-
-  // Allow unbounded past navigation
-
   const selectedMonthKey = monthKey(selectedMonth)
+  const previousMonth = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() - 1, 1)
+  const spending = household.monthSummaries?.find((item) => item.month === selectedMonthKey)?.spend
+    ?? (selectedMonthKey === currentMonthKey ? household.monthSpend : 0)
+  const previousSpending = household.monthSummaries?.find((item) => item.month === monthKey(previousMonth))?.spend ?? 0
+  const change = previousSpending === 0
+    ? spending === 0 ? 0 : null
+    : Math.round((spending - previousSpending) * 100) / previousSpending
+  const magnitude = Math.abs(change ?? 0)
+  const changeLabel = change === null ? '—'
+    : (change > 0 ? '+' : change < 0 ? '−' : '')
+      + (magnitude > 0 && magnitude < 0.1 ? '<' + formatNumber(0.1) : formatNumber(magnitude, { maximumFractionDigits: 1 })) + '%'
+  const money = (value: number) => formatNumber(value, { style: 'currency', currency: household.currency || 'GBP' })
+  const net = household.currentUserBalance
+  const hasOutstanding = household.debts.some((debt) => debt.fromMemberId === household.currentMemberId || debt.toMemberId === household.currentMemberId)
+  const positionLabel = net > 0 ? t('household.header.position.owed') : net < 0 ? t('household.header.position.youOwe') : t(hasOutstanding ? 'household.header.balanced' : 'household.header.position.settled')
+  const memberLabel = t(household.members.length === 1 ? 'household.header.activeMembers.one' : 'household.header.activeMembers.other', { count: formatNumber(household.members.length) })
+  const comparisonLabel = change === null
+    ? t('household.header.noPreviousSpending')
+    : t('household.header.changeAria', { change: changeLabel, month: formatDate(previousMonth, { month: 'long', year: 'numeric' }) })
 
+  const panel = useColorModeValue('rgba(228,237,222,0.94)', 'rgba(30,51,43,0.96)')
+  const ink = useColorModeValue('#284D3C', '#E3EDDA')
+  const muted = useColorModeValue('#526653', '#B8CCB5')
+  const income = useColorModeValue('#326548', '#A9D29C')
+  const expense = useColorModeValue('#A44735', '#F1B6A6')
+  const neutralTint = useColorModeValue('rgba(75,108,76,0.10)', 'rgba(185,211,171,0.12)')
+  const increaseTint = useColorModeValue('#F4DFD5', '#593F35')
+  const decreaseTint = useColorModeValue('#D2E5CE', '#345239')
+  const buttonBg = useColorModeValue('#FBFAF4', '#324A3D')
+  const buttonHover = useColorModeValue('#E6EEE7', '#405D4B')
+  const positionColor = net < 0 ? expense : net > 0 ? income : muted
 
-
-  const selectedSummary = summaries.get(selectedMonthKey) ?? {
-    month: selectedMonthKey,
-    spend: 0,
-    expenseCount: 0,
+  function navigateMonth(offset: number) {
+    const candidate = new Date(selectedMonth.getFullYear(), selectedMonth.getMonth() + offset, 1)
+    if (monthKey(candidate) <= currentMonthKey) setSelectedMonth(candidate)
   }
-
-  const canNavigatePrevious = true
-  const canNavigateNext = true
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    const candidate = new Date(
-      selectedMonth.getFullYear(),
-      selectedMonth.getMonth() + (direction === 'prev' ? -1 : 1),
-      1,
-    )
-    setSelectedMonth(candidate)
-  }
-
-  const position = useMemo(() => {
-    const owedToUser = household.debts.filter(
-      (debt) => debt.toMemberId === household.currentMemberId,
-    )
-    const owedByUser = household.debts.filter(
-      (debt) => debt.fromMemberId === household.currentMemberId,
-    )
-    const toReceive = owedToUser.reduce((sum, debt) => sum + debt.amount, 0)
-    const toPay = owedByUser.reduce((sum, debt) => sum + debt.amount, 0)
-
-    if (toReceive === 0 && toPay === 0) {
-      return {
-        title: t('household.header.position.settled'),
-        value: formatCurrency(0),
-        detail: t('household.header.position.settledDetail'),
-        icon: CheckCircle2,
-        color: 'var(--pb-summary-income)',
-        tint: 'var(--pb-tint-income)',
-      }
-    }
-
-    if (toReceive > 0 && toPay === 0) {
-      const detail = owedToUser.length === 1
-        ? t('household.header.position.owedByOne', { name: owedToUser[0].fromMemberName })
-        : t('household.header.position.owedByMany', { count: formatNumber(owedToUser.length) })
-      return {
-        title: t('household.header.position.owed'),
-        value: formatCurrency(toReceive),
-        detail,
-        icon: TrendingUp,
-        color: 'var(--pb-summary-income)',
-        tint: 'var(--pb-tint-income)',
-      }
-    }
-
-    if (toPay > 0 && toReceive === 0) {
-      const detail = owedByUser.length === 1
-        ? t('household.header.position.oweOne', { name: owedByUser[0].toMemberName })
-        : t('household.header.position.oweMany', { count: formatNumber(owedByUser.length) })
-      return {
-        title: t('household.header.position.youOwe'),
-        value: formatCurrency(toPay),
-        detail,
-        icon: TrendingDown,
-        color: 'var(--pb-summary-coral)',
-        tint: 'var(--pb-tint-coral)',
-      }
-    }
-
-    const net = household.currentUserBalance
-    const netDetail = Math.abs(net) < 0.005
-      ? t('household.header.position.evenWithOutstanding')
-      : net > 0
-        ? t('household.header.position.netReceive', { amount: formatCurrency(net) })
-        : t('household.header.position.netPay', { amount: formatCurrency(Math.abs(net)) })
-    return {
-      title: t('household.header.position.bothWays'),
-      value: t('household.header.position.bothWaysValue', {
-        incoming: formatCurrency(toReceive),
-        outgoing: formatCurrency(toPay),
-      }),
-      detail: netDetail,
-      icon: Wallet,
-      color: 'var(--pb-summary-gold)',
-      tint: 'var(--pb-tint-gold)',
-    }
-  }, [formatCurrency, formatNumber, household.currentMemberId, household.currentUserBalance, household.debts, t])
-
-  const PositionIcon = position.icon
-  const expenseCountCopy = selectedSummary.expenseCount === 0
-    ? t('household.header.expenses.none')
-    : t(
-      selectedSummary.expenseCount === 1
-        ? 'household.header.expenses.one'
-        : 'household.header.expenses.other',
-      { count: formatNumber(selectedSummary.expenseCount) },
-    )
-  const selectedMonthLabel = formatDate(selectedMonth, { month: 'long', year: 'numeric' })
 
   return (
-    <Box
+    <Flex
+      as="section"
+      aria-label={household.name}
       position="relative"
       overflow="hidden"
-      bg="var(--pb-summary-petrol)"
-      border="1px solid var(--pb-summary-line)"
-      borderRadius={{ base: '18px', md: '22px' }}
+      isolation="isolate"
+      borderRadius="27px"
+      bg="#194C3F"
+      minH={{ base: 'clamp(430px, 130vw, 520px)', md: '460px' }}
+      direction="column"
+      justify="space-between"
+      gap={16}
+      p={{ base: '15px', md: 6 }}
       boxShadow="var(--pb-shadow)"
-      p={{ base: 3.5, sm: 4, md: 5 }}
     >
-      <Box
-        position="absolute"
-        inset={0}
-        pointerEvents="none"
-        borderRadius="inherit"
-        boxShadow="inset 0 1px 0 rgba(255,255,255,0.14)"
-      />
+      <Box aria-hidden="true" position="absolute" inset={0} zIndex={-1} bgImage="url('/household-landscape.svg')" bgSize="cover" bgPosition="center" pointerEvents="none" />
 
-      <Flex
-        position="relative"
-        zIndex={1}
-        direction={{ base: 'column', sm: 'row' }}
-        align={{ base: 'stretch', sm: 'center' }}
-        justify="space-between"
-        gap={{ base: 3.5, sm: 4 }}
-        pb={{ base: 3.5, md: 4 }}
-        borderBottom="1px solid var(--pb-summary-line)"
-      >
-        <Flex justify="space-between" align="center" w={{ base: 'full', sm: 'auto' }} minW={0} gap={2}>
-          <HStack spacing={3} minW={0} align="center">
-            <Flex
-              w={{ base: 12, md: 14 }}
-              h={{ base: 12, md: 14 }}
-              flexShrink={0}
-              align="center"
-              justify="center"
-              borderRadius={{ base: '16px', md: '18px' }}
-              bgGradient="linear(to-br, var(--pb-forest), var(--pb-forest-2))"
-              color="white"
-              boxShadow="0 4px 10px rgba(0, 0, 0, 0.12), inset 0 2px 0 rgba(255, 255, 255, 0.15)"
-              border="1px solid rgba(255, 255, 255, 0.1)"
-            >
-              <Icon as={Home} boxSize={{ base: 6, md: 7 }} weight="duotone" />
-            </Flex>
-            <Box minW={0}>
-              <Text
-                fontFamily="var(--pb-serif)"
-                fontSize={{ base: 'xl', md: '2xl' }}
-                fontWeight={500}
-                lineHeight={1.1}
-                letterSpacing="-0.025em"
-                color="var(--pb-summary-ink)"
-                noOfLines={1}
-              >
-                {household.name}
-              </Text>
-              <HStack
-                as="button"
-                onClick={onMembersOverview}
-                mt={1.5}
-                spacing={-2}
-                cursor="pointer"
-                transition="all 0.2s"
-                _hover={{ transform: 'scale(1.02)' }}
-                _active={{ transform: 'scale(0.98)' }}
-                align="center"
-              >
-                {household.members.slice(0, 5).map((member, i) => {
-                  const initials = member.name
-                    .split(' ')
-                    .filter(Boolean)
-                    .map((n) => n[0])
-                    .slice(0, 2)
-                    .join('')
-                    .toUpperCase()
-
-                  return (
-                    <Flex
-                      key={member.id}
-                      w="28px"
-                      h="28px"
-                      borderRadius="full"
-                      bgGradient={HOUSEHOLD_AVATAR_GRADIENTS[
-                        i % HOUSEHOLD_AVATAR_GRADIENTS.length
-                      ]}
-                      color="white"
-                      border="2px solid var(--pb-summary-panel)"
-                      boxShadow="0 2px 4px rgba(0,0,0,0.1)"
-                      align="center"
-                      justify="center"
-                      fontSize="10px"
-                      fontWeight={800}
-                      fontFamily="var(--pb-mono)"
-                      zIndex={10 - i}
-                    >
-                      {initials}
-                    </Flex>
-                  )
-                })}
-                {household.members.length > 5 && (
-                  <Flex
-                    w="28px"
-                    h="28px"
-                    borderRadius="full"
-                    bg="var(--pb-summary-line)"
-                    color="var(--pb-summary-ink-soft)"
-                    border="2px solid var(--pb-summary-panel)"
-                    boxShadow="0 2px 4px rgba(0,0,0,0.1)"
-                    align="center"
-                    justify="center"
-                    fontSize="10px"
-                    fontWeight={800}
-                    fontFamily="var(--pb-mono)"
-                    zIndex={0}
-                  >
-                    +{household.members.length - 5}
-                  </Flex>
-                )}
-                <Flex
-                  ml={2}
-                  w="18px"
-                  h="18px"
-                  borderRadius="full"
-                  bgGradient="linear(to-br, var(--pb-forest), var(--pb-forest-2))"
-                  color="white"
-                  align="center"
-                  justify="center"
-                  boxShadow="0 2px 6px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.2)"
-                  animation={`${pulseAnim} 2s infinite ease-in-out`}
-                >
-                  <Icon as={ChevronRight} boxSize={2.5} weight="bold" />
-                </Flex>
-              </HStack>
-            </Box>
-          </HStack>
-
-          {/* Mobile: notifications + manage only (Add Expense moved below header) */}
-          <HStack spacing={2} display={{ base: 'flex', sm: 'none' }} flexShrink={0}>
-            <Flex
-              as="button"
-              aria-label={t('household.notifications.openAria', {
-                count: formatNumber(household.unreadNotificationCount),
-              })}
-              onClick={onNotifications}
-              position="relative"
-              w="40px"
-              h="40px"
-              align="center"
-              justify="center"
-              borderRadius="11px"
-              bg="var(--pb-summary-panel)"
-              color="var(--pb-summary-ink-soft)"
-              border="1px solid var(--pb-summary-line)"
-              transition="all 0.2s"
-              _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
-            >
-              <Icon as={Bell} boxSize={5} weight="duotone" />
-              {household.unreadNotificationCount > 0 && (
-                <UnreadNotificationIndicator
-                  count={household.unreadNotificationCount > 99
-                    ? '99+'
-                    : formatNumber(household.unreadNotificationCount)}
-                />
-              )}
-            </Flex>
-            {household.currentMemberRole === 'OWNER' && (
-              <Flex
-                as="button"
-                aria-label={t('household.header.manageAria', { name: household.name })}
-                onClick={onManage}
-                w="40px"
-                h="40px"
-                align="center"
-                justify="center"
-                borderRadius="11px"
-                bg="var(--pb-summary-panel)"
-                color="var(--pb-summary-ink-soft)"
-                border="1px solid var(--pb-summary-line)"
-                transition="all 0.2s"
-                _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-                _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
-              >
-                <Icon as={Gear} boxSize={5} />
-              </Flex>
-            )}
-          </HStack>
-        </Flex>
-
-        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0} display={{ base: 'none', sm: 'flex' }}>
-          <Button
-            aria-label={t('household.notifications.openAria', {
-              count: formatNumber(household.unreadNotificationCount),
-            })}
-            leftIcon={<Icon as={Bell} boxSize={4} weight="duotone" />}
-            onClick={onNotifications}
-            position="relative"
-            h="44px"
-            px={3.5}
-            borderRadius="11px"
-            bg="var(--pb-summary-panel)"
-            color="var(--pb-summary-ink-soft)"
-            border="1px solid var(--pb-summary-line)"
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={600}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
-          >
-            <Text display={{ base: 'none', lg: 'inline' }}>
-              {t('household.notifications.shortTitle')}
-            </Text>
-            {household.unreadNotificationCount > 0 && (
-              <UnreadNotificationIndicator
-                count={household.unreadNotificationCount > 99
-                  ? '99+'
-                  : formatNumber(household.unreadNotificationCount)}
-              />
-            )}
-          </Button>
-          {household.currentMemberRole === 'OWNER' && (
+      <Flex align="center" justify="space-between" wrap="wrap" gap={3} px={{ base: 1, md: 0 }} pt={1}>
+        <Box flex={1} minW="120px">
+          <HStack spacing={1.5}>
+            <Text color="whiteAlpha.900" fontSize="12px" fontWeight={500} textShadow="0 1px 5px rgba(15,48,38,0.4)">{t('household.header.ourHome')}</Text>
             <Button
-              aria-label={t('household.header.manageAria', { name: household.name })}
-              leftIcon={<Icon as={Gear} boxSize={4} />}
-              onClick={onManage}
-              h="44px"
-              px={3.5}
-              borderRadius="11px"
-              bg="var(--pb-summary-panel)"
-              color="var(--pb-summary-ink-soft)"
-              border="1px solid var(--pb-summary-line)"
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={600}
-              letterSpacing="0.06em"
-              textTransform="uppercase"
-              _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
-              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+              aria-label={memberLabel}
+              title={memberLabel}
+              onClick={onMembersOverview}
+              leftIcon={<Icon as={Users} boxSize={3} aria-hidden="true" />}
+              minW={0}
+              h="24px"
+              px={1.5}
+              borderRadius="10px"
+              bg="rgba(255,255,255,0.78)"
+              color="#24383C"
+              fontSize="10px"
+              _hover={{ bg: 'white' }}
             >
-              {t('household.header.manage')}
+              {formatNumber(household.members.length)}
             </Button>
-          )}
-          <Button
-            leftIcon={<Icon as={Plus} boxSize={4} />}
-            onClick={onAddExpense}
-            h="44px"
-            px={4}
-            borderRadius="11px"
-            bgGradient="linear(135deg, #4F7396, #3D6080, #5D849F, #4F7396)"
-            backgroundSize="200% auto"
-            color="rgba(235,242,248,0.95)"
-            border="1px solid rgba(71,112,148,0.45)"
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={700}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            boxShadow="0 3px 14px rgba(71,112,148,0.25)"
-            animation={`${pulseGlow} 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite`}
-            transition="all 0.3s ease"
-            _hover={{
-              bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
-              backgroundSize: '200% auto',
-              animation: `${shimmerAnim} 1.4s linear infinite`,
-              transform: 'scale(1.02)',
-              boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
-              borderColor: 'rgba(123,163,192,0.7)',
-            }}
-            _active={{ transform: 'translateY(0)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
-            _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
-          >
-            {t('household.header.addExpense')}
-          </Button>
-        </Flex>
+          </HStack>
+          <Text as="h1" color="white" fontSize={{ base: '20px', md: '30px' }} fontWeight={800} letterSpacing="-0.4px" lineHeight={1.2} mt={1} overflowWrap="anywhere" textShadow="0 2px 8px rgba(15,48,38,0.45)">
+            {household.name}
+          </Text>
+        </Box>
+        <HStack spacing={1} p={1} borderRadius="15px" bg="rgba(255,255,255,0.86)" border="1px solid rgba(255,255,255,0.75)" color="#52656A" flexShrink={0}>
+          <IconButton aria-label={t('period.previous')} icon={<Icon as={ChevronLeft} boxSize={3.5} />} onClick={() => navigateMonth(-1)} minW="28px" h="32px" borderRadius="9px" bg="rgba(220,232,232,0.8)" color="inherit" _hover={{ bg: '#D0DFD8' }} />
+          <Icon as={Calendar} boxSize={3.5} aria-hidden="true" />
+          <Text aria-live="polite" aria-atomic="true" fontSize={{ base: '10px', md: '12px' }} fontWeight={600} textAlign="center" minW="72px" px={1}>{formatDate(selectedMonth, { month: 'short', year: 'numeric' })}</Text>
+          <IconButton aria-label={t('period.next')} icon={<Icon as={ChevronRight} boxSize={3.5} />} onClick={() => navigateMonth(1)} isDisabled={selectedMonthKey >= currentMonthKey} minW="28px" h="32px" borderRadius="9px" bg="rgba(220,232,232,0.8)" color="inherit" _hover={{ bg: '#D0DFD8' }} />
+        </HStack>
       </Flex>
 
-
-      <Grid
-        position="relative"
-        zIndex={1}
-        templateColumns={{ base: '1fr', md: 'minmax(0, 1.05fr) minmax(320px, 0.95fr)' }}
-        gap={{ base: 2.5, md: 4 }}
-        pt={{ base: 3, md: 4 }}
-        alignItems="center"
-      >
-        <Flex
-          minW={0}
-          direction="column"
-          justify="center"
-          pr={{ md: 4 }}
-          borderRight={{ base: 'none', md: '1px solid var(--pb-summary-line)' }}
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            letterSpacing="0.14em"
-            textTransform="uppercase"
-            color="var(--pb-summary-ink-faint)"
-          >
-            {t('household.header.spentTitle', { defaultValue: 'GASTOS DA CASA' })}
-          </Text>
-          <Flex
-            mt={1}
-            align="center"
-            justify="space-between"
-            gap={{ base: 2, sm: 3 }}
-          >
-            <HStack spacing={2} align="center" minW={0}>
-              <Text
-                fontFamily="var(--pb-serif)"
-                fontSize="clamp(1.8rem, 5vw, 3rem)"
-                fontWeight={500}
-                lineHeight={0.95}
-                letterSpacing="-0.04em"
-                color="var(--pb-summary-coral)"
-                noOfLines={1}
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {formatCurrency(selectedSummary.spend)}
-              </Text>
-
-              <Flex
-                align="center"
-                gap={0.5}
-                px={2}
-                py={0.5}
-                borderRadius="full"
-                bg="var(--pb-summary-panel)"
-                border="1px solid var(--pb-summary-line)"
-                color="var(--pb-summary-ink-soft)"
-                fontFamily="var(--pb-mono)"
-                fontSize="10px"
-                fontWeight={700}
-                lineHeight={1}
-                boxShadow="0 1px 3px rgba(0,0,0,0.08)"
-                title={expenseCountCopy}
-                aria-label={expenseCountCopy}
-              >
-                <Text as="span" opacity={0.6} fontWeight={400} fontSize="9px">
-                  ×
-                </Text>
-                {formatNumber(selectedSummary.expenseCount)}
-              </Flex>
-            </HStack>
-
-            <Box minW={0} maxW="190px" flexShrink={0}>
-            <PeriodNavigator
-                selectedPeriod="month"
-                selectedDate={selectedMonth}
-                onDateChange={(date) => {
-                  const candidate = monthStart(date)
-                  setSelectedMonth(candidate)
-                }}
-                onPeriodChange={() => undefined}
-                onNavigatePeriod={navigateMonth}
-                onGoToToday={() => setSelectedMonth(currentMonth)}
-                formatLabel={() => formatDate(selectedMonth, { month: 'short', year: '2-digit' }).toLocaleUpperCase(locale)}
-                isEmbedded
-                showPeriodSelector={false}
-                canNavigatePrevious={canNavigatePrevious}
-                canNavigateNext={canNavigateNext}
-                isDateDisabled={() => false}
-              />
-            </Box>
-          </Flex>
-        </Flex>
-
-        <Flex
-          minW={0}
-          align="center"
-          justify="space-between"
-          gap={3}
-          p={{ base: 3, md: 3.5 }}
-          borderRadius="15px"
-          bg="var(--pb-summary-panel)"
-          border="1px solid var(--pb-summary-line)"
-        >
-          <Box minW={0} flex={1}>
-            <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              letterSpacing="0.14em"
-              textTransform="uppercase"
-              color="var(--pb-summary-ink-faint)"
-            >
-              {t('household.header.positionEyebrow')}
-            </Text>
-            <Flex mt={1} align="baseline" gap={2.5} wrap="wrap">
-              <Text fontSize="sm" fontWeight={500} color={position.color}>
-                {position.title}
-              </Text>
-              <Text
-                fontFamily="var(--pb-serif)"
-                fontSize={{ base: 'xl', sm: '2xl' }}
-                fontWeight={500}
-                lineHeight={1}
-                color={position.color}
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {position.value}
-              </Text>
+      <Box bg={panel} border="1px solid rgba(255,255,255,0.45)" borderRadius="23px" p={{ base: 3.5, md: 5 }} backdropFilter="blur(12px)">
+        <Grid templateColumns="minmax(0, 1.3fr) minmax(0, 1fr)" gap={{ base: 3, md: 8 }} alignItems="center">
+          <Box minW={0} aria-live="polite" aria-atomic="true">
+            <Text fontSize={{ base: '12px', md: '14px' }} color={muted}>{t('household.header.monthSpending')}</Text>
+            <Flex align="center" gap={2} mt={1} wrap="wrap">
+              <Text color={ink} fontSize={{ base: 'clamp(1rem, 5.1vw, 1.4rem)', md: '32px' }} fontWeight={800} letterSpacing="-0.35px" lineHeight={1.2} overflowWrap="anywhere" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(spending)}</Text>
+              <Box aria-label={comparisonLabel} title={comparisonLabel} borderRadius="9px" px={1.5} py={1} bg={change !== null && change > 0 ? increaseTint : change !== null && change < 0 ? decreaseTint : neutralTint} color={change !== null && change > 0 ? expense : change !== null && change < 0 ? income : muted} fontSize={{ base: '10px', md: '12px' }} fontWeight={800}>
+                {changeLabel}
+              </Box>
             </Flex>
-            <Text mt={1} fontSize="xs" color="var(--pb-summary-ink-soft)" noOfLines={2}>
-              {position.detail}
-            </Text>
+            <Text mt={1} fontSize={{ base: '9px', md: '11px' }} color={muted}>{t(change === null ? 'household.header.noPreviousSpending' : 'household.header.vsPreviousMonth')}</Text>
           </Box>
-
-          <Flex
-            w={{ base: 8, sm: 9 }}
-            h={{ base: 8, sm: 9 }}
-            flexShrink={0}
-            align="center"
-            justify="center"
-            borderRadius="full"
-            bg={position.tint}
-            color={position.color}
-            border="1px solid var(--pb-summary-line)"
-          >
-            <Icon as={PositionIcon} boxSize={{ base: '18px', sm: '19px' }} weight="duotone" aria-hidden="true" />
-          </Flex>
+          <Box minW={0}>
+            <Text color={positionColor} fontSize={{ base: '11px', md: '13px' }} fontWeight={600}>{positionLabel}</Text>
+            {net !== 0 ? (
+              <Flex align="center" gap={1} mt={1}>
+                <Text color={positionColor} fontSize={{ base: 'clamp(1rem, 5.1vw, 1.4rem)', md: '30px' }} fontWeight={800} lineHeight={1.2} overflowWrap="anywhere" style={{ fontVariantNumeric: 'tabular-nums' }}>{money(Math.abs(net))}</Text>
+                <Icon as={net > 0 ? TrendingUp : TrendingDown} boxSize={3.5} color={positionColor} flexShrink={0} aria-hidden="true" />
+              </Flex>
+            ) : null}
+            <Text mt={1} fontSize={{ base: '9px', md: '11px' }} color={muted}>{t(net === 0 && hasOutstanding ? 'household.header.position.evenWithOutstanding' : 'household.header.netBalance')}</Text>
+          </Box>
+        </Grid>
+        <Flex mt={4} gap={2}>
+          <Button onClick={onAddExpense} leftIcon={<Icon as={Plus} boxSize={4} />} flex={1} minW={0} h="44px" borderRadius="17px" bg={buttonBg} color={ink} fontSize="13px" fontWeight={700} _hover={{ bg: buttonHover }}>
+            {t('household.header.addExpense')}
+          </Button>
+          <Box position="relative">
+            <IconButton aria-label={t('household.notifications.openAria', { count: formatNumber(household.unreadNotificationCount) })} onClick={onNotifications} icon={<Icon as={Bell} boxSize={5} />} w="44px" h="44px" borderRadius="15px" bg={buttonBg} color={ink} _hover={{ bg: buttonHover }} />
+            {household.unreadNotificationCount > 0 ? <Flex aria-hidden="true" pointerEvents="none" position="absolute" top="-5px" right="-4px" minW="18px" h="18px" px={1} borderRadius="full" bg="#A44735" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>{household.unreadNotificationCount > 99 ? '99+' : formatNumber(household.unreadNotificationCount)}</Flex> : null}
+          </Box>
+          {household.currentMemberRole === 'OWNER' ? <IconButton aria-label={t('household.header.manageAria', { name: household.name })} onClick={onManage} icon={<Icon as={Gear} boxSize={5} />} w="44px" h="44px" borderRadius="15px" bg={buttonBg} color={ink} _hover={{ bg: buttonHover }} /> : null}
         </Flex>
-      </Grid>
-    </Box>
+      </Box>
+    </Flex>
   )
 }

@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Box, Button, Icon, VStack, useDisclosure } from '@chakra-ui/react'
+import { Box, Icon, VStack, useDisclosure } from '@chakra-ui/react'
 import { markHouseholdNotificationsRead, updateHouseholdCleaningDuty, uploadHouseholdExpenseAttachments, uploadHouseholdSettlementAttachments } from '../../api'
 import { useI18n } from '../../i18n'
 import type { HouseholdExpense } from '../../types'
-import { Plus, Wallet } from '../../components/ui/icons'
+import { Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
@@ -24,17 +24,6 @@ import { PaymentsOverviewModal } from './settlements/PaymentsOverviewModal'
 import type { AttachmentTarget } from './household.types'
 import { useHouseholdPageController } from './hooks/useHouseholdPageController'
 import { HouseholdOverview } from './HouseholdOverview'
-import { keyframes } from '@emotion/react'
-
-const pulseGlow = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(71,112,148, 0.5); }
-  50% { box-shadow: 0 0 0 8px rgba(71,112,148, 0); }
-`
-
-const shimmerAnim = keyframes`
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-`
 
 export default function HouseholdPage() {
   const { formatCurrency, formatNumber, t } = useI18n()
@@ -175,37 +164,6 @@ export default function HouseholdPage() {
           onNotifications={notificationsModal.onOpen}
         />
 
-        {/* Mobile-only Add Expense button — below the header */}
-        <Button
-          display={{ base: 'flex', sm: 'none' }}
-          leftIcon={<Icon as={Plus} boxSize={5} />}
-          onClick={openNewExpense}
-          w="full"
-          h="48px"
-          borderRadius="14px"
-          bgGradient="linear(135deg, #4F7396, #3D6080, #5D849F, #4F7396)"
-          backgroundSize="200% auto"
-          color="rgba(235,242,248,0.95)"
-          border="1px solid rgba(71,112,148,0.45)"
-          fontFamily="var(--pb-mono)"
-          fontSize="10px"
-          fontWeight={700}
-          letterSpacing="0.08em"
-          textTransform="uppercase"
-          boxShadow="0 3px 14px rgba(71,112,148,0.25)"
-          animation={`${pulseGlow} 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite`}
-          _hover={{
-            bgGradient: 'linear(135deg, #3D6080, #4F7396, #7BA3C0, #3D6080)',
-            animation: `${shimmerAnim} 1.4s linear infinite`,
-            boxShadow: '0 6px 24px rgba(71,112,148,0.45)',
-            transform: 'scale(1.02)',
-          }}
-          _active={{ transform: 'scale(0.98)', boxShadow: '0 2px 8px rgba(71,112,148,0.3)' }}
-          _focusVisible={{ boxShadow: '0 0 0 3px rgba(71,112,148,0.4)', outline: 'none' }}
-          transition="all 0.3s ease"
-        >
-          {t('household.header.addExpense')}
-        </Button>
 
         <HouseholdSectionNavigation
           ariaLabel={t('household.navigation.aria')}
