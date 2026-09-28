@@ -26,14 +26,14 @@ interface MetricCardProps {
 function MetricCard({ background, borderColor, icon: Icon, iconBackground, label, value, valueColor }: MetricCardProps) {
   return (
     <HStack
-      minH={{ base: '76px', md: '92px' }} spacing={{ base: 2, md: 3 }} px={{ base: 3, md: 4 }} py={3}
+      minH={{ base: '70px', md: '92px' }} spacing={{ base: 2, md: 3 }} px={{ base: 2, md: 4 }} py={{ base: 2, md: 3 }}
       border="1px solid" borderColor={borderColor} borderRadius="18px" bg={background} backdropFilter="blur(8px)"
     >
       <Box
-        display="grid" placeItems="center" flexShrink={0} w={{ base: '38px', md: '46px' }} h={{ base: '38px', md: '46px' }}
+        display="grid" placeItems="center" flexShrink={0} w={{ base: '34px', md: '46px' }} h={{ base: '34px', md: '46px' }}
         borderRadius={{ base: '12px', md: '15px' }} bg={iconBackground} color={valueColor}
       >
-        <Icon size={22} strokeWidth={2.4} />
+        <Icon size={20} strokeWidth={2.4} />
       </Box>
       <Box minW={0} flex={1}>
         <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'xs', md: 'sm' }} color="#52635E" noOfLines={1}>{label}</Text>
@@ -94,7 +94,14 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
           </Text>
         </Box>
 
-        <Grid templateColumns={{ base: '1fr', md: 'minmax(0, 1fr) minmax(280px, 1fr)' }} gap={3} alignItems="stretch">
+        <Grid
+          templateColumns={{
+            base: 'minmax(0, 1fr) minmax(0, 1fr)',
+            md: 'minmax(0, 1fr) minmax(280px, 1fr)',
+          }}
+          gap={{ base: 2.5, md: 3 }}
+          alignItems="stretch"
+        >
           <VStack align="stretch" spacing={2.5}>
             <MetricCard background="rgba(242,249,233,0.88)" borderColor="rgba(255,255,255,0.66)" icon={ArrowUp}
               iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257" />
@@ -105,18 +112,18 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
           </VStack>
 
           <VStack
-            align="stretch" justify="center" spacing={4} h="full" p={{ base: 4, md: 5 }} border="1px solid"
+            align="stretch" justify="center" spacing={{ base: 3, md: 4 }} h="full" p={{ base: 3, md: 5 }} border="1px solid"
             borderColor="rgba(255,255,255,0.68)" borderRadius="20px" bg="rgba(255,248,237,0.88)" backdropFilter="blur(10px)"
           >
             <Box>
-              <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={700} color="#24383A">{t('dashboard.incomeUsed')}</Text>
+              <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'sm', md: 'md' }} fontWeight={700} color="#24383A">{t('dashboard.incomeUsed')}</Text>
               <Text
-                mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: '3xl', md: '4xl' }} fontWeight={800}
+                mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: '3xl', md: '4xl' }} fontWeight={800} noOfLines={1}
                 color={usage !== null && usage > 1 ? '#A45148' : '#2F7257'}
               >
                 {usage === null ? '—' : `${Math.round(usage * 100)}%`}
               </Text>
-              <Text fontFamily="var(--pb-serif)" fontSize="sm" color="#52635E">
+              <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'xs', md: 'sm' }} color="#52635E">
                 {usage === null ? t('dashboard.noIncomeYet') : t('dashboard.ofIncomeSpent')}
               </Text>
             </Box>
@@ -129,12 +136,17 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
               <Box h="full" w={`${remainingShare * 100}%`} bg="#3E9870" />
             </HStack>
 
-            <Grid templateColumns="1fr 1fr" gap={4}>
+            <Grid templateColumns={{ base: '1fr', sm: '1fr 1fr' }} gap={{ base: 2, sm: 4 }}>
               <Box>
                 <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.spent')}</Text>
                 <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#A45148">{formatCurrency(expense)}</Text>
               </Box>
-              <Box borderLeft="1px solid rgba(36,56,60,0.14)" pl={4}>
+              <Box
+                borderTop={{ base: '1px solid rgba(36,56,60,0.14)', sm: 'none' }}
+                borderLeft={{ base: 'none', sm: '1px solid rgba(36,56,60,0.14)' }}
+                pt={{ base: 2, sm: 0 }}
+                pl={{ base: 0, sm: 4 }}
+              >
                 <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.dailyAverage')}</Text>
                 <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#24383A">{formatCurrency(dailyAverage)}</Text>
                 <Text mt={1} fontFamily="var(--pb-serif)" fontSize="10px" color="#52635E">
