@@ -35,7 +35,18 @@ export function BalancesOverviewModal({
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', md: '2xl' }}
+      size={{ base: 'full', md: 'xl' }}
+      contentProps={{
+        alignSelf: { base: 'flex-end', md: 'center' },
+        w: { base: '100%', md: 'min(640px, calc(100vw - 3rem))' },
+        maxW: { base: '100%', md: '640px' },
+        h: 'auto',
+        maxH: { base: '85dvh', md: 'min(720px, calc(100vh - 5rem))' },
+        mx: { base: 0, md: 4 },
+        mt: { base: '15dvh', md: 0 },
+        mb: 0,
+        borderRadius: { base: '28px 28px 0 0', md: '22px' },
+      }}
       header={
         <ModalHeader
           title={t('household.balances.title')}

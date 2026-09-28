@@ -6,6 +6,7 @@ import type { HouseholdExpense } from '../../types'
 import { Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
+import { HouseholdMembersCarousel } from './HouseholdMembersCarousel'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
 import { ActionRequiredBanner, HouseholdSectionNavigation } from './components/HouseholdPageComponents'
 import {
@@ -164,11 +165,14 @@ export default function HouseholdPage() {
           onNotifications={notificationsModal.onOpen}
         />
 
+        <HouseholdMembersCarousel
+          household={household}
+          onViewBalances={balancesOverviewModal.onOpen}
+        />
 
         <HouseholdSectionNavigation
           ariaLabel={t('household.navigation.aria')}
           items={[
-            { id: 'household-balances', label: t('household.balances.title') },
             { id: 'household-members', label: t('household.members.title') },
             { id: 'household-expenses', label: t('household.expenses.title') },
             { id: 'household-cleaning', label: t('household.cleaning.title') },
@@ -204,8 +208,6 @@ export default function HouseholdPage() {
 
         <HouseholdOverview
           household={household}
-          onViewBalances={balancesOverviewModal.onOpen}
-          onViewMembers={membersOverviewModal.onOpen}
           onViewExpenses={recentExpensesModal.onOpen}
           onViewPayments={paymentsOverviewModal.onOpen}
         />
