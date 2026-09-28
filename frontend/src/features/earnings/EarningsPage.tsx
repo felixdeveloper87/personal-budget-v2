@@ -1,6 +1,7 @@
 import { Box, Flex, Grid, HStack, Skeleton, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import { useMemo, useState, type ReactNode } from 'react'
 import { useReducedMotion } from 'framer-motion'
+import { TrendingUp } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { getPreviousPeriodDate, usePeriodData } from '../../hooks/usePeriodData'
@@ -115,8 +116,8 @@ export default function EarningsPage() {
           <EarningsOverview
             total={periodData.income}
             previousTotal={previousPeriodData.income}
+            incomeCount={incomeTransactions.length}
             comparisonCopy={comparisonCopy}
-            periodLabel={periodLabel}
             loading={loading}
             periodNavigator={(
               <PeriodNavBar
@@ -224,15 +225,15 @@ function SelectedDayIncomes({
 function EarningsOverview({
   total,
   previousTotal,
+  incomeCount,
   comparisonCopy,
-  periodLabel,
   loading,
   periodNavigator,
 }: {
   total: number
   previousTotal: number
+  incomeCount: number
   comparisonCopy: string
-  periodLabel: string
   loading: boolean
   periodNavigator: ReactNode
 }) {
@@ -247,48 +248,64 @@ function EarningsOverview({
       overflow="hidden"
       bg="#EDE9DF"
       border="1px solid var(--pb-summary-line)"
-      borderRadius="18px"
+      borderRadius="28px"
       boxShadow="var(--pb-shadow)"
-      p="clamp(1.1rem, 2.4vw, 1.5rem)"
     >
       <Box position="absolute" inset={0} pointerEvents="none">
         <IncomeHeroArtwork />
       </Box>
       <Box position="absolute" inset={0} bg={artworkVeil} pointerEvents="none" />
 
-      <Box position="relative" zIndex={1}>
-        <Box mb={4} pb={4} borderBottom="1px solid var(--pb-summary-line)">
-          {periodNavigator}
+      <Box position="relative" zIndex={1} p="clamp(1rem, 2.4vw, 1.5rem)">
+        <Flex align="center" gap={3}>
+          <Box flex={1} minW={0}>
+            <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={800} letterSpacing="0.18em" color="var(--pb-summary-income)">
+              {t('earnings.hero.eyebrow')}
+            </Text>
+            <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: '27px', md: '30px' }} fontWeight={700} letterSpacing="-0.025em" lineHeight={1} color="var(--pb-summary-ink)">
+              {t('earnings.hero.title')}
+            </Text>
+          </Box>
+          <Box
+            display="grid" placeItems="center" flexShrink={0} w="44px" h="44px" borderRadius="16px"
+            bg="rgba(251,249,244,0.75)" border="1px solid rgba(255,255,255,0.7)" color="var(--pb-summary-income)"
+          >
+            <TrendingUp size={23} strokeWidth={2.4} aria-hidden="true" />
+          </Box>
+        </Flex>
+
+        <Box mt={4.5}>
+          <Text fontSize="xs" fontWeight={500} color="var(--pb-summary-ink-soft)">
+            {t('earnings.hero.total')}
+          </Text>
+          {loading ? (
+            <Skeleton mt={2} height="53px" maxW="280px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
+          ) : (
+            <>
+              <Text
+                mt={1} fontFamily="var(--pb-serif)" fontSize="clamp(2.55rem, 6vw, 3.25rem)" fontWeight={800}
+                letterSpacing="-0.035em" lineHeight={1.05} color="var(--pb-summary-income)" noOfLines={1}
+                sx={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
+              >
+                {formatCurrency(total)}
+              </Text>
+              <Text mt={1} fontSize="11px" color="var(--pb-summary-ink-soft)">
+                {t(incomeCount === 1 ? 'earnings.hero.count.one' : 'earnings.hero.count.other', { count: incomeCount })}
+              </Text>
+              <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" textTransform="uppercase" color={changeColor}>
+                {comparisonCopy}
+              </Text>
+            </>
+          )}
         </Box>
 
-        {loading ? (
-          <Skeleton height="104px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
-        ) : (
-          <VStack align="stretch" spacing={4}>
-            <VStack align="stretch" spacing={1}>
-              <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
-                {t('earnings.summary.heading', { period: periodLabel })}
-              </Text>
-              <Text fontSize="sm" color="var(--pb-summary-ink-soft)">{t('earnings.summary.subtitle')}</Text>
-            </VStack>
-
-            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem, 2.6vw, 1.55rem)" fontWeight={400} lineHeight={1.25} color="var(--pb-summary-ink)" maxW="48ch">
-              {total > 0 ? (
-                <>
-                  {t('earnings.summary.earnedPrefix')}{' '}
-                  <Text as="em" color="var(--pb-summary-income)">{formatCurrency(total)}</Text>{' '}
-                  {t('earnings.summary.earnedSuffix', { period: periodLabel })}
-                </>
-              ) : (
-                <>{t('earnings.summary.empty', { period: periodLabel })}</>
-              )}
-            </Text>
-
-            <Text pt={3} borderTop="1px solid var(--pb-summary-line)" fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.08em" textTransform="uppercase" color={changeColor}>
-              {comparisonCopy}
-            </Text>
-          </VStack>
-        )}
+        <Box
+          mt={4.5} p={{ base: 2.5, md: 3 }} borderRadius="18px"
+          bg="rgba(251,249,244,0.9)" border="1px solid rgba(255,255,255,0.8)"
+          backdropFilter="blur(8px)"
+        >
+          {periodNavigator}
+        </Box>
       </Box>
     </Box>
   )
