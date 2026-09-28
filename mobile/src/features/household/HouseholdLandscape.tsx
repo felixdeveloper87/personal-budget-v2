@@ -1,79 +1,718 @@
-import Svg, { Circle, Defs, G, LinearGradient, Path, Polygon, Rect, Stop } from "react-native-svg";
+import Svg, {
+  Circle,
+  Defs,
+  Ellipse,
+  G,
+  LinearGradient,
+  Path,
+  Polygon,
+  Rect,
+  Stop,
+} from "react-native-svg";
 
-/** A warm, layered landscape that fills the mobile Household hero. */
 interface HouseholdLandscapeProps {
   width: number;
   height: number;
 }
 
-export function HouseholdLandscape({ width, height }: HouseholdLandscapeProps) {
+export function HouseholdLandscape({
+  width,
+  height,
+}: HouseholdLandscapeProps) {
   return (
-    <Svg height={height} preserveAspectRatio="xMidYMid slice" viewBox="0 0 390 560" width={width}>
+    <Svg
+      width={width}
+      height={height}
+      viewBox="0 0 390 560"
+      preserveAspectRatio="xMidYMid slice"
+    >
       <Defs>
-        <LinearGradient id="householdSky" x1="0%" y1="0%" x2="20%" y2="100%">
-          <Stop offset="0" stopColor="#59A9D2" />
-          <Stop offset="0.56" stopColor="#B8D9D9" />
-          <Stop offset="1" stopColor="#D4DFBF" />
+        {/* Sky */}
+        <LinearGradient id="sky" x1="0%" y1="0%" x2="15%" y2="100%">
+          <Stop offset="0" stopColor="#4EA6D8" />
+          <Stop offset="0.55" stopColor="#A9D4DD" />
+          <Stop offset="1" stopColor="#E8D5A7" />
         </LinearGradient>
-        <LinearGradient id="householdShade" x1="0%" y1="0%" x2="0%" y2="100%">
-          <Stop offset="0" stopColor="#123E35" stopOpacity="0" />
-          <Stop offset="0.48" stopColor="#123E35" stopOpacity="0.28" />
-          <Stop offset="1" stopColor="#0D3D34" stopOpacity="0.83" />
+
+        {/* Hero readability overlay */}
+        <LinearGradient id="heroShade" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0" stopColor="#123D38" stopOpacity="0.04" />
+          <Stop offset="0.48" stopColor="#123D38" stopOpacity="0.16" />
+          <Stop offset="0.76" stopColor="#103A31" stopOpacity="0.43" />
+          <Stop offset="1" stopColor="#092D27" stopOpacity="0.78" />
+        </LinearGradient>
+
+        {/* Warm window */}
+        <LinearGradient id="windowGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0" stopColor="#FFF0BF" />
+          <Stop offset="1" stopColor="#E9B86D" />
+        </LinearGradient>
+
+        {/* Brick */}
+        <LinearGradient id="brick" x1="0%" y1="0%" x2="100%" y2="100%">
+          <Stop offset="0" stopColor="#B86945" />
+          <Stop offset="1" stopColor="#8D4935" />
+        </LinearGradient>
+
+        {/* Slate roof */}
+        <LinearGradient id="roof" x1="0%" y1="0%" x2="0%" y2="100%">
+          <Stop offset="0" stopColor="#45545B" />
+          <Stop offset="1" stopColor="#25383D" />
         </LinearGradient>
       </Defs>
 
-      <Rect height="560" width="390" fill="url(#householdSky)" />
-      <Circle cx="318" cy="181" fill="#F8D9B3" opacity="0.83" r="39" />
-      <Path d="M207 139c12-21 36-21 48-1 17-2 28 8 28 21h-91c0-10 5-17 15-20Z" fill="#FFF5E6" opacity="0.7" />
-      <Path d="M76 175c9-15 27-15 36 0 12-1 20 6 20 16H65c0-8 4-14 11-16Z" fill="#FFF8EC" opacity="0.64" />
+      {/* =========================
+          SKY
+      ========================== */}
 
-      <Path d="M0 251 49 208l42 34 47-64 61 70 56-66 46 57 45-42 44 49v139H0Z" fill="#8CB9B4" />
-      <Path d="m0 277 62-48 54 49 52-45 63 54 51-48 52 45 56-38v111H0Z" fill="#6C9F8D" />
-      <Path d="M0 319c48-39 102-34 148-4 48-45 100-40 150-4 32-23 62-26 92-9v119H0Z" fill="#477E68" />
-      <Path d="M0 355c52-42 109-29 155 2 48-41 102-35 144 0 32-28 59-30 91-12v95H0Z" fill="#75A879" />
-      <Path d="M0 389c44-30 96-28 137 2 49-31 101-24 141 8 38-29 74-25 112-7v73H0Z" fill="#9BB780" />
+      <Rect width="390" height="560" fill="url(#sky)" />
 
-      <G transform="translate(0 87) scale(1 0.65)">
-      <Path d="M194 270h151v143H194z" fill="#F5EAD0" />
-      <Path d="M184 279 247 214l110 22 18 43Z" fill="#244A4E" />
-      <Path d="m247 214 110 22 18 43h-72l-28-37-45 37h-46Z" fill="#315C5C" />
-      <Path d="m250 220 13 2 24 55h-16Z" fill="#78989A" opacity="0.76" />
-      <Path d="M312 221v-25h15v28" fill="#294E4F" />
-      <Rect x="208" y="302" width="25" height="25" fill="#D8EAE0" />
-      <Path d="M220.5 302v25m-12.5-12.5h25" stroke="#83AFAA" strokeWidth="3" />
-      <Rect x="276" y="302" width="25" height="25" fill="#D8EAE0" />
-      <Path d="M288.5 302v25M276 314.5h25" stroke="#83AFAA" strokeWidth="3" />
-      <Rect x="255" y="350" width="26" height="63" rx="3" fill="#D98D57" />
-      <Circle cx="274" cy="381" fill="#F4D9A6" r="2.3" />
-      <Path d="M186 414h175" stroke="#D0D2B4" strokeWidth="5" />
-      <Path d="M166 418c42-11 68-12 100-7 35-7 66-5 97 8l-7 22H171Z" fill="#C8C49C" opacity="0.72" />
+      <Circle
+        cx="321"
+        cy="142"
+        r="42"
+        fill="#FFD894"
+        opacity="0.78"
+      />
+
+      {/* Clouds */}
+
+      <G opacity="0.68" fill="#FFF5DF">
+        <Path d="M210 114c9-17 29-18 40-3 16-3 30 7 32 21h-88c1-9 6-15 16-18Z" />
+        <Path d="M56 155c8-13 24-14 33-2 13-2 24 6 26 17H45c1-7 4-12 11-15Z" />
       </G>
 
-      <Path d="M0 236c13-17 32-22 48-8 12-20 36-21 49-2 11-4 23 3 29 17v99H0Z" fill="#43815F" />
-      <Rect x="26" y="217" width="5" height="139" fill="#4D6650" />
-      <Circle cx="25" cy="214" r="29" fill="#3F865F" />
-      <Circle cx="7" cy="234" r="24" fill="#4D9668" />
-      <Circle cx="48" cy="232" r="25" fill="#559B6D" />
-      <Circle cx="69" cy="250" r="22" fill="#498A61" />
-      <Path d="M29 254v37m-12-23 12 14 12-14" fill="none" stroke="#356D50" strokeLinecap="round" strokeWidth="3" />
+      {/* =========================
+          DISTANT ENGLISH HILLS
+      ========================== */}
 
-      <Path d="M332 244c14-22 40-22 55-1v130h-81c-13-25-1-55 20-62-13-25-9-48 6-67Z" fill="#508F68" />
-      <Circle cx="340" cy="236" r="31" fill="#72A978" />
-      <Circle cx="373" cy="248" r="29" fill="#4C9268" />
-      <Circle cx="357" cy="277" r="24" fill="#5E9D70" />
+      <Path
+        d="M0 217c47-28 94-35 143-12 54-39 106-37 151-8 38-22 69-25 96-12v93H0Z"
+        fill="#83A994"
+      />
 
-      <Path d="M0 428c42-27 86-21 119 9 37-26 74-27 111 0 49-35 100-29 160 4v119H0Z" fill="#437A52" />
-      <Path d="M0 469c56-35 101-20 138 15 47-36 97-31 139 3 34-27 73-32 113-11v84H0Z" fill="#285F45" />
-      <Path d="M0 510c49-23 89-22 130 10 45-29 92-21 129 5 43-31 83-31 131-4v39H0Z" fill="#1B503D" />
-      <Path d="M0 324V0h77C54 48 39 91 48 131c-15 53-26 121-19 193Z" fill="#174D3F" opacity="0.8" />
-      <Path d="M0 0h79C55 33 42 62 37 93 22 71 11 54 0 46Z" fill="#245B42" />
-      <Path d="M0 0c29 4 45 20 55 45M0 26c18 8 30 20 39 38M12 0c9 19 15 34 19 51" fill="none" stroke="#356E4D" strokeLinecap="round" strokeWidth="5" />
-      <Circle cx="9" cy="429" fill="#77955B" r="21" />
-      <Circle cx="38" cy="447" fill="#49794B" r="25" />
-      <Circle cx="353" cy="431" fill="#6B9257" r="26" />
-      <Circle cx="380" cy="455" fill="#386D47" r="24" />
+      <Path
+        d="M0 244c53-28 99-25 144 2 50-34 100-29 147-1 36-22 69-23 99-8v73H0Z"
+        fill="#658F72"
+      />
 
-      <Rect height="560" width="390" fill="url(#householdShade)" />
+      {/* Distant village */}
+
+      <G opacity="0.82">
+        <Rect x="34" y="238" width="30" height="25" fill="#E4D2B6" />
+        <Polygon
+          points="30,238 49,224 68,238"
+          fill="#657076"
+        />
+
+        <Rect x="77" y="245" width="27" height="22" fill="#DCCBAF" />
+        <Polygon
+          points="73,245 90,232 108,245"
+          fill="#59696D"
+        />
+
+        {/* Church */}
+        <Rect x="119" y="220" width="25" height="53" fill="#D8CEB7" />
+        <Polygon
+          points="116,220 131.5,181 147,220"
+          fill="#596A6E"
+        />
+        <Rect x="128" y="235" width="7" height="15" rx="3" fill="#718484" />
+      </G>
+
+      {/* =========================
+          HOUSE
+      ========================== */}
+
+      <G transform="translate(0 22)">
+
+        {/* Main wall */}
+        <Path
+          d="M137 264H352V437H137Z"
+          fill="url(#brick)"
+        />
+
+        {/* Side extension */}
+        <Path
+          d="M104 314H160V437H104Z"
+          fill="#A8583D"
+        />
+
+        {/* Roof */}
+        <Polygon
+          points="118,274 190,211 329,226 371,278"
+          fill="url(#roof)"
+        />
+
+        {/* Roof highlight */}
+        <Path
+          d="M124 270 191 218l136 14"
+          fill="none"
+          stroke="#65767B"
+          strokeWidth="4"
+          opacity="0.65"
+        />
+
+        {/* Chimney left */}
+        <Rect
+          x="179"
+          y="190"
+          width="31"
+          height="66"
+          rx="2"
+          fill="#A9583C"
+        />
+
+        <Rect
+          x="176"
+          y="187"
+          width="37"
+          height="8"
+          rx="2"
+          fill="#74402F"
+        />
+
+        <Rect
+          x="185"
+          y="176"
+          width="7"
+          height="15"
+          fill="#873F2D"
+        />
+
+        <Rect
+          x="198"
+          y="176"
+          width="7"
+          height="15"
+          fill="#873F2D"
+        />
+
+        {/* Chimney right */}
+        <Rect
+          x="314"
+          y="199"
+          width="29"
+          height="59"
+          rx="2"
+          fill="#A9583C"
+        />
+
+        <Rect
+          x="311"
+          y="196"
+          width="35"
+          height="8"
+          fill="#74402F"
+        />
+
+        <Rect
+          x="319"
+          y="185"
+          width="7"
+          height="15"
+          fill="#873F2D"
+        />
+
+        <Rect
+          x="332"
+          y="185"
+          width="7"
+          height="15"
+          fill="#873F2D"
+        />
+
+        {/* Subtle brick lines */}
+        <G
+          stroke="#D38A67"
+          strokeWidth="1"
+          opacity="0.32"
+        >
+          <Path d="M145 291h198" />
+          <Path d="M145 310h198" />
+          <Path d="M145 329h198" />
+          <Path d="M145 348h198" />
+          <Path d="M145 367h198" />
+          <Path d="M145 386h198" />
+          <Path d="M145 405h198" />
+        </G>
+
+        {/* =========================
+            UPPER WINDOWS
+        ========================== */}
+
+        <G>
+          <Rect
+            x="166"
+            y="289"
+            width="42"
+            height="50"
+            rx="2"
+            fill="#EEE4D0"
+          />
+
+          <Rect
+            x="171"
+            y="294"
+            width="32"
+            height="40"
+            fill="#CDE0D9"
+          />
+
+          <Path
+            d="M187 294v40M171 314h32"
+            stroke="#F7F0DE"
+            strokeWidth="3"
+          />
+
+          <Rect
+            x="273"
+            y="292"
+            width="42"
+            height="50"
+            rx="2"
+            fill="#EEE4D0"
+          />
+
+          <Rect
+            x="278"
+            y="297"
+            width="32"
+            height="40"
+            fill="#CDE0D9"
+          />
+
+          <Path
+            d="M294 297v40M278 317h32"
+            stroke="#F7F0DE"
+            strokeWidth="3"
+          />
+        </G>
+
+        {/* =========================
+            BAY WINDOW
+        ========================== */}
+
+        <Path
+          d="M118 356h66l12 15v66h-90v-66Z"
+          fill="#E8DDC7"
+        />
+
+        <Polygon
+          points="105,370 119,350 184,350 198,370"
+          fill="#34494D"
+        />
+
+        <Rect
+          x="116"
+          y="375"
+          width="69"
+          height="51"
+          fill="url(#windowGlow)"
+        />
+
+        <Path
+          d="M139 375v51M162 375v51M116 400h69"
+          stroke="#F7F0E1"
+          strokeWidth="4"
+        />
+
+        {/* =========================
+            FRONT DOOR
+        ========================== */}
+
+        <Rect
+          x="235"
+          y="360"
+          width="42"
+          height="77"
+          rx="2"
+          fill="#183F3B"
+        />
+
+        <Rect
+          x="241"
+          y="369"
+          width="30"
+          height="26"
+          rx="2"
+          fill="#214C47"
+        />
+
+        <Rect
+          x="241"
+          y="402"
+          width="30"
+          height="27"
+          rx="2"
+          fill="#214C47"
+        />
+
+        <Circle
+          cx="268"
+          cy="398"
+          r="2.5"
+          fill="#D7AE64"
+        />
+
+        {/* Door canopy */}
+        <Polygon
+          points="226,360 256,337 286,360"
+          fill="#EEE5D4"
+        />
+
+        <Polygon
+          points="232,358 256,341 280,358"
+          fill="#384B4E"
+        />
+
+        {/* Lamp */}
+        <Circle
+          cx="288"
+          cy="377"
+          r="5"
+          fill="#F8C86D"
+          opacity="0.9"
+        />
+
+        <Path
+          d="M288 371v-8"
+          stroke="#263D3C"
+          strokeWidth="3"
+        />
+
+        {/* Ivy */}
+        <G fill="#47724A">
+          <Circle cx="222" cy="359" r="12" />
+          <Circle cx="218" cy="344" r="10" />
+          <Circle cx="225" cy="331" r="8" />
+
+          <Circle cx="284" cy="355" r="11" />
+          <Circle cx="290" cy="341" r="10" />
+          <Circle cx="295" cy="328" r="8" />
+        </G>
+
+        <G fill="#F4E5C8">
+          <Circle cx="217" cy="342" r="2.5" />
+          <Circle cx="226" cy="351" r="2.5" />
+          <Circle cx="288" cy="339" r="2.5" />
+          <Circle cx="296" cy="349" r="2.5" />
+        </G>
+      </G>
+
+      {/* =========================
+          GARDEN
+      ========================== */}
+
+      <Path
+        d="M0 406c45-31 89-24 127 7 37-27 75-29 113-3 48-34 100-31 150 0v150H0Z"
+        fill="#557B45"
+      />
+
+      <Path
+        d="M0 443c46-29 93-20 132 12 46-33 93-31 137 3 42-28 82-25 121-4v106H0Z"
+        fill="#356B43"
+      />
+
+      {/* Gravel driveway */}
+      <Path
+        d="M113 560c21-51 48-91 91-120h115c-14 36-24 75-25 120Z"
+        fill="#C8B58B"
+      />
+
+      <Path
+        d="M134 560c18-45 43-82 82-111"
+        stroke="#E1CFAB"
+        strokeWidth="4"
+        opacity="0.65"
+      />
+
+      {/* Bushes */}
+
+      <G>
+        <Circle cx="25" cy="422" r="34" fill="#447747" />
+        <Circle cx="57" cy="431" r="29" fill="#56864F" />
+        <Circle cx="91" cy="425" r="27" fill="#3F7545" />
+
+        <Circle cx="329" cy="417" r="33" fill="#4E7F48" />
+        <Circle cx="364" cy="429" r="31" fill="#376D43" />
+      </G>
+
+      {/* Flowers */}
+
+      <G fill="#F4E7DC">
+        <Circle cx="54" cy="415" r="4" />
+        <Circle cx="68" cy="426" r="3.5" />
+        <Circle cx="82" cy="412" r="4" />
+
+        <Circle cx="324" cy="408" r="4" />
+        <Circle cx="341" cy="418" r="3.5" />
+        <Circle cx="355" cy="405" r="4" />
+      </G>
+
+      <G fill="#B9A3D8">
+        <Circle cx="95" cy="435" r="4" />
+        <Circle cx="105" cy="426" r="3" />
+        <Circle cx="316" cy="433" r="4" />
+        <Circle cx="327" cy="441" r="3" />
+      </G>
+
+      {/* =========================
+          SCOOTER COMPONENT #1
+          Grey NMAX-style
+      ========================== */}
+
+      <G transform="translate(27 432) scale(.72)">
+        {/* wheels */}
+        <Circle cx="31" cy="77" r="17" fill="#152323" />
+        <Circle cx="31" cy="77" r="10" fill="#647173" />
+        <Circle cx="104" cy="77" r="17" fill="#152323" />
+        <Circle cx="104" cy="77" r="10" fill="#647173" />
+
+        {/* rear delivery box */}
+        <Rect
+          x="5"
+          y="12"
+          width="43"
+          height="33"
+          rx="4"
+          fill="#202A2B"
+        />
+
+        <Rect
+          x="8"
+          y="15"
+          width="37"
+          height="5"
+          rx="2"
+          fill="#455052"
+        />
+
+        {/* bike body */}
+        <Path
+          d="M27 49c17-12 42-13 60-4l23 16-11 16H49L24 64Z"
+          fill="#727B7D"
+        />
+
+        <Path
+          d="M45 49c12-8 29-9 42-3l-10 18H50Z"
+          fill="#92999A"
+        />
+
+        {/* seat */}
+        <Path
+          d="M36 41h46c6 0 9 4 8 8H41Z"
+          fill="#1A2526"
+        />
+
+        {/* front fairing */}
+        <Path
+          d="M87 42c10-4 17 2 20 13l8 19H94l-11-20Z"
+          fill="#606B6D"
+        />
+
+        {/* windshield */}
+        <Path
+          d="M91 39 99 20c4-3 8-2 11 2l-3 21Z"
+          fill="#274348"
+          opacity="0.85"
+        />
+
+        {/* handlebars */}
+        <Path
+          d="M98 33h17"
+          stroke="#202C2D"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+
+        {/* light */}
+        <Path
+          d="M103 50h8l4 9h-12Z"
+          fill="#E6D8AD"
+        />
+      </G>
+
+      {/* =========================
+          SCOOTER #2
+      ========================== */}
+
+      <G transform="translate(132 426) scale(.76)">
+        <Circle cx="31" cy="77" r="17" fill="#152323" />
+        <Circle cx="31" cy="77" r="10" fill="#647173" />
+        <Circle cx="104" cy="77" r="17" fill="#152323" />
+        <Circle cx="104" cy="77" r="10" fill="#647173" />
+
+        <Rect
+          x="5"
+          y="12"
+          width="43"
+          height="33"
+          rx="4"
+          fill="#202A2B"
+        />
+
+        <Rect
+          x="8"
+          y="15"
+          width="37"
+          height="5"
+          rx="2"
+          fill="#455052"
+        />
+
+        <Path
+          d="M27 49c17-12 42-13 60-4l23 16-11 16H49L24 64Z"
+          fill="#747D7F"
+        />
+
+        <Path
+          d="M45 49c12-8 29-9 42-3l-10 18H50Z"
+          fill="#989FA0"
+        />
+
+        <Path
+          d="M36 41h46c6 0 9 4 8 8H41Z"
+          fill="#172324"
+        />
+
+        <Path
+          d="M87 42c10-4 17 2 20 13l8 19H94l-11-20Z"
+          fill="#626D6F"
+        />
+
+        <Path
+          d="M91 39 99 20c4-3 8-2 11 2l-3 21Z"
+          fill="#274348"
+          opacity="0.85"
+        />
+
+        <Path
+          d="M98 33h17"
+          stroke="#202C2D"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M103 50h8l4 9h-12Z"
+          fill="#E6D8AD"
+        />
+      </G>
+
+      {/* =========================
+          SCOOTER #3
+      ========================== */}
+
+      <G transform="translate(241 440) scale(.64)">
+        <Circle cx="31" cy="77" r="17" fill="#152323" />
+        <Circle cx="31" cy="77" r="10" fill="#647173" />
+        <Circle cx="104" cy="77" r="17" fill="#152323" />
+        <Circle cx="104" cy="77" r="10" fill="#647173" />
+
+        <Rect
+          x="5"
+          y="12"
+          width="43"
+          height="33"
+          rx="4"
+          fill="#202A2B"
+        />
+
+        <Rect
+          x="8"
+          y="15"
+          width="37"
+          height="5"
+          rx="2"
+          fill="#455052"
+        />
+
+        <Path
+          d="M27 49c17-12 42-13 60-4l23 16-11 16H49L24 64Z"
+          fill="#6F797B"
+        />
+
+        <Path
+          d="M45 49c12-8 29-9 42-3l-10 18H50Z"
+          fill="#929A9C"
+        />
+
+        <Path
+          d="M36 41h46c6 0 9 4 8 8H41Z"
+          fill="#172324"
+        />
+
+        <Path
+          d="M87 42c10-4 17 2 20 13l8 19H94l-11-20Z"
+          fill="#606B6D"
+        />
+
+        <Path
+          d="M91 39 99 20c4-3 8-2 11 2l-3 21Z"
+          fill="#274348"
+          opacity="0.85"
+        />
+
+        <Path
+          d="M98 33h17"
+          stroke="#202C2D"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+
+        <Path
+          d="M103 50h8l4 9h-12Z"
+          fill="#E6D8AD"
+        />
+      </G>
+
+      {/* =========================
+          FOREGROUND
+      ========================== */}
+
+      <Path
+        d="M0 510c44-24 87-20 125 9 42-28 86-23 122 4 48-30 94-28 143-5v42H0Z"
+        fill="#1F523B"
+      />
+
+      <Circle cx="17" cy="515" r="22" fill="#376C43" />
+      <Circle cx="46" cy="527" r="27" fill="#285D3E" />
+
+      <Circle cx="349" cy="519" r="25" fill="#356A43" />
+      <Circle cx="381" cy="529" r="28" fill="#22573A" />
+
+      {/* Tree framing left */}
+      <Path
+        d="M0 0h73C51 36 39 76 40 117c-15 47-22 91-19 139H0Z"
+        fill="#174B3D"
+        opacity="0.92"
+      />
+
+      <G fill="#2C6748">
+        <Circle cx="13" cy="46" r="31" />
+        <Circle cx="39" cy="29" r="29" />
+        <Circle cx="18" cy="89" r="27" />
+        <Circle cx="49" cy="76" r="25" />
+      </G>
+
+      <Path
+        d="M0 23c24 10 39 26 50 48M5 75c18 5 31 17 40 32"
+        stroke="#4B7751"
+        strokeWidth="5"
+        strokeLinecap="round"
+        fill="none"
+      />
+
+      {/* =========================
+          FINAL HERO OVERLAY
+      ========================== */}
+
+      <Rect
+        width="390"
+        height="560"
+        fill="url(#heroShade)"
+      />
     </Svg>
   );
 }
