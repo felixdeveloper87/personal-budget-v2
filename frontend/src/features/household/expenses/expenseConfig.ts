@@ -1,11 +1,11 @@
 import { Building, Broom, CookingPot, Drop, Flame, Gear, Home, Lightbulb, Plant, ShoppingCart, Tag, ToiletPaper, WifiHigh, Zap, type LucideIcon } from '../../../components/ui/icons'
 
 export const CATEGORIES = [
+  'Groceries',
   'Electricity',
   'Water',
   'Gas',
   'Internet',
-  'Groceries',
   'Cleaning',
   'Rent',
   'Council tax',
