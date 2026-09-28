@@ -26,6 +26,7 @@ interface MetricCardProps {
 function MetricCard({ background, borderColor, icon: Icon, iconBackground, label, value, valueColor }: MetricCardProps) {
   return (
     <HStack
+      flex={1}
       minH={{ base: '70px', md: '92px' }} spacing={{ base: 2, md: 3 }} px={{ base: 2, md: 4 }} py={{ base: 2, md: 3 }}
       border="1px solid" borderColor={borderColor} borderRadius="18px" bg={background} backdropFilter="blur(8px)"
     >
@@ -102,7 +103,7 @@ export default function MonthHero({ income, expense, date, userName, onAddIncome
           gap={{ base: 2.5, md: 3 }}
           alignItems="stretch"
         >
-          <VStack align="stretch" spacing={2.5}>
+          <VStack align="stretch" spacing={2.5} h="full">
             <MetricCard background="rgba(242,249,233,0.88)" borderColor="rgba(255,255,255,0.66)" icon={ArrowUp}
               iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257" />
             <MetricCard background="rgba(255,239,229,0.9)" borderColor="rgba(255,255,255,0.66)" icon={ArrowDown}
