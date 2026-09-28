@@ -8,7 +8,7 @@ import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdMembersCarousel } from './HouseholdMembersCarousel'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
-import { ActionRequiredBanner, HouseholdSectionNavigation } from './components/HouseholdPageComponents'
+import { ActionRequiredBanner } from './components/HouseholdPageComponents'
 import {
   HouseholdLoadingState,
   HouseholdLoadError,
@@ -192,16 +192,6 @@ export default function HouseholdPage() {
             )}
           />
         </Box>
-
-        <HouseholdSectionNavigation
-          ariaLabel={t('household.navigation.aria')}
-          items={[
-            { id: 'household-members', label: t('household.members.title') },
-            { id: 'household-cleaning', label: t('household.cleaning.title') },
-            { id: 'household-expenses', label: t('household.expenses.title') },
-          ]}
-        />
-
 
         {debtsYouOwe.length > 0 && (
           <ActionRequiredBanner
