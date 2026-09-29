@@ -20,9 +20,16 @@ const categories = [
   "Health",
   "Rent",
   "Shopping",
+  "Subscription",
+  "Entertainment",
+  "Other",
 ] as const;
 
 type ExpenseCategory = typeof categories[number];
+
+function categoryLabel(category: ExpenseCategory) {
+  return category === "Entertainment" ? "Leisure" : category;
+}
 
 interface MerchantSuggestion {
   domain?: string;
@@ -80,6 +87,22 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "Bupa", domain: "bupa.co.uk" },
     { name: "Nuffield Health", domain: "nuffieldhealth.com" },
   ],
+  Subscription: [
+    { name: "YouTube", domain: "youtube.com" },
+    { name: "OpenAI", domain: "openai.com" },
+    { name: "Claude", domain: "claude.ai" },
+    { name: "iCloud", domain: "icloud.com" },
+    { name: "Spotify", domain: "spotify.com" },
+    { name: "Netflix", domain: "netflix.com" },
+    { name: "Disney+", domain: "disneyplus.com" },
+    { name: "Amazon Prime", domain: "amazon.co.uk" },
+    { name: "Microsoft 365", domain: "microsoft.com" },
+  ],
+  Entertainment: [
+    { name: "Cinema" },
+    { name: "Steam", domain: "steampowered.com" },
+    { name: "Show" },
+  ],
   Shopping: [
     { name: "Amazon", domain: "amazon.co.uk" },
     { name: "Primark", domain: "primark.com" },
@@ -97,6 +120,8 @@ const suggestedMerchantNames = new Set(
 export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
   const form = useTransactionEntry({ ...props, initialCategory: categories[0], type: "EXPENSE" });
   const selectedMerchants = merchantSuggestions[form.category as ExpenseCategory] ?? [];
+  const hasSelectedMerchant = selectedMerchants.some((merchant) => merchant.name === form.description);
+  const hideDescription = hasSelectedMerchant || form.category === "Rent";
 
   return (
     <TransactionSheetFrame
@@ -123,7 +148,11 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
             <Pressable
               key={category}
               onPress={() => {
-                if (suggestedMerchantNames.has(form.description)) form.setDescription("");
+                if (category === "Rent") {
+                  form.setDescription("Rent");
+                } else if (form.category === "Rent" || suggestedMerchantNames.has(form.description)) {
+                  form.setDescription("");
+                }
                 form.setCategory(category);
               }}
               style={({ pressed }) => [
@@ -133,7 +162,9 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
                 pressed && sharedStyles.optionPressed,
               ]}
             >
-              <Text style={[sharedStyles.chipText, selected && styles.selectedCategoryText]}>{category}</Text>
+              <Text style={[sharedStyles.chipText, selected && styles.selectedCategoryText]}>
+                {categoryLabel(category)}
+              </Text>
             </Pressable>
           );
         })}
@@ -149,8 +180,9 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
                 <Pressable
                   accessibilityLabel={`Use ${merchant.name} as expense merchant`}
                   accessibilityRole="button"
+                  accessibilityState={{ selected }}
                   key={merchant.name}
-                  onPress={() => form.setDescription(merchant.name)}
+                  onPress={() => form.setDescription(selected ? "" : merchant.name)}
                   style={({ pressed }) => [
                     styles.merchantButton,
                     selected && styles.selectedMerchant,
@@ -176,17 +208,21 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
         </>
       ) : null}
 
-      <Text style={sharedStyles.fieldLabel}>DESCRIPTION</Text>
-      <TextInput
-        autoCapitalize="sentences"
-        maxLength={120}
-        onChangeText={form.setDescription}
-        placeholder="e.g. Weekly groceries"
-        placeholderTextColor={colors.inkFaint}
-        returnKeyType="done"
-        style={sharedStyles.textField}
-        value={form.description}
-      />
+      {!hideDescription ? (
+        <>
+          <Text style={sharedStyles.fieldLabel}>DESCRIPTION</Text>
+          <TextInput
+            autoCapitalize="sentences"
+            maxLength={120}
+            onChangeText={form.setDescription}
+            placeholder="e.g. Weekly groceries"
+            placeholderTextColor={colors.inkFaint}
+            returnKeyType="done"
+            style={sharedStyles.textField}
+            value={form.description}
+          />
+        </>
+      ) : null}
 
       <AccountPicker
         accent={colors.expense}

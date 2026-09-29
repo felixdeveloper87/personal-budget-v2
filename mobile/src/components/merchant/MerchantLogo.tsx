@@ -17,6 +17,16 @@ interface MerchantFallback {
 }
 
 const merchantFallbacks = {
+  cinema: {
+    backgroundColor: "#E8E0EF",
+    icon: { ios: "film.fill", android: "movie", web: "movie" },
+    tintColor: "#75558A",
+  },
+  event: {
+    backgroundColor: "#F1DFE7",
+    icon: { ios: "music.note", android: "music_note", web: "music_note" },
+    tintColor: "#98546F",
+  },
   restaurant: {
     backgroundColor: "#F2E0D4",
     icon: { ios: "fork.knife", android: "restaurant", web: "restaurant" },
@@ -65,6 +75,13 @@ function includesAny(value: string, terms: readonly string[]) {
 function getMerchantFallback(name: string, category?: string): MerchantFallback | null {
   const normalisedName = normaliseFallbackValue(name);
   const normalisedCategory = normaliseFallbackValue(category ?? "");
+
+  if (includesAny(normalisedName, ["cinema", "movie", "film"])) {
+    return merchantFallbacks.cinema;
+  }
+  if (includesAny(normalisedName, ["show", "concert", "gig"])) {
+    return merchantFallbacks.event;
+  }
 
   if (
     includesAny(normalisedCategory, ["fuel", "petrol", "gas", "combustivel"]) ||

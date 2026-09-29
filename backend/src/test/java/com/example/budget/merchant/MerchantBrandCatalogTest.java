@@ -53,6 +53,22 @@ class MerchantBrandCatalogTest {
     }
 
     @Test
+    void resolvesSubscriptionMerchantsToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("iCloud+ storage"))
+                .contains(new MerchantBrand("iCloud", "icloud.com"));
+        assertThat(MerchantBrandCatalog.resolve("Amazon Prime membership"))
+                .contains(new MerchantBrand("Amazon Prime", "amazon.co.uk"));
+        assertThat(MerchantBrandCatalog.resolve("Microsoft 365 personal"))
+                .contains(new MerchantBrand("Microsoft 365", "microsoft.com"));
+    }
+
+    @Test
+    void resolvesEntertainmentMerchantsToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("Steam games"))
+                .contains(new MerchantBrand("Steam", "steampowered.com"));
+    }
+
+    @Test
     void doesNotMatchAliasesInsideOtherWords() {
         assertThat(MerchantBrandCatalog.resolve("Subway"))
                 .contains(new MerchantBrand("Subway", "subway.com"));
