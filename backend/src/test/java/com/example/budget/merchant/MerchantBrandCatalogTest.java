@@ -22,10 +22,16 @@ class MerchantBrandCatalogTest {
 
     @Test
     void resolvesUtilityProvidersToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("OVO Energy gas bill"))
+                .contains(new MerchantBrand("OVO Energy", "ovoenergy.com"));
+        assertThat(MerchantBrandCatalog.resolve("100Green electricity"))
+                .contains(new MerchantBrand("100Green", "100green.com"));
+        assertThat(MerchantBrandCatalog.resolve("Community Fibre broadband"))
+                .contains(new MerchantBrand("Community Fibre", "communityfibre.co.uk"));
+        assertThat(MerchantBrandCatalog.resolve("SES Water bill"))
+                .contains(new MerchantBrand("SES Water", "seswater.co.uk"));
         assertThat(MerchantBrandCatalog.resolve("Octopus Energy monthly bill"))
                 .contains(new MerchantBrand("Octopus Energy", "octopus.energy"));
-        assertThat(MerchantBrandCatalog.resolve("Virgin Media broadband"))
-                .contains(new MerchantBrand("Virgin Media", "virginmedia.com"));
     }
 
     @Test
@@ -34,6 +40,16 @@ class MerchantBrandCatalogTest {
                 .contains(new MerchantBrand("Pret A Manger", "pret.co.uk"));
         assertThat(MerchantBrandCatalog.resolve("Wagamama dinner"))
                 .contains(new MerchantBrand("Wagamama", "wagamama.com"));
+        assertThat(MerchantBrandCatalog.resolve("Pizza Pilgrims Soho"))
+                .contains(new MerchantBrand("Pizza Pilgrims", "pizzapilgrims.co.uk"));
+    }
+
+    @Test
+    void resolvesHealthMerchantsToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("Specsavers eye test"))
+                .contains(new MerchantBrand("Specsavers", "specsavers.co.uk"));
+        assertThat(MerchantBrandCatalog.resolve("Nuffield Health appointment"))
+                .contains(new MerchantBrand("Nuffield Health", "nuffieldhealth.com"));
     }
 
     @Test

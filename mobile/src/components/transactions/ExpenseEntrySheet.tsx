@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { colors } from "@/theme/colors";
@@ -17,9 +17,8 @@ const categories = [
   "Groceries",
   "Dining out",
   "Utilities",
-  "Transport",
   "Health",
-  "Housing",
+  "Rent",
   "Shopping",
 ] as const;
 
@@ -60,20 +59,26 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "Kokoro", domain: "kokorouk.com" },
     { name: "Pret A Manger", domain: "pret.co.uk" },
     { name: "Wagamama", domain: "wagamama.com" },
+    { name: "Pizza Pilgrims", domain: "pizzapilgrims.co.uk" },
   ],
   Utilities: [
+    { name: "OVO Energy", domain: "ovoenergy.com" },
+    { name: "100Green", domain: "100green.com" },
+    { name: "Community Fibre", domain: "communityfibre.co.uk" },
+    { name: "SES Water", domain: "seswater.co.uk" },
     { name: "British Gas", domain: "britishgas.co.uk" },
     { name: "Octopus Energy", domain: "octopus.energy" },
     { name: "EDF Energy", domain: "edfenergy.com" },
     { name: "Thames Water", domain: "thameswater.co.uk" },
     { name: "Sky", domain: "sky.com" },
-    { name: "Virgin Media", domain: "virginmedia.com" },
   ],
-  Transport: [
-    { name: "TfL", domain: "tfl.gov.uk" },
-    { name: "Uber", domain: "uber.com" },
-    { name: "Bolt", domain: "bolt.eu" },
-    { name: "Trainline", domain: "thetrainline.com" },
+  Health: [
+    { name: "Boots", domain: "boots.com" },
+    { name: "Superdrug", domain: "superdrug.com" },
+    { name: "Holland & Barrett", domain: "hollandandbarrett.com" },
+    { name: "Specsavers", domain: "specsavers.co.uk" },
+    { name: "Bupa", domain: "bupa.co.uk" },
+    { name: "Nuffield Health", domain: "nuffieldhealth.com" },
   ],
   Shopping: [
     { name: "Amazon", domain: "amazon.co.uk" },
@@ -111,11 +116,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
       />
 
       <Text style={sharedStyles.fieldLabel}>CATEGORY</Text>
-      <ScrollView
-        contentContainerStyle={sharedStyles.chipRow}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-      >
+      <View style={styles.categoryGrid}>
         {categories.map((category) => {
           const selected = category === form.category;
           return (
@@ -127,6 +128,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
               }}
               style={({ pressed }) => [
                 sharedStyles.chip,
+                styles.categoryButton,
                 selected && styles.selectedCategory,
                 pressed && sharedStyles.optionPressed,
               ]}
@@ -135,7 +137,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
             </Pressable>
           );
         })}
-      </ScrollView>
+      </View>
 
       {selectedMerchants.length > 0 ? (
         <>
@@ -207,6 +209,8 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
 }
 
 const styles = StyleSheet.create({
+  categoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  categoryButton: { alignItems: "center", justifyContent: "center", width: "31.7%" },
   selectedCategory: {
     backgroundColor: colors.expenseTint,
     borderColor: colors.expense,
