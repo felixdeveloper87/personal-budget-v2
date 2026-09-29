@@ -49,6 +49,9 @@ export default function AddTransactionModal({
         '& p, & button, & input, & label, & .chakra-text': {
           fontSize: '16px !important',
         },
+        '& input[data-amount-input]': {
+          fontSize: '22px !important',
+        },
       }}
     >
       <TransactionForm

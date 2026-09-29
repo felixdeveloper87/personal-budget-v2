@@ -133,18 +133,29 @@ export default function AmountInput({
 
                   <Box
                     flexShrink={0}
-                    minW={{ base: '72px', sm: '88px', md: '104px' }}
+                    minW={{ base: '108px', sm: '122px' }}
                   >
-                    <HStack spacing={1} justify="flex-end" whiteSpace="nowrap">
+                    <HStack
+                      spacing={1}
+                      justify="flex-end"
+                      whiteSpace="nowrap"
+                      px={2}
+                      py={1}
+                      borderRadius="10px"
+                      border="1px solid"
+                      borderColor={type === 'INCOME' ? 'rgba(47, 114, 87, 0.2)' : 'rgba(164, 81, 72, 0.2)'}
+                      bg={type === 'INCOME' ? 'rgba(47, 114, 87, 0.08)' : 'rgba(164, 81, 72, 0.08)'}
+                    >
                       <Text
-                        color={colors.text.secondary}
-                        fontSize={{ base: 'sm', sm: 'lg' }}
-                        fontWeight={700}
+                        color={type === 'INCOME' ? '#2F7257' : '#A45148'}
+                        fontSize="lg"
+                        fontWeight={800}
                       >
                         {currencyMark}
                       </Text>
                       <Input
                         ref={nativeInputRef}
+                        data-amount-input
                         variant="unstyled"
                         inputMode="decimal"
                         value={amountDraft}
@@ -156,13 +167,13 @@ export default function AmountInput({
                         onChange={(event) => handleNativeAmountChange(event.target.value)}
                         placeholder="0.00"
                         aria-label={t('form.howMuch')}
-                        w={{ base: '62px', sm: '76px' }}
-                        minW={{ base: '62px', sm: '76px' }}
+                        w={{ base: '68px', sm: '80px' }}
+                        minW={{ base: '68px', sm: '80px' }}
                         flex="none"
                         p={0}
-                        color={colors.text.primary}
-                        fontSize={{ base: 'sm', sm: 'lg' }}
-                        fontWeight={700}
+                        color={type === 'INCOME' ? '#2F7257' : '#A45148'}
+                        fontSize="22px"
+                        fontWeight={800}
                         lineHeight="1.1"
                         textAlign="left"
                         sx={{
