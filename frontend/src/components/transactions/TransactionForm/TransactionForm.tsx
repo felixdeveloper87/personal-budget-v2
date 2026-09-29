@@ -506,7 +506,12 @@ export default function TransactionForm({
               }}
             />
           )}
-          <AmountInput amount={amount} onChange={setAmount} type={type} />
+          <AmountInput
+            amount={amount}
+            onChange={setAmount}
+            type={type}
+            hideQuickAmountsOnMobile={type === 'INCOME'}
+          />
           <AccountSelector
             value={accountId}
             onChange={setAccountId}

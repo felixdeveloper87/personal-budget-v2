@@ -8,6 +8,7 @@ interface AmountInputProps {
   amount: number
   onChange: (amount: number) => void
   type: 'INCOME' | 'EXPENSE'
+  hideQuickAmountsOnMobile?: boolean
 }
 
 /**
@@ -15,7 +16,12 @@ interface AmountInputProps {
  * - Currency picker + quick amounts (matches DateSelector card pattern)
  * - Opens number pad from the keypad icon or displayed value
  */
-export default function AmountInput({ amount, onChange, type }: AmountInputProps) {
+export default function AmountInput({
+  amount,
+  onChange,
+  type,
+  hideQuickAmountsOnMobile = false,
+}: AmountInputProps) {
   const { t, formatCurrency } = useI18n()
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -145,7 +151,11 @@ export default function AmountInput({ amount, onChange, type }: AmountInputProps
                   </Box>
                 </HStack>
 
-                <Wrap spacing={2} align="center">
+                <Wrap
+                  spacing={2}
+                  align="center"
+                  display={hideQuickAmountsOnMobile ? { base: 'none', md: 'flex' } : 'flex'}
+                >
                   {quickAmountOptions.map((option) => (
                     <WrapItem key={option.value}>
                       <Button
