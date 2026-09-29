@@ -37,6 +37,7 @@ import PaymentMethodSelector from './PaymentMethodSelector'
 import AccountSelector from './AccountSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
+import IncomeQuickAdd from './IncomeQuickAdd'
 import QuickTransactionPresets from './QuickTransactionPresets'
 import { FinancialAccount, PaymentMethod, Transaction } from '../../../types'
 import { ToastService } from '../../../services/toast'
@@ -561,18 +562,30 @@ export default function TransactionForm({
                 card={selectedCard}
               />
           )}
-          <CategorySelector type={type} category={category} onChange={setCategory} />
-          <QuickTransactionPresets
-            category={category}
-            transactionType={type}
-            onSelect={applyQuickPreset}
-          />
-          <DescriptionInput
-            value={description}
-            onChange={setDescription}
-            type={type}
-            loading={loading}
-          />
+          {type === 'INCOME' ? (
+            <IncomeQuickAdd
+              description={description}
+              loading={loading}
+              onDescriptionChange={setDescription}
+              onSelect={(source) => applyQuickPreset({ description: source, category: 'Salary' })}
+              onSelectOther={() => applyQuickPreset({ description: '', category: 'Salary' })}
+            />
+          ) : (
+            <>
+              <CategorySelector type={type} category={category} onChange={setCategory} />
+              <QuickTransactionPresets
+                category={category}
+                transactionType={type}
+                onSelect={applyQuickPreset}
+              />
+              <DescriptionInput
+                value={description}
+                onChange={setDescription}
+                type={type}
+                loading={loading}
+              />
+            </>
+          )}
           
           {compact && (
             <Button
