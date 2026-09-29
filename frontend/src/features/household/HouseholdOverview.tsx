@@ -2,6 +2,7 @@ import { Box, Button, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { ReceiptText } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../types'
+import { ActivityCardArtwork } from './ActivityCardArtwork'
 import { getHouseholdCategoryConfig } from './expenses/expenseConfig'
 
 export function HouseholdOverview({
@@ -76,10 +77,12 @@ function RecentExpenseRow({ expense, household }: {
 
   return (
     <Flex
+      position="relative" overflow="hidden"
       align="center" gap={{ base: 2.5, sm: 3 }} px={{ base: 3, sm: 3.5 }} py={3}
       border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)"
       aria-label={`${categoryLabel}. ${expense.description}. ${t('household.expenses.total')}: ${formatCurrency(expense.amount)}. ${t('household.expenses.paidBy', { name: expense.payerName })}.`}
     >
+      <ActivityCardArtwork />
       <Flex
         w="36px" h="36px" flexShrink={0} align="center" justify="center" borderRadius="11px"
         bg={category.bg} color={category.color}

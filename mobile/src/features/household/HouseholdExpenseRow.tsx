@@ -1,16 +1,18 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
+import { ActivityCardArtwork } from "@/features/household/ActivityCardArtwork";
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
 import { colors } from "@/theme/colors";
 import type { HouseholdExpense } from "@/types/household";
 
-export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments }: {
+export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments, showArtwork = false }: {
   expense: HouseholdExpense;
   currency: string;
   currentMemberId: number;
   onOpenAttachments: (expense: HouseholdExpense) => void;
+  showArtwork?: boolean;
 }) {
   const category = categories.find((item) => item.value === expense.category);
   const key = category?.value ?? "Other";
@@ -33,6 +35,7 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
       onPress={() => onOpenAttachments(expense)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
+      {showArtwork ? <ActivityCardArtwork /> : null}
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
         <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
       </View>
@@ -59,7 +62,7 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
 }
 
 const styles = StyleSheet.create({
-  card: { alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
+  card: { position: "relative", overflow: "hidden", alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
   pressed: { backgroundColor: "#EDF3E6" },
   icon: { alignItems: "center", justifyContent: "center", flexShrink: 0, height: 34, width: 34, borderRadius: 11 },
   copy: { flex: 1, minWidth: 0 },
