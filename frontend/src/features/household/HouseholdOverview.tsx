@@ -115,7 +115,8 @@ function RecentExpenseRow({ expense, household }: {
           {formatCurrency(expense.amount)}
         </Text>
         <Text fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1}>
-          {t('household.expenses.paidBy', { name: expense.payerName })}
+          {t('household.expenses.paidByLabel')}{' '}
+          <Text as="span" color="var(--pb-income)" fontWeight={700}>{expense.payerName}</Text>
         </Text>
         <Text fontSize="2xs" color="var(--pb-ink-faint)" noOfLines={1}>
           {formatDate(expense.expenseDate, { day: '2-digit', month: 'short', year: 'numeric' })}
