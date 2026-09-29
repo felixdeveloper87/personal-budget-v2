@@ -56,6 +56,7 @@ export interface InstallmentPlan {
 export interface FinancialAccount {
   id: number;
   name: string;
+  institution?: string | null;
   currency: string;
   currentBalance: number;
   active: boolean;
