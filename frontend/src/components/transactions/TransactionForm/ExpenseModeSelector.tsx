@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
+import { Box, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import { useI18n } from '../../../i18n'
 
@@ -39,25 +39,24 @@ export default function ExpenseModeSelector({
 
   return (
     <Box>
-      <Text fontWeight="600" mb={3} color={colors.text.label} fontSize={{ base: 'sm', sm: 'md' }}>
+      <Text
+        mb={2}
+        color={colors.text.label}
+        fontSize="xs"
+        fontWeight={700}
+        letterSpacing="0.025em"
+      >
         {t('form.expenseModeQuestion')}
       </Text>
 
-      {/* Mobile: a single horizontal row that scrolls (carousel) so all three
-          modes stay on one line. sm+: an equal 3-column grid. */}
-      <Flex
-        direction="row"
-        gap={{ base: 2.5, sm: 3 }}
-        overflowX={{ base: 'auto', sm: 'visible' }}
-        mx={{ base: -1, sm: 0 }}
-        px={{ base: 1, sm: 0 }}
-        sx={{
-          scrollSnapType: 'x proximity',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-          '::-webkit-scrollbar': { display: 'none' },
-        }}
+      <SimpleGrid
+        columns={3}
+        spacing={1.5}
+        p={1.5}
+        border="1px solid"
+        borderColor={colors.border}
+        borderRadius="18px"
+        bg={colors.bgSecondary}
       >
         {MODES.map((mode) => {
           const selected = value === mode.value
@@ -67,53 +66,55 @@ export default function ExpenseModeSelector({
               as="button"
               type="button"
               role="group"
+              aria-pressed={selected}
               onClick={() => onChange(mode.value)}
               textAlign="left"
-              borderRadius="2xl"
-              flex={{ base: '0 0 auto', sm: 1 }}
-              minW={{ base: '128px', sm: 0 }}
-              minH={{ base: '64px', sm: '78px' }}
-              px={{ base: 3, sm: 3.5 }}
-              py={{ base: 2.5, sm: 3 }}
-              border="2px solid"
+              minW={0}
+              borderRadius="14px"
+              minH={{ base: '58px', sm: '62px' }}
+              px={{ base: 2, sm: 3 }}
+              py={{ base: 2, sm: 2.5 }}
+              border="1px solid"
               borderColor={selected ? mode.accent : colors.border}
-              bg={selected ? `${mode.accent}14` : colors.inputBg}
-              boxShadow={selected ? `0 12px 30px -18px ${mode.accent}` : 'none'}
-              transition="border-color 0.18s ease, box-shadow 0.18s ease"
-              sx={{ scrollSnapAlign: 'center' }}
-              _hover={{ borderColor: mode.accent }}
+              bg={selected ? colors.inputBg : 'transparent'}
+              boxShadow={selected ? `0 5px 14px -10px ${mode.accent}` : 'none'}
+              transform={selected ? 'translateY(-1px)' : 'none'}
+              transition="background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease"
+              _hover={{ borderColor: mode.accent, bg: colors.inputBg }}
+              _active={{ transform: 'translateY(0) scale(0.985)' }}
               _focusVisible={{
                 outline: '2px solid',
                 outlineColor: mode.accent,
                 outlineOffset: '2px',
               }}
             >
-              <VStack align="stretch" spacing={{ base: 1, sm: 2 }}>
-                <HStack justify="space-between" align="flex-start">
+              <VStack align="stretch" spacing={0.5}>
+                <HStack justify="space-between" align="center" spacing={1}>
                   <Text
                     color={colors.text.primary}
                     fontWeight={800}
-                    fontSize="sm"
-                    _groupHover={{ textDecoration: 'underline' }}
+                    fontSize={{ base: 'xs', sm: 'sm' }}
+                    lineHeight="shorter"
+                    noOfLines={1}
                   >
                     {t(mode.titleKey)}
                   </Text>
                   <Box
-                    w={2.5}
-                    h={2.5}
-                    mt={1}
+                    w={2}
+                    h={2}
                     borderRadius="full"
                     bg={selected ? mode.accent : 'transparent'}
-                    border="1.5px solid"
+                    border="1px solid"
                     borderColor={selected ? mode.accent : colors.border}
+                    boxShadow={selected ? `0 0 0 3px ${mode.accent}20` : 'none'}
                     flexShrink={0}
                   />
                 </HStack>
                 <Text
                   color={colors.text.secondary}
-                  fontSize="xs"
-                  lineHeight="short"
-                  noOfLines={{ base: 1, sm: 2 }}
+                  fontSize={{ base: '10px', sm: '11px' }}
+                  lineHeight="1.25"
+                  noOfLines={2}
                 >
                   {t(mode.captionKey)}
                 </Text>
@@ -121,7 +122,7 @@ export default function ExpenseModeSelector({
             </Box>
           )
         })}
-      </Flex>
+      </SimpleGrid>
     </Box>
   )
 }
