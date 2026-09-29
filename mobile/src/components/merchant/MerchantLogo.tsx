@@ -60,6 +60,10 @@ const merchantDomains: readonly MerchantDomainEntry[] = [
   { keys: ["tesco"], domain: "tesco.com" },
   { keys: ["aldi"], domain: "aldi.co.uk" },
   { keys: ["asda"], domain: "asda.com" },
+  {
+    keys: ["marks and spencer", "marks & spencer", "m&s", "m & s", "m and s"],
+    domain: "marksandspencer.com",
+  },
   { keys: ["co-op", "co op", "coop"], domain: "coop.co.uk" },
   { keys: ["amazon"], domain: "amazon.co.uk" },
   { keys: ["uber eats"], domain: "ubereats.com" },
@@ -69,6 +73,10 @@ const merchantDomains: readonly MerchantDomainEntry[] = [
   { keys: ["bolt"], domain: "bolt.eu" },
   { keys: ["mcdonald's", "mcdonalds"], domain: "mcdonalds.com" },
   { keys: ["nando's", "nandos"], domain: "nandos.co.uk" },
+  {
+    keys: ["pepe's piri piri", "pepes piri piri", "pepe's", "pepes"],
+    domain: "pepes.co.uk",
+  },
   { keys: ["burger king"], domain: "burgerking.co.uk" },
   { keys: ["costa coffee", "costa"], domain: "costa.co.uk" },
   { keys: ["domino's", "dominos"], domain: "dominos.co.uk" },
@@ -175,16 +183,20 @@ function merchantInitials(name: string) {
 
 interface MerchantLogoProps {
   category?: string;
+  lookupByName?: boolean;
   name: string;
   size?: number;
 }
 
-export function MerchantLogo({ category, name, size = 42 }: MerchantLogoProps) {
+export function MerchantLogo({ category, lookupByName = false, name, size = 42 }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false);
   const domain = useMemo(() => getMerchantLogoDomain(name), [name]);
   const fallback = useMemo(() => getMerchantFallback(name, category), [category, name]);
-  const logoUrl = domain && logoDevToken
-    ? `https://img.logo.dev/${domain}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png`
+  const logoTarget = domain ?? (lookupByName && name.trim()
+    ? `name/${encodeURIComponent(name.trim())}`
+    : null);
+  const logoUrl = logoTarget && logoDevToken
+    ? `https://img.logo.dev/${logoTarget}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
     : null;
 
   useEffect(() => setFailed(false), [logoUrl]);

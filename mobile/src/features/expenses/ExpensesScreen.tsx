@@ -65,6 +65,9 @@ function transactionDate(expense: Transaction) {
   return (expense.transactionDate ?? expense.paymentDate ?? expense.dateTime).slice(0, 10);
 }
 
+function isInstallment(expense: Transaction) {
+  return expense.isInstallment === true || expense.installmentPlanId != null;
+}
 
 function formatSelectedDate(value: string) {
   const [year, month, day] = value.split("-").map(Number);
@@ -131,17 +134,18 @@ export function ExpensesScreen() {
       try {
         const result = await searchTransactions(user.token, {
           type: "expense",
-          startDate: period.range.startDate,
-          endDate: period.range.endDate,
         });
 
         if (sequence === requestSequence.current) {
           setExpenses(
-            [...result].sort((a, b) =>
-              (b.transactionDate ?? b.paymentDate ?? b.dateTime).localeCompare(
-                a.transactionDate ?? a.paymentDate ?? a.dateTime,
-              ),
-            ),
+            result
+              .filter((expense) => {
+                const date = transactionDate(expense);
+                return !isInstallment(expense)
+                  && date >= period.range.startDate
+                  && date <= period.range.endDate;
+              })
+              .sort((a, b) => transactionDate(b).localeCompare(transactionDate(a))),
           );
         }
 
@@ -325,7 +329,12 @@ export function ExpensesScreen() {
                   style={[styles.expenseRow, index > 0 && styles.expenseRowBorder]}
                 >
                   <View style={styles.rowLogo}>
-                    <MerchantLogo name={expense.description || expense.category} size={42} />
+                    <MerchantLogo
+                      category={expense.category}
+                      lookupByName={Boolean(expense.description.trim())}
+                      name={expense.description || expense.category}
+                      size={42}
+                    />
                   </View>
                   <View style={styles.rowCopy}>
                     <Text numberOfLines={1} style={styles.rowTitle}>
@@ -347,7 +356,12 @@ export function ExpensesScreen() {
                   style={[styles.expenseRow, index > 0 && styles.expenseRowBorder]}
                 >
                   <View style={styles.rowLogo}>
-                    <MerchantLogo name={group.name} size={42} />
+                    <MerchantLogo
+                      category={group.category}
+                      lookupByName={group.name !== group.category}
+                      name={group.name}
+                      size={42}
+                    />
                   </View>
                   <View style={styles.rowCopy}>
                     <Text numberOfLines={1} style={styles.rowTitle}>{group.name}</Text>
