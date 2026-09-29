@@ -112,7 +112,7 @@ export default function RecurringSelector({
           transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack align="stretch" spacing={2} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 3.5 }}>
-            {compactOnMobile && isIncome && (
+            {compactOnMobile && (
               <Flex display={{ base: 'flex', md: 'none' }} align="center" justify="space-between" gap={3} minH="40px">
                 <Flex align="center" gap={2.5} minW={0}>
                   <Box
@@ -131,7 +131,7 @@ export default function RecurringSelector({
                     <Icon as={CalendarClock} boxSize={4} sx={{ '& svg': { display: 'block' } }} />
                   </Box>
                   <Text color={colors.text.secondary} fontWeight={600} lineHeight="1.1" noOfLines={1}>
-                    {t('form.paymentDay')}
+                    {t(isIncome ? 'form.paymentDay' : 'form.dueDay')}
                   </Text>
                 </Flex>
 
@@ -165,7 +165,7 @@ export default function RecurringSelector({
 
             {/* Mobile: title row above content row. Desktop: both on one line. */}
             <Flex
-              display={compactOnMobile && isIncome ? { base: 'none', md: 'flex' } : 'flex'}
+              display={compactOnMobile ? { base: 'none', md: 'flex' } : 'flex'}
               align={{ base: 'stretch', md: 'center' }}
               direction={{ base: 'column', md: 'row' }}
               gap={{ base: 2.5, md: 4 }}

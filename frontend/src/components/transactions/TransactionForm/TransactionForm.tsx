@@ -510,7 +510,7 @@ export default function TransactionForm({
             amount={amount}
             onChange={setAmount}
             type={type}
-            hideQuickAmountsOnMobile={type === 'INCOME'}
+            hideQuickAmountsOnMobile
           />
           {type === 'INCOME' && incomeMode === 'single' && (
             <DateSelector
@@ -526,6 +526,26 @@ export default function TransactionForm({
               dayOfMonth={recurringDayOfMonth}
               onDayOfMonthChange={setRecurringDayOfMonth}
               showSystemNote={false}
+              compactOnMobile
+            />
+          )}
+          {type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment') && (
+            <DateSelector
+              date={date}
+              onChange={onTransactionDateChange}
+              label={expenseMode === 'installment' ? t('form.purchaseDate') : undefined}
+              hideQuickDatesOnMobile
+            />
+          )}
+          {type === 'EXPENSE' && expenseMode === 'fixed' && (
+            <RecurringSelector
+              title={t('form.fixedExpenseSchedule')}
+              type={type}
+              startDate={recurringStartDate}
+              onStartDateChange={setRecurringStartDate}
+              dayOfMonth={recurringDayOfMonth}
+              onDayOfMonthChange={setRecurringDayOfMonth}
+              showSystemNote
               compactOnMobile
             />
           )}
@@ -552,24 +572,6 @@ export default function TransactionForm({
               paymentMethods={paymentMethods}
               loading={paymentMethodsLoading}
             />
-          )}
-          {type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment') && (
-            <DateSelector
-              date={date}
-              onChange={onTransactionDateChange}
-              label={expenseMode === 'installment' ? t('form.purchaseDate') : undefined}
-            />
-          )}
-          {type === 'EXPENSE' && expenseMode === 'fixed' && (
-              <RecurringSelector
-                title={t('form.fixedExpenseSchedule')}
-                type={type}
-                startDate={recurringStartDate}
-                onStartDateChange={setRecurringStartDate}
-                dayOfMonth={recurringDayOfMonth}
-                onDayOfMonthChange={setRecurringDayOfMonth}
-                showSystemNote
-              />
           )}
           {type === 'EXPENSE' && expenseMode === 'installment' && (
               <InstallmentSelector
