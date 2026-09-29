@@ -8,7 +8,6 @@ import {
 } from '@chakra-ui/react'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
-import { PremiumModal } from '../ui'
 import TransactionModalHeader from './TransactionModalHeader'
 import { useEditorialPalette } from '../../editorial'
 
@@ -30,7 +29,7 @@ export default function AddTransactionModal({
   onRefresh,
 }: AddTransactionModalProps) {
   const ed = useEditorialPalette()
-  const incomeDrawerPlacement = useBreakpointValue<'bottom' | 'right'>({
+  const transactionDrawerPlacement = useBreakpointValue<'bottom' | 'right'>({
     base: 'bottom',
     sm: 'right',
   }) ?? 'right'
@@ -53,55 +52,40 @@ export default function AddTransactionModal({
     </Box>
   )
 
-  if (type === 'INCOME') {
-    return (
-      <Drawer
-        isOpen={isOpen}
-        onClose={onClose}
-        placement={incomeDrawerPlacement}
-        size="full"
-        blockScrollOnMount
-      >
-        <DrawerOverlay bg="var(--pb-overlay)" backdropFilter="blur(8px)" />
-        <DrawerContent
-          w="full"
-          maxW={{ base: '100vw', sm: '520px' }}
-          h={{ base: '92dvh', sm: '100dvh' }}
-          maxH={{ base: '92dvh', sm: '100dvh' }}
-          bg={ed.modal}
-          borderLeft={{ base: 'none', sm: '1px solid' }}
-          borderTop={{ base: '1px solid', sm: 'none' }}
-          borderColor={ed.lineStrong}
-          borderRadius={{ base: '22px 22px 0 0', sm: '22px 0 0 22px' }}
-          boxShadow="-20px 0 50px -20px rgba(20, 35, 32, 0.35)"
-          overflow="hidden"
-        >
-          <TransactionModalHeader type="INCOME" onClose={onClose} useMobileSafeArea={false} />
-          <DrawerBody
-            display="flex"
-            flexDirection="column"
-            minH={0}
-            p={0}
-            overflow="hidden"
-            pb="env(safe-area-inset-bottom, 0px)"
-          >
-            {form}
-          </DrawerBody>
-        </DrawerContent>
-      </Drawer>
-    )
-  }
-
   return (
-    <PremiumModal
+    <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '4xl' }}
-      header={
-        <TransactionModalHeader type={type} onClose={onClose} />
-      }
+      placement={transactionDrawerPlacement}
+      size="full"
+      blockScrollOnMount
     >
-      {form}
-    </PremiumModal>
+      <DrawerOverlay bg="var(--pb-overlay)" backdropFilter="blur(8px)" />
+      <DrawerContent
+        w="full"
+        maxW={{ base: '100vw', sm: '520px' }}
+        h={{ base: '92dvh', sm: '100dvh' }}
+        maxH={{ base: '92dvh', sm: '100dvh' }}
+        bg={ed.modal}
+        borderLeft={{ base: 'none', sm: '1px solid' }}
+        borderTop={{ base: '1px solid', sm: 'none' }}
+        borderColor={ed.lineStrong}
+        borderRadius={{ base: '22px 22px 0 0', sm: '22px 0 0 22px' }}
+        boxShadow="-20px 0 50px -20px rgba(20, 35, 32, 0.35)"
+        overflow="hidden"
+      >
+        <TransactionModalHeader type={type} onClose={onClose} useMobileSafeArea={false} />
+        <DrawerBody
+          display="flex"
+          flexDirection="column"
+          minH={0}
+          p={0}
+          overflow="hidden"
+          pb="env(safe-area-inset-bottom, 0px)"
+        >
+          {form}
+        </DrawerBody>
+      </DrawerContent>
+    </Drawer>
   )
 }
