@@ -17,6 +17,7 @@ interface AccountSelectorProps {
   onChange: (value: number | null) => void
   accounts: FinancialAccount[]
   loading?: boolean
+  showBalances?: boolean
 }
 
 export default function AccountSelector({
@@ -24,6 +25,7 @@ export default function AccountSelector({
   onChange,
   accounts,
   loading = false,
+  showBalances = true,
 }: AccountSelectorProps) {
   const { t, formatCurrency } = useI18n()
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
@@ -87,9 +89,11 @@ export default function AccountSelector({
                     >
                       {account.name}
                     </Text>
-                    <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                      {formatCurrency(account.currentBalance)}
-                    </Text>
+                    {showBalances && (
+                      <Text noOfLines={1} fontSize="xs" color={captionColor}>
+                        {formatCurrency(account.currentBalance)}
+                      </Text>
+                    )}
                   </VStack>
                 </HStack>
               </Box>
@@ -98,14 +102,16 @@ export default function AccountSelector({
         </ChipCarousel>
       )}
 
-      <Text mt={2} fontSize="xs" color={captionColor}>
-        {selected
-          ? t('form.currentBalance', {
-              institution: selected.institution || selected.type,
-              balance: formatCurrency(selected.currentBalance),
-            })
-          : t('form.accountHelp')}
-      </Text>
+      {showBalances && (
+        <Text mt={2} fontSize="xs" color={captionColor}>
+          {selected
+            ? t('form.currentBalance', {
+                institution: selected.institution || selected.type,
+                balance: formatCurrency(selected.currentBalance),
+              })
+            : t('form.accountHelp')}
+        </Text>
+      )}
     </FormControl>
   )
 }

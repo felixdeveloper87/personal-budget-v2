@@ -526,6 +526,7 @@ export default function TransactionForm({
             onChange={setAccountId}
             accounts={accounts}
             loading={accountsLoading}
+            showBalances={false}
           />
           {type === 'EXPENSE' && (
             <PaymentMethodSelector
