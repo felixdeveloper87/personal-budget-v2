@@ -66,7 +66,7 @@ export default function IncomeQuickAdd({
               aria-label={`Use ${source.name} as income source`}
             >
               <HStack spacing={2.5} minW={0}>
-                <MerchantLogo domain={source.domain} name={source.name} size={31} />
+                <MerchantLogo domain={source.domain} name={source.name} size={38} borderRadius="12px" />
                 <Text as="span" minW={0} noOfLines={1} fontSize={{ base: 'xs', sm: 'sm' }} fontWeight={800}>
                   {source.name}
                 </Text>
@@ -93,16 +93,16 @@ export default function IncomeQuickAdd({
         >
           <HStack spacing={2.5} minW={0}>
             <Box
-              w="31px"
-              h="31px"
+              w="38px"
+              h="38px"
               display="grid"
               placeItems="center"
               flexShrink={0}
-              borderRadius="10px"
+              borderRadius="12px"
               bg={customSource ? '#2F7257' : '#E8F3E8'}
               color={customSource ? 'white' : '#2F7257'}
             >
-              <MoreHorizontal aria-hidden="true" size={19} strokeWidth={2.5} />
+              <MoreHorizontal aria-hidden="true" size={23} strokeWidth={2.5} />
             </Box>
             <Text as="span" minW={0} noOfLines={1} fontSize={{ base: 'xs', sm: 'sm' }} fontWeight={800}>
               {t('dashboard.other')}
