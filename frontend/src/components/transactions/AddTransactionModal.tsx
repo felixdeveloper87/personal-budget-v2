@@ -8,6 +8,7 @@ import {
 } from '@chakra-ui/react'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
+import { PremiumModal } from '../ui'
 import TransactionModalHeader from './TransactionModalHeader'
 import { useEditorialPalette } from '../../editorial'
 
@@ -29,10 +30,7 @@ export default function AddTransactionModal({
   onRefresh,
 }: AddTransactionModalProps) {
   const ed = useEditorialPalette()
-  const transactionDrawerPlacement = useBreakpointValue<'bottom' | 'right'>({
-    base: 'bottom',
-    sm: 'right',
-  }) ?? 'right'
+  const useMobileDrawer = useBreakpointValue({ base: true, md: false }) ?? true
 
   const handleTransactionCreated = () => {
     onTransactionCreated()
@@ -52,26 +50,25 @@ export default function AddTransactionModal({
     </Box>
   )
 
-  return (
+  if (useMobileDrawer) return (
     <Drawer
       isOpen={isOpen}
       onClose={onClose}
-      placement={transactionDrawerPlacement}
+      placement="bottom"
       size="full"
       blockScrollOnMount
     >
       <DrawerOverlay bg="var(--pb-overlay)" backdropFilter="blur(8px)" />
       <DrawerContent
         w="full"
-        maxW={{ base: '100vw', sm: '520px' }}
-        h={{ base: '92dvh', sm: '100dvh' }}
-        maxH={{ base: '92dvh', sm: '100dvh' }}
+        maxW="100vw"
+        h="92dvh"
+        maxH="92dvh"
         bg={ed.modal}
-        borderLeft={{ base: 'none', sm: '1px solid' }}
-        borderTop={{ base: '1px solid', sm: 'none' }}
+        borderTop="1px solid"
         borderColor={ed.lineStrong}
-        borderRadius={{ base: '22px 22px 0 0', sm: '22px 0 0 22px' }}
-        boxShadow="-20px 0 50px -20px rgba(20, 35, 32, 0.35)"
+        borderRadius="22px 22px 0 0"
+        boxShadow="0 -20px 50px -20px rgba(20, 35, 32, 0.35)"
         overflow="hidden"
       >
         <TransactionModalHeader type={type} onClose={onClose} useMobileSafeArea={false} />
@@ -87,5 +84,16 @@ export default function AddTransactionModal({
         </DrawerBody>
       </DrawerContent>
     </Drawer>
+  )
+
+  return (
+    <PremiumModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{ base: 'full', md: 'xl', lg: '4xl' }}
+      header={<TransactionModalHeader type={type} onClose={onClose} />}
+    >
+      {form}
+    </PremiumModal>
   )
 }
