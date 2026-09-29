@@ -35,14 +35,12 @@ export function HouseholdMembers({ household }: { household: HouseholdHeroData }
           const status = member.balance > 0 ? "A receber" : member.balance < 0 ? "A pagar" : "Neutro";
           const tone = member.balance > 0 ? styles.receiving : member.balance < 0 ? styles.paying : styles.neutral;
           const tint = member.balance > 0 ? styles.receivingTint : member.balance < 0 ? styles.payingTint : styles.neutralTint;
-          const cardTone = member.balance > 0 ? styles.receivingCard : member.balance < 0 ? styles.payingCard : styles.neutralCard;
-          const accentTone = member.balance > 0 ? styles.receivingAccent : member.balance < 0 ? styles.payingAccent : styles.neutralAccent;
           const amount = currency.format(Math.abs(member.balance));
           const initials = member.name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase();
 
           return (
-            <View key={member.id} accessible accessibilityLabel={`${member.name}. ${status}: ${amount}`} style={[styles.member, cardTone]}>
-              <View pointerEvents="none" style={[styles.memberAccent, accentTone]} />
+            <View key={member.id} accessible accessibilityLabel={`${member.name}. ${status}: ${amount}`} style={styles.member}>
+              <View pointerEvents="none" style={styles.memberAccent} />
               <View style={styles.memberHeader}>
                 <View style={[styles.avatar, tint]}><Text style={[styles.initials, tone]}>{initials}</Text></View>
                 <View style={styles.memberCopy}>
@@ -73,8 +71,8 @@ const styles = StyleSheet.create({
   seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 13, minHeight: 44, paddingHorizontal: 12 },
   seeAllText: { color: colors.income, fontSize: 11, fontWeight: "700" },
   carousel: { gap: 8, paddingBottom: 2 },
-  member: { position: "relative", overflow: "hidden", width: 160, minHeight: 128, borderWidth: 1, borderRadius: 16, padding: 11 },
-  memberAccent: { position: "absolute", top: 0, left: 12, right: 12, height: 3, borderBottomLeftRadius: 3, borderBottomRightRadius: 3 },
+  member: { position: "relative", overflow: "hidden", width: 160, minHeight: 128, backgroundColor: "#FBF9F4", borderColor: "#DEDDD6", borderWidth: 1, borderRadius: 16, padding: 11 },
+  memberAccent: { position: "absolute", top: 0, left: 12, right: 12, height: 3, borderBottomLeftRadius: 3, borderBottomRightRadius: 3, backgroundColor: "#3F403B" },
   memberHeader: { minHeight: 38, flexDirection: "row", alignItems: "center", gap: 8 },
   avatar: { alignItems: "center", justifyContent: "center", height: 32, width: 32, borderRadius: 16 },
   initials: { fontSize: 11, fontWeight: "800" },
@@ -91,10 +89,4 @@ const styles = StyleSheet.create({
   receivingTint: { backgroundColor: "#E3EDDA" },
   payingTint: { backgroundColor: "#F3E3DC" },
   neutralTint: { backgroundColor: "#EBEDE5" },
-  receivingCard: { backgroundColor: "#F5F9F2", borderColor: "#D5E1CF" },
-  payingCard: { backgroundColor: "#FFF7F3", borderColor: "#E8D8D0" },
-  neutralCard: { backgroundColor: "#F8F8F4", borderColor: "#DEE1D9" },
-  receivingAccent: { backgroundColor: "#6F9A77" },
-  payingAccent: { backgroundColor: "#C27A69" },
-  neutralAccent: { backgroundColor: "#98A29D" },
 });

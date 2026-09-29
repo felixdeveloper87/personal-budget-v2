@@ -42,7 +42,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           const paying = member.balance < -0.005
           const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
           const tint = receiving ? 'var(--pb-tint-income)' : paying ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)'
-          const cardBackground = `linear-gradient(145deg, var(--pb-surface) 18%, ${tint} 100%)`
           const status = receiving
             ? t('household.members.toReceive')
             : paying ? t('household.members.toPay') : t('household.members.settled')
@@ -52,11 +51,11 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
             <Box
               key={member.id} role="listitem" position="relative" overflow="hidden"
               flex="0 0 178px" minW="178px" minH="132px" p={3}
-              border="1px solid var(--pb-hair)" borderRadius="16px" background={cardBackground} boxShadow="var(--pb-shadow)"
+              border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)"
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
-              <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg={accent} opacity={0.62} />
+              <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg="#3F403B" opacity={0.78} />
               <HStack spacing={2.5} minW={0} minH="38px" align="center">
                 <Flex
                   w="34px" h="34px" flexShrink={0} align="center" justify="center" borderRadius="full"
