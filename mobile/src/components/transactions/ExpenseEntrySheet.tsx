@@ -107,9 +107,15 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "Amazon", domain: "amazon.co.uk" },
     { name: "Primark", domain: "primark.com" },
     { name: "Zara", domain: "zara.com" },
-    { name: "ASOS", domain: "asos.com" },
     { name: "eBay", domain: "ebay.co.uk" },
-    { name: "Vinted", domain: "vinted.co.uk" },
+    { name: "Next", domain: "next.co.uk" },
+    { name: "H&M", domain: "hm.com" },
+    { name: "John Lewis", domain: "johnlewis.com" },
+    { name: "Argos", domain: "argos.co.uk" },
+    { name: "TK Maxx", domain: "tkmaxx.com" },
+    { name: "Hollister", domain: "hollisterco.com" },
+    { name: "Dunelm", domain: "dunelm.com" },
+    { name: "UNIQLO", domain: "uniqlo.com" },
   ],
 };
 

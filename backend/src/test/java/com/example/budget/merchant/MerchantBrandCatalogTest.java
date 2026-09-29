@@ -69,6 +69,16 @@ class MerchantBrandCatalogTest {
     }
 
     @Test
+    void resolvesShoppingMerchantsToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("John Lewis & Partners"))
+                .contains(new MerchantBrand("John Lewis", "johnlewis.com"));
+        assertThat(MerchantBrandCatalog.resolve("TK Maxx Oxford Street"))
+                .contains(new MerchantBrand("TK Maxx", "tkmaxx.com"));
+        assertThat(MerchantBrandCatalog.resolve("UNIQLO Regent Street"))
+                .contains(new MerchantBrand("UNIQLO", "uniqlo.com"));
+    }
+
+    @Test
     void doesNotMatchAliasesInsideOtherWords() {
         assertThat(MerchantBrandCatalog.resolve("Subway"))
                 .contains(new MerchantBrand("Subway", "subway.com"));
