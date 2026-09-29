@@ -79,15 +79,10 @@ function RecentExpenseRow({ expense, household }: {
       position="relative" overflow="hidden"
       align="center" gap={{ base: 2.5, sm: 3 }} px={{ base: 3, sm: 3.5 }} py={3}
       border="1px solid var(--pb-hair)" borderRadius="16px"
-      bg="var(--pb-surface)"
+      background="radial-gradient(ellipse 48% 115% at 100% 50%, var(--pb-surface-2) 0%, var(--pb-surface-2) 99.5%, transparent 100%), var(--pb-surface)"
       boxShadow="var(--pb-shadow)"
       aria-label={`${categoryLabel}. ${expense.description}. ${t('household.expenses.total')}: ${formatCurrency(expense.amount)}. ${t('household.expenses.paidBy', { name: expense.payerName })}.`}
     >
-      <Box
-        aria-hidden="true" position="absolute" top={0} right={0} bottom={0} w="43%"
-        bg="var(--pb-surface-2)" borderRadius="55% 0 0 55% / 100% 0 0 100%"
-        pointerEvents="none"
-      />
       <Flex
         w="36px" h="36px" flexShrink={0} align="center" justify="center" borderRadius="11px"
         bg={category.bg} color={category.color}

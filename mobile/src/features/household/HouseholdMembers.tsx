@@ -35,11 +35,14 @@ export function HouseholdMembers({ household }: { household: HouseholdHeroData }
           const status = member.balance > 0 ? "A receber" : member.balance < 0 ? "A pagar" : "Neutro";
           const tone = member.balance > 0 ? styles.receiving : member.balance < 0 ? styles.paying : styles.neutral;
           const tint = member.balance > 0 ? styles.receivingTint : member.balance < 0 ? styles.payingTint : styles.neutralTint;
+          const cardTone = member.balance > 0 ? styles.receivingCard : member.balance < 0 ? styles.payingCard : styles.neutralCard;
+          const accentTone = member.balance > 0 ? styles.receivingAccent : member.balance < 0 ? styles.payingAccent : styles.neutralAccent;
           const amount = currency.format(Math.abs(member.balance));
           const initials = member.name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase();
 
           return (
-            <View key={member.id} accessible accessibilityLabel={`${member.name}. ${status}: ${amount}`} style={styles.member}>
+            <View key={member.id} accessible accessibilityLabel={`${member.name}. ${status}: ${amount}`} style={[styles.member, cardTone]}>
+              <View pointerEvents="none" style={[styles.memberAccent, accentTone]} />
               <View style={styles.memberHeader}>
                 <View style={[styles.avatar, tint]}><Text style={[styles.initials, tone]}>{initials}</Text></View>
                 <View style={styles.memberCopy}>
@@ -70,16 +73,17 @@ const styles = StyleSheet.create({
   seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 13, minHeight: 44, paddingHorizontal: 12 },
   seeAllText: { color: colors.income, fontSize: 11, fontWeight: "700" },
   carousel: { gap: 8, paddingBottom: 2 },
-  member: { width: 160, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, padding: 11 },
-  memberHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
-  avatar: { alignItems: "center", justifyContent: "center", height: 30, width: 30, borderRadius: 15 },
-  initials: { fontSize: 11, fontWeight: "700" },
+  member: { position: "relative", overflow: "hidden", width: 160, minHeight: 128, borderWidth: 1, borderRadius: 16, padding: 11 },
+  memberAccent: { position: "absolute", top: 0, left: 12, right: 12, height: 3, borderBottomLeftRadius: 3, borderBottomRightRadius: 3 },
+  memberHeader: { minHeight: 38, flexDirection: "row", alignItems: "center", gap: 8 },
+  avatar: { alignItems: "center", justifyContent: "center", height: 32, width: 32, borderRadius: 16 },
+  initials: { fontSize: 11, fontWeight: "800" },
   memberCopy: { flex: 1, minWidth: 0 },
-  name: { color: colors.ink, fontSize: 12, lineHeight: 16, fontWeight: "600" },
-  you: { color: colors.income, fontSize: 9, lineHeight: 12, fontWeight: "600" },
-  balance: { alignItems: "flex-start", marginTop: 10 },
-  amount: { fontSize: 17, fontWeight: "800", letterSpacing: -0.4 },
-  statusPill: { borderRadius: 6, paddingHorizontal: 6, paddingVertical: 3, marginTop: 4 },
+  name: { color: colors.ink, fontSize: 12, lineHeight: 16, fontWeight: "700" },
+  you: { color: colors.income, fontSize: 9, lineHeight: 12, fontWeight: "700" },
+  balance: { alignItems: "center", marginTop: 9, paddingTop: 9, borderTopWidth: 1, borderTopColor: "#DDE3DA" },
+  amount: { fontSize: 18, lineHeight: 22, fontWeight: "800", letterSpacing: -0.4, textAlign: "center" },
+  statusPill: { borderRadius: 7, paddingHorizontal: 7, paddingVertical: 3, marginTop: 5 },
   status: { fontSize: 9, fontWeight: "700" },
   receiving: { color: "#326548" },
   paying: { color: "#A44735" },
@@ -87,4 +91,10 @@ const styles = StyleSheet.create({
   receivingTint: { backgroundColor: "#E3EDDA" },
   payingTint: { backgroundColor: "#F3E3DC" },
   neutralTint: { backgroundColor: "#EBEDE5" },
+  receivingCard: { backgroundColor: "#F5F9F2", borderColor: "#D5E1CF" },
+  payingCard: { backgroundColor: "#FFF7F3", borderColor: "#E8D8D0" },
+  neutralCard: { backgroundColor: "#F8F8F4", borderColor: "#DEE1D9" },
+  receivingAccent: { backgroundColor: "#6F9A77" },
+  payingAccent: { backgroundColor: "#C27A69" },
+  neutralAccent: { backgroundColor: "#98A29D" },
 });

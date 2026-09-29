@@ -42,6 +42,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           const paying = member.balance < -0.005
           const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
           const tint = receiving ? 'var(--pb-tint-income)' : paying ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)'
+          const cardBackground = `linear-gradient(145deg, var(--pb-surface) 18%, ${tint} 100%)`
           const status = receiving
             ? t('household.members.toReceive')
             : paying ? t('household.members.toPay') : t('household.members.settled')
@@ -49,27 +50,31 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
 
           return (
             <Box
-              key={member.id} role="listitem" flex="0 0 178px" minW="178px" p={3}
-              border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)"
+              key={member.id} role="listitem" position="relative" overflow="hidden"
+              flex="0 0 178px" minW="178px" minH="132px" p={3}
+              border="1px solid var(--pb-hair)" borderRadius="16px" background={cardBackground} boxShadow="var(--pb-shadow)"
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
-              <HStack spacing={2.5} minW={0}>
+              <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg={accent} opacity={0.62} />
+              <HStack spacing={2.5} minW={0} minH="38px" align="center">
                 <Flex
                   w="34px" h="34px" flexShrink={0} align="center" justify="center" borderRadius="full"
                   bgGradient={householdAvatarGradient(index, member.id)} color="white" fontSize="xs" fontWeight={800}
                 >
                   {initials}
                 </Flex>
-                <Box minW={0}>
+                <Box minW={0} flex={1}>
                   <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
-                  {member.id === household.currentMemberId && (
-                    <Text mt={0.5} fontSize="2xs" fontWeight={700} color="var(--pb-income)">{t('household.common.you')}</Text>
-                  )}
+                  <Box minH="13px">
+                    {member.id === household.currentMemberId && (
+                      <Text mt={0.5} fontSize="2xs" fontWeight={700} color="var(--pb-income)">{t('household.common.you')}</Text>
+                    )}
+                  </Box>
                 </Box>
               </HStack>
-              <VStack mt={3} align="flex-start" spacing={1}>
-                <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={700} lineHeight={1} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <VStack mt={2.5} pt={2.5} align="center" spacing={1.5} borderTop="1px solid var(--pb-hair)">
+                <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={700} lineHeight={1} color={accent} textAlign="center" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(Math.abs(member.balance))}
                 </Text>
                 <Text px={2} py={1} borderRadius="7px" bg={tint} color={accent} fontSize="2xs" fontWeight={700}>{status}</Text>
