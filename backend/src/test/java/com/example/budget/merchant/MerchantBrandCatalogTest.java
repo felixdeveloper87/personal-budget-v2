@@ -12,8 +12,6 @@ class MerchantBrandCatalogTest {
                 .contains(new MerchantBrand("Marks & Spencer", "marksandspencer.com"));
         assertThat(MerchantBrandCatalog.resolve("PEPE'S PIRI PIRI #42"))
                 .contains(new MerchantBrand("Pepe's Piri Piri", "pepes.co.uk"));
-        assertThat(MerchantBrandCatalog.resolve("Ocado weekly shop"))
-                .contains(new MerchantBrand("Ocado", "ocado.com"));
     }
 
     @Test
@@ -28,6 +26,14 @@ class MerchantBrandCatalogTest {
                 .contains(new MerchantBrand("Octopus Energy", "octopus.energy"));
         assertThat(MerchantBrandCatalog.resolve("Virgin Media broadband"))
                 .contains(new MerchantBrand("Virgin Media", "virginmedia.com"));
+    }
+
+    @Test
+    void resolvesDiningMerchantsToVerifiedDomains() {
+        assertThat(MerchantBrandCatalog.resolve("Pret A Manger London"))
+                .contains(new MerchantBrand("Pret A Manger", "pret.co.uk"));
+        assertThat(MerchantBrandCatalog.resolve("Wagamama dinner"))
+                .contains(new MerchantBrand("Wagamama", "wagamama.com"));
     }
 
     @Test

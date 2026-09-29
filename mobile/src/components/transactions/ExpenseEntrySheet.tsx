@@ -26,7 +26,7 @@ const categories = [
 type ExpenseCategory = typeof categories[number];
 
 interface MerchantSuggestion {
-  domain: string;
+  domain?: string;
   name: string;
 }
 
@@ -43,7 +43,7 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "Waitrose", domain: "waitrose.com" },
     { name: "Iceland", domain: "iceland.co.uk" },
     { name: "Co-op", domain: "coop.co.uk" },
-    { name: "Ocado", domain: "ocado.com" },
+    { name: "Off Licence" },
   ],
   "Dining out": [
     { name: "McDonald's", domain: "mcdonalds.com" },
@@ -52,6 +52,14 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "KFC", domain: "kfc.co.uk" },
     { name: "Greggs", domain: "greggs.co.uk" },
     { name: "Costa Coffee", domain: "costa.co.uk" },
+    { name: "Starbucks", domain: "starbucks.co.uk" },
+    { name: "Pizza Hut", domain: "pizzahut.co.uk" },
+    { name: "Burger King", domain: "burgerking.co.uk" },
+    { name: "Domino's", domain: "dominos.co.uk" },
+    { name: "Subway", domain: "subway.com" },
+    { name: "Kokoro", domain: "kokorouk.com" },
+    { name: "Pret A Manger", domain: "pret.co.uk" },
+    { name: "Wagamama", domain: "wagamama.com" },
   ],
   Utilities: [
     { name: "British Gas", domain: "britishgas.co.uk" },
@@ -84,41 +92,6 @@ const suggestedMerchantNames = new Set(
 export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
   const form = useTransactionEntry({ ...props, initialCategory: categories[0], type: "EXPENSE" });
   const selectedMerchants = merchantSuggestions[form.category as ExpenseCategory] ?? [];
-  const groceryColumns = Array.from(
-    { length: Math.ceil(selectedMerchants.length / 2) },
-    (_, index) => selectedMerchants.slice(index * 2, index * 2 + 2),
-  );
-
-  const renderMerchantButton = (merchant: MerchantSuggestion, carousel = false) => {
-    const selected = form.description === merchant.name;
-    return (
-      <Pressable
-        accessibilityLabel={`Use ${merchant.name} as expense merchant`}
-        accessibilityRole="button"
-        key={merchant.name}
-        onPress={() => form.setDescription(merchant.name)}
-        style={({ pressed }) => [
-          styles.merchantButton,
-          carousel && styles.carouselMerchantButton,
-          selected && styles.selectedMerchant,
-          pressed && sharedStyles.optionPressed,
-        ]}
-      >
-        <MerchantLogo
-          category={form.category}
-          domain={merchant.domain}
-          name={merchant.name}
-          size={32}
-        />
-        <Text
-          numberOfLines={1}
-          style={[styles.merchantName, selected && styles.selectedMerchantName]}
-        >
-          {merchant.name}
-        </Text>
-      </Pressable>
-    );
-  };
 
   return (
     <TransactionSheetFrame
@@ -167,27 +140,37 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
       {selectedMerchants.length > 0 ? (
         <>
           <Text style={sharedStyles.fieldLabel}>QUICK ADD</Text>
-          {form.category === "Groceries" ? (
-            <ScrollView
-              contentContainerStyle={styles.groceryCarousel}
-              decelerationRate="fast"
-              directionalLockEnabled
-              horizontal
-              snapToAlignment="start"
-              snapToInterval={130}
-              showsHorizontalScrollIndicator={false}
-            >
-              {groceryColumns.map((column, index) => (
-                <View key={`grocery-column-${index}`} style={styles.groceryColumn}>
-                  {column.map((merchant) => renderMerchantButton(merchant, true))}
-                </View>
-              ))}
-            </ScrollView>
-          ) : (
-            <View style={styles.merchantGrid}>
-              {selectedMerchants.map((merchant) => renderMerchantButton(merchant))}
-            </View>
-          )}
+          <View style={styles.merchantGrid}>
+            {selectedMerchants.map((merchant) => {
+              const selected = form.description === merchant.name;
+              return (
+                <Pressable
+                  accessibilityLabel={`Use ${merchant.name} as expense merchant`}
+                  accessibilityRole="button"
+                  key={merchant.name}
+                  onPress={() => form.setDescription(merchant.name)}
+                  style={({ pressed }) => [
+                    styles.merchantButton,
+                    selected && styles.selectedMerchant,
+                    pressed && sharedStyles.optionPressed,
+                  ]}
+                >
+                  <MerchantLogo
+                    category={form.category}
+                    domain={merchant.domain}
+                    name={merchant.name}
+                    size={32}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.merchantName, selected && styles.selectedMerchantName]}
+                  >
+                    {merchant.name}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </>
       ) : null}
 
@@ -230,8 +213,6 @@ const styles = StyleSheet.create({
   },
   selectedCategoryText: { color: colors.expense },
   merchantGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  groceryCarousel: { gap: 8, paddingRight: 12 },
-  groceryColumn: { gap: 8, width: 122 },
   merchantButton: {
     alignItems: "center",
     backgroundColor: colors.paperRaised,
@@ -245,7 +226,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     width: "31.7%",
   },
-  carouselMerchantButton: { width: 122 },
   merchantName: { color: colors.ink, flex: 1, fontSize: 10, fontWeight: "800" },
   selectedMerchant: {
     backgroundColor: colors.expenseTint,
