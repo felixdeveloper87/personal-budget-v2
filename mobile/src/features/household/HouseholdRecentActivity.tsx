@@ -27,7 +27,7 @@ export function HouseholdRecentActivity({ household }: { household: HouseholdHer
         ) : null}
       </View>
       {recentExpenses.length > 0 ? recentExpenses.map((expense) => (
-        <HouseholdExpenseRow key={expense.id} expense={expense} currency={household.currency} currentMemberId={household.currentMemberId} onOpenAttachments={setProofExpense} showArtwork />
+        <HouseholdExpenseRow key={expense.id} expense={expense} currency={household.currency} currentMemberId={household.currentMemberId} onOpenAttachments={setProofExpense} twoTone />
       )) : (
         <View style={styles.empty}>
           <Text style={styles.emptyTitle}>Ainda sem despesas</Text>

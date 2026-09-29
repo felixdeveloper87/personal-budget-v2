@@ -1,18 +1,17 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { ActivityCardArtwork } from "@/features/household/ActivityCardArtwork";
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
 import { colors } from "@/theme/colors";
 import type { HouseholdExpense } from "@/types/household";
 
-export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments, showArtwork = false }: {
+export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments, twoTone = false }: {
   expense: HouseholdExpense;
   currency: string;
   currentMemberId: number;
   onOpenAttachments: (expense: HouseholdExpense) => void;
-  showArtwork?: boolean;
+  twoTone?: boolean;
 }) {
   const category = categories.find((item) => item.value === expense.category);
   const key = category?.value ?? "Other";
@@ -33,9 +32,9 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
       accessibilityLabel={`${category?.label ?? expense.category}. ${expense.description}. Total: ${amount}. ${shareLabel}. Pago por ${expense.payerName}. ${date}. ${proofLabel}`}
       disabled={attachmentCount === 0}
       onPress={() => onOpenAttachments(expense)}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.card, twoTone && styles.twoToneCard, pressed && styles.pressed]}
     >
-      {showArtwork ? <ActivityCardArtwork /> : null}
+      {twoTone ? <View pointerEvents="none" style={styles.offWhiteTone} /> : null}
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
         <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
       </View>
@@ -63,6 +62,8 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
 
 const styles = StyleSheet.create({
   card: { position: "relative", overflow: "hidden", alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
+  twoToneCard: { backgroundColor: "#FFFFFF" },
+  offWhiteTone: { position: "absolute", top: 0, right: 0, bottom: 0, width: "43%", backgroundColor: "#F7F3EA", borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
   pressed: { backgroundColor: "#EDF3E6" },
   icon: { alignItems: "center", justifyContent: "center", flexShrink: 0, height: 34, width: 34, borderRadius: 11 },
   copy: { flex: 1, minWidth: 0 },
