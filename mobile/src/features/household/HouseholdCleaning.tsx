@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { cleaningDutyPreview } from "@/features/household/cleaningDuties";
+import { CleaningCardArtwork } from "@/features/household/CleaningCardArtwork";
 import { expenseDateLabel } from "@/features/household/expenseHistory";
 import { HouseholdCleaningProgress } from "@/features/household/HouseholdCleaningProgress";
 import { HouseholdCleaningSheet } from "@/features/household/HouseholdCleaningSheet";
@@ -82,6 +83,7 @@ export function HouseholdCleaning({ household, onUpdated }: { household: Househo
         ) : null}
       </View>
       <View style={styles.card}>
+        <CleaningCardArtwork />
         {rotation?.configured && rotation.active && current ? (
           <>
             <View style={styles.periodRow}>
@@ -146,7 +148,7 @@ const styles = StyleSheet.create({
   title: { color: colors.ink, fontSize: 20, fontWeight: "700", letterSpacing: -0.4, marginTop: 5 },
   open: { minHeight: 44, paddingHorizontal: 12, borderRadius: 13, backgroundColor: "#E5EDDC", alignItems: "center", justifyContent: "center" },
   openText: { color: colors.income, fontSize: 11, fontWeight: "700" },
-  card: { borderRadius: 16, padding: 16, backgroundColor: "#FFFEFA", borderWidth: 1, borderColor: "#E2E6DB", gap: 14 },
+  card: { position: "relative", overflow: "hidden", borderRadius: 16, padding: 16, backgroundColor: "#FFFEFA", borderWidth: 1, borderColor: "#E2E6DB", gap: 14 },
   periodRow: { flexDirection: "row", alignItems: "center", gap: 7 },
   period: { flex: 1, color: colors.inkSoft, fontSize: 10, lineHeight: 15 },
   personRow: { flexDirection: "row", alignItems: "center", gap: 11 },

@@ -3,6 +3,7 @@ import { Gear, Repeat } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
+import { CleaningCardArtwork } from './CleaningCardArtwork'
 import { CleaningDutiesModal } from './CleaningDutiesModal'
 import { CLEANING_DUTIES, type DisplayedCleaningDuty } from './cleaningConfig'
 
@@ -105,7 +106,11 @@ export function CleaningRotationCard({
           </HStack>
         </Flex>
 
-        <Box p={{ base: 4, md: 5 }} border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)">
+        <Box
+          position="relative" overflow="hidden" p={{ base: 4, md: 5 }}
+          border="1px solid var(--pb-hair)" borderRadius="16px" bg="var(--pb-surface)" boxShadow="var(--pb-shadow)"
+        >
+          <CleaningCardArtwork />
           {rotation.configured && rotation.active && current ? (
             <VStack align="stretch" spacing={3.5}>
               <Text fontSize="xs" color="var(--pb-ink-soft)">
