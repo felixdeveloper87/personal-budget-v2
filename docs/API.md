@@ -22,7 +22,7 @@ Base URL: `http://localhost:8080` (dev) or your deployed backend URL. All endpoi
 - `DELETE /api/transactions/{id}` — delete a transaction (must own it).
 - `GET /api/transactions/search`
   - Query params (all optional): `text`, `type` (`income|expense`), `category`, `startDate` (`yyyy-MM-dd`), `endDate` (`yyyy-MM-dd`).
-  - Response: array of `{ id, description, type, category, amount, date, installmentPlanId? }`.
+  - Response includes `merchantName` and `merchantDomain` when the description matches the server merchant catalog.
 
 ## Analytics
 - `GET /api/summary/month`

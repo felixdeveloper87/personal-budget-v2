@@ -54,7 +54,7 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
   const fallback = useMemo(() => getFallback(name, category), [name, category])
   const FallbackIcon = fallback?.Icon
   const logoUrl = domain && LOGO_DEV_TOKEN
-    ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${Math.max(64, size * 2)}&format=png`
+    ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
     : null
 
   useEffect(() => setFailed(false), [logoUrl])
