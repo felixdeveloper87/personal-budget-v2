@@ -1,4 +1,5 @@
-import { Box, Text, HStack, useDisclosure, VStack, Wrap, WrapItem, Button, Icon } from '@chakra-ui/react'
+import { Box, Text, HStack, Input, useDisclosure, VStack, Wrap, WrapItem, Button, Icon } from '@chakra-ui/react'
+import { useEffect, useRef, useState } from 'react'
 import { Calculator } from '../../ui/icons'
 import { useThemeColors } from '../../../hooks/useThemeColors'
 import NumberPad from './NumberPad'
@@ -9,6 +10,7 @@ interface AmountInputProps {
   onChange: (amount: number) => void
   type: 'INCOME' | 'EXPENSE'
   hideQuickAmountsOnMobile?: boolean
+  useNativeInput?: boolean
 }
 
 /**
@@ -21,13 +23,40 @@ export default function AmountInput({
   onChange,
   type,
   hideQuickAmountsOnMobile = false,
+  useNativeInput = false,
 }: AmountInputProps) {
   const { t, formatCurrency } = useI18n()
   const colors = useThemeColors()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [amountDraft, setAmountDraft] = useState(() => amount > 0 ? String(amount) : '')
+  const nativeInputRef = useRef<HTMLInputElement>(null)
+  const nativeInputFocused = useRef(false)
+
+  useEffect(() => {
+    if (!nativeInputFocused.current) {
+      setAmountDraft(amount > 0 ? String(amount) : '')
+    }
+  }, [amount])
 
   const handleOpenPad = () => {
+    if (useNativeInput) {
+      nativeInputRef.current?.focus()
+      return
+    }
     onOpen()
+  }
+
+  const handleNativeAmountChange = (value: string) => {
+    const numericCharacters = value.replace(/[^0-9.,]/g, '')
+    const separatorIndex = numericCharacters.search(/[.,]/)
+    const sanitized = separatorIndex === -1
+      ? numericCharacters
+      : numericCharacters.slice(0, separatorIndex + 1)
+        + numericCharacters.slice(separatorIndex + 1).replace(/[.,]/g, '')
+    setAmountDraft(sanitized)
+
+    const numericValue = Number(sanitized.replace(',', '.'))
+    onChange(Number.isFinite(numericValue) ? numericValue : 0)
   }
 
   const handleNumberPadChange = (value: number) => {
@@ -47,6 +76,7 @@ export default function AmountInput({
 
   const quickAmountOptions = getQuickAmountOptions()
   const amountLabel = formatCurrency(amount)
+  const currencyMark = formatCurrency(0).replace(/[\d\s.,]/g, '') || '£'
   const focusRing =
     type === 'INCOME'
       ? '0 0 0 2px rgba(74, 222, 128, 0.2)'
@@ -120,34 +150,64 @@ export default function AmountInput({
                     flexShrink={0}
                     minW={{ base: '72px', sm: '88px', md: '104px' }}
                   >
-                    <Text
-                      as="button"
-                      type="button"
-                      onClick={handleOpenPad}
-                      display="block"
-                      w="full"
-                      fontSize={{ base: 'sm', sm: 'lg' }}
-                      fontWeight="700"
-                      color={
-                        amount !== 0
-                          ? colors.text.primary
-                          : colors.text.secondary
-                      }
-                      lineHeight="1.1"
-                      noOfLines={1}
-                      textDecoration="underline"
-                      textUnderlineOffset="3px"
-                      cursor="pointer"
-                      textAlign="right"
-                      sx={{ fontVariantNumeric: 'tabular-nums' }}
-                      _hover={{
-                        color:
-                          type === 'INCOME' ? 'green.400' : 'red.400',
-                      }}
-                      _focusVisible={{ boxShadow: focusRing }}
-                    >
-                      {amountLabel}
-                    </Text>
+                    {useNativeInput ? (
+                      <HStack spacing={1} justify="flex-end">
+                        <Text
+                          color={colors.text.secondary}
+                          fontSize={{ base: 'sm', sm: 'lg' }}
+                          fontWeight={700}
+                        >
+                          {currencyMark}
+                        </Text>
+                        <Input
+                          ref={nativeInputRef}
+                          variant="unstyled"
+                          inputMode="decimal"
+                          value={amountDraft}
+                          onFocus={() => { nativeInputFocused.current = true }}
+                          onBlur={() => {
+                            nativeInputFocused.current = false
+                            setAmountDraft(amount > 0 ? String(amount) : '')
+                          }}
+                          onChange={(event) => handleNativeAmountChange(event.target.value)}
+                          placeholder="0.00"
+                          aria-label={t('form.howMuch')}
+                          minW={0}
+                          p={0}
+                          color={colors.text.primary}
+                          fontSize={{ base: 'sm', sm: 'lg' }}
+                          fontWeight={700}
+                          lineHeight="1.1"
+                          textAlign="right"
+                          sx={{
+                            fontVariantNumeric: 'tabular-nums',
+                            _placeholder: { color: colors.text.secondary, opacity: 0.8 },
+                          }}
+                        />
+                      </HStack>
+                    ) : (
+                      <Text
+                        as="button"
+                        type="button"
+                        onClick={handleOpenPad}
+                        display="block"
+                        w="full"
+                        fontSize={{ base: 'sm', sm: 'lg' }}
+                        fontWeight="700"
+                        color={amount !== 0 ? colors.text.primary : colors.text.secondary}
+                        lineHeight="1.1"
+                        noOfLines={1}
+                        textDecoration="underline"
+                        textUnderlineOffset="3px"
+                        cursor="pointer"
+                        textAlign="right"
+                        sx={{ fontVariantNumeric: 'tabular-nums' }}
+                        _hover={{ color: type === 'INCOME' ? 'green.400' : 'red.400' }}
+                        _focusVisible={{ boxShadow: focusRing }}
+                      >
+                        {amountLabel}
+                      </Text>
+                    )}
                   </Box>
                 </HStack>
 
@@ -197,7 +257,7 @@ export default function AmountInput({
         </Box>
       </VStack>
 
-      {isOpen && (
+      {!useNativeInput && isOpen && (
         <Box
           position="fixed"
           top="0"
