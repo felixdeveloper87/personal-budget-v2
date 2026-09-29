@@ -25,6 +25,7 @@ interface RecurringSelectorProps {
   dayOfMonth: number
   onDayOfMonthChange: (day: number) => void
   showSystemNote?: boolean
+  compactOnMobile?: boolean
 }
 
 /** Compact field with its label stacked on top — sits inline in the single content row. */
@@ -69,6 +70,7 @@ export default function RecurringSelector({
   onStartDateChange,
   dayOfMonth,
   onDayOfMonthChange,
+  compactOnMobile = false,
 }: RecurringSelectorProps) {
   const { t } = useI18n()
   const displayTitle = title ?? t('form.fixedPaymentSchedule')
@@ -110,8 +112,60 @@ export default function RecurringSelector({
           transition="border-color 0.3s ease, box-shadow 0.3s ease"
         >
           <VStack align="stretch" spacing={2} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 3.5 }}>
+            {compactOnMobile && isIncome && (
+              <Flex display={{ base: 'flex', md: 'none' }} align="center" justify="space-between" gap={3} minH="40px">
+                <Flex align="center" gap={2.5} minW={0}>
+                  <Box
+                    role="presentation"
+                    w={8}
+                    h={8}
+                    borderRadius="xl"
+                    bg={colors.bgSecondary}
+                    color={accentBorder}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                    flexShrink={0}
+                    aria-hidden
+                  >
+                    <Icon as={CalendarClock} boxSize={4} sx={{ '& svg': { display: 'block' } }} />
+                  </Box>
+                  <Text color={colors.text.secondary} fontWeight={600} lineHeight="1.1" noOfLines={1}>
+                    {t('form.paymentDay')}
+                  </Text>
+                </Flex>
+
+                <NumberInput
+                  value={dayOfMonth}
+                  onChange={(_, value) => onDayOfMonthChange(value || 1)}
+                  min={1}
+                  max={31}
+                  w="90px"
+                  size="sm"
+                  flexShrink={0}
+                >
+                  <NumberInputField
+                    w="full"
+                    minW={0}
+                    textAlign="center"
+                    fontWeight="bold"
+                    {...fieldShell}
+                    sx={{
+                      paddingInlineStart: 'var(--number-input-stepper-width, 1.5rem)',
+                      paddingInlineEnd: 'var(--number-input-stepper-width, 1.5rem)',
+                    }}
+                  />
+                  <NumberInputStepper borderColor={colors.border}>
+                    <NumberIncrementStepper />
+                    <NumberDecrementStepper />
+                  </NumberInputStepper>
+                </NumberInput>
+              </Flex>
+            )}
+
             {/* Mobile: title row above content row. Desktop: both on one line. */}
             <Flex
+              display={compactOnMobile && isIncome ? { base: 'none', md: 'flex' } : 'flex'}
               align={{ base: 'stretch', md: 'center' }}
               direction={{ base: 'column', md: 'row' }}
               gap={{ base: 2.5, md: 4 }}

@@ -519,6 +519,16 @@ export default function TransactionForm({
               hideQuickDatesOnMobile
             />
           )}
+          {type === 'INCOME' && incomeMode === 'fixed' && (
+            <RecurringSelector
+              title={t('form.fixedIncomeSchedule')}
+              type={type}
+              dayOfMonth={recurringDayOfMonth}
+              onDayOfMonthChange={setRecurringDayOfMonth}
+              showSystemNote={false}
+              compactOnMobile
+            />
+          )}
           {type === 'INCOME' && (
             <IncomeQuickAdd
               description={description}
@@ -559,15 +569,6 @@ export default function TransactionForm({
                 dayOfMonth={recurringDayOfMonth}
                 onDayOfMonthChange={setRecurringDayOfMonth}
                 showSystemNote
-              />
-          )}
-          {type === 'INCOME' && incomeMode === 'fixed' && (
-              <RecurringSelector
-                title={t('form.fixedIncomeSchedule')}
-                type={type}
-                dayOfMonth={recurringDayOfMonth}
-                onDayOfMonthChange={setRecurringDayOfMonth}
-                showSystemNote={false}
               />
           )}
           {type === 'EXPENSE' && expenseMode === 'installment' && (
