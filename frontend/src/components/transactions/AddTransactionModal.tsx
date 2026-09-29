@@ -38,7 +38,19 @@ export default function AddTransactionModal({
   }
 
   const form = (
-    <Box flex="1" minW={0} maxW="100%" bg={ed.bg} p={{ base: 3, sm: 5, md: 6 }} overflowY="auto">
+    <Box
+      flex="1"
+      minW={0}
+      maxW="100%"
+      bg={ed.bg}
+      p={{ base: 3, sm: 5, md: 6 }}
+      overflowY="auto"
+      sx={type === 'INCOME' ? {
+        '& p, & button, & input, & label, & .chakra-text': {
+          fontSize: '16px !important',
+        },
+      } : undefined}
+    >
       <TransactionForm
         transactions={transactions}
         onCreated={handleTransactionCreated}
