@@ -35,6 +35,7 @@ interface TopMerchantsCarouselProps {
 interface MerchantStat {
   category: string;
   count: number;
+  domain?: string | null;
   key: string;
   name: string;
   total: number;
@@ -91,7 +92,7 @@ function buildMonths(date: Date, transactions: Transaction[]): MerchantMonth[] {
     const month = monthByKey.get(getPaceTransactionDate(transaction).slice(0, 7));
     if (!month) continue;
 
-    const rawName = transaction.description.trim();
+    const rawName = transaction.merchantName?.trim() || transaction.description.trim();
     const key = normaliseMerchant(rawName);
     const amount = Number(transaction.amount || 0);
     const merchant = month.merchants.get(key);
@@ -103,6 +104,7 @@ function buildMonths(date: Date, transactions: Transaction[]): MerchantMonth[] {
       month.merchants.set(key, {
         category: transaction.category,
         count: 1,
+        domain: transaction.merchantDomain,
         key,
         name: merchantDisplayName(rawName),
         total: amount,
@@ -141,7 +143,12 @@ function MerchantRow({ merchant, rank, total }: {
       style={styles.merchantRow}
     >
       <View style={styles.logoWrap}>
-        <MerchantLogo category={merchant.category} name={merchant.name} size={57} />
+        <MerchantLogo
+          category={merchant.category}
+          domain={merchant.domain}
+          name={merchant.name}
+          size={57}
+        />
         <View style={[styles.rankBadge, { backgroundColor: tone.tint, borderColor: tone.accent }]}>
           <Text style={[styles.rankText, { color: tone.accent }]}>{rank}</Text>
         </View>

@@ -15,6 +15,8 @@ export interface Transaction {
   type: TransactionType
   category: string
   description: string
+  merchantName?: string | null
+  merchantDomain?: string | null
   amount: number
   paymentMethodId?: number | null
   paymentMethodName?: string | null

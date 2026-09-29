@@ -4,6 +4,8 @@ import com.example.budget.dto.CreateTransactionRequest;
 import com.example.budget.dto.TransactionDTO;
 import com.example.budget.dto.TransactionSearchDTO;
 import com.example.budget.dto.UpdateTransactionRequest;
+import com.example.budget.merchant.MerchantBrand;
+import com.example.budget.merchant.MerchantBrandCatalog;
 import com.example.budget.model.Transaction;
 import com.example.budget.model.User;
 import org.springframework.stereotype.Component;
@@ -51,6 +53,8 @@ public class TransactionMapper {
     public TransactionDTO toDTO(Transaction t) {
         if (t == null) return null;
 
+        MerchantBrand merchant = MerchantBrandCatalog.resolve(t.getDescription()).orElse(null);
+
         return new TransactionDTO(
                 t.getId(),
                 t.getDateTime(),
@@ -67,7 +71,9 @@ public class TransactionMapper {
                 t.getStatus(),
                 t.getInstallmentPlan() != null ? t.getInstallmentPlan().getId() : null,
                 t.getRecurringTransaction() != null ? t.getRecurringTransaction().getId() : null,
-                t.getInstallmentNumber()
+                t.getInstallmentNumber(),
+                merchant != null ? merchant.name() : null,
+                merchant != null ? merchant.domain() : null
         );
     }
 

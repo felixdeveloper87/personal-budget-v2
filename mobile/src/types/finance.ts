@@ -19,6 +19,8 @@ export interface Transaction {
   type: "INCOME" | "EXPENSE";
   category: string;
   description: string;
+  merchantName?: string | null;
+  merchantDomain?: string | null;
   amount: number;
   paymentMethodName?: string | null;
   accountName?: string | null;

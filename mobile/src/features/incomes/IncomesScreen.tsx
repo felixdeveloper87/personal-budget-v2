@@ -77,6 +77,7 @@ function formatSelectedDate(value: string) {
 interface IncomeDescriptionGroup {
   category: string;
   count: number;
+  domain?: string | null;
   key: string;
   name: string;
   total: number;
@@ -86,7 +87,9 @@ function groupIncomesByDescription(incomes: Transaction[]): IncomeDescriptionGro
   const grouped = new Map<string, IncomeDescriptionGroup>();
 
   for (const income of incomes) {
-    const name = income.description.trim().replace(/\s+/g, " ") || income.category;
+    const name = income.merchantName?.trim()
+      || income.description.trim().replace(/\s+/g, " ")
+      || income.category;
     const key = name.toLocaleLowerCase();
     const current = grouped.get(key);
 
@@ -97,6 +100,7 @@ function groupIncomesByDescription(incomes: Transaction[]): IncomeDescriptionGro
       grouped.set(key, {
         category: income.category,
         count: 1,
+        domain: income.merchantDomain,
         key,
         name,
         total: Number(income.amount || 0),
@@ -313,7 +317,12 @@ export function IncomesScreen() {
                   style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
                 >
                   <View style={styles.rowLogo}>
-                    <MerchantLogo name={income.description || income.category} size={42} />
+                    <MerchantLogo
+                      category={income.category}
+                      domain={income.merchantDomain}
+                      name={income.merchantName || income.description || income.category}
+                      size={42}
+                    />
                   </View>
                   <View style={styles.rowCopy}>
                     <Text numberOfLines={1} style={styles.rowTitle}>
@@ -334,7 +343,12 @@ export function IncomesScreen() {
                   style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
                 >
                   <View style={styles.rowLogo}>
-                    <MerchantLogo name={group.name} size={42} />
+                    <MerchantLogo
+                      category={group.category}
+                      domain={group.domain}
+                      name={group.name}
+                      size={42}
+                    />
                   </View>
                   <View style={styles.rowCopy}>
                     <Text numberOfLines={1} style={styles.rowTitle}>{group.name}</Text>

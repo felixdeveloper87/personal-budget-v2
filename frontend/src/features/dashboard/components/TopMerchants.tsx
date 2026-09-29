@@ -238,6 +238,7 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
                 key={merchant.key}
                 rank={index + 1}
                 name={merchant.name}
+                domain={merchant.domain}
                 category={merchant.category}
                 count={merchant.count}
                 total={merchant.total}
@@ -254,6 +255,7 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
 interface MerchantRowProps {
   rank: number
   name: string
+  domain?: string | null
   category?: string
   count: number
   total: number
@@ -261,7 +263,7 @@ interface MerchantRowProps {
   share: number
 }
 
-function MerchantRow({ rank, name, category, count, total, share }: MerchantRowProps) {
+function MerchantRow({ rank, name, domain, category, count, total, share }: MerchantRowProps) {
   const { t, formatCurrency } = useI18n()
   const percentage = Math.round(share * 100)
   const tone = MERCHANT_TONES[(rank - 1) % MERCHANT_TONES.length]
@@ -275,7 +277,7 @@ function MerchantRow({ rank, name, category, count, total, share }: MerchantRowP
     >
       <HStack align="flex-start" spacing={3}>
         <Box position="relative" w="54px" h="54px" flexShrink={0}>
-          <MerchantLogo name={name} category={category} size={54} borderRadius="14px" />
+          <MerchantLogo name={name} domain={domain} category={category} size={54} borderRadius="14px" />
           <Box
             position="absolute"
             right="-4px"

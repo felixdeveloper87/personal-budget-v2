@@ -112,6 +112,7 @@ export function deriveEarnings(txns: TxnVM[]): EarningsInsight | null {
 
 export interface BreakdownItem {
   name: string
+  merchantDomain?: string | null
   total: number
   count: number
 }
@@ -148,7 +149,12 @@ export function earningsBySource(txns: TxnVM[]): BreakdownItem[] {
       existing.total += t.amount
       existing.count += 1
     } else {
-      map.set(key, { name: t.merchant.trim(), total: t.amount, count: 1 })
+      map.set(key, {
+        name: t.merchant.trim(),
+        merchantDomain: t.merchantDomain,
+        total: t.amount,
+        count: 1,
+      })
     }
   }
   return [...map.values()].sort((a, b) => b.total - a.total)

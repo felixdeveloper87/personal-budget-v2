@@ -23,6 +23,8 @@ public class TransactionDTO {
     private Long installmentPlanId;
     private Long recurringTransactionId;
     private Integer installmentNumber;
+    private String merchantName;
+    private String merchantDomain;
 
     public TransactionDTO(
             Long id,
@@ -40,7 +42,9 @@ public class TransactionDTO {
             TransactionStatus status,
             Long installmentPlanId,
             Long recurringTransactionId,
-            Integer installmentNumber
+            Integer installmentNumber,
+            String merchantName,
+            String merchantDomain
     ) {
         this.id = id;
         this.dateTime = dateTime;
@@ -58,6 +62,8 @@ public class TransactionDTO {
         this.installmentPlanId = installmentPlanId;
         this.recurringTransactionId = recurringTransactionId;
         this.installmentNumber = installmentNumber;
+        this.merchantName = merchantName;
+        this.merchantDomain = merchantDomain;
     }
 
     public Long getId() { return id; }
@@ -76,4 +82,6 @@ public class TransactionDTO {
     public Long getInstallmentPlanId() { return installmentPlanId; }
     public Long getRecurringTransactionId() { return recurringTransactionId; }
     public Integer getInstallmentNumber() { return installmentNumber; }
+    public String getMerchantName() { return merchantName; }
+    public String getMerchantDomain() { return merchantDomain; }
 }

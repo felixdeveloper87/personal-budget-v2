@@ -82,6 +82,7 @@ function formatSelectedDate(value: string) {
 interface ExpenseDescriptionGroup {
   category: string;
   count: number;
+  domain?: string | null;
   key: string;
   name: string;
   total: number;
@@ -91,7 +92,9 @@ function groupExpensesByDescription(expenses: Transaction[]): ExpenseDescription
   const grouped = new Map<string, ExpenseDescriptionGroup>();
 
   for (const expense of expenses) {
-    const name = expense.description.trim().replace(/\s+/g, " ") || expense.category;
+    const name = expense.merchantName?.trim()
+      || expense.description.trim().replace(/\s+/g, " ")
+      || expense.category;
     const key = name.toLocaleLowerCase();
     const current = grouped.get(key);
 
@@ -102,6 +105,7 @@ function groupExpensesByDescription(expenses: Transaction[]): ExpenseDescription
       grouped.set(key, {
         category: expense.category,
         count: 1,
+        domain: expense.merchantDomain,
         key,
         name,
         total: Number(expense.amount || 0),
@@ -331,8 +335,8 @@ export function ExpensesScreen() {
                   <View style={styles.rowLogo}>
                     <MerchantLogo
                       category={expense.category}
-                      lookupByName={Boolean(expense.description.trim())}
-                      name={expense.description || expense.category}
+                      domain={expense.merchantDomain}
+                      name={expense.merchantName || expense.description || expense.category}
                       size={42}
                     />
                   </View>
@@ -358,7 +362,7 @@ export function ExpensesScreen() {
                   <View style={styles.rowLogo}>
                     <MerchantLogo
                       category={group.category}
-                      lookupByName={group.name !== group.category}
+                      domain={group.domain}
                       name={group.name}
                       size={42}
                     />

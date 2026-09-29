@@ -51,7 +51,8 @@ export function toViewModel(transactions: Transaction[]): TxnVM[] {
     const type: 'in' | 'out' = t.type === 'INCOME' ? 'in' : 'out'
     return {
       id: t.id != null ? String(t.id) : `tmp-${i}`,
-      merchant: t.description || t.category || 'Transaction',
+      merchant: t.merchantName || t.description || t.category || 'Transaction',
+      merchantDomain: t.merchantDomain ?? null,
       category: t.category || 'Uncategorised',
       iconKey: iconKeyForCategory(t.category, type),
       account: accountLabel(t),
@@ -295,6 +296,7 @@ export function collapseCardStatements(
       statementRows.push({
         id: `stmt-${cardId}-${g.key}`,
         merchant: name,
+        merchantDomain: null,
         category: 'Credit card statement',
         iconKey: 'tag',
         account: name,

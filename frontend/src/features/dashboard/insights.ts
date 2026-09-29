@@ -10,6 +10,7 @@ export interface MerchantStat {
   key: string
   /** Human-friendly display name. */
   name: string
+  domain?: string | null
   total: number
   count: number
 }
@@ -32,7 +33,7 @@ export function merchantStats(transactions: Transaction[]): MerchantStat[] {
   const map = new Map<string, MerchantStat>()
   for (const t of transactions) {
     if (t.type !== 'EXPENSE') continue
-    const raw = t.description?.trim() ? t.description : t.category
+    const raw = t.merchantName?.trim() || (t.description?.trim() ? t.description : t.category)
     const key = normaliseKey(raw)
     if (!key) continue
     const existing = map.get(key)
@@ -40,7 +41,13 @@ export function merchantStats(transactions: Transaction[]): MerchantStat[] {
       existing.total += t.amount
       existing.count += 1
     } else {
-      map.set(key, { key, name: displayName(raw), total: t.amount, count: 1 })
+      map.set(key, {
+        key,
+        name: displayName(raw),
+        domain: t.merchantDomain,
+        total: t.amount,
+        count: 1,
+      })
     }
   }
   return [...map.values()].sort((a, b) => b.total - a.total)

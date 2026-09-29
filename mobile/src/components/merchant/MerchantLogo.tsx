@@ -45,77 +45,9 @@ const merchantFallbacks = {
   },
 } satisfies Record<string, MerchantFallback>;
 
-interface MerchantDomainEntry {
-  domain: string;
-  keys: readonly string[];
-}
-
-const merchantDomains: readonly MerchantDomainEntry[] = [
-  { keys: ["costco"], domain: "costco.co.uk" },
-  { keys: ["lidl"], domain: "lidl.co.uk" },
-  { keys: ["sainsbury"], domain: "sainsburys.co.uk" },
-  { keys: ["morrisons"], domain: "morrisons.com" },
-  { keys: ["waitrose"], domain: "waitrose.com" },
-  { keys: ["iceland"], domain: "iceland.co.uk" },
-  { keys: ["tesco"], domain: "tesco.com" },
-  { keys: ["aldi"], domain: "aldi.co.uk" },
-  { keys: ["asda"], domain: "asda.com" },
-  {
-    keys: ["marks and spencer", "marks & spencer", "m&s", "m & s", "m and s"],
-    domain: "marksandspencer.com",
-  },
-  { keys: ["co-op", "co op", "coop"], domain: "coop.co.uk" },
-  { keys: ["amazon"], domain: "amazon.co.uk" },
-  { keys: ["uber eats"], domain: "ubereats.com" },
-  { keys: ["deliveroo"], domain: "deliveroo.co.uk" },
-  { keys: ["just eat"], domain: "just-eat.co.uk" },
-  { keys: ["uber"], domain: "uber.com" },
-  { keys: ["bolt"], domain: "bolt.eu" },
-  { keys: ["mcdonald's", "mcdonalds"], domain: "mcdonalds.com" },
-  { keys: ["nando's", "nandos"], domain: "nandos.co.uk" },
-  {
-    keys: ["pepe's piri piri", "pepes piri piri", "pepe's", "pepes"],
-    domain: "pepes.co.uk",
-  },
-  { keys: ["burger king"], domain: "burgerking.co.uk" },
-  { keys: ["costa coffee", "costa"], domain: "costa.co.uk" },
-  { keys: ["domino's", "dominos"], domain: "dominos.co.uk" },
-  { keys: ["greggs"], domain: "greggs.co.uk" },
-  { keys: ["subway"], domain: "subway.com" },
-  { keys: ["kfc"], domain: "kfc.co.uk" },
-  { keys: ["boots"], domain: "boots.com" },
-  { keys: ["superdrug"], domain: "superdrug.com" },
-  { keys: ["primark"], domain: "primark.com" },
-  { keys: ["river island"], domain: "riverisland.com" },
-  { keys: ["new look"], domain: "newlook.com" },
-  { keys: ["zara"], domain: "zara.com" },
-  { keys: ["h&m"], domain: "hm.com" },
-  { keys: ["asos"], domain: "asos.com" },
-  { keys: ["spotify"], domain: "spotify.com" },
-  { keys: ["netflix"], domain: "netflix.com" },
-  { keys: ["youtube"], domain: "youtube.com" },
-  { keys: ["chatgpt", "openai"], domain: "openai.com" },
-  { keys: ["claude"], domain: "claude.ai" },
-  { keys: ["disney+"], domain: "disneyplus.com" },
-  { keys: ["playstation"], domain: "playstation.com" },
-  { keys: ["xbox"], domain: "xbox.com" },
-  { keys: ["airbnb"], domain: "airbnb.co.uk" },
-  { keys: ["booking.com", "booking"], domain: "booking.com" },
-  { keys: ["trainline"], domain: "thetrainline.com" },
-  { keys: ["tfl"], domain: "tfl.gov.uk" },
-  { keys: ["vinted"], domain: "vinted.co.uk" },
-  { keys: ["ebay"], domain: "ebay.co.uk" },
-  { keys: ["etsy"], domain: "etsy.com" },
-  { keys: ["royal mail", "royalmail"], domain: "royalmail.com" },
-];
-
 const logoDevToken =
   process.env.EXPO_PUBLIC_LOGO_DEV_TOKEN ||
   (Constants.expoConfig?.extra?.logoDevToken as string | undefined);
-
-function normaliseMerchantName(name: string) {
-  return name.toLowerCase().replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim();
-}
 
 function normaliseFallbackValue(value: string) {
   return value
@@ -159,21 +91,6 @@ function getMerchantFallback(name: string, category?: string): MerchantFallback 
   return null;
 }
 
-export function getMerchantLogoDomain(name: string) {
-  const normalised = normaliseMerchantName(name);
-  let match: { domain: string; length: number } | null = null;
-
-  for (const entry of merchantDomains) {
-    for (const key of entry.keys) {
-      if (normalised.includes(key) && (!match || key.length > match.length)) {
-        match = { domain: entry.domain, length: key.length };
-      }
-    }
-  }
-
-  return match?.domain ?? null;
-}
-
 function merchantInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "—";
@@ -183,20 +100,16 @@ function merchantInitials(name: string) {
 
 interface MerchantLogoProps {
   category?: string;
-  lookupByName?: boolean;
+  domain?: string | null;
   name: string;
   size?: number;
 }
 
-export function MerchantLogo({ category, lookupByName = false, name, size = 42 }: MerchantLogoProps) {
+export function MerchantLogo({ category, domain, name, size = 42 }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false);
-  const domain = useMemo(() => getMerchantLogoDomain(name), [name]);
   const fallback = useMemo(() => getMerchantFallback(name, category), [category, name]);
-  const logoTarget = domain ?? (lookupByName && name.trim()
-    ? `name/${encodeURIComponent(name.trim())}`
-    : null);
-  const logoUrl = logoTarget && logoDevToken
-    ? `https://img.logo.dev/${logoTarget}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
+  const logoUrl = domain && logoDevToken
+    ? `https://img.logo.dev/${domain}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
     : null;
 
   useEffect(() => setFailed(false), [logoUrl]);

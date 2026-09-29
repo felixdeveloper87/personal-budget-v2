@@ -427,7 +427,12 @@ function EarningsSourceCard({
     >
       <HStack align="center" spacing={3.5}>
         <Box position="relative" w="46px" h="46px" flexShrink={0}>
-          <MerchantLogo name={source.name} size={46} borderRadius="13px" />
+          <MerchantLogo
+            name={source.name}
+            domain={source.merchantDomain}
+            size={46}
+            borderRadius="13px"
+          />
           <Box
             position="absolute"
             right="-5px"

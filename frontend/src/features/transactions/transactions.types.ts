@@ -24,6 +24,7 @@ export type IconKey =
 export interface TxnVM {
   id: string
   merchant: string
+  merchantDomain: string | null
   category: string
   iconKey: IconKey
   account: string
