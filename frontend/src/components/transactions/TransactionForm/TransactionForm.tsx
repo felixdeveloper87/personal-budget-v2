@@ -14,6 +14,7 @@ import {
   HStack,
   Text,
   Badge,
+  Collapse,
   Divider,
 } from '@chakra-ui/react'
 import { useAuth } from '../../../contexts/AuthContext'
@@ -26,7 +27,7 @@ import {
   listPaymentMethods,
 } from '../../../api'
 import RecentTransactions from './RecentTransactions'
-import { Plus, Minus } from '../../ui/icons'
+import { ChevronDown, ChevronUp, CreditCard, Plus, Minus } from '../../ui/icons'
 import DateSelector from './DateSelector'
 import AmountInput from './AmountInput'
 import CategorySelector from './CategorySelector'
@@ -104,6 +105,7 @@ export default function TransactionForm({
 
   // Review-before-save step shown after the user taps the submit button.
   const [reviewOpen, setReviewOpen] = useState(false)
+  const [installmentDetailsOpen, setInstallmentDetailsOpen] = useState(false)
 
   // 💳 Installment states
   const [expenseMode, setExpenseMode] = useState<ExpenseMode>('single')
@@ -114,6 +116,10 @@ export default function TransactionForm({
   const [recurringDayOfMonth, setRecurringDayOfMonth] = useState(() =>
     dayOfMonthFromYMD(toLocalYYYYMMDD())
   )
+
+  useEffect(() => {
+    if (expenseMode !== 'installment') setInstallmentDetailsOpen(false)
+  }, [expenseMode])
 
   useEffect(() => {
     if (!user?.token) return
@@ -384,6 +390,7 @@ export default function TransactionForm({
     }
     const isInstallment = type === 'EXPENSE' && expenseMode === 'installment' && installments > 1
     if (isInstallment && !paymentMethodId) {
+      setInstallmentDetailsOpen(true)
       ToastService.warning({
         title: t('form.selectCreditCard'),
         description: t('form.creditCardRequiredDescription'),
@@ -565,7 +572,7 @@ export default function TransactionForm({
             loading={accountsLoading}
             showBalances={false}
           />
-          {type === 'EXPENSE' && (
+          {type === 'EXPENSE' && expenseMode !== 'installment' && (
             <PaymentMethodSelector
               value={paymentMethodId}
               onChange={handlePaymentMethodChange}
@@ -574,17 +581,90 @@ export default function TransactionForm({
             />
           )}
           {type === 'EXPENSE' && expenseMode === 'installment' && (
-              <InstallmentSelector
-                enabled
-                onEnabledChange={() => undefined}
-                installments={installments}
-                onInstallmentsChange={setInstallments}
-                amount={amount}
-                firstInstallmentDate={firstInstallmentDate}
-                onFirstInstallmentDateChange={setFirstInstallmentDate}
-                showToggle={false}
-                card={selectedCard}
-              />
+            <Box
+              border="2px solid"
+              borderColor={installmentDetailsOpen ? 'red.400' : colors.border}
+              borderRadius="2xl"
+              bg={colors.inputBg}
+              overflow="hidden"
+              transition="border-color 0.18s ease, box-shadow 0.18s ease"
+              boxShadow={installmentDetailsOpen ? '0 0 0 3px #f8717120' : 'none'}
+            >
+              <HStack
+                as="button"
+                type="button"
+                w="full"
+                minH="60px"
+                px={3}
+                py={2.5}
+                spacing={3}
+                textAlign="left"
+                onClick={() => setInstallmentDetailsOpen((open) => !open)}
+                aria-expanded={installmentDetailsOpen}
+                _hover={{ bg: colors.bgSecondary }}
+                _focusVisible={{ boxShadow: 'inset 0 0 0 2px rgba(248, 113, 113, 0.35)' }}
+              >
+                <Box
+                  w={9}
+                  h={9}
+                  display="grid"
+                  placeItems="center"
+                  flexShrink={0}
+                  borderRadius="lg"
+                  bg={colors.bgSecondary}
+                  color="red.400"
+                >
+                  <CreditCard size={19} aria-hidden="true" />
+                </Box>
+                <Box minW={0} flex={1}>
+                  <Text fontWeight={800} color={colors.text.primary} noOfLines={1}>
+                    {t('form.configureInstallments')}
+                  </Text>
+                  <Text mt={0.5} color={colors.text.secondary} noOfLines={1}>
+                    {selectedCard
+                      ? t('form.installmentConfiguredSummary', {
+                          card: selectedCard.name,
+                          count: installments,
+                          amount: formatCurrency(installments > 0 ? amount / installments : amount),
+                        })
+                      : t('form.configureInstallmentsHint')}
+                  </Text>
+                </Box>
+                {installmentDetailsOpen
+                  ? <ChevronUp size={18} aria-hidden="true" />
+                  : <ChevronDown size={18} aria-hidden="true" />}
+              </HStack>
+
+              <Collapse in={installmentDetailsOpen} animateOpacity>
+                <VStack
+                  align="stretch"
+                  spacing={4}
+                  px={3}
+                  pt={3}
+                  pb={3.5}
+                  borderTop="1px solid"
+                  borderColor={colors.border}
+                >
+                  <PaymentMethodSelector
+                    value={paymentMethodId}
+                    onChange={handlePaymentMethodChange}
+                    paymentMethods={paymentMethods}
+                    loading={paymentMethodsLoading}
+                  />
+                  <InstallmentSelector
+                    enabled
+                    onEnabledChange={() => undefined}
+                    installments={installments}
+                    onInstallmentsChange={setInstallments}
+                    amount={amount}
+                    firstInstallmentDate={firstInstallmentDate}
+                    onFirstInstallmentDateChange={setFirstInstallmentDate}
+                    showToggle={false}
+                    card={selectedCard}
+                  />
+                </VStack>
+              </Collapse>
+            </Box>
           )}
           {type === 'EXPENSE' && (
             <>
