@@ -512,6 +512,13 @@ export default function TransactionForm({
             type={type}
             hideQuickAmountsOnMobile={type === 'INCOME'}
           />
+          {type === 'INCOME' && incomeMode === 'single' && (
+            <DateSelector
+              date={date}
+              onChange={onTransactionDateChange}
+              hideQuickDatesOnMobile
+            />
+          )}
           {type === 'INCOME' && (
             <IncomeQuickAdd
               description={description}
@@ -536,8 +543,7 @@ export default function TransactionForm({
               loading={paymentMethodsLoading}
             />
           )}
-          {((type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment')) ||
-            (type === 'INCOME' && incomeMode === 'single')) && (
+          {type === 'EXPENSE' && (expenseMode === 'single' || expenseMode === 'installment') && (
             <DateSelector
               date={date}
               onChange={onTransactionDateChange}

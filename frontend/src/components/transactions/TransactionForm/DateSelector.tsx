@@ -7,6 +7,7 @@ interface DateSelectorProps {
   date: string
   onChange: (date: string) => void
   label?: string
+  hideQuickDatesOnMobile?: boolean
 }
 
 /**
@@ -15,7 +16,12 @@ interface DateSelectorProps {
  * - Uses HTML5 date input for native date picker
  * - Handles date formatting and validation
  */
-export default function DateSelector({ date, onChange, label }: DateSelectorProps) {
+export default function DateSelector({
+  date,
+  onChange,
+  label,
+  hideQuickDatesOnMobile = false,
+}: DateSelectorProps) {
   const { t, formatDate } = useI18n()
   const colors = useThemeColors()
   const displayLabel = label ?? t('form.whatDate')
@@ -165,7 +171,11 @@ export default function DateSelector({ date, onChange, label }: DateSelectorProp
                 </HStack>
               </Box>
 
-              <Wrap spacing={2} align="center">
+              <Wrap
+                spacing={2}
+                align="center"
+                display={hideQuickDatesOnMobile ? { base: 'none', md: 'flex' } : 'flex'}
+              >
                 {quickDateOptions.map((option) => (
                   <WrapItem key={option.value}>
                     <Button
