@@ -37,6 +37,7 @@ import RecurringSelector from './RecurringSelector'
 import PaymentMethodSelector from './PaymentMethodSelector'
 import AccountSelector from './AccountSelector'
 import ExpenseModeSelector, { ExpenseMode } from './ExpenseModeSelector'
+import ExpenseQuickAdd from './ExpenseQuickAdd'
 import IncomeModeSelector, { IncomeMode } from './IncomeModeSelector'
 import IncomeQuickAdd from './IncomeQuickAdd'
 import QuickTransactionPresets from './QuickTransactionPresets'
@@ -556,6 +557,15 @@ export default function TransactionForm({
               compactOnMobile
             />
           )}
+          {type === 'EXPENSE' && (
+            <ExpenseQuickAdd
+              category={category}
+              description={description}
+              loading={loading}
+              onCategoryChange={setCategory}
+              onDescriptionChange={setDescription}
+            />
+          )}
           {type === 'INCOME' && (
             <IncomeQuickAdd
               description={description}
@@ -665,22 +675,6 @@ export default function TransactionForm({
                 </VStack>
               </Collapse>
             </Box>
-          )}
-          {type === 'EXPENSE' && (
-            <>
-              <CategorySelector type={type} category={category} onChange={setCategory} />
-              <QuickTransactionPresets
-                category={category}
-                transactionType={type}
-                onSelect={applyQuickPreset}
-              />
-              <DescriptionInput
-                value={description}
-                onChange={setDescription}
-                type={type}
-                loading={loading}
-              />
-            </>
           )}
           
           {compact && (
