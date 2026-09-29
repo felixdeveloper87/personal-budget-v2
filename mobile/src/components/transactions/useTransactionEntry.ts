@@ -21,12 +21,17 @@ function localDateParts(date: Date) {
 }
 
 export function useTransactionEntry({
+  accountFilter,
   initialCategory,
   onClose,
   onCreated,
   type,
   visible,
-}: TransactionEntrySheetProps & { initialCategory: string; type: TransactionType }) {
+}: TransactionEntrySheetProps & {
+  accountFilter?: (account: FinancialAccount) => boolean;
+  initialCategory: string;
+  type: TransactionType;
+}) {
   const { user, logout } = useAuth();
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +67,9 @@ export function useTransactionEntry({
     void listAccounts(user.token)
       .then((items) => {
         if (!active) return;
-        const activeAccounts = items.filter((account) => account.active);
+        const activeAccounts = items.filter(
+          (account) => account.active && (accountFilter?.(account) ?? true),
+        );
         setAccounts(activeAccounts);
         setAccountId(activeAccounts[0]?.id ?? null);
       })
@@ -81,7 +88,7 @@ export function useTransactionEntry({
     return () => {
       active = false;
     };
-  }, [initialCategory, logout, user, visible]);
+  }, [accountFilter, initialCategory, logout, user, visible]);
 
   const submit = async () => {
     if (!user || !canSubmit || accountId === null) return;

@@ -57,6 +57,7 @@ export interface FinancialAccount {
   id: number;
   name: string;
   institution?: string | null;
+  type: "CURRENT" | "SAVINGS" | "CASH" | "CREDIT_CARD";
   currency: string;
   currentBalance: number;
   active: boolean;

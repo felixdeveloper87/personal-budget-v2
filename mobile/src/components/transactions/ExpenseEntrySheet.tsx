@@ -2,6 +2,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { colors } from "@/theme/colors";
+import type { FinancialAccount } from "@/types/finance";
 
 import {
   AccountPicker,
@@ -123,8 +124,17 @@ const suggestedMerchantNames = new Set(
   Object.values(merchantSuggestions).flatMap((merchants) => merchants?.map((merchant) => merchant.name) ?? []),
 );
 
+function isExpenseAccount(account: FinancialAccount) {
+  return account.type !== "SAVINGS";
+}
+
 export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
-  const form = useTransactionEntry({ ...props, initialCategory: categories[0], type: "EXPENSE" });
+  const form = useTransactionEntry({
+    ...props,
+    accountFilter: isExpenseAccount,
+    initialCategory: categories[0],
+    type: "EXPENSE",
+  });
   const selectedMerchants = merchantSuggestions[form.category as ExpenseCategory] ?? [];
   const hasSelectedMerchant = selectedMerchants.some((merchant) => merchant.name === form.description);
   const hideDescription = hasSelectedMerchant || form.category === "Rent";
