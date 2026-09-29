@@ -135,7 +135,7 @@ export default function AmountInput({
                     flexShrink={0}
                     minW={{ base: '72px', sm: '88px', md: '104px' }}
                   >
-                    <HStack spacing={1} justify="flex-end">
+                    <HStack spacing={1} justify="flex-end" whiteSpace="nowrap">
                       <Text
                         color={colors.text.secondary}
                         fontSize={{ base: 'sm', sm: 'lg' }}
@@ -156,13 +156,15 @@ export default function AmountInput({
                         onChange={(event) => handleNativeAmountChange(event.target.value)}
                         placeholder="0.00"
                         aria-label={t('form.howMuch')}
-                        minW={0}
+                        w={{ base: '62px', sm: '76px' }}
+                        minW={{ base: '62px', sm: '76px' }}
+                        flex="none"
                         p={0}
                         color={colors.text.primary}
                         fontSize={{ base: 'sm', sm: 'lg' }}
                         fontWeight={700}
                         lineHeight="1.1"
-                        textAlign="right"
+                        textAlign="left"
                         sx={{
                           fontVariantNumeric: 'tabular-nums',
                           _placeholder: { color: colors.text.secondary, opacity: 0.8 },
