@@ -1,10 +1,12 @@
 import type { AuthResponse, AuthUser } from "@/types/auth";
 import type {
   CreateHouseholdExpenseRequest,
+  CreateHouseholdSettlementRequest,
   HouseholdExpenseCreatedResponse,
   HouseholdExpenseHistory,
   HouseholdPaymentHistory,
   HouseholdPageResponse,
+  HouseholdSettlementCreatedResponse,
 } from "@/types/household";
 import type {
   CreateTransactionRequest,
@@ -150,6 +152,18 @@ export async function getHouseholdPaymentHistory(
   page = 0,
 ): Promise<HouseholdPaymentHistory> {
   return request<HouseholdPaymentHistory>(`/households/${householdId}/settlements?page=${page}`, { token });
+}
+
+export async function createHouseholdSettlement(
+  token: string,
+  householdId: number,
+  settlement: CreateHouseholdSettlementRequest,
+): Promise<HouseholdSettlementCreatedResponse> {
+  return request<HouseholdSettlementCreatedResponse>(`/households/${householdId}/settlements`, {
+    method: "POST",
+    body: JSON.stringify(settlement),
+    token,
+  });
 }
 
 export async function createHouseholdExpense(

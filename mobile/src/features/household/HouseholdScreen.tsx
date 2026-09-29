@@ -97,7 +97,7 @@ export function HouseholdScreen() {
               onAddExpense={() => setExpenseSheetVisible(true)}
               selectedMonth={selectedMonth}
             />
-            <HouseholdMembers key={`members-${page.household.id}`} household={page.household} />
+            <HouseholdMembers key={`members-${page.household.id}`} household={page.household} onUpdated={setPage} />
             <HouseholdCleaning
               key={`cleaning-${page.household.id}`}
               household={page.household}

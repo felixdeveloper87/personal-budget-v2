@@ -1,12 +1,58 @@
 import { SymbolView } from "expo-symbols";
-import { FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { Alert, FlatList, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { useAuth } from "@/contexts/AuthContext";
+import { ApiError, createHouseholdSettlement } from "@/services/api";
 import { colors } from "@/theme/colors";
-import type { HouseholdHeroData } from "@/types/household";
+import type { HouseholdDebt, HouseholdHeroData, HouseholdPageResponse } from "@/types/household";
 
-export function HouseholdDebtsSheet({ household, onClose }: { household: HouseholdHeroData; onClose: () => void }) {
+function localDate() {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+export function HouseholdDebtsSheet({ household, onUpdated, onClose }: {
+  household: HouseholdHeroData;
+  onUpdated: (page: HouseholdPageResponse) => void;
+  onClose: () => void;
+}) {
+  const { user, logout } = useAuth();
+  const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [holdKey, setHoldKey] = useState<string | null>(null);
+  const longPressCompletedRef = useRef(false);
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: household.currency });
+
+  async function submitPayment(debt: HouseholdDebt) {
+    if (!user || busyKey) return;
+    const key = `${debt.fromMemberId}-${debt.toMemberId}`;
+    setBusyKey(key);
+    try {
+      const created = await createHouseholdSettlement(user.token, household.id, {
+        toMemberId: debt.toMemberId,
+        amount: debt.amount,
+        settlementDate: localDate(),
+      });
+      onUpdated(created.page);
+      Alert.alert("Pagamento registrado", `O pagamento de ${currency.format(debt.amount)} para ${debt.toMemberName} foi marcado como pago.`);
+    } catch (requestError) {
+      if (requestError instanceof ApiError && requestError.status === 401) {
+        await logout();
+        return;
+      }
+      Alert.alert(
+        "Não foi possível registrar",
+        requestError instanceof ApiError && [403, 404, 409].includes(requestError.status)
+          ? "A dívida mudou ou não está mais disponível. Atualize os dados da casa e tente novamente."
+          : "Confira sua conexão e tente novamente.",
+      );
+    } finally {
+      setBusyKey(null);
+    }
+  }
 
   return (
     <Modal animationType="slide" transparent visible statusBarTranslucent onRequestClose={onClose}>
@@ -29,8 +75,6 @@ export function HouseholdDebtsSheet({ household, onClose }: { household: Househo
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
               <View
-                accessible
-                accessibilityLabel={`${item.fromMemberName} deve ${currency.format(item.amount)} a ${item.toMemberName}`}
                 style={styles.debtCard}
               >
                 <View style={styles.parties}>
@@ -52,6 +96,41 @@ export function HouseholdDebtsSheet({ household, onClose }: { household: Househo
                   <Text style={styles.amountLabel}>Valor a acertar</Text>
                   <Text style={styles.amount}>{currency.format(item.amount)}</Text>
                 </View>
+                {item.fromMemberId === household.currentMemberId ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Marcar pagamento de ${currency.format(item.amount)} para ${item.toMemberName} como pago`}
+                    accessibilityHint="Pressione e segure por 3 segundos"
+                    delayLongPress={3000}
+                    disabled={busyKey !== null}
+                    onLongPress={() => {
+                      longPressCompletedRef.current = true;
+                      setHoldKey(null);
+                      void submitPayment(item);
+                    }}
+                    onPress={() => {
+                      if (longPressCompletedRef.current) {
+                        longPressCompletedRef.current = false;
+                        return;
+                      }
+                      Alert.alert("Segure por 3 segundos", "Mantenha o botão pressionado até o pagamento começar a ser registrado.");
+                    }}
+                    onPressIn={() => {
+                      longPressCompletedRef.current = false;
+                      setHoldKey(`${item.fromMemberId}-${item.toMemberId}`);
+                    }}
+                    onPressOut={() => setHoldKey((current) => current === `${item.fromMemberId}-${item.toMemberId}` ? null : current)}
+                    style={({ pressed }) => [styles.paymentButton, (pressed || holdKey === `${item.fromMemberId}-${item.toMemberId}`) && styles.paymentButtonPressed, busyKey !== null && styles.paymentButtonDisabled]}
+                  >
+                    <Text style={styles.paymentButtonText}>
+                      {busyKey === `${item.fromMemberId}-${item.toMemberId}`
+                        ? "Registrando…"
+                        : holdKey === `${item.fromMemberId}-${item.toMemberId}`
+                          ? "Continue segurando…"
+                          : "Segure 3s para marcar como pago"}
+                    </Text>
+                  </Pressable>
+                ) : null}
               </View>
             )}
             ListEmptyComponent={
@@ -91,6 +170,10 @@ const styles = StyleSheet.create({
   amountRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 8, borderTopColor: "#E8EBE1", borderTopWidth: 1, marginTop: 14, paddingTop: 12 },
   amountLabel: { color: colors.inkSoft, fontSize: 11 },
   amount: { color: colors.ink, fontSize: 19, fontWeight: "800" },
+  paymentButton: { alignItems: "center", justifyContent: "center", minHeight: 44, marginTop: 12, paddingHorizontal: 14, backgroundColor: colors.forest, borderRadius: 12 },
+  paymentButtonPressed: { backgroundColor: colors.forestPressed, transform: [{ scale: 0.99 }] },
+  paymentButtonDisabled: { opacity: 0.62 },
+  paymentButtonText: { color: colors.white, fontSize: 12, fontWeight: "800" },
   empty: { alignItems: "center", paddingHorizontal: 20, paddingVertical: 40 },
   emptyIcon: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 28, width: 56, height: 56 },
   emptyTitle: { color: colors.ink, fontSize: 19, fontWeight: "700", marginTop: 16 },

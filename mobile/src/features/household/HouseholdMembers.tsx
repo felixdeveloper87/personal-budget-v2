@@ -3,11 +3,13 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { HouseholdDebtsSheet } from "@/features/household/HouseholdDebtsSheet";
 import { colors } from "@/theme/colors";
-import type { HouseholdHeroData } from "@/types/household";
+import type { HouseholdHeroData, HouseholdPageResponse } from "@/types/household";
 
-export function HouseholdMembers({ household }: { household: HouseholdHeroData }) {
+export function HouseholdMembers({ household, onUpdated }: { household: HouseholdHeroData; onUpdated: (page: HouseholdPageResponse) => void }) {
   const [debtsVisible, setDebtsVisible] = useState(false);
   const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: household.currency });
+  const debtsYouOwe = household.debts.filter((debt) => debt.fromMemberId === household.currentMemberId);
+  const totalYouOwe = debtsYouOwe.reduce((total, debt) => total + debt.amount, 0);
 
   return (
     <View style={styles.section}>
@@ -56,7 +58,28 @@ export function HouseholdMembers({ household }: { household: HouseholdHeroData }
           );
         })}
       </ScrollView>
-      {debtsVisible ? <HouseholdDebtsSheet household={household} onClose={() => setDebtsVisible(false)} /> : null}
+      {debtsYouOwe.length > 0 ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Pagamento pendente. Você deve ${currency.format(totalYouOwe)}. Revisar pagamentos.`}
+          onPress={() => setDebtsVisible(true)}
+          style={({ pressed }) => [styles.paymentAlert, pressed && styles.paymentAlertPressed]}
+        >
+          <View style={styles.paymentAlertIcon}>
+            <Text style={styles.paymentAlertMark}>!</Text>
+          </View>
+          <View style={styles.paymentAlertCopy}>
+            <Text style={styles.paymentAlertTitle}>{debtsYouOwe.length === 1 ? "Pagamento pendente" : "Pagamentos pendentes"}</Text>
+            <Text style={styles.paymentAlertText} numberOfLines={2}>
+              {debtsYouOwe.length === 1
+                ? `Você deve ${currency.format(totalYouOwe)} a ${debtsYouOwe[0].toMemberName}.`
+                : `Você tem ${debtsYouOwe.length} acertos, totalizando ${currency.format(totalYouOwe)}.`}
+            </Text>
+          </View>
+          <Text style={styles.paymentAlertAction}>Revisar</Text>
+        </Pressable>
+      ) : null}
+      {debtsVisible ? <HouseholdDebtsSheet household={household} onUpdated={onUpdated} onClose={() => setDebtsVisible(false)} /> : null}
     </View>
   );
 }
@@ -89,4 +112,12 @@ const styles = StyleSheet.create({
   receivingTint: { backgroundColor: "#E3EDDA" },
   payingTint: { backgroundColor: "#F3E3DC" },
   neutralTint: { backgroundColor: "#EBEDE5" },
+  paymentAlert: { flexDirection: "row", alignItems: "center", gap: 10, minHeight: 72, marginTop: 12, padding: 12, backgroundColor: "#FFF6F1", borderColor: "#E8D4CA", borderWidth: 1, borderRadius: 16 },
+  paymentAlertPressed: { backgroundColor: "#F9ECE6", transform: [{ scale: 0.99 }] },
+  paymentAlertIcon: { alignItems: "center", justifyContent: "center", width: 34, height: 34, borderRadius: 17, backgroundColor: "#F1DED6" },
+  paymentAlertMark: { color: colors.expense, fontSize: 16, fontWeight: "800" },
+  paymentAlertCopy: { flex: 1, minWidth: 0 },
+  paymentAlertTitle: { color: colors.ink, fontSize: 13, fontWeight: "800" },
+  paymentAlertText: { color: colors.inkSoft, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  paymentAlertAction: { color: colors.expense, fontSize: 11, fontWeight: "800" },
 });

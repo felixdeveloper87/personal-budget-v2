@@ -130,3 +130,14 @@ export interface HouseholdExpenseCreatedResponse {
   recordId: number;
   page: HouseholdPageResponse;
 }
+
+export interface CreateHouseholdSettlementRequest {
+  toMemberId: number;
+  amount: number;
+  settlementDate: string;
+}
+
+export interface HouseholdSettlementCreatedResponse {
+  recordId: number;
+  page: HouseholdPageResponse;
+}
