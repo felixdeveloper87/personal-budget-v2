@@ -45,11 +45,11 @@ export default function AddTransactionModal({
       bg={ed.bg}
       p={{ base: 3, sm: 5, md: 6 }}
       overflowY="auto"
-      sx={type === 'INCOME' ? {
+      sx={{
         '& p, & button, & input, & label, & .chakra-text': {
           fontSize: '16px !important',
         },
-      } : undefined}
+      }}
     >
       <TransactionForm
         transactions={transactions}
