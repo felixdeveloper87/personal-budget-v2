@@ -512,6 +512,15 @@ export default function TransactionForm({
             type={type}
             hideQuickAmountsOnMobile={type === 'INCOME'}
           />
+          {type === 'INCOME' && (
+            <IncomeQuickAdd
+              description={description}
+              loading={loading}
+              onDescriptionChange={setDescription}
+              onSelect={(source) => applyQuickPreset({ description: source, category: 'Salary' })}
+              onSelectOther={() => applyQuickPreset({ description: '', category: 'Salary' })}
+            />
+          )}
           <AccountSelector
             value={accountId}
             onChange={setAccountId}
@@ -567,15 +576,7 @@ export default function TransactionForm({
                 card={selectedCard}
               />
           )}
-          {type === 'INCOME' ? (
-            <IncomeQuickAdd
-              description={description}
-              loading={loading}
-              onDescriptionChange={setDescription}
-              onSelect={(source) => applyQuickPreset({ description: source, category: 'Salary' })}
-              onSelectOther={() => applyQuickPreset({ description: '', category: 'Salary' })}
-            />
-          ) : (
+          {type === 'EXPENSE' && (
             <>
               <CategorySelector type={type} category={category} onChange={setCategory} />
               <QuickTransactionPresets
