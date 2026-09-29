@@ -4,6 +4,7 @@ import {
   DrawerBody,
   DrawerContent,
   DrawerOverlay,
+  useBreakpointValue,
 } from '@chakra-ui/react'
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
@@ -29,6 +30,10 @@ export default function AddTransactionModal({
   onRefresh,
 }: AddTransactionModalProps) {
   const ed = useEditorialPalette()
+  const incomeDrawerPlacement = useBreakpointValue<'bottom' | 'right'>({
+    base: 'bottom',
+    sm: 'right',
+  }) ?? 'right'
 
   const handleTransactionCreated = () => {
     onTransactionCreated()
@@ -53,7 +58,7 @@ export default function AddTransactionModal({
       <Drawer
         isOpen={isOpen}
         onClose={onClose}
-        placement="right"
+        placement={incomeDrawerPlacement}
         size="full"
         blockScrollOnMount
       >
@@ -61,16 +66,17 @@ export default function AddTransactionModal({
         <DrawerContent
           w="full"
           maxW={{ base: '100vw', sm: '520px' }}
-          h="100dvh"
-          maxH="100dvh"
+          h={{ base: '92dvh', sm: '100dvh' }}
+          maxH={{ base: '92dvh', sm: '100dvh' }}
           bg={ed.modal}
           borderLeft={{ base: 'none', sm: '1px solid' }}
+          borderTop={{ base: '1px solid', sm: 'none' }}
           borderColor={ed.lineStrong}
-          borderRadius={{ base: 0, sm: '22px 0 0 22px' }}
+          borderRadius={{ base: '22px 22px 0 0', sm: '22px 0 0 22px' }}
           boxShadow="-20px 0 50px -20px rgba(20, 35, 32, 0.35)"
           overflow="hidden"
         >
-          <TransactionModalHeader type="INCOME" onClose={onClose} />
+          <TransactionModalHeader type="INCOME" onClose={onClose} useMobileSafeArea={false} />
           <DrawerBody
             display="flex"
             flexDirection="column"

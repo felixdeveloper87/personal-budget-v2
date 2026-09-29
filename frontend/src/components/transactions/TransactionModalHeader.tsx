@@ -11,11 +11,13 @@ import TransactionArtwork from './TransactionArtwork'
 interface TransactionModalHeaderProps {
   type: 'INCOME' | 'EXPENSE'
   onClose: () => void
+  useMobileSafeArea?: boolean
 }
 
 export default function TransactionModalHeader({
   type,
   onClose,
+  useMobileSafeArea = true,
 }: TransactionModalHeaderProps) {
   const { t } = useI18n()
   const copy = type === 'INCOME'
@@ -29,7 +31,9 @@ export default function TransactionModalHeader({
       borderColor="rgba(255, 255, 255, 0.18)"
       px={{ base: 3.5, sm: 6 }}
       pt={{
-        base: 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))',
+        base: useMobileSafeArea
+          ? 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))'
+          : 4,
         sm: 5,
       }}
       pb={{ base: 3, sm: 4 }}
