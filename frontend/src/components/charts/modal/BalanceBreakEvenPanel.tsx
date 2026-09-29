@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
-import { Box, Button, Divider, HStack, Icon, SimpleGrid, Text, VStack, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Button, Divider, HStack, Icon, Input, SimpleGrid, Text, VStack, useColorModeValue } from '@chakra-ui/react'
 import type { PeriodType, Transaction } from '../../../types'
 import { Calculator, CheckCircle2, Wallet } from '../../ui/icons'
-import NumberPad from '../../transactions/TransactionForm/NumberPad'
 import { ChartPlotShell } from './components'
 import { useI18n } from '../../../i18n'
 
@@ -96,7 +95,19 @@ export default function BalanceBreakEvenPanel({
 }: BalanceBreakEvenPanelProps) {
   const { t, formatCurrency } = useI18n()
   const [savingsTarget, setSavingsTarget] = useState(0)
-  const { isOpen: isNumberPadOpen, onOpen: openNumberPad, onClose: closeNumberPad } = useDisclosure()
+  const [savingsTargetDraft, setSavingsTargetDraft] = useState('')
+
+  const updateSavingsTarget = (value: string) => {
+    const numericCharacters = value.replace(/[^0-9.,]/g, '')
+    const separatorIndex = numericCharacters.search(/[.,]/)
+    const sanitized = separatorIndex === -1
+      ? numericCharacters
+      : numericCharacters.slice(0, separatorIndex + 1)
+        + numericCharacters.slice(separatorIndex + 1).replace(/[.,]/g, '')
+    setSavingsTargetDraft(sanitized)
+    const numericValue = Number(sanitized.replace(',', '.'))
+    setSavingsTarget(Number.isFinite(numericValue) ? numericValue : 0)
+  }
 
   const remainingRange = getRemainingRange(selectedDate, periodType)
   const remainingDays = remainingRange
@@ -135,7 +146,6 @@ export default function BalanceBreakEvenPanel({
 
   const titleColor = useColorModeValue('gray.900', 'gray.50')
   const mutedColor = useColorModeValue('gray.500', 'gray.400')
-  const panelBg = useColorModeValue('#ffffff', '#0a0a0a')
   const borderColor = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const inputBg = useColorModeValue('white', 'whiteAlpha.50')
   const summaryBg = useColorModeValue('white', 'rgba(255,255,255,0.035)')
@@ -147,13 +157,13 @@ export default function BalanceBreakEvenPanel({
   const successIconBg = useColorModeValue('green.100', 'green.900')
   const activeButtonBg = useColorModeValue('purple.50', 'purple.900')
   const activeButtonBorder = useColorModeValue('purple.300', 'purple.500')
-  const overlayBg = useColorModeValue('blackAlpha.500', 'blackAlpha.700')
   const orangeColor = useColorModeValue('orange.600', 'orange.300')
   const greenColor = useColorModeValue('green.600', 'green.300')
   const redColor = useColorModeValue('red.600', 'red.300')
   const purpleColor = useColorModeValue('purple.600', 'purple.300')
   const targetColor = neededToBreakEven > 0 ? orangeColor : greenColor
   const balanceColor = currentBalance >= 0 ? greenColor : redColor
+  const currencyMark = formatCurrency(0).replace(/[\d\s.,]/g, '') || '\u00A3'
 
   const caption = remainingDays > 0
     ? t('charts.breakEven.remainingCaption', { earningDays, daysOff })
@@ -486,7 +496,10 @@ export default function BalanceBreakEvenPanel({
                       boxShadow="none"
                       fontWeight={700}
                       fontSize="xs"
-                      onClick={() => setSavingsTarget(value)}
+                      onClick={() => {
+                        setSavingsTarget(value)
+                        setSavingsTargetDraft(String(value))
+                      }}
                       _hover={{ borderColor: activeButtonBorder, bg: activeButtonBg }}
                     >
                       {formatCurrency(value)}
@@ -496,29 +509,41 @@ export default function BalanceBreakEvenPanel({
               </SimpleGrid>
 
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={2}>
-                <Button
-                  type="button"
+                <HStack
                   h="48px"
                   justifyContent="space-between"
                   bg={inputBg}
-                  color={savingsTarget > 0 ? titleColor : mutedColor}
                   border="1px solid"
                   borderColor={borderColor}
                   borderRadius="lg"
-                  fontWeight={600}
                   px={3.5}
-                  onClick={openNumberPad}
-                  _hover={{ borderColor: activeButtonBorder, bg: inputBg }}
-                  _active={{ bg: inputBg }}
-                  rightIcon={<Icon as={Calculator} boxSize={4} color={purpleColor} />}
+                  spacing={2}
+                  _focusWithin={{ borderColor: activeButtonBorder, boxShadow: '0 0 0 2px rgba(126,34,206,0.12)' }}
                 >
-                  <Text as="span" fontSize="xs">
+                  <Text as="span" minW={0} fontSize="xs" fontWeight={600} color={mutedColor} noOfLines={1}>
                     {isPositiveBalance ? t('charts.breakEven.customChallenge') : t('charts.breakEven.customSurplus')}
                   </Text>
-                  <Text as="span" fontSize="xs" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {savingsTarget > 0 ? formatCurrency(savingsTarget) : t('charts.breakEven.enterAmount')}
-                  </Text>
-                </Button>
+                  <HStack spacing={1} maxW="120px" flexShrink={0}>
+                    <Text fontSize="xs" fontWeight={700} color={mutedColor}>{currencyMark}</Text>
+                    <Input
+                      variant="unstyled"
+                      inputMode="decimal"
+                      value={savingsTargetDraft}
+                      onChange={(event) => updateSavingsTarget(event.target.value)}
+                      onBlur={() => setSavingsTargetDraft(savingsTarget > 0 ? String(savingsTarget) : '')}
+                      placeholder="0.00"
+                      aria-label={t('charts.breakEven.enterAmount')}
+                      minW={0}
+                      p={0}
+                      color={savingsTarget > 0 ? titleColor : mutedColor}
+                      fontSize="xs"
+                      fontWeight={700}
+                      textAlign="right"
+                      sx={{ fontVariantNumeric: 'tabular-nums' }}
+                    />
+                    <Icon as={Calculator} boxSize={4} color={purpleColor} flexShrink={0} />
+                  </HStack>
+                </HStack>
 
                 <HStack
                   justify="space-between"
@@ -553,36 +578,6 @@ export default function BalanceBreakEvenPanel({
         )}
       </VStack>
 
-      {isNumberPadOpen && (
-        <Box
-          position="fixed"
-          inset="0"
-          bg={overlayBg}
-          backdropFilter="blur(10px)"
-          zIndex={2000}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          p={4}
-        >
-          <Box
-            bg={panelBg}
-            borderRadius="2xl"
-            p={{ base: 3.5, sm: 6 }}
-            maxW="400px"
-            w="full"
-            border="1px solid"
-            borderColor={borderColor}
-            shadow="2xl"
-          >
-            <NumberPad
-              value={savingsTarget}
-              onValueChange={setSavingsTarget}
-              onDone={closeNumberPad}
-            />
-          </Box>
-        </Box>
-      )}
     </ChartPlotShell>
   )
 }

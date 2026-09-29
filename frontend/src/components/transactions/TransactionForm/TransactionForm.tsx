@@ -511,7 +511,6 @@ export default function TransactionForm({
             onChange={setAmount}
             type={type}
             hideQuickAmountsOnMobile={type === 'INCOME'}
-            useNativeInput={type === 'INCOME'}
           />
           {type === 'INCOME' && (
             <IncomeQuickAdd
