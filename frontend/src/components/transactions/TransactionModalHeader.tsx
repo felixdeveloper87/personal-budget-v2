@@ -3,11 +3,10 @@ import {
   HStack,
   Text,
   VStack,
-  useColorMode,
 } from '@chakra-ui/react'
-import { editorialPalette, useEd } from '../../editorial'
 import { AppCloseButton } from '../ui'
 import { useI18n } from '../../i18n'
+import TransactionArtwork from './TransactionArtwork'
 
 interface TransactionModalHeaderProps {
   type: 'INCOME' | 'EXPENSE'
@@ -18,18 +17,16 @@ export default function TransactionModalHeader({
   type,
   onClose,
 }: TransactionModalHeaderProps) {
-  const { colorMode } = useColorMode()
   const { t } = useI18n()
-  const ed = useEd() ?? editorialPalette(colorMode)
   const copy = type === 'INCOME'
     ? { title: t('dashboard.income'), caption: t('transactions.incomeModalCaption') }
     : { title: t('dashboard.expense'), caption: t('transactions.expenseModalCaption') }
 
   return (
     <Box
-      bg={ed.header}
+      bg={type === 'INCOME' ? '#173D31' : '#6E302E'}
       borderBottom="1px solid"
-      borderColor={ed.line}
+      borderColor="rgba(255, 255, 255, 0.18)"
       px={{ base: 3.5, sm: 6 }}
       pt={{
         base: 'max(0.85rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))',
@@ -39,34 +36,36 @@ export default function TransactionModalHeader({
       position="relative"
       overflow="hidden"
     >
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        right={0}
-        h="2px"
-        bg={ed.jade}
-      />
+      <Box position="absolute" inset={0} pointerEvents="none">
+        <TransactionArtwork tone={type === 'INCOME' ? 'income' : 'expense'} />
+      </Box>
 
-      <VStack align="stretch" spacing={0.5}>
+      <VStack align="stretch" spacing={0.5} position="relative" zIndex={1}>
         <HStack align="center" justify="space-between" spacing={3}>
           <Text
             textStyle="display"
             fontWeight={400}
             fontSize={{ base: 'xl', sm: '2xl' }}
-            color={ed.headerInk}
+            color="white"
             lineHeight="1"
             noOfLines={1}
           >
             {copy.title}
           </Text>
-          <AppCloseButton onClick={onClose} />
+          <AppCloseButton
+            onClick={onClose}
+            bg="rgba(255, 255, 255, 0.12)"
+            borderColor="rgba(255, 255, 255, 0.24)"
+            color="white"
+            _hover={{ bg: 'rgba(255, 255, 255, 0.2)', borderColor: 'rgba(255, 255, 255, 0.38)', color: 'white' }}
+            _active={{ bg: 'rgba(255, 255, 255, 0.16)' }}
+          />
         </HStack>
 
         <Text
           fontSize={{ base: 'xs', sm: 'sm' }}
           textStyle="mono"
-          color={ed.muted}
+          color="rgba(255, 255, 255, 0.78)"
           letterSpacing="0.025em"
           lineHeight="1.4"
           noOfLines={1}
