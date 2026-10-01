@@ -128,11 +128,6 @@ export function AccountDetailsScreen() {
             <SymbolView name={icons.back} size={21} tintColor={colors.ink} weight="semibold" />
           </Pressable>
           <Text style={styles.pageTitle}>Detalhes da conta</Text>
-          {account ? (
-            <Pressable accessibilityLabel="Configurações da conta" accessibilityRole="button" onPress={() => setSettingsVisible(true)} style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}>
-              <SymbolView name={icons.settings} size={20} tintColor={colors.inkSoft} weight="semibold" />
-            </Pressable>
-          ) : null}
         </View>
 
         {error || !account ? (
@@ -150,6 +145,14 @@ export function AccountDetailsScreen() {
                   <Text numberOfLines={1} style={styles.institution}>{account.institution || typeLabels[account.type]}</Text>
                   <Text numberOfLines={1} style={styles.accountName}>{account.name}</Text>
                 </View>
+                <Pressable
+                  accessibilityLabel="Configurações da conta"
+                  accessibilityRole="button"
+                  onPress={() => setSettingsVisible(true)}
+                  style={({ pressed }) => [styles.settingsButton, pressed && styles.pressed]}
+                >
+                  <SymbolView name={icons.settings} size={20} tintColor={colors.inkSoft} weight="semibold" />
+                </Pressable>
               </View>
 
               <View style={styles.heroDivider} />
@@ -208,7 +211,7 @@ const styles = StyleSheet.create({
   backButton: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, height: 40, justifyContent: "center", width: 40 },
   pressed: { opacity: 0.65 },
   pageTitle: { color: colors.ink, flex: 1, fontSize: 19, fontWeight: "700", marginLeft: 12 },
-  settingsButton: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, height: 40, justifyContent: "center", width: 40 },
+  settingsButton: { alignItems: "center", backgroundColor: "rgba(251,249,244,0.72)", borderColor: "rgba(255,255,255,0.82)", borderRadius: 14, borderWidth: 1, height: 40, justifyContent: "center", marginLeft: 10, width: 40 },
   hero: { backgroundColor: colors.header, borderColor: "#C1D1D0", borderRadius: 26, borderWidth: 1, marginTop: 12, overflow: "hidden", padding: 17 },
   accountHeading: { alignItems: "center", flexDirection: "row" },
   accountCopy: { flex: 1, marginLeft: 12 },
