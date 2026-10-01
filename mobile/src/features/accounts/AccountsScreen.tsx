@@ -24,10 +24,19 @@ type SymbolName = ComponentProps<typeof SymbolView>["name"];
 const icons = {
   back: { ios: "chevron.left", android: "arrow_back", web: "arrow_back" },
   add: { ios: "plus", android: "add", web: "add" },
+  bank: { ios: "building.columns.fill", android: "account_balance", web: "account_balance" },
+  cash: { ios: "banknote.fill", android: "payments", web: "payments" },
   hidden: { ios: "eye.slash", android: "visibility_off", web: "visibility_off" },
   visible: { ios: "eye", android: "visibility", web: "visibility" },
   wallet: { ios: "wallet.bifold.fill", android: "account_balance_wallet", web: "account_balance_wallet" },
 } satisfies Record<string, SymbolName>;
+
+const accountTypeLabels: Record<FinancialAccount["type"], string> = {
+  CURRENT: "Conta corrente",
+  SAVINGS: "Poupança",
+  CASH: "Dinheiro",
+  CREDIT_CARD: "Crédito",
+};
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
@@ -62,6 +71,41 @@ function BalanceCard({ count, hidden, label, value }: BalanceCardProps) {
       <Text style={styles.balanceCardCount}>
         {count === 1 ? "1 conta" : `${count} contas`}
       </Text>
+    </View>
+  );
+}
+
+function AccountCard({ account, hidden }: { account: FinancialAccount; hidden: boolean }) {
+  const isCash = account.type === "CASH";
+
+  return (
+    <View style={styles.accountCard}>
+      <View style={styles.accountCardTop}>
+        <View style={styles.accountIcon}>
+          <SymbolView
+            name={isCash ? icons.cash : icons.bank}
+            size={18}
+            tintColor={colors.forest}
+            weight="semibold"
+          />
+        </View>
+        <Text numberOfLines={1} style={styles.accountCurrency}>{account.currency}</Text>
+      </View>
+
+      <Text numberOfLines={1} style={styles.accountName}>{account.name}</Text>
+      <Text numberOfLines={1} style={styles.accountMeta}>
+        {account.institution?.trim() || accountTypeLabels[account.type]}
+      </Text>
+
+      <Text
+        adjustsFontSizeToFit
+        minimumFontScale={0.72}
+        numberOfLines={1}
+        style={[styles.accountBalance, !hidden && account.currentBalance < 0 && styles.negativeValue]}
+      >
+        {hidden ? "••••••" : formatCurrency(Number(account.currentBalance || 0))}
+      </Text>
+      <Text style={styles.accountBalanceLabel}>Saldo atual</Text>
     </View>
   );
 }
@@ -224,6 +268,31 @@ export function AccountsScreen() {
             </View>
           ) : null}
         </View>
+
+        {!loading && !error ? (
+          <View style={styles.accountsSection}>
+            <View style={styles.sectionHeading}>
+              <View>
+                <Text style={styles.sectionEyebrow}>SUAS CONTAS</Text>
+                <Text style={styles.sectionTitle}>Contas ativas</Text>
+              </View>
+              <Text style={styles.accountCount}>{accounts.length}</Text>
+            </View>
+
+            {accounts.length > 0 ? (
+              <View style={styles.accountsGrid}>
+                {accounts.map((account) => (
+                  <AccountCard account={account} hidden={balancesHidden} key={account.id} />
+                ))}
+              </View>
+            ) : (
+              <View style={styles.emptyAccounts}>
+                <Text style={styles.emptyAccountsTitle}>Nenhuma conta ativa</Text>
+                <Text style={styles.emptyAccountsText}>Adicione uma conta para começar.</Text>
+              </View>
+            )}
+          </View>
+        ) : null}
       </ScrollView>
     </SafeAreaView>
   );
@@ -231,30 +300,30 @@ export function AccountsScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { paddingBottom: 40, paddingHorizontal: 18, paddingTop: 10 },
-  pageHeader: { alignItems: "center", flexDirection: "row", minHeight: 64 },
+  content: { paddingBottom: 40, paddingHorizontal: 18, paddingTop: 6 },
+  pageHeader: { alignItems: "center", flexDirection: "row", minHeight: 56 },
   iconButton: {
     alignItems: "center",
     backgroundColor: colors.paperRaised,
     borderColor: colors.line,
-    borderRadius: 15,
+    borderRadius: 14,
     borderWidth: 1,
-    height: 44,
+    height: 40,
     justifyContent: "center",
-    width: 44,
+    width: 40,
   },
   buttonPressed: { opacity: 0.65, transform: [{ scale: 0.97 }] },
-  titleBlock: { flex: 1, marginHorizontal: 13 },
+  titleBlock: { flex: 1, marginHorizontal: 12 },
   eyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.55 },
-  title: { color: colors.ink, fontSize: 27, fontWeight: "700", letterSpacing: -0.7, marginTop: 3 },
+  title: { color: colors.ink, fontSize: 25, fontWeight: "700", letterSpacing: -0.7, marginTop: 2 },
   addButton: {
     alignItems: "center",
     backgroundColor: colors.forest,
-    borderRadius: 15,
+    borderRadius: 14,
     flexDirection: "row",
     gap: 6,
-    minHeight: 44,
-    paddingHorizontal: 13,
+    minHeight: 40,
+    paddingHorizontal: 12,
   },
   addButtonLabel: { color: colors.white, fontSize: 12, fontWeight: "800" },
   hero: {
@@ -262,9 +331,9 @@ const styles = StyleSheet.create({
     borderColor: "#C1D1D0",
     borderRadius: 28,
     borderWidth: 1,
-    marginTop: 18,
+    marginTop: 12,
     overflow: "hidden",
-    padding: 18,
+    padding: 14,
     shadowColor: colors.ink,
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.08,
@@ -278,12 +347,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "rgba(251,249,244,0.78)",
     borderColor: "rgba(255,255,255,0.85)",
-    borderRadius: 14,
+    borderRadius: 13,
     borderWidth: 1,
-    height: 42,
+    height: 38,
     justifyContent: "center",
     marginRight: 11,
-    width: 42,
+    width: 38,
   },
   heroEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.45 },
   heroSubtitle: { color: colors.inkSoft, fontSize: 12, marginTop: 4 },
@@ -293,35 +362,97 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.8)",
     borderRadius: 13,
     borderWidth: 1,
-    height: 40,
+    height: 38,
     justifyContent: "center",
     marginLeft: 8,
-    width: 40,
+    width: 38,
   },
-  divider: { backgroundColor: "rgba(48,94,101,0.14)", height: 1, marginVertical: 18 },
+  divider: { backgroundColor: "rgba(48,94,101,0.14)", height: 1, marginVertical: 12 },
   totalLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.35 },
-  loadingValue: { alignItems: "flex-start", height: 57, justifyContent: "center" },
+  loadingValue: { alignItems: "flex-start", height: 47, justifyContent: "center" },
   totalValue: {
     color: colors.ink,
-    fontSize: 42,
+    fontSize: 37,
     fontWeight: "800",
     letterSpacing: -1.6,
-    lineHeight: 51,
-    marginTop: 3,
+    lineHeight: 44,
+    marginTop: 2,
   },
   negativeValue: { color: colors.expense },
   totalCaption: { color: colors.inkSoft, fontSize: 12, marginTop: 3 },
-  balanceGrid: { flexDirection: "row", gap: 10, marginTop: 20 },
+  balanceGrid: { flexDirection: "row", gap: 9, marginTop: 14 },
   balanceCard: {
     backgroundColor: "rgba(251,249,244,0.66)",
     borderColor: "rgba(255,255,255,0.8)",
     borderRadius: 17,
     borderWidth: 1,
     flex: 1,
-    minHeight: 106,
-    padding: 13,
+    minHeight: 88,
+    padding: 11,
   },
   balanceCardLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 1.05 },
-  balanceCardValue: { color: colors.ink, fontSize: 19, fontWeight: "800", marginTop: 13 },
-  balanceCardCount: { color: colors.inkSoft, fontSize: 10, marginTop: 8 },
+  balanceCardValue: { color: colors.ink, fontSize: 18, fontWeight: "800", marginTop: 9 },
+  balanceCardCount: { color: colors.inkSoft, fontSize: 10, marginTop: 6 },
+  accountsSection: { marginTop: 24 },
+  sectionHeading: {
+    alignItems: "flex-end",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 3,
+  },
+  sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
+  sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "700", marginTop: 4 },
+  accountCount: {
+    backgroundColor: colors.header,
+    borderRadius: 12,
+    color: colors.forest,
+    fontSize: 12,
+    fontWeight: "800",
+    minWidth: 28,
+    overflow: "hidden",
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    textAlign: "center",
+  },
+  accountsGrid: {
+    columnGap: 10,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 10,
+  },
+  accountCard: {
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 20,
+    borderWidth: 1,
+    minHeight: 166,
+    padding: 14,
+    width: "48%",
+  },
+  accountCardTop: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  accountIcon: {
+    alignItems: "center",
+    backgroundColor: colors.header,
+    borderRadius: 12,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  accountCurrency: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 0.8 },
+  accountName: { color: colors.ink, fontSize: 15, fontWeight: "700", marginTop: 13 },
+  accountMeta: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
+  accountBalance: { color: colors.ink, fontSize: 19, fontWeight: "800", marginTop: 17 },
+  accountBalanceLabel: { color: colors.inkFaint, fontSize: 9, marginTop: 4 },
+  emptyAccounts: {
+    alignItems: "center",
+    backgroundColor: colors.paperRaised,
+    borderColor: colors.line,
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 28,
+  },
+  emptyAccountsTitle: { color: colors.ink, fontSize: 16, fontWeight: "700" },
+  emptyAccountsText: { color: colors.inkSoft, fontSize: 12, marginTop: 5 },
 });
