@@ -1,7 +1,7 @@
 import { SymbolView } from "expo-symbols";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ComponentProps } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -137,12 +137,6 @@ export function AccountDetailsScreen() {
   const account = details?.account;
   const displayedItems = selectedTab === "recent" ? activity?.items ?? details?.recentActivity ?? [] : details?.upcomingActivity ?? [];
   const filteredItems = displayedItems.filter((item) => matchesFilter(item, selectedFilter));
-  const totals = useMemo(() => displayedItems.reduce((summary, item) => {
-    const amount = Math.abs(Number(item.amount || 0));
-    if (isIncoming(item)) summary.income += amount; else summary.expense += amount;
-    return summary;
-  }, { income: 0, expense: 0 }), [displayedItems]);
-  const net = totals.income - totals.expense;
   const overdraftUsed = Number(account?.overdraftUsed || 0);
   const overdraftLimit = Number(account?.overdraftLimit || 0);
   const overdraftPercentage = Math.max(0, Math.min(100, Number(account?.overdraftPercentageUsed || 0)));
@@ -179,7 +173,21 @@ export function AccountDetailsScreen() {
               </View>
               <View style={styles.heroDivider} />
               <Text style={styles.balanceLabel}>SALDO ATUAL</Text>
-              <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.balance, !balancesHidden && account.currentBalance < 0 && styles.negativeBalance]}>{displayMoney(Number(account.currentBalance || 0))}</Text>
+              <View style={styles.balanceRow}>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.balance, !balancesHidden && account.currentBalance < 0 && styles.negativeBalance]}>{displayMoney(Number(account.currentBalance || 0))}</Text>
+                <View style={styles.balanceSideActions}>
+                  {needsWarning ? (
+                    <View style={styles.balanceWarningBadge}>
+                      <SymbolView name={icons.warning} size={14} tintColor={colors.expense} weight="semibold" />
+                      <Text numberOfLines={2} style={styles.balanceWarningText}>{overdraftPercentage >= 75 ? "Limite próximo" : "Saldo negativo"}</Text>
+                    </View>
+                  ) : null}
+                  <Pressable accessibilityRole="button" onPress={() => setTransferVisible(true)} style={({ pressed }) => [styles.transferButton, pressed && styles.pressed]}>
+                    <SymbolView name={icons.transfer} size={15} tintColor={colors.white} weight="semibold" />
+                    <Text style={styles.transferButtonText}>Transferir</Text>
+                  </Pressable>
+                </View>
+              </View>
               <Text style={styles.balanceCaption}>{account.currency} · Conta ativa</Text>
 
               {account.type === "CURRENT" && overdraftLimit > 0 ? (
@@ -189,17 +197,6 @@ export function AccountDetailsScreen() {
                   <View style={styles.overdraftMeta}><Text style={styles.overdraftMetaText}>Usado: {displayMoney(overdraftUsed)}</Text><Text style={styles.overdraftMetaText}>Disponível: {displayMoney(Number(account.overdraftAvailable || 0))}</Text></View>
                 </View>
               ) : null}
-              {needsWarning ? <View style={styles.warningBox}><SymbolView name={icons.warning} size={17} tintColor={colors.expense} weight="semibold" /><Text style={styles.warningText}>{overdraftPercentage >= 75 ? "Você está próximo do limite desta conta." : "O saldo desta conta está negativo."}</Text></View> : null}
-              <View style={styles.heroActions}><Pressable accessibilityRole="button" onPress={() => setTransferVisible(true)} style={({ pressed }) => [styles.transferButton, pressed && styles.pressed]}><SymbolView name={icons.transfer} size={18} tintColor={colors.white} weight="semibold" /><Text style={styles.transferButtonText}>Transferir</Text></Pressable></View>
-            </View>
-
-            <View style={styles.summarySection}>
-              <Text style={styles.sectionEyebrow}>RESUMO CARREGADO</Text>
-              <View style={styles.summaryGrid}>
-                <View style={styles.summaryCard}><Text style={styles.summaryLabel}>ENTRADAS</Text><Text numberOfLines={1} style={[styles.summaryValue, styles.incomeAmount]}>{displayMoney(totals.income)}</Text></View>
-                <View style={styles.summaryCard}><Text style={styles.summaryLabel}>SAÍDAS</Text><Text numberOfLines={1} style={[styles.summaryValue, styles.expenseAmount]}>{displayMoney(totals.expense)}</Text></View>
-                <View style={styles.summaryCard}><Text style={styles.summaryLabel}>RESULTADO</Text><Text numberOfLines={1} style={[styles.summaryValue, !balancesHidden && net < 0 ? styles.expenseAmount : styles.incomeAmount]}>{displayMoney(net)}</Text></View>
-              </View>
             </View>
 
             <View style={styles.infoCard}>
@@ -239,10 +236,9 @@ export function AccountDetailsScreen() {
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: colors.paper, flex: 1 }, content: { padding: 18, paddingBottom: 42, paddingTop: 8 }, loading: { alignItems: "center", flex: 1, justifyContent: "center" },
   topBar: { alignItems: "center", flexDirection: "row", minHeight: 52 }, backButton: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, height: 40, justifyContent: "center", width: 40 }, pressed: { opacity: 0.65 }, pageTitle: { color: colors.ink, flex: 1, fontSize: 19, fontWeight: "700", marginLeft: 12 },
-  hero: { backgroundColor: colors.header, borderColor: "#C1D1D0", borderRadius: 26, borderWidth: 1, marginTop: 12, overflow: "hidden", padding: 17 }, accountHeading: { alignItems: "center", flexDirection: "row" }, accountCopy: { flex: 1, marginLeft: 12, minWidth: 0 }, institution: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase" }, accountName: { color: colors.ink, fontSize: 18, fontWeight: "700", marginTop: 4 }, heroIconButton: { alignItems: "center", backgroundColor: "rgba(251,249,244,0.72)", borderColor: "rgba(255,255,255,0.82)", borderRadius: 13, borderWidth: 1, height: 38, justifyContent: "center", marginLeft: 7, width: 38 }, heroDivider: { backgroundColor: "rgba(48,94,101,0.15)", height: 1, marginVertical: 15 }, balanceLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.3 }, balance: { color: colors.ink, fontSize: 38, fontWeight: "800", letterSpacing: -1.2, marginTop: 4 }, negativeBalance: { color: colors.expense }, balanceCaption: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
-  overdraftBlock: { backgroundColor: "rgba(251,249,244,0.56)", borderRadius: 15, marginTop: 15, padding: 12 }, overdraftHeading: { flexDirection: "row", justifyContent: "space-between" }, overdraftLabel: { color: colors.inkSoft, fontSize: 10, fontWeight: "700" }, overdraftValue: { color: colors.ink, fontSize: 10, fontWeight: "800" }, overdraftTrack: { backgroundColor: "rgba(48,94,101,0.13)", borderRadius: 4, height: 7, marginTop: 9, overflow: "hidden" }, overdraftProgress: { backgroundColor: colors.forest, borderRadius: 4, height: 7 }, overdraftDanger: { backgroundColor: colors.expense }, overdraftMeta: { flexDirection: "row", justifyContent: "space-between", marginTop: 7 }, overdraftMetaText: { color: colors.inkFaint, fontSize: 9 }, warningBox: { alignItems: "center", backgroundColor: "rgba(242,230,227,0.86)", borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 11, padding: 10 }, warningText: { color: colors.expense, flex: 1, fontSize: 10, fontWeight: "700", lineHeight: 15 }, heroActions: { flexDirection: "row", marginTop: 14 }, transferButton: { alignItems: "center", backgroundColor: colors.forest, borderRadius: 14, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 44, paddingHorizontal: 16 }, transferButtonText: { color: colors.white, fontSize: 12, fontWeight: "800" },
-  summarySection: { marginTop: 23 }, summaryGrid: { flexDirection: "row", gap: 8, marginTop: 9 }, summaryCard: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 16, borderWidth: 1, flex: 1, minHeight: 75, padding: 11 }, summaryLabel: { color: colors.inkFaint, fontSize: 7, fontWeight: "800", letterSpacing: 0.8 }, summaryValue: { fontSize: 13, fontWeight: "800", marginTop: 12 },
-  infoCard: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 18, borderWidth: 1, flexDirection: "row", flexWrap: "wrap", marginTop: 12, padding: 12, rowGap: 14 }, infoItem: { paddingHorizontal: 4, width: "50%" }, infoLabel: { color: colors.inkFaint, fontSize: 7, fontWeight: "800", letterSpacing: 0.8 }, infoValue: { color: colors.ink, fontSize: 11, fontWeight: "700", marginTop: 5 },
+  hero: { backgroundColor: colors.header, borderColor: "#C1D1D0", borderRadius: 26, borderWidth: 1, marginTop: 12, overflow: "hidden", padding: 17 }, accountHeading: { alignItems: "center", flexDirection: "row" }, accountCopy: { flex: 1, marginLeft: 12, minWidth: 0 }, institution: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.2, textTransform: "uppercase" }, accountName: { color: colors.ink, fontSize: 18, fontWeight: "700", marginTop: 4 }, heroIconButton: { alignItems: "center", backgroundColor: "rgba(251,249,244,0.72)", borderColor: "rgba(255,255,255,0.82)", borderRadius: 13, borderWidth: 1, height: 38, justifyContent: "center", marginLeft: 7, width: 38 }, heroDivider: { backgroundColor: "rgba(48,94,101,0.15)", height: 1, marginVertical: 15 }, balanceLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.3 }, balanceRow: { alignItems: "center", flexDirection: "row", gap: 10 }, balance: { color: colors.ink, flex: 1, fontSize: 38, fontWeight: "800", letterSpacing: -1.2, marginTop: 4 }, balanceSideActions: { alignItems: "stretch", gap: 6 }, balanceWarningBadge: { alignItems: "center", backgroundColor: "rgba(242,230,227,0.9)", borderRadius: 11, flexDirection: "row", gap: 5, maxWidth: 96, paddingHorizontal: 8, paddingVertical: 6 }, balanceWarningText: { color: colors.expense, flexShrink: 1, fontSize: 8, fontWeight: "800", lineHeight: 10 }, negativeBalance: { color: colors.expense }, balanceCaption: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
+  overdraftBlock: { backgroundColor: "rgba(251,249,244,0.56)", borderRadius: 15, marginTop: 15, padding: 12 }, overdraftHeading: { flexDirection: "row", justifyContent: "space-between" }, overdraftLabel: { color: colors.inkSoft, fontSize: 10, fontWeight: "700" }, overdraftValue: { color: colors.ink, fontSize: 10, fontWeight: "800" }, overdraftTrack: { backgroundColor: "rgba(48,94,101,0.13)", borderRadius: 4, height: 7, marginTop: 9, overflow: "hidden" }, overdraftProgress: { backgroundColor: colors.forest, borderRadius: 4, height: 7 }, overdraftDanger: { backgroundColor: colors.expense }, overdraftMeta: { flexDirection: "row", justifyContent: "space-between", marginTop: 7 }, overdraftMetaText: { color: colors.inkFaint, fontSize: 9 }, transferButton: { alignItems: "center", backgroundColor: colors.forest, borderRadius: 11, flexDirection: "row", gap: 5, justifyContent: "center", minHeight: 32, paddingHorizontal: 9 }, transferButtonText: { color: colors.white, fontSize: 9, fontWeight: "800" },
+  infoCard: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 18, borderWidth: 1, flexDirection: "row", flexWrap: "wrap", marginTop: 18, padding: 12, rowGap: 14 }, infoItem: { paddingHorizontal: 4, width: "50%" }, infoLabel: { color: colors.inkFaint, fontSize: 7, fontWeight: "800", letterSpacing: 0.8 }, infoValue: { color: colors.ink, fontSize: 11, fontWeight: "700", marginTop: 5 },
   sectionHeader: { alignItems: "flex-end", flexDirection: "row", justifyContent: "space-between", marginBottom: 11, marginTop: 25, paddingHorizontal: 3 }, sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.5 }, sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "700", marginTop: 4 }, activityCount: { backgroundColor: colors.header, borderRadius: 11, color: colors.forest, fontSize: 11, fontWeight: "800", minWidth: 27, overflow: "hidden", paddingHorizontal: 8, paddingVertical: 5, textAlign: "center" },
   tabs: { backgroundColor: colors.paperMuted, borderRadius: 15, flexDirection: "row", padding: 4 }, tab: { alignItems: "center", borderRadius: 12, flex: 1, minHeight: 38, justifyContent: "center" }, tabSelected: { backgroundColor: colors.paperRaised }, tabText: { color: colors.inkFaint, fontSize: 11, fontWeight: "700" }, tabTextSelected: { color: colors.forest }, filters: { gap: 7, paddingVertical: 11 }, filter: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 12, borderWidth: 1, justifyContent: "center", minHeight: 34, paddingHorizontal: 12 }, filterSelected: { backgroundColor: colors.header, borderColor: colors.forest }, filterText: { color: colors.inkSoft, fontSize: 10, fontWeight: "700" }, filterTextSelected: { color: colors.forest },
   activityCard: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 20, borderWidth: 1, overflow: "hidden", paddingHorizontal: 14 }, activityLoader: { paddingVertical: 18 }, activityRow: { alignItems: "center", flexDirection: "row", minHeight: 74, paddingVertical: 11 }, activityRowBorder: { borderColor: colors.line, borderTopWidth: StyleSheet.hairlineWidth }, activityIcon: { alignItems: "center", borderRadius: 12, height: 38, justifyContent: "center", marginRight: 10, width: 38 }, incomeIcon: { backgroundColor: colors.incomeTint }, expenseIcon: { backgroundColor: colors.expenseTint }, activityCopy: { flex: 1, minWidth: 0 }, activityTitleRow: { alignItems: "center", flexDirection: "row", gap: 5 }, activityTitle: { color: colors.ink, flexShrink: 1, fontSize: 12, fontWeight: "700" }, statusBadge: { backgroundColor: colors.paperMuted, borderRadius: 6, color: colors.inkSoft, fontSize: 7, fontWeight: "800", overflow: "hidden", paddingHorizontal: 5, paddingVertical: 3 }, activityMeta: { color: colors.inkFaint, fontSize: 8, marginTop: 5 }, activityAmount: { fontSize: 11, fontWeight: "800", marginLeft: 7, maxWidth: 84 }, incomeAmount: { color: colors.income }, expenseAmount: { color: colors.expense }, emptyText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, padding: 24, textAlign: "center" },
