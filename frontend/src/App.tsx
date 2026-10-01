@@ -53,6 +53,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
 
 function pageFromBrowserLocation(): AppPage {
   if (window.location.pathname === '/household') return 'household'
+  if (window.location.pathname === '/accounts' || window.location.pathname.startsWith('/accounts/')) return 'accounts'
   const statePage = window.history.state?.appPage
   return typeof statePage === 'string' && statePage in PAGE_RENDERERS
     ? statePage as AppPage
@@ -78,7 +79,7 @@ function AppContent() {
 
   const navigateToPage = useCallback((page: AppPage) => {
     setCurrentPage(page)
-    const nextPath = page === 'household' ? '/household' : '/'
+    const nextPath = page === 'household' ? '/household' : page === 'accounts' ? '/accounts' : '/'
     const nextState = { ...(window.history.state ?? {}), appPage: page }
     if (window.location.pathname !== nextPath) {
       window.history.pushState(nextState, '', nextPath)

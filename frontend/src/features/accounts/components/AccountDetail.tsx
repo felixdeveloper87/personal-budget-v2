@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { getAccountDetails, getAccountActivityPage } from '../../../api'
 import type { AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
 import { ToastService } from '../../../services/toast'
-import { ChevronLeft, ChevronRight, Repeat } from '../../../components/ui/icons'
+import { ChevronLeft, ChevronRight, Repeat, Settings } from '../../../components/ui/icons'
 import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
 import AccountAvatar from '../../../components/accounts/AccountAvatar'
@@ -20,6 +20,7 @@ interface AccountDetailProps {
   showBackButton: boolean
   onBack: () => void
   onTransfer: () => void
+  onSettings: () => void
 }
 
 export default function AccountDetail({
@@ -28,6 +29,7 @@ export default function AccountDetail({
   showBackButton,
   onBack,
   onTransfer,
+  onSettings,
 }: AccountDetailProps) {
   const { t, formatCurrency } = useI18n()
   const [details, setDetails] = useState<AccountDetails | null>(null)
@@ -177,6 +179,24 @@ export default function AccountDetail({
             <Text as="span" display={{ base: 'none', sm: 'inline' }}>
               {t('accounts.transfer.short')}
             </Text>
+          </Box>
+          <Box
+            as="button"
+            type="button"
+            aria-label={t('accounts.form.editTitle')}
+            onClick={onSettings}
+            display="grid"
+            placeItems="center"
+            flexShrink={0}
+            w="32px"
+            h="32px"
+            borderRadius="10px"
+            color="var(--pb-summary-ink-soft)"
+            bg="var(--pb-summary-panel)"
+            border="1px solid var(--pb-summary-line)"
+            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+          >
+            <Icon as={Settings} boxSize="14px" />
           </Box>
         </Flex>
 

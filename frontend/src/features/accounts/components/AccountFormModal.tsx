@@ -25,7 +25,7 @@ import {
 import { createAccount, updateAccount } from '../../../api'
 import type { AccountType, FinancialAccount } from '../../../types'
 import { BankCombobox, BankLogo, ModalHeader, PremiumModal, getBankMeta } from '../../../components/ui'
-import { Pencil, Plus, Wallet } from '../../../components/ui/icons'
+import { Pencil, Plus, Trash2, Wallet } from '../../../components/ui/icons'
 import { ToastService } from '../../../services/toast'
 import { useI18n } from '../../../i18n'
 import { ACCOUNT_HELP, ACCOUNT_LABELS, CREATABLE_ACCOUNT_TYPES, accountName } from '../data/accountMeta'
@@ -36,9 +36,10 @@ export interface AccountFormModalProps {
   /** Account being edited, or `null`/`undefined` to create a new one. */
   account?: FinancialAccount | null
   onSaved: () => void
+  onDelete?: (account: FinancialAccount) => void
 }
 
-export default function AccountFormModal({ isOpen, onClose, account, onSaved }: AccountFormModalProps) {
+export default function AccountFormModal({ isOpen, onClose, account, onSaved, onDelete }: AccountFormModalProps) {
   const { t } = useI18n()
   const isEditing = Boolean(account)
 
@@ -265,6 +266,28 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved }: 
           </SimpleGrid>
 
           <Divider />
+          {account && onDelete ? (
+            <Box>
+              <Text fontSize="sm" fontWeight={600} color="var(--pb-coral)">
+                {t('accounts.delete.title')}
+              </Text>
+              <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)">
+                {t('accounts.delete.description')}
+              </Text>
+              <Button
+                mt={3}
+                size="sm"
+                variant="outline"
+                leftIcon={<Icon as={Trash2} boxSize={4} />}
+                color="var(--pb-coral)"
+                borderColor="var(--pb-coral)"
+                onClick={() => onDelete(account)}
+                _hover={{ bg: 'var(--pb-tint-coral)' }}
+              >
+                {t('accounts.delete.title')}
+              </Button>
+            </Box>
+          ) : null}
         </VStack>
       </Box>
     </PremiumModal>

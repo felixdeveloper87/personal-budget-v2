@@ -1,17 +1,17 @@
 import { Box, Button, Flex, Grid, Icon, SimpleGrid, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
-import { Eye, EyeOff, Plus } from '../../../components/ui/icons'
+import { Eye, EyeOff, Wallet } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
+import AccountsHeroArtwork from '../AccountsHeroArtwork'
 
 interface TotalHeroProps {
   accounts: FinancialAccount[]
   totalBalance: number
   hideBalances: boolean
   onToggleHide: () => void
-  onAddAccount: () => void
 }
 
-export default function TotalHero({ accounts, totalBalance, hideBalances, onToggleHide, onAddAccount }: TotalHeroProps) {
+export default function TotalHero({ accounts, totalBalance, hideBalances, onToggleHide }: TotalHeroProps) {
   const { t, formatCurrency } = useI18n()
   const currentAccounts = accounts.filter((account) => account.type === 'CURRENT')
   const savingsAccounts = accounts.filter((account) => account.type === 'SAVINGS')
@@ -27,61 +27,38 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
       border="1px solid var(--pb-summary-line)"
       borderRadius="22px"
       boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
-      p={{ base: 3.5, sm: 'clamp(1.1rem, 2.4vw, 1.45rem)' }}
+      p={{ base: 3.5, sm: 5 }}
     >
+      <Box position="absolute" inset={0} pointerEvents="none"><AccountsHeroArtwork /></Box>
+      <Box position="absolute" inset={0} pointerEvents="none" bg="rgba(244,249,246,.48)" />
       <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.16)" />
       <Flex
         position="relative"
         zIndex={2}
-        direction={{ base: 'column', sm: 'row' }}
-        align={{ base: 'flex-start', sm: 'center' }}
+        align="center"
         justify="space-between"
         gap="1rem"
         pb={{ base: 3, sm: 3.5 }}
         borderBottom="1px solid var(--pb-summary-line)"
       >
         <Box minW={0}>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            fontWeight={600}
-            letterSpacing="0.18em"
-            textTransform="uppercase"
-            color="var(--pb-summary-ink-faint)"
-          >
-            {t('accounts.overview.title')}
-          </Text>
-          <Text mt={1} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-summary-ink-soft)">
-            {t('accounts.overview.subtitle')}
-          </Text>
+          <Flex align="center" gap={3}>
+            <Flex w="42px" h="42px" align="center" justify="center" borderRadius="14px" bg="rgba(251,249,244,.78)" border="1px solid rgba(255,255,255,.85)">
+              <Icon as={Wallet} boxSize="19px" color="var(--pb-forest-2)" />
+            </Flex>
+            <Box>
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">{t('accounts.overview.title')}</Text>
+              <Text mt={1} fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-summary-ink-soft)">{t('accounts.overview.subtitle')}</Text>
+            </Box>
+          </Flex>
         </Box>
-        <Flex gap={2} w={{ base: 'full', sm: 'auto' }} flexShrink={0}>
-          <Button
-            onClick={onAddAccount}
-            leftIcon={<Icon as={Plus} boxSize={4} />}
-            flex={{ base: 1, sm: 'initial' }}
-            h="36px"
-            px={3}
-            borderRadius="10px"
-            color="var(--pb-summary-ink)"
-            bg="var(--pb-summary-control)"
-            border="1px solid var(--pb-summary-line)"
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={600}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            _hover={{ borderColor: 'var(--pb-summary-ink-faint)', transform: 'translateY(-1px)' }}
-          >
-            {t('accounts.action.add')}
-          </Button>
+        <Flex gap={2} flexShrink={0}>
           <Button
             aria-label={hideBalances ? t('accounts.action.showBalances') : t('accounts.action.hideBalances')}
             aria-pressed={hideBalances}
             title={hideBalances ? t('accounts.action.showBalances') : t('accounts.action.hideBalances')}
             onClick={onToggleHide}
             leftIcon={<Icon as={hideBalances ? Eye : EyeOff} boxSize={4} />}
-            flex={{ base: 1, sm: 'initial' }}
             h="36px"
             px={3}
             borderRadius="10px"
@@ -106,7 +83,7 @@ export default function TotalHero({ accounts, totalBalance, hideBalances, onTogg
         templateColumns={{ base: '1fr', md: 'minmax(0, 1.05fr) minmax(300px, 0.95fr)' }}
         gap={{ base: 4, md: 5 }}
         alignItems="stretch"
-        mt={{ base: 4, sm: 4.5 }}
+        mt={{ base: 3.5, sm: 4 }}
       >
         <Flex
           minW={0}

@@ -1,210 +1,55 @@
-import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { Box, Flex, Icon, Text } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
-import { ChevronRight, Pencil, Trash2 } from '../../../components/ui/icons'
+import { ChevronRight } from '../../../components/ui/icons'
 import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
 import AccountAvatar from '../../../components/accounts/AccountAvatar'
 
 interface AccountCardProps {
   account: FinancialAccount
-  selected: boolean
   hideBalances: boolean
   onSelect: () => void
-  onEdit: () => void
-  onArchive: () => void
 }
 
-const Tool = ({
-  label,
-  icon,
-  danger,
-  onClick,
-}: {
-  label: string
-  icon: typeof Pencil
-  danger?: boolean
-  onClick: (e: React.MouseEvent) => void
-}) => (
-  <Box
-    as="button"
-    type="button"
-    aria-label={label}
-    onClick={onClick}
-    w="30px"
-    h="30px"
-    borderRadius="8px"
-    display="grid"
-    placeItems="center"
-    color="var(--pb-ink-faint)"
-    transition="0.15s"
-    _hover={{
-      bg: danger ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)',
-      color: danger ? 'var(--pb-coral)' : 'var(--pb-forest-2)',
-    }}
-  >
-    <Icon as={icon} boxSize="15px" />
-  </Box>
-)
-
-export default function AccountCard({
-  account,
-  selected,
-  hideBalances,
-  onSelect,
-  onEdit,
-  onArchive,
-}: AccountCardProps) {
+export default function AccountCard({ account, hideBalances, onSelect }: AccountCardProps) {
   const { t, formatCurrency } = useI18n()
-  const negative = account.currentBalance < 0
-
   return (
     <Box
-      role="button"
-      tabIndex={0}
-      aria-pressed={selected}
+      as="button"
+      type="button"
       onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onSelect()
-        }
-      }}
-      cursor="pointer"
       position="relative"
-      w="full"
+      minH={{ base: '168px', md: '182px' }}
+      p={{ base: 3.5, md: 4 }}
       textAlign="left"
-      bg="var(--pb-surface)"
-      border="1px solid"
-      borderColor={selected ? 'var(--pb-forest-2)' : 'var(--pb-hair)'}
-      borderRadius="14px"
-      boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
-      pt="1rem"
-      px="1.05rem"
-      pb="1.3rem"
+      bg="linear-gradient(145deg, var(--pb-surface) 0%, var(--pb-tint-green) 100%)"
+      border="1px solid var(--pb-hair)"
+      borderRadius="20px"
       overflow="hidden"
-      transition="0.18s"
-      _hover={{ borderColor: 'var(--pb-hair-2)', transform: 'translateY(-1px)' }}
-      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest-2)' }}
-      sx={{ '&:hover .acc-reveal, &:focus-visible .acc-reveal': { opacity: 1 } }}
+      transition=".18s ease"
+      boxShadow="0 1px 2px rgba(15,23,42,.04), 0 8px 22px rgba(15,23,42,.05)"
+      _before={{ content: '""', position: 'absolute', w: '120px', h: '120px', borderRadius: 'full', bg: 'rgba(255,255,255,.36)', top: '-58px', right: '-44px' }}
+      _after={{ content: '""', position: 'absolute', w: '52px', h: '34px', borderRadius: '8px 8px 0 0', bg: 'rgba(48,94,101,.06)', bottom: 0, right: 3 }}
+      _hover={{ transform: 'translateY(-3px)', borderColor: 'var(--pb-forest-2)', boxShadow: '0 12px 30px rgba(28,67,61,.1)' }}
+      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px var(--pb-sidebar-active-bg)' }}
     >
-      {/* Selected left rule */}
-      {selected && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg="var(--pb-forest-2)" />}
-
-      <Flex align="flex-start" gap="0.8rem">
-        <AccountAvatar account={account} />
-        <Box flex={1} minW={0}>
-          <Text fontSize="1.08rem" fontWeight={500} lineHeight="1.2" color="var(--pb-ink)" noOfLines={1}>
-            {account.name}
-          </Text>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            letterSpacing="0.05em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-            mt="0.2rem"
-            noOfLines={1}
-          >
-            {t(`accounts.type.${account.type}`, undefined, ACCOUNT_LABELS[account.type])}
-            {account.institution ? ` · ${account.institution}` : ''}
-          </Text>
-        </Box>
-        <HStack
-          className="acc-reveal"
-          spacing="0.2rem"
-          flexShrink={0}
-          opacity={selected ? 1 : 0}
-          transition="opacity 0.15s"
-        >
-          <Tool
-            label={t('accounts.action.editNamed', { name: account.name })}
-            icon={Pencil}
-            onClick={(e) => {
-              e.stopPropagation()
-              onEdit()
-            }}
-          />
-          <Tool
-            label={t('accounts.action.removeNamed', { name: account.name })}
-            icon={Trash2}
-            danger
-            onClick={(e) => {
-              e.stopPropagation()
-              onArchive()
-            }}
-          />
-        </HStack>
+      <Flex position="relative" zIndex={1} align="flex-start" justify="space-between">
+        <AccountAvatar account={account} size={42} />
+        <Flex align="center" gap={2}>
+          <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} color="var(--pb-ink-faint)">{account.currency}</Text>
+          <Icon as={ChevronRight} boxSize="16px" color="var(--pb-ink-faint)" />
+        </Flex>
       </Flex>
-
-      <Box mt="0.9rem">
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="9.5px"
-          letterSpacing="0.13em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-        >
-          {t('accounts.balance')}
-        </Text>
-        <Text
-          className="num"
-          display="block"
-          fontSize="1.45rem"
-          fontWeight={500}
-          lineHeight="1.1"
-          mt="0.1rem"
-          color={!hideBalances && negative ? 'var(--pb-coral)' : 'var(--pb-ink)'}
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
+      <Box position="relative" zIndex={1} mt={3}>
+        <Text fontSize="1.08rem" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{account.name}</Text>
+        <Text mt={1} fontFamily="var(--pb-mono)" fontSize="9px" color="var(--pb-ink-faint)" noOfLines={1}>{account.institution || t(`accounts.type.${account.type}`, undefined, ACCOUNT_LABELS[account.type])}</Text>
+      </Box>
+      <Box position="relative" zIndex={1} mt={4}>
+        <Text className="num" fontSize={{ base: '1.28rem', md: '1.45rem' }} fontWeight={600} color={!hideBalances && account.currentBalance < 0 ? 'var(--pb-coral)' : 'var(--pb-ink)'} noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {hideBalances ? '••••••' : formatCurrency(account.currentBalance)}
         </Text>
+        <Text mt={1} fontFamily="var(--pb-mono)" fontSize="8px" textTransform="uppercase" letterSpacing=".1em" color="var(--pb-ink-faint)">{t('accounts.balance')}</Text>
       </Box>
-
-      {account.type === 'CURRENT' && account.overdraftLimit > 0 && (
-        <Flex
-          mt="0.7rem"
-          pt="0.6rem"
-          align="center"
-          justify="space-between"
-          gap="0.75rem"
-          borderTop="1px solid var(--pb-hair)"
-        >
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            letterSpacing="0.09em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            {t('accounts.overdraftRemaining')}
-          </Text>
-          <Text
-            className="num"
-            flexShrink={0}
-            fontFamily="var(--pb-mono)"
-            fontSize="11px"
-            fontWeight={600}
-            color={account.overdraftAvailable > 0 ? 'var(--pb-forest-2)' : 'var(--pb-coral)'}
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {hideBalances ? '••••••' : formatCurrency(account.overdraftAvailable)}
-          </Text>
-        </Flex>
-      )}
-
-      {/* Chevron affordance */}
-      <Icon
-        as={ChevronRight}
-        className="acc-reveal"
-        position="absolute"
-        right="1.05rem"
-        bottom="1rem"
-        boxSize="16px"
-        color="var(--pb-ink-faint)"
-        opacity={0}
-        transition="0.15s"
-      />
-
     </Box>
   )
 }
