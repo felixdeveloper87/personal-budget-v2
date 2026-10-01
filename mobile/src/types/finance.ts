@@ -99,6 +99,21 @@ export interface FinancialAccountRequest {
   active: boolean;
 }
 
+export interface AccountActivityPage {
+  items: AccountActivityItem[];
+  page: number;
+  size: number;
+  hasMore: boolean;
+}
+
+export interface AccountTransferRequest {
+  fromAccountId: number;
+  toAccountId: number;
+  amount: number;
+  transferDate: string;
+  description?: string;
+}
+
 export interface CreateTransactionRequest {
   dateTime: string;
   transactionDate: string;

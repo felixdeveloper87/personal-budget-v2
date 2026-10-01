@@ -11,6 +11,8 @@ import type {
 import type {
   CreateTransactionRequest,
   AccountDetails,
+  AccountActivityPage,
+  AccountTransferRequest,
   FinancialAccount,
   FinancialAccountRequest,
   InstallmentPlan,
@@ -142,6 +144,26 @@ export async function updateAccount(
 
 export async function archiveAccount(token: string, id: number): Promise<void> {
   await request<void>(`/accounts/${id}`, { method: "DELETE", token });
+}
+
+export async function getAccountActivityPage(
+  token: string,
+  id: number,
+  page: number,
+  size = 10,
+): Promise<AccountActivityPage> {
+  return request<AccountActivityPage>(`/accounts/${id}/activity?page=${page}&size=${size}`, { token });
+}
+
+export async function createAccountTransfer(
+  token: string,
+  transfer: AccountTransferRequest,
+): Promise<void> {
+  await request<unknown>("/accounts/transfers", {
+    method: "POST",
+    body: JSON.stringify(transfer),
+    token,
+  });
 }
 
 export async function getHouseholdPage(token: string): Promise<HouseholdPageResponse> {
