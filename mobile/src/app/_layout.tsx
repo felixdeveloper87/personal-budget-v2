@@ -23,6 +23,7 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={Boolean(user)}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="accounts" />
       </Stack.Protected>
     </Stack>
   );

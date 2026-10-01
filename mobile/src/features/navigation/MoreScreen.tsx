@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "@/contexts/AuthContext";
@@ -5,6 +6,7 @@ import { colors } from "@/theme/colors";
 
 export function MoreScreen() {
   const { user, logout } = useAuth();
+  const router = useRouter();
 
   if (!user) return null;
 
@@ -35,12 +37,22 @@ export function MoreScreen() {
         </View>
 
         <View style={styles.menuCard}>
-          {["Cartões", "Compromissos", "Metas", "Planejamento", "Relatórios"].map(
+          {["Contas", "Cartões", "Compromissos", "Metas", "Planejamento", "Relatórios"].map(
             (item, index) => (
-              <View key={item} style={[styles.menuRow, index > 0 && styles.menuRowBorder]}>
+              <Pressable
+                accessibilityRole={item === "Contas" ? "button" : undefined}
+                disabled={item !== "Contas"}
+                key={item}
+                onPress={() => item === "Contas" && router.push("/accounts")}
+                style={({ pressed }) => [
+                  styles.menuRow,
+                  index > 0 && styles.menuRowBorder,
+                  pressed && styles.menuRowPressed,
+                ]}
+              >
                 <Text style={styles.menuLabel}>{item}</Text>
                 <Text style={styles.chevron}>›</Text>
-              </View>
+              </Pressable>
             ),
           )}
         </View>
@@ -111,6 +123,7 @@ const styles = StyleSheet.create({
   },
   menuRow: { alignItems: "center", flexDirection: "row", minHeight: 56 },
   menuRowBorder: { borderColor: colors.line, borderTopWidth: 1 },
+  menuRowPressed: { opacity: 0.55 },
   menuLabel: { color: colors.ink, flex: 1, fontSize: 15, fontWeight: "600" },
   chevron: { color: colors.inkFaint, fontSize: 25, fontWeight: "300" },
   logoutButton: {
