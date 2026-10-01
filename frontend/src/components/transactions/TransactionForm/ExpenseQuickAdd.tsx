@@ -8,7 +8,7 @@ const CATEGORIES = [
   'Dining out',
   'Utilities',
   'Health',
-  'Rent',
+  'Transport',
   'Shopping',
   'Subscription',
   'Entertainment',
@@ -73,6 +73,14 @@ const MERCHANTS: Partial<Record<ExpenseCategory, readonly MerchantSuggestion[]>>
     { name: 'Bupa', domain: 'bupa.co.uk' },
     { name: 'Nuffield Health', domain: 'nuffieldhealth.com' },
   ],
+  Transport: [
+    { name: 'Oil change' },
+    { name: 'Petrol' },
+    { name: 'Front tyre' },
+    { name: 'Front brake pad' },
+    { name: 'Rear tyre' },
+    { name: 'Rear brake pad' },
+  ],
   Subscription: [
     { name: 'YouTube', domain: 'youtube.com' },
     { name: 'OpenAI', domain: 'openai.com' },
@@ -127,12 +135,10 @@ export default function ExpenseQuickAdd({
   const { t, categoryLabel } = useI18n()
   const selectedMerchants = MERCHANTS[category as ExpenseCategory] ?? []
   const hasSelectedMerchant = selectedMerchants.some((merchant) => merchant.name === description)
-  const hideDescription = hasSelectedMerchant || category === 'Rent'
+  const hideDescription = hasSelectedMerchant
 
   const selectCategory = (nextCategory: ExpenseCategory) => {
-    if (nextCategory === 'Rent') {
-      onDescriptionChange('Rent')
-    } else if (category === 'Rent' || SUGGESTED_MERCHANT_NAMES.has(description)) {
+    if (SUGGESTED_MERCHANT_NAMES.has(description)) {
       onDescriptionChange('')
     }
     onCategoryChange(nextCategory)

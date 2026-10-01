@@ -19,7 +19,7 @@ const categories = [
   "Dining out",
   "Utilities",
   "Health",
-  "Rent",
+  "Transport",
   "Shopping",
   "Subscription",
   "Entertainment",
@@ -88,6 +88,14 @@ const merchantSuggestions: Partial<Record<ExpenseCategory, readonly MerchantSugg
     { name: "Bupa", domain: "bupa.co.uk" },
     { name: "Nuffield Health", domain: "nuffieldhealth.com" },
   ],
+  Transport: [
+    { name: "Oil change" },
+    { name: "Petrol" },
+    { name: "Front tyre" },
+    { name: "Front brake pad" },
+    { name: "Rear tyre" },
+    { name: "Rear brake pad" },
+  ],
   Subscription: [
     { name: "YouTube", domain: "youtube.com" },
     { name: "OpenAI", domain: "openai.com" },
@@ -137,7 +145,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
   });
   const selectedMerchants = merchantSuggestions[form.category as ExpenseCategory] ?? [];
   const hasSelectedMerchant = selectedMerchants.some((merchant) => merchant.name === form.description);
-  const hideDescription = hasSelectedMerchant || form.category === "Rent";
+  const hideDescription = hasSelectedMerchant;
 
   return (
     <TransactionSheetFrame
@@ -164,9 +172,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
             <Pressable
               key={category}
               onPress={() => {
-                if (category === "Rent") {
-                  form.setDescription("Rent");
-                } else if (form.category === "Rent" || suggestedMerchantNames.has(form.description)) {
+                if (suggestedMerchantNames.has(form.description)) {
                   form.setDescription("");
                 }
                 form.setCategory(category);
