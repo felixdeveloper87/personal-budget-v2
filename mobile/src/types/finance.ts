@@ -59,7 +59,43 @@ export interface FinancialAccount {
   institution?: string | null;
   type: "CURRENT" | "SAVINGS" | "CASH" | "CREDIT_CARD";
   currency: string;
+  openingBalance: number;
+  balanceAnchorAt: string;
   currentBalance: number;
+  overdraftLimit: number;
+  overdraftUsed: number;
+  overdraftAvailable: number;
+  overdraftPercentageUsed: number;
+  active: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface AccountActivityItem {
+  id: number;
+  date: string;
+  kind: "INCOME" | "EXPENSE" | "TRANSFER_IN" | "TRANSFER_OUT";
+  description?: string | null;
+  category?: string | null;
+  amount: number;
+  status?: string | null;
+  paymentMethodName?: string | null;
+  paymentMethodType?: string | null;
+}
+
+export interface AccountDetails {
+  account: FinancialAccount;
+  recentActivity: AccountActivityItem[];
+  upcomingActivity: AccountActivityItem[];
+}
+
+export interface FinancialAccountRequest {
+  name: string;
+  type: FinancialAccount["type"];
+  institution: string | null;
+  currency: string;
+  openingBalance: number;
+  overdraftLimit: number;
   active: boolean;
 }
 

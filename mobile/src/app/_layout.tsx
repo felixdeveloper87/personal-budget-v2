@@ -24,6 +24,7 @@ function RootNavigator() {
       <Stack.Protected guard={Boolean(user)}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="accounts" />
+        <Stack.Screen name="accounts/[id]" />
       </Stack.Protected>
     </Stack>
   );

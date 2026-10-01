@@ -1,7 +1,7 @@
 import { SymbolView } from "expo-symbols";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import type { ComponentProps } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -85,9 +85,22 @@ function AccountCardBackground() {
   );
 }
 
-function AccountCard({ account, hidden }: { account: FinancialAccount; hidden: boolean }) {
+function AccountCard({
+  account,
+  hidden,
+  onPress,
+}: {
+  account: FinancialAccount;
+  hidden: boolean;
+  onPress: () => void;
+}) {
   return (
-    <View style={styles.accountCard}>
+    <Pressable
+      accessibilityLabel={`Abrir detalhes de ${account.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.accountCard, pressed && styles.accountCardPressed]}
+    >
       <View pointerEvents="none" style={styles.accountCardBackground}>
         <AccountCardBackground />
       </View>
@@ -110,7 +123,7 @@ function AccountCard({ account, hidden }: { account: FinancialAccount; hidden: b
         {hidden ? "••••••" : formatCurrency(Number(account.currentBalance || 0))}
       </Text>
       <Text style={styles.accountBalanceLabel}>Saldo atual</Text>
-    </View>
+    </Pressable>
   );
 }
 
@@ -143,9 +156,9 @@ export function AccountsScreen() {
     }
   }, [logout, user]);
 
-  useEffect(() => {
+  useFocusEffect(useCallback(() => {
     void loadAccounts();
-  }, [loadAccounts]);
+  }, [loadAccounts]));
 
   const summary = useMemo(() => {
     const current = accounts.filter((account) => account.type === "CURRENT");
@@ -286,7 +299,15 @@ export function AccountsScreen() {
             {accounts.length > 0 ? (
               <View style={styles.accountsGrid}>
                 {accounts.map((account) => (
-                  <AccountCard account={account} hidden={balancesHidden} key={account.id} />
+                  <AccountCard
+                    account={account}
+                    hidden={balancesHidden}
+                    key={account.id}
+                    onPress={() => router.push({
+                      pathname: "/accounts/[id]",
+                      params: { id: String(account.id) },
+                    })}
+                  />
                 ))}
               </View>
             ) : (
@@ -437,6 +458,7 @@ const styles = StyleSheet.create({
     width: "48%",
   },
   accountCardBackground: { ...StyleSheet.absoluteFill },
+  accountCardPressed: { opacity: 0.78, transform: [{ scale: 0.985 }] },
   accountCardDecoration: { flex: 1 },
   accountCardOrb: {
     backgroundColor: "rgba(255,255,255,0.42)",

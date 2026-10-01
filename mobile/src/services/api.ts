@@ -10,7 +10,9 @@ import type {
 } from "@/types/household";
 import type {
   CreateTransactionRequest,
+  AccountDetails,
   FinancialAccount,
+  FinancialAccountRequest,
   InstallmentPlan,
   MonthlySummary,
   Transaction,
@@ -60,6 +62,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(message, response.status);
   }
 
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
@@ -119,6 +122,26 @@ export async function searchTransactions(
 
 export async function listAccounts(token: string): Promise<FinancialAccount[]> {
   return request<FinancialAccount[]>("/accounts", { token });
+}
+
+export async function getAccountDetails(token: string, id: number): Promise<AccountDetails> {
+  return request<AccountDetails>(`/accounts/${id}`, { token });
+}
+
+export async function updateAccount(
+  token: string,
+  id: number,
+  account: FinancialAccountRequest,
+): Promise<FinancialAccount> {
+  return request<FinancialAccount>(`/accounts/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(account),
+    token,
+  });
+}
+
+export async function archiveAccount(token: string, id: number): Promise<void> {
+  await request<void>(`/accounts/${id}`, { method: "DELETE", token });
 }
 
 export async function getHouseholdPage(token: string): Promise<HouseholdPageResponse> {
