@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { BankLogo } from "@/components/accounts/BankLogo";
 import { useAuth } from "@/contexts/AuthContext";
 import { AccountsHeroArtwork } from "@/features/accounts/AccountsHeroArtwork";
 import { ApiError, listAccounts } from "@/services/api";
@@ -24,8 +25,6 @@ type SymbolName = ComponentProps<typeof SymbolView>["name"];
 const icons = {
   back: { ios: "chevron.left", android: "arrow_back", web: "arrow_back" },
   add: { ios: "plus", android: "add", web: "add" },
-  bank: { ios: "building.columns.fill", android: "account_balance", web: "account_balance" },
-  cash: { ios: "banknote.fill", android: "payments", web: "payments" },
   hidden: { ios: "eye.slash", android: "visibility_off", web: "visibility_off" },
   visible: { ios: "eye", android: "visibility", web: "visibility" },
   wallet: { ios: "wallet.bifold.fill", android: "account_balance_wallet", web: "account_balance_wallet" },
@@ -75,20 +74,25 @@ function BalanceCard({ count, hidden, label, value }: BalanceCardProps) {
   );
 }
 
-function AccountCard({ account, hidden }: { account: FinancialAccount; hidden: boolean }) {
-  const isCash = account.type === "CASH";
+function AccountCardBackground() {
+  return (
+    <View style={styles.accountCardDecoration}>
+      <View style={styles.accountCardOrb} />
+      <View style={[styles.accountCardBar, styles.accountCardBarShort]} />
+      <View style={[styles.accountCardBar, styles.accountCardBarMedium]} />
+      <View style={[styles.accountCardBar, styles.accountCardBarTall]} />
+    </View>
+  );
+}
 
+function AccountCard({ account, hidden }: { account: FinancialAccount; hidden: boolean }) {
   return (
     <View style={styles.accountCard}>
+      <View pointerEvents="none" style={styles.accountCardBackground}>
+        <AccountCardBackground />
+      </View>
       <View style={styles.accountCardTop}>
-        <View style={styles.accountIcon}>
-          <SymbolView
-            name={isCash ? icons.cash : icons.bank}
-            size={18}
-            tintColor={colors.forest}
-            weight="semibold"
-          />
-        </View>
+        <BankLogo institution={account.institution} name={account.name} size={40} />
         <Text numberOfLines={1} style={styles.accountCurrency}>{account.currency}</Text>
       </View>
 
@@ -423,23 +427,37 @@ const styles = StyleSheet.create({
     rowGap: 10,
   },
   accountCard: {
-    backgroundColor: colors.paperRaised,
+    backgroundColor: "#EDF3EE",
     borderColor: colors.line,
     borderRadius: 20,
     borderWidth: 1,
     minHeight: 166,
+    overflow: "hidden",
     padding: 14,
     width: "48%",
   },
-  accountCardTop: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  accountIcon: {
-    alignItems: "center",
-    backgroundColor: colors.header,
-    borderRadius: 12,
-    height: 36,
-    justifyContent: "center",
-    width: 36,
+  accountCardBackground: { ...StyleSheet.absoluteFill },
+  accountCardDecoration: { flex: 1 },
+  accountCardOrb: {
+    backgroundColor: "rgba(255,255,255,0.42)",
+    borderRadius: 52,
+    height: 104,
+    position: "absolute",
+    right: -42,
+    top: -48,
+    width: 104,
   },
+  accountCardBar: {
+    backgroundColor: "rgba(48,94,101,0.07)",
+    borderRadius: 4,
+    bottom: 0,
+    position: "absolute",
+    width: 18,
+  },
+  accountCardBarShort: { height: 24, right: 46 },
+  accountCardBarMedium: { height: 38, right: 24 },
+  accountCardBarTall: { height: 54, right: 2 },
+  accountCardTop: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   accountCurrency: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 0.8 },
   accountName: { color: colors.ink, fontSize: 15, fontWeight: "700", marginTop: 13 },
   accountMeta: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
