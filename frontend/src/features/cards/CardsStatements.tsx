@@ -30,7 +30,7 @@ function StatementRow({ item, expanded, onToggle, hidden }: { item: NamedStateme
   return (
     <article className={'cw-statement' + (expanded ? ' is-expanded' : '')}>
       <button type="button" className="cw-statement-button" aria-expanded={expanded} aria-controls={'statement-' + item.id} onClick={onToggle}>
-        <div className="cw-statement-identity"><BankLogo issuer={card.issuer} size={32} /><span>{card.name}</span><span className={'cw-status cw-status-' + statement.status}>{t('cards.statementStatus.' + statement.status)}</span></div>
+        <div className="cw-statement-identity"><BankLogo issuer={card.issuer} size={32} /><span>{card.name}</span><span className={'cw-status cw-status-' + statement.status}>{t(`cards.statementStatus.${statement.status}`)}</span></div>
         <h3>{formatDate(statement.closingDate, { month: 'long', year: 'numeric' })}</h3>
         <div className="cw-statement-value"><strong>{value(statement.total)}</strong><span className="cw-expand"><ChevronDown size={18} /></span></div>
         <div className="cw-statement-meta"><span>{t('cards.dueDate', { date: formatDate(statement.paymentDate, { day: 'numeric', month: 'short', year: 'numeric' }) })}</span><span>{t(statement.transactions.length === 1 ? 'cards.transactionCount.one' : 'cards.transactionCount.other', { count: statement.transactions.length })}</span></div>
@@ -76,9 +76,9 @@ export default function CardsStatements({ cards, statements, filter, onFilter, o
         {cards.map((card) => <button type="button" key={card.id} className={'cw-filter' + (filter === card.id ? ' is-selected' : '')} aria-pressed={filter === card.id} onClick={() => { onFilter(card.id); setHistoryLimit(8) }}><BankLogo issuer={card.issuer} size={24} />{card.name}</button>)}
       </div>
       <div className="cw-history-tabs" role="group" aria-label={t('cards.statements')}>
-        {(['current', 'history'] as const).map((tab) => <button type="button" key={tab} aria-pressed={view === tab} className={view === tab ? 'is-selected' : ''} onClick={() => setView(tab)}>{t('cards.statements.' + tab)}<span>{tab === 'current' ? current.length : history.length}</span></button>)}
+        {(['current', 'history'] as const).map((tab) => <button type="button" key={tab} aria-pressed={view === tab} className={view === tab ? 'is-selected' : ''} onClick={() => setView(tab)}>{t(`cards.statements.${tab}`)}<span>{tab === 'current' ? current.length : history.length}</span></button>)}
       </div>
-      {groups.filter((group) => group.items.length).map((group) => <section className="cw-statement-group" key={group.key}><div className="cw-group-heading"><h3>{t('cards.statements.' + group.key)}</h3><span>{group.key === 'previous' ? history.length : group.items.length}</span></div><p className="cw-group-description">{t('cards.statements.' + group.key + 'Help')}</p><div className="cw-statements-grid">{group.items.map((item) => <StatementRow item={item} key={item.id} expanded={item.id === openId} onToggle={() => onToggle(item.id)} hidden={hidden} />)}</div></section>)}
+      {groups.filter((group) => group.items.length).map((group) => <section className="cw-statement-group" key={group.key}><div className="cw-group-heading"><h3>{t(`cards.statements.${group.key}`)}</h3><span>{group.key === 'previous' ? history.length : group.items.length}</span></div><p className="cw-group-description">{t(`cards.statements.${group.key}Help`)}</p><div className="cw-statements-grid">{group.items.map((item) => <StatementRow item={item} key={item.id} expanded={item.id === openId} onToggle={() => onToggle(item.id)} hidden={hidden} />)}</div></section>)}
       {(view === 'current' ? current : history).length === 0 && <div className="cw-empty"><FileText size={30} /><p>{t(view === 'current' ? 'cards.statements.emptyCurrent' : 'cards.statements.emptyHistory')}</p></div>}
       {view === 'history' && history.length > historyLimit && <button type="button" className="cw-more" onClick={() => setHistoryLimit((limit) => limit + 8)}>{t('cards.statements.more', { count: history.length - historyLimit })}</button>}
     </section>
