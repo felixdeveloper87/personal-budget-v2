@@ -53,7 +53,12 @@ export default function CardsStatements({ cards, statements, filter, onFilter, o
     const target = statements.find((item) => item.id === openId)
     return target && target.statement.paymentDate.getTime() < today ? 'history' : 'current'
   })
-  const [historyLimit, setHistoryLimit] = useState(8)
+  const [historyLimit, setHistoryLimit] = useState(() => {
+    const previous = statements
+      .filter((item) => (filter === null || item.card.id === filter) && item.statement.paymentDate.getTime() < today)
+      .sort((a, b) => b.statement.paymentDate.getTime() - a.statement.paymentDate.getTime())
+    return Math.max(8, previous.findIndex((item) => item.id === openId) + 1)
+  })
   const filtered = statements.filter((item) => filter === null || item.card.id === filter)
   const current = filtered.filter((item) => item.statement.paymentDate.getTime() >= today).sort((a,b) => a.statement.paymentDate.getTime() - b.statement.paymentDate.getTime())
   const history = filtered.filter((item) => item.statement.paymentDate.getTime() < today).sort((a,b) => b.statement.paymentDate.getTime() - a.statement.paymentDate.getTime())

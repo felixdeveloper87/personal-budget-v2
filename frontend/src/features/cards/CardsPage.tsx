@@ -147,12 +147,14 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
     }
   }, [cards, currentTotals])
 
-  const selectCard = (id: number) => {
+  const selectCard = (id: number, paymentDate?: Date) => {
     setSelectedId(id)
     const card = cards.find((item) => item.id === id)
     if (!card) return
     const cardStatements = buildCardStatements(card, transactions)
-    const initial = cardStatements.find((statement) => statement.status === 'open') ?? cardStatements[0]
+    const initial = (paymentDate
+      ? cardStatements.find((statement) => isoDate(statement.paymentDate) === isoDate(paymentDate))
+      : cardStatements.find((statement) => statement.status === 'open')) ?? cardStatements[0]
     setOpenStatementKey(initial ? id + "-" + initial.key : null)
     setSection("statements")
     setStatementVersion((current) => current + 1)
@@ -218,7 +220,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
           : cards.length === 0 ? <div className="cw-empty"><CreditCard size={36} /><h2>{t('cards.empty.title')}</h2><p>{t('cards.empty.noCards')}</p><button type="button" className="cw-primary" onClick={() => setFormCard(null)}><Plus size={18} />{t('cards.action.add')}</button></div>
           : <>
             {section === 'overview' && <>
-              <CardsHero count={cards.length} used={overview.used} limit={overview.limit} hidden={hideValues} next={nextPayment} onToggle={toggleValues} onOpenPayment={() => nextCard && selectCard(nextCard.id)} />
+              <CardsHero count={cards.length} used={overview.used} limit={overview.limit} hidden={hideValues} next={nextPayment} onToggle={toggleValues} onOpenPayment={() => nextCard && selectCard(nextCard.id, nextPayment?.date)} />
               <div className="cw-section-heading"><p className="cw-eyebrow">{t('cards.shortcuts.title')}</p><h2>{t('cards.yourCards')}</h2></div>
               <div className="cw-shortcuts">
                 <button type="button" onClick={() => navigate('cards')}><span className="cw-shortcut-icon"><Layers size={25} /></span><div><strong>{t('cards.yourCards')}</strong><p>{t('cards.shortcuts.cards')}</p><span className="cw-shortcut-link">{t('cards.shortcuts.viewCards', { count: cards.length })}<ArrowUpRight size={18} /></span></div></button>
