@@ -120,9 +120,10 @@ interface MerchantLogoProps {
   domain?: string | null;
   name: string;
   size?: number;
+  fallbackMode?: "default" | "none";
 }
 
-export function MerchantLogo({ category, domain, name, size = 42 }: MerchantLogoProps) {
+export function MerchantLogo({ category, domain, name, size = 42, fallbackMode = "default" }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false);
   const fallback = useMemo(() => getMerchantFallback(name, category), [category, name]);
   const logoUrl = domain && logoDevToken
@@ -132,6 +133,8 @@ export function MerchantLogo({ category, domain, name, size = 42 }: MerchantLogo
   useEffect(() => setFailed(false), [logoUrl]);
 
   const showLogo = Boolean(logoUrl && !failed);
+
+  if (!showLogo && fallbackMode === "none") return null;
 
   return (
     <View

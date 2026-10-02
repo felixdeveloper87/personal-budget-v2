@@ -22,6 +22,7 @@ export interface Transaction {
   merchantName?: string | null;
   merchantDomain?: string | null;
   amount: number;
+  paymentMethodId?: number | null;
   paymentMethodName?: string | null;
   accountName?: string | null;
   status?: "PLANNED" | "PENDING" | "CLEARED" | "RECONCILED";

@@ -40,10 +40,13 @@ export function MoreScreen() {
           {["Contas", "Cartões", "Compromissos", "Metas", "Planejamento", "Relatórios"].map(
             (item, index) => (
               <Pressable
-                accessibilityRole={item === "Contas" ? "button" : undefined}
-                disabled={item !== "Contas"}
+                accessibilityRole={item === "Contas" || item === "Cartões" ? "button" : undefined}
+                disabled={item !== "Contas" && item !== "Cartões"}
                 key={item}
-                onPress={() => item === "Contas" && router.push("/accounts")}
+                onPress={() => {
+                  if (item === "Contas") router.push("/accounts");
+                  if (item === "Cartões") router.push("/cards");
+                }}
                 style={({ pressed }) => [
                   styles.menuRow,
                   index > 0 && styles.menuRowBorder,

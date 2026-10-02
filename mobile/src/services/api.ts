@@ -99,6 +99,22 @@ export async function listTransactions(token: string): Promise<Transaction[]> {
   return request<Transaction[]>("/transactions", { token });
 }
 
+export interface CreditCardPaymentMethod {
+  id: number;
+  name: string;
+  type: "CASH" | "DEBIT_CARD" | "CREDIT_CARD" | "BANK_TRANSFER";
+  issuer?: string | null;
+  active: boolean;
+  statementClosingDay?: number | null;
+  paymentDay?: number | null;
+  creditLimit?: number | null;
+  settlementAccountName?: string | null;
+}
+
+export async function listPaymentMethods(token: string): Promise<CreditCardPaymentMethod[]> {
+  return request<CreditCardPaymentMethod[]>("/payment-methods", { token });
+}
+
 export async function listInstallmentPlans(token: string): Promise<InstallmentPlan[]> {
   return request<InstallmentPlan[]>("/installment-plans", { token });
 }
