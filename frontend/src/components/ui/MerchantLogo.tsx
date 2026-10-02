@@ -17,6 +17,7 @@ interface MerchantLogoProps {
   name: string
   size?: number
   borderRadius?: string
+  fallbackMode?: 'default' | 'none'
 }
 
 function getFallback(name: string, category?: string) {
@@ -49,7 +50,7 @@ function getFallback(name: string, category?: string) {
   return null
 }
 
-export default function MerchantLogo({ name, category, domain, size = 36, borderRadius = '10px' }: MerchantLogoProps) {
+export default function MerchantLogo({ name, category, domain, size = 36, borderRadius = '10px', fallbackMode = 'default' }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false)
   const fallback = useMemo(() => getFallback(name, category), [name, category])
   const FallbackIcon = fallback?.Icon
@@ -58,6 +59,8 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
     : null
 
   useEffect(() => setFailed(false), [logoUrl])
+
+  if (fallbackMode === 'none' && (!logoUrl || failed)) return null
 
   return (
     <Box

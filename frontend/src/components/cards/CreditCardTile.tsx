@@ -44,6 +44,7 @@ export default function CreditCardTile({
       tabIndex={0}
       onClick={onSelect}
       onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault()
           onSelect()
@@ -62,7 +63,7 @@ export default function CreditCardTile({
       _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px var(--pb-tint-green), var(--pb-shadow-lift)' }}
       opacity={card.active ? 1 : 0.7}
     >
-      <Box h="4px" bg="linear-gradient(90deg, var(--pb-forest), var(--pb-line), var(--pb-gold-2))" />
+      <Box h="4px" bg="var(--pb-forest-2)" />
       <VStack align="stretch" spacing={4} p={5}>
         <HStack justify="space-between" align="start">
           <HStack spacing={3} minW={0}>
@@ -74,7 +75,7 @@ export default function CreditCardTile({
               </Flex>
             )}
             <Box minW={0}>
-              <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
+              <Text fontSize="md" fontWeight={800} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
               <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
             </Box>
           </HStack>
@@ -87,7 +88,7 @@ export default function CreditCardTile({
 
         <Box>
           <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.currentStatement')}</Text>
-          <Text className="num" fontSize="2rem" fontWeight={500} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Text className="num" fontSize="2rem" fontWeight={800} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hideValues ? '••••••' : formatCurrency(currentTotal)}
           </Text>
         </Box>
