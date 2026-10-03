@@ -1,4 +1,4 @@
-import { Box, Container, Flex, Text, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Box, Container, Flex, HStack, Text, useBreakpointValue, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../../contexts/AuthContext'
 import { useEd } from '../../../editorial'
@@ -8,6 +8,7 @@ import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
 import NavBar from './NavBar'
+import UserMenu from './UserMenu'
 import { ON_BRAND, OnBrandContext } from './onBrand'
 import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
@@ -37,7 +38,7 @@ export default function Header({
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const ed = useEd()
-  const { formatDate } = useI18n()
+  const { t } = useI18n()
   const navItems = useMemo(
     () => (user?.admin ? [ADMIN_NAV_ITEM] : NAV_ITEMS),
     [user?.admin]
@@ -88,6 +89,9 @@ export default function Header({
   // Logged-in shell: a solid purple app bar that flows into the dashboard hero.
   const onBrand = Boolean(user)
   const bg = onBrand ? ON_BRAND.bg : ed ? ed.header : bgBase
+  const hour = new Date().getHours()
+  const firstName = typeof user?.name === 'string' ? user.name.trim().split(/\s+/)[0] : ''
+  const greeting = `${t(hour < 12 ? 'dashboard.goodMorning' : hour < 18 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening')}${firstName ? `, ${firstName}` : ''}`
   const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
@@ -176,26 +180,30 @@ export default function Header({
                   onOpen={openSearch}
                 />
               </Box>
+            ) : onBrand ? (
+              // Account badge + greeting lead the purple bar (Nubank-style).
+              <HStack spacing={2.5} minW={0} flexShrink={1}>
+                <UserMenu
+                  user={user}
+                  compact
+                  placement="bottom-start"
+                  onOpenProfile={onOpenProfile}
+                  onOpenSettings={onOpenSettings}
+                  onLogout={logout}
+                />
+                <Text color={ON_BRAND.ink} fontSize={{ base: 'md', sm: 'lg' }} fontWeight={700} letterSpacing="-0.01em" noOfLines={1}>
+                  {greeting}
+                </Text>
+              </HStack>
             ) : (
               <Logo user={user} />
             )}
 
-            {/* Editorial masthead: today's date in the mono ledger voice,
-                centered between search and actions (desktop, sidebar shell). */}
+            {/* Desktop sidebar shell: greeting centered between search and actions. */}
             {user && hasSidebar && ed && (
               <Box display={{ base: 'none', lg: 'block' }} mx="auto" px={4} minW={0}>
-                <Text
-                  as="span"
-                  fontFamily="var(--pb-mono)"
-                  fontSize="10.5px"
-                  letterSpacing="0.22em"
-                  textTransform="uppercase"
-                  color={onBrand ? ON_BRAND.inkSoft : 'var(--pb-ink-faint)'}
-                  whiteSpace="nowrap"
-                >
-                  {formatDate(new Date(), { weekday: 'long' })}
-                  {' · '}
-                  {formatDate(new Date(), { day: 'numeric', month: 'long', year: 'numeric' })}
+                <Text as="span" color={ON_BRAND.ink} fontSize="lg" fontWeight={700} whiteSpace="nowrap">
+                  {greeting}
                 </Text>
               </Box>
             )}
@@ -223,7 +231,7 @@ export default function Header({
               <HeaderActions
                 user={user}
                 hideSearch={isAdminOnly || searchOnLeft}
-                hideUserControls={hasSidebar}
+                hideUserControls={hasSidebar || onBrand}
                 onSearchOpen={openSearch}
                 onLogin={onLogin}
                 onOpenProfile={onOpenProfile}
@@ -256,7 +264,7 @@ export default function Header({
           bottom={0}
           h="1px"
           background={accentBorder}
-          opacity={pageIntegrated ? 0 : (showGlass ? (isScrolled ? 1 : 0.55) : 0)}
+          opacity={pageIntegrated || onBrand ? 0 : (showGlass ? (isScrolled ? 1 : 0.55) : 0)}
           transition="opacity 0.35s ease"
           pointerEvents="none"
           zIndex={3}

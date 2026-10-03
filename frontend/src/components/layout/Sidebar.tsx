@@ -12,7 +12,6 @@ import {
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { useEd } from '../../editorial'
-import BrandMark from '../brand/BrandMark'
 import {
   CaretDoubleLeft,
 } from '../ui/icons'
@@ -272,28 +271,6 @@ export default function Sidebar({
 /* Sub-components                                                              */
 /* -------------------------------------------------------------------------- */
 
-/** Editorial brand lockup: engraved mini seal + serif wordmark + mono tagline. */
-function SidebarBrand({ onClick }: { onClick?: () => void }) {
-  const { t } = useI18n()
-  return (
-    <Flex
-      as="button"
-      type="button"
-      aria-label={t('sidebar.brand.goToDashboard')}
-      onClick={onClick}
-      align="center"
-      gap={2.5}
-      minW={0}
-      cursor="pointer"
-      role="group"
-      textAlign="left"
-      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)', borderRadius: '10px' }}
-    >
-      <BrandMark variant="wordmark" size="174px" />
-    </Flex>
-  )
-}
-
 function SidebarHeader({
   isCollapsed,
   onToggle,
@@ -327,7 +304,7 @@ function SidebarHeader({
           <Tooltip label={t('sidebar.expand')} hasArrow placement="right" openDelay={200}>
             <IconButton
               aria-label={t('sidebar.expand')}
-              icon={<BrandMark size={36} />}
+              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} transform="rotate(180deg)" />}
               size="sm"
               variant="ghost"
               borderRadius="full"
@@ -345,9 +322,7 @@ function SidebarHeader({
         </Flex>
       ) : (
         <Flex align="center" justify="space-between" gap={2}>
-          <Box minW={0}>
-            <SidebarBrand onClick={() => onPageChange?.('dashboard')} />
-          </Box>
+          <Box minW={0} />
 
           <Tooltip label={t('sidebar.collapse')} hasArrow placement="right" openDelay={400}>
             <IconButton

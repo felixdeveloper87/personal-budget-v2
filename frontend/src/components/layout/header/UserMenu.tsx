@@ -25,7 +25,7 @@ interface UserMenuProps {
   onOpenProfile?: () => void
   onOpenSettings?: () => void
   onLogout: () => void
-  placement?: 'bottom-end' | 'right-end'
+  placement?: 'bottom-start' | 'bottom-end' | 'right-end'
   /** Hide the account name and chevron when space is limited. */
   compact?: boolean
   /** Adapt the trigger to the sidebar's account area. */

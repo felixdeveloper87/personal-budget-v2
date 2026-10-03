@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Avatar, Box, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { Box, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { ArrowDown, ArrowUp, CreditCard, Eye, EyeOff, House, Landmark, Target, type LucideIcon } from 'lucide-react'
 import type { Transaction } from '../../../types'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
@@ -12,41 +12,12 @@ interface MonthHeroProps {
   previousExpense?: number | null
   transactions: Transaction[]
   date?: Date
-  userName?: string
   onAddIncome?: () => void
   onAddExpense?: () => void
   onPageChange?: (page: AppPage) => void
 }
 
 const MASK = '••••'
-
-/** Faint concentric rings anchored top-right: texture for the purple header. */
-function HeaderArtwork() {
-  return (
-    <svg width="100%" height="100%" viewBox="0 0 720 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
-      <defs>
-        {/* Starts at the app bar's flat purple so the two read as one surface. */}
-        <linearGradient id="nuHeaderBase" x1="0" y1="0" x2="0.35" y2="1">
-          <stop offset="0" stopColor="#820ad1" />
-          <stop offset="1" stopColor="#8f1bdc" />
-        </linearGradient>
-        <radialGradient id="nuHeaderGlow" cx="92%" cy="15%" r="55%">
-          <stop offset="0" stopColor="#d9a8ff" stopOpacity="0.24" />
-          <stop offset="1" stopColor="#d9a8ff" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      <rect width="720" height="200" fill="url(#nuHeaderBase)" />
-      <rect width="720" height="200" fill="url(#nuHeaderGlow)" />
-      <g fill="none" stroke="#fff">
-        <circle cx="680" cy="40" r="70" strokeOpacity="0.08" />
-        <circle cx="680" cy="40" r="115" strokeOpacity="0.06" />
-        <circle cx="680" cy="40" r="160" strokeOpacity="0.045" />
-        <circle cx="680" cy="40" r="205" strokeOpacity="0.03" />
-      </g>
-      <circle cx="560" cy="150" r="3" fill="#fff" opacity="0.25" />
-    </svg>
-  )
-}
 
 interface ShortcutProps {
   icon: LucideIcon
@@ -122,7 +93,6 @@ export default function MonthHero({
   previousExpense,
   transactions,
   date,
-  userName,
   onAddIncome,
   onAddExpense,
   onPageChange,
@@ -132,9 +102,6 @@ export default function MonthHero({
   const currentDate = date ?? new Date()
   const net = income - expense
   const money = (value: number) => (hidden ? MASK : formatCurrency(value))
-  const firstName = userName?.trim().split(/\s+/)[0] ?? ''
-  const hour = new Date().getHours()
-  const greeting = t(hour < 12 ? 'dashboard.goodMorning' : hour < 18 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening')
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
 
   const incomeComparison = useMemo(
@@ -165,32 +132,6 @@ export default function MonthHero({
 
   return (
     <Box>
-      {/* Purple header */}
-      <Box position="relative" overflow="hidden" bg="var(--nu-brand)" color="white" px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 6, md: 7 }}>
-        <Box position="absolute" inset={0} pointerEvents="none"><HeaderArtwork /></Box>
-        <HStack position="relative" justify="space-between" align="center">
-          <HStack spacing={3} minW={0}>
-            {userName && (
-              <Avatar name={userName} size="md" bg="rgba(255,255,255,0.18)" color="white" fontWeight={700} />
-            )}
-            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" noOfLines={1}>
-              {greeting}{firstName ? `, ${firstName}` : ''}
-            </Text>
-          </HStack>
-          <IconButton
-            aria-label={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
-            title={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
-            icon={hidden ? <EyeOff size={20} /> : <Eye size={20} />}
-            onClick={() => setHidden((value) => !value)}
-            variant="ghost"
-            color="white"
-            borderRadius="full"
-            _hover={{ bg: 'rgba(255,255,255,0.16)' }}
-            _active={{ bg: 'rgba(255,255,255,0.24)' }}
-          />
-        </HStack>
-      </Box>
-
       {/* Net + shortcuts */}
       <Grid
         templateColumns={{ base: '1fr', lg: 'minmax(0, 1fr) auto' }}
@@ -200,11 +141,25 @@ export default function MonthHero({
         py={{ base: 5, md: 6 }}
       >
         <Box minW={0}>
-          <HStack justify="space-between" align="baseline" spacing={3}>
-            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={600} color="var(--pb-ink)">{t('dashboard.netThisMonth')}</Text>
-            <Text fontSize="sm" color="var(--pb-ink-soft)" sx={{ fontVariantNumeric: 'tabular-nums' }} textTransform="capitalize" noOfLines={1}>
-              {formatDate(currentDate, { month: 'long' })} · {t('dashboard.dayOfMonth', { day: currentDate.getDate(), total: daysInMonth })}
-            </Text>
+          <HStack justify="space-between" align="center" spacing={3}>
+            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{t('dashboard.netThisMonth')}</Text>
+            <HStack spacing={1} minW={0}>
+              <Text fontSize="sm" color="var(--pb-ink-soft)" sx={{ fontVariantNumeric: 'tabular-nums' }} textTransform="capitalize" noOfLines={1}>
+                {formatDate(currentDate, { month: 'long' })} · {t('dashboard.dayOfMonth', { day: currentDate.getDate(), total: daysInMonth })}
+              </Text>
+              <IconButton
+                aria-label={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+                title={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+                aria-pressed={hidden}
+                icon={hidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                onClick={() => setHidden((value) => !value)}
+                variant="ghost"
+                size="sm"
+                borderRadius="full"
+                color="var(--pb-ink-soft)"
+                _hover={{ bg: 'var(--nu-surface)', color: 'var(--pb-ink)' }}
+              />
+            </HStack>
           </HStack>
           <Text mt={2} fontSize={{ base: '3xl', md: '4xl' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="var(--pb-ink)"
             sx={{ fontVariantNumeric: 'tabular-nums' }} aria-label={hidden ? t('dashboard.hiddenValue') : undefined}>

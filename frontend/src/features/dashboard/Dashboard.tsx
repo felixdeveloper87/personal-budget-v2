@@ -116,21 +116,31 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const handleAddExpense = useCallback(() => { setModalType('EXPENSE'); openModal() }, [openModal])
 
   return (
+    // The purple app bar keeps going behind the top of the white sheet, so bar and
+    // page read as one surface (no seam) — the sheet's rounded corners sit on purple.
     <Box
       minH="100vh"
+      sx={{
+        '--nu-band': { base: '28px', md: '160px' },
+        background: 'linear-gradient(to bottom, var(--pb-hero) 0, var(--pb-hero) var(--nu-band), transparent var(--nu-band))',
+      }}
+    >
+    <Box
       maxW="appContent"
       mx="auto"
       px={{ base: 0, md: 4, lg: 6 }}
-      py={{ base: 0, md: 7 }}
+      pt={{ base: 1, md: 2 }}
+      pb={{ base: 0, md: 7 }}
     >
-      {/* Nubank-style sheet: purple header, white body, hairline-separated sections. */}
+      {/* Nubank-style sheet: white body, hairline-separated sections. */}
       <MotionBox
         className="nu-dashboard"
         variants={containerV}
         initial="hidden"
         animate="show"
         bg="var(--nu-page)"
-        borderRadius={{ base: 0, md: '24px' }}
+        borderTopRadius="24px"
+        borderBottomRadius={{ base: 0, md: '24px' }}
         overflow="hidden"
         boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
       >
@@ -144,7 +154,6 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               previousExpense={previousSummary?.totalExpense ?? null}
               transactions={transactions}
               date={selectedDate}
-              userName={user?.name}
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
               onPageChange={onPageChange}
@@ -221,6 +230,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         onTransactionCreated={() => { closeModal(); setSummaryRefresh((value) => value + 1); void loadData() }}
         onRefresh={() => { setSummaryRefresh((value) => value + 1); void loadData() }}
       />
+    </Box>
     </Box>
   )
 }
