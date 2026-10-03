@@ -128,9 +128,9 @@ export default function NavBar({
         trackShadow: 'none',
         trackBgMobile: ON_BRAND.controlBg,
         trackBorderMobile: ON_BRAND.line,
-        inactiveColor: ON_BRAND.inkSoft,
+        inactiveColor: 'rgba(255, 255, 255, 0.68)',
         hoverColor: ON_BRAND.ink,
-        activeColor: ON_BRAND.bg,
+        activeColor: ON_BRAND.ink,
         indicatorBg: '#ffffff',
         indicatorBgMobile: '#ffffff',
         indicatorShadow: brandIndicatorShadow,
@@ -228,6 +228,10 @@ export default function NavBar({
   }, [measure, updateEdges, localizedItems])
 
 
+  const edgeMask = edges.start || edges.end
+    ? `linear-gradient(to right, ${edges.start ? 'transparent 0, #000 28px' : '#000 0'}, ${edges.end ? '#000 calc(100% - 36px), transparent 100%' : '#000 100%'})`
+    : null
+
   const nudge = (dir: 1 | -1) => {
     const el = containerRef.current
     if (!el) return
@@ -242,14 +246,14 @@ export default function NavBar({
       role="tablist"
       aria-orientation="horizontal"
       aria-label={t('header.nav.primary')}
-      spacing={1}
-      p={1}
-      borderRadius={isMobile ? '2xl' : 'xl'}
-      bg={isMobile ? c.trackBgMobile : c.trackBg}
-      border="1px solid"
+      spacing={onBrand ? 0 : 1}
+      p={onBrand ? 0 : 1}
+      borderRadius={onBrand ? 0 : isMobile ? '2xl' : 'xl'}
+      bg={onBrand ? 'transparent' : isMobile ? c.trackBgMobile : c.trackBg}
+      border={onBrand ? '0' : '1px solid'}
       borderColor={isMobile ? c.trackBorderMobile : c.trackBorder}
-      backdropFilter={isMobile ? 'blur(16px) saturate(150%)' : 'blur(12px)'}
-      boxShadow={c.trackShadow}
+      backdropFilter={onBrand ? 'none' : isMobile ? 'blur(16px) saturate(150%)' : 'blur(12px)'}
+      boxShadow={onBrand ? 'none' : c.trackShadow}
       flexShrink={0}
       w={isMobile ? 'full' : 'auto'}
       maxW="none"
@@ -285,14 +289,34 @@ export default function NavBar({
               msOverflowStyle: 'none',
               WebkitOverflowScrolling: 'touch',
               '::-webkit-scrollbar': { display: 'none' },
+              // On the purple bar, fade the edge that still has tabs to scroll to.
+              ...(onBrand && edgeMask ? { maskImage: edgeMask, WebkitMaskImage: edgeMask } : {}),
             }
           : undefined
       }
       {...stackProps}
     >
+      {/* Purple bar: a short white underline slides under the active tab. */}
+      <Box
+        aria-hidden
+        display={onBrand ? undefined : 'none'}
+        position="absolute"
+        bottom="0"
+        h="3px"
+        left={`${indicator.left + indicator.width * 0.25}px`}
+        width={`${indicator.width * 0.5}px`}
+        borderRadius="full"
+        bg={ON_BRAND.ink}
+        opacity={indicator.ready ? 1 : 0}
+        transition={indicatorTransition}
+        zIndex={0}
+        pointerEvents="none"
+      />
+
       {/* Sliding active indicator */}
       <Box
         aria-hidden
+        display={onBrand ? 'none' : undefined}
         position="absolute"
         top="4px"
         bottom="4px"
@@ -311,7 +335,7 @@ export default function NavBar({
       {/* Accent underline anchored to the indicator */}
       <Box
         aria-hidden
-        display={isMobile ? 'none' : undefined}
+        display={isMobile || onBrand ? 'none' : undefined}
         position="absolute"
         bottom={isMobile ? '6px' : '5px'}
         left={`${indicator.left + indicator.width * 0.28}px`}
@@ -346,7 +370,8 @@ export default function NavBar({
     </HStack>
   )
 
-  if (!isMobile) return track
+  // The purple bar relies on the edge fade instead of chevron buttons.
+  if (!isMobile || onBrand) return track
 
   return (
     <Box position="relative" w="full">

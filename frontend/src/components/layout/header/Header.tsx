@@ -243,7 +243,7 @@ export default function Header({
 
           {/* Mobile primary nav: four frequent destinations plus a More menu. */}
           {user && (
-            <Box display={{ base: 'block', md: 'none' }} pb={3} pt={1}>
+            <Box display={{ base: 'block', md: 'none' }} pb={onBrand ? 1 : 3} pt={onBrand ? 0 : 1} mx={onBrand ? -2 : 0}>
               <NavBar
                 variant="mobile"
                 items={navItems}
