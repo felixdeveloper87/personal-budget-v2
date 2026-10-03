@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="768" height="900" viewBox="0 0 768 900" preserveAspectRatio="xMidYMid slice">
   <defs>
     <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4199db"/>
-      <stop offset=".55" stop-color="#86c6eb"/>
-      <stop offset="1" stop-color="#f1d89e"/>
+      <stop offset="0" stop-color="#8c92da"/>
+      <stop offset=".55" stop-color="#cdb9e8"/>
+      <stop offset="1" stop-color="#f1d3bf"/>
     </linearGradient>
     <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
       <stop stop-color="#8eb77b"/><stop offset="1" stop-color="#567f62"/>
@@ -15,18 +15,18 @@
       <stop stop-color="#4d5860"/><stop offset=".55" stop-color="#26343b"/><stop offset="1" stop-color="#17262d"/>
     </linearGradient>
     <linearGradient id="door" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#253f3b"/><stop offset="1" stop-color="#102724"/>
+      <stop stop-color="#5c2a86"/><stop offset="1" stop-color="#3a1658"/>
     </linearGradient>
     <linearGradient id="path" x1="0" y1="0" x2="0" y2="1">
       <stop stop-color="#e9d4a4"/><stop offset="1" stop-color="#a9815a"/>
     </linearGradient>
     <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0b392f" stop-opacity=".12"/>
-      <stop offset=".55" stop-color="#0b392f" stop-opacity=".05"/>
-      <stop offset="1" stop-color="#092f29" stop-opacity=".68"/>
+      <stop offset="0" stop-color="#2a1240" stop-opacity=".12"/>
+      <stop offset=".55" stop-color="#2a1240" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#1c0b2c" stop-opacity=".68"/>
     </linearGradient>
     <linearGradient id="leftShade" x1="0" y1="0" x2="1" y2="0">
-      <stop stop-color="#123d31" stop-opacity=".48"/><stop offset=".6" stop-color="#123d31" stop-opacity="0"/>
+      <stop stop-color="#2a1240" stop-opacity=".48"/><stop offset=".6" stop-color="#2a1240" stop-opacity="0"/>
     </linearGradient>
     <radialGradient id="windowGlow">
       <stop stop-color="#ffd778"/><stop offset=".58" stop-color="#e69b42"/><stop offset="1" stop-color="#8c4e2b"/>
@@ -46,20 +46,20 @@
   </defs>
 
   <rect width="768" height="900" fill="url(#sky)"/>
-  <circle cx="618" cy="126" r="62" fill="#fff0c8" opacity=".45" filter="url(#softBlur)"/>
+  <circle cx="618" cy="126" r="62" fill="#f6d9f0" opacity=".5" filter="url(#softBlur)"/>
 
   <!-- warm summer clouds -->
-  <g fill="#fff1d5" opacity=".9">
+  <g fill="#fbf1ff" opacity=".9">
     <path d="M480 165c9-28 44-36 65-13 12-39 66-42 83-7 33-10 62 12 63 41H454c1-12 10-19 26-21Z"/>
     <path d="M97 237c8-23 38-29 55-10 15-31 59-30 71 2 29-7 52 11 54 36H70c2-15 11-24 27-28Z" opacity=".84"/>
     <path d="M657 252c5-18 29-23 42-9 11-22 43-21 52 2v28h-112c1-10 7-17 18-21Z" opacity=".72"/>
   </g>
-  <g fill="#e8b982" opacity=".42">
+  <g fill="#d9a6c4" opacity=".42">
     <ellipse cx="538" cy="181" rx="67" ry="13"/><ellipse cx="173" cy="258" rx="62" ry="11"/>
   </g>
 
   <!-- layered English countryside -->
-  <path d="M0 350c90-74 175-91 270-42 72-58 158-65 242-18 85-54 168-48 256 2v214H0Z" fill="#87ad76"/>
+  <path d="M0 350c90-74 175-91 270-42 72-58 158-65 242-18 85-54 168-48 256 2v214H0Z" fill="#9aa2c2"/>
   <path d="M0 390c86-58 181-68 276-23 69-51 152-57 236-14 87-44 170-37 256 11v173H0Z" fill="url(#hillFar)"/>
   <path d="M0 439c95-64 186-50 268-2 80-54 173-45 252 7 90-44 168-38 248 5v139H0Z" fill="url(#hillNear)"/>
   <g fill="none" stroke="#d3d69a" stroke-width="3" opacity=".55">

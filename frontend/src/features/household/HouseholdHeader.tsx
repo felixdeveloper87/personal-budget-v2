@@ -76,7 +76,7 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
       p={{ base: '15px', md: 6 }}
       boxShadow="var(--pb-shadow)"
     >
-      <Box aria-hidden="true" position="absolute" inset={0} zIndex={-1} bgImage="url('/household-landscape.svg?v=20260928-2')" bgSize="cover" bgPosition="center" pointerEvents="none" />
+      <Box aria-hidden="true" position="absolute" inset={0} zIndex={-1} bgImage="url('/household-landscape.svg?v=20261004-lilac')" bgSize="cover" bgPosition="center" pointerEvents="none" />
 
       <Flex align="center" justify="space-between" wrap="wrap" gap={3} px={{ base: 1, md: 0 }} pt={1}>
         <Box flex={1} minW="120px">

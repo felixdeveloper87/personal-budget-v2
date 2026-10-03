@@ -29,17 +29,18 @@ export function HouseholdLandscape({
       <Defs>
         {/* Sky */}
         <LinearGradient id="sky" x1="0%" y1="0%" x2="15%" y2="100%">
-          <Stop offset="0" stopColor="#4EA6D8" />
-          <Stop offset="0.55" stopColor="#A9D4DD" />
-          <Stop offset="1" stopColor="#E8D5A7" />
+          {/* Soft lavender dusk — a quiet nod to the app's purple */}
+          <Stop offset="0" stopColor="#8C92DA" />
+          <Stop offset="0.55" stopColor="#CDB9E8" />
+          <Stop offset="1" stopColor="#F1D3BF" />
         </LinearGradient>
 
-        {/* Hero readability overlay */}
+        {/* Hero readability overlay (deep night-purple) */}
         <LinearGradient id="heroShade" x1="0%" y1="0%" x2="0%" y2="100%">
-          <Stop offset="0" stopColor="#123D38" stopOpacity="0.04" />
-          <Stop offset="0.48" stopColor="#123D38" stopOpacity="0.16" />
-          <Stop offset="0.76" stopColor="#103A31" stopOpacity="0.43" />
-          <Stop offset="1" stopColor="#092D27" stopOpacity="0.78" />
+          <Stop offset="0" stopColor="#2A1240" stopOpacity="0.04" />
+          <Stop offset="0.48" stopColor="#2A1240" stopOpacity="0.16" />
+          <Stop offset="0.76" stopColor="#261038" stopOpacity="0.43" />
+          <Stop offset="1" stopColor="#1C0B2C" stopOpacity="0.78" />
         </LinearGradient>
 
         {/* Warm window */}
@@ -71,13 +72,14 @@ export function HouseholdLandscape({
         cx="321"
         cy="142"
         r="42"
-        fill="#FFD894"
-        opacity="0.78"
+        fill="#FFD9A8"
+        opacity="0.82"
       />
+      <Circle cx="321" cy="142" r="70" fill="#F6D9F0" opacity="0.22" />
 
       {/* Clouds */}
 
-      <G opacity="0.68" fill="#FFF5DF">
+      <G opacity="0.7" fill="#FBF1FF">
         <Path d="M210 114c9-17 29-18 40-3 16-3 30 7 32 21h-88c1-9 6-15 16-18Z" />
         <Path d="M56 155c8-13 24-14 33-2 13-2 24 6 26 17H45c1-7 4-12 11-15Z" />
       </G>
@@ -88,12 +90,12 @@ export function HouseholdLandscape({
 
       <Path
         d="M0 217c47-28 94-35 143-12 54-39 106-37 151-8 38-22 69-25 96-12v93H0Z"
-        fill="#83A994"
+        fill="#9AA2C2"
       />
 
       <Path
         d="M0 244c53-28 99-25 144 2 50-34 100-29 147-1 36-22 69-23 99-8v73H0Z"
-        fill="#658F72"
+        fill="#6E8B80"
       />
 
       {/* Distant village */}
@@ -327,7 +329,7 @@ export function HouseholdLandscape({
           width="42"
           height="77"
           rx="2"
-          fill="#183F3B"
+          fill="#4A1F6E"
         />
 
         <Rect
@@ -336,7 +338,7 @@ export function HouseholdLandscape({
           width="30"
           height="26"
           rx="2"
-          fill="#214C47"
+          fill="#5C2A86"
         />
 
         <Rect
@@ -345,7 +347,7 @@ export function HouseholdLandscape({
           width="30"
           height="27"
           rx="2"
-          fill="#214C47"
+          fill="#5C2A86"
         />
 
         <Circle
