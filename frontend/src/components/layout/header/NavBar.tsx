@@ -21,6 +21,7 @@ import {
 import { ChevronLeft, ChevronRight } from '../../ui/icons'
 import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
+import { ON_BRAND, useOnBrand } from './onBrand'
 
 interface NavBarProps extends Omit<StackProps, 'onChange'> {
   currentPage: AppPage
@@ -112,9 +113,51 @@ export default function NavBar({
     'linear-gradient(90deg, #60a5fa, #a78bfa)',
   )
   const accentBar = ed ? ed.jade : accentBarBase
-  const focusShadow = ed
+  const focusShadowBase = ed
     ? `0 0 0 2px ${ed.bg}, 0 0 0 5px ${ed.jade}`
     : '0 0 0 3px rgba(59, 130, 246, 0.35)'
+
+  // On the purple app bar: translucent white track, white labels, and the
+  // active tab as a solid white pill with purple text.
+  const onBrand = useOnBrand()
+  const brandIndicatorShadow = '0 2px 8px rgba(40, 0, 70, 0.25)'
+  const c = onBrand
+    ? {
+        trackBg: ON_BRAND.controlBg,
+        trackBorder: ON_BRAND.line,
+        trackShadow: 'none',
+        trackBgMobile: ON_BRAND.controlBg,
+        trackBorderMobile: ON_BRAND.line,
+        inactiveColor: ON_BRAND.inkSoft,
+        hoverColor: ON_BRAND.ink,
+        activeColor: ON_BRAND.bg,
+        indicatorBg: '#ffffff',
+        indicatorBgMobile: '#ffffff',
+        indicatorShadow: brandIndicatorShadow,
+        indicatorRing: 'inset 0 0 0 0 transparent',
+        chevronBg: '#ffffff',
+        chevronColor: ON_BRAND.bg,
+        accentBar: ON_BRAND.bg,
+        focusShadow: ON_BRAND.focus,
+      }
+    : {
+        trackBg,
+        trackBorder,
+        trackShadow,
+        trackBgMobile,
+        trackBorderMobile,
+        inactiveColor,
+        hoverColor,
+        activeColor,
+        indicatorBg,
+        indicatorBgMobile,
+        indicatorShadow,
+        indicatorRing,
+        chevronBg,
+        chevronColor: hoverColor,
+        accentBar,
+        focusShadow: focusShadowBase,
+      }
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -202,11 +245,11 @@ export default function NavBar({
       spacing={1}
       p={1}
       borderRadius={isMobile ? '2xl' : 'xl'}
-      bg={isMobile ? trackBgMobile : trackBg}
+      bg={isMobile ? c.trackBgMobile : c.trackBg}
       border="1px solid"
-      borderColor={isMobile ? trackBorderMobile : trackBorder}
+      borderColor={isMobile ? c.trackBorderMobile : c.trackBorder}
       backdropFilter={isMobile ? 'blur(16px) saturate(150%)' : 'blur(12px)'}
-      boxShadow={trackShadow}
+      boxShadow={c.trackShadow}
       flexShrink={0}
       w={isMobile ? 'full' : 'auto'}
       maxW="none"
@@ -256,8 +299,8 @@ export default function NavBar({
         left={`${indicator.left}px`}
         width={`${indicator.width}px`}
         borderRadius={isMobile ? 'full' : 'lg'}
-        bg={isMobile ? indicatorBgMobile : indicatorBg}
-        boxShadow={`${indicatorShadow}, ${indicatorRing}`}
+        bg={isMobile ? c.indicatorBgMobile : c.indicatorBg}
+        boxShadow={`${c.indicatorShadow}, ${c.indicatorRing}`}
         opacity={indicator.ready ? 1 : 0}
         transition={indicatorTransition}
         data-nav-indicator="true"
@@ -275,7 +318,7 @@ export default function NavBar({
         width={`${indicator.width * 0.44}px`}
         h="2px"
         borderRadius="full"
-        background={accentBar}
+        background={c.accentBar}
         opacity={indicator.ready ? 0.95 : 0}
         transition={indicatorTransition}
         zIndex={0}
@@ -291,10 +334,10 @@ export default function NavBar({
           isIconOnly={isIconOnly}
           onSelect={selectTab}
           reducedMotion={!!reducedMotion}
-          inactiveColor={inactiveColor}
-          hoverColor={hoverColor}
-          activeColor={activeColor}
-          focusShadow={focusShadow}
+          inactiveColor={c.inactiveColor}
+          hoverColor={c.hoverColor}
+          activeColor={c.activeColor}
+          focusShadow={c.focusShadow}
           assignRef={(el) => {
             itemRefs.current[item.id] = el
           }}
@@ -326,11 +369,11 @@ export default function NavBar({
         justifyContent="center"
         boxSize="28px"
         borderRadius="full"
-        bg={chevronBg}
-        color={hoverColor}
+        bg={c.chevronBg}
+        color={c.chevronColor}
         border="1px solid"
-        borderColor={trackBorderMobile}
-        boxShadow={indicatorShadow}
+        borderColor={c.trackBorderMobile}
+        boxShadow={c.indicatorShadow}
         opacity={interacting && edges.start ? 1 : 0}
         transition="opacity 0.2s ease, transform 0.2s ease"
         pointerEvents={interacting && edges.start ? 'auto' : 'none'}
@@ -354,11 +397,11 @@ export default function NavBar({
         justifyContent="center"
         boxSize="28px"
         borderRadius="full"
-        bg={chevronBg}
-        color={hoverColor}
+        bg={c.chevronBg}
+        color={c.chevronColor}
         border="1px solid"
-        borderColor={trackBorderMobile}
-        boxShadow={indicatorShadow}
+        borderColor={c.trackBorderMobile}
+        boxShadow={c.indicatorShadow}
         opacity={interacting && edges.end ? 1 : 0}
         transition="opacity 0.2s ease, transform 0.2s ease"
         pointerEvents={interacting && edges.end ? 'auto' : 'none'}

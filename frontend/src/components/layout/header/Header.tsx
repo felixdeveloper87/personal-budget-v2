@@ -8,6 +8,7 @@ import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
 import NavBar from './NavBar'
+import { ON_BRAND, OnBrandContext } from './onBrand'
 import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
@@ -84,7 +85,9 @@ export default function Header({
     showGlass ? (isScrolled ? 'rgba(255,255,255,0.78)' : 'rgba(255,255,255,0.62)') : 'transparent',
     showGlass ? (isScrolled ? 'rgba(10,10,12,0.78)'    : 'rgba(10,10,12,0.55)')    : 'transparent',
   )
-  const bg = ed ? ed.header : bgBase
+  // Logged-in shell: a solid purple app bar that flows into the dashboard hero.
+  const onBrand = Boolean(user)
+  const bg = onBrand ? ON_BRAND.bg : ed ? ed.header : bgBase
   const bgOverlayVal = useColorModeValue(
     'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 60%)',
     'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0) 60%)',
@@ -118,8 +121,8 @@ export default function Header({
         top={0}
         zIndex={1000}
         bg={bg}
-        borderBottom={ed ? `1px solid ${ed.line}` : undefined}
-        boxShadow={shadow}
+        borderBottom={ed && !onBrand ? `1px solid ${ed.line}` : undefined}
+        boxShadow={onBrand ? 'none' : shadow}
         backdropFilter={backdrop}
         transition="background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease"
         sx={{
@@ -145,6 +148,7 @@ export default function Header({
           },
         }}
       >
+        <OnBrandContext.Provider value={onBrand}>
         <Container
           maxW={pageIntegrated ? 'appContent' : '100%'}
           px={contentPadding}
@@ -186,7 +190,7 @@ export default function Header({
                   fontSize="10.5px"
                   letterSpacing="0.22em"
                   textTransform="uppercase"
-                  color="var(--pb-ink-faint)"
+                  color={onBrand ? ON_BRAND.inkSoft : 'var(--pb-ink-faint)'}
                   whiteSpace="nowrap"
                 >
                   {formatDate(new Date(), { weekday: 'long' })}
@@ -241,6 +245,7 @@ export default function Header({
             </Box>
           )}
         </Container>
+        </OnBrandContext.Provider>
 
         {/* Animated accent gradient bottom border */}
         <Box

@@ -1,6 +1,7 @@
 import { IconButton, Tooltip, useColorModeValue } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
+import { ON_BRAND, useOnBrand } from './onBrand'
 
 function BrazilFlag() {
   return (
@@ -53,6 +54,11 @@ export default function LanguageToggle() {
   const fallbackBg = useColorModeValue('rgba(255,255,255,0.65)', 'rgba(255,255,255,0.04)')
   const fallbackBorder = useColorModeValue('rgba(226,232,240,0.8)', 'rgba(255,255,255,0.08)')
   const fallbackHoverBg = useColorModeValue('white', 'rgba(255,255,255,0.09)')
+  const onBrand = useOnBrand()
+  const border = onBrand ? ON_BRAND.line : ed?.line ?? fallbackBorder
+  const bg = onBrand ? ON_BRAND.controlBg : ed?.controlBg ?? fallbackBg
+  const hoverBg = onBrand ? ON_BRAND.controlHoverBg : ed?.controlHoverBg ?? fallbackHoverBg
+  const hoverBorder = onBrand ? ON_BRAND.lineStrong : ed?.jade ?? 'blue.300'
 
   return (
     <Tooltip label={label} hasArrow openDelay={300}>
@@ -66,9 +72,9 @@ export default function LanguageToggle() {
         minW="40px"
         borderRadius="full"
         border="1px solid"
-        borderColor={ed?.line ?? fallbackBorder}
-        bg={ed?.controlBg ?? fallbackBg}
-        boxShadow="var(--pb-shadow, 0 1px 4px rgba(15, 23, 42, 0.08))"
+        borderColor={border}
+        bg={bg}
+        boxShadow={onBrand ? 'none' : 'var(--pb-shadow, 0 1px 4px rgba(15, 23, 42, 0.08))'}
         transition="background 0.2s ease, border-color 0.2s ease, transform 0.2s ease"
         sx={{
           '& > svg': {
@@ -79,14 +85,16 @@ export default function LanguageToggle() {
           '&:hover > svg': { transform: 'scale(1.08)' },
         }}
         _hover={{
-          bg: ed?.controlHoverBg ?? fallbackHoverBg,
-          borderColor: ed?.jade ?? 'blue.300',
+          bg: hoverBg,
+          borderColor: hoverBorder,
           transform: 'translateY(-1px)',
         }}
         _active={{ transform: 'translateY(0)' }}
         _focusVisible={{
           outline: 'none',
-          boxShadow: ed
+          boxShadow: onBrand
+            ? ON_BRAND.focus
+            : ed
             ? `0 0 0 2px ${ed.bg}, 0 0 0 5px ${ed.jade}`
             : '0 0 0 3px rgba(59, 130, 246, 0.35)',
         }}

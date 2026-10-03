@@ -18,6 +18,7 @@ import { ChevronDown, ChevronRight, LogOut, Settings, User } from '../../ui/icon
 import { editorialPalette, useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
 import type { UserPlan } from '../../../types'
+import { ON_BRAND, useOnBrand } from './onBrand'
 
 interface UserMenuProps {
   user: any
@@ -43,6 +44,7 @@ export default function UserMenu({
   const { t } = useI18n()
   const { colorMode } = useColorMode()
   const ed = useEd() ?? editorialPalette(colorMode)
+  const onBrand = useOnBrand()
   const plan: UserPlan = user?.plan ?? 'STANDARD'
   const displayName = user?.name || t('user.defaultName')
   const displayEmail = user?.email || ''
@@ -86,21 +88,21 @@ export default function UserMenu({
         h="40px"
         px={1.5}
         borderRadius="full"
-        bg={ed.controlBg}
+        bg={onBrand ? ON_BRAND.controlBg : ed.controlBg}
         border="1px solid"
-        borderColor={line}
+        borderColor={onBrand ? ON_BRAND.line : line}
         backdropFilter="blur(14px)"
         display="inline-flex"
         alignItems="center"
         transition="background 0.2s ease, border-color 0.2s ease, transform 0.2s ease"
         _hover={{
-          bg: ed.controlHoverBg,
-          borderColor: jade,
+          bg: onBrand ? ON_BRAND.controlHoverBg : ed.controlHoverBg,
+          borderColor: onBrand ? ON_BRAND.lineStrong : jade,
           transform: 'translateY(-1px)',
         }}
         _focusVisible={{
           outline: 'none',
-          boxShadow: `0 0 0 3px ${jade}38`,
+          boxShadow: onBrand ? ON_BRAND.focus : `0 0 0 3px ${jade}38`,
         }}
       >
         <HStack spacing={1.5}>
@@ -140,14 +142,14 @@ export default function UserMenu({
               display={{ base: 'none', md: 'block' }}
               textStyle="display"
               fontSize="md"
-              color={text}
+              color={onBrand ? ON_BRAND.ink : text}
               maxW="100px"
               isTruncated
             >
               {displayName.split(' ')[0]}
             </Text>
           ))}
-          {!compact && <Icon as={ChevronDown} boxSize={3.5} color={muted} flexShrink={0} />}
+          {!compact && <Icon as={ChevronDown} boxSize={3.5} color={onBrand ? ON_BRAND.inkSoft : muted} flexShrink={0} />}
         </HStack>
       </MenuButton>
 

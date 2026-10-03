@@ -9,6 +9,7 @@ import {
 } from '@chakra-ui/react'
 import { Search } from '../../ui/icons'
 import { useI18n } from '../../../i18n'
+import { ON_BRAND, useOnBrand } from './onBrand'
 
 interface SearchTriggerProps {
   onOpen: () => void
@@ -29,21 +30,33 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
   const isMac = typeof navigator !== 'undefined' && navigator.platform.toLowerCase().includes('mac')
   const shortcut = isMac ? '⌘K' : 'Ctrl K'
 
-  const pillProps = {
-    bg: 'var(--pb-surface)',
-    border: '1px solid var(--pb-hair)',
-    color: 'var(--pb-ink-faint)',
-    boxShadow: 'var(--pb-shadow)',
-    transition: 'all 0.2s ease',
-    _hover: {
-      borderColor: 'var(--pb-hair-2)',
-      color: 'var(--pb-ink)',
-      transform: 'translateY(-1px)',
-      boxShadow: 'var(--pb-shadow-lift)',
-    },
-    _active: { transform: 'translateY(0)' },
-    _focusVisible: { outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)' },
-  } as const
+  const onBrand = useOnBrand()
+  const pillProps = onBrand
+    ? {
+        bg: ON_BRAND.controlBg,
+        border: `1px solid ${ON_BRAND.line}`,
+        color: ON_BRAND.ink,
+        boxShadow: 'none',
+        transition: 'all 0.2s ease',
+        _hover: { bg: ON_BRAND.controlHoverBg, borderColor: ON_BRAND.lineStrong, transform: 'translateY(-1px)' },
+        _active: { transform: 'translateY(0)' },
+        _focusVisible: { outline: 'none', boxShadow: ON_BRAND.focus },
+      }
+    : {
+        bg: 'var(--pb-surface)',
+        border: '1px solid var(--pb-hair)',
+        color: 'var(--pb-ink-faint)',
+        boxShadow: 'var(--pb-shadow)',
+        transition: 'all 0.2s ease',
+        _hover: {
+          borderColor: 'var(--pb-hair-2)',
+          color: 'var(--pb-ink)',
+          transform: 'translateY(-1px)',
+          boxShadow: 'var(--pb-shadow-lift)',
+        },
+        _active: { transform: 'translateY(0)' },
+        _focusVisible: { outline: 'none', boxShadow: '0 0 0 2px var(--pb-forest)' },
+      }
 
   if (variant === 'compact') {
     return (
@@ -92,14 +105,14 @@ export default function SearchTrigger({ onOpen, variant }: SearchTriggerProps) {
             px={1.5}
             py="1px"
             borderRadius="6px"
-            border="1px solid var(--pb-hair)"
+            border={onBrand ? `1px solid ${ON_BRAND.line}` : '1px solid var(--pb-hair)'}
             flexShrink={0}
           >
             <Text
               fontFamily="var(--pb-mono)"
               fontSize="9px"
               fontWeight={500}
-              color="var(--pb-ink-faint)"
+              color={onBrand ? ON_BRAND.inkSoft : 'var(--pb-ink-faint)'}
               letterSpacing="0.06em"
             >
               {shortcut}

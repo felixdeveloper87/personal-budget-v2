@@ -1,6 +1,7 @@
 import { Box, useColorModeValue } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import BrandMark from '../../brand/BrandMark'
+import { useOnBrand } from './onBrand'
 
 interface LogoProps {
   user?: any
@@ -270,6 +271,8 @@ export function LogoIconWallet({ boxSize }: { boxSize?: number } = {}) {
 
 export default function Logo({ onClick }: LogoProps) {
   const { t } = useI18n()
+  // On the purple app bar, use the light-on-dark artwork.
+  const markMode = useOnBrand() ? 'dark' : undefined
   return (
     <Box
       as="button"
@@ -282,10 +285,10 @@ export default function Logo({ onClick }: LogoProps) {
       _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '4px' }}
     >
       <Box display={{ base: 'block', md: 'none' }} w="clamp(112px, 34vw, 165px)">
-        <BrandMark variant="title" size="100%" />
+        <BrandMark variant="title" size="100%" colorMode={markMode} />
       </Box>
       <Box display={{ base: 'none', md: 'block' }} w="210px" maxW="full">
-        <BrandMark variant="wordmark" size="100%" />
+        <BrandMark variant="wordmark" size="100%" colorMode={markMode} />
       </Box>
     </Box>
   )

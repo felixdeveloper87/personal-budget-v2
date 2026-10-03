@@ -25,9 +25,9 @@ function HeaderArtwork() {
   return (
     <svg width="100%" height="100%" viewBox="0 0 720 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
       <defs>
-        <linearGradient id="nuHeaderBase" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#6e08b3" />
-          <stop offset="0.6" stopColor="#820ad1" />
+        {/* Starts at the app bar's flat purple so the two read as one surface. */}
+        <linearGradient id="nuHeaderBase" x1="0" y1="0" x2="0.35" y2="1">
+          <stop offset="0" stopColor="#820ad1" />
           <stop offset="1" stopColor="#8f1bdc" />
         </linearGradient>
         <radialGradient id="nuHeaderGlow" cx="92%" cy="15%" r="55%">
