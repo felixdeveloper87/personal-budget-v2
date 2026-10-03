@@ -22,6 +22,8 @@ interface ActivityIntensityStripProps {
   dateKey: ActivityDateKey
   title: string
   caption: string
+  /** "nu": flat grey card, purple intensity and sentence-case labels (Nubank-style pages). */
+  appearance?: "editorial" | "nu"
 }
 
 function dayLabel(day: ChartDay, locale: string): string {
@@ -42,14 +44,18 @@ export default function ActivityIntensityStrip({
   dateKey,
   title,
   caption,
+  appearance = "editorial",
 }: ActivityIntensityStripProps) {
+  const isNu = appearance === "nu"
+  const labelCase = isNu ? "none" : "uppercase"
   const { t, locale, formatCurrency } = useI18n()
   const { colorMode } = useColorMode()
   const dark = colorMode === 'dark'
   const isIncome = tone === 'income'
   const transactionType = isIncome ? 'in' : 'out'
-  const tint = isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
-  const accent = isIncome ? 'var(--pb-income)' : 'var(--pb-coral)'
+  const tint = isNu ? 'var(--nu-brand-tint)' : isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
+  const accent = isNu ? 'var(--nu-brand)' : isIncome ? 'var(--pb-income)' : 'var(--pb-coral)'
+  const surfaceTint = isNu ? 'var(--nu-page)' : tint
 
   const totals = useMemo(() => {
     const totalsByDay = new Map<string, number>()
@@ -80,11 +86,12 @@ export default function ActivityIntensityStrip({
   const columns = Math.max(days.length, 7)
 
   const fillFor = (amount: number) => {
-    if (amount === 0) return 'var(--pb-surface-2)'
+    if (amount === 0) return isNu ? 'var(--nu-track)' : 'var(--pb-surface-2)'
 
     // Square-root intensity keeps quieter days visible when the period has
     // one much larger transaction.
     const intensity = 0.2 + Math.sqrt(amount / max) * 0.72
+    if (isNu) return `rgba(130, 10, 209, ${intensity})`
     if (isIncome) {
       return dark
         ? `rgba(98, 220, 162, ${intensity})`
@@ -97,10 +104,10 @@ export default function ActivityIntensityStrip({
 
   return (
     <Box
-      bg="var(--pb-surface)"
-      border={`1px solid ${tint}`}
-      borderRadius="20px"
-      boxShadow="var(--pb-shadow)"
+      bg={isNu ? 'var(--nu-surface)' : 'var(--pb-surface)'}
+      border={isNu ? '0' : `1px solid ${tint}`}
+      borderRadius={isNu ? '16px' : '20px'}
+      boxShadow={isNu ? 'none' : 'var(--pb-shadow)'}
       p={{ base: 4, md: 5 }}
     >
       <Flex
@@ -110,18 +117,18 @@ export default function ActivityIntensityStrip({
         direction={{ base: 'column', sm: 'row' }}
       >
         <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={600} letterSpacing=".14em" textTransform="uppercase" color="var(--pb-ink)">
+          <Text fontFamily="var(--pb-mono)" fontSize={isNu ? '15px' : '10px'} fontWeight={600} letterSpacing={isNu ? 0 : '.14em'} textTransform={labelCase} color="var(--pb-ink)">
             {title}
           </Text>
           <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
             {t('transactions.activityInPeriod', { caption, period: periodLabel })}
           </Text>
         </Box>
-        <Box minW={{ base: 'full', sm: '142px' }} px={3.5} py={2.5} bg={tint} border={`1px solid ${tint}`} borderRadius="13px" textAlign={{ base: 'left', sm: 'right' }}>
-          <Text fontFamily="var(--pb-serif)" fontSize="1.35rem" lineHeight={1} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
+        <Box minW={{ base: 'full', sm: '142px' }} px={3.5} py={2.5} bg={surfaceTint} border={`1px solid ${surfaceTint}`} borderRadius="13px" textAlign={{ base: 'left', sm: 'right' }}>
+          <Text fontFamily="var(--pb-serif)" fontSize="1.35rem" fontWeight={isNu ? 700 : undefined} lineHeight={1} color={isNu ? 'var(--pb-ink)' : accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(summary.total)}
           </Text>
-          <Text mt={1} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".08em" textTransform="uppercase" color="var(--pb-ink-faint)">
+          <Text mt={1} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".08em" textTransform={labelCase} color="var(--pb-ink-faint)">
             {summary.activeDays === 1
               ? t('transactions.activeDay')
               : t('transactions.activeDays', { count: summary.activeDays })}
@@ -130,7 +137,7 @@ export default function ActivityIntensityStrip({
       </Flex>
 
       {summary.peak.day && (
-        <HStack mt={4} spacing={2} w="fit-content" px={2.5} py={1.5} borderRadius="full" bg={tint}>
+        <HStack mt={4} spacing={2} w="fit-content" px={2.5} py={1.5} borderRadius="full" bg={surfaceTint}>
           <Box w="6px" h="6px" borderRadius="full" bg={accent} />
           <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing=".025em" color="var(--pb-ink-soft)">
             {t('transactions.highestDay', {
@@ -169,14 +176,14 @@ export default function ActivityIntensityStrip({
                 p={1}
                 borderRadius="10px"
                 textAlign="center"
-                bg={selected ? tint : 'transparent'}
+                bg={selected ? surfaceTint : 'transparent'}
                 outline={selected ? `2px solid ${accent}` : '1px solid transparent'}
                 outlineOffset="1px"
                 transition="background .16s ease, transform .16s ease, outline-color .16s ease"
-                _hover={{ bg: tint, transform: 'translateY(-2px)' }}
+                _hover={{ bg: surfaceTint, transform: 'translateY(-2px)' }}
                 _focusVisible={{ outline: `2px solid ${accent}`, outlineOffset: '2px' }}
               >
-                <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing=".04em" textTransform="uppercase" color="var(--pb-ink-faint)">
+                <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing=".04em" textTransform={labelCase} color="var(--pb-ink-faint)">
                   {day.date.toLocaleDateString(locale, { weekday: 'narrow' })}
                 </Text>
                 <Text mt="1px" fontFamily="var(--pb-mono)" fontSize="10px" color={active ? 'var(--pb-ink)' : 'var(--pb-ink-faint)'}>
@@ -190,20 +197,20 @@ export default function ActivityIntensityStrip({
       </Box>
 
       <Flex mt={4} pt={3} borderTop="1px solid var(--pb-hair)" align="center" gap={2} flexWrap="wrap">
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('transactions.lower')}</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform={labelCase} color="var(--pb-ink-faint)">{t('transactions.lower')}</Text>
         {[0.24, 0.42, 0.62, 0.9].map((intensity) => (
           <Box
             key={intensity}
             w="10px"
             h="10px"
             borderRadius="3px"
-            bg={isIncome
+            bg={isNu ? `rgba(130, 10, 209, ${intensity})` : isIncome
               ? dark ? `rgba(98, 220, 162, ${intensity})` : `rgba(31, 138, 79, ${intensity})`
               : dark ? `rgba(255, 154, 144, ${intensity})` : `rgba(184, 69, 47, ${intensity})`}
           />
         ))}
-        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('transactions.higher')}</Text>
-        <Text ml={{ base: 0, sm: 'auto' }} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".05em" textTransform="uppercase" color="var(--pb-ink-faint)">
+        <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".06em" textTransform={labelCase} color="var(--pb-ink-faint)">{t('transactions.higher')}</Text>
+        <Text ml={{ base: 0, sm: 'auto' }} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing=".05em" textTransform={labelCase} color="var(--pb-ink-faint)">
           {t('transactions.selectDayDetails')}
         </Text>
       </Flex>

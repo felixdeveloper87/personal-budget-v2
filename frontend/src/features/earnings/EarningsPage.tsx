@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, HStack, Skeleton, Text, VStack, useColorModeValue } from '@chakra-ui/react'
-import { useMemo, useState, type ReactNode } from 'react'
+import { Box, Flex, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
 import { TrendingUp } from 'lucide-react'
 
@@ -18,7 +18,7 @@ import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
 import MerchantLogo from '../../components/ui/MerchantLogo'
-import IncomeHeroArtwork from './IncomeHeroArtwork'
+import { NuSection } from '../dashboard/components/nu'
 
 type I18nApi = ReturnType<typeof useI18n>
 
@@ -29,7 +29,9 @@ function periodNavigationLabel(
   formatDate: I18nApi['formatDate'],
 ): string {
   if (period === 'month') {
-    return formatDate(date, { month: 'short', year: 'numeric' }).toLocaleUpperCase(locale)
+    // Sentence case, matching the mobile app's period label.
+    const label = formatDate(date, { month: 'long', year: 'numeric' })
+    return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1)
   }
   if (period === 'day') {
     return formatDate(date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
@@ -109,17 +111,44 @@ export default function EarningsPage() {
           { amount: formatCurrency(Math.abs(difference)) },
         )
 
+  const change = periodData.income - previousPeriodData.income
+
   return (
-    <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
-      <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          <EarningsOverview
-            total={periodData.income}
-            previousTotal={previousPeriodData.income}
-            incomeCount={incomeTransactions.length}
-            comparisonCopy={comparisonCopy}
-            loading={loading}
-            periodNavigator={(
+    <Box>
+      {/* Purple page header — continues the app bar, like the mobile Incomes tab. */}
+      <Box className="nu-on-brand" bg="var(--pb-hero)">
+        <Box maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 3, md: 6 }} pb={{ base: 10, md: 12 }}>
+          <Flex align="center" justify="space-between" gap={3}>
+            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white">
+              {t('earnings.hero.title')}
+            </Text>
+            <Box display="grid" placeItems="center" w="36px" h="36px" borderRadius="full" bg="rgba(255,255,255,0.16)" color="white" flexShrink={0}>
+              <TrendingUp size={18} strokeWidth={2.4} aria-hidden="true" />
+            </Box>
+          </Flex>
+
+          <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
+            <Box minW={0}>
+              <Text fontSize="sm" color="rgba(255,255,255,0.82)">{t('earnings.hero.total')}</Text>
+              {loading ? (
+                <Skeleton mt={1} height="44px" maxW="240px" borderRadius="10px" startColor="rgba(255,255,255,0.18)" endColor="rgba(255,255,255,0.3)" />
+              ) : (
+                <>
+                  <Text fontSize={{ base: '2rem', md: '2.5rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white" noOfLines={1}
+                    sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatCurrency(periodData.income)}
+                  </Text>
+                  <Text mt={1} fontSize="sm" color="rgba(255,255,255,0.82)">
+                    {t(incomeTransactions.length === 1 ? 'earnings.hero.count.one' : 'earnings.hero.count.other', { count: incomeTransactions.length })}
+                    {' · '}
+                    <Text as="span" fontWeight={600} color={previousPeriodData.income === 0 || change === 0 ? 'rgba(255,255,255,0.9)' : change > 0 ? '#9ff0c8' : '#ffc2b8'}>
+                      {comparisonCopy}
+                    </Text>
+                  </Text>
+                </>
+              )}
+            </Box>
+            <Box flexShrink={0} minW={{ md: '360px' }}>
               <PeriodNavBar
                 embedded
                 allowedPeriods={['week', 'month']}
@@ -130,47 +159,62 @@ export default function EarningsPage() {
                 onNavigate={navigatePeriod}
                 onGoToToday={goToToday}
               />
+            </Box>
+          </Flex>
+        </Box>
+      </Box>
+
+      {/* White sheet with rounded top tucked over the purple header. */}
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }}>
+        <MotionBox
+          className="nu-dashboard"
+          variants={containerV}
+          initial={reduce ? false : 'hidden'}
+          animate="show"
+          bg="var(--nu-page)"
+          borderTopRadius="24px"
+          borderBottomRadius={{ base: 0, md: '24px' }}
+          overflow="hidden"
+          boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+        >
+          <MotionBox variants={riseV} px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 5, md: 6 }}>
+            {loading ? (
+              <Skeleton height="230px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+            ) : (
+              <ActivityIntensityStrip
+                appearance="nu"
+                days={days}
+                txns={incomeTransactions}
+                selectedDay={selectedDay}
+                onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
+                periodLabel={periodLabel}
+                tone="income"
+                dateKey="purchaseDate"
+                title={t('earnings.activity.title')}
+                caption={t('earnings.activity.caption')}
+              />
             )}
-          />
-        </MotionBox>
+          </MotionBox>
 
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          {loading ? (
-            <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <ActivityIntensityStrip
-              days={days}
-              txns={incomeTransactions}
-              selectedDay={selectedDay}
-              onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
-              periodLabel={periodLabel}
-              tone="income"
-              dateKey="purchaseDate"
-              title={t('earnings.activity.title')}
-              caption={t('earnings.activity.caption')}
-            />
-          )}
+          <MotionBox variants={riseV}>
+            {loading ? (
+              <Box px={{ base: 4, md: 6 }} pb={6}>
+                <Skeleton height="260px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+              </Box>
+            ) : (
+              <EarningsSources sources={sources} periodLabel={periodLabel} />
+            )}
+          </MotionBox>
         </MotionBox>
+      </Box>
 
-        <MotionBox variants={riseV}>
-          {loading ? (
-            <Skeleton height="300px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <EarningsSources
-              sources={sources}
-              periodLabel={periodLabel}
-            />
-          )}
-        </MotionBox>
-
-        {selectedDay && (
-          <SelectedDayIncomes
-            day={selectedDay}
-            incomes={selectedDayIncomes}
-            onClose={() => setSelectedDay(null)}
-          />
-        )}
-      </MotionBox>
+      {selectedDay && (
+        <SelectedDayIncomes
+          day={selectedDay}
+          incomes={selectedDayIncomes}
+          onClose={() => setSelectedDay(null)}
+        />
+      )}
     </Box>
   )
 }
@@ -223,95 +267,7 @@ function SelectedDayIncomes({
   )
 }
 
-function EarningsOverview({
-  total,
-  previousTotal,
-  incomeCount,
-  comparisonCopy,
-  loading,
-  periodNavigator,
-}: {
-  total: number
-  previousTotal: number
-  incomeCount: number
-  comparisonCopy: string
-  loading: boolean
-  periodNavigator: ReactNode
-}) {
-  const { t, formatCurrency } = useI18n()
-  const change = total - previousTotal
-  const changeColor = change >= 0 ? 'var(--pb-summary-income)' : 'var(--pb-summary-coral)'
-  const artworkVeil = useColorModeValue('rgba(251,249,244,0.42)', 'rgba(20,35,34,0.58)')
-
-  return (
-    <Box
-      position="relative"
-      overflow="hidden"
-      bg="#EDE9DF"
-      border="1px solid var(--pb-summary-line)"
-      borderRadius="28px"
-      boxShadow="var(--pb-shadow)"
-    >
-      <Box position="absolute" inset={0} pointerEvents="none">
-        <IncomeHeroArtwork />
-      </Box>
-      <Box position="absolute" inset={0} bg={artworkVeil} pointerEvents="none" />
-
-      <Box position="relative" zIndex={1} p="clamp(1rem, 2.4vw, 1.5rem)">
-        <Flex align="center" gap={3}>
-          <Box flex={1} minW={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={800} letterSpacing="0.18em" color="var(--pb-summary-income)">
-              {t('earnings.hero.eyebrow')}
-            </Text>
-            <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: '27px', md: '30px' }} fontWeight={700} letterSpacing="-0.025em" lineHeight={1} color="var(--pb-summary-ink)">
-              {t('earnings.hero.title')}
-            </Text>
-          </Box>
-          <Box
-            display="grid" placeItems="center" flexShrink={0} w="44px" h="44px" borderRadius="16px"
-            bg="rgba(251,249,244,0.75)" border="1px solid rgba(255,255,255,0.7)" color="var(--pb-summary-income)"
-          >
-            <TrendingUp size={23} strokeWidth={2.4} aria-hidden="true" />
-          </Box>
-        </Flex>
-
-        <Box mt={4.5}>
-          <Text fontSize="xs" fontWeight={500} color="var(--pb-summary-ink-soft)">
-            {t('earnings.hero.total')}
-          </Text>
-          {loading ? (
-            <Skeleton mt={2} height="53px" maxW="280px" borderRadius="12px" startColor="var(--pb-summary-panel)" endColor="var(--pb-summary-control)" />
-          ) : (
-            <>
-              <Text
-                mt={1} fontFamily="var(--pb-serif)" fontSize="clamp(2.55rem, 6vw, 3.25rem)" fontWeight={800}
-                letterSpacing="-0.035em" lineHeight={1.05} color="var(--pb-summary-income)" noOfLines={1}
-                sx={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
-              >
-                {formatCurrency(total)}
-              </Text>
-              <Text mt={1} fontSize="11px" color="var(--pb-summary-ink-soft)">
-                {t(incomeCount === 1 ? 'earnings.hero.count.one' : 'earnings.hero.count.other', { count: incomeCount })}
-              </Text>
-              <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.06em" textTransform="uppercase" color={changeColor}>
-                {comparisonCopy}
-              </Text>
-            </>
-          )}
-        </Box>
-
-        <Box
-          mt={4.5} p={{ base: 2.5, md: 3 }} borderRadius="18px"
-          bg="rgba(251,249,244,0.9)" border="1px solid rgba(255,255,255,0.8)"
-          backdropFilter="blur(8px)"
-        >
-          {periodNavigator}
-        </Box>
-      </Box>
-    </Box>
-  )
-}
-
+/** Income sources as a flat list on the white sheet (logo · name · share · amount). */
 function EarningsSources({
   sources,
   periodLabel,
@@ -323,189 +279,47 @@ function EarningsSources({
   const total = sources.reduce((sum, source) => sum + source.total, 0)
 
   return (
-    <Box
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      borderRadius="22px"
-      boxShadow="var(--pb-shadow)"
-      p="clamp(1.1rem,2.5vw,1.5rem)"
-      overflow="hidden"
-    >
-      <VStack align="stretch" spacing={5}>
-        <Flex
-          direction={{ base: 'column', sm: 'row' }}
-          justify="space-between"
-          align={{ base: 'flex-start', sm: 'flex-end' }}
-          gap={3}
-          pb={4}
-          borderBottom="1px solid var(--pb-hair)"
+    <NuSection
+      title={t('earnings.sources.title')}
+      subtitle={t('earnings.sources.description', { period: periodLabel })}
+      action={sources.length > 0 ? (
+        <Text
+          flexShrink={0} px={3} py={1} borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)"
+          fontSize="sm" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}
         >
-          <Box>
-            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.2em" textTransform="uppercase" color="var(--pb-ink-faint)">
-              {t('earnings.sources.title')}
-            </Text>
-            <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
-              {t('earnings.sources.description', { period: periodLabel })}
-            </Text>
-          </Box>
-
-          {sources.length > 0 && (
-            <VStack align={{ base: 'flex-start', sm: 'flex-end' }} spacing={0.5}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">
-                {t(
-                  sources.length === 1
-                    ? 'earnings.sources.count.one'
-                    : 'earnings.sources.count.other',
-                  { count: formatNumber(sources.length) },
-                )}
-              </Text>
-              <Text
-                fontFamily="var(--pb-serif)"
-                fontSize="1.65rem"
-                fontWeight={500}
-                lineHeight={1}
-                color="var(--pb-income)"
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {formatCurrency(total)}
-              </Text>
-            </VStack>
-          )}
-        </Flex>
-
-        {sources.length === 0 ? (
-          <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)" py={3}>
-            {t('earnings.sources.empty')}
-          </Text>
-        ) : (
-          <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }} gap={3}>
-            {sources.map((source, index) => (
-              <EarningsSourceCard
-                key={source.name}
-                source={source}
-                rank={index + 1}
-                share={total > 0 ? source.total / total : 0}
-              />
-            ))}
-          </Grid>
-        )}
-      </VStack>
-    </Box>
-  )
-}
-
-function EarningsSourceCard({
-  source,
-  rank,
-  share,
-}: {
-  source: ReturnType<typeof earningsBySource>[number]
-  rank: number
-  share: number
-}) {
-  const { t, formatCurrency, formatNumber } = useI18n()
-  const percentage = Math.round(share * 100)
-  const formattedPercentage = formatNumber(percentage)
-  const paymentLabel = t(
-    source.count === 1 ? 'earnings.source.payment.one' : 'earnings.source.payment.other',
-    { count: formatNumber(source.count) },
-  )
-
-  return (
-    <Box
-      bg="var(--pb-surface-2)"
-      border="1px solid var(--pb-hair)"
-      borderRadius="16px"
-      px={{ base: 3.5, sm: 4 }}
-      py={{ base: 3.5, sm: 4 }}
-      transition="transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease"
-      _hover={{
-        transform: 'translateY(-2px)',
-        borderColor: 'var(--pb-hair-2)',
-        boxShadow: '0 10px 28px rgba(23, 53, 38, 0.08)',
-      }}
+          {formatCurrency(total)}
+        </Text>
+      ) : undefined}
     >
-      <HStack align="center" spacing={3.5}>
-        <Box position="relative" w="46px" h="46px" flexShrink={0}>
-          <MerchantLogo
-            name={source.name}
-            domain={source.merchantDomain}
-            size={46}
-            borderRadius="13px"
-          />
-          <Box
-            position="absolute"
-            right="-5px"
-            bottom="-5px"
-            minW="19px"
-            h="19px"
-            px="4px"
-            display="grid"
-            placeItems="center"
-            borderRadius="full"
-            bg="var(--pb-surface)"
-            border="1px solid var(--pb-hair-2)"
-            boxShadow="0 2px 6px rgba(0,0,0,0.12)"
-          >
-            <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={700} lineHeight={1} color="var(--pb-ink-faint)">
-              {rank}
-            </Text>
-          </Box>
+      {sources.length === 0 ? (
+        <Box bg="var(--nu-surface)" borderRadius="16px" p={6} textAlign="center">
+          <Text fontSize="sm" color="var(--pb-ink-soft)">{t('earnings.sources.empty')}</Text>
         </Box>
-
-        <Box minW={0} flex={1}>
-          <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} lineHeight={1.2} color="var(--pb-ink)" noOfLines={1}>
-            {source.name}
-          </Text>
-          <Text mt={1} fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            {t('earnings.source.share', {
-              payments: paymentLabel,
-              percentage: formattedPercentage,
-            })}
-          </Text>
-        </Box>
-
-        <VStack align="flex-end" spacing={0.5} flexShrink={0}>
-          <Text
-            fontFamily="var(--pb-serif)"
-            fontSize={{ base: 'lg', sm: 'xl' }}
-            fontWeight={600}
-            lineHeight={1}
-            color="var(--pb-income)"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {formatCurrency(source.total)}
-          </Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
-            {t('earnings.source.received')}
-          </Text>
-        </VStack>
-      </HStack>
-
-      <Box
-        role="progressbar"
-        aria-label={t('earnings.source.progress', {
-          source: source.name,
-          percentage: formattedPercentage,
-        })}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={percentage}
-        mt={3.5}
-        h="4px"
-        borderRadius="full"
-        bg="var(--pb-surface-3)"
-        overflow="hidden"
-      >
-        <Box
-          h="full"
-          w={`max(${percentage}%, 8px)`}
-          borderRadius="full"
-          bgGradient="linear(to-r, var(--pb-income), var(--pb-forest-2))"
-          opacity={0.82}
-          transition="width 0.5s ease"
-        />
-      </Box>
-    </Box>
+      ) : (
+        <Grid templateColumns={{ base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }} columnGap={10}>
+          {sources.map((source) => {
+            const percentage = total > 0 ? Math.round((source.total / total) * 100) : 0
+            const paymentLabel = t(
+              source.count === 1 ? 'earnings.source.payment.one' : 'earnings.source.payment.other',
+              { count: formatNumber(source.count) },
+            )
+            return (
+              <HStack key={source.name} spacing={3} py={3} borderBottom="1px solid var(--pb-hair)" minW={0}>
+                <MerchantLogo name={source.name} domain={source.merchantDomain} size={42} borderRadius="50%" />
+                <Box minW={0} flex={1}>
+                  <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{source.name}</Text>
+                  <Text mt={0.5} fontSize="sm" color="var(--pb-ink-soft)" noOfLines={1}>
+                    {t('earnings.source.share', { payments: paymentLabel, percentage: formatNumber(percentage) })}
+                  </Text>
+                </Box>
+                <Text flexShrink={0} fontSize="md" fontWeight={700} color="var(--nu-positive)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  +{formatCurrency(source.total)}
+                </Text>
+              </HStack>
+            )
+          })}
+        </Grid>
+      )}
+    </NuSection>
   )
 }

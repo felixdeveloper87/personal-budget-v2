@@ -74,6 +74,28 @@
   font-family: var(--pb-serif);
 }
 
+/* Controls sitting on a purple page header (e.g. the Earnings period bar).
+   Re-points the "summary" tokens that PeriodNavBar/Segmented already use. */
+.nu-on-brand {
+  --pb-mono: var(--pb-serif);
+  --pb-eyebrow-case: none;
+  --pb-eyebrow-tracking: 0;
+  --pb-summary-panel: rgba(255, 255, 255, 0.14);
+  --pb-summary-line: rgba(255, 255, 255, 0.22);
+  --pb-summary-control: rgba(255, 255, 255, 0.24);
+  --pb-summary-ink: #ffffff;
+  --pb-summary-ink-soft: rgba(255, 255, 255, 0.82);
+  --pb-summary-ink-faint: rgba(255, 255, 255, 0.7);
+  color: #ffffff;
+}
+
+/* Selected segment: a solid white pill with purple text, as in the mobile app. */
+.nu-on-brand [role="radio"][aria-checked="true"] {
+  background: #ffffff;
+  color: #820ad1;
+  box-shadow: 0 2px 8px rgba(40, 0, 70, 0.22);
+}
+
 @keyframes pb-spin {
   to { transform: rotate(360deg); }
 }
