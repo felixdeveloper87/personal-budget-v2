@@ -15,6 +15,8 @@ interface PeriodNavigatorProps {
   onNavigate: (direction: "previous" | "next") => void;
   onGoToToday: () => void;
   variant?: "default" | "inverse";
+  /** "inline": one compact row (chevrons + label + small segmented) for short headers. */
+  layout?: "stacked" | "inline";
 }
 
 const options: Array<{ label: string; value: PeriodUnit }> = [
@@ -35,8 +37,66 @@ export function PeriodNavigator({
   onNavigate,
   onGoToToday,
   variant = "default",
+  layout = "stacked",
 }: PeriodNavigatorProps) {
   const inverse = variant === "inverse";
+
+  if (layout === "inline") {
+    return (
+      <View style={styles.inlineRow}>
+        <NavigationButton compact direction="previous" inverse={inverse} onPress={() => onNavigate("previous")} />
+        <Pressable
+          accessibilityHint={isCurrent ? undefined : "Volta para o período atual"}
+          accessibilityRole="button"
+          disabled={isCurrent}
+          onPress={onGoToToday}
+          style={styles.inlineCopy}
+        >
+          <Text numberOfLines={1} style={[styles.periodLabel, inverse && styles.periodLabelInverse]}>
+            {label}
+          </Text>
+          {!isCurrent ? (
+            <Text style={[styles.inlineToday, inverse && styles.todayTextInverse]}>Hoje</Text>
+          ) : null}
+        </Pressable>
+        <NavigationButton compact direction="next" inverse={inverse} onPress={() => onNavigate("next")} />
+        <View
+          accessibilityLabel="Selecionar período"
+          accessibilityRole="tablist"
+          style={[styles.segmented, styles.inlineSegmented, inverse && styles.segmentedInverse]}
+        >
+          {options.map((option) => {
+            const selected = option.value === value;
+            return (
+              <Pressable
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                key={option.value}
+                onPress={() => onChange(option.value)}
+                style={({ pressed }) => [
+                  styles.segment,
+                  styles.inlineSegment,
+                  selected && styles.segmentSelected,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    styles.inlineSegmentText,
+                    inverse && styles.segmentTextInverse,
+                    selected && (inverse ? styles.segmentTextSelectedInverse : styles.segmentTextSelected),
+                  ]}
+                >
+                  {option.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -63,7 +123,7 @@ export function PeriodNavigator({
                 style={[
                   styles.segmentText,
                   inverse && styles.segmentTextInverse,
-                  selected && styles.segmentTextSelected,
+                  selected && (inverse ? styles.segmentTextSelectedInverse : styles.segmentTextSelected),
                 ]}
               >
                 {option.label}
@@ -107,10 +167,12 @@ export function PeriodNavigator({
 }
 
 function NavigationButton({
+  compact = false,
   direction,
   inverse,
   onPress,
 }: {
+  compact?: boolean;
   direction: "previous" | "next";
   inverse: boolean;
   onPress: () => void;
@@ -123,6 +185,7 @@ function NavigationButton({
       onPress={onPress}
       style={({ pressed }) => [
         styles.navigationButton,
+        compact && styles.navigationButtonCompact,
         inverse && styles.navigationButtonInverse,
         pressed && styles.pressed,
       ]}
@@ -144,7 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 4,
   },
-  segmentedInverse: { backgroundColor: "rgba(255,255,255,0.10)" },
+  segmentedInverse: { backgroundColor: "rgba(255,255,255,0.14)" },
   segment: {
     alignItems: "center",
     borderRadius: 11,
@@ -161,8 +224,10 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   segmentText: { color: colors.inkSoft, fontSize: 13, fontWeight: "600" },
-  segmentTextInverse: { color: "#D8E7E7" },
+  segmentTextInverse: { color: "rgba(255,255,255,0.82)" },
   segmentTextSelected: { color: colors.forest, fontWeight: "700" },
+  // Inverse sits on the purple header: the white selected pill carries purple text.
+  segmentTextSelectedInverse: { color: "#820AD1", fontWeight: "700" },
   navigationRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -180,8 +245,8 @@ const styles = StyleSheet.create({
     width: 42,
   },
   navigationButtonInverse: {
-    backgroundColor: "rgba(255,255,255,0.10)",
-    borderColor: "rgba(255,255,255,0.18)",
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderColor: "rgba(255,255,255,0.22)",
   },
   periodCopy: {
     alignItems: "center",
@@ -198,7 +263,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
-  todayBadgeInverse: { borderColor: "rgba(255,255,255,0.18)" },
+  todayBadgeInverse: { borderColor: "rgba(255,255,255,0.3)" },
   todayText: {
     color: colors.inkFaint,
     fontSize: 9,
@@ -206,6 +271,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
-  todayTextInverse: { color: "#D8E7E7" },
+  todayTextInverse: { color: "rgba(255,255,255,0.88)" },
   pressed: { opacity: 0.7 },
+  inlineRow: { alignItems: "center", flexDirection: "row", gap: 6 },
+  inlineCopy: { alignItems: "center", flex: 1, minWidth: 0, paddingHorizontal: 4 },
+  inlineToday: { color: colors.inkFaint, fontSize: 10, fontWeight: "600", marginTop: 1 },
+  inlineSegmented: { borderRadius: 999, marginLeft: 4, padding: 3 },
+  inlineSegment: { borderRadius: 999, flex: 0, minHeight: 30, paddingHorizontal: 11 },
+  inlineSegmentText: { fontSize: 12 },
+  navigationButtonCompact: { borderRadius: 17, height: 34, width: 34 },
 });

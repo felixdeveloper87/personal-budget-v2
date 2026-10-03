@@ -1,3 +1,5 @@
+import { useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -5,24 +7,24 @@ import {
   ActivityIndicator,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
   DailyActivityChart,
   type DailyActivityEntry,
 } from "@/components/activity/DailyActivityChart";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { PeriodNavigator } from "@/components/period/PeriodNavigator";
 import { useAuth } from "@/contexts/AuthContext";
-import { IncomeHeroArtwork } from "@/features/incomes/IncomeHeroArtwork";
+import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
 import { usePeriodNavigation } from "@/hooks/usePeriodNavigation";
 import { ApiError, searchTransactions } from "@/services/api";
-import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
@@ -115,6 +117,7 @@ function groupIncomesByDescription(incomes: Transaction[]): IncomeDescriptionGro
 
 export function IncomesScreen() {
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const period = usePeriodNavigation("month");
   const [incomes, setIncomes] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -186,294 +189,235 @@ export function IncomesScreen() {
     [visibleIncomes],
   );
 
+  // Light status-bar icons over the purple header, restored when leaving the tab.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
+    }, []),
+  );
+
   if (!user) return null;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
+            colors={[nu.brand]}
             onRefresh={() => void loadIncomes(true)}
+            progressViewOffset={insets.top}
             refreshing={refreshing}
-            tintColor={colors.forest}
+            tintColor={nu.white}
           />
         }
       >
-        <View style={styles.hero}>
-          <View style={styles.heroImage}>
-            <View pointerEvents="none" style={styles.heroArtwork}>
-              <IncomeHeroArtwork />
-            </View>
-            <View pointerEvents="none" style={styles.heroVeil} />
-            <View style={styles.heroContent}>
-              <View style={styles.heroHeading}>
-                <View style={styles.heroCopy}>
-                  <Text style={styles.eyebrow}>SUAS ENTRADAS</Text>
-                  <Text style={styles.heroLabel}>Receitas</Text>
-                </View>
-                <View style={styles.heroIcon}>
-                  <IncomeTrendIcon color={colors.income} size={23} />
-                </View>
-              </View>
+        {/* Brand colour also fills the iOS overscroll area above the header. */}
+        <View style={styles.overscrollFill} />
 
-              <View style={styles.totalBlock}>
-                <Text style={styles.totalLabel}>Total no período</Text>
-                {loading ? (
-                  <View style={styles.loadingValue}>
-                    <ActivityIndicator color={colors.income} />
-                  </View>
-                ) : (
-                  <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.totalValue}>
-                    {error ? "—" : formatCurrency(totalIncome)}
-                  </Text>
-                )}
-                <Text style={styles.totalCaption}>
-                  {loading ? "Carregando suas entradas…" : error ? "Total indisponível no momento" : incomes.length === 1 ? "1 receita no período" : `${incomes.length} receitas no período`}
+        <NuHeader>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.headerTitle}>Receitas</Text>
+            <View style={styles.headerIcon}>
+              <IncomeTrendIcon color={nu.white} size={17} />
+            </View>
+          </View>
+
+          <Text style={styles.totalLabel}>Total no período</Text>
+          {loading ? (
+            <View style={styles.loadingValue}>
+              <ActivityIndicator color={nu.white} />
+            </View>
+          ) : (
+            <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.totalValue}>
+              {error ? "—" : formatCurrency(totalIncome)}
+            </Text>
+          )}
+          <Text style={styles.totalCaption}>
+            {loading ? "Carregando suas entradas…" : error ? "Total indisponível no momento" : incomes.length === 1 ? "1 receita no período" : `${incomes.length} receitas no período`}
+          </Text>
+
+          <View style={styles.periodPanel}>
+            <PeriodNavigator
+              isCurrent={period.isCurrent}
+              label={period.label}
+              onChange={period.setSelectedPeriod}
+              onGoToToday={period.goToToday}
+              onNavigate={period.navigate}
+              layout="inline"
+              value={period.selectedPeriod}
+              variant="inverse"
+            />
+          </View>
+        </NuHeader>
+
+        {/* White sheet: rounded top tucked over the purple header. */}
+        <View style={styles.sheet}>
+          {!loading && !error ? (
+            <View style={styles.section}>
+              <DailyActivityChart
+                appearance="nu"
+                endDate={period.range.end}
+                entries={chartEntries}
+                onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
+                period={period.selectedPeriod}
+                selectedDay={selectedDay}
+                startDate={period.range.start}
+                title={`Intensidade por dia · ${period.label}`}
+                tone="income"
+              />
+            </View>
+          ) : null}
+
+          <View style={[styles.section, styles.sectionDivided]}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionCopy}>
+                <Text style={styles.sectionTitle}>
+                  {selectedDay ? formatSelectedDate(selectedDay) : "Fontes de receita"}
+                </Text>
+                <Text style={styles.sectionSubtitle}>
+                  {selectedDay ? `Total do dia · ${formatCurrency(selectedDayTotal)}` : "Agrupadas por descrição"}
                 </Text>
               </View>
+              {!loading && !error ? (
+                selectedDay ? (
+                  <Pressable onPress={() => setSelectedDay(null)} style={({ pressed }) => [styles.pill, pressed && styles.pressed]}>
+                    <Text style={styles.pillText}>Ver todas</Text>
+                  </Pressable>
+                ) : (
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>{groupedIncomes.length}</Text>
+                  </View>
+                )
+              ) : null}
+            </View>
 
-              <View style={styles.periodPanel}>
-                <PeriodNavigator
-                  isCurrent={period.isCurrent}
-                  label={period.label}
-                  onChange={period.setSelectedPeriod}
-                  onGoToToday={period.goToToday}
-                  onNavigate={period.navigate}
-                  value={period.selectedPeriod}
-                />
+            {loading ? (
+              <View style={styles.stateCard}>
+                <ActivityIndicator color={nu.brand} />
+                <Text style={styles.stateText}>Carregando receitas…</Text>
               </View>
-            </View>
-          </View>
-        </View>
-
-        {!loading && !error ? (
-          <DailyActivityChart
-            endDate={period.range.end}
-            entries={chartEntries}
-            onSelectDay={(day) => setSelectedDay((current) => current === day ? null : day)}
-            period={period.selectedPeriod}
-            selectedDay={selectedDay}
-            startDate={period.range.start}
-            title={`Intensidade diária · ${period.label}`}
-            tone="income"
-          />
-        ) : null}
-
-        <View style={styles.sectionHeader}>
-          <View>
-            <Text style={styles.sectionEyebrow}>{selectedDay ? "DIA SELECIONADO" : "FONTES DE RECEITA"}</Text>
-            <Text style={styles.sectionTitle}>
-              {selectedDay ? formatSelectedDate(selectedDay) : "Receitas por descrição"}
-            </Text>
-            {selectedDay ? (
-              <Text style={styles.selectedDayTotal}>
-                Total do dia · {formatCurrency(selectedDayTotal)}
-              </Text>
-            ) : null}
-          </View>
-          {!loading && !error ? (
-            selectedDay ? (
-              <Pressable onPress={() => setSelectedDay(null)} style={styles.clearButton}>
-                <Text style={styles.clearButtonText}>Ver todas</Text>
-              </Pressable>
+            ) : error ? (
+              <View style={styles.stateCard}>
+                <Text style={styles.stateTitle}>Receitas indisponíveis</Text>
+                <Text style={styles.stateText}>{error}</Text>
+                <Pressable onPress={() => void loadIncomes()} style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}>
+                  <Text style={styles.retryText}>Tentar novamente</Text>
+                </Pressable>
+              </View>
+            ) : visibleIncomes.length === 0 ? (
+              <View style={styles.stateCard}>
+                <View style={styles.emptyIcon}>
+                  <IncomeTrendIcon color={nu.brand} size={24} />
+                </View>
+                <Text style={styles.stateTitle}>Nenhuma receita</Text>
+                <Text style={styles.stateText}>
+                  {selectedDay
+                    ? "Não há entradas registradas no dia selecionado."
+                    : "Não há entradas registradas neste período."}
+                </Text>
+              </View>
             ) : (
-              <Text style={styles.countBadge}>{groupedIncomes.length}</Text>
-            )
-          ) : null}
-        </View>
-
-        {loading ? (
-          <View style={styles.stateCard}>
-            <ActivityIndicator color={colors.forest} />
-            <Text style={styles.stateText}>Carregando receitas…</Text>
-          </View>
-        ) : error ? (
-          <View style={styles.stateCard}>
-            <Text style={styles.errorTitle}>Receitas indisponíveis</Text>
-            <Text style={styles.stateText}>{error}</Text>
-            <Pressable onPress={() => void loadIncomes()} style={styles.retryButton}>
-              <Text style={styles.retryText}>Tentar novamente</Text>
-            </Pressable>
-          </View>
-        ) : visibleIncomes.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <View style={styles.emptyIcon}>
-              <IncomeTrendIcon color={colors.income} size={25} />
-            </View>
-            <Text style={styles.emptyTitle}>Nenhuma receita</Text>
-            <Text style={styles.emptyText}>
-              {selectedDay
-                ? "Não há entradas registradas no dia selecionado."
-                : "Não há entradas registradas neste período."}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.listCard}>
-            {selectedDay
-              ? visibleIncomes.map((income, index) => (
-                <View
-                  key={income.id}
-                  style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
-                >
-                  <View style={styles.rowLogo}>
-                    <MerchantLogo
+              <View>
+                {selectedDay
+                  ? visibleIncomes.map((income, index) => (
+                    <IncomeRow
+                      amount={Number(income.amount)}
                       category={income.category}
+                      divided={index > 0}
                       domain={income.merchantDomain}
-                      name={income.merchantName || income.description || income.category}
-                      size={42}
+                      key={income.id}
+                      logoName={income.merchantName || income.description || income.category}
+                      meta={`${income.category} · ${formatTransactionDate(income.paymentDate ?? income.transactionDate)}`}
+                      title={income.description || income.category}
                     />
-                  </View>
-                  <View style={styles.rowCopy}>
-                    <Text numberOfLines={1} style={styles.rowTitle}>
-                      {income.description || income.category}
-                    </Text>
-                    <Text numberOfLines={1} style={styles.rowMeta}>
-                      {income.category} · {formatTransactionDate(income.paymentDate ?? income.transactionDate)}
-                    </Text>
-                  </View>
-                  <Text numberOfLines={1} style={styles.rowAmount}>
-                    +{formatCurrency(Number(income.amount))}
-                  </Text>
-                </View>
-              ))
-              : groupedIncomes.map((group, index) => (
-                <View
-                  key={group.key}
-                  style={[styles.incomeRow, index > 0 && styles.incomeRowBorder]}
-                >
-                  <View style={styles.rowLogo}>
-                    <MerchantLogo
+                  ))
+                  : groupedIncomes.map((group, index) => (
+                    <IncomeRow
+                      amount={group.total}
                       category={group.category}
+                      divided={index > 0}
                       domain={group.domain}
-                      name={group.name}
-                      size={42}
+                      key={group.key}
+                      logoName={group.name}
+                      meta={`${group.count === 1 ? "1 receita" : `${group.count} receitas`} · ${group.category}`}
+                      title={group.name}
                     />
-                  </View>
-                  <View style={styles.rowCopy}>
-                    <Text numberOfLines={1} style={styles.rowTitle}>{group.name}</Text>
-                    <Text numberOfLines={1} style={styles.rowMeta}>
-                      {group.count === 1 ? "1 receita" : `${group.count} receitas`} · {group.category}
-                    </Text>
-                  </View>
-                  <Text numberOfLines={1} style={styles.rowAmount}>
-                    +{formatCurrency(group.total)}
-                  </Text>
-                </View>
-              ))}
+                  ))}
+              </View>
+            )}
           </View>
-        )}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
+  );
+}
+
+function IncomeRow({
+  amount,
+  category,
+  divided,
+  domain,
+  logoName,
+  meta,
+  title,
+}: {
+  amount: number;
+  category: string;
+  divided: boolean;
+  domain?: string | null;
+  logoName: string;
+  meta: string;
+  title: string;
+}) {
+  return (
+    <View style={[styles.row, divided && styles.rowDivided]}>
+      <View style={styles.rowLogo}>
+        <MerchantLogo category={category} domain={domain} name={logoName} size={42} />
+      </View>
+      <View style={styles.rowCopy}>
+        <Text numberOfLines={1} style={styles.rowTitle}>{title}</Text>
+        <Text numberOfLines={1} style={styles.rowMeta}>{meta}</Text>
+      </View>
+      <Text numberOfLines={1} style={styles.rowAmount}>+{formatCurrency(amount)}</Text>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { padding: 18, paddingBottom: 42 },
-  hero: {
-    backgroundColor: "#EDE9DF",
-    borderRadius: 28,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.07,
-    shadowRadius: 14,
-  },
-  heroImage: { borderRadius: 28, overflow: "hidden" },
-  heroArtwork: { ...StyleSheet.absoluteFill },
-  heroVeil: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(251,249,244,0.42)" },
-  heroContent: { padding: 16 },
-  heroHeading: { flexDirection: "row", alignItems: "center", gap: 12 },
-  heroCopy: { flex: 1 },
-  heroIcon: { width: 44, height: 44, borderRadius: 16, backgroundColor: "rgba(251,249,244,0.75)", borderWidth: 1, borderColor: "rgba(255,255,255,0.7)", alignItems: "center", justifyContent: "center" },
-  eyebrow: { color: colors.income, fontSize: 9, fontWeight: "800", letterSpacing: 1.7 },
-  heroLabel: { color: colors.ink, fontSize: 27, fontWeight: "700", letterSpacing: -0.7, marginTop: 4 },
-  totalBlock: { marginTop: 18 },
-  totalLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "500" },
-  loadingValue: { alignItems: "flex-start", height: 53, justifyContent: "center" },
-  totalValue: {
-    color: "#234D3B",
-    fontSize: 43,
-    fontWeight: "800",
-    letterSpacing: -1.5,
-    marginTop: 4,
-  },
-  totalCaption: { color: colors.inkSoft, fontSize: 11, marginTop: 3 },
-  periodPanel: { backgroundColor: "rgba(251,249,244,0.9)", borderRadius: 18, borderWidth: 1, borderColor: "rgba(255,255,255,0.8)", padding: 11, marginTop: 18 },
-  sectionHeader: {
-    alignItems: "flex-end",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    marginTop: 28,
-    paddingHorizontal: 3,
-  },
-  sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.6 },
-  sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "700", marginTop: 5 },
-  selectedDayTotal: { color: colors.income, fontSize: 14, fontWeight: "800", marginTop: 7 },
-  countBadge: {
-    backgroundColor: colors.incomeTint,
-    borderRadius: 12,
-    color: colors.income,
-    fontSize: 12,
-    fontWeight: "800",
-    minWidth: 28,
-    overflow: "hidden",
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    textAlign: "center",
-  },
-  clearButton: {
-    backgroundColor: colors.incomeTint,
-    borderRadius: 13,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-  },
-  clearButtonText: { color: colors.income, fontSize: 11, fontWeight: "800" },
-  listCard: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 22,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-  },
-  incomeRow: { alignItems: "center", flexDirection: "row", minHeight: 76, paddingVertical: 12 },
-  incomeRowBorder: { borderColor: colors.line, borderTopWidth: StyleSheet.hairlineWidth },
+  screen: { backgroundColor: nu.white, flex: 1 },
+  content: { paddingBottom: 42 },
+  overscrollFill: { backgroundColor: nu.brand, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
+  headerTitleRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  headerTitle: { color: nu.white, fontSize: 20, fontWeight: "700", letterSpacing: -0.3 },
+  headerIcon: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.16)", borderRadius: 17, height: 34, justifyContent: "center", width: 34 },
+  totalLabel: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 10 },
+  loadingValue: { alignItems: "flex-start", height: 40, justifyContent: "center" },
+  totalValue: { color: nu.white, fontSize: 31, fontWeight: "700", letterSpacing: -0.9, fontVariant: ["tabular-nums"] },
+  totalCaption: { color: "rgba(255,255,255,0.8)", fontSize: 12 },
+  periodPanel: { marginTop: 12 },
+  sheet: { backgroundColor: nu.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -NU_SHEET_OVERLAP, paddingTop: 4 },
+  section: { paddingHorizontal: 20, paddingVertical: 18 },
+  sectionDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
+  sectionHeader: { alignItems: "flex-start", flexDirection: "row", gap: 12, justifyContent: "space-between", marginBottom: 6 },
+  sectionCopy: { flex: 1, minWidth: 0 },
+  sectionTitle: nuSection.title,
+  sectionSubtitle: nuSection.subtitle,
+  pill: { backgroundColor: nu.brandTint, borderRadius: 999, minWidth: 30, paddingHorizontal: 11, paddingVertical: 5 },
+  pillText: { color: nu.brand, fontSize: 12, fontWeight: "700", textAlign: "center" },
+  row: { alignItems: "center", flexDirection: "row", minHeight: 70, paddingVertical: 12 },
+  rowDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
   rowLogo: { marginRight: 12 },
   rowCopy: { flex: 1, minWidth: 0 },
-  rowTitle: { color: colors.ink, fontSize: 15, fontWeight: "700" },
-  rowMeta: { color: colors.inkFaint, fontSize: 11, marginTop: 5 },
-  rowAmount: { color: colors.income, fontSize: 14, fontWeight: "800", marginLeft: 8 },
-  stateCard: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 22,
-    borderWidth: 1,
-    gap: 11,
-    padding: 28,
-  },
-  stateText: { color: colors.inkSoft, fontSize: 14, lineHeight: 20, textAlign: "center" },
-  errorTitle: { color: colors.ink, fontSize: 17, fontWeight: "700" },
-  retryButton: { paddingHorizontal: 16, paddingVertical: 9 },
-  retryText: { color: colors.forest, fontSize: 14, fontWeight: "800" },
-  emptyCard: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 22,
-    borderWidth: 1,
-    padding: 30,
-  },
-  emptyIcon: {
-    alignItems: "center",
-    backgroundColor: colors.incomeTint,
-    borderRadius: 22,
-    height: 46,
-    justifyContent: "center",
-    marginBottom: 13,
-    width: 46,
-  },
-  emptyTitle: { color: colors.ink, fontSize: 17, fontWeight: "700" },
-  emptyText: { color: colors.inkSoft, fontSize: 13, marginTop: 6, textAlign: "center" },
+  rowTitle: { color: nu.ink, fontSize: 15, fontWeight: "600" },
+  rowMeta: { color: nu.inkSoft, fontSize: 12, marginTop: 3 },
+  rowAmount: { color: nu.positive, fontSize: 15, fontWeight: "700", marginLeft: 8, fontVariant: ["tabular-nums"] },
+  stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, marginTop: 10, padding: 26 },
+  stateTitle: { color: nu.ink, fontSize: 16, fontWeight: "600" },
+  stateText: { color: nu.inkSoft, fontSize: 13, lineHeight: 19, textAlign: "center" },
+  emptyIcon: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 22, height: 44, justifyContent: "center", marginBottom: 4, width: 44 },
+  retryButton: { backgroundColor: nu.brand, borderRadius: 999, marginTop: 6, paddingHorizontal: 20, paddingVertical: 11 },
+  retryText: { color: nu.white, fontSize: 14, fontWeight: "600" },
+  pressed: { opacity: 0.75 },
 });

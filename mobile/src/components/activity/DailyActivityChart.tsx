@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 
+import { nu } from "@/components/dashboard/nuTheme";
 import { colors } from "@/theme/colors";
 import { toLocalIsoDate, type PeriodUnit } from "@/utils/period";
 
@@ -18,6 +19,8 @@ interface DailyActivityChartProps {
   startDate: Date;
   title: string;
   tone: "income" | "expense";
+  /** "nu": flat grey card with purple intensity, for the Nubank-style screens. */
+  appearance?: "editorial" | "nu";
 }
 
 interface ActivityDay {
@@ -61,7 +64,9 @@ export function DailyActivityChart({
   startDate,
   title,
   tone,
+  appearance = "editorial",
 }: DailyActivityChartProps) {
+  const isNu = appearance === "nu";
   const days = useMemo(
     () => buildDays(startDate, endDate, entries),
     [endDate, entries, startDate],
@@ -76,8 +81,9 @@ export function DailyActivityChart({
     [days],
   );
   const maxAmount = peak?.amount || 1;
-  const accent = tone === "income" ? colors.income : colors.expense;
-  const tint = tone === "income" ? colors.incomeTint : colors.expenseTint;
+  const accent = isNu ? nu.brand : tone === "income" ? colors.income : colors.expense;
+  const tint = isNu ? nu.brandTint : tone === "income" ? colors.incomeTint : colors.expenseTint;
+  const palette = isNu ? "nu" : tone;
 
   const cells = days.map((day) => (
     <DayCell
@@ -85,24 +91,25 @@ export function DailyActivityChart({
       amount={day.amount}
       day={day.date}
       intensity={day.amount > 0 ? 0.18 + Math.sqrt(day.amount / maxAmount) * 0.72 : 0}
+      isNu={isNu}
       isWeek={period === "week"}
       key={day.iso}
       onPress={() => onSelectDay(day.iso)}
       selected={selectedDay === day.iso}
       tint={tint}
-      tone={tone}
+      tone={palette}
     />
   ));
 
   return (
-    <View style={[styles.card, { borderColor: tint }]}>
+    <View style={isNu ? styles.nuCard : [styles.card, { borderColor: tint }]}>
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text style={styles.eyebrow}>ATIVIDADE DE RECEITAS</Text>
+          <Text style={isNu ? styles.nuEyebrow : styles.eyebrow}>{isNu ? "Atividade diária" : "ATIVIDADE DE RECEITAS"}</Text>
           <Text style={styles.title}>{title}</Text>
         </View>
-        <View style={[styles.totalPanel, { backgroundColor: tint }]}>
-          <Text style={[styles.total, { color: accent }]}>{formatCurrency(total)}</Text>
+        <View style={[styles.totalPanel, { backgroundColor: isNu ? nu.white : tint }]}>
+          <Text style={[styles.total, { color: isNu ? nu.ink : accent }]}>{formatCurrency(total)}</Text>
           <Text style={styles.activeDays}>
             {activeDays === 1 ? "1 dia ativo" : `${activeDays} dias ativos`}
           </Text>
@@ -110,7 +117,7 @@ export function DailyActivityChart({
       </View>
 
       {peak ? (
-        <View style={[styles.peakBadge, { backgroundColor: tint }]}>
+        <View style={[styles.peakBadge, { backgroundColor: isNu ? nu.white : tint }]}>
           <View style={[styles.peakDot, { backgroundColor: accent }]} />
           <Text numberOfLines={1} style={styles.peakText}>
             Maior dia: {formatCurrency(peak.amount)} · {formatDayLabel(peak.date)}
@@ -131,18 +138,18 @@ export function DailyActivityChart({
       )}
 
       <View style={styles.legend}>
-        <Text style={styles.legendText}>MENOR</Text>
+        <Text style={styles.legendText}>{isNu ? "Menor" : "MENOR"}</Text>
         {[0.24, 0.42, 0.62, 0.9].map((opacity) => (
           <View
             key={opacity}
             style={[
               styles.legendSquare,
-              { backgroundColor: intensityColor(tone, opacity) },
+              { backgroundColor: intensityColor(palette, opacity) },
             ]}
           />
         ))}
-        <Text style={styles.legendText}>MAIOR</Text>
-        <Text style={styles.legendHint}>TOQUE EM UM DIA</Text>
+        <Text style={styles.legendText}>{isNu ? "Maior" : "MAIOR"}</Text>
+        <Text style={styles.legendHint}>{isNu ? "Toque em um dia" : "TOQUE EM UM DIA"}</Text>
       </View>
     </View>
   );
@@ -153,6 +160,7 @@ function DayCell({
   amount,
   day,
   intensity,
+  isNu,
   isWeek,
   onPress,
   selected,
@@ -163,11 +171,12 @@ function DayCell({
   amount: number;
   day: Date;
   intensity: number;
+  isNu: boolean;
   isWeek: boolean;
   onPress: () => void;
   selected: boolean;
   tint: string;
-  tone: "income" | "expense";
+  tone: Palette;
 }) {
   return (
     <Pressable
@@ -178,7 +187,7 @@ function DayCell({
       style={({ pressed }) => [
         styles.dayCell,
         isWeek ? styles.weekCell : styles.monthCell,
-        selected && { backgroundColor: tint, borderColor: accent },
+        selected && { backgroundColor: isNu ? nu.white : tint, borderColor: accent },
         pressed && styles.pressed,
       ]}
     >
@@ -191,7 +200,7 @@ function DayCell({
           styles.intensity,
           {
             backgroundColor:
-              amount > 0 ? intensityColor(tone, intensity) : colors.paperMuted,
+              amount > 0 ? intensityColor(tone, intensity) : isNu ? nu.track : colors.paperMuted,
           },
         ]}
       />
@@ -199,7 +208,10 @@ function DayCell({
   );
 }
 
-function intensityColor(tone: "income" | "expense", opacity: number) {
+type Palette = "income" | "expense" | "nu";
+
+function intensityColor(tone: Palette, opacity: number) {
+  if (tone === "nu") return `rgba(130, 10, 209, ${opacity})`;
   return tone === "income"
     ? `rgba(49, 95, 77, ${opacity})`
     : `rgba(145, 70, 62, ${opacity})`;
@@ -225,6 +237,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 12,
   },
+  nuCard: { backgroundColor: nu.surface, borderRadius: 16, padding: 16 },
+  nuEyebrow: { color: nu.ink, fontSize: 15, fontWeight: "600" },
   header: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   headerCopy: { flex: 1, paddingRight: 10 },
   eyebrow: { color: colors.ink, fontSize: 9, fontWeight: "800", letterSpacing: 1.2 },

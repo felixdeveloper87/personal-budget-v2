@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -22,7 +23,8 @@ import { PaceChart } from "@/components/dashboard/PaceChart";
 import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarousel";
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
 import { useAuth } from "@/contexts/AuthContext";
-import { DashboardHeroArtwork } from "@/features/dashboard/DashboardHeroArtwork";
+import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
+import { TransactionSearchSheet } from "@/components/search/TransactionSearchSheet";
 import { ApiError, getMonthlySummary, listInstallmentPlans, listTransactions } from "@/services/api";
 import { colors } from "@/theme/colors";
 import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finance";
@@ -33,6 +35,16 @@ import { getVariableSpending } from "@/utils/variableSpending";
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const actionIcons = {
+  search: {
+    ios: "magnifyingglass",
+    android: "search",
+    web: "search",
+  },
+  language: {
+    ios: "globe",
+    android: "language",
+    web: "language",
+  },
   settings: {
     ios: "gearshape",
     android: "settings",
@@ -94,6 +106,14 @@ function formatCurrency(value: number) {
 
 function monthLabel(date: Date) {
   return new Intl.DateTimeFormat("en-GB", {
+    month: "long",
+  }).format(date);
+}
+
+function fullDateLabel(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
     month: "long",
   }).format(date);
 }
@@ -252,6 +272,7 @@ export function DashboardScreen() {
   const [error, setError] = useState<string | null>(null);
   const [entryType, setEntryType] = useState<"INCOME" | "EXPENSE" | null>(null);
   const [hidden, setHidden] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const currentDate = useMemo(() => new Date(), []);
 
   // Light status-bar icons over the coloured header, restored when leaving the tab.
@@ -361,27 +382,30 @@ export function DashboardScreen() {
         {/* Brand colour also fills the iOS overscroll area above the header. */}
         <View style={styles.overscrollFill} />
 
-        <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-            <DashboardHeroArtwork />
-          </View>
-          <View style={styles.headerTopRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials || "PB"}</Text>
+        <NuHeader>
+          <View style={styles.headerInner}>
+            <View style={styles.headerTopRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials || "PB"}</Text>
+              </View>
+              <View style={styles.headerActions}>
+                <HeaderIconButton icon={actionIcons.search} label="Search transactions" onPress={() => setSearchOpen(true)} />
+                <HeaderIconButton
+                  icon={actionIcons.language}
+                  label="Change language"
+                  onPress={() => Alert.alert("Idioma", "A troca de idioma no app chega em breve.")}
+                />
+                <HeaderIconButton icon={actionIcons.settings} label="Open settings" onPress={() => router.navigate("/more")} />
+              </View>
             </View>
-            <View style={styles.headerActions}>
-              <HeaderIconButton
-                icon={hidden ? actionIcons.hide : actionIcons.show}
-                label={hidden ? "Show values" : "Hide values"}
-                onPress={() => setHidden((value) => !value)}
-              />
-              <HeaderIconButton icon={actionIcons.settings} label="Open settings" onPress={() => router.navigate("/more")} />
+            <View>
+              <Text numberOfLines={1} style={styles.greeting}>
+                {greetingLabel(currentDate)}, {firstName}
+              </Text>
+              <Text numberOfLines={1} style={styles.headerDate}>{fullDateLabel(currentDate)}</Text>
             </View>
           </View>
-          <Text numberOfLines={1} style={styles.greeting}>
-            {greetingLabel(currentDate)}, {firstName}
-          </Text>
-        </View>
+        </NuHeader>
 
         <View style={styles.body}>
           {loading ? (
@@ -401,9 +425,21 @@ export function DashboardScreen() {
             <View style={styles.section}>
               <View style={styles.sectionHeadingRow}>
                 <Text style={styles.sectionHeading}>Net this month</Text>
-                <Text style={styles.sectionMeta}>
-                  {monthLabel(currentDate)} · Day {currentDate.getDate()} of {daysInMonth}
-                </Text>
+                <View style={styles.sectionMetaRow}>
+                  <Text numberOfLines={1} style={styles.sectionMeta}>
+                    {monthLabel(currentDate)} · Day {currentDate.getDate()} of {daysInMonth}
+                  </Text>
+                  <Pressable
+                    accessibilityLabel={hidden ? "Show values" : "Hide values"}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: hidden }}
+                    hitSlop={8}
+                    onPress={() => setHidden((value) => !value)}
+                    style={({ pressed }) => [styles.eyeButton, pressed && styles.eyeButtonPressed]}
+                  >
+                    <SymbolView name={hidden ? actionIcons.hide : actionIcons.show} size={18} tintColor={inkSoft} />
+                  </Pressable>
+                </View>
               </View>
               <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.balanceValue}>
                 {hidden ? MASK : formatCurrency(summary.balance)}
@@ -494,6 +530,12 @@ export function DashboardScreen() {
         ) : null}
       </ScrollView>
 
+      <TransactionSearchSheet
+        onClose={() => setSearchOpen(false)}
+        transactions={transactions}
+        visible={searchOpen}
+      />
+
       {entryType ? (
         <TransactionEntryModal
           onClose={() => setEntryType(null)}
@@ -510,15 +552,26 @@ const styles = StyleSheet.create({
   screen: { backgroundColor: colors.white, flex: 1 },
   content: { paddingBottom: 48 },
   overscrollFill: { backgroundColor: brandTop, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
-  header: { backgroundColor: brand, overflow: "hidden", paddingBottom: 22, paddingHorizontal: 20 },
+  headerInner: { flex: 1, justifyContent: "space-between" },
   headerTopRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  headerDate: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 4 },
+  sectionMetaRow: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: 4 },
+  eyeButton: { alignItems: "center", borderRadius: 16, height: 32, justifyContent: "center", width: 32 },
+  eyeButtonPressed: { backgroundColor: nu.surface },
   avatar: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
   avatarText: { color: colors.white, fontSize: 14, fontWeight: "700" },
   headerActions: { flexDirection: "row", gap: 6 },
   headerAction: { alignItems: "center", borderRadius: 20, height: 40, justifyContent: "center", width: 40 },
   headerActionPressed: { backgroundColor: "rgba(255,255,255,0.16)" },
-  greeting: { color: colors.white, fontSize: 19, fontWeight: "700", letterSpacing: -0.3, marginTop: 18 },
-  body: { backgroundColor: colors.white, paddingBottom: 8 },
+  greeting: { color: colors.white, fontSize: 24, fontWeight: "700", letterSpacing: -0.5 },
+  body: {
+    backgroundColor: colors.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    marginTop: -NU_SHEET_OVERLAP,
+    paddingBottom: 8,
+    paddingTop: 4,
+  },
   section: { paddingHorizontal: 20, paddingVertical: 18 },
   sectionHeadingRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between" },
   sectionHeading: { color: ink, fontSize: 17, fontWeight: "600", letterSpacing: -0.2 },
