@@ -1,10 +1,10 @@
-import { Box, Text, useColorMode } from '@chakra-ui/react'
+import { Box, Text } from '@chakra-ui/react'
 import type { BoxProps } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
 /** Concrete Nubank-style colours for places where CSS vars can't reach (recharts SVG attributes).
  * Mirrors the .nu-dashboard tokens in theme/pb-tokens.css. */
-const NU_LIGHT = {
+const NU = {
   brand: '#820ad1',
   ink: '#1f1f24',
   inkFaint: '#8a8a95',
@@ -15,20 +15,8 @@ const NU_LIGHT = {
   negative: '#c2412d',
 } as const
 
-const NU_DARK: { [Key in keyof typeof NU_LIGHT]: string } = {
-  brand: '#a64cec',
-  ink: '#f2f2f5',
-  inkFaint: '#85858f',
-  page: '#141418',
-  hair: '#26262d',
-  hair2: '#34343c',
-  positive: '#4cc38a',
-  negative: '#f07a66',
-}
-
 export function useNuPalette() {
-  const { colorMode } = useColorMode()
-  return colorMode === 'dark' ? NU_DARK : NU_LIGHT
+  return NU
 }
 
 interface NuSectionProps extends Omit<BoxProps, 'title'> {

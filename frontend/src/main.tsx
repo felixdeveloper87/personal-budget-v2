@@ -5,6 +5,7 @@ import {
   ColorModeScript,
   createLocalStorageManager,
   extendTheme,
+  type ChakraProviderProps,
 } from '@chakra-ui/react'
 import App from './App'
 import ReportPrintPage from './pages/ReportPrintPage'
@@ -39,10 +40,24 @@ const printRoot = (
   </I18nProvider>
 )
 
+// The app ships a single light theme. Drop any dark preference saved by older
+// builds and pin Chakra to light so nothing can switch it back.
+try {
+  window.localStorage.removeItem('chakra-ui-color-mode')
+} catch {
+  // Storage can be unavailable (private mode); light is the default anyway.
+}
+const lightOnlyColorModeManager: NonNullable<ChakraProviderProps['colorModeManager']> = {
+  type: 'localStorage',
+  ssr: false,
+  get: () => 'light',
+  set: () => {},
+}
+
 const appRoot = (
   <I18nProvider>
-    <ChakraProvider theme={theme}>
-      <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <ChakraProvider theme={theme} colorModeManager={lightOnlyColorModeManager}>
+      <ColorModeScript initialColorMode="light" />
       <AuthProvider>
         <SearchProvider>
           <App />

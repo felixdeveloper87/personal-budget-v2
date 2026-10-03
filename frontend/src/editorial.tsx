@@ -30,7 +30,7 @@ function createEditorialPalette(palette: Palette) {
     jadeSoft: palette['tint-green'],
     jadeSoftHover: palette['tint-green-hover'],
     bgGradient: palette.canvas,
-    fontDisplay: "'Instrument Serif', Georgia, serif",
+    fontDisplay: "'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif",
   }
 }
 

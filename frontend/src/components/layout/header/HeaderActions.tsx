@@ -3,7 +3,6 @@ import { ArrowRight } from '../../ui/icons'
 import { useI18n } from '../../../i18n'
 import LanguageToggle from './LanguageToggle'
 import SearchTrigger from './SearchTrigger'
-import ThemeToggle from './ThemeToggle'
 import UserMenu from './UserMenu'
 
 interface HeaderActionsProps {
@@ -54,8 +53,6 @@ export default function HeaderActions({
       )}
 
       <LanguageToggle />
-
-      {!hideUserControls && <ThemeToggle />}
 
       {user && onLogout && !hideUserControls ? (
         <UserMenu

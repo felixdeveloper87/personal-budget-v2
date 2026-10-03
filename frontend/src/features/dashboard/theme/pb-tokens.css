@@ -1,7 +1,7 @@
 /* Colors, surfaces and shadows are registered globally by theme.ts from
    palette.ts. Keep typography and animation utilities available to CSS users. */
 :root {
-  --pb-serif: "Spectral", "Instrument Serif", Georgia, serif;
+  --pb-serif: "Schibsted Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   --pb-mono: "IBM Plex Mono", "Spline Sans Mono", ui-monospace, monospace;
 }
 
@@ -21,7 +21,6 @@
   --nu-negative: #c2412d;
   --nu-negative-tint: #fbe7e3;
 
-  --pb-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --pb-mono: var(--pb-serif);
   --pb-eyebrow-case: none;
   --pb-eyebrow-tracking: 0;
@@ -73,37 +72,6 @@
 
   color: var(--pb-ink);
   font-family: var(--pb-serif);
-}
-
-[data-theme="dark"] .nu-dashboard {
-  --nu-brand: #a64cec;
-  --nu-brand-deep: #5a0796;
-  --nu-brand-tint: rgba(166, 76, 236, 0.16);
-  --nu-page: #141418;
-  --nu-surface: #1f1f25;
-  --nu-surface-hover: #28282f;
-  --nu-track: #2e2e36;
-  --nu-positive: #4cc38a;
-  --nu-positive-tint: rgba(76, 195, 138, 0.14);
-  --nu-negative: #f07a66;
-  --nu-negative-tint: rgba(240, 122, 102, 0.14);
-
-  --pb-ink: #f2f2f5;
-  --pb-ink-soft: #a9a9b4;
-  --pb-ink-faint: #85858f;
-  --pb-surface-2: #28282f;
-  --pb-surface-3: #2e2e36;
-  --pb-tint-green: rgba(166, 76, 236, 0.14);
-  --pb-tint-green-hover: rgba(166, 76, 236, 0.22);
-  --pb-gold: #d9a94a;
-  --pb-gold-2: #d9a94a;
-  --pb-tint-gold: rgba(217, 169, 74, 0.12);
-  --pb-hair: #26262d;
-  --pb-hair-2: #34343c;
-  --pb-hover: rgba(166, 76, 236, 0.08);
-  --pb-control-hover: #28282f;
-  --pb-shadow-lift: 0 12px 30px -14px rgba(0, 0, 0, 0.6);
-  --pb-focus: rgba(166, 76, 236, 0.5);
 }
 
 @keyframes pb-spin {

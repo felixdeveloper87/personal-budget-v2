@@ -23,7 +23,6 @@ import {
   type NavItem,
 } from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
-import ThemeToggle from './header/ThemeToggle'
 import UserMenu from './header/UserMenu'
 import { useI18n } from '../../i18n'
 
@@ -540,7 +539,6 @@ function SidebarFooter({
         direction={isCollapsed ? 'column' : 'row'}
         gap={isCollapsed ? 2 : 2}
       >
-        <ThemeToggle size="sm" />
         <UserMenu
           user={user}
           onOpenProfile={onOpenProfile}

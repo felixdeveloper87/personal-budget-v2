@@ -12,13 +12,14 @@ const GRADIENTS = {
 } as const
 
 const FONTS = {
-  display: "'Instrument Serif', Georgia, serif",
+  display: "'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif",
   mono: "'Spline Sans Mono', ui-monospace, monospace",
 } as const
 
+// Single light theme — the app no longer offers a dark mode.
 const config: ThemeConfig = {
-  initialColorMode: 'system',
-  useSystemColorMode: true,
+  initialColorMode: 'light',
+  useSystemColorMode: false,
 }
 
 const theme = extendTheme({
@@ -34,7 +35,6 @@ const theme = extendTheme({
   styles: {
     global: {
       ':root': paletteCssVariables(LIGHT_PALETTE),
-      '[data-theme="dark"]': paletteCssVariables(DARK_PALETTE),
       '::selection': {
         bg: 'var(--pb-sidebar-active-bg)',
         color: 'var(--pb-ink)',
@@ -64,8 +64,6 @@ const theme = extendTheme({
         color: 'var(--pb-ink)',
         transition: 'background-color 0.3s ease, color 0.3s ease',
       },
-      // Estilos para modo escuro
-      'html[data-theme="dark"]': { colorScheme: 'dark' },
       // Melhora a experiência de scroll em modais no iOS
       '.chakra-modal__content': {
         WebkitOverflowScrolling: 'touch',
@@ -84,20 +82,13 @@ const theme = extendTheme({
     },
   },
   fonts: {
-    // A serifada editorial é a fonte PADRÃO da plataforma (títulos e corpo).
+    // Grotesca sem serifa é a fonte PADRÃO da plataforma (títulos e corpo).
     heading: FONTS.display,
     body: FONTS.display,
     mono: FONTS.mono,
   },
-  // Escala de tamanhos: subimos só os degraus PEQUENOS (~+1px), pois no serif
-  // ficavam apertados. Títulos usam `lg`/`xl`/`2xl`+ (intactos, defaults Chakra).
-  fontSizes: {
-    '2xs': '0.6875rem', // 10 → 11px
-    xs: '0.8125rem', // 12 → 13px
-    sm: '1.05rem', // 14 → 15px
-  },
-  // Tokens de tipografia reutilizáveis. Use `textStyle="display"` (serifada
-  // editorial, = padrão) ou `"mono"` (labels/números) em vez de repetir
+  // Tokens de tipografia reutilizáveis. Use `textStyle="display"` (fonte
+  // padrão) ou `"mono"` (labels/números) em vez de repetir
   // `fontFamily`. Carregam só a família — peso/tamanho/spacing ficam por conta
   // de cada componente, pois variam.
   textStyles: {

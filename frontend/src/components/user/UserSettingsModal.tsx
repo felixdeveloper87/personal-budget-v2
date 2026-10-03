@@ -15,7 +15,6 @@ import {
   Switch,
   Text,
   VStack,
-  useColorMode,
   useColorModeValue,
   useDisclosure,
   useToast,
@@ -31,10 +30,8 @@ import {
   Bell,
   Download,
   Globe,
-  Moon,
   Settings,
   Shield,
-  Sun,
   Trash2,
   Upload,
 } from '../ui/icons'
@@ -49,7 +46,6 @@ interface UserSettingsModalProps {
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
   const { locale, setLocale, t } = useI18n()
   const ed = useEd()
-  const { colorMode, setColorMode } = useColorMode()
   const toast = useToast()
 
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
@@ -82,16 +78,6 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const sectionTitleColor = ed?.muted ?? sectionTitleColorBase
   const iconBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
   const iconBg = ed?.jadeSoft ?? iconBgBase
-  const themeActiveBgBase = useColorModeValue('blue.50', 'rgba(37,99,235,0.15)')
-  const themeActiveBg = ed?.jadeSoft ?? themeActiveBgBase
-  const themeActiveBorderBase = useColorModeValue('blue.200', 'rgba(37,99,235,0.4)')
-  const themeActiveBorder = ed?.lineStrong ?? themeActiveBorderBase
-  const themeActiveColorBase = useColorModeValue('blue.700', 'blue.200')
-  const themeActiveColor = ed?.jade ?? themeActiveColorBase
-  const themeInactiveBgBase = useColorModeValue('white', 'whiteAlpha.50')
-  const themeInactiveBg = ed?.controlBg ?? themeInactiveBgBase
-  const themeInactiveBorderBase = useColorModeValue('gray.200', 'whiteAlpha.100')
-  const themeInactiveBorder = ed?.line ?? themeInactiveBorderBase
   const dangerBgBase = useColorModeValue('red.50', 'rgba(220,38,38,0.05)')
   const dangerBg = ed ? 'var(--pb-tint-coral)' : dangerBgBase
   const dangerBorderBase = useColorModeValue('red.100', 'rgba(220,38,38,0.15)')
@@ -275,55 +261,6 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   <option value="YYYY-MM-DD">YYYY-MM-DD</option>
                 </Select>
               </SettingRow>
-            </VStack>
-          </Box>
-
-          {/* Appearance */}
-          <Box>
-            <SectionTitle icon={Sun} label={t('settings.appearance')} />
-            <VStack
-              spacing={0}
-              align="stretch"
-              border="1px solid"
-              borderColor={borderColor}
-              borderRadius="xl"
-              overflow="hidden"
-            >
-              <Box px={4} py={3.5} bg={rowBg}>
-                <Text fontSize="sm" fontWeight={600} color={textColor} mb={3}>{t('settings.theme')}</Text>
-                <HStack spacing={2}>
-                  {(['light', 'dark', 'system'] as const).map((mode) => {
-                    const isActive = mode === 'system'
-                      ? false
-                      : colorMode === mode
-                    const label = t(`settings.theme.${mode}`)
-                    const ModeIcon = mode === 'dark' ? Moon : Sun
-                    return (
-                      <Button
-                        key={mode}
-                        size="sm"
-                        h="36px"
-                        px={3}
-                        borderRadius="lg"
-                        variant="outline"
-                        leftIcon={<Icon as={ModeIcon} boxSize={3.5} />}
-                        bg={isActive ? themeActiveBg : themeInactiveBg}
-                        borderColor={isActive ? themeActiveBorder : themeInactiveBorder}
-                        color={isActive ? themeActiveColor : mutedColor}
-                        fontWeight={isActive ? 700 : 500}
-                        onClick={() => {
-                          if (mode === 'system') { showComingSoon(); return }
-                          setColorMode(mode)
-                        }}
-                        transition="all 0.2s ease"
-                        _hover={{ borderColor: themeActiveBorder, color: themeActiveColor }}
-                      >
-                        {label}
-                      </Button>
-                    )
-                  })}
-                </HStack>
-              </Box>
             </VStack>
           </Box>
 
