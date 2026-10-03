@@ -14,7 +14,7 @@ export function CategoryPaceCarousel({ date, transactions, userId }: CategoryPac
       accessibilityLabel="Expense pace by category"
       date={date}
       dimension="category"
-      eyebrow="PACE BY CATEGORY"
+      eyebrow="Pace by category, this month vs last"
       title="Where your money is going"
       transactions={transactions}
       userId={userId}

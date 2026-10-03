@@ -10,22 +10,15 @@ import {
 } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
-import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 
+import { nu, nuSection, SECTION_GUTTER } from "./nuTheme";
 import { getPaceTransactionDate, isExpensePaceTransaction } from "./PaceChart";
 
 const CARD_GAP = 12;
-const PAGE_HORIZONTAL_PADDING = 36;
+const PAGE_HORIZONTAL_PADDING = SECTION_GUTTER;
 const MONTH_COUNT = 4;
 const MAX_MERCHANTS = 5;
-const MERCHANT_TONES = [
-  { accent: "#2D8062", tint: "#D9ECE2" },
-  { accent: "#BC5D52", tint: "#F1DAD5" },
-  { accent: "#98752D", tint: "#EEE4C9" },
-  { accent: "#397780", tint: "#D9E9EA" },
-  { accent: "#705E78", tint: "#E7DFE9" },
-] as const;
 
 interface TopMerchantsCarouselProps {
   date: Date;
@@ -135,7 +128,6 @@ function MerchantRow({ merchant, rank, total }: {
 }) {
   const percentage = total > 0 ? Math.round((merchant.total / total) * 100) : 0;
   const progressWidth = `${Math.max(percentage, 3)}%` as `${number}%`;
-  const tone = MERCHANT_TONES[(rank - 1) % MERCHANT_TONES.length];
 
   return (
     <View
@@ -147,10 +139,10 @@ function MerchantRow({ merchant, rank, total }: {
           category={merchant.category}
           domain={merchant.domain}
           name={merchant.name}
-          size={57}
+          size={44}
         />
-        <View style={[styles.rankBadge, { backgroundColor: tone.tint, borderColor: tone.accent }]}>
-          <Text style={[styles.rankText, { color: tone.accent }]}>{rank}</Text>
+        <View style={styles.rankBadge}>
+          <Text style={styles.rankText}>{rank}</Text>
         </View>
       </View>
 
@@ -158,17 +150,17 @@ function MerchantRow({ merchant, rank, total }: {
         <View style={styles.merchantHeading}>
           <View style={styles.merchantNameRow}>
             <Text numberOfLines={1} style={styles.merchantName}>{merchant.name}</Text>
-            <Text style={styles.merchantCount}>x{merchant.count}</Text>
+            <Text style={styles.merchantCount}>{merchant.count}×</Text>
           </View>
           <View style={styles.merchantValueWrap}>
-            <Text numberOfLines={1} style={[styles.merchantValue, { color: tone.accent }]}>
+            <Text numberOfLines={1} style={styles.merchantValue}>
               {formatCurrency(merchant.total)}
             </Text>
-            <Text style={styles.merchantShare}>{percentage}% OF TOTAL</Text>
+            <Text style={styles.merchantShare}>{percentage}% of total</Text>
           </View>
         </View>
         <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, { backgroundColor: tone.accent, width: progressWidth }]} />
+          <View style={[styles.progressFill, { width: progressWidth }]} />
         </View>
       </View>
     </View>
@@ -183,12 +175,11 @@ function MerchantMonthCard({ month }: { month: MerchantMonth }) {
     >
       <View style={styles.cardHeader}>
         <View style={styles.cardTitleWrap}>
-          <Text style={styles.eyebrow}>TOP 5 MERCHANTS</Text>
           <Text style={styles.monthLabel}>{month.label}</Text>
         </View>
         {month.merchants.length > 0 ? (
           <View style={styles.totalWrap}>
-            <Text style={styles.totalLabel}>TRACKED SPEND</Text>
+            <Text style={styles.totalLabel}>Tracked spend</Text>
             <Text adjustsFontSizeToFit numberOfLines={1} style={styles.totalValue}>
               {formatCurrency(month.merchantTotal)}
             </Text>
@@ -235,6 +226,8 @@ export function TopMerchantsCarousel({ date, transactions }: TopMerchantsCarouse
 
   return (
     <View style={styles.container}>
+      <Text style={styles.sectionTitle}>Top merchants</Text>
+      <Text style={styles.sectionSubtitle}>Your 5 biggest everyday spends per month</Text>
       <FlatList
         ref={listRef}
         accessibilityLabel="Top 5 merchants by month"
@@ -277,79 +270,32 @@ export function TopMerchantsCarousel({ date, transactions }: TopMerchantsCarouse
 }
 
 const styles = StyleSheet.create({
-  container: { marginTop: 30 },
-  card: {
-    backgroundColor: "#FCFBF7",
-    borderColor: "#D7E0DC",
-    borderRadius: 22,
-    borderWidth: 1,
-    elevation: 2,
-    minHeight: 410,
-    padding: 20,
-    shadowColor: colors.ink,
-    shadowOffset: { height: 5, width: 0 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-  },
-  cardHeader: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 12,
-    justifyContent: "space-between",
-  },
+  container: nuSection.container,
+  sectionTitle: nuSection.title,
+  sectionSubtitle: { ...nuSection.subtitle, marginBottom: 14 },
+  card: { backgroundColor: nu.surface, borderRadius: 16, minHeight: 360, padding: 16 },
+  cardHeader: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between" },
   cardTitleWrap: { flex: 1, minWidth: 0 },
-  eyebrow: {
-    color: colors.forest,
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-  },
-  monthLabel: {
-    color: colors.ink,
-    fontSize: 14,
-    fontWeight: "700",
-    marginTop: 5,
-  },
-  totalWrap: {
-    alignItems: "flex-end",
-    backgroundColor: "#F1E8D5",
-    borderColor: "#E3D6B8",
-    borderRadius: 13,
-    borderWidth: 1,
-    maxWidth: "48%",
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  totalLabel: {
-    color: colors.gold,
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 0.9,
-  },
-  totalValue: {
-    color: colors.gold,
-    fontSize: 20,
-    fontWeight: "800",
-    letterSpacing: -0.45,
-    marginTop: 3,
-    textAlign: "right",
-  },
-  merchantList: { gap: 2, marginTop: 18 },
+  monthLabel: { color: nu.ink, fontSize: 15, fontWeight: "600" },
+  totalWrap: { alignItems: "flex-end", maxWidth: "50%" },
+  totalLabel: { color: nu.inkSoft, fontSize: 11 },
+  totalValue: { color: nu.ink, fontSize: 17, fontWeight: "700", letterSpacing: -0.3, marginTop: 1, textAlign: "right", fontVariant: ["tabular-nums"] },
+  merchantList: { marginTop: 10 },
   merchantRow: {
-    alignItems: "flex-start",
+    alignItems: "center",
+    borderBottomColor: nu.track,
+    borderBottomWidth: StyleSheet.hairlineWidth,
     flexDirection: "row",
     gap: 12,
-    minHeight: 78,
-    borderBottomColor: "rgba(36, 56, 60, 0.055)",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 2,
-    paddingVertical: 10,
+    paddingVertical: 11,
   },
-  logoWrap: { height: 57, position: "relative", width: 57 },
+  logoWrap: { height: 44, position: "relative", width: 44 },
   rankBadge: {
     alignItems: "center",
-    borderRadius: 9,
-    borderWidth: 1,
+    backgroundColor: nu.brand,
+    borderColor: nu.surface,
+    borderRadius: 10,
+    borderWidth: 2,
     bottom: -4,
     height: 20,
     justifyContent: "center",
@@ -358,54 +304,21 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: -4,
   },
-  rankText: { fontSize: 9, fontWeight: "800" },
+  rankText: { color: nu.white, fontSize: 10, fontWeight: "700" },
   merchantDetails: { flex: 1, minWidth: 0 },
-  merchantHeading: {
-    alignItems: "flex-start",
-    flexDirection: "row",
-    gap: 10,
-    justifyContent: "space-between",
-  },
-  merchantNameRow: {
-    alignItems: "baseline",
-    flex: 1,
-    flexDirection: "row",
-    gap: 6,
-    minWidth: 0,
-  },
-  merchantName: {
-    color: colors.ink,
-    flexShrink: 1,
-    fontSize: 15,
-    fontWeight: "700",
-  },
-  merchantCount: { color: colors.inkFaint, fontSize: 9, fontWeight: "600" },
+  merchantHeading: { alignItems: "flex-start", flexDirection: "row", gap: 10, justifyContent: "space-between" },
+  merchantNameRow: { alignItems: "baseline", flex: 1, flexDirection: "row", gap: 6, minWidth: 0 },
+  merchantName: { color: nu.ink, flexShrink: 1, fontSize: 14, fontWeight: "600" },
+  merchantCount: { color: nu.inkFaint, fontSize: 11 },
   merchantValueWrap: { alignItems: "flex-end", flexShrink: 0 },
-  merchantValue: { color: colors.ink, fontSize: 14, fontWeight: "800" },
-  merchantShare: {
-    color: colors.inkFaint,
-    fontSize: 7,
-    fontWeight: "700",
-    letterSpacing: 0.35,
-    marginTop: 2,
-  },
-  progressTrack: {
-    backgroundColor: "#E8E4DB",
-    borderRadius: 3,
-    height: 6,
-    marginTop: 8,
-    overflow: "hidden",
-  },
-  progressFill: { borderRadius: 3, height: 6 },
+  merchantValue: { color: nu.ink, fontSize: 14, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  merchantShare: { color: nu.inkSoft, fontSize: 11, marginTop: 1 },
+  progressTrack: { backgroundColor: nu.track, borderRadius: 2, height: 4, marginTop: 8, overflow: "hidden" },
+  progressFill: { backgroundColor: nu.brand, borderRadius: 2, height: 4 },
   emptyState: { alignItems: "center", flex: 1, justifyContent: "center", padding: 24 },
-  emptyText: { color: colors.inkFaint, fontSize: 13, textAlign: "center" },
-  dots: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 7,
-    justifyContent: "center",
-    marginTop: 12,
-  },
-  dot: { backgroundColor: "#C9D2CF", borderRadius: 4, height: 7, width: 7 },
-  activeDot: { backgroundColor: "#2D8062", width: 22 },
+  emptyText: { color: nu.inkSoft, fontSize: 13, textAlign: "center" },
+  dots: nuSection.dots,
+  dot: nuSection.dot,
+  activeDot: nuSection.activeDot,
 });
+

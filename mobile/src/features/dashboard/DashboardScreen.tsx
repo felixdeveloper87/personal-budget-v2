@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CategoryPaceCarousel } from "@/components/dashboard/CategoryPaceCarousel";
 import { DescriptionPaceCarousel } from "@/components/dashboard/DescriptionPaceCarousel";
 import { InstallmentCarousel } from "@/components/dashboard/InstallmentCarousel";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { PaceChart } from "@/components/dashboard/PaceChart";
 import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarousel";
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
@@ -74,12 +75,14 @@ const actionIcons = {
   },
 } satisfies Record<string, SymbolName>;
 
-/** Flat, single-colour header in the spirit of Nubank; swap this one value to re-theme it. */
-const brand = "#820AD1";
-const ink = "#1F1F24";
-const inkSoft = "#6B6B76";
-const hairline = "#ECECF1";
-const accent = { positive: "#1E8A5A", negative: "#C2412D" } as const;
+/** Header colours live in DashboardHeroArtwork's gradient; `brand` is its mid-tone, reused for accents in the body. */
+const brand = nu.brand;
+const brandTop = nu.brandDeep;
+const brandTint = nu.brandTint;
+const ink = nu.ink;
+const inkSoft = nu.inkSoft;
+const hairline = nu.hairline;
+const accent = { positive: nu.positive, negative: nu.negative } as const;
 const MASK = "••••";
 
 function formatCurrency(value: number) {
@@ -468,11 +471,13 @@ export function DashboardScreen() {
         </View>
 
         {!loading && !error ? (
-          <View style={styles.paceSection}>
-            <Text style={styles.sectionEyebrow}>MONTHLY RHYTHM</Text>
-            <Text style={styles.sectionTitle}>Find your rhythm</Text>
-            <PaceChart interactive date={currentDate} tone="income" transactions={transactions} />
-            <PaceChart interactive date={currentDate} tone="expense" transactions={transactions} />
+          <>
+            <View style={styles.paceSection}>
+              <Text style={styles.sectionTitle}>Monthly rhythm</Text>
+              <Text style={styles.sectionSubtitle}>This month vs last, day by day</Text>
+              <PaceChart interactive date={currentDate} tone="income" transactions={transactions} />
+              <PaceChart interactive date={currentDate} tone="expense" transactions={transactions} />
+            </View>
             <CategoryPaceCarousel
               date={currentDate}
               transactions={transactions}
@@ -485,7 +490,7 @@ export function DashboardScreen() {
             />
             <TopMerchantsCarousel date={currentDate} transactions={transactions} />
             <InstallmentCarousel date={currentDate} plans={installmentPlans} />
-          </View>
+          </>
         ) : null}
       </ScrollView>
 
@@ -502,9 +507,9 @@ export function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  screen: { backgroundColor: "#F4F5EF", flex: 1 },
+  screen: { backgroundColor: colors.white, flex: 1 },
   content: { paddingBottom: 48 },
-  overscrollFill: { backgroundColor: brand, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
+  overscrollFill: { backgroundColor: brandTop, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
   header: { backgroundColor: brand, overflow: "hidden", paddingBottom: 22, paddingHorizontal: 20 },
   headerTopRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
   avatar: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
@@ -534,7 +539,7 @@ const styles = StyleSheet.create({
   metricLabel: { color: inkSoft, fontSize: 13 },
   metricValue: { color: ink, fontSize: 20, fontWeight: "700", letterSpacing: -0.5, marginTop: 6, fontVariant: ["tabular-nums"] },
   metricChange: { color: inkSoft, fontSize: 11, marginTop: 4 },
-  dailyAverageBadge: { backgroundColor: "#F3E8FC", borderRadius: 999, flexShrink: 0, paddingHorizontal: 10, paddingVertical: 5 },
+  dailyAverageBadge: { backgroundColor: brandTint, borderRadius: 999, flexShrink: 0, paddingHorizontal: 10, paddingVertical: 5 },
   dailyAverageAmount: { color: brand, fontSize: 12, fontWeight: "700", fontVariant: ["tabular-nums"] },
   dailyAverageUnit: { fontWeight: "500" },
   spendingAmount: { color: ink, fontSize: 24, fontWeight: "700", letterSpacing: -0.6, marginTop: 10, fontVariant: ["tabular-nums"] },
@@ -551,7 +556,7 @@ const styles = StyleSheet.create({
   errorText: { color: inkSoft, fontSize: 12, lineHeight: 18, marginTop: 8 },
   retryButton: { alignSelf: "flex-start", backgroundColor: brand, borderRadius: 999, marginTop: 16, paddingHorizontal: 20, paddingVertical: 12 },
   retryText: { color: colors.white, fontSize: 13, fontWeight: "600" },
-  paceSection: { marginTop: 24, paddingHorizontal: 16 },
-  sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "700", letterSpacing: 2, paddingHorizontal: 3 },
-  sectionTitle: { color: colors.ink, fontSize: 26, fontWeight: "600", letterSpacing: -0.8, marginTop: 6, marginBottom: 8, paddingHorizontal: 3 },
+  paceSection: nuSection.container,
+  sectionTitle: nuSection.title,
+  sectionSubtitle: nuSection.subtitle,
 });

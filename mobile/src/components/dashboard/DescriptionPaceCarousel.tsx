@@ -18,7 +18,7 @@ export function DescriptionPaceCarousel({
       accessibilityLabel="Expense pace by description"
       date={date}
       dimension="description"
-      eyebrow="PACE BY DESCRIPTION"
+      eyebrow="Pace by description, this month vs last"
       title="What you're spending on"
       transactions={transactions}
       userId={userId}

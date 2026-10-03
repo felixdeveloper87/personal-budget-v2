@@ -3,10 +3,11 @@ import type { ComponentProps } from "react";
 import { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 import { toLocalIsoDate } from "@/utils/period";
 import { isExpensePaceTransaction } from "@/utils/variableSpending";
+
+import { nu } from "./nuTheme";
 
 export { isExpensePaceTransaction } from "@/utils/variableSpending";
 
@@ -207,7 +208,7 @@ export function PaceChart({
   const [chartWidth, setChartWidth] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const isIncome = tone === "income";
-  const accent = isIncome ? "#2D9169" : "#C95750";
+  const accent = nu.brand;
   const type = isIncome ? "INCOME" : "EXPENSE";
 
   const pace = useMemo(() => {
@@ -257,16 +258,12 @@ export function PaceChart({
   );
   const plotHeight = CHART_HEIGHT - PLOT_TOP - PLOT_BOTTOM;
   const higherThanPrevious = pace.delta > 0;
-  const usesPositiveSurface = isIncome || pace.delta < 0;
-  const tint = usesPositiveSurface ? "#D9EEE3" : "#F3DCD7";
-  const surface = usesPositiveSurface ? "#FBFDFC" : "#FEFBFA";
-  const chartSurface = usesPositiveSurface ? "#EFF7F2" : "#FAF1EF";
-  const deltaColor = isIncome
-    ? higherThanPrevious ? "#2D9169" : "#C95750"
-    : higherThanPrevious ? "#C95750" : "#2D9169";
-  const deltaTint = deltaColor === "#2D9169" ? "#D9EEE3" : "#F3DCD7";
+  const chartSurface = nu.white;
+  const favorable = isIncome ? higherThanPrevious : !higherThanPrevious;
+  const deltaColor = favorable ? nu.positive : nu.negative;
+  const deltaTint = favorable ? nu.positiveTint : nu.negativeTint;
   const hasData = pace.amountSoFar > 0 || pace.previousTotal > 0;
-  const paceTitle = description ?? category ?? (isIncome ? "INCOME PACE" : "EXPENSE PACE");
+  const paceTitle = description ?? category ?? (isIncome ? "Income pace" : "Expense pace");
   const selectedIndex = selectedDay === null ? null : selectedDay - 1;
   const selectedCurrent = selectedIndex === null || !pace.current[selectedIndex]?.visible
     ? null
@@ -307,20 +304,15 @@ export function PaceChart({
     );
 
   return (
-    <View style={[styles.card, { backgroundColor: surface, borderColor: tint }]}>
+    <View style={styles.card}>
       <View style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text
-            adjustsFontSizeToFit
-            minimumFontScale={0.7}
-            numberOfLines={1}
-            style={[styles.eyebrow, { color: accent }]}
-          >
-            {paceTitle.toLocaleUpperCase()}
+          <Text adjustsFontSizeToFit minimumFontScale={0.7} numberOfLines={1} style={styles.eyebrow}>
+            {paceTitle}
           </Text>
           <View style={styles.totalRow}>
-            <Text style={[styles.total, { color: accent }]}>{formatCurrency(pace.amountSoFar)}</Text>
-            <Text style={styles.dayLabel}>BY DAY {pace.elapsedDays}</Text>
+            <Text style={styles.total}>{formatCurrency(pace.amountSoFar)}</Text>
+            <Text style={styles.dayLabel}>by day {pace.elapsedDays}</Text>
           </View>
         </View>
 
@@ -346,7 +338,7 @@ export function PaceChart({
               onPress={onHide}
               style={({ pressed }) => [styles.hideButton, pressed && styles.hideButtonPressed]}
             >
-              <SymbolView name={hideIcon} size={12} tintColor={colors.inkFaint} weight="bold" />
+              <SymbolView name={hideIcon} size={12} tintColor={nu.inkSoft} weight="bold" />
             </Pressable>
           ) : null}
         </View>
@@ -371,7 +363,7 @@ export function PaceChart({
         {chartWidth > 0 && hasData ? (
           <>
             <ChartLine
-              color="#71817E"
+              color={nu.inkFaint}
               maxValue={maxValue}
               opacity={0.72}
               plotHeight={plotHeight}
@@ -442,9 +434,9 @@ export function PaceChart({
       {interactive && selectedDay !== null ? (
         <View
           accessibilityLiveRegion="polite"
-          style={[styles.selectionCard, { backgroundColor: tint, borderColor: accent }]}
+          style={styles.selectionCard}
         >
-          <Text style={styles.selectionTitle}>CUMULATIVE TO {selectedDateLabel.toLocaleUpperCase()}</Text>
+          <Text style={styles.selectionTitle}>Cumulative to {selectedDateLabel}</Text>
           <View style={styles.selectionValues}>
             <View style={styles.selectionValueColumn}>
               <Text style={styles.selectionLabel}>{currentMonthLabel}</Text>
@@ -475,151 +467,51 @@ export function PaceChart({
 }
 
 const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colors.paperRaised,
-    borderRadius: 22,
-    borderWidth: 1,
-    elevation: 2,
-    marginTop: 16,
-    padding: 17,
-    shadowColor: colors.ink,
-    shadowOffset: { height: 4, width: 0 },
-    shadowOpacity: 0.09,
-    shadowRadius: 12,
-  },
+  card: { backgroundColor: nu.surface, borderRadius: 16, marginTop: 14, padding: 16 },
   header: { alignItems: "flex-start", flexDirection: "row", justifyContent: "space-between" },
   headerCopy: { flex: 1, minWidth: 0 },
-  headerActions: { alignItems: "center", flexDirection: "row", gap: 5, marginLeft: 8 },
-  eyebrow: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
-  totalRow: { alignItems: "baseline", flexDirection: "row", gap: 9, marginTop: 7 },
-  total: { color: colors.ink, fontSize: 22, fontWeight: "800", letterSpacing: -0.5 },
-  dayLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "700", letterSpacing: 0.7 },
-  deltaBadge: {
-    alignItems: "center",
-    borderRadius: 12,
-    flexDirection: "row",
-    gap: 3,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-  },
-  deltaText: { fontSize: 10, fontWeight: "800" },
-  hideButton: {
-    alignItems: "center",
-    backgroundColor: colors.paperMuted,
-    borderColor: colors.line,
-    borderRadius: 13,
-    borderWidth: 1,
-    height: 26,
-    justifyContent: "center",
-    width: 26,
-  },
-  hideButtonPressed: { opacity: 0.65, transform: [{ scale: 0.94 }] },
-  chart: {
-    borderRadius: 14,
-    height: CHART_HEIGHT,
-    marginTop: 13,
-    overflow: "hidden",
-    position: "relative",
-  },
-  interactionLayer: {
-    bottom: PLOT_BOTTOM,
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: PLOT_TOP,
-    zIndex: 3,
-  },
-  gridLine: {
-    backgroundColor: "#BFCBC8",
-    height: StyleSheet.hairlineWidth,
-    left: 0,
-    opacity: 0.75,
-    position: "absolute",
-    right: 0,
-  },
-  maxLabel: {
-    backgroundColor: colors.paperRaised,
-    color: colors.inkFaint,
-    fontSize: 8,
-    left: 0,
-    paddingRight: 4,
-    position: "absolute",
-    top: 0,
-    zIndex: 2,
-  },
+  headerActions: { alignItems: "center", flexDirection: "row", gap: 6, marginLeft: 8 },
+  eyebrow: { color: nu.inkSoft, fontSize: 13, fontWeight: "500" },
+  totalRow: { alignItems: "baseline", flexDirection: "row", gap: 8, marginTop: 4 },
+  total: { color: nu.ink, fontSize: 22, fontWeight: "700", letterSpacing: -0.5, fontVariant: ["tabular-nums"] },
+  dayLabel: { color: nu.inkSoft, fontSize: 12 },
+  deltaBadge: { alignItems: "center", borderRadius: 999, flexDirection: "row", gap: 3, paddingHorizontal: 9, paddingVertical: 5 },
+  deltaText: { fontSize: 11, fontWeight: "700" },
+  hideButton: { alignItems: "center", backgroundColor: nu.white, borderRadius: 13, height: 26, justifyContent: "center", width: 26 },
+  hideButtonPressed: { backgroundColor: nu.surfacePressed },
+  chart: { borderRadius: 12, height: CHART_HEIGHT, marginTop: 14, overflow: "hidden", position: "relative" },
+  interactionLayer: { bottom: PLOT_BOTTOM, left: 0, position: "absolute", right: 0, top: PLOT_TOP, zIndex: 3 },
+  gridLine: { backgroundColor: nu.hairline, height: 1, left: 0, position: "absolute", right: 0 },
+  maxLabel: { color: nu.inkFaint, fontSize: 9, left: 4, paddingRight: 4, position: "absolute", top: 0, zIndex: 2 },
   currentDot: {
-    borderColor: colors.white,
-    borderRadius: 5,
-    borderWidth: 2,
-    elevation: 2,
-    height: 10,
-    position: "absolute",
-    shadowColor: colors.ink,
-    shadowOffset: { height: 1, width: 0 },
-    shadowOpacity: 0.18,
-    shadowRadius: 3,
-    width: 10,
-  },
-  selectionOverlay: {
-    bottom: PLOT_BOTTOM,
-    left: 0,
-    position: "absolute",
-    right: 0,
-    top: PLOT_TOP,
-    zIndex: 4,
-  },
-  selectionGuide: {
-    bottom: 0,
-    opacity: 0.42,
-    position: "absolute",
-    top: 0,
-    width: StyleSheet.hairlineWidth,
-  },
-  selectionDot: {
-    borderColor: colors.paperRaised,
+    borderColor: nu.white,
     borderRadius: 5,
     borderWidth: 2,
     height: 10,
     position: "absolute",
     width: 10,
   },
-  previousSelectionDot: { backgroundColor: colors.inkFaint, height: 8, width: 8 },
+  selectionOverlay: { bottom: PLOT_BOTTOM, left: 0, position: "absolute", right: 0, top: PLOT_TOP, zIndex: 4 },
+  selectionGuide: { bottom: 0, opacity: 0.35, position: "absolute", top: 0, width: 1 },
+  selectionDot: { borderColor: nu.white, borderRadius: 5, borderWidth: 2, height: 10, position: "absolute", width: 10 },
+  previousSelectionDot: { backgroundColor: nu.inkFaint, height: 8, width: 8 },
   emptyPlot: { alignItems: "center", flex: 1, justifyContent: "center" },
-  emptyText: { color: colors.inkFaint, fontSize: 11 },
-  axisLabels: {
-    bottom: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    left: 0,
-    position: "absolute",
-    right: 0,
-  },
-  axisLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "600" },
-  legend: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 1 },
-  legendLine: { borderRadius: 1, height: 2, width: 15 },
-  previousLegendLine: { backgroundColor: "#71817E", opacity: 0.72 },
-  legendText: { color: colors.inkFaint, fontSize: 9, marginRight: 8 },
-  interactionHint: { color: colors.inkFaint, fontSize: 9, marginTop: 10, textAlign: "center" },
-  selectionCard: {
-    backgroundColor: colors.paperMuted,
-    borderRadius: 14,
-    borderWidth: 1,
-    marginTop: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  selectionTitle: {
-    color: colors.inkFaint,
-    fontSize: 8,
-    fontWeight: "800",
-    letterSpacing: 1.1,
-    textAlign: "center",
-  },
-  selectionValues: { flexDirection: "row", marginTop: 9 },
+  emptyText: { color: nu.inkSoft, fontSize: 12 },
+  axisLabels: { bottom: 2, flexDirection: "row", justifyContent: "space-between", left: 4, position: "absolute", right: 4 },
+  axisLabel: { color: nu.inkFaint, fontSize: 9 },
+  legend: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 10 },
+  legendLine: { borderRadius: 1, height: 3, width: 14 },
+  previousLegendLine: { backgroundColor: nu.inkFaint },
+  legendText: { color: nu.inkSoft, fontSize: 11, marginRight: 10 },
+  interactionHint: { color: nu.inkFaint, fontSize: 11, marginTop: 10 },
+  selectionCard: { backgroundColor: nu.white, borderRadius: 12, marginTop: 12, paddingHorizontal: 14, paddingVertical: 12 },
+  selectionTitle: { color: nu.inkSoft, fontSize: 12 },
+  selectionValues: { flexDirection: "row", marginTop: 8 },
   selectionValueColumn: { flex: 1, minWidth: 0 },
-  selectionDivider: { backgroundColor: colors.line, marginHorizontal: 12, width: 1 },
-  selectionLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 0.9 },
-  selectionValue: { fontSize: 14, fontWeight: "800", marginTop: 3 },
-  previousSelectionValue: { color: colors.inkSoft, fontSize: 14, fontWeight: "800", marginTop: 3 },
-  caption: { color: colors.inkSoft, fontSize: 11, lineHeight: 17, marginTop: 13 },
+  selectionDivider: { backgroundColor: nu.hairline, marginHorizontal: 12, width: 1 },
+  selectionLabel: { color: nu.inkFaint, fontSize: 11 },
+  selectionValue: { fontSize: 16, fontWeight: "700", marginTop: 2 },
+  previousSelectionValue: { color: nu.inkSoft, fontSize: 16, fontWeight: "700", marginTop: 2 },
+  caption: { color: nu.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 12 },
 });
+

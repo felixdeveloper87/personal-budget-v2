@@ -11,9 +11,9 @@ import {
 } from "react-native";
 
 import { loadHiddenPaceKeys, saveHiddenPaceKeys } from "@/services/pacePreferences";
-import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 
+import { nu, nuSection, SECTION_GUTTER } from "./nuTheme";
 import {
   getPaceTransactionDate,
   isExpensePaceTransaction,
@@ -22,7 +22,7 @@ import {
 } from "./PaceChart";
 
 const CARD_GAP = 12;
-const PAGE_HORIZONTAL_PADDING = 36;
+const PAGE_HORIZONTAL_PADDING = SECTION_GUTTER;
 const MAX_VISIBLE_DOTS = 7;
 
 export type PaceCollectionDimension = "category" | "description";
@@ -189,8 +189,8 @@ export function PaceCollectionCarousel({
     <View style={styles.container}>
       <View style={styles.headingRow}>
         <View style={styles.headingCopy}>
-          <Text style={styles.eyebrow}>{eyebrow}</Text>
           <Text numberOfLines={1} style={styles.title}>{title}</Text>
+          <Text numberOfLines={1} style={styles.eyebrow}>{eyebrow}</Text>
         </View>
         <View style={styles.headingActions}>
           {hiddenCount > 0 ? (
@@ -200,7 +200,7 @@ export function PaceCollectionCarousel({
               onPress={restoreHiddenItems}
               style={({ pressed }) => [styles.restoreButton, pressed && styles.restoreButtonPressed]}
             >
-              <Text style={styles.restoreButtonText}>SHOW HIDDEN ({hiddenCount})</Text>
+              <Text style={styles.restoreButtonText}>Show hidden ({hiddenCount})</Text>
             </Pressable>
           ) : null}
           {visibleItems.length > 0 ? (
@@ -263,59 +263,36 @@ export function PaceCollectionCarousel({
 }
 
 const styles = StyleSheet.create({
-  container: { marginTop: 30 },
+  container: nuSection.container,
   headingRow: {
-    alignItems: "flex-end",
+    alignItems: "flex-start",
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 3,
   },
   headingCopy: { flex: 1, minWidth: 0, paddingRight: 12 },
-  headingActions: { alignItems: "flex-end", gap: 7 },
-  eyebrow: {
-    color: colors.forest,
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 1.6,
-  },
-  title: {
-    color: colors.ink,
-    fontSize: 21,
-    fontWeight: "700",
-    letterSpacing: -0.35,
-    marginTop: 5,
-  },
-  counter: { color: colors.inkFaint, fontSize: 10, fontWeight: "700", marginBottom: 3 },
+  headingActions: { alignItems: "flex-end", gap: 6 },
+  title: nuSection.title,
+  eyebrow: nuSection.subtitle,
+  counter: { color: nu.inkSoft, fontSize: 12, fontVariant: ["tabular-nums"], marginTop: 3 },
   restoreButton: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 9,
-    paddingVertical: 6,
+    backgroundColor: nu.brandTint,
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  restoreButtonPressed: { opacity: 0.65 },
-  restoreButtonText: { color: colors.forest, fontSize: 8, fontWeight: "800", letterSpacing: 0.7 },
+  restoreButtonPressed: { opacity: 0.7 },
+  restoreButtonText: { color: nu.brand, fontSize: 11, fontWeight: "600" },
   allHiddenState: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 18,
-    borderWidth: 1,
+    backgroundColor: nu.surface,
+    borderRadius: 16,
     justifyContent: "center",
-    marginTop: 16,
+    marginTop: 14,
     minHeight: 110,
     padding: 20,
   },
-  allHiddenText: { color: colors.inkFaint, fontSize: 12, textAlign: "center" },
-  dots: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 5,
-    justifyContent: "center",
-    marginTop: 12,
-    paddingHorizontal: 30,
-  },
-  dot: { backgroundColor: colors.line, borderRadius: 3, height: 5, width: 5 },
-  activeDot: { backgroundColor: colors.expense, width: 16 },
+  allHiddenText: { color: nu.inkSoft, fontSize: 13, textAlign: "center" },
+  dots: nuSection.dots,
+  dot: nuSection.dot,
+  activeDot: nuSection.activeDot,
 });
