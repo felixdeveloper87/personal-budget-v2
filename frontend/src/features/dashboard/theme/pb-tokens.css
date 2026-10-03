@@ -69,6 +69,7 @@
   --pb-panel-border: transparent;
   --pb-panel-radius: 16px;
   --pb-panel-padding: clamp(1rem, 2vw, 1.25rem);
+  --pb-panel-shadow: none;
 
   color: var(--pb-ink);
   font-family: var(--pb-serif);

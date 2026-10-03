@@ -4,6 +4,7 @@ import type { LucideIcon } from '../../../components/ui/icons'
 import type { HabitInsight, RhythmInsight } from '../../transactions/transactions.types'
 import type { CategoryShift, EarningsInsight } from '../insights'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from '../../dashboard/components/eyebrow'
 
 interface InsightsPanelProps {
   periodWord: string
@@ -154,8 +155,8 @@ export default function InsightsPanel({
         <Text
           fontFamily="var(--pb-mono)"
           fontSize="10.5px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
+          letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+          textTransform={EYEBROW_CASE}
           color="var(--pb-ink-faint)"
         >
           {t('behaviour.insights.title')}
@@ -189,8 +190,8 @@ function InsightCard({ icon, tint, color, tag, title, value }: InsightCardData) 
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="9.5px"
-            letterSpacing="0.16em"
-            textTransform="uppercase"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.16em)"
+            textTransform={EYEBROW_CASE}
             color="var(--pb-ink-faint)"
           >
             {tag}

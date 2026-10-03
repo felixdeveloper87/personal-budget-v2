@@ -9,6 +9,7 @@ import AllocationDonut from './AllocationDonut'
 import CategoryTransactionsModal from './CategoryTransactionsModal'
 import CategoryTxnRow from './CategoryTxnRow'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from '../../dashboard/components/eyebrow'
 
 const MotionGrid = motion(Grid)
 const TRANSACTION_LIMIT = 5
@@ -73,11 +74,11 @@ export default function Distribution({
   return (
     <Box
       position="relative"
-      bg="linear-gradient(176deg, var(--pb-surface), var(--pb-surface-2))"
-      border="1px solid var(--pb-hair)"
-      borderRadius="22px"
-      boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
-      p="clamp(1.2rem, 2.8vw, 1.7rem)"
+      bg="var(--pb-panel-bg, linear-gradient(176deg, var(--pb-surface), var(--pb-surface-2)))"
+      border="1px solid var(--pb-panel-border, var(--pb-hair))"
+      borderRadius="var(--pb-panel-radius, 22px)"
+      boxShadow="var(--pb-panel-shadow, 0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06))"
+      p="var(--pb-panel-padding, clamp(1.2rem, 2.8vw, 1.7rem))"
       overflow="hidden"
     >
       {/* Inner top highlight */}
@@ -87,6 +88,7 @@ export default function Distribution({
       <Flex
         position="relative"
         zIndex={2}
+        display="var(--pb-card-eyebrow-display, flex)"
         align="flex-start"
         justify="space-between"
         gap="0.9rem"
@@ -186,19 +188,19 @@ function CategorySpotlight({
             <Icon as={cat.icon} boxSize="20px" color={cat.color} weight="duotone" />
           </Flex>
           <Box minW={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.14em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('categories.spotlight')}</Text>
+            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.14em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">{t('categories.spotlight')}</Text>
             <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem,2vw,1.45rem)" lineHeight="1.08" color="var(--pb-ink)" noOfLines={1}>{cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}</Text>
           </Box>
         </HStack>
         <Box textAlign="right" flexShrink={0}>
           <Text className="num" fontFamily="var(--pb-serif)" fontSize="clamp(1.45rem,2.4vw,1.85rem)" fontWeight={500} lineHeight="0.95" color={amountColor}>{formatCurrency(cat.amount)}</Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt={1}>{t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)" mt={1}>{t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}</Text>
         </Box>
       </Flex>
 
       <HStack position="relative" display="inline-flex" mt={3} px="0.55rem" py="0.38rem" borderRadius="999px" spacing={1.5} color={changeColor} bg={cat.change === 0 ? 'var(--pb-surface-2)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.1)} border="1px solid" borderColor={cat.change === 0 ? 'var(--pb-hair)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.24)}>
         <Icon as={cat.change >= 0 ? ArrowUpRight : ArrowDownRight} boxSize="14px" />
-        <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.06em" textTransform="uppercase">{comparison}</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" textTransform={EYEBROW_CASE}>{comparison}</Text>
       </HStack>
 
       <Grid position="relative" templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={3.5}>
@@ -209,17 +211,17 @@ function CategorySpotlight({
 
       {cat.topMerchant && (
         <Flex position="relative" mt={3} align="baseline" gap={1.5} fontSize="sm" noOfLines={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('categories.topMerchant')}</Text>
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">{t('categories.topMerchant')}</Text>
           <Text fontFamily="var(--pb-serif)" fontSize="1rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{cat.topMerchant}</Text>
         </Flex>
       )}
 
       <Box position="relative" mt={4} pt={3.5} borderTop="1px solid var(--pb-hair)">
         <Flex align="center" justify="space-between" mb={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.12em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">
             {t('categories.recentTransactions')}
           </Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.06em" color="var(--pb-ink-faint)">
+          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" color="var(--pb-ink-faint)">
             {t('categories.transactionTotal', { count: formatNumber(cat.shownCount) })}
           </Text>
         </Flex>
@@ -244,8 +246,8 @@ function CategorySpotlight({
             borderColor={hexA(cat.color, 0.28)}
             fontFamily="var(--pb-mono)"
             fontSize="9.5px"
-            letterSpacing="0.06em"
-            textTransform="uppercase"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.06em)"
+            textTransform={EYEBROW_CASE}
             color={cat.color}
             cursor="pointer"
             transition="background .16s ease, transform .16s ease"
@@ -268,7 +270,7 @@ function Metric({ icon, label, value }: { icon: ComputedCategory['icon']; label:
     <Box bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="11px" p="0.65rem" minW={0}>
       <HStack spacing={1} color="var(--pb-ink-faint)">
         <Icon as={icon} boxSize="10px" />
-        <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.04em" textTransform="uppercase" noOfLines={1}>{label}</Text>
+        <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="var(--pb-eyebrow-tracking, 0.04em)" textTransform={EYEBROW_CASE} noOfLines={1}>{label}</Text>
       </HStack>
       <Text className="num" mt={1.5} fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{value}</Text>
     </Box>

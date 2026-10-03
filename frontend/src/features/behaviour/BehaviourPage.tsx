@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
+import { TrendingDown } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -11,6 +12,7 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import TopMerchants from '../dashboard/components/TopMerchants'
+import { NuSection } from '../dashboard/components/nu'
 
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
@@ -27,7 +29,6 @@ import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
 
 import InsightsPanel from './components/InsightsPanel'
-import DayToDaySummary from './components/DayToDaySummary'
 import {
   deriveCategoryShift,
   deriveTopCategory,
@@ -61,7 +62,9 @@ function periodNavigationLabel(
   formatDate: I18nApi['formatDate'],
 ): string {
   if (period === 'month') {
-    return formatDate(date, { month: 'short', year: 'numeric' }).toLocaleUpperCase(locale)
+    // Sentence case, matching the Earnings page and the mobile app.
+    const label = formatDate(date, { month: 'long', year: 'numeric' })
+    return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1)
   }
   if (period === 'day') {
     return formatDate(date, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
@@ -105,7 +108,7 @@ function selectedDateLabel(
 }
 
 export default function BehaviourPage() {
-  const { locale, t, formatDate } = useI18n()
+  const { locale, t, formatDate, formatCurrency } = useI18n()
   const reduce = useReducedMotion() ?? false
 
   const {
@@ -179,17 +182,51 @@ export default function BehaviourPage() {
     setSelectedChartDay((current) => current === iso ? null : iso)
   }
 
-  return (
-    <Box maxW="appContent" mx="auto" px="clamp(1rem,4vw,1.9rem)" py={{ base: 4, md: 7 }}>
-      <MotionBox variants={containerV} initial={reduce ? false : 'hidden'} animate="show">
+  const change = periodData.expense - prevPeriodData.expense
+  const comparisonCopy = prevPeriodData.expense === 0
+    ? t('behaviour.comparison.none')
+    : change === 0
+      ? t('earnings.comparison.same', { amount: formatCurrency(prevPeriodData.expense) })
+      : t(change > 0 ? 'earnings.comparison.more' : 'earnings.comparison.less', { amount: formatCurrency(Math.abs(change)) })
 
-        {/* Day-to-day summary first */}
-        <MotionBox variants={riseV} mb="clamp(1.15rem,2.4vw,1.55rem)">
-          <DayToDaySummary
-            expense={periodData.expense}
-            periodLabel={periodLabel}
-            narrativePeriodLabel={narrativePeriodLabel}
-            periodNavigator={(
+  return (
+    <Box>
+      {/* Purple page header — continues the app bar, same pattern as Earnings. */}
+      <Box className="nu-on-brand" bg="var(--pb-hero)">
+        <Box maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 3, md: 6 }} pb={{ base: 10, md: 12 }}>
+          <Flex align="center" justify="space-between" gap={3}>
+            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white">
+              {t('nav.behaviour.label')}
+            </Text>
+            <Box display="grid" placeItems="center" w="36px" h="36px" borderRadius="full" bg="rgba(255,255,255,0.16)" color="white" flexShrink={0}>
+              <TrendingDown size={18} strokeWidth={2.4} aria-hidden="true" />
+            </Box>
+          </Flex>
+
+          <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
+            <Box minW={0}>
+              <Text fontSize="sm" color="rgba(255,255,255,0.82)">{t('earnings.hero.total')}</Text>
+              {loading ? (
+                <Skeleton mt={1} height="44px" maxW="240px" borderRadius="10px" startColor="rgba(255,255,255,0.18)" endColor="rgba(255,255,255,0.3)" />
+              ) : (
+                <>
+                  <Text fontSize={{ base: '2rem', md: '2.5rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white" noOfLines={1}
+                    sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    {formatCurrency(periodData.expense)}
+                  </Text>
+                  <Text mt={1} fontSize="sm" color="rgba(255,255,255,0.82)">
+                    {t(vm.length === 1 ? 'behaviour.hero.count.one' : 'behaviour.hero.count.other', { count: vm.length })}
+                    {' · '}
+                    {/* Spending less than before is the good direction. */}
+                    <Text as="span" fontWeight={600} color={prevPeriodData.expense === 0 || change === 0 ? 'rgba(255,255,255,0.9)' : change < 0 ? '#9ff0c8' : '#ffc2b8'}>
+                      {comparisonCopy}
+                    </Text>
+                  </Text>
+                  <Text mt={1} fontSize="xs" color="rgba(255,255,255,0.7)">{t('behaviour.summary.installmentsNote')}</Text>
+                </>
+              )}
+            </Box>
+            <Box flexShrink={0} minW={{ md: '400px' }}>
               <PeriodNavBar
                 embedded
                 selectedPeriod={selectedPeriod}
@@ -199,66 +236,88 @@ export default function BehaviourPage() {
                 onNavigate={navigatePeriod}
                 onGoToToday={goToToday}
               />
+            </Box>
+          </Flex>
+        </Box>
+      </Box>
+
+      {/* White sheet with rounded top tucked over the purple header. */}
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }}>
+        <MotionBox
+          className="nu-dashboard"
+          variants={containerV}
+          initial={reduce ? false : 'hidden'}
+          animate="show"
+          bg="var(--nu-page)"
+          borderTopRadius="24px"
+          borderBottomRadius={{ base: 0, md: '24px' }}
+          overflow="hidden"
+          boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+        >
+          <MotionBox variants={riseV} px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 5, md: 6 }}>
+            {loading ? (
+              <Skeleton height="230px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+            ) : (
+              <ActivityIntensityStrip
+                appearance="nu"
+                days={days}
+                txns={vm}
+                selectedDay={selectedChartDay}
+                onSelectDay={selectDay}
+                periodLabel={periodLabel}
+                tone="expense"
+                dateKey="purchaseDate"
+                title={t('behaviour.activity.title')}
+                caption={t('behaviour.activity.caption')}
+              />
             )}
-          />
+          </MotionBox>
+
+          <MotionBox variants={riseV}>
+            <NuSection
+              title={t('behaviour.sections.categories')}
+              subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
+            >
+              <Distribution
+                expense={expense}
+                previousExpense={previousExpense}
+                periodLabel={periodLabel}
+              />
+            </NuSection>
+          </MotionBox>
+
+          <MotionBox variants={riseV}>
+            <NuSection title={t('behaviour.sections.merchants')} subtitle={t('behaviour.sections.merchantsCaption')}>
+              {loading ? (
+                <Skeleton height="260px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+              ) : (
+                <TopMerchants transactions={periodData.transactions} />
+              )}
+            </NuSection>
+          </MotionBox>
+
+          <MotionBox variants={riseV}>
+            <NuSection title={t('behaviour.sections.insights')} subtitle={t('behaviour.sections.insightsCaption')}>
+              <InsightsPanel
+                periodWord={t(`cashflow.periodWord.${selectedPeriod}`)}
+                shift={shift}
+                topCategory={topCategory}
+                rhythm={rhythm}
+                habit={habit}
+                earnings={null}
+              />
+            </NuSection>
+          </MotionBox>
         </MotionBox>
+      </Box>
 
-        <MotionBox variants={riseV} mb="clamp(1.4rem,3vw,2rem)">
-          {loading ? (
-            <Skeleton height="230px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <ActivityIntensityStrip
-              days={days}
-              txns={vm}
-              selectedDay={selectedChartDay}
-              onSelectDay={selectDay}
-              periodLabel={periodLabel}
-              tone="expense"
-              dateKey="purchaseDate"
-              title={t('behaviour.activity.title')}
-              caption={t('behaviour.activity.caption')}
-            />
-          )}
-        </MotionBox>
-
-        {selectedChartDay && (
-          <SelectedDayExpenses
-            day={selectedChartDay}
-            expenses={selectedDayExpenses}
-            onClose={() => setSelectedChartDay(null)}
-          />
-        )}
-
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <Distribution
-            expense={expense}
-            previousExpense={previousExpense}
-            periodLabel={periodLabel}
-          />
-        </MotionBox>
-
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          {loading ? (
-            <Skeleton height="260px" borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
-          ) : (
-            <TopMerchants transactions={periodData.transactions} />
-          )}
-        </MotionBox>
-
-        {/* Pattern insights close the page, just before the footer */}
-        <MotionBox variants={riseV} mt="clamp(1.6rem,3vw,2.4rem)">
-          <InsightsPanel
-            periodWord={t(`cashflow.periodWord.${selectedPeriod}`)}
-            shift={shift}
-            topCategory={topCategory}
-            rhythm={rhythm}
-            habit={habit}
-            earnings={null}
-          />
-        </MotionBox>
-
-      </MotionBox>
-
+      {selectedChartDay && (
+        <SelectedDayExpenses
+          day={selectedChartDay}
+          expenses={selectedDayExpenses}
+          onClose={() => setSelectedChartDay(null)}
+        />
+      )}
     </Box>
   )
 }
