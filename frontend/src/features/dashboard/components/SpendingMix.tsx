@@ -7,6 +7,7 @@ import Panel from './Panel'
 import { categoryColor } from './format'
 import { useI18n } from '../../../i18n'
 import { DARK_PALETTE, LIGHT_PALETTE } from '../../../palette'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface SpendingMixProps {
   transactions: Transaction[]
@@ -75,16 +76,16 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
         <HStack justify="space-between" align="flex-start">
           <Text
             fontFamily="var(--pb-mono)"
-            fontSize="10.5px"
-            letterSpacing="0.2em"
-            textTransform="uppercase"
+            fontSize="var(--pb-eyebrow-size, 10.5px)"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+            textTransform={EYEBROW_CASE}
             color="var(--pb-ink-faint)"
           >
             {t('dashboard.spendingMix')}
           </Text>
           {hasData && (
             <VStack align="flex-end" spacing={0}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="var(--pb-eyebrow-tracking, 0.13em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">
                 {t('dashboard.totalSpent')}
               </Text>
               <Text fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={500} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -136,7 +137,7 @@ export default function SpendingMix({ transactions, previousTransactions = [] }:
                 </PieChart>
               </ResponsiveContainer>
               <VStack position="absolute" inset={0} justify="center" spacing={0} pointerEvents="none">
-                <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.16em" color="var(--pb-ink-faint)" textTransform="uppercase">
+                <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="var(--pb-eyebrow-tracking, 0.16em)" color="var(--pb-ink-faint)" textTransform={EYEBROW_CASE}>
                   {t('dashboard.categories')}
                 </Text>
                 <Text fontFamily="var(--pb-serif)" fontSize="2xl" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
@@ -185,7 +186,7 @@ function MixRow({ slice, total, color }: { slice: MixSlice; total: number; color
               {slice.delta > 0 ? '+' : '−'}{formatCurrency(Math.abs(slice.delta))}
             </Text>
           )}
-          <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Text fontFamily="var(--pb-mono)" fontSize="var(--pb-eyebrow-size, 10.5px)" color="var(--pb-ink-soft)" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {formatCurrency(slice.amount)}
           </Text>
         </HStack>

@@ -1,5 +1,6 @@
 import { Box, Grid, Text } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 export interface FlowMetric {
   label: string
@@ -49,8 +50,8 @@ export default function FlowSummary({ income, expense, balance, metrics }: FlowS
           <Text
             fontFamily="var(--pb-mono)"
             fontSize="8.5px"
-            letterSpacing="0.12em"
-            textTransform="uppercase"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.12em)"
+            textTransform={EYEBROW_CASE}
             color="var(--pb-ink-faint)"
             mb="0.2rem"
             noOfLines={1}

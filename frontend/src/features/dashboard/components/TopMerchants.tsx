@@ -6,6 +6,7 @@ import { getTransactionDate } from '../../../utils/transactionDates'
 import { merchantStats } from '../insights'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface TopMerchantsProps {
   transactions: Transaction[]
@@ -195,19 +196,20 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
           <VStack align="flex-start" spacing={0.5} minW={0}>
             <Text
               fontFamily="var(--pb-mono)"
-              fontSize="10.5px"
-              letterSpacing="0.2em"
-              textTransform="uppercase"
+              fontSize="var(--pb-eyebrow-size, 10.5px)"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+              textTransform={EYEBROW_CASE}
               color="var(--pb-ink-faint)"
+              display="var(--pb-card-eyebrow-display, block)"
             >
               {t('dashboard.topMerchants')}
             </Text>
             {periodLabel && (
               <Text
                 fontFamily="var(--pb-serif)"
-                fontSize="sm"
-                fontWeight={500}
-                color="var(--pb-ink-soft)"
+                fontSize="var(--pb-card-period-size, 0.875rem)"
+                fontWeight="var(--pb-card-period-weight, 500)"
+                color="var(--pb-card-period-ink, var(--pb-ink-soft))"
                 textTransform="capitalize"
                 noOfLines={1}
               >
@@ -217,7 +219,7 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
           </VStack>
           {rows.length > 0 && (
             <VStack align="flex-end" spacing={0.5}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="var(--pb-eyebrow-tracking, 0.13em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">
                 {t('dashboard.trackedSpend')}
               </Text>
               <Text fontFamily="var(--pb-serif)" fontSize="xl" fontWeight={500} lineHeight={1} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
@@ -288,10 +290,10 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
             display="grid"
             placeItems="center"
             borderRadius="full"
-            bg={tone.tint}
-            color={tone.accent}
+            bg={`var(--pb-merchant-badge-bg, ${tone.tint})`}
+            color={`var(--pb-merchant-badge-ink, ${tone.accent})`}
             border="1px solid"
-            borderColor={tone.accent}
+            borderColor={`var(--pb-merchant-accent, ${tone.accent})`}
             boxShadow="0 1px 4px rgba(0,0,0,0.18)"
           >
               <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} lineHeight={1}>
@@ -331,7 +333,7 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
                 fontSize="md"
                 fontWeight={600}
                 lineHeight={1.1}
-                color={tone.accent}
+                color={`var(--pb-merchant-value, ${tone.accent})`}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {formatCurrency(total)}
@@ -358,7 +360,7 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
               h="full"
               w={`max(${percentage}%, 8px)`}
               borderRadius="full"
-              bg={tone.accent}
+              bg={`var(--pb-merchant-accent, ${tone.accent})`}
               transition="width 0.5s ease"
             />
           </Box>

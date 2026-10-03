@@ -6,6 +6,7 @@ import type { AppPage } from '../../../components/layout/header/navigation.confi
 import { getTransactionDate } from '../../../utils/transactionDates'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface UpcomingPaymentsProps {
   transactions: Transaction[]
@@ -104,9 +105,9 @@ export default function UpcomingPayments({
         <HStack justify="space-between">
           <Text
             fontFamily="var(--pb-mono)"
-            fontSize="10.5px"
-            letterSpacing="0.2em"
-            textTransform="uppercase"
+            fontSize="var(--pb-eyebrow-size, 10.5px)"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+            textTransform={EYEBROW_CASE}
             color="var(--pb-ink-faint)"
           >
             {t('dashboard.upcomingPayments')}
@@ -142,7 +143,7 @@ export default function UpcomingPayments({
                     borderRight="1px solid var(--pb-hair)"
                     pr={2}
                   >
-                    <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.1em" color="var(--pb-ink-faint)" textTransform="uppercase">
+                    <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="var(--pb-eyebrow-tracking, 0.1em)" color="var(--pb-ink-faint)" textTransform={EYEBROW_CASE}>
                       {formatDate(item.date, { month: 'short' })}
                     </Text>
                     <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={500} color="var(--pb-ink)" lineHeight={1}>
@@ -153,7 +154,7 @@ export default function UpcomingPayments({
                     <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
                       {item.title}
                     </Text>
-                    <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>
+                    <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" noOfLines={1}>
                       {item.subtitle}
                     </Text>
                   </VStack>

@@ -1,4 +1,5 @@
 import { HStack, Box } from '@chakra-ui/react'
+import { EYEBROW_CASE } from './eyebrow'
 
 export interface SegmentedOption<T extends string> {
   value: T
@@ -66,7 +67,7 @@ export default function Segmented<T extends string>({
           fontFamily="var(--pb-mono)"
           fontSize={fs}
           fontWeight={value === opt.value ? 500 : 400}
-          letterSpacing="0.06em"
+          letterSpacing="var(--pb-eyebrow-tracking, 0.06em)"
           color={value === opt.value
             ? summary ? 'var(--pb-summary-ink)' : 'var(--pb-ink)'
             : summary ? 'var(--pb-summary-ink-soft)' : 'var(--pb-ink-soft)'}
@@ -74,7 +75,7 @@ export default function Segmented<T extends string>({
           cursor="pointer"
           border="none"
           outline="none"
-          textTransform="uppercase"
+          textTransform={EYEBROW_CASE}
           whiteSpace="nowrap"
           textAlign="center"
           _focus={{ boxShadow: `0 0 0 2px ${summary ? 'var(--pb-summary-ink-faint)' : 'var(--pb-forest)'}` }}

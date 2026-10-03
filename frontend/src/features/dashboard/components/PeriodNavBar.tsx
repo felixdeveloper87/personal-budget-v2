@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { PeriodType } from '../../../types'
 import Segmented from './Segmented'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface PeriodNavBarProps {
   selectedPeriod: PeriodType
@@ -97,9 +98,9 @@ export default function PeriodNavBar({
             fontFamily="var(--pb-mono)"
             fontSize={{ base: '11px', sm: '12px' }}
             fontWeight={500}
-            letterSpacing="0.1em"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.1em)"
             color={embedded ? 'var(--pb-summary-ink)' : 'var(--pb-ink)'}
-            textTransform="uppercase"
+            textTransform={EYEBROW_CASE}
             textAlign="center"
             whiteSpace="nowrap"
           >
@@ -117,8 +118,8 @@ export default function PeriodNavBar({
               border={`1px solid ${embedded ? 'var(--pb-summary-line)' : 'var(--pb-hair)'}`}
               fontFamily="var(--pb-mono)"
               fontSize="9.5px"
-              letterSpacing="0.1em"
-              textTransform="uppercase"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.1em)"
+              textTransform={EYEBROW_CASE}
               fontWeight={500}
               whiteSpace="nowrap"
             >
@@ -136,8 +137,8 @@ export default function PeriodNavBar({
               border={`1px solid ${embedded ? 'var(--pb-summary-line)' : 'var(--pb-hair)'}`}
               fontFamily="var(--pb-mono)"
               fontSize="9.5px"
-              letterSpacing="0.1em"
-              textTransform="uppercase"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.1em)"
+              textTransform={EYEBROW_CASE}
               fontWeight={500}
               whiteSpace="nowrap"
               cursor="pointer"

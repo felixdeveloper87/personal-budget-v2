@@ -2,6 +2,7 @@ import { Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { ArrowUpRight, Repeat2, Rows3 } from 'lucide-react'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 type CommitmentKind = 'installments' | 'fixed'
 
@@ -55,9 +56,9 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
             </HStack>
             <Text
               fontFamily="var(--pb-mono)"
-              fontSize="10.5px"
-              letterSpacing="0.17em"
-              textTransform="uppercase"
+              fontSize="var(--pb-eyebrow-size, 10.5px)"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.17em)"
+              textTransform={EYEBROW_CASE}
               color="var(--pb-ink-faint)"
             >
               {t(content.labelKey)}
@@ -79,7 +80,7 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
           >
             {formatCurrency(monthly)}
           </Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" color="var(--pb-ink-faint)">
+          <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" color="var(--pb-ink-faint)">
             {t('dashboard.perMonth')}
           </Text>
         </HStack>
@@ -89,7 +90,7 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
         </Text>
 
         <HStack justify="space-between" mt="auto" pt={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="0.06em" color="var(--pb-ink-faint)">
+          <Text fontFamily="var(--pb-mono)" fontSize="9.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" color="var(--pb-ink-faint)">
             {inactive} {t(content.inactiveLabelKey)}
           </Text>
           {onManage && (
@@ -102,8 +103,8 @@ export default function CommitmentCard({ kind, monthly, active, inactive, onMana
               color={content.color}
               fontFamily="var(--pb-mono)"
               fontSize="10px"
-              letterSpacing="0.08em"
-              textTransform="uppercase"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.08em)"
+              textTransform={EYEBROW_CASE}
               rightIcon={<ArrowUpRight size={13} />}
               _hover={{ bg: 'transparent', textDecoration: 'underline' }}
             >

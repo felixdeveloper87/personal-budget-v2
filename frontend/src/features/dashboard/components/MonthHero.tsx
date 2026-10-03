@@ -1,236 +1,300 @@
-import { Avatar, Box, Button, Grid, HStack, Text, VStack } from '@chakra-ui/react'
-import { ArrowDown, ArrowDownRight, ArrowUp, ArrowUpRight, ChartNoAxesColumnIncreasing, Minus, Plus, type LucideIcon } from 'lucide-react'
-import TransactionArtwork from '../../../components/transactions/TransactionArtwork'
+import { useMemo, useState } from 'react'
+import { Avatar, Box, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
+import { ArrowDown, ArrowUp, CreditCard, Eye, EyeOff, House, Landmark, Target, type LucideIcon } from 'lucide-react'
+import type { Transaction } from '../../../types'
+import type { AppPage } from '../../../components/layout/header/navigation.config'
 import { useI18n } from '../../../i18n'
-import DashboardHeroArtwork from './DashboardHeroArtwork'
-import Panel from './Panel'
+import { getMonthToDateComparison, getVariableSpending } from '../heroMetrics'
 
 interface MonthHeroProps {
   income: number
   expense: number
-  previousIncome?: number | null
   previousExpense?: number | null
+  transactions: Transaction[]
   date?: Date
   userName?: string
   onAddIncome?: () => void
   onAddExpense?: () => void
+  onPageChange?: (page: AppPage) => void
 }
 
-interface MetricCardProps {
-  background: string
-  borderColor: string
-  icon: LucideIcon
-  iconBackground: string
-  label: string
-  value: string
-  valueColor: string
-  comparison?: {
-    caption: string
-    direction: -1 | 0 | 1
-    favourable: boolean
-    label: string
-  }
-}
+const MASK = '••••'
 
-function MetricCard({ background, borderColor, comparison, icon: Icon, iconBackground, label, value, valueColor }: MetricCardProps) {
-  const ComparisonIcon = comparison?.direction === 1
-    ? ArrowUpRight
-    : comparison?.direction === -1
-      ? ArrowDownRight
-      : Minus
-
+/** Faint concentric rings anchored top-right: texture for the purple header. */
+function HeaderArtwork() {
   return (
-    <HStack
-      flex={1}
-      minH={{ base: '62px', md: '82px' }} spacing={{ base: 1.5, md: 2.5 }} px={{ base: 1.5, md: 3 }} py={{ base: 1.5, md: 2 }}
-      border="1px solid" borderColor={borderColor} borderRadius="18px" bg={background} backdropFilter="blur(8px)"
-    >
-      <Box
-        display="grid" placeItems="center" flexShrink={0} w={{ base: '30px', md: '40px' }} h={{ base: '30px', md: '40px' }}
-        borderRadius={{ base: '12px', md: '15px' }} bg={iconBackground} color={valueColor}
-      >
-        <Icon size={20} strokeWidth={2.4} />
-      </Box>
-      <Box minW={0} flex={1}>
-        <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'xs', md: 'sm' }} color="#52635E" noOfLines={1}>{label}</Text>
-        <Text
-          mt={0.5} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'clamp(1.25rem, 2.2vw, 1.7rem)' }}
-          fontWeight={700} lineHeight={1.05} color={valueColor} noOfLines={1}
-          sx={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
-        >
-          {value}
-        </Text>
-        {comparison && (
-          <Box mt={{ base: 1, md: 1.5 }} minW={0}>
-            <HStack spacing={1} color={comparison.direction === 0 ? '#52635E' : comparison.favourable ? '#2F7257' : '#A45148'}>
-              <ComparisonIcon size={13} strokeWidth={2.4} aria-hidden="true" />
-              <Text fontFamily="var(--pb-serif)" fontSize={{ base: '10px', md: 'xs' }} fontWeight={700} lineHeight={1.1} noOfLines={1}>
-                {comparison.label}
-              </Text>
-            </HStack>
-            <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize={{ base: '9px', md: '10px' }} color="#52635E" lineHeight={1.1} noOfLines={1}>
-              {comparison.caption}
-            </Text>
-          </Box>
-        )}
-      </Box>
-    </HStack>
+    <svg width="100%" height="100%" viewBox="0 0 720 200" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="nuHeaderBase" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#6e08b3" />
+          <stop offset="0.6" stopColor="#820ad1" />
+          <stop offset="1" stopColor="#8f1bdc" />
+        </linearGradient>
+        <radialGradient id="nuHeaderGlow" cx="92%" cy="15%" r="55%">
+          <stop offset="0" stopColor="#d9a8ff" stopOpacity="0.24" />
+          <stop offset="1" stopColor="#d9a8ff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      <rect width="720" height="200" fill="url(#nuHeaderBase)" />
+      <rect width="720" height="200" fill="url(#nuHeaderGlow)" />
+      <g fill="none" stroke="#fff">
+        <circle cx="680" cy="40" r="70" strokeOpacity="0.08" />
+        <circle cx="680" cy="40" r="115" strokeOpacity="0.06" />
+        <circle cx="680" cy="40" r="160" strokeOpacity="0.045" />
+        <circle cx="680" cy="40" r="205" strokeOpacity="0.03" />
+      </g>
+      <circle cx="560" cy="150" r="3" fill="#fff" opacity="0.25" />
+    </svg>
   )
 }
 
-export default function MonthHero({ income, expense, previousIncome, previousExpense, date, userName, onAddIncome, onAddExpense }: MonthHeroProps) {
+interface ShortcutProps {
+  icon: LucideIcon
+  label: string
+  onClick: () => void
+  tint?: string
+}
+
+function Shortcut({ icon: Icon, label, onClick, tint = 'var(--pb-ink)' }: ShortcutProps) {
+  return (
+    <VStack
+      as="button"
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      spacing={2}
+      w="76px"
+      flexShrink={0}
+      role="group"
+    >
+      <Box
+        display="grid"
+        placeItems="center"
+        w="64px"
+        h="64px"
+        borderRadius="full"
+        bg="var(--nu-surface)"
+        color={tint}
+        transition="background 0.15s ease, transform 0.15s ease"
+        _groupHover={{ bg: 'var(--nu-surface-hover)' }}
+        _groupActive={{ transform: 'scale(0.95)' }}
+      >
+        <Icon size={22} strokeWidth={2.2} />
+      </Box>
+      <Text fontSize="xs" fontWeight={500} color="var(--pb-ink)" textAlign="center" lineHeight={1.25} noOfLines={2}>
+        {label}
+      </Text>
+    </VStack>
+  )
+}
+
+interface MetricProps {
+  label: string
+  value: string
+  change: { amount?: string; direction: -1 | 0 | 1; label: string } | null
+  favourable: boolean
+  caption: string
+}
+
+function Metric({ label, value, change, favourable, caption }: MetricProps) {
+  return (
+    <Box minW={0}>
+      <Text fontSize="sm" color="var(--pb-ink-soft)">{label}</Text>
+      <Text mt={1} fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="var(--pb-ink)" noOfLines={1}
+        sx={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </Text>
+      <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
+        {change && change.direction !== 0 && change.amount ? (
+          <Text as="span" fontWeight={600} color={favourable ? 'var(--nu-positive)' : 'var(--nu-negative)'}>
+            {change.direction > 0 ? '↑ ' : '↓ '}{change.amount}
+          </Text>
+        ) : change?.label}
+        {' '}{caption}
+      </Text>
+    </Box>
+  )
+}
+
+export default function MonthHero({
+  income,
+  expense,
+  previousExpense,
+  transactions,
+  date,
+  userName,
+  onAddIncome,
+  onAddExpense,
+  onPageChange,
+}: MonthHeroProps) {
   const { t, formatCurrency, formatDate, formatNumber } = useI18n()
+  const [hidden, setHidden] = useState(false)
   const currentDate = date ?? new Date()
   const net = income - expense
-  const usage = income > 0 ? expense / income : null
-  const spentShare = usage === null ? (expense > 0 ? 1 : 0) : Math.min(1, Math.max(0, usage))
-  const remainingShare = income > 0 ? 1 - spentShare : 0
-  const elapsedDays = Math.max(1, currentDate.getDate())
-  const dailyAverage = expense / elapsedDays
+  const money = (value: number) => (hidden ? MASK : formatCurrency(value))
   const firstName = userName?.trim().split(/\s+/)[0] ?? ''
   const hour = new Date().getHours()
   const greeting = t(hour < 12 ? 'dashboard.goodMorning' : hour < 18 ? 'dashboard.goodAfternoon' : 'dashboard.goodEvening')
-  const monthLabel = formatDate(currentDate, { month: 'long', year: 'numeric' })
-  const getComparison = (value: number, previousValue: number | null | undefined, kind: 'income' | 'expense') => {
-    if (previousValue === null || previousValue === undefined) return undefined
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
 
-    const difference = Math.round((value - previousValue) * 100) / 100
-    const direction = difference === 0 ? 0 : difference > 0 ? 1 : -1
-    const amount = previousValue === 0 && difference !== 0
+  const incomeComparison = useMemo(
+    () => getMonthToDateComparison(transactions, 'INCOME', currentDate),
+    [transactions, currentDate],
+  )
+  const spending = useMemo(() => getVariableSpending(transactions, currentDate), [transactions, currentDate])
+
+  const getChange = (value: number, previous: number | null | undefined) => {
+    if (previous === null || previous === undefined) return null
+    const difference = Math.round((value - previous) * 100) / 100
+    if (difference === 0) return { direction: 0 as const, label: t('dashboard.noMonthlyChange') }
+    const amount = previous === 0
       ? formatCurrency(Math.abs(difference))
-      : `${formatNumber(previousValue === 0 ? 0 : Math.abs(difference / previousValue) * 100, { maximumFractionDigits: 1 })}%`
-
+      : `${formatNumber(Math.abs(difference / previous) * 100, { maximumFractionDigits: 1 })}%`
     return {
-      caption: t('dashboard.vsPreviousMonth'),
-      direction: direction as -1 | 0 | 1,
-      favourable: direction !== 0 && (kind === 'income' ? direction > 0 : direction < 0),
-      label: direction === 0
-        ? t('dashboard.noMonthlyChange')
-        : t(direction > 0 ? 'dashboard.monthlyChangeHigher' : 'dashboard.monthlyChangeLower', { amount }),
+      amount,
+      direction: (difference > 0 ? 1 : -1) as 1 | -1,
+      label: t(difference > 0 ? 'dashboard.monthlyChangeHigher' : 'dashboard.monthlyChangeLower', { amount }),
     }
   }
 
-  const incomeComparison = getComparison(income, previousIncome, 'income')
-  const expenseComparison = getComparison(expense, previousExpense, 'expense')
+  const incomeChange = getChange(incomeComparison.current, incomeComparison.previous)
+  const paymentsChange = getChange(expense, previousExpense)
+  const balanceCaption = income === 0 && expense === 0
+    ? t('dashboard.balanceNoTransactions')
+    : net > 0 ? t('dashboard.balanceAhead') : net < 0 ? t('dashboard.balanceBehind') : t('dashboard.balanceEven')
 
   return (
-    <Panel
-      p={0} overflow="hidden" position="relative" background="#E9D3B0"
-      borderColor="rgba(126, 91, 48, 0.2)" boxShadow="var(--pb-shadow-lift)"
-    >
-      <Box position="absolute" inset={0} pointerEvents="none"><DashboardHeroArtwork /></Box>
-      <Box position="absolute" inset={0} bg="rgba(255,247,230,0.08)" pointerEvents="none" />
-
-      <VStack position="relative" zIndex={1} align="stretch" spacing={{ base: 4, md: 5 }} p={{ base: 4, md: 5, lg: 6 }}>
-        {userName && (
-          <HStack spacing={3}>
-            <Avatar name={userName} size="md" bg="#285F45" color="white" fontFamily="var(--pb-mono)" fontWeight={700} />
-            <Box minW={0}>
-              <Text fontFamily="var(--pb-serif)" fontSize="sm" fontWeight={600} color="#52635E">{greeting},</Text>
-              <Text fontFamily="var(--pb-serif)" fontSize="2xl" fontWeight={700} lineHeight={1.05} color="#24383A" noOfLines={1}>{firstName}</Text>
-            </Box>
+    <Box>
+      {/* Purple header */}
+      <Box position="relative" overflow="hidden" bg="var(--nu-brand)" color="white" px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 6, md: 7 }}>
+        <Box position="absolute" inset={0} pointerEvents="none"><HeaderArtwork /></Box>
+        <HStack position="relative" justify="space-between" align="center">
+          <HStack spacing={3} minW={0}>
+            {userName && (
+              <Avatar name={userName} size="md" bg="rgba(255,255,255,0.18)" color="white" fontWeight={700} />
+            )}
+            <Text fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" noOfLines={1}>
+              {greeting}{firstName ? `, ${firstName}` : ''}
+            </Text>
           </HStack>
-        )}
+          <IconButton
+            aria-label={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+            title={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+            icon={hidden ? <EyeOff size={20} /> : <Eye size={20} />}
+            onClick={() => setHidden((value) => !value)}
+            variant="ghost"
+            color="white"
+            borderRadius="full"
+            _hover={{ bg: 'rgba(255,255,255,0.16)' }}
+            _active={{ bg: 'rgba(255,255,255,0.24)' }}
+          />
+        </HStack>
+      </Box>
 
-        <Box>
-          <Text
-            fontFamily="var(--pb-serif)" fontSize="clamp(2rem, 4.3vw, 3.35rem)" fontWeight={700}
-            letterSpacing="-0.035em" lineHeight={1} color="#24383A" textTransform="capitalize"
-          >
-            {monthLabel}
+      {/* Net + shortcuts */}
+      <Grid
+        templateColumns={{ base: '1fr', lg: 'minmax(0, 1fr) auto' }}
+        gap={{ base: 5, lg: 8 }}
+        alignItems="center"
+        px={{ base: 4, md: 6 }}
+        py={{ base: 5, md: 6 }}
+      >
+        <Box minW={0}>
+          <HStack justify="space-between" align="baseline" spacing={3}>
+            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={600} color="var(--pb-ink)">{t('dashboard.netThisMonth')}</Text>
+            <Text fontSize="sm" color="var(--pb-ink-soft)" sx={{ fontVariantNumeric: 'tabular-nums' }} textTransform="capitalize" noOfLines={1}>
+              {formatDate(currentDate, { month: 'long' })} · {t('dashboard.dayOfMonth', { day: currentDate.getDate(), total: daysInMonth })}
+            </Text>
+          </HStack>
+          <Text mt={2} fontSize={{ base: '3xl', md: '4xl' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="var(--pb-ink)"
+            sx={{ fontVariantNumeric: 'tabular-nums' }} aria-label={hidden ? t('dashboard.hiddenValue') : undefined}>
+            {money(net)}
           </Text>
-          <Text mt={1.5} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} color="#52635E">
-            {t('dashboard.monthlyBudgetSnapshot')}
-          </Text>
+          <HStack mt={1.5} spacing={2}>
+            <Box w="7px" h="7px" borderRadius="full" bg={net < 0 ? 'var(--nu-negative)' : 'var(--nu-positive)'} />
+            <Text fontSize="sm" color="var(--pb-ink-soft)">{balanceCaption}</Text>
+          </HStack>
         </Box>
 
-        <Grid
-          templateColumns={{
-            base: 'minmax(0, 1fr) minmax(0, 1fr)',
-            md: 'minmax(0, 1fr) minmax(280px, 1fr)',
-          }}
-          gap={{ base: 2.5, md: 3 }}
-          alignItems="stretch"
+        <HStack
+          spacing={{ base: 2, md: 3 }}
+          overflowX="auto"
+          mx={{ base: -4, md: 0 }}
+          px={{ base: 4, md: 0 }}
+          sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
         >
-          <VStack align="stretch" spacing={{ base: 1.5, md: 2 }} h="full">
-            <MetricCard background="rgba(242,249,233,0.88)" borderColor="rgba(255,255,255,0.66)" icon={ArrowUp}
-              iconBackground="#C9E6D4" label={t('dashboard.income')} value={formatCurrency(income)} valueColor="#2F7257"
-              comparison={incomeComparison} />
-            <MetricCard background="rgba(255,239,229,0.9)" borderColor="rgba(255,255,255,0.66)" icon={ArrowDown}
-              iconBackground="#F0D1CA" label={t('dashboard.expense')} value={formatCurrency(expense)} valueColor="#A45148"
-              comparison={expenseComparison} />
-            <MetricCard background="rgba(250,240,211,0.9)" borderColor="rgba(255,255,255,0.66)" icon={ChartNoAxesColumnIncreasing}
-              iconBackground="#E4DAB8" label={t('dashboard.netThisMonth')} value={formatCurrency(net)} valueColor={net < 0 ? '#A45148' : '#806832'} />
-          </VStack>
+          {onAddIncome && <Shortcut icon={ArrowUp} label={t('dashboard.addIncome')} onClick={onAddIncome} tint="var(--nu-positive)" />}
+          {onAddExpense && <Shortcut icon={ArrowDown} label={t('dashboard.addExpense')} onClick={onAddExpense} tint="var(--nu-negative)" />}
+          {onPageChange && (
+            <>
+              <Shortcut icon={CreditCard} label={t('dashboard.shortcutCards')} onClick={() => onPageChange('cards')} />
+              <Shortcut icon={Landmark} label={t('dashboard.shortcutAccounts')} onClick={() => onPageChange('accounts')} />
+              <Shortcut icon={House} label={t('dashboard.shortcutHousehold')} onClick={() => onPageChange('household')} />
+              <Shortcut icon={Target} label={t('dashboard.shortcutPlanning')} onClick={() => onPageChange('planning')} />
+            </>
+          )}
+        </HStack>
+      </Grid>
 
-          <VStack
-            align="stretch" justify="center" spacing={{ base: 3, md: 4 }} h="full" p={{ base: 3, md: 5 }} border="1px solid"
-            borderColor="rgba(255,255,255,0.68)" borderRadius="20px" bg="rgba(255,248,237,0.88)" backdropFilter="blur(10px)"
-          >
-            <Box>
-              <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'sm', md: 'md' }} fontWeight={700} color="#24383A">{t('dashboard.incomeUsed')}</Text>
-              <Text
-                mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: '3xl', md: '4xl' }} fontWeight={800} noOfLines={1}
-                color={usage !== null && usage > 1 ? '#A45148' : '#2F7257'}
-              >
-                {usage === null ? '—' : `${Math.round(usage * 100)}%`}
-              </Text>
-              <Text fontFamily="var(--pb-serif)" fontSize={{ base: 'xs', md: 'sm' }} color="#52635E">
-                {usage === null ? t('dashboard.noIncomeYet') : t('dashboard.ofIncomeSpent')}
-              </Text>
-            </Box>
+      {/* Income · Payments · Everyday spending */}
+      <Grid
+        templateColumns={{ base: 'repeat(2, minmax(0, 1fr))', lg: 'minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.4fr)' }}
+        gap={{ base: 4, md: 6 }}
+        borderTop="1px solid var(--pb-hair)"
+        px={{ base: 4, md: 6 }}
+        py={{ base: 5, md: 6 }}
+        alignItems="stretch"
+      >
+        <Box pr={{ base: 2, md: 4 }} borderRight="1px solid var(--pb-hair)">
+          <Metric
+            label={t('dashboard.income')}
+            value={money(income)}
+            change={incomeChange}
+            favourable={(incomeChange?.direction ?? 0) > 0}
+            caption={t('dashboard.vsSameDayLastMonth')}
+          />
+        </Box>
+        <Box pr={{ lg: 4 }} borderRight={{ lg: '1px solid var(--pb-hair)' }}>
+          <Metric
+            label={t('dashboard.payments')}
+            value={money(expense)}
+            change={paymentsChange}
+            favourable={(paymentsChange?.direction ?? 0) < 0}
+            caption={t('dashboard.vsPreviousMonth')}
+          />
+        </Box>
 
-            <HStack
-              spacing={0} h="11px" overflow="hidden" borderRadius="full" bg="#E4DCCF"
-              role="img" aria-label={`${t('dashboard.incomeUsed')}: ${usage === null ? t('dashboard.noIncomeYet') : `${Math.round(usage * 100)}%`}`}
-            >
-              <Box h="full" w={`${spentShare * 100}%`} bg="#D05F5B" />
-              <Box h="full" w={`${remainingShare * 100}%`} bg="#3E9870" />
-            </HStack>
-
-            <Box>
-              <Text fontFamily="var(--pb-serif)" fontSize="xs" color="#52635E">{t('dashboard.dailyAverage')}</Text>
-              <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={700} color="#24383A">{formatCurrency(dailyAverage)}</Text>
-              <Text mt={1} fontFamily="var(--pb-serif)" fontSize="10px" color="#52635E">
-                {t(elapsedDays === 1 ? 'dashboard.dayThisMonth' : 'dashboard.daysThisMonth', { count: elapsedDays })}
-              </Text>
-            </Box>
-          </VStack>
-        </Grid>
-
-        {(onAddIncome || onAddExpense) && (
-          <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={{ base: 2, md: 3 }}>
-            {onAddIncome && (
-              <Button
-                h={{ base: '48px', md: '54px' }} borderRadius="17px" bg="#285F45" color="white" overflow="hidden" position="relative"
-                fontFamily="var(--pb-serif)" fontWeight={700} onClick={onAddIncome}
-                _hover={{ filter: 'brightness(0.94)', transform: 'translateY(-1px)' }}
-                _active={{ filter: 'brightness(0.88)', transform: 'translateY(0)' }}
-              >
-                <Box position="absolute" inset={0} pointerEvents="none"><TransactionArtwork showSun={false} tone="income" /></Box>
-                <HStack position="relative" zIndex={1} spacing={2}>
-                  <Plus aria-hidden="true" size={19} strokeWidth={2.4} />
-                  <Text as="span" fontFamily="inherit" fontWeight="inherit">{t('dashboard.addIncome')}</Text>
-                </HStack>
-              </Button>
-            )}
-            {onAddExpense && (
-              <Button
-                h={{ base: '48px', md: '54px' }} borderRadius="17px" bg="#D05F5B" color="white" overflow="hidden" position="relative"
-                fontFamily="var(--pb-serif)" fontWeight={700} onClick={onAddExpense}
-                _hover={{ filter: 'brightness(0.94)', transform: 'translateY(-1px)' }}
-                _active={{ filter: 'brightness(0.88)', transform: 'translateY(0)' }}
-              >
-                <Box position="absolute" inset={0} pointerEvents="none"><TransactionArtwork showSun={false} tone="expense" /></Box>
-                <HStack position="relative" zIndex={1} spacing={2}>
-                  <Plus aria-hidden="true" size={19} strokeWidth={2.4} />
-                  <Text as="span" fontFamily="inherit" fontWeight="inherit">{t('dashboard.addExpense')}</Text>
-                </HStack>
-              </Button>
-            )}
-          </Grid>
-        )}
-      </VStack>
-    </Panel>
+        <Box
+          gridColumn={{ base: '1 / -1', lg: 'auto' }}
+          bg="var(--nu-surface)"
+          borderRadius="16px"
+          p={4}
+          role="group"
+          aria-label={hidden ? `${t('dashboard.everydaySpending')}: ${t('dashboard.hiddenValue')}` : undefined}
+        >
+          <HStack justify="space-between" spacing={3}>
+            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)">{t('dashboard.everydaySpending')}</Text>
+            <Text fontSize="xs" fontWeight={700} color="var(--nu-brand)" bg="var(--nu-brand-tint)" px={2.5} py={1} borderRadius="full"
+              whiteSpace="nowrap" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+              {money(spending.dailyAverage)}{' '}
+              <Text as="span" fontWeight={500}>{t('dashboard.perDay')}</Text>
+            </Text>
+          </HStack>
+          <Text mt={2} fontSize="2xl" fontWeight={700} letterSpacing="-0.01em" color="var(--pb-ink)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            {money(spending.spent)}
+          </Text>
+          <Box mt={3} h="6px" borderRadius="full" bg="var(--nu-track)" overflow="hidden">
+            <Box h="full" w={`${spending.share * 100}%`} borderRadius="full" bg="var(--nu-brand)" transition="width 0.5s ease" />
+          </Box>
+          <HStack mt={2.5} justify="space-between" spacing={3}>
+            <Text fontSize="xs" color="var(--pb-ink-soft)">{t('dashboard.monthEndAtPace')}</Text>
+            <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+              {hidden ? MASK : spending.projection > 0 ? formatCurrency(spending.projection) : '—'}
+            </Text>
+          </HStack>
+          <Text mt={1.5} fontSize="11px" color="var(--pb-ink-faint)">{t('dashboard.excludesCommitments')}</Text>
+        </Box>
+      </Grid>
+    </Box>
   )
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Box, Grid, Skeleton, VStack, useDisclosure } from '@chakra-ui/react'
+import { Box, Grid, Skeleton, useDisclosure } from '@chakra-ui/react'
 import { AddTransactionModal } from '../../components/transactions'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -16,7 +16,7 @@ import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
-import SectionLabel from './components/SectionLabel'
+import { NuSection } from './components/nu'
 import MonthHero from './components/MonthHero'
 import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
@@ -120,90 +120,97 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
       minH="100vh"
       maxW="appContent"
       mx="auto"
-      px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 4, md: 7 }}
+      px={{ base: 0, md: 4, lg: 6 }}
+      py={{ base: 0, md: 7 }}
     >
-      <MotionBox variants={containerV} initial="hidden" animate="show">
-      <VStack spacing={{ base: 5, md: 6 }} align="stretch">
-
-        {/* Hero card — current-month snapshot */}
+      {/* Nubank-style sheet: purple header, white body, hairline-separated sections. */}
+      <MotionBox
+        className="nu-dashboard"
+        variants={containerV}
+        initial="hidden"
+        animate="show"
+        bg="var(--nu-page)"
+        borderRadius={{ base: 0, md: '24px' }}
+        overflow="hidden"
+        boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+      >
         {loading ? (
-          <Skeleton height={{ base: '520px', md: '620px' }} borderRadius="22px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          <Skeleton height={{ base: '520px', md: '420px' }} startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
           <MotionBox variants={riseV}>
             <MonthHero
               income={periodData.income}
               expense={periodData.expense}
-              previousIncome={previousSummary?.totalIncome ?? null}
               previousExpense={previousSummary?.totalExpense ?? null}
+              transactions={transactions}
               date={selectedDate}
               userName={user?.name}
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
+              onPageChange={onPageChange}
             />
           </MotionBox>
         ) : null}
 
-        {/* Spending pace · Personalised insight */}
-        <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="income" />
-          </MotionBox>
-        </Grid>
-
         <MotionBox variants={riseV}>
-          <CategorySpendingPaces
-            transactions={transactions}
-            selectedDate={selectedDate}
-            dateBasis="activity"
-            userId={user?.id ?? null}
-          />
+          <NuSection title={t('dashboard.monthlyRhythm')} subtitle={t('dashboard.monthlyRhythmCaption')}>
+            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+              <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="income" />
+              <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
+            </Grid>
+          </NuSection>
         </MotionBox>
 
         <MotionBox variants={riseV}>
-          <DescriptionSpendingPaces
-            transactions={transactions}
-            selectedDate={selectedDate}
-            dateBasis="activity"
-            userId={user?.id ?? null}
-          />
-        </MotionBox>
-
-        {/* Top merchants */}
-        <MotionBox variants={riseV}>
-          <TopMerchants
-            transactions={behaviourPeriodData.transactions}
-            historyTransactions={transactions}
-            selectedDate={selectedDate}
-          />
+          <NuSection>
+            <CategorySpendingPaces
+              transactions={transactions}
+              selectedDate={selectedDate}
+              dateBasis="activity"
+              userId={user?.id ?? null}
+            />
+          </NuSection>
         </MotionBox>
 
         <MotionBox variants={riseV}>
-          <SectionLabel>{t('dashboard.monthlyCommitments')}</SectionLabel>
+          <NuSection>
+            <DescriptionSpendingPaces
+              transactions={transactions}
+              selectedDate={selectedDate}
+              dateBasis="activity"
+              userId={user?.id ?? null}
+            />
+          </NuSection>
         </MotionBox>
+
         <MotionBox variants={riseV}>
-          <InstallmentCarousel
-            plans={installmentPlans}
-            selectedDate={selectedDate}
-            onManage={() => onPageChange?.('installments')}
-          />
+          <NuSection title={t('dashboard.topMerchants')} subtitle={t('dashboard.topMerchantsCaption')}>
+            <TopMerchants
+              transactions={behaviourPeriodData.transactions}
+              historyTransactions={transactions}
+              selectedDate={selectedDate}
+            />
+          </NuSection>
         </MotionBox>
 
-        {/* Upcoming payments · Recent activity */}
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
-          <MotionBox variants={riseV}>
-            <UpcomingPayments transactions={transactions} cardNames={cardNames} onPageChange={onPageChange} />
-          </MotionBox>
-          <MotionBox variants={riseV}>
-            <RecentActivity transactions={behaviourPeriodData.transactions} dateBasis="activity" onPageChange={onPageChange} />
-          </MotionBox>
-        </Grid>
+        <MotionBox variants={riseV}>
+          <NuSection title={t('dashboard.installments')} subtitle={t('dashboard.installmentsCaption')}>
+            <InstallmentCarousel
+              plans={installmentPlans}
+              selectedDate={selectedDate}
+              onManage={() => onPageChange?.('installments')}
+            />
+          </NuSection>
+        </MotionBox>
 
-        {/* Commitments · For you */}
-      </VStack>
+        <MotionBox variants={riseV}>
+          <NuSection title={t('dashboard.paymentsAndActivity')} subtitle={t('dashboard.activityCaption')}>
+            <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+              <UpcomingPayments transactions={transactions} cardNames={cardNames} onPageChange={onPageChange} />
+              <RecentActivity transactions={behaviourPeriodData.transactions} dateBasis="activity" onPageChange={onPageChange} />
+            </Grid>
+          </NuSection>
+        </MotionBox>
       </MotionBox>
 
       <AddTransactionModal

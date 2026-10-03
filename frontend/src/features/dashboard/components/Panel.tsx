@@ -5,14 +5,16 @@ interface PanelProps extends BoxProps {
   interactive?: boolean
 }
 
+/** Card surface. The optional --pb-panel-* tokens let a page (e.g. the
+ * Nubank-style dashboard) flatten every panel without touching other pages. */
 export default function Panel({ children, interactive = false, ...props }: PanelProps) {
   return (
     <Box
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      borderRadius="22px"
+      bg="var(--pb-panel-bg, var(--pb-surface))"
+      border="1px solid var(--pb-panel-border, var(--pb-hair))"
+      borderRadius="var(--pb-panel-radius, 22px)"
       boxShadow="var(--pb-shadow)"
-      p="clamp(1.3rem, 2.6vw, 1.6rem)"
+      p="var(--pb-panel-padding, clamp(1.3rem, 2.6vw, 1.6rem))"
       transition="transform 0.2s ease, box-shadow 0.2s ease"
       {...(interactive
         ? {

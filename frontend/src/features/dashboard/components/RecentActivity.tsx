@@ -7,6 +7,7 @@ import { getTransactionDate } from '../../../utils/transactionDates'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface RecentActivityProps {
   transactions: Transaction[]
@@ -49,9 +50,9 @@ export default function RecentActivity({
       <VStack align="stretch" spacing={4}>
         <Text
           fontFamily="var(--pb-mono)"
-          fontSize="10.5px"
-          letterSpacing="0.2em"
-          textTransform="uppercase"
+          fontSize="var(--pb-eyebrow-size, 10.5px)"
+          letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+          textTransform={EYEBROW_CASE}
           color="var(--pb-ink-faint)"
         >
           {t('dashboard.recentActivity')}
@@ -87,7 +88,7 @@ export default function RecentActivity({
                       <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink)" noOfLines={1}>
                         {t.description || t.category}
                       </Text>
-                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.06em" noOfLines={1}>
+                      <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" noOfLines={1}>
                         {categoryLabel(t.category)} · {formatDate(date, { day: 'numeric', month: 'short' })}
                       </Text>
                     </VStack>

@@ -2,6 +2,7 @@ import { HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { ArrowDownRight, ArrowUpRight, Eye, EyeOff } from 'lucide-react'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 export const MASK = '••••••'
 
@@ -41,9 +42,9 @@ export default function StatCard({
         <HStack justify="space-between" align="center">
           <Text
             fontFamily="var(--pb-mono)"
-            fontSize="10.5px"
-            letterSpacing="0.2em"
-            textTransform="uppercase"
+            fontSize="var(--pb-eyebrow-size, 10.5px)"
+            letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+            textTransform={EYEBROW_CASE}
             color="var(--pb-ink-faint)"
           >
             {eyebrow}

@@ -10,6 +10,7 @@ import RestoreSpendingPaceDialog from './RestoreSpendingPaceDialog'
 import { useI18n } from '../../../i18n'
 import SectionLabel from './SectionLabel'
 import CashPace from './SpendingPace'
+import { EYEBROW_CASE } from './eyebrow'
 
 export type SpendingPaceDimension = 'category' | 'description'
 
@@ -283,8 +284,8 @@ export default function SpendingPaceCollection({
               fontFamily="var(--pb-mono)"
               fontSize="9px"
               fontWeight={600}
-              letterSpacing="0.06em"
-              textTransform="uppercase"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.06em)"
+              textTransform={EYEBROW_CASE}
               _hover={{ color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)', borderColor: 'var(--pb-hair-2)' }}
             >
               {t('dashboard.showHidden', { count: hiddenCount })}
@@ -389,7 +390,7 @@ export default function SpendingPaceCollection({
               h="5px"
               w={index === activeIndex ? '18px' : '5px'}
               borderRadius="full"
-              bg={index === activeIndex ? 'var(--pb-coral)' : 'var(--pb-hair-2)'}
+              bg={index === activeIndex ? 'var(--nu-brand, var(--pb-coral))' : 'var(--pb-hair-2)'}
               transition="width 0.2s ease, background 0.2s ease"
             />
           ))}

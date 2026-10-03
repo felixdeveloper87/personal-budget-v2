@@ -2,6 +2,7 @@ import { Box, Flex, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import { MotionBox, barV } from './motion'
 import { useI18n } from '../../../i18n'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface FlowBarsProps {
   income: number
@@ -71,8 +72,8 @@ function LedgerValue({ label, value, color }: { label: string; value: string; co
       <Text
         fontFamily="var(--pb-mono)"
         fontSize="9.5px"
-        letterSpacing="0.16em"
-        textTransform="uppercase"
+        letterSpacing="var(--pb-eyebrow-tracking, 0.16em)"
+        textTransform={EYEBROW_CASE}
         color="var(--pb-ink-faint)"
       >
         {label}

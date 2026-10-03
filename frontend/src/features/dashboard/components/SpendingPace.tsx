@@ -1,5 +1,5 @@
 import { useId, useMemo } from 'react'
-import { Box, HStack, IconButton, Text, VStack, useColorMode } from '@chakra-ui/react'
+import { Box, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
 import { ArrowDownRight, ArrowUpRight, X } from 'lucide-react'
 import {
@@ -16,7 +16,8 @@ import type { TransactionDateBasis } from '../../../utils/transactionDates'
 import { cumulativeDailyAmount, daysInMonth } from '../insights'
 import Panel from './Panel'
 import { useI18n } from '../../../i18n'
-import { DARK_PALETTE, LIGHT_PALETTE } from '../../../palette'
+import { useNuPalette } from './nu'
+import { EYEBROW_CASE } from './eyebrow'
 
 type PaceKind = 'expense' | 'income'
 
@@ -47,8 +48,7 @@ export default function CashPace({
   const reduce = useReducedMotion()
   const reactId = useId()
   const gradientId = `pb-${kind}-pace-${reactId.replace(/[^a-zA-Z0-9]/g, '')}`
-  const { colorMode } = useColorMode()
-  const palette = colorMode === 'dark' ? DARK_PALETTE : LIGHT_PALETTE
+  const nu = useNuPalette()
   const isIncome = kind === 'income'
 
   // recharts writes stroke/fill as SVG attributes, where CSS var() is
@@ -100,31 +100,18 @@ export default function CashPace({
     }
   }, [transactions, selectedDate, dateBasis, isIncome, includeCommitments])
 
-  const improvedSpending = !isIncome && paceDelta < 0
-  const positiveSurface = isIncome || improvedSpending
   const deltaIsPositive = isIncome ? paceDelta > 0 : paceDelta < 0
+  // Flat Nubank card: purple "this month" line on a page-coloured plot, grey "last month".
   const c = {
-    current: isIncome
-      ? colorMode === 'dark' ? palette.income : '#2d9169'
-      : colorMode === 'dark' ? palette.coral : '#c95750',
-    previous: palette['ink-faint'],
-    grid: palette.hair,
-    tick: palette['ink-faint'],
-    tooltipBg: palette.solid,
-    tooltipBorder: palette['hair-2'],
-    tooltipText: palette.ink,
-    chartBackground: colorMode === 'dark'
-      ? positiveSurface ? '#1c332b' : '#352725'
-      : positiveSurface ? '#eff7f2' : '#faf1ef',
-    panelBackground: colorMode === 'dark'
-      ? positiveSurface ? '#192a25' : '#2a2222'
-      : positiveSurface ? '#fbfdfb' : '#fefbfa',
-    toneBorder: colorMode === 'dark'
-      ? positiveSurface ? '#3b6555' : '#68413d'
-      : positiveSurface ? '#cbe3d4' : '#eacfc8',
-    deltaBackground: colorMode === 'dark'
-      ? deltaIsPositive ? '#234336' : '#492d2a'
-      : deltaIsPositive ? '#d9eee3' : '#f3dcd7',
+    current: nu.brand,
+    previous: nu.inkFaint,
+    grid: nu.hair,
+    tick: nu.inkFaint,
+    tooltipBg: nu.page,
+    tooltipBorder: nu.hair2,
+    tooltipText: nu.ink,
+    chartBackground: 'var(--nu-page)',
+    deltaBackground: deltaIsPositive ? 'var(--nu-positive-tint)' : 'var(--nu-negative-tint)',
   }
 
   const higherThanPrevious = paceDelta > 0
@@ -136,16 +123,16 @@ export default function CashPace({
   const title = titleOverride ?? t(isIncome ? 'dashboard.incomePace' : 'dashboard.spendingPace')
 
   return (
-    <Panel h="full" bg={c.panelBackground} borderColor={c.toneBorder}>
+    <Panel h="full">
       <VStack align="stretch" spacing={4} h="full">
         {/* Header */}
         <HStack justify="space-between" align="flex-start" flexWrap="wrap" gap={2}>
           <VStack align="stretch" spacing={1}>
             <Text
               fontFamily="var(--pb-mono)"
-              fontSize="10.5px"
-              letterSpacing="0.2em"
-              textTransform="uppercase"
+              fontSize="var(--pb-eyebrow-size, 10.5px)"
+              letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
+              textTransform={EYEBROW_CASE}
               color="var(--pb-ink-faint)"
             >
               {title}
@@ -153,14 +140,14 @@ export default function CashPace({
             <HStack align="baseline" spacing={3} flexWrap="wrap">
               <Text
                 fontFamily="var(--pb-serif)"
-                fontSize="xl"
-                fontWeight={500}
-                color={c.current}
+                fontSize="2xl"
+                fontWeight={700}
+                color="var(--pb-ink)"
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {formatCurrency(amountSoFar)}
               </Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="0.08em">
+              <Text fontFamily="var(--pb-mono)" fontSize="10px" color="var(--pb-ink-faint)" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)">
                 {t('dashboard.byDay', { day: elapsedDays })}
               </Text>
             </HStack>

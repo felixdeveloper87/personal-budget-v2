@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Box, Button, HStack, Text, VStack, useColorMode } from '@chakra-ui/react'
+import { Box, Button, HStack, Text, VStack } from '@chakra-ui/react'
 import { ArrowUpRight, Rows3 } from 'lucide-react'
 import type { InstallmentPlan } from '../../../types'
 import { useI18n } from '../../../i18n'
 import Panel from './Panel'
+import { EYEBROW_CASE } from './eyebrow'
 
 interface InstallmentCarouselProps {
   plans: InstallmentPlan[]
@@ -31,7 +32,6 @@ export default function InstallmentCarousel({
   onManage,
 }: InstallmentCarouselProps) {
   const { t, formatCurrency, formatDate } = useI18n()
-  const { colorMode } = useColorMode()
   const carouselRef = useRef<HTMLDivElement>(null)
   const [activeMonth, setActiveMonth] = useState(CURRENT_MONTH_INDEX)
 
@@ -124,18 +124,8 @@ export default function InstallmentCarousel({
       >
         {months.map((month, index) => {
           const hasPayments = month.count > 0
-          const accent = hasPayments
-            ? colorMode === 'dark' ? '#d5b769' : '#a16f19'
-            : colorMode === 'dark' ? '#8fbea3' : '#3d765f'
-          const tint = hasPayments
-            ? colorMode === 'dark' ? '#392f1d' : '#f4e5c2'
-            : colorMode === 'dark' ? '#20352b' : '#e2efe7'
-          const surface = hasPayments
-            ? colorMode === 'dark' ? '#28241d' : '#fff9ed'
-            : colorMode === 'dark' ? '#1d2923' : '#f7faf7'
-          const border = hasPayments
-            ? colorMode === 'dark' ? '#66542d' : '#e8d4a7'
-            : colorMode === 'dark' ? '#3e5c49' : '#d6e5db'
+          const accent = hasPayments ? 'var(--nu-brand)' : 'var(--pb-ink-faint)'
+          const tint = hasPayments ? 'var(--nu-brand-tint)' : 'var(--pb-surface-3)'
 
           return (
           <Box
@@ -148,23 +138,16 @@ export default function InstallmentCarousel({
             scrollSnapAlign="start"
             scrollSnapStop="always"
           >
-            <Panel
-              h="full"
-              bg={surface}
-              borderColor={border}
-              borderTop="4px solid"
-              borderTopColor={accent}
-              boxShadow="var(--pb-shadow-lift)"
-            >
+            <Panel h="full">
               <VStack align="stretch" spacing={3.5} h="full">
                 <HStack justify="space-between" align="flex-start" spacing={3}>
                   <HStack spacing={2.5} minW={0}>
                     <HStack
-                      w={8}
-                      h={8}
+                      w={10}
+                      h={10}
                       justify="center"
-                      borderRadius="10px"
-                      bg={tint}
+                      borderRadius="full"
+                      bg="var(--nu-page)"
                       color={accent}
                       flexShrink={0}
                     >
@@ -173,14 +156,15 @@ export default function InstallmentCarousel({
                     <VStack align="flex-start" spacing={0.5} minW={0}>
                       <Text
                         fontFamily="var(--pb-mono)"
-                        fontSize="10.5px"
-                        letterSpacing="0.17em"
-                        textTransform="uppercase"
-                        color={accent}
+                        fontSize="var(--pb-eyebrow-size, 10.5px)"
+                        letterSpacing="var(--pb-eyebrow-tracking, 0.17em)"
+                        textTransform={EYEBROW_CASE}
+                        color="var(--pb-ink-soft)"
+                        display="var(--pb-card-eyebrow-display, block)"
                       >
                         {t('dashboard.installments')}
                       </Text>
-                      <Text fontFamily="var(--pb-serif)" fontSize="sm" fontWeight={500} color="var(--pb-ink-soft)" textTransform="capitalize" noOfLines={1}>
+                      <Text fontFamily="var(--pb-serif)" fontSize="md" fontWeight={600} color="var(--pb-ink)" textTransform="capitalize" noOfLines={1}>
                         {month.label}
                       </Text>
                     </VStack>
@@ -204,14 +188,14 @@ export default function InstallmentCarousel({
                   <Text
                     fontFamily="var(--pb-serif)"
                     fontSize="clamp(1.75rem, 3.2vw, 2.15rem)"
-                    fontWeight={500}
+                    fontWeight={700}
                     lineHeight={1}
-                    color={accent}
+                    color={hasPayments ? 'var(--pb-ink)' : 'var(--pb-ink-faint)'}
                     style={{ fontVariantNumeric: 'tabular-nums lining-nums' }}
                   >
                     {formatCurrency(month.total)}
                   </Text>
-                  <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" color="var(--pb-ink-faint)">
+                  <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" color="var(--pb-ink-faint)">
                     {t('dashboard.perMonth')}
                   </Text>
                 </HStack>
@@ -219,13 +203,6 @@ export default function InstallmentCarousel({
                 <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-soft)" lineHeight={1.5}>
                   {t(month.count > 0 ? 'dashboard.installmentsMonthDescription' : 'dashboard.installmentsMonthEmpty', { month: month.label })}
                 </Text>
-
-                <HStack align="center" alignSelf="flex-start" spacing={2} bg={tint} px={2.5} py={1.5} borderRadius="full">
-                  <Box w="8px" h="8px" borderRadius="full" bg={accent} />
-                  <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing="0.08em" textTransform="uppercase" color={accent}>
-                    {t(hasPayments ? 'dashboard.scheduledPayments' : 'dashboard.noPayments')}
-                  </Text>
-                </HStack>
 
                 {onManage && (
                   <HStack justify="flex-end" mt="auto" pt={1}>
@@ -238,8 +215,8 @@ export default function InstallmentCarousel({
                       color={accent}
                       fontFamily="var(--pb-mono)"
                       fontSize="10px"
-                      letterSpacing="0.08em"
-                      textTransform="uppercase"
+                      letterSpacing="var(--pb-eyebrow-tracking, 0.08em)"
+                      textTransform={EYEBROW_CASE}
                       rightIcon={<ArrowUpRight size={13} />}
                       _hover={{ bg: 'transparent', textDecoration: 'underline' }}
                     >
@@ -266,7 +243,7 @@ export default function InstallmentCarousel({
             h="7px"
             w={index === activeMonth ? '22px' : '7px'}
             borderRadius="full"
-            bg={index === activeMonth ? colorMode === 'dark' ? '#d5b769' : '#a16f19' : 'var(--pb-hair-2)'}
+            bg={index === activeMonth ? 'var(--nu-brand)' : 'var(--pb-hair-2)'}
             transition="width 0.2s ease, background 0.2s ease"
           />
         ))}
