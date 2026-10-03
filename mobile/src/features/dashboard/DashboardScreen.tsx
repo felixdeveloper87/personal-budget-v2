@@ -25,6 +25,9 @@ import { ApiError, getMonthlySummary, listInstallmentPlans, listTransactions } f
 import { colors } from "@/theme/colors";
 import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finance";
 
+import { getMonthToDateComparison } from "@/utils/monthToDate";
+import { getVariableSpending } from "@/utils/variableSpending";
+
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const actionIcons = {
@@ -85,67 +88,93 @@ function getMetricChange(value: number, previousValue: number | null) {
       : `${new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 }).format(percentage)}%`;
 
   return {
+    amount,
     label: `${amount} ${difference > 0 ? "higher" : "lower"}`,
     direction: difference > 0 ? 1 : -1,
   };
 }
 
+const heroAccent = { positive: "#D6EF9B", negative: "#F1B9A4" } as const;
+
 interface SummaryMetricProps {
   icon: SymbolName;
   label: string;
   value: number;
-  previousValue: number | null;
+  /** Values to compare; may differ from `value` (e.g. month-to-date slices). */
+  current: number;
+  previous: number | null;
+  comparisonCaption: string;
   tone: "income" | "expense";
 }
 
-function SummaryMetric({ icon, label, value, previousValue, tone }: SummaryMetricProps) {
-  const change = getMetricChange(value, previousValue);
+function SummaryMetric({ icon, label, value, current, previous, comparisonCaption, tone }: SummaryMetricProps) {
+  const change = getMetricChange(current, previous);
   const favorable = tone === "income" ? change.direction > 0 : change.direction < 0;
+  const accent = tone === "income" ? heroAccent.positive : heroAccent.negative;
 
   return (
-    <View style={styles.metricCard}>
+    <View
+      accessible
+      accessibilityLabel={`${label}: ${formatCurrency(value)}. ${change.label} ${comparisonCaption}.`}
+      style={styles.metricCard}
+    >
       <View style={styles.metricHeading}>
-        <SymbolView name={icon} size={14} tintColor={tone === "income" ? "#D6EF9B" : "#F1B9A4"} />
+        <View style={[styles.metricIcon, { backgroundColor: `${accent}26` }]}>
+          <SymbolView name={icon} size={11} tintColor={accent} weight="semibold" />
+        </View>
         <Text style={styles.metricLabel}>{label}</Text>
       </View>
       <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.metricValue}>
         {formatCurrency(value)}
       </Text>
-      <Text style={[styles.metricChange, change.direction !== 0 && { color: favorable ? "#D6EF9B" : "#F1B9A4" }]}>
-        {change.direction > 0 ? "↑ " : change.direction < 0 ? "↓ " : ""}{change.label}
+      <Text adjustsFontSizeToFit minimumFontScale={0.8} numberOfLines={1} style={styles.metricChange}>
+        {change.direction !== 0 && "amount" in change ? (
+          <Text style={{ color: favorable ? heroAccent.positive : heroAccent.negative, fontWeight: "600" }}>
+            {change.direction > 0 ? "↑ " : "↓ "}{change.amount}
+          </Text>
+        ) : change.label}
+        {` ${comparisonCaption}`}
       </Text>
-      <Text style={styles.metricComparisonCaption}>vs last month</Text>
     </View>
   );
 }
 
-function IncomeUsageChart({ elapsedDays, expense, income }: { elapsedDays: number; expense: number; income: number }) {
-  const usage = income > 0 ? expense / income : null;
-  const spentShare = usage === null ? (expense > 0 ? 1 : 0) : Math.min(1, Math.max(0, usage));
+function VariableSpendingBar({ date, transactions }: { date: Date; transactions: Transaction[] }) {
+  const spending = useMemo(() => getVariableSpending(transactions, date), [transactions, date]);
 
   return (
-    <View style={styles.flowCard}>
-      <View style={styles.flowHeading}>
-        <View style={styles.flowCopy}>
-          <Text style={styles.flowTitle}>A little perspective</Text>
-          <Text style={styles.usageLabel}>{usage === null ? "Record income to see your spending share" : "Your spending, as a share of this month’s income"}</Text>
+    <View
+      accessible
+      accessibilityLabel={
+        formatCurrency(spending.spent) + " everyday spending this month, excluding installments and fixed payments. " +
+        formatCurrency(spending.dailyAverage) + " per calendar day. " +
+        (spending.projection > 0 ? "Projected month total at this pace: " + formatCurrency(spending.projection) + "." : "No spending projection yet.")
+      }
+      style={styles.spendingPanel}
+    >
+      <View style={styles.spendingRow}>
+        <View style={styles.spendingAmountCopy}>
+          <Text style={styles.spendingEyebrow}>EVERYDAY SPENDING</Text>
+          <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.spendingAmount}>
+            {formatCurrency(spending.spent)}
+          </Text>
         </View>
-        <Text style={[styles.usagePercentage, expense > income && { color: colors.expense }]}>
-          {usage === null ? "—" : `${Math.round(usage * 100)}%`}
-        </Text>
+        <View style={styles.dailyAverageBadge}>
+          <Text adjustsFontSizeToFit minimumFontScale={0.8} numberOfLines={1} style={styles.dailyAverageAmount}>
+            {formatCurrency(spending.dailyAverage)}
+            <Text style={styles.dailyAverageUnit}> / day</Text>
+          </Text>
+        </View>
       </View>
-      <View
-        accessible
-        accessibilityRole="image"
-        accessibilityLabel={`Income usage: ${formatCurrency(expense)} spent. ${usage === null ? "No income recorded." : `${Math.round(usage * 100)} percent of income spent.`}`}
-        style={styles.usageTrack}
-      >
-        <View style={[styles.spentSegment, { width: `${spentShare * 100}%`, backgroundColor: expense > income ? colors.expense : colors.forest }]} />
+      <View style={styles.spendingTrack}>
+        <View style={[styles.spendingFill, { width: `${spending.share * 100}%` }]} />
+        <View style={[styles.spendingKnob, { left: `${spending.share * 100}%` }]} />
       </View>
-      <View style={styles.flowFooter}>
-        <Text style={styles.dailyAverageCaption}>Daily spending average</Text>
-        <Text style={styles.dailyAverageValue}>{formatCurrency(expense / Math.max(1, elapsedDays))}<Text style={styles.dailyAverageCaption}> / day</Text></Text>
+      <View style={styles.spendingRow}>
+        <Text numberOfLines={1} style={styles.spendingCaption}>Month-end at this pace</Text>
+        <Text style={styles.spendingProjection}>{spending.projection > 0 ? formatCurrency(spending.projection) : "—"}</Text>
       </View>
+      <Text style={styles.spendingExclusion}>Excludes installments & fixed payments</Text>
     </View>
   );
 }
@@ -170,18 +199,15 @@ function ActionButton({ label, onPress, tone }: ActionButtonProps) {
         pressed && styles.actionButtonPressed,
       ]}
     >
-      <SymbolView
-        name={actionIcons.plus}
-        size={25}
-        tintColor={isIncome ? "#193D37" : colors.ink}
-        weight="bold"
-      />
-      <Text
-        adjustsFontSizeToFit
-        minimumFontScale={0.8}
-        numberOfLines={1}
-        style={[styles.actionLabel, isIncome && { color: "#193D37" }]}
-      >
+      <View style={styles.actionIcon}>
+        <SymbolView
+          name={isIncome ? actionIcons.income : actionIcons.expense}
+          size={14}
+          tintColor={colors.white}
+          weight="bold"
+        />
+      </View>
+      <Text adjustsFontSizeToFit minimumFontScale={0.8} numberOfLines={1} style={styles.actionLabel}>
         {label}
       </Text>
     </Pressable>
@@ -245,6 +271,11 @@ export function DashboardScreen() {
 
     setTransactions((current) => [...current, transaction]);
 
+    // The summary sums by payment date: a card purchase billed next month must not move this month's totals.
+    const paidOn = (transaction.paymentDate ?? transaction.transactionDate ?? transaction.dateTime).slice(0, 7);
+    const thisMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+    if (paidOn !== thisMonth) return;
+
     setSummary((current) => {
       if (!current || !Number.isFinite(amount)) return current;
       if (transaction.type === "INCOME") {
@@ -260,7 +291,12 @@ export function DashboardScreen() {
         totalExpense: current.totalExpense + amount,
       };
     });
-  }, []);
+  }, [currentDate]);
+
+  const incomeComparison = useMemo(
+    () => getMonthToDateComparison(transactions, "INCOME", currentDate),
+    [transactions, currentDate],
+  );
 
   if (!user) return null;
 
@@ -284,39 +320,31 @@ export function DashboardScreen() {
           />
         }
       >
-        <View style={styles.userRow}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials || "PB"}</Text>
-          </View>
-          <View style={styles.greetingCopy}>
-            <Text style={styles.greeting}>{greetingLabel(currentDate)},</Text>
-            <Text adjustsFontSizeToFit numberOfLines={1} style={styles.userName}>{firstName}</Text>
-          </View>
-          <Pressable
-            accessibilityLabel="Open settings"
-            accessibilityRole="button"
-            onPress={() => router.navigate("/more")}
-            style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
-          >
-            <SymbolView name={actionIcons.settings} size={22} tintColor={colors.ink} weight="regular" />
-          </Pressable>
-        </View>
-
         <View style={styles.homeHeader}>
-          <View pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.heroArtwork}>
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
             <DashboardHeroArtwork />
           </View>
           <View style={styles.heroContent}>
             <View style={styles.heroTopRow}>
-              <Text style={styles.heroEyebrow}>YOUR MONTH, IN FOCUS</Text>
-              <View style={styles.monthPill}>
-                <View style={styles.liveDot} />
-                <Text style={styles.monthTitle}>{monthLabel(currentDate)}</Text>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials || "PB"}</Text>
               </View>
+              <Text numberOfLines={1} style={styles.greeting}>
+                {greetingLabel(currentDate)}, <Text style={styles.userName}>{firstName}</Text>
+              </Text>
+              <Pressable
+                accessibilityLabel="Open settings"
+                accessibilityRole="button"
+                hitSlop={6}
+                onPress={() => router.navigate("/more")}
+                style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
+              >
+                <SymbolView name={actionIcons.settings} size={18} tintColor="#E6F0DA" weight="regular" />
+              </Pressable>
             </View>
             {loading ? (
               <View style={styles.loadingSummary}>
-                <ActivityIndicator color="#D6EF9B" />
+                <ActivityIndicator color={heroAccent.positive} />
                 <Text style={styles.loadingText}>Loading your totals…</Text>
               </View>
             ) : error ? (
@@ -330,33 +358,58 @@ export function DashboardScreen() {
             ) : summary ? (
               <>
                 <View style={styles.balanceBlock}>
-                  <Text style={styles.balanceLabel}>Net this month</Text>
-                  <Text adjustsFontSizeToFit minimumFontScale={0.45} numberOfLines={1} style={[styles.balanceValue, summary.balance < 0 && { color: "#F1B9A4" }]}>
+                  <View style={styles.balanceLabelRow}>
+                    <View style={styles.monthPill}>
+                      <View style={styles.monthPillDot} />
+                      <Text style={styles.monthTitle}>Net · {monthLabel(currentDate)}</Text>
+                    </View>
+                    <Text style={styles.heroDay}>
+                      Day {currentDate.getDate()} of {new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()}
+                    </Text>
+                  </View>
+                  <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.balanceValue}>
                     {formatCurrency(summary.balance)}
                   </Text>
-                  <Text style={styles.balanceCaption}>
-                    {summary.totalIncome === 0 && summary.totalExpense === 0
-                      ? "A fresh month. Make your first move."
-                      : summary.balance > 0
-                        ? "More coming in. Room to breathe."
-                        : summary.balance < 0
-                          ? "More going out. Time for a closer look."
-                          : "Income and spending, in balance."}
-                  </Text>
-                </View>
-                <View style={styles.monthTimeline}>
-                  <View style={styles.timelineLabels}>
-                    <Text style={styles.timelineLabel}>Day {currentDate.getDate()}</Text>
-                    <Text style={styles.timelineLabel}>{new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() - currentDate.getDate()} days left</Text>
-                  </View>
-                  <View style={styles.timelineTrack}>
-                    <View style={[styles.timelineFill, { width: `${currentDate.getDate() / new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate() * 100}%` }]} />
+                  <View style={styles.balanceCaptionRow}>
+                    <View
+                      style={[
+                        styles.balanceCaptionDot,
+                        { backgroundColor: summary.balance < 0 ? heroAccent.negative : heroAccent.positive },
+                      ]}
+                    />
+                    <Text style={styles.balanceCaption}>
+                      {summary.totalIncome === 0 && summary.totalExpense === 0
+                        ? "No transactions recorded yet"
+                        : summary.balance > 0
+                          ? "Income exceeds spending so far"
+                          : summary.balance < 0
+                            ? "Spending exceeds income so far"
+                            : "Income and spending are balanced"}
+                    </Text>
                   </View>
                 </View>
                 <View style={styles.summaryGrid}>
-                  <SummaryMetric icon={actionIcons.income} label="Income" previousValue={previousSummary?.totalIncome ?? null} tone="income" value={summary.totalIncome} />
-                  <SummaryMetric icon={actionIcons.expense} label="Expenses" previousValue={previousSummary?.totalExpense ?? null} tone="expense" value={summary.totalExpense} />
+                  <SummaryMetric
+                    comparisonCaption="vs same day last month"
+                    current={incomeComparison.current}
+                    icon={actionIcons.income}
+                    label="Income"
+                    previous={incomeComparison.previous}
+                    tone="income"
+                    value={summary.totalIncome}
+                  />
+                  <View style={styles.metricDivider} />
+                  <SummaryMetric
+                    comparisonCaption="vs last month"
+                    current={summary.totalExpense}
+                    icon={actionIcons.expense}
+                    label="Payments"
+                    previous={previousSummary?.totalExpense ?? null}
+                    tone="expense"
+                    value={summary.totalExpense}
+                  />
                 </View>
+                <VariableSpendingBar date={currentDate} transactions={transactions} />
               </>
             ) : null}
           </View>
@@ -367,9 +420,6 @@ export function DashboardScreen() {
             <ActionButton label="Add income" onPress={() => setEntryType("INCOME")} tone="income" />
             <ActionButton label="Add expense" onPress={() => setEntryType("EXPENSE")} tone="expense" />
           </View>
-          {!loading && !error && summary ? (
-            <IncomeUsageChart elapsedDays={currentDate.getDate()} expense={summary.totalExpense} income={summary.totalIncome} />
-          ) : null}
         </View>
 
         {!loading && !error ? (
@@ -408,64 +458,91 @@ export function DashboardScreen() {
 
 const styles = StyleSheet.create({
   safeArea: { backgroundColor: "#F4F5EF", flex: 1 },
-  content: { paddingBottom: 48, paddingTop: 8 },
-  userRow: { alignItems: "center", flexDirection: "row", paddingHorizontal: 22, paddingBottom: 22, paddingTop: 8 },
-  avatar: { alignItems: "center", backgroundColor: "#E2E8DA", borderRadius: 18, height: 46, justifyContent: "center", marginRight: 12, width: 46 },
-  avatarText: { color: "#193D37", fontSize: 15, fontWeight: "700" },
-  greetingCopy: { flex: 1, minWidth: 0 },
-  greeting: { color: colors.inkSoft, fontSize: 12 },
-  userName: { color: colors.ink, fontSize: 21, fontWeight: "700", letterSpacing: -0.6, marginTop: 2 },
-  headerAction: { alignItems: "center", borderColor: "#DCE1D5", borderRadius: 23, borderWidth: 1, height: 46, justifyContent: "center", marginLeft: 10, width: 46 },
-  headerActionPressed: { backgroundColor: "#E2E8DA", transform: [{ scale: 0.96 }] },
-  homeHeader: { backgroundColor: "#193D37", borderRadius: 30, marginHorizontal: 16, overflow: "hidden" },
-  heroArtwork: { position: "absolute", right: -60, top: 40, width: 240, height: 240, opacity: 0.65 },
-  heroContent: { padding: 22 },
-  heroTopRow: { alignItems: "flex-start", gap: 12 },
-  heroEyebrow: { color: "#D6EF9B", fontSize: 10, fontWeight: "700", letterSpacing: 2 },
-  monthPill: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, flexDirection: "row", gap: 7, paddingHorizontal: 11, paddingVertical: 7 },
-  liveDot: { backgroundColor: "#D6EF9B", borderRadius: 3, height: 5, width: 5 },
-  monthTitle: { color: "#EFF4E8", fontSize: 11, fontWeight: "600" },
-  balanceBlock: { marginTop: 30 },
-  balanceLabel: { color: "#C2D1C9", fontSize: 13, fontWeight: "500" },
-  balanceValue: { color: "#F5F8EC", fontSize: 51, fontWeight: "600", letterSpacing: -2.5, marginTop: 4, fontVariant: ["tabular-nums"] },
-  balanceCaption: { color: "#C2D1C9", fontSize: 12, lineHeight: 18, marginTop: 6 },
-  monthTimeline: { marginTop: 26, marginBottom: 22 },
-  timelineLabels: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  timelineLabel: { color: "#C2D1C9", fontSize: 10, fontWeight: "500" },
-  timelineTrack: { backgroundColor: "rgba(255,255,255,0.12)", borderRadius: 3, height: 3, overflow: "hidden" },
-  timelineFill: { backgroundColor: "#D6EF9B", borderRadius: 3, height: 3 },
-  summaryGrid: { flexDirection: "row", gap: 10 },
-  metricCard: { backgroundColor: "rgba(255,255,255,0.07)", borderColor: "rgba(255,255,255,0.09)", borderRadius: 18, borderWidth: 1, flex: 1, minWidth: 0, padding: 13 },
+  content: { paddingBottom: 48, paddingTop: 12 },
+  avatar: { alignItems: "center", backgroundColor: "rgba(214,239,155,0.16)", borderColor: "rgba(214,239,155,0.3)", borderRadius: 16, borderWidth: StyleSheet.hairlineWidth, height: 32, justifyContent: "center", width: 32 },
+  avatarText: { color: "#D6EF9B", fontSize: 11, fontWeight: "700" },
+  greeting: { color: "rgba(230,240,218,0.7)", flex: 1, fontSize: 13, minWidth: 0 },
+  userName: { color: "#F6F8F0", fontSize: 15, fontWeight: "600", letterSpacing: -0.2 },
+  headerAction: { alignItems: "center", backgroundColor: "rgba(246,248,240,0.1)", borderRadius: 16, height: 32, justifyContent: "center", width: 32 },
+  headerActionPressed: { backgroundColor: "rgba(246,248,240,0.2)", transform: [{ scale: 0.94 }] },
+  homeHeader: {
+    backgroundColor: "#1C4049",
+    borderRadius: 24,
+    elevation: 6,
+    marginHorizontal: 16,
+    overflow: "hidden",
+    shadowColor: "#0E2229",
+    shadowOffset: { height: 10, width: 0 },
+    shadowOpacity: 0.18,
+    shadowRadius: 18,
+  },
+  heroContent: { paddingHorizontal: 18, paddingVertical: 16 },
+  heroTopRow: { alignItems: "center", flexDirection: "row", gap: 10 },
+  monthPill: { alignItems: "center", backgroundColor: "rgba(214,239,155,0.12)", borderRadius: 999, flexDirection: "row", gap: 6, paddingHorizontal: 9, paddingVertical: 4 },
+  monthPillDot: { backgroundColor: "#D6EF9B", borderRadius: 3, height: 6, width: 6 },
+  monthTitle: { color: "#E6F0DA", fontSize: 11, fontWeight: "600" },
+  heroDay: { color: "rgba(230,240,218,0.62)", fontSize: 11, fontVariant: ["tabular-nums"] },
+  balanceBlock: { marginTop: 14 },
+  balanceLabelRow: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between", marginBottom: 4 },
+  balanceValue: { color: "#F6F8F0", fontSize: 36, fontWeight: "700", letterSpacing: -1.4, marginTop: 2, fontVariant: ["tabular-nums"] },
+  balanceCaptionRow: { alignItems: "center", flexDirection: "row", gap: 6, marginTop: 2 },
+  balanceCaptionDot: { borderRadius: 3, height: 6, width: 6 },
+  balanceCaption: { color: "rgba(230,240,218,0.7)", flexShrink: 1, fontSize: 12, lineHeight: 17 },
+  summaryGrid: { flexDirection: "row", gap: 14, marginTop: 16 },
+  metricCard: { flex: 1, minWidth: 0 },
+  metricDivider: { backgroundColor: "rgba(230,240,218,0.14)", width: StyleSheet.hairlineWidth },
   metricHeading: { alignItems: "center", flexDirection: "row", gap: 6 },
-  metricLabel: { color: "#C2D1C9", fontSize: 11 },
-  metricValue: { color: "#F5F8EC", fontSize: 22, fontWeight: "600", letterSpacing: -0.7, marginTop: 10, fontVariant: ["tabular-nums"] },
-  metricChange: { color: "#C2D1C9", fontSize: 10, fontWeight: "600", marginTop: 8 },
-  metricComparisonCaption: { color: "#C2D1C9", fontSize: 9, marginTop: 2 },
-  belowHero: { gap: 16, marginTop: 16, paddingHorizontal: 16 },
+  metricIcon: { alignItems: "center", borderRadius: 9, height: 18, justifyContent: "center", width: 18 },
+  metricLabel: { color: "rgba(230,240,218,0.72)", fontSize: 12 },
+  metricValue: { color: "#F6F8F0", fontSize: 19, fontWeight: "600", letterSpacing: -0.5, marginTop: 6, fontVariant: ["tabular-nums"] },
+  metricChange: { color: "rgba(230,240,218,0.55)", fontSize: 11, marginTop: 3 },
+  belowHero: { gap: 20, marginTop: 12, paddingHorizontal: 16 },
   actionsRow: { flexDirection: "row", gap: 10 },
-  actionButton: { alignItems: "center", borderRadius: 18, flex: 1, flexDirection: "row", gap: 7, justifyContent: "center", minHeight: 52, minWidth: 0, paddingHorizontal: 10 },
-  incomeButton: { backgroundColor: "#D6EF9B" },
-  expenseButton: { backgroundColor: "#E6EADF" },
-  actionButtonPressed: { opacity: 0.78, transform: [{ scale: 0.98 }] },
-  actionLabel: { color: colors.ink, flexShrink: 1, fontSize: 12, fontWeight: "700" },
-  flowCard: { backgroundColor: "#FCFDF8", borderColor: "#E2E6DB", borderRadius: 22, borderWidth: 1, padding: 18 },
-  flowHeading: { alignItems: "center", flexDirection: "row", gap: 12 },
-  flowCopy: { flex: 1 },
-  flowTitle: { color: colors.ink, fontSize: 14, fontWeight: "600" },
-  usageLabel: { color: colors.inkSoft, fontSize: 11, lineHeight: 16, marginTop: 3 },
-  usagePercentage: { color: colors.forest, fontSize: 30, fontWeight: "600", letterSpacing: -1, flexShrink: 1 },
-  usageTrack: { backgroundColor: "#E4EADB", borderRadius: 4, height: 7, marginTop: 16, overflow: "hidden" },
-  spentSegment: { borderRadius: 4, height: "100%" },
-  flowFooter: { alignItems: "center", flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "space-between", marginTop: 13 },
-  dailyAverageCaption: { color: colors.inkSoft, fontSize: 11, fontWeight: "400" },
-  dailyAverageValue: { color: colors.ink, fontSize: 13, fontWeight: "700" },
-  loadingSummary: { alignItems: "center", gap: 12, justifyContent: "center", minHeight: 285 },
-  loadingText: { color: "#C2D1C9", fontSize: 13 },
-  errorSummary: { justifyContent: "center", minHeight: 285 },
-  errorTitle: { color: "#F5F8EC", fontSize: 18, fontWeight: "700" },
-  errorText: { color: "#C2D1C9", fontSize: 12, lineHeight: 18, marginTop: 8 },
-  retryButton: { alignSelf: "flex-start", backgroundColor: "#D6EF9B", borderRadius: 14, marginTop: 16, paddingHorizontal: 18, paddingVertical: 14 },
-  retryText: { color: "#193D37", fontSize: 13, fontWeight: "700" },
+  actionButton: { alignItems: "center", borderRadius: 16, flex: 1, flexDirection: "row", gap: 10, justifyContent: "center", minHeight: 52, minWidth: 0, paddingHorizontal: 12, paddingVertical: 10 },
+  incomeButton: { backgroundColor: "#2B6A4E", elevation: 3, shadowColor: "#1E5640", shadowOffset: { height: 6, width: 0 }, shadowOpacity: 0.2, shadowRadius: 10 },
+  expenseButton: { backgroundColor: "#A94E3C", elevation: 3, shadowColor: "#7E3528", shadowOffset: { height: 6, width: 0 }, shadowOpacity: 0.2, shadowRadius: 10 },
+  actionButtonPressed: { opacity: 0.88, transform: [{ scale: 0.97 }] },
+  actionIcon: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 999, height: 26, justifyContent: "center", overflow: "hidden", width: 26 },
+  actionLabel: { color: colors.white, flexShrink: 1, fontSize: 14, fontWeight: "600", letterSpacing: -0.1 },
+  spendingPanel: {
+    backgroundColor: "rgba(246,248,240,0.07)",
+    borderColor: "rgba(214,239,155,0.14)",
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 10,
+    marginTop: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  spendingRow: { alignItems: "center", flexDirection: "row", gap: 10, justifyContent: "space-between" },
+  spendingEyebrow: { color: "#D6EF9B", fontSize: 9, fontWeight: "700", letterSpacing: 1.3 },
+  spendingAmountCopy: { flexShrink: 1, minWidth: 0 },
+  spendingAmount: { color: "#F6F8F0", fontSize: 22, fontWeight: "600", letterSpacing: -0.6, marginTop: 3, fontVariant: ["tabular-nums"] },
+  spendingCaption: { color: "rgba(230,240,218,0.62)", flexShrink: 1, fontSize: 11 },
+  dailyAverageBadge: { backgroundColor: "rgba(214,239,155,0.14)", borderRadius: 999, flexShrink: 0, paddingHorizontal: 10, paddingVertical: 5 },
+  dailyAverageAmount: { color: "#E6F4C4", fontSize: 12, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  dailyAverageUnit: { color: "rgba(230,244,196,0.7)", fontWeight: "500" },
+  spendingTrack: { backgroundColor: "rgba(230,240,218,0.14)", borderRadius: 3, height: 6, justifyContent: "center" },
+  spendingFill: { backgroundColor: "#D6EF9B", borderRadius: 3, height: "100%" },
+  spendingKnob: {
+    backgroundColor: "#F6F8F0",
+    borderColor: "#D6EF9B",
+    borderRadius: 6,
+    borderWidth: 2,
+    height: 12,
+    marginLeft: -6,
+    position: "absolute",
+    width: 12,
+  },
+  spendingProjection: { color: "#F6F8F0", fontSize: 12, fontWeight: "600", fontVariant: ["tabular-nums"] },
+  spendingExclusion: { color: "rgba(230,240,218,0.45)", fontSize: 10 },
+  loadingSummary: { alignItems: "center", gap: 12, justifyContent: "center", minHeight: 200 },
+  loadingText: { color: "rgba(230,240,218,0.72)", fontSize: 13 },
+  errorSummary: { justifyContent: "center", minHeight: 200 },
+  errorTitle: { color: "#F6F8F0", fontSize: 18, fontWeight: "600" },
+  errorText: { color: "rgba(230,240,218,0.72)", fontSize: 12, lineHeight: 18, marginTop: 8 },
+  retryButton: { alignSelf: "flex-start", backgroundColor: "#D6EF9B", borderRadius: 12, marginTop: 16, paddingHorizontal: 18, paddingVertical: 12 },
+  retryText: { color: "#1C4049", fontSize: 13, fontWeight: "600" },
   paceSection: { marginTop: 30, paddingHorizontal: 16 },
   sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "700", letterSpacing: 2, paddingHorizontal: 3 },
   sectionTitle: { color: colors.ink, fontSize: 26, fontWeight: "600", letterSpacing: -0.8, marginTop: 6, marginBottom: 8, paddingHorizontal: 3 },

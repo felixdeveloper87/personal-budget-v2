@@ -6,6 +6,9 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { colors } from "@/theme/colors";
 import type { Transaction } from "@/types/finance";
 import { toLocalIsoDate } from "@/utils/period";
+import { isExpensePaceTransaction } from "@/utils/variableSpending";
+
+export { isExpensePaceTransaction } from "@/utils/variableSpending";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 type PaceTone = "income" | "expense";
@@ -54,15 +57,6 @@ function formatCurrency(value: number, compact = false) {
 export function getPaceTransactionDate(transaction: Transaction) {
   const source = transaction.transactionDate ?? transaction.dateTime;
   return source.length === 10 ? source : toLocalIsoDate(new Date(source));
-}
-
-export function isExpensePaceTransaction(transaction: Transaction) {
-  return !(
-    transaction.isInstallment ||
-    transaction.installmentPlanId != null ||
-    transaction.isRecurring ||
-    transaction.recurringTransactionId != null
-  );
 }
 
 export function normalizePaceLabel(value: string) {
