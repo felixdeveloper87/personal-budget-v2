@@ -18,22 +18,14 @@ import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import ActivityIntensityStrip, { type ChartDay } from '../transactions/components/ActivityIntensityStrip'
-import {
-  deriveHabit,
-  deriveMomentum,
-  deriveRhythm,
-  toViewModel,
-} from '../transactions/transactions.utils'
+import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 
 import { aggregateSide } from '../categories/data/aggregate'
 import Distribution from '../categories/components/Distribution'
 
 import InsightsPanel from './components/InsightsPanel'
-import {
-  deriveCategoryShift,
-  deriveTopCategory,
-} from './insights'
+import { deriveSmartInsights } from './smartInsights'
 
 function isoOf(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(
@@ -146,20 +138,26 @@ export default function BehaviourPage() {
     [selectedDate, selectedPeriod],
   )
   const prevPeriodData = usePeriodData(spendingTransactions, null, selectedPeriod, prevDate, 'activity')
-  const prevVm = useMemo<TxnVM[]>(
-    () => toViewModel(prevPeriodData.transactions),
-    [prevPeriodData.transactions],
+  // Full expense history — the pattern insights compare like-for-like with
+  // earlier periods and need category history for outliers.
+  const allExpenseVm = useMemo<TxnVM[]>(
+    () => toViewModel(spendingTransactions).filter((transaction) => transaction.type === 'out'),
+    [spendingTransactions],
   )
 
   useEffect(() => {
     setSelectedChartDay(null)
   }, [selectedDate, selectedPeriod])
 
-  const rhythm = useMemo(() => deriveRhythm(vm), [vm])
-  const habit = useMemo(() => deriveHabit(vm), [vm])
-  const momentum = useMemo(() => deriveMomentum(vm), [vm])
-  const shift = useMemo(() => deriveCategoryShift(vm, prevVm), [vm, prevVm])
-  const topCategory = useMemo(() => deriveTopCategory(vm), [vm])
+  const smartInsights = useMemo(
+    () => deriveSmartInsights({
+      allExpenses: allExpenseVm,
+      period: selectedPeriod,
+      start: periodData.startDate,
+      end: periodData.endDate,
+    }),
+    [allExpenseVm, selectedPeriod, periodData.startDate, periodData.endDate],
+  )
 
   const expense = useMemo(() => aggregateSide(periodData.transactions, 'expense'), [periodData.transactions])
   const previousExpense = useMemo(
@@ -290,18 +288,14 @@ export default function BehaviourPage() {
             </NuSection>
           </MotionBox>
 
-          <MotionBox variants={riseV}>
-            <NuSection title={t('behaviour.sections.insights')} subtitle={t('behaviour.sections.insightsCaption')}>
-              <InsightsPanel
-                periodWord={t(`cashflow.periodWord.${selectedPeriod}`)}
-                shift={shift}
-                topCategory={topCategory}
-                rhythm={rhythm}
-                habit={habit}
-                earnings={null}
-              />
-            </NuSection>
-          </MotionBox>
+          {/* Only rendered when at least one insight has enough data to be fair. */}
+          {!loading && smartInsights.length > 0 && (
+            <MotionBox variants={riseV}>
+              <NuSection title={t('behaviour.sections.insights')} subtitle={t('behaviour.sections.insightsCaption')}>
+                <InsightsPanel insights={smartInsights} period={selectedPeriod} />
+              </NuSection>
+            </MotionBox>
+          )}
         </MotionBox>
       </Box>
 
@@ -335,6 +329,7 @@ function SelectedDayExpenses({
 
   return (
     <ActivityDayModal
+      appearance="nu"
       isOpen
       onClose={onClose}
       label={t('behaviour.day.label', { date: dayLabel })}

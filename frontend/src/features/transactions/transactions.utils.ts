@@ -2,10 +2,7 @@ import type { Transaction } from '../../types'
 import { getTransactionDateSource } from '../../utils/transactionDates'
 import type { AppLocale } from '../../i18n'
 import type {
-  HabitInsight,
   IconKey,
-  MomentumInsight,
-  RhythmInsight,
   TxAction,
   TxFilter,
   TxnVM,
@@ -72,56 +69,8 @@ export function toViewModel(transactions: Transaction[]): TxnVM[] {
 /* -------------------------------------------------------------------------- */
 
 // 1. RHYTHM — weekday with the highest total spend.
-export function deriveRhythm(txns: TxnVM[]): RhythmInsight | null {
-  const byWd = Array.from({ length: 7 }, () => ({ sum: 0, n: 0 }))
-  let any = false
-  for (const t of txns) {
-    if (t.type !== 'out') continue
-    any = true
-    const wd = parseISO(t.purchaseDate).getDay()
-    byWd[wd].sum += t.amount
-    byWd[wd].n++
-  }
-  if (!any) return null
-  let best = 0
-  for (let i = 1; i < 7; i++) if (byWd[i].sum > byWd[best].sum) best = i
-  return { weekday: best, total: byWd[best].sum, count: byWd[best].n }
-}
-
 // 2. HABIT — category with the most transactions.
-export function deriveHabit(txns: TxnVM[]): HabitInsight | null {
-  const byCat: Record<string, { sum: number; n: number }> = {}
-  for (const t of txns) {
-    if (t.type !== 'out') continue
-    if (!byCat[t.category]) byCat[t.category] = { sum: 0, n: 0 }
-    byCat[t.category].sum += t.amount
-    byCat[t.category].n++
-  }
-  const entries = Object.entries(byCat)
-  if (entries.length === 0) return null
-  const best = entries.reduce((a, b) => (b[1].n > a[1].n ? b : a))
-  return { category: best[0], total: best[1].sum, count: best[1].n }
-}
-
 // 3. MOMENTUM — category with the biggest spend increase in the 2nd half.
-export function deriveMomentum(txns: TxnVM[], midDay = 15): MomentumInsight | null {
-  const byCat: Record<string, { h1: number; h2: number }> = {}
-  for (const t of txns) {
-    if (t.type !== 'out') continue
-    const day = Number(t.purchaseDate.slice(8, 10))
-    const half = day > midDay ? 'h2' : 'h1'
-    if (!byCat[t.category]) byCat[t.category] = { h1: 0, h2: 0 }
-    byCat[t.category][half] += t.amount
-  }
-  const entries = Object.entries(byCat)
-  if (entries.length === 0) return null
-  const best = entries
-    .map(([cat, v]) => ({ category: cat, diff: v.h2 - v.h1 }))
-    .reduce((a, b) => (b.diff > a.diff ? b : a))
-  if (best.diff <= 0) return null
-  return best
-}
-
 /* -------------------------------------------------------------------------- */
 /* Filtering                                                                   */
 /* -------------------------------------------------------------------------- */

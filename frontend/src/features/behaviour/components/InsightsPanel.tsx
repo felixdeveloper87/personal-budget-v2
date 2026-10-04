@@ -1,216 +1,142 @@
-import { Box, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
-import { TrendingUp, TrendingDown, Layers, CalendarDays, Lightbulb } from '../../../components/ui/icons'
+import { Box, Flex, Icon, SimpleGrid, Text } from '@chakra-ui/react'
+import { AlertTriangle, ChartLineUp, Coffee, Smile, TrendingDown, TrendingUp } from '../../../components/ui/icons'
 import type { LucideIcon } from '../../../components/ui/icons'
-import type { HabitInsight, RhythmInsight } from '../../transactions/transactions.types'
-import type { CategoryShift, EarningsInsight } from '../insights'
+import type { PeriodKind, SmartInsight } from '../smartInsights'
 import { useI18n } from '../../../i18n'
-import { EYEBROW_CASE } from '../../dashboard/components/eyebrow'
 
-interface InsightsPanelProps {
-  periodWord: string
-  shift: { riser: CategoryShift | null; faller: CategoryShift | null }
-  topCategory: { category: string; total: number } | null
-  rhythm: RhythmInsight | null
-  habit: HabitInsight | null
-  earnings: EarningsInsight | null
-}
+type Tone = 'good' | 'bad' | 'neutral'
 
-interface InsightCardData {
+interface CardData {
+  id: string
   icon: LucideIcon
-  tint: string
-  color: string
-  tag: string
+  tone: Tone
   title: string
-  value: string
+  detail: string
 }
 
-export default function InsightsPanel({
-  periodWord,
-  shift,
-  topCategory,
-  rhythm,
-  habit,
-  earnings,
-}: InsightsPanelProps) {
+const TONES: Record<Tone, { ink: string; bg: string }> = {
+  good: { ink: 'var(--pb-income)', bg: 'var(--pb-tint-income)' },
+  bad: { ink: 'var(--pb-coral)', bg: 'var(--pb-tint-coral)' },
+  neutral: { ink: 'var(--nu-brand, #820ad1)', bg: 'var(--nu-brand-tint, #f3e8fc)' },
+}
+
+/** Up to three Nubank-style cards; the caller hides the section when empty. */
+export default function InsightsPanel({ insights, period }: { insights: SmartInsight[]; period: PeriodKind }) {
   const { t, formatCurrency, formatDate, formatNumber, categoryLabel } = useI18n()
-  const cards: InsightCardData[] = []
-  const pct = (value: number | null) => value == null
-    ? null
-    : `${value > 0 ? '+' : ''}${formatNumber(Math.round(value))}%`
-  const weekdayName = (weekday: number) => formatDate(
-    new Date(2024, 0, 7 + weekday),
-    { weekday: 'long' },
+  const monthName = (date: Date) => formatDate(date, { month: 'long' })
+  const ref = (date: Date, soFar: boolean) => {
+    const variant = soFar ? 'soFar' : 'total'
+    if (period === 'week') return t(`behaviour.smart.ref.week.${variant}`)
+    if (period === 'year') return t(`behaviour.smart.ref.year.${variant}`, { year: String(date.getFullYear()) })
+    return t(`behaviour.smart.ref.month.${variant}`, { month: monthName(date) })
+  }
+
+  const cards: CardData[] = insights.map((insight): CardData => {
+    switch (insight.kind) {
+      case 'pace': {
+        const diff = insight.spent - insight.previous
+        const direction = Math.abs(diff) < 0.005 ? 'same' : diff < 0 ? 'less' : 'more'
+        const suffix = insight.inProgress ? 'SoFar' : 'Total'
+        return {
+          id: 'pace',
+          icon: direction === 'more' ? TrendingUp : TrendingDown,
+          tone: direction === 'less' ? 'good' : direction === 'more' ? 'bad' : 'neutral',
+          title: t(`behaviour.smart.pace.${direction}${suffix}`, {
+            amount: formatCurrency(Math.abs(diff)),
+            ref: ref(insight.previousStart, insight.inProgress),
+          }),
+          detail: t(`behaviour.smart.pace.detail${suffix}`, {
+            spent: formatCurrency(insight.spent),
+            previous: formatCurrency(insight.previous),
+          }),
+        }
+      }
+      case 'projection':
+        return {
+          id: 'projection',
+          icon: ChartLineUp,
+          tone: insight.previousTotal > 0 && insight.projected > insight.previousTotal ? 'bad' : 'neutral',
+          title: t('behaviour.smart.projection.title', {
+            amount: formatCurrency(insight.projected, { maximumFractionDigits: 0 }),
+          }),
+          detail: insight.previousTotal > 0
+            ? t('behaviour.smart.projection.detail', {
+                month: capitalise(monthName(insight.previousStart)),
+                previous: formatCurrency(insight.previousTotal, { maximumFractionDigits: 0 }),
+              })
+            : t('behaviour.smart.projection.detailNoPrevious', { days: formatNumber(insight.daysElapsed) }),
+        }
+      case 'outlier':
+        return {
+          id: 'outlier',
+          icon: AlertTriangle,
+          tone: 'bad',
+          title: t('behaviour.smart.outlier.title', {
+            amount: formatCurrency(insight.amount),
+            merchant: insight.merchant,
+          }),
+          detail: t('behaviour.smart.outlier.detail', {
+            ratio: formatNumber(insight.ratio, { maximumFractionDigits: 0 }),
+            category: categoryLabel(insight.category),
+          }),
+        }
+      case 'small':
+        return {
+          id: 'small',
+          icon: Coffee,
+          tone: 'neutral',
+          title: t('behaviour.smart.small.title', {
+            count: formatNumber(insight.count),
+            limit: formatCurrency(insight.limit, { maximumFractionDigits: 0 }),
+            total: formatCurrency(insight.total),
+          }),
+          detail: t('behaviour.smart.small.detail', {
+            percentage: formatNumber(insight.share, { maximumFractionDigits: 0 }),
+          }),
+        }
+      case 'noSpend':
+        return {
+          id: 'noSpend',
+          icon: Smile,
+          tone: 'good',
+          title: t(insight.days === 1 ? 'behaviour.smart.noSpend.title.one' : 'behaviour.smart.noSpend.title.other', {
+            count: formatNumber(insight.days),
+          }),
+          detail: t(insight.inProgress ? 'behaviour.smart.noSpend.detailSoFar' : 'behaviour.smart.noSpend.detailTotal', {
+            days: formatNumber(insight.daysElapsed),
+          }),
+        }
+    }
+  })
+
+  return (
+    <SimpleGrid columns={{ base: 1, md: Math.min(cards.length, 3) }} spacing={3}>
+      {cards.map((card) => (
+        <InsightCard key={card.id} {...card} />
+      ))}
+    </SimpleGrid>
   )
+}
 
-  // Earnings lead — for daily/variable income the best-paying weekday is the
-  // headline behaviour signal, not a footnote.
-  if (earnings && earnings.bestWeekday != null) {
-    cards.push({
-      icon: TrendingUp,
-      tint: 'var(--pb-tint-income)',
-      color: 'var(--pb-income)',
-      tag: t('behaviour.insights.earningsTag'),
-      title: t('behaviour.insights.bestWeekday', {
-        weekday: weekdayName(earnings.bestWeekday),
-      }),
-      value: t('behaviour.insights.earningsValue', {
-        total: formatCurrency(earnings.bestWeekdayTotal),
-        average: formatCurrency(earnings.avgPerWorkedDay),
-      }),
-    })
-  }
-
-  if (shift.riser && shift.riser.diff > 0) {
-    const r = shift.riser
-    const p = pct(r.pct)
-    cards.push({
-      icon: TrendingUp,
-      tint: 'var(--pb-tint-coral)',
-      color: 'var(--pb-coral)',
-      tag: t('behaviour.insights.upTag', { period: periodWord }),
-      title: t('behaviour.insights.spendingMore', { category: categoryLabel(r.category) }),
-      value: t('behaviour.insights.upValue', {
-        amount: formatCurrency(r.diff),
-        percent: p ? ` (${p})` : '',
-        period: periodWord,
-      }),
-    })
-  }
-
-  if (shift.faller && shift.faller.diff < 0) {
-    const f = shift.faller
-    const p = pct(f.pct)
-    cards.push({
-      icon: TrendingDown,
-      tint: 'var(--pb-tint-green)',
-      color: 'var(--pb-income)',
-      tag: t('behaviour.insights.downTag', { period: periodWord }),
-      title: t('behaviour.insights.easingOff', { category: categoryLabel(f.category) }),
-      value: t('behaviour.insights.downValue', {
-        amount: formatCurrency(f.diff),
-        percent: p ? ` (${p})` : '',
-        period: periodWord,
-      }),
-    })
-  }
-
-  if (topCategory) {
-    cards.push({
-      icon: Layers,
-      tint: 'var(--pb-tint-gold)',
-      color: 'var(--pb-gold)',
-      tag: t('behaviour.insights.biggestCategory'),
-      title: categoryLabel(topCategory.category),
-      value: t('behaviour.insights.categoryValue', {
-        amount: formatCurrency(topCategory.total),
-        period: periodWord,
-      }),
-    })
-  }
-
-  if (rhythm) {
-    cards.push({
-      icon: CalendarDays,
-      tint: 'var(--pb-tint-green)',
-      color: 'var(--pb-forest-2)',
-      tag: t('behaviour.insights.spendingRhythm'),
-      title: t('behaviour.insights.heaviestDay', { weekday: weekdayName(rhythm.weekday) }),
-      value: t(
-        rhythm.count === 1
-          ? 'behaviour.insights.rhythmValue.one'
-          : 'behaviour.insights.rhythmValue.other',
-        { amount: formatCurrency(rhythm.total), count: formatNumber(rhythm.count) },
-      ),
-    })
-  }
-
-  if (habit && cards.length < 4) {
-    cards.push({
-      icon: Lightbulb,
-      tint: 'var(--pb-tint-gold)',
-      color: 'var(--pb-gold)',
-      tag: t('behaviour.insights.repeatedHabit'),
-      title: t('behaviour.insights.habitTitle', {
-        category: categoryLabel(habit.category),
-        count: formatNumber(habit.count),
-      }),
-      value: t('behaviour.insights.habitValue', { amount: formatCurrency(habit.total) }),
-    })
-  }
-
-  if (cards.length === 0) {
-    return (
-      <Box bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="18px" p="1.1rem">
-        <Text fontFamily="var(--pb-serif)" fontStyle="italic" fontSize=".95rem" color="var(--pb-ink-faint)">
-          {t('behaviour.insights.empty', { period: periodWord })}
+function InsightCard({ icon, tone, title, detail }: CardData) {
+  const colors = TONES[tone]
+  return (
+    <Flex bg="var(--pb-surface)" borderRadius="16px" p={4} gap={3} align="flex-start" h="full">
+      <Flex w="36px" h="36px" flexShrink={0} align="center" justify="center" borderRadius="full" bg={colors.bg} color={colors.ink}>
+        <Icon as={icon} boxSize="18px" weight="bold" />
+      </Flex>
+      <Box minW={0}>
+        <Text fontSize="sm" fontWeight={700} lineHeight="1.3" color="var(--pb-ink)">
+          {title}
+        </Text>
+        <Text mt={1} fontSize="xs" lineHeight="1.4" color="var(--pb-ink-soft)">
+          {detail}
         </Text>
       </Box>
-    )
-  }
-
-  return (
-    <Box>
-      <HStack spacing=".5rem" mb=".8rem">
-        <Icon as={Lightbulb} boxSize="16px" color="var(--pb-gold)" />
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10.5px"
-          letterSpacing="var(--pb-eyebrow-tracking, 0.2em)"
-          textTransform={EYEBROW_CASE}
-          color="var(--pb-ink-faint)"
-        >
-          {t('behaviour.insights.title')}
-        </Text>
-      </HStack>
-
-      <SimpleGrid columns={{ base: 1, sm: 2, lg: cards.length >= 4 ? 4 : cards.length }} spacing=".7rem">
-        {cards.slice(0, 4).map((card) => (
-          <InsightCard key={card.tag + card.title} {...card} />
-        ))}
-      </SimpleGrid>
-    </Box>
+    </Flex>
   )
 }
 
-function InsightCard({ icon, tint, color, tag, title, value }: InsightCardData) {
-  return (
-    <Box
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      borderRadius="16px"
-      p="1rem"
-      boxShadow="var(--pb-shadow)"
-      h="full"
-    >
-      <HStack spacing=".7rem" align="flex-start">
-        <Box w="34px" h="34px" borderRadius="10px" display="grid" placeItems="center" bg={tint} color={color} flexShrink={0}>
-          <Icon as={icon} boxSize="17px" />
-        </Box>
-        <VStack align="stretch" spacing="0.25rem" minW={0}>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9.5px"
-            letterSpacing="var(--pb-eyebrow-tracking, 0.16em)"
-            textTransform={EYEBROW_CASE}
-            color="var(--pb-ink-faint)"
-          >
-            {tag}
-          </Text>
-          <Text fontFamily="var(--pb-serif)" fontSize="1rem" fontWeight={500} color="var(--pb-ink)" lineHeight="1.25" noOfLines={2}>
-            {title}
-          </Text>
-        </VStack>
-      </HStack>
-      <Text
-        mt=".6rem"
-        fontFamily="var(--pb-mono)"
-        fontSize="11px"
-        color="var(--pb-ink-soft)"
-        style={{ fontVariantNumeric: 'tabular-nums' }}
-        noOfLines={1}
-      >
-        {value}
-      </Text>
-    </Box>
-  )
+function capitalise(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1)
 }
