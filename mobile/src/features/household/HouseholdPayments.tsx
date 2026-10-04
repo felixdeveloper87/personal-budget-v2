@@ -15,10 +15,11 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
     <View style={styles.section}>
       <View style={styles.heading}>
         <View style={styles.headingCopy}>
-          <Text style={styles.title}>Pagamentos</Text>
+          <Text style={styles.title}>Transferências</Text>
+          <Text style={styles.subtitle}>Dinheiro enviado entre moradores para acertar saldos.</Text>
         </View>
         {recentPayments.length > 0 ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Ver todos os pagamentos da casa" onPress={() => setHistoryVisible(true)} style={styles.seeAll}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Ver todas as transferências entre moradores" onPress={() => setHistoryVisible(true)} style={styles.seeAll}>
             <Text style={styles.seeAllText}>Ver tudo</Text>
           </Pressable>
         ) : null}
@@ -41,8 +42,8 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
         </ScrollView>
       ) : (
         <View style={styles.empty}>
-          <Text style={styles.emptyTitle}>Ainda sem pagamentos</Text>
-          <Text style={styles.emptyText}>Os pagamentos entre integrantes vão aparecer aqui.</Text>
+          <Text style={styles.emptyTitle}>Nenhuma transferência ainda</Text>
+          <Text style={styles.emptyText}>Quando um morador enviar dinheiro para acertar um saldo, a transferência aparece aqui.</Text>
         </View>
       )}
       {historyVisible ? (
@@ -57,6 +58,7 @@ const styles = StyleSheet.create({
   heading: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   headingCopy: { flex: 1 },
   title: nuSection.title,
+  subtitle: nuSection.subtitle,
   seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: nu.brandTint, borderRadius: 999, minHeight: 34, paddingHorizontal: 14 },
   seeAllText: { color: nu.brand, fontSize: 12, fontWeight: "600" },
   // Bleeds to the screen edges so cards scroll under the gutter, Nubank-style.

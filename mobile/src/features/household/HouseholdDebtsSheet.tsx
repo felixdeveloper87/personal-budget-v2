@@ -37,7 +37,7 @@ export function HouseholdDebtsSheet({ household, onUpdated, onClose }: {
         settlementDate: localDate(),
       });
       onUpdated(created.page);
-      Alert.alert("Pagamento registrado", `O pagamento de ${currency.format(debt.amount)} para ${debt.toMemberName} foi marcado como pago.`);
+      Alert.alert("Transferência registrada", `A transferência de ${currency.format(debt.amount)} para ${debt.toMemberName} foi registrada.`);
     } catch (requestError) {
       if (requestError instanceof ApiError && requestError.status === 401) {
         await logout();
@@ -99,7 +99,7 @@ export function HouseholdDebtsSheet({ household, onUpdated, onClose }: {
                 {item.fromMemberId === household.currentMemberId ? (
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Marcar pagamento de ${currency.format(item.amount)} para ${item.toMemberName} como pago`}
+                    accessibilityLabel={`Marcar transferência de ${currency.format(item.amount)} para ${item.toMemberName} como feita`}
                     accessibilityHint="Pressione e segure por 3 segundos"
                     delayLongPress={3000}
                     disabled={busyKey !== null}
@@ -113,7 +113,7 @@ export function HouseholdDebtsSheet({ household, onUpdated, onClose }: {
                         longPressCompletedRef.current = false;
                         return;
                       }
-                      Alert.alert("Segure por 3 segundos", "Mantenha o botão pressionado até o pagamento começar a ser registrado.");
+                      Alert.alert("Segure por 3 segundos", "Mantenha o botão pressionado até a transferência começar a ser registrada.");
                     }}
                     onPressIn={() => {
                       longPressCompletedRef.current = false;
@@ -127,7 +127,7 @@ export function HouseholdDebtsSheet({ household, onUpdated, onClose }: {
                         ? "Registrando…"
                         : holdKey === `${item.fromMemberId}-${item.toMemberId}`
                           ? "Continue segurando…"
-                          : "Segure 3s para marcar como pago"}
+                          : "Segure 3s para marcar como transferido"}
                     </Text>
                   </Pressable>
                 ) : null}

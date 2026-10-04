@@ -60,7 +60,7 @@ export function HouseholdMembers({ household, onUpdated }: { household: Househol
       {debtsYouOwe.length > 0 ? (
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Pagamento pendente. Você deve ${currency.format(totalYouOwe)}. Revisar pagamentos.`}
+          accessibilityLabel={`Transferência pendente. Você deve ${currency.format(totalYouOwe)}. Revisar transferências.`}
           onPress={() => setDebtsVisible(true)}
           style={({ pressed }) => [styles.paymentAlert, pressed && styles.paymentAlertPressed]}
         >
@@ -68,11 +68,11 @@ export function HouseholdMembers({ household, onUpdated }: { household: Househol
             <Text style={styles.paymentAlertMark}>!</Text>
           </View>
           <View style={styles.paymentAlertCopy}>
-            <Text style={styles.paymentAlertTitle}>{debtsYouOwe.length === 1 ? "Pagamento pendente" : "Pagamentos pendentes"}</Text>
+            <Text style={styles.paymentAlertTitle}>{debtsYouOwe.length === 1 ? "Transferência pendente" : "Transferências pendentes"}</Text>
             <Text style={styles.paymentAlertText} numberOfLines={2}>
               {debtsYouOwe.length === 1
                 ? `Você deve ${currency.format(totalYouOwe)} a ${debtsYouOwe[0].toMemberName}.`
-                : `Você tem ${debtsYouOwe.length} acertos, totalizando ${currency.format(totalYouOwe)}.`}
+                : `Você tem ${debtsYouOwe.length} transferências a fazer, totalizando ${currency.format(totalYouOwe)}.`}
             </Text>
           </View>
           <Text style={styles.paymentAlertAction}>Revisar</Text>

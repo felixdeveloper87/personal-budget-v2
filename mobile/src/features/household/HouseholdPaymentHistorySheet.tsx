@@ -44,7 +44,7 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
         await logout();
         return;
       }
-      setError("Não foi possível carregar os pagamentos. Tente novamente.");
+      setError("Não foi possível carregar as transferências. Tente novamente.");
     } finally {
       if (generation.current === requestGeneration) {
         inFlight.current = false;
@@ -71,7 +71,7 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
           <View style={styles.handle} />
           <View style={styles.header}>
             <View style={styles.headerCopy}>
-              <Text style={styles.title}>Todos os pagamentos</Text>
+              <Text style={styles.title}>Todas as transferências</Text>
               <Text style={styles.subtitle}>O histórico da casa, mês a mês.</Text>
             </View>
             <Pressable accessibilityRole="button" accessibilityLabel="Fechar histórico" onPress={onClose} style={styles.close}>
@@ -85,18 +85,18 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
             stickySectionHeadersEnabled={false}
             renderSectionHeader={({ section }) => <Text style={styles.month}>{expenseMonthLabel(section.month)}</Text>}
             renderItem={({ item }) => <HouseholdPaymentRow payment={item} currency={currency} />}
-            ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhum pagamento registrado ainda.</Text> : null}
+            ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhuma transferência registrada ainda.</Text> : null}
             ListFooterComponent={
               <View style={styles.footer}>
-                {loading ? <ActivityIndicator accessibilityLabel="Carregando pagamentos" color={nu.brand} /> : null}
+                {loading ? <ActivityIndicator accessibilityLabel="Carregando transferências" color={nu.brand} /> : null}
                 {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
                 {!loading && (hasMore || error) ? (
                   <Pressable accessibilityRole="button" onPress={() => void load(nextPage)} style={styles.loadMore}>
-                    <Text style={styles.loadMoreText}>{error ? "Tentar novamente" : "Carregar mais pagamentos"}</Text>
+                    <Text style={styles.loadMoreText}>{error ? "Tentar novamente" : "Carregar mais transferências"}</Text>
                   </Pressable>
                 ) : null}
                 {!loading && !error && !hasMore && payments.length > 0 ? (
-                  <Text style={styles.message}>Você viu todos os pagamentos.</Text>
+                  <Text style={styles.message}>Você viu todas as transferências.</Text>
                 ) : null}
               </View>
             }
