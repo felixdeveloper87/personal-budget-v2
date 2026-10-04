@@ -54,17 +54,18 @@ export default function CreditCardTile({
       textAlign="left"
       w="full"
       overflow="hidden"
-      borderRadius="18px"
-      border="1px solid var(--pb-hair)"
+      borderRadius={0}
+      border={0}
+      borderBottom="1px solid var(--pb-hair)"
       bg="var(--pb-surface)"
       boxShadow="none"
-      transition="transform .2s ease, box-shadow .2s ease, border-color .2s ease"
-      _hover={{ transform: 'translateY(-1px)', boxShadow: '0 10px 26px -20px rgba(67, 0, 105, .42)', borderColor: 'rgba(130, 10, 209, .3)' }}
-      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px var(--nu-brand-tint, #f3e8fc)' }}
+      transition="background-color .16s ease"
+      _hover={{ bg: 'rgba(130, 10, 209, .025)' }}
+      _focusVisible={{ outline: 'none', boxShadow: 'inset 3px 0 0 var(--nu-brand, #820ad1)' }}
+      _last={{ borderBottom: 0 }}
       opacity={card.active ? 1 : 0.7}
     >
-      <Box h="3px" bg="var(--nu-brand, #820ad1)" />
-      <VStack align="stretch" spacing={3} p={4}>
+      <VStack align="stretch" spacing={2.5} py={3.5} px={{ base: 0, md: 1 }}>
         <HStack justify="space-between" align="start">
           <HStack spacing={2.5} minW={0}>
             {getBankMeta(card.issuer) ? (

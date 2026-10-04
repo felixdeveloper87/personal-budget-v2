@@ -355,6 +355,12 @@
 }
 .nu-cards .cw-wallet-intro h2 { margin-top: 4px; font-size: 21px; font-weight: 650; }
 .nu-cards .cw-wallet-intro p { margin-top: 4px; }
+.nu-cards .cw-cards-grid {
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--pb-hair);
+  border-bottom: 1px solid var(--pb-hair);
+}
 
 .nu-cards .cw-primary { border-radius: 999px; background: var(--nu-brand, #820ad1); }
 .nu-cards .cw-primary:hover { background: #6f00b8; }
@@ -408,8 +414,25 @@
 .nu-cards .cw-statement-copy { min-width: 0; flex: 1; }
 .nu-cards .cw-statement-identity { gap: 7px; }
 .nu-cards .cw-statement-identity > span:first-of-type { flex: 0 1 auto; font-size: 11px; font-weight: 600; }
-.nu-cards .cw-status { padding: 3px 7px; border-radius: 999px; font-size: 9px; }
-.nu-cards .cw-status-open { background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--pb-ink-faint);
+  font-size: 9px;
+}
+.nu-cards .cw-status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.nu-cards .cw-status-open { background: transparent; color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-status-upcoming { background: transparent; color: var(--pb-gold); }
 .nu-cards .cw-statement h3 { margin-top: 3px; font-size: 15px; font-weight: 650; line-height: 1.2; }
 .nu-cards .cw-statement-meta {
   justify-content: flex-start;
@@ -421,8 +444,8 @@
 }
 .nu-cards .cw-statement-value { flex-shrink: 0; gap: 9px; margin-top: 0; }
 .nu-cards .cw-statement-value > strong { font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
-.nu-cards .cw-expand { width: 30px; height: 30px; border-radius: 50%; background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
-.nu-cards .is-expanded .cw-expand { background: var(--nu-brand, #820ad1); color: #fff; }
+.nu-cards .cw-expand { width: 24px; height: 24px; border-radius: 0; background: transparent; color: var(--nu-brand, #820ad1); }
+.nu-cards .is-expanded .cw-expand { background: transparent; color: var(--nu-brand, #820ad1); }
 .nu-cards .cw-statement-details { padding: 15px 0 18px 47px; background: #fff; }
 .nu-cards .cw-statement-details h4 { margin-top: 16px; font-size: 13px; }
 .nu-cards .cw-purchase-day { margin-top: 13px !important; }

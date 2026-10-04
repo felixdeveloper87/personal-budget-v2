@@ -53,6 +53,12 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
+function formatShare(share: number) {
+  const percent = share * 100;
+  if (percent > 0 && percent < 1) return "<1%";
+  return `${Math.round(percent)}%`;
+}
+
 function formatTransactionDate(value?: string | null) {
   if (!value) return "Data não informada";
   const [year, month, day] = value.slice(0, 10).split("-").map(Number);
@@ -330,6 +336,7 @@ export function IncomesScreen() {
                       key={income.id}
                       logoName={income.merchantName || income.description || income.category}
                       meta={`${income.category} · ${formatTransactionDate(income.paymentDate ?? income.transactionDate)}`}
+                      share={totalIncome > 0 ? Number(income.amount) / totalIncome : null}
                       title={income.description || income.category}
                     />
                   ))
@@ -342,6 +349,7 @@ export function IncomesScreen() {
                       key={group.key}
                       logoName={group.name}
                       meta={`${group.count === 1 ? "1 receita" : `${group.count} receitas`} · ${group.category}`}
+                      share={totalIncome > 0 ? group.total / totalIncome : null}
                       title={group.name}
                     />
                   ))}
@@ -361,6 +369,7 @@ function IncomeRow({
   domain,
   logoName,
   meta,
+  share,
   title,
 }: {
   amount: number;
@@ -369,6 +378,8 @@ function IncomeRow({
   domain?: string | null;
   logoName: string;
   meta: string;
+  /** Fraction (0–1) of the selected period's total income. */
+  share?: number | null;
   title: string;
 }) {
   return (
@@ -377,7 +388,10 @@ function IncomeRow({
         <MerchantLogo category={category} domain={domain} name={logoName} size={42} />
       </View>
       <View style={styles.rowCopy}>
-        <Text numberOfLines={1} style={styles.rowTitle}>{title}</Text>
+        <View style={styles.rowTitleLine}>
+          <Text numberOfLines={1} style={styles.rowTitle}>{title}</Text>
+          {share != null ? <Text style={styles.rowShare}>{formatShare(share)}</Text> : null}
+        </View>
         <Text numberOfLines={1} style={styles.rowMeta}>{meta}</Text>
       </View>
       <Text numberOfLines={1} style={styles.rowAmount}>+{formatCurrency(amount)}</Text>
@@ -410,7 +424,9 @@ const styles = StyleSheet.create({
   rowDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
   rowLogo: { marginRight: 12 },
   rowCopy: { flex: 1, minWidth: 0 },
-  rowTitle: { color: nu.ink, fontSize: 15, fontWeight: "600" },
+  rowTitleLine: { alignItems: "baseline", flexDirection: "row", gap: 6 },
+  rowTitle: { color: nu.ink, flexShrink: 1, fontSize: 15, fontWeight: "600" },
+  rowShare: { color: nu.inkFaint, fontSize: 11, fontVariant: ["tabular-nums"], fontWeight: "500" },
   rowMeta: { color: nu.inkSoft, fontSize: 12, marginTop: 3 },
   rowAmount: { color: nu.positive, fontSize: 15, fontWeight: "700", marginLeft: 8, fontVariant: ["tabular-nums"] },
   stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, marginTop: 10, padding: 26 },
