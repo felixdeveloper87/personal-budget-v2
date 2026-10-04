@@ -308,7 +308,7 @@ function CategorySpotlight({
       <Box mt={4}>
         <Flex align="baseline" justify="space-between" mb={1}>
           <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
-            {t('categories.recentTransactions')}
+            {t('categories.transactions')}
           </Text>
           {!isNu && (
             <Text fontSize="xs" color="var(--pb-ink-soft)">

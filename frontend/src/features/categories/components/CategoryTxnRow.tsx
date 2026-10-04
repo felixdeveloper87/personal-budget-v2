@@ -24,11 +24,22 @@ export default function CategoryTxnRow({ appearance = 'default', txn, icon, side
   return (
     <Flex
       align="center"
-      gap={isNu ? 0 : 3}
+      gap={3}
       py={isNu ? 3.25 : 3}
       borderBottom="1px solid var(--pb-hair)"
       _last={{ borderBottom: 'none' }}
     >
+      {isNu && (
+        <Box
+          aria-hidden="true"
+          flexShrink={0}
+          w="7px"
+          h="7px"
+          borderRadius="full"
+          bg="var(--nu-brand, #820ad1)"
+          opacity={0.45}
+        />
+      )}
       {!isNu && (
         <Flex
           flexShrink={0}
