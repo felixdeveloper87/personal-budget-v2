@@ -64,19 +64,19 @@ export default function CreditCardTile({
       opacity={card.active ? 1 : 0.7}
     >
       <Box h="3px" bg="var(--nu-brand, #820ad1)" />
-      <VStack align="stretch" spacing={3.5} p={{ base: 4, md: 5 }}>
+      <VStack align="stretch" spacing={3} p={4}>
         <HStack justify="space-between" align="start">
-          <HStack spacing={3} minW={0}>
+          <HStack spacing={2.5} minW={0}>
             {getBankMeta(card.issuer) ? (
-              <BankLogo issuer={card.issuer} size={42} borderRadius="13px" />
+              <BankLogo issuer={card.issuer} size={36} borderRadius="full" />
             ) : (
-              <Flex w={10.5} h={10.5} borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" align="center" justify="center" flexShrink={0}>
-                <Icon as={CreditCard} boxSize={5} color="var(--nu-brand, #820ad1)" weight="duotone" />
+              <Flex w="36px" h="36px" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" align="center" justify="center" flexShrink={0}>
+                <Icon as={CreditCard} boxSize={4.5} color="var(--nu-brand, #820ad1)" weight="duotone" />
               </Flex>
             )}
             <Box minW={0}>
-              <Text fontSize="md" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
-              <Text fontSize="11px" color="var(--pb-ink-soft)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
+              <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
+              <Text fontSize="10px" color="var(--pb-ink-soft)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
             </Box>
           </HStack>
           <HStack spacing={1} flexShrink={0}>
@@ -86,29 +86,20 @@ export default function CreditCardTile({
           </HStack>
         </HStack>
 
-        <Box>
-          <Text fontSize="12px" color="var(--pb-ink-soft)">{t('cards.currentStatement')}</Text>
-          <Text className="num" fontSize="1.75rem" fontWeight={700} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.3rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {hideValues ? '••••••' : formatCurrency(currentTotal)}
-          </Text>
-        </Box>
-
-        <Flex justify="space-between" align="center" pt={3} borderTop="1px solid var(--pb-hair)" gap={3}>
-          <Box>
-            <Text fontSize="11px" fontWeight={600} color="var(--pb-ink-soft)">{t('cards.statementCycle')}</Text>
-            <Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.closesPays', { closingDay: card.statementClosingDay ?? '—', paymentDay: card.paymentDay ?? '—' })}</Text>
+        <Flex justify="space-between" align="flex-end" gap={4}>
+          <Box minW={0}>
+            <Text fontSize="11px" color="var(--pb-ink-soft)">{t('cards.currentStatement')}</Text>
+            <Text className="num" fontSize="1.5rem" fontWeight={700} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="2px" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {hideValues ? '••••••' : formatCurrency(currentTotal)}
+            </Text>
           </Box>
-          <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right">
-            {t(statementCount === 1 ? 'cards.statementCount.one' : 'cards.statementCount.other', { count: statementCount })}
-          </Text>
+          {nextPaymentDate && (
+            <Box flexShrink={0} textAlign="right">
+              <Text fontSize="10px" color="var(--pb-ink-soft)">{t('cards.dueDate', { date: formatDate(nextPaymentDate, { day: 'numeric', month: 'short' }) })}</Text>
+              <Text mt="2px" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : formatCurrency(nextPaymentAmount)}</Text>
+            </Box>
+          )}
         </Flex>
-
-        {nextPaymentDate && (
-          <Flex justify="space-between" align="center" pt={3} borderTop="1px solid var(--pb-hair)" gap={3}>
-            <Box><Text fontSize="11px" fontWeight={600} color="var(--pb-ink-soft)">{t('cards.nextPayment')}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.dueDate', { date: formatDate(nextPaymentDate, { day: 'numeric', month: 'short' }) })}</Text></Box>
-            <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : formatCurrency(nextPaymentAmount)}</Text>
-          </Flex>
-        )}
 
         {hasLimit && (
           <Box>
@@ -116,11 +107,18 @@ export default function CreditCardTile({
               <Text fontSize="11px" color="var(--pb-ink-soft)">{hideValues ? '••••' : t('cards.percentOfLimit', { percentage: Math.round(usedPct) })}</Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : t('cards.amountAvailable', { amount: formatCurrency(remaining) })}</Text>
             </Flex>
-            <Box h="6px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${usedPct}%`} bg={utilisationColour} borderRadius="full" transition="width .4s ease" /></Box>
+            <Box h="4px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${usedPct}%`} bg={utilisationColour} borderRadius="full" transition="width .4s ease" /></Box>
           </Box>
         )}
 
-        {card.settlementAccountName && <Text fontSize="xs" color="var(--pb-ink-faint)" noOfLines={1}>{t('cards.paidFrom', { account: card.settlementAccountName })}</Text>}
+        <Flex justify="space-between" align="center" gap={3} pt={2.5} borderTop="1px solid var(--pb-hair)">
+          <Text minW={0} fontSize="10px" color="var(--pb-ink-soft)" noOfLines={1}>
+            {t('cards.closesPays', { closingDay: card.statementClosingDay ?? '—', paymentDay: card.paymentDay ?? '—' })}
+          </Text>
+          <Text flexShrink={0} fontSize="10px" color="var(--pb-ink-faint)">
+            {t(statementCount === 1 ? 'cards.statementCount.one' : 'cards.statementCount.other', { count: statementCount })}
+          </Text>
+        </Flex>
       </VStack>
     </Box>
   )
