@@ -142,11 +142,15 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
       }
       footer={
         <HStack justify="flex-end" spacing={2}>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" borderRadius="full" onClick={onClose}>
             {t('cards.form.cancel')}
           </Button>
           <Button
-            colorScheme="blue"
+            bg="var(--nu-brand, #820ad1)"
+            color="white"
+            borderRadius="full"
+            px={5}
+            _hover={{ bg: '#6f00b8' }}
             leftIcon={<Icon as={isEditing ? Check : Plus} boxSize={4} />}
             onClick={save}
             isLoading={saving}
@@ -244,7 +248,7 @@ export default function CardFormModal({ isOpen, onClose, card, onSaved }: CardFo
             <Switch
               isChecked={state.active}
               onChange={(e) => patch({ active: e.target.checked })}
-              colorScheme="blue"
+              colorScheme="purple"
             />
           </FormControl>
         </VStack>

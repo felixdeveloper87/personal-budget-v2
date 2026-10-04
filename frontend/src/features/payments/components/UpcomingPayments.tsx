@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
-import { CalendarClock } from '../../../components/ui/icons'
+import { Box, Text } from '@chakra-ui/react'
 import { parseISO } from '../../transactions/transactions.utils'
 import type { TxnVM } from '../../transactions/transactions.types'
 import { useI18n } from '../../../i18n'
@@ -23,13 +22,9 @@ function todayIso(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
-  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const [isDragging, setIsDragging] = useState(false)
-  const dragRef = useRef({ startX: 0, scrollLeft: 0 })
-
-  const buckets = useMemo<DayBucket[]>(() => {
+/** Sums the scheduled outflow from today onwards (settlement date). */
+export function useUpcomingBuckets(allTxns: TxnVM[]) {
+  return useMemo(() => {
     const today = todayIso()
     const map = new Map<string, { total: number; count: number; merchants: Map<string, number> }>()
     for (const t of allTxns) {
@@ -41,16 +36,25 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
       entry.merchants.set(t.merchant, (entry.merchants.get(t.merchant) ?? 0) + t.amount)
       map.set(t.settlementDate, entry)
     }
-    return [...map.entries()]
+    const buckets: DayBucket[] = [...map.entries()]
       .sort((a, b) => a[0].localeCompare(b[0]))
       .slice(0, 24)
       .map(([iso, v]) => {
         const topMerchant = [...v.merchants.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? ''
         return { iso, date: parseISO(iso), total: v.total, count: v.count, topMerchant }
       })
+    return { buckets, grandTotal: buckets.reduce((sum, b) => sum + b.total, 0) }
   }, [allTxns])
+}
 
-  const grandTotal = useMemo(() => buckets.reduce((sum, b) => sum + b.total, 0), [buckets])
+/** Swipeable day cards for what leaves next — Nubank style: flat grey cards,
+    the next payment day highlighted in lilac. The section title lives outside. */
+export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
+  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const dragRef = useRef({ startX: 0, scrollLeft: 0 })
+  const { buckets } = useUpcomingBuckets(allTxns)
 
   const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.pointerType !== 'mouse' || event.button !== 0 || !carouselRef.current) return
@@ -69,76 +73,66 @@ export default function UpcomingPayments({ allTxns }: UpcomingPaymentsProps) {
     setIsDragging(false)
   }
 
-  return (
-    <Box p={{ base: 2.5, md: 3 }} borderRadius="14px" bg="var(--pb-surface)" border="1px solid var(--pb-hair)" boxShadow="var(--pb-shadow)">
-      <Flex justify="space-between" align="center" gap={3} mb={2.5}>
-        <HStack spacing={2.5} align="baseline" minW={0}>
-          <Icon as={CalendarClock} boxSize="15px" color="var(--pb-forest-2)" />
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-forest-2)" whiteSpace="nowrap">
-            {t('payments.upcoming.eyebrow')}
-          </Text>
-          <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
-            {t('payments.upcoming.title')}
-          </Text>
-        </HStack>
-        {grandTotal > 0 && (
-          <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" whiteSpace="nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {formatCurrency(grandTotal)}
-          </Text>
-        )}
-      </Flex>
+  if (buckets.length === 0) {
+    return (
+      <Box bg="var(--pb-surface)" borderRadius="16px" px={4} py={6} textAlign="center">
+        <Text fontSize="sm" color="var(--pb-ink-soft)">{t('payments.upcoming.empty')}</Text>
+      </Box>
+    )
+  }
 
-      {buckets.length === 0 ? (
-        <Box py={6} textAlign="center">
-          <Text fontFamily="var(--pb-serif)" fontStyle="italic" fontSize=".95rem" color="var(--pb-ink-faint)">
-            {t('payments.upcoming.empty')}
-          </Text>
-        </Box>
-      ) : (
-        <Box
-          ref={carouselRef}
-          onPointerDown={startDrag}
-          onPointerMove={moveDrag}
-          onPointerUp={stopDrag}
-          onPointerCancel={stopDrag}
-          onLostPointerCapture={() => setIsDragging(false)}
-          display="flex"
-          gap={2}
-          overflowX="auto"
-          pb={1}
-          cursor={isDragging ? 'grabbing' : 'grab'}
-          userSelect={isDragging ? 'none' : 'auto'}
-          sx={{ touchAction: 'pan-x pan-y', WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
-        >
-          {buckets.map((bucket, index) => (
-            <Box
-              key={bucket.iso}
-              flex={{ base: '0 0 60%', sm: '0 0 calc(33.333% - 6px)', lg: '0 0 calc(25% - 6px)' }}
-              px={2.5}
-              py={2}
-              borderRadius="11px"
-              bg={index === 0 ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
-              border="1px solid"
-              borderColor={index === 0 ? 'var(--pb-hair-2)' : 'var(--pb-hair)'}
-            >
-              <Flex justify="space-between" align="baseline" gap={2}>
-                <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)" noOfLines={1}>
-                  {formatDate(bucket.date, { weekday: 'short', day: 'numeric', month: 'short' })}
-                </Text>
-                <Text className="num" fontSize="sm" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatCurrency(bucket.total)}
-                </Text>
-              </Flex>
-              <Text mt={1} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
-                {bucket.topMerchant}
-                {bucket.count > 1
-                  ? ` ${t('payments.upcoming.more', { count: formatNumber(bucket.count - 1) })}`
-                  : ''}
-              </Text>
-            </Box>
-          ))}
-        </Box>
-      )}
+  return (
+    <Box
+      ref={carouselRef}
+      onPointerDown={startDrag}
+      onPointerMove={moveDrag}
+      onPointerUp={stopDrag}
+      onPointerCancel={stopDrag}
+      onLostPointerCapture={() => setIsDragging(false)}
+      display="flex"
+      gap={2.5}
+      overflowX="auto"
+      mx={{ base: -4, md: 0 }}
+      px={{ base: 4, md: 0 }}
+      pb={1}
+      cursor={isDragging ? 'grabbing' : 'grab'}
+      userSelect={isDragging ? 'none' : 'auto'}
+      sx={{
+        touchAction: 'pan-x pan-y',
+        WebkitOverflowScrolling: 'touch',
+        scrollSnapType: 'x mandatory',
+        scrollPaddingInline: '16px',
+        scrollbarWidth: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}
+    >
+      {buckets.map((bucket, index) => {
+        const next = index === 0
+        return (
+          <Box
+            key={bucket.iso}
+            flex={{ base: '0 0 62%', sm: '0 0 calc(33.333% - 7px)', lg: '0 0 calc(25% - 8px)' }}
+            px={3.5}
+            py={3}
+            borderRadius="16px"
+            bg={next ? 'var(--nu-brand-tint, #f3e8fc)' : 'var(--pb-surface)'}
+            sx={{ scrollSnapAlign: 'start' }}
+          >
+            <Text fontSize="xs" fontWeight={next ? 600 : 500} color={next ? 'var(--nu-brand, #820ad1)' : 'var(--pb-ink-soft)'} noOfLines={1}>
+              {formatDate(bucket.date, { weekday: 'short', day: 'numeric', month: 'short' })}
+            </Text>
+            <Text mt={1} fontSize="lg" fontWeight={700} letterSpacing="-0.01em" color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {formatCurrency(bucket.total)}
+            </Text>
+            <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
+              {bucket.topMerchant}
+              {bucket.count > 1
+                ? ` ${t('payments.upcoming.more', { count: formatNumber(bucket.count - 1) })}`
+                : ''}
+            </Text>
+          </Box>
+        )
+      })}
     </Box>
   )
 }

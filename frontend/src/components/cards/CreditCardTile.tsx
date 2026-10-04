@@ -36,7 +36,7 @@ export default function CreditCardTile({
   const hasLimit = limit > 0
   const usedPct = hasLimit ? Math.min(100, Math.max(0, (used / limit) * 100)) : 0
   const remaining = Math.max(0, limit - used)
-  const utilisationColour = usedPct >= 90 ? 'var(--pb-coral-2)' : usedPct >= 70 ? 'var(--pb-gold-2)' : 'var(--pb-income-2)'
+  const utilisationColour = usedPct >= 90 ? 'var(--pb-coral-2)' : 'var(--nu-brand, #820ad1)'
 
   return (
     <Box
@@ -54,29 +54,29 @@ export default function CreditCardTile({
       textAlign="left"
       w="full"
       overflow="hidden"
-      borderRadius="22px"
+      borderRadius="18px"
       border="1px solid var(--pb-hair)"
       bg="var(--pb-surface)"
-      boxShadow="var(--pb-shadow)"
+      boxShadow="none"
       transition="transform .2s ease, box-shadow .2s ease, border-color .2s ease"
-      _hover={{ transform: 'translateY(-3px)', boxShadow: 'var(--pb-shadow-lift)', borderColor: 'var(--pb-hair-2)' }}
-      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px var(--pb-tint-green), var(--pb-shadow-lift)' }}
+      _hover={{ transform: 'translateY(-1px)', boxShadow: '0 10px 26px -20px rgba(67, 0, 105, .42)', borderColor: 'rgba(130, 10, 209, .3)' }}
+      _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px var(--nu-brand-tint, #f3e8fc)' }}
       opacity={card.active ? 1 : 0.7}
     >
-      <Box h="4px" bg="var(--pb-forest-2)" />
-      <VStack align="stretch" spacing={4} p={5}>
+      <Box h="3px" bg="var(--nu-brand, #820ad1)" />
+      <VStack align="stretch" spacing={3.5} p={{ base: 4, md: 5 }}>
         <HStack justify="space-between" align="start">
           <HStack spacing={3} minW={0}>
             {getBankMeta(card.issuer) ? (
               <BankLogo issuer={card.issuer} size={42} borderRadius="13px" />
             ) : (
-              <Flex w={10.5} h={10.5} borderRadius="13px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" align="center" justify="center" flexShrink={0}>
-                <Icon as={CreditCard} boxSize={5} color="var(--pb-forest-2)" weight="duotone" />
+              <Flex w={10.5} h={10.5} borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" align="center" justify="center" flexShrink={0}>
+                <Icon as={CreditCard} boxSize={5} color="var(--nu-brand, #820ad1)" weight="duotone" />
               </Flex>
             )}
             <Box minW={0}>
-              <Text fontSize="md" fontWeight={800} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
+              <Text fontSize="md" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{card.name}</Text>
+              <Text fontSize="11px" color="var(--pb-ink-soft)" mt="1px" noOfLines={1}>{card.issuer || t('cards.creditCard')}</Text>
             </Box>
           </HStack>
           <HStack spacing={1} flexShrink={0}>
@@ -87,15 +87,15 @@ export default function CreditCardTile({
         </HStack>
 
         <Box>
-          <Text fontFamily="var(--pb-mono)" fontSize="10px" letterSpacing="0.16em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.currentStatement')}</Text>
-          <Text className="num" fontSize="2rem" fontWeight={800} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.35rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Text fontSize="12px" color="var(--pb-ink-soft)">{t('cards.currentStatement')}</Text>
+          <Text className="num" fontSize="1.75rem" fontWeight={700} lineHeight="1.1" letterSpacing="-0.025em" color="var(--pb-ink)" mt="0.3rem" style={{ fontVariantNumeric: 'tabular-nums' }}>
             {hideValues ? '••••••' : formatCurrency(currentTotal)}
           </Text>
         </Box>
 
         <Flex justify="space-between" align="center" pt={3} borderTop="1px solid var(--pb-hair)" gap={3}>
           <Box>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.statementCycle')}</Text>
+            <Text fontSize="11px" fontWeight={600} color="var(--pb-ink-soft)">{t('cards.statementCycle')}</Text>
             <Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.closesPays', { closingDay: card.statementClosingDay ?? '—', paymentDay: card.paymentDay ?? '—' })}</Text>
           </Box>
           <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right">
@@ -104,8 +104,8 @@ export default function CreditCardTile({
         </Flex>
 
         {nextPaymentDate && (
-          <Flex justify="space-between" align="center" bg="var(--pb-surface-2)" borderRadius="12px" px={3} py={2.5}>
-            <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-ink-faint)">{t('cards.nextPayment')}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.dueDate', { date: formatDate(nextPaymentDate, { day: 'numeric', month: 'short' }) })}</Text></Box>
+          <Flex justify="space-between" align="center" pt={3} borderTop="1px solid var(--pb-hair)" gap={3}>
+            <Box><Text fontSize="11px" fontWeight={600} color="var(--pb-ink-soft)">{t('cards.nextPayment')}</Text><Text fontSize="xs" color="var(--pb-ink-soft)" mt="2px">{t('cards.dueDate', { date: formatDate(nextPaymentDate, { day: 'numeric', month: 'short' }) })}</Text></Box>
             <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : formatCurrency(nextPaymentAmount)}</Text>
           </Flex>
         )}
@@ -113,7 +113,7 @@ export default function CreditCardTile({
         {hasLimit && (
           <Box>
             <Flex justify="space-between" align="baseline" mb={1.5} gap={2}>
-              <Text fontFamily="var(--pb-mono)" fontSize="9px" letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-ink-faint)">{hideValues ? '••••' : t('cards.percentOfLimit', { percentage: Math.round(usedPct) })}</Text>
+              <Text fontSize="11px" color="var(--pb-ink-soft)">{hideValues ? '••••' : t('cards.percentOfLimit', { percentage: Math.round(usedPct) })}</Text>
               <Text fontSize="xs" color="var(--pb-ink-soft)" textAlign="right" style={{ fontVariantNumeric: 'tabular-nums' }}>{hideValues ? '••••••' : t('cards.amountAvailable', { amount: formatCurrency(remaining) })}</Text>
             </Flex>
             <Box h="6px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden"><Box h="full" w={`${usedPct}%`} bg={utilisationColour} borderRadius="full" transition="width .4s ease" /></Box>
@@ -127,5 +127,5 @@ export default function CreditCardTile({
 }
 
 function TileAction({ label, icon, danger, onClick }: { label: string; icon: typeof Pencil; danger?: boolean; onClick: () => void }) {
-  return <IconButton aria-label={label} icon={<Icon as={icon} boxSize={3.5} />} size="sm" variant="ghost" borderRadius="9px" color={danger ? 'var(--pb-coral)' : 'var(--pb-ink-faint)'} _hover={{ bg: danger ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)', color: danger ? 'var(--pb-coral)' : 'var(--pb-ink)' }} onClick={(event) => { event.stopPropagation(); onClick() }} />
+  return <IconButton aria-label={label} icon={<Icon as={icon} boxSize={3.5} />} size="sm" variant="ghost" borderRadius="full" color={danger ? 'var(--pb-coral)' : 'var(--pb-ink-faint)'} _hover={{ bg: danger ? 'var(--pb-tint-coral)' : 'var(--nu-brand-tint, #f3e8fc)', color: danger ? 'var(--pb-coral)' : 'var(--nu-brand, #820ad1)' }} onClick={(event) => { event.stopPropagation(); onClick() }} />
 }

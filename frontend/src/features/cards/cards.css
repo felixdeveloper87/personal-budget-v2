@@ -166,3 +166,232 @@
 @media (prefers-reduced-motion: reduce) {
   .cards-workspace button { transition: none; }
 }
+
+/* Nubank presentation ----------------------------------------------------- */
+.cw-nu-eye {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .16);
+  color: #fff;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+.cw-nu-eye:hover { background: rgba(255, 255, 255, .24); }
+.cw-nu-eye:focus-visible,
+.cw-nu-add:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+.cw-nu-orbit {
+  position: absolute;
+  z-index: 0;
+  right: -118px;
+  bottom: -205px;
+  width: 390px;
+  height: 390px;
+  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.cw-nu-orbit::before,
+.cw-nu-orbit::after {
+  content: "";
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 50%;
+}
+.cw-nu-orbit::before { inset: 48px; }
+.cw-nu-orbit::after { inset: 96px; }
+.cw-nu-add {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 17px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--nu-brand, #820ad1);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(46, 0, 74, .12);
+  transition: transform .15s ease, background-color .15s ease;
+}
+.cw-nu-add:hover { background: #fbf7fe; transform: translateY(-1px); }
+
+.cards-workspace.nu-cards {
+  --cw-forest: var(--nu-brand, #820ad1);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  color: var(--pb-ink);
+}
+.nu-cards button:focus-visible { outline-color: var(--nu-brand, #820ad1); outline-offset: 2px; }
+.nu-cards .cw-eyebrow { color: var(--nu-brand, #820ad1); letter-spacing: .1em; }
+.nu-cards .cw-navigation {
+  gap: 22px;
+  padding: 11px 22px 0;
+  overflow-x: auto;
+  border: 0;
+  border-bottom: 1px solid var(--pb-hair);
+  border-radius: 0;
+  background: #fff;
+  scrollbar-width: none;
+}
+.nu-cards .cw-navigation::-webkit-scrollbar { display: none; }
+.nu-cards .cw-navigation > button {
+  flex: 0 0 auto;
+  gap: 7px;
+  min-height: 48px;
+  padding: 0 2px 11px;
+  border-radius: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--pb-ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nu-cards .cw-navigation > button:hover { background: transparent; color: var(--pb-ink); }
+.nu-cards .cw-navigation > button.is-selected {
+  border-bottom-color: var(--nu-brand, #820ad1);
+  background: transparent;
+  color: var(--nu-brand, #820ad1);
+  box-shadow: none;
+}
+.nu-cards .cw-navigation > button > span,
+.nu-cards .cw-navigation > button.is-selected > span {
+  min-width: 21px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--nu-brand-tint, #f3e8fc);
+  color: var(--nu-brand, #820ad1);
+  font-size: 9px;
+}
+.nu-cards .cw-content { margin: 0; padding: 22px 22px 30px; }
+
+.cw-nu-payment {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 13px;
+  padding: 0 0 18px;
+  border: 0;
+  border-bottom: 1px solid var(--pb-hair);
+  background: transparent;
+  color: var(--pb-ink);
+  text-align: left;
+}
+.cw-nu-payment:not(:disabled):hover .cw-nu-payment-icon { background: #ead6fa; }
+.cw-nu-payment:disabled { cursor: default; }
+.cw-nu-payment-icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--nu-brand-tint, #f3e8fc);
+  color: var(--nu-brand, #820ad1);
+  transition: background-color .15s ease;
+}
+.cw-nu-payment-copy { flex: 1; min-width: 0; }
+.cw-nu-payment-copy small {
+  display: block;
+  color: var(--pb-ink-faint);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.cw-nu-payment-copy strong {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: var(--pb-ink);
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cw-nu-payment-copy > span { display: block; margin-top: 2px; color: var(--pb-ink-soft); font-size: 11px; }
+.cw-nu-payment-value { flex-shrink: 0; font-size: 16px; font-variant-numeric: tabular-nums; }
+
+.nu-cards .cw-section-heading { margin: 25px 0 11px; }
+.nu-cards .cw-section-heading h2 { margin-top: 4px; font-size: 21px; font-weight: 650; }
+.nu-cards .cw-shortcuts { gap: 0; border-top: 1px solid var(--pb-hair); border-bottom: 1px solid var(--pb-hair); }
+.nu-cards .cw-shortcuts > button {
+  gap: 13px;
+  padding: 17px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.nu-cards .cw-shortcuts > button + button { border-left: 1px solid var(--pb-hair); padding-left: 18px; }
+.nu-cards .cw-shortcuts > button:hover { border-color: var(--pb-hair); box-shadow: none; }
+.nu-cards .cw-shortcut-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--nu-brand-tint, #f3e8fc);
+  color: var(--nu-brand, #820ad1);
+}
+.nu-cards .cw-shortcuts strong { font-size: 15px; font-weight: 650; }
+.nu-cards .cw-shortcuts p { margin-top: 3px; }
+.nu-cards .cw-shortcut-link { gap: 8px; margin-top: 9px; color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-wallet-intro {
+  margin: 0 0 17px;
+  padding: 0 0 15px;
+  border: 0;
+  border-bottom: 1px solid var(--pb-hair);
+  border-radius: 0;
+  background: transparent;
+}
+.nu-cards .cw-wallet-intro h2 { margin-top: 4px; font-size: 21px; font-weight: 650; }
+.nu-cards .cw-wallet-intro p { margin-top: 4px; }
+
+.nu-cards .cw-primary { border-radius: 999px; background: var(--nu-brand, #820ad1); }
+.nu-cards .cw-primary:hover { background: #6f00b8; }
+.nu-cards .cw-empty { border: 0; border-radius: 0; background: transparent; }
+.nu-cards .cw-statement-summary {
+  padding: 20px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--nu-brand-tint, #f3e8fc);
+}
+.nu-cards .cw-summary-heading { color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-summary-metrics > div + div { border-color: rgba(130, 10, 209, .13); }
+.nu-cards .cw-filter-label { margin-top: 20px !important; }
+.nu-cards .cw-filter { border-color: var(--pb-hair); border-radius: 999px; background: #fff; }
+.nu-cards .cw-filter.is-selected { border-color: var(--nu-brand, #820ad1); background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-history-tabs button.is-selected { border-bottom-color: var(--nu-brand, #820ad1); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-statement { border-radius: 18px; box-shadow: none; }
+.nu-cards .cw-statement.is-expanded { border-color: rgba(130, 10, 209, .42); }
+.nu-cards .cw-expand { border-radius: 50%; background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .is-expanded .cw-expand { background: var(--nu-brand, #820ad1); color: #fff; }
+.nu-cards .cw-statement-details { background: #fff; }
+.nu-cards .cw-more { border-radius: 999px; color: var(--nu-brand, #820ad1); }
+
+@media (max-width: 760px) {
+  .cw-nu-add { align-self: flex-start; }
+  .cards-workspace.nu-cards { padding: 0; }
+  .nu-cards .cw-content { padding: 19px 16px 28px; }
+  .nu-cards .cw-navigation { gap: 20px; padding-left: 16px; padding-right: 16px; }
+  .nu-cards .cw-shortcuts { grid-template-columns: 1fr; }
+  .nu-cards .cw-shortcuts > button { display: flex; }
+  .nu-cards .cw-shortcuts > button + button { border-left: 0; border-top: 1px solid var(--pb-hair); padding-left: 0; }
+  .nu-cards .cw-shortcut-icon { margin-bottom: 0; }
+}
+
+@media (max-width: 460px) {
+  .cw-nu-payment-value { font-size: 14px; }
+  .nu-cards .cw-navigation > button { font-size: 12px; }
+  .nu-cards .cw-navigation > button svg { width: 16px; height: 16px; }
+  .nu-cards .cw-statement-summary { padding: 17px; }
+}
