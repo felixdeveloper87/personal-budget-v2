@@ -1,0 +1,21 @@
+/** Nubank-style palette shared by the transaction entry sheets. */
+export const transactionTheme = {
+  brand: "#820AD1",
+  brandPressed: "#6E08B3",
+  brandTint: "#F3E8FC",
+  page: "#FFFFFF",
+  surface: "#F5F5F8",
+  surfaceRaised: "#FFFFFF",
+  surfacePressed: "#EDEDF2",
+  ink: "#1F1F24",
+  inkSoft: "#6B6B76",
+  inkFaint: "#8A8A95",
+  hairline: "#ECECF1",
+  hairlineStrong: "#DADAE2",
+  positive: "#1E8A5A",
+  positiveTint: "#E3F4EB",
+  negative: "#C2412D",
+  negativeTint: "#FBE7E3",
+  disabled: "#B9B9C2",
+  overlay: "rgba(31, 31, 36, 0.48)",
+} as const;

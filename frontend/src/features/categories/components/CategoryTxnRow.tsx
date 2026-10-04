@@ -1,90 +1,68 @@
 import { Box, Flex, Icon, Text } from '@chakra-ui/react'
 import { type LucideIcon } from '../../../components/ui/icons'
-import { hexA } from '../data/format'
 import type { CategoryTxn, Side } from '../data/types'
 import { useI18n } from '../../../i18n'
 
 interface CategoryTxnRowProps {
   txn: CategoryTxn
   icon: LucideIcon
-  color: string
+  /** Kept for callers; rows use the brand tint so the list reads as one. */
+  color?: string
   side: Side
 }
 
-/** A single sample transaction inside a category's expanded row. */
-export default function CategoryTxnRow({ txn, icon, color, side }: CategoryTxnRowProps) {
+/** One transaction in a category list — Nubank row: tinted icon circle,
+    bold name, quiet meta line and the amount on the right. */
+export default function CategoryTxnRow({ txn, icon, side }: CategoryTxnRowProps) {
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const sign = side === 'expense' ? '−' : '+'
-  const amtColor = side === 'expense' ? 'var(--pb-coral)' : 'var(--pb-income)'
+  const amtColor = side === 'expense' ? 'var(--pb-ink)' : 'var(--pb-income)'
+  const settlesLater = txn.settlesDate && txn.settlesDate !== txn.purchaseDate
 
   return (
     <Flex
       align="center"
       gap={3}
-      px="0.45rem"
-      py={2.5}
+      py={3}
       borderBottom="1px solid var(--pb-hair)"
-      borderRadius="10px"
-      transition="background .16s ease, transform .16s ease"
-      _hover={{ bg: 'var(--pb-surface-2)', transform: 'translateX(2px)' }}
       _last={{ borderBottom: 'none' }}
     >
       <Flex
         flexShrink={0}
-        w="32px"
-        h="32px"
+        w="40px"
+        h="40px"
         align="center"
         justify="center"
-        borderRadius="9px"
-        color={color}
-        bg={hexA(color, 0.12)}
-        border="1px solid"
-        borderColor={hexA(color, 0.28)}
+        borderRadius="full"
+        color="var(--nu-brand, #820ad1)"
+        bg="var(--nu-brand-tint, #f3e8fc)"
       >
-        <Icon as={icon} boxSize="16px" weight="duotone" />
+        <Icon as={icon} boxSize="18px" weight="bold" />
       </Flex>
 
       <Box minW={0} flex={1}>
-        <Text fontSize="0.98rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>
+        <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
           {txn.merchantIsCategory
             ? txn.merchant === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(txn.merchant)
             : txn.merchant}
         </Text>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="9.5px"
-          letterSpacing="0.04em"
-          color="var(--pb-ink-faint)"
-          mt="0.12rem"
-          noOfLines={1}
-        >
+        <Text fontSize="xs" color="var(--pb-ink-soft)" mt="0.1rem" noOfLines={1}>
           {formatDate(txn.purchaseDate, { day: 'numeric', month: 'short' })} · {txn.account}
         </Text>
       </Box>
 
       <Box textAlign="right" flexShrink={0}>
-        <Text
-          className="num"
-          fontSize="1rem"
-          fontWeight={500}
-          color={amtColor}
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
+        <Text fontSize="sm" fontWeight={700} color={amtColor} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {sign}
           {formatCurrency(txn.amount)}
         </Text>
-        <Text
-          mt="0.18rem"
-          fontFamily="var(--pb-mono)"
-          fontSize="8.5px"
-          letterSpacing="0.05em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-        >
-          {t('categories.paidDate', {
-            date: formatDate(txn.settlesDate, { day: 'numeric', month: 'short' }),
-          })}
-        </Text>
+        {settlesLater && (
+          <Text mt="0.1rem" fontSize="2xs" color="var(--pb-ink-faint)">
+            {t('categories.paidDate', {
+              date: formatDate(txn.settlesDate, { day: 'numeric', month: 'short' }),
+            })}
+          </Text>
+        )}
       </Box>
     </Flex>
   )

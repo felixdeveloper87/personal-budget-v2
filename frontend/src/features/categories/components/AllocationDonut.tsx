@@ -1,4 +1,4 @@
-import { Box, Icon, Text, VStack } from '@chakra-ui/react'
+import { Box, Text, VStack } from '@chakra-ui/react'
 import type { ComputedCategory, Side } from '../data/types'
 import { useI18n } from '../../../i18n'
 
@@ -26,6 +26,8 @@ interface AllocationDonutProps {
   onSegmentClick: (id: string) => void
 }
 
+/** Thin Nubank-style ring: flat segments split by white gaps, the active one
+    lifted and the rest dimmed; the centre reads the active category. */
 export default function AllocationDonut({
   rows,
   total,
@@ -38,8 +40,8 @@ export default function AllocationDonut({
   const { t, formatCurrency, formatNumber, categoryLabel } = useI18n()
   const cx = 120
   const cy = 120
-  const rO = 100
-  const rI = 62
+  const rO = 104
+  const rI = 78
 
   let angle = -Math.PI / 2
   const segments = rows.map((c) => {
@@ -48,13 +50,14 @@ export default function AllocationDonut({
     const d = arc(cx, cy, rO, rI, a0, a1)
     angle = a1
     const midpoint = (a0 + a1) / 2
-    return { id: c.id, d, color: c.color, dx: Math.cos(midpoint) * 5, dy: Math.sin(midpoint) * 5 }
+    return { id: c.id, d, color: c.color, dx: Math.cos(midpoint) * 4, dy: Math.sin(midpoint) * 4 }
   })
 
-  const active = (activeCat ? rows.find((c) => c.id === activeCat) : null) ?? rows[0] ?? null
+  const active = activeCat ? rows.find((c) => c.id === activeCat) ?? null : null
+  const label = (cat: ComputedCategory) => cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)
 
   return (
-    <Box position="relative" w="min(280px, 78vw)" mx="auto" mt="0.2rem">
+    <Box position="relative" w="min(260px, 72vw)" mx="auto">
       <Box
         as="svg"
         viewBox="0 0 240 240"
@@ -65,91 +68,65 @@ export default function AllocationDonut({
         h="auto"
         overflow="visible"
       >
-        <g>
-          {segments.map((s) => (
-            <path
-              key={s.id}
-              d={s.d}
-              fill={s.color}
-              stroke="var(--pb-paper)"
-              strokeWidth={1.6}
-              style={{
-                cursor: 'pointer',
-                opacity: activeCat && activeCat !== s.id ? 0.3 : 1,
-                transform: activeCat === s.id ? `translate(${s.dx}px, ${s.dy}px)` : undefined,
-                transition: 'opacity 0.2s, transform 0.2s',
-                outline: 'none',
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label={t('categories.showCategory', {
-                category: categoryLabel(rows.find((row) => row.id === s.id)?.name ?? t('categories.category')),
-              })}
-              aria-pressed={activeCat === s.id}
-              onMouseEnter={() => onActive(s.id)}
-              onMouseLeave={() => onActive(null)}
-              onFocus={() => onActive(s.id)}
-              onBlur={() => onActive(null)}
-              onClick={() => onSegmentClick(s.id)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
-                  onSegmentClick(s.id)
-                }
-              }}
-            />
-          ))}
-        </g>
-        {/* Gold dashed rim */}
-        <circle cx={cx} cy={cy} r={106} fill="none" stroke="var(--pb-gold)" strokeWidth={1.4} strokeDasharray=".5 5" opacity={0.4} />
-        {/* Hole */}
-        <circle cx={cx} cy={cy} r={58} fill="var(--pb-surface)" stroke="var(--pb-hair)" />
+        {segments.map((s) => (
+          <path
+            key={s.id}
+            d={s.d}
+            fill={s.color}
+            stroke="var(--pb-surface)"
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+            style={{
+              cursor: 'pointer',
+              opacity: activeCat && activeCat !== s.id ? 0.35 : 1,
+              transform: activeCat === s.id ? `translate(${s.dx}px, ${s.dy}px)` : undefined,
+              transition: 'opacity 0.2s, transform 0.2s',
+              outline: 'none',
+            }}
+            role="button"
+            tabIndex={0}
+            aria-label={t('categories.showCategory', {
+              category: categoryLabel(rows.find((row) => row.id === s.id)?.name ?? t('categories.category')),
+            })}
+            aria-pressed={activeCat === s.id}
+            onMouseEnter={() => onActive(s.id)}
+            onMouseLeave={() => onActive(null)}
+            onFocus={() => onActive(s.id)}
+            onBlur={() => onActive(null)}
+            onClick={() => onSegmentClick(s.id)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                onSegmentClick(s.id)
+              }
+            }}
+          />
+        ))}
       </Box>
 
-      {/* Centre overlay */}
       <VStack
         position="absolute"
         inset={0}
         align="center"
         justify="center"
-        spacing={0}
+        spacing={0.5}
         textAlign="center"
         pointerEvents="none"
-        px="22%"
+        px="24%"
       >
-        {active && <Icon as={active.icon} boxSize="15px" color={active.color} mb="0.1rem" />}
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="9px"
-          letterSpacing="0.12em"
-          textTransform="uppercase"
-          color="var(--pb-ink-faint)"
-          mb="0.3rem"
-          maxW="13ch"
-          lineHeight="1.25"
-          noOfLines={2}
-        >
-          {active
-            ? active.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(active.name)
-            : t(side === 'expense' ? 'categories.totalSpending' : 'categories.totalIncome')}
+        <Text fontSize="xs" color="var(--pb-ink-soft)" lineHeight="1.25" noOfLines={2}>
+          {active ? label(active) : t(side === 'expense' ? 'categories.totalSpending' : 'categories.totalIncome')}
         </Text>
         <Text
-          className="num"
-          fontSize="1.45rem"
-          fontWeight={500}
-          lineHeight="1"
+          fontSize="1.5rem"
+          fontWeight={700}
+          letterSpacing="-0.02em"
+          lineHeight="1.1"
           color="var(--pb-ink)"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
         >
           {formatCurrency(active ? active.amount : total)}
         </Text>
-        <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="9px"
-          letterSpacing="0.06em"
-          color="var(--pb-ink-faint)"
-          mt="0.3rem"
-        >
+        <Text fontSize="xs" color="var(--pb-ink-faint)">
           {active
             ? t('categories.shareTransactions', {
                 percentage: formatNumber(active.pct, { maximumFractionDigits: 1 }),

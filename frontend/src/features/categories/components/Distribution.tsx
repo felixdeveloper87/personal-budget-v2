@@ -1,18 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Flex, Grid, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { motion } from 'framer-motion'
-import { ArrowDownRight, ArrowUpRight, CalendarDays, Layers, ReceiptText } from '../../../components/ui/icons'
+import { ArrowDownRight, ArrowUpRight, Layers } from '../../../components/ui/icons'
 import { computeSide } from '../data/computeSide'
-import { hexA } from '../data/format'
 import type { Category, ComputedCategory, Side } from '../data/types'
 import AllocationDonut from './AllocationDonut'
 import CategoryTransactionsModal from './CategoryTransactionsModal'
 import CategoryTxnRow from './CategoryTxnRow'
 import { useI18n } from '../../../i18n'
-import { EYEBROW_CASE } from '../../dashboard/components/eyebrow'
 
 const MotionGrid = motion(Grid)
 const TRANSACTION_LIMIT = 5
+
+/* Categories are ranked by spend and painted on one purple ramp: the biggest
+   in brand purple, fading to lilac; the long tail shares a neutral grey. */
+const NU_RAMP = ['#820ad1', '#9a3cdd', '#b06be6', '#c495ee', '#d7b9f4', '#e7d5f9']
+const NU_TAIL = '#d4d4dd'
 
 interface DistributionProps {
   expense: Category[]
@@ -25,7 +28,6 @@ export default function Distribution({
   previousExpense = [],
   periodLabel,
 }: DistributionProps) {
-  const { t } = useI18n()
   // Payments is an outflow-only lens — lock to expense and hide the income tab.
   const side: Side = 'expense'
   // `pinned` is a click-selected category that persists; `hovered` is a transient
@@ -33,7 +35,7 @@ export default function Distribution({
   const [pinned, setPinned] = useState<string | null>(null)
   const [hovered, setHovered] = useState<string | null>(null)
   const [viewAllCat, setViewAllCat] = useState<ComputedCategory | null>(null)
-  const donutRef = useRef<HTMLDivElement>(null)
+  const chartRef = useRef<HTMLDivElement>(null)
   const detailsRef = useRef<HTMLDivElement>(null)
 
   const activeCat = hovered ?? pinned
@@ -42,19 +44,19 @@ export default function Distribution({
     () => computeSide(expense, previousExpense),
     [expense, previousExpense],
   )
-  const displayRows = rows
+  const displayRows = useMemo(
+    () => rows.map((row, index) => ({ ...row, color: NU_RAMP[index] ?? NU_TAIL })),
+    [rows],
+  )
   const spotlight = (activeCat ? displayRows.find((row) => row.id === activeCat) : null) ?? displayRows[0] ?? null
 
-  // A view/side swap re-shuffles the donut — drop any lingering highlight/expands.
-  // Clicking anywhere outside the donut clears the selection — back to the
-  // default "Total" view and collapses the row that the segment opened.
+  // Clicking anywhere outside the chart/legend or the details card clears the
+  // selection — back to the default "Total" view.
   useEffect(() => {
     if (!pinned) return
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node
-      const clickedDonut = donutRef.current?.contains(target)
-      const clickedDetails = detailsRef.current?.contains(target)
-      if (!clickedDonut && !clickedDetails) {
+      if (!chartRef.current?.contains(target) && !detailsRef.current?.contains(target)) {
         setPinned(null)
         setHovered(null)
       }
@@ -63,84 +65,57 @@ export default function Distribution({
     return () => document.removeEventListener('pointerdown', handlePointerDown)
   }, [pinned])
 
-  // Clicking a donut segment pins the single detail card; clicking it again
-  // returns that card to the default top category.
-  const onSegmentClick = useCallback((id: string) => {
+  // Clicking a segment or legend row pins it; clicking it again un-pins.
+  const togglePinned = useCallback((id: string) => {
     setPinned((current) => current === id ? null : id)
   }, [])
 
-  const hasData = rows.length > 0
+  if (displayRows.length === 0) {
+    return (
+      <Box bg="var(--pb-surface)" borderRadius="16px" p={5}>
+        <EmptyState side={side} />
+      </Box>
+    )
+  }
 
   return (
-    <Box
-      position="relative"
-      bg="var(--pb-panel-bg, linear-gradient(176deg, var(--pb-surface), var(--pb-surface-2)))"
-      border="1px solid var(--pb-panel-border, var(--pb-hair))"
-      borderRadius="var(--pb-panel-radius, 22px)"
-      boxShadow="var(--pb-panel-shadow, 0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06))"
-      p="var(--pb-panel-padding, clamp(1.2rem, 2.8vw, 1.7rem))"
-      overflow="hidden"
-    >
-      {/* Inner top highlight */}
-      <Box position="absolute" inset={0} borderRadius="inherit" pointerEvents="none" boxShadow="inset 0 1px 0 rgba(255,255,255,.5)" />
-
-      {/* Header */}
-      <Flex
-        position="relative"
-        zIndex={2}
-        display="var(--pb-card-eyebrow-display, flex)"
-        align="flex-start"
-        justify="space-between"
-        gap="0.9rem"
-        flexWrap="wrap"
-        mb="1.2rem"
+    <>
+      <MotionGrid
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.15 }}
+        templateColumns={{ base: '1fr', lg: 'minmax(280px, 340px) 1fr' }}
+        gap={{ base: 4, lg: 5 }}
+        alignItems="start"
       >
-        <VStack align="flex-start" spacing="0.15rem">
-          <Text fontWeight={500} fontSize="1.2rem" letterSpacing="-0.01em" color="var(--pb-ink)">
-            {t(side === 'expense' ? 'categories.expenseDistribution' : 'categories.incomeDistribution')}
-          </Text>
-          <Text fontStyle="italic" color="var(--pb-ink-faint)" fontSize="0.9rem">
-            {t(side === 'expense' ? 'categories.spendingShare' : 'categories.incomeShare')}
-          </Text>
-        </VStack>
-      </Flex>
+        <Box ref={chartRef} bg="var(--pb-surface)" borderRadius="16px" p={{ base: 4, md: 5 }} position={{ base: 'static', lg: 'sticky' }} top={{ lg: '90px' }}>
+          <AllocationDonut
+            rows={displayRows}
+            total={total}
+            side={side}
+            periodLabel={periodLabel}
+            activeCat={activeCat}
+            onActive={setHovered}
+            onSegmentClick={togglePinned}
+          />
+          <CategoryLegend
+            rows={displayRows}
+            activeCat={activeCat}
+            onHover={setHovered}
+            onSelect={togglePinned}
+          />
+        </Box>
 
-      {/* Body */}
-      {hasData ? (
-        <MotionGrid
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.15 }}
-          position="relative"
-          zIndex={2}
-          templateColumns={{ base: '1fr', lg: '300px 1fr' }}
-          gap={{ base: '1.5rem', lg: '2rem' }}
-          alignItems="start"
-        >
-          <Box ref={donutRef} position={{ base: 'static', lg: 'sticky' }} top={{ lg: '90px' }}>
-            <AllocationDonut
-              rows={displayRows}
-              total={total}
+        <Box ref={detailsRef}>
+          {spotlight && (
+            <CategorySpotlight
+              cat={spotlight}
               side={side}
-              periodLabel={periodLabel}
-              activeCat={activeCat}
-              onActive={setHovered}
-              onSegmentClick={onSegmentClick}
+              onViewAll={() => setViewAllCat(spotlight)}
             />
-          </Box>
-          <VStack ref={detailsRef} align="stretch" spacing="0.85rem">
-            {spotlight && (
-              <CategorySpotlight
-                cat={spotlight}
-                side={side}
-                onViewAll={() => setViewAllCat(spotlight)}
-              />
-            )}
-          </VStack>
-        </MotionGrid>
-      ) : (
-        <EmptyState side={side} />
-      )}
+          )}
+        </Box>
+      </MotionGrid>
 
       <CategoryTransactionsModal
         cat={viewAllCat}
@@ -148,7 +123,63 @@ export default function Distribution({
         periodLabel={periodLabel}
         onClose={() => setViewAllCat(null)}
       />
-    </Box>
+    </>
+  )
+}
+
+/** Tappable category list under the ring: colour dot, name, share and amount. */
+function CategoryLegend({
+  rows,
+  activeCat,
+  onHover,
+  onSelect,
+}: {
+  rows: ComputedCategory[]
+  activeCat: string | null
+  onHover: (id: string | null) => void
+  onSelect: (id: string) => void
+}) {
+  const { t, formatCurrency, formatNumber, categoryLabel } = useI18n()
+  return (
+    <VStack mt={4} align="stretch" spacing={0.5} role="list">
+      {rows.map((row) => {
+        const isActive = activeCat === row.id
+        return (
+          <Flex
+            key={row.id}
+            as="button"
+            type="button"
+            role="listitem"
+            align="center"
+            gap={2.5}
+            px={2.5}
+            py={2}
+            borderRadius="10px"
+            textAlign="left"
+            bg={isActive ? 'var(--nu-brand-tint, #f3e8fc)' : 'transparent'}
+            opacity={activeCat && !isActive ? 0.6 : 1}
+            transition="background 0.15s ease, opacity 0.15s ease"
+            _hover={{ bg: isActive ? 'var(--nu-brand-tint, #f3e8fc)' : 'var(--pb-surface-2)' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand, #820ad1)', outlineOffset: '1px' }}
+            aria-pressed={isActive}
+            onMouseEnter={() => onHover(row.id)}
+            onMouseLeave={() => onHover(null)}
+            onClick={() => onSelect(row.id)}
+          >
+            <Box w="10px" h="10px" flexShrink={0} borderRadius="full" bg={row.color} />
+            <Text flex={1} minW={0} fontSize="sm" fontWeight={isActive ? 700 : 500} color="var(--pb-ink)" noOfLines={1}>
+              {row.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(row.name)}
+            </Text>
+            <Text fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
+              {formatNumber(row.pct, { maximumFractionDigits: 0 })}%
+            </Text>
+            <Text w="78px" textAlign="right" fontSize="sm" fontWeight={600} color="var(--pb-ink)" flexShrink={0} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {formatCurrency(row.amount)}
+            </Text>
+          </Flex>
+        )
+      })}
+    </VStack>
   )
 }
 
@@ -163,11 +194,10 @@ function CategorySpotlight({
 }) {
   const { t, formatCurrency, formatNumber, categoryLabel } = useI18n()
   const isExpense = side === 'expense'
-  const amountColor = isExpense ? 'var(--pb-coral)' : 'var(--pb-income)'
-  const changeColor = cat.change > 0
-    ? isExpense ? 'var(--pb-coral)' : 'var(--pb-income)'
-    : cat.change < 0 ? isExpense ? 'var(--pb-income)' : 'var(--pb-coral)'
-      : 'var(--pb-ink-faint)'
+  // Spending more is bad for expenses, good for income — and vice versa.
+  const good = cat.change !== 0 && (cat.change < 0) === isExpense
+  const changeInk = cat.change === 0 ? 'var(--pb-ink-soft)' : good ? 'var(--pb-income)' : 'var(--pb-coral)'
+  const changeBg = cat.change === 0 ? 'var(--pb-surface-2)' : good ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
   const comparison = cat.changePct === null
     ? t('categories.newThisPeriod')
     : t('categories.vsPrevious', {
@@ -178,58 +208,57 @@ function CategorySpotlight({
   const moreTransactions = Math.max(0, cat.shownCount - shownTransactions.length)
 
   return (
-    <Box position="relative" overflow="hidden" border="1px solid var(--pb-hair-2)" borderRadius="18px" bg="var(--pb-surface)" p="clamp(1rem,2vw,1.25rem)" boxShadow="0 12px 30px rgba(15,23,42,.07)">
-      <Box position="absolute" insetX={0} top={0} h="2px" bg={cat.color} opacity={0.9} />
-      <Box position="absolute" top="-90px" right="-70px" w="220px" h="220px" borderRadius="full" bg={hexA(cat.color, 0.1)} filter="blur(34px)" pointerEvents="none" />
-
-      <Flex position="relative" align="flex-start" justify="space-between" gap={4}>
-        <HStack spacing={2.5} minW={0}>
-          <Flex w="40px" h="40px" align="center" justify="center" borderRadius="13px" bg={hexA(cat.color, 0.1)} border="1px solid" borderColor={hexA(cat.color, 0.34)} flexShrink={0}>
-            <Icon as={cat.icon} boxSize="20px" color={cat.color} weight="duotone" />
+    <Box bg="var(--pb-surface)" borderRadius="16px" p={{ base: 4, md: 5 }}>
+      <Flex align="center" justify="space-between" gap={4}>
+        <HStack spacing={3} minW={0}>
+          <Flex w="44px" h="44px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
+            <Icon as={cat.icon} boxSize="20px" weight="bold" />
           </Flex>
           <Box minW={0}>
-            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.14em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">{t('categories.spotlight')}</Text>
-            <Text fontFamily="var(--pb-serif)" fontSize="clamp(1.2rem,2vw,1.45rem)" lineHeight="1.08" color="var(--pb-ink)" noOfLines={1}>{cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}</Text>
+            <Text fontSize="lg" fontWeight={700} letterSpacing="-0.01em" lineHeight="1.15" color="var(--pb-ink)" noOfLines={1}>
+              {cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
+            </Text>
+            <Text fontSize="xs" color="var(--pb-ink-soft)">
+              {t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}
+            </Text>
           </Box>
         </HStack>
-        <Box textAlign="right" flexShrink={0}>
-          <Text className="num" fontFamily="var(--pb-serif)" fontSize="clamp(1.45rem,2.4vw,1.85rem)" fontWeight={500} lineHeight="0.95" color={amountColor}>{formatCurrency(cat.amount)}</Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)" mt={1}>{t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}</Text>
-        </Box>
+        <Text flexShrink={0} fontSize="xl" fontWeight={700} letterSpacing="-0.02em" color="var(--pb-ink)">
+          {formatCurrency(cat.amount)}
+        </Text>
       </Flex>
 
-      <HStack position="relative" display="inline-flex" mt={3} px="0.55rem" py="0.38rem" borderRadius="999px" spacing={1.5} color={changeColor} bg={cat.change === 0 ? 'var(--pb-surface-2)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.1)} border="1px solid" borderColor={cat.change === 0 ? 'var(--pb-hair)' : hexA(changeColor === 'var(--pb-coral)' ? '#b8452f' : '#1f8a4f', 0.24)}>
-        <Icon as={cat.change >= 0 ? ArrowUpRight : ArrowDownRight} boxSize="14px" />
-        <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" textTransform={EYEBROW_CASE}>{comparison}</Text>
+      <HStack display="inline-flex" mt={3} px={2.5} py={1} borderRadius="full" spacing={1} color={changeInk} bg={changeBg}>
+        {cat.change !== 0 && <Icon as={cat.change > 0 ? ArrowUpRight : ArrowDownRight} boxSize="13px" />}
+        <Text fontSize="xs" fontWeight={600}>{comparison}</Text>
       </HStack>
 
-      <Grid position="relative" templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={3.5}>
-        <Metric icon={ReceiptText} label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
-        <Metric icon={CalendarDays} label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
-        <Metric icon={cat.icon} label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
+      <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={4}>
+        <Metric label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
+        <Metric label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
+        <Metric label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
       </Grid>
 
       {cat.topMerchant && (
-        <Flex position="relative" mt={3} align="baseline" gap={1.5} fontSize="sm" noOfLines={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.08em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">{t('categories.topMerchant')}</Text>
-          <Text fontFamily="var(--pb-serif)" fontSize="1rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{cat.topMerchant}</Text>
-        </Flex>
+        <Text mt={3} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
+          {t('categories.topMerchant')}: <Text as="span" fontWeight={600} color="var(--pb-ink)">{cat.topMerchant}</Text>
+        </Text>
       )}
 
-      <Box position="relative" mt={4} pt={3.5} borderTop="1px solid var(--pb-hair)">
-        <Flex align="center" justify="space-between" mb={1}>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.12em)" textTransform={EYEBROW_CASE} color="var(--pb-ink-faint)">
+      <Box mt={5}>
+        <Flex align="baseline" justify="space-between" mb={1}>
+          <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
             {t('categories.recentTransactions')}
           </Text>
-          <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="var(--pb-eyebrow-tracking, 0.06em)" color="var(--pb-ink-faint)">
+          <Text fontSize="xs" color="var(--pb-ink-soft)">
             {t('categories.transactionTotal', { count: formatNumber(cat.shownCount) })}
           </Text>
         </Flex>
-        <VStack align="stretch" spacing={0}>
+        <Box bg="white" borderRadius="14px" px={3.5}>
           {shownTransactions.map((transaction) => (
-            <CategoryTxnRow key={transaction.id} txn={transaction} icon={cat.icon} color={cat.color} side={side} />
+            <CategoryTxnRow key={transaction.id} txn={transaction} icon={cat.icon} side={side} />
           ))}
-        </VStack>
+        </Box>
         {moreTransactions > 0 && (
           <Flex
             as="button"
@@ -237,22 +266,18 @@ function CategorySpotlight({
             onClick={onViewAll}
             align="center"
             justify="center"
-            minH="38px"
-            mt={2}
+            h="44px"
+            mt={3}
             w="full"
-            borderRadius="10px"
-            bg={hexA(cat.color, 0.09)}
-            border="1px solid"
-            borderColor={hexA(cat.color, 0.28)}
-            fontFamily="var(--pb-mono)"
-            fontSize="9.5px"
-            letterSpacing="var(--pb-eyebrow-tracking, 0.06em)"
-            textTransform={EYEBROW_CASE}
-            color={cat.color}
+            borderRadius="full"
+            bg="var(--nu-brand-tint, #f3e8fc)"
+            color="var(--nu-brand, #820ad1)"
+            fontSize="sm"
+            fontWeight={600}
             cursor="pointer"
-            transition="background .16s ease, transform .16s ease"
-            _hover={{ bg: hexA(cat.color, 0.16), transform: 'translateY(-1px)' }}
-            _focusVisible={{ outline: '2px solid var(--pb-forest)', outlineOffset: '2px' }}
+            transition="background .15s ease"
+            _hover={{ bg: '#ead6fa' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand, #820ad1)', outlineOffset: '2px' }}
           >
             {t(moreTransactions === 1 ? 'categories.viewMore' : 'categories.viewMorePlural', {
               count: formatNumber(moreTransactions),
@@ -260,19 +285,15 @@ function CategorySpotlight({
           </Flex>
         )}
       </Box>
-
     </Box>
   )
 }
 
-function Metric({ icon, label, value }: { icon: ComputedCategory['icon']; label: string; value: string }) {
+function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <Box bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="11px" p="0.65rem" minW={0}>
-      <HStack spacing={1} color="var(--pb-ink-faint)">
-        <Icon as={icon} boxSize="10px" />
-        <Text fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="var(--pb-eyebrow-tracking, 0.04em)" textTransform={EYEBROW_CASE} noOfLines={1}>{label}</Text>
-      </HStack>
-      <Text className="num" mt={1.5} fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)" noOfLines={1}>{value}</Text>
+    <Box bg="white" borderRadius="12px" px={3} py={2.5} minW={0}>
+      <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{label}</Text>
+      <Text mt={0.5} fontSize="md" fontWeight={700} color="var(--pb-ink)" noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>
     </Box>
   )
 }
@@ -280,20 +301,12 @@ function Metric({ icon, label, value }: { icon: ComputedCategory['icon']; label:
 function EmptyState({ side }: { side: Side }) {
   const { t } = useI18n()
   return (
-    <VStack position="relative" zIndex={2} spacing={3} py={14} align="center">
-      <Flex
-        w={14}
-        h={14}
-        align="center"
-        justify="center"
-        borderRadius="2xl"
-        bg="var(--pb-surface-2)"
-        border="1px solid var(--pb-hair)"
-      >
-        <Icon as={Layers} boxSize={7} color="var(--pb-ink-faint)" weight="duotone" />
+    <VStack spacing={3} py={10} align="center">
+      <Flex w={12} h={12} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)">
+        <Icon as={Layers} boxSize={6} weight="bold" />
       </Flex>
       <VStack spacing={1}>
-        <Text fontSize="md" fontWeight={500} color="var(--pb-ink)">
+        <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
           {t(side === 'expense' ? 'categories.noSpending' : 'categories.noIncome')}
         </Text>
         <Text fontSize="sm" color="var(--pb-ink-soft)" maxW="340px" textAlign="center">
