@@ -21,6 +21,7 @@ import {
   Laptop,
   TrendingUp,
   Home,
+  RentHome,
   FileText,
   ShoppingCart,
   Car,
@@ -69,7 +70,7 @@ const INCOME_OTHER_ICONS = [
 ] as const
 
 const EXPENSE_OTHER_ICONS = [
-  Home,
+  RentHome,
   ShoppingBag,
   CreditCard,
   Film,

@@ -1,4 +1,4 @@
-import { Building, Broom, CookingPot, Drop, Flame, Gear, Home, Lightbulb, Plant, ShoppingCart, Tag, ToiletPaper, WifiHigh, Zap, type LucideIcon } from '../../../components/ui/icons'
+import { Building, Broom, CookingPot, Drop, Flame, Gear, Lightbulb, Plant, RentHome, ShoppingCart, Tag, ToiletPaper, WifiHigh, Zap, type LucideIcon } from '../../../components/ui/icons'
 
 export const CATEGORIES = [
   'Groceries',
@@ -105,7 +105,7 @@ export function getHouseholdCategoryConfig(category?: string) {
     case 'Cleaning':
       return { icon: Broom, color: 'var(--pb-forest)', bg: 'var(--pb-tint-green)' }
     case 'Rent':
-      return { icon: Home, color: 'var(--pb-forest)', bg: 'var(--pb-tint-green)' }
+      return { icon: RentHome, color: 'var(--pb-forest)', bg: 'var(--pb-tint-green)' }
     case 'Council tax':
       return { icon: Building, color: 'var(--pb-forest)', bg: 'var(--pb-tint-green)' }
     case 'Repairs':

@@ -15,6 +15,7 @@ export type IconKey =
   | 'play'
   | 'pill'
   | 'bolt'
+  | 'rent'
   | 'house'
   | 'brief'
   | 'refund'

@@ -25,6 +25,7 @@ const ICON_RULES: Array<{ key: IconKey; test: RegExp }> = [
   { key: 'play', test: /subscri|stream|netflix|spotify|media|music|cinema|entertain|game/ },
   { key: 'pill', test: /health|pharma|medic|gym|fitness|dental|doctor|wellness|hospital/ },
   { key: 'bolt', test: /util|electric|water|gas|internet|broadband|phone|mobile|energy|bill/ },
+  { key: 'rent', test: /\brent\b/ },
   { key: 'house', test: /hous|rent|mortgage|home|council|accommodation/ },
   { key: 'brief', test: /salary|payroll|wage|income|freelance|bonus|invoice/ },
   { key: 'refund', test: /refund|reimburs|return|cashback|rebate/ },

@@ -103,6 +103,38 @@ import {
 
 export type LucideIcon = React.FC<IconProps>
 
+/** Lightweight rent-specific mark: a welcoming home paired with a small key. */
+export const RentHome: LucideIcon = ({
+  color = 'currentColor',
+  mirrored = false,
+  size = 24,
+  style,
+  weight = 'regular',
+  ...props
+}) => {
+  const strokeWidth = weight === 'thin' ? 1 : weight === 'light' ? 1.5 : weight === 'bold' ? 2.5 : 2
+
+  return React.createElement(
+    'svg',
+    {
+      ...props,
+      width: size,
+      height: size,
+      viewBox: '0 0 24 24',
+      fill: 'none',
+      stroke: color,
+      strokeWidth,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
+      style: { ...style, transform: mirrored ? 'scaleX(-1)' : style?.transform },
+    },
+    React.createElement('path', { d: 'M3.75 10.5 12 3.75l8.25 6.75v8a1.75 1.75 0 0 1-1.75 1.75h-13a1.75 1.75 0 0 1-1.75-1.75Z' }),
+    React.createElement('path', { d: 'M8.75 20.25V15.5a1.5 1.5 0 0 1 1.5-1.5h2.5a1.5 1.5 0 0 1 1.5 1.5v4.75' }),
+    React.createElement('circle', { cx: '16.75', cy: '11.25', r: '1.5' }),
+    React.createElement('path', { d: 'M18.25 11.25h2.25m-1 0v1.25' }),
+  )
+}
+
 export {
   Activity,
   AlertCircle,

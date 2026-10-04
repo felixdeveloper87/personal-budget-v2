@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Heart,
   Home,
+  RentHome,
   Music,
   ReceiptText,
   Shield,
@@ -176,10 +177,10 @@ const PRIMARY_PRESETS: ReadonlyArray<TransactionPreset> = [
   { label: 'TfL',                category: 'Transport', icon: Car, domain: 'tfl.gov.uk' },
   { label: 'Trainline',          category: 'Transport', icon: Car, domain: 'thetrainline.com' },
 
-  { label: 'Rent payment', category: 'Rent', icon: Home },
+  { label: 'Rent payment', category: 'Rent', icon: RentHome },
   { label: 'Service charge', category: 'Rent', icon: Building },
   { label: 'Ground rent', category: 'Rent', icon: Building },
-  { label: 'Room rent', category: 'Rent', icon: Home },
+  { label: 'Room rent', category: 'Rent', icon: RentHome },
   { label: 'Storage rent', category: 'Rent', icon: Building },
 
   { label: 'Primark',       category: 'Shopping', icon: ShoppingBag, domain: 'primark.com' },
