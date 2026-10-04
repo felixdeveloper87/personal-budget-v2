@@ -57,11 +57,17 @@ export interface TransactionListGroupedRef {
   goToCurrentMonth: () => void
 }
 
+/** Rows revealed per click inside an expanded month. */
+const ROWS_STEP = 30
+
 const TransactionListGrouped = forwardRef<TransactionListGroupedRef, TransactionListGroupedProps>(
   ({ transactions, onTransactionDeleted, dateBasis = 'activity' }, ref) => {
     const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
     const { transactionToDelete, isOpen, openDeleteDialog, closeDeleteDialog } = useDeleteTransaction()
     const [expandedMonths, setExpandedMonths] = useState<Record<string, boolean>>({})
+    // Rows shown per expanded month; grows in steps via "Show more" so a busy month
+    // doesn't mount hundreds of table rows at once.
+    const [visibleRows, setVisibleRows] = useState<Record<string, number>>({})
     const [transactionToEdit, setTransactionToEdit] = useState<Transaction | null>(null)
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
@@ -434,7 +440,8 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
               </Box>
 
               {/* Transactions Table */}
-              <Collapse in={isExpanded} animateOpacity>
+              {/* unmountOnExit: collapsed months don't keep their rows mounted. */}
+              <Collapse in={isExpanded} animateOpacity unmountOnExit>
                 <Box 
                   borderTop="1px solid" 
                   borderColor="var(--pb-hair)"
@@ -464,7 +471,7 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                         </Tr>
                       </Thead>
                       <Tbody>
-                        {group.transactions.map((tx) => {
+                        {group.transactions.slice(0, visibleRows[group.monthKey] ?? ROWS_STEP).map((tx) => {
                           const dateHint = getCounterpartDateHint(tx, dateBasis)
                           return (
                           <Tr key={tx.id} _hover={{ bg: 'var(--pb-surface-3)' }}>
@@ -589,6 +596,24 @@ const TransactionListGrouped = forwardRef<TransactionListGroupedRef, Transaction
                       </Tbody>
                     </Table>
                   </TableContainer>
+                  {group.transactions.length > (visibleRows[group.monthKey] ?? ROWS_STEP) && (
+                    <Flex justify="center" mt={3}>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        borderRadius="full"
+                        color="var(--pb-forest-2)"
+                        onClick={() => setVisibleRows((current) => ({
+                          ...current,
+                          [group.monthKey]: (current[group.monthKey] ?? ROWS_STEP) + ROWS_STEP,
+                        }))}
+                      >
+                        {t('transactions.showMore', {
+                          count: group.transactions.length - (visibleRows[group.monthKey] ?? ROWS_STEP),
+                        })}
+                      </Button>
+                    </Flex>
+                  )}
                 </Box>
               </Collapse>
             </Box>
