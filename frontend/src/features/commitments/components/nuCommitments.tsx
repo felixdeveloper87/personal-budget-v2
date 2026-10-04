@@ -186,9 +186,13 @@ function brandDomain(name: string): string | null {
   return best?.domain ?? null
 }
 
+/** Favicon URLs that already failed this session — never re-requested. */
+const failedBrandUrls = new Set<string>()
+
 /** Brand favicon in a white circle; falls back to MerchantLogo if the image fails. */
 function BrandLogo({ domain, name, category, size }: { domain: string; name: string; category?: string; size: number }) {
-  const [failed, setFailed] = useState(false)
+  const src = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`
+  const [failed, setFailed] = useState(() => failedBrandUrls.has(src))
   if (failed) return <MerchantLogo name={name} category={category} size={size} borderRadius="50%" />
   return (
     <Box
@@ -205,13 +209,13 @@ function BrandLogo({ domain, name, category, size }: { domain: string; name: str
       boxShadow="0 1px 2px rgba(0,0,0,0.08)"
     >
       <img
-        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+        src={src}
         alt=""
         width={Math.round(size * 0.62)}
         height={Math.round(size * 0.62)}
         decoding="async"
         style={{ objectFit: 'contain', display: 'block' }}
-        onError={() => setFailed(true)}
+        onError={() => { failedBrandUrls.add(src); setFailed(true) }}
       />
     </Box>
   )

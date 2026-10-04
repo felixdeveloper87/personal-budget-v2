@@ -61,18 +61,24 @@ function getFallback(name: string, category?: string) {
   return null
 }
 
+/** Logo URLs that already failed this session — never re-requested (errors aren't cached). */
+const failedLogoUrls = new Set<string>()
+/** One fixed size per brand, so the same logo is a single cached URL at every size it's drawn. */
+const LOGO_FETCH_SIZE = 128
+
 export default function MerchantLogo({ name, category, domain, size = 36, borderRadius = '10px', fallbackMode = 'default' }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false)
   const rent = useMemo(() => isRentLike(name, category), [name, category])
   const fallback = useMemo(() => (rent ? null : getFallback(name, category)), [name, category, rent])
   const FallbackIcon = fallback?.Icon
   const logoUrl = domain && LOGO_DEV_TOKEN
-    ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
+    ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${LOGO_FETCH_SIZE}&format=png&fallback=404`
     : null
 
   useEffect(() => setFailed(false), [logoUrl])
+  const showLogo = Boolean(logoUrl && !failed && !failedLogoUrls.has(logoUrl))
 
-  if (fallbackMode === 'none' && (!logoUrl || failed)) return null
+  if (fallbackMode === 'none' && !showLogo) return null
 
   return (
     <Box
@@ -84,12 +90,12 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
       flexShrink={0}
       overflow="hidden"
       borderRadius={borderRadius}
-      bg={logoUrl && !failed ? '#ffffff' : rent ? '#f3e8fc' : fallback?.background ?? 'var(--pb-surface-2)'}
+      bg={showLogo ? '#ffffff' : rent ? '#f3e8fc' : fallback?.background ?? 'var(--pb-surface-2)'}
       border="1px solid var(--pb-hair)"
       boxShadow="0 1px 2px rgba(0,0,0,0.08)"
       userSelect="none"
     >
-      {logoUrl && !failed ? (
+      {showLogo && logoUrl ? (
         <img
           src={logoUrl}
           alt=""
@@ -97,7 +103,7 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
           height={size}
           decoding="async"
           style={{ objectFit: 'contain', display: 'block', padding: '3px' }}
-          onError={() => setFailed(true)}
+          onError={() => { failedLogoUrls.add(logoUrl); setFailed(true) }}
         />
       ) : rent ? (
         <RentHome size={Math.round(size * 0.56)} weight="bold" color="#820ad1" />

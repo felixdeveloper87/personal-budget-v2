@@ -65,6 +65,9 @@ interface BankLogoProps {
   borderRadius?: string
 }
 
+/** Favicon URLs that already failed this session — never re-requested. */
+const failedLogoUrls = new Set<string>()
+
 export default function BankLogo({ issuer, size = 32, borderRadius = '10px' }: BankLogoProps) {
   const [imgFailed, setImgFailed] = useState(false)
   const meta = getBankMeta(issuer)
@@ -90,14 +93,14 @@ export default function BankLogo({ issuer, size = 32, borderRadius = '10px' }: B
       overflow="hidden"
       userSelect="none"
     >
-      {!imgFailed ? (
+      {!imgFailed && !failedLogoUrls.has(logoUrl) ? (
         <img
           src={logoUrl}
           alt={issuer ?? ''}
           width={size}
           height={size}
           style={{ objectFit: 'contain', display: 'block' }}
-          onError={() => setImgFailed(true)}
+          onError={() => { failedLogoUrls.add(logoUrl); setImgFailed(true) }}
         />
       ) : (
         <Text

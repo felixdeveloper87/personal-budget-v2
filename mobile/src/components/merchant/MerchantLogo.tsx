@@ -136,17 +136,22 @@ interface MerchantLogoProps {
   fallbackMode?: "default" | "none";
 }
 
+/** Logo URLs that already failed this session — never re-requested (errors aren't cached). */
+const failedLogoUrls = new Set<string>();
+/** One fixed size per brand, so the same logo is a single cached URL at every size it's drawn. */
+const LOGO_FETCH_SIZE = 128;
+
 export function MerchantLogo({ category, domain, name, size = 42, fallbackMode = "default" }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false);
   const rent = useMemo(() => isRentLike(name, category), [category, name]);
   const fallback = useMemo(() => (rent ? null : getMerchantFallback(name, category)), [category, name, rent]);
   const logoUrl = domain && logoDevToken
-    ? `https://img.logo.dev/${domain}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
+    ? `https://img.logo.dev/${domain}?token=${encodeURIComponent(logoDevToken)}&size=${LOGO_FETCH_SIZE}&format=png&fallback=404`
     : null;
 
   useEffect(() => setFailed(false), [logoUrl]);
 
-  const showLogo = Boolean(logoUrl && !failed);
+  const showLogo = Boolean(logoUrl && !failed && !failedLogoUrls.has(logoUrl));
 
   if (!showLogo && fallbackMode === "none") return null;
 
@@ -172,7 +177,7 @@ export function MerchantLogo({ category, domain, name, size = 42, fallbackMode =
         <Image
           cachePolicy="memory-disk"
           contentFit="contain"
-          onError={() => setFailed(true)}
+          onError={() => { failedLogoUrls.add(logoUrl!); setFailed(true); }}
           source={{ uri: logoUrl! }}
           style={{ height: size - 7, width: size - 7 }}
           transition={120}

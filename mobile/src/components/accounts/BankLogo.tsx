@@ -58,6 +58,9 @@ function initials(value: string) {
   return `${words[0][0]}${words[1][0]}`.toLocaleUpperCase();
 }
 
+/** Favicon URLs that already failed this session — never re-requested. */
+const failedLogoUrls = new Set<string>();
+
 export function BankLogo({ institution, name, size = 30 }: {
   institution?: string | null;
   name: string;
@@ -86,11 +89,11 @@ export function BankLogo({ institution, name, size = 30 }: {
         },
       ]}
     >
-      {logoUrl && !failed ? (
+      {logoUrl && !failed && !failedLogoUrls.has(logoUrl) ? (
         <Image
           cachePolicy="memory-disk"
           contentFit="contain"
-          onError={() => setFailed(true)}
+          onError={() => { failedLogoUrls.add(logoUrl); setFailed(true); }}
           source={{ uri: logoUrl }}
           style={{ height: size, width: size }}
           transition={100}
