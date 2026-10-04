@@ -1,5 +1,5 @@
 import { Box, Flex, Grid, Icon, Text } from '@chakra-ui/react'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 
 import { ChevronRight } from '../../../components/ui/icons'
 import BankLogo, { getBankMeta } from '../../../components/ui/BankLogo'
@@ -137,11 +137,94 @@ export function NuPill({ children }: { children: ReactNode }) {
   )
 }
 
+/** Common subscription / payment brands → domain, matched as whole words in the row name. */
+const KNOWN_BRANDS: Array<{ keys: string[]; domain: string }> = [
+  { keys: ['paypal'], domain: 'paypal.com' },
+  { keys: ['youtube'], domain: 'youtube.com' },
+  { keys: ['netflix'], domain: 'netflix.com' },
+  { keys: ['spotify'], domain: 'spotify.com' },
+  { keys: ['disney'], domain: 'disneyplus.com' },
+  { keys: ['prime video', 'amazon prime', 'amazon'], domain: 'amazon.co.uk' },
+  { keys: ['apple', 'icloud'], domain: 'apple.com' },
+  { keys: ['google'], domain: 'google.com' },
+  { keys: ['microsoft', 'office 365', 'xbox'], domain: 'microsoft.com' },
+  { keys: ['playstation', 'psn'], domain: 'playstation.com' },
+  { keys: ['nintendo'], domain: 'nintendo.com' },
+  { keys: ['adobe'], domain: 'adobe.com' },
+  { keys: ['chatgpt', 'openai'], domain: 'openai.com' },
+  { keys: ['claude', 'anthropic'], domain: 'anthropic.com' },
+  { keys: ['github'], domain: 'github.com' },
+  { keys: ['dropbox'], domain: 'dropbox.com' },
+  { keys: ['canva'], domain: 'canva.com' },
+  { keys: ['duolingo'], domain: 'duolingo.com' },
+  { keys: ['uber'], domain: 'uber.com' },
+  { keys: ['deliveroo'], domain: 'deliveroo.co.uk' },
+  { keys: ['klarna'], domain: 'klarna.com' },
+  { keys: ['clearpay'], domain: 'clearpay.co.uk' },
+  { keys: ['now tv', 'nowtv'], domain: 'nowtv.com' },
+  { keys: ['sky'], domain: 'sky.com' },
+  { keys: ['bt'], domain: 'bt.com' },
+  { keys: ['vodafone'], domain: 'vodafone.co.uk' },
+  { keys: ['ee'], domain: 'ee.co.uk' },
+  { keys: ['o2'], domain: 'o2.co.uk' },
+  { keys: ['three'], domain: 'three.co.uk' },
+  { keys: ['giffgaff'], domain: 'giffgaff.com' },
+  { keys: ['virgin media'], domain: 'virginmedia.com' },
+  { keys: ['puregym', 'pure gym'], domain: 'puregym.com' },
+  { keys: ['gym group'], domain: 'thegymgroup.com' },
+  { keys: ['tv licence', 'tv license'], domain: 'tvlicensing.co.uk' },
+]
+
+function brandDomain(name: string): string | null {
+  const words = ` ${name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()} `
+  let best: { len: number; domain: string } | null = null
+  for (const brand of KNOWN_BRANDS) {
+    for (const key of brand.keys) {
+      if (words.includes(` ${key} `) && (!best || key.length > best.len)) best = { len: key.length, domain: brand.domain }
+    }
+  }
+  return best?.domain ?? null
+}
+
+/** Brand favicon in a white circle; falls back to MerchantLogo if the image fails. */
+function BrandLogo({ domain, name, category, size }: { domain: string; name: string; category?: string; size: number }) {
+  const [failed, setFailed] = useState(false)
+  if (failed) return <MerchantLogo name={name} category={category} size={size} borderRadius="50%" />
+  return (
+    <Box
+      aria-hidden="true"
+      w={`${size}px`}
+      h={`${size}px`}
+      display="grid"
+      placeItems="center"
+      flexShrink={0}
+      overflow="hidden"
+      borderRadius="50%"
+      bg="#ffffff"
+      border="1px solid var(--pb-hair)"
+      boxShadow="0 1px 2px rgba(0,0,0,0.08)"
+    >
+      <img
+        src={`https://www.google.com/s2/favicons?domain=${domain}&sz=128`}
+        alt=""
+        width={Math.round(size * 0.62)}
+        height={Math.round(size * 0.62)}
+        decoding="async"
+        style={{ objectFit: 'contain', display: 'block' }}
+        onError={() => setFailed(true)}
+      />
+    </Box>
+  )
+}
+
 /**
- * Round logo for a commitment row. Bank/card products (e.g. "Monzo Max",
- * "Amex Gold") show the issuer's logo; everything else falls back to MerchantLogo.
+ * Round logo for a commitment row. Bank/card products (e.g. "Monzo Max") show the
+ * issuer's logo, known brands (PayPal, YouTube…) their favicon; everything else
+ * falls back to MerchantLogo.
  */
 export function CommitmentLogo({ name, category, size = 42 }: { name: string; category?: string; size?: number }) {
   if (getBankMeta(name)) return <BankLogo issuer={name} size={size} borderRadius="50%" />
+  const domain = brandDomain(name)
+  if (domain) return <BrandLogo key={domain} domain={domain} name={name} category={category} size={size} />
   return <MerchantLogo name={name} category={category} size={size} borderRadius="50%" />
 }
