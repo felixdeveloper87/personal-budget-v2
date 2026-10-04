@@ -120,6 +120,7 @@ public final class MerchantBrandCatalog {
             entry("Trainline", "thetrainline.com", "trainline"),
             entry("TfL", "tfl.gov.uk", "tfl", "transport for london"),
             entry("Vinted", "vinted.co.uk", "vinted"),
+            entry("Temu", "temu.com", "temu"),
             entry("eBay", "ebay.co.uk", "ebay"),
             entry("Etsy", "etsy.com", "etsy"),
             entry("Royal Mail", "royalmail.com", "royal mail", "royalmail"),

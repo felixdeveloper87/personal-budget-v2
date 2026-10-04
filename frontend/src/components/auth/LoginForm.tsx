@@ -131,10 +131,10 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
                 type="button"
                 variant="ghost"
                 size="sm"
-                color={C.muted}
+                color={C.inkSoft}
                 borderRadius="full"
-                _hover={{ color: C.jade, bg: C.jadeSoft }}
-                _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+                _hover={{ color: C.brand, bg: C.brandSoft }}
+                _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
                 onClick={() => setShowPassword((s) => !s)}
               />
             }
@@ -144,13 +144,13 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
             type="button"
             variant="link"
             alignSelf="flex-end"
-            color={C.jade}
+            color={C.brand}
             fontFamily={F.body}
             fontWeight={600}
             fontSize="xs"
             onClick={onForgotPassword}
-            _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
-            _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+            _hover={{ color: C.brandDeep, textDecoration: 'none' }}
+            _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
           >
             {t('auth.login.forgotPassword')}
           </Button>
@@ -162,10 +162,10 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
               spacing={2.5}
               p={3.5}
               border="1px solid"
-              borderColor="rgba(255, 154, 144, 0.22)"
+              borderColor="rgba(194, 65, 45, 0.22)"
               borderRadius="12px"
-              bg={C.coralSoft}
-              color={C.coral}
+              bg={C.dangerSoft}
+              color={C.danger}
             >
               <Icon as={AlertCircle} boxSize="16px" mt="1px" flexShrink={0} />
               <Text fontFamily={F.body} fontSize="xs" lineHeight={1.5}>
@@ -179,51 +179,51 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
             isLoading={loading}
             loadingText={t('auth.login.loading')}
             rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
-            h="50px"
+            h="52px"
             w="full"
             mt={1}
             fontSize="sm"
             fontFamily={F.body}
             fontWeight={700}
-            color={C.bg}
+            color={C.onBrand}
             borderRadius="999px"
-            bg={C.jade}
+            bg={C.brand}
             border="1px solid"
-            borderColor={C.jade}
-            boxShadow="0 12px 28px -16px rgba(127, 230, 179, 0.72)"
+            borderColor={C.brand}
+            boxShadow="none"
             transition="transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease"
             _hover={{
-              bg: C.jadeStrong,
-              borderColor: C.jadeStrong,
-              transform: 'translateY(-1px)',
-              boxShadow: '0 16px 34px -16px rgba(127, 230, 179, 0.82)',
+              bg: C.brandDeep,
+              borderColor: C.brandDeep,
+              transform: 'none',
+              boxShadow: 'none',
             }}
-            _active={{ transform: 'translateY(0)', bg: C.jadeStrong }}
-            _focusVisible={{ boxShadow: `0 0 0 4px ${C.jade}28` }}
+            _active={{ bg: C.brandDeep }}
+            _focusVisible={{ boxShadow: `0 0 0 4px ${C.brand}28` }}
             _loading={{ opacity: 0.7 }}
           >
             {t('auth.login.submit')}
           </Button>
 
-          <HStack justify="center" spacing={2} color={C.mutedDim}>
+          <HStack justify="center" spacing={2} color={C.inkFaint}>
             <Icon as={ShieldCheck} boxSize="14px" />
-            <Text fontFamily={F.mono} fontSize="9px" letterSpacing="0.08em" textTransform="uppercase">
+            <Text fontFamily={F.body} fontSize="xs">
               {t('auth.login.secure')}
             </Text>
           </HStack>
 
-          <Text textAlign="center" color={C.muted} fontFamily={F.body} fontSize="sm" pt={1}>
+          <Text textAlign="center" color={C.inkSoft} fontFamily={F.body} fontSize="sm" pt={1}>
             {t('auth.login.noAccount')}{' '}
             <Button
               type="button"
               variant="link"
-              color={C.jade}
+              color={C.brand}
               fontFamily={F.body}
               fontWeight={600}
               fontSize="sm"
               onClick={onSwitchToRegister}
-              _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
-              _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+              _hover={{ color: C.brandDeep, textDecoration: 'none' }}
+              _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
             >
               {t('auth.login.create')}
             </Button>

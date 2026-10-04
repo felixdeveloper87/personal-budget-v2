@@ -99,6 +99,7 @@ const MERCHANTS: Partial<Record<ExpenseCategory, readonly MerchantSuggestion[]>>
   ],
   Shopping: [
     { name: 'Amazon', domain: 'amazon.co.uk' },
+    { name: 'Temu', domain: 'temu.com' },
     { name: 'Primark', domain: 'primark.com' },
     { name: 'Zara', domain: 'zara.com' },
     { name: 'eBay', domain: 'ebay.co.uk' },

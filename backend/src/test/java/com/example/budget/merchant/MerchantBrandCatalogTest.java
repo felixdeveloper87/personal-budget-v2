@@ -76,6 +76,8 @@ class MerchantBrandCatalogTest {
                 .contains(new MerchantBrand("TK Maxx", "tkmaxx.com"));
         assertThat(MerchantBrandCatalog.resolve("UNIQLO Regent Street"))
                 .contains(new MerchantBrand("UNIQLO", "uniqlo.com"));
+        assertThat(MerchantBrandCatalog.resolve("TEMU.COM purchase"))
+                .contains(new MerchantBrand("Temu", "temu.com"));
     }
 
     @Test

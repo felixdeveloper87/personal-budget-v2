@@ -236,13 +236,11 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             align="flex-start"
             spacing={3}
             p={3.5}
-            border="1px solid"
-            borderColor="rgba(232, 196, 119, 0.18)"
-            borderRadius="12px"
-            bg={C.goldSoft}
+            borderRadius="14px"
+            bg={C.surface}
           >
-            <Icon as={Clock} boxSize="16px" mt="1px" flexShrink={0} color={C.gold} />
-            <Text color={C.muted} fontFamily={F.body} fontSize="xs" lineHeight={1.55}>
+            <Icon as={Clock} boxSize="16px" mt="1px" flexShrink={0} color={C.brand} />
+            <Text color={C.inkSoft} fontFamily={F.body} fontSize="xs" lineHeight={1.55}>
               {t('auth.register.reviewNotice')}
             </Text>
           </HStack>
@@ -252,44 +250,43 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             isLoading={loading}
             loadingText={t('auth.register.loading')}
             rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
-            h="50px"
+            h="52px"
             w="full"
             mt={1}
             border="1px solid"
-            borderColor={C.jade}
+            borderColor={C.brand}
             borderRadius="999px"
-            bg={C.jade}
-            color={C.bg}
-            boxShadow="0 12px 28px -16px rgba(127, 230, 179, 0.72)"
+            bg={C.onBrand}
+            color={C.brand}
             fontFamily={F.body}
             fontSize="sm"
             fontWeight={700}
             transition="transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease"
             _hover={{
-              bg: C.jadeStrong,
-              borderColor: C.jadeStrong,
-              transform: 'translateY(-1px)',
-              boxShadow: '0 16px 34px -16px rgba(127, 230, 179, 0.82)',
+              bg: C.brandDeep,
+              borderColor: C.brandDeep,
+              transform: 'none',
+              boxShadow: 'none',
             }}
-            _active={{ transform: 'translateY(0)', bg: C.jadeStrong }}
-            _focusVisible={{ boxShadow: `0 0 0 4px ${C.jade}28` }}
+            _active={{ bg: C.brandDeep }}
+            _focusVisible={{ boxShadow: `0 0 0 4px ${C.brand}28` }}
             _loading={{ opacity: 0.72 }}
           >
             {t('auth.register.submit')}
           </Button>
 
-          <Text textAlign="center" color={C.muted} fontFamily={F.body} fontSize="sm">
+          <Text textAlign="center" color={C.inkSoft} fontFamily={F.body} fontSize="sm">
             {t('auth.register.hasAccount')}{' '}
             <Button
               type="button"
               variant="link"
-              color={C.jade}
+              color={C.brand}
               fontFamily={F.body}
               fontSize="sm"
               fontWeight={600}
               onClick={onSwitchToLogin}
-              _hover={{ color: C.jadeStrong, textDecoration: 'none' }}
-              _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+              _hover={{ color: C.brandDeep, textDecoration: 'none' }}
+              _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
             >
               {t('auth.register.signIn')}
             </Button>
@@ -318,10 +315,10 @@ function PasswordToggle({
       variant="ghost"
       size="sm"
       borderRadius="full"
-      color={C.muted}
+      color={C.inkSoft}
       onClick={onClick}
-      _hover={{ color: C.jade, bg: C.jadeSoft }}
-      _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+      _hover={{ color: C.brand, bg: C.brandSoft }}
+      _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
     />
   )
 }
@@ -333,13 +330,13 @@ function Requirement({ met, children }: { met: boolean; children: React.ReactNod
       px={2.5}
       py={1.5}
       border="1px solid"
-      borderColor={met ? 'rgba(127, 230, 179, 0.2)' : C.line}
+      borderColor={met ? 'rgba(130, 10, 209, 0.2)' : C.line}
       borderRadius="999px"
-      bg={met ? C.jadeSoft : 'transparent'}
-      color={met ? C.jade : C.mutedDim}
+      bg={met ? C.brandSoft : 'transparent'}
+      color={met ? C.brand : C.inkFaint}
     >
       <Icon as={Check} boxSize="12px" />
-      <Text fontFamily={F.mono} fontSize="8px" letterSpacing="0.04em">
+      <Text fontFamily={F.body} fontSize="xs">
         {children}
       </Text>
     </HStack>
@@ -354,10 +351,10 @@ function FormAlert({ message }: { message: string }) {
       spacing={2.5}
       p={3.5}
       border="1px solid"
-      borderColor="rgba(255, 154, 144, 0.22)"
+      borderColor="rgba(194, 65, 45, 0.22)"
       borderRadius="12px"
-      bg={C.coralSoft}
-      color={C.coral}
+      bg={C.dangerSoft}
+      color={C.danger}
     >
       <Icon as={AlertCircle} boxSize="16px" mt="1px" flexShrink={0} />
       <Text fontFamily={F.body} fontSize="xs" lineHeight={1.5}>
@@ -382,18 +379,18 @@ function PendingApprovalPanel({
         justify="center"
         overflow="hidden"
         border="1px solid"
-        borderColor="rgba(232, 196, 119, 0.2)"
-        borderRadius="18px"
-        bg={C.goldSoft}
+        borderColor="transparent"
+        borderRadius="20px"
+        bg={C.brandBand}
       >
         <Box
           position="absolute"
           w="150px"
           h="150px"
           border="1px solid"
-          borderColor="rgba(232, 196, 119, 0.12)"
+          borderColor="rgba(255, 255, 255, 0.16)"
           borderRadius="full"
-          boxShadow="0 0 0 18px rgba(232,196,119,0.025), 0 0 0 38px rgba(127,230,179,0.018)"
+          boxShadow="0 0 0 18px rgba(255, 255, 255, 0.04), 0 0 0 38px rgba(255, 255, 255, 0.03)"
         />
         <Flex
           position="relative"
@@ -402,19 +399,18 @@ function PendingApprovalPanel({
           align="center"
           justify="center"
           borderRadius="full"
-          bg={C.gold}
-          color={C.bg}
-          boxShadow="0 16px 30px -16px rgba(232,196,119,0.7)"
+          bg={C.onBrand}
+          color={C.brand}
         >
           <Clock size={25} weight="bold" aria-hidden />
         </Flex>
       </Flex>
 
       <Box>
-        <Text color={C.cream} fontFamily={F.display} fontSize="3xl" lineHeight={1}>
+        <Text color={C.ink} fontFamily={F.body} fontSize="2xl" fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1}>
           {t('auth.register.requestReceived')}
         </Text>
-        <Text mt={3} color={C.muted} fontFamily={F.body} fontSize="sm" lineHeight={1.65}>
+        <Text mt={3} color={C.inkSoft} fontFamily={F.body} fontSize="sm" lineHeight={1.65}>
           {message}
         </Text>
       </Box>
@@ -425,12 +421,12 @@ function PendingApprovalPanel({
         border="1px solid"
         borderColor={C.line}
         borderRadius="12px"
-        bg={C.panelSoft}
+        bg={C.surface}
       >
-        <Text color={C.mutedDim} fontFamily={F.mono} fontSize="8px" letterSpacing="0.13em" textTransform="uppercase">
+        <Text color={C.inkFaint} fontFamily={F.body} fontSize="xs">
           {t('auth.register.accountEmail')}
         </Text>
-        <Text mt={1} color={C.cream} fontFamily={F.body} fontSize="sm" wordBreak="break-word">
+        <Text mt={1} color={C.ink} fontFamily={F.body} fontSize="sm" wordBreak="break-word">
           {email}
         </Text>
       </Box>
@@ -439,16 +435,16 @@ function PendingApprovalPanel({
         type="button"
         h="48px"
         border="1px solid"
-        borderColor={C.lineStrong}
+        borderColor={C.brand}
         borderRadius="999px"
-        bg={C.panelSoft}
-        color={C.cream}
+        bg="transparent"
+        color={C.brand}
         fontFamily={F.body}
         fontSize="sm"
         fontWeight={650}
         onClick={onSwitchToLogin}
-        _hover={{ bg: C.jadeSoft, borderColor: C.jade, color: C.jade }}
-        _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+        _hover={{ bg: C.brandSoft }}
+        _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
       >
         {t('auth.register.returnToSignIn')}
       </Button>

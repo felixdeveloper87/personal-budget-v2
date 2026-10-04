@@ -19,7 +19,6 @@ import {
   UsersRound,
   X,
 } from 'lucide-react'
-import { guilloche } from '../../features/dashboard/components/guilloche'
 import BrandMark from '../../components/brand/BrandMark'
 import LanguageToggle from '../../components/layout/header/LanguageToggle'
 import { LightMode } from '@chakra-ui/react'
@@ -27,6 +26,7 @@ import { LIGHT_PALETTE, paletteCssVariables } from '../../palette'
 import { EditorialProvider } from '../../editorial'
 import { useI18n } from '../../i18n'
 import './LandingV3.css'
+import './LandingNu.css'
 import {
   createLandingV3Config,
   type LandingFeatureKind,
@@ -64,24 +64,6 @@ function BrandLockup({ footer = false }: { footer?: boolean }) {
       <BrandMark variant="wordmark" size="100%" className="pbv3-brand__artwork" />
       <BrandMark variant="title" size="100%" className="pbv3-brand__mobile" />
     </span>
-  )
-}
-
-function GuillocheField({ className = '' }: { className?: string }) {
-  const pathA = useMemo(() => guilloche(96, 31, 105), [])
-  const pathB = useMemo(() => guilloche(94, 37, 88), [])
-
-  return (
-    <svg
-      className={`pbv3-guilloche ${className}`}
-      viewBox="-205 -205 410 410"
-      aria-hidden="true"
-    >
-      <g>
-        <path className="pbv3-guilloche__jade" d={pathA} />
-        <path className="pbv3-guilloche__gold" d={pathB} />
-      </g>
-    </svg>
   )
 }
 
@@ -655,7 +637,7 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
   return (
     <LightMode>
     <EditorialProvider active>
-    <div className="pbv3" ref={rootRef} style={LANDING_STYLE}>
+    <div className="pbv3 pbv3--nu" ref={rootRef} style={LANDING_STYLE}>
       <a className="pbv3-skip-link" href="#main-content">
         {t('landing.a11y.skipContent')}
       </a>
@@ -750,18 +732,6 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
           onPointerMove={handleHeroPointerMove}
           onPointerLeave={resetHeroPointer}
         >
-          <div className="pbv3-hero__media" aria-hidden="true">
-            <img
-              src="/personal-budget-ledger-hero.webp"
-              alt=""
-              width="1792"
-              height="1024"
-              decoding="async"
-              fetchPriority="high"
-            />
-          </div>
-          <div className="pbv3-hero__wash" aria-hidden="true" />
-          <GuillocheField className="pbv3-hero__guilloche" />
 
           <div className="pbv3-shell pbv3-hero__grid">
             <div className="pbv3-hero__copy">
@@ -903,7 +873,6 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         </section>
 
         <section className="pbv3-household" id="household" aria-labelledby="household-title">
-          <GuillocheField className="pbv3-household__guilloche" />
           <div className="pbv3-shell pbv3-household__grid">
             <div className="pbv3-household__copy pbv3-reveal">
               <span className="pbv3-eyebrow">{household.eyebrow}</span>
@@ -923,8 +892,6 @@ export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props)
         </section>
 
         <section className="pbv3-final-cta" aria-labelledby="final-cta-title">
-          <div className="pbv3-final-cta__media" aria-hidden="true" />
-          <GuillocheField className="pbv3-final-cta__guilloche" />
           <div className="pbv3-shell pbv3-final-cta__inner pbv3-reveal">
             <span className="pbv3-eyebrow">{finalCta.eyebrow}</span>
             <h2 id="final-cta-title">{finalCta.title}</h2>

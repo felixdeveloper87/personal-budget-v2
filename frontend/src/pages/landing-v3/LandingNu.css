@@ -1,0 +1,441 @@
+/* Nubank-style skin for the landing, layered over LandingV3.css.
+   Purple full-bleed bands with white type, white sections with flat grey
+   cards, bold sans headlines and pill CTAs — matching the in-app NuHero.
+   Every selector is prefixed with .pbv3--nu so it outranks the base sheet
+   (including its media queries) without touching it. */
+.pbv3--nu {
+  --nu-brand: #820ad1;
+  --nu-brand-deep: #6e08b3;
+  --nu-brand-tint: #f3e8fc;
+  --nu-lilac: #e2c2fb;
+  --nu-surface: #f5f5f8;
+  --nu-surface-hover: #ededf2;
+
+  --font-display: var(--font-body);
+  --font-mono: var(--font-body);
+  --paper: #ffffff;
+  --paper-bright: #ffffff;
+  --paper-deep: var(--nu-surface);
+  --cta-green: var(--nu-brand);
+  --cta-green-hover: var(--nu-brand-deep);
+
+  background: #ffffff;
+}
+
+/* ---------- Type ---------- */
+.pbv3--nu .pbv3-eyebrow {
+  color: var(--nu-brand);
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.pbv3--nu .pbv3-section-heading h2,
+.pbv3--nu .pbv3-planning__copy h2,
+.pbv3--nu .pbv3-household__copy h2,
+.pbv3--nu .pbv3-final-cta h2 {
+  font-size: clamp(2.1rem, 4.4vw, 3.6rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.pbv3--nu .pbv3-section-heading h2 em,
+.pbv3--nu .pbv3-manifesto p em {
+  color: var(--nu-brand);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.pbv3--nu .pbv3-proof article > span,
+.pbv3--nu .pbv3-feature-card__top,
+.pbv3--nu .pbv3-feature-card__meta,
+.pbv3--nu .pbv3-snapshot__label,
+.pbv3--nu .pbv3-metrics small,
+.pbv3--nu .pbv3-planning-months small,
+.pbv3--nu .pbv3-dashboard__demo-label,
+.pbv3--nu .pbv3-mini-private small,
+.pbv3--nu .pbv3-nav-menu__heading small {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.pbv3--nu .pbv3-proof h2,
+.pbv3--nu .pbv3-feature-card h3,
+.pbv3--nu .pbv3-card-heading b,
+.pbv3--nu .pbv3-dashboard__heading h3,
+.pbv3--nu .pbv3-nav-menu__heading span {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.pbv3--nu .pbv3-snapshot__amount,
+.pbv3--nu .pbv3-planning-card__header strong {
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.pbv3--nu .pbv3-brand__wordmark em {
+  font-style: normal;
+}
+
+/* ---------- Buttons ---------- */
+.pbv3--nu .pbv3-button {
+  min-height: 52px;
+  padding-inline: 26px;
+  box-shadow: none;
+  color: #ffffff;
+  font-size: 0.95rem;
+}
+
+.pbv3--nu .pbv3-button--ghost {
+  border-color: var(--nu-brand);
+  background: transparent;
+  color: var(--nu-brand);
+  backdrop-filter: none;
+}
+
+@media (hover: hover) {
+  .pbv3--nu .pbv3-button:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .pbv3--nu .pbv3-button--ghost:hover {
+    border-color: var(--nu-brand);
+    background: var(--nu-brand-tint);
+  }
+}
+
+/* Inverted buttons on purple bands: white pill, purple text. */
+.pbv3--nu .pbv3-hero .pbv3-button:not(.pbv3-button--ghost),
+.pbv3--nu .pbv3-final-cta .pbv3-button {
+  border-color: #ffffff;
+  background: #ffffff;
+  color: var(--nu-brand);
+}
+
+.pbv3--nu .pbv3-hero .pbv3-button--ghost {
+  border-color: rgba(255, 255, 255, 0.7);
+  color: #ffffff;
+}
+
+@media (hover: hover) {
+  .pbv3--nu .pbv3-hero .pbv3-button:not(.pbv3-button--ghost):hover,
+  .pbv3--nu .pbv3-final-cta .pbv3-button:hover {
+    border-color: var(--nu-brand-tint);
+    background: var(--nu-brand-tint);
+  }
+
+  .pbv3--nu .pbv3-hero .pbv3-button--ghost:hover {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.14);
+  }
+}
+
+.pbv3--nu .pbv3-hero :focus-visible,
+.pbv3--nu .pbv3-household :focus-visible,
+.pbv3--nu .pbv3-final-cta :focus-visible {
+  outline-color: #ffffff;
+}
+
+/* ---------- Navigation ---------- */
+.pbv3--nu .pbv3-nav__inner,
+.pbv3--nu .pbv3-nav.is-elevated .pbv3-nav__inner,
+.pbv3--nu .pbv3-nav.is-menu-open .pbv3-nav__inner {
+  border-color: transparent;
+  background: #ffffff;
+  box-shadow: 0 10px 30px -18px rgba(40, 0, 70, 0.45);
+}
+
+.pbv3--nu .pbv3-nav__links {
+  background: var(--nu-surface);
+}
+
+.pbv3--nu .pbv3-nav__links a > span {
+  display: none;
+}
+
+.pbv3--nu .pbv3-nav__links a.is-active {
+  background: #ffffff;
+  color: var(--nu-brand);
+}
+
+.pbv3--nu .pbv3-nav__cta {
+  background: var(--nu-brand);
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-nav__cta:hover {
+  background: var(--nu-brand-deep);
+}
+
+/* ---------- Hero: purple band ---------- */
+.pbv3--nu .pbv3-hero {
+  background: var(--nu-brand);
+  color: #ffffff;
+}
+
+/* Soft concentric rings — the same line-art language as the in-app hero. */
+.pbv3--nu .pbv3-hero::before,
+.pbv3--nu .pbv3-final-cta::before {
+  content: '';
+  position: absolute;
+  top: -22%;
+  right: -12%;
+  width: min(900px, 90vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 0 0 70px rgba(255, 255, 255, 0.025),
+    0 0 0 71px rgba(255, 255, 255, 0.1),
+    0 0 0 160px rgba(255, 255, 255, 0.02),
+    0 0 0 161px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.pbv3--nu .pbv3-hero h1 {
+  font-size: clamp(2.6rem, 5.4vw, 5rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+.pbv3--nu .pbv3-hero h1 > em {
+  margin-top: 4px;
+  color: var(--nu-lilac);
+  font-style: normal;
+  font-weight: 700;
+}
+
+.pbv3--nu .pbv3-hero__copy > p {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.pbv3--nu .pbv3-access-note {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.82rem;
+  letter-spacing: 0;
+}
+
+.pbv3--nu .pbv3-access-note svg {
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-hero-stage__halo {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pbv3--nu .pbv3-snapshot,
+.pbv3--nu .pbv3-floating-row {
+  border-color: transparent;
+  box-shadow: 0 30px 60px -30px rgba(30, 0, 60, 0.6);
+}
+
+.pbv3--nu .pbv3-snapshot__top {
+  background: #ffffff;
+}
+
+.pbv3--nu .pbv3-scroll-cue {
+  color: rgba(255, 255, 255, 0.75);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-size: 0.75rem;
+}
+
+.pbv3--nu .pbv3-scroll-cue i {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.pbv3--nu .pbv3-scroll-cue i::after {
+  background: #ffffff;
+}
+
+/* ---------- White sections, flat grey cards ---------- */
+.pbv3--nu .pbv3-proof {
+  border-bottom: 0;
+}
+
+.pbv3--nu .pbv3-proof article > span {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pbv3--nu .pbv3-proof p {
+  font-size: 0.88rem;
+}
+
+.pbv3--nu .pbv3-overview {
+  background: #ffffff;
+}
+
+.pbv3--nu .pbv3-dashboard,
+.pbv3--nu .pbv3-planning-card,
+.pbv3--nu .pbv3-household-card {
+  border-color: transparent;
+  box-shadow: 0 30px 70px -40px rgba(31, 31, 36, 0.35);
+}
+
+.pbv3--nu .pbv3-feature-card {
+  border-color: transparent;
+  border-radius: 24px;
+  background: var(--nu-surface);
+  box-shadow: none;
+}
+
+.pbv3--nu .pbv3-feature-card::before {
+  display: none;
+}
+
+.pbv3--nu .pbv3-feature-card__icon {
+  background: var(--nu-brand-tint);
+  color: var(--nu-brand);
+}
+
+.pbv3--nu .pbv3-feature-card__meta {
+  font-size: 0.8rem;
+}
+
+@media (hover: hover) {
+  .pbv3--nu .pbv3-feature-card:hover {
+    border-color: transparent;
+    background: var(--nu-surface-hover);
+    box-shadow: none;
+  }
+}
+
+.pbv3--nu .pbv3-mini-search > div,
+.pbv3--nu .pbv3-mini-report__page {
+  background: #ffffff;
+}
+
+/* Ticker: thin purple ribbon between sections. */
+.pbv3--nu .pbv3-ticker {
+  border-block: 0;
+  background: var(--nu-brand);
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-ticker__track > span {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.pbv3--nu .pbv3-ticker__track i {
+  color: var(--nu-lilac);
+}
+
+.pbv3--nu .pbv3-planning {
+  background: var(--nu-surface);
+}
+
+.pbv3--nu .pbv3-manifesto {
+  border-block: 0;
+}
+
+.pbv3--nu .pbv3-manifesto p {
+  font-size: clamp(2.2rem, 5.4vw, 4.6rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+
+/* ---------- Household: purple band ---------- */
+.pbv3--nu .pbv3-household {
+  background: var(--nu-brand-deep);
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-household .pbv3-eyebrow {
+  color: var(--nu-lilac);
+}
+
+.pbv3--nu .pbv3-household__copy h2 {
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-household__copy > p,
+.pbv3--nu .pbv3-household__copy li {
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.pbv3--nu .pbv3-household__copy li svg {
+  color: #ffffff;
+}
+
+/* ---------- Final CTA: purple band ---------- */
+.pbv3--nu .pbv3-final-cta {
+  min-height: 560px;
+  background: var(--nu-brand);
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-final-cta::before {
+  top: 50%;
+  right: auto;
+  left: 50%;
+  width: min(640px, 86vw);
+  transform: translate(-50%, -50%);
+}
+
+.pbv3--nu .pbv3-final-cta__media {
+  display: none;
+}
+
+.pbv3--nu .pbv3-final-cta h2 {
+  font-size: clamp(2.5rem, 6vw, 4.8rem);
+  color: #ffffff;
+}
+
+.pbv3--nu .pbv3-final-cta .pbv3-eyebrow {
+  color: var(--nu-lilac);
+}
+
+.pbv3--nu .pbv3-final-cta p {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.pbv3--nu .pbv3-final-cta__inner > small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.78rem;
+  letter-spacing: 0;
+}
+
+/* ---------- Footer ---------- */
+.pbv3--nu .pbv3-footer {
+  border-top: 0;
+  background: var(--nu-surface);
+}
+
+.pbv3--nu .pbv3-footer__meta {
+  font-size: 0.78rem;
+}
+
+/* ---------- Fixes for the reskin ---------- */
+/* The seal crops a wider artwork via viewBox; clip it so the wordmark
+   doesn't spill over neighbouring copy (manifesto, private-workspace demo). */
+.pbv3--nu .pbv3-seal {
+  overflow: hidden;
+}
+
+/* Grey cards need a white section to read as cards. */
+.pbv3--nu .pbv3-features {
+  background: #ffffff;
+}
+
+/* Cards inside purple bands keep dark ink. */
+.pbv3--nu .pbv3-household-card {
+  color: var(--pb-ink);
+}
+
+.pbv3--nu .pbv3-settlement {
+  border-color: transparent;
+  background: var(--nu-surface);
+}
+
+.pbv3--nu .pbv3-settlement > strong {
+  color: var(--pb-ink);
+  font-weight: 700;
+}

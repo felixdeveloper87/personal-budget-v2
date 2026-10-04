@@ -47,40 +47,27 @@ interface AuthModalProps {
   initialTab?: AuthTab
 }
 
-function AuthSeal({ size = 52 }: { size?: number }) {
-  return (
-    <BrandMark
-      size={size}
-      colorMode="dark"
-      style={{ flexShrink: 0, filter: 'drop-shadow(0 8px 14px rgba(0, 0, 0, 0.24))' }}
-    />
-  )
-}
-
-function BrandLockup({ compact = false }: { compact?: boolean }) {
+function BrandLockup({ onBrand = false, compact = false }: { onBrand?: boolean; compact?: boolean }) {
   const { t } = useI18n()
   return (
     <HStack spacing={3} minW={0}>
-      <AuthSeal size={compact ? 38 : 52} />
-      <VStack align="flex-start" spacing={0} minW={0}>
+      <BrandMark size={compact ? 34 : 44} colorMode={onBrand ? 'dark' : 'light'} />
+      <VStack align="flex-start" spacing={0.5} minW={0}>
         <Text
-          color={C.cream}
-          fontFamily={F.display}
-          fontSize={compact ? 'lg' : 'xl'}
-          fontWeight={400}
+          color={onBrand ? C.onBrand : C.ink}
+          fontFamily={F.body}
+          fontSize={compact ? 'md' : 'lg'}
+          fontWeight={700}
           letterSpacing="-0.02em"
-          lineHeight={1}
+          lineHeight={1.1}
           noOfLines={1}
         >
-          Personal <Text as="em" color={C.jade}>Budget</Text>
+          Personal Budget
         </Text>
         <Text
-          mt={1}
-          color={C.muted}
-          fontFamily={F.mono}
-          fontSize={compact ? '7px' : '8px'}
-          letterSpacing="0.22em"
-          textTransform="uppercase"
+          color={onBrand ? 'rgba(255,255,255,0.78)' : C.inkSoft}
+          fontFamily={F.body}
+          fontSize="xs"
           noOfLines={1}
         >
           {t('brand.tagline', undefined, BRAND.tagline)}
@@ -90,6 +77,7 @@ function BrandLockup({ compact = false }: { compact?: boolean }) {
   )
 }
 
+/** Purple brand panel — the same band + line-art language as the app's NuHero. */
 function AuthAside({ tab }: { tab: AuthTabConfig }) {
   const { t } = useI18n()
   const isSignUp = tab.id === 'signUp'
@@ -114,117 +102,62 @@ function AuthAside({ tab }: { tab: AuthTabConfig }) {
       flexDirection="column"
       overflow="hidden"
       p={{ md: 8, lg: 10 }}
-      borderRight="1px solid"
-      borderColor={C.line}
-      bg={C.bgRaised}
+      bg={C.brandBand}
+      color={C.onBrand}
     >
       <Box
+        aria-hidden="true"
         position="absolute"
-        inset={0}
-        bgImage={`
-          linear-gradient(180deg, rgba(8,13,10,0.36), rgba(8,13,10,0.88) 72%, #0b0b0c),
-          linear-gradient(90deg, rgba(11,11,12,0.26), rgba(11,11,12,0.08)),
-          url('/personal-budget-ledger-hero.webp')
-        `}
-        bgSize="cover"
-        bgPosition="63% center"
-        opacity={0.72}
-        transform="scale(1.03)"
-      />
-      <Box
-        position="absolute"
-        inset="-25% -60% auto auto"
-        w="420px"
-        h="420px"
+        top="-140px"
+        right="-180px"
+        w="440px"
+        h="440px"
         borderRadius="full"
-        border="1px solid"
-        borderColor="rgba(127,230,179,0.12)"
-        boxShadow="0 0 0 28px rgba(127,230,179,0.025), 0 0 0 58px rgba(232,196,119,0.018)"
+        border="1px solid rgba(255,255,255,0.14)"
+        boxShadow="0 0 0 56px rgba(255,255,255,0.03), 0 0 0 57px rgba(255,255,255,0.10), 0 0 0 128px rgba(255,255,255,0.02), 0 0 0 129px rgba(255,255,255,0.08)"
+        pointerEvents="none"
       />
 
       <Box position="relative" zIndex={1}>
-        <BrandLockup />
+        <BrandLockup onBrand />
       </Box>
 
-      <VStack
-        position="relative"
-        zIndex={1}
-        align="stretch"
-        spacing={5}
-        mt="auto"
-        mb={8}
-      >
+      <VStack position="relative" zIndex={1} align="stretch" spacing={5} mt="auto">
         <Text
-          maxW="330px"
-          color={C.cream}
-          fontFamily={F.display}
-          fontSize={{ md: '3xl', lg: '4xl' }}
-          fontWeight={400}
-          letterSpacing="-0.035em"
-          lineHeight={0.98}
+          maxW="340px"
+          fontFamily={F.body}
+          fontSize={{ md: '2xl', lg: '3xl' }}
+          fontWeight={700}
+          letterSpacing="-0.03em"
+          lineHeight={1.1}
         >
           {tab.asideTitle}
         </Text>
-        <Text
-          maxW="330px"
-          color="rgba(226,234,228,0.72)"
-          fontFamily={F.body}
-          fontSize="sm"
-          lineHeight={1.7}
-        >
+        <Text maxW="340px" color="rgba(255,255,255,0.84)" fontFamily={F.body} fontSize="sm" lineHeight={1.65}>
           {tab.asideDescription}
         </Text>
 
-        <VStack
-          align="stretch"
-          spacing={0}
-          overflow="hidden"
-          border="1px solid"
-          borderColor={C.line}
-          borderRadius="16px"
-          bg="rgba(11,11,12,0.54)"
-          backdropFilter="blur(13px)"
-        >
-          {details.map(({ icon: DetailIcon, label }, index) => (
-            <HStack
-              key={label}
-              spacing={3}
-              px={4}
-              py={3.5}
-              borderTop={index ? '1px solid' : '0'}
-              borderColor={C.line}
-            >
+        <VStack align="stretch" spacing={2.5} pt={2}>
+          {details.map(({ icon: DetailIcon, label }) => (
+            <HStack key={label} spacing={3}>
               <Flex
-                w={7}
-                h={7}
+                w={8}
+                h={8}
                 flexShrink={0}
                 align="center"
                 justify="center"
                 borderRadius="full"
-                bg={index === 1 && isSignUp ? C.goldSoft : C.jadeSoft}
-                color={index === 1 && isSignUp ? C.gold : C.jade}
+                bg="rgba(255,255,255,0.16)"
               >
-                <DetailIcon size={14} weight="bold" aria-hidden />
+                <DetailIcon size={15} weight="bold" aria-hidden />
               </Flex>
-              <Text color="rgba(232,237,233,0.82)" fontFamily={F.body} fontSize="xs">
+              <Text fontFamily={F.body} fontSize="sm" fontWeight={500}>
                 {label}
               </Text>
             </HStack>
           ))}
         </VStack>
       </VStack>
-
-      <Text
-        position="relative"
-        zIndex={1}
-        color={C.mutedDim}
-        fontFamily={F.mono}
-        fontSize="8px"
-        letterSpacing="0.15em"
-        textTransform="uppercase"
-      >
-        {t('auth.privateLedger')}
-      </Text>
     </Flex>
   )
 }
@@ -295,7 +228,9 @@ export default function AuthModal({
       size="4xl"
       aria-label={activeTab.title}
       contentProps={{
-        bg: C.bg,
+        bg: C.page,
+        // The shared modal styles pad the content; the purple panel runs edge to edge.
+        sx: { padding: '0 !important' },
         w: { base: '100vw', sm: 'calc(100vw - 32px)', md: '920px' },
         maxW: { base: '100vw', sm: 'calc(100vw - 32px)', md: '920px' },
         h: {
@@ -306,8 +241,8 @@ export default function AuthModal({
         },
         maxH: { base: '100dvh', sm: view === 'signUp' ? '840px' : '720px' },
         borderRadius: { base: 0, sm: '24px' },
-        borderColor: C.lineStrong,
-        boxShadow: '0 48px 120px -34px rgba(0,0,0,0.92), 0 0 0 1px rgba(127,230,179,0.025)',
+        borderColor: 'transparent',
+        boxShadow: '0 40px 100px -40px rgba(40, 0, 70, 0.55)',
       }}
     >
       <Box
@@ -316,11 +251,11 @@ export default function AuthModal({
         w="full"
         h="full"
         minH={0}
-        bg={C.bg}
+        bg={C.page}
       >
         <AuthAside tab={activeTab} />
 
-        <Flex minW={0} minH={0} flexDirection="column" bg={C.bg}>
+        <Flex minW={0} minH={0} flexDirection="column" bg={C.page}>
           <Flex
             align="center"
             justify="space-between"
@@ -336,22 +271,20 @@ export default function AuthModal({
             </Box>
             <Text
               display={{ base: 'none', md: 'block' }}
-              color={C.mutedDim}
-              fontFamily={F.mono}
-              fontSize="8px"
-              letterSpacing="0.16em"
-              textTransform="uppercase"
+              color={C.inkFaint}
+              fontFamily={F.body}
+              fontSize="sm"
             >
               {t('auth.secureAccess')}
             </Text>
             <AppCloseButton
               onClick={onClose}
-              bg={C.panelSoft}
-              borderColor={C.line}
-              color={C.muted}
-              _hover={{ bg: C.jadeSoft, borderColor: C.jade, color: C.jade }}
-              _active={{ bg: 'rgba(127,230,179,0.17)' }}
-              _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}38` }}
+              bg={C.surface}
+              borderColor="transparent"
+              color={C.ink}
+              _hover={{ bg: C.brandSoft, color: C.brand }}
+              _active={{ bg: C.brandSoft }}
+              _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}38` }}
             />
           </Flex>
 
@@ -363,10 +296,8 @@ export default function AuthModal({
               onKeyDown={moveTabFocus}
               spacing={1}
               p={1}
-              border="1px solid"
-              borderColor={C.line}
               borderRadius="999px"
-              bg="rgba(244,246,242,0.035)"
+              bg={C.surface}
             >
               {tabs.map((item) => {
                 const isActive = item.id === view
@@ -382,17 +313,16 @@ export default function AuthModal({
                     onClick={() => setView(item.id)}
                     variant="unstyled"
                     flex={1}
-                    h="38px"
+                    h="42px"
                     borderRadius="999px"
-                    bg={isActive ? C.panel : 'transparent'}
-                    color={isActive ? C.cream : C.muted}
-                    boxShadow={isActive ? `inset 0 0 0 1px ${C.lineStrong}, 0 8px 20px -16px rgba(0,0,0,0.8)` : 'none'}
+                    bg={isActive ? C.brand : 'transparent'}
+                    color={isActive ? C.onBrand : C.inkSoft}
                     fontFamily={F.body}
                     fontSize="sm"
-                    fontWeight={isActive ? 650 : 500}
+                    fontWeight={isActive ? 700 : 600}
                     transition="background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease"
-                    _hover={{ color: C.cream }}
-                    _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}30` }}
+                    _hover={{ color: isActive ? C.onBrand : C.brand }}
+                    _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}30` }}
                   >
                     {item.label}
                   </Button>
@@ -436,24 +366,22 @@ export default function AuthModal({
               }}
             >
               <Text
-                color={C.jade}
-                fontFamily={F.mono}
-                fontSize="9px"
-                fontWeight={500}
-                letterSpacing="0.17em"
-                textTransform="uppercase"
+                color={C.brand}
+                fontFamily={F.body}
+                fontSize="sm"
+                fontWeight={600}
               >
                 {activeTab.kicker}
               </Text>
               <Text
                 id="auth-dialog-title"
                 mt={2.5}
-                color={C.cream}
-                fontFamily={F.display}
-                fontSize={{ base: '3xl', sm: '4xl' }}
-                fontWeight={400}
-                letterSpacing="-0.035em"
-                lineHeight={1}
+                color={C.ink}
+                fontFamily={F.body}
+                fontSize={{ base: '2xl', sm: '3xl' }}
+                fontWeight={700}
+                letterSpacing="-0.03em"
+                lineHeight={1.1}
               >
                 {activeTab.title}
               </Text>
@@ -461,7 +389,7 @@ export default function AuthModal({
                 mt={3}
                 mb={7}
                 maxW="48ch"
-                color={C.muted}
+                color={C.inkSoft}
                 fontFamily={F.body}
                 fontSize="sm"
                 lineHeight={1.65}
@@ -494,12 +422,12 @@ export default function AuthModal({
 function RegisterFormFallback() {
   return (
     <VStack spacing={4} align="stretch">
-      <Skeleton h="48px" borderRadius="xl" startColor={C.panelSoft} endColor={C.line} />
-      <Skeleton h="68px" borderRadius="xl" startColor={C.panelSoft} endColor={C.line} />
-      <Skeleton h="68px" borderRadius="xl" startColor={C.panelSoft} endColor={C.line} />
-      <Skeleton h="68px" borderRadius="xl" startColor={C.panelSoft} endColor={C.line} />
-      <Skeleton h="68px" borderRadius="xl" startColor={C.panelSoft} endColor={C.line} />
-      <Skeleton h="50px" borderRadius="full" startColor={C.jadeSoft} endColor={C.lineStrong} />
+      <Skeleton h="48px" borderRadius="xl" startColor={C.surface} endColor={C.line} />
+      <Skeleton h="68px" borderRadius="xl" startColor={C.surface} endColor={C.line} />
+      <Skeleton h="68px" borderRadius="xl" startColor={C.surface} endColor={C.line} />
+      <Skeleton h="68px" borderRadius="xl" startColor={C.surface} endColor={C.line} />
+      <Skeleton h="68px" borderRadius="xl" startColor={C.surface} endColor={C.line} />
+      <Skeleton h="50px" borderRadius="full" startColor={C.brandSoft} endColor={C.lineStrong} />
     </VStack>
   )
 }

@@ -111,9 +111,9 @@ export default function PasswordResetForm({ onBackToLogin }: PasswordResetFormPr
           align="center"
           justify="center"
           border="1px solid"
-          borderColor="rgba(127, 230, 179, 0.2)"
-          borderRadius="18px"
-          bg={C.jadeSoft}
+          borderColor="transparent"
+          borderRadius="20px"
+          bg={C.brandBand}
         >
           <Flex
             w={14}
@@ -121,19 +121,18 @@ export default function PasswordResetForm({ onBackToLogin }: PasswordResetFormPr
             align="center"
             justify="center"
             borderRadius="full"
-            bg={C.jade}
-            color={C.bg}
-            boxShadow="0 16px 30px -16px rgba(127,230,179,0.7)"
+            bg={C.onBrand}
+            color={C.brand}
           >
             <CheckCircle2 size={27} weight="bold" aria-hidden />
           </Flex>
         </Flex>
 
         <Box>
-          <Text color={C.cream} fontFamily={F.display} fontSize="3xl" lineHeight={1}>
+          <Text color={C.ink} fontFamily={F.body} fontSize="2xl" fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1}>
             {t('auth.forgot.completeTitle')}
           </Text>
-          <Text mt={3} color={C.muted} fontFamily={F.body} fontSize="sm" lineHeight={1.65}>
+          <Text mt={3} color={C.inkSoft} fontFamily={F.body} fontSize="sm" lineHeight={1.65}>
             {t('auth.forgot.completeDescription')}
           </Text>
         </Box>
@@ -142,16 +141,16 @@ export default function PasswordResetForm({ onBackToLogin }: PasswordResetFormPr
           type="button"
           h="48px"
           border="1px solid"
-          borderColor={C.lineStrong}
+          borderColor={C.brand}
           borderRadius="999px"
-          bg={C.panelSoft}
-          color={C.cream}
+          bg="transparent"
+          color={C.brand}
           fontFamily={F.body}
           fontSize="sm"
           fontWeight={650}
           onClick={onBackToLogin}
-          _hover={{ bg: C.jadeSoft, borderColor: C.jade, color: C.jade }}
-          _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+          _hover={{ bg: C.brandSoft }}
+          _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
         >
           {t('auth.forgot.backToLogin')}
         </Button>
@@ -234,21 +233,21 @@ export default function PasswordResetForm({ onBackToLogin }: PasswordResetFormPr
           isLoading={loading}
           loadingText={t('auth.forgot.saving')}
           rightIcon={!loading ? <Icon as={ArrowRight} boxSize={4} /> : undefined}
-          h="50px"
+          h="52px"
           w="full"
           mt={1}
           border="1px solid"
-          borderColor={C.jade}
+          borderColor={C.brand}
           borderRadius="999px"
-          bg={C.jade}
-          color={C.bg}
-          boxShadow="0 12px 28px -16px rgba(127, 230, 179, 0.72)"
+          bg={C.brand}
+          color={C.onBrand}
+          boxShadow="none"
           fontFamily={F.body}
           fontSize="sm"
           fontWeight={700}
-          _hover={{ bg: C.jadeStrong, borderColor: C.jadeStrong, transform: 'translateY(-1px)' }}
-          _active={{ transform: 'translateY(0)', bg: C.jadeStrong }}
-          _focusVisible={{ boxShadow: `0 0 0 4px ${C.jade}28` }}
+          _hover={{ bg: C.brandDeep, borderColor: C.brandDeep }}
+          _active={{ bg: C.brandDeep }}
+          _focusVisible={{ boxShadow: `0 0 0 4px ${C.brand}28` }}
           _loading={{ opacity: 0.72 }}
         >
           {t('auth.forgot.submit')}
@@ -258,12 +257,12 @@ export default function PasswordResetForm({ onBackToLogin }: PasswordResetFormPr
           type="button"
           variant="ghost"
           leftIcon={<Icon as={ArrowLeft} boxSize={4} />}
-          color={C.muted}
+          color={C.inkSoft}
           fontFamily={F.body}
           fontSize="sm"
           onClick={onBackToLogin}
-          _hover={{ color: C.jade, bg: C.jadeSoft }}
-          _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+          _hover={{ color: C.brand, bg: C.brandSoft }}
+          _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
         >
           {t('auth.forgot.backToLogin')}
         </Button>
@@ -290,10 +289,10 @@ function PasswordToggle({
       variant="ghost"
       size="sm"
       borderRadius="full"
-      color={C.muted}
+      color={C.inkSoft}
       onClick={onClick}
-      _hover={{ color: C.jade, bg: C.jadeSoft }}
-      _focusVisible={{ boxShadow: `0 0 0 3px ${C.jade}28` }}
+      _hover={{ color: C.brand, bg: C.brandSoft }}
+      _focusVisible={{ boxShadow: `0 0 0 3px ${C.brand}28` }}
     />
   )
 }
@@ -306,10 +305,10 @@ function FormAlert({ message }: { message: string }) {
       spacing={2.5}
       p={3.5}
       border="1px solid"
-      borderColor="rgba(255, 154, 144, 0.22)"
+      borderColor="rgba(194, 65, 45, 0.22)"
       borderRadius="12px"
-      bg={C.coralSoft}
-      color={C.coral}
+      bg={C.dangerSoft}
+      color={C.danger}
     >
       <Icon as={AlertCircle} boxSize="16px" mt="1px" flexShrink={0} />
       <Text fontFamily={F.body} fontSize="xs" lineHeight={1.5}>

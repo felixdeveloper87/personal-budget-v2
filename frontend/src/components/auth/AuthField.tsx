@@ -53,21 +53,19 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
       <FormLabel
         htmlFor={id}
         mb={2}
-        color={hasError ? C.coral : C.muted}
-        fontFamily={F.mono}
-        fontSize="9px"
-        fontWeight={500}
-        letterSpacing="0.13em"
-        textTransform="uppercase"
+        color={hasError ? C.danger : C.ink}
+        fontFamily={F.body}
+        fontSize="sm"
+        fontWeight={600}
       >
         {label}
       </FormLabel>
       <InputGroup>
         <InputLeftElement
           pointerEvents="none"
-          h="50px"
+          h="52px"
           zIndex={1}
-          color={hasError ? C.coral : C.mutedDim}
+          color={hasError ? C.danger : C.inkFaint}
           transition="color 0.18s ease"
         >
           <Icon as={icon} boxSize="17px" />
@@ -82,48 +80,48 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           placeholder={placeholder}
           autoComplete={autoComplete}
           isDisabled={isDisabled}
-          h="50px"
+          h="52px"
           pl={11}
           pr={rightElement ? 11 : 4}
-          bg={C.panelSoft}
-          border="1px solid"
-          borderColor={C.line}
-          color={C.cream}
+          bg={C.surface}
+          border="1.5px solid"
+          borderColor="transparent"
+          color={C.ink}
           fontFamily={F.body}
-          fontSize="sm"
-          borderRadius="12px"
-          _placeholder={{ color: C.mutedDim }}
-          _hover={{ borderColor: 'rgba(127, 230, 179, 0.32)', bg: 'rgba(244,246,242,0.055)' }}
+          fontSize="md"
+          borderRadius="14px"
+          _placeholder={{ color: C.inkFaint }}
+          _hover={{ bg: C.surfaceHover }}
           _focus={{
-            borderColor: C.jade,
-            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.14)',
-            bg: 'rgba(244,246,242,0.065)',
+            borderColor: C.brand,
+            boxShadow: 'none',
+            bg: C.panel,
           }}
           _focusVisible={{
-            borderColor: C.jade,
-            boxShadow: '0 0 0 3px rgba(127, 230, 179, 0.14)',
-            bg: 'rgba(244,246,242,0.065)',
+            borderColor: C.brand,
+            boxShadow: 'none',
+            bg: C.panel,
           }}
           _invalid={{
-            borderColor: 'rgba(255, 154, 144, 0.72)',
-            boxShadow: '0 0 0 3px rgba(255, 154, 144, 0.10)',
+            borderColor: C.danger,
+            boxShadow: 'none',
           }}
           _disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
           transition="border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease"
           sx={{
-            caretColor: C.jade,
+            caretColor: C.brand,
             paddingInlineStart: '46px !important',
             paddingInlineEnd: rightElement ? '46px !important' : '16px !important',
             '&:-webkit-autofill': {
-              WebkitTextFillColor: C.cream,
+              WebkitTextFillColor: C.ink,
               WebkitBoxShadow: `0 0 0 1000px ${C.panel} inset`,
-              caretColor: C.jade,
+              caretColor: C.brand,
               transition: 'background-color 9999s ease-out',
             },
           }}
         />
         {rightElement && (
-          <InputRightElement h="50px" color={C.muted}>
+          <InputRightElement h="52px" color={C.inkSoft}>
             {rightElement}
           </InputRightElement>
         )}
@@ -135,7 +133,7 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           alignItems="center"
           gap={1.5}
           mt={2}
-          color={C.coral}
+          color={C.danger}
           fontFamily={F.body}
           fontSize="xs"
           lineHeight={1.35}
