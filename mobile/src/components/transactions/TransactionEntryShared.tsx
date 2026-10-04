@@ -16,21 +16,23 @@ import {
   TextInput,
   View,
 } from "react-native";
-import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 
 import { BankLogo } from "@/components/accounts/BankLogo";
 import { colors } from "@/theme/colors";
 import type { FinancialAccount } from "@/types/finance";
 
 import type { TransactionType } from "./transactionEntryTypes";
+import { transactionTheme } from "./transactionTheme";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const icons = {
+  calculator: { ios: "plus.forwardslash.minus", android: "calculate", web: "calculate" },
   calendar: { ios: "calendar", android: "calendar_month", web: "calendar_month" },
   close: { ios: "xmark", android: "close", web: "close" },
-  expense: { ios: "arrow.up.right", android: "north_east", web: "north_east" },
-  income: { ios: "arrow.down.left", android: "south_west", web: "south_west" },
+  description: { ios: "doc.text", android: "description", web: "description" },
+  minus: { ios: "minus", android: "remove", web: "remove" },
+  plus: { ios: "plus", android: "add", web: "add" },
 } satisfies Record<string, SymbolName>;
 
 export function dateLabel(date: Date) {
@@ -49,64 +51,14 @@ function compactDateLabel(date: Date) {
   }).format(date);
 }
 
-function IncomeHeaderArtwork() {
-  return (
-    <Svg height="100%" preserveAspectRatio="xMidYMid slice" viewBox="0 0 390 106" width="100%">
-      <Defs>
-        <LinearGradient id="incomeHeaderSky" x1="0" x2="1" y1="0" y2="1">
-          <Stop offset="0" stopColor="#173D31" />
-          <Stop offset="0.58" stopColor="#285847" />
-          <Stop offset="1" stopColor="#496D55" />
-        </LinearGradient>
-        <LinearGradient id="incomeHeaderHill" x1="0" x2="1" y1="0" y2="0">
-          <Stop offset="0" stopColor="#D9C896" stopOpacity="0.16" />
-          <Stop offset="1" stopColor="#F2E6BE" stopOpacity="0.42" />
-        </LinearGradient>
-      </Defs>
-      <Rect fill="url(#incomeHeaderSky)" height="106" width="390" />
-      <Circle cx="326" cy="18" fill="#F1D98E" opacity="0.82" r="25" />
-      <Circle cx="326" cy="18" fill="none" opacity="0.23" r="35" stroke="#FFF5D6" />
-      <Path d="M170 106 C220 62 276 62 390 82 L390 106 Z" fill="url(#incomeHeaderHill)" />
-      <Path d="M220 106 C272 74 327 72 390 90 L390 106 Z" fill="#102E27" opacity="0.48" />
-      <Path d="M286 106 C318 83 348 81 390 91" fill="none" opacity="0.2" stroke="#FFF8E8" strokeWidth="1" />
-    </Svg>
-  );
-}
-
-function ExpenseHeaderArtwork() {
-  return (
-    <Svg height="100%" preserveAspectRatio="xMidYMid slice" viewBox="0 0 390 106" width="100%">
-      <Defs>
-        <LinearGradient id="expenseHeaderSky" x1="0" x2="1" y1="0" y2="1">
-          <Stop offset="0" stopColor="#6E302E" />
-          <Stop offset="0.58" stopColor="#91463E" />
-          <Stop offset="1" stopColor="#B66E58" />
-        </LinearGradient>
-        <LinearGradient id="expenseHeaderWave" x1="0" x2="1" y1="0" y2="0">
-          <Stop offset="0" stopColor="#F3C89E" stopOpacity="0.12" />
-          <Stop offset="1" stopColor="#F8DFBE" stopOpacity="0.45" />
-        </LinearGradient>
-      </Defs>
-      <Rect fill="url(#expenseHeaderSky)" height="106" width="390" />
-      <Circle cx="330" cy="16" fill="#F2C87F" opacity="0.88" r="24" />
-      <Circle cx="330" cy="16" fill="none" opacity="0.24" r="35" stroke="#FFF0D5" />
-      <Path d="M150 106 C214 60 286 64 390 81 L390 106 Z" fill="url(#expenseHeaderWave)" />
-      <Path d="M218 106 C274 77 333 76 390 91 L390 106 Z" fill="#562825" opacity="0.5" />
-      <Path d="M270 106 C310 82 352 82 390 93" fill="none" opacity="0.2" stroke="#FFF4E4" strokeWidth="1" />
-    </Svg>
-  );
-}
-
 export function TransactionSheetFrame({
   children,
   onClose,
-  transactionDate,
   type,
   visible,
 }: {
   children: ReactNode;
   onClose: () => void;
-  transactionDate: Date;
   type: TransactionType;
   visible: boolean;
 }) {
@@ -126,22 +78,16 @@ export function TransactionSheetFrame({
       >
         <Pressable accessibilityRole="button" onPress={onClose} style={sharedStyles.backdrop} />
         <SafeAreaView style={sharedStyles.sheet}>
-          <View style={sharedStyles.handle} />
-          <View style={[sharedStyles.modalHeader, sharedStyles.illustratedModalHeader]}>
-            <View pointerEvents="none" style={sharedStyles.headerArtwork}>
-              {isIncome ? <IncomeHeaderArtwork /> : <ExpenseHeaderArtwork />}
-            </View>
-            <View style={sharedStyles.titleIcon}>
-              <SymbolView
-                name={isIncome ? icons.income : icons.expense}
-                size={20}
-                tintColor={colors.white}
-                weight="bold"
-              />
-            </View>
+          <View style={sharedStyles.modalHeader}>
+            <View pointerEvents="none" style={sharedStyles.headerRingOuter} />
+            <View pointerEvents="none" style={sharedStyles.headerRingInner} />
             <View style={sharedStyles.titleCopy}>
-              <Text style={sharedStyles.title}>Add {isIncome ? "income" : "expense"}</Text>
-              <Text style={sharedStyles.headerDate}>{dateLabel(transactionDate)}</Text>
+              <Text style={sharedStyles.title}>{isIncome ? "Income" : "Expense"}</Text>
+              <Text numberOfLines={1} style={sharedStyles.headerCaption}>
+                {isIncome
+                  ? "Track salary, transfers and one-off payments."
+                  : "Track spending, bills and monthly commitments."}
+              </Text>
             </View>
             <Pressable
               accessibilityLabel="Close"
@@ -184,6 +130,7 @@ export function AmountDateFields({
   visible: boolean;
 }) {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const amountTint = type === "INCOME" ? transactionTheme.positiveTint : transactionTheme.negativeTint;
 
   useEffect(() => {
     if (!visible) setDatePickerVisible(false);
@@ -191,46 +138,51 @@ export function AmountDateFields({
 
   return (
     <>
-      <View style={sharedStyles.amountDateRow}>
-        <View style={sharedStyles.amountColumn}>
-          <Text style={sharedStyles.fieldLabel}>AMOUNT</Text>
-          <View style={[sharedStyles.amountField, { borderColor: accent }]}>
+      <View style={sharedStyles.amountDateStack}>
+        <View style={sharedStyles.formCard}>
+          <View style={[sharedStyles.formCardIcon, { backgroundColor: amountTint }]}>
+            <SymbolView name={icons.calculator} size={19} tintColor={accent} weight="semibold" />
+          </View>
+          <Text numberOfLines={1} style={sharedStyles.formCardLabel}>How much?</Text>
+          <View style={[sharedStyles.amountPill, { backgroundColor: amountTint }]}>
             <Text style={[sharedStyles.currencyMark, { color: accent }]}>£</Text>
             <TextInput
               autoFocus
               keyboardType="decimal-pad"
               onChangeText={(value) => onAmountChange(value.replace(/[^0-9.,]/g, ""))}
               placeholder="0.00"
-              placeholderTextColor={colors.inkFaint}
+              placeholderTextColor={transactionTheme.inkFaint}
               selectionColor={accent}
-              style={sharedStyles.amountInput}
+              style={[sharedStyles.amountInput, { color: accent }]}
               value={amount}
             />
           </View>
         </View>
-        <View style={sharedStyles.dateColumn}>
-          <Text style={sharedStyles.fieldLabel}>DATE</Text>
-          <Pressable
-            accessibilityLabel={`${type === "INCOME" ? "Income" : "Expense"} date: ${dateLabel(transactionDate)}`}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: datePickerVisible }}
-            onPress={() => {
-              Keyboard.dismiss();
-              setDatePickerVisible((current) => !current);
-            }}
-            style={sharedStyles.dateTrigger}
-          >
-            <Text numberOfLines={1} style={sharedStyles.dateTriggerText}>
-              {compactDateLabel(transactionDate)}
-            </Text>
-            <SymbolView name={icons.calendar} size={18} tintColor={accent} weight="semibold" />
-          </Pressable>
-        </View>
+
+        <Pressable
+          accessibilityLabel={`${type === "INCOME" ? "Income" : "Expense"} date: ${dateLabel(transactionDate)}`}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: datePickerVisible }}
+          onPress={() => {
+            Keyboard.dismiss();
+            setDatePickerVisible((current) => !current);
+          }}
+          style={({ pressed }) => [sharedStyles.formCard, pressed && sharedStyles.optionPressed]}
+        >
+          <View style={sharedStyles.formCardIcon}>
+            <SymbolView name={icons.calendar} size={19} tintColor={transactionTheme.brand} weight="semibold" />
+          </View>
+          <Text numberOfLines={1} style={sharedStyles.formCardLabel}>What date?</Text>
+          <Text numberOfLines={1} style={sharedStyles.dateTriggerText}>
+            {compactDateLabel(transactionDate)}
+          </Text>
+        </Pressable>
       </View>
+
       {datePickerVisible && Platform.OS === "ios" ? (
         <View style={sharedStyles.iosCalendar}>
           <DateTimePicker
-            accentColor={accent}
+            accentColor={transactionTheme.brand}
             display="inline"
             locale="en_GB"
             mode="date"
@@ -245,7 +197,7 @@ export function AmountDateFields({
             onPress={() => setDatePickerVisible(false)}
             style={sharedStyles.calendarCloseButton}
           >
-            <Text style={[sharedStyles.calendarCloseText, { color: accent }]}>Done</Text>
+            <Text style={sharedStyles.calendarCloseText}>Done</Text>
           </Pressable>
         </View>
       ) : datePickerVisible && Platform.OS === "android" ? (
@@ -284,7 +236,7 @@ export function AccountPicker({
 }) {
   return (
     <>
-      <Text style={sharedStyles.fieldLabel}>ACCOUNT</Text>
+      <Text style={sharedStyles.fieldLabel}>Balance account</Text>
       {loading ? (
         <View style={sharedStyles.accountsState}>
           <ActivityIndicator color={accent} size="small" />
@@ -302,11 +254,13 @@ export function AccountPicker({
             const selected = account.id === accountId;
             return (
               <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
                 key={account.id}
                 onPress={() => onChange(account.id)}
                 style={({ pressed }) => [
                   sharedStyles.accountChip,
-                  selected && { backgroundColor: tint, borderColor: accent, borderWidth: 1.5 },
+                  selected && { backgroundColor: tint, borderColor: accent, borderWidth: 2 },
                   pressed && sharedStyles.optionPressed,
                 ]}
               >
@@ -326,6 +280,35 @@ export function AccountPicker({
   );
 }
 
+export function DescriptionField({
+  onChangeText,
+  placeholder,
+  value,
+}: {
+  onChangeText: (value: string) => void;
+  placeholder: string;
+  value: string;
+}) {
+  return (
+    <View style={[sharedStyles.formCard, sharedStyles.descriptionCard]}>
+      <View style={sharedStyles.formCardIcon}>
+        <SymbolView name={icons.description} size={19} tintColor={transactionTheme.brand} weight="semibold" />
+      </View>
+      <Text style={sharedStyles.descriptionLabel}>Details</Text>
+      <TextInput
+        autoCapitalize="sentences"
+        maxLength={120}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={transactionTheme.inkFaint}
+        returnKeyType="done"
+        style={sharedStyles.descriptionInput}
+        value={value}
+      />
+    </View>
+  );
+}
+
 export function TransactionSubmit({
   accent,
   canSubmit,
@@ -333,6 +316,7 @@ export function TransactionSubmit({
   label,
   onPress,
   submitting,
+  type,
 }: {
   accent: string;
   canSubmit: boolean;
@@ -340,6 +324,7 @@ export function TransactionSubmit({
   label: string;
   onPress: () => void;
   submitting: boolean;
+  type: TransactionType;
 }) {
   return (
     <>
@@ -358,7 +343,15 @@ export function TransactionSubmit({
         {submitting ? (
           <ActivityIndicator color={colors.white} />
         ) : (
-          <Text style={sharedStyles.saveButtonText}>{label}</Text>
+          <View style={sharedStyles.saveButtonContent}>
+            <SymbolView
+              name={type === "INCOME" ? icons.plus : icons.minus}
+              size={18}
+              tintColor={colors.white}
+              weight="bold"
+            />
+            <Text style={sharedStyles.saveButtonText}>{label}</Text>
+          </View>
         )}
       </Pressable>
     </>
@@ -367,114 +360,144 @@ export function TransactionSubmit({
 
 export const sharedStyles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(17, 31, 34, 0.46)" },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: transactionTheme.overlay },
   sheet: {
-    backgroundColor: colors.paper,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
+    backgroundColor: transactionTheme.page,
+    borderColor: transactionTheme.hairlineStrong,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+    borderTopWidth: StyleSheet.hairlineWidth,
     maxHeight: "92%",
     overflow: "hidden",
   },
-  handle: {
-    alignSelf: "center",
-    backgroundColor: colors.line,
-    borderRadius: 2,
-    height: 4,
-    marginTop: 10,
-    width: 38,
-  },
   modalHeader: {
     alignItems: "center",
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    backgroundColor: transactionTheme.brand,
     flexDirection: "row",
-    minHeight: 92,
+    minHeight: 88,
     overflow: "hidden",
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     position: "relative",
   },
-  illustratedModalHeader: { borderBottomColor: "rgba(255,255,255,0.14)" },
-  headerArtwork: { ...StyleSheet.absoluteFill },
-  titleIcon: {
-    alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.16)",
-    borderRadius: 16,
-    height: 42,
-    justifyContent: "center",
-    marginRight: 12,
-    zIndex: 1,
-    width: 42,
+  headerRingOuter: {
+    borderColor: "rgba(255,255,255,0.10)",
+    borderRadius: 110,
+    borderWidth: 1,
+    height: 220,
+    position: "absolute",
+    right: -70,
+    top: -90,
+    width: 220,
+  },
+  headerRingInner: {
+    borderColor: "rgba(255,255,255,0.14)",
+    borderRadius: 74,
+    borderWidth: 1,
+    height: 148,
+    position: "absolute",
+    right: -34,
+    top: -54,
+    width: 148,
   },
   titleCopy: { flex: 1, zIndex: 1 },
-  title: { color: colors.white, fontSize: 20, fontWeight: "800", letterSpacing: -0.35 },
-  headerDate: { color: "rgba(255,255,255,0.74)", fontSize: 12, marginTop: 3 },
+  title: { color: colors.white, fontSize: 22, fontWeight: "700", letterSpacing: -0.44, lineHeight: 25 },
+  headerCaption: {
+    color: "rgba(255,255,255,0.84)",
+    fontSize: 12,
+    lineHeight: 17,
+    marginTop: 4,
+    paddingRight: 10,
+  },
   closeButton: {
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255,255,255,0.24)",
     borderRadius: 17,
+    borderWidth: 1,
     height: 34,
     justifyContent: "center",
     zIndex: 1,
     width: 34,
   },
-  form: { padding: 20, paddingBottom: 28 },
+  form: { padding: 16, paddingBottom: 28 },
   fieldLabel: {
-    color: colors.inkSoft,
-    fontSize: 10,
-    fontWeight: "800",
-    letterSpacing: 1.3,
-    marginBottom: 8,
-    marginTop: 18,
+    color: transactionTheme.inkSoft,
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 10,
+    marginTop: 20,
   },
-  amountDateRow: { alignItems: "flex-end", flexDirection: "row", gap: 10 },
-  amountColumn: { flex: 1, minWidth: 0 },
-  dateColumn: { width: 144 },
-  amountField: {
+  amountDateStack: { gap: 16 },
+  formCard: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderRadius: 19,
-    borderWidth: 1.5,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
+    borderRadius: 16,
+    borderWidth: 2,
     flexDirection: "row",
-    paddingHorizontal: 17,
-  },
-  currencyMark: { fontSize: 25, fontWeight: "800", marginRight: 8 },
-  amountInput: {
-    color: colors.ink,
-    flex: 1,
-    fontSize: 32,
-    fontWeight: "800",
     minHeight: 68,
-    paddingVertical: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  formCardIcon: {
+    alignItems: "center",
+    backgroundColor: transactionTheme.surfacePressed,
+    borderRadius: 12,
+    height: 40,
+    justifyContent: "center",
+    marginRight: 10,
+    width: 40,
+  },
+  formCardLabel: { color: transactionTheme.inkSoft, flex: 1, fontSize: 15, fontWeight: "600" },
+  amountPill: {
+    alignItems: "center",
+    borderRadius: 10,
+    flexDirection: "row",
+    minWidth: 112,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+  },
+  currencyMark: { fontSize: 18, fontWeight: "800", marginRight: 4 },
+  amountInput: {
+    fontSize: 22,
+    fontWeight: "800",
+    minHeight: 28,
+    minWidth: 72,
+    padding: 0,
   },
   textField: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 16,
-    borderWidth: 1,
-    color: colors.ink,
+    borderWidth: 2,
+    color: transactionTheme.ink,
     fontSize: 15,
     minHeight: 52,
     paddingHorizontal: 15,
     paddingVertical: 12,
   },
-  dateTrigger: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 16,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 7,
-    justifyContent: "space-between",
-    minHeight: 70,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
+  descriptionCard: { marginTop: 20 },
+  descriptionLabel: { color: transactionTheme.inkSoft, fontSize: 15, fontWeight: "600", marginRight: 10 },
+  descriptionInput: {
+    color: transactionTheme.ink,
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "500",
+    minWidth: 0,
+    padding: 0,
   },
-  dateTriggerText: { color: colors.ink, flexShrink: 1, fontSize: 13, fontWeight: "700" },
+  dateTriggerText: {
+    color: transactionTheme.ink,
+    flexShrink: 1,
+    fontSize: 15,
+    fontWeight: "700",
+    textDecorationLine: "underline",
+  },
   nativeDatePicker: { height: 50, width: "100%" },
   iosCalendar: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 16,
     borderWidth: 1,
     marginTop: 10,
@@ -483,32 +506,31 @@ export const sharedStyles = StyleSheet.create({
   iosDatePicker: { minHeight: 320, width: "100%" },
   calendarCloseButton: {
     alignItems: "center",
-    borderTopColor: colors.line,
+    borderTopColor: transactionTheme.hairline,
     borderTopWidth: StyleSheet.hairlineWidth,
     justifyContent: "center",
     minHeight: 44,
   },
-  calendarCloseText: { fontSize: 12, fontWeight: "800" },
-  chipRow: { gap: 8, paddingRight: 4 },
+  calendarCloseText: { color: transactionTheme.brand, fontSize: 12, fontWeight: "800" },
   chip: {
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 18,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
+    borderRadius: 14,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  chipText: { color: colors.inkSoft, fontSize: 12, fontWeight: "700" },
+  chipText: { color: transactionTheme.ink, fontSize: 12, fontWeight: "700" },
   accountGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   accountChip: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 15,
     borderWidth: 1,
     flexDirection: "row",
     gap: 9,
-    minHeight: 50,
+    minHeight: 52,
     paddingHorizontal: 9,
     paddingVertical: 8,
     width: "48.5%",
@@ -516,8 +538,8 @@ export const sharedStyles = StyleSheet.create({
   accountChipText: { flexShrink: 1 },
   accountsState: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 15,
     borderWidth: 1,
     flexDirection: "row",
@@ -526,7 +548,7 @@ export const sharedStyles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 10,
   },
-  accountsStateText: { color: colors.inkSoft, flex: 1, fontSize: 12, lineHeight: 18 },
+  accountsStateText: { color: transactionTheme.inkSoft, flex: 1, fontSize: 12, lineHeight: 18 },
   errorText: {
     color: colors.danger,
     fontSize: 12,
@@ -536,12 +558,13 @@ export const sharedStyles = StyleSheet.create({
   },
   saveButton: {
     alignItems: "center",
-    borderRadius: 17,
+    borderRadius: 999,
     justifyContent: "center",
     marginTop: 24,
     minHeight: 54,
   },
-  saveButtonDisabled: { backgroundColor: "#B7C4BD", opacity: 0.82 },
+  saveButtonDisabled: { backgroundColor: transactionTheme.disabled, opacity: 0.72 },
+  saveButtonContent: { alignItems: "center", flexDirection: "row", gap: 8 },
   saveButtonText: { color: colors.white, fontSize: 15, fontWeight: "800" },
   optionPressed: { opacity: 0.72, transform: [{ scale: 0.985 }] },
   pressed: { opacity: 0.78 },

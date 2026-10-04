@@ -51,9 +51,11 @@ export default function Distribution({
   const spotlight = (activeCat ? displayRows.find((row) => row.id === activeCat) : null) ?? displayRows[0] ?? null
 
   // Clicking anywhere outside the chart/legend or the details card clears the
-  // selection — back to the default "Total" view.
+  // selection — back to the default "Total" view. Listens while *any* category
+  // is shown (pinned or hovered): on touch screens there is no mouseleave, so a
+  // tap leaves `hovered` set and only an outside tap can clear it.
   useEffect(() => {
-    if (!pinned) return
+    if (!activeCat) return
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node
       if (!chartRef.current?.contains(target) && !detailsRef.current?.contains(target)) {
@@ -63,12 +65,18 @@ export default function Distribution({
     }
     document.addEventListener('pointerdown', handlePointerDown)
     return () => document.removeEventListener('pointerdown', handlePointerDown)
-  }, [pinned])
+  }, [activeCat])
 
-  // Clicking a segment or legend row pins it; clicking it again un-pins.
+  // Tapping the selected category again goes back to the total — clear the
+  // touch "hover" too, or the ring would keep showing the category.
   const togglePinned = useCallback((id: string) => {
-    setPinned((current) => current === id ? null : id)
-  }, [])
+    if (pinned === id) {
+      setPinned(null)
+      setHovered(null)
+    } else {
+      setPinned(id)
+    }
+  }, [pinned])
 
   if (displayRows.length === 0) {
     return (

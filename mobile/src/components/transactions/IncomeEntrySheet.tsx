@@ -1,7 +1,7 @@
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { colors } from "@/theme/colors";
@@ -9,11 +9,13 @@ import { colors } from "@/theme/colors";
 import {
   AccountPicker,
   AmountDateFields,
+  DescriptionField,
   sharedStyles,
   TransactionSheetFrame,
   TransactionSubmit,
 } from "./TransactionEntryShared";
 import type { TransactionEntrySheetProps } from "./transactionEntryTypes";
+import { transactionTheme } from "./transactionTheme";
 import { useTransactionEntry } from "./useTransactionEntry";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
@@ -25,8 +27,8 @@ const otherIcon = {
 } satisfies SymbolName;
 
 const quickSources = [
-  { name: "Uber Eats", domain: "ubereats.com" },
   { name: "Deliveroo", domain: "deliveroo.co.uk" },
+  { name: "Uber Eats", domain: "ubereats.com" },
   { name: "Just Eat", domain: "just-eat.co.uk" },
 ] as const;
 
@@ -41,12 +43,11 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
   return (
     <TransactionSheetFrame
       onClose={props.onClose}
-      transactionDate={form.transactionDate}
       type="INCOME"
       visible={props.visible}
     >
       <AmountDateFields
-        accent={colors.income}
+        accent={transactionTheme.positive}
         amount={form.amount}
         onAmountChange={form.setAmount}
         onDateChange={form.setTransactionDate}
@@ -55,7 +56,7 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
         visible={props.visible}
       />
 
-      <Text style={sharedStyles.fieldLabel}>QUICK ADD</Text>
+      <Text style={sharedStyles.fieldLabel}>Quick add</Text>
       <View style={styles.quickSourceGrid}>
         {quickSources.map((source) => {
           const selected = !customSource
@@ -76,7 +77,7 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
                 pressed && sharedStyles.optionPressed,
               ]}
             >
-              <MerchantLogo domain={source.domain} name={source.name} size={31} />
+              <MerchantLogo domain={source.domain} name={source.name} size={38} />
               <Text numberOfLines={1} style={[styles.quickSourceText, selected && styles.selectedSourceText]}>
                 {source.name}
               </Text>
@@ -101,7 +102,7 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
             <SymbolView
               name={otherIcon}
               size={19}
-              tintColor={customSource ? colors.white : colors.income}
+              tintColor={customSource ? colors.white : transactionTheme.brand}
               weight="bold"
             />
           </View>
@@ -110,36 +111,29 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
       </View>
 
       {customSource ? (
-        <>
-          <Text style={sharedStyles.fieldLabel}>DESCRIPTION</Text>
-          <TextInput
-            autoCapitalize="sentences"
-            maxLength={120}
-            onChangeText={form.setDescription}
-            placeholder="e.g. September salary"
-            placeholderTextColor={colors.inkFaint}
-            returnKeyType="done"
-            style={sharedStyles.textField}
-            value={form.description}
-          />
-        </>
+        <DescriptionField
+          onChangeText={form.setDescription}
+          placeholder="e.g. September salary"
+          value={form.description}
+        />
       ) : null}
 
       <AccountPicker
-        accent={colors.income}
+        accent={transactionTheme.brand}
         accountId={form.accountId}
         accounts={form.accounts}
         loading={form.accountsLoading}
         onChange={form.setAccountId}
-        tint={colors.incomeTint}
+        tint={transactionTheme.brandTint}
       />
       <TransactionSubmit
-        accent={colors.income}
+        accent={transactionTheme.brand}
         canSubmit={form.canSubmit}
         error={form.error}
-        label="Save income"
+        label="Add income"
         onPress={() => void form.submit()}
         submitting={form.submitting}
+        type="INCOME"
       />
     </TransactionSheetFrame>
   );
@@ -149,8 +143,8 @@ const styles = StyleSheet.create({
   quickSourceGrid: { flexDirection: "row", flexWrap: "wrap", gap: 9 },
   quickSourceButton: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 16,
     borderWidth: 1,
     flexDirection: "row",
@@ -161,19 +155,19 @@ const styles = StyleSheet.create({
     width: "48.5%",
   },
   selectedSource: {
-    backgroundColor: colors.incomeTint,
-    borderColor: colors.income,
-    borderWidth: 1.5,
+    backgroundColor: transactionTheme.brandTint,
+    borderColor: transactionTheme.brand,
+    borderWidth: 2,
   },
-  quickSourceText: { color: colors.ink, flexShrink: 1, fontSize: 12, fontWeight: "800" },
-  selectedSourceText: { color: colors.income },
+  quickSourceText: { color: transactionTheme.ink, flexShrink: 1, fontSize: 12, fontWeight: "800" },
+  selectedSourceText: { color: transactionTheme.brand },
   otherSourceIcon: {
     alignItems: "center",
-    backgroundColor: colors.incomeTint,
+    backgroundColor: transactionTheme.brandTint,
     borderRadius: 10,
-    height: 31,
+    height: 38,
     justifyContent: "center",
-    width: 31,
+    width: 38,
   },
-  selectedOtherIcon: { backgroundColor: colors.income },
+  selectedOtherIcon: { backgroundColor: transactionTheme.brand },
 });

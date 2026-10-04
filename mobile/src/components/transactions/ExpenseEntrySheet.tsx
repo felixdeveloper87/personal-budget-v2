@@ -1,17 +1,18 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
-import { colors } from "@/theme/colors";
 import type { FinancialAccount } from "@/types/finance";
 
 import {
   AccountPicker,
   AmountDateFields,
+  DescriptionField,
   sharedStyles,
   TransactionSheetFrame,
   TransactionSubmit,
 } from "./TransactionEntryShared";
 import type { TransactionEntrySheetProps } from "./transactionEntryTypes";
+import { transactionTheme } from "./transactionTheme";
 import { useTransactionEntry } from "./useTransactionEntry";
 
 const categories = [
@@ -151,12 +152,11 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
   return (
     <TransactionSheetFrame
       onClose={props.onClose}
-      transactionDate={form.transactionDate}
       type="EXPENSE"
       visible={props.visible}
     >
       <AmountDateFields
-        accent={colors.expense}
+        accent={transactionTheme.negative}
         amount={form.amount}
         onAmountChange={form.setAmount}
         onDateChange={form.setTransactionDate}
@@ -165,7 +165,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
         visible={props.visible}
       />
 
-      <Text style={sharedStyles.fieldLabel}>CATEGORY</Text>
+      <Text style={sharedStyles.fieldLabel}>Category</Text>
       <View style={styles.categoryGrid}>
         {categories.map((category) => {
           const selected = category === form.category;
@@ -195,7 +195,7 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
 
       {selectedMerchants.length > 0 ? (
         <>
-          <Text style={sharedStyles.fieldLabel}>QUICK ADD</Text>
+          <Text style={sharedStyles.fieldLabel}>Quick add</Text>
           <View style={styles.merchantGrid}>
             {selectedMerchants.map((merchant) => {
               const selected = form.description === merchant.name;
@@ -232,36 +232,29 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
       ) : null}
 
       {!hideDescription ? (
-        <>
-          <Text style={sharedStyles.fieldLabel}>DESCRIPTION</Text>
-          <TextInput
-            autoCapitalize="sentences"
-            maxLength={120}
-            onChangeText={form.setDescription}
-            placeholder="e.g. Weekly groceries"
-            placeholderTextColor={colors.inkFaint}
-            returnKeyType="done"
-            style={sharedStyles.textField}
-            value={form.description}
-          />
-        </>
+        <DescriptionField
+          onChangeText={form.setDescription}
+          placeholder="e.g. Weekly groceries"
+          value={form.description}
+        />
       ) : null}
 
       <AccountPicker
-        accent={colors.expense}
+        accent={transactionTheme.brand}
         accountId={form.accountId}
         accounts={form.accounts}
         loading={form.accountsLoading}
         onChange={form.setAccountId}
-        tint={colors.expenseTint}
+        tint={transactionTheme.brandTint}
       />
       <TransactionSubmit
-        accent={colors.expense}
+        accent={transactionTheme.brand}
         canSubmit={form.canSubmit}
         error={form.error}
-        label="Save expense"
+        label="Add expense"
         onPress={() => void form.submit()}
         submitting={form.submitting}
+        type="EXPENSE"
       />
     </TransactionSheetFrame>
   );
@@ -271,15 +264,16 @@ const styles = StyleSheet.create({
   categoryGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   categoryButton: { alignItems: "center", justifyContent: "center", width: "31.7%" },
   selectedCategory: {
-    backgroundColor: colors.expenseTint,
-    borderColor: colors.expense,
+    backgroundColor: transactionTheme.brandTint,
+    borderColor: transactionTheme.brand,
+    borderWidth: 2,
   },
-  selectedCategoryText: { color: colors.expense },
+  selectedCategoryText: { color: transactionTheme.brand },
   merchantGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   merchantButton: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
+    backgroundColor: transactionTheme.surface,
+    borderColor: transactionTheme.hairline,
     borderRadius: 15,
     borderWidth: 1,
     flexDirection: "row",
@@ -289,11 +283,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     width: "31.7%",
   },
-  merchantName: { color: colors.ink, flex: 1, fontSize: 10, fontWeight: "800" },
+  merchantName: { color: transactionTheme.ink, flex: 1, fontSize: 10, fontWeight: "800" },
   selectedMerchant: {
-    backgroundColor: colors.expenseTint,
-    borderColor: colors.expense,
-    borderWidth: 1.5,
+    backgroundColor: transactionTheme.brandTint,
+    borderColor: transactionTheme.brand,
+    borderWidth: 2,
   },
-  selectedMerchantName: { color: colors.expense },
+  selectedMerchantName: { color: transactionTheme.brand },
 });
