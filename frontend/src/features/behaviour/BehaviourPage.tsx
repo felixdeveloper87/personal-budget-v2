@@ -264,25 +264,27 @@ export default function BehaviourPage() {
             )}
           </MotionBox>
 
-          <MotionBox variants={riseV}>
-            {selectedChartDay ? (
+          {selectedChartDay && (
+            <MotionBox variants={riseV}>
               <SelectedDayExpenses
                 day={selectedChartDay}
                 expenses={selectedDayExpenses}
                 onClose={() => setSelectedChartDay(null)}
               />
-            ) : (
-              <NuSection
-                title={t('behaviour.sections.categories')}
-                subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
-              >
-                <Distribution
-                  expense={expense}
-                  previousExpense={previousExpense}
-                  periodLabel={periodLabel}
-                />
-              </NuSection>
-            )}
+            </MotionBox>
+          )}
+
+          <MotionBox variants={riseV}>
+            <NuSection
+              title={t('behaviour.sections.categories')}
+              subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
+            >
+              <Distribution
+                expense={expense}
+                previousExpense={previousExpense}
+                periodLabel={periodLabel}
+              />
+            </NuSection>
           </MotionBox>
 
           <MotionBox variants={riseV}>
