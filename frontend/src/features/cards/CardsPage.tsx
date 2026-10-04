@@ -273,7 +273,9 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
       </NuHero>
 
       <Box {...NU_SHEET_WRAP}>
-        <Box className="cards-workspace nu-cards" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
+        {/* nu-dashboard defines --nu-page/--nu-brand; without it the sheet is
+            transparent and the purple hero shows through its top edge. */}
+        <Box className="nu-dashboard cards-workspace nu-cards" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           <div className="cw-content">
             {loading ? <div className="cw-empty"><Spinner color="var(--nu-brand)" /><p>{t('common.loading')}</p></div>
               : error ? <div className="cw-empty"><p>{t('cards.toast.loadFailed')}</p><button type="button" className="cw-primary" onClick={() => void load()}>{t('cards.action.retry')}</button></div>
