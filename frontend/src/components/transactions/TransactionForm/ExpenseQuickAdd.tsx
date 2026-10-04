@@ -10,7 +10,7 @@ const CATEGORIES = [
   'Health',
   'Transport',
   'Shopping',
-  'Subscription',
+  'Subscriptions',
   'Entertainment',
   'Other',
 ] as const
@@ -81,7 +81,7 @@ const MERCHANTS: Partial<Record<ExpenseCategory, readonly MerchantSuggestion[]>>
     { name: 'Rear tyre' },
     { name: 'Rear brake pad' },
   ],
-  Subscription: [
+  Subscriptions: [
     { name: 'YouTube', domain: 'youtube.com' },
     { name: 'OpenAI', domain: 'openai.com' },
     { name: 'Claude', domain: 'claude.ai' },

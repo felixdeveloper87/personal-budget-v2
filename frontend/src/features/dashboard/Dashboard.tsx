@@ -166,7 +166,23 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
 
         <MotionBox variants={riseV}>
           <NuSection title={t('dashboard.monthlyRhythm')} subtitle={t('dashboard.monthlyRhythmCaption')}>
-            <Grid templateColumns={{ base: '1fr', md: 'repeat(2, minmax(0, 1fr))' }} gap={{ base: 4, md: 5 }} alignItems="stretch">
+            {/* One row: a swipeable pair on phones (second card peeks in), two columns from md. */}
+            <Grid
+              templateColumns={{ base: 'repeat(2, 86%)', md: 'repeat(2, minmax(0, 1fr))' }}
+              gap={{ base: 3, md: 5 }}
+              alignItems="stretch"
+              overflowX={{ base: 'auto', md: 'visible' }}
+              mx={{ base: -4, md: 0 }}
+              px={{ base: 4, md: 0 }}
+              pb={{ base: 1, md: 0 }}
+              sx={{
+                scrollSnapType: { base: 'x mandatory', md: 'none' },
+                scrollPaddingInline: '16px',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': { display: 'none' },
+                '& > *': { scrollSnapAlign: 'start' },
+              }}
+            >
               <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="income" />
               <CashPace transactions={transactions} selectedDate={selectedDate} dateBasis="activity" kind="expense" />
             </Grid>
