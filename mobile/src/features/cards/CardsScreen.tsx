@@ -1,112 +1,58 @@
+import { setStatusBarStyle } from "expo-status-bar";
 import { SymbolView } from "expo-symbols";
 import { useFocusEffect, useRouter } from "expo-router";
 import type { ComponentProps } from "react";
-import { useCallback, useMemo, useState } from "react";
-import { ActivityIndicator, RefreshControl, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BankLogo } from "@/components/accounts/BankLogo";
+import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, listPaymentMethods, listTransactions, type CreditCardPaymentMethod } from "@/services/api";
 import type { Transaction } from "@/types/finance";
-import { CardsHero } from "./CardsHero";
+
 import { StatementsSection } from "./StatementsSection";
-import { buildCardStatements } from "./cardStatements";
-import { colors } from "@/theme/colors";
+import { buildCardsOverview, focusStatementFor, type CardView, type StatementView } from "./cardViews";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
-type Section = "overview" | "cards" | "statements";
-
-export interface CardView {
-  id: number;
-  name: string;
-  issuer: string;
-  currentStatement: number;
-  outstanding: number;
-  limit: number;
-  closingDay: number | string;
-  paymentDay: number | string;
-  nextPayment: number;
-  nextPaymentDate: string;
-  settlementAccount: string;
-  accent: string;
-}
-
-export interface StatementView {
-  id: string;
-  cardId: number;
-  label: string;
-  period: string;
-  dueDate: string;
-  paymentTimestamp: number;
-  closingTimestamp: number;
-  status: "Aberta" | "Fechada" | "Próxima";
-  total: number;
-  transactions: Array<{ id: number; description: string; category: string; date: string; amount: number; merchantName?: string | null; merchantDomain?: string | null }>;
-}
+type Tab = "cards" | "statements";
 
 const icons = {
-  back: { ios: "chevron.left", android: "arrow_back", web: "arrow_back" },
-  chevronDown: { ios: "chevron.down", android: "keyboard_arrow_down", web: "keyboard_arrow_down" },
-  chevronRight: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
-  hidden: { ios: "eye.slash", android: "visibility_off", web: "visibility_off" },
-  home: { ios: "chart.pie.fill", android: "donut_small", web: "donut_small" },
-  receipt: { ios: "doc.text.fill", android: "receipt_long", web: "receipt_long" },
-  visible: { ios: "eye", android: "visibility", web: "visibility" },
+  calendar: { ios: "calendar", android: "calendar_today", web: "calendar_today" },
   card: { ios: "creditcard.fill", android: "credit_card", web: "credit_card" },
-  cards: { ios: "rectangle.stack.fill", android: "style", web: "style" },
+  chevron: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
+  hidden: { ios: "eye.slash", android: "visibility_off", web: "visibility_off" },
+  visible: { ios: "eye", android: "visibility", web: "visibility" },
 } satisfies Record<string, SymbolName>;
 
-const shortDate = (date: Date) => new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "short" }).format(date);
-function buildViews(methods: CreditCardPaymentMethod[], transactions: Transaction[]) {
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const statements: StatementView[] = [];
-  const cards: CardView[] = methods.filter((method) => method.type === "CREDIT_CARD").map((method) => {
-    const cycles = buildCardStatements(method, transactions);
-    const upcoming = cycles.filter((cycle) => cycle.paymentDate >= today).sort((a,b) => a.paymentDate.getTime() - b.paymentDate.getTime());
-    for (const cycle of cycles) {
-      statements.push({
-        id: method.id + "-" + cycle.key,
-        cardId: method.id,
-        label: "Fatura de " + new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(cycle.closingDate),
-        period: shortDate(cycle.periodStart) + " – " + shortDate(cycle.closingDate),
-        dueDate: shortDate(cycle.paymentDate),
-        paymentTimestamp: cycle.paymentDate.getTime(),
-        closingTimestamp: cycle.closingDate.getTime(),
-        status: cycle.status === "open" ? "Aberta" : cycle.status === "closed" ? "Fechada" : "Próxima",
-        total: cycle.total,
-        transactions: cycle.transactions.map((transaction) => {
-          const raw = transaction.transactionDate ?? transaction.paymentDate ?? transaction.dateTime;
-          const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(raw ?? "");
-          return { id: transaction.id, description: transaction.description || "Compra", category: transaction.category, date: match ? shortDate(new Date(Number(match[1]), Number(match[2])-1, Number(match[3]))) : "—", amount: Number(transaction.amount), merchantName: transaction.merchantName, merchantDomain: transaction.merchantDomain };
-        }),
-      });
-    }
-    return { id: method.id, name: method.name, issuer: method.issuer || "Cartão de crédito", currentStatement: cycles.find((cycle) => cycle.status === "open")?.total ?? 0, outstanding: upcoming.reduce((sum,cycle) => sum + cycle.total,0), limit: Math.max(Number(method.creditLimit || 0),0), closingDay: method.statementClosingDay ?? "—", paymentDay: method.paymentDay ?? "—", nextPayment: upcoming[0]?.total ?? 0, nextPaymentDate: upcoming[0] ? shortDate(upcoming[0].paymentDate) : "", settlementAccount: method.settlementAccountName || "", accent: colors.forest };
-  });
-  const next = methods.filter((method) => method.type === "CREDIT_CARD").flatMap((method) => buildCardStatements(method, transactions).filter((cycle) => cycle.paymentDate >= today).map((cycle) => ({ cardId: method.id, date: cycle.paymentDate, total: cycle.total, count: cycle.transactions.length, status: cycle.status }))).sort((a,b) => a.date.getTime()-b.date.getTime())[0] ?? null;
-  return { cards, statements, next };
-}
+const TABS: Array<{ value: Tab; label: string }> = [
+  { value: "cards", label: "Cartões" },
+  { value: "statements", label: "Faturas" },
+];
 
+/** Title row + total + caption + tab switch: a little taller than the default header. */
+const HEADER_CONTENT_HEIGHT = 166;
+const MASK = "••••••";
 const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "GBP" });
-const money = (value: number, hidden: boolean) => hidden ? "••••••" : currency.format(value);
+const money = (value: number, hidden: boolean) => hidden ? MASK : currency.format(value);
 
-function SegmentedNavigation({ active, onChange, cardCount, statementCount }: { active: Section; onChange: (section: Section) => void; cardCount: number; statementCount: number }) {
-  const items: Array<{ id: Section; label: string; icon: SymbolName; badge?: number }> = [
-    { id: "overview", label: "Resumo", icon: icons.home },
-    { id: "cards", label: "Cartões", icon: icons.cards, badge: cardCount },
-    { id: "statements", label: "Faturas", icon: icons.receipt, badge: statementCount },
-  ];
+/** Two-option switch on the purple header, same look as the commitments page. */
+function TabSwitch({ value, onChange }: { value: Tab; onChange: (tab: Tab) => void }) {
   return (
-    <View accessibilityRole="tablist" style={styles.segmentedNav}>
-      {items.map((item) => {
-        const selected = active === item.id;
+    <View accessibilityLabel="Visualização" accessibilityRole="tablist" style={styles.tabs}>
+      {TABS.map((option) => {
+        const selected = option.value === value;
         return (
-          <Pressable accessibilityRole="tab" accessibilityState={{ selected }} key={item.id} onPress={() => onChange(item.id)} style={({ pressed }) => [styles.navItem, selected && styles.navItemActive, pressed && styles.pressed]}>
-            <SymbolView name={item.icon} size={16} tintColor={selected ? colors.white : colors.inkFaint} weight="semibold" />
-            <Text style={[styles.navLabel, selected && styles.navLabelActive]}>{item.label}</Text>
-            {item.badge ? <Text style={[styles.navBadge, selected && styles.navBadgeActive]}>{item.badge}</Text> : null}
+          <Pressable
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            key={option.value}
+            onPress={() => onChange(option.value)}
+            style={({ pressed }) => [styles.tab, selected && styles.tabSelected, pressed && !selected && styles.pressed]}
+          >
+            <Text style={[styles.tabText, selected && styles.tabTextSelected]}>{option.label}</Text>
           </Pressable>
         );
       })}
@@ -114,171 +60,352 @@ function SegmentedNavigation({ active, onChange, cardCount, statementCount }: { 
   );
 }
 
-function OverviewSection({ cards, statements, next, hidden, onNavigate, onToggleHidden, onOpenCard }: { onOpenCard: (id: number) => void; cards: CardView[]; statements: StatementView[]; next: ReturnType<typeof buildViews>["next"]; hidden: boolean; onNavigate: (section: Section) => void; onToggleHidden: () => void }) {
-  const used = cards.reduce((total, card) => total + card.outstanding, 0);
-  const limit = cards.reduce((total, card) => total + card.limit, 0);
-  const nextCard = cards.find((card) => card.id === next?.cardId);
+function NextDue({ card, statement, hidden, onPress }: {
+  card: CardView;
+  statement: StatementView;
+  hidden: boolean;
+  onPress: () => void;
+}) {
   return (
-    <>
-      <CardsHero
-        cardCount={cards.length}
-        hidden={hidden}
-        limit={limit}
-        used={used}
-        next={next && nextCard ? { name: nextCard.name, date: shortDate(next.date), amount: next.total } : null}
-        onToggleHidden={onToggleHidden}
-        onOpenPayment={() => nextCard && onOpenCard(nextCard.id)}
-      />
-
-      <View style={styles.sectionHeader}><View><Text style={styles.sectionEyebrow}>ATALHOS</Text><Text style={styles.sectionTitle}>Acesse rapidamente</Text></View></View>
-      <View style={styles.shortcutGrid}>
-        <Pressable accessibilityRole="button" onPress={() => onNavigate("cards")} style={({ pressed }) => [styles.shortcut, pressed && styles.cardPressed]}><View style={[styles.shortcutIcon, { backgroundColor: colors.header }]}><SymbolView name={icons.cards} size={22} tintColor={colors.forest} weight="semibold" /></View><Text style={styles.shortcutTitle}>Meus cartões</Text><Text style={styles.shortcutText}>Limites e datas de ciclo</Text><View style={styles.shortcutFooter}><Text style={styles.shortcutLink}>Ver {cards.length} cartões</Text><SymbolView name={icons.chevronRight} size={15} tintColor={colors.forest} weight="semibold" /></View></Pressable>
-        <Pressable accessibilityRole="button" onPress={() => onNavigate("statements")} style={({ pressed }) => [styles.shortcut, pressed && styles.cardPressed]}><View style={[styles.shortcutIcon, { backgroundColor: "#EFE9D8" }]}><SymbolView name={icons.receipt} size={22} tintColor={colors.gold} weight="semibold" /></View><Text style={styles.shortcutTitle}>Faturas</Text><Text style={styles.shortcutText}>Compras e vencimentos</Text><View style={styles.shortcutFooter}><Text style={styles.shortcutLink}>Ver {statements.length} faturas</Text><SymbolView name={icons.chevronRight} size={15} tintColor={colors.forest} weight="semibold" /></View></Pressable>
+    <Pressable
+      accessibilityLabel={`Ver fatura de ${card.name} com vencimento em ${statement.dueDate}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.nextDue, pressed && styles.nextDuePressed]}
+    >
+      <View style={styles.nextDueIcon}>
+        <SymbolView name={icons.calendar} size={19} tintColor={nu.brand} weight="semibold" />
       </View>
-
-    </>
-  );
-}
-
-function CardTile({ card, hidden, onViewStatements }: { card: CardView; hidden: boolean; onViewStatements: () => void }) {
-  const used = card.limit > 0 ? Math.min(100, Math.round((card.outstanding / card.limit) * 100)) : 0;
-  return (
-    <Pressable accessibilityLabel={`Ver faturas de ${card.name}`} accessibilityRole="button" onPress={onViewStatements} style={({ pressed }) => [styles.cardTile, pressed && styles.cardPressed]}>
-      <View style={[styles.cardAccent, { backgroundColor: card.accent }]} />
-      <View style={styles.cardTop}><View style={styles.cardIdentity}><BankLogo institution={card.issuer} name={card.name} size={44} /><View style={styles.cardNameBlock}><Text numberOfLines={1} style={styles.cardName}>{card.name}</Text><Text style={styles.cardIssuer}>{card.issuer.toLocaleUpperCase()}</Text></View></View><View style={styles.chevronBubble}><SymbolView name={icons.chevronRight} size={17} tintColor={colors.inkFaint} weight="semibold" /></View></View>
-      <Text style={styles.cardValueLabel}>FATURA ATUAL</Text><Text style={styles.cardValue}>{money(card.currentStatement, hidden)}</Text><View style={styles.cardDivider} />
-      <View style={styles.cardCycleRow}><View><Text style={styles.cardMetaLabel}>CICLO DA FATURA</Text><Text style={styles.cardMeta}>Fecha dia {card.closingDay} · vence dia {card.paymentDay}</Text></View><View style={styles.cardCycleAmount}><Text style={styles.cardMetaLabel}>PRÓXIMO PAGAMENTO</Text><Text style={styles.cardMetaStrong}>{money(card.nextPayment, hidden)}</Text></View></View>
-      <View style={styles.creditRow}><Text style={styles.creditLabel}>{hidden ? "••••" : card.limit > 0 ? `${used}% do limite` : "Limite não cadastrado"}</Text><Text style={styles.creditAvailable}>{hidden ? "••••••" : card.limit > 0 ? `${money(Math.max(card.limit - card.outstanding, 0), false)} disponíveis` : "—"}</Text></View><View style={styles.progressTrack}><View style={[styles.progressFill, { width: `${used}%` }]} /></View>{card.settlementAccount ? <Text style={styles.settlement}>Pago pela conta {card.settlementAccount}</Text> : null}
+      <View style={styles.rowCopy}>
+        <Text numberOfLines={1} style={styles.nextDueLabel}>Próximo vencimento · {statement.dueDate}</Text>
+        <Text numberOfLines={1} style={styles.nextDueName}>{card.name}</Text>
+      </View>
+      <Text adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1} style={styles.nextDueAmount}>
+        {money(statement.total, hidden)}
+      </Text>
+      <SymbolView name={icons.chevron} size={14} tintColor={nu.brand} weight="semibold" />
     </Pressable>
   );
 }
 
-function CardsSection({ cards, hidden, onCardPress }: { cards: CardView[]; hidden: boolean; onCardPress: (id: number) => void }) {
-  return <><View style={styles.sectionIntro}><View style={styles.introIcon}><SymbolView name={icons.cards} size={22} tintColor={colors.forest} weight="semibold" /></View><View style={styles.introCopy}><Text style={styles.introTitle}>Sua carteira</Text><Text style={styles.introText}>Toque em um cartão para abrir as faturas.</Text></View><Text style={styles.countBadge}>{cards.length}</Text></View><View style={styles.cardsList}>{cards.map((card) => <CardTile card={card} hidden={hidden} key={card.id} onViewStatements={() => onCardPress(card.id)} />)}</View></>;
+function CardRow({ card, first, hidden, onPress }: { card: CardView; first: boolean; hidden: boolean; onPress: () => void }) {
+  const hasLimit = card.limit > 0;
+  const usedPercent = hasLimit ? Math.min(100, Math.round((card.outstanding / card.limit) * 100)) : 0;
+  const cycle = card.closingDay && card.paymentDay
+    ? `Fecha dia ${card.closingDay} · vence dia ${card.paymentDay}`
+    : "Ciclo não configurado";
+  const nextLine = [
+    card.nextPaymentDate ? `Próximo pagamento ${money(card.nextPayment, hidden)} em ${card.nextPaymentDate}` : "Sem pagamento previsto",
+    card.settlementAccount ? `conta ${card.settlementAccount}` : null,
+  ].filter(Boolean).join(" · ");
+
+  return (
+    <Pressable
+      accessibilityLabel={`Ver faturas de ${card.name}`}
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.cardRow, !first && styles.rowDivided, pressed && styles.rowPressed]}
+    >
+      <View style={styles.cardRowTop}>
+        <BankLogo institution={card.issuer} name={card.name} size={42} />
+        <View style={styles.rowCopy}>
+          <Text numberOfLines={1} style={styles.rowTitle}>{card.name}</Text>
+          <Text numberOfLines={1} style={styles.rowMeta}>{cycle}</Text>
+        </View>
+        <View style={styles.rowTrailing}>
+          <Text adjustsFontSizeToFit minimumFontScale={0.75} numberOfLines={1} style={styles.rowAmount}>
+            {money(card.currentStatement, hidden)}
+          </Text>
+          <Text style={styles.rowAmountLabel}>Fatura atual</Text>
+        </View>
+        <SymbolView name={icons.chevron} size={14} tintColor={nu.brand} weight="semibold" />
+      </View>
+
+      <View style={styles.cardUsage}>
+        <View style={styles.track}>
+          <View
+            style={[
+              styles.fill,
+              { width: hidden ? "0%" : `${usedPercent}%` },
+              usedPercent >= 90 && styles.fillDanger,
+            ]}
+          />
+        </View>
+        <View style={styles.usageRow}>
+          <Text style={styles.usageText}>
+            {hidden ? "••" : hasLimit ? `${usedPercent}% do limite` : "Limite não cadastrado"}
+          </Text>
+          {hasLimit ? (
+            <Text style={styles.usageText}>{money(Math.max(card.limit - card.outstanding, 0), hidden)} disponível</Text>
+          ) : null}
+        </View>
+        <Text numberOfLines={1} style={styles.cardNext}>{nextLine}</Text>
+      </View>
+    </Pressable>
+  );
 }
 
 export function CardsScreen() {
   const router = useRouter();
-  const [section, setSection] = useState<Section>("overview");
+  const insets = useSafeAreaInsets();
+  const scrollRef = useRef<ScrollView>(null);
+  const { user, logout } = useAuth();
+  const [tab, setTab] = useState<Tab>("cards");
   const [hidden, setHidden] = useState(false);
   const [cardFilter, setCardFilter] = useState<number | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const { user, logout } = useAuth();
   const [methods, setMethods] = useState<CreditCardPaymentMethod[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { cards, statements, next } = useMemo(() => buildViews(methods, transactions), [methods, transactions]);
+
+  const overview = useMemo(() => buildCardsOverview(methods, transactions), [methods, transactions]);
+  const { cards, statements, next, used, limit } = overview;
+  const nextCard = cards.find((card) => card.id === next?.cardId);
+
   const load = useCallback(async (refresh = false) => {
     if (!user) return;
     refresh ? setRefreshing(true) : setLoading(true);
     setError(null);
     try {
-      const [loadedMethods, loadedTransactions] = await Promise.all([listPaymentMethods(user.token), listTransactions(user.token)]);
-      setMethods(loadedMethods); setTransactions(loadedTransactions);
+      const [loadedMethods, loadedTransactions] = await Promise.all([
+        listPaymentMethods(user.token),
+        listTransactions(user.token),
+      ]);
+      setMethods(loadedMethods);
+      setTransactions(loadedTransactions);
       setCardFilter((current) => loadedMethods.some((method) => method.id === current) ? current : null);
     } catch (failure) {
-      if (failure instanceof ApiError && failure.status === 401) { await logout(); return; }
+      if (failure instanceof ApiError && failure.status === 401) {
+        await logout();
+        return;
+      }
       setError("Não foi possível carregar seus cartões. Tente novamente.");
-    } finally { setLoading(false); setRefreshing(false); }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   }, [user, logout]);
-  useFocusEffect(useCallback(() => { void load(); }, [load]));
-  const subtitle = useMemo(() => ({ overview: "Acompanhe seu crédito", cards: "Limites e ciclos", statements: "Compras e vencimentos" })[section], [section]);
-  const openCardStatements = (id: number) => { setCardFilter(id); setExpanded(statements.find((statement) => statement.cardId === id)?.id ?? null); setSection("statements"); };
+
+  useFocusEffect(useCallback(() => {
+    void load();
+  }, [load]));
+
+  // Light status-bar icons over the purple header, restored when leaving.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
+    }, []),
+  );
+
+  /** Jump straight from a card (or the next due date) to its statement, already open. */
+  const openStatement = (statement: StatementView | null, filter: number | null) => {
+    setCardFilter(filter);
+    setExpanded(statement?.id ?? null);
+    setTab("statements");
+    scrollRef.current?.scrollTo({ animated: false, y: 0 });
+  };
+
+  if (!user) return null;
+
+  const hasLimit = limit > 0;
+  const usedPercent = hasLimit ? Math.min(100, Math.round((used / limit) * 100)) : 0;
+  const caption = loading
+    ? "Carregando seus cartões…"
+    : error
+      ? "Crédito indisponível no momento"
+      : hasLimit
+        ? `Em uso ${money(used, hidden)} de ${money(limit, hidden)} · ${hidden ? "••" : `${usedPercent}%`}`
+        : `${cards.length === 1 ? "1 cartão" : `${cards.length} cartões`} · limites não cadastrados`;
+
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      <View style={styles.pageHeader}>
-        <Pressable accessibilityLabel="Voltar" accessibilityRole="button" hitSlop={8} onPress={() => router.back()} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-          <SymbolView name={icons.back} size={20} tintColor={colors.ink} weight="semibold" />
-        </Pressable>
-        <View style={styles.headerBrand}><View style={styles.brandDot} /><Text style={styles.headerBrandText}>PERSONAL BUDGET</Text></View>
-        <Pressable accessibilityRole="button" accessibilityLabel={hidden ? "Mostrar valores" : "Ocultar valores"} onPress={() => setHidden((value) => !value)} style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}>
-          <SymbolView name={hidden ? icons.visible : icons.hidden} size={19} tintColor={colors.ink} />
-        </Pressable>
-      </View>
-      <View style={styles.pageTitleRow}>
-        <View style={styles.titleBlock}>
-          <Text style={styles.pageEyebrow}>CRÉDITO & FATURAS</Text>
-          <Text style={styles.pageTitle}>Seus cartões.</Text>
-          <Text style={styles.pageSubtitle}>{subtitle}</Text>
+    <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        ref={scrollRef}
+        refreshControl={
+          <RefreshControl
+            colors={[nu.brand]}
+            onRefresh={() => void load(true)}
+            progressViewOffset={insets.top}
+            refreshing={refreshing}
+            tintColor={nu.white}
+          />
+        }
+      >
+        {/* Brand colour also fills the iOS overscroll area above the header. */}
+        <View style={styles.overscrollFill} />
+
+        <NuHeader contentHeight={HEADER_CONTENT_HEIGHT} onBack={() => router.back()} searchTransactions={transactions}>
+          <View style={styles.headerTitleRow}>
+            <Text numberOfLines={1} style={styles.headerTitle}>Cartões</Text>
+            <Pressable
+              accessibilityLabel={hidden ? "Mostrar valores" : "Ocultar valores"}
+              accessibilityRole="button"
+              accessibilityState={{ checked: hidden }}
+              hitSlop={8}
+              onPress={() => setHidden((current) => !current)}
+              style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
+            >
+              <SymbolView name={hidden ? icons.visible : icons.hidden} size={17} tintColor={nu.white} weight="semibold" />
+            </Pressable>
+          </View>
+
+          <Text style={styles.totalLabel}>{hasLimit || loading ? "Crédito disponível" : "Crédito em uso"}</Text>
+          {loading ? (
+            <View style={styles.loadingValue}>
+              <ActivityIndicator color={nu.white} />
+            </View>
+          ) : (
+            <Text adjustsFontSizeToFit minimumFontScale={0.6} numberOfLines={1} style={styles.totalValue}>
+              {error ? "—" : money(hasLimit ? Math.max(limit - used, 0) : used, hidden)}
+            </Text>
+          )}
+          <Text numberOfLines={1} style={styles.totalCaption}>{caption}</Text>
+
+          <View style={styles.tabsPanel}>
+            <TabSwitch onChange={setTab} value={tab} />
+          </View>
+        </NuHeader>
+
+        {/* White sheet: rounded top tucked over the purple header. */}
+        <View style={styles.sheet}>
+          {loading ? (
+            <View style={styles.section}>
+              <View style={styles.stateCard}>
+                <ActivityIndicator color={nu.brand} />
+                <Text style={styles.stateText}>Carregando cartões…</Text>
+              </View>
+            </View>
+          ) : error ? (
+            <View style={styles.section}>
+              <View style={styles.stateCard}>
+                <Text style={styles.stateTitle}>Cartões indisponíveis</Text>
+                <Text style={styles.stateText}>{error}</Text>
+                <Pressable onPress={() => void load()} style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}>
+                  <Text style={styles.retryText}>Tentar novamente</Text>
+                </Pressable>
+              </View>
+            </View>
+          ) : cards.length === 0 ? (
+            <View style={styles.section}>
+              <View style={styles.stateCard}>
+                <View style={styles.emptyIcon}>
+                  <SymbolView name={icons.card} size={22} tintColor={nu.brand} weight="semibold" />
+                </View>
+                <Text style={styles.stateTitle}>Nenhum cartão de crédito</Text>
+                <Text style={styles.stateText}>Cadastre um cartão na versão web para acompanhar limites e faturas.</Text>
+              </View>
+            </View>
+          ) : tab === "cards" ? (
+            <View style={styles.section}>
+              {next && nextCard ? (
+                <NextDue card={nextCard} hidden={hidden} onPress={() => openStatement(next, null)} statement={next} />
+              ) : null}
+
+              <View style={[styles.sectionHeader, next && nextCard ? styles.sectionHeaderSpaced : null]}>
+                <View style={styles.sectionCopy}>
+                  <Text style={styles.sectionTitle}>Seus cartões</Text>
+                  <Text style={styles.sectionSubtitle}>Toque em um cartão para abrir as faturas</Text>
+                </View>
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>{cards.length}</Text>
+                </View>
+              </View>
+
+              <View style={styles.list}>
+                {cards.map((card, index) => (
+                  <CardRow
+                    card={card}
+                    first={index === 0}
+                    hidden={hidden}
+                    key={card.id}
+                    onPress={() => openStatement(focusStatementFor(card.id, statements), card.id)}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : (
+            <StatementsSection
+              cardFilter={cardFilter}
+              cards={cards}
+              expanded={expanded}
+              hidden={hidden}
+              onFilter={setCardFilter}
+              onToggle={(id) => setExpanded((current) => current === id ? null : id)}
+              statements={statements}
+            />
+          )}
         </View>
-        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.headerEmblem}>
-          <SymbolView name={icons.card} size={28} tintColor={colors.forest} weight="regular" />
-        </View>
-      </View>
-      <SegmentedNavigation active={section} onChange={setSection} cardCount={cards.length} statementCount={statements.length} />
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} tintColor={colors.forest} />}>
-        {loading ? <ActivityIndicator color={colors.forest} style={{ marginVertical: 40 }} /> : error ? <Pressable accessibilityRole="button" onPress={() => void load()}><Text style={styles.introText}>{error}</Text><Text style={styles.shortcutLink}>Tentar novamente</Text></Pressable> : cards.length === 0 ? <Text style={styles.introTitle}>Nenhum cartão de crédito cadastrado.</Text> : <>
-        {section === "overview" ? <OverviewSection cards={cards} statements={statements} next={next} hidden={hidden} onNavigate={setSection} onToggleHidden={() => setHidden((value) => !value)} onOpenCard={openCardStatements} /> : null}
-        {section === "cards" ? <CardsSection cards={cards} hidden={hidden} onCardPress={openCardStatements} /> : null}
-        {section === "statements" ? <StatementsSection cards={cards} allStatements={statements} cardFilter={cardFilter} expanded={expanded} hidden={hidden} onFilter={setCardFilter} onToggle={(id) => setExpanded((current) => current === id ? null : id)} /> : null}
-        </>}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.paper, flex: 1 },
-  pageHeader: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20, paddingTop: 7, paddingBottom: 7 },
-  headerBrand: { flexDirection: "row", alignItems: "center", gap: 6 },
-  brandDot: { height: 5, width: 5, borderRadius: 3, backgroundColor: colors.forest },
-  headerBrandText: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 1.6 },
-  pageTitleRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 23, paddingTop: 11, paddingBottom: 14 },
-  pageSubtitle: { color: colors.inkSoft, fontSize: 12, marginTop: 5 },
-  headerEmblem: { width: 53, height: 60, borderRadius: 18, borderWidth: 1, borderColor: "#CED7CB", backgroundColor: "#E7EBDD", alignItems: "center", justifyContent: "center", transform: [{ rotate: "8deg" }] },
-  iconButton: { alignItems: "center", backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 14, borderWidth: 1, height: 40, justifyContent: "center", width: 40 },
-  titleBlock: { flex: 1, marginRight: 10 },
-  pageEyebrow: { color: colors.forest, fontSize: 8, fontWeight: "800", letterSpacing: 1.35 },
-  pageTitle: { color: colors.ink, fontSize: 35, fontWeight: "700", letterSpacing: -1.5, marginTop: 4 },
-  segmentedNav: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 17, borderWidth: 1, flexDirection: "row", gap: 3, marginHorizontal: 18, marginTop: 8, padding: 4 },
-  navItem: { alignItems: "center", borderRadius: 13, flex: 1, flexDirection: "row", gap: 5, justifyContent: "center", minHeight: 42, paddingHorizontal: 5 },
-  navItemActive: { backgroundColor: colors.forest, shadowColor: colors.forest, shadowOffset: { height: 2, width: 0 }, shadowOpacity: 0.18, shadowRadius: 5 },
-  navLabel: { color: colors.inkSoft, fontSize: 10, fontWeight: "700" },
-  navLabelActive: { color: colors.white },
-  navBadge: { backgroundColor: colors.paperMuted, borderRadius: 8, color: colors.inkFaint, fontSize: 8, fontWeight: "900", minWidth: 16, overflow: "hidden", paddingHorizontal: 4, paddingVertical: 2, textAlign: "center" },
-  navBadgeActive: { backgroundColor: "rgba(255,255,255,0.16)", color: colors.white },
-  content: { paddingBottom: 44, paddingHorizontal: 18, paddingTop: 14 },
-  pressed: { opacity: 0.67, transform: [{ scale: 0.98 }] },
-  cardPressed: { opacity: 0.8, transform: [{ scale: 0.99 }] },
-  sectionHeader: { alignItems: "flex-end", flexDirection: "row", justifyContent: "space-between", marginBottom: 11, marginTop: 24, paddingHorizontal: 3 },
-  sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.45 },
-  sectionTitle: { color: colors.ink, fontSize: 20, fontWeight: "700", marginTop: 4 },
-  shortcutGrid: { flexDirection: "row", gap: 9 },
-  shortcut: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 19, borderWidth: 1, flex: 1, minHeight: 160, padding: 13 },
-  shortcutIcon: { alignItems: "center", borderRadius: 13, height: 40, justifyContent: "center", width: 40 },
-  shortcutTitle: { color: colors.ink, fontSize: 14, fontWeight: "800", marginTop: 13 },
-  shortcutText: { color: colors.inkSoft, fontSize: 10, lineHeight: 14, marginTop: 4 },
-  shortcutFooter: { alignItems: "center", flexDirection: "row", justifyContent: "space-between", marginTop: "auto", paddingTop: 12 },
-  shortcutLink: { color: colors.forest, fontSize: 10, fontWeight: "800" },
-  sectionIntro: { alignItems: "center", backgroundColor: colors.header, borderColor: colors.line, borderRadius: 18, borderWidth: 1, flexDirection: "row", marginBottom: 12, padding: 13 },
-  introIcon: { alignItems: "center", backgroundColor: "rgba(251,249,244,0.72)", borderRadius: 13, height: 42, justifyContent: "center", width: 42 },
-  introCopy: { flex: 1, marginLeft: 11 },
-  introTitle: { color: colors.ink, fontSize: 14, fontWeight: "800" },
-  introText: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
-  countBadge: { backgroundColor: colors.paperRaised, borderRadius: 11, color: colors.forest, fontSize: 11, fontWeight: "900", minWidth: 28, overflow: "hidden", paddingHorizontal: 8, paddingVertical: 5, textAlign: "center" },
-  cardsList: { gap: 11 },
-  cardTile: { backgroundColor: colors.paperRaised, borderColor: colors.line, borderRadius: 22, borderWidth: 1, overflow: "hidden", padding: 15, paddingTop: 19, shadowColor: colors.ink, shadowOffset: { height: 3, width: 0 }, shadowOpacity: 0.06, shadowRadius: 10 },
-  cardAccent: { height: 4, left: 0, position: "absolute", right: 0, top: 0 },
-  cardTop: { alignItems: "center", flexDirection: "row" },
-  cardIdentity: { alignItems: "center", flex: 1, flexDirection: "row", minWidth: 0 },
-  cardNameBlock: { flex: 1, marginLeft: 11 },
-  cardName: { color: colors.ink, fontSize: 16, fontWeight: "800" },
-  cardIssuer: { color: colors.inkFaint, fontSize: 9, fontWeight: "700", letterSpacing: 0.8, marginTop: 3 },
-  chevronBubble: { alignItems: "center", backgroundColor: colors.paperMuted, borderRadius: 11, height: 34, justifyContent: "center", width: 34 },
-  cardValueLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.25, marginTop: 20 },
-  cardValue: { color: colors.ink, fontSize: 30, fontWeight: "800", letterSpacing: -1, marginTop: 5 },
-  cardDivider: { backgroundColor: colors.line, height: StyleSheet.hairlineWidth, marginVertical: 14 },
-  cardCycleRow: { flexDirection: "row", justifyContent: "space-between" },
-  cardCycleAmount: { alignItems: "flex-end" },
-  cardMetaLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 1 },
-  cardMeta: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
-  cardMetaStrong: { color: colors.ink, fontSize: 11, fontWeight: "800", marginTop: 4 },
-  creditRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 16 },
-  creditLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 0.7 },
-  creditAvailable: { color: colors.inkSoft, fontSize: 9 },
-  progressTrack: { backgroundColor: colors.paperMuted, borderRadius: 4, height: 6, marginTop: 7, overflow: "hidden" },
-  progressFill: { backgroundColor: colors.income, borderRadius: 4, height: 6 },
-  settlement: { color: colors.inkFaint, fontSize: 9, marginTop: 11 },
+  screen: { backgroundColor: nu.white, flex: 1 },
+  content: { paddingBottom: 42 },
+  overscrollFill: { backgroundColor: nu.brand, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
+  pressed: { opacity: 0.7 },
+
+  headerTitleRow: { alignItems: "center", flexDirection: "row", gap: 12 },
+  headerTitle: { color: nu.white, flex: 1, fontSize: 20, fontWeight: "700", letterSpacing: -0.3 },
+  headerButton: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.16)", borderRadius: 17, height: 34, justifyContent: "center", width: 34 },
+  totalLabel: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 6 },
+  loadingValue: { alignItems: "flex-start", height: 37, justifyContent: "center" },
+  totalValue: { color: nu.white, fontSize: 31, fontWeight: "700", letterSpacing: -0.9, fontVariant: ["tabular-nums"] },
+  totalCaption: { color: "rgba(255,255,255,0.75)", fontSize: 12 },
+
+  tabsPanel: { marginTop: 12 },
+  tabs: { backgroundColor: "rgba(255,255,255,0.14)", borderRadius: 999, flexDirection: "row", padding: 3 },
+  tab: { alignItems: "center", borderRadius: 999, flex: 1, justifyContent: "center", minHeight: 36, paddingHorizontal: 8 },
+  tabSelected: { backgroundColor: nu.white, shadowColor: nu.ink, shadowOffset: { height: 1, width: 0 }, shadowOpacity: 0.12, shadowRadius: 4 },
+  tabText: { color: "rgba(255,255,255,0.82)", fontSize: 13, fontWeight: "600" },
+  tabTextSelected: { color: nu.brand, fontWeight: "700" },
+
+  sheet: { backgroundColor: nu.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -NU_SHEET_OVERLAP, paddingTop: 4 },
+  section: { paddingHorizontal: 20, paddingVertical: 18 },
+  sectionHeader: { alignItems: "flex-start", flexDirection: "row", gap: 12, justifyContent: "space-between", marginBottom: 6 },
+  sectionHeaderSpaced: { marginTop: 22 },
+  sectionCopy: { flex: 1, minWidth: 0 },
+  sectionTitle: nuSection.title,
+  sectionSubtitle: nuSection.subtitle,
+  pill: { backgroundColor: nu.brandTint, borderRadius: 999, minWidth: 30, paddingHorizontal: 11, paddingVertical: 5 },
+  pillText: { color: nu.brand, fontSize: 12, fontWeight: "700", textAlign: "center" },
+
+  nextDue: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, flexDirection: "row", gap: 12, padding: 14 },
+  nextDuePressed: { backgroundColor: nu.surfacePressed },
+  nextDueIcon: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 20, height: 40, justifyContent: "center", width: 40 },
+  nextDueLabel: { color: nu.inkSoft, fontSize: 12 },
+  nextDueName: { color: nu.ink, fontSize: 15, fontWeight: "700", marginTop: 2 },
+  nextDueAmount: { color: nu.ink, fontSize: 16, fontWeight: "700", maxWidth: 130, fontVariant: ["tabular-nums"] },
+
+  list: { borderBottomColor: nu.hairline, borderBottomWidth: 1, borderTopColor: nu.hairline, borderTopWidth: 1, marginTop: 8 },
+  rowDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
+  rowPressed: { backgroundColor: "rgba(130,10,209,0.04)" },
+  rowCopy: { flex: 1, minWidth: 0 },
+  rowTitle: { color: nu.ink, fontSize: 15, fontWeight: "700" },
+  rowMeta: { color: nu.inkSoft, fontSize: 12, marginTop: 2 },
+  rowTrailing: { alignItems: "flex-end", maxWidth: 130 },
+  rowAmount: { color: nu.ink, fontSize: 15, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  rowAmountLabel: { color: nu.inkFaint, fontSize: 10, marginTop: 2 },
+
+  cardRow: { paddingVertical: 14 },
+  cardRowTop: { alignItems: "center", flexDirection: "row", gap: 12 },
+  cardUsage: { marginLeft: 54, marginTop: 10 },
+  track: { backgroundColor: nu.track, borderRadius: 3, height: 5, overflow: "hidden" },
+  fill: { backgroundColor: nu.brand, borderRadius: 3, height: 5 },
+  fillDanger: { backgroundColor: nu.negative },
+  usageRow: { flexDirection: "row", gap: 8, justifyContent: "space-between", marginTop: 6 },
+  usageText: { color: nu.inkSoft, fontSize: 11, fontVariant: ["tabular-nums"] },
+  cardNext: { color: nu.inkFaint, fontSize: 11, marginTop: 4 },
+
+  stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, padding: 26 },
+  stateTitle: { color: nu.ink, fontSize: 16, fontWeight: "600" },
+  stateText: { color: nu.inkSoft, fontSize: 13, lineHeight: 19, textAlign: "center" },
+  emptyIcon: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 22, height: 44, justifyContent: "center", marginBottom: 4, width: 44 },
+  retryButton: { backgroundColor: nu.brand, borderRadius: 999, marginTop: 6, paddingHorizontal: 20, paddingVertical: 11 },
+  retryText: { color: nu.white, fontSize: 14, fontWeight: "600" },
 });
