@@ -9,7 +9,7 @@ import { expenseDateLabel } from "@/features/household/expenseHistory";
 import { HouseholdCleaningProgress } from "@/features/household/HouseholdCleaningProgress";
 import { HouseholdCleaningSheet } from "@/features/household/HouseholdCleaningSheet";
 import { ApiError, getHouseholdPage, updateHouseholdCleaningDuty } from "@/services/api";
-import { colors } from "@/theme/colors";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import type { HouseholdCleaningDuty, HouseholdHeroData, HouseholdPageResponse } from "@/types/household";
 
 export function HouseholdCleaning({ household, onUpdated }: { household: HouseholdHeroData; onUpdated: (page: HouseholdPageResponse) => void }) {
@@ -73,7 +73,6 @@ export function HouseholdCleaning({ household, onUpdated }: { household: Househo
     <View style={styles.section}>
       <View style={styles.heading}>
         <View style={styles.copy}>
-          <Text style={styles.eyebrow}>CUIDADOS DA CASA</Text>
           <Text style={styles.title}>Limpeza semanal</Text>
         </View>
         {rotation ? (
@@ -94,7 +93,7 @@ export function HouseholdCleaning({ household, onUpdated }: { household: Househo
                 <Text style={styles.initials}>{current.assignedMemberName.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join("").toUpperCase()}</Text>
               </View>
               <View style={styles.copy}>
-                <Text style={styles.caption}>{isYourWeek ? "SUA SEMANA" : "RESPONSÁVEL DA SEMANA"}</Text>
+                <Text style={styles.caption}>{isYourWeek ? "Sua semana" : "Responsável da semana"}</Text>
                 <Text style={styles.name}>{current.assignedMemberName}</Text>
               </View>
             </View>
@@ -119,7 +118,7 @@ export function HouseholdCleaning({ household, onUpdated }: { household: Househo
         )}
         {rotation?.configured && rotation.active && next ? (
           <View style={styles.next}>
-            <SymbolView name={{ ios: "arrow.triangle.2.circlepath", android: "repeat", web: "repeat" }} size={14} tintColor={colors.inkSoft} />
+            <SymbolView name={{ ios: "arrow.triangle.2.circlepath", android: "repeat", web: "repeat" }} size={14} tintColor={nu.inkSoft} />
             <Text style={styles.nextText}>A seguir: <Text style={styles.nextName}>{next.assignedMemberId === household.currentMemberId ? "Você" : next.assignedMemberName}</Text> · {expenseDateLabel(next.weekStart)}</Text>
           </View>
         ) : null}
@@ -141,26 +140,25 @@ export function HouseholdCleaning({ household, onUpdated }: { household: Househo
 }
 
 const styles = StyleSheet.create({
-  section: { marginTop: 26 },
+  section: { borderTopColor: nu.hairline, borderTopWidth: 1, paddingHorizontal: 20, paddingVertical: 20 },
   heading: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   copy: { flex: 1, minWidth: 0 },
-  eyebrow: { color: colors.income, fontSize: 9, fontWeight: "800", letterSpacing: 1.2 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: "700", letterSpacing: -0.4, marginTop: 5 },
-  open: { minHeight: 44, paddingHorizontal: 12, borderRadius: 13, backgroundColor: "#E5EDDC", alignItems: "center", justifyContent: "center" },
-  openText: { color: colors.income, fontSize: 11, fontWeight: "700" },
-  card: { position: "relative", overflow: "hidden", borderRadius: 16, padding: 16, backgroundColor: "#FFFEFA", borderWidth: 1, borderColor: "#E2E6DB", gap: 14 },
+  title: nuSection.title,
+  open: { alignItems: "center", justifyContent: "center", backgroundColor: nu.brandTint, borderRadius: 999, minHeight: 34, paddingHorizontal: 14 },
+  openText: { color: nu.brand, fontSize: 12, fontWeight: "600" },
+  card: { position: "relative", overflow: "hidden", borderRadius: 16, padding: 16, backgroundColor: nu.surface, gap: 14 },
   periodRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  period: { flex: 1, color: colors.inkSoft, fontSize: 10, lineHeight: 15 },
+  period: { flex: 1, color: nu.inkSoft, fontSize: 12, lineHeight: 16 },
   personRow: { flexDirection: "row", alignItems: "center", gap: 11 },
-  avatar: { height: 42, width: 42, borderRadius: 15, backgroundColor: "#D8E5CC", alignItems: "center", justifyContent: "center" },
-  initials: { color: colors.income, fontSize: 14, fontWeight: "800" },
-  caption: { color: colors.income, fontSize: 8, fontWeight: "800", letterSpacing: 0.8 },
-  name: { color: colors.ink, fontSize: 17, fontWeight: "700", marginTop: 4 },
-  complete: { color: colors.income, fontSize: 11, fontWeight: "600" },
-  next: { flexDirection: "row", alignItems: "center", gap: 7, paddingTop: 12, borderTopWidth: 1, borderTopColor: "#DCE5D5" },
-  nextText: { flex: 1, color: colors.inkSoft, fontSize: 10, lineHeight: 16 },
-  nextName: { color: colors.ink, fontWeight: "700" },
+  avatar: { height: 42, width: 42, borderRadius: 21, backgroundColor: nu.brandTint, alignItems: "center", justifyContent: "center" },
+  initials: { color: nu.brand, fontSize: 14, fontWeight: "700" },
+  caption: { color: nu.inkSoft, fontSize: 12 },
+  name: { color: nu.ink, fontSize: 17, fontWeight: "600", marginTop: 2 },
+  complete: { color: nu.positive, fontSize: 12, fontWeight: "600" },
+  next: { flexDirection: "row", alignItems: "center", gap: 7, paddingTop: 12, borderTopWidth: 1, borderTopColor: nu.track },
+  nextText: { flex: 1, color: nu.inkSoft, fontSize: 12, lineHeight: 17 },
+  nextName: { color: nu.ink, fontWeight: "600" },
   empty: { flexDirection: "row", alignItems: "center", gap: 12 },
-  emptyTitle: { color: colors.ink, fontSize: 14, fontWeight: "700" },
-  emptyText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
+  emptyTitle: { color: nu.ink, fontSize: 15, fontWeight: "600" },
+  emptyText: { color: nu.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
 });

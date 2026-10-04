@@ -1,3 +1,5 @@
+import { useFocusEffect } from "expo-router";
+import { setStatusBarStyle } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
@@ -9,7 +11,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
+import { HouseLineArt } from "@/features/household/HouseLineArt";
 
 import { HouseholdHero } from "@/features/household/HouseholdHero";
 import { HouseholdExpenseSheet } from "@/features/household/HouseholdExpenseSheet";
@@ -19,11 +25,11 @@ import { HouseholdPayments } from "@/features/household/HouseholdPayments";
 import { HouseholdCleaning } from "@/features/household/HouseholdCleaning";
 import { useAuth } from "@/contexts/AuthContext";
 import { ApiError, getHouseholdPage } from "@/services/api";
-import { colors } from "@/theme/colors";
 import type { HouseholdPageResponse } from "@/types/household";
 
 export function HouseholdScreen() {
   const { user, logout } = useAuth();
+  const insets = useSafeAreaInsets();
   const [page, setPage] = useState<HouseholdPageResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,85 +63,110 @@ export function HouseholdScreen() {
     void loadPage();
   }, [loadPage]);
 
+  // Light status-bar icons over the purple header, restored when leaving the tab.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
+    }, []),
+  );
+
+  const household = page?.household;
+
   return (
-    <SafeAreaView edges={["top", "left", "right"]} style={styles.safeArea}>
+    <View style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
+            colors={[nu.brand]}
             onRefresh={() => void loadPage(true)}
+            progressViewOffset={insets.top}
             refreshing={refreshing}
-            tintColor={colors.forest}
+            tintColor={nu.white}
           />
         }
       >
-        {loading ? (
-          <View style={styles.stateCard}>
-            <ActivityIndicator color={colors.forest} />
-            <Text style={styles.stateText}>Carregando sua casa…</Text>
-          </View>
-        ) : error ? (
-          <View style={styles.stateCard}>
-            <View style={styles.stateIcon}>
-              <Text style={styles.stateIconText}>!</Text>
-            </View>
-            <Text style={styles.stateTitle}>A casa não carregou</Text>
-            <Text style={styles.stateText}>{error}</Text>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => void loadPage()}
-              style={({ pressed }) => [styles.retryButton, pressed && styles.retryPressed]}
-            >
-              <Text style={styles.retryLabel}>Tentar novamente</Text>
-            </Pressable>
-          </View>
-        ) : page?.household ? (
-          <>
-            <HouseholdHero
-              household={page.household}
-              onMonthChange={setSelectedMonth}
-              onAddExpense={() => setExpenseSheetVisible(true)}
-              selectedMonth={selectedMonth}
-            />
-            <HouseholdMembers key={`members-${page.household.id}`} household={page.household} onUpdated={setPage} />
-            <HouseholdCleaning
-              key={`cleaning-${page.household.id}`}
-              household={page.household}
-              onUpdated={(updated) => setPage((current) => {
-                if (!updated.household) return updated;
-                if (!current?.household || current.household.id !== updated.household.id) return current;
-                return { ...current, household: { ...current.household, cleaningRotation: updated.household.cleaningRotation } };
-              })}
-            />
-            <HouseholdRecentActivity key={page.household.id} household={page.household} />
-            <HouseholdPayments key={`payments-${page.household.id}`} household={page.household} />
-          </>
+        {/* Brand colour also fills the iOS overscroll area above the header. */}
+        <View style={styles.overscrollFill} />
+
+        {household && !loading && !error ? (
+          <HouseholdHero
+            household={household}
+            onMonthChange={setSelectedMonth}
+            onAddExpense={() => setExpenseSheetVisible(true)}
+            selectedMonth={selectedMonth}
+          />
         ) : (
-          <View style={styles.emptyState}>
-            <View style={styles.emptyMark}>
-              <Text style={styles.emptyMarkText}>⌂</Text>
-            </View>
-            <Text style={styles.emptyEyebrow}>CASA COMPARTILHADA</Text>
-            <Text style={styles.emptyTitle}>A vida da casa, em conjunto.</Text>
-            <Text style={styles.emptyText}>
-              Quando você criar ou aceitar um convite para uma casa, os gastos e saldos compartilhados vão aparecer aqui.
-            </Text>
-            {page && page.pendingInvitations.length > 0 ? (
-              <View style={styles.invitationHint}>
-                <Text style={styles.invitationHintTitle}>
-                  {page.pendingInvitations.length === 1 ? "Você tem um convite" : `Você tem ${page.pendingInvitations.length} convites`}
-                </Text>
-                <Text style={styles.invitationHintText}>
-                  Abra a versão web para aceitar ou recusar um convite por enquanto.
-                </Text>
-              </View>
-            ) : null}
-          </View>
+          <NuHeader decoration={<HouseLineArt />}>
+            <Text style={styles.headerEyebrow}>Nosso lar</Text>
+            <Text style={styles.headerTitle}>Casa</Text>
+          </NuHeader>
         )}
+
+        {/* White sheet: rounded top tucked over the purple header. */}
+        <View style={styles.sheet}>
+          {loading ? (
+            <View style={styles.stateCard}>
+              <ActivityIndicator color={nu.brand} />
+              <Text style={styles.stateText}>Carregando sua casa…</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.stateCard}>
+              <View style={styles.stateIcon}>
+                <Text style={styles.stateIconText}>!</Text>
+              </View>
+              <Text style={styles.stateTitle}>A casa não carregou</Text>
+              <Text style={styles.stateText}>{error}</Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => void loadPage()}
+                style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+              >
+                <Text style={styles.retryLabel}>Tentar novamente</Text>
+              </Pressable>
+            </View>
+          ) : household ? (
+            <>
+              <HouseholdMembers key={`members-${household.id}`} household={household} onUpdated={setPage} />
+              <HouseholdCleaning
+                key={`cleaning-${household.id}`}
+                household={household}
+                onUpdated={(updated) => setPage((current) => {
+                  if (!updated.household) return updated;
+                  if (!current?.household || current.household.id !== updated.household.id) return current;
+                  return { ...current, household: { ...current.household, cleaningRotation: updated.household.cleaningRotation } };
+                })}
+              />
+              <HouseholdRecentActivity key={household.id} household={household} />
+              <HouseholdPayments key={`payments-${household.id}`} household={household} />
+            </>
+          ) : (
+            <View style={styles.stateCard}>
+              <View style={styles.emptyMark}>
+                <Text style={styles.emptyMarkText}>⌂</Text>
+              </View>
+              <Text style={styles.stateTitle}>A vida da casa, em conjunto</Text>
+              <Text style={styles.stateText}>
+                Quando você criar ou aceitar um convite para uma casa, os gastos e saldos compartilhados vão aparecer aqui.
+              </Text>
+              {page && page.pendingInvitations.length > 0 ? (
+                <View style={styles.invitationHint}>
+                  <Text style={styles.invitationHintTitle}>
+                    {page.pendingInvitations.length === 1 ? "Você tem um convite" : `Você tem ${page.pendingInvitations.length} convites`}
+                  </Text>
+                  <Text style={styles.invitationHintText}>
+                    Abra a versão web para aceitar ou recusar um convite por enquanto.
+                  </Text>
+                </View>
+              ) : null}
+            </View>
+          )}
+        </View>
       </ScrollView>
-      {page?.household ? (
+      {household ? (
         <HouseholdExpenseSheet
-          household={page.household}
+          household={household}
           onClose={() => setExpenseSheetVisible(false)}
           onSaved={(nextPage) => {
             setPage(nextPage);
@@ -146,55 +177,29 @@ export function HouseholdScreen() {
           visible={expenseSheetVisible}
         />
       ) : null}
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { flexGrow: 1, paddingHorizontal: 16, paddingTop: 12, paddingBottom: 28 },
-  stateCard: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 25,
-    borderWidth: 1,
-    justifyContent: "center",
-    marginTop: 4,
-    minHeight: 220,
-    padding: 24,
-  },
-  stateIcon: {
-    alignItems: "center",
-    backgroundColor: colors.expenseTint,
-    borderRadius: 20,
-    height: 40,
-    justifyContent: "center",
-    marginBottom: 10,
-    width: 40,
-  },
-  stateIconText: { color: colors.expense, fontSize: 19, fontWeight: "800" },
-  stateTitle: { color: colors.ink, fontSize: 17, fontWeight: "700" },
-  stateText: { color: colors.inkSoft, fontSize: 13, lineHeight: 19, marginTop: 7, textAlign: "center" },
-  retryButton: { backgroundColor: colors.forest, borderRadius: 13, marginTop: 17, paddingHorizontal: 18, paddingVertical: 12 },
-  retryPressed: { backgroundColor: colors.forestPressed, transform: [{ scale: 0.98 }] },
-  retryLabel: { color: colors.white, fontSize: 13, fontWeight: "700" },
-  emptyState: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 28,
-    borderWidth: 1,
-    marginTop: 4,
-    paddingHorizontal: 25,
-    paddingVertical: 32,
-  },
-  emptyMark: { alignItems: "center", backgroundColor: colors.header, borderRadius: 24, height: 58, justifyContent: "center", width: 58 },
-  emptyMarkText: { color: colors.forest, fontSize: 32, fontWeight: "700", marginTop: -3 },
-  emptyEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.55, marginTop: 19 },
-  emptyTitle: { color: colors.ink, fontSize: 24, fontWeight: "700", letterSpacing: -0.6, marginTop: 8, textAlign: "center" },
-  emptyText: { color: colors.inkSoft, fontSize: 14, lineHeight: 21, marginTop: 9, maxWidth: 300, textAlign: "center" },
-  invitationHint: { alignSelf: "stretch", backgroundColor: colors.header, borderRadius: 16, marginTop: 22, padding: 15 },
-  invitationHintTitle: { color: colors.ink, fontSize: 14, fontWeight: "700" },
-  invitationHintText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 4 },
+  screen: { backgroundColor: nu.white, flex: 1 },
+  content: { flexGrow: 1, paddingBottom: 28 },
+  overscrollFill: { backgroundColor: nu.brand, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
+  headerEyebrow: { color: "rgba(255,255,255,0.8)", fontSize: 12 },
+  headerTitle: { color: nu.white, fontSize: 20, fontWeight: "700", letterSpacing: -0.3, marginTop: 1 },
+  sheet: { backgroundColor: nu.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, flexGrow: 1, marginTop: -NU_SHEET_OVERLAP, paddingTop: 4 },
+  stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, marginHorizontal: 20, marginTop: 18, padding: 26 },
+  stateIcon: { alignItems: "center", backgroundColor: nu.negativeTint, borderRadius: 20, height: 40, justifyContent: "center", width: 40 },
+  stateIconText: { color: nu.negative, fontSize: 19, fontWeight: "800" },
+  stateTitle: { ...nuSection.title, textAlign: "center" },
+  stateText: { color: nu.inkSoft, fontSize: 13, lineHeight: 19, textAlign: "center" },
+  retryButton: { backgroundColor: nu.brand, borderRadius: 999, marginTop: 6, paddingHorizontal: 20, paddingVertical: 11 },
+  retryLabel: { color: nu.white, fontSize: 14, fontWeight: "600" },
+  pressed: { opacity: 0.75 },
+  emptyMark: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 26, height: 52, justifyContent: "center", width: 52 },
+  emptyMarkText: { color: nu.brand, fontSize: 28, fontWeight: "700", marginTop: -3 },
+  invitationHint: { alignSelf: "stretch", backgroundColor: nu.white, borderRadius: 12, marginTop: 10, padding: 14 },
+  invitationHintTitle: { color: nu.ink, fontSize: 14, fontWeight: "600" },
+  invitationHintText: { color: nu.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 4 },
 });
+

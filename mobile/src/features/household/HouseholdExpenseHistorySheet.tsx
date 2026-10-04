@@ -8,7 +8,7 @@ import { HouseholdExpenseRow } from "@/features/household/HouseholdExpenseRow";
 import { HouseholdProofViewer } from "@/features/household/HouseholdProofViewer";
 import { expenseMonthLabel, groupHouseholdExpenses, mergeHouseholdExpenses } from "@/features/household/expenseHistory";
 import { ApiError, getHouseholdExpenseHistory } from "@/services/api";
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdExpense } from "@/types/household";
 
 export function HouseholdExpenseHistorySheet({ householdId, currency, currentMemberId, onClose }: {
@@ -77,7 +77,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
               <Text style={styles.subtitle}>O histórico da casa, mês a mês.</Text>
             </View>
             <Pressable accessibilityRole="button" accessibilityLabel="Fechar histórico" onPress={onClose} style={styles.close}>
-              <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={18} tintColor={colors.ink} />
+              <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={18} tintColor={nu.ink} />
             </Pressable>
           </View>
           <SectionList
@@ -90,7 +90,7 @@ export function HouseholdExpenseHistorySheet({ householdId, currency, currentMem
             ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhuma despesa registrada ainda.</Text> : null}
             ListFooterComponent={
               <View style={styles.footer}>
-                {loading ? <ActivityIndicator accessibilityLabel="Carregando despesas" color={colors.income} /> : null}
+                {loading ? <ActivityIndicator accessibilityLabel="Carregando despesas" color={nu.brand} /> : null}
                 {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
                 {!loading && (hasMore || error) ? (
                   <Pressable accessibilityRole="button" onPress={() => void load(nextPage)} style={styles.loadMore}>
@@ -114,18 +114,18 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
   hidden: { display: "none" },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(19,36,28,0.48)" },
-  sheet: { alignSelf: "center", backgroundColor: "#F6F5EF", height: "90%", maxWidth: 640, width: "100%", borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
-  handle: { alignSelf: "center", backgroundColor: "#C6D1C1", borderRadius: 3, height: 5, width: 36, marginTop: 10 },
-  header: { flexDirection: "row", alignItems: "center", gap: 10, padding: 20, borderBottomWidth: 1, borderBottomColor: "#E2E6DB" },
+  sheet: { alignSelf: "center", backgroundColor: nu.surface, height: "90%", maxWidth: 640, width: "100%", borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
+  handle: { alignSelf: "center", backgroundColor: nu.track, borderRadius: 3, height: 5, width: 36, marginTop: 10 },
+  header: { flexDirection: "row", alignItems: "center", gap: 10, padding: 20, borderBottomWidth: 1, borderBottomColor: nu.hairline },
   headerCopy: { flex: 1 },
-  title: { color: colors.ink, fontSize: 21, fontWeight: "800", letterSpacing: -0.4 },
-  subtitle: { color: colors.inkSoft, fontSize: 12, marginTop: 5 },
-  close: { alignItems: "center", justifyContent: "center", backgroundColor: "#EAEDE4", borderRadius: 22, width: 44, height: 44 },
+  title: { color: nu.ink, fontSize: 21, fontWeight: "800", letterSpacing: -0.4 },
+  subtitle: { color: nu.inkSoft, fontSize: 12, marginTop: 5 },
+  close: { alignItems: "center", justifyContent: "center", backgroundColor: nu.hairline, borderRadius: 22, width: 44, height: 44 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
-  month: { color: colors.income, fontSize: 15, fontWeight: "700", marginTop: 22, marginBottom: 12 },
+  month: { color: nu.brand, fontSize: 15, fontWeight: "700", marginTop: 22, marginBottom: 12 },
   footer: { alignItems: "center", gap: 12, paddingTop: 18 },
-  message: { color: colors.inkSoft, fontSize: 12, textAlign: "center", paddingVertical: 18 },
-  error: { color: colors.danger, fontSize: 12, lineHeight: 18, textAlign: "center" },
-  loadMore: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 14, minHeight: 46, paddingHorizontal: 20 },
-  loadMoreText: { color: colors.income, fontSize: 12, fontWeight: "700" },
+  message: { color: nu.inkSoft, fontSize: 12, textAlign: "center", paddingVertical: 18 },
+  error: { color: nu.negative, fontSize: 12, lineHeight: 18, textAlign: "center" },
+  loadMore: { alignItems: "center", justifyContent: "center", backgroundColor: nu.brandTint, borderRadius: 14, minHeight: 46, paddingHorizontal: 20 },
+  loadMoreText: { color: nu.brand, fontSize: 12, fontWeight: "700" },
 });

@@ -20,8 +20,8 @@ export function groupHouseholdPayments(payments: HouseholdPayment[]) {
 }
 
 export const paymentStatuses = {
-  CONFIRMED: { label: "Confirmado", ink: "#326548", background: "#E3EDDA" },
-  PENDING: { label: "Pendente", ink: "#80652D", background: "#F2E9D5" },
-  REJECTED: { label: "Recusado", ink: "#A44735", background: "#F3E3DC" },
-  CANCELLED: { label: "Cancelado", ink: "#52656A", background: "#EBEDE5" },
+  CONFIRMED: { label: "Confirmado", ink: "#1E8A5A", background: "#E3F4EB" },
+  PENDING: { label: "Pendente", ink: "#8A5A00", background: "#FBF1DC" },
+  REJECTED: { label: "Recusado", ink: "#C2412D", background: "#FBE7E3" },
+  CANCELLED: { label: "Cancelado", ink: "#6B6B76", background: "#ECECF1" },
 } satisfies Record<HouseholdPayment["status"], { label: string; ink: string; background: string }>;

@@ -24,7 +24,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { HouseholdLandscape } from "@/features/household/HouseholdLandscape";
 import { ApiError, createHouseholdExpense, uploadHouseholdExpenseAttachments } from "@/services/api";
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdHeroData, HouseholdPageResponse } from "@/types/household";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
@@ -277,9 +277,9 @@ export function HouseholdExpenseSheet({
               <Svg height="100%" width="100%" style={StyleSheet.absoluteFill}>
                 <Defs>
                   <LinearGradient id="expenseHeaderFade" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <Stop offset="0" stopColor="#EDF2E5" stopOpacity="1" />
-                    <Stop offset="0.55" stopColor="#EDF2E5" stopOpacity="0.78" />
-                    <Stop offset="1" stopColor="#EDF2E5" stopOpacity="0.22" />
+                    <Stop offset="0" stopColor={nu.brandTint} stopOpacity="1" />
+                    <Stop offset="0.55" stopColor={nu.brandTint} stopOpacity="0.78" />
+                    <Stop offset="1" stopColor={nu.brandTint} stopOpacity="0.22" />
                   </LinearGradient>
                 </Defs>
                 <Rect fill="url(#expenseHeaderFade)" height="100%" width="100%" />
@@ -288,7 +288,7 @@ export function HouseholdExpenseSheet({
             <View style={styles.handle} />
             <View style={styles.modalHeader}>
               <View style={styles.titleIcon}>
-                <SymbolView name={icons.expense} size={20} tintColor={colors.forest} weight="semibold" />
+                <SymbolView name={icons.expense} size={20} tintColor={nu.brand} weight="semibold" />
               </View>
               <View style={styles.titleCopy}>
                 <Text numberOfLines={1} style={styles.householdLabel}>{household.name}</Text>
@@ -303,7 +303,7 @@ export function HouseholdExpenseSheet({
                 onPress={onClose}
                 style={({ pressed }) => [styles.closeButton, pressed && styles.pressed]}
               >
-                <SymbolView name={icons.close} size={18} tintColor={colors.ink} weight="semibold" />
+                <SymbolView name={icons.close} size={18} tintColor={nu.ink} weight="semibold" />
               </Pressable>
             </View>
           </View>
@@ -325,13 +325,13 @@ export function HouseholdExpenseSheet({
                     keyboardType="decimal-pad"
                     onChangeText={(value) => setAmount(value.replace(/[^0-9.,]/g, ""))}
                     placeholder="0,00"
-                    placeholderTextColor={colors.inkFaint}
-                    selectionColor={colors.forest}
+                    placeholderTextColor={nu.inkFaint}
+                    selectionColor={nu.brand}
                     style={[styles.amountInput, { width: Math.max(92, (amount || "0,00").length * 23) }]}
                     value={amount}
                   />
                   <View style={styles.amountHintRow}>
-                    <SymbolView name={icons.people} size={14} tintColor={colors.income} />
+                    <SymbolView name={icons.people} size={14} tintColor={nu.brand} />
                     <Text numberOfLines={1} style={styles.amountHint}>
                       {selectedCount >= 2 ? `Dividido por ${selectedCount} pessoas` : "Selecione quem vai dividir"}
                     </Text>
@@ -354,12 +354,12 @@ export function HouseholdExpenseSheet({
                       style={[styles.textField, styles.dateField, styles.dateTrigger]}
                     >
                       <Text style={styles.dateTriggerText}>{dateInput}</Text>
-                      <SymbolView name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }} size={17} tintColor={colors.forest} weight="semibold" />
+                      <SymbolView name={{ ios: "calendar", android: "calendar_month", web: "calendar_month" }} size={17} tintColor={nu.brand} weight="semibold" />
                     </Pressable>
                     {datePickerVisible && Platform.OS === "ios" ? (
                       <View style={styles.iosCalendar}>
                         <DateTimePicker
-                          accentColor={colors.income}
+                          accentColor={nu.brand}
                           disabled={formLocked}
                           display="inline"
                           locale="pt_BR"
@@ -399,7 +399,7 @@ export function HouseholdExpenseSheet({
                     maxLength={10}
                     onChangeText={(value) => setDateInput(formatDateInput(value))}
                     placeholder="DD/MM/AAAA"
-                    placeholderTextColor={colors.inkFaint}
+                    placeholderTextColor={nu.inkFaint}
                     style={[styles.textField, styles.dateField, !parsedExpenseDate && dateInput.length >= 10 && styles.invalidField]}
                     value={dateInput}
                   />
@@ -438,12 +438,12 @@ export function HouseholdExpenseSheet({
                         { backgroundColor: tone.background },
                         selected && styles.categoryIconSelected,
                       ]}>
-                        <SymbolView name={categoryIcons[item.value]} size={16} tintColor={selected ? colors.white : tone.ink} weight="medium" />
+                        <SymbolView name={categoryIcons[item.value]} size={16} tintColor={selected ? nu.white : tone.ink} weight="medium" />
                       </View>
                       <Text style={[styles.categoryText, selected && styles.categoryTextSelected]}>{item.label}</Text>
                       {selected ? (
                         <View style={styles.categoryCheck}>
-                          <SymbolView name={icons.check} size={9} tintColor={colors.income} weight="bold" />
+                          <SymbolView name={icons.check} size={9} tintColor={nu.brand} weight="bold" />
                         </View>
                       ) : null}
                     </Pressable>
@@ -461,7 +461,7 @@ export function HouseholdExpenseSheet({
                     maxLength={120}
                     onChangeText={setDescription}
                     placeholder={selectedCategory.detailPlaceholder}
-                    placeholderTextColor={colors.inkFaint}
+                    placeholderTextColor={nu.inkFaint}
                     returnKeyType="done"
                     style={styles.textField}
                     value={description}
@@ -469,7 +469,7 @@ export function HouseholdExpenseSheet({
                 </View>
               ) : (
                 <View style={styles.autoDescription}>
-                  <SymbolView name={icons.check} size={15} tintColor={colors.forest} weight="bold" />
+                  <SymbolView name={icons.check} size={15} tintColor={nu.brand} weight="bold" />
                   <Text style={styles.autoDescriptionCopy}>
                     Vamos registrar como <Text style={styles.autoDescriptionName}>{selectedCategory.defaultDescription}</Text>
                   </Text>
@@ -510,7 +510,7 @@ export function HouseholdExpenseSheet({
                         {payer ? " · pagou" : ""}
                       </Text>
                       <View style={[styles.checkbox, selected && styles.checkboxSelected]}>
-                        {selected ? <SymbolView name={icons.check} size={12} tintColor={colors.white} weight="bold" /> : null}
+                        {selected ? <SymbolView name={icons.check} size={12} tintColor={nu.white} weight="bold" /> : null}
                       </View>
                     </Pressable>
                   );
@@ -520,7 +520,7 @@ export function HouseholdExpenseSheet({
               {selectedCount >= 2 && parsedAmount > 0 ? (
                 <View style={styles.splitPreview}>
                   <View style={styles.splitPreviewHeading}>
-                    <SymbolView name={icons.people} size={17} tintColor={colors.income} />
+                    <SymbolView name={icons.people} size={17} tintColor={nu.brand} />
                     <Text style={styles.splitPreviewLabel}>Por pessoa, aproximadamente</Text>
                   </View>
                   <Text style={styles.splitPreviewAmount}>{formatCurrency(perPerson, household.currency)}</Text>
@@ -550,7 +550,7 @@ export function HouseholdExpenseSheet({
                         onPress={() => setAttachments((current) => current.filter((_, itemIndex) => itemIndex !== index))}
                         style={styles.removeAttachment}
                       >
-                        <SymbolView name={icons.remove} size={20} tintColor={colors.ink} weight="semibold" />
+                        <SymbolView name={icons.remove} size={20} tintColor={nu.ink} weight="semibold" />
                       </Pressable>
                     </View>
                   ))}
@@ -563,9 +563,9 @@ export function HouseholdExpenseSheet({
                   onPress={() => void chooseAttachments()}
                   style={({ pressed }) => [styles.attachmentButton, pressed && styles.pressed]}
                 >
-                  <SymbolView name={icons.attachment} size={17} tintColor={colors.forest} weight="semibold" />
+                  <SymbolView name={icons.attachment} size={17} tintColor={nu.brand} weight="semibold" />
                   <Text style={styles.attachmentButtonText}>{attachments.length ? "Adicionar mais fotos" : "Adicionar foto do comprovante"}</Text>
-                  <SymbolView name={icons.plus} size={16} tintColor={colors.forest} weight="semibold" />
+                  <SymbolView name={icons.plus} size={16} tintColor={nu.brand} weight="semibold" />
                 </Pressable>
               ) : null}
             </View>
@@ -589,10 +589,10 @@ export function HouseholdExpenseSheet({
               style={({ pressed }) => [styles.saveButton, !canSubmit && createdExpenseId === null && styles.saveButtonDisabled, pressed && (canSubmit || createdExpenseId !== null) && styles.pressed]}
             >
               {saving ? (
-                <ActivityIndicator color={colors.white} />
+                <ActivityIndicator color={nu.white} />
               ) : (
                 <>
-                  <SymbolView name={icons.plus} size={18} tintColor={colors.white} weight="bold" />
+                  <SymbolView name={icons.plus} size={18} tintColor={nu.white} weight="bold" />
                   <Text style={styles.saveButtonText}>{createdExpenseId !== null ? "Tentar enviar comprovante" : "Adicionar à casa"}</Text>
                 </>
               )}
@@ -617,93 +617,93 @@ export function HouseholdExpenseSheet({
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
   backdrop: { backgroundColor: "rgba(19, 36, 28, 0.48)", ...StyleSheet.absoluteFill },
-  sheet: { alignSelf: "center", backgroundColor: "#F6F5EF", borderTopLeftRadius: 32, borderTopRightRadius: 32, height: "90%", maxHeight: "90%", maxWidth: 640, overflow: "hidden", width: "100%" },
-  headerBanner: { backgroundColor: "#EDF2E5", borderBottomColor: "#DFE7D6", borderBottomWidth: 1, marginBottom: 14, overflow: "hidden" },
+  sheet: { alignSelf: "center", backgroundColor: nu.surface, borderTopLeftRadius: 32, borderTopRightRadius: 32, height: "90%", maxHeight: "90%", maxWidth: 640, overflow: "hidden", width: "100%" },
+  headerBanner: { backgroundColor: nu.brandTint, borderBottomColor: nu.hairline, borderBottomWidth: 1, marginBottom: 14, overflow: "hidden" },
   headerArt: { bottom: 0, position: "absolute", right: 0, top: 0, width: 190 },
-  handle: { alignSelf: "center", backgroundColor: "#C6D1C1", borderRadius: 3, height: 5, marginTop: 10, width: 36 },
+  handle: { alignSelf: "center", backgroundColor: nu.track, borderRadius: 3, height: 5, marginTop: 10, width: 36 },
   modalHeader: { alignItems: "center", flexDirection: "row", paddingHorizontal: 20, paddingTop: 18, paddingBottom: 20 },
-  titleIcon: { alignItems: "center", backgroundColor: "#E3ECD9", borderColor: "#D4DFC9", borderWidth: 1, borderRadius: 17, height: 48, justifyContent: "center", marginRight: 12, width: 48 },
+  titleIcon: { alignItems: "center", backgroundColor: nu.brandTint, borderColor: nu.track, borderWidth: 1, borderRadius: 17, height: 48, justifyContent: "center", marginRight: 12, width: 48 },
   titleCopy: { flex: 1, minWidth: 0 },
-  householdLabel: { color: "#60735A", fontSize: 10, fontWeight: "700", letterSpacing: 0.8, marginBottom: 3 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
-  headerHint: { color: colors.inkSoft, fontSize: 11, marginTop: 4 },
-  closeButton: { alignItems: "center", backgroundColor: "#EAEDE4", borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 6, width: 44 },
+  householdLabel: { color: nu.brand, fontSize: 10, fontWeight: "700", letterSpacing: 0.8, marginBottom: 3 },
+  title: { color: nu.ink, fontSize: 20, fontWeight: "800", letterSpacing: -0.5 },
+  headerHint: { color: nu.inkSoft, fontSize: 11, marginTop: 4 },
+  closeButton: { alignItems: "center", backgroundColor: nu.hairline, borderRadius: 22, height: 44, justifyContent: "center", marginLeft: 6, width: 44 },
   formScroll: { flex: 1 },
   form: { gap: 14, paddingHorizontal: 16, paddingBottom: 22 },
-  formCard: { backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderRadius: 22, borderWidth: 1, padding: 16 },
-  sectionTitle: { color: colors.ink, fontSize: 15, fontWeight: "700", letterSpacing: -0.2 },
-  sectionHint: { color: colors.inkSoft, fontSize: 11, lineHeight: 16, marginTop: 4 },
-  sheetFooter: { backgroundColor: "#F6F5EF", borderTopColor: "#E0E5D9", borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
+  formCard: { backgroundColor: nu.surface, borderColor: nu.hairline, borderRadius: 22, borderWidth: 1, padding: 16 },
+  sectionTitle: { color: nu.ink, fontSize: 15, fontWeight: "700", letterSpacing: -0.2 },
+  sectionHint: { color: nu.inkSoft, fontSize: 11, lineHeight: 16, marginTop: 4 },
+  sheetFooter: { backgroundColor: nu.surface, borderTopColor: nu.hairline, borderTopWidth: 1, paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 },
   footerSummary: { alignItems: "center", flexDirection: "row", gap: 12, justifyContent: "space-between", marginBottom: 10 },
-  footerSummaryLabel: { color: colors.inkSoft, fontSize: 12 },
-  footerSummaryAmount: { color: colors.ink, flexShrink: 1, fontSize: 17, fontWeight: "800" },
-  footerError: { color: colors.danger, fontSize: 11, fontWeight: "600", lineHeight: 15, marginBottom: 7 },
-  amountDateRow: { backgroundColor: "#E8EFDF", borderColor: "#D8E2CE", borderRadius: 24, borderWidth: 1, padding: 18 },
+  footerSummaryLabel: { color: nu.inkSoft, fontSize: 12 },
+  footerSummaryAmount: { color: nu.ink, flexShrink: 1, fontSize: 17, fontWeight: "800" },
+  footerError: { color: nu.negative, fontSize: 11, fontWeight: "600", lineHeight: 15, marginBottom: 7 },
+  amountDateRow: { backgroundColor: nu.brandTint, borderColor: nu.track, borderRadius: 24, borderWidth: 1, padding: 18 },
   amountColumn: { minWidth: 0 },
-  amountLabel: { color: "#52664B", fontSize: 12, fontWeight: "600" },
+  amountLabel: { color: nu.brand, fontSize: 12, fontWeight: "600" },
   amountHintRow: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 4, marginLeft: 4 },
-  amountHint: { color: "#52664B", fontSize: 11, lineHeight: 16 },
-  dateColumn: { borderTopColor: "#D2DDC8", borderTopWidth: 1, marginTop: 16, minWidth: 0 },
-  fieldLabel: { color: colors.inkSoft, fontSize: 12, fontWeight: "600", marginBottom: 8, marginTop: 14 },
+  amountHint: { color: nu.brand, fontSize: 11, lineHeight: 16 },
+  dateColumn: { borderTopColor: nu.track, borderTopWidth: 1, marginTop: 16, minWidth: 0 },
+  fieldLabel: { color: nu.inkSoft, fontSize: 12, fontWeight: "600", marginBottom: 8, marginTop: 14 },
   amountField: { alignItems: "center", flexDirection: "row", minHeight: 68 },
-  currencyMark: { color: "#55764F", fontSize: 28, fontWeight: "600", marginRight: 8 },
-  amountInput: { color: "#284D3C", flexShrink: 1, fontSize: 42, fontWeight: "800", letterSpacing: -1.5, minHeight: 64, minWidth: 0, paddingHorizontal: 0, paddingVertical: 4 },
-  textField: { backgroundColor: "#F8F9F3", borderColor: "#DCE3D5", borderRadius: 14, borderWidth: 1, color: colors.ink, fontSize: 14, minHeight: 50, paddingHorizontal: 14, paddingVertical: 12 },
-  dateField: { backgroundColor: "#F6F9F0", fontSize: 13, minHeight: 50, paddingHorizontal: 12, paddingVertical: 0 },
+  currencyMark: { color: nu.brand, fontSize: 28, fontWeight: "600", marginRight: 8 },
+  amountInput: { color: nu.ink, flexShrink: 1, fontSize: 42, fontWeight: "800", letterSpacing: -1.5, minHeight: 64, minWidth: 0, paddingHorizontal: 0, paddingVertical: 4 },
+  textField: { backgroundColor: nu.surface, borderColor: nu.hairline, borderRadius: 14, borderWidth: 1, color: nu.ink, fontSize: 14, minHeight: 50, paddingHorizontal: 14, paddingVertical: 12 },
+  dateField: { backgroundColor: nu.surface, fontSize: 13, minHeight: 50, paddingHorizontal: 12, paddingVertical: 0 },
   dateTrigger: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  dateTriggerText: { color: colors.ink, fontSize: 13, fontWeight: "600" },
+  dateTriggerText: { color: nu.ink, fontSize: 13, fontWeight: "600" },
   nativeDatePicker: { height: 50, width: "100%" },
-  iosCalendar: { backgroundColor: "#F6F9F0", borderColor: "#DCE3D5", borderRadius: 16, borderWidth: 1, marginTop: 10, overflow: "hidden" },
+  iosCalendar: { backgroundColor: nu.surface, borderColor: nu.hairline, borderRadius: 16, borderWidth: 1, marginTop: 10, overflow: "hidden" },
   iosDatePicker: { minHeight: 320, width: "100%" },
-  calendarCloseButton: { alignItems: "center", borderTopColor: "#DCE3D5", borderTopWidth: StyleSheet.hairlineWidth, justifyContent: "center", minHeight: 44 },
-  calendarCloseText: { color: colors.income, fontSize: 12, fontWeight: "700" },
-  invalidField: { borderColor: colors.danger },
-  dateError: { color: colors.danger, fontSize: 11 },
+  calendarCloseButton: { alignItems: "center", borderTopColor: nu.hairline, borderTopWidth: StyleSheet.hairlineWidth, justifyContent: "center", minHeight: 44 },
+  calendarCloseText: { color: nu.brand, fontSize: 12, fontWeight: "700" },
+  invalidField: { borderColor: nu.negative },
+  dateError: { color: nu.negative, fontSize: 11 },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 14 },
-  categoryChip: { alignItems: "center", backgroundColor: "#FAFBF6", borderColor: "#E4E8DC", borderRadius: 16, borderWidth: 1, flexDirection: "row", gap: 7, minHeight: 48, paddingLeft: 7, paddingRight: 15, paddingVertical: 8 },
-  categoryChipSelected: { backgroundColor: "#E8F0DF", borderColor: "#8FA87B" },
+  categoryChip: { alignItems: "center", backgroundColor: nu.surface, borderColor: nu.hairline, borderRadius: 16, borderWidth: 1, flexDirection: "row", gap: 7, minHeight: 48, paddingLeft: 7, paddingRight: 15, paddingVertical: 8 },
+  categoryChipSelected: { backgroundColor: nu.brandTint, borderColor: nu.brand },
   categoryChipPressed: { opacity: 0.85, transform: [{ scale: 0.97 }] },
   categoryIcon: { alignItems: "center", borderRadius: 10, height: 28, justifyContent: "center", width: 28 },
-  categoryIconSelected: { backgroundColor: "#638253" },
+  categoryIconSelected: { backgroundColor: nu.brand },
   categoryCheck: { position: "absolute", right: 4, top: 4 },
-  categoryText: { color: colors.inkSoft, fontSize: 11, fontWeight: "600" },
-  categoryTextSelected: { color: colors.income, fontWeight: "800" },
-  autoDescription: { alignItems: "center", backgroundColor: "#EFF3E8", borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 16, paddingHorizontal: 12, paddingVertical: 11 },
-  autoDescriptionCopy: { color: colors.inkSoft, flex: 1, fontSize: 12, lineHeight: 17 },
-  autoDescriptionName: { color: colors.ink, fontWeight: "700" },
+  categoryText: { color: nu.inkSoft, fontSize: 11, fontWeight: "600" },
+  categoryTextSelected: { color: nu.brand, fontWeight: "800" },
+  autoDescription: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 13, flexDirection: "row", gap: 8, marginTop: 16, paddingHorizontal: 12, paddingVertical: 11 },
+  autoDescriptionCopy: { color: nu.inkSoft, flex: 1, fontSize: 12, lineHeight: 17 },
+  autoDescriptionName: { color: nu.ink, fontWeight: "700" },
   splitHeading: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between" },
-  splitHint: { color: colors.inkSoft, fontSize: 11, marginTop: 4 },
-  selectedCount: { backgroundColor: "#EDF2E5", borderRadius: 10, color: colors.income, fontSize: 11, fontWeight: "800", overflow: "hidden", paddingHorizontal: 9, paddingVertical: 6 },
+  splitHint: { color: nu.inkSoft, fontSize: 11, marginTop: 4 },
+  selectedCount: { backgroundColor: nu.brandTint, borderRadius: 10, color: nu.brand, fontSize: 11, fontWeight: "800", overflow: "hidden", paddingHorizontal: 9, paddingVertical: 6 },
   memberList: { gap: 6, marginTop: 14 },
-  memberRow: { alignItems: "center", backgroundColor: "#F8F8F3", borderColor: "#E8EBE1", borderRadius: 14, borderWidth: 1, flexDirection: "row", minHeight: 58, paddingHorizontal: 10, paddingVertical: 8 },
-  memberRowSelected: { backgroundColor: "#F0F5E9", borderColor: "#DAE5CE" },
-  memberAvatar: { alignItems: "center", backgroundColor: "#EAEDE4", borderRadius: 18, height: 36, justifyContent: "center", marginRight: 10, width: 36 },
-  memberAvatarSelected: { backgroundColor: "#DCE8D1" },
-  memberInitial: { color: colors.inkFaint, fontSize: 13, fontWeight: "700" },
-  memberInitialSelected: { color: colors.income },
-  memberName: { color: colors.ink, flex: 1, fontSize: 13, fontWeight: "600" },
-  checkbox: { alignItems: "center", borderColor: "#C9D5C0", borderRadius: 12, borderWidth: 1.5, height: 24, justifyContent: "center", width: 24 },
-  checkboxSelected: { backgroundColor: "#54754B", borderColor: "#54754B" },
-  splitPreview: { backgroundColor: "#E6EFDB", borderRadius: 16, marginTop: 14, padding: 14 },
+  memberRow: { alignItems: "center", backgroundColor: nu.surface, borderColor: nu.hairline, borderRadius: 14, borderWidth: 1, flexDirection: "row", minHeight: 58, paddingHorizontal: 10, paddingVertical: 8 },
+  memberRowSelected: { backgroundColor: nu.brandTint, borderColor: nu.brandTint },
+  memberAvatar: { alignItems: "center", backgroundColor: nu.hairline, borderRadius: 18, height: 36, justifyContent: "center", marginRight: 10, width: 36 },
+  memberAvatarSelected: { backgroundColor: nu.brandTint },
+  memberInitial: { color: nu.inkFaint, fontSize: 13, fontWeight: "700" },
+  memberInitialSelected: { color: nu.brand },
+  memberName: { color: nu.ink, flex: 1, fontSize: 13, fontWeight: "600" },
+  checkbox: { alignItems: "center", borderColor: nu.track, borderRadius: 12, borderWidth: 1.5, height: 24, justifyContent: "center", width: 24 },
+  checkboxSelected: { backgroundColor: nu.brand, borderColor: nu.brand },
+  splitPreview: { backgroundColor: nu.brandTint, borderRadius: 16, marginTop: 14, padding: 14 },
   splitPreviewHeading: { alignItems: "center", flexDirection: "row", gap: 7 },
-  splitPreviewLabel: { color: "#52664B", flex: 1, fontSize: 11 },
-  splitPreviewAmount: { color: colors.income, fontSize: 25, fontWeight: "800", letterSpacing: -0.5, marginTop: 6 },
-  roundingHint: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
+  splitPreviewLabel: { color: nu.brand, flex: 1, fontSize: 11 },
+  splitPreviewAmount: { color: nu.brand, fontSize: 25, fontWeight: "800", letterSpacing: -0.5, marginTop: 6 },
+  roundingHint: { color: nu.inkSoft, fontSize: 10, marginTop: 4 },
   attachmentHeading: { alignItems: "center", flexDirection: "row", gap: 8, justifyContent: "space-between" },
   attachmentCopy: { flex: 1 },
-  optionalLabel: { color: colors.inkFaint, fontSize: 10, fontWeight: "500" },
-  attachmentHint: { color: colors.inkSoft, fontSize: 10, lineHeight: 15, marginTop: 5 },
+  optionalLabel: { color: nu.inkFaint, fontSize: 10, fontWeight: "500" },
+  attachmentHint: { color: nu.inkSoft, fontSize: 10, lineHeight: 15, marginTop: 5 },
   attachmentList: { gap: 12, paddingTop: 14, paddingBottom: 6, paddingRight: 6 },
   attachmentPreview: { height: 84, position: "relative", width: 84 },
-  attachmentImage: { backgroundColor: colors.header, borderRadius: 14, height: 84, width: 84 },
-  removeAttachment: { alignItems: "center", backgroundColor: "#FFFEFA", borderRadius: 14, height: 28, justifyContent: "center", position: "absolute", right: -5, top: -5, width: 28 },
-  attachmentButton: { alignItems: "center", backgroundColor: "#F7F9F1", borderColor: "#BCCAAD", borderRadius: 15, borderStyle: "dashed", borderWidth: 1, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 64, marginTop: 14, paddingHorizontal: 14 },
-  attachmentButtonText: { color: colors.income, flex: 1, fontSize: 12, fontWeight: "600" },
-  errorText: { color: colors.danger, fontSize: 12, fontWeight: "600", lineHeight: 18 },
-  saveButton: { alignItems: "center", backgroundColor: "#42633D", borderRadius: 17, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 54, paddingHorizontal: 14 },
-  saveButtonDisabled: { backgroundColor: "#9FAC96" },
-  saveButtonText: { color: colors.white, flexShrink: 1, fontSize: 14, fontWeight: "800" },
+  attachmentImage: { backgroundColor: nu.brandTint, borderRadius: 14, height: 84, width: 84 },
+  removeAttachment: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 14, height: 28, justifyContent: "center", position: "absolute", right: -5, top: -5, width: 28 },
+  attachmentButton: { alignItems: "center", backgroundColor: nu.surface, borderColor: nu.track, borderRadius: 15, borderStyle: "dashed", borderWidth: 1, flexDirection: "row", gap: 9, justifyContent: "center", minHeight: 64, marginTop: 14, paddingHorizontal: 14 },
+  attachmentButtonText: { color: nu.brand, flex: 1, fontSize: 12, fontWeight: "600" },
+  errorText: { color: nu.negative, fontSize: 12, fontWeight: "600", lineHeight: 18 },
+  saveButton: { alignItems: "center", backgroundColor: nu.brand, borderRadius: 17, flexDirection: "row", gap: 8, justifyContent: "center", minHeight: 54, paddingHorizontal: 14 },
+  saveButtonDisabled: { backgroundColor: nu.brand },
+  saveButtonText: { color: nu.white, flexShrink: 1, fontSize: 14, fontWeight: "800" },
   skipAttachmentButton: { alignItems: "center", minHeight: 44, justifyContent: "center" },
-  skipAttachmentText: { color: colors.inkSoft, fontSize: 12, fontWeight: "700" },
+  skipAttachmentText: { color: nu.inkSoft, fontSize: 12, fontWeight: "700" },
   pressed: { opacity: 0.78 },
 });

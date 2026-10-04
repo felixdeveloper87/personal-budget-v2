@@ -31,11 +31,12 @@ export const categories = [
   { value: "Other", label: "Outro", defaultDescription: null, detailPlaceholder: "Ex.: o que foi comprado ou feito?" },
 ] as const;
 
+// Nubank-style: every category icon sits in the same soft lilac circle.
 export const categoryPalette = {
-  sage: { background: "#E5EDDC", ink: "#526E43" },
-  sand: { background: "#F2E9D5", ink: "#8B7040" },
-  blue: { background: "#E3ECED", ink: "#507780" },
-  clay: { background: "#F0E3DA", ink: "#916951" },
+  sage: { background: "#F3E8FC", ink: "#820AD1" },
+  sand: { background: "#F3E8FC", ink: "#820AD1" },
+  blue: { background: "#F3E8FC", ink: "#820AD1" },
+  clay: { background: "#F3E8FC", ink: "#820AD1" },
 };
 
 export const categoryTones = {

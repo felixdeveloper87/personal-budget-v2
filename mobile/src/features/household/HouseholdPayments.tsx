@@ -4,7 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { HouseholdPaymentHistorySheet } from "@/features/household/HouseholdPaymentHistorySheet";
 import { HouseholdPaymentRow } from "@/features/household/HouseholdPaymentRow";
 import { sortHouseholdPayments } from "@/features/household/paymentHistory";
-import { colors } from "@/theme/colors";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import type { HouseholdHeroData } from "@/types/household";
 
 export function HouseholdPayments({ household }: { household: HouseholdHeroData }) {
@@ -15,7 +15,6 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
     <View style={styles.section}>
       <View style={styles.heading}>
         <View style={styles.headingCopy}>
-          <Text style={styles.eyebrow}>ACERTOS DA CASA</Text>
           <Text style={styles.title}>Pagamentos</Text>
         </View>
         {recentPayments.length > 0 ? (
@@ -29,6 +28,7 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.carousel}
+        style={styles.carouselScroll}
           snapToInterval={200}
           snapToAlignment="start"
           decelerationRate="fast"
@@ -53,15 +53,16 @@ export function HouseholdPayments({ household }: { household: HouseholdHeroData 
 }
 
 const styles = StyleSheet.create({
-  section: { marginTop: 26 },
+  section: { borderTopColor: nu.hairline, borderTopWidth: 1, paddingHorizontal: 20, paddingVertical: 20 },
   heading: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 14 },
   headingCopy: { flex: 1 },
-  eyebrow: { color: colors.income, fontSize: 9, fontWeight: "800", letterSpacing: 1.2 },
-  title: { color: colors.ink, fontSize: 20, fontWeight: "700", letterSpacing: -0.4, marginTop: 5 },
-  seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", borderRadius: 13, minHeight: 44, paddingHorizontal: 12 },
-  seeAllText: { color: colors.income, fontSize: 11, fontWeight: "700" },
-  carousel: { gap: 8, paddingBottom: 2 },
-  empty: { backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 18, padding: 20 },
-  emptyTitle: { color: colors.ink, fontSize: 14, fontWeight: "700" },
-  emptyText: { color: colors.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
+  title: nuSection.title,
+  seeAll: { alignItems: "center", justifyContent: "center", backgroundColor: nu.brandTint, borderRadius: 999, minHeight: 34, paddingHorizontal: 14 },
+  seeAllText: { color: nu.brand, fontSize: 12, fontWeight: "600" },
+  // Bleeds to the screen edges so cards scroll under the gutter, Nubank-style.
+  carouselScroll: { marginHorizontal: -20 },
+  carousel: { gap: 10, paddingBottom: 2, paddingHorizontal: 20 },
+  empty: { backgroundColor: nu.surface, borderRadius: 16, padding: 20 },
+  emptyTitle: { color: nu.ink, fontSize: 14, fontWeight: "700" },
+  emptyText: { color: nu.inkSoft, fontSize: 12, lineHeight: 18, marginTop: 5 },
 });

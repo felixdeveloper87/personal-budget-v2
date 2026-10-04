@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdCleaningDuty } from "@/types/household";
 
 export function HouseholdCleaningProgress({ duties }: { duties: HouseholdCleaningDuty[] }) {
@@ -17,7 +17,7 @@ export function HouseholdCleaningProgress({ duties }: { duties: HouseholdCleanin
 
 const styles = StyleSheet.create({
   wrapper: { gap: 7 },
-  label: { color: colors.income, fontSize: 11, fontWeight: "600" },
-  track: { height: 6, borderRadius: 3, overflow: "hidden", backgroundColor: "#DCE5D5" },
-  fill: { height: "100%", backgroundColor: "#618258", borderRadius: 3 },
+  label: { color: nu.inkSoft, fontSize: 12, fontWeight: "500" },
+  track: { height: 6, borderRadius: 3, overflow: "hidden", backgroundColor: nu.track },
+  fill: { height: "100%", backgroundColor: nu.brand, borderRadius: 3 },
 });

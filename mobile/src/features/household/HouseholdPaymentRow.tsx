@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { expenseDateLabel } from "@/features/household/expenseHistory";
 import { paymentStatuses } from "@/features/household/paymentHistory";
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdPayment } from "@/types/household";
 
 export function HouseholdPaymentRow({ payment, currency, variant = "row" }: { payment: HouseholdPayment; currency: string; variant?: "row" | "carousel" }) {
@@ -16,7 +16,7 @@ export function HouseholdPaymentRow({ payment, currency, variant = "row" }: { pa
     <View accessible accessibilityLabel={`De ${payment.fromMemberName} para ${payment.toMemberName}. ${amount}. ${date}. ${status.label}.`} style={[styles.card, isCarousel && styles.carouselCard]}>
       <View style={[styles.header, isCarousel && styles.carouselHeader]}>
         <View style={[styles.icon, isCarousel && styles.carouselIcon]}>
-          <SymbolView name={{ ios: "arrow.right", android: "arrow_forward", web: "arrow_forward" }} size={isCarousel ? 15 : 18} tintColor={colors.income} />
+          <SymbolView name={{ ios: "arrow.right", android: "arrow_forward", web: "arrow_forward" }} size={isCarousel ? 15 : 18} tintColor={nu.brand} />
         </View>
         <View style={styles.people}>
           <Text numberOfLines={1} style={styles.person}>De <Text style={styles.name}>{payment.fromMemberName}</Text></Text>
@@ -36,21 +36,21 @@ export function HouseholdPaymentRow({ payment, currency, variant = "row" }: { pa
 }
 
 const styles = StyleSheet.create({
-  card: { alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
+  card: { alignItems: "center", flexDirection: "row", gap: 10, backgroundColor: nu.surface, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 12, marginBottom: 8 },
   header: { flex: 1, minWidth: 0, flexDirection: "row", alignItems: "center", gap: 9 },
-  carouselCard: { width: 192, flexDirection: "column", alignItems: "stretch", padding: 11, gap: 8, marginBottom: 0 },
+  carouselCard: { width: 192, flexDirection: "column", alignItems: "stretch", padding: 12, gap: 8, marginBottom: 0 },
   carouselHeader: { flex: 0, gap: 7 },
-  carouselIcon: { height: 28, width: 28, borderRadius: 10 },
+  carouselIcon: { height: 30, width: 30, borderRadius: 15 },
   carouselDetails: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", maxWidth: "100%", gap: 6 },
   carouselAmount: { flex: 1, fontSize: 17, letterSpacing: -0.4 },
   carouselStatus: { marginTop: 0, paddingHorizontal: 5 },
-  icon: { alignItems: "center", justifyContent: "center", backgroundColor: "#E5EDDC", height: 34, width: 34, borderRadius: 11 },
+  icon: { alignItems: "center", justifyContent: "center", backgroundColor: nu.brandTint, height: 36, width: 36, borderRadius: 18 },
   people: { flex: 1, minWidth: 0, gap: 3 },
-  person: { color: colors.inkSoft, fontSize: 11, lineHeight: 16 },
-  name: { color: colors.ink, fontWeight: "600" },
-  date: { color: colors.inkFaint, fontSize: 10, lineHeight: 13 },
+  person: { color: nu.inkSoft, fontSize: 12, lineHeight: 16 },
+  name: { color: nu.ink, fontWeight: "600" },
+  date: { color: nu.inkFaint, fontSize: 11, lineHeight: 14 },
   details: { alignItems: "flex-end", flexShrink: 1, maxWidth: "40%" },
-  amount: { color: colors.ink, fontSize: 14, fontWeight: "800" },
-  statusPill: { borderRadius: 7, paddingHorizontal: 7, paddingVertical: 3, marginTop: 5 },
-  status: { fontSize: 9, fontWeight: "700" },
+  amount: { color: nu.ink, fontSize: 15, fontWeight: "700" },
+  statusPill: { borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3, marginTop: 5 },
+  status: { fontSize: 10, fontWeight: "600" },
 });

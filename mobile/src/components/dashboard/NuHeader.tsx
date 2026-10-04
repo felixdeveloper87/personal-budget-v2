@@ -16,7 +16,7 @@ export const NU_SHEET_OVERLAP = 24;
  * Dashboard and Incomes headers match; the next sibling should be a sheet with
  * `marginTop: -NU_SHEET_OVERLAP` and rounded top corners.
  */
-export function NuHeader({ children }: { children: ReactNode }) {
+export function NuHeader({ children, decoration }: { children: ReactNode; /** Extra art drawn over the gradient (e.g. house line art). */ decoration?: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
     <View
@@ -28,6 +28,7 @@ export function NuHeader({ children }: { children: ReactNode }) {
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <DashboardHeroArtwork />
       </View>
+      {decoration ? <View pointerEvents="none" style={StyleSheet.absoluteFill}>{decoration}</View> : null}
       <View style={styles.content}>{children}</View>
     </View>
   );

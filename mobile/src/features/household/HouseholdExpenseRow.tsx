@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdExpense } from "@/types/household";
 
 export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpenAttachments, twoTone = false }: {
@@ -34,7 +34,6 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
       onPress={() => onOpenAttachments(expense)}
       style={({ pressed }) => [styles.card, twoTone && styles.twoToneCard, pressed && styles.pressed]}
     >
-      {twoTone ? <View pointerEvents="none" style={styles.offWhiteTone} /> : null}
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
         <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
       </View>
@@ -43,7 +42,7 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
           <Text numberOfLines={1} style={styles.category}>{category?.label ?? expense.category}</Text>
           {attachmentCount > 0 ? (
             <View style={styles.proofBadge}>
-              <SymbolView name={{ ios: "paperclip", android: "attach_file", web: "attach_file" }} size={10} tintColor={colors.income} />
+              <SymbolView name={{ ios: "paperclip", android: "attach_file", web: "attach_file" }} size={10} tintColor={nu.brand} />
               <Text style={styles.proofCount}>{attachmentCount}</Text>
             </View>
           ) : null}
@@ -61,21 +60,20 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
 }
 
 const styles = StyleSheet.create({
-  card: { position: "relative", overflow: "hidden", alignItems: "center", flexDirection: "row", gap: 9, backgroundColor: "#FFFEFA", borderColor: "#E2E6DB", borderWidth: 1, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 10, marginBottom: 7 },
-  twoToneCard: { backgroundColor: "#FFFFFF" },
-  offWhiteTone: { position: "absolute", top: 0, right: 0, bottom: 0, width: "43%", backgroundColor: "#F7F3EA", borderTopLeftRadius: 999, borderBottomLeftRadius: 999 },
-  pressed: { backgroundColor: "#EDF3E6" },
-  icon: { alignItems: "center", justifyContent: "center", flexShrink: 0, height: 34, width: 34, borderRadius: 11 },
+  card: { position: "relative", overflow: "hidden", alignItems: "center", flexDirection: "row", gap: 10, backgroundColor: nu.surface, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 12, marginBottom: 8 },
+  twoToneCard: {},
+  pressed: { backgroundColor: nu.surfacePressed },
+  icon: { alignItems: "center", justifyContent: "center", flexShrink: 0, height: 38, width: 38, borderRadius: 19 },
   copy: { flex: 1, minWidth: 0 },
   details: { flex: 1.1, minWidth: 0 },
-  category: { color: colors.ink, fontSize: 13, fontWeight: "700", flexShrink: 1 },
+  category: { color: nu.ink, fontSize: 14, fontWeight: "600", flexShrink: 1 },
   categoryRow: { alignItems: "center", flexDirection: "row", gap: 5 },
-  proofBadge: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 2, backgroundColor: "#E5EDDC", borderRadius: 6, paddingHorizontal: 4, paddingVertical: 2 },
-  proofCount: { color: colors.income, fontSize: 9, fontWeight: "700" },
-  amount: { color: colors.ink, fontSize: 14, fontWeight: "800", textAlign: "right" },
-  description: { color: colors.inkSoft, fontSize: 11, lineHeight: 15, marginTop: 3 },
-  share: { color: colors.income, fontSize: 10, fontWeight: "600", lineHeight: 14, marginTop: 3 },
-  payer: { color: colors.inkSoft, fontSize: 10, lineHeight: 14, marginTop: 2, textAlign: "right" },
-  payerName: { color: colors.income, fontSize: 12, fontWeight: "800" },
-  date: { color: colors.inkFaint, fontSize: 10, lineHeight: 13, marginTop: 1, textAlign: "right" },
+  proofBadge: { alignItems: "center", flexDirection: "row", flexShrink: 0, gap: 2, backgroundColor: nu.brandTint, borderRadius: 999, paddingHorizontal: 6, paddingVertical: 2 },
+  proofCount: { color: nu.brand, fontSize: 10, fontWeight: "700" },
+  amount: { color: nu.ink, fontSize: 15, fontWeight: "700", textAlign: "right" },
+  description: { color: nu.inkSoft, fontSize: 12, lineHeight: 16, marginTop: 2 },
+  share: { color: nu.brand, fontSize: 11, fontWeight: "600", lineHeight: 15, marginTop: 3 },
+  payer: { color: nu.inkSoft, fontSize: 11, lineHeight: 15, marginTop: 2, textAlign: "right" },
+  payerName: { color: nu.ink, fontSize: 11, fontWeight: "600" },
+  date: { color: nu.inkFaint, fontSize: 11, lineHeight: 14, marginTop: 1, textAlign: "right" },
 });

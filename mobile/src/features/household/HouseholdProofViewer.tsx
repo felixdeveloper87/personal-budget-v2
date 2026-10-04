@@ -1,4 +1,5 @@
 import { SymbolView } from "expo-symbols";
+import { nu } from "@/components/dashboard/nuTheme";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -62,7 +63,7 @@ function ProofImage({ proof, householdId }: { proof: HouseholdProof; householdId
               />
             </ScrollView>
           </ScrollView>
-        ) : <View style={styles.state}><ActivityIndicator accessibilityLabel="Carregando comprovante" color="#D7E8C9" /></View>}
+        ) : <View style={styles.state}><ActivityIndicator accessibilityLabel="Carregando comprovante" color={nu.brandTint} /></View>}
       </View>
       <View style={styles.imageToolbar}>
         <Text numberOfLines={1} style={styles.filename}>{proof.originalFilename}</Text>
@@ -73,7 +74,7 @@ function ProofImage({ proof, householdId }: { proof: HouseholdProof; householdId
           onPress={() => setZoom((current) => current === 1 ? 2 : 1)}
           style={[styles.zoomButton, (!source || Boolean(error)) && styles.disabled]}
         >
-          <SymbolView name={{ ios: zoom === 1 ? "plus.magnifyingglass" : "minus.magnifyingglass", android: zoom === 1 ? "zoom_in" : "zoom_out", web: zoom === 1 ? "zoom_in" : "zoom_out" }} size={18} tintColor="#F6F5EF" />
+          <SymbolView name={{ ios: zoom === 1 ? "plus.magnifyingglass" : "minus.magnifyingglass", android: zoom === 1 ? "zoom_in" : "zoom_out", web: zoom === 1 ? "zoom_in" : "zoom_out" }} size={18} tintColor={nu.surface} />
           <Text style={styles.buttonText}>{zoom === 1 ? "Ampliar" : "Reduzir"}</Text>
         </Pressable>
       </View>
@@ -98,7 +99,7 @@ export function HouseholdProofViewer({ expense, householdId, onClose }: ProofVie
             <Text numberOfLines={1} style={styles.subtitle}>{expense.description}</Text>
           </View>
           <Pressable accessibilityRole="button" accessibilityLabel="Fechar comprovantes" onPress={onClose} style={styles.close}>
-            <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={21} tintColor="#F6F5EF" />
+            <SymbolView name={{ ios: "xmark", android: "close", web: "close" }} size={21} tintColor={nu.surface} />
           </Pressable>
         </View>
         {proof ? <ProofImage key={proof.id} proof={proof} householdId={householdId} /> : (
@@ -109,11 +110,11 @@ export function HouseholdProofViewer({ expense, householdId, onClose }: ProofVie
         {proofs.length > 0 ? (
           <View style={styles.navigation}>
             <Pressable accessibilityRole="button" accessibilityLabel="Comprovante anterior" disabled={index === 0} onPress={() => setIndex((current) => current - 1)} style={[styles.navButton, index === 0 && styles.disabled]}>
-              <SymbolView name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} size={20} tintColor="#F6F5EF" />
+              <SymbolView name={{ ios: "chevron.left", android: "chevron_left", web: "chevron_left" }} size={20} tintColor={nu.surface} />
             </Pressable>
             <Text accessibilityLiveRegion="polite" style={styles.counter}>{index + 1} de {proofs.length}</Text>
             <Pressable accessibilityRole="button" accessibilityLabel="Próximo comprovante" disabled={index === proofs.length - 1} onPress={() => setIndex((current) => current + 1)} style={[styles.navButton, index === proofs.length - 1 && styles.disabled]}>
-              <SymbolView name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={20} tintColor="#F6F5EF" />
+              <SymbolView name={{ ios: "chevron.right", android: "chevron_right", web: "chevron_right" }} size={20} tintColor={nu.surface} />
             </Pressable>
           </View>
         ) : null}
@@ -133,26 +134,26 @@ export function HouseholdProofModal(props: ProofViewerProps) {
 const styles = StyleSheet.create({
   overlay: { flex: 1, justifyContent: "flex-end" },
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(19,36,28,0.48)" },
-  viewer: { height: "75%", width: "100%", maxWidth: 640, alignSelf: "center", backgroundColor: "#18231E", borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
-  handle: { alignSelf: "center", backgroundColor: "#607365", borderRadius: 3, height: 5, width: 36, marginTop: 10 },
+  viewer: { height: "75%", width: "100%", maxWidth: 640, alignSelf: "center", backgroundColor: nu.ink, borderTopLeftRadius: 30, borderTopRightRadius: 30, overflow: "hidden" },
+  handle: { alignSelf: "center", backgroundColor: nu.inkSoft, borderRadius: 3, height: 5, width: 36, marginTop: 10 },
   header: { flexDirection: "row", alignItems: "center", gap: 12, padding: 16 },
   headerCopy: { flex: 1 },
-  title: { color: "#F6F5EF", fontSize: 19, fontWeight: "700" },
-  subtitle: { color: "#BBC7B7", fontSize: 12, marginTop: 4 },
-  close: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#2E3E32", alignItems: "center", justifyContent: "center" },
+  title: { color: nu.surface, fontSize: 19, fontWeight: "700" },
+  subtitle: { color: nu.track, fontSize: 12, marginTop: 4 },
+  close: { width: 44, height: 44, borderRadius: 22, backgroundColor: nu.ink, alignItems: "center", justifyContent: "center" },
   imageSection: { flex: 1 },
   viewport: { flex: 1, overflow: "hidden" },
   scroller: { flex: 1 },
   imageScroll: { flexGrow: 1 },
   state: { flex: 1, alignItems: "center", justifyContent: "center", padding: 24, gap: 18 },
-  message: { color: "#E1E8DD", fontSize: 13, lineHeight: 20, textAlign: "center" },
-  retry: { backgroundColor: "#42633D", minHeight: 44, paddingHorizontal: 18, borderRadius: 12, justifyContent: "center" },
-  buttonText: { color: "#F6F5EF", fontSize: 12, fontWeight: "600" },
+  message: { color: nu.hairline, fontSize: 13, lineHeight: 20, textAlign: "center" },
+  retry: { backgroundColor: nu.brand, minHeight: 44, paddingHorizontal: 18, borderRadius: 12, justifyContent: "center" },
+  buttonText: { color: nu.surface, fontSize: 12, fontWeight: "600" },
   imageToolbar: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingTop: 12 },
-  filename: { flex: 1, color: "#BBC7B7", fontSize: 11 },
-  zoomButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: "#2E3E32" },
+  filename: { flex: 1, color: nu.track, fontSize: 11 },
+  zoomButton: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, minHeight: 44, paddingHorizontal: 12, borderRadius: 12, backgroundColor: nu.ink },
   navigation: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 28, padding: 16 },
-  navButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: "#2E3E32", alignItems: "center", justifyContent: "center" },
+  navButton: { width: 44, height: 44, borderRadius: 14, backgroundColor: nu.ink, alignItems: "center", justifyContent: "center" },
   disabled: { opacity: 0.35 },
-  counter: { color: "#E1E8DD", fontSize: 13, fontWeight: "600" },
+  counter: { color: nu.hairline, fontSize: 13, fontWeight: "600" },
 });

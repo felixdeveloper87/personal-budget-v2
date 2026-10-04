@@ -11,16 +11,16 @@ export function CleaningCardArtwork() {
       style={styles.artwork}
       viewBox="0 0 360 220"
     >
-      <Circle cx="329" cy="108" r="112" fill="#618258" opacity={0.065} />
+      <Circle cx="329" cy="108" r="112" fill="#820AD1" opacity={0.065} />
       <Path
         d="M206 220c21-37 50-57 87-60 30-3 52-14 67-34v94Z"
-        fill="#618258"
+        fill="#820AD1"
         opacity={0.08}
       />
 
-      <G fill="none" stroke="#618258" strokeLinecap="round" strokeLinejoin="round">
+      <G fill="none" stroke="#820AD1" strokeLinecap="round" strokeLinejoin="round">
         <G opacity={0.22} strokeWidth={2}>
-          <Path fill="#618258" fillOpacity={0.06} d="M279 68h35l-3 18c-1 6 1 11 6 15l8 7c5 4 7 10 7 16v46c0 8-6 14-14 14h-48c-8 0-14-6-14-14v-45c0-8 3-14 9-19l8-6c5-4 7-9 6-15Z" />
+          <Path fill="#820AD1" fillOpacity={0.06} d="M279 68h35l-3 18c-1 6 1 11 6 15l8 7c5 4 7 10 7 16v46c0 8-6 14-14 14h-48c-8 0-14-6-14-14v-45c0-8 3-14 9-19l8-6c5-4 7-9 6-15Z" />
           <Path d="M278 68V57h28l13 7-4 9-15-5" />
           <Path d="M286 57v-9h17v9" />
           <Path d="M257 133c20 8 46 7 74-3" />
