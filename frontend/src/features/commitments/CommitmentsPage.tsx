@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Flex, HStack, Text, VStack, useBreakpointValue, type BoxProps } from '@chakra-ui/react'
+import { Box, Flex, Text } from '@chakra-ui/react'
+import { useReducedMotion } from 'framer-motion'
+import { Repeat } from 'lucide-react'
 
 import { listInstallmentPlans, listRecurringTransactions } from '../../api'
 import type { InstallmentPlan, RecurringTransaction } from '../../types'
@@ -10,6 +12,7 @@ import { useI18n } from '../../i18n'
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import Segmented from '../dashboard/components/Segmented'
+import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 
 import FixedPaymentsPage from '../../pages/FixedPaymentsPage'
 import InstallmentsPage, { currentMonthInstallmentTotal } from '../../pages/InstallmentsPage'
@@ -24,6 +27,8 @@ interface CommitmentsPageProps {
 
 export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: CommitmentsPageProps) {
   const { user } = useAuth()
+  const { t } = useI18n()
+  const reduce = useReducedMotion() ?? false
   const [tab, setTab] = useState<CommitmentsTab>(initialTab)
 
   // Follow the deep link when it changes (e.g. arriving from the dashboard).
@@ -59,14 +64,28 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
   }, [recurring, plans])
 
   return (
-    <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 4, md: 7 }}>
-      <MotionBox variants={containerV} initial="hidden" animate="show">
-        <VStack align="stretch" spacing={{ base: 4, md: 6 }}>
+    <Box minH="100vh">
+      {/* Purple page header — same pattern as Payments and Earnings. */}
+      <NuHero
+        title={t('nav.commitments.label')}
+        action={<NuHeroBadge><Repeat size={18} strokeWidth={2.4} aria-hidden="true" /></NuHeroBadge>}
+      >
+        <SummaryHero summary={summary} tab={tab} onTabChange={setTab} />
+      </NuHero>
 
-          <MotionBox variants={riseV}>
-            <SummaryBar summary={summary} tab={tab} onTabChange={setTab} />
-          </MotionBox>
-
+      {/* White sheet with rounded top tucked over the purple header. */}
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+        <MotionBox
+          className="nu-dashboard"
+          variants={containerV}
+          initial={reduce ? false : 'hidden'}
+          animate="show"
+          bg="var(--nu-page)"
+          borderTopRadius="24px"
+          borderBottomRadius={{ base: 0, md: '24px' }}
+          overflow="hidden"
+          boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+        >
           <MotionBox variants={riseV}>
             {tab === 'fixed' ? (
               <FixedPaymentsPage embedded onPageChange={onPageChange} onDataChange={loadSummary} />
@@ -74,9 +93,8 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
               <InstallmentsPage embedded onPageChange={onPageChange} onDataChange={loadSummary} />
             )}
           </MotionBox>
-
-        </VStack>
-      </MotionBox>
+        </MotionBox>
+      </Box>
     </Box>
   )
 }
@@ -87,7 +105,7 @@ interface SummaryShape {
   total: number
 }
 
-function SummaryBar({
+function SummaryHero({
   summary,
   tab,
   onTabChange,
@@ -101,87 +119,32 @@ function SummaryBar({
     { value: 'fixed', label: t('commitments.fixedPayments') },
     { value: 'installments', label: t('commitments.instalments') },
   ]
-  // Full-width segmented control on phones so the two options are easy to tap.
-  const fullWidthToggle = useBreakpointValue({ base: true, md: false }) ?? false
   return (
-    <Box
-      borderRadius="16px"
-      bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      boxShadow="var(--pb-shadow)"
-      px={{ base: 4, md: 5 }}
-      py={{ base: 4, md: 4 }}
-    >
-      <Flex
-        direction={{ base: 'column', md: 'row' }}
-        justify="space-between"
-        align={{ base: 'stretch', md: 'center' }}
-        gap={{ base: 4, md: 3 }}
-      >
-        <Box>
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            letterSpacing="0.16em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-          >
-            {t('commitments.monthly')}
-          </Text>
-          <Text
-            fontFamily="var(--pb-serif)"
-            fontSize={{ base: '1.9rem', md: '2rem' }}
-            fontWeight={500}
-            lineHeight="1.1"
-            color="var(--pb-ink)"
-            style={{ fontVariantNumeric: 'tabular-nums' }}
-          >
-            {formatCurrency(summary.total, { minimumFractionDigits: 2 })}
-          </Text>
-        </Box>
-
+    <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
+      <Box minW={0}>
+        <Text fontSize="sm" color="rgba(255,255,255,0.82)">{t('commitments.monthly')}</Text>
+        <Text fontSize={{ base: '2rem', md: '2.5rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white" noOfLines={1}
+          sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          {formatCurrency(summary.total)}
+        </Text>
+        <Text mt={1} fontSize="sm" color="rgba(255,255,255,0.82)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          {t('commitments.fixedPayments')}{' '}
+          <Text as="span" color="white" fontWeight={600}>{formatCurrency(summary.fixedMonthly)}</Text>
+          {' · '}
+          {t('commitments.instalments')}{' '}
+          <Text as="span" color="white" fontWeight={600}>{formatCurrency(summary.installmentsMonthly)}</Text>
+        </Text>
+      </Box>
+      <Box flexShrink={0}>
         <Segmented
+          tone="summary"
           options={tabOptions}
           value={tab}
           onChange={onTabChange}
-          fullWidth={fullWidthToggle}
+          mobileFullWidth
           aria-label={t('commitments.view')}
         />
-
-        <HStack
-          spacing={{ base: 0, md: 7 }}
-          justify={{ base: 'space-between', md: 'flex-start' }}
-          w={{ base: 'full', md: 'auto' }}
-        >
-          <Stat label={t('commitments.fixedPayments')} value={formatCurrency(summary.fixedMonthly, { minimumFractionDigits: 2 })} />
-          <Stat label={t('commitments.instalments')} value={formatCurrency(summary.installmentsMonthly, { minimumFractionDigits: 2 })} align={{ base: 'right', md: 'left' }} />
-        </HStack>
-      </Flex>
-    </Box>
-  )
-}
-
-function Stat({ label, value, align }: { label: string; value: string; align?: BoxProps['textAlign'] }) {
-  return (
-    <Box textAlign={align}>
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="9px"
-        letterSpacing="0.12em"
-        textTransform="uppercase"
-        color="var(--pb-ink-faint)"
-      >
-        {label}
-      </Text>
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="md"
-        fontWeight={500}
-        color="var(--pb-ink-soft)"
-        style={{ fontVariantNumeric: 'tabular-nums' }}
-      >
-        {value}
-      </Text>
-    </Box>
+      </Box>
+    </Flex>
   )
 }

@@ -39,12 +39,12 @@ export default function StartChallengeDialog({
   const cancelRef = React.useRef<HTMLButtonElement>(null)
 
   const surfaceBg = 'var(--pb-surface)'
-  const previewBg = 'var(--pb-tint-gold)'
+  const previewBg = 'var(--nu-brand-tint, #f3e8fc)'
   const previewBorder = 'var(--pb-hair)'
   const titleColor = 'var(--pb-ink)'
   const captionColor = 'var(--pb-ink-soft)'
-  const chipBg = 'var(--pb-tint-gold)'
-  const chipFg = 'var(--pb-gold)'
+  const chipBg = 'var(--nu-brand-tint, #f3e8fc)'
+  const chipFg = 'var(--nu-brand, #820ad1)'
 
   const today = new Date()
   const year = today.getFullYear()
@@ -62,7 +62,7 @@ export default function StartChallengeDialog({
       <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
         <AlertDialogContent
           bg={surfaceBg}
-          borderRadius="xl"
+          borderRadius="24px"
           boxShadow="0 20px 60px -20px rgba(0,0,0,0.4)"
           maxW="440px"
           mx={4}
@@ -72,7 +72,7 @@ export default function StartChallengeDialog({
             <Box
               w={9}
               h={9}
-              borderRadius="lg"
+              borderRadius="full"
               bg={chipBg}
               color={chipFg}
               display="flex"
@@ -101,7 +101,7 @@ export default function StartChallengeDialog({
                   total: formatCurrency(total),
                 })}
               </Text>
-              <Box p={4} bg={previewBg} border="1px solid" borderColor={previewBorder} borderRadius="lg">
+              <Box p={4} bg={previewBg} borderRadius="16px">
                 <HStack justify="space-between">
                   <Text fontSize="sm" color={captionColor}>
                     {t('goals.challenge.dialog.seedLabel')}
@@ -118,14 +118,17 @@ export default function StartChallengeDialog({
           </AlertDialogBody>
 
           <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={previewBorder} gap={2}>
-            <Button ref={cancelRef} onClick={onClose} variant="ghost" fontSize="sm" fontWeight={600}>
+            <Button ref={cancelRef} onClick={onClose} variant="ghost" borderRadius="full" fontSize="sm" fontWeight={600}>
               {t('goals.challenge.dialog.cancel')}
             </Button>
             <Button
               onClick={onConfirm}
               isLoading={isLoading}
               loadingText={t('goals.challenge.dialog.starting')}
-              colorScheme="orange"
+              borderRadius="full"
+              bg="var(--nu-brand, #820ad1)"
+              color="white"
+              _hover={{ bg: '#6f00b8' }}
               fontSize="sm"
               fontWeight={700}
               leftIcon={<Icon as={Sparkles} boxSize={4} />}
