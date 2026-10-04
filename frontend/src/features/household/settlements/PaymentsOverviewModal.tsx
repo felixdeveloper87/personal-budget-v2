@@ -114,18 +114,30 @@ export function PaymentsOverviewModal({
             {settlementsByMonth.map(([monthKey, settlements]) => {
               const [year, month] = monthKey.split('-')
               const monthDate = new Date(Number(year), Number(month) - 1, 1)
-              const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+              const monthName = formatDate(monthDate, { month: 'long', year: 'numeric' })
+              const monthLabel = monthName.charAt(0).toUpperCase() + monthName.slice(1)
+              // Rejected / cancelled transfers never moved money, so they stay out of the month total.
+              const monthTotal = settlements
+                .filter((settlement) => settlement.status !== 'REJECTED' && settlement.status !== 'CANCELLED')
+                .reduce((total, settlement) => total + settlement.amount, 0)
 
               return (
                 <Box key={monthKey}>
-                  <Text
-                    fontSize="xs"
-                    fontWeight={700}
-                    color="var(--pb-ink-faint)"
-                    mb={3}
-                  >
-                    {monthLabel}
-                  </Text>
+                  <Flex align="baseline" justify="space-between" gap={3} mb={3}>
+                    <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
+                      {monthLabel}
+                    </Text>
+                    <Text fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
+                      {t(
+                        settlements.length === 1
+                          ? 'household.settlements.count.one'
+                          : 'household.settlements.count.other',
+                        { count: formatNumber(settlements.length) },
+                      )}
+                      {' · '}
+                      <Text as="span" fontWeight={700} color="var(--pb-ink)">{formatCurrency(monthTotal)}</Text>
+                    </Text>
+                  </Flex>
                   <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
                     {settlements.map((settlement) => {
                       const statusAccent = settlement.status === 'CONFIRMED'

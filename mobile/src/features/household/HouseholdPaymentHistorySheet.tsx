@@ -25,6 +25,7 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
   const generation = useRef(0);
   const inFlight = useRef(false);
   const sections = useMemo(() => groupHouseholdPayments(payments), [payments]);
+  const money = useMemo(() => new Intl.NumberFormat("pt-BR", { style: "currency", currency }), [currency]);
 
   const load = useCallback(async (pageNumber: number) => {
     if (!user || inFlight.current) return;
@@ -83,7 +84,22 @@ export function HouseholdPaymentHistorySheet({ householdId, currency, onClose }:
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.list}
             stickySectionHeadersEnabled={false}
-            renderSectionHeader={({ section }) => <Text style={styles.month}>{expenseMonthLabel(section.month)}</Text>}
+            renderSectionHeader={({ section }) => {
+              // Rejected / cancelled transfers never moved money, so they stay out of the month total.
+              const total = section.data
+                .filter((payment) => payment.status !== "REJECTED" && payment.status !== "CANCELLED")
+                .reduce((sum, payment) => sum + Number(payment.amount), 0);
+              return (
+                <View style={styles.monthHeader}>
+                  <Text style={styles.month}>{expenseMonthLabel(section.month)}</Text>
+                  <Text style={styles.monthMeta}>
+                    {section.data.length === 1 ? "1 transferência" : `${section.data.length} transferências`}
+                    {" · "}
+                    <Text style={styles.monthTotal}>{money.format(total)}</Text>
+                  </Text>
+                </View>
+              );
+            }}
             renderItem={({ item }) => <HouseholdPaymentRow payment={item} currency={currency} />}
             ListEmptyComponent={!loading && !error ? <Text style={styles.message}>Nenhuma transferência registrada ainda.</Text> : null}
             ListFooterComponent={
@@ -118,7 +134,10 @@ const styles = StyleSheet.create({
   subtitle: { color: nu.inkSoft, fontSize: 12, marginTop: 5 },
   close: { alignItems: "center", justifyContent: "center", backgroundColor: nu.hairline, borderRadius: 22, width: 44, height: 44 },
   list: { paddingHorizontal: 16, paddingBottom: 24 },
-  month: { color: nu.brand, fontSize: 15, fontWeight: "700", marginTop: 22, marginBottom: 12 },
+  monthHeader: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginTop: 22, marginBottom: 12 },
+  month: { color: nu.ink, fontSize: 16, fontWeight: "700" },
+  monthMeta: { color: nu.inkSoft, fontSize: 12 },
+  monthTotal: { color: nu.ink, fontWeight: "700" },
   footer: { alignItems: "center", gap: 12, paddingTop: 18 },
   message: { color: nu.inkSoft, fontSize: 12, textAlign: "center", paddingVertical: 18 },
   error: { color: nu.negative, fontSize: 12, lineHeight: 18, textAlign: "center" },
