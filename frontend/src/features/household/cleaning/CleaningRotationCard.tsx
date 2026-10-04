@@ -120,7 +120,7 @@ export function CleaningRotationCard({
               <HStack spacing={3} minW={0}>
                 <Flex
                   w="42px" h="42px" flexShrink={0} align="center" justify="center" borderRadius="15px"
-                  bg="#D8E5CC" color="var(--pb-income)" fontSize="sm" fontWeight={800}
+                  bg="var(--pb-tint-green)" color="var(--pb-income)" fontSize="sm" fontWeight={800}
                 >
                   {initials}
                 </Flex>
@@ -142,14 +142,14 @@ export function CleaningRotationCard({
                   })}
                 </Text>
                 <Box
-                  mt={2} h="6px" overflow="hidden" borderRadius="full" bg="#DCE5D5"
+                  mt={2} h="6px" overflow="hidden" borderRadius="full" bg="var(--pb-hair-2)"
                   role="progressbar" aria-label={t('household.cleaning.progress', {
                     completed: formatNumber(completedDutyCount),
                     total: formatNumber(displayedDuties.length),
                   })}
                   aria-valuemin={0} aria-valuemax={displayedDuties.length} aria-valuenow={completedDutyCount}
                 >
-                  <Box h="full" w={`${progress}%`} borderRadius="full" bg="#618258" transition="width 300ms ease" />
+                  <Box h="full" w={`${progress}%`} borderRadius="full" bg="var(--pb-forest)" transition="width 300ms ease" />
                 </Box>
               </Box>
 

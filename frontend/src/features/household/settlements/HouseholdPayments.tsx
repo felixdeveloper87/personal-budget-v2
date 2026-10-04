@@ -4,10 +4,10 @@ import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdSettlement, HouseholdSettlementStatus } from '../../../types'
 
 const statusColors: Record<HouseholdSettlementStatus, { background: string; color: string }> = {
-  CONFIRMED: { background: '#E3EDDA', color: '#326548' },
-  PENDING: { background: '#F2E9D5', color: '#80652D' },
-  REJECTED: { background: '#F3E3DC', color: '#A44735' },
-  CANCELLED: { background: '#EBEDE5', color: '#52656A' },
+  CONFIRMED: { background: 'var(--pb-tint-income)', color: 'var(--pb-income)' },
+  PENDING: { background: '#FBF1DC', color: '#8A5A00' },
+  REJECTED: { background: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' },
+  CANCELLED: { background: 'var(--pb-surface-3)', color: 'var(--pb-ink-soft)' },
 }
 
 export function HouseholdPayments({
@@ -101,14 +101,14 @@ function PaymentCard({ payment }: { payment: HouseholdSettlement }) {
       w="192px"
       minW="192px"
       p="11px"
-      border="1px solid #E2E6DB"
+      border="1px solid var(--pb-hair)"
       borderRadius="16px"
-      bg="#FFFEFA"
+      bg="var(--pb-surface-2)"
       scrollSnapAlign="start"
       aria-label={`${t('household.record.paymentTitle', { from: payment.fromMemberName, to: payment.toMemberName })}. ${formatCurrency(payment.amount)}. ${t(`household.status.${payment.status}`, undefined, payment.status)}.`}
     >
       <HStack spacing={1.75} minW={0}>
-        <Flex w="28px" h="28px" flexShrink={0} align="center" justify="center" borderRadius="10px" bg="#E5EDDC" color="var(--pb-income)">
+        <Flex w="28px" h="28px" flexShrink={0} align="center" justify="center" borderRadius="10px" bg="var(--pb-tint-green)" color="var(--pb-income)">
           <Icon as={ArrowRight} boxSize="15px" weight="bold" />
         </Flex>
         <Box minW={0} flex={1}>

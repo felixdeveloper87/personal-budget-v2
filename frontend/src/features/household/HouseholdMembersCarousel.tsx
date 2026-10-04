@@ -55,7 +55,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
-              <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg="#3F403B" opacity={0.78} />
+              <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg="var(--pb-forest)" opacity={0.78} />
               <HStack spacing={2.5} minW={0} minH="38px" align="center">
                 <Flex
                   w="34px" h="34px" flexShrink={0} align="center" justify="center" borderRadius="full"
