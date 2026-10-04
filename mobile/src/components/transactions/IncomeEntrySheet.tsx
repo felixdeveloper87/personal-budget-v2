@@ -65,6 +65,7 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
             <Pressable
               accessibilityLabel={`Use ${source.name} as income source`}
               accessibilityRole="button"
+              accessibilityState={{ selected }}
               key={source.name}
               onPress={() => {
                 setCustomSource(false);
@@ -87,6 +88,7 @@ export function IncomeEntrySheet(props: TransactionEntrySheetProps) {
         <Pressable
           accessibilityLabel="Add another income source"
           accessibilityRole="button"
+          accessibilityState={{ selected: customSource }}
           onPress={() => {
             if (!customSource) form.setDescription("");
             setCustomSource(true);

@@ -171,6 +171,9 @@ export function ExpenseEntrySheet(props: TransactionEntrySheetProps) {
           const selected = category === form.category;
           return (
             <Pressable
+              accessibilityLabel={`Use ${categoryLabel(category)} as expense category`}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
               key={category}
               onPress={() => {
                 if (suggestedMerchantNames.has(form.description)) {
