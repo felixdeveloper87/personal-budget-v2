@@ -5,7 +5,7 @@ import { deletePaymentMethod, listPaymentMethods, listTransactions } from '../..
 import type { PaymentMethod, Transaction } from '../../types'
 import { buildCardStatements } from '../../utils/creditCardStatements'
 import { ConfirmDeleteDialog } from '../../components/ui'
-import { ArrowUpRight, CalendarDays, CreditCard, Eye, EyeOff, Plus, Layers, PieChart, FileText } from '../../components/ui/icons'
+import { ArrowUpRight, CalendarDays, CreditCard, Eye, EyeOff, Plus } from '../../components/ui/icons'
 import CreditCardTile from '../../components/cards/CreditCardTile'
 import CardFormModal from '../../components/cards/CardFormModal'
 import CardsStatements from './CardsStatements'
@@ -13,12 +13,15 @@ import './cards.css'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import NuHero from '../dashboard/components/NuHero'
+import Segmented from '../dashboard/components/Segmented'
 
 import '../dashboard/theme/pb-tokens.css'
 import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
+
+type CardsTab = 'cards' | 'statements'
 
 type CardTotal = {
   total: number
@@ -42,7 +45,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-  const [section, setSection] = useState<'overview' | 'cards' | 'statements'>('overview')
+  const [tab, setTab] = useState<CardsTab>('cards')
   const [statementVersion, setStatementVersion] = useState(0)
   const [selectedId, setSelectedId] = useState<number | null>(null)
   const [openStatementKey, setOpenStatementKey] = useState<string | null>(null)
@@ -86,7 +89,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
       )
       setSelectedId(card.id)
       setOpenStatementKey(statement ? card.id + "-" + statement.key : null)
-      setSection("statements")
+      setTab('statements')
       setStatementVersion((current) => current + 1)
     }
     onStatementTargetHandled?.()
@@ -157,7 +160,7 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
       ? cardStatements.find((statement) => isoDate(statement.paymentDate) === isoDate(paymentDate))
       : cardStatements.find((statement) => statement.status === 'open')) ?? cardStatements[0]
     setOpenStatementKey(initial ? id + "-" + initial.key : null)
-    setSection("statements")
+    setTab('statements')
     setStatementVersion((current) => current + 1)
   }
 
@@ -197,10 +200,17 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
     ? { cardName: nextCard.name, amount: overview.nextPayment.nextPaymentAmount, date: overview.nextPayment.nextPaymentDate }
     : null
 
-  const navigate = (next: typeof section) => {
+  // Switching tabs by hand shows every card's statements; jumping from a card
+  // (selectCard) keeps that card selected and its statement open.
+  const changeTab = (next: CardsTab) => {
+    if (next === tab) return
     if (next === 'statements') setSelectedId(null)
-    setSection(next)
+    setTab(next)
   }
+  const tabOptions: Array<{ value: CardsTab; label: string }> = [
+    { value: 'cards', label: t('cards.tab.cards') },
+    { value: 'statements', label: t('cards.statements') },
+  ]
 
   const availableCredit = Math.max(overview.limit - overview.used, 0)
   const creditUsage = overview.limit > 0
@@ -249,44 +259,50 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
             )}
           </Box>
 
-          <button type="button" className="cw-nu-add" onClick={() => setFormCard(null)}>
-            <Plus size={18} />
-            {t('cards.action.add')}
-          </button>
+          <Box flexShrink={0}>
+            <Segmented
+              tone="summary"
+              options={tabOptions}
+              value={tab}
+              onChange={changeTab}
+              mobileFullWidth
+              aria-label={t('cards.view')}
+            />
+          </Box>
         </Flex>
       </NuHero>
 
       <Box {...NU_SHEET_WRAP}>
         <Box className="cards-workspace nu-cards" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
-          <div className="cw-navigation" role="group" aria-label={t('nav.cards.label')}>
-            {([{ id: 'overview', label: t('cards.tab.overview'), icon: PieChart }, { id: 'cards', label: t('cards.tab.cards'), icon: Layers, count: cards.length }, { id: 'statements', label: t('cards.statements'), icon: FileText, count: statements.length }] as const).map((tab) => <button type="button" key={tab.id} className={section === tab.id ? 'is-selected' : ''} aria-pressed={section === tab.id} onClick={() => navigate(tab.id)}><tab.icon size={18} />{tab.label}{'count' in tab && <span>{tab.count}</span>}</button>)}
-          </div>
           <div className="cw-content">
             {loading ? <div className="cw-empty"><Spinner color="var(--nu-brand)" /><p>{t('common.loading')}</p></div>
               : error ? <div className="cw-empty"><p>{t('cards.toast.loadFailed')}</p><button type="button" className="cw-primary" onClick={() => void load()}>{t('cards.action.retry')}</button></div>
               : cards.length === 0 ? <div className="cw-empty"><CreditCard size={36} /><h2>{t('cards.empty.title')}</h2><p>{t('cards.empty.noCards')}</p><button type="button" className="cw-primary" onClick={() => setFormCard(null)}><Plus size={18} />{t('cards.action.add')}</button></div>
               : <>
-                {section === 'overview' && <>
-                  <button type="button" className="cw-nu-payment" disabled={!nextPayment} onClick={() => nextCard && selectCard(nextCard.id, nextPayment?.date)}>
-                    <span className="cw-nu-payment-icon"><CalendarDays size={20} /></span>
-                    <span className="cw-nu-payment-copy">
-                      <small>{t('cards.hero.next')}</small>
-                      <strong>{nextPayment ? nextPayment.cardName : t('cards.hero.noPayment')}</strong>
-                      {nextPayment && <span>{t('cards.dueDate', { date: formatDate(nextPayment.date, { day: 'numeric', month: 'short' }) })}</span>}
-                    </span>
-                    {nextPayment && <><strong className="cw-nu-payment-value">{visibleValue(nextPayment.amount)}</strong><ArrowUpRight size={18} /></>}
-                  </button>
-                  <div className="cw-section-heading"><p className="cw-eyebrow">{t('cards.shortcuts.title')}</p><h2>{t('cards.yourCards')}</h2></div>
-                  <div className="cw-shortcuts">
-                    <button type="button" onClick={() => navigate('cards')}><span className="cw-shortcut-icon"><Layers size={22} /></span><div><strong>{t('cards.yourCards')}</strong><p>{t('cards.shortcuts.cards')}</p><span className="cw-shortcut-link">{t('cards.shortcuts.viewCards', { count: cards.length })}<ArrowUpRight size={17} /></span></div></button>
-                    <button type="button" onClick={() => navigate('statements')}><span className="cw-shortcut-icon"><FileText size={22} /></span><div><strong>{t('cards.statements')}</strong><p>{t('cards.shortcuts.statements')}</p><span className="cw-shortcut-link">{t('cards.shortcuts.viewStatements', { count: statements.length })}<ArrowUpRight size={17} /></span></div></button>
+                {tab === 'cards' && <>
+                  {nextPayment && (
+                    <button type="button" className="cw-nu-payment" onClick={() => nextCard && selectCard(nextCard.id, nextPayment.date)}>
+                      <span className="cw-nu-payment-icon"><CalendarDays size={20} /></span>
+                      <span className="cw-nu-payment-copy">
+                        <small>{t('cards.hero.next')}</small>
+                        <strong>{nextPayment.cardName}</strong>
+                        <span>{t('cards.dueDate', { date: formatDate(nextPayment.date, { day: 'numeric', month: 'short' }) })}</span>
+                      </span>
+                      <strong className="cw-nu-payment-value">{visibleValue(nextPayment.amount)}</strong>
+                      <ArrowUpRight size={18} />
+                    </button>
+                  )}
+                  <div className="cw-tab-heading">
+                    <div>
+                      <p className="cw-eyebrow">{t(cards.length === 1 ? 'cards.count.one' : 'cards.count.other', { count: cards.length })}</p>
+                      <h2>{t('cards.yourCards')}</h2>
+                      <p>{t('cards.wallet.help')}</p>
+                    </div>
+                    <button type="button" className="cw-primary" onClick={() => setFormCard(null)}><Plus size={18} />{t('cards.action.add')}</button>
                   </div>
-                </>}
-                {section === 'cards' && <>
-                  <div className="cw-wallet-intro"><div><p className="cw-eyebrow">{t(cards.length === 1 ? 'cards.count.one' : 'cards.count.other', { count: cards.length })}</p><h2>{t('cards.yourCards')}</h2><p>{t('cards.wallet.help')}</p></div></div>
                   <div className="cw-cards-grid">{cards.map((card) => { const info = currentTotals.get(card.id); return <CreditCardTile key={card.id} card={card} currentTotal={info?.total ?? 0} usedCredit={info?.outstanding ?? 0} statementCount={info?.count ?? 0} nextPaymentAmount={info?.nextPaymentAmount ?? 0} nextPaymentDate={info?.nextPaymentDate ?? null} hideValues={hideValues} onSelect={() => selectCard(card.id)} onEdit={() => setFormCard(card)} onDelete={() => setCardToDelete(card)} /> })}</div>
                 </>}
-                {section === 'statements' && <CardsStatements key={statementVersion} cards={cards} statements={statements} filter={selectedId} onFilter={setSelectedId} openId={openStatementKey} onToggle={(id) => setOpenStatementKey((current) => current === id ? null : id)} hidden={hideValues} />}
+                {tab === 'statements' && <CardsStatements key={statementVersion} cards={cards} statements={statements} filter={selectedId} onFilter={setSelectedId} openId={openStatementKey} onToggle={(id) => setOpenStatementKey((current) => current === id ? null : id)} hidden={hideValues} />}
               </>}
           </div>
         </Box>
