@@ -239,17 +239,32 @@ function CategorySpotlight({
       p={isNu ? undefined : { base: 4, md: 5 }}
     >
       <Flex align="center" justify="space-between" gap={3}>
-        <HStack spacing={2.5} minW={0}>
-          <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
-            <Icon as={cat.icon} boxSize="18px" weight="bold" />
-          </Flex>
+        <HStack spacing={isNu ? 0 : 2.5} minW={0}>
+          {!isNu && (
+            <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
+              <Icon as={cat.icon} boxSize="18px" weight="bold" />
+            </Flex>
+          )}
           <Box minW={0}>
-            <Text fontSize="md" fontWeight={700} lineHeight="1.2" color="var(--pb-ink)" noOfLines={1}>
-              {cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
-            </Text>
-            <Text fontSize="xs" color="var(--pb-ink-soft)" lineHeight="1.3">
-              {t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}
-            </Text>
+            {isNu ? (
+              <HStack spacing={2} align="baseline" minW={0}>
+                <Text fontSize="md" fontWeight={700} lineHeight="1.25" color="var(--pb-ink)" noOfLines={1}>
+                  {cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
+                </Text>
+                <Text flexShrink={0} fontSize="xs" color="var(--pb-ink-soft)" lineHeight="1.25">
+                  {t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}
+                </Text>
+              </HStack>
+            ) : (
+              <>
+                <Text fontSize="md" fontWeight={700} lineHeight="1.2" color="var(--pb-ink)" noOfLines={1}>
+                  {cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
+                </Text>
+                <Text fontSize="xs" color="var(--pb-ink-soft)" lineHeight="1.3">
+                  {t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}
+                </Text>
+              </>
+            )}
           </Box>
         </HStack>
         <Text flexShrink={0} fontSize="lg" fontWeight={700} letterSpacing="-0.02em" color="var(--pb-ink)">
@@ -303,7 +318,7 @@ function CategorySpotlight({
         </Flex>
         <Box bg={isNu ? 'transparent' : 'white'} borderRadius="14px" px={isNu ? 0 : 3.5}>
           {shownTransactions.map((transaction) => (
-            <CategoryTxnRow key={transaction.id} txn={transaction} icon={cat.icon} side={side} />
+            <CategoryTxnRow key={transaction.id} appearance={appearance} txn={transaction} icon={cat.icon} side={side} />
           ))}
         </Box>
         {moreTransactions > 0 && (
