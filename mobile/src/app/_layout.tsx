@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
+import { AppMenuProvider } from "@/components/navigation/AppMenu";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { colors } from "@/theme/colors";
 
@@ -34,8 +35,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="dark" />
-      <RootNavigator />
+      <AppMenuProvider>
+        <StatusBar style="dark" />
+        <RootNavigator />
+      </AppMenuProvider>
     </AuthProvider>
   );
 }

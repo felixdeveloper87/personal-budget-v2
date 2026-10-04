@@ -1,10 +1,10 @@
-import { useRouter } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps, ReactNode } from "react";
 import { useCallback, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { useAppMenu } from "@/components/navigation/AppMenu";
 import { TransactionSearchSheet } from "@/components/search/TransactionSearchSheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { DashboardHeroArtwork } from "@/features/dashboard/DashboardHeroArtwork";
@@ -55,10 +55,10 @@ function TopBarButton({ icon, label, onPress }: { icon: SymbolName; label: strin
 /**
  * Same top bar on every purple screen: the user's badge (or a back button on
  * pushed screens) on the left, search and language on the right. The avatar
- * opens the profile/settings screen.
+ * opens the app menu (profile + every page).
  */
 function NuTopBar({ onBack, searchTransactions }: { onBack?: () => void; searchTransactions?: Transaction[] }) {
-  const router = useRouter();
+  const { openMenu } = useAppMenu();
   const { user } = useAuth();
   const [searchOpen, setSearchOpen] = useState(false);
   const [loaded, setLoaded] = useState<Transaction[] | null>(null);
@@ -85,10 +85,10 @@ function NuTopBar({ onBack, searchTransactions }: { onBack?: () => void; searchT
         </Pressable>
       ) : (
         <Pressable
-          accessibilityLabel="Abrir perfil e configurações"
+          accessibilityLabel="Abrir menu"
           accessibilityRole="button"
           hitSlop={6}
-          onPress={() => router.navigate("/more")}
+          onPress={openMenu}
           style={({ pressed }) => [styles.badge, pressed && styles.pressed]}
         >
           <Text style={styles.badgeText}>{initialsOf(user?.name) || "PB"}</Text>

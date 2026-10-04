@@ -1,9 +1,11 @@
 import { Tabs } from "expo-router";
 import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
-import { type ColorValue, StyleSheet, Text, View } from "react-native";
+import { type ColorValue, Pressable, StyleSheet, Text, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { nu } from "@/components/dashboard/nuTheme";
+import { useAppMenu } from "@/components/navigation/AppMenu";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
@@ -81,15 +83,61 @@ const icons = {
     standard: { ios: "person.2", android: "groups", web: "groups" },
     selected: { ios: "person.2.fill", android: "groups", web: "groups" },
   },
-  more: {
-    standard: { ios: "ellipsis.circle", android: "more_horiz", web: "more_horiz" },
-    selected: { ios: "ellipsis.circle.fill", android: "more_horiz", web: "more_horiz" },
+  menu: {
+    standard: { ios: "line.3.horizontal", android: "menu", web: "menu" },
+    selected: { ios: "line.3.horizontal", android: "menu", web: "menu" },
   },
 } satisfies Record<string, { standard: SymbolName; selected: SymbolName }>;
+
+type TabBarProps = Parameters<NonNullable<ComponentProps<typeof Tabs>["tabBar"]>>[0];
+
+/**
+ * The four tabs plus a "Menu" button. Menu isn't a route: it opens the app menu
+ * sheet (every page in a carousel + profile), so there's no "More" screen.
+ */
+function AppTabBar({ descriptors, navigation, state }: TabBarProps) {
+  const insets = useSafeAreaInsets();
+  const { openMenu } = useAppMenu();
+
+  return (
+    <View style={[styles.tabBar, { paddingBottom: insets.bottom + 6 }]}>
+      {state.routes.map((route, index) => {
+        const focused = state.index === index;
+        const { options } = descriptors[route.key];
+        const color = focused ? nu.brand : nu.inkSoft;
+        const label = options.title ?? route.name;
+        const onPress = () => {
+          const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+          if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+        };
+        return (
+          <Pressable
+            accessibilityLabel={label}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: focused }}
+            key={route.key}
+            onPress={onPress}
+            style={styles.tabItem}
+          >
+            {options.tabBarIcon?.({ color, focused, size: 23 })}
+            {typeof options.tabBarLabel === "function"
+              ? options.tabBarLabel({ children: label, color, focused, position: "below-icon" })
+              : <TabLabel color={color} focused={focused} label={label} />}
+          </Pressable>
+        );
+      })}
+      <Pressable accessibilityLabel="Abrir menu" accessibilityRole="button" onPress={openMenu} style={styles.tabItem}>
+        <TabIcon color={nu.inkSoft} focused={false} {...icons.menu} />
+        <TabLabel color={nu.inkSoft} focused={false} label="Menu" />
+      </Pressable>
+    </View>
+  );
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
+      tabBar={(props) => <AppTabBar {...props} />}
       backBehavior="history"
       detachInactiveScreens={false}
       screenOptions={{
@@ -154,18 +202,6 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="more"
-        options={{
-          title: "Mais",
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon color={color} focused={focused} {...icons.more} />
-          ),
-          tabBarLabel: ({ color, focused }) => (
-            <TabLabel color={color} focused={focused} label="Mais" />
-          ),
-        }}
-      />
     </Tabs>
   );
 }
@@ -177,11 +213,13 @@ const styles = StyleSheet.create({
     backgroundColor: nu.white,
     borderTopColor: nu.hairline,
     borderTopWidth: 1,
-    elevation: 0,
+    flexDirection: "row",
     paddingTop: 8,
-    shadowOpacity: 0,
   },
   tabItem: {
+    alignItems: "center",
+    flex: 1,
+    gap: 3,
     paddingHorizontal: 0,
     paddingVertical: 2,
   },
