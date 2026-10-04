@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Box, Flex, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
-import { TrendingDown } from 'lucide-react'
+import { TrendingDown, X } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -15,7 +15,6 @@ import TopMerchants from '../dashboard/components/TopMerchants'
 import { NuSection } from '../dashboard/components/nu'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 
-import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import ActivityIntensityStrip, { type ChartDay } from '../transactions/components/ActivityIntensityStrip'
 import { toViewModel } from '../transactions/transactions.utils'
@@ -250,18 +249,27 @@ export default function BehaviourPage() {
             {loading ? (
               <Skeleton height="230px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
             ) : (
-              <ActivityIntensityStrip
-                appearance="nu"
-                days={days}
-                txns={vm}
-                selectedDay={selectedChartDay}
-                onSelectDay={selectDay}
-                periodLabel={periodLabel}
-                tone="expense"
-                dateKey="purchaseDate"
-                title={t('behaviour.activity.title')}
-                caption={t('behaviour.activity.caption')}
-              />
+              <>
+                <ActivityIntensityStrip
+                  appearance="nu"
+                  days={days}
+                  txns={vm}
+                  selectedDay={selectedChartDay}
+                  onSelectDay={selectDay}
+                  periodLabel={periodLabel}
+                  tone="expense"
+                  dateKey="purchaseDate"
+                  title={t('behaviour.activity.title')}
+                  caption={t('behaviour.activity.caption')}
+                />
+                {selectedChartDay && (
+                  <SelectedDayExpenses
+                    day={selectedChartDay}
+                    expenses={selectedDayExpenses}
+                    onClose={() => setSelectedChartDay(null)}
+                  />
+                )}
+              </>
             )}
           </MotionBox>
 
@@ -298,14 +306,6 @@ export default function BehaviourPage() {
           )}
         </MotionBox>
       </Box>
-
-      {selectedChartDay && (
-        <SelectedDayExpenses
-          day={selectedChartDay}
-          expenses={selectedDayExpenses}
-          onClose={() => setSelectedChartDay(null)}
-        />
-      )}
     </Box>
   )
 }
@@ -326,24 +326,85 @@ function SelectedDayExpenses({
     day: 'numeric',
     month: 'long',
   })
+  const countLabel = t(
+    expenses.length === 1 ? 'transactions.count' : 'transactions.countPlural',
+    { count: expenses.length },
+  )
 
   return (
-    <ActivityDayModal
-      appearance="nu"
-      isOpen
-      onClose={onClose}
-      label={t('behaviour.day.label', { date: dayLabel })}
-      tone="expense"
-      title={dayLabel}
-      totalLabel={t('behaviour.day.total')}
-      total={formatCurrency(total)}
-      count={expenses.length}
-      dateContext={t('behaviour.day.dateContext')}
+    <Box
+      mt={4}
+      border="1px solid var(--pb-hair)"
+      borderRadius="16px"
+      bg="var(--nu-page)"
+      overflow="hidden"
+      role="region"
+      aria-label={t('behaviour.day.label', { date: dayLabel })}
     >
-      <VStack align="stretch" spacing={2}>
+      <Flex
+        position="relative"
+        align={{ base: 'stretch', sm: 'center' }}
+        justify="space-between"
+        direction={{ base: 'column', sm: 'row' }}
+        gap={3}
+        px={{ base: 4, sm: 5 }}
+        py={4}
+        bg="var(--nu-brand-tint)"
+      >
+        <Box minW={0} pr={{ base: 10, sm: 0 }}>
+          <Text color="var(--nu-brand)" fontSize="xs" fontWeight={700}>
+            {t('transactions.selectedDay')}
+          </Text>
+          <Text mt={0.5} color="var(--pb-ink)" fontSize={{ base: 'lg', sm: 'xl' }} fontWeight={700} letterSpacing="-0.01em">
+            {dayLabel}
+          </Text>
+          <Text mt={1} color="var(--pb-ink-soft)" fontSize="xs">
+            {countLabel} · {t('behaviour.day.dateContext')}
+          </Text>
+        </Box>
+
+        <Box
+          minW={{ sm: '150px' }}
+          mr={{ sm: 8 }}
+          px={3.5}
+          py={2.5}
+          borderRadius="13px"
+          bg="var(--nu-page)"
+          textAlign={{ base: 'left', sm: 'right' }}
+        >
+          <Text color="var(--pb-ink-soft)" fontSize="xs" fontWeight={600}>
+            {t('behaviour.day.total')}
+          </Text>
+          <Text mt={0.5} color="var(--nu-negative)" fontSize="xl" fontWeight={700} lineHeight={1} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+            {formatCurrency(total)}
+          </Text>
+        </Box>
+
+        <Box
+          as="button"
+          type="button"
+          aria-label={t('common.close')}
+          onClick={onClose}
+          position="absolute"
+          top={3}
+          right={3}
+          display="grid"
+          placeItems="center"
+          w="32px"
+          h="32px"
+          borderRadius="full"
+          color="var(--nu-brand)"
+          _hover={{ bg: 'rgba(130, 10, 209, 0.1)' }}
+          _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
+        >
+          <X size={18} strokeWidth={2.4} aria-hidden="true" />
+        </Box>
+      </Flex>
+
+      <Box p={{ base: 3, sm: 4 }}>
         {expenses.length === 0 ? (
           <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
-            <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
               {t('behaviour.day.empty')}
             </Text>
           </Box>
@@ -354,7 +415,7 @@ function SelectedDayExpenses({
             ))}
           </VStack>
         )}
-      </VStack>
-    </ActivityDayModal>
+      </Box>
+    </Box>
   )
 }
