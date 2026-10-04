@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Box, Button, Flex, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, Icon, Spinner, Text } from '@chakra-ui/react'
 
 import { archiveAccount, getAccountSummary } from '../../api'
 import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { ConfirmDeleteDialog } from '../../components/ui'
-import { ChevronLeft, Plus, Wallet } from '../../components/ui/icons'
+import { ChevronLeft, Eye, EyeOff, Plus, Wallet } from '../../components/ui/icons'
 import AccountFormModal from './components/AccountFormModal'
 import AccountList from './components/AccountList'
 import AccountDetail from './components/AccountDetail'
 import TotalHero from './components/TotalHero'
 import TransferModal from './components/TransferModal'
+import NuHero from '../dashboard/components/NuHero'
 import '../dashboard/theme/pb-tokens.css'
 
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
@@ -88,56 +89,103 @@ export default function AccountsPage() {
   }
 
   return (
-    <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 3, md: 6, xl: 8 }} py={{ base: 4, md: 7 }}>
-      <Flex align="center" minH="58px" mb={{ base: 3, md: 5 }}>
-        {detailOpen ? (
-          <Button onClick={() => navigateToList()} leftIcon={<Icon as={ChevronLeft} boxSize={4} />} variant="outline" h="42px" borderRadius="14px" borderColor="var(--pb-hair)" bg="var(--pb-surface)">
-            {t('accounts.action.back')}
-          </Button>
-        ) : (
-          <Box flex={1}>
-            <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing=".17em" color="var(--pb-forest-2)" textTransform="uppercase">{t('accounts.page.eyebrow')}</Text>
-            <Text mt={1} fontSize={{ base: '2rem', md: '2.45rem' }} fontWeight={600} color="var(--pb-ink)" lineHeight={1}>{t('nav.accounts.label')}</Text>
-          </Box>
-        )}
-        {!detailOpen ? (
-          <Button onClick={() => setFormAccount(null)} leftIcon={<Icon as={Plus} boxSize={4} />} bg="var(--pb-forest-2)" color="var(--pb-on-accent)" h="42px" borderRadius="14px" px={4} _hover={{ bg: 'var(--pb-forest)', transform: 'translateY(-1px)' }}>
-            {t('accounts.action.add')}
-          </Button>
-        ) : (
-          <Text ml={4} fontSize={{ base: '1.35rem', md: '1.65rem' }} fontWeight={600} color="var(--pb-ink)">{t('accounts.page.detailTitle')}</Text>
-        )}
-      </Flex>
-
-      {loading && !summary ? <Flex justify="center" py={24}><Spinner color="var(--pb-forest-2)" /></Flex> : detailOpen ? (
-        selectedAccount ? (
-          <AccountDetail
-            key={`${selectedAccount.id}-${detailVersion}`}
-            account={selectedAccount}
-            hideBalances={hideBalances}
-            showBackButton={false}
-            onBack={() => navigateToList()}
-            onTransfer={() => setTransferOpen(true)}
-            onSettings={() => setFormAccount(selectedAccount)}
-          />
-        ) : (
-          <Flex direction="column" align="center" py={20} bg="var(--pb-surface)" border="1px solid var(--pb-hair)" borderRadius="22px">
-            <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('accounts.page.notFound')}</Text>
-            <Button mt={4} onClick={() => navigateToList(true)} variant="outline">{t('accounts.action.back')}</Button>
+    <Box minH="100vh">
+      <NuHero
+        title={t('nav.accounts.label')}
+        action={(
+          <Flex
+            as="button"
+            type="button"
+            aria-label={hideBalances ? t('accounts.action.showBalances') : t('accounts.action.hideBalances')}
+            aria-pressed={hideBalances}
+            onClick={toggleHide}
+            align="center"
+            justify="center"
+            w="36px"
+            h="36px"
+            borderRadius="full"
+            bg="rgba(255,255,255,.16)"
+            color="white"
+            transition="background-color .15s ease"
+            _hover={{ bg: 'rgba(255,255,255,.24)' }}
+            _focusVisible={{ outline: '2px solid white', outlineOffset: '3px' }}
+          >
+            <Icon as={hideBalances ? Eye : EyeOff} boxSize="18px" />
           </Flex>
-        )
-      ) : (
-        <VStack align="stretch" spacing={{ base: 5, md: 7 }}>
-          <TotalHero accounts={accounts} totalBalance={summary?.totalBalance ?? 0} hideBalances={hideBalances} onToggleHide={toggleHide} />
-          <Box>
-            <Flex align="flex-end" justify="space-between" mb={3} px={1}>
-              <Box><Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} letterSpacing=".16em" color="var(--pb-forest-2)" textTransform="uppercase">{t('accounts.list.title')}</Text><Text mt={1} fontSize="1.45rem" fontWeight={600} color="var(--pb-ink)">{t('accounts.page.activeTitle')}</Text></Box>
-              <Text minW="30px" textAlign="center" px={2.5} py={1} borderRadius="12px" bg="var(--pb-tint-green)" color="var(--pb-forest-2)" fontFamily="var(--pb-mono)" fontSize="11px" fontWeight={700}>{accounts.length}</Text>
-            </Flex>
-            {accounts.length > 0 ? <AccountList accounts={accounts} hideBalances={hideBalances} onSelect={navigateToAccount} /> : <EmptyState onAdd={() => setFormAccount(null)} />}
+        )}
+      >
+        {detailOpen && selectedAccount ? (
+          <Box mt={{ base: 3, md: 4 }}>
+            <Text fontSize="sm" color="rgba(255,255,255,.74)">{t('accounts.page.detailTitle')}</Text>
+            <Text mt={0.5} fontSize={{ base: '1.8rem', md: '2.2rem' }} fontWeight={700} color="white" lineHeight={1.1} noOfLines={1}>{selectedAccount.name}</Text>
+            <Text mt={1} fontSize="sm" color="rgba(255,255,255,.7)">{selectedAccount.institution || t(`accounts.type.${selectedAccount.type}`)}</Text>
           </Box>
-        </VStack>
-      )}
+        ) : (
+          <TotalHero accounts={accounts} totalBalance={summary?.totalBalance ?? 0} hideBalances={hideBalances} />
+        )}
+      </NuHero>
+
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+        <Box className="nu-dashboard" bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
+          {loading && !summary ? (
+            <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
+          ) : detailOpen ? (
+            <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }}>
+              <Button
+                onClick={() => navigateToList()}
+                leftIcon={<Icon as={ChevronLeft} boxSize={4} />}
+                variant="ghost"
+                h="38px"
+                mb={3}
+                ml={-3}
+                borderRadius="full"
+                color="var(--nu-brand, #820ad1)"
+                _hover={{ bg: 'var(--nu-brand-tint, #f3e8fc)' }}
+              >
+                {t('accounts.action.back')}
+              </Button>
+              {selectedAccount ? (
+                <AccountDetail
+                  key={`${selectedAccount.id}-${detailVersion}`}
+                  account={selectedAccount}
+                  hideBalances={hideBalances}
+                  showBackButton={false}
+                  onBack={() => navigateToList()}
+                  onTransfer={() => setTransferOpen(true)}
+                  onSettings={() => setFormAccount(selectedAccount)}
+                />
+              ) : (
+                <Flex direction="column" align="center" py={16}>
+                  <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('accounts.page.notFound')}</Text>
+                  <Button mt={4} onClick={() => navigateToList(true)} variant="outline">{t('accounts.action.back')}</Button>
+                </Flex>
+              )}
+            </Box>
+          ) : (
+            <Box px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
+              <Flex align="center" justify="space-between" gap={4} mb={3}>
+                <Box>
+                  <Text fontSize="xl" fontWeight={650} color="var(--pb-ink)">{t('accounts.page.activeTitle')}</Text>
+                  <Text mt={0.5} fontSize="sm" color="var(--pb-ink-soft)">{t(accounts.length === 1 ? 'accounts.count.one' : 'accounts.count.other', { count: accounts.length })}</Text>
+                </Box>
+                <Button
+                  onClick={() => setFormAccount(null)}
+                  leftIcon={<Icon as={Plus} boxSize={4} />}
+                  h="40px"
+                  px={4}
+                  borderRadius="full"
+                  bg="var(--nu-brand, #820ad1)"
+                  color="white"
+                  _hover={{ bg: '#6f00b8', transform: 'translateY(-1px)' }}
+                >
+                  {t('accounts.action.add')}
+                </Button>
+              </Flex>
+              {accounts.length > 0 ? <AccountList accounts={accounts} hideBalances={hideBalances} onSelect={navigateToAccount} /> : <EmptyState onAdd={() => setFormAccount(null)} />}
+            </Box>
+          )}
+        </Box>
+      </Box>
 
       <AccountFormModal
         isOpen={formAccount !== undefined}

@@ -1,4 +1,4 @@
-import { SimpleGrid } from '@chakra-ui/react'
+import { Box } from '@chakra-ui/react'
 import type { FinancialAccount } from '../../../types'
 import AccountCard from './AccountCard'
 
@@ -8,13 +8,9 @@ interface AccountListProps {
   onSelect: (id: number) => void
 }
 
-export default function AccountList({
-  accounts,
-  hideBalances,
-  onSelect,
-}: AccountListProps) {
+export default function AccountList({ accounts, hideBalances, onSelect }: AccountListProps) {
   return (
-    <SimpleGrid columns={{ base: 2, md: 3, xl: 4 }} spacing={{ base: 2.5, md: 4 }}>
+    <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)">
       {accounts.map((account) => (
         <AccountCard
           key={account.id}
@@ -23,6 +19,6 @@ export default function AccountList({
           onSelect={() => onSelect(account.id)}
         />
       ))}
-    </SimpleGrid>
+    </Box>
   )
 }
