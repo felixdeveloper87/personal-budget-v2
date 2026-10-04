@@ -21,7 +21,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
+import { HouseholdCategoryIcon } from "@/features/household/HouseholdCategoryIcon";
+import { categories, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { HouseholdLandscape } from "@/features/household/HouseholdLandscape";
 import { ApiError, createHouseholdExpense, uploadHouseholdExpenseAttachments } from "@/services/api";
 import { nu } from "@/components/dashboard/nuTheme";
@@ -438,7 +439,7 @@ export function HouseholdExpenseSheet({
                         { backgroundColor: tone.background },
                         selected && styles.categoryIconSelected,
                       ]}>
-                        <SymbolView name={categoryIcons[item.value]} size={16} tintColor={selected ? nu.white : tone.ink} weight="medium" />
+                        <HouseholdCategoryIcon category={item.value} size={16} color={selected ? nu.white : tone.ink} weight="medium" />
                       </View>
                       <Text style={[styles.categoryText, selected && styles.categoryTextSelected]}>{item.label}</Text>
                       {selected ? (

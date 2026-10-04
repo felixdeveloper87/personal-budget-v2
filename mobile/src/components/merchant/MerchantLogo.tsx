@@ -5,6 +5,8 @@ import type { ComponentProps } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { RentIcon } from "@/components/icons/RentIcon";
+import { nu } from "@/components/dashboard/nuTheme";
 import { colors } from "@/theme/colors";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
@@ -108,6 +110,17 @@ function getMerchantFallback(name: string, category?: string): MerchantFallback 
   return null;
 }
 
+const RENT_CATEGORY_WORDS = ["rent", "housing", "aluguel", "moradia", "mortgage"];
+const RENT_NAME_WORDS = ["rent", "aluguel", "landlord", "letting", "lettings"];
+
+/** Whole-word match so "parent" or "current" don't read as rent. */
+function isRentLike(name: string, category?: string) {
+  const nameWords = normaliseFallbackValue(name).split(" ");
+  const categoryWords = normaliseFallbackValue(category ?? "").split(" ");
+  return categoryWords.some((word) => RENT_CATEGORY_WORDS.includes(word))
+    || nameWords.some((word) => RENT_NAME_WORDS.includes(word));
+}
+
 function merchantInitials(name: string) {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "—";
@@ -125,7 +138,8 @@ interface MerchantLogoProps {
 
 export function MerchantLogo({ category, domain, name, size = 42, fallbackMode = "default" }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false);
-  const fallback = useMemo(() => getMerchantFallback(name, category), [category, name]);
+  const rent = useMemo(() => isRentLike(name, category), [category, name]);
+  const fallback = useMemo(() => (rent ? null : getMerchantFallback(name, category)), [category, name, rent]);
   const logoUrl = domain && logoDevToken
     ? `https://img.logo.dev/${domain}?token=${encodeURIComponent(logoDevToken)}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
     : null;
@@ -145,7 +159,9 @@ export function MerchantLogo({ category, domain, name, size = 42, fallbackMode =
         {
           backgroundColor: showLogo
             ? colors.white
-            : fallback?.backgroundColor ?? colors.incomeTint,
+            : rent
+              ? nu.brandTint
+              : fallback?.backgroundColor ?? colors.incomeTint,
           borderRadius: Math.round(size * 0.34),
           height: size,
           width: size,
@@ -161,6 +177,8 @@ export function MerchantLogo({ category, domain, name, size = 42, fallbackMode =
           style={{ height: size - 7, width: size - 7 }}
           transition={120}
         />
+      ) : rent ? (
+        <RentIcon color={nu.brand} size={Math.max(18, Math.round(size * 0.52))} strokeWidth={2.2} />
       ) : fallback ? (
         <SymbolView
           name={fallback.icon}

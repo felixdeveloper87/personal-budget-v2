@@ -1,7 +1,8 @@
 import { SymbolView } from "expo-symbols";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { categories, categoryIcons, categoryPalette, categoryTones } from "@/features/household/householdCategories";
+import { HouseholdCategoryIcon } from "@/features/household/HouseholdCategoryIcon";
+import { categories, categoryPalette, categoryTones } from "@/features/household/householdCategories";
 import { expenseDateLabel, getExpenseAttachmentCount, getExpenseShare } from "@/features/household/expenseHistory";
 import { nu } from "@/components/dashboard/nuTheme";
 import type { HouseholdExpense } from "@/types/household";
@@ -35,7 +36,7 @@ export function HouseholdExpenseRow({ expense, currency, currentMemberId, onOpen
       style={({ pressed }) => [styles.card, twoTone && styles.twoToneCard, pressed && styles.pressed]}
     >
       <View style={[styles.icon, { backgroundColor: tone.background }]}>
-        <SymbolView name={categoryIcons[key]} size={19} tintColor={tone.ink} />
+        <HouseholdCategoryIcon category={key} size={19} color={tone.ink} />
       </View>
       <View style={styles.copy}>
         <View style={styles.categoryRow}>

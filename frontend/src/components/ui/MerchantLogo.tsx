@@ -1,6 +1,7 @@
 import { Box, Text } from '@chakra-ui/react'
 import { CarFront, Fuel, ShoppingBag, ShoppingCart, Utensils } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import { RentHome } from './icons'
 
 const LOGO_DEV_TOKEN = import.meta.env.VITE_LOGO_DEV_TOKEN as string | undefined
 
@@ -20,13 +21,23 @@ interface MerchantLogoProps {
   fallbackMode?: 'default' | 'none'
 }
 
+const normalise = (value: string) => value
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLocaleLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim()
+
+const RENT_CATEGORY_WORDS = ['rent', 'housing', 'aluguel', 'moradia', 'mortgage']
+const RENT_NAME_WORDS = ['rent', 'aluguel', 'landlord', 'letting', 'lettings']
+
+/** Whole-word match so "parent" or "current" don't read as rent. */
+function isRentLike(name: string, category?: string) {
+  return normalise(category ?? '').split(' ').some((word) => RENT_CATEGORY_WORDS.includes(word))
+    || normalise(name).split(' ').some((word) => RENT_NAME_WORDS.includes(word))
+}
+
 function getFallback(name: string, category?: string) {
-  const normalise = (value: string) => value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLocaleLowerCase()
-    .replace(/[^a-z0-9]+/g, ' ')
-    .trim()
   const merchant = normalise(name)
   const group = normalise(category ?? '')
   if (['fuel', 'petrol', 'gas', 'combustivel'].some((word) => group.includes(word))
@@ -52,7 +63,8 @@ function getFallback(name: string, category?: string) {
 
 export default function MerchantLogo({ name, category, domain, size = 36, borderRadius = '10px', fallbackMode = 'default' }: MerchantLogoProps) {
   const [failed, setFailed] = useState(false)
-  const fallback = useMemo(() => getFallback(name, category), [name, category])
+  const rent = useMemo(() => isRentLike(name, category), [name, category])
+  const fallback = useMemo(() => (rent ? null : getFallback(name, category)), [name, category, rent])
   const FallbackIcon = fallback?.Icon
   const logoUrl = domain && LOGO_DEV_TOKEN
     ? `https://img.logo.dev/${domain}?token=${LOGO_DEV_TOKEN}&size=${Math.max(64, size * 2)}&format=png&fallback=404`
@@ -72,7 +84,7 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
       flexShrink={0}
       overflow="hidden"
       borderRadius={borderRadius}
-      bg={logoUrl && !failed ? '#ffffff' : fallback?.background ?? 'var(--pb-surface-2)'}
+      bg={logoUrl && !failed ? '#ffffff' : rent ? '#f3e8fc' : fallback?.background ?? 'var(--pb-surface-2)'}
       border="1px solid var(--pb-hair)"
       boxShadow="0 1px 2px rgba(0,0,0,0.08)"
       userSelect="none"
@@ -87,6 +99,8 @@ export default function MerchantLogo({ name, category, domain, size = 36, border
           style={{ objectFit: 'contain', display: 'block', padding: '3px' }}
           onError={() => setFailed(true)}
         />
+      ) : rent ? (
+        <RentHome size={Math.round(size * 0.56)} weight="bold" color="#820ad1" />
       ) : fallback && FallbackIcon ? (
         <FallbackIcon size={Math.round(size * 0.62)} strokeWidth={2.3} color={fallback.color} />
       ) : (
