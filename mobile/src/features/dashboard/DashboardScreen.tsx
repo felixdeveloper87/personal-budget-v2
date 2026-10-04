@@ -5,7 +5,6 @@ import type { ComponentProps } from "react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -24,7 +23,6 @@ import { TopMerchantsCarousel } from "@/components/dashboard/TopMerchantsCarouse
 import { TransactionEntryModal } from "@/components/transactions/TransactionEntryModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
-import { TransactionSearchSheet } from "@/components/search/TransactionSearchSheet";
 import { ApiError, getMonthlySummary, listInstallmentPlans, listTransactions } from "@/services/api";
 import { colors } from "@/theme/colors";
 import type { InstallmentPlan, MonthlySummary, Transaction } from "@/types/finance";
@@ -35,21 +33,6 @@ import { getVariableSpending } from "@/utils/variableSpending";
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const actionIcons = {
-  search: {
-    ios: "magnifyingglass",
-    android: "search",
-    web: "search",
-  },
-  language: {
-    ios: "globe",
-    android: "language",
-    web: "language",
-  },
-  settings: {
-    ios: "gearshape",
-    android: "settings",
-    web: "settings",
-  },
   show: {
     ios: "eye",
     android: "visibility",
@@ -245,20 +228,6 @@ function Shortcut({ icon, label, onPress, tint = ink }: ShortcutProps) {
   );
 }
 
-function HeaderIconButton({ icon, label, onPress }: { icon: SymbolName; label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityLabel={label}
-      accessibilityRole="button"
-      hitSlop={6}
-      onPress={onPress}
-      style={({ pressed }) => [styles.headerAction, pressed && styles.headerActionPressed]}
-    >
-      <SymbolView name={icon} size={20} tintColor={colors.white} weight="regular" />
-    </Pressable>
-  );
-}
-
 export function DashboardScreen() {
   const { user, logout } = useAuth();
   const router = useRouter();
@@ -272,7 +241,6 @@ export function DashboardScreen() {
   const [error, setError] = useState<string | null>(null);
   const [entryType, setEntryType] = useState<"INCOME" | "EXPENSE" | null>(null);
   const [hidden, setHidden] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const currentDate = useMemo(() => new Date(), []);
 
   // Light status-bar icons over the coloured header, restored when leaving the tab.
@@ -357,12 +325,6 @@ export function DashboardScreen() {
   if (!user) return null;
 
   const firstName = user.name.split(" ")[0];
-  const initials = user.name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
 
   return (
@@ -382,22 +344,8 @@ export function DashboardScreen() {
         {/* Brand colour also fills the iOS overscroll area above the header. */}
         <View style={styles.overscrollFill} />
 
-        <NuHeader>
+        <NuHeader searchTransactions={transactions}>
           <View style={styles.headerInner}>
-            <View style={styles.headerTopRow}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initials || "PB"}</Text>
-              </View>
-              <View style={styles.headerActions}>
-                <HeaderIconButton icon={actionIcons.search} label="Search transactions" onPress={() => setSearchOpen(true)} />
-                <HeaderIconButton
-                  icon={actionIcons.language}
-                  label="Change language"
-                  onPress={() => Alert.alert("Idioma", "A troca de idioma no app chega em breve.")}
-                />
-                <HeaderIconButton icon={actionIcons.settings} label="Open settings" onPress={() => router.navigate("/more")} />
-              </View>
-            </View>
             <View>
               <Text numberOfLines={1} style={styles.greeting}>
                 {greetingLabel(currentDate)}, {firstName}
@@ -530,12 +478,6 @@ export function DashboardScreen() {
         ) : null}
       </ScrollView>
 
-      <TransactionSearchSheet
-        onClose={() => setSearchOpen(false)}
-        transactions={transactions}
-        visible={searchOpen}
-      />
-
       {entryType ? (
         <TransactionEntryModal
           onClose={() => setEntryType(null)}
@@ -552,17 +494,11 @@ const styles = StyleSheet.create({
   screen: { backgroundColor: colors.white, flex: 1 },
   content: { paddingBottom: 48 },
   overscrollFill: { backgroundColor: brandTop, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
-  headerInner: { flex: 1, justifyContent: "space-between" },
-  headerTopRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
+  headerInner: { flex: 1, justifyContent: "flex-end" },
   headerDate: { color: "rgba(255,255,255,0.8)", fontSize: 13, marginTop: 4 },
   sectionMetaRow: { alignItems: "center", flexDirection: "row", flexShrink: 1, gap: 4 },
   eyeButton: { alignItems: "center", borderRadius: 16, height: 32, justifyContent: "center", width: 32 },
   eyeButtonPressed: { backgroundColor: nu.surface },
-  avatar: { alignItems: "center", backgroundColor: "rgba(255,255,255,0.18)", borderRadius: 22, height: 44, justifyContent: "center", width: 44 },
-  avatarText: { color: colors.white, fontSize: 14, fontWeight: "700" },
-  headerActions: { flexDirection: "row", gap: 6 },
-  headerAction: { alignItems: "center", borderRadius: 20, height: 40, justifyContent: "center", width: 40 },
-  headerActionPressed: { backgroundColor: "rgba(255,255,255,0.16)" },
   greeting: { color: colors.white, fontSize: 24, fontWeight: "700", letterSpacing: -0.5 },
   body: {
     backgroundColor: colors.white,

@@ -201,11 +201,8 @@ export function AccountDetailsScreen() {
         {/* Brand colour also fills the iOS overscroll area above the header. */}
         <View style={styles.overscrollFill} />
 
-        <NuHeader>
+        <NuHeader onBack={() => router.back()}>
           <View style={styles.headerTitleRow}>
-            <Pressable accessibilityLabel="Voltar" accessibilityRole="button" hitSlop={8} onPress={() => router.back()} style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}>
-              <SymbolView name={icons.back} size={17} tintColor={nu.white} weight="semibold" />
-            </Pressable>
             <Text numberOfLines={1} style={styles.headerTitle}>{account?.name ?? "Detalhes da conta"}</Text>
             <Pressable
               accessibilityLabel={balancesHidden ? "Mostrar valores" : "Ocultar valores"}

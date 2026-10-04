@@ -38,8 +38,6 @@ const accountTypeLabels: Record<FinancialAccount["type"], string> = {
   CREDIT_CARD: "Crédito",
 };
 
-/** Header content is taller than the tabs' (total + two balance columns). */
-const HEADER_CONTENT_HEIGHT = 176;
 const MASK = "••••••";
 
 function formatCurrency(value: number) {
@@ -205,17 +203,8 @@ export function AccountsScreen() {
         {/* Brand colour also fills the iOS overscroll area above the header. */}
         <View style={styles.overscrollFill} />
 
-        <NuHeader contentHeight={HEADER_CONTENT_HEIGHT}>
+        <NuHeader onBack={() => router.back()}>
           <View style={styles.headerTitleRow}>
-            <Pressable
-              accessibilityLabel="Voltar"
-              accessibilityRole="button"
-              hitSlop={8}
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
-            >
-              <SymbolView name={icons.back} size={17} tintColor={nu.white} weight="semibold" />
-            </Pressable>
             <Text numberOfLines={1} style={styles.headerTitle}>Contas</Text>
             <Pressable
               accessibilityLabel={balancesHidden ? "Mostrar saldos" : "Ocultar saldos"}
@@ -356,7 +345,7 @@ const styles = StyleSheet.create({
     width: 34,
   },
   headerTitle: { color: nu.white, flex: 1, fontSize: 20, fontWeight: "700", letterSpacing: -0.3 },
-  totalLabel: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 10 },
+  totalLabel: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 6 },
   loadingValue: { alignItems: "flex-start", height: 40, justifyContent: "center" },
   totalValue: { color: nu.white, fontSize: 31, fontWeight: "700", letterSpacing: -0.9, fontVariant: ["tabular-nums"] },
   heroNegative: { color: "#FFC2B8" },
@@ -365,8 +354,8 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.18)",
     borderTopWidth: 1,
     flexDirection: "row",
-    marginTop: 12,
-    paddingTop: 10,
+    marginTop: 8,
+    paddingTop: 8,
   },
   balanceLine: { flex: 1, minWidth: 0 },
   balanceLineBordered: { borderLeftColor: "rgba(255,255,255,0.18)", borderLeftWidth: 1, marginLeft: 14, paddingLeft: 14 },
