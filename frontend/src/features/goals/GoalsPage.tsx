@@ -27,7 +27,7 @@ import { usePeriodData } from '../../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../../components/charts/modal/BalanceBreakEvenPanel'
 import { Trash2 } from '../../components/ui/icons'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
-import { NuSection } from '../dashboard/components/nu'
+import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
 
 export default function GoalsPage() {
@@ -125,8 +125,8 @@ export default function GoalsPage() {
         </Flex>
       </NuHero>
 
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
-        <Box className="nu-dashboard" bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
+      <Box {...NU_SHEET_WRAP}>
+        <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           <NuSection title={t('goals.section.active')} subtitle={t('goals.section.activeCaption')}>
             {activeGoals.length > 0 ? (
               <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)">

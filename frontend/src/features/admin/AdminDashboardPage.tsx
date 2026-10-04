@@ -47,6 +47,7 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { CommunicationEmailModal } from './CommunicationEmailModal'
+import { PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 
 interface AdminDashboardPageProps {
   onPageChange?: (page: AppPage) => void
@@ -241,7 +242,7 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
   const currentUserId = user.id
 
   return (
-    <Box py={{ base: 6, md: 10 }} px={{ base: 3, md: 6 }}>
+    <Box pt={{ base: 6, md: 10 }} pb={PAGE_BOTTOM_PADDING} px={{ base: 3, md: 6 }}>
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={closeRemoveDialog}>
         <AlertDialogOverlay />
         <AlertDialogContent mx={3}>

@@ -16,7 +16,7 @@ import { type TransactionDateBasis } from '../../utils/transactionDates'
 import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
-import { NuSection } from './components/nu'
+import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from './components/nu'
 import MonthHero, { NetHero } from './components/MonthHero'
 import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
@@ -117,7 +117,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   const handleAddExpense = useCallback(() => { setModalType('EXPENSE'); openModal() }, [openModal])
 
   return (
-    <Box minH="100vh">
+    <Box>
       {/* Purple hero with the month's net — same shell as Earnings/Expenses/Household. */}
       <NetHero
         income={periodData.income}
@@ -126,17 +126,10 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         hidden={hidden}
         onToggleHidden={() => setHidden((value) => !value)}
       />
-    <Box
-      maxW="appContent"
-      mx="auto"
-      px={{ base: 0, md: 4, lg: 6 }}
-      mt="-24px"
-      pb={{ base: 0, md: 7 }}
-      position="relative"
-    >
+    <Box {...NU_SHEET_WRAP}>
       {/* Nubank-style sheet: white body, hairline-separated sections. */}
       <MotionBox
-        className="nu-dashboard"
+        className="nu-dashboard" pb={NU_SHEET_PB}
         variants={containerV}
         initial="hidden"
         animate="show"

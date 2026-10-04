@@ -9,6 +9,7 @@ import { Transaction, InstallmentPlan } from '../../types'
 import { mergeTransactionsWithFutureInstallments } from '../../utils/installments'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
+import { PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 
 export default function AllTransactionsPage() {
   const { t } = useI18n()
@@ -61,7 +62,8 @@ export default function AllTransactionsPage() {
     return (
       <Box
         px={{ base: 2, md: 4, lg: 6 }}
-        py={{ base: 4, md: 7 }}
+        pt={{ base: 4, md: 7 }}
+        pb={PAGE_BOTTOM_PADDING}
         maxW="appContent"
         mx="auto"
       >
@@ -85,7 +87,8 @@ export default function AllTransactionsPage() {
   return (
     <Box
       px={{ base: 2, md: 4, lg: 6 }}
-      py={{ base: 4, md: 7 }}
+      pt={{ base: 4, md: 7 }}
+      pb={PAGE_BOTTOM_PADDING}
       maxW="appContent"
       mx="auto"
       minW={0}

@@ -11,7 +11,7 @@ import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import { NuSection } from '../dashboard/components/nu'
+import { NuSection, PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
 import { CommitmentLogo, NuEmpty, NuListRow, NuPill, NuStatStrip } from '../commitments/components/nuCommitments'
 
 interface FixedPaymentsPageProps {
@@ -131,7 +131,7 @@ export default function FixedPaymentsPage({
   if (embedded) return body
 
   return (
-    <Box minH="100vh" maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} py={{ base: 0, md: 5 }}>
+    <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} pt={{ base: 0, md: 5 }} pb={PAGE_BOTTOM_PADDING}>
       <Box className="nu-dashboard" bg="var(--nu-page)" borderRadius={{ base: 0, md: '24px' }} overflow="hidden">
         {body}
       </Box>

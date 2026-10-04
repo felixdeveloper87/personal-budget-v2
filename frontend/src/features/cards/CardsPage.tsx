@@ -15,6 +15,7 @@ import { useI18n } from '../../i18n'
 import NuHero from '../dashboard/components/NuHero'
 
 import '../dashboard/theme/pb-tokens.css'
+import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 
 
 const CARD_BALANCE_VISIBILITY_KEY = 'cards:hide-values'
@@ -255,8 +256,8 @@ export default function CardsPage({ statementTarget = null, onStatementTargetHan
         </Flex>
       </NuHero>
 
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
-        <Box className="cards-workspace nu-cards" bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
+      <Box {...NU_SHEET_WRAP}>
+        <Box className="cards-workspace nu-cards" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           <div className="cw-navigation" role="group" aria-label={t('nav.cards.label')}>
             {([{ id: 'overview', label: t('cards.tab.overview'), icon: PieChart }, { id: 'cards', label: t('cards.tab.cards'), icon: Layers, count: cards.length }, { id: 'statements', label: t('cards.statements'), icon: FileText, count: statements.length }] as const).map((tab) => <button type="button" key={tab.id} className={section === tab.id ? 'is-selected' : ''} aria-pressed={section === tab.id} onClick={() => navigate(tab.id)}><tab.icon size={18} />{tab.label}{'count' in tab && <span>{tab.count}</span>}</button>)}
           </div>

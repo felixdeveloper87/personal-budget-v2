@@ -25,6 +25,7 @@ import { Home, Plus, RefreshCw } from '../../../components/ui/icons'
 import NuHero from '../../dashboard/components/NuHero'
 import { HouseLineArt } from '../HouseholdHeader'
 import type { ApplyHouseholdAction } from '../hooks/useHouseholdPageController'
+import { NU_SHEET_PB, NU_SHEET_WRAP } from '../../dashboard/components/nu'
 
 /* Same frame as the loaded page: purple hero, then a white sheet tucked over it. */
 function HouseholdStateFrame({ hero, children }: { hero: ReactNode; children: ReactNode }) {
@@ -44,9 +45,9 @@ function HouseholdStateFrame({ hero, children }: { hero: ReactNode; children: Re
       >
         {hero}
       </NuHero>
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+      <Box {...NU_SHEET_WRAP}>
         <Box
-          className="nu-dashboard"
+          className="nu-dashboard" pb={NU_SHEET_PB}
           bg="var(--nu-page)"
           borderTopRadius="24px"
           borderBottomRadius={{ base: 0, md: '24px' }}

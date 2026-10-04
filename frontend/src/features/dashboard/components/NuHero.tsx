@@ -1,6 +1,9 @@
 import { Box, Flex, Text } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
+/** Shared hero height (content box incl. padding). Tune here to resize every page header. */
+export const NU_HERO_MIN_H = { base: '312px', md: '296px' }
+
 interface NuHeroProps {
   /** Page title (string) or a custom identity block (e.g. household eyebrow + name). */
   title: ReactNode
@@ -27,8 +30,11 @@ export default function NuHero({ title, action, decoration, children }: NuHeroPr
         px={{ base: 4, md: 6, lg: 8 }}
         pt={{ base: 3, md: 6 }}
         pb={{ base: 10, md: 12 }}
-        // Desktop keeps one hero height across pages; on phones the hero hugs its content.
-        minH={{ base: 'auto', md: '252px' }}
+        // One hero height on every page (sized for the tallest content, e.g. a
+        // stacked period bar on phones / Household's actions on desktop).
+        minH={NU_HERO_MIN_H}
+        display="flex"
+        flexDirection="column"
       >
         <Flex align="center" justify="space-between" gap={3} minH="44px">
           {typeof title === 'string' ? (
@@ -40,7 +46,8 @@ export default function NuHero({ title, action, decoration, children }: NuHeroPr
           )}
           {action}
         </Flex>
-        {children}
+        {/* Figures sit at the bottom, just above the white sheet; spare height goes under the title. */}
+        {children != null && <Box mt="auto" minW={0}>{children}</Box>}
       </Box>
     </Box>
   )

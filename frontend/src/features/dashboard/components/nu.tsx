@@ -51,3 +51,23 @@ export function NuTitle({ children }: { children: ReactNode }) {
     </Text>
   )
 }
+
+/**
+ * Page-bottom spacing shared by every page, so the gap above the footer is the
+ * same everywhere. Nubank pages: the white sheet keeps `NU_SHEET_PB` inside and
+ * the wrapper adds `NU_PAGE_BOTTOM` on desktop (on phones the sheet meets the footer).
+ */
+export const NU_PAGE_BOTTOM = { base: 0, md: 8 }
+export const NU_SHEET_PB = { base: 6, md: 4 }
+/** Bottom padding for non-sheet pages (cards on the page background). */
+export const PAGE_BOTTOM_PADDING = { base: 6, md: 8 }
+
+/** Wrapper that pulls the white sheet up over the purple hero. */
+export const NU_SHEET_WRAP = {
+  maxW: 'appContent',
+  mx: 'auto',
+  px: { base: 0, md: 4, lg: 6 },
+  mt: '-24px',
+  pb: NU_PAGE_BOTTOM,
+  position: 'relative',
+} as const satisfies BoxProps

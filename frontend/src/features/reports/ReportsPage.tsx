@@ -18,7 +18,7 @@ import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import { NuSection } from '../dashboard/components/nu'
+import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import NuHero from '../dashboard/components/NuHero'
 import { CommitmentLogo, NuEmpty, NuPill, NuStatStrip } from '../commitments/components/nuCommitments'
 
@@ -83,7 +83,7 @@ export default function ReportsPage() {
   const balance = report?.balance ?? 0
 
   return (
-    <Box minH="100vh">
+    <Box>
       {/* Purple page header — same pattern as Payments and Earnings. */}
       <NuHero
         title={t('nav.reports.label')}
@@ -152,9 +152,9 @@ export default function ReportsPage() {
       </NuHero>
 
       {/* White sheet with rounded top tucked over the purple header. */}
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+      <Box {...NU_SHEET_WRAP}>
         <MotionBox
-          className="nu-dashboard"
+          className="nu-dashboard" pb={NU_SHEET_PB}
           variants={containerV}
           initial={reduce ? false : 'hidden'}
           animate="show"

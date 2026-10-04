@@ -14,6 +14,7 @@ import TotalHero from './components/TotalHero'
 import TransferModal from './components/TransferModal'
 import NuHero from '../dashboard/components/NuHero'
 import '../dashboard/theme/pb-tokens.css'
+import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 
 const BALANCE_VISIBILITY_KEY = 'accounts:hide-balances'
 
@@ -89,7 +90,7 @@ export default function AccountsPage() {
   }
 
   return (
-    <Box minH="100vh">
+    <Box>
       <NuHero
         title={detailOpen ? (
           <Flex align="center" gap={3} minW={0}>
@@ -147,8 +148,8 @@ export default function AccountsPage() {
         )}
       </NuHero>
 
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
-        <Box className="nu-dashboard" bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
+      <Box {...NU_SHEET_WRAP}>
+        <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           {loading && !summary ? (
             <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
           ) : detailOpen ? (
