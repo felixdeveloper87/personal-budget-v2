@@ -2,7 +2,6 @@ import { Box, Button, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
 import { ChevronRight } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
-import { householdAvatarGradient } from './householdAvatar'
 
 export function HouseholdMembersCarousel({ household, onViewBalances }: {
   household: HouseholdDashboard
@@ -14,7 +13,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
     <Box id="household-members" scrollMarginTop="90px">
       <Flex align="center" justify="space-between" gap={3}>
         <Box minW={0}>
-          <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={800} letterSpacing="0.12em" textTransform="uppercase" color="var(--pb-income)">
+          <Text fontSize="11px" fontWeight={600} color="var(--pb-income)">
             {t('household.members.eyebrow')}
           </Text>
           <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">
@@ -37,7 +36,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
         role="list" aria-label={t('household.members.title')}
         sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', '&::-webkit-scrollbar': { display: 'none' } }}
       >
-        {household.members.map((member, index) => {
+        {household.members.map((member) => {
           const receiving = member.balance > 0.005
           const paying = member.balance < -0.005
           const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
@@ -45,7 +44,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           const status = receiving
             ? t('household.members.toReceive')
             : paying ? t('household.members.toPay') : t('household.members.settled')
-          const initials = member.name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase()
 
           return (
             <Box
@@ -57,12 +55,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
             >
               <Box position="absolute" top={0} left={3} right={3} h="3px" borderBottomRadius="full" bg="var(--pb-forest)" opacity={0.78} />
               <HStack spacing={2.5} minW={0} minH="38px" align="center">
-                <Flex
-                  w="34px" h="34px" flexShrink={0} align="center" justify="center" borderRadius="full"
-                  bgGradient={householdAvatarGradient(index, member.id)} color="white" fontSize="xs" fontWeight={800}
-                >
-                  {initials}
-                </Flex>
                 <Box minW={0} flex={1}>
                   <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
                   <Box minH="13px">

@@ -37,6 +37,7 @@ export function BalancesOverviewModal({
       onClose={onClose}
       size={{ base: 'full', md: 'xl' }}
       contentProps={{
+        className: 'nu-dashboard',
         alignSelf: { base: 'flex-end', md: 'center' },
         w: { base: '100%', md: 'min(640px, calc(100vw - 3rem))' },
         maxW: { base: '100%', md: '640px' },

@@ -3,7 +3,6 @@ import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard } from '../../../types'
 import { CheckCircle2, TrendingDown, TrendingUp } from '../../../components/ui/icons'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
-import { HOUSEHOLD_AVATAR_GRADIENTS } from '../householdAvatar'
 
 export function MembersOverviewModal({
   isOpen,
@@ -19,6 +18,7 @@ export function MembersOverviewModal({
   return (
     <PremiumModal
       isOpen={isOpen}
+      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
       size={{ base: 'full', md: 'xl' }}
       header={
@@ -69,15 +69,11 @@ export function MembersOverviewModal({
     >
       <Box p={{ base: 2.5, sm: 3.5 }} bg="var(--pb-surface-2)">
         <VStack align="stretch" spacing={2}>
-          {household.members.map((member, index) => {
+          {household.members.map((member) => {
             const isCurrentMember = member.id === household.currentMemberId
             const isReceiving = member.balance > 0.005
             const isPaying = member.balance < -0.005
             const isSettled = !isReceiving && !isPaying
-            const gradient = HOUSEHOLD_AVATAR_GRADIENTS[
-              index % HOUSEHOLD_AVATAR_GRADIENTS.length
-            ]
-            const initial = (member.name || '?').charAt(0).toUpperCase()
 
             const balanceAccent = isReceiving
               ? 'var(--pb-income)'
@@ -125,23 +121,6 @@ export function MembersOverviewModal({
                   gap={2.5}
                 >
                   <HStack spacing={2.5} minW={0} align="center" flex={1}>
-                    <Flex
-                      w="36px"
-                      h="36px"
-                      flexShrink={0}
-                      align="center"
-                      justify="center"
-                      borderRadius="11px"
-                      bgGradient={gradient}
-                      color="white"
-                      fontFamily="var(--pb-serif)"
-                      fontWeight={700}
-                      fontSize="md"
-                      boxShadow="0 2px 8px rgba(0, 0, 0, 0.12)"
-                      border="1px solid rgba(255, 255, 255, 0.2)"
-                    >
-                      {initial}
-                    </Flex>
 
                     <Box minW={0} flex={1}>
                       <HStack spacing={1.5} flexWrap="wrap" align="center">
@@ -162,9 +141,8 @@ export function MembersOverviewModal({
                             bg="var(--pb-tint-green)"
                             color="var(--pb-forest-2)"
                             border="1px solid var(--pb-hair)"
-                            fontSize="8px"
+                            fontSize="11px"
                             fontWeight={700}
-                            textTransform="uppercase"
                           >
                             {t('household.common.you')}
                           </Badge>
@@ -177,9 +155,8 @@ export function MembersOverviewModal({
                             bg="var(--pb-tint-gold)"
                             color="var(--pb-gold)"
                             border="1px solid var(--pb-hair)"
-                            fontSize="8px"
+                            fontSize="11px"
                             fontWeight={700}
-                            textTransform="uppercase"
                           >
                             {t('household.common.owner')}
                           </Badge>
@@ -207,12 +184,9 @@ export function MembersOverviewModal({
                         weight={isSettled ? 'fill' : 'duotone'}
                       />
                       <Text
-                        fontFamily="var(--pb-mono)"
-                        fontSize="8px"
+                        fontSize="11px"
                         fontWeight={700}
                         color={balanceAccent}
-                        letterSpacing="0.04em"
-                        textTransform="uppercase"
                         noOfLines={1}
                       >
                         {balanceLabel}

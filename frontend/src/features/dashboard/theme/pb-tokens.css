@@ -75,6 +75,26 @@
   font-family: var(--pb-serif);
 }
 
+/* Nubank-scoped modals run their grey body edge to edge: keep only the real
+   safe-area insets, not the 12px minimum frame from safariStyles.modal. */
+.chakra-modal__content.nu-dashboard {
+  padding-left: env(safe-area-inset-left, 0px) !important;
+  padding-right: env(safe-area-inset-right, 0px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* Shared ModalHeader inside a Nubank-scoped modal: bold sans title, plain caption. */
+.nu-dashboard .pb-modal-title {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.nu-dashboard .pb-modal-caption {
+  font-family: var(--pb-serif);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+}
+
 /* Controls sitting on a purple page header (e.g. the Earnings period bar).
    Re-points the "summary" tokens that PeriodNavBar/Segmented already use. */
 .nu-on-brand {

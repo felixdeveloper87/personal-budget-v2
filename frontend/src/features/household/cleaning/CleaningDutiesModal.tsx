@@ -48,6 +48,7 @@ export function CleaningDutiesModal({
   return (
     <PremiumModal
       isOpen={isOpen}
+      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
@@ -105,7 +106,7 @@ export function CleaningDutiesModal({
             gap={4}
           >
             <Box>
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="rgba(255,255,255,0.7)">
+              <Text fontSize="12px" fontWeight={700} color="rgba(255,255,255,0.7)">
                 {t('household.cleaning.dutiesTitle')}
               </Text>
               <Text mt={1} color="white" fontSize="md" fontWeight={500} lineHeight={1.4}>
@@ -114,7 +115,7 @@ export function CleaningDutiesModal({
             </Box>
             <HStack flexShrink={0} spacing={2} px={3.5} py={2} bg="rgba(255,255,255,0.15)" borderRadius="full" backdropFilter="blur(10px)">
               <Icon as={CheckCircle2} boxSize={4} weight="fill" color="var(--pb-gold)" />
-              <Text fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} textTransform="uppercase">
+              <Text fontSize="12px" fontWeight={700}>
                 {progressLabel}
               </Text>
             </HStack>
@@ -140,7 +141,7 @@ export function CleaningDutiesModal({
         <VStack spacing={6} align="stretch">
           {duties.filter(d => !d.completed).length > 0 && (
             <Box>
-              <Text mb={3} fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              <Text mb={3} fontSize="12px" fontWeight={700} color="var(--pb-ink-faint)">
                 {t('household.cleaning.inProgress')}
               </Text>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
@@ -159,7 +160,7 @@ export function CleaningDutiesModal({
 
           {duties.filter(d => d.completed).length > 0 && (
             <Box>
-              <Text mb={3} fontFamily="var(--pb-mono)" fontSize="10px" fontWeight={700} letterSpacing="0.1em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              <Text mb={3} fontSize="12px" fontWeight={700} color="var(--pb-ink-faint)">
                 {t('household.cleaning.completed')}
               </Text>
               <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
@@ -301,10 +302,12 @@ function CleaningDutyCard({
             mt={4}
             size="sm"
             h="36px"
-            borderRadius="9px"
+            borderRadius="full"
             isLoading={isBusy}
             isDisabled={busyDutyKey !== null}
-            colorScheme={duty.completed ? 'gray' : 'green'}
+            {...(duty.completed
+              ? { colorScheme: 'gray' }
+              : { bg: '#820ad1', color: 'white', _hover: { bg: '#6e08b3' }, _active: { bg: '#6e08b3' } })}
             onClick={() => onToggleDuty(assignmentId, duty.key, !duty.completed)}
           >
             {t(duty.completed ? 'household.cleaning.markNotDone' : 'household.cleaning.markDone', { duty: label })}

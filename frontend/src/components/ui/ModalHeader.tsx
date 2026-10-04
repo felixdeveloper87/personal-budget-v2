@@ -67,6 +67,7 @@ export default function ModalHeader({
         <HStack spacing={3} minW={0} flex={1}>
           <VStack align="flex-start" spacing={0} minW={0}>
             <Text
+              className="pb-modal-title"
               textStyle="display"
               fontWeight={400}
               fontSize={{ base: 'lg', sm: 'xl' }}
@@ -78,6 +79,7 @@ export default function ModalHeader({
             </Text>
             {caption && (
               <Text
+                className="pb-modal-caption"
                 textStyle="mono"
                 fontSize={{ base: '2xs', sm: 'xs' }}
                 color={ed.muted}

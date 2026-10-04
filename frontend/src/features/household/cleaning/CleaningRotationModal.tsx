@@ -7,7 +7,6 @@ import type { HouseholdDashboard, HouseholdCleaningRotation, HouseholdPageState 
 import { Check, Calendar, CalendarCheck, ChevronDown, ChevronUp, Clock, Plus, Repeat, X } from '../../../components/ui/icons'
 import { ModalHeader, PremiumModal } from '../../../components/ui'
 import { currentMonday } from '../householdDates'
-import { householdAvatarGradient } from '../householdAvatar'
 
 export function CleaningRotationModal({
   isOpen,
@@ -112,6 +111,7 @@ export function CleaningRotationModal({
   return (
     <PremiumModal
       isOpen={isOpen}
+      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
@@ -216,8 +216,8 @@ export function CleaningRotationModal({
               aria-label={t('household.cleaning.modal.toggleAria')}
               isChecked={active}
               onChange={(event) => setActive(event.target.checked)}
-              colorScheme="green"
               size="lg"
+              sx={{ '& .chakra-switch__track[data-checked]': { bg: '#820ad1' } }}
               flexShrink={0}
             />
           </Flex>
@@ -253,10 +253,7 @@ export function CleaningRotationModal({
 
                 <FormControl isRequired isInvalid={Boolean(startDate) && !startDateIsMonday}>
                   <FormLabel
-                    fontFamily="var(--pb-mono)"
-                    fontSize="9px"
-                    letterSpacing="0.08em"
-                    textTransform="uppercase"
+                    fontSize="11px"
                     color="var(--pb-ink-faint)"
                   >
                     {t('household.cleaning.modal.firstWeek')}
@@ -326,11 +323,6 @@ export function CleaningRotationModal({
                 ) : (
                   <VStack align="stretch" spacing={2}>
                     {participants.map((member, index) => {
-                      const memberIndex = household.members.findIndex(
-                        (m) => m.id === member.id,
-                      )
-                      const gradient = householdAvatarGradient(memberIndex, member.id)
-
                       return (
                         <Flex
                           key={member.id}
@@ -344,23 +336,6 @@ export function CleaningRotationModal({
                           border="1px solid var(--pb-hair)"
                         >
                           <HStack minW={0} spacing={2.5} flex={1}>
-                            <Flex
-                              w={7}
-                              h={7}
-                              flexShrink={0}
-                              align="center"
-                              justify="center"
-                              borderRadius="full"
-                              bgGradient={gradient}
-                              color="white"
-                              border="1px solid rgba(255, 255, 255, 0.24)"
-                              boxShadow="0 1px 4px rgba(0, 0, 0, 0.14)"
-                              fontFamily="var(--pb-mono)"
-                              fontSize="9px"
-                              fontWeight={800}
-                            >
-                              {formatNumber(index + 1)}
-                            </Flex>
                             <Box minW={0}>
                               <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
                                 {member.name}
@@ -434,10 +409,7 @@ export function CleaningRotationModal({
                   <Box mt={4}>
                     <Text
                       mb={2}
-                      fontFamily="var(--pb-mono)"
-                      fontSize="9px"
-                      letterSpacing="0.08em"
-                      textTransform="uppercase"
+                      fontSize="11px"
                       color="var(--pb-ink-faint)"
                     >
                       {t('household.cleaning.modal.addMember')}
@@ -478,11 +450,8 @@ export function CleaningRotationModal({
               <HStack justify="space-between" spacing={3} mb={4}>
                 <Box>
                   <Text
-                    fontFamily="var(--pb-mono)"
-                    fontSize="9px"
+                    fontSize="11px"
                     fontWeight={600}
-                    letterSpacing="0.14em"
-                    textTransform="uppercase"
                     color="var(--pb-summary-ink-faint)"
                   >
                     {t('household.cleaning.modal.preview')}
@@ -511,11 +480,6 @@ export function CleaningRotationModal({
               ) : (
                 <VStack align="stretch" spacing={2}>
                   {previewWeeks.map((week, index) => {
-                    const memberIndex = household.members.findIndex(
-                      (m) => m.id === week.member.id,
-                    )
-                    const gradient = householdAvatarGradient(memberIndex, week.member.id)
-
                     return (
                       <Flex
                         key={`${week.member.id}-${index}`}
@@ -526,23 +490,6 @@ export function CleaningRotationModal({
                         bg="var(--pb-summary-panel)"
                         border="1px solid var(--pb-summary-line)"
                       >
-                        <Flex
-                          w={7}
-                          h={7}
-                          flexShrink={0}
-                          align="center"
-                          justify="center"
-                          borderRadius="full"
-                          bgGradient={gradient}
-                          color="white"
-                          border="1px solid rgba(255, 255, 255, 0.24)"
-                          boxShadow="0 1px 4px rgba(0, 0, 0, 0.14)"
-                          fontFamily="var(--pb-mono)"
-                          fontSize="9px"
-                          fontWeight={800}
-                        >
-                          {formatNumber(index + 1)}
-                        </Flex>
                         <Box minW={0} flex={1}>
                           <Text fontSize="sm" fontWeight={600} color="var(--pb-summary-ink)" noOfLines={1}>
                             {week.member.name}

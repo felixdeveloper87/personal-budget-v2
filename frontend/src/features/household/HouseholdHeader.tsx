@@ -165,7 +165,7 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
 }
 
 /** Faint white line drawing of a little street of houses, anchored bottom-right of the purple header. */
-function HouseLineArt() {
+export function HouseLineArt() {
   return (
     <Box aria-hidden="true" position="absolute" right={0} bottom={0} w={{ base: '78%', md: '52%' }} maxW="680px" h="100%" pointerEvents="none" zIndex={-1}>
       <svg width="100%" height="100%" viewBox="0 0 600 260" preserveAspectRatio="xMaxYMax meet" fill="none" stroke="#fff" strokeLinecap="round" strokeLinejoin="round">

@@ -27,11 +27,8 @@ export function HouseholdPayments({
       <Flex align="center" justify="space-between" gap={3} mb={3.5}>
         <Box minW={0}>
           <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="9px"
-            fontWeight={800}
-            letterSpacing="0.12em"
-            textTransform="uppercase"
+            fontSize="11px"
+            fontWeight={600}
             color="var(--pb-income)"
           >
             {t('household.settlements.eyebrow')}

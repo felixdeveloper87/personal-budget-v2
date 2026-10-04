@@ -36,6 +36,7 @@ export function RecentExpensesModal({
   return (
     <PremiumModal
       isOpen={isOpen}
+      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
       size={{ base: 'full', md: '2xl' }}
       header={
@@ -133,11 +134,8 @@ export function RecentExpensesModal({
               return (
                 <Box key={monthKey}>
                   <Text
-                    fontFamily="var(--pb-mono)"
                     fontSize="xs"
                     fontWeight={700}
-                    letterSpacing="0.1em"
-                    textTransform="uppercase"
                     color="var(--pb-ink-faint)"
                     mb={3}
                   >

@@ -1,10 +1,11 @@
-import { type FormEvent } from 'react'
+import { type FormEvent, type ReactNode } from 'react'
 import {
   Box,
+  type BoxProps,
   Button,
+  type ButtonProps,
   FormControl,
   FormLabel,
-  Heading,
   HStack,
   Icon,
   Input,
@@ -12,53 +13,102 @@ import {
   Stack,
   Text,
   VStack,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import {
   acceptHouseholdInvitation,
   createHousehold,
   declineHouseholdInvitation,
 } from '../../../api'
-import { useEd } from '../../../editorial'
 import { useI18n } from '../../../i18n'
 import type { HouseholdPageState } from '../../../types'
 import { Home, Plus, RefreshCw } from '../../../components/ui/icons'
-import { Surface } from './HouseholdPageComponents'
+import NuHero from '../../dashboard/components/NuHero'
+import { HouseLineArt } from '../HouseholdHeader'
 import type { ApplyHouseholdAction } from '../hooks/useHouseholdPageController'
 
-export function HouseholdLoadingState() {
-  const ed = useEd()
+/* Same frame as the loaded page: purple hero, then a white sheet tucked over it. */
+function HouseholdStateFrame({ hero, children }: { hero: ReactNode; children: ReactNode }) {
   const { t } = useI18n()
-  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
-  const muted = ed?.muted ?? mutedFallback
   return (
-    <Box minH="55vh" display="grid" placeItems="center">
-      <VStack spacing={3}>
-        <Spinner color={ed?.jade ?? 'teal.500'} thickness="3px" />
-        <Text color={muted} fontSize="sm">{t('household.loading')}</Text>
-      </VStack>
+    <Box>
+      <NuHero
+        decoration={<HouseLineArt />}
+        title={(
+          <Box minW={0}>
+            <Text fontSize="sm" color="rgba(255,255,255,0.8)">{t('household.header.ourHome')}</Text>
+            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white">
+              {t('dashboard.shortcutHousehold')}
+            </Text>
+          </Box>
+        )}
+      >
+        {hero}
+      </NuHero>
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+        <Box
+          className="nu-dashboard"
+          bg="var(--nu-page)"
+          borderTopRadius="24px"
+          borderBottomRadius={{ base: 0, md: '24px' }}
+          px={{ base: 4, md: 6 }}
+          py={{ base: 6, md: 8 }}
+          boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+        >
+          {children}
+        </Box>
+      </Box>
     </Box>
   )
 }
 
-export function HouseholdLoadError({ onRetry }: { onRetry: () => void }) {
-  const ed = useEd()
-  const { t } = useI18n()
-  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
-  const muted = ed?.muted ?? mutedFallback
+/** Flat grey Nubank card. */
+function NuCard({ children, ...props }: BoxProps) {
   return (
-    <Box maxW="720px" mx="auto" px={4} py={16}>
-      <Surface p={8} textAlign="center">
-        <VStack spacing={4}>
-          <Icon as={Home} boxSize={9} color={muted} />
-          <Heading size="md">{t('household.load.failedTitle')}</Heading>
-          <Text color={muted}>{t('household.load.failedDescription')}</Text>
-          <Button leftIcon={<Icon as={RefreshCw} boxSize={4} />} onClick={onRetry}>
+    <Box bg="var(--nu-surface)" borderRadius="16px" p={{ base: 5, md: 6 }} {...props}>
+      {children}
+    </Box>
+  )
+}
+
+const pillPrimary: ButtonProps = {
+  bg: 'var(--nu-brand)',
+  color: 'white',
+  borderRadius: 'full',
+  fontWeight: 600,
+  px: 5,
+  _hover: { bg: 'var(--nu-brand-deep)' },
+  _active: { bg: 'var(--nu-brand-deep)' },
+}
+
+export function HouseholdLoadingState() {
+  const { t } = useI18n()
+  return (
+    <HouseholdStateFrame hero={null}>
+      <VStack spacing={3} py={10}>
+        <Spinner color="var(--nu-brand)" thickness="3px" />
+        <Text color="var(--pb-ink-soft)" fontSize="sm">{t('household.loading')}</Text>
+      </VStack>
+    </HouseholdStateFrame>
+  )
+}
+
+export function HouseholdLoadError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useI18n()
+  return (
+    <HouseholdStateFrame hero={null}>
+      <NuCard maxW="560px" mx="auto" textAlign="center">
+        <VStack spacing={3}>
+          <Box display="grid" placeItems="center" w="44px" h="44px" borderRadius="full" bg="var(--nu-negative-tint)" color="var(--nu-negative)">
+            <Icon as={Home} boxSize={5} weight="bold" />
+          </Box>
+          <Text fontSize="lg" fontWeight={700} color="var(--pb-ink)">{t('household.load.failedTitle')}</Text>
+          <Text color="var(--pb-ink-soft)" fontSize="sm">{t('household.load.failedDescription')}</Text>
+          <Button {...pillPrimary} mt={1} leftIcon={<Icon as={RefreshCw} boxSize={4} />} onClick={onRetry}>
             {t('household.load.retry')}
           </Button>
         </VStack>
-      </Surface>
-    </Box>
+      </NuCard>
+    </HouseholdStateFrame>
   )
 }
 
@@ -75,35 +125,28 @@ export function HouseholdOnboarding({
   setHouseholdName: (name: string) => void
   applyAction: ApplyHouseholdAction
 }) {
-  const ed = useEd()
   const { t } = useI18n()
-  const mutedFallback = useColorModeValue('gray.600', 'gray.400')
-  const muted = ed?.muted ?? mutedFallback
   return (
-    <Box maxW="900px" mx="auto" px={{ base: 3, md: 6 }} py={{ base: 5, md: 10 }}>
-      <VStack align="stretch" spacing={6}>
-        <Box>
-          <Text
-            color={ed?.gold ?? 'orange.500'}
-            fontSize="xs"
-            fontWeight={800}
-            letterSpacing="0.16em"
-            textTransform="uppercase"
-          >
-            {t('household.create.eyebrow')}
-          </Text>
-          <Heading mt={2} size={{ base: 'xl', md: '2xl' }}>
+    <HouseholdStateFrame
+      hero={(
+        <Box mt={{ base: 4, md: 5 }} maxW="620px">
+          <Text fontSize="sm" fontWeight={600} color="#e2c2fb">{t('household.create.eyebrow')}</Text>
+          <Text mt={1} fontSize={{ base: '2xl', md: '3xl' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white">
             {t('household.create.title')}
-          </Heading>
-          <Text mt={3} color={muted} maxW="620px">
+          </Text>
+          <Text mt={2} fontSize="sm" lineHeight={1.6} color="rgba(255,255,255,0.84)">
             {t('household.create.description')}
           </Text>
         </Box>
-
+      )}
+    >
+      <VStack align="stretch" spacing={4} maxW="760px" mx="auto">
         {page.pendingInvitations.length > 0 && (
-          <Surface p={{ base: 4, md: 6 }}>
-            <VStack align="stretch" spacing={4}>
-              <Heading size="sm">{t('household.invitations.title')}</Heading>
+          <Box>
+            <Text mb={3} fontSize="md" fontWeight={700} color="var(--pb-ink)">
+              {t('household.invitations.title')}
+            </Text>
+            <VStack align="stretch" spacing={2.5}>
               {page.pendingInvitations.map((invitation) => (
                 <Stack
                   key={invitation.id}
@@ -111,19 +154,19 @@ export function HouseholdOnboarding({
                   justify="space-between"
                   align={{ base: 'stretch', sm: 'center' }}
                   p={4}
-                  borderRadius="xl"
-                  bg={ed?.panelRaised ?? 'blackAlpha.50'}
+                  borderRadius="16px"
+                  bg="var(--nu-surface)"
                 >
-                  <Box>
-                    <Text fontWeight={800}>{invitation.householdName}</Text>
-                    <Text color={muted} fontSize="sm">
+                  <Box minW={0}>
+                    <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{invitation.householdName}</Text>
+                    <Text color="var(--pb-ink-soft)" fontSize="sm">
                       {t('household.invitations.invitedBy', { name: invitation.invitedByName })}
                     </Text>
                   </Box>
-                  <HStack>
+                  <HStack spacing={2}>
                     <Button
+                      {...pillPrimary}
                       size="sm"
-                      colorScheme="teal"
                       isLoading={busyAction === `accept-${invitation.id}`}
                       onClick={() => void applyAction(
                         `accept-${invitation.id}`,
@@ -136,6 +179,9 @@ export function HouseholdOnboarding({
                     <Button
                       size="sm"
                       variant="ghost"
+                      borderRadius="full"
+                      color="var(--nu-brand)"
+                      _hover={{ bg: 'var(--nu-brand-tint)' }}
                       isLoading={busyAction === `decline-${invitation.id}`}
                       onClick={() => void applyAction(
                         `decline-${invitation.id}`,
@@ -148,10 +194,10 @@ export function HouseholdOnboarding({
                 </Stack>
               ))}
             </VStack>
-          </Surface>
+          </Box>
         )}
 
-        <Surface p={{ base: 5, md: 7 }}>
+        <NuCard>
           <VStack
             as="form"
             align="stretch"
@@ -165,26 +211,24 @@ export function HouseholdOnboarding({
               )
             }}
           >
-            <HStack>
-              <Box
-                w={11}
-                h={11}
-                display="grid"
-                placeItems="center"
-                borderRadius="xl"
-                bg={ed?.jadeSoft ?? 'teal.50'}
-                color={ed?.jade ?? 'teal.600'}
-              >
-                <Icon as={Home} boxSize={6} weight="duotone" />
+            <HStack spacing={3}>
+              <Box display="grid" placeItems="center" w="44px" h="44px" flexShrink={0} borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)">
+                <Icon as={Home} boxSize={5} weight="bold" />
               </Box>
               <Box>
-                <Heading size="md">{t('household.create.formTitle')}</Heading>
-                <Text color={muted} fontSize="sm">{t('household.create.ownerHint')}</Text>
+                <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">{t('household.create.formTitle')}</Text>
+                <Text color="var(--pb-ink-soft)" fontSize="sm">{t('household.create.ownerHint')}</Text>
               </Box>
             </HStack>
             <FormControl isRequired>
-              <FormLabel>{t('household.create.name')}</FormLabel>
+              <FormLabel fontSize="sm" fontWeight={600} color="var(--pb-ink)">{t('household.create.name')}</FormLabel>
               <Input
+                h="52px"
+                bg="white"
+                border="1.5px solid transparent"
+                borderRadius="14px"
+                _hover={{ bg: 'white' }}
+                _focusVisible={{ borderColor: 'var(--nu-brand)', boxShadow: 'none' }}
                 value={householdName}
                 maxLength={120}
                 onChange={(event) => setHouseholdName(event.target.value)}
@@ -192,17 +236,18 @@ export function HouseholdOnboarding({
               />
             </FormControl>
             <Button
+              {...pillPrimary}
               type="submit"
-              alignSelf="flex-start"
-              colorScheme="teal"
+              h="48px"
+              alignSelf={{ base: 'stretch', sm: 'flex-start' }}
               leftIcon={<Icon as={Plus} boxSize={4} />}
               isLoading={busyAction === 'create-household'}
             >
               {t('household.create.submit')}
             </Button>
           </VStack>
-        </Surface>
+        </NuCard>
       </VStack>
-    </Box>
+    </HouseholdStateFrame>
   )
 }

@@ -84,6 +84,7 @@ export function MembersModal({
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
       <ModalContent
+        className="nu-dashboard"
         bg={ed?.modal}
         color={ed?.cream}
         borderColor={ed?.lineStrong}
@@ -148,7 +149,7 @@ export function MembersModal({
                     placeholder={t('household.manage.emailPlaceholder')}
                   />
                 </FormControl>
-                <Button type="submit" colorScheme="teal" isLoading={busy === 'invite'}>
+                <Button type="submit" bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }} isLoading={busy === 'invite'}>
                   {t('household.manage.invite')}
                 </Button>
               </Stack>
@@ -238,7 +239,7 @@ export function MembersModal({
                             <Button
                               type="submit"
                               size="sm"
-                              colorScheme="teal"
+                              bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
                               leftIcon={<Icon as={Check} boxSize={4} />}
                               isLoading={busy === `rename-member-${member.id}`}
                               isDisabled={!memberName.trim()}

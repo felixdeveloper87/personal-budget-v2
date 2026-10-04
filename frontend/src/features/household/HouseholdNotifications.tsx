@@ -142,7 +142,7 @@ export function HouseholdNotificationsCard({
           </Button>
           <Button
             size="sm"
-            colorScheme="teal"
+            bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
             flex={{ base: 1, sm: 'initial' }}
             rightIcon={<ChevronRight size={15} />}
             onClick={onOpenAll}
@@ -171,6 +171,7 @@ export function HouseholdNotificationsModal({
   return (
     <PremiumModal
       isOpen={isOpen}
+      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
       size={{ base: 'full', md: 'xl' }}
       header={(
@@ -199,7 +200,7 @@ export function HouseholdNotificationsModal({
       footer={unreadCount > 0 ? (
         <Button
           w="full"
-          colorScheme="teal"
+          bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
           leftIcon={<CheckCircle2 size={17} />}
           isLoading={isMarkingRead}
           onClick={onMarkAllRead}

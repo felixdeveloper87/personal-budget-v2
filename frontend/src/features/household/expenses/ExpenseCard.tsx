@@ -3,7 +3,6 @@ import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../../types'
 import { Pencil, ReceiptText, Upload, Users } from '../../../components/ui/icons'
 import { getHouseholdCategoryConfig } from './expenseConfig'
-import { householdAvatarGradient } from '../householdAvatar'
 
 export function ExpenseCard({
   expense,
@@ -24,14 +23,6 @@ const currentShare = expense.shares.find(
 const attachmentCount = (expense.attachments ?? []).length
 const canOpenProof = attachmentCount > 0 || expense.canEdit
 const hasFooter = Boolean(currentShare || canOpenProof || expense.canEdit)
-const payerIndex = household.members.findIndex(
-  (member) => member.id === expense.payerMemberId,
-)
-const payerGradient = householdAvatarGradient(
-  payerIndex,
-  expense.payerMemberId,
-)
-const payerInitial = (expense.payerName || '?').charAt(0).toUpperCase()
 const categoryCfg = getHouseholdCategoryConfig(expense.category)
 
 return (
@@ -55,16 +46,6 @@ return (
       transform: 'translateY(-1px)',
     }}
   >
-    <Box
-      aria-hidden="true"
-      position="absolute"
-      left="0"
-      top="12px"
-      bottom="12px"
-      w="3.5px"
-      borderRadius="full"
-      bgGradient={payerGradient}
-    />
 
     {/* Header: Category Icon + Description & Payer + Total */}
     <Flex align="flex-start" justify="space-between" gap={3}>
@@ -102,22 +83,6 @@ return (
               border="1px solid var(--pb-hair)"
               maxW="140px"
             >
-              <Flex
-                aria-hidden="true"
-                w="14px"
-                h="14px"
-                flexShrink={0}
-                align="center"
-                justify="center"
-                borderRadius="full"
-                bgGradient={payerGradient}
-                color="white"
-                fontFamily="var(--pb-mono)"
-                fontSize="7px"
-                fontWeight={800}
-              >
-                {payerInitial}
-              </Flex>
               <Text
                 color="var(--pb-ink-soft)"
                 fontSize="2xs"
@@ -137,8 +102,6 @@ return (
         <Text
           fontSize="2xs"
           fontWeight={600}
-          letterSpacing="0.06em"
-          textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
           {t('household.expenses.total')}
@@ -227,8 +190,6 @@ return (
             <Text
               fontSize="2xs"
               fontWeight={600}
-              letterSpacing="0.04em"
-              textTransform="uppercase"
               color="var(--pb-forest-2)"
             >
               {t('household.expenses.yourShare')}

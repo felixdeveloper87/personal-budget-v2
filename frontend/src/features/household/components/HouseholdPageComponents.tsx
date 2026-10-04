@@ -128,11 +128,8 @@ export function HouseholdSectionNavigation({
               borderRadius="12px"
               variant="unstyled"
               color={selected ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={700}
-              letterSpacing="0.08em"
-              textTransform="uppercase"
+              fontSize="13px"
+              fontWeight={600}
               aria-current={selected ? 'location' : undefined}
               onClick={() => selectSection(item.id)}
               transition={prefersReducedMotion ? 'none' : 'color 0.2s ease'}
@@ -205,11 +202,8 @@ export function ActionRequiredBanner({
         <Box minW={0}>
           <HStack spacing={2} flexWrap="wrap">
             <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
+              fontSize="11px"
               fontWeight={700}
-              letterSpacing="0.14em"
-              textTransform="uppercase"
               color={accent}
             >
               {t('household.common.actionRequired')}
@@ -302,11 +296,8 @@ export function HouseholdSectionHeader({
     >
       <Box minW={0}>
         <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="9px"
+          fontSize="11px"
           fontWeight={600}
-          letterSpacing="0.15em"
-          textTransform="uppercase"
           color="var(--pb-ink-faint)"
         >
           {eyebrow}
@@ -333,11 +324,8 @@ export function HouseholdSectionHeader({
         bg={tint}
         color={accent}
         border="1px solid var(--pb-hair)"
-        fontFamily="var(--pb-mono)"
-        fontSize="8px"
+        fontSize="11px"
         fontWeight={700}
-        letterSpacing="0.05em"
-        textTransform="uppercase"
         whiteSpace="nowrap"
       >
         {stat}

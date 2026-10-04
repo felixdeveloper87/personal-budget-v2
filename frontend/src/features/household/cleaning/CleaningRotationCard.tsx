@@ -73,9 +73,7 @@ export function CleaningRotationCard({
       <Box>
         <Flex align="center" justify="space-between" gap={3} mb={3.5}>
           <Box minW={0}>
-            <Text
-              fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={800} letterSpacing="0.12em"
-              textTransform="uppercase" color="var(--pb-income)"
+            <Text fontSize="11px" fontWeight={600} color="var(--pb-income)"
             >
               {t('household.cleaning.eyebrow')}
             </Text>
@@ -125,7 +123,7 @@ export function CleaningRotationCard({
                   {initials}
                 </Flex>
                 <Box minW={0}>
-                  <Text fontFamily="var(--pb-mono)" fontSize="8px" fontWeight={800} letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-income)">
+                  <Text fontSize="11px" fontWeight={600} color="var(--pb-income)">
                     {currentIsUser ? t('household.cleaning.yourWeek') : t('household.cleaning.onDuty')}
                   </Text>
                   <Text mt={1} fontFamily="var(--pb-serif)" fontSize="lg" fontWeight={700} lineHeight={1} color="var(--pb-ink)" noOfLines={1}>

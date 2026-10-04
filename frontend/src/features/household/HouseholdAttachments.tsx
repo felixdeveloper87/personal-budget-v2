@@ -745,6 +745,7 @@ export function AttachmentGalleryModal({
       <Modal isOpen={isOpen} onClose={closeGallery} size="xl" scrollBehavior="inside">
         <ModalOverlay bg="blackAlpha.700" backdropFilter="blur(8px)" />
         <ModalContent
+          className="nu-dashboard"
           bg={ed?.modal}
           color={ed?.cream}
           borderColor={ed?.lineStrong}
@@ -875,7 +876,7 @@ export function AttachmentGalleryModal({
                     <Button
                       mt={3}
                       w={{ base: 'full', sm: 'auto' }}
-                      colorScheme="teal"
+                      bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
                       leftIcon={<Upload size={16} />}
                       isLoading={uploading}
                       onClick={() => void upload()}

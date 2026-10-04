@@ -169,6 +169,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
     <PremiumModal
       isOpen={isOpen} onClose={saving ? () => undefined : onClose} size="full" closeOnOverlayClick={!saving} footer={footer}
       contentProps={{
+        className: 'nu-dashboard',
         w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
         h: { base: '80dvh', md: '80vh' }, maxH: { base: '80dvh', md: '80vh' },
         mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', bg: 'var(--pb-surface-2)',
