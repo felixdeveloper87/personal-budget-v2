@@ -11,14 +11,12 @@ import {
   Progress,
   Spinner,
   Text,
-  VStack,
 } from '@chakra-ui/react'
 import { Target } from 'lucide-react'
 
 import {
   archiveSavingsGoal,
   contributeToSavingsGoal,
-  createSavingsGoal,
   listSavingsGoals,
 } from '../../api'
 import type { SavingsGoal } from '../../types'
@@ -27,36 +25,15 @@ import { useI18n } from '../../i18n'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../../components/charts/modal/BalanceBreakEvenPanel'
-import PennyChallengeCard from '../../components/goals/PennyChallengeCard'
-import PennyChallengeSummaryRow from '../../components/goals/PennyChallengeSummaryRow'
-import StartChallengeDialog from '../../components/goals/StartChallengeDialog'
-import { ChevronDown, ChevronUp, Sparkles, Trash2 } from '../../components/ui/icons'
+import { Trash2 } from '../../components/ui/icons'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 import { NuSection } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
-import {
-  CHALLENGE_NAME_PREFIX,
-  challengeYearTotal,
-  expectedCumulativeToday,
-  isPennyChallengeGoal,
-} from '../../utils/pennyChallenge'
-
-const CHALLENGE_COLLAPSED_KEY = 'goals:challenge-collapsed'
 
 export default function GoalsPage() {
   const { t, formatCurrency } = useI18n()
   const [goals, setGoals] = useState<SavingsGoal[]>([])
   const [contributions, setContributions] = useState<Record<number, number>>({})
-  const [challengeBusyId, setChallengeBusyId] = useState<number | null>(null)
-  const [startingChallenge, setStartingChallenge] = useState(false)
-  const [confirmStartOpen, setConfirmStartOpen] = useState(false)
-  const [challengeCollapsed, setChallengeCollapsed] = useState(() => {
-    try {
-      return localStorage.getItem(CHALLENGE_COLLAPSED_KEY) === 'true'
-    } catch {
-      return false
-    }
-  })
 
   const currentMonth = useMemo(() => new Date(), [])
   const {
@@ -105,11 +82,6 @@ export default function GoalsPage() {
   }
 
   const activeGoals = useMemo(() => goals.filter((goal) => !goal.archived), [goals])
-  const challengeGoals = useMemo(() => activeGoals.filter(isPennyChallengeGoal), [activeGoals])
-  const normalGoals = useMemo(
-    () => activeGoals.filter((goal) => !isPennyChallengeGoal(goal)),
-    [activeGoals],
-  )
 
   const totals = useMemo(() => {
     const saved = activeGoals.reduce((sum, goal) => sum + goal.currentAmount, 0)
@@ -121,58 +93,6 @@ export default function GoalsPage() {
       progress: target > 0 ? Math.min(100, Math.max(0, saved / target * 100)) : 0,
     }
   }, [activeGoals])
-
-  const toggleChallengeCollapsed = () => {
-    setChallengeCollapsed((current) => {
-      const next = !current
-      try {
-        localStorage.setItem(CHALLENGE_COLLAPSED_KEY, String(next))
-      } catch {
-        // Keep the preference for this session when storage is unavailable.
-      }
-      return next
-    })
-  }
-
-  const applyChallengeContribution = async (goal: SavingsGoal, amount: number) => {
-    const rounded = Math.round(amount * 100) / 100
-    if (rounded === 0) return
-    setChallengeBusyId(goal.id)
-    try {
-      await contributeToSavingsGoal(goal.id, rounded)
-      await load()
-      ToastService.success({ title: t('goals.challenge.toast.updated'), dedupeKey: `challenge-contribution:${goal.id}` })
-    } catch (err) {
-      ToastService.apiError(err, {
-        title: t('goals.challenge.toast.updateFailed'),
-        dedupeKey: `challenge-contribution-failed:${goal.id}`,
-      })
-    } finally {
-      setChallengeBusyId(null)
-    }
-  }
-
-  const startChallenge = async () => {
-    const today = new Date()
-    const year = today.getFullYear()
-    setStartingChallenge(true)
-    try {
-      await createSavingsGoal({
-        name: `${CHALLENGE_NAME_PREFIX} ${year}`,
-        targetAmount: challengeYearTotal(year),
-        currentAmount: expectedCumulativeToday(year, today),
-        targetDate: `${year}-12-31`,
-        color: '#820ad1',
-      })
-      await load()
-      setConfirmStartOpen(false)
-      ToastService.success({ title: t('goals.challenge.toast.started'), dedupeKey: 'challenge-started' })
-    } catch (err) {
-      ToastService.apiError(err, { title: t('goals.challenge.toast.startFailed'), dedupeKey: 'challenge-start-failed' })
-    } finally {
-      setStartingChallenge(false)
-    }
-  }
 
   return (
     <Box>
@@ -208,9 +128,9 @@ export default function GoalsPage() {
       <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
         <Box className="nu-dashboard" bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           <NuSection title={t('goals.section.active')} subtitle={t('goals.section.activeCaption')}>
-            {normalGoals.length > 0 ? (
+            {activeGoals.length > 0 ? (
               <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)">
-                {normalGoals.map((goal) => (
+                {activeGoals.map((goal) => (
                   <SavingsGoalRow
                     key={goal.id}
                     goal={goal}
@@ -225,59 +145,6 @@ export default function GoalsPage() {
               <Box py={5} borderTop="1px solid var(--pb-hair)">
                 <Text fontSize="sm" color="var(--pb-ink-soft)">{t('goals.empty.description')}</Text>
               </Box>
-            )}
-          </NuSection>
-
-          <NuSection title={t('goals.challenge.sectionTitle')} subtitle={t('goals.challenge.description', {
-            first: formatCurrency(0.01),
-            second: formatCurrency(0.02),
-            total: formatCurrency(challengeYearTotal(new Date().getFullYear())),
-          })} action={challengeGoals.length === 0 ? (
-            <Button
-              size="sm"
-              borderRadius="full"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              color="var(--nu-brand, #820ad1)"
-              leftIcon={<Sparkles size={15} weight="duotone" />}
-              onClick={() => setConfirmStartOpen(true)}
-              _hover={{ bg: '#ead6fa' }}
-            >
-              {t('goals.challenge.start')}
-            </Button>
-          ) : (
-            <Button
-              size="xs"
-              variant="ghost"
-              borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              rightIcon={<Icon as={challengeCollapsed ? ChevronDown : ChevronUp} boxSize={4} />}
-              onClick={toggleChallengeCollapsed}
-            >
-              {challengeCollapsed ? t('goals.challenge.expand') : t('goals.challenge.collapse')}
-            </Button>
-          )}>
-            {challengeGoals.length === 0 ? (
-              <Box py={4} borderTop="1px solid var(--pb-hair)">
-                <Text fontSize="sm" color="var(--pb-ink-soft)">{t('goals.empty.challenge')}</Text>
-              </Box>
-            ) : challengeCollapsed ? (
-              <VStack align="stretch" spacing={0}>
-                {challengeGoals.map((goal) => (
-                  <PennyChallengeSummaryRow key={goal.id} goal={goal} onExpand={toggleChallengeCollapsed} />
-                ))}
-              </VStack>
-            ) : (
-              <VStack align="stretch" spacing={3}>
-                {challengeGoals.map((goal) => (
-                  <PennyChallengeCard
-                    key={goal.id}
-                    goal={goal}
-                    busy={challengeBusyId === goal.id}
-                    onContribute={applyChallengeContribution}
-                    onArchive={archive}
-                  />
-                ))}
-              </VStack>
             )}
           </NuSection>
 
@@ -298,12 +165,6 @@ export default function GoalsPage() {
         </Box>
       </Box>
 
-      <StartChallengeDialog
-        isOpen={confirmStartOpen}
-        onClose={() => setConfirmStartOpen(false)}
-        onConfirm={startChallenge}
-        isLoading={startingChallenge}
-      />
     </Box>
   )
 }

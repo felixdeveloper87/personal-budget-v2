@@ -16,25 +16,34 @@ export const NU_SHEET_OVERLAP = 24;
  * Dashboard and Incomes headers match; the next sibling should be a sheet with
  * `marginTop: -NU_SHEET_OVERLAP` and rounded top corners.
  */
-export function NuHeader({ children, decoration }: { children: ReactNode; /** Extra art drawn over the gradient (e.g. house line art). */ decoration?: ReactNode }) {
+export function NuHeader({
+  children,
+  contentHeight = NU_HEADER_CONTENT_HEIGHT,
+  decoration,
+}: {
+  children: ReactNode;
+  /** Override for pushed (non-tab) screens that need a taller header. */
+  contentHeight?: number;
+  /** Extra art drawn over the gradient (e.g. house line art). */
+  decoration?: ReactNode;
+}) {
   const insets = useSafeAreaInsets();
   return (
     <View
       style={[
         styles.header,
-        { height: insets.top + 8 + NU_HEADER_CONTENT_HEIGHT + 12 + NU_SHEET_OVERLAP, paddingTop: insets.top + 8 },
+        { height: insets.top + 8 + contentHeight + 12 + NU_SHEET_OVERLAP, paddingTop: insets.top + 8 },
       ]}
     >
       <View pointerEvents="none" style={StyleSheet.absoluteFill}>
         <DashboardHeroArtwork />
       </View>
       {decoration ? <View pointerEvents="none" style={StyleSheet.absoluteFill}>{decoration}</View> : null}
-      <View style={styles.content}>{children}</View>
+      <View style={{ height: contentHeight }}>{children}</View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   header: { backgroundColor: nu.brand, overflow: "hidden", paddingHorizontal: 20 },
-  content: { height: NU_HEADER_CONTENT_HEIGHT },
 });

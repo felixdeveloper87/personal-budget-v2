@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { Box, Flex, Icon, Text } from '@chakra-ui/react'
 import type { AccountActivityItem } from '../../../types'
 import { ArrowDownRight, ArrowUpRight, Repeat } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
@@ -6,117 +6,61 @@ import { useI18n } from '../../../i18n'
 const isIncoming = (item: AccountActivityItem) =>
   item.kind === 'INCOME' || item.kind === 'TRANSFER_IN'
 
-interface RecentActivityProps {
-  items: AccountActivityItem[]
+interface AccountActivityRowProps {
+  item: AccountActivityItem
   hideBalances: boolean
 }
 
-export default function RecentActivity({ items, hideBalances }: RecentActivityProps) {
+/** One account movement: tinted circle · description + meta · signed amount (+ status pill). */
+export default function AccountActivityRow({ item, hideBalances }: AccountActivityRowProps) {
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
-
-  if (items.length === 0) {
-    return (
-      <Text fontSize="sm" color="var(--pb-ink-soft)" py={3}>
-        {t('accounts.activity.empty')}
-      </Text>
-    )
-  }
+  const incoming = isIncoming(item)
+  const transfer = item.kind === 'TRANSFER_IN' || item.kind === 'TRANSFER_OUT'
+  const paidByCreditCard = item.paymentMethodType === 'CREDIT_CARD' && Boolean(item.paymentMethodName)
+  const title = paidByCreditCard
+    ? t('accounts.activity.paidWithCard', { name: item.paymentMethodName ?? '' })
+    : item.description?.trim() || (item.category ? categoryLabel(item.category) : t('accounts.activity.fallback'))
+  const meta = [
+    formatDate(item.date, { day: '2-digit', month: 'short', year: 'numeric' }),
+    transfer ? t('accounts.detail.filter.TRANSFER') : item.category ? categoryLabel(item.category) : null,
+    !paidByCreditCard && item.paymentMethodName ? item.paymentMethodName : null,
+  ].filter(Boolean).join(' · ')
 
   return (
-    <Box>
-      {items.map((item) => {
-        const incoming = isIncoming(item)
-        const transfer = item.kind === 'TRANSFER_IN' || item.kind === 'TRANSFER_OUT'
-        const paidByCreditCard = item.paymentMethodType === 'CREDIT_CARD' && Boolean(item.paymentMethodName)
-        const tone = incoming ? 'var(--pb-income)' : 'var(--pb-ink)'
-        const tint = incoming ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
-        return (
-          <Flex
-            key={`${item.kind}-${item.id}-${item.date}`}
-            align="center"
-            gap="0.75rem"
-            py="0.7rem"
-            borderBottom="1px solid var(--pb-hair)"
-            _last={{ borderBottom: 'none' }}
-          >
-            <Flex
-              flexShrink={0}
-              w="32px"
-              h="32px"
-              align="center"
-              justify="center"
-              borderRadius="full"
-              color={tone}
-              bg={tint}
-            >
-              <Icon
-                as={transfer ? Repeat : incoming ? ArrowDownRight : ArrowUpRight}
-                boxSize="13px"
-              />
-            </Flex>
+    <Flex align="center" gap={3} minH="68px" py={3} borderBottom="1px solid var(--pb-hair)" _last={{ borderBottom: 'none' }}>
+      <Flex
+        flexShrink={0}
+        w="40px"
+        h="40px"
+        align="center"
+        justify="center"
+        borderRadius="full"
+        color={incoming ? 'var(--nu-positive)' : 'var(--nu-negative)'}
+        bg={incoming ? 'var(--nu-positive-tint)' : 'var(--nu-negative-tint)'}
+      >
+        <Icon as={transfer ? Repeat : incoming ? ArrowDownRight : ArrowUpRight} boxSize="16px" />
+      </Flex>
 
-            <Box minW={0} flex={1}>
-              <Text
-                fontSize="0.875rem"
-                color="var(--pb-ink)"
-                noOfLines={1}
-              >
-                {paidByCreditCard ? (
-                  <Text as="span" fontWeight={500}>
-                    {t('accounts.activity.paidWithCard', { name: item.paymentMethodName ?? '' })}
-                  </Text>
-                ) : (
-                  <>
-                    <Text as="span" fontWeight={500}>
-                      {item.description?.trim() || (item.category ? categoryLabel(item.category) : t('accounts.activity.fallback'))}
-                    </Text>
-                    {' · '}
-                    {formatDate(item.date, { day: '2-digit', month: 'short', year: 'numeric' })}
-                    {item.category ? ` · ${categoryLabel(item.category)}` : ''}
-                    {item.paymentMethodName ? (
-                      <Text as="span" color="var(--pb-ink-soft)">
-                        {' · '}{t('accounts.activity.paidWith', { name: item.paymentMethodName })}
-                      </Text>
-                    ) : null}
-                  </>
-                )}
-              </Text>
-            </Box>
+      <Box minW={0} flex={1}>
+        <Text fontSize="15px" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{title}</Text>
+        <Text mt="2px" fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{meta}</Text>
+      </Box>
 
-            <HStack
-              spacing="0.4rem"
-              flexShrink={0}
-              align="baseline"
-            >
-              {item.status && item.status !== 'CLEARED' ? (
-                <Text
-                  fontFamily="var(--pb-mono)"
-                  fontSize="8.5px"
-                  letterSpacing="0.05em"
-                  textTransform="uppercase"
-                  color="var(--pb-gold)"
-                  bg="var(--pb-tint-gold)"
-                  border="1px solid var(--pb-hair)"
-                  borderRadius="5px"
-                  px="0.32rem"
-                  py="0.06rem"
-                >
-                  {t(`status.${item.status}`, undefined, item.status.toLowerCase())}
-                </Text>
-              ) : null}
-              <Text
-                className="num"
-                fontSize="1.02rem"
-                fontWeight={500}
-                color={tone}
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {hideBalances ? '••••••' : `${incoming ? '+' : '−'}${formatCurrency(Math.abs(item.amount))}`}
-              </Text>
-            </HStack>
-          </Flex>
-        )
-      })}
-    </Box>
+      <Flex direction="column" align="flex-end" gap={1} flexShrink={0}>
+        <Text
+          fontSize="15px"
+          fontWeight={700}
+          color={incoming ? 'var(--nu-positive)' : 'var(--pb-ink)'}
+          sx={{ fontVariantNumeric: 'tabular-nums' }}
+        >
+          {hideBalances ? '••••••' : `${incoming ? '+' : '−'}${formatCurrency(Math.abs(item.amount))}`}
+        </Text>
+        {item.status && item.status !== 'CLEARED' ? (
+          <Text px={2} py="1px" borderRadius="full" bg="var(--nu-surface)" color="var(--pb-ink-soft)" fontSize="10px" fontWeight={600}>
+            {t(`status.${item.status}`, undefined, item.status.toLowerCase())}
+          </Text>
+        ) : null}
+      </Flex>
+    </Flex>
   )
 }

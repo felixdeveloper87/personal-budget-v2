@@ -1,37 +1,38 @@
-import { useEffect, useState } from 'react'
-import { Box, Flex, Grid, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
-import { motion } from 'framer-motion'
+import { useEffect, useState, type ReactNode } from 'react'
+import { Box, Flex, HStack, Icon, IconButton, Spinner, Text } from '@chakra-ui/react'
 import { getAccountDetails, getAccountActivityPage } from '../../../api'
-import type { AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
+import type { AccountActivityItem, AccountActivityPage, AccountDetails, FinancialAccount } from '../../../types'
 import { ToastService } from '../../../services/toast'
 import { ChevronLeft, ChevronRight, Repeat, Settings } from '../../../components/ui/icons'
 import { ACCOUNT_LABELS } from '../data/accountMeta'
 import { useI18n } from '../../../i18n'
 import AccountAvatar from '../../../components/accounts/AccountAvatar'
-import RecentActivity from './RecentActivity'
+import { NuSection } from '../../dashboard/components/nu'
+import Segmented from '../../dashboard/components/Segmented'
+import AccountActivityRow from './RecentActivity'
 
 const ACTIVITY_PAGE_SIZE = 10
 
-const MotionBox = motion(Box)
+type ActivityTab = 'recent' | 'upcoming'
+type ActivityFilter = 'ALL' | 'INCOME' | 'EXPENSE' | 'TRANSFER'
+const FILTERS: ActivityFilter[] = ['ALL', 'INCOME', 'EXPENSE', 'TRANSFER']
+
+function matchesFilter(item: AccountActivityItem, filter: ActivityFilter) {
+  if (filter === 'ALL') return true
+  if (filter === 'TRANSFER') return item.kind === 'TRANSFER_IN' || item.kind === 'TRANSFER_OUT'
+  return item.kind === filter
+}
 
 interface AccountDetailProps {
   account: FinancialAccount
   hideBalances: boolean
-  showBackButton: boolean
-  onBack: () => void
   onTransfer: () => void
   onSettings: () => void
 }
 
-export default function AccountDetail({
-  account,
-  hideBalances,
-  showBackButton,
-  onBack,
-  onTransfer,
-  onSettings,
-}: AccountDetailProps) {
-  const { t, formatCurrency } = useI18n()
+/** Body of the account page's white sheet — the balance itself lives in the purple hero. */
+export default function AccountDetail({ account, hideBalances, onTransfer, onSettings }: AccountDetailProps) {
+  const { t, formatCurrency, formatDate } = useI18n()
   const [details, setDetails] = useState<AccountDetails | null>(null)
 
   useEffect(() => {
@@ -57,10 +58,14 @@ export default function AccountDetail({
   const [activityPage, setActivityPage] = useState(0)
   const [activity, setActivity] = useState<AccountActivityPage | null>(null)
   const [activityLoading, setActivityLoading] = useState(false)
+  const [tab, setTab] = useState<ActivityTab>('recent')
+  const [filter, setFilter] = useState<ActivityFilter>('ALL')
 
   useEffect(() => {
     setActivityPage(0)
     setActivity(null)
+    setTab('recent')
+    setFilter('ALL')
   }, [account.id])
 
   useEffect(() => {
@@ -86,301 +91,233 @@ export default function AccountDetail({
 
   const shown = details?.account ?? account
   const mask = (value: number) => (hideBalances ? '••••••' : formatCurrency(value))
-  const isCurrentAccount = shown.type === 'CURRENT'
-  const secondaryLabel = isCurrentAccount
-    ? t('accounts.overdraftRemaining')
-    : t('accounts.openingBalance')
-  const secondaryAmount = isCurrentAccount ? shown.overdraftAvailable : shown.openingBalance
-  const secondaryNote = isCurrentAccount
-    ? shown.overdraftLimit > 0
-      ? t('accounts.overdraftUsed', { percentage: Math.round(shown.overdraftPercentageUsed) })
-      : t('accounts.noOverdraft')
-    : t('accounts.openingBalanceNote')
+  const typeLabel = t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])
+  const overdraftPercentage = Math.max(0, Math.min(100, shown.overdraftPercentageUsed || 0))
+  const overdraftDanger = overdraftPercentage >= 75
+  const fullDate = (value: string) => formatDate(value, { day: '2-digit', month: 'long', year: 'numeric' })
+
+  const items = tab === 'recent' ? activity?.items ?? [] : details?.upcomingActivity ?? []
+  const filtered = items.filter((item) => matchesFilter(item, filter))
+  const showRecentSpinner = tab === 'recent' && activityLoading && !activity
 
   return (
-    <Box
-      bg="var(--pb-surface)"
-      border={0}
-      borderRadius={0}
-      boxShadow="none"
-      overflow="hidden"
-    >
-      <Box
-        position="relative"
-        bg="transparent"
-        color="var(--pb-ink)"
-        borderBottom="1px solid var(--pb-hair)"
-        pb={{ base: 4, sm: 5 }}
-      >
-        <Flex align="center" gap="0.65rem">
-          {showBackButton && (
-            <Box
-              as="button"
-              type="button"
-              aria-label={t('accounts.action.back')}
-              onClick={onBack}
-              flexShrink={0}
-              w="32px"
-              h="32px"
-              borderRadius="full"
-              display="grid"
-              placeItems="center"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              border={0}
-              _hover={{ bg: '#ead6fa' }}
-            >
-              <Icon as={ChevronLeft} boxSize="16px" />
-            </Box>
-          )}
-
-          <AccountAvatar account={shown} size={40} />
-          <Box flex={1} minW={0}>
-            <Text
-              fontSize="8.5px"
-              color="var(--pb-ink-soft)"
-              noOfLines={1}
-            >
-              {shown.institution || t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])}
+    <Box>
+      {/* Identity + round shortcuts */}
+      <Box px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
+        <Flex align="center" gap={3}>
+          <AccountAvatar account={shown} size={44} />
+          <Box minW={0} flex={1}>
+            <Text fontSize="md" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{shown.name}</Text>
+            <Text mt="2px" fontSize="sm" color="var(--pb-ink-soft)" noOfLines={1}>
+              {shown.institution || t('accounts.personalAccount')} · {typeLabel}
             </Text>
-            <Text mt={0.5} fontSize="1.05rem" fontWeight={650} lineHeight="1.1" color="var(--pb-ink)" noOfLines={1}>
-              {shown.name}
-            </Text>
-          </Box>
-
-          <Box
-            as="button"
-            type="button"
-            aria-label={t('accounts.transfer.action')}
-            onClick={onTransfer}
-            display="inline-flex"
-            alignItems="center"
-            justifyContent="center"
-            gap="0.4rem"
-            flexShrink={0}
-            minW="32px"
-            h="32px"
-            px={{ base: 2.5, sm: 3 }}
-            borderRadius="full"
-            color="var(--nu-brand, #820ad1)"
-            bg="var(--nu-brand-tint, #f3e8fc)"
-            border={0}
-            fontSize="9px"
-            fontWeight={650}
-            _hover={{ bg: '#ead6fa' }}
-          >
-            <Icon as={Repeat} boxSize="13px" />
-            <Text as="span" display={{ base: 'none', sm: 'inline' }}>
-              {t('accounts.transfer.short')}
-            </Text>
-          </Box>
-          <Box
-            as="button"
-            type="button"
-            aria-label={t('accounts.form.editTitle')}
-            onClick={onSettings}
-            display="grid"
-            placeItems="center"
-            flexShrink={0}
-            w="32px"
-            h="32px"
-            borderRadius="full"
-            color="var(--nu-brand, #820ad1)"
-            bg="var(--nu-brand-tint, #f3e8fc)"
-            border={0}
-            _hover={{ bg: '#ead6fa' }}
-          >
-            <Icon as={Settings} boxSize="14px" />
           </Box>
         </Flex>
-
-        <Grid
-          mt={3.5}
-          templateColumns={{ base: '1fr', md: 'minmax(0, 1.15fr) minmax(240px, 0.85fr)' }}
-          gap={{ base: 3, md: 4 }}
-          alignItems="stretch"
-        >
-          <Flex
-            direction="column"
-            justify="center"
-            minW={0}
-            pr={{ md: 4 }}
-            borderRight={{ base: 'none', md: '1px solid var(--pb-hair)' }}
-          >
-            <Text fontSize="11px" color="var(--pb-ink-soft)">
-              {t('accounts.currentBalance')}
-            </Text>
-            <Text
-              className="num"
-              mt={1}
-              fontSize="clamp(1.65rem, 3.4vw, 2.35rem)"
-              fontWeight={700}
-              lineHeight={0.98}
-              letterSpacing="-0.03em"
-              color={!hideBalances && shown.currentBalance < 0 ? 'var(--pb-coral)' : 'var(--pb-ink)'}
-              noOfLines={1}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-            >
-              {mask(shown.currentBalance)}
-            </Text>
-            <Text mt={1.5} fontSize="10px" color="var(--pb-ink-faint)">
-              GBP · {t('accounts.activeAccount')}
-            </Text>
-          </Flex>
-
-          <Grid templateColumns="repeat(2, minmax(0, 1fr))" gap={2}>
-            <DetailMetric
-              label={secondaryLabel}
-              value={mask(secondaryAmount)}
-              note={secondaryNote}
-              danger={!hideBalances && isCurrentAccount && secondaryAmount <= 0 && shown.overdraftLimit > 0}
-            />
-            <DetailMetric
-              label={t('accounts.accountType')}
-              value={t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])}
-              note={shown.institution || t('accounts.personalAccount')}
-              compact
-            />
-          </Grid>
-        </Grid>
+        <HStack mt={5} spacing={5} align="flex-start">
+          <QuickAction icon={<Icon as={Repeat} boxSize="20px" />} label={t('accounts.detail.transfer')} onClick={onTransfer} />
+          <QuickAction icon={<Icon as={Settings} boxSize="20px" />} label={t('accounts.detail.configure')} onClick={onSettings} />
+        </HStack>
       </Box>
 
-      <MotionBox
-        key={account.id}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.15 }}
-        pt={{ base: 4, md: 5 }}
-      >
-        <Flex align="flex-end" justify="space-between" gap={3} mb={3}>
-          <Box>
-            <Text as="h3" fontSize="1.08rem" fontWeight={650} color="var(--pb-ink)">
-              {t('accounts.activity.title')}
-            </Text>
-            <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
-              {t('accounts.activity.description')}
-            </Text>
-          </Box>
-
-          <HStack spacing="0.35rem" flexShrink={0}>
-            <IconButton
-              aria-label={t('accounts.activity.newer')}
-              title={t('accounts.activity.newer')}
-              icon={<Icon as={ChevronLeft} boxSize="15px" />}
-              size="xs"
-              variant="ghost"
-              borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              border={0}
-              isDisabled={activityPage === 0 || activityLoading}
-              onClick={() => setActivityPage((page) => Math.max(0, page - 1))}
-              _hover={{ bg: '#ead6fa' }}
-            />
+      {shown.type === 'CURRENT' && shown.overdraftLimit > 0 && (
+        <NuSection
+          title={t('accounts.detail.overdraft.title')}
+          subtitle={t('accounts.detail.overdraft.limit', { amount: mask(shown.overdraftLimit) })}
+          action={(
             <Text
-              minW="54px"
-              textAlign="center"
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              color="var(--pb-ink-faint)"
+              flexShrink={0} px={3} py={1} borderRadius="full"
+              bg={overdraftDanger ? 'var(--nu-negative-tint)' : 'var(--nu-brand-tint)'}
+              color={overdraftDanger ? 'var(--nu-negative)' : 'var(--nu-brand)'}
+              fontSize="sm" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}
             >
-              {t('accounts.activity.page', { page: activityPage + 1 })}
+              {hideBalances ? '••' : `${Math.round(overdraftPercentage)}%`}
             </Text>
-            <IconButton
-              aria-label={t('accounts.activity.older')}
-              title={t('accounts.activity.older')}
-              icon={<Icon as={ChevronRight} boxSize="15px" />}
-              size="xs"
-              variant="ghost"
-              borderRadius="full"
-              color="var(--nu-brand, #820ad1)"
-              bg="var(--nu-brand-tint, #f3e8fc)"
-              border={0}
-              isDisabled={!activity?.hasMore || activityLoading}
-              onClick={() => setActivityPage((page) => page + 1)}
-              _hover={{ bg: '#ead6fa' }}
-            />
-          </HStack>
-        </Flex>
+          )}
+        >
+          <Box h="6px" borderRadius="full" bg="var(--nu-track)" overflow="hidden" maxW="560px">
+            <Box h="full" w={`${overdraftPercentage}%`} borderRadius="full" bg={overdraftDanger ? 'var(--nu-negative)' : 'var(--nu-brand)'} transition="width .4s ease" />
+          </Box>
+          <Flex mt={2} justify="space-between" maxW="560px" fontSize="sm" color="var(--pb-ink-soft)">
+            <Text>{t('accounts.detail.overdraft.used', { amount: mask(shown.overdraftUsed) })}</Text>
+            <Text>{t('accounts.detail.overdraft.available', { amount: mask(shown.overdraftAvailable) })}</Text>
+          </Flex>
+        </NuSection>
+      )}
 
-        <Box position="relative" minH="110px">
-          {activityLoading && !activity ? (
-            <Flex minH="110px" align="center" justify="center">
+      <NuSection title={t('accounts.detail.info.title')}>
+        <Box display="grid" gridTemplateColumns={{ base: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }} columnGap={10}>
+          <InfoRow label={t('accounts.detail.info.institution')} value={shown.institution || t('accounts.personalAccount')} />
+          <InfoRow label={t('accounts.detail.info.type')} value={typeLabel} />
+          <InfoRow label={t('accounts.detail.info.currency')} value={shown.currency} />
+          <InfoRow label={t('accounts.openingBalance')} value={mask(shown.openingBalance)} />
+          <InfoRow label={t('accounts.detail.info.anchor')} value={fullDate(shown.balanceAnchorAt)} />
+          {shown.createdAt && <InfoRow label={t('accounts.detail.info.created')} value={fullDate(shown.createdAt)} />}
+        </Box>
+      </NuSection>
+
+      <NuSection
+        title={t('accounts.detail.activity.title')}
+        subtitle={t('accounts.detail.activity.caption')}
+        action={(
+          <Text
+            flexShrink={0} minW="32px" textAlign="center" px={3} py={1} borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)"
+            fontSize="sm" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}
+          >
+            {filtered.length}
+          </Text>
+        )}
+      >
+        <Segmented
+          options={[
+            { value: 'recent', label: t('accounts.detail.tab.recent') },
+            { value: 'upcoming', label: t('accounts.detail.tab.upcoming') },
+          ]}
+          value={tab}
+          onChange={(next) => { setTab(next); setFilter('ALL') }}
+          mobileFullWidth
+          aria-label={t('accounts.detail.tabsAria')}
+        />
+
+        <HStack
+          mt={3}
+          spacing={2}
+          overflowX="auto"
+          mx={{ base: -4, md: 0 }}
+          px={{ base: 4, md: 0 }}
+          pb={1}
+          sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
+        >
+          {FILTERS.map((value) => {
+            const selected = filter === value
+            return (
+              <Box
+                as="button"
+                type="button"
+                key={value}
+                onClick={() => setFilter(value)}
+                aria-pressed={selected}
+                flexShrink={0}
+                px={4}
+                py={2}
+                borderRadius="full"
+                bg={selected ? 'var(--nu-brand)' : 'var(--nu-surface)'}
+                color={selected ? 'white' : 'var(--pb-ink)'}
+                fontSize="sm"
+                fontWeight={selected ? 700 : 500}
+                transition="background-color .15s ease, color .15s ease"
+                _hover={{ bg: selected ? 'var(--nu-brand-deep)' : 'var(--nu-surface-hover)' }}
+                _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
+              >
+                {t(`accounts.detail.filter.${value}`)}
+              </Box>
+            )
+          })}
+        </HStack>
+
+        <Box mt={2} position="relative" minH="96px">
+          {showRecentSpinner ? (
+            <Flex minH="96px" align="center" justify="center">
               <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
             </Flex>
+          ) : filtered.length === 0 ? (
+            <Box mt={2} bg="var(--nu-surface)" borderRadius="16px" p={6} textAlign="center">
+              <Text fontSize="sm" color="var(--pb-ink-soft)">
+                {tab === 'upcoming'
+                  ? t('accounts.detail.empty.upcoming')
+                  : filter === 'ALL' ? t('accounts.activity.empty') : t('accounts.detail.empty.filtered')}
+              </Text>
+            </Box>
           ) : (
-            <Box opacity={activityLoading ? 0.45 : 1} transition="opacity 0.15s ease">
-              <RecentActivity
-                items={activity?.items ?? []}
-                hideBalances={hideBalances}
-              />
+            <Box opacity={tab === 'recent' && activityLoading ? 0.45 : 1} transition="opacity .15s ease">
+              {filtered.map((item) => (
+                <AccountActivityRow key={`${item.kind}-${item.id}-${item.date}`} item={item} hideBalances={hideBalances} />
+              ))}
             </Box>
           )}
-
-          {activityLoading && activity && (
+          {tab === 'recent' && activityLoading && activity && (
             <Flex position="absolute" inset={0} align="center" justify="center" pointerEvents="none">
               <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
             </Flex>
           )}
         </Box>
-      </MotionBox>
+
+        {tab === 'recent' && (
+          <HStack mt={4} spacing={3} justify="center">
+            <IconButton
+              aria-label={t('accounts.activity.newer')}
+              title={t('accounts.activity.newer')}
+              icon={<Icon as={ChevronLeft} boxSize="16px" />}
+              size="sm"
+              variant="ghost"
+              borderRadius="full"
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              isDisabled={activityPage === 0 || activityLoading}
+              onClick={() => setActivityPage((page) => Math.max(0, page - 1))}
+              _hover={{ bg: '#ead6fa' }}
+            />
+            <Text minW="64px" textAlign="center" fontSize="sm" fontWeight={600} color="var(--pb-ink-soft)">
+              {t('accounts.activity.page', { page: activityPage + 1 })}
+            </Text>
+            <IconButton
+              aria-label={t('accounts.activity.older')}
+              title={t('accounts.activity.older')}
+              icon={<Icon as={ChevronRight} boxSize="16px" />}
+              size="sm"
+              variant="ghost"
+              borderRadius="full"
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              isDisabled={!activity?.hasMore || activityLoading}
+              onClick={() => setActivityPage((page) => page + 1)}
+              _hover={{ bg: '#ead6fa' }}
+            />
+          </HStack>
+        )}
+      </NuSection>
     </Box>
   )
 }
 
-function DetailMetric({
-  label,
-  value,
-  note,
-  danger,
-  compact,
-}: {
-  label: string
-  value: string
-  note: string
-  danger?: boolean
-  compact?: boolean
-}) {
+/** Nubank-style round shortcut: grey circle + label underneath. */
+function QuickAction({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <Flex
+      as="button"
+      type="button"
+      onClick={onClick}
+      aria-label={label}
       direction="column"
-      justify="space-between"
-      minW={0}
-      minH="86px"
-      bg="transparent"
-      border={0}
-      borderLeft="1px solid var(--pb-hair)"
-      borderRadius={0}
-      py={1}
-      pl={3}
-      overflow="hidden"
+      align="center"
+      w="76px"
+      gap={2}
+      role="group"
+      _focusVisible={{ outline: 'none' }}
     >
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="9px"
-        letterSpacing="0.12em"
-        textTransform="uppercase"
-        color="var(--pb-ink-soft)"
-        lineHeight="1.3"
-        noOfLines={1}
+      <Flex
+        w="60px"
+        h="60px"
+        align="center"
+        justify="center"
+        borderRadius="full"
+        bg="var(--nu-surface)"
+        color="var(--pb-ink)"
+        transition="background-color .15s ease, transform .15s ease"
+        _groupHover={{ bg: 'var(--nu-surface-hover)', transform: 'translateY(-1px)' }}
+        _groupFocusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)' }}
       >
-        {label}
-      </Text>
-      <Text
-        className="num"
-        mt={1.5}
-        fontSize={compact ? '0.88rem' : '1rem'}
-        fontWeight={650}
-        lineHeight="1.05"
-        color={danger ? 'var(--pb-coral)' : 'var(--pb-ink)'}
-        noOfLines={1}
-        style={{ fontVariantNumeric: 'tabular-nums' }}
-      >
-        {value}
-      </Text>
-      <Text mt={1} fontSize="9px" color="var(--pb-ink-faint)" noOfLines={2}>
-        {note}
-      </Text>
+        {icon}
+      </Flex>
+      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{label}</Text>
+    </Flex>
+  )
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Flex align="center" justify="space-between" gap={3} minH="48px" py={3} borderBottom="1px solid var(--pb-hair)">
+      <Text fontSize="sm" color="var(--pb-ink-soft)">{label}</Text>
+      <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" textAlign="right" noOfLines={1}>{value}</Text>
     </Flex>
   )
 }

@@ -6,7 +6,7 @@ import type { AccountSummary, FinancialAccount } from '../../types'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { ConfirmDeleteDialog } from '../../components/ui'
-import { ChevronLeft, Eye, EyeOff, Plus, Wallet } from '../../components/ui/icons'
+import { AlertTriangle, ChevronLeft, Eye, EyeOff, Plus, Wallet } from '../../components/ui/icons'
 import AccountFormModal from './components/AccountFormModal'
 import AccountList from './components/AccountList'
 import AccountDetail from './components/AccountDetail'
@@ -91,7 +91,32 @@ export default function AccountsPage() {
   return (
     <Box minH="100vh">
       <NuHero
-        title={t('nav.accounts.label')}
+        title={detailOpen ? (
+          <Flex align="center" gap={3} minW={0}>
+            <Flex
+              as="button"
+              type="button"
+              aria-label={t('accounts.action.back')}
+              onClick={() => navigateToList()}
+              align="center"
+              justify="center"
+              flexShrink={0}
+              w="36px"
+              h="36px"
+              borderRadius="full"
+              bg="rgba(255,255,255,.16)"
+              color="white"
+              transition="background-color .15s ease"
+              _hover={{ bg: 'rgba(255,255,255,.24)' }}
+              _focusVisible={{ outline: '2px solid white', outlineOffset: '3px' }}
+            >
+              <Icon as={ChevronLeft} boxSize="18px" />
+            </Flex>
+            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white" noOfLines={1}>
+              {selectedAccount?.name ?? t('accounts.page.detailTitle')}
+            </Text>
+          </Flex>
+        ) : t('nav.accounts.label')}
         action={(
           <Flex
             as="button"
@@ -101,6 +126,7 @@ export default function AccountsPage() {
             onClick={toggleHide}
             align="center"
             justify="center"
+            flexShrink={0}
             w="36px"
             h="36px"
             borderRadius="full"
@@ -114,12 +140,8 @@ export default function AccountsPage() {
           </Flex>
         )}
       >
-        {detailOpen && selectedAccount ? (
-          <Box mt={{ base: 3, md: 4 }}>
-            <Text fontSize="sm" color="rgba(255,255,255,.74)">{t('accounts.page.detailTitle')}</Text>
-            <Text mt={0.5} fontSize={{ base: '1.8rem', md: '2.2rem' }} fontWeight={700} color="white" lineHeight={1.1} noOfLines={1}>{selectedAccount.name}</Text>
-            <Text mt={1} fontSize="sm" color="rgba(255,255,255,.7)">{selectedAccount.institution || t(`accounts.type.${selectedAccount.type}`)}</Text>
-          </Box>
+        {detailOpen ? (
+          selectedAccount ? <AccountHeroBalance account={selectedAccount} hideBalances={hideBalances} /> : null
         ) : (
           <TotalHero accounts={accounts} totalBalance={summary?.totalBalance ?? 0} hideBalances={hideBalances} />
         )}
@@ -130,37 +152,20 @@ export default function AccountsPage() {
           {loading && !summary ? (
             <Flex justify="center" py={24}><Spinner color="var(--nu-brand, #820ad1)" /></Flex>
           ) : detailOpen ? (
-            <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }}>
-              <Button
-                onClick={() => navigateToList()}
-                leftIcon={<Icon as={ChevronLeft} boxSize={4} />}
-                variant="ghost"
-                h="38px"
-                mb={3}
-                ml={-3}
-                borderRadius="full"
-                color="var(--nu-brand, #820ad1)"
-                _hover={{ bg: 'var(--nu-brand-tint, #f3e8fc)' }}
-              >
-                {t('accounts.action.back')}
-              </Button>
-              {selectedAccount ? (
-                <AccountDetail
-                  key={`${selectedAccount.id}-${detailVersion}`}
-                  account={selectedAccount}
-                  hideBalances={hideBalances}
-                  showBackButton={false}
-                  onBack={() => navigateToList()}
-                  onTransfer={() => setTransferOpen(true)}
-                  onSettings={() => setFormAccount(selectedAccount)}
-                />
-              ) : (
-                <Flex direction="column" align="center" py={16}>
-                  <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('accounts.page.notFound')}</Text>
-                  <Button mt={4} onClick={() => navigateToList(true)} variant="outline">{t('accounts.action.back')}</Button>
-                </Flex>
-              )}
-            </Box>
+            selectedAccount ? (
+              <AccountDetail
+                key={`${selectedAccount.id}-${detailVersion}`}
+                account={selectedAccount}
+                hideBalances={hideBalances}
+                onTransfer={() => setTransferOpen(true)}
+                onSettings={() => setFormAccount(selectedAccount)}
+              />
+            ) : (
+              <Flex direction="column" align="center" py={16}>
+                <Text fontSize="lg" fontWeight={600} color="var(--pb-ink)">{t('accounts.page.notFound')}</Text>
+                <Button mt={4} onClick={() => navigateToList(true)} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('accounts.action.back')}</Button>
+              </Flex>
+            )
           ) : (
             <Box px={{ base: 4, md: 6 }} py={{ base: 5, md: 6 }}>
               <Flex align="center" justify="space-between" gap={4} mb={3}>
@@ -203,11 +208,46 @@ export default function AccountsPage() {
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   const { t } = useI18n()
   return (
-    <Flex direction="column" align="center" py={14} px={6} textAlign="center" bg="var(--pb-surface)" border="1px dashed var(--pb-hair-2)" borderRadius="22px">
-      <Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={Wallet} boxSize={7} color="var(--pb-ink-faint)" /></Flex>
-      <Text fontSize="md" fontWeight={600} color="var(--pb-ink)">{t('accounts.empty.title')}</Text>
+    <Flex direction="column" align="center" py={10} px={6} textAlign="center" bg="var(--nu-surface)" borderRadius="16px">
+      <Flex w="44px" h="44px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)" mb={3}><Icon as={Wallet} boxSize="22px" /></Flex>
+      <Text fontSize="md" fontWeight={650} color="var(--pb-ink)">{t('accounts.empty.title')}</Text>
       <Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="340px">{t('accounts.empty.description')}</Text>
       <Button mt={5} onClick={onAdd} leftIcon={<Icon as={Plus} boxSize={4} />} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('accounts.action.add')}</Button>
     </Flex>
+  )
+}
+
+/** Purple-hero balance block for a single account (mirrors the mobile account screen). */
+function AccountHeroBalance({ account, hideBalances }: { account: FinancialAccount; hideBalances: boolean }) {
+  const { t, formatCurrency } = useI18n()
+  const overdraftPercentage = account.overdraftLimit > 0 ? account.overdraftPercentageUsed : 0
+  const warning = account.currentBalance < 0 || overdraftPercentage >= 75
+  return (
+    <Box mt={{ base: 3, md: 4 }}>
+      <Text fontSize="sm" color="rgba(255,255,255,.8)">{t('accounts.currentBalance')}</Text>
+      <Text
+        mt={0.5}
+        fontSize={{ base: '2rem', md: '2.5rem' }}
+        fontWeight={700}
+        letterSpacing="-0.025em"
+        lineHeight={1.1}
+        color={!hideBalances && account.currentBalance < 0 ? '#ffc2b8' : 'white'}
+        noOfLines={1}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {hideBalances ? '••••••' : formatCurrency(account.currentBalance)}
+      </Text>
+      <Text mt={1} fontSize="sm" color="rgba(255,255,255,.75)" noOfLines={1}>
+        {account.institution || t(`accounts.type.${account.type}`)} · {account.currency} · {t('accounts.activeAccount')}
+      </Text>
+      {warning && (
+        <Flex mt={3} display="inline-flex" align="center" gap={1.5} px={3} py={1} borderRadius="full" bg="rgba(255,255,255,.16)" color="white">
+          <Icon as={AlertTriangle} boxSize="13px" />
+          <Text fontSize="xs" fontWeight={600}>
+            {overdraftPercentage >= 75 ? t('accounts.detail.warning.overdraft') : t('accounts.detail.warning.negative')}
+          </Text>
+        </Flex>
+      )}
+    </Box>
   )
 }

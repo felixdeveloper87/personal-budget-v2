@@ -1,3 +1,4 @@
+import { setStatusBarStyle } from "expo-status-bar";
 import { SymbolView } from "expo-symbols";
 import { useFocusEffect, useRouter } from "expo-router";
 import type { ComponentProps } from "react";
@@ -11,20 +12,20 @@ import {
   Text,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { BankLogo } from "@/components/accounts/BankLogo";
+import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
+import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { useAuth } from "@/contexts/AuthContext";
-import { AccountsHeroArtwork } from "@/features/accounts/AccountsHeroArtwork";
 import { ApiError, listAccounts } from "@/services/api";
-import { colors } from "@/theme/colors";
 import type { FinancialAccount } from "@/types/finance";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
 const icons = {
   back: { ios: "chevron.left", android: "arrow_back", web: "arrow_back" },
-  add: { ios: "plus", android: "add", web: "add" },
+  chevron: { ios: "chevron.right", android: "chevron_right", web: "chevron_right" },
   hidden: { ios: "eye.slash", android: "visibility_off", web: "visibility_off" },
   visible: { ios: "eye", android: "visibility", web: "visibility" },
   wallet: { ios: "wallet.bifold.fill", android: "account_balance_wallet", web: "account_balance_wallet" },
@@ -37,6 +38,10 @@ const accountTypeLabels: Record<FinancialAccount["type"], string> = {
   CREDIT_CARD: "Crédito",
 };
 
+/** Header content is taller than the tabs' (total + two balance columns). */
+const HEADER_CONTENT_HEIGHT = 176;
+const MASK = "••••••";
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -44,91 +49,86 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-function accountCountLabel(count: number) {
-  return count === 1 ? "1 conta ativa" : `${count} contas ativas`;
+function countLabel(count: number) {
+  return count === 1 ? "1 conta" : `${count} contas`;
 }
 
-interface BalanceCardProps {
+function BalanceLine({
+  bordered,
+  count,
+  hidden,
+  label,
+  value,
+}: {
+  bordered?: boolean;
   count: number;
   hidden: boolean;
   label: string;
   value: number;
-}
-
-function BalanceCard({ count, hidden, label, value }: BalanceCardProps) {
+}) {
   return (
-    <View style={styles.balanceCard}>
-      <Text numberOfLines={1} style={styles.balanceCardLabel}>{label}</Text>
+    <View style={[styles.balanceLine, bordered && styles.balanceLineBordered]}>
+      <Text numberOfLines={1} style={styles.balanceLineLabel}>{label}</Text>
       <Text
         adjustsFontSizeToFit
         minimumFontScale={0.72}
         numberOfLines={1}
-        style={[styles.balanceCardValue, !hidden && value < 0 && styles.negativeValue]}
+        style={[styles.balanceLineValue, !hidden && value < 0 && styles.heroNegative]}
       >
-        {hidden ? "••••••" : formatCurrency(value)}
+        {hidden ? MASK : formatCurrency(value)}
       </Text>
-      <Text style={styles.balanceCardCount}>
-        {count === 1 ? "1 conta" : `${count} contas`}
-      </Text>
+      <Text style={styles.balanceLineCount}>{countLabel(count)}</Text>
     </View>
   );
 }
 
-function AccountCardBackground() {
-  return (
-    <View style={styles.accountCardDecoration}>
-      <View style={styles.accountCardOrb} />
-      <View style={[styles.accountCardBar, styles.accountCardBarShort]} />
-      <View style={[styles.accountCardBar, styles.accountCardBarMedium]} />
-      <View style={[styles.accountCardBar, styles.accountCardBarTall]} />
-    </View>
-  );
-}
-
-function AccountCard({
+function AccountRow({
   account,
+  first,
   hidden,
   onPress,
 }: {
   account: FinancialAccount;
+  first: boolean;
   hidden: boolean;
   onPress: () => void;
 }) {
+  const balance = Number(account.currentBalance || 0);
   return (
     <Pressable
       accessibilityLabel={`Abrir detalhes de ${account.name}`}
       accessibilityRole="button"
       onPress={onPress}
-      style={({ pressed }) => [styles.accountCard, pressed && styles.accountCardPressed]}
+      style={({ pressed }) => [styles.row, !first && styles.rowDivided, pressed && styles.rowPressed]}
     >
-      <View pointerEvents="none" style={styles.accountCardBackground}>
-        <AccountCardBackground />
+      <View style={styles.rowLogo}>
+        <BankLogo institution={account.institution} name={account.name} size={42} />
       </View>
-      <View style={styles.accountCardTop}>
-        <BankLogo institution={account.institution} name={account.name} size={40} />
-        <Text numberOfLines={1} style={styles.accountCurrency}>{account.currency}</Text>
+      <View style={styles.rowCopy}>
+        <Text numberOfLines={1} style={styles.rowTitle}>{account.name}</Text>
+        <Text numberOfLines={1} style={styles.rowMeta}>
+          {account.institution?.trim() || accountTypeLabels[account.type]} · {account.currency}
+        </Text>
       </View>
-
-      <Text numberOfLines={1} style={styles.accountName}>{account.name}</Text>
-      <Text numberOfLines={1} style={styles.accountMeta}>
-        {account.institution?.trim() || accountTypeLabels[account.type]}
-      </Text>
-
-      <Text
-        adjustsFontSizeToFit
-        minimumFontScale={0.72}
-        numberOfLines={1}
-        style={[styles.accountBalance, !hidden && account.currentBalance < 0 && styles.negativeValue]}
-      >
-        {hidden ? "••••••" : formatCurrency(Number(account.currentBalance || 0))}
-      </Text>
-      <Text style={styles.accountBalanceLabel}>Saldo atual</Text>
+      <View style={styles.rowTrailing}>
+        <Text
+          adjustsFontSizeToFit
+          minimumFontScale={0.75}
+          numberOfLines={1}
+          style={[styles.rowAmount, !hidden && balance < 0 && styles.negativeValue]}
+        >
+          {hidden ? MASK : formatCurrency(balance)}
+        </Text>
+        <Text style={styles.rowAmountLabel}>Saldo</Text>
+      </View>
+      <SymbolView name={icons.chevron} size={14} tintColor={nu.brand} weight="semibold" />
     </Pressable>
   );
 }
 
 export function AccountsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
   const [accounts, setAccounts] = useState<FinancialAccount[]>([]);
   const [balancesHidden, setBalancesHidden] = useState(false);
@@ -143,7 +143,11 @@ export function AccountsScreen() {
 
     try {
       const result = await listAccounts(user.token);
-      setAccounts(result.filter((account) => account.active));
+      setAccounts(
+        result
+          .filter((account) => account.active)
+          .sort((a, b) => a.name.localeCompare(b.name, "pt-BR")),
+      );
     } catch (loadError) {
       if (loadError instanceof ApiError && loadError.status === 401) {
         await logout();
@@ -160,147 +164,165 @@ export function AccountsScreen() {
     void loadAccounts();
   }, [loadAccounts]));
 
+  // Light status-bar icons over the purple header, restored when leaving.
+  useFocusEffect(
+    useCallback(() => {
+      setStatusBarStyle("light");
+      return () => setStatusBarStyle("dark");
+    }, []),
+  );
+
   const summary = useMemo(() => {
     const current = accounts.filter((account) => account.type === "CURRENT");
     const savings = accounts.filter((account) => account.type === "SAVINGS");
+    const sum = (list: FinancialAccount[]) =>
+      list.reduce((total, account) => total + Number(account.currentBalance || 0), 0);
     return {
       current,
-      currentBalance: current.reduce((total, account) => total + Number(account.currentBalance || 0), 0),
+      currentBalance: sum(current),
       savings,
-      savingsBalance: savings.reduce((total, account) => total + Number(account.currentBalance || 0), 0),
-      total: accounts.reduce((total, account) => total + Number(account.currentBalance || 0), 0),
+      savingsBalance: sum(savings),
+      total: sum(accounts),
     };
   }, [accounts]);
 
   if (!user) return null;
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
+    <View style={styles.screen}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
+            colors={[nu.brand]}
             onRefresh={() => void loadAccounts(true)}
+            progressViewOffset={insets.top}
             refreshing={refreshing}
-            tintColor={colors.forest}
+            tintColor={nu.white}
           />
         }
       >
-        <View style={styles.pageHeader}>
-          <Pressable
-            accessibilityLabel="Voltar"
-            accessibilityRole="button"
-            hitSlop={8}
-            onPress={() => router.back()}
-            style={({ pressed }) => [styles.iconButton, pressed && styles.buttonPressed]}
-          >
-            <SymbolView name={icons.back} size={21} tintColor={colors.ink} weight="semibold" />
-          </Pressable>
+        {/* Brand colour also fills the iOS overscroll area above the header. */}
+        <View style={styles.overscrollFill} />
 
-          <View style={styles.titleBlock}>
-            <Text style={styles.eyebrow}>CONTAS E SALDOS</Text>
-            <Text style={styles.title}>Contas</Text>
-          </View>
-
-          <Pressable
-            accessibilityLabel="Adicionar conta"
-            accessibilityRole="button"
-            accessibilityState={{ disabled: true }}
-            disabled
-            style={styles.addButton}
-          >
-            <SymbolView name={icons.add} size={19} tintColor={colors.white} weight="bold" />
-            <Text style={styles.addButtonLabel}>Adicionar</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.hero}>
-          <View pointerEvents="none" style={styles.heroArtwork}>
-            <AccountsHeroArtwork />
-          </View>
-          <View pointerEvents="none" style={styles.heroVeil} />
-
-          <View style={styles.heroTopRow}>
-            <View style={styles.heroHeading}>
-              <View style={styles.walletIcon}>
-                <SymbolView name={icons.wallet} size={19} tintColor={colors.forest} weight="semibold" />
-              </View>
-              <View>
-                <Text style={styles.heroEyebrow}>VISÃO GERAL</Text>
-                <Text style={styles.heroSubtitle}>Seus saldos em um relance</Text>
-              </View>
-            </View>
-
+        <NuHeader contentHeight={HEADER_CONTENT_HEIGHT}>
+          <View style={styles.headerTitleRow}>
+            <Pressable
+              accessibilityLabel="Voltar"
+              accessibilityRole="button"
+              hitSlop={8}
+              onPress={() => router.back()}
+              style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
+            >
+              <SymbolView name={icons.back} size={17} tintColor={nu.white} weight="semibold" />
+            </Pressable>
+            <Text numberOfLines={1} style={styles.headerTitle}>Contas</Text>
             <Pressable
               accessibilityLabel={balancesHidden ? "Mostrar saldos" : "Ocultar saldos"}
               accessibilityRole="button"
               accessibilityState={{ checked: balancesHidden }}
+              hitSlop={8}
               onPress={() => setBalancesHidden((current) => !current)}
-              style={({ pressed }) => [styles.visibilityButton, pressed && styles.buttonPressed]}
+              style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
             >
               <SymbolView
                 name={balancesHidden ? icons.visible : icons.hidden}
-                size={18}
-                tintColor={colors.inkSoft}
+                size={17}
+                tintColor={nu.white}
                 weight="semibold"
               />
             </Pressable>
           </View>
 
-          <View style={styles.divider} />
-
-          <Text style={styles.totalLabel}>SALDO TOTAL</Text>
+          <Text style={styles.totalLabel}>Saldo total</Text>
           {loading ? (
             <View style={styles.loadingValue}>
-              <ActivityIndicator color={colors.forest} />
+              <ActivityIndicator color={nu.white} />
             </View>
           ) : (
             <Text
               adjustsFontSizeToFit
-              minimumFontScale={0.62}
+              minimumFontScale={0.6}
               numberOfLines={1}
-              style={[styles.totalValue, !balancesHidden && summary.total < 0 && styles.negativeValue]}
+              style={[styles.totalValue, !balancesHidden && summary.total < 0 && styles.heroNegative]}
             >
-              {error ? "—" : balancesHidden ? "••••••" : formatCurrency(summary.total)}
+              {error ? "—" : balancesHidden ? MASK : formatCurrency(summary.total)}
             </Text>
           )}
-          <Text style={styles.totalCaption}>
-            {loading ? "Carregando suas contas…" : error ?? accountCountLabel(accounts.length)}
+          <Text numberOfLines={1} style={styles.totalCaption}>
+            {loading
+              ? "Carregando suas contas…"
+              : error
+                ? "Saldo indisponível no momento"
+                : accounts.length === 1 ? "Posição de 1 conta ativa" : `Posição de ${accounts.length} contas ativas`}
           </Text>
 
           {!loading && !error ? (
             <View style={styles.balanceGrid}>
-              <BalanceCard
+              <BalanceLine
                 count={summary.current.length}
                 hidden={balancesHidden}
-                label="CONTAS CORRENTES"
+                label="Contas correntes"
                 value={summary.currentBalance}
               />
-              <BalanceCard
+              <BalanceLine
+                bordered
                 count={summary.savings.length}
                 hidden={balancesHidden}
-                label="POUPANÇAS"
+                label="Poupanças"
                 value={summary.savingsBalance}
               />
             </View>
           ) : null}
-        </View>
+        </NuHeader>
 
-        {!loading && !error ? (
-          <View style={styles.accountsSection}>
-            <View style={styles.sectionHeading}>
-              <View>
-                <Text style={styles.sectionEyebrow}>SUAS CONTAS</Text>
+        {/* White sheet: rounded top tucked over the purple header. */}
+        <View style={styles.sheet}>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <View style={styles.sectionCopy}>
                 <Text style={styles.sectionTitle}>Contas ativas</Text>
+                <Text style={styles.sectionSubtitle}>
+                  {loading ? "Carregando…" : error ? "Indisponível" : countLabel(accounts.length)}
+                </Text>
               </View>
-              <Text style={styles.accountCount}>{accounts.length}</Text>
+              {!loading && !error ? (
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>{accounts.length}</Text>
+                </View>
+              ) : null}
             </View>
 
-            {accounts.length > 0 ? (
-              <View style={styles.accountsGrid}>
-                {accounts.map((account) => (
-                  <AccountCard
+            {loading ? (
+              <View style={styles.stateCard}>
+                <ActivityIndicator color={nu.brand} />
+                <Text style={styles.stateText}>Carregando contas…</Text>
+              </View>
+            ) : error ? (
+              <View style={styles.stateCard}>
+                <Text style={styles.stateTitle}>Contas indisponíveis</Text>
+                <Text style={styles.stateText}>{error}</Text>
+                <Pressable
+                  onPress={() => void loadAccounts()}
+                  style={({ pressed }) => [styles.retryButton, pressed && styles.pressed]}
+                >
+                  <Text style={styles.retryText}>Tentar novamente</Text>
+                </Pressable>
+              </View>
+            ) : accounts.length === 0 ? (
+              <View style={styles.stateCard}>
+                <View style={styles.emptyIcon}>
+                  <SymbolView name={icons.wallet} size={22} tintColor={nu.brand} weight="semibold" />
+                </View>
+                <Text style={styles.stateTitle}>Nenhuma conta ativa</Text>
+                <Text style={styles.stateText}>Adicione uma conta na versão web para começar.</Text>
+              </View>
+            ) : (
+              <View style={styles.list}>
+                {accounts.map((account, index) => (
+                  <AccountRow
                     account={account}
+                    first={index === 0}
                     hidden={balancesHidden}
                     key={account.id}
                     onPress={() => router.push({
@@ -310,189 +332,74 @@ export function AccountsScreen() {
                   />
                 ))}
               </View>
-            ) : (
-              <View style={styles.emptyAccounts}>
-                <Text style={styles.emptyAccountsTitle}>Nenhuma conta ativa</Text>
-                <Text style={styles.emptyAccountsText}>Adicione uma conta para começar.</Text>
-              </View>
             )}
           </View>
-        ) : null}
+        </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { backgroundColor: colors.paper, flex: 1 },
-  content: { paddingBottom: 40, paddingHorizontal: 18, paddingTop: 6 },
-  pageHeader: { alignItems: "center", flexDirection: "row", minHeight: 56 },
-  iconButton: {
+  screen: { backgroundColor: nu.white, flex: 1 },
+  content: { paddingBottom: 42 },
+  overscrollFill: { backgroundColor: nu.brand, height: 1000, left: 0, position: "absolute", right: 0, top: -1000 },
+  pressed: { opacity: 0.7 },
+
+  headerTitleRow: { alignItems: "center", flexDirection: "row", gap: 12 },
+  headerButton: {
     alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 14,
-    borderWidth: 1,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
-  },
-  buttonPressed: { opacity: 0.65, transform: [{ scale: 0.97 }] },
-  titleBlock: { flex: 1, marginHorizontal: 12 },
-  eyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.55 },
-  title: { color: colors.ink, fontSize: 25, fontWeight: "700", letterSpacing: -0.7, marginTop: 2 },
-  addButton: {
-    alignItems: "center",
-    backgroundColor: colors.forest,
-    borderRadius: 14,
-    flexDirection: "row",
-    gap: 6,
-    minHeight: 40,
-    paddingHorizontal: 12,
-  },
-  addButtonLabel: { color: colors.white, fontSize: 12, fontWeight: "800" },
-  hero: {
-    backgroundColor: "#DCE8E8",
-    borderColor: "#C1D1D0",
-    borderRadius: 28,
-    borderWidth: 1,
-    marginTop: 12,
-    overflow: "hidden",
-    padding: 14,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-  },
-  heroArtwork: { ...StyleSheet.absoluteFill },
-  heroVeil: { ...StyleSheet.absoluteFill, backgroundColor: "rgba(244,249,246,0.42)" },
-  heroTopRow: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  heroHeading: { alignItems: "center", flexDirection: "row", flex: 1 },
-  walletIcon: {
-    alignItems: "center",
-    backgroundColor: "rgba(251,249,244,0.78)",
-    borderColor: "rgba(255,255,255,0.85)",
-    borderRadius: 13,
-    borderWidth: 1,
-    height: 38,
-    justifyContent: "center",
-    marginRight: 11,
-    width: 38,
-  },
-  heroEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.45 },
-  heroSubtitle: { color: colors.inkSoft, fontSize: 12, marginTop: 4 },
-  visibilityButton: {
-    alignItems: "center",
-    backgroundColor: "rgba(251,249,244,0.7)",
-    borderColor: "rgba(255,255,255,0.8)",
-    borderRadius: 13,
-    borderWidth: 1,
-    height: 38,
-    justifyContent: "center",
-    marginLeft: 8,
-    width: 38,
-  },
-  divider: { backgroundColor: "rgba(48,94,101,0.14)", height: 1, marginVertical: 12 },
-  totalLabel: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 1.35 },
-  loadingValue: { alignItems: "flex-start", height: 47, justifyContent: "center" },
-  totalValue: {
-    color: colors.ink,
-    fontSize: 37,
-    fontWeight: "800",
-    letterSpacing: -1.6,
-    lineHeight: 44,
-    marginTop: 2,
-  },
-  negativeValue: { color: colors.expense },
-  totalCaption: { color: colors.inkSoft, fontSize: 12, marginTop: 3 },
-  balanceGrid: { flexDirection: "row", gap: 9, marginTop: 14 },
-  balanceCard: {
-    backgroundColor: "rgba(251,249,244,0.66)",
-    borderColor: "rgba(255,255,255,0.8)",
+    backgroundColor: "rgba(255,255,255,0.16)",
     borderRadius: 17,
-    borderWidth: 1,
-    flex: 1,
-    minHeight: 88,
-    padding: 11,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
   },
-  balanceCardLabel: { color: colors.inkFaint, fontSize: 8, fontWeight: "800", letterSpacing: 1.05 },
-  balanceCardValue: { color: colors.ink, fontSize: 18, fontWeight: "800", marginTop: 9 },
-  balanceCardCount: { color: colors.inkSoft, fontSize: 10, marginTop: 6 },
-  accountsSection: { marginTop: 24 },
-  sectionHeading: {
-    alignItems: "flex-end",
+  headerTitle: { color: nu.white, flex: 1, fontSize: 20, fontWeight: "700", letterSpacing: -0.3 },
+  totalLabel: { color: "rgba(255,255,255,0.8)", fontSize: 12, marginTop: 10 },
+  loadingValue: { alignItems: "flex-start", height: 40, justifyContent: "center" },
+  totalValue: { color: nu.white, fontSize: 31, fontWeight: "700", letterSpacing: -0.9, fontVariant: ["tabular-nums"] },
+  heroNegative: { color: "#FFC2B8" },
+  totalCaption: { color: "rgba(255,255,255,0.75)", fontSize: 12 },
+  balanceGrid: {
+    borderTopColor: "rgba(255,255,255,0.18)",
+    borderTopWidth: 1,
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    paddingHorizontal: 3,
+    marginTop: 12,
+    paddingTop: 10,
   },
-  sectionEyebrow: { color: colors.forest, fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
-  sectionTitle: { color: colors.ink, fontSize: 21, fontWeight: "700", marginTop: 4 },
-  accountCount: {
-    backgroundColor: colors.header,
-    borderRadius: 12,
-    color: colors.forest,
-    fontSize: 12,
-    fontWeight: "800",
-    minWidth: 28,
-    overflow: "hidden",
-    paddingHorizontal: 9,
-    paddingVertical: 5,
-    textAlign: "center",
-  },
-  accountsGrid: {
-    columnGap: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    rowGap: 10,
-  },
-  accountCard: {
-    backgroundColor: "#EDF3EE",
-    borderColor: colors.line,
-    borderRadius: 20,
-    borderWidth: 1,
-    minHeight: 166,
-    overflow: "hidden",
-    padding: 14,
-    width: "48%",
-  },
-  accountCardBackground: { ...StyleSheet.absoluteFill },
-  accountCardPressed: { opacity: 0.78, transform: [{ scale: 0.985 }] },
-  accountCardDecoration: { flex: 1 },
-  accountCardOrb: {
-    backgroundColor: "rgba(255,255,255,0.42)",
-    borderRadius: 52,
-    height: 104,
-    position: "absolute",
-    right: -42,
-    top: -48,
-    width: 104,
-  },
-  accountCardBar: {
-    backgroundColor: "rgba(48,94,101,0.07)",
-    borderRadius: 4,
-    bottom: 0,
-    position: "absolute",
-    width: 18,
-  },
-  accountCardBarShort: { height: 24, right: 46 },
-  accountCardBarMedium: { height: 38, right: 24 },
-  accountCardBarTall: { height: 54, right: 2 },
-  accountCardTop: { alignItems: "center", flexDirection: "row", justifyContent: "space-between" },
-  accountCurrency: { color: colors.inkFaint, fontSize: 9, fontWeight: "800", letterSpacing: 0.8 },
-  accountName: { color: colors.ink, fontSize: 15, fontWeight: "700", marginTop: 13 },
-  accountMeta: { color: colors.inkSoft, fontSize: 10, marginTop: 4 },
-  accountBalance: { color: colors.ink, fontSize: 19, fontWeight: "800", marginTop: 17 },
-  accountBalanceLabel: { color: colors.inkFaint, fontSize: 9, marginTop: 4 },
-  emptyAccounts: {
-    alignItems: "center",
-    backgroundColor: colors.paperRaised,
-    borderColor: colors.line,
-    borderRadius: 20,
-    borderWidth: 1,
-    padding: 28,
-  },
-  emptyAccountsTitle: { color: colors.ink, fontSize: 16, fontWeight: "700" },
-  emptyAccountsText: { color: colors.inkSoft, fontSize: 12, marginTop: 5 },
+  balanceLine: { flex: 1, minWidth: 0 },
+  balanceLineBordered: { borderLeftColor: "rgba(255,255,255,0.18)", borderLeftWidth: 1, marginLeft: 14, paddingLeft: 14 },
+  balanceLineLabel: { color: "rgba(255,255,255,0.7)", fontSize: 11 },
+  balanceLineValue: { color: nu.white, fontSize: 16, fontWeight: "700", marginTop: 2, fontVariant: ["tabular-nums"] },
+  balanceLineCount: { color: "rgba(255,255,255,0.62)", fontSize: 10, marginTop: 1 },
+
+  sheet: { backgroundColor: nu.white, borderTopLeftRadius: 24, borderTopRightRadius: 24, marginTop: -NU_SHEET_OVERLAP, paddingTop: 4 },
+  section: { paddingHorizontal: 20, paddingVertical: 18 },
+  sectionHeader: { alignItems: "flex-start", flexDirection: "row", gap: 12, justifyContent: "space-between", marginBottom: 6 },
+  sectionCopy: { flex: 1, minWidth: 0 },
+  sectionTitle: nuSection.title,
+  sectionSubtitle: nuSection.subtitle,
+  pill: { backgroundColor: nu.brandTint, borderRadius: 999, minWidth: 30, paddingHorizontal: 11, paddingVertical: 5 },
+  pillText: { color: nu.brand, fontSize: 12, fontWeight: "700", textAlign: "center" },
+
+  list: { borderBottomColor: nu.hairline, borderBottomWidth: 1, borderTopColor: nu.hairline, borderTopWidth: 1, marginTop: 8 },
+  row: { alignItems: "center", flexDirection: "row", gap: 12, minHeight: 74, paddingVertical: 12 },
+  rowDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
+  rowPressed: { backgroundColor: "rgba(130,10,209,0.04)" },
+  rowLogo: { flexShrink: 0 },
+  rowCopy: { flex: 1, minWidth: 0 },
+  rowTitle: { color: nu.ink, fontSize: 15, fontWeight: "700" },
+  rowMeta: { color: nu.inkSoft, fontSize: 11, marginTop: 2 },
+  rowTrailing: { alignItems: "flex-end", maxWidth: 140 },
+  rowAmount: { color: nu.ink, fontSize: 15, fontWeight: "700", fontVariant: ["tabular-nums"] },
+  rowAmountLabel: { color: nu.inkFaint, fontSize: 10, marginTop: 2 },
+  negativeValue: { color: nu.negative },
+
+  stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, marginTop: 10, padding: 26 },
+  stateTitle: { color: nu.ink, fontSize: 16, fontWeight: "600" },
+  stateText: { color: nu.inkSoft, fontSize: 13, lineHeight: 19, textAlign: "center" },
+  emptyIcon: { alignItems: "center", backgroundColor: nu.brandTint, borderRadius: 22, height: 44, justifyContent: "center", marginBottom: 4, width: 44 },
+  retryButton: { backgroundColor: nu.brand, borderRadius: 999, marginTop: 6, paddingHorizontal: 20, paddingVertical: 11 },
+  retryText: { color: nu.white, fontSize: 14, fontWeight: "600" },
 });
