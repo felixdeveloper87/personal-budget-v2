@@ -61,7 +61,7 @@ function BrandSeal({ className = '' }: { className?: string }) {
 function BrandLockup({ footer = false }: { footer?: boolean }) {
   return (
     <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
-      <BrandMark variant="wordmark" size="100%" className="pbv3-brand__artwork" />
+      <BrandMark variant="title" size="100%" className="pbv3-brand__artwork" />
       <BrandMark variant="title" size="100%" className="pbv3-brand__mobile" />
     </span>
   )

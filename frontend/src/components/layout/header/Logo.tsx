@@ -288,7 +288,7 @@ export default function Logo({ onClick }: LogoProps) {
         <BrandMark variant="title" size="100%" colorMode={markMode} />
       </Box>
       <Box display={{ base: 'none', md: 'block' }} w="210px" maxW="full">
-        <BrandMark variant="wordmark" size="100%" colorMode={markMode} />
+        <BrandMark variant="title" size="100%" colorMode={markMode} />
       </Box>
     </Box>
   )

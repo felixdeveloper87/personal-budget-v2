@@ -25,27 +25,11 @@ export default function ReportHeader({ report, userName }: ReportHeaderProps) {
       <Flex justify="space-between" align="flex-start" gap={6} direction={{ base: 'column', md: 'row' }}>
         <VStack align="flex-start" spacing={4} minW={0}>
           <HStack spacing={3} align="center">
-            <BrandMark
-              size={40}
-              colorMode="light"
-              style={{ flexShrink: 0, filter: 'drop-shadow(0 6px 10px rgba(0, 0, 0, 0.18))' }}
-            />
+            <BrandMark size={40} colorMode="light" />
             <VStack align="flex-start" spacing={0}>
-              <HStack spacing={1} align="baseline">
-                <Text fontFamily="'Instrument Serif', Georgia, serif" fontSize="lg" fontWeight={400} letterSpacing="-0.02em" color="gray.800">
-                  Personal
-                </Text>
-                <Text
-                  as="em"
-                  fontFamily="'Instrument Serif', Georgia, serif"
-                  fontSize="lg"
-                  fontWeight={400}
-                  letterSpacing="-0.02em"
-                  color="#237a55"
-                >
-                  Budget
-                </Text>
-              </HStack>
+              <Text fontSize="lg" fontWeight={700} letterSpacing="-0.02em" color="gray.900">
+                Personal Budget
+              </Text>
               <Text fontSize="10px" color="gray.500" letterSpacing="0.04em" fontWeight={500}>
                 {t('app.meta.title').replace('Personal Budget — ', '')}
               </Text>
