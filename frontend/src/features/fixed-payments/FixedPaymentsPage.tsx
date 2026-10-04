@@ -6,14 +6,13 @@ import { listRecurringTransactions } from '../../api'
 import type { RecurringTransaction } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import RecurringTransactionDrawer from '../../components/recurring/RecurringTransactionDrawer'
-import MerchantLogo from '../../components/ui/MerchantLogo'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import { NuSection } from '../dashboard/components/nu'
-import { NuEmpty, NuListRow, NuPill, NuStatStrip } from '../commitments/components/nuCommitments'
+import { CommitmentLogo, NuEmpty, NuListRow, NuPill, NuStatStrip } from '../commitments/components/nuCommitments'
 
 interface FixedPaymentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -158,7 +157,7 @@ function FixedPaymentList({ items, onOpen }: { items: RecurringTransaction[]; on
             onClick={() => onOpen(item)}
             ariaLabel={`${t('fixedPayments.openDetails')}: ${item.description}`}
             muted={!item.active}
-            leading={<MerchantLogo name={item.description} category={item.category} size={42} borderRadius="50%" />}
+            leading={<CommitmentLogo name={item.description} category={item.category} />}
             title={item.description}
             caption={caption}
             amount={`${isIncome ? '+' : '−'}${formatCurrency(item.amount)}`}

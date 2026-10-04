@@ -2,6 +2,8 @@ import { Box, Flex, Grid, Icon, Text } from '@chakra-ui/react'
 import type { ReactNode } from 'react'
 
 import { ChevronRight } from '../../../components/ui/icons'
+import BankLogo, { getBankMeta } from '../../../components/ui/BankLogo'
+import MerchantLogo from '../../../components/ui/MerchantLogo'
 
 /** Row of key figures on a soft grey tile (Nubank "resumo" strip). */
 export function NuStatStrip({ stats }: { stats: Array<{ label: string; value: string; tone?: 'positive' | 'negative' }> }) {
@@ -133,4 +135,13 @@ export function NuPill({ children }: { children: ReactNode }) {
       {children}
     </Text>
   )
+}
+
+/**
+ * Round logo for a commitment row. Bank/card products (e.g. "Monzo Max",
+ * "Amex Gold") show the issuer's logo; everything else falls back to MerchantLogo.
+ */
+export function CommitmentLogo({ name, category, size = 42 }: { name: string; category?: string; size?: number }) {
+  if (getBankMeta(name)) return <BankLogo issuer={name} size={size} borderRadius="50%" />
+  return <MerchantLogo name={name} category={category} size={size} borderRadius="50%" />
 }

@@ -7,7 +7,6 @@ import type { InstallmentPlan } from '../../types'
 import type { AppPage } from '../../components/layout/header/navigation.config'
 import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
 import InstallmentPlanDrawer from '../../components/installments/InstallmentPlanDrawer'
-import MerchantLogo from '../../components/ui/MerchantLogo'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { ToastService } from '../../services/toast'
 
@@ -15,7 +14,7 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import Segmented from '../dashboard/components/Segmented'
 import { NuSection } from '../dashboard/components/nu'
-import { NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitments/components/nuCommitments'
+import { CommitmentLogo, NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitments/components/nuCommitments'
 import { useI18n } from '../../i18n'
 
 type InstallmentView = 'plans' | 'statements'
@@ -211,7 +210,7 @@ function PlanList({ plans, onOpen }: { plans: InstallmentPlan[]; onOpen: (plan: 
                 <CheckCircle2 size={20} strokeWidth={2.2} aria-hidden="true" />
               </Flex>
             ) : (
-              <MerchantLogo name={title} category={plan.transactions[0]?.category} size={42} borderRadius="50%" />
+              <CommitmentLogo name={title} category={plan.transactions[0]?.category} />
             )}
             title={title}
             caption={caption}
