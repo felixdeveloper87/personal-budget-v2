@@ -1,14 +1,12 @@
 import { useState } from 'react'
-import { Box, Icon, VStack, useDisclosure } from '@chakra-ui/react'
+import { Box, VStack, useDisclosure } from '@chakra-ui/react'
 import { markHouseholdNotificationsRead, updateHouseholdCleaningDuty, uploadHouseholdExpenseAttachments, uploadHouseholdSettlementAttachments } from '../../api'
 import { useI18n } from '../../i18n'
 import type { HouseholdExpense } from '../../types'
-import { Wallet } from '../../components/ui/icons'
 import { AttachmentGalleryModal } from './HouseholdAttachments'
 import HouseholdHeader from './HouseholdHeader'
 import { HouseholdMembersCarousel } from './HouseholdMembersCarousel'
 import { HouseholdNotificationsModal } from './HouseholdNotifications'
-import { ActionRequiredBanner } from './components/HouseholdPageComponents'
 import {
   HouseholdLoadingState,
   HouseholdLoadError,
@@ -28,7 +26,7 @@ import { useHouseholdPageController } from './hooks/useHouseholdPageController'
 import { HouseholdOverview } from './HouseholdOverview'
 
 export default function HouseholdPage() {
-  const { formatCurrency, formatNumber, t } = useI18n()
+  const { t } = useI18n()
   const {
     page,
     setPage,
@@ -82,14 +80,6 @@ export default function HouseholdPage() {
   }
 
   const household = page.household
-  const debtsYouOwe = household.debts.filter(
-    (debt) => debt.fromMemberId === household.currentMemberId,
-  )
-  const totalYouOwe = debtsYouOwe.reduce(
-    (total, debt) => total + debt.amount,
-    0,
-  )
-  const firstDebtYouOwe = debtsYouOwe[0]
   const attachmentExpense = attachmentTarget?.kind === 'expense'
     ? household.expenses.find((expense) => expense.id === attachmentTarget.id)
     : undefined
@@ -206,31 +196,6 @@ export default function HouseholdPage() {
           />
         </Box>
 
-        {debtsYouOwe.length > 0 && (
-          <ActionRequiredBanner
-            ariaLabel={t('household.banner.debtsAria')}
-            icon={<Icon as={Wallet} boxSize={5} weight="duotone" />}
-            accent="var(--pb-coral)"
-            tint="var(--pb-tint-coral)"
-            count={debtsYouOwe.length}
-            title={debtsYouOwe.length === 1
-              ? t('household.banner.debts.one')
-              : t('household.banner.debts.other', {
-                count: formatNumber(debtsYouOwe.length),
-              })}
-            detail={debtsYouOwe.length === 1 && firstDebtYouOwe
-              ? t('household.banner.debtDetail.one', {
-                amount: formatCurrency(firstDebtYouOwe.amount),
-                name: firstDebtYouOwe.toMemberName,
-              })
-              : t('household.banner.debtDetail.other', {
-                amount: formatCurrency(totalYouOwe),
-                count: formatNumber(debtsYouOwe.length),
-              })}
-            actionLabel={t('household.banner.reviewBalances')}
-            onAction={balancesOverviewModal.onOpen}
-          />
-        )}
 
         <HouseholdOverview
           household={household}

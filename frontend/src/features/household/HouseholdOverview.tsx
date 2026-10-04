@@ -20,8 +20,7 @@ export function HouseholdOverview({
     <Box id="household-expenses" scrollMarginTop="90px">
       <Flex align="center" justify="space-between" gap={3} mb={3.5}>
         <Box minW={0}>
-          <Text fontSize="11px" fontWeight={600} color="var(--pb-income)"
-          >
+          <Text fontSize="xs" color="var(--pb-ink-soft)">
             {t('household.expenses.eyebrow')}
           </Text>
           <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">

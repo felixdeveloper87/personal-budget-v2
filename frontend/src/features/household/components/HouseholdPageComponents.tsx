@@ -1,8 +1,7 @@
-import { type ReactNode, useEffect, useRef, useState } from 'react'
-import { Badge, Box, Button, Flex, HStack, Icon, Text, useColorModeValue, usePrefersReducedMotion, type BoxProps } from '@chakra-ui/react'
+import { useEffect, useRef, useState } from 'react'
+import { Box, Button, Flex, Icon, Text, useColorModeValue, usePrefersReducedMotion, type BoxProps } from '@chakra-ui/react'
 import { useEd } from '../../../editorial'
-import { useI18n } from '../../../i18n'
-import { ChevronDown, ChevronRight } from '../../../components/ui/icons'
+import { ChevronRight } from '../../../components/ui/icons'
 
 export function Surface({
   children,
@@ -142,129 +141,6 @@ export function HouseholdSectionNavigation({
         })}
       </Box>
     </Box>
-  )
-}
-
-export function ActionRequiredBanner({
-  ariaLabel,
-  icon,
-  accent,
-  tint,
-  count,
-  title,
-  detail,
-  actionLabel,
-  targetId,
-  onAction,
-}: {
-  ariaLabel: string
-  icon: ReactNode
-  accent: string
-  tint: string
-  count: number
-  title: string
-  detail: string
-  actionLabel: string
-  targetId?: string
-  onAction?: () => void
-}) {
-  const { formatNumber, t } = useI18n()
-  return (
-    <Flex
-      role="region"
-      aria-label={ariaLabel}
-      direction={{ base: 'column', sm: 'row' }}
-      align={{ base: 'stretch', sm: 'center' }}
-      justify="space-between"
-      gap={4}
-      h="full"
-      px={{ base: 3.5, sm: 4, md: 5 }}
-      py={{ base: 3.5, md: 4 }}
-      borderRadius={{ base: '16px', md: '18px' }}
-      border="1px solid var(--pb-summary-line)"
-      bg={tint}
-      boxShadow="var(--pb-shadow)"
-    >
-      <HStack align="flex-start" spacing={3.5} minW={0}>
-        <Flex
-          w={11}
-          h={11}
-          flexShrink={0}
-          align="center"
-          justify="center"
-          borderRadius="13px"
-          bg="var(--pb-surface)"
-          color={accent}
-          border="1px solid var(--pb-summary-line)"
-        >
-          {icon}
-        </Flex>
-        <Box minW={0}>
-          <HStack spacing={2} flexWrap="wrap">
-            <Text
-              fontSize="11px"
-              fontWeight={700}
-              color={accent}
-            >
-              {t('household.common.actionRequired')}
-            </Text>
-            <Badge
-              borderRadius="full"
-              px={2}
-              bg="var(--pb-surface)"
-              color={accent}
-              border="1px solid var(--pb-summary-line)"
-              textTransform="none"
-            >
-              {formatNumber(count)}
-            </Badge>
-          </HStack>
-          <Text
-            mt={1}
-            fontFamily="var(--pb-serif)"
-            fontSize={{ base: 'lg', md: 'xl' }}
-            fontWeight={500}
-            lineHeight={1.15}
-            color="var(--pb-ink)"
-          >
-            {title}
-          </Text>
-          <Text mt={1} color="var(--pb-ink-soft)" fontSize="sm" lineHeight={1.45}>
-            {detail}
-          </Text>
-        </Box>
-      </HStack>
-      <Button
-        flexShrink={0}
-        h="42px"
-        w={{ base: 'full', sm: 'auto' }}
-        px={4}
-        borderRadius="10px"
-        bg={accent}
-        color="var(--pb-on-accent)"
-        rightIcon={(
-          <Icon
-            as={onAction ? ChevronRight : ChevronDown}
-            boxSize={4}
-            weight="bold"
-          />
-        )}
-        onClick={() => {
-          if (onAction) {
-            onAction()
-            return
-          }
-          if (targetId) {
-            document.getElementById(targetId)?.scrollIntoView({ block: 'start' })
-          }
-        }}
-        _hover={{ filter: 'brightness(0.96)', transform: 'translateY(-1px)' }}
-        _active={{ transform: 'translateY(0)' }}
-        _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-ink)' }}
-      >
-        {actionLabel}
-      </Button>
-    </Flex>
   )
 }
 

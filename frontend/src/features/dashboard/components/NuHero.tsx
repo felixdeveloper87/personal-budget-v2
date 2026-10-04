@@ -27,7 +27,8 @@ export default function NuHero({ title, action, decoration, children }: NuHeroPr
         px={{ base: 4, md: 6, lg: 8 }}
         pt={{ base: 3, md: 6 }}
         pb={{ base: 10, md: 12 }}
-        minH={{ base: '232px', md: '252px' }}
+        // Desktop keeps one hero height across pages; on phones the hero hugs its content.
+        minH={{ base: 'auto', md: '252px' }}
       >
         <Flex align="center" justify="space-between" gap={3} minH="44px">
           {typeof title === 'string' ? (
