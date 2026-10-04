@@ -328,12 +328,20 @@ function EarningsSources({
                 <Box minW={0} flex={1}>
                   <Text fontSize="md" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{source.name}</Text>
                   <Text mt={0.5} fontSize="sm" color="var(--pb-ink-soft)" noOfLines={1}>
-                    {t('earnings.source.share', { payments: paymentLabel, percentage: formatNumber(percentage) })}
+                    {paymentLabel}
                   </Text>
                 </Box>
-                <Text flexShrink={0} fontSize="md" fontWeight={700} color="var(--nu-positive)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  +{formatCurrency(source.total)}
-                </Text>
+                <VStack flexShrink={0} align="flex-end" spacing={1}>
+                  <Text
+                    px={2} py="1px" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)"
+                    fontSize="11px" fontWeight={700} lineHeight="16px" sx={{ fontVariantNumeric: 'tabular-nums' }}
+                  >
+                    {formatNumber(percentage)}%
+                  </Text>
+                  <Text fontSize="md" fontWeight={700} color="var(--nu-positive)" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                    +{formatCurrency(source.total)}
+                  </Text>
+                </VStack>
               </HStack>
             )
           })}

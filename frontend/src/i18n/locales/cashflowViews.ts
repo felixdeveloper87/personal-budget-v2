@@ -102,7 +102,6 @@ export const cashflowViewsTranslations: TranslationBundle = {
     'earnings.sources.empty': 'No earnings recorded in this period.',
     'earnings.source.payment.one': '1 payment',
     'earnings.source.payment.other': '{{count}} payments',
-    'earnings.source.share': '{{payments}} · {{percentage}}% of earnings',
     'earnings.source.received': 'received',
     'earnings.source.progress': '{{source}}: {{percentage}}% of recorded earnings',
 
@@ -232,7 +231,6 @@ export const cashflowViewsTranslations: TranslationBundle = {
     'earnings.sources.empty': 'Nenhuma receita registrada neste período.',
     'earnings.source.payment.one': '1 pagamento',
     'earnings.source.payment.other': '{{count}} pagamentos',
-    'earnings.source.share': '{{payments}} · {{percentage}}% das receitas',
     'earnings.source.received': 'recebido',
     'earnings.source.progress': '{{source}}: {{percentage}}% das receitas registradas',
 
