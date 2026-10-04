@@ -221,6 +221,7 @@ export default function BehaviourPage() {
             <Box flexShrink={0} minW={{ md: '400px' }}>
               <PeriodNavBar
                 embedded
+                allowedPeriods={['week', 'month']}
                 selectedPeriod={selectedPeriod}
                 label={periodLabel}
                 isCurrent={isCurrentPeriod}
