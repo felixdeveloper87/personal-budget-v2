@@ -3,7 +3,7 @@ import { SymbolView } from "expo-symbols";
 import type { ComponentProps } from "react";
 import { type ColorValue, StyleSheet, Text, View } from "react-native";
 
-import { colors } from "@/theme/colors";
+import { nu } from "@/components/dashboard/nuTheme";
 
 type SymbolName = ComponentProps<typeof SymbolView>["name"];
 
@@ -14,13 +14,14 @@ interface TabIconProps {
   standard: SymbolName;
 }
 
+/** Nubank-style tab: the active icon sits in a soft lilac pill, tinted purple. */
 function TabIcon({ color, focused, selected, standard }: TabIconProps) {
   return (
     <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
       <SymbolView
         name={focused ? selected : standard}
-        size={focused ? 36 : 35}
-        tintColor={focused ? colors.white : color}
+        size={23}
+        tintColor={color}
         weight={focused ? "semibold" : "regular"}
       />
     </View>
@@ -97,9 +98,9 @@ export default function TabsLayout() {
         headerShown: false,
         lazy: false,
         sceneStyle: styles.scene,
-        tabBarActiveTintColor: colors.forest,
+        tabBarActiveTintColor: nu.brand,
         tabBarHideOnKeyboard: true,
-        tabBarInactiveTintColor: colors.inkFaint,
+        tabBarInactiveTintColor: nu.inkSoft,
         tabBarIconStyle: styles.tabIcon,
         tabBarItemStyle: styles.tabItem,
         tabBarStyle: styles.tabBar,
@@ -109,7 +110,6 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Dashboard",
-          tabBarItemStyle: [styles.tabItem, styles.firstTabItem],
           tabBarIcon: ({ color, focused }) => (
             <TabIcon color={color} focused={focused} {...icons.dashboard} />
           ),
@@ -158,7 +158,6 @@ export default function TabsLayout() {
         name="more"
         options={{
           title: "Mais",
-          tabBarItemStyle: [styles.tabItem, styles.lastTabItem],
           tabBarIcon: ({ color, focused }) => (
             <TabIcon color={color} focused={focused} {...icons.more} />
           ),
@@ -172,59 +171,41 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  scene: { backgroundColor: colors.paper },
+  scene: { backgroundColor: nu.white },
+  // No fixed height: React Navigation adds the bottom safe-area inset itself.
   tabBar: {
-    backgroundColor: colors.paperRaised,
-    borderTopColor: colors.line,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    elevation: 16,
-    height: 96,
+    backgroundColor: nu.white,
+    borderTopColor: nu.hairline,
+    borderTopWidth: 1,
+    elevation: 0,
     paddingTop: 8,
-    shadowColor: colors.ink,
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
+    shadowOpacity: 0,
   },
   tabItem: {
-    borderRadius: 16,
-    minHeight: 62,
-    paddingHorizontal: 1,
-    paddingVertical: 3,
-  },
-  firstTabItem: {
-    marginLeft: 28,
-  },
-  lastTabItem: {
-    marginRight: 28,
+    paddingHorizontal: 0,
+    paddingVertical: 2,
   },
   tabIcon: {
-    height: 44,
-    marginBottom: 2,
+    height: 32,
+    marginBottom: 3,
   },
   iconContainer: {
     alignItems: "center",
-    borderColor: "transparent",
-    borderRadius: 17,
-    borderWidth: 1,
-    height: 44,
+    borderRadius: 16,
+    height: 32,
     justifyContent: "center",
-    width: 50,
+    width: 58,
   },
   iconContainerActive: {
-    backgroundColor: colors.forest,
-    borderColor: colors.forestPressed,
-    shadowColor: colors.forest,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
+    backgroundColor: nu.brandTint,
   },
   tabLabel: {
     flexShrink: 1,
-    fontSize: 10,
-    fontWeight: "600",
+    fontSize: 11,
+    fontWeight: "500",
     includeFontPadding: false,
     letterSpacing: 0,
-    lineHeight: 13,
+    lineHeight: 14,
     textAlign: "center",
   },
   tabLabelActive: {
