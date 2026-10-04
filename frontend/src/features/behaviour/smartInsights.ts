@@ -10,9 +10,13 @@ import type { TxnVM } from '../transactions/transactions.types'
 
 export type PeriodKind = 'day' | 'week' | 'month' | 'year'
 
+export type InsightSide = 'expense' | 'income'
+
 export type SmartInsight =
   | {
       kind: 'pace'
+      /** Expense (default): less is good. Income: more is good. */
+      side?: InsightSide
       /** true while the period is still running ("so far"), false once it ended. */
       inProgress: boolean
       spent: number
@@ -22,10 +26,14 @@ export type SmartInsight =
       /** Day of month reached so far (month view). */
       dayReached: number
     }
-  | { kind: 'projection'; projected: number; previousTotal: number; previousStart: Date; daysElapsed: number }
+  | { kind: 'projection'; side?: InsightSide; projected: number; previousTotal: number; previousStart: Date; daysElapsed: number }
   | { kind: 'outlier'; amount: number; merchant: string; category: string; ratio: number }
   | { kind: 'small'; count: number; total: number; share: number; limit: number }
   | { kind: 'noSpend'; days: number; daysElapsed: number; inProgress: boolean }
+  | { kind: 'newSource'; name: string; total: number }
+  | { kind: 'bestWeekday'; weekday: number; average: number; liftPct: number }
+  | { kind: 'topSource'; name: string; share: number; total: number }
+  | { kind: 'perEarningDay'; average: number; days: number }
 
 const DAY_MS = 86_400_000
 const SMALL_PURCHASE_LIMIT = 10
@@ -171,6 +179,149 @@ export function deriveSmartInsights({
     if (noSpend >= 1) {
       out.push({ score: 40 + Math.min(15, noSpend), insight: { kind: 'noSpend', days: noSpend, daysElapsed, inProgress } })
     }
+  }
+
+  return out
+    .sort((a, b) => b.score - a.score)
+    .slice(0, MAX_INSIGHTS)
+    .map((entry) => entry.insight)
+}
+
+/* -------------------------------------------------------------------------- */
+/* Earnings page                                                              */
+/* -------------------------------------------------------------------------- */
+
+const NEW_SOURCE_LOOKBACK_DAYS = 120
+const WEEKDAY_LOOKBACK_DAYS = 90
+const WEEKDAY_MIN_EARNING_DAYS = 12
+const WEEKDAY_MIN_LIFT = 0.25
+
+const sourceKey = (name: string) => name.trim().toLowerCase().replace(/\s+/g, ' ')
+
+/** Same rules as the expense insights, tuned for income: more is good, and the
+    interesting signals are new sources, the best-paying weekday, concentration
+    on one source and earnings per day with income. */
+export function deriveEarningsInsights({
+  allIncome,
+  period,
+  start,
+  end,
+  today = new Date(),
+}: {
+  allIncome: TxnVM[]
+  period: PeriodKind
+  start: Date
+  end: Date
+  today?: Date
+}): SmartInsight[] {
+  const out: Array<{ score: number; insight: SmartInsight }> = []
+  const periodStart = startOfDay(start)
+  const periodEnd = startOfDay(end)
+  const todayDay = startOfDay(today)
+  if (periodStart > todayDay) return []
+
+  const inProgress = todayDay <= periodEnd
+  const cutoff = inProgress ? todayDay : periodEnd
+  const startIso = iso(periodStart)
+  const cutoffIso = iso(cutoff)
+  const daysElapsed = daysBetween(periodStart, cutoff) + 1
+  const totalDays = daysBetween(periodStart, periodEnd) + 1
+  const current = allIncome.filter((t) => t.purchaseDate >= startIso && t.purchaseDate <= cutoffIso)
+  const earned = current.reduce((sum, t) => sum + t.amount, 0)
+
+  // 1. New source — nothing from it in the previous 120 days.
+  const lookbackIso = iso(new Date(periodStart.getTime() - NEW_SOURCE_LOOKBACK_DAYS * DAY_MS))
+  const seenBefore = new Set(
+    allIncome.filter((t) => t.purchaseDate >= lookbackIso && t.purchaseDate < startIso).map((t) => sourceKey(t.merchant)),
+  )
+  const hadHistory = seenBefore.size > 0
+  const newSources = new Map<string, { name: string; total: number }>()
+  for (const txn of current) {
+    const key = sourceKey(txn.merchant)
+    if (!key || seenBefore.has(key)) continue
+    const entry = newSources.get(key) ?? { name: txn.merchant.trim(), total: 0 }
+    entry.total += txn.amount
+    newSources.set(key, entry)
+  }
+  // Without any history every source looks "new" — only flag once there is a baseline.
+  if (hadHistory && newSources.size > 0) {
+    const best = [...newSources.values()].sort((a, b) => b.total - a.total)[0]
+    out.push({ score: 85, insight: { kind: 'newSource', name: best.name, total: best.total } })
+  }
+
+  // 2. Pace vs the same point of the previous period.
+  if (period !== 'day') {
+    const previousStart = shiftBack(periodStart, period)
+    const previousCutoff = inProgress ? shiftBack(cutoff, period) : new Date(periodStart.getTime() - DAY_MS)
+    const previous = sumBetween(allIncome, iso(previousStart), iso(previousCutoff))
+    if (previous > 0 && (earned > 0 || daysElapsed >= 3)) {
+      const diffPct = Math.abs(earned - previous) / previous
+      out.push({
+        score: 60 + Math.min(30, diffPct * 30),
+        insight: { kind: 'pace', side: 'income', inProgress, spent: earned, previous, previousStart, dayReached: cutoff.getDate() },
+      })
+    }
+  }
+
+  // 3. Best-paying weekday over the last 90 days (needs a real sample).
+  const weekdayFromIso = iso(new Date(cutoff.getTime() - (WEEKDAY_LOOKBACK_DAYS - 1) * DAY_MS))
+  const perDay = new Map<string, number>()
+  for (const txn of allIncome) {
+    if (txn.purchaseDate >= weekdayFromIso && txn.purchaseDate <= cutoffIso) {
+      perDay.set(txn.purchaseDate, (perDay.get(txn.purchaseDate) ?? 0) + txn.amount)
+    }
+  }
+  if (perDay.size >= WEEKDAY_MIN_EARNING_DAYS) {
+    const sums = Array.from({ length: 7 }, () => 0)
+    const counts = Array.from({ length: 7 }, () => 0)
+    for (const [day, total] of perDay) {
+      const weekday = new Date(`${day}T00:00:00`).getDay()
+      sums[weekday] += total
+      counts[weekday] += 1
+    }
+    const overall = [...perDay.values()].reduce((a, b) => a + b, 0) / perDay.size
+    let best = -1
+    for (let i = 0; i < 7; i++) {
+      if (counts[i] >= 2 && (best === -1 || sums[i] / counts[i] > sums[best] / counts[best])) best = i
+    }
+    if (best !== -1) {
+      const average = sums[best] / counts[best]
+      const lift = overall > 0 ? average / overall - 1 : 0
+      if (lift >= WEEKDAY_MIN_LIFT) {
+        out.push({ score: 75, insight: { kind: 'bestWeekday', weekday: best, average, liftPct: lift * 100 } })
+      }
+    }
+  }
+
+  // 4. Month-end projection.
+  if (period === 'month' && inProgress && daysElapsed >= PROJECTION_MIN_DAYS && daysElapsed < totalDays && earned > 0) {
+    const previousStart = shiftBack(periodStart, 'month')
+    const previousTotal = sumBetween(allIncome, iso(previousStart), iso(new Date(periodStart.getTime() - DAY_MS)))
+    out.push({
+      score: 70,
+      insight: { kind: 'projection', side: 'income', projected: (earned / daysElapsed) * totalDays, previousTotal, previousStart, daysElapsed },
+    })
+  }
+
+  // 5. Concentration on one source (only meaningful with 2+ sources).
+  const bySource = new Map<string, { name: string; total: number }>()
+  for (const txn of current) {
+    const key = sourceKey(txn.merchant)
+    if (!key) continue
+    const entry = bySource.get(key) ?? { name: txn.merchant.trim(), total: 0 }
+    entry.total += txn.amount
+    bySource.set(key, entry)
+  }
+  if (bySource.size >= 2 && earned > 0) {
+    const top = [...bySource.values()].sort((a, b) => b.total - a.total)[0]
+    const share = (top.total / earned) * 100
+    if (share >= 50) out.push({ score: 55, insight: { kind: 'topSource', name: top.name, share, total: top.total } })
+  }
+
+  // 6. Average per day with income.
+  const earningDays = new Set(current.map((t) => t.purchaseDate)).size
+  if (earningDays >= 3) {
+    out.push({ score: 45, insight: { kind: 'perEarningDay', average: earned / earningDays, days: earningDays } })
   }
 
   return out

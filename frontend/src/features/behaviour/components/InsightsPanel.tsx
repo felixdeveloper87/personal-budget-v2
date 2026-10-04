@@ -1,5 +1,5 @@
 import { Box, Flex, Icon, SimpleGrid, Text } from '@chakra-ui/react'
-import { AlertTriangle, ChartLineUp, Coffee, Smile, TrendingDown, TrendingUp } from '../../../components/ui/icons'
+import { AlertTriangle, CalendarDays, ChartLineUp, Coffee, PieChart, Smile, Sparkles, TrendingDown, TrendingUp, Wallet } from '../../../components/ui/icons'
 import type { LucideIcon } from '../../../components/ui/icons'
 import type { PeriodKind, SmartInsight } from '../smartInsights'
 import { useI18n } from '../../../i18n'
@@ -24,6 +24,8 @@ const TONES: Record<Tone, { ink: string; bg: string }> = {
 export default function InsightsPanel({ insights, period }: { insights: SmartInsight[]; period: PeriodKind }) {
   const { t, formatCurrency, formatDate, formatNumber, categoryLabel } = useI18n()
   const monthName = (date: Date) => formatDate(date, { month: 'long' })
+  // 7 Jan 2024 was a Sunday, so weekday 0..6 maps onto that week.
+  const weekdayName = (weekday: number) => formatDate(new Date(2024, 0, 7 + weekday), { weekday: 'long' })
   const ref = (date: Date, soFar: boolean) => {
     const variant = soFar ? 'soFar' : 'total'
     if (period === 'week') return t(`behaviour.smart.ref.week.${variant}`)
@@ -37,15 +39,18 @@ export default function InsightsPanel({ insights, period }: { insights: SmartIns
         const diff = insight.spent - insight.previous
         const direction = Math.abs(diff) < 0.005 ? 'same' : diff < 0 ? 'less' : 'more'
         const suffix = insight.inProgress ? 'SoFar' : 'Total'
+        const income = insight.side === 'income'
+        // Spending less is good; earning more is good.
+        const good = income ? direction === 'more' : direction === 'less'
         return {
           id: 'pace',
           icon: direction === 'more' ? TrendingUp : TrendingDown,
-          tone: direction === 'less' ? 'good' : direction === 'more' ? 'bad' : 'neutral',
+          tone: direction === 'same' ? 'neutral' : good ? 'good' : 'bad',
           title: t(`behaviour.smart.pace.${direction}${suffix}`, {
             amount: formatCurrency(Math.abs(diff)),
             ref: ref(insight.previousStart, insight.inProgress),
           }),
-          detail: t(`behaviour.smart.pace.detail${suffix}`, {
+          detail: t(`behaviour.smart.pace.detail${suffix}${income ? 'Income' : ''}`, {
             spent: formatCurrency(insight.spent),
             previous: formatCurrency(insight.previous),
           }),
@@ -55,8 +60,10 @@ export default function InsightsPanel({ insights, period }: { insights: SmartIns
         return {
           id: 'projection',
           icon: ChartLineUp,
-          tone: insight.previousTotal > 0 && insight.projected > insight.previousTotal ? 'bad' : 'neutral',
-          title: t('behaviour.smart.projection.title', {
+          tone: insight.previousTotal > 0 && insight.projected > insight.previousTotal
+            ? insight.side === 'income' ? 'good' : 'bad'
+            : 'neutral',
+          title: t(insight.side === 'income' ? 'behaviour.smart.projection.titleIncome' : 'behaviour.smart.projection.title', {
             amount: formatCurrency(insight.projected, { maximumFractionDigits: 0 }),
           }),
           detail: insight.previousTotal > 0
@@ -105,6 +112,44 @@ export default function InsightsPanel({ insights, period }: { insights: SmartIns
           detail: t(insight.inProgress ? 'behaviour.smart.noSpend.detailSoFar' : 'behaviour.smart.noSpend.detailTotal', {
             days: formatNumber(insight.daysElapsed),
           }),
+        }
+      case 'newSource':
+        return {
+          id: 'newSource',
+          icon: Sparkles,
+          tone: 'good',
+          title: t('behaviour.smart.newSource.title', { name: insight.name }),
+          detail: t('behaviour.smart.newSource.detail', { amount: formatCurrency(insight.total) }),
+        }
+      case 'bestWeekday':
+        return {
+          id: 'bestWeekday',
+          icon: CalendarDays,
+          tone: 'neutral',
+          title: t('behaviour.smart.bestWeekday.title', { weekday: capitalise(weekdayName(insight.weekday)) }),
+          detail: t('behaviour.smart.bestWeekday.detail', {
+            average: formatCurrency(insight.average),
+            percentage: formatNumber(insight.liftPct, { maximumFractionDigits: 0 }),
+          }),
+        }
+      case 'topSource':
+        return {
+          id: 'topSource',
+          icon: PieChart,
+          tone: 'neutral',
+          title: t('behaviour.smart.topSource.title', {
+            name: insight.name,
+            percentage: formatNumber(insight.share, { maximumFractionDigits: 0 }),
+          }),
+          detail: t('behaviour.smart.topSource.detail', { amount: formatCurrency(insight.total) }),
+        }
+      case 'perEarningDay':
+        return {
+          id: 'perEarningDay',
+          icon: Wallet,
+          tone: 'neutral',
+          title: t('behaviour.smart.perEarningDay.title', { amount: formatCurrency(insight.average) }),
+          detail: t('behaviour.smart.perEarningDay.detail', { days: formatNumber(insight.days) }),
         }
     }
   })

@@ -17,6 +17,8 @@ import ActivityIntensityStrip, { type ChartDay } from '../transactions/component
 import { toViewModel } from '../transactions/transactions.utils'
 import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
+import InsightsPanel from '../behaviour/components/InsightsPanel'
+import { deriveEarningsInsights } from '../behaviour/smartInsights'
 import MerchantLogo from '../../components/ui/MerchantLogo'
 import { NuSection } from '../dashboard/components/nu'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
@@ -91,6 +93,20 @@ export default function EarningsPage() {
   const incomeTransactions = useMemo<TxnVM[]>(
     () => toViewModel(periodData.transactions).filter((transaction) => transaction.type === 'in'),
     [periodData.transactions],
+  )
+  // Full income history — patterns compare like-for-like and spot new sources.
+  const allIncome = useMemo<TxnVM[]>(
+    () => toViewModel(transactions).filter((transaction) => transaction.type === 'in'),
+    [transactions],
+  )
+  const earningsInsights = useMemo(
+    () => deriveEarningsInsights({
+      allIncome,
+      period: selectedPeriod,
+      start: periodData.startDate,
+      end: periodData.endDate,
+    }),
+    [allIncome, selectedPeriod, periodData.startDate, periodData.endDate],
   )
   const days = useMemo(
     () => buildDays(periodData.startDate, periodData.endDate),
@@ -199,6 +215,15 @@ export default function EarningsPage() {
               <EarningsSources sources={sources} periodLabel={periodLabel} />
             )}
           </MotionBox>
+
+          {/* Only rendered when at least one insight has enough data to be fair. */}
+          {!loading && earningsInsights.length > 0 && (
+            <MotionBox variants={riseV}>
+              <NuSection title={t('behaviour.sections.insights')} subtitle={t('earnings.patternsCaption')}>
+                <InsightsPanel insights={earningsInsights} period={selectedPeriod} />
+              </NuSection>
+            </MotionBox>
+          )}
         </MotionBox>
       </Box>
 
