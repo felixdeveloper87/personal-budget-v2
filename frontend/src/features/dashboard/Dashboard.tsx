@@ -17,7 +17,7 @@ import './theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from './components/motion'
 import { NuSection } from './components/nu'
-import MonthHero from './components/MonthHero'
+import MonthHero, { NetHero } from './components/MonthHero'
 import CashPace from './components/SpendingPace'
 import CategorySpendingPaces from './components/CategorySpendingPaces'
 import DescriptionSpendingPaces from './components/DescriptionSpendingPaces'
@@ -111,26 +111,28 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
   /* ── Quick-add modal ── */
   const { isOpen: isModalOpen, onOpen: openModal, onClose: closeModal } = useDisclosure()
   const [modalType, setModalType] = useState<'INCOME' | 'EXPENSE'>('INCOME')
+  const [hidden, setHidden] = useState(false)
 
   const handleAddIncome = useCallback(() => { setModalType('INCOME'); openModal() }, [openModal])
   const handleAddExpense = useCallback(() => { setModalType('EXPENSE'); openModal() }, [openModal])
 
   return (
-    // The purple app bar keeps going behind the top of the white sheet, so bar and
-    // page read as one surface (no seam) — the sheet's rounded corners sit on purple.
-    <Box
-      minH="100vh"
-      sx={{
-        '--nu-band': { base: '28px', md: '160px' },
-        background: 'linear-gradient(to bottom, var(--pb-hero) 0, var(--pb-hero) var(--nu-band), transparent var(--nu-band))',
-      }}
-    >
+    <Box minH="100vh">
+      {/* Purple hero with the month's net — same shell as Earnings/Expenses/Household. */}
+      <NetHero
+        income={periodData.income}
+        expense={periodData.expense}
+        date={selectedDate}
+        hidden={hidden}
+        onToggleHidden={() => setHidden((value) => !value)}
+      />
     <Box
       maxW="appContent"
       mx="auto"
       px={{ base: 0, md: 4, lg: 6 }}
-      pt={{ base: 1, md: 2 }}
+      mt="-24px"
       pb={{ base: 0, md: 7 }}
+      position="relative"
     >
       {/* Nubank-style sheet: white body, hairline-separated sections. */}
       <MotionBox
@@ -145,7 +147,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
         boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
       >
         {loading ? (
-          <Skeleton height={{ base: '520px', md: '420px' }} startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
+          <Skeleton height={{ base: '360px', md: '260px' }} startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
         ) : monthSummary ? (
           <MotionBox variants={riseV}>
             <MonthHero
@@ -154,6 +156,7 @@ export default function Dashboard({ onPageChange }: DashboardProps) {
               previousExpense={previousSummary?.totalExpense ?? null}
               transactions={transactions}
               date={selectedDate}
+              hidden={hidden}
               onAddIncome={handleAddIncome}
               onAddExpense={handleAddExpense}
               onPageChange={onPageChange}

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Box, Grid, HStack, IconButton, Text, VStack } from '@chakra-ui/react'
 import { ArrowDown, ArrowUp, CreditCard, Eye, EyeOff, House, Landmark, Target, type LucideIcon } from 'lucide-react'
 import type { Transaction } from '../../../types'
 import type { AppPage } from '../../../components/layout/header/navigation.config'
 import { useI18n } from '../../../i18n'
 import { getMonthToDateComparison, getVariableSpending } from '../heroMetrics'
+import NuHero from './NuHero'
 
 interface MonthHeroProps {
   income: number
@@ -12,6 +13,8 @@ interface MonthHeroProps {
   previousExpense?: number | null
   transactions: Transaction[]
   date?: Date
+  /** Mask money values (toggled from the NetHero eye button). */
+  hidden: boolean
   onAddIncome?: () => void
   onAddExpense?: () => void
   onPageChange?: (page: AppPage) => void
@@ -87,22 +90,78 @@ function Metric({ label, value, change, favourable, caption }: MetricProps) {
   )
 }
 
+/** Purple hero with this month's net balance — same shell as the other pages' heroes. */
+export function NetHero({
+  income,
+  expense,
+  date,
+  hidden,
+  onToggleHidden,
+}: {
+  income: number
+  expense: number
+  date?: Date
+  hidden: boolean
+  onToggleHidden: () => void
+}) {
+  const { t, formatCurrency, formatDate } = useI18n()
+  const currentDate = date ?? new Date()
+  const net = income - expense
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
+  const balanceCaption = income === 0 && expense === 0
+    ? t('dashboard.balanceNoTransactions')
+    : net > 0 ? t('dashboard.balanceAhead') : net < 0 ? t('dashboard.balanceBehind') : t('dashboard.balanceEven')
+
+  return (
+    <NuHero
+      title={t('dashboard.netThisMonth')}
+      action={(
+        <IconButton
+          aria-label={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+          title={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
+          aria-pressed={hidden}
+          icon={hidden ? <EyeOff size={18} /> : <Eye size={18} />}
+          onClick={onToggleHidden}
+          w="36px"
+          minW="36px"
+          h="36px"
+          borderRadius="full"
+          bg="rgba(255,255,255,0.16)"
+          color="white"
+          _hover={{ bg: 'rgba(255,255,255,0.26)' }}
+          _active={{ bg: 'rgba(255,255,255,0.32)' }}
+        />
+      )}
+    >
+      <Text mt={{ base: 3, md: 4 }} fontSize="sm" color="rgba(255,255,255,0.82)" textTransform="capitalize" sx={{ fontVariantNumeric: 'tabular-nums' }}>
+        {formatDate(currentDate, { month: 'long' })} · {t('dashboard.dayOfMonth', { day: currentDate.getDate(), total: daysInMonth })}
+      </Text>
+      <Text fontSize={{ base: '2rem', md: '2.5rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="white" noOfLines={1}
+        sx={{ fontVariantNumeric: 'tabular-nums' }} aria-label={hidden ? t('dashboard.hiddenValue') : undefined}>
+        {hidden ? MASK : formatCurrency(net)}
+      </Text>
+      <HStack mt={1.5} spacing={2}>
+        <Box w="7px" h="7px" borderRadius="full" bg={net < 0 ? '#ffc2b8' : '#9ff0c8'} />
+        <Text fontSize="sm" color="rgba(255,255,255,0.82)">{balanceCaption}</Text>
+      </HStack>
+    </NuHero>
+  )
+}
+
 export default function MonthHero({
   income,
   expense,
   previousExpense,
   transactions,
   date,
+  hidden,
   onAddIncome,
   onAddExpense,
   onPageChange,
 }: MonthHeroProps) {
-  const { t, formatCurrency, formatDate, formatNumber } = useI18n()
-  const [hidden, setHidden] = useState(false)
+  const { t, formatCurrency, formatNumber } = useI18n()
   const currentDate = date ?? new Date()
-  const net = income - expense
   const money = (value: number) => (hidden ? MASK : formatCurrency(value))
-  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate()
 
   const incomeComparison = useMemo(
     () => getMonthToDateComparison(transactions, 'INCOME', currentDate),
@@ -126,51 +185,11 @@ export default function MonthHero({
 
   const incomeChange = getChange(incomeComparison.current, incomeComparison.previous)
   const paymentsChange = getChange(expense, previousExpense)
-  const balanceCaption = income === 0 && expense === 0
-    ? t('dashboard.balanceNoTransactions')
-    : net > 0 ? t('dashboard.balanceAhead') : net < 0 ? t('dashboard.balanceBehind') : t('dashboard.balanceEven')
 
   return (
     <Box>
-      {/* Net + shortcuts */}
-      <Grid
-        templateColumns={{ base: '1fr', lg: 'minmax(0, 1fr) auto' }}
-        gap={{ base: 5, lg: 8 }}
-        alignItems="center"
-        px={{ base: 4, md: 6 }}
-        py={{ base: 5, md: 6 }}
-      >
-        <Box minW={0}>
-          <HStack justify="space-between" align="center" spacing={3}>
-            <Text fontSize={{ base: 'lg', md: 'xl' }} fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{t('dashboard.netThisMonth')}</Text>
-            <HStack spacing={1} minW={0}>
-              <Text fontSize="sm" color="var(--pb-ink-soft)" sx={{ fontVariantNumeric: 'tabular-nums' }} textTransform="capitalize" noOfLines={1}>
-                {formatDate(currentDate, { month: 'long' })} · {t('dashboard.dayOfMonth', { day: currentDate.getDate(), total: daysInMonth })}
-              </Text>
-              <IconButton
-                aria-label={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
-                title={t(hidden ? 'dashboard.showValues' : 'dashboard.hideValues')}
-                aria-pressed={hidden}
-                icon={hidden ? <EyeOff size={18} /> : <Eye size={18} />}
-                onClick={() => setHidden((value) => !value)}
-                variant="ghost"
-                size="sm"
-                borderRadius="full"
-                color="var(--pb-ink-soft)"
-                _hover={{ bg: 'var(--nu-surface)', color: 'var(--pb-ink)' }}
-              />
-            </HStack>
-          </HStack>
-          <Text mt={2} fontSize={{ base: '3xl', md: '4xl' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} color="var(--pb-ink)"
-            sx={{ fontVariantNumeric: 'tabular-nums' }} aria-label={hidden ? t('dashboard.hiddenValue') : undefined}>
-            {money(net)}
-          </Text>
-          <HStack mt={1.5} spacing={2}>
-            <Box w="7px" h="7px" borderRadius="full" bg={net < 0 ? 'var(--nu-negative)' : 'var(--nu-positive)'} />
-            <Text fontSize="sm" color="var(--pb-ink-soft)">{balanceCaption}</Text>
-          </HStack>
-        </Box>
-
+      {/* Shortcuts */}
+      <Box px={{ base: 4, md: 6 }} pt={{ base: 5, md: 6 }} pb={{ base: 5, md: 6 }}>
         <HStack
           spacing={{ base: 2, md: 3 }}
           overflowX="auto"
@@ -189,7 +208,7 @@ export default function MonthHero({
             </>
           )}
         </HStack>
-      </Grid>
+      </Box>
 
       {/* Income · Payments · Everyday spending */}
       <Grid

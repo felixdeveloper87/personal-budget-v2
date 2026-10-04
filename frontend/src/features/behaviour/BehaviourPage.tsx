@@ -13,6 +13,7 @@ import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
 import TopMerchants from '../dashboard/components/TopMerchants'
 import { NuSection } from '../dashboard/components/nu'
+import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 
 import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
@@ -192,16 +193,10 @@ export default function BehaviourPage() {
   return (
     <Box>
       {/* Purple page header — continues the app bar, same pattern as Earnings. */}
-      <Box className="nu-on-brand" bg="var(--pb-hero)">
-        <Box maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 3, md: 6 }} pb={{ base: 10, md: 12 }}>
-          <Flex align="center" justify="space-between" gap={3}>
-            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white">
-              {t('nav.behaviour.label')}
-            </Text>
-            <Box display="grid" placeItems="center" w="36px" h="36px" borderRadius="full" bg="rgba(255,255,255,0.16)" color="white" flexShrink={0}>
-              <TrendingDown size={18} strokeWidth={2.4} aria-hidden="true" />
-            </Box>
-          </Flex>
+      <NuHero
+        title={t('nav.behaviour.label')}
+        action={<NuHeroBadge><TrendingDown size={18} strokeWidth={2.4} aria-hidden="true" /></NuHeroBadge>}
+      >
 
           <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
             <Box minW={0}>
@@ -238,11 +233,10 @@ export default function BehaviourPage() {
               />
             </Box>
           </Flex>
-        </Box>
-      </Box>
+      </NuHero>
 
       {/* White sheet with rounded top tucked over the purple header. */}
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }}>
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
         <MotionBox
           className="nu-dashboard"
           variants={containerV}

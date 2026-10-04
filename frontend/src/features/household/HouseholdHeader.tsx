@@ -3,6 +3,7 @@ import { Box, Button, Flex, Grid, HStack, Icon, IconButton, Text } from '@chakra
 import { Bell, Calendar, ChevronLeft, ChevronRight, Gear, Plus, TrendingDown, TrendingUp, Users } from '../../components/ui/icons'
 import type { HouseholdDashboard } from '../../types'
 import { useI18n } from '../../i18n'
+import NuHero from '../dashboard/components/NuHero'
 
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
@@ -60,13 +61,10 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
   }
 
   return (
-    <Box as="section" aria-label={household.name} position="relative" overflow="hidden" isolation="isolate" bg="var(--pb-hero)" color="white">
-      <HouseLineArt />
-
-      <Box position="relative" maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 3, md: 6 }} pb={{ base: 10, md: 12 }}>
-        {/* Title + month navigator */}
-        <Flex align="center" justify="space-between" wrap="wrap" gap={3}>
-          <Box flex={1} minW="140px">
+    <NuHero
+      decoration={<HouseLineArt />}
+      title={(
+          <Box minW={0}>
             <HStack spacing={1.5}>
               <Text fontSize="sm" color={soft}>{t('household.header.ourHome')}</Text>
               <Button
@@ -88,6 +86,8 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
               {household.name}
             </Text>
           </Box>
+      )}
+      action={(
           <HStack spacing={1} p={1} borderRadius="full" flexShrink={0} {...glass} _hover={undefined}>
             <IconButton aria-label={t('period.previous')} icon={<Icon as={ChevronLeft} boxSize={3.5} />} onClick={() => navigateMonth(-1)} minW="30px" h="30px" borderRadius="full" bg="transparent" color="white" _hover={{ bg: 'rgba(255,255,255,0.18)' }} />
             <Icon as={Calendar} boxSize={3.5} aria-hidden="true" />
@@ -96,7 +96,8 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
             </Text>
             <IconButton aria-label={t('period.next')} icon={<Icon as={ChevronRight} boxSize={3.5} />} onClick={() => navigateMonth(1)} isDisabled={selectedMonthKey >= currentMonthKey} minW="30px" h="30px" borderRadius="full" bg="transparent" color="white" _hover={{ bg: 'rgba(255,255,255,0.18)' }} />
           </HStack>
-        </Flex>
+      )}
+    >
 
         {/* Month spending · your position */}
         <Grid mt={{ base: 4, md: 5 }} templateColumns={{ base: 'minmax(0, 1fr) minmax(0, 1fr)', md: 'minmax(0, 1.2fr) minmax(0, 1fr)' }} gap={{ base: 4, md: 8 }} maxW={{ md: '720px' }}>
@@ -159,8 +160,7 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
           </Box>
           {household.currentMemberRole === 'OWNER' ? <IconButton aria-label={t('household.header.manageAria', { name: household.name })} onClick={onManage} icon={<Icon as={Gear} boxSize={5} />} w="44px" h="44px" borderRadius="full" {...glass} /> : null}
         </Flex>
-      </Box>
-    </Box>
+    </NuHero>
   )
 }
 

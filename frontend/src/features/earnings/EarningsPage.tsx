@@ -19,6 +19,7 @@ import type { TxnVM } from '../transactions/transactions.types'
 import { earningsBySource } from '../behaviour/insights'
 import MerchantLogo from '../../components/ui/MerchantLogo'
 import { NuSection } from '../dashboard/components/nu'
+import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 
 type I18nApi = ReturnType<typeof useI18n>
 
@@ -116,16 +117,10 @@ export default function EarningsPage() {
   return (
     <Box>
       {/* Purple page header — continues the app bar, like the mobile Incomes tab. */}
-      <Box className="nu-on-brand" bg="var(--pb-hero)">
-        <Box maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 3, md: 6 }} pb={{ base: 10, md: 12 }}>
-          <Flex align="center" justify="space-between" gap={3}>
-            <Text as="h1" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={700} letterSpacing="-0.01em" color="white">
-              {t('earnings.hero.title')}
-            </Text>
-            <Box display="grid" placeItems="center" w="36px" h="36px" borderRadius="full" bg="rgba(255,255,255,0.16)" color="white" flexShrink={0}>
-              <TrendingUp size={18} strokeWidth={2.4} aria-hidden="true" />
-            </Box>
-          </Flex>
+      <NuHero
+        title={t('earnings.hero.title')}
+        action={<NuHeroBadge><TrendingUp size={18} strokeWidth={2.4} aria-hidden="true" /></NuHeroBadge>}
+      >
 
           <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
             <Box minW={0}>
@@ -161,11 +156,10 @@ export default function EarningsPage() {
               />
             </Box>
           </Flex>
-        </Box>
-      </Box>
+      </NuHero>
 
       {/* White sheet with rounded top tucked over the purple header. */}
-      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }}>
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
         <MotionBox
           className="nu-dashboard"
           variants={containerV}
