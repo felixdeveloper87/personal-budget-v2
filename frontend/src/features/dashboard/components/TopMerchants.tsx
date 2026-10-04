@@ -9,6 +9,7 @@ import { useI18n } from '../../../i18n'
 import { EYEBROW_CASE } from './eyebrow'
 
 interface TopMerchantsProps {
+  appearance?: 'default' | 'nu'
   transactions: Transaction[]
   /** Full history used to build the monthly carousel. */
   historyTransactions?: Transaction[]
@@ -49,6 +50,7 @@ function monthTransactions(transactions: Transaction[], date: Date): Transaction
 
 /** Where discretionary money went, grouped by the transaction description. */
 export default function TopMerchants({
+  appearance = 'default',
   transactions,
   historyTransactions,
   selectedDate,
@@ -104,7 +106,7 @@ export default function TopMerchants({
   }, [monthlySlides, syncActiveMonth])
 
   if (monthlySlides.length === 0) {
-    return <MerchantPanel transactions={transactions} />
+    return <MerchantPanel appearance={appearance} transactions={transactions} />
   }
 
   return (
@@ -139,7 +141,7 @@ export default function TopMerchants({
             scrollSnapAlign="start"
             scrollSnapStop="always"
           >
-            <MerchantPanel transactions={month.transactions} periodLabel={month.label} />
+            <MerchantPanel appearance={appearance} transactions={month.transactions} periodLabel={month.label} />
           </Box>
         ))}
       </Box>
@@ -166,11 +168,12 @@ export default function TopMerchants({
 }
 
 interface MerchantPanelProps {
+  appearance: 'default' | 'nu'
   transactions: Transaction[]
   periodLabel?: string
 }
 
-function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
+function MerchantPanel({ appearance, transactions, periodLabel }: MerchantPanelProps) {
   const { t, formatCurrency } = useI18n()
   const { rows, merchantTotal } = useMemo(() => {
     const merchantTransactions = transactions.filter(isMerchantTransaction)
@@ -189,10 +192,10 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
     }
   }, [transactions])
 
-  return (
-    <Panel h="full">
-      <VStack align="stretch" spacing={4} h="full">
-        <HStack justify="space-between" align="flex-start" spacing={3}>
+  const isNu = appearance === 'nu'
+  const content = (
+      <VStack align="stretch" spacing={isNu ? 0 : 4} h="full">
+        {!isNu && <HStack justify="space-between" align="flex-start" spacing={3}>
           <VStack align="flex-start" spacing={0.5} minW={0}>
             <Text
               fontFamily="var(--pb-mono)"
@@ -227,14 +230,14 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
               </Text>
             </VStack>
           )}
-        </HStack>
+        </HStack>}
 
         {rows.length === 0 ? (
           <Text fontFamily="var(--pb-serif)" fontSize="sm" color="var(--pb-ink-faint)" py={6}>
             {t('dashboard.noMerchants')}
           </Text>
         ) : (
-          <VStack align="stretch" spacing={0.75} flex={1}>
+          <VStack align="stretch" spacing={isNu ? 0 : 0.75} flex={1}>
             {rows.map((merchant, index) => (
               <MerchantRow
                 key={merchant.key}
@@ -245,16 +248,25 @@ function MerchantPanel({ transactions, periodLabel }: MerchantPanelProps) {
                 count={merchant.count}
                 total={merchant.total}
                 share={merchantTotal > 0 ? merchant.total / merchantTotal : 0}
+                appearance={appearance}
               />
             ))}
           </VStack>
         )}
       </VStack>
+  )
+
+  return isNu ? (
+    <Box>{content}</Box>
+  ) : (
+    <Panel h="full">
+      {content}
     </Panel>
   )
 }
 
 interface MerchantRowProps {
+  appearance: 'default' | 'nu'
   rank: number
   name: string
   domain?: string | null
@@ -265,22 +277,25 @@ interface MerchantRowProps {
   share: number
 }
 
-function MerchantRow({ rank, name, domain, category, count, total, share }: MerchantRowProps) {
+function MerchantRow({ appearance, rank, name, domain, category, count, total, share }: MerchantRowProps) {
   const { t, formatCurrency } = useI18n()
   const percentage = Math.round(share * 100)
   const tone = MERCHANT_TONES[(rank - 1) % MERCHANT_TONES.length]
+  const isNu = appearance === 'nu'
 
   return (
     <Box
-      px={{ base: 2.5, md: 3 }}
-      py={2.5}
-      borderRadius="14px"
+      px={isNu ? 0 : { base: 2.5, md: 3 }}
+      py={isNu ? 3 : 2.5}
+      borderBottom={isNu ? '1px solid var(--pb-hair)' : undefined}
+      borderRadius={isNu ? 0 : '14px'}
       bg="transparent"
+      _last={isNu ? { borderBottom: 0 } : undefined}
     >
-      <HStack align="flex-start" spacing={3}>
-        <Box position="relative" w="54px" h="54px" flexShrink={0}>
-          <MerchantLogo name={name} domain={domain} category={category} size={54} borderRadius="14px" />
-          <Box
+      <HStack align="center" spacing={3}>
+        <Box position="relative" w={isNu ? '42px' : '54px'} h={isNu ? '42px' : '54px'} flexShrink={0}>
+          <MerchantLogo name={name} domain={domain} category={category} size={isNu ? 42 : 54} borderRadius={isNu ? '50%' : '14px'} />
+          {!isNu && <Box
             position="absolute"
             right="-4px"
             bottom="-4px"
@@ -299,7 +314,7 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
               <Text fontFamily="var(--pb-mono)" fontSize="9px" fontWeight={700} lineHeight={1}>
               {rank}
             </Text>
-          </Box>
+          </Box>}
         </Box>
 
         <Box minW={0} flex={1}>
@@ -308,8 +323,8 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
               <HStack align="baseline" spacing={2} minW={0}>
                 <Text
                   fontFamily="var(--pb-serif)"
-                  fontSize="md"
-                  fontWeight={500}
+                  fontSize={isNu ? '15px' : 'md'}
+                  fontWeight={isNu ? 600 : 500}
                   lineHeight={1.15}
                   color="var(--pb-ink)"
                   noOfLines={1}
@@ -319,7 +334,7 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
                 <Text
                   flexShrink={0}
                   fontFamily="var(--pb-mono)"
-                  fontSize="8.5px"
+                  fontSize={isNu ? '10px' : '8.5px'}
                   color="var(--pb-ink-faint)"
                 >
                   x{count}
@@ -333,12 +348,12 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
                 fontSize="md"
                 fontWeight={600}
                 lineHeight={1.1}
-                color={`var(--pb-merchant-value, ${tone.accent})`}
+                color={isNu ? 'var(--pb-ink)' : `var(--pb-merchant-value, ${tone.accent})`}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {formatCurrency(total)}
               </Text>
-              <Text fontFamily="var(--pb-mono)" fontSize="8.5px" color="var(--pb-ink-faint)" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <Text fontFamily="var(--pb-mono)" fontSize={isNu ? '10px' : '8.5px'} color="var(--pb-ink-faint)" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {t('dashboard.shareOfTotal', { percentage })}
               </Text>
             </VStack>
@@ -350,8 +365,8 @@ function MerchantRow({ rank, name, domain, category, count, total, share }: Merc
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percentage}
-            mt={2}
-            h="6px"
+            mt={isNu ? 1.5 : 2}
+            h={isNu ? '4px' : '6px'}
             borderRadius="full"
             bg="var(--pb-surface-3)"
             overflow="hidden"

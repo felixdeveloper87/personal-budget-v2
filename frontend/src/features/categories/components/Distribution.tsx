@@ -18,16 +18,19 @@ const NU_RAMP = ['#820ad1', '#9a3cdd', '#b06be6', '#c495ee', '#d7b9f4', '#e7d5f9
 const NU_TAIL = '#d4d4dd'
 
 interface DistributionProps {
+  appearance?: 'default' | 'nu'
   expense: Category[]
   previousExpense?: Category[]
   periodLabel: string
 }
 
 export default function Distribution({
+  appearance = 'default',
   expense,
   previousExpense = [],
   periodLabel,
 }: DistributionProps) {
+  const isNu = appearance === 'nu'
   // Payments is an outflow-only lens — lock to expense and hide the income tab.
   const side: Side = 'expense'
   // `pinned` is a click-selected category that persists; `hovered` is a transient
@@ -93,10 +96,17 @@ export default function Distribution({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
         templateColumns={{ base: '1fr', lg: 'minmax(280px, 340px) 1fr' }}
-        gap={{ base: 4, lg: 5 }}
+        gap={{ base: isNu ? 0 : 4, lg: isNu ? 4 : 5 }}
         alignItems="start"
       >
-        <Box ref={chartRef} bg="var(--pb-surface)" borderRadius="16px" p={{ base: 4, md: 5 }} position={{ base: 'static', lg: 'sticky' }} top={{ lg: '90px' }}>
+        <Box
+          ref={chartRef}
+          bg={isNu ? 'transparent' : 'var(--pb-surface)'}
+          borderRadius="16px"
+          p={isNu ? 0 : { base: 4, md: 5 }}
+          position={{ base: 'static', lg: 'sticky' }}
+          top={{ lg: '90px' }}
+        >
           <AllocationDonut
             rows={displayRows}
             total={total}
@@ -117,6 +127,7 @@ export default function Distribution({
         <Box ref={detailsRef}>
           {spotlight && (
             <CategorySpotlight
+              appearance={appearance}
               cat={spotlight}
               side={side}
               onViewAll={() => setViewAllCat(spotlight)}
@@ -192,10 +203,12 @@ function CategoryLegend({
 }
 
 function CategorySpotlight({
+  appearance,
   cat,
   side,
   onViewAll,
 }: {
+  appearance: 'default' | 'nu'
   cat: ComputedCategory
   side: Side
   onViewAll: () => void
@@ -214,9 +227,17 @@ function CategorySpotlight({
       })
   const shownTransactions = cat.sample.slice(0, TRANSACTION_LIMIT)
   const moreTransactions = Math.max(0, cat.shownCount - shownTransactions.length)
+  const isNu = appearance === 'nu'
 
   return (
-    <Box bg="var(--pb-surface)" borderRadius="16px" p={{ base: 4, md: 5 }}>
+    <Box
+      bg={isNu ? 'transparent' : 'var(--pb-surface)'}
+      borderRadius="16px"
+      borderTop={{ base: isNu ? '1px solid var(--pb-hair)' : 'none', lg: 'none' }}
+      mt={{ base: isNu ? 4 : 0, lg: 0 }}
+      pt={{ base: isNu ? 4 : 4, md: isNu ? 0 : 5 }}
+      p={isNu ? undefined : { base: 4, md: 5 }}
+    >
       <Flex align="center" justify="space-between" gap={3}>
         <HStack spacing={2.5} minW={0}>
           <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
@@ -236,19 +257,31 @@ function CategorySpotlight({
         </Text>
       </Flex>
 
-      {/* One compact strip: trend pill, then the key numbers as running text. */}
       <Flex mt={2.5} align="center" gap={2} rowGap={1.5} flexWrap="wrap">
-        <HStack px={2} py={0.5} borderRadius="full" spacing={1} color={changeInk} bg={changeBg}>
-          {cat.change !== 0 && <Icon as={cat.change > 0 ? ArrowUpRight : ArrowDownRight} boxSize="12px" />}
-          <Text fontSize="2xs" fontWeight={600}>{comparison}</Text>
-        </HStack>
+        {(!isNu || cat.change !== 0) && (
+          <HStack
+            px={isNu ? 0 : 2}
+            py={isNu ? 0 : 0.5}
+            borderRadius="full"
+            spacing={1}
+            color={changeInk}
+            bg={isNu ? 'transparent' : changeBg}
+          >
+            {cat.change !== 0 && <Icon as={cat.change > 0 ? ArrowUpRight : ArrowDownRight} boxSize="12px" />}
+            <Text fontSize="2xs" fontWeight={600}>{comparison}</Text>
+          </HStack>
+        )}
         <Text fontSize="xs" color="var(--pb-ink-soft)">
           <Stat label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
           {' · '}
-          <Stat label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
-          {' · '}
+          {!isNu && (
+            <>
+              <Stat label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
+              {' · '}
+            </>
+          )}
           <Stat label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
-          {cat.topMerchant && (
+          {!isNu && cat.topMerchant && (
             <>
               {' · '}
               <Stat label={t('categories.topMerchant')} value={cat.topMerchant} />
@@ -262,11 +295,13 @@ function CategorySpotlight({
           <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
             {t('categories.recentTransactions')}
           </Text>
-          <Text fontSize="xs" color="var(--pb-ink-soft)">
-            {t('categories.transactionTotal', { count: formatNumber(cat.shownCount) })}
-          </Text>
+          {!isNu && (
+            <Text fontSize="xs" color="var(--pb-ink-soft)">
+              {t('categories.transactionTotal', { count: formatNumber(cat.shownCount) })}
+            </Text>
+          )}
         </Flex>
-        <Box bg="white" borderRadius="14px" px={3.5}>
+        <Box bg={isNu ? 'transparent' : 'white'} borderRadius="14px" px={isNu ? 0 : 3.5}>
           {shownTransactions.map((transaction) => (
             <CategoryTxnRow key={transaction.id} txn={transaction} icon={cat.icon} side={side} />
           ))}

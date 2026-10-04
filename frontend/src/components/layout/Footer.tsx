@@ -4,116 +4,72 @@ import {
   IconButton,
   Text,
   Tooltip,
-  useColorModeValue,
 } from '@chakra-ui/react'
 import { ArrowUp } from '../ui/icons'
-import { useEd } from '../../editorial'
-import { FOOTER } from '../../pages/landing-v3/landingV3.config'
+import BrandMark from '../brand/BrandMark'
 import { useI18n } from '../../i18n'
 
+/** Nubank-style app footer: logo, the brand statement, and a quiet legal row. */
 export default function Footer() {
   const { t } = useI18n()
-  const ed = useEd()
-  const fallbackBg = useColorModeValue('#f5f1e8', '#070a08')
-  const fallbackText = useColorModeValue('#16241c', '#efeae0')
-  const fallbackMuted = useColorModeValue('#5f6d62', '#94a398')
-  const fallbackLine = useColorModeValue(
-    'rgba(20, 36, 28, 0.12)',
-    'rgba(239, 234, 224, 0.10)',
-  )
-  const fallbackJade = useColorModeValue('#0e8f5e', '#7fe6b3')
-
-  const bg = ed?.bg ?? fallbackBg
-  const text = ed?.cream ?? fallbackText
-  const muted = ed?.muted ?? fallbackMuted
-  const line = ed?.line ?? fallbackLine
-  const jade = ed?.jade ?? fallbackJade
   const year = new Date().getFullYear()
 
   return (
     <Box
       as="footer"
       role="contentinfo"
-      position="relative"
       mt="auto"
-      overflow="hidden"
-      borderTop="1px solid"
-      borderColor={line}
-      bg={bg}
-      color={text}
+      bg="var(--pb-surface-2, #f5f5f8)"
+      color="var(--pb-ink)"
     >
-      <Box pt={{ base: 8, md: 12 }}>
+      <Box maxW="appContent" mx="auto" px={{ base: 4, md: 6, lg: 8 }} pt={{ base: 8, md: 10 }} pb={{ base: 6, md: 7 }}>
+        <Flex align="center" justify="space-between" gap={4}>
+          <Box w={{ base: '150px', md: '180px' }} flexShrink={0}>
+            <BrandMark variant="title" size="100%" colorMode="light" />
+          </Box>
+          <Tooltip label={t('footer.backToTop')} hasArrow placement="top" openDelay={250}>
+            <IconButton
+              aria-label={t('footer.scrollToTop')}
+              icon={<ArrowUp size={16} strokeWidth={2.2} />}
+              w="40px"
+              h="40px"
+              minW="40px"
+              borderRadius="full"
+              bg="#f3e8fc"
+              color="#820ad1"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              _hover={{ bg: '#ead6fa' }}
+              _active={{ bg: '#e2c6f8' }}
+            />
+          </Tooltip>
+        </Flex>
+
         <Text
-          aria-hidden
-          textStyle="display"
-          fontSize={{ base: 'clamp(3.25rem, 15vw, 7rem)', md: 'clamp(5rem, 11vw, 11rem)' }}
-          fontWeight={400}
-          lineHeight={0.9}
-          letterSpacing="-0.025em"
-          textAlign="center"
-          whiteSpace="nowrap"
-          color="transparent"
-          sx={{
-            WebkitTextStroke: `1px ${line}`,
-            background: `linear-gradient(100deg, transparent 30%, ${jade}8c 50%, transparent 70%)`,
-            backgroundSize: '250% 100%',
-            WebkitBackgroundClip: 'text',
-            backgroundClip: 'text',
-            animation: 'footerWordmarkSweep 6s linear infinite',
-            '@keyframes footerWordmarkSweep': {
-              to: { backgroundPosition: '-250% 0' },
-            },
-            '@media (prefers-reduced-motion: reduce)': {
-              animation: 'none',
-              backgroundPosition: '50% 0',
-            },
-          }}
+          mt={{ base: 6, md: 7 }}
+          maxW="640px"
+          fontSize={{ base: 'xl', md: '2xl' }}
+          fontWeight={700}
+          letterSpacing="-0.02em"
+          lineHeight={1.2}
         >
-          {FOOTER.wordmark}
+          {t('footer.statement')}{' '}
+          <Text as="span" color="#820ad1">{t('footer.statementAccent')}</Text>
         </Text>
 
         <Flex
-          maxW="appContent"
-          mx="auto"
-          px={{ base: 4, md: 6 }}
-          py={{ base: 6, md: 8 }}
-          align={{ base: 'flex-start', md: 'center' }}
-          justify="space-between"
+          mt={{ base: 6, md: 8 }}
+          pt={4}
+          borderTop="1px solid var(--pb-hair-2, #dadae2)"
           direction={{ base: 'column', md: 'row' }}
-          gap={{ base: 4, md: 6 }}
-          color={muted}
+          justify="space-between"
+          gap={{ base: 1.5, md: 4 }}
+          fontSize="xs"
+          color="var(--pb-ink-soft)"
         >
-          <Text fontSize={{ base: 'sm', md: 'md' }}>
-            {t('footer.tagline', undefined, FOOTER.tagline)}
+          <Text>
+            {t('footer.copyright', { year })} · {t('footer.note')}
           </Text>
-
-          <Flex
-            align="center"
-            gap={{ base: 3, md: 5 }}
-            textStyle="mono"
-            fontSize="xs"
-            letterSpacing="0.04em"
-            flexWrap="wrap"
-          >
-            <Text>{t('footer.note', undefined, FOOTER.note)}</Text>
-            <Text>{t('footer.copyright', { year })}</Text>
-            <Tooltip label={t('footer.backToTop')} hasArrow placement="top" openDelay={250}>
-              <IconButton
-                aria-label={t('footer.scrollToTop')}
-                icon={<ArrowUp size={14} strokeWidth={2} />}
-                size="sm"
-                variant="ghost"
-                borderRadius="full"
-                color={jade}
-                border="1px solid"
-                borderColor={line}
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                _hover={{ bg: ed?.jadeSoft ?? `${jade}1a`, transform: 'translateY(-2px)' }}
-                _active={{ transform: 'translateY(0)' }}
-                transition="background 0.2s ease, transform 0.2s ease"
-              />
-            </Tooltip>
-          </Flex>
+          <Text>{t('footer.tagline')}</Text>
         </Flex>
       </Box>
     </Box>

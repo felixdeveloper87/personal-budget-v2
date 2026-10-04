@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Box, Flex, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Icon, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
-import { TrendingDown } from 'lucide-react'
+import { TrendingDown, X } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -280,6 +280,7 @@ export default function BehaviourPage() {
               subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
             >
               <Distribution
+                appearance="nu"
                 expense={expense}
                 previousExpense={previousExpense}
                 periodLabel={periodLabel}
@@ -292,7 +293,7 @@ export default function BehaviourPage() {
               {loading ? (
                 <Skeleton height="260px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
               ) : (
-                <TopMerchants transactions={periodData.transactions} />
+                <TopMerchants appearance="nu" transactions={periodData.transactions} />
               )}
             </NuSection>
           </MotionBox>
@@ -327,49 +328,87 @@ function SelectedDayExpenses({
     day: 'numeric',
     month: 'long',
   })
+  const transactionCount = t(
+    expenses.length === 1 ? 'transactions.count' : 'transactions.countPlural',
+    { count: expenses.length },
+  )
 
   return (
-    <NuSection
-      title={dayLabel}
-      subtitle={`${t('behaviour.day.total')} · ${formatCurrency(total)}`}
-      action={(
-        <Box
-          as="button"
-          type="button"
-          onClick={onClose}
-          flexShrink={0}
-          px={3}
-          py={1.5}
-          borderRadius="full"
-          bg="var(--nu-brand-tint)"
-          color="var(--nu-brand)"
-          fontSize="xs"
-          fontWeight={700}
-          _hover={{ bg: 'rgba(130, 10, 209, 0.14)' }}
-          _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
-        >
-          {t('behaviour.day.viewAll')}
-        </Box>
-      )}
-    >
-      {expenses.length === 0 ? (
-        <Box py={4}>
-          <Text color="var(--pb-ink-soft)" fontSize="sm">
-            {t('behaviour.day.empty')}
+    <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)" bg="var(--nu-page)">
+      <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }} bg="rgba(130, 10, 209, 0.035)">
+        <Flex align="flex-start" justify="space-between" gap={4}>
+          <Box minW={0}>
+            <Text
+              color="var(--nu-brand)"
+              fontSize="10px"
+              fontWeight={700}
+              letterSpacing="0.08em"
+              lineHeight={1.2}
+              textTransform="uppercase"
+            >
+              {t('transactions.selectedDay')}
+            </Text>
+            <Text mt={1} color="var(--pb-ink)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={600} lineHeight={1.25}>
+              {dayLabel}
+            </Text>
+            <Text mt={1} color="var(--pb-ink-soft)" fontSize="12px" lineHeight={1.3}>
+              {transactionCount} · {t('behaviour.day.dateContext')}
+            </Text>
+          </Box>
+
+          <Flex
+            as="button"
+            type="button"
+            aria-label={t('common.close')}
+            onClick={onClose}
+            flexShrink={0}
+            align="center"
+            justify="center"
+            w="32px"
+            h="32px"
+            mt="-4px"
+            mr="-6px"
+            borderRadius="full"
+            color="var(--nu-brand)"
+            bg="transparent"
+            transition="background-color .14s ease"
+            _hover={{ bg: 'rgba(130, 10, 209, 0.08)' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
+          >
+            <Icon as={X} boxSize="17px" strokeWidth={2.25} />
+          </Flex>
+        </Flex>
+
+        <Flex mt={3} pt={3} borderTop="1px solid rgba(130, 10, 209, 0.1)" align="center" justify="space-between" gap={4}>
+          <Text color="var(--pb-ink-soft)" fontSize="12px" fontWeight={500}>
+            {t('behaviour.day.total')}
           </Text>
-        </Box>
-      ) : (
-        <VStack align="stretch" spacing={0}>
-          {expenses.map((expense) => (
-            <ActivityDayTransactionRow
-              key={expense.id}
-              appearance="nu"
-              transaction={expense}
-              tone="expense"
-            />
-          ))}
-        </VStack>
-      )}
-    </NuSection>
+          <Text color="var(--pb-ink)" fontSize="lg" fontWeight={700} letterSpacing="-0.01em" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {formatCurrency(total)}
+          </Text>
+        </Flex>
+      </Box>
+
+      <Box px={{ base: 4, md: 6 }}>
+        {expenses.length === 0 ? (
+          <Box py={5}>
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
+              {t('behaviour.day.empty')}
+            </Text>
+          </Box>
+        ) : (
+          <VStack role="list" align="stretch" spacing={0}>
+            {expenses.map((expense) => (
+              <ActivityDayTransactionRow
+                key={expense.id}
+                appearance="nu"
+                transaction={expense}
+                tone="expense"
+              />
+            ))}
+          </VStack>
+        )}
+      </Box>
+    </Box>
   )
 }

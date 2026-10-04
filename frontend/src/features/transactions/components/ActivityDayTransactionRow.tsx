@@ -24,38 +24,37 @@ export default function ActivityDayTransactionRow({
   if (appearance === 'nu') {
     return (
       <Flex
+        role="listitem"
         justify="space-between"
         align="center"
         gap={3}
-        minH="70px"
-        py={3}
+        minH="64px"
+        py={2.5}
         borderBottom="1px solid var(--pb-hair)"
         bg="var(--nu-page)"
-        transition="background-color .14s ease"
-        _hover={{ bg: 'var(--nu-surface)' }}
         _last={{ borderBottom: 0 }}
       >
-        <HStack spacing={3} minW={0}>
+        <HStack spacing={2.5} minW={0}>
           <MerchantLogo
             category={transaction.category}
             domain={transaction.merchantDomain}
             name={transaction.merchant}
-            size={42}
+            size={40}
             borderRadius="50%"
           />
           <Box minW={0}>
-            <Text color="var(--pb-ink)" fontSize="15px" fontWeight={600} lineHeight={1.2} noOfLines={1}>
+            <Text color="var(--pb-ink)" fontSize="14px" fontWeight={600} lineHeight={1.25} noOfLines={1}>
               {transaction.merchant}
             </Text>
-            <Text mt="3px" color="var(--pb-ink-soft)" fontSize="12px" lineHeight={1.2} noOfLines={1}>
-              {categoryLabel(transaction.category)} · {formatDate(transaction.purchaseDate, { day: '2-digit', month: 'short' })}
+            <Text mt="3px" color="var(--pb-ink-soft)" fontSize="11px" lineHeight={1.2} noOfLines={1}>
+              {categoryLabel(transaction.category)}
             </Text>
           </Box>
         </HStack>
         <Text
           color="var(--pb-ink)"
           flexShrink={0}
-          fontSize="15px"
+          fontSize="14px"
           fontWeight={700}
           style={{ fontVariantNumeric: 'tabular-nums' }}
         >
