@@ -45,10 +45,12 @@ export default function PeriodNavBar({
     { value: 'day', label: t('period.day') },
     { value: 'week', label: t('period.week') },
     { value: 'month', label: t('period.month') },
+    { value: 'year', label: t('period.year') },
   ]
-  const periodOptions = allPeriodOptions.filter(
-    (option) => !allowedPeriods || allowedPeriods.includes(option.value),
-  )
+  // Year is opt-in (Reports); pages without allowedPeriods keep day/week/month.
+  const periodOptions = allPeriodOptions.filter((option) => allowedPeriods
+    ? allowedPeriods.includes(option.value)
+    : option.value !== 'year')
   const navSize = { base: '30px', sm: '32px' }
   const navStyles = embedded
     ? {
