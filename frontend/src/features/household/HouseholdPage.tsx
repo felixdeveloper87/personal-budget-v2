@@ -156,16 +156,28 @@ export default function HouseholdPage() {
   }
 
   return (
-    <Box maxW="appContent" mx="auto" px={{ base: 2, md: 4, lg: 6 }} py={{ base: 3, md: 7 }}>
-      <VStack align="stretch" spacing={{ base: 3, md: 6 }}>
-        <HouseholdHeader
-          household={household}
-          onAddExpense={openNewExpense}
-          onManage={membersModal.onOpen}
-          onMembersOverview={membersOverviewModal.onOpen}
-          onNotifications={notificationsModal.onOpen}
-        />
+    <Box>
+      <HouseholdHeader
+        household={household}
+        onAddExpense={openNewExpense}
+        onManage={membersModal.onOpen}
+        onMembersOverview={membersOverviewModal.onOpen}
+        onNotifications={notificationsModal.onOpen}
+      />
 
+      {/* White sheet with rounded top tucked over the purple header. */}
+      <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} mt="-24px" pb={{ base: 0, md: 7 }} position="relative">
+      <VStack
+        className="nu-dashboard"
+        align="stretch"
+        spacing={{ base: 4, md: 6 }}
+        bg="var(--nu-page)"
+        borderTopRadius="24px"
+        borderBottomRadius={{ base: 0, md: '24px' }}
+        px={{ base: 3, md: 6 }}
+        py={{ base: 5, md: 6 }}
+        boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
+      >
         <HouseholdMembersCarousel
           household={household}
           onViewBalances={balancesOverviewModal.onOpen}
@@ -231,6 +243,7 @@ export default function HouseholdPage() {
         />
 
       </VStack>
+      </Box>
 
       <ExpenseModal
         isOpen={expenseModal.isOpen}
