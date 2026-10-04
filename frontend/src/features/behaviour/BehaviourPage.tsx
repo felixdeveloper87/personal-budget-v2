@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Box, Flex, Skeleton, Text, VStack } from '@chakra-ui/react'
 import { useReducedMotion } from 'framer-motion'
-import { TrendingDown, X } from 'lucide-react'
+import { TrendingDown } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodNavigator } from '../../hooks/usePeriodNavigator'
@@ -249,41 +249,40 @@ export default function BehaviourPage() {
             {loading ? (
               <Skeleton height="230px" borderRadius="16px" startColor="var(--pb-surface-2)" endColor="var(--pb-surface-3)" />
             ) : (
-              <>
-                <ActivityIntensityStrip
-                  appearance="nu"
-                  days={days}
-                  txns={vm}
-                  selectedDay={selectedChartDay}
-                  onSelectDay={selectDay}
-                  periodLabel={periodLabel}
-                  tone="expense"
-                  dateKey="purchaseDate"
-                  title={t('behaviour.activity.title')}
-                  caption={t('behaviour.activity.caption')}
-                />
-                {selectedChartDay && (
-                  <SelectedDayExpenses
-                    day={selectedChartDay}
-                    expenses={selectedDayExpenses}
-                    onClose={() => setSelectedChartDay(null)}
-                  />
-                )}
-              </>
+              <ActivityIntensityStrip
+                appearance="nu"
+                days={days}
+                txns={vm}
+                selectedDay={selectedChartDay}
+                onSelectDay={selectDay}
+                periodLabel={periodLabel}
+                tone="expense"
+                dateKey="purchaseDate"
+                title={t('behaviour.activity.title')}
+                caption={t('behaviour.activity.caption')}
+              />
             )}
           </MotionBox>
 
           <MotionBox variants={riseV}>
-            <NuSection
-              title={t('behaviour.sections.categories')}
-              subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
-            >
-              <Distribution
-                expense={expense}
-                previousExpense={previousExpense}
-                periodLabel={periodLabel}
+            {selectedChartDay ? (
+              <SelectedDayExpenses
+                day={selectedChartDay}
+                expenses={selectedDayExpenses}
+                onClose={() => setSelectedChartDay(null)}
               />
-            </NuSection>
+            ) : (
+              <NuSection
+                title={t('behaviour.sections.categories')}
+                subtitle={t('behaviour.sections.categoriesCaption', { period: narrativePeriodLabel })}
+              >
+                <Distribution
+                  expense={expense}
+                  previousExpense={previousExpense}
+                  periodLabel={periodLabel}
+                />
+              </NuSection>
+            )}
           </MotionBox>
 
           <MotionBox variants={riseV}>
@@ -326,96 +325,49 @@ function SelectedDayExpenses({
     day: 'numeric',
     month: 'long',
   })
-  const countLabel = t(
-    expenses.length === 1 ? 'transactions.count' : 'transactions.countPlural',
-    { count: expenses.length },
-  )
 
   return (
-    <Box
-      mt={4}
-      border="1px solid var(--pb-hair)"
-      borderRadius="16px"
-      bg="var(--nu-page)"
-      overflow="hidden"
-      role="region"
-      aria-label={t('behaviour.day.label', { date: dayLabel })}
-    >
-      <Flex
-        position="relative"
-        align={{ base: 'stretch', sm: 'center' }}
-        justify="space-between"
-        direction={{ base: 'column', sm: 'row' }}
-        gap={3}
-        px={{ base: 4, sm: 5 }}
-        py={4}
-        bg="var(--nu-brand-tint)"
-      >
-        <Box minW={0} pr={{ base: 10, sm: 0 }}>
-          <Text color="var(--nu-brand)" fontSize="xs" fontWeight={700}>
-            {t('transactions.selectedDay')}
-          </Text>
-          <Text mt={0.5} color="var(--pb-ink)" fontSize={{ base: 'lg', sm: 'xl' }} fontWeight={700} letterSpacing="-0.01em">
-            {dayLabel}
-          </Text>
-          <Text mt={1} color="var(--pb-ink-soft)" fontSize="xs">
-            {countLabel} · {t('behaviour.day.dateContext')}
-          </Text>
-        </Box>
-
-        <Box
-          minW={{ sm: '150px' }}
-          mr={{ sm: 8 }}
-          px={3.5}
-          py={2.5}
-          borderRadius="13px"
-          bg="var(--nu-page)"
-          textAlign={{ base: 'left', sm: 'right' }}
-        >
-          <Text color="var(--pb-ink-soft)" fontSize="xs" fontWeight={600}>
-            {t('behaviour.day.total')}
-          </Text>
-          <Text mt={0.5} color="var(--nu-negative)" fontSize="xl" fontWeight={700} lineHeight={1} sx={{ fontVariantNumeric: 'tabular-nums' }}>
-            {formatCurrency(total)}
-          </Text>
-        </Box>
-
+    <NuSection
+      title={dayLabel}
+      subtitle={`${t('behaviour.day.total')} · ${formatCurrency(total)}`}
+      action={(
         <Box
           as="button"
           type="button"
-          aria-label={t('common.close')}
           onClick={onClose}
-          position="absolute"
-          top={3}
-          right={3}
-          display="grid"
-          placeItems="center"
-          w="32px"
-          h="32px"
+          flexShrink={0}
+          px={3}
+          py={1.5}
           borderRadius="full"
+          bg="var(--nu-brand-tint)"
           color="var(--nu-brand)"
-          _hover={{ bg: 'rgba(130, 10, 209, 0.1)' }}
+          fontSize="xs"
+          fontWeight={700}
+          _hover={{ bg: 'rgba(130, 10, 209, 0.14)' }}
           _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
         >
-          <X size={18} strokeWidth={2.4} aria-hidden="true" />
+          {t('behaviour.day.viewAll')}
         </Box>
-      </Flex>
-
-      <Box p={{ base: 3, sm: 4 }}>
-        {expenses.length === 0 ? (
-          <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
-            <Text color="var(--pb-ink-soft)" fontSize="sm">
-              {t('behaviour.day.empty')}
-            </Text>
-          </Box>
-        ) : (
-          <VStack align="stretch" spacing={2}>
-            {expenses.map((expense) => (
-              <ActivityDayTransactionRow key={expense.id} transaction={expense} tone="expense" />
-            ))}
-          </VStack>
-        )}
-      </Box>
-    </Box>
+      )}
+    >
+      {expenses.length === 0 ? (
+        <Box py={4}>
+          <Text color="var(--pb-ink-soft)" fontSize="sm">
+            {t('behaviour.day.empty')}
+          </Text>
+        </Box>
+      ) : (
+        <VStack align="stretch" spacing={0}>
+          {expenses.map((expense) => (
+            <ActivityDayTransactionRow
+              key={expense.id}
+              appearance="nu"
+              transaction={expense}
+              tone="expense"
+            />
+          ))}
+        </VStack>
+      )}
+    </NuSection>
   )
 }
