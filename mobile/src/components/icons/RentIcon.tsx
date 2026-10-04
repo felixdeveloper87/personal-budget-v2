@@ -1,6 +1,6 @@
-import Svg, { Circle, Path } from "react-native-svg";
+import Svg, { Path } from "react-native-svg";
 
-/** Soft-roofed home with a keyhole — same mark as the web RentHome icon. */
+/** Rounded home with a subtle pound sign — same mark as the web RentHome icon. */
 export function RentIcon({ color, size, strokeWidth = 2 }: { color: string; size: number; strokeWidth?: number }) {
   return (
     <Svg
@@ -13,14 +13,19 @@ export function RentIcon({ color, size, strokeWidth = 2 }: { color: string; size
       fill="none"
     >
       <Path
-        d="M4 10.3 11.06 4.5a1.5 1.5 0 0 1 1.88 0L20 10.3v8.2a1.75 1.75 0 0 1-1.75 1.75H5.75A1.75 1.75 0 0 1 4 18.5Z"
+        d="M3.75 10.5 12 3.75l8.25 6.75v8a1.75 1.75 0 0 1-1.75 1.75h-13a1.75 1.75 0 0 1-1.75-1.75Z"
         stroke={color}
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <Circle cx={12} cy={12.4} r={1.9} stroke={color} strokeWidth={strokeWidth} />
-      <Path d="M12 14.3v2.7" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" />
+      <Path
+        d="M14.75 9.25a2.4 2.4 0 0 0-2.1-1.25c-1.45 0-2.4 1.05-2.4 2.65v3.7c0 1.15-.45 1.95-1.35 2.4h6.35M8.75 12.75h4.75"
+        stroke={color}
+        strokeWidth={strokeWidth}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }

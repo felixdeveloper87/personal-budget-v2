@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningAssignment } from '../../../types'
@@ -216,21 +216,21 @@ function CleaningDutyCard({
       transition="height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)"
       sx={{ interpolateSize: 'allow-keywords' }}
     >
-      <Flex
-        as="button"
-        type="button"
-        w="full"
-        h={{ base: '78px', md: '82px' }}
-        px={4}
-        align="center"
-        gap={3.5}
-        textAlign="left"
-        aria-expanded={expanded}
-        aria-controls={detailId}
-        onClick={() => setExpanded((value) => !value)}
-        _focusVisible={{ boxShadow: 'inset 0 0 0 2px var(--pb-forest)', outline: 'none' }}
-      >
+      <Flex w="full" h={{ base: '78px', md: '82px' }} pl={4} align="center" gap={3.5}>
+        {/* The circle is the checkbox: residents tick a duty off right here. */}
         <Flex
+          as={canToggle ? 'button' : 'span'}
+          {...(canToggle
+            ? {
+              type: 'button',
+              role: 'checkbox',
+              'aria-checked': duty.completed,
+              'aria-busy': isBusy,
+              'aria-label': t(duty.completed ? 'household.cleaning.markNotDone' : 'household.cleaning.markDone', { duty: label }),
+              disabled: busyDutyKey !== null,
+              onClick: () => onToggleDuty(assignmentId, duty.key, !duty.completed),
+            }
+            : { 'aria-hidden': true })}
           w={10}
           h={10}
           flexShrink={0}
@@ -238,43 +238,67 @@ function CleaningDutyCard({
           justify="center"
           borderRadius="full"
           border="2px solid"
-          borderColor={duty.completed ? 'transparent' : 'var(--pb-hair-2)'}
-          bg={duty.completed ? 'var(--pb-tint-income)' : 'transparent'}
-          color="var(--pb-income)"
+          borderColor={duty.completed ? 'transparent' : canToggle ? 'var(--nu-brand)' : 'var(--pb-hair-2)'}
+          bg={duty.completed ? 'var(--nu-brand)' : 'transparent'}
+          color="white"
+          cursor={canToggle ? 'pointer' : 'default'}
+          transition="background 0.15s ease, border-color 0.15s ease, transform 0.1s ease"
+          _hover={canToggle && !duty.completed ? { bg: 'var(--nu-brand-tint)' } : undefined}
+          _active={canToggle ? { transform: 'scale(0.92)' } : undefined}
+          _disabled={{ cursor: 'progress', opacity: isBusy ? 1 : 0.6 }}
+          _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
         >
-          {duty.completed && <Icon as={Check} boxSize={5} weight="bold" />}
+          {isBusy
+            ? <Spinner size="sm" color={duty.completed ? 'white' : 'var(--nu-brand)'} />
+            : duty.completed && <Icon as={Check} boxSize={5} weight="bold" />}
         </Flex>
-        <Box minW={0} flex={1}>
-          <Text
-            color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
-            fontSize="sm"
-            fontWeight={600}
-            lineHeight={1.25}
-            textDecoration={duty.completed ? 'line-through' : undefined}
-          >
-            {label}
-          </Text>
-          <Text mt={0.5} color={duty.completed ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="2xs">
-            {duty.completed ? t('household.cleaning.completed') : t('household.cleaning.tapForInstructions')}
-          </Text>
-        </Box>
-        {!expanded && (
-          <Flex
-            aria-hidden="true"
-            w={4}
-            h={4}
-            flexShrink={0}
-            align="center"
-            justify="center"
-            border="1px solid var(--pb-hair-2)"
-            borderRadius="full"
-            color="var(--pb-ink-faint)"
-            fontFamily="var(--pb-serif)"
-            fontSize="10px"
-            fontStyle="italic"
-            sx={{ '&::before': { content: '"i"' } }}
-          />
-        )}
+        <Flex
+          as="button"
+          type="button"
+          flex={1}
+          minW={0}
+          h="full"
+          pr={4}
+          align="center"
+          gap={3}
+          textAlign="left"
+          aria-expanded={expanded}
+          aria-controls={detailId}
+          onClick={() => setExpanded((value) => !value)}
+          _focusVisible={{ boxShadow: 'inset 0 0 0 2px var(--pb-forest)', outline: 'none' }}
+        >
+          <Box minW={0} flex={1}>
+            <Text
+              color={duty.completed ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
+              fontSize="sm"
+              fontWeight={600}
+              lineHeight={1.25}
+              textDecoration={duty.completed ? 'line-through' : undefined}
+            >
+              {label}
+            </Text>
+            <Text mt={0.5} color={duty.completed ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="2xs">
+              {duty.completed ? t('household.cleaning.completed') : t('household.cleaning.tapForInstructions')}
+            </Text>
+          </Box>
+          {!expanded && (
+            <Flex
+              aria-hidden="true"
+              w={4}
+              h={4}
+              flexShrink={0}
+              align="center"
+              justify="center"
+              border="1px solid var(--pb-hair-2)"
+              borderRadius="full"
+              color="var(--pb-ink-faint)"
+              fontFamily="var(--pb-serif)"
+              fontSize="10px"
+              fontStyle="italic"
+              sx={{ '&::before': { content: '"i"' } }}
+            />
+          )}
+        </Flex>
       </Flex>
 
       <Box
@@ -296,22 +320,6 @@ function CleaningDutyCard({
               {schedule}
             </Text>
           </HStack>
-        )}
-        {canToggle && (
-          <Button
-            mt={4}
-            size="sm"
-            h="36px"
-            borderRadius="full"
-            isLoading={isBusy}
-            isDisabled={busyDutyKey !== null}
-            {...(duty.completed
-              ? { colorScheme: 'gray' }
-              : { bg: '#820ad1', color: 'white', _hover: { bg: '#6e08b3' }, _active: { bg: '#6e08b3' } })}
-            onClick={() => onToggleDuty(assignmentId, duty.key, !duty.completed)}
-          >
-            {t(duty.completed ? 'household.cleaning.markNotDone' : 'household.cleaning.markDone', { duty: label })}
-          </Button>
         )}
       </Box>
     </Box>
