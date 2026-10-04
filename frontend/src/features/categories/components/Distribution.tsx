@@ -217,43 +217,47 @@ function CategorySpotlight({
 
   return (
     <Box bg="var(--pb-surface)" borderRadius="16px" p={{ base: 4, md: 5 }}>
-      <Flex align="center" justify="space-between" gap={4}>
-        <HStack spacing={3} minW={0}>
-          <Flex w="44px" h="44px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
-            <Icon as={cat.icon} boxSize="20px" weight="bold" />
+      <Flex align="center" justify="space-between" gap={3}>
+        <HStack spacing={2.5} minW={0}>
+          <Flex w="36px" h="36px" align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint, #f3e8fc)" color="var(--nu-brand, #820ad1)" flexShrink={0}>
+            <Icon as={cat.icon} boxSize="18px" weight="bold" />
           </Flex>
           <Box minW={0}>
-            <Text fontSize="lg" fontWeight={700} letterSpacing="-0.01em" lineHeight="1.15" color="var(--pb-ink)" noOfLines={1}>
+            <Text fontSize="md" fontWeight={700} lineHeight="1.2" color="var(--pb-ink)" noOfLines={1}>
               {cat.name === 'Uncategorised' ? t('categories.uncategorised') : categoryLabel(cat.name)}
             </Text>
-            <Text fontSize="xs" color="var(--pb-ink-soft)">
+            <Text fontSize="xs" color="var(--pb-ink-soft)" lineHeight="1.3">
               {t('categories.ofTotal', { percentage: formatNumber(cat.pct, { maximumFractionDigits: 1 }) })}
             </Text>
           </Box>
         </HStack>
-        <Text flexShrink={0} fontSize="xl" fontWeight={700} letterSpacing="-0.02em" color="var(--pb-ink)">
+        <Text flexShrink={0} fontSize="lg" fontWeight={700} letterSpacing="-0.02em" color="var(--pb-ink)">
           {formatCurrency(cat.amount)}
         </Text>
       </Flex>
 
-      <HStack display="inline-flex" mt={3} px={2.5} py={1} borderRadius="full" spacing={1} color={changeInk} bg={changeBg}>
-        {cat.change !== 0 && <Icon as={cat.change > 0 ? ArrowUpRight : ArrowDownRight} boxSize="13px" />}
-        <Text fontSize="xs" fontWeight={600}>{comparison}</Text>
-      </HStack>
-
-      <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2} mt={4}>
-        <Metric label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
-        <Metric label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
-        <Metric label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
-      </Grid>
-
-      {cat.topMerchant && (
-        <Text mt={3} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
-          {t('categories.topMerchant')}: <Text as="span" fontWeight={600} color="var(--pb-ink)">{cat.topMerchant}</Text>
+      {/* One compact strip: trend pill, then the key numbers as running text. */}
+      <Flex mt={2.5} align="center" gap={2} rowGap={1.5} flexWrap="wrap">
+        <HStack px={2} py={0.5} borderRadius="full" spacing={1} color={changeInk} bg={changeBg}>
+          {cat.change !== 0 && <Icon as={cat.change > 0 ? ArrowUpRight : ArrowDownRight} boxSize="12px" />}
+          <Text fontSize="2xs" fontWeight={600}>{comparison}</Text>
+        </HStack>
+        <Text fontSize="xs" color="var(--pb-ink-soft)">
+          <Stat label={t('categories.transactions')} value={formatNumber(cat.shownCount)} />
+          {' · '}
+          <Stat label={t('categories.activeDays')} value={formatNumber(cat.activeDays)} />
+          {' · '}
+          <Stat label={t('categories.averageSpend')} value={formatCurrency(cat.averageAmount)} />
+          {cat.topMerchant && (
+            <>
+              {' · '}
+              <Stat label={t('categories.topMerchant')} value={cat.topMerchant} />
+            </>
+          )}
         </Text>
-      )}
+      </Flex>
 
-      <Box mt={5}>
+      <Box mt={4}>
         <Flex align="baseline" justify="space-between" mb={1}>
           <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
             {t('categories.recentTransactions')}
@@ -297,12 +301,11 @@ function CategorySpotlight({
   )
 }
 
-function Metric({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <Box bg="white" borderRadius="12px" px={3} py={2.5} minW={0}>
-      <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>{label}</Text>
-      <Text mt={0.5} fontSize="md" fontWeight={700} color="var(--pb-ink)" noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>
-    </Box>
+    <>
+      {label} <Text as="span" fontWeight={700} color="var(--pb-ink)">{value}</Text>
+    </>
   )
 }
 
