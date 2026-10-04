@@ -388,13 +388,17 @@ function IncomeRow({
         <MerchantLogo category={category} domain={domain} name={logoName} size={42} />
       </View>
       <View style={styles.rowCopy}>
-        <View style={styles.rowTitleLine}>
-          <Text numberOfLines={1} style={styles.rowTitle}>{title}</Text>
-          {share != null ? <Text style={styles.rowShare}>{formatShare(share)}</Text> : null}
-        </View>
+        <Text numberOfLines={1} style={styles.rowTitle}>{title}</Text>
         <Text numberOfLines={1} style={styles.rowMeta}>{meta}</Text>
       </View>
-      <Text numberOfLines={1} style={styles.rowAmount}>+{formatCurrency(amount)}</Text>
+      <View style={styles.rowTrailing}>
+        {share != null ? (
+          <View style={styles.sharePill}>
+            <Text style={styles.sharePillText}>{formatShare(share)}</Text>
+          </View>
+        ) : null}
+        <Text numberOfLines={1} style={styles.rowAmount}>+{formatCurrency(amount)}</Text>
+      </View>
     </View>
   );
 }
@@ -424,9 +428,10 @@ const styles = StyleSheet.create({
   rowDivided: { borderTopColor: nu.hairline, borderTopWidth: 1 },
   rowLogo: { marginRight: 12 },
   rowCopy: { flex: 1, minWidth: 0 },
-  rowTitleLine: { alignItems: "baseline", flexDirection: "row", gap: 6 },
-  rowTitle: { color: nu.ink, flexShrink: 1, fontSize: 15, fontWeight: "600" },
-  rowShare: { color: nu.inkFaint, fontSize: 11, fontVariant: ["tabular-nums"], fontWeight: "500" },
+  rowTitle: { color: nu.ink, fontSize: 15, fontWeight: "600" },
+  rowTrailing: { alignItems: "flex-end", gap: 4, marginLeft: 8 },
+  sharePill: { backgroundColor: nu.brandTint, borderRadius: 999, paddingHorizontal: 7, paddingVertical: 2 },
+  sharePillText: { color: nu.brand, fontSize: 10.5, fontVariant: ["tabular-nums"], fontWeight: "700" },
   rowMeta: { color: nu.inkSoft, fontSize: 12, marginTop: 3 },
   rowAmount: { color: nu.positive, fontSize: 15, fontWeight: "700", marginLeft: 8, fontVariant: ["tabular-nums"] },
   stateCard: { alignItems: "center", backgroundColor: nu.surface, borderRadius: 16, gap: 8, marginTop: 10, padding: 26 },
