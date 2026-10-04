@@ -135,11 +135,15 @@ export default function TransferModal({
       }
       footer={
         <HStack justify="flex-end" spacing={2}>
-          <Button variant="ghost" onClick={onClose} isDisabled={saving}>
+          <Button variant="ghost" borderRadius="full" onClick={onClose} isDisabled={saving}>
             {t('accounts.transfer.cancel')}
           </Button>
           <Button
-            colorScheme="blue"
+            bg="var(--nu-brand, #820ad1)"
+            color="white"
+            borderRadius="full"
+            px={5}
+            _hover={{ bg: '#6f00b8' }}
             leftIcon={<Icon as={Repeat} boxSize={4} />}
             onClick={submit}
             isLoading={saving}
@@ -176,8 +180,8 @@ export default function TransferModal({
                   align="center"
                   justify="center"
                   borderRadius="full"
-                  bg="var(--pb-sidebar-active-bg)"
-                  color="var(--pb-sidebar-accent)"
+                  bg="var(--nu-brand-tint, #f3e8fc)"
+                  color="var(--nu-brand, #820ad1)"
                 >
                   <Icon as={ArrowRight} boxSize={4} />
                 </Flex>

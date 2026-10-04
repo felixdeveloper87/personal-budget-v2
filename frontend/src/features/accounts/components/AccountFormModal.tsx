@@ -51,7 +51,7 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
 
   const muted = 'var(--pb-ink-soft)'
   const softBg = 'var(--pb-surface-2)'
-  const blueSoftBg = 'var(--pb-tint-green)'
+  const blueSoftBg = 'var(--nu-brand-tint, #f3e8fc)'
   const fieldBg = 'var(--pb-surface)'
 
   // Sync the form whenever the modal opens (or the target account changes).
@@ -139,11 +139,15 @@ export default function AccountFormModal({ isOpen, onClose, account, onSaved, on
       }
       footer={
         <HStack justify="flex-end" spacing={2}>
-          <Button variant="ghost" onClick={onClose}>
+          <Button variant="ghost" borderRadius="full" onClick={onClose}>
             {t('accounts.form.cancel')}
           </Button>
           <Button
-            colorScheme="blue"
+            bg="var(--nu-brand, #820ad1)"
+            color="white"
+            borderRadius="full"
+            px={5}
+            _hover={{ bg: '#6f00b8' }}
             leftIcon={<Icon as={isEditing ? Pencil : Plus} boxSize={4} />}
             onClick={save}
             isLoading={saving}

@@ -100,17 +100,17 @@ export default function AccountDetail({
   return (
     <Box
       bg="var(--pb-surface)"
-      border="1px solid var(--pb-hair)"
-      borderRadius="22px"
-      boxShadow="0 1px 2px rgba(15,23,42,.05), 0 10px 28px rgba(15,23,42,.06)"
+      border={0}
+      borderRadius={0}
+      boxShadow="none"
       overflow="hidden"
     >
       <Box
         position="relative"
-        bg="var(--pb-summary-petrol)"
-        color="var(--pb-summary-ink)"
-        borderBottom="1px solid var(--pb-summary-line)"
-        p={{ base: 3, sm: 3.5 }}
+        bg="transparent"
+        color="var(--pb-ink)"
+        borderBottom="1px solid var(--pb-hair)"
+        pb={{ base: 4, sm: 5 }}
       >
         <Flex align="center" gap="0.65rem">
           {showBackButton && (
@@ -122,13 +122,13 @@ export default function AccountDetail({
               flexShrink={0}
               w="32px"
               h="32px"
-              borderRadius="10px"
+              borderRadius="full"
               display="grid"
               placeItems="center"
-              color="var(--pb-summary-ink-soft)"
-              bg="var(--pb-summary-panel)"
-              border="1px solid var(--pb-summary-line)"
-              _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              border={0}
+              _hover={{ bg: '#ead6fa' }}
             >
               <Icon as={ChevronLeft} boxSize="16px" />
             </Box>
@@ -137,16 +137,13 @@ export default function AccountDetail({
           <AccountAvatar account={shown} size={40} />
           <Box flex={1} minW={0}>
             <Text
-              fontFamily="var(--pb-mono)"
               fontSize="8.5px"
-              letterSpacing="0.13em"
-              textTransform="uppercase"
-              color="var(--pb-summary-ink-faint)"
+              color="var(--pb-ink-soft)"
               noOfLines={1}
             >
               {shown.institution || t(`accounts.type.${shown.type}`, undefined, ACCOUNT_LABELS[shown.type])}
             </Text>
-            <Text mt={0.5} fontSize="1.05rem" fontWeight={500} lineHeight="1.1" color="var(--pb-summary-ink)" noOfLines={1}>
+            <Text mt={0.5} fontSize="1.05rem" fontWeight={650} lineHeight="1.1" color="var(--pb-ink)" noOfLines={1}>
               {shown.name}
             </Text>
           </Box>
@@ -164,16 +161,13 @@ export default function AccountDetail({
             minW="32px"
             h="32px"
             px={{ base: 2.5, sm: 3 }}
-            borderRadius="10px"
-            color="var(--pb-summary-ink-soft)"
-            bg="var(--pb-summary-panel)"
-            border="1px solid var(--pb-summary-line)"
-            fontFamily="var(--pb-mono)"
+            borderRadius="full"
+            color="var(--nu-brand, #820ad1)"
+            bg="var(--nu-brand-tint, #f3e8fc)"
+            border={0}
             fontSize="9px"
-            fontWeight={600}
-            letterSpacing="0.06em"
-            textTransform="uppercase"
-            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+            fontWeight={650}
+            _hover={{ bg: '#ead6fa' }}
           >
             <Icon as={Repeat} boxSize="13px" />
             <Text as="span" display={{ base: 'none', sm: 'inline' }}>
@@ -190,11 +184,11 @@ export default function AccountDetail({
             flexShrink={0}
             w="32px"
             h="32px"
-            borderRadius="10px"
-            color="var(--pb-summary-ink-soft)"
-            bg="var(--pb-summary-panel)"
-            border="1px solid var(--pb-summary-line)"
-            _hover={{ color: 'var(--pb-summary-ink)', borderColor: 'var(--pb-summary-ink-faint)' }}
+            borderRadius="full"
+            color="var(--nu-brand, #820ad1)"
+            bg="var(--nu-brand-tint, #f3e8fc)"
+            border={0}
+            _hover={{ bg: '#ead6fa' }}
           >
             <Icon as={Settings} boxSize="14px" />
           </Box>
@@ -211,26 +205,25 @@ export default function AccountDetail({
             justify="center"
             minW={0}
             pr={{ md: 4 }}
-            borderRight={{ base: 'none', md: '1px solid var(--pb-summary-line)' }}
+            borderRight={{ base: 'none', md: '1px solid var(--pb-hair)' }}
           >
-            <Text fontFamily="var(--pb-mono)" fontSize="8.5px" letterSpacing="0.13em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+            <Text fontSize="11px" color="var(--pb-ink-soft)">
               {t('accounts.currentBalance')}
             </Text>
             <Text
               className="num"
               mt={1}
-              fontFamily="var(--pb-serif)"
               fontSize="clamp(1.65rem, 3.4vw, 2.35rem)"
-              fontWeight={500}
+              fontWeight={700}
               lineHeight={0.98}
               letterSpacing="-0.03em"
-              color={!hideBalances && shown.currentBalance < 0 ? 'var(--pb-summary-coral)' : 'var(--pb-summary-ink)'}
+              color={!hideBalances && shown.currentBalance < 0 ? 'var(--pb-coral)' : 'var(--pb-ink)'}
               noOfLines={1}
               style={{ fontVariantNumeric: 'tabular-nums' }}
             >
               {mask(shown.currentBalance)}
             </Text>
-            <Text mt={1.5} fontFamily="var(--pb-mono)" fontSize="8px" letterSpacing="0.06em" textTransform="uppercase" color="var(--pb-summary-ink-faint)">
+            <Text mt={1.5} fontSize="10px" color="var(--pb-ink-faint)">
               GBP · {t('accounts.activeAccount')}
             </Text>
           </Flex>
@@ -257,14 +250,14 @@ export default function AccountDetail({
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.15 }}
-        p="clamp(1rem, 2.5vw, 1.35rem)"
+        pt={{ base: 4, md: 5 }}
       >
         <Flex align="flex-end" justify="space-between" gap={3} mb={3}>
           <Box>
-            <Text as="h3" fontSize="1.08rem" fontWeight={500} color="var(--pb-ink)">
+            <Text as="h3" fontSize="1.08rem" fontWeight={650} color="var(--pb-ink)">
               {t('accounts.activity.title')}
             </Text>
-            <Text mt={0.5} fontFamily="var(--pb-serif)" fontSize="xs" color="var(--pb-ink-soft)">
+            <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
               {t('accounts.activity.description')}
             </Text>
           </Box>
@@ -276,13 +269,13 @@ export default function AccountDetail({
               icon={<Icon as={ChevronLeft} boxSize="15px" />}
               size="xs"
               variant="ghost"
-              borderRadius="8px"
-              color="var(--pb-ink-soft)"
-              bg="var(--pb-surface-2)"
-              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              border={0}
               isDisabled={activityPage === 0 || activityLoading}
               onClick={() => setActivityPage((page) => Math.max(0, page - 1))}
-              _hover={{ color: 'var(--pb-sidebar-accent)', borderColor: 'var(--pb-sidebar-active-border)' }}
+              _hover={{ bg: '#ead6fa' }}
             />
             <Text
               minW="54px"
@@ -299,13 +292,13 @@ export default function AccountDetail({
               icon={<Icon as={ChevronRight} boxSize="15px" />}
               size="xs"
               variant="ghost"
-              borderRadius="8px"
-              color="var(--pb-ink-soft)"
-              bg="var(--pb-surface-2)"
-              border="1px solid var(--pb-hair)"
+              borderRadius="full"
+              color="var(--nu-brand, #820ad1)"
+              bg="var(--nu-brand-tint, #f3e8fc)"
+              border={0}
               isDisabled={!activity?.hasMore || activityLoading}
               onClick={() => setActivityPage((page) => page + 1)}
-              _hover={{ color: 'var(--pb-sidebar-accent)', borderColor: 'var(--pb-sidebar-active-border)' }}
+              _hover={{ bg: '#ead6fa' }}
             />
           </HStack>
         </Flex>
@@ -313,7 +306,7 @@ export default function AccountDetail({
         <Box position="relative" minH="110px">
           {activityLoading && !activity ? (
             <Flex minH="110px" align="center" justify="center">
-              <Spinner size="sm" color="var(--pb-sidebar-accent)" />
+              <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
             </Flex>
           ) : (
             <Box opacity={activityLoading ? 0.45 : 1} transition="opacity 0.15s ease">
@@ -326,7 +319,7 @@ export default function AccountDetail({
 
           {activityLoading && activity && (
             <Flex position="absolute" inset={0} align="center" justify="center" pointerEvents="none">
-              <Spinner size="sm" color="var(--pb-sidebar-accent)" />
+              <Spinner size="sm" color="var(--nu-brand, #820ad1)" />
             </Flex>
           )}
         </Box>
@@ -354,10 +347,12 @@ function DetailMetric({
       justify="space-between"
       minW={0}
       minH="86px"
-      bg="var(--pb-summary-panel)"
-      border="1px solid var(--pb-summary-line)"
-      borderRadius="14px"
-      p={2.5}
+      bg="transparent"
+      border={0}
+      borderLeft="1px solid var(--pb-hair)"
+      borderRadius={0}
+      py={1}
+      pl={3}
       overflow="hidden"
     >
       <Text
@@ -365,7 +360,7 @@ function DetailMetric({
         fontSize="9px"
         letterSpacing="0.12em"
         textTransform="uppercase"
-        color="var(--pb-summary-ink-faint)"
+        color="var(--pb-ink-soft)"
         lineHeight="1.3"
         noOfLines={1}
       >
@@ -375,15 +370,15 @@ function DetailMetric({
         className="num"
         mt={1.5}
         fontSize={compact ? '0.88rem' : '1rem'}
-        fontWeight={500}
+        fontWeight={650}
         lineHeight="1.05"
-        color={danger ? 'var(--pb-summary-coral)' : 'var(--pb-summary-ink)'}
+        color={danger ? 'var(--pb-coral)' : 'var(--pb-ink)'}
         noOfLines={1}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {value}
       </Text>
-      <Text mt={1} fontFamily="var(--pb-serif)" fontSize="9px" color="var(--pb-summary-ink-faint)" noOfLines={2}>
+      <Text mt={1} fontSize="9px" color="var(--pb-ink-faint)" noOfLines={2}>
         {note}
       </Text>
     </Flex>

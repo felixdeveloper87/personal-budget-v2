@@ -28,7 +28,7 @@ export default function RecentActivity({ items, hideBalances }: RecentActivityPr
         const incoming = isIncoming(item)
         const transfer = item.kind === 'TRANSFER_IN' || item.kind === 'TRANSFER_OUT'
         const paidByCreditCard = item.paymentMethodType === 'CREDIT_CARD' && Boolean(item.paymentMethodName)
-        const tone = incoming ? 'var(--pb-income)' : 'var(--pb-coral)'
+        const tone = incoming ? 'var(--pb-income)' : 'var(--pb-ink)'
         const tint = incoming ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
         return (
           <Flex
@@ -41,15 +41,13 @@ export default function RecentActivity({ items, hideBalances }: RecentActivityPr
           >
             <Flex
               flexShrink={0}
-              w="30px"
-              h="30px"
+              w="32px"
+              h="32px"
               align="center"
               justify="center"
-              borderRadius="9px"
+              borderRadius="full"
               color={tone}
               bg={tint}
-              border="1px solid"
-              borderColor={tone}
             >
               <Icon
                 as={transfer ? Repeat : incoming ? ArrowDownRight : ArrowUpRight}
@@ -59,8 +57,7 @@ export default function RecentActivity({ items, hideBalances }: RecentActivityPr
 
             <Box minW={0} flex={1}>
               <Text
-                fontFamily="var(--pb-serif)"
-                fontSize="0.94rem"
+                fontSize="0.875rem"
                 color="var(--pb-ink)"
                 noOfLines={1}
               >

@@ -207,7 +207,7 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
       <Flex w={14} h={14} align="center" justify="center" borderRadius="2xl" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" mb={3}><Icon as={Wallet} boxSize={7} color="var(--pb-ink-faint)" /></Flex>
       <Text fontSize="md" fontWeight={600} color="var(--pb-ink)">{t('accounts.empty.title')}</Text>
       <Text fontSize="sm" color="var(--pb-ink-soft)" mt={1} maxW="340px">{t('accounts.empty.description')}</Text>
-      <Button mt={5} onClick={onAdd} leftIcon={<Icon as={Plus} boxSize={4} />} bg="var(--pb-forest-2)" color="var(--pb-on-accent)">{t('accounts.action.add')}</Button>
+      <Button mt={5} onClick={onAdd} leftIcon={<Icon as={Plus} boxSize={4} />} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" _hover={{ bg: '#6f00b8' }}>{t('accounts.action.add')}</Button>
     </Flex>
   )
 }
