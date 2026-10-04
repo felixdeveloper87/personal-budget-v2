@@ -42,7 +42,7 @@ export default function AddTransactionModal({
       flex="1"
       minW={0}
       maxW="100%"
-      bg={ed.bg}
+      bg="var(--nu-page, #ffffff)"
       p={{ base: 3, sm: 5, md: 6 }}
       overflowY="auto"
       sx={{
@@ -75,6 +75,7 @@ export default function AddTransactionModal({
     >
       <DrawerOverlay bg="var(--pb-overlay)" backdropFilter="blur(8px)" />
       <DrawerContent
+        className="nu-dashboard"
         w="full"
         maxW="100vw"
         h="92dvh"
@@ -106,6 +107,7 @@ export default function AddTransactionModal({
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', md: 'xl', lg: '4xl' }}
+      contentProps={{ className: 'nu-dashboard' }}
       header={<TransactionModalHeader type={type} onClose={onClose} />}
     >
       {form}

@@ -33,7 +33,7 @@ export default function AccountSelector({
   const cardBg = useColorModeValue('white', 'whiteAlpha.50')
   const selectedBg = useColorModeValue('blue.50', 'whiteAlpha.100')
   const nameColor = useColorModeValue('gray.800', 'gray.100')
-  const accent = useColorModeValue('#2563eb', '#60a5fa')
+  const accent = '#820ad1'
 
   const activeAccounts = accounts.filter((account) => account.active)
   const selected = activeAccounts.find((account) => account.id === value)

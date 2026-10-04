@@ -469,9 +469,6 @@ export default function TransactionForm({
 
   const isIncome = type === 'INCOME'
   const accentScheme = isIncome ? 'green' : 'red'
-  const confirmGradient = isIncome
-    ? 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
-    : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
 
   return (
     <Box w="full" minW={0}>
@@ -598,7 +595,7 @@ export default function TransactionForm({
               bg={colors.inputBg}
               overflow="hidden"
               transition="border-color 0.18s ease, box-shadow 0.18s ease"
-              boxShadow={installmentDetailsOpen ? '0 0 0 3px #f8717120' : 'none'}
+              boxShadow={installmentDetailsOpen ? '0 0 0 3px #820ad120' : 'none'}
             >
               <HStack
                 as="button"
@@ -612,7 +609,7 @@ export default function TransactionForm({
                 onClick={() => setInstallmentDetailsOpen((open) => !open)}
                 aria-expanded={installmentDetailsOpen}
                 _hover={{ bg: colors.bgSecondary }}
-                _focusVisible={{ boxShadow: 'inset 0 0 0 2px rgba(248, 113, 113, 0.35)' }}
+                _focusVisible={{ boxShadow: 'inset 0 0 0 2px rgba(130, 10, 209, 0.35)' }}
               >
                 <Box
                   w={9}
@@ -685,17 +682,8 @@ export default function TransactionForm({
               fontSize={{ base: 'sm', sm: 'md' }}
               fontWeight={700}
               color="white"
-              borderRadius="xl"
-              bg={type === 'INCOME'
-                ? 'linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)'
-                : 'linear-gradient(135deg, #f43f5e 0%, #dc2626 50%, #b91c1c 100%)'
-              }
-              bgSize="200% 100%"
-              bgPosition="0% 50%"
-              boxShadow={type === 'INCOME'
-                ? '0 8px 24px -10px rgba(16, 185, 129, 0.55)'
-                : '0 8px 24px -10px rgba(244, 63, 94, 0.55)'
-              }
+              borderRadius="full"
+              bg="#820ad1"
               leftIcon={type === 'INCOME' ? <Plus size={18} /> : <Minus size={18} />}
               onClick={handleReviewRequest}
               isLoading={loading}
@@ -711,13 +699,9 @@ export default function TransactionForm({
                     ? t('form.addingIncome')
                     : t('form.addingExpense')
               }
-              _hover={{
-                bgPosition: '100% 50%',
-                boxShadow: type === 'INCOME'
-                  ? '0 12px 30px -10px rgba(16, 185, 129, 0.65)'
-                  : '0 12px 30px -10px rgba(244, 63, 94, 0.65)',
-              }}
-              transition="background-position 0.3s ease, box-shadow 0.2s ease"
+              _hover={{ bg: '#6e08b3' }}
+              _active={{ bg: '#6e08b3' }}
+              transition="background 0.15s ease"
             >
               {type === 'INCOME' && incomeMode === 'fixed'
                 ? t('form.createFixedIncome')
@@ -913,19 +897,19 @@ export default function TransactionForm({
               onClick={() => setReviewOpen(false)}
               isDisabled={loading}
               flex={1}
-              borderRadius="xl"
+              borderRadius="full"
             >
               {t('form.back')}
             </Button>
             <Button
               flex={1}
               color="white"
-              borderRadius="xl"
-              bg={confirmGradient}
+              borderRadius="full"
+              bg="#820ad1"
+              _hover={{ bg: '#6e08b3' }}
               onClick={handleConfirmSave}
               isLoading={loading}
               loadingText={t('form.saving')}
-              _hover={{ filter: 'brightness(1.06)' }}
             >
               {t('form.confirmSave')}
             </Button>

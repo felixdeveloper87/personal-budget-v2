@@ -6,7 +6,6 @@ import {
 } from '@chakra-ui/react'
 import { AppCloseButton } from '../ui'
 import { useI18n } from '../../i18n'
-import TransactionArtwork from './TransactionArtwork'
 
 interface TransactionModalHeaderProps {
   type: 'INCOME' | 'EXPENSE'
@@ -26,9 +25,7 @@ export default function TransactionModalHeader({
 
   return (
     <Box
-      bg={type === 'INCOME' ? '#173D31' : '#6E302E'}
-      borderBottom="1px solid"
-      borderColor="rgba(255, 255, 255, 0.18)"
+      bg="#820ad1"
       px={{ base: 3.5, sm: 6 }}
       pt={{
         base: useMobileSafeArea
@@ -40,15 +37,25 @@ export default function TransactionModalHeader({
       position="relative"
       overflow="hidden"
     >
-      <Box position="absolute" inset={0} pointerEvents="none">
-        <TransactionArtwork tone={type === 'INCOME' ? 'income' : 'expense'} />
-      </Box>
+      {/* Soft concentric rings — same line-art language as the page heroes. */}
+      <Box
+        aria-hidden="true"
+        position="absolute"
+        top="-90px"
+        right="-70px"
+        w="220px"
+        h="220px"
+        borderRadius="full"
+        border="1px solid rgba(255,255,255,0.14)"
+        boxShadow="0 0 0 36px rgba(255,255,255,0.03), 0 0 0 37px rgba(255,255,255,0.1)"
+        pointerEvents="none"
+      />
 
       <VStack align="stretch" spacing={0.5} position="relative" zIndex={1}>
         <HStack align="center" justify="space-between" spacing={3}>
           <Text
-            textStyle="display"
-            fontWeight={400}
+            fontWeight={700}
+            letterSpacing="-0.02em"
             fontSize={{ base: 'xl', sm: '2xl' }}
             color="white"
             lineHeight="1"
@@ -68,9 +75,7 @@ export default function TransactionModalHeader({
 
         <Text
           fontSize={{ base: 'xs', sm: 'sm' }}
-          textStyle="mono"
-          color="rgba(255, 255, 255, 0.78)"
-          letterSpacing="0.025em"
+          color="rgba(255, 255, 255, 0.84)"
           lineHeight="1.4"
           noOfLines={1}
           pr={10}

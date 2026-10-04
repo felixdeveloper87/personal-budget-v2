@@ -64,8 +64,8 @@ export default function AmountInput({
   const currencyMark = formatCurrency(0).replace(/[\d\s.,]/g, '') || '\u00A3'
   const focusRing =
     type === 'INCOME'
-      ? '0 0 0 2px rgba(74, 222, 128, 0.2)'
-      : '0 0 0 2px rgba(248, 113, 113, 0.2)'
+      ? '0 0 0 2px rgba(130, 10, 209, 0.2)'
+      : '0 0 0 2px rgba(130, 10, 209, 0.2)'
 
   return (
     <>
@@ -81,8 +81,8 @@ export default function AmountInput({
               borderColor: type === 'INCOME' ? 'green.400' : 'red.400',
               boxShadow:
                 type === 'INCOME'
-                  ? '0 0 0 3px #4ade8020'
-                  : '0 0 0 3px #f8717120',
+                  ? '0 0 0 3px #820ad120'
+                  : '0 0 0 3px #820ad120',
             }}
             transition="border-color 0.3s ease, box-shadow 0.3s ease"
           >
@@ -143,11 +143,11 @@ export default function AmountInput({
                       py={1}
                       borderRadius="10px"
                       border="1px solid"
-                      borderColor={type === 'INCOME' ? 'rgba(47, 114, 87, 0.2)' : 'rgba(164, 81, 72, 0.2)'}
-                      bg={type === 'INCOME' ? 'rgba(47, 114, 87, 0.08)' : 'rgba(164, 81, 72, 0.08)'}
+                      borderColor="transparent"
+                      bg={type === 'INCOME' ? '#e3f4eb' : '#fbe7e3'}
                     >
                       <Text
-                        color={type === 'INCOME' ? '#2F7257' : '#A45148'}
+                        color={type === 'INCOME' ? '#1e8a5a' : '#c2412d'}
                         fontSize="lg"
                         fontWeight={800}
                       >
@@ -171,7 +171,7 @@ export default function AmountInput({
                         minW={{ base: '68px', sm: '80px' }}
                         flex="none"
                         p={0}
-                        color={type === 'INCOME' ? '#2F7257' : '#A45148'}
+                        color={type === 'INCOME' ? '#1e8a5a' : '#c2412d'}
                         fontSize="22px"
                         fontWeight={800}
                         lineHeight="1.1"

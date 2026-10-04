@@ -41,7 +41,7 @@ export default function PaymentMethodSelector({
   const selectedBg = useColorModeValue('blue.50', 'whiteAlpha.100')
   const nameColor = useColorModeValue('gray.800', 'gray.100')
   const iconBg = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const accent = useColorModeValue('#2563eb', '#60a5fa')
+  const accent = '#820ad1'
 
   const activeMethods = paymentMethods.filter((m) => m.active)
   const selected = activeMethods.find((m) => m.id === value)

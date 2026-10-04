@@ -147,10 +147,10 @@ export default function CategorySelector({
   }, [customDraft, onChange])
 
   const focusRing = isIncome
-    ? '0 0 0 2px rgba(74, 222, 128, 0.2)'
-    : '0 0 0 2px rgba(248, 113, 113, 0.2)'
+    ? '0 0 0 2px rgba(130, 10, 209, 0.2)'
+    : '0 0 0 2px rgba(130, 10, 209, 0.2)'
   const focusWithinShadow =
-    type === 'INCOME' ? '0 0 0 3px #4ade8020' : '0 0 0 3px #f8717120'
+    type === 'INCOME' ? '0 0 0 3px #820ad120' : '0 0 0 3px #820ad120'
   const accentBorder = isIncome ? 'green.400' : 'red.400'
 
   const kindWord = t(isIncome ? 'form.incomeKind' : 'form.expenseKind')

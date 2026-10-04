@@ -88,8 +88,8 @@ export default function InstallmentSelector({
   const { t, formatCurrency, formatDate } = useI18n()
   const colors = useThemeColors()
   const accentBorder = 'red.400'
-  const focusWithinShadow = '0 0 0 3px #f8717120'
-  const focusRing = '0 0 0 2px rgba(248, 113, 113, 0.2)'
+  const focusWithinShadow = '0 0 0 3px #820ad120'
+  const focusRing = '0 0 0 2px rgba(130, 10, 209, 0.2)'
 
   // When the installment is charged to a credit card, the due dates come from the
   // card's billing cycle — the user shouldn't pick a date manually.

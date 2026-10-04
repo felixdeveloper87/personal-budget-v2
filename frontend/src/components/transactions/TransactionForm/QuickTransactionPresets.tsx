@@ -271,8 +271,6 @@ export default function QuickTransactionPresets({
         fontSize="xs"
         fontWeight={700}
         color={labelColor}
-        textTransform="uppercase"
-        letterSpacing="0.05em"
       >
         {t('form.quickAddCategory', { category: categoryLabel(category) })}
       </Text>

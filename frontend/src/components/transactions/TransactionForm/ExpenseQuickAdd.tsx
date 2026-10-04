@@ -147,7 +147,7 @@ export default function ExpenseQuickAdd({
 
   return (
     <VStack align="stretch" spacing={3}>
-      <Text color="var(--pb-ink-soft)" fontWeight={700} textTransform="uppercase" letterSpacing="0.05em">
+      <Text color="var(--pb-ink-soft)" fontWeight={700}>
         {t('transactions.category')}
       </Text>
       <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2}>
@@ -162,13 +162,13 @@ export default function ExpenseQuickAdd({
               px={2}
               borderRadius="14px"
               border="1px solid"
-              borderColor={selected ? '#D05F5B' : 'var(--pb-hair)'}
-              bg={selected ? '#F9E9E5' : 'var(--pb-surface)'}
-              color={selected ? '#A45148' : 'var(--pb-ink)'}
+              borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
+              bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
+              color={selected ? '#820ad1' : 'var(--pb-ink)'}
               fontWeight={selected ? 800 : 650}
               onClick={() => selectCategory(item)}
               aria-pressed={selected}
-              _hover={{ borderColor: '#D05F5B', bg: selected ? '#F9E9E5' : '#FBF1ED' }}
+              _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
             >
               <Box as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
                 {label}
@@ -180,7 +180,7 @@ export default function ExpenseQuickAdd({
 
       {selectedMerchants.length > 0 && (
         <>
-          <Text color="var(--pb-ink-soft)" fontWeight={700} textTransform="uppercase" letterSpacing="0.05em">
+          <Text color="var(--pb-ink-soft)" fontWeight={700}>
             {t('dashboard.quickAdd')}
           </Text>
           <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2}>
@@ -195,12 +195,12 @@ export default function ExpenseQuickAdd({
                   justifyContent="flex-start"
                   borderRadius="15px"
                   border="1px solid"
-                  borderColor={selected ? '#D05F5B' : 'var(--pb-hair)'}
-                  bg={selected ? '#F9E9E5' : 'var(--pb-surface)'}
-                  color={selected ? '#A45148' : 'var(--pb-ink)'}
+                  borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
+                  bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
+                  color={selected ? '#820ad1' : 'var(--pb-ink)'}
                   onClick={() => onDescriptionChange(selected ? '' : merchant.name)}
                   aria-pressed={selected}
-                  _hover={{ borderColor: '#D05F5B', bg: selected ? '#F9E9E5' : '#FBF1ED' }}
+                  _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
                 >
                   <MerchantLogo category={category} domain={merchant.domain} name={merchant.name} size={32} />
                   <Box as="span" ml={2} minW={0} overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" fontWeight={800}>

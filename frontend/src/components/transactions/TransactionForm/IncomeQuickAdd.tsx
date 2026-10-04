@@ -35,8 +35,6 @@ export default function IncomeQuickAdd({
         fontSize="xs"
         fontWeight={700}
         color="var(--pb-ink-soft)"
-        textTransform="uppercase"
-        letterSpacing="0.05em"
       >
         {t('dashboard.quickAdd')}
       </Text>
@@ -55,14 +53,14 @@ export default function IncomeQuickAdd({
               justifyContent="flex-start"
               borderRadius="16px"
               border="1px solid"
-              borderColor={selected ? '#2F7257' : 'var(--pb-hair)'}
-              bg={selected ? '#E8F3E8' : 'var(--pb-surface)'}
-              color={selected ? '#2F7257' : 'var(--pb-ink)'}
+              borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
+              bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
+              color={selected ? '#820ad1' : 'var(--pb-ink)'}
               onClick={() => {
                 setCustomSource(false)
                 onSelect(source.name)
               }}
-              _hover={{ borderColor: '#2F7257', bg: selected ? '#E8F3E8' : '#F1F6EE' }}
+              _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
               aria-label={`Use ${source.name} as income source`}
             >
               <HStack spacing={2.5} minW={0}>
@@ -82,14 +80,14 @@ export default function IncomeQuickAdd({
           justifyContent="flex-start"
           borderRadius="16px"
           border="1px solid"
-          borderColor={customSource ? '#2F7257' : 'var(--pb-hair)'}
-          bg={customSource ? '#E8F3E8' : 'var(--pb-surface)'}
-          color={customSource ? '#2F7257' : 'var(--pb-ink)'}
+          borderColor={customSource ? '#820ad1' : 'var(--pb-hair)'}
+          bg={customSource ? '#f3e8fc' : 'var(--pb-surface)'}
+          color={customSource ? '#820ad1' : 'var(--pb-ink)'}
           onClick={() => {
             setCustomSource(true)
             onSelectOther()
           }}
-          _hover={{ borderColor: '#2F7257', bg: customSource ? '#E8F3E8' : '#F1F6EE' }}
+          _hover={{ borderColor: '#820ad1', bg: customSource ? '#f3e8fc' : '#f8f1fe' }}
         >
           <HStack spacing={2.5} minW={0}>
             <Box
@@ -99,8 +97,8 @@ export default function IncomeQuickAdd({
               placeItems="center"
               flexShrink={0}
               borderRadius="12px"
-              bg={customSource ? '#2F7257' : '#E8F3E8'}
-              color={customSource ? 'white' : '#2F7257'}
+              bg={customSource ? '#820ad1' : '#f3e8fc'}
+              color={customSource ? 'white' : '#820ad1'}
             >
               <MoreHorizontal aria-hidden="true" size={23} strokeWidth={2.5} />
             </Box>

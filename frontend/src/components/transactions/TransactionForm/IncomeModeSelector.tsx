@@ -14,13 +14,13 @@ const MODES = [
     value: 'single' as const,
     titleKey: 'form.oneOff',
     captionKey: 'form.incomeOneOffCaption',
-    accent: '#10b981',
+    accent: '#820ad1',
   },
   {
     value: 'fixed' as const,
     titleKey: 'form.fixedIncome',
     captionKey: 'form.fixedIncomeCaption',
-    accent: '#0ea5e9',
+    accent: '#820ad1',
   },
 ]
 

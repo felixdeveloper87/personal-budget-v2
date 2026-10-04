@@ -14,19 +14,19 @@ const MODES = [
     value: 'single' as const,
     titleKey: 'form.oneOff',
     captionKey: 'form.regularExpense',
-    accent: '#ef4444',
+    accent: '#820ad1',
   },
   {
     value: 'fixed' as const,
     titleKey: 'form.fixedMonthly',
     captionKey: 'form.fixedExpenseCaption',
-    accent: '#14b8a6',
+    accent: '#820ad1',
   },
   {
     value: 'installment' as const,
     titleKey: 'dashboard.installments',
     captionKey: 'form.installmentsCaption',
-    accent: '#6366f1',
+    accent: '#820ad1',
   },
 ]
 
