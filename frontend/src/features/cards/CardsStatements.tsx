@@ -30,15 +30,20 @@ function StatementRow({ item, expanded, onToggle, hidden }: { item: NamedStateme
   return (
     <article className={'cw-statement' + (expanded ? ' is-expanded' : '')}>
       <button type="button" className="cw-statement-button" aria-expanded={expanded} aria-controls={'statement-' + item.id} onClick={onToggle}>
-        <div className="cw-statement-identity"><BankLogo issuer={card.issuer} size={32} /><span>{card.name}</span><span className={'cw-status cw-status-' + statement.status}>{t(`cards.statementStatus.${statement.status}`)}</span></div>
-        <h3>{formatDate(statement.closingDate, { month: 'long', year: 'numeric' })}</h3>
-        <div className="cw-statement-value"><strong>{value(statement.total)}</strong><span className="cw-expand"><ChevronDown size={18} /></span></div>
-        <div className="cw-statement-meta"><span>{t('cards.dueDate', { date: formatDate(statement.paymentDate, { day: 'numeric', month: 'short', year: 'numeric' }) })}</span><span>{t(statement.transactions.length === 1 ? 'cards.transactionCount.one' : 'cards.transactionCount.other', { count: statement.transactions.length })}</span></div>
+        <div className="cw-statement-leading">
+          <BankLogo issuer={card.issuer} size={36} borderRadius="50%" />
+          <div className="cw-statement-copy">
+            <div className="cw-statement-identity"><span>{card.name}</span><span className={'cw-status cw-status-' + statement.status}>{t(`cards.statementStatus.${statement.status}`)}</span></div>
+            <h3>{formatDate(statement.closingDate, { month: 'long', year: 'numeric' })}</h3>
+            <div className="cw-statement-meta"><span>{t('cards.dueDate', { date: formatDate(statement.paymentDate, { day: 'numeric', month: 'short', year: 'numeric' }) })}</span><span>{t(statement.transactions.length === 1 ? 'cards.transactionCount.one' : 'cards.transactionCount.other', { count: statement.transactions.length })}</span></div>
+          </div>
+        </div>
+        <div className="cw-statement-value"><strong>{value(statement.total)}</strong><span className="cw-expand"><ChevronDown size={17} /></span></div>
       </button>
       <div id={'statement-' + item.id} hidden={!expanded} className="cw-statement-details">
         <div className="cw-cycle"><span className="cw-eyebrow">{t('cards.statementCycle')}</span><span>{formatDate(statement.periodStart, { day: 'numeric', month: 'short', year: 'numeric' })} – {formatDate(statement.closingDate, { day: 'numeric', month: 'short', year: 'numeric' })}</span></div>
         <h4>{t('cards.statements.purchases')}</h4>
-        {[...days].map(([date, transactions]) => <div key={date}><p className="cw-purchase-day">{formatDate(date, { day: 'numeric', month: 'short' })}</p>{transactions.map((transaction, index) => <div key={transaction.id ?? index} className="cw-purchase"><MerchantLogo domain={transaction.merchantDomain} name={transaction.merchantName || transaction.description} size={34} fallbackMode="none" /><div className="cw-purchase-copy"><strong>{transaction.description}</strong><span>{categoryLabel(transaction.category)}</span></div><strong>{value(transaction.amount)}</strong></div>)}</div>)}
+        {[...days].map(([date, transactions]) => <div key={date}><p className="cw-purchase-day">{formatDate(date, { day: 'numeric', month: 'short' })}</p>{transactions.map((transaction, index) => <div key={transaction.id ?? index} className="cw-purchase"><MerchantLogo domain={transaction.merchantDomain} name={transaction.merchantName || transaction.description} size={32} fallbackMode="none" /><div className="cw-purchase-copy"><strong>{transaction.description}</strong><span>{categoryLabel(transaction.category)}</span></div><strong>{value(transaction.amount)}</strong></div>)}</div>)}
         <div className="cw-statement-total"><span>{t('cards.statements.total')}</span><strong>{value(statement.total)}</strong></div>
       </div>
     </article>

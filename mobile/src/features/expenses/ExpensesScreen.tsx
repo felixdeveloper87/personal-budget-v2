@@ -285,19 +285,6 @@ export function ExpensesScreen() {
             </View>
           ) : null}
 
-          {!loading && !error && expenses.length > 0 ? (
-            <View style={[styles.section, styles.sectionDivided]}>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionCopy}>
-                  <Text style={styles.sectionTitle}>Por categoria</Text>
-                  <Text style={styles.sectionSubtitle}>Distribuição dos gastos no período</Text>
-                </View>
-              </View>
-              <View style={styles.donutSpacer} />
-              <CategoryDonutChart entries={expenses} totalLabel="Total gasto" />
-            </View>
-          ) : null}
-
           <View style={[styles.section, styles.sectionDivided]}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionCopy}>
@@ -376,6 +363,19 @@ export function ExpensesScreen() {
               </View>
             )}
           </View>
+
+          {!loading && !error && expenses.length > 0 ? (
+            <View style={[styles.section, styles.sectionDivided]}>
+              <View style={styles.sectionHeader}>
+                <View style={styles.sectionCopy}>
+                  <Text style={styles.sectionTitle}>Por categoria</Text>
+                  <Text style={styles.sectionSubtitle}>Distribuição dos gastos no período</Text>
+                </View>
+              </View>
+              <View style={styles.donutSpacer} />
+              <CategoryDonutChart entries={expenses} totalLabel="Total gasto" />
+            </View>
+          ) : null}
         </View>
       </ScrollView>
     </View>

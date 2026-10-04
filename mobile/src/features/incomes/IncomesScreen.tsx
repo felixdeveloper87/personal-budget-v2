@@ -22,7 +22,6 @@ import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
 import { PeriodNavigator } from "@/components/period/PeriodNavigator";
 import { useAuth } from "@/contexts/AuthContext";
-import { CategoryDonutChart } from "@/components/category/CategoryDonutChart";
 import { NU_SHEET_OVERLAP, NuHeader } from "@/components/dashboard/NuHeader";
 import { usePeriodNavigation } from "@/hooks/usePeriodNavigation";
 import { ApiError, searchTransactions } from "@/services/api";
@@ -271,19 +270,6 @@ export function IncomesScreen() {
             </View>
           ) : null}
 
-          {!loading && !error && incomes.length > 0 ? (
-            <View style={[styles.section, styles.sectionDivided]}>
-              <View style={styles.sectionHeader}>
-                <View style={styles.sectionCopy}>
-                  <Text style={styles.sectionTitle}>Por categoria</Text>
-                  <Text style={styles.sectionSubtitle}>Distribuição das receitas no período</Text>
-                </View>
-              </View>
-              <View style={styles.donutSpacer} />
-              <CategoryDonutChart entries={incomes} totalLabel="Total recebido" />
-            </View>
-          ) : null}
-
           <View style={[styles.section, styles.sectionDivided]}>
             <View style={styles.sectionHeader}>
               <View style={styles.sectionCopy}>
@@ -418,7 +404,6 @@ const styles = StyleSheet.create({
   sectionCopy: { flex: 1, minWidth: 0 },
   sectionTitle: nuSection.title,
   sectionSubtitle: nuSection.subtitle,
-  donutSpacer: { height: 8 },
   pill: { backgroundColor: nu.brandTint, borderRadius: 999, minWidth: 30, paddingHorizontal: 11, paddingVertical: 5 },
   pillText: { color: nu.brand, fontSize: 12, fontWeight: "700", textAlign: "center" },
   row: { alignItems: "center", flexDirection: "row", minHeight: 70, paddingVertical: 12 },

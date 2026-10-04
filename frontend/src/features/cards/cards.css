@@ -360,22 +360,75 @@
 .nu-cards .cw-primary:hover { background: #6f00b8; }
 .nu-cards .cw-empty { border: 0; border-radius: 0; background: transparent; }
 .nu-cards .cw-statement-summary {
-  padding: 20px;
+  padding: 0 0 20px;
   border: 0;
-  border-radius: 20px;
-  background: var(--nu-brand-tint, #f3e8fc);
+  border-bottom: 1px solid var(--pb-hair);
+  border-radius: 0;
+  background: transparent;
 }
 .nu-cards .cw-summary-heading { color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-statement-summary h2 { margin-top: 5px; font-size: 20px; font-weight: 650; }
+.nu-cards .cw-summary-metrics { margin-top: 15px; gap: 18px; }
+.nu-cards .cw-summary-metrics > div + div { padding-left: 18px; }
 .nu-cards .cw-summary-metrics > div + div { border-color: rgba(130, 10, 209, .13); }
+.nu-cards .cw-summary-metrics strong { margin-top: 4px; font-size: clamp(20px, 3vw, 25px); font-weight: 700; }
+.nu-cards .cw-summary-metrics small { margin-top: 3px; }
 .nu-cards .cw-filter-label { margin-top: 20px !important; }
 .nu-cards .cw-filter { border-color: var(--pb-hair); border-radius: 999px; background: #fff; }
 .nu-cards .cw-filter.is-selected { border-color: var(--nu-brand, #820ad1); background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-history-tabs { margin-top: 8px; }
+.nu-cards .cw-history-tabs button { padding: 12px 18px; font-size: 13px; }
 .nu-cards .cw-history-tabs button.is-selected { border-bottom-color: var(--nu-brand, #820ad1); color: var(--nu-brand, #820ad1); }
-.nu-cards .cw-statement { border-radius: 18px; box-shadow: none; }
-.nu-cards .cw-statement.is-expanded { border-color: rgba(130, 10, 209, .42); }
-.nu-cards .cw-expand { border-radius: 50%; background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-statement-group { margin-top: 21px; }
+.nu-cards .cw-group-heading h3 { font-size: 17px; font-weight: 700; }
+.nu-cards .cw-group-description { margin-bottom: 8px !important; }
+.nu-cards .cw-statements-grid {
+  grid-template-columns: 1fr;
+  gap: 0;
+  border-top: 1px solid var(--pb-hair);
+  border-bottom: 1px solid var(--pb-hair);
+}
+.nu-cards .cw-statement {
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: none;
+}
+.nu-cards .cw-statement + .cw-statement { border-top: 1px solid var(--pb-hair); }
+.nu-cards .cw-statement.is-expanded { border-color: var(--pb-hair); }
+.nu-cards .cw-statement-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 0;
+}
+.nu-cards .cw-statement-button:hover { background: transparent; }
+.nu-cards .cw-statement-leading { display: flex; align-items: center; gap: 11px; min-width: 0; flex: 1; }
+.nu-cards .cw-statement-copy { min-width: 0; flex: 1; }
+.nu-cards .cw-statement-identity { gap: 7px; }
+.nu-cards .cw-statement-identity > span:first-of-type { flex: 0 1 auto; font-size: 11px; font-weight: 600; }
+.nu-cards .cw-status { padding: 3px 7px; border-radius: 999px; font-size: 9px; }
+.nu-cards .cw-status-open { background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
+.nu-cards .cw-statement h3 { margin-top: 3px; font-size: 15px; font-weight: 650; line-height: 1.2; }
+.nu-cards .cw-statement-meta {
+  justify-content: flex-start;
+  gap: 5px 10px;
+  margin-top: 4px;
+  padding-top: 0;
+  border-top: 0;
+  font-size: 10px;
+}
+.nu-cards .cw-statement-value { flex-shrink: 0; gap: 9px; margin-top: 0; }
+.nu-cards .cw-statement-value > strong { font-size: 17px; font-weight: 700; letter-spacing: -.2px; }
+.nu-cards .cw-expand { width: 30px; height: 30px; border-radius: 50%; background: var(--nu-brand-tint, #f3e8fc); color: var(--nu-brand, #820ad1); }
 .nu-cards .is-expanded .cw-expand { background: var(--nu-brand, #820ad1); color: #fff; }
-.nu-cards .cw-statement-details { background: #fff; }
+.nu-cards .cw-statement-details { padding: 15px 0 18px 47px; background: #fff; }
+.nu-cards .cw-statement-details h4 { margin-top: 16px; font-size: 13px; }
+.nu-cards .cw-purchase-day { margin-top: 13px !important; }
+.nu-cards .cw-purchase { min-height: 56px; padding: 10px 0; }
+.nu-cards .cw-purchase-copy > strong { font-size: 13px; }
+.nu-cards .cw-statement-total { padding-top: 14px; }
 .nu-cards .cw-more { border-radius: 999px; color: var(--nu-brand, #820ad1); }
 
 @media (max-width: 760px) {
@@ -387,11 +440,15 @@
   .nu-cards .cw-shortcuts > button { display: flex; }
   .nu-cards .cw-shortcuts > button + button { border-left: 0; border-top: 1px solid var(--pb-hair); padding-left: 0; }
   .nu-cards .cw-shortcut-icon { margin-bottom: 0; }
+  .nu-cards .cw-statement-button { gap: 10px; }
+  .nu-cards .cw-statement-details { padding-left: 0; }
 }
 
 @media (max-width: 460px) {
   .cw-nu-payment-value { font-size: 14px; }
   .nu-cards .cw-navigation > button { font-size: 12px; }
   .nu-cards .cw-navigation > button svg { width: 16px; height: 16px; }
-  .nu-cards .cw-statement-summary { padding: 17px; }
+  .nu-cards .cw-statement-summary { padding-bottom: 17px; }
+  .nu-cards .cw-statement-value > strong { font-size: 15px; }
+  .nu-cards .cw-statement-meta span:last-child { display: none; }
 }
