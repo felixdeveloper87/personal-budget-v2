@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { MerchantLogo } from "@/components/merchant/MerchantLogo";
+import { EXPENSE_CATEGORIES as categories } from "@/constants/transactionCategories";
 import type { FinancialAccount } from "@/types/finance";
 
 import {
@@ -14,18 +15,6 @@ import {
 import type { TransactionEntrySheetProps } from "./transactionEntryTypes";
 import { transactionTheme } from "./transactionTheme";
 import { useTransactionEntry } from "./useTransactionEntry";
-
-const categories = [
-  "Groceries",
-  "Dining out",
-  "Utilities",
-  "Health",
-  "Transport",
-  "Shopping",
-  "Subscriptions",
-  "Entertainment",
-  "Other",
-] as const;
 
 type ExpenseCategory = typeof categories[number];
 

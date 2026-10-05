@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NuHeader, NU_SHEET_OVERLAP } from "@/components/dashboard/NuHeader";
 import { nu, nuSection } from "@/components/dashboard/nuTheme";
 import { useAuth } from "@/contexts/AuthContext";
+import { EXPENSE_CATEGORIES } from "@/constants/transactionCategories";
 import { ApiError, listCategoryBudgets, listTransactions } from "@/services/api";
 import type { Transaction } from "@/types/finance";
 import type { CategoryBudget } from "@/types/planning";
@@ -27,12 +28,6 @@ function tone(budget: CategoryBudget) {
   if (budget.exceeded || budget.percentageUsed >= 100) return { color: nu.negative, tint: nu.negativeTint };
   if (budget.percentageUsed >= 80) return { color: AMBER, tint: AMBER_TINT };
   return { color: nu.brand, tint: nu.brandTint };
-}
-
-function sameMonth(source: string | null | undefined, month: Date) {
-  if (!source) return false;
-  const date = new Date(source.length === 10 ? `${source}T00:00:00` : source);
-  return date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth();
 }
 
 export function PlanningScreen() {
@@ -88,13 +83,14 @@ export function PlanningScreen() {
   }, [budgets]);
 
   const suggestions = useMemo(() => {
-    const used = new Set(budgets.map((item) => item.category.toLowerCase()));
-    const found = new Set<string>();
+    const used = new Set(budgets.map((item) => item.category.trim().toLowerCase()));
+    const found = new Map<string, string>(EXPENSE_CATEGORIES.map((category) => [category.toLowerCase(), category]));
     for (const tx of transactions) {
-      if (tx.type === "EXPENSE" && tx.category && !used.has(tx.category.toLowerCase()) && sameMonth(tx.paymentDate || tx.transactionDate || tx.dateTime, month)) found.add(tx.category);
+      const category = tx.category?.trim();
+      if (tx.type === "EXPENSE" && category && !found.has(category.toLowerCase())) found.set(category.toLowerCase(), category);
     }
-    return [...found].sort();
-  }, [transactions, budgets, month]);
+    return [...found.entries()].filter(([key]) => !used.has(key)).map(([, category]) => category).sort((a, b) => a.localeCompare(b));
+  }, [transactions, budgets]);
 
   const monthLabel = useMemo(() => new Intl.DateTimeFormat("pt-BR", { month: "long", year: "numeric" }).format(month), [month]);
   const subtitle = budgets.length === 0 ? "Adicione limites por categoria para acompanhar os gastos aqui."
