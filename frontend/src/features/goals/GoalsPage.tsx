@@ -1,31 +1,32 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Box,
-  Button,
   Flex,
   HStack,
   Icon,
-  IconButton,
-  NumberInput,
-  NumberInputField,
-  Progress,
+  SimpleGrid,
   Spinner,
   Text,
+  useDisclosure,
 } from '@chakra-ui/react'
 import { Target } from 'lucide-react'
 
 import {
   archiveSavingsGoal,
   contributeToSavingsGoal,
+  createSavingsGoal,
   listSavingsGoals,
+  updateSavingsGoal,
 } from '../../api'
-import type { SavingsGoal } from '../../types'
+import type { SavingsGoal, SavingsGoalRequest } from '../../types'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { usePeriodData } from '../../hooks/usePeriodData'
 import BalanceBreakEvenPanel from '../../components/charts/modal/BalanceBreakEvenPanel'
-import { Trash2 } from '../../components/ui/icons'
+import { Plus } from '../../components/ui/icons'
+import GoalCard from './components/GoalCard'
+import { ContributeModal, GoalFormModal } from './components/GoalModals'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
@@ -33,7 +34,9 @@ import '../dashboard/theme/pb-tokens.css'
 export default function GoalsPage() {
   const { t, formatCurrency } = useI18n()
   const [goals, setGoals] = useState<SavingsGoal[]>([])
-  const [contributions, setContributions] = useState<Record<number, number>>({})
+  const form = useDisclosure()
+  const [editing, setEditing] = useState<SavingsGoal | null>(null)
+  const [contributing, setContributing] = useState<SavingsGoal | null>(null)
 
   const currentMonth = useMemo(() => new Date(), [])
   const {
@@ -59,16 +62,33 @@ export default function GoalsPage() {
 
   useEffect(() => { void load() }, [load])
 
-  const contribute = async (goal: SavingsGoal) => {
-    const amount = contributions[goal.id] ?? 0
-    if (amount === 0) return
+  const contribute = async (amount: number) => {
+    if (!contributing || amount === 0) return
+    const goal = contributing
     try {
       await contributeToSavingsGoal(goal.id, amount)
-      setContributions((current) => ({ ...current, [goal.id]: 0 }))
+      setContributing(null)
       await load()
       ToastService.success({ title: amount > 0 ? t('goals.toast.contributionAdded') : t('goals.toast.withdrawalRecorded'), dedupeKey: `goal-contribution:${goal.id}` })
     } catch (err) {
       ToastService.apiError(err, { title: t('goals.toast.updateFailed'), dedupeKey: `goal-contribution-failed:${goal.id}` })
+    }
+  }
+
+  const openForm = (goal: SavingsGoal | null) => {
+    setEditing(goal)
+    form.onOpen()
+  }
+
+  const submitForm = async (request: SavingsGoalRequest) => {
+    try {
+      if (editing) await updateSavingsGoal(editing.id, request)
+      else await createSavingsGoal(request)
+      form.onClose()
+      await load()
+      ToastService.success({ title: t(editing ? 'goals.toast.updated' : 'goals.toast.created'), dedupeKey: 'goal-saved' })
+    } catch (err) {
+      ToastService.apiError(err, { title: t('goals.toast.saveFailed'), dedupeKey: 'goal-save-failed' })
     }
   }
 
@@ -82,6 +102,8 @@ export default function GoalsPage() {
   }
 
   const activeGoals = useMemo(() => goals.filter((goal) => !goal.archived), [goals])
+  const openGoals = useMemo(() => activeGoals.filter((goal) => goal.progressPercentage < 100), [activeGoals])
+  const doneGoals = useMemo(() => activeGoals.filter((goal) => goal.progressPercentage >= 100), [activeGoals])
 
   const totals = useMemo(() => {
     const saved = activeGoals.reduce((sum, goal) => sum + goal.currentAmount, 0)
@@ -98,7 +120,19 @@ export default function GoalsPage() {
     <Box>
       <NuHero
         title={t('nav.goals.label')}
-        action={<NuHeroBadge><Target size={18} strokeWidth={2.4} aria-hidden="true" /></NuHeroBadge>}
+        action={
+          <HStack spacing={2}>
+            <Box
+              as="button" type="button" onClick={() => openForm(null)}
+              display="inline-flex" alignItems="center" gap={1.5} h="36px" px={4} borderRadius="full"
+              bg="white" color="var(--nu-brand)" fontSize="14px" fontWeight={650}
+              _hover={{ bg: 'rgba(255,255,255,.9)' }}
+            >
+              <Icon as={Plus} boxSize={4} />{t('goals.new')}
+            </Box>
+            <NuHeroBadge><Target size={18} strokeWidth={2.4} aria-hidden="true" /></NuHeroBadge>
+          </HStack>
+        }
       >
         <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 10 }}>
           <Box minW={0} flex={1}>
@@ -128,25 +162,33 @@ export default function GoalsPage() {
       <Box {...NU_SHEET_WRAP}>
         <Box className="nu-dashboard" pb={NU_SHEET_PB} bg="var(--nu-page)" borderTopRadius="24px" borderBottomRadius={{ base: 0, md: '24px' }} overflow="hidden">
           <NuSection title={t('goals.section.active')} subtitle={t('goals.section.activeCaption')}>
-            {activeGoals.length > 0 ? (
-              <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)">
-                {activeGoals.map((goal) => (
-                  <SavingsGoalRow
-                    key={goal.id}
-                    goal={goal}
-                    contribution={contributions[goal.id] ?? 0}
-                    onContributionChange={(value) => setContributions((current) => ({ ...current, [goal.id]: value }))}
-                    onContribute={() => contribute(goal)}
-                    onArchive={() => archive(goal)}
-                  />
+            {openGoals.length > 0 ? (
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                {openGoals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onSave={() => setContributing(goal)} onEdit={() => openForm(goal)} onArchive={() => archive(goal)} />
                 ))}
-              </Box>
-            ) : (
-              <Box py={5} borderTop="1px solid var(--pb-hair)">
+              </SimpleGrid>
+            ) : doneGoals.length === 0 ? (
+              <Flex direction="column" align="center" gap={3} py={8} borderRadius="20px" bg="var(--nu-surface)">
+                <Icon as={Target} boxSize={8} color="var(--nu-brand)" />
+                <Text fontWeight={700} color="var(--pb-ink)">{t('goals.empty.title')}</Text>
                 <Text fontSize="sm" color="var(--pb-ink-soft)">{t('goals.empty.description')}</Text>
-              </Box>
-            )}
+                <Box as="button" type="button" onClick={() => openForm(null)} h="40px" px={5} borderRadius="full" bg="var(--nu-brand)" color="white" fontWeight={600} _hover={{ bg: 'var(--nu-brand-deep)' }}>
+                  {t('goals.empty.cta')}
+                </Box>
+              </Flex>
+            ) : null}
           </NuSection>
+
+          {doneGoals.length > 0 && (
+            <NuSection title={t('goals.completed')} subtitle={t('goals.completedCaption')}>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+                {doneGoals.map((goal) => (
+                  <GoalCard key={goal.id} goal={goal} onSave={() => setContributing(goal)} onEdit={() => openForm(goal)} onArchive={() => archive(goal)} />
+                ))}
+              </SimpleGrid>
+            </NuSection>
+          )}
 
           <NuSection title={t('goals.section.monthly')} subtitle={t('goals.section.monthlyCaption')}>
             {balanceLoading ? (
@@ -165,81 +207,8 @@ export default function GoalsPage() {
         </Box>
       </Box>
 
-    </Box>
-  )
-}
-
-function SavingsGoalRow({
-  goal,
-  contribution,
-  onContributionChange,
-  onContribute,
-  onArchive,
-}: {
-  goal: SavingsGoal
-  contribution: number
-  onContributionChange: (value: number) => void
-  onContribute: () => void
-  onArchive: () => void
-}) {
-  const { t, formatCurrency, formatDate } = useI18n()
-  const completed = goal.progressPercentage >= 100
-
-  return (
-    <Box py={4} borderBottom="1px solid var(--pb-hair)" _last={{ borderBottom: 0 }}>
-      <Flex align="flex-start" gap={3}>
-        <Box mt="7px" w="8px" h="8px" flexShrink={0} borderRadius="full" bg={completed ? 'var(--pb-income)' : goal.color || 'var(--nu-brand, #820ad1)'} />
-        <Box minW={0} flex={1}>
-          <Flex justify="space-between" align="flex-start" gap={3}>
-            <Box minW={0}>
-              <Text fontSize="15px" fontWeight={650} color="var(--pb-ink)" noOfLines={1}>{goal.name}</Text>
-              <Text mt="2px" fontSize="11px" color="var(--pb-ink-soft)">
-                {t('goals.remaining', { amount: formatCurrency(goal.remainingAmount) })}
-                {goal.targetDate ? ` · ${t('goals.targetDate', { date: formatDate(goal.targetDate) })}` : ''}
-              </Text>
-            </Box>
-            <HStack spacing={1.5} flexShrink={0}>
-              <Text fontSize="13px" fontWeight={700} color={completed ? 'var(--pb-income)' : 'var(--nu-brand, #820ad1)'}>{goal.progressPercentage.toFixed(0)}%</Text>
-              <IconButton
-                aria-label={t('goals.archive')}
-                icon={<Icon as={Trash2} boxSize={3.5} />}
-                size="xs"
-                variant="ghost"
-                borderRadius="full"
-                color="var(--pb-ink-faint)"
-                onClick={onArchive}
-                _hover={{ bg: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' }}
-              />
-            </HStack>
-          </Flex>
-
-          <Progress mt={3} value={Math.min(100, goal.progressPercentage)} colorScheme={completed ? 'green' : 'purple'} borderRadius="full" size="xs" bg="var(--pb-surface-3)" />
-
-          <Flex mt={2.5} justify="space-between" gap={4}>
-            <Text fontSize="11px" color="var(--pb-ink-soft)">
-              {t('goals.saved')} <Text as="span" fontWeight={650} color="var(--pb-ink)">{formatCurrency(goal.currentAmount)}</Text>
-            </Text>
-            <Text fontSize="11px" color="var(--pb-ink-soft)" textAlign="right">
-              {t('goals.target')} <Text as="span" fontWeight={650} color="var(--pb-ink)">{formatCurrency(goal.targetAmount)}</Text>
-            </Text>
-          </Flex>
-
-          <HStack mt={3} spacing={2}>
-            <NumberInput
-              flex={1}
-              maxW={{ base: 'none', md: '220px' }}
-              precision={2}
-              value={contribution}
-              onChange={(_, value) => onContributionChange(value || 0)}
-            >
-              <NumberInputField h="38px" borderRadius="12px" borderColor="var(--pb-hair)" placeholder={t('goals.contributionPlaceholder')} _focusVisible={{ borderColor: 'var(--nu-brand, #820ad1)', boxShadow: '0 0 0 1px var(--nu-brand, #820ad1)' }} />
-            </NumberInput>
-            <Button h="38px" px={4} borderRadius="full" bg="var(--nu-brand, #820ad1)" color="white" isDisabled={contribution === 0} onClick={onContribute} _hover={{ bg: '#6f00b8' }}>
-              {t('goals.apply')}
-            </Button>
-          </HStack>
-        </Box>
-      </Flex>
+      <GoalFormModal isOpen={form.isOpen} goal={editing} onClose={form.onClose} onSubmit={submitForm} />
+      <ContributeModal goal={contributing} onClose={() => setContributing(null)} onSubmit={contribute} />
     </Box>
   )
 }
