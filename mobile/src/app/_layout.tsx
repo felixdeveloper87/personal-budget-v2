@@ -29,6 +29,8 @@ function RootNavigator() {
         <Stack.Screen name="cards" />
         <Stack.Screen name="commitments" />
         <Stack.Screen name="goals" />
+        <Stack.Screen name="planning" />
+        <Stack.Screen name="reports" />
       </Stack.Protected>
     </Stack>
   );

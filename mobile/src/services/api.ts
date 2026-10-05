@@ -1,5 +1,7 @@
 import type { AuthResponse, AuthUser } from "@/types/auth";
 import type { SavingsGoal, SavingsGoalRequest } from "@/types/goals";
+import type { CategoryBudget, CategoryBudgetRequest } from "@/types/planning";
+import type { Report } from "@/types/reports";
 import { toLocalIsoDate } from "@/utils/period";
 import type {
   CreateHouseholdExpenseRequest,
@@ -173,6 +175,22 @@ export async function contributeToSavingsGoal(token: string, id: number, amount:
 
 export async function archiveSavingsGoal(token: string, id: number): Promise<void> {
   return request<void>(`/goals/${id}`, { token, method: "DELETE" });
+}
+
+export async function listCategoryBudgets(token: string, date: Date): Promise<CategoryBudget[]> {
+  return request<CategoryBudget[]>(`/planning/budgets?year=${date.getFullYear()}&month=${date.getMonth() + 1}`, { token });
+}
+
+export async function upsertCategoryBudget(token: string, budget: CategoryBudgetRequest): Promise<CategoryBudget> {
+  return request<CategoryBudget>("/planning/budgets", { token, method: "PUT", body: JSON.stringify(budget) });
+}
+
+export async function deleteCategoryBudget(token: string, id: number): Promise<void> {
+  return request<void>(`/planning/budgets/${id}`, { token, method: "DELETE" });
+}
+
+export async function getReport(token: string, period: "week" | "month", date: Date): Promise<Report> {
+  return request<Report>(`/reports?period=${period}&date=${toLocalIsoDate(date)}`, { token });
 }
 
 export async function searchTransactions(
