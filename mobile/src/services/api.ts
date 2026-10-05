@@ -1,4 +1,6 @@
 import type { AuthResponse, AuthUser } from "@/types/auth";
+import type { SavingsGoal, SavingsGoalRequest } from "@/types/goals";
+import { toLocalIsoDate } from "@/utils/period";
 import type {
   CreateHouseholdExpenseRequest,
   CreateHouseholdSettlementRequest,
@@ -149,6 +151,28 @@ interface TransactionFilters {
   type?: "income" | "expense";
   startDate?: string;
   endDate?: string;
+}
+
+export async function listSavingsGoals(token: string): Promise<SavingsGoal[]> {
+  return request<SavingsGoal[]>("/goals", { token });
+}
+
+export async function createSavingsGoal(token: string, goal: SavingsGoalRequest): Promise<SavingsGoal> {
+  return request<SavingsGoal>("/goals", { token, method: "POST", body: JSON.stringify(goal) });
+}
+
+export async function updateSavingsGoal(token: string, id: number, goal: SavingsGoalRequest): Promise<SavingsGoal> {
+  return request<SavingsGoal>(`/goals/${id}`, { token, method: "PUT", body: JSON.stringify(goal) });
+}
+
+export async function contributeToSavingsGoal(token: string, id: number, amount: number): Promise<SavingsGoal> {
+  return request<SavingsGoal>(`/goals/${id}/contributions`, {
+    token, method: "POST", body: JSON.stringify({ amount, contributionDate: toLocalIsoDate(new Date()) }),
+  });
+}
+
+export async function archiveSavingsGoal(token: string, id: number): Promise<void> {
+  return request<void>(`/goals/${id}`, { token, method: "DELETE" });
 }
 
 export async function searchTransactions(

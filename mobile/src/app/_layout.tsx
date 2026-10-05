@@ -28,6 +28,7 @@ function RootNavigator() {
         <Stack.Screen name="accounts/[id]" />
         <Stack.Screen name="cards" />
         <Stack.Screen name="commitments" />
+        <Stack.Screen name="goals" />
       </Stack.Protected>
     </Stack>
   );

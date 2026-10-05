@@ -27,7 +27,7 @@ const PAGES: MenuPage[] = [
   { label: "Contas", icon: { ios: "building.columns.fill", android: "account_balance", web: "account_balance" }, href: "/accounts" },
   { label: "Cartões", icon: { ios: "creditcard.fill", android: "credit_card", web: "credit_card" }, href: "/cards" },
   { label: "Compromissos", icon: { ios: "repeat", android: "repeat", web: "repeat" }, href: "/commitments" },
-  { label: "Metas", icon: { ios: "target", android: "track_changes", web: "track_changes" } },
+  { label: "Metas", icon: { ios: "target", android: "track_changes", web: "track_changes" }, href: "/goals" },
   { label: "Planejamento", icon: { ios: "calendar", android: "calendar_month", web: "calendar_month" } },
   { label: "Relatórios", icon: { ios: "doc.text.fill", android: "description", web: "description" } },
 ];
