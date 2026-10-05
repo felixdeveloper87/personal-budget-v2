@@ -540,6 +540,9 @@ export const dashboardTransactionsTranslations: TranslationBundle = {
     'charts.breakEven.target': 'Break-even target',
     'charts.breakEven.perDayShort': '/ day',
     'charts.breakEven.currentBalance': 'Current balance',
+    'charts.breakEven.headline': 'to earn each day to cover the {{amount}} gap',
+    'charts.breakEven.reached': 'You are in the black',
+    'charts.breakEven.reachedCaption': 'Your balance is already at or above zero.',
   },
   'pt-BR': {
     'common.cancel': 'Cancelar',
@@ -1080,5 +1083,8 @@ export const dashboardTransactionsTranslations: TranslationBundle = {
     'charts.breakEven.target': 'Meta para chegar ao equilíbrio',
     'charts.breakEven.perDayShort': '/ dia',
     'charts.breakEven.currentBalance': 'Saldo atual',
+    'charts.breakEven.headline': 'para ganhar por dia e cobrir os {{amount}} que faltam',
+    'charts.breakEven.reached': 'Você está no azul',
+    'charts.breakEven.reachedCaption': 'Seu saldo já está em zero ou acima.',
   },
 }

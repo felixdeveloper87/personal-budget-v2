@@ -62,59 +62,46 @@ export default function BalanceBreakEvenPanel({
   const earningDays = getEarningDays(selectedDate, periodType)
   const gapToZero = Math.max(0, -currentBalance)
   const dailyTarget = earningDays > 0 ? gapToZero / earningDays : gapToZero
-  const balanceColor = currentBalance < 0 ? 'var(--pb-coral)' : 'var(--pb-income)'
+  const inRed = gapToZero > 0
+  const bg = inRed
+    ? 'linear-gradient(135deg, var(--nu-brand) 0%, var(--nu-brand-deep) 100%)'
+    : 'linear-gradient(135deg, #1e8a5a 0%, #166b46 100%)'
 
   return (
-    <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)">
-      <BreakEvenRow
-        label={t('charts.breakEven.currentBalance')}
-        value={formatCurrency(currentBalance)}
-        valueColor={balanceColor}
-      />
-      <BreakEvenRow
-        label={t('charts.breakEven.target')}
-        value={formatCurrency(gapToZero)}
-        valueColor={gapToZero > 0 ? 'var(--nu-brand, #820ad1)' : 'var(--pb-income)'}
-        detail={gapToZero > 0 && earningDays > 0
-          ? `${formatCurrency(dailyTarget)} ${t('charts.breakEven.perDayShort')}`
-          : undefined}
-      />
-    </Box>
-  )
-}
-
-function BreakEvenRow({
-  label,
-  value,
-  valueColor,
-  detail,
-}: {
-  label: string
-  value: string
-  valueColor: string
-  detail?: string
-}) {
-  return (
-    <Flex
-      minH="52px"
-      py={3}
-      align="center"
-      justify="space-between"
-      gap={4}
-      borderBottom="1px solid var(--pb-hair)"
-      _last={{ borderBottom: 0 }}
-    >
-      <Text fontSize="sm" color="var(--pb-ink-soft)">{label}</Text>
-      <Flex align="baseline" justify="flex-end" gap={2} minW={0} textAlign="right">
-        <Text fontSize="md" fontWeight={700} color={valueColor} style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {value}
+    <Box position="relative" overflow="hidden" borderRadius="24px" p={{ base: 5, md: 6 }} color="white" bg={bg}>
+      <Box aria-hidden position="absolute" top="-60px" right="-50px" w="200px" h="200px" borderRadius="full" border="28px solid rgba(255,255,255,.08)" />
+      <Box aria-hidden position="absolute" bottom="-80px" right="60px" w="160px" h="160px" borderRadius="full" border="20px solid rgba(255,255,255,.06)" />
+      <Box position="relative">
+        <Text display="inline-block" px={3} py="3px" borderRadius="full" bg="rgba(255,255,255,.18)" fontSize="12px" fontWeight={600}>
+          {t('charts.breakEven.target')}
         </Text>
-        {detail && (
-          <Text fontSize="10px" color="var(--pb-ink-soft)" whiteSpace="nowrap">
-            {detail}
-          </Text>
+        {inRed ? (
+          <>
+            <Flex mt={4} align="baseline" gap={2} wrap="wrap">
+              <Text fontSize={{ base: '2.4rem', md: '3rem' }} fontWeight={700} letterSpacing="-0.03em" lineHeight={1} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatCurrency(earningDays > 0 ? dailyTarget : gapToZero)}
+              </Text>
+              {earningDays > 0 && <Text fontSize="md" opacity={0.85}>{t('charts.breakEven.perDayShort')}</Text>}
+            </Flex>
+            <Text mt={2} fontSize="sm" opacity={0.85}>
+              {t('charts.breakEven.headline', { amount: formatCurrency(gapToZero) })}
+            </Text>
+          </>
+        ) : (
+          <>
+            <Text mt={4} fontSize={{ base: '1.8rem', md: '2.2rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1}>
+              {t('charts.breakEven.reached')}
+            </Text>
+            <Text mt={2} fontSize="sm" opacity={0.85}>{t('charts.breakEven.reachedCaption')}</Text>
+          </>
         )}
-      </Flex>
-    </Flex>
+        <Flex mt={5} pt={4} borderTop="1px solid rgba(255,255,255,.2)" justify="space-between" align="center" gap={4}>
+          <Text fontSize="sm" opacity={0.8}>{t('charts.breakEven.currentBalance')}</Text>
+          <Text fontSize="md" fontWeight={700} style={{ fontVariantNumeric: 'tabular-nums' }}>
+            {formatCurrency(currentBalance)}
+          </Text>
+        </Flex>
+      </Box>
+    </Box>
   )
 }
