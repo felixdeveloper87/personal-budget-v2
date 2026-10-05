@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
-  Box, Button, Flex, FormControl, FormLabel, HStack, Icon, IconButton, Input,
-  NumberInput, NumberInputField, SimpleGrid, Text, VStack, useDisclosure,
+  Box, Button, Flex, FormControl, FormLabel, HStack, Icon, IconButton,
+  NumberInput, NumberInputField, Select, SimpleGrid, Text, VStack, useDisclosure,
 } from '@chakra-ui/react'
 import { Target } from 'lucide-react'
 
@@ -10,6 +10,7 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 import { ModalHeader, PremiumModal } from '../../components/ui'
 import { ChevronLeft, ChevronRight, Plus, Trash2 } from '../../components/ui/icons'
 import { useDashboardData } from '../../hooks/useDashboardData'
+import { getAllExpenseCategoryLabels } from '../../constants/transactionCategories'
 import { useI18n } from '../../i18n'
 import { ToastService } from '../../services/toast'
 import type { CategoryBudget } from '../../types'
@@ -37,7 +38,7 @@ const fieldProps = {
 } as const
 
 export default function PlanningPage(_props: PlanningPageProps) {
-  const { t, formatCurrency, formatDate } = useI18n()
+  const { t, formatCurrency, formatDate, categoryLabel, locale } = useI18n()
   const [month, setMonth] = useState(() => new Date())
   const [budgets, setBudgets] = useState<CategoryBudget[]>([])
   const [editing, setEditing] = useState<CategoryBudget | null>(null)
@@ -57,11 +58,20 @@ export default function PlanningPage(_props: PlanningPageProps) {
   const shiftMonth = (delta: number) => setMonth((m) => new Date(m.getFullYear(), m.getMonth() + delta, 1))
 
   const suggestions = useMemo(() => {
-    const used = new Set(budgets.map((b) => b.category.toLowerCase()))
-    const all = new Set<string>()
-    for (const tx of transactions) if (tx.category && !used.has(tx.category.toLowerCase())) all.add(tx.category)
-    return [...all].sort()
-  }, [transactions, budgets])
+    const used = new Set(budgets.map((b) => b.category.trim().toLowerCase()))
+    const all = new Map<string, string>()
+    for (const category of getAllExpenseCategoryLabels()) all.set(category.toLowerCase(), category)
+    for (const tx of transactions) {
+      const category = tx.category?.trim()
+      if (tx.type === 'EXPENSE' && category && !all.has(category.toLowerCase())) {
+        all.set(category.toLowerCase(), category)
+      }
+    }
+    return [...all.entries()]
+      .filter(([key]) => !used.has(key))
+      .map(([, category]) => category)
+      .sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b), locale))
+  }, [transactions, budgets, categoryLabel, locale])
 
   const totals = useMemo(() => {
     const limit = budgets.reduce((s, b) => s + b.limitAmount, 0)
@@ -102,7 +112,7 @@ export default function PlanningPage(_props: PlanningPageProps) {
             <Box
               as="button" type="button" onClick={() => openForm(null)}
               display="inline-flex" alignItems="center" gap={1.5} h="36px" px={4} borderRadius="full"
-              bg="white" color="var(--nu-brand)" fontSize="14px" fontWeight={650} _hover={{ bg: 'rgba(255,255,255,.9)' }}
+              bg="white" color="#820ad1" fontSize="14px" fontWeight={650} _hover={{ bg: 'rgba(255,255,255,.9)' }}
             >
               <Icon as={Plus} boxSize={4} />{t('planning.budget.new')}
             </Box>
@@ -195,7 +205,7 @@ function BudgetFormModal({
   onClose: () => void
   onSubmit: (category: string, limit: number) => Promise<void>
 }) {
-  const { t } = useI18n()
+  const { t, categoryLabel } = useI18n()
   const [category, setCategory] = useState('')
   const [limit, setLimit] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -207,7 +217,8 @@ function BudgetFormModal({
     setBusy(false)
   }, [isOpen, budget])
 
-  const valid = category.trim().length > 0 && limit > 0
+  const categories = budget ? [budget.category] : suggestions
+  const valid = categories.includes(category) && limit > 0
   const submit = async () => {
     if (!valid || busy) return
     setBusy(true)
@@ -223,10 +234,11 @@ function BudgetFormModal({
       header={<ModalHeader title={t(budget ? 'planning.budget.editTitle' : 'planning.budget.title')} caption={monthLabel} onClose={onClose} />}
     >
       <VStack spacing={4} align="stretch" p={5} bg="var(--nu-page)">
-        <FormControl>
+        <FormControl id="budget-category" isRequired>
           <FormLabel fontSize="13px" color="var(--pb-ink-soft)">{t('planning.budget.category')}</FormLabel>
-          <Input {...fieldProps} list="budget-categories" value={category} isReadOnly={budget != null} maxLength={60} onChange={(e) => setCategory(e.target.value)} placeholder={t('planning.budget.categoryPlaceholder')} />
-          <datalist id="budget-categories">{suggestions.map((c) => <option key={c} value={c} />)}</datalist>
+          <Select {...fieldProps} value={category} isDisabled={budget != null || busy} onChange={(e) => setCategory(e.target.value)} placeholder={t('planning.budget.categoryPlaceholder')}>
+            {categories.map((c) => <option key={c} value={c}>{categoryLabel(c)}</option>)}
+          </Select>
         </FormControl>
         <FormControl>
           <FormLabel fontSize="13px" color="var(--pb-ink-soft)">{t('planning.budget.monthlyLimit')}</FormLabel>

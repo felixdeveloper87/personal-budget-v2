@@ -125,7 +125,7 @@ export default function GoalsPage() {
             <Box
               as="button" type="button" onClick={() => openForm(null)}
               display="inline-flex" alignItems="center" gap={1.5} h="36px" px={4} borderRadius="full"
-              bg="white" color="var(--nu-brand)" fontSize="14px" fontWeight={650}
+              bg="white" color="#820ad1" fontSize="14px" fontWeight={650}
               _hover={{ bg: 'rgba(255,255,255,.9)' }}
             >
               <Icon as={Plus} boxSize={4} />{t('goals.new')}
