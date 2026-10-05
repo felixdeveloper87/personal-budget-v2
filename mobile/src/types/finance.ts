@@ -54,6 +54,41 @@ export interface InstallmentPlan {
   transactions: InstallmentTransaction[];
 }
 
+export interface RecurringTransaction {
+  id: number;
+  type: "INCOME" | "EXPENSE";
+  category: string;
+  description: string;
+  amount: number;
+  frequency: "MONTHLY";
+  startDate: string;
+  endDate?: string | null;
+  nextRunDate: string;
+  dayOfMonth: number;
+  active: boolean;
+  accountId?: number | null;
+  accountName?: string | null;
+  paymentMethodId?: number | null;
+  paymentMethodName?: string | null;
+}
+
+export interface UpdateRecurringTransactionRequest {
+  amount: number;
+  startDate: string;
+  dayOfMonth: number;
+  accountId: number;
+  paymentMethodId: number | null;
+  applyFrom: "CURRENT_MONTH" | "NEXT_MONTH";
+}
+
+export interface UpdateInstallmentPlanRequest {
+  installmentValue: number;
+  totalAmount: number;
+  startDate: string;
+  accountId: number;
+  paymentMethodId: number | null;
+}
+
 export interface FinancialAccount {
   id: number;
   name: string;

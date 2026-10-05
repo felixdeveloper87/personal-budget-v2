@@ -21,7 +21,6 @@ import { ToastService } from '../../services/toast'
 import type { Transaction } from '../../types'
 
 import { PremiumModal } from '../ui'
-import { Guilloche, useEd } from '../../editorial'
 
 import '../../features/dashboard/theme/pb-tokens.css'
 import { toViewModel, buildLedger, parseSearchQuery, type LedgerGroup } from '../../features/transactions/transactions.utils'
@@ -69,25 +68,19 @@ function Chip({
       aria-checked={active}
       onClick={onClick}
       spacing="0.35rem"
-      px=".7rem"
-      py=".34rem"
+      px=".9rem"
+      py=".4rem"
       borderRadius="999px"
-      border="1px solid var(--pb-hair)"
-      bg={active ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
-      color={active ? 'var(--pb-forest)' : 'var(--pb-ink-soft)'}
+      border="none"
+      bg={active ? 'var(--nu-brand)' : 'var(--nu-surface)'}
+      color={active ? '#fff' : 'var(--pb-ink-soft)'}
       cursor="pointer"
       transition="all 0.15s ease"
-      _hover={{ borderColor: 'var(--pb-hair-2)' }}
-      _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+      _hover={{ bg: active ? 'var(--nu-brand-deep)' : 'var(--nu-surface-hover)' }}
+      _focusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)', outline: 'none' }}
     >
-      {dot && <Box w="6px" h="6px" borderRadius="999px" bg={dot} />}
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="10.5px"
-        letterSpacing="0.06em"
-        textTransform="uppercase"
-        fontWeight={active ? 500 : 400}
-      >
+      {dot && <Box w="6px" h="6px" borderRadius="999px" bg={active ? '#fff' : dot} />}
+      <Text fontSize="13px" fontWeight={600}>
         {t(`transactions.${value === 'in' ? 'income' : value === 'out' ? 'expenses' : value}`)}
       </Text>
     </HStack>
@@ -103,7 +96,6 @@ function Chip({
  */
 export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProps) {
   const { t } = useI18n()
-  const ed = useEd()
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<TxFilter>('all')
   const [page, setPage] = useState(0)
@@ -217,31 +209,21 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
     return { groups: pageGroups, summary: { count, from, to, inTotal, outTotal } }
   }, [flat, safePage, count, inTotal, outTotal])
 
-  const surfaceBg = ed?.modal ?? 'var(--pb-paper)'
-
   return (
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'xl', md: '2xl' }}
       contentProps={{
+        className: 'nu-dashboard',
+        bg: 'var(--nu-page)',
         maxH: { base: 'calc(100dvh - 24px)', sm: '78dvh' },
         mx: { base: 3, sm: 0 },
         my: { base: 3, sm: 0 },
-        borderRadius: { base: '18px', md: '18px' },
+        borderRadius: { base: '24px', md: '24px' },
       }}
     >
-      <Flex direction="column" h="full" minH={0} bg={surfaceBg} position="relative">
-        {/* Guilloché watermark — the ledger's quiet engraving identity. */}
-        <Box aria-hidden position="absolute" inset={0} overflow="hidden" pointerEvents="none" zIndex={0}>
-          <Box position="absolute" top="-22%" right="-14%" w="380px" h="380px">
-            <Guilloche n={26} rx={300} ry={120} opacity={0.16} />
-          </Box>
-          <Box position="absolute" bottom="-26%" right="-8%" w="300px" h="300px">
-            <Guilloche n={22} rx={300} ry={120} opacity={0.12} />
-          </Box>
-        </Box>
-
+      <Flex direction="column" h="full" minH={0} bg="var(--nu-page)" position="relative">
         {/* Search field + chips */}
         <Box
           position="relative"
@@ -249,31 +231,30 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
           px={{ base: 4, sm: 5 }}
           pt={{ base: 4, sm: 5 }}
           pb={3}
-          borderBottom="1px solid var(--pb-hair)"
         >
           <HStack spacing={{ base: 2, sm: 3 }} align="stretch">
             <InputGroup flex="1">
               <InputLeftElement pointerEvents="none" h="full">
-                <Icon as={Search} boxSize="18px" color="var(--pb-forest-2)" />
+                <Icon as={Search} boxSize="18px" color="var(--nu-brand)" />
               </InputLeftElement>
               <Input
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('search.placeholder')}
-                fontFamily="var(--pb-serif)"
-                fontSize="1.05rem"
+                fontSize="1rem"
                 h="48px"
                 pr="44px"
-                bg="var(--pb-surface)"
-                border="1px solid var(--pb-hair)"
-                borderRadius="14px"
+                bg="var(--nu-surface)"
+                border="2px solid transparent"
+                borderRadius="999px"
                 color="var(--pb-ink)"
                 _placeholder={{ color: 'var(--pb-ink-faint)' }}
-                _hover={{ borderColor: 'var(--pb-hair-2)' }}
+                _hover={{ bg: 'var(--nu-surface-hover)' }}
                 _focus={{
-                  borderColor: 'var(--pb-hair-2)',
-                  boxShadow: 'var(--pb-shadow-lift)',
+                  bg: 'var(--nu-page)',
+                  borderColor: 'var(--nu-brand)',
+                  boxShadow: 'none',
                 }}
               />
               {q && (
@@ -303,12 +284,11 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
               w="48px"
               minW="48px"
               flexShrink={0}
-              bg="var(--pb-surface)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="14px"
+              bg="var(--nu-surface)"
+              borderRadius="full"
               color="var(--pb-ink-soft)"
-              _hover={{ borderColor: 'var(--pb-hair-2)', color: 'var(--pb-ink)', bg: 'var(--pb-surface-2)' }}
-              _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+              _hover={{ color: 'var(--pb-ink)', bg: 'var(--nu-surface-hover)' }}
+              _focusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)', outline: 'none' }}
             />
           </HStack>
 
@@ -332,8 +312,8 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
             <IdleHint />
           ) : loading && raw.length === 0 ? (
             <Flex direction="column" align="center" justify="center" py="3rem" gap="0.9rem">
-              <Spinner size="md" color="var(--pb-forest-2)" thickness="2px" speed="0.7s" />
-              <Text fontFamily="var(--pb-mono)" fontSize="10.5px" letterSpacing="0.08em" textTransform="uppercase" color="var(--pb-ink-faint)">
+              <Spinner size="md" color="var(--nu-brand)" thickness="2px" speed="0.7s" />
+              <Text fontSize="13px" color="var(--pb-ink-faint)">
                 {t('search.searching')}
               </Text>
             </Flex>
@@ -348,11 +328,8 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
                   mb="1rem"
                 >
                   <Text
-                    fontFamily="var(--pb-mono)"
-                    fontSize="10px"
-                    letterSpacing="0.08em"
-                    textTransform="uppercase"
-                    color="var(--pb-ink-faint)"
+                    fontSize="13px"
+                    color="var(--pb-ink-soft)"
                   >
                     {summary.count > PAGE_SIZE
                       ? t('search.showingRange', { from: summary.from, to: summary.to, total: summary.count })
@@ -394,7 +371,7 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
   if (groups.length === 0) {
     return (
       <Box py="2.5rem" textAlign="center">
-        <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-faint)">
+        <Text color="var(--pb-ink-faint)">
           {t('search.noResults')}
         </Text>
       </Box>
@@ -406,14 +383,11 @@ function ResultsList({ groups }: { groups: LedgerGroup[] }) {
       {groups.map((g, gi) => (
         <Box key={g.key} mt={gi === 0 ? 0 : '1.4rem'}>
           <Flex align="center" justify="space-between" gap=".5rem" mb=".4rem">
-            <Text fontFamily="var(--pb-serif)" fontSize="1.05rem" fontWeight={500} color="var(--pb-ink)">
+            <Text fontSize="1rem" fontWeight={700} letterSpacing="-0.01em" color="var(--pb-ink)">
               {formatDate(g.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
             </Text>
             <Text
-              fontFamily="var(--pb-mono)"
-              fontSize="10px"
-              letterSpacing="0.08em"
-              textTransform="uppercase"
+              fontSize="12px"
               color="var(--pb-ink-faint)"
             >
               {t(g.rows.length === 1 ? 'transactions.count' : 'transactions.countPlural', { count: g.rows.length })}
@@ -458,12 +432,11 @@ function Pager({
     w: '30px',
     h: '30px',
     minW: '30px',
-    borderRadius: '9px',
-    border: '1px solid var(--pb-hair)',
-    bg: 'var(--pb-surface)',
+    borderRadius: '999px',
+    bg: 'var(--nu-surface)',
     color: 'var(--pb-ink-soft)',
-    _hover: { borderColor: 'var(--pb-hair-2)', color: 'var(--pb-ink)' },
-    _disabled: { opacity: 0.4, cursor: 'not-allowed', _hover: { borderColor: 'var(--pb-hair)' } },
+    _hover: { bg: 'var(--nu-surface-hover)', color: 'var(--pb-ink)' },
+    _disabled: { opacity: 0.4, cursor: 'not-allowed', _hover: { bg: 'var(--nu-surface)' } },
   } as const
 
   return (
@@ -481,7 +454,7 @@ function Pager({
       />
       {pages.map((p, i) =>
         p === '…' ? (
-          <Box key={`e${i}`} px="2px" color="var(--pb-ink-faint)" fontFamily="var(--pb-mono)" fontSize="11px">
+          <Box key={`e${i}`} px="2px" color="var(--pb-ink-faint)" fontSize="13px">
             …
           </Box>
         ) : (
@@ -494,18 +467,15 @@ function Pager({
             minW="30px"
             h="30px"
             px="8px"
-            borderRadius="9px"
-            border="1px solid"
-            borderColor={p === page ? 'var(--pb-forest)' : 'var(--pb-hair)'}
-            bg={p === page ? 'var(--pb-tint-green)' : 'var(--pb-surface)'}
-            color={p === page ? 'var(--pb-forest)' : 'var(--pb-ink-soft)'}
-            fontFamily="var(--pb-mono)"
-            fontSize="11px"
+            borderRadius="999px"
+            bg={p === page ? 'var(--nu-brand)' : 'var(--nu-surface)'}
+            color={p === page ? '#fff' : 'var(--pb-ink-soft)'}
+            fontSize="13px"
             fontWeight={p === page ? 600 : 400}
             cursor="pointer"
             transition="all 0.15s ease"
-            _hover={{ borderColor: 'var(--pb-hair-2)' }}
-            _focusVisible={{ boxShadow: '0 0 0 2px var(--pb-forest)', outline: 'none' }}
+            _hover={{ bg: p === page ? 'var(--nu-brand-deep)' : 'var(--nu-surface-hover)' }}
+            _focusVisible={{ boxShadow: '0 0 0 2px var(--nu-brand)', outline: 'none' }}
           >
             {p + 1}
           </Box>
@@ -542,9 +512,8 @@ function SummaryPill({ kind, value }: { kind: 'in' | 'out'; value: number }) {
         {isIn ? '↗' : '↘'}
       </Text>
       <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="11px"
-        fontWeight={500}
+        fontSize="12px"
+        fontWeight={600}
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {formatCurrency(value, { minimumFractionDigits: 2 })}
@@ -558,25 +527,22 @@ function IdleHint() {
   return (
     <VStack spacing="0.9rem" py="3rem" textAlign="center">
       <Box
-        w="48px"
-        h="48px"
-        borderRadius="14px"
+        w="56px"
+        h="56px"
+        borderRadius="full"
         display="grid"
         placeItems="center"
-        bg="var(--pb-tint-green)"
-        color="var(--pb-forest-2)"
-        border="1px solid var(--pb-hair)"
+        bg="var(--nu-brand-tint)"
+        color="var(--nu-brand)"
       >
         <Icon as={Search} boxSize="22px" />
       </Box>
       <Box>
-        <Text fontFamily="var(--pb-serif)" fontSize="1.1rem" fontWeight={500} color="var(--pb-ink)">
+        <Text fontSize="1.1rem" fontWeight={700} color="var(--pb-ink)">
           {t('search.idleTitle')}
         </Text>
         <Text
-          fontFamily="var(--pb-mono)"
-          fontSize="10.5px"
-          letterSpacing="0.04em"
+          fontSize="13px"
           color="var(--pb-ink-faint)"
           mt="0.35rem"
         >

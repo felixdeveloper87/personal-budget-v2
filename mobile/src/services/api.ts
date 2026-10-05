@@ -18,6 +18,9 @@ import type {
   InstallmentPlan,
   MonthlySummary,
   Transaction,
+  RecurringTransaction,
+  UpdateRecurringTransactionRequest,
+  UpdateInstallmentPlanRequest,
 } from "@/types/finance";
 
 const API_BASE_URL = (
@@ -117,6 +120,29 @@ export async function listPaymentMethods(token: string): Promise<CreditCardPayme
 
 export async function listInstallmentPlans(token: string): Promise<InstallmentPlan[]> {
   return request<InstallmentPlan[]>("/installment-plans", { token });
+}
+
+export async function listRecurringTransactions(token: string): Promise<RecurringTransaction[]> {
+  return request<RecurringTransaction[]>("/recurring-transactions", { token });
+}
+
+export async function updateRecurringTransaction(token: string, id: number, payload: UpdateRecurringTransactionRequest): Promise<RecurringTransaction> {
+  const { applyFrom, ...body } = payload;
+  return request<RecurringTransaction>(`/recurring-transactions/${id}?applyFrom=${applyFrom}`, {
+    token, method: "PUT", body: JSON.stringify(body),
+  });
+}
+
+export async function cancelRecurringTransaction(token: string, id: number): Promise<RecurringTransaction> {
+  return request<RecurringTransaction>(`/recurring-transactions/${id}`, { token, method: "DELETE" });
+}
+
+export async function updateInstallmentPlan(token: string, id: number, payload: UpdateInstallmentPlanRequest): Promise<InstallmentPlan> {
+  return request<InstallmentPlan>(`/installment-plans/${id}`, { token, method: "PUT", body: JSON.stringify(payload) });
+}
+
+export async function deleteInstallmentPlan(token: string, id: number): Promise<void> {
+  return request<void>(`/installment-plans/${id}`, { token, method: "DELETE" });
 }
 
 interface TransactionFilters {

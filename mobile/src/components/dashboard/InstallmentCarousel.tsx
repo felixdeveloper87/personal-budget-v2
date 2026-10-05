@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from "react";
+import { useRouter } from "expo-router";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import {
   FlatList,
@@ -112,6 +113,7 @@ function InstallmentMonthCard({ month }: { month: InstallmentMonth }) {
 }
 
 export function InstallmentCarousel({ date, plans }: InstallmentCarouselProps) {
+  const router = useRouter();
   const listRef = useRef<FlatList<InstallmentMonth>>(null);
   const { width: windowWidth } = useWindowDimensions();
   const [activeIndex, setActiveIndex] = useState(CURRENT_MONTH_INDEX);
@@ -131,7 +133,12 @@ export function InstallmentCarousel({ date, plans }: InstallmentCarouselProps) {
   return (
     <View style={styles.container}>
       <View style={styles.sectionHeading}>
-        <Text style={styles.sectionTitle}>Installments</Text>
+        <View style={styles.headingRow}>
+          <Text style={styles.sectionTitle}>Installments</Text>
+          <Pressable accessibilityRole="button" accessibilityLabel="Ver todos os parcelamentos" onPress={() => router.navigate({ pathname: "/commitments", params: { tab: "installments" } })} hitSlop={8} style={styles.viewAll}>
+            <Text style={styles.viewAllText}>Ver todos</Text>
+          </Pressable>
+        </View>
         <Text style={styles.sectionEyebrow}>Your monthly commitments</Text>
       </View>
 
@@ -180,6 +187,9 @@ export function InstallmentCarousel({ date, plans }: InstallmentCarouselProps) {
 const styles = StyleSheet.create({
   container: nuSection.container,
   sectionHeading: { marginBottom: 14 },
+  headingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12 },
+  viewAll: { minHeight: 44, justifyContent: "center" },
+  viewAllText: { color: nu.brand, fontSize: 13, fontWeight: "600" },
   sectionTitle: nuSection.title,
   sectionEyebrow: nuSection.subtitle,
   card: { backgroundColor: nu.surface, borderRadius: 16, minHeight: 170, padding: 16 },
@@ -203,4 +213,3 @@ const styles = StyleSheet.create({
   dot: nuSection.dot,
   activeDot: nuSection.activeDot,
 });
-
