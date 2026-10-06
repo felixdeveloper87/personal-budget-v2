@@ -446,6 +446,8 @@ export type HouseholdNotificationType =
   | 'CLEANING_DUTY_COMPLETED'
   | 'CLEANING_WEEK_COMPLETED'
   | 'CLEANING_WEEK_REMINDER'
+  | 'CLEANING_BINS_REMINDER'
+  | 'CLEANING_BINS_FINAL_REMINDER'
 
 export interface HouseholdMember {
   id: number

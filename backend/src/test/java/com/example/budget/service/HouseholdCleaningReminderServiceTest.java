@@ -120,9 +120,70 @@ class HouseholdCleaningReminderServiceTest {
     @Test
     void otherDaysDoNothing() {
         service.sendMondayAssignmentReminders(monday.plusDays(1));
+        service.sendWednesdayBinsReminders(monday.plusDays(1));
+        service.sendThursdayBinsFinalReminders(monday.plusDays(1));
         service.sendSundayIncompleteReminders(monday.plusDays(1));
 
         verify(rotationRepository, never()).findByActiveTrue();
         verify(notificationService, never()).notifyMemberOnce(any(), isNull(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void wednesdayRemindsToPutTheRubbishOutWhenItIsNotTickedYet() {
+        stubCurrentAssignment();
+        HouseholdCleaningDutyCompletion otherDuty = new HouseholdCleaningDutyCompletion();
+        otherDuty.setDutyKey("shower_room");
+        when(assignment.getCompletedAt()).thenReturn(null);
+        when(assignment.getAssignedMember()).thenReturn(member);
+        when(assignment.getId()).thenReturn(42L);
+        when(assignment.getWeekStart()).thenReturn(monday);
+        when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment))
+                .thenReturn(List.of(otherDuty));
+
+        service.sendWednesdayBinsReminders(monday.plusDays(2));
+
+        verify(notificationService).notifyMemberOnce(
+                member,
+                null,
+                HouseholdNotificationType.CLEANING_BINS_REMINDER,
+                42L,
+                "2026-09-07",
+                null,
+                "cleaning-bins-reminder:42");
+    }
+
+    @Test
+    void thursdayFinalReminderIsSkippedOnceTheRubbishIsOut() {
+        stubCurrentAssignment();
+        HouseholdCleaningDutyCompletion rubbish = new HouseholdCleaningDutyCompletion();
+        rubbish.setDutyKey("rubbish_out");
+        when(assignment.getCompletedAt()).thenReturn(null);
+        when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment))
+                .thenReturn(List.of(rubbish));
+
+        service.sendThursdayBinsFinalReminders(monday.plusDays(3));
+
+        verify(notificationService, never()).notifyMemberOnce(any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void thursdayFinalReminderGoesOutWhenTheRubbishIsStillIn() {
+        stubCurrentAssignment();
+        when(assignment.getCompletedAt()).thenReturn(null);
+        when(assignment.getAssignedMember()).thenReturn(member);
+        when(assignment.getId()).thenReturn(42L);
+        when(assignment.getWeekStart()).thenReturn(monday);
+        when(dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment)).thenReturn(List.of());
+
+        service.sendThursdayBinsFinalReminders(monday.plusDays(3));
+
+        verify(notificationService).notifyMemberOnce(
+                member,
+                null,
+                HouseholdNotificationType.CLEANING_BINS_FINAL_REMINDER,
+                42L,
+                "2026-09-07",
+                null,
+                "cleaning-bins-final:42");
     }
 }

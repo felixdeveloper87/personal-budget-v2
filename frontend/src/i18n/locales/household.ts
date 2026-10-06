@@ -129,6 +129,8 @@ export const householdTranslations: TranslationBundle = {
     'household.notifications.message.CLEANING_DUTY_COMPLETED': '{{actor}} completed {{duty}}.',
     'household.notifications.message.CLEANING_WEEK_COMPLETED': '{{actor}} completed all cleaning tasks for the week.',
     'household.notifications.message.CLEANING_WEEK_REMINDER': 'Reminder: your cleaning checklist for this week is not finished yet.',
+    'household.notifications.message.CLEANING_BINS_REMINDER': 'Tonight: put the rubbish out for the Thursday collection.',
+    'household.notifications.message.CLEANING_BINS_FINAL_REMINDER': 'Final reminder: is the rubbish out? Collection is this morning, by 10:00.',
 
     'household.load.failedToast': 'Could not load your household',
     'household.action.failedToast': 'Could not complete that household action',
@@ -571,6 +573,8 @@ export const householdTranslations: TranslationBundle = {
     'household.notifications.message.CLEANING_DUTY_COMPLETED': '{{actor}} concluiu {{duty}}.',
     'household.notifications.message.CLEANING_WEEK_COMPLETED': '{{actor}} concluiu todas as tarefas de limpeza da semana.',
     'household.notifications.message.CLEANING_WEEK_REMINDER': 'Lembrete: sua lista de limpeza desta semana ainda não foi concluída.',
+    'household.notifications.message.CLEANING_BINS_REMINDER': 'Hoje à noite: coloque o lixo para fora para a coleta de quinta.',
+    'household.notifications.message.CLEANING_BINS_FINAL_REMINDER': 'Último lembrete: o lixo já está lá fora? A coleta é hoje de manhã, até 10:00.',
 
     'household.load.failedToast': 'Não foi possível carregar sua casa',
     'household.action.failedToast': 'Não foi possível concluir esta ação da casa',

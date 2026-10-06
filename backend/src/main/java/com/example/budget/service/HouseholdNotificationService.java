@@ -213,7 +213,9 @@ public class HouseholdNotificationService {
             String subject,
             BigDecimal amount,
             BigDecimal recipientAmount) {
-        if (!pushNotificationService.isEnabled()) {
+        // Single ticked tasks stay in the inbox only; the household is pushed
+        // once, when the whole week is done (CLEANING_WEEK_COMPLETED).
+        if (!pushNotificationService.isEnabled() || type == HouseholdNotificationType.CLEANING_DUTY_COMPLETED) {
             return;
         }
         Household household = recipient.getHousehold();

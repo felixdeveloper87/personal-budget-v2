@@ -1,6 +1,7 @@
 package com.example.budget.service;
 
 import com.example.budget.model.HouseholdCleaningAssignment;
+import com.example.budget.model.HouseholdCleaningDutyCompletion;
 import com.example.budget.model.HouseholdCleaningRotation;
 import com.example.budget.model.HouseholdCleaningRotationMember;
 import com.example.budget.model.HouseholdNotificationType;
@@ -21,16 +22,24 @@ import java.time.ZoneId;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
- * Weekly cleaning nudges for the member on duty: Monday's "it's your week" and
- * Sunday's "checklist unfinished". Both go to the Household inbox and, through
- * it, as push notifications. Dedupe keys make reruns harmless.
+ * Weekly cleaning nudges for the member on duty. Each lands in the Household
+ * inbox and, through it, as a push notification. Dedupe keys make reruns harmless.
+ *
+ * <ul>
+ *   <li>Monday 10:00 — it's your cleaning week.</li>
+ *   <li>Wednesday 22:00 — put the rubbish out tonight.</li>
+ *   <li>Thursday 08:00 — final reminder, only if the rubbish is still not ticked off.</li>
+ *   <li>Sunday — the checklist is still unfinished.</li>
+ * </ul>
  */
 @Service
 public class HouseholdCleaningReminderService {
     private static final Logger log = LoggerFactory.getLogger(HouseholdCleaningReminderService.class);
     private static final int CLEANING_DUTY_COUNT = 10;
+    static final String RUBBISH_OUT_DUTY = "rubbish_out";
 
     private final HouseholdCleaningRotationRepository rotationRepository;
     private final HouseholdCleaningRotationMemberRepository rotationMemberRepository;
@@ -55,7 +64,7 @@ public class HouseholdCleaningReminderService {
     }
 
     @Scheduled(
-            cron = "${app.household.cleaning.assignment-cron:0 0 9 * * MON}",
+            cron = "${app.household.cleaning.assignment-cron:0 0 10 * * MON}",
             zone = "${app.household.cleaning.reminder-zone:Europe/London}")
     @Transactional
     public void sendMondayAssignmentReminders() {
@@ -66,15 +75,47 @@ public class HouseholdCleaningReminderService {
         if (today.getDayOfWeek() != DayOfWeek.MONDAY) {
             return;
         }
-        forEachCurrentAssignment(today, assignment -> notificationService.notifyMemberOnce(
-                assignment.getAssignedMember(),
-                null,
-                HouseholdNotificationType.CLEANING_WEEK_ASSIGNED,
-                assignment.getId(),
-                assignment.getWeekStart().toString(),
-                null,
-                // Same key the Household page uses, so the member is told once.
-                "cleaning-week-assigned:" + assignment.getId()));
+        // Same type and key the Household page uses, so the member is told once.
+        forEachCurrentAssignment(today, assignment ->
+                remind(assignment, HouseholdNotificationType.CLEANING_WEEK_ASSIGNED, "cleaning-week-assigned:"));
+    }
+
+    @Scheduled(
+            cron = "${app.household.cleaning.bins-cron:0 0 22 * * WED}",
+            zone = "${app.household.cleaning.reminder-zone:Europe/London}")
+    @Transactional
+    public void sendWednesdayBinsReminders() {
+        sendWednesdayBinsReminders(LocalDate.now(zone));
+    }
+
+    void sendWednesdayBinsReminders(LocalDate today) {
+        if (today.getDayOfWeek() != DayOfWeek.WEDNESDAY) {
+            return;
+        }
+        forEachCurrentAssignment(today, assignment -> {
+            if (!rubbishAlreadyOut(assignment)) {
+                remind(assignment, HouseholdNotificationType.CLEANING_BINS_REMINDER, "cleaning-bins-reminder:");
+            }
+        });
+    }
+
+    @Scheduled(
+            cron = "${app.household.cleaning.bins-final-cron:0 0 8 * * THU}",
+            zone = "${app.household.cleaning.reminder-zone:Europe/London}")
+    @Transactional
+    public void sendThursdayBinsFinalReminders() {
+        sendThursdayBinsFinalReminders(LocalDate.now(zone));
+    }
+
+    void sendThursdayBinsFinalReminders(LocalDate today) {
+        if (today.getDayOfWeek() != DayOfWeek.THURSDAY) {
+            return;
+        }
+        forEachCurrentAssignment(today, assignment -> {
+            if (!rubbishAlreadyOut(assignment)) {
+                remind(assignment, HouseholdNotificationType.CLEANING_BINS_FINAL_REMINDER, "cleaning-bins-final:");
+            }
+        });
     }
 
     @Scheduled(
@@ -91,24 +132,38 @@ public class HouseholdCleaningReminderService {
         }
         forEachCurrentAssignment(today, assignment -> {
             if (assignment.getCompletedAt() != null
-                    || dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment).size()
-                            >= CLEANING_DUTY_COUNT) {
+                    || completions(assignment).size() >= CLEANING_DUTY_COUNT) {
                 return;
             }
-            notificationService.notifyMemberOnce(
-                    assignment.getAssignedMember(),
-                    null,
-                    HouseholdNotificationType.CLEANING_WEEK_REMINDER,
-                    assignment.getId(),
-                    assignment.getWeekStart().toString(),
-                    null,
-                    "cleaning-week-reminder:" + assignment.getId());
+            remind(assignment, HouseholdNotificationType.CLEANING_WEEK_REMINDER, "cleaning-week-reminder:");
         });
     }
 
-    private void forEachCurrentAssignment(
-            LocalDate today,
-            java.util.function.Consumer<HouseholdCleaningAssignment> action) {
+    private boolean rubbishAlreadyOut(HouseholdCleaningAssignment assignment) {
+        return assignment.getCompletedAt() != null
+                || completions(assignment).stream()
+                        .anyMatch(completion -> RUBBISH_OUT_DUTY.equals(completion.getDutyKey()));
+    }
+
+    private List<HouseholdCleaningDutyCompletion> completions(HouseholdCleaningAssignment assignment) {
+        return dutyCompletionRepository.findByAssignmentOrderByDutyKeyAsc(assignment);
+    }
+
+    private void remind(
+            HouseholdCleaningAssignment assignment,
+            HouseholdNotificationType type,
+            String dedupePrefix) {
+        notificationService.notifyMemberOnce(
+                assignment.getAssignedMember(),
+                null,
+                type,
+                assignment.getId(),
+                assignment.getWeekStart().toString(),
+                null,
+                dedupePrefix + assignment.getId());
+    }
+
+    private void forEachCurrentAssignment(LocalDate today, Consumer<HouseholdCleaningAssignment> action) {
         rotationRepository.findByActiveTrue().forEach(rotation -> {
             try {
                 currentAssignment(rotation, today).ifPresent(action);

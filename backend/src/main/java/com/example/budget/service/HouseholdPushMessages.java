@@ -59,6 +59,8 @@ final class HouseholdPushMessages {
             case CLEANING_DUTY_COMPLETED -> actor + " completed " + HouseholdCleaningService.dutyLabel(subject) + ".";
             case CLEANING_WEEK_COMPLETED -> actor + " completed all cleaning tasks for the week.";
             case CLEANING_WEEK_REMINDER -> "Reminder: your cleaning checklist for this week is not finished yet.";
+            case CLEANING_BINS_REMINDER -> "Tonight's job: put the rubbish out for Thursday's collection.";
+            case CLEANING_BINS_FINAL_REMINDER -> "Final reminder: is the rubbish out? Collection is this morning, by 10:00.";
         };
 
         String tag = switch (type) {
@@ -67,6 +69,8 @@ final class HouseholdPushMessages {
                     "household-settlement-" + referenceId;
             case CLEANING_WEEK_ASSIGNED -> "cleaning-week-" + referenceId;
             case CLEANING_WEEK_REMINDER -> "cleaning-week-reminder-" + referenceId;
+            // The final reminder replaces Wednesday's on the lock screen.
+            case CLEANING_BINS_REMINDER, CLEANING_BINS_FINAL_REMINDER -> "cleaning-bins-" + referenceId;
             case SETTLEMENT_REMINDER -> "household-settlement-reminder";
             default -> null;
         };

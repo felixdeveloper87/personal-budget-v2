@@ -8,7 +8,7 @@ public enum HouseholdNotificationType {
     SETTLEMENT_CONFIRMED,
     SETTLEMENT_REJECTED,
     SETTLEMENT_CANCELLED,
-    /** Scheduled nudge (15th and 30th) to members who still owe money. */
+    /** Scheduled nudge (28th, 29th and 30th) to members who still owe money. */
     SETTLEMENT_REMINDER,
     MEMBER_JOINED,
     MEMBER_REMOVED,
@@ -16,5 +16,9 @@ public enum HouseholdNotificationType {
     CLEANING_DUTY_COMPLETED,
     CLEANING_WEEK_COMPLETED,
     /** Sunday nudge when this week's cleaning checklist is still unfinished. */
-    CLEANING_WEEK_REMINDER
+    CLEANING_WEEK_REMINDER,
+    /** Wednesday night: put the rubbish out for Thursday's collection. */
+    CLEANING_BINS_REMINDER,
+    /** Thursday morning: last call if the rubbish is still not out. */
+    CLEANING_BINS_FINAL_REMINDER
 }

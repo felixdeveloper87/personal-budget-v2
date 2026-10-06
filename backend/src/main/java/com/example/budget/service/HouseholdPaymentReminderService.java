@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Twice-monthly reminder to members who still owe money. It lands in the
+ * End-of-month reminder (28th, 29th and 30th) to members who still owe money. It lands in the
  * Household inbox and, through it, as a push notification.
  */
 @Service
@@ -60,7 +60,7 @@ public class HouseholdPaymentReminderService {
     }
 
     @Scheduled(
-            cron = "${app.household.payment.reminder-cron:0 0 9 15,30 * *}",
+            cron = "${app.household.payment.reminder-cron:0 0 9 28,29,30 * *}",
             zone = "${app.household.payment.reminder-zone:Europe/London}")
     @Transactional
     public void sendPaymentReminders() {
@@ -68,7 +68,8 @@ public class HouseholdPaymentReminderService {
     }
 
     void sendPaymentReminders(LocalDate today) {
-        if (today.getDayOfMonth() != 15 && today.getDayOfMonth() != 30) {
+        int day = today.getDayOfMonth();
+        if (day < 28 || day > 30) {
             return;
         }
         householdRepository.findAll().forEach(household -> {

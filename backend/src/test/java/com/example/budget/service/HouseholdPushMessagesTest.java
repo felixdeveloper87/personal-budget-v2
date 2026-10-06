@@ -55,4 +55,18 @@ class HouseholdPushMessagesTest {
         assertThat(message.body()).isEqualTo("Reminder: your cleaning checklist for this week is not finished yet.");
         assertThat(message.tag()).isEqualTo("cleaning-week-reminder-40");
     }
+
+    @Test
+    void binsRemindersShareOneTagSoTheFinalReplacesTheFirst() {
+        PushMessage wednesday = HouseholdPushMessages.forNotification(
+                HouseholdNotificationType.CLEANING_BINS_REMINDER, "Flat 1", "GBP", null, 40L,
+                "2026-10-05", null, null);
+        PushMessage thursday = HouseholdPushMessages.forNotification(
+                HouseholdNotificationType.CLEANING_BINS_FINAL_REMINDER, "Flat 1", "GBP", null, 40L,
+                "2026-10-05", null, null);
+
+        assertThat(wednesday.body()).isEqualTo("Tonight's job: put the rubbish out for Thursday's collection.");
+        assertThat(thursday.body()).startsWith("Final reminder:");
+        assertThat(thursday.tag()).isEqualTo(wednesday.tag()).isEqualTo("cleaning-bins-40");
+    }
 }

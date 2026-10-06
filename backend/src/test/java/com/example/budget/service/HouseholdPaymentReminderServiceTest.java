@@ -83,7 +83,7 @@ class HouseholdPaymentReminderServiceTest {
         when(settlementRepository.findByHouseholdOrderBySettlementDateDescIdDesc(household))
                 .thenReturn(List.of(completed));
 
-        service.sendPaymentReminders(LocalDate.of(2026, 9, 15));
+        service.sendPaymentReminders(LocalDate.of(2026, 9, 28));
 
         verify(notificationService).notifyMemberOnce(
                 eq(debtor),
@@ -92,14 +92,15 @@ class HouseholdPaymentReminderServiceTest {
                 isNull(),
                 eq("Leandro"),
                 argThat(amount -> amount.compareTo(new BigDecimal("15.00")) == 0),
-                eq("settlement-reminder:2026-09-15"));
+                eq("settlement-reminder:2026-09-28"));
         verify(notificationService, never()).notifyMemberOnce(
                 eq(payer), any(), any(), any(), any(), any(), any());
     }
 
     @Test
     void doesNothingOutsideTheReminderDays() {
-        service.sendPaymentReminders(LocalDate.of(2026, 9, 16));
+        service.sendPaymentReminders(LocalDate.of(2026, 9, 15));
+        service.sendPaymentReminders(LocalDate.of(2026, 10, 31));
 
         verifyNoInteractions(householdRepository, notificationService);
     }

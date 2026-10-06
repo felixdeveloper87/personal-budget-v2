@@ -200,4 +200,24 @@ class HouseholdNotificationServiceTest {
 
         verify(pushNotificationService, never()).sendToUser(any(), any());
     }
+
+    @Test
+    void singleCleaningTaskStaysInTheInboxWithoutAPush() {
+        when(pushNotificationService.isEnabled()).thenReturn(true);
+        when(actor.getId()).thenReturn(10L);
+        when(recipient.getId()).thenReturn(11L);
+        when(recipient.isActive()).thenReturn(true);
+        when(recipient.getHousehold()).thenReturn(household);
+
+        service.notifyMember(
+                recipient,
+                actor,
+                HouseholdNotificationType.CLEANING_DUTY_COMPLETED,
+                42L,
+                "shower_room",
+                null);
+
+        verify(notificationRepository).save(any());
+        verify(pushNotificationService, never()).sendToUser(any(), any());
+    }
 }
