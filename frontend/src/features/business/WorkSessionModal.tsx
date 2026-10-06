@@ -2,13 +2,23 @@ import { useEffect, useMemo, useState } from 'react'
 import { Box, Button, FormControl, FormLabel, HStack, Input, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { PremiumModal } from '../../components/ui'
 import { useI18n } from '../../i18n'
-import type { ManualWorkSessionRequest, WorkSession } from '../../types'
+import type { ManualWorkSessionRequest } from '../../types'
 import { combineLocal, formatDuration, localDateKey, localTimeKey } from './businessTime'
+
+/** What the form opens with: just a day (adding) or a whole period (editing). */
+export interface WorkSessionDraft {
+  workDate: string
+  startedAt?: string
+  endedAt?: string
+  breakSeconds?: number
+  note?: string | null
+}
 
 interface WorkSessionModalProps {
   isOpen: boolean
-  /** Null to add a new session. */
-  session: WorkSession | null
+  /** Null opens a blank form for today. */
+  draft: WorkSessionDraft | null
+  isEdit: boolean
   onClose: () => void
   onSubmit: (request: ManualWorkSessionRequest) => Promise<void>
 }
@@ -22,7 +32,7 @@ const fieldProps = {
 } as const
 
 /** Add or fix a session by hand, for when the Start / End buttons were forgotten. */
-export default function WorkSessionModal({ isOpen, session, onClose, onSubmit }: WorkSessionModalProps) {
+export default function WorkSessionModal({ isOpen, draft, isEdit, onClose, onSubmit }: WorkSessionModalProps) {
   const { t } = useI18n()
   const [date, setDate] = useState('')
   const [start, setStart] = useState('09:00')
@@ -33,20 +43,12 @@ export default function WorkSessionModal({ isOpen, session, onClose, onSubmit }:
 
   useEffect(() => {
     if (!isOpen) return
-    if (session) {
-      setDate(session.workDate)
-      setStart(localTimeKey(new Date(session.startedAt)))
-      setEnd(localTimeKey(new Date(session.endedAt ?? Date.now())))
-      setBreakMinutes(String(Math.round(session.breakSeconds / 60)))
-      setNote(session.note ?? '')
-    } else {
-      setDate(localDateKey(new Date()))
-      setStart('09:00')
-      setEnd('17:00')
-      setBreakMinutes('0')
-      setNote('')
-    }
-  }, [isOpen, session])
+    setDate(draft?.workDate ?? localDateKey(new Date()))
+    setStart(draft?.startedAt ? localTimeKey(new Date(draft.startedAt)) : '09:00')
+    setEnd(draft?.endedAt ? localTimeKey(new Date(draft.endedAt)) : '17:00')
+    setBreakMinutes(String(Math.round((draft?.breakSeconds ?? 0) / 60)))
+    setNote(draft?.note ?? '')
+  }, [isOpen, draft])
 
   // An end earlier than the start means the session ran past midnight.
   const overnight = end <= start
@@ -84,7 +86,7 @@ export default function WorkSessionModal({ isOpen, session, onClose, onSubmit }:
     >
       <Box as="form" px={{ base: 5, md: 6 }} pt={{ base: 7, md: 6 }} pb={5} onSubmit={(event: React.FormEvent) => { event.preventDefault(); void submit() }}>
         <Text as="h2" fontSize="xl" fontWeight={650} color="var(--pb-ink)" mb={5}>
-          {session ? t('business.form.titleEdit') : t('business.form.titleNew')}
+          {isEdit ? t('business.form.titleEdit') : t('business.form.titleNew')}
         </Text>
         <VStack spacing={4} align="stretch">
           <FormControl isRequired>

@@ -28,7 +28,7 @@ import AddTransactionModal from '../../components/transactions/AddTransactionMod
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
-import WorkSessionModal from './WorkSessionModal'
+import WorkSessionModal, { type WorkSessionDraft } from './WorkSessionModal'
 import {
   dateFromKey,
   formatClock,
@@ -67,8 +67,10 @@ export default function BusinessPage() {
   const [busy, setBusy] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const fetchedAt = useRef(Date.now())
-  const [editing, setEditing] = useState<WorkSession | null>(null)
-  const [deleting, setDeleting] = useState<WorkSession | null>(null)
+  const [draft, setDraft] = useState<WorkSessionDraft | null>(null)
+  /** Sessions being edited as one period (a day's finished sessions). Empty when adding. */
+  const [editingIds, setEditingIds] = useState<number[]>([])
+  const [deletingDay, setDeletingDay] = useState<string | null>(null)
   const sessionForm = useDisclosure()
   const earningsForm = useDisclosure()
 
@@ -121,34 +123,79 @@ export default function BusinessPage() {
     (session) => t('business.toast.ended', { duration: formatDuration(session.workedSeconds) }),
   )
 
+  /** Finished sessions per day; the running one is managed by the timer, not here. */
+  const endedByDay = useMemo(() => {
+    const map = new Map<string, WorkSession[]>()
+    for (const session of summary?.sessions ?? []) {
+      if (session.status !== 'ENDED') continue
+      map.set(session.workDate, [...(map.get(session.workDate) ?? []), session])
+    }
+    return map
+  }, [summary])
+
+  const openAdd = (workDate?: string) => {
+    setDraft(workDate ? { workDate } : null)
+    setEditingIds([])
+    sessionForm.onOpen()
+  }
+
+  /**
+   * A day is edited as one period: earliest start, latest end, and the gaps as
+   * break. A day without hours yet opens the same form, ready to add them.
+   */
+  const openEditDay = (workDate: string) => {
+    const sessions = endedByDay.get(workDate) ?? []
+    if (sessions.length === 0) {
+      openAdd(workDate)
+      return
+    }
+    const startMs = Math.min(...sessions.map((s) => new Date(s.startedAt).getTime()))
+    const endMs = Math.max(...sessions.map((s) => new Date(s.endedAt ?? s.startedAt).getTime()))
+    const worked = sessions.reduce((sum, s) => sum + s.workedSeconds, 0)
+    setDraft({
+      workDate,
+      startedAt: new Date(startMs).toISOString(),
+      endedAt: new Date(endMs).toISOString(),
+      breakSeconds: Math.max(0, (endMs - startMs) / 1000 - worked),
+      note: sessions.find((s) => s.note)?.note ?? null,
+    })
+    setEditingIds(sessions.map((s) => s.id))
+    sessionForm.onOpen()
+  }
+
+  const closeForm = () => {
+    sessionForm.onClose()
+    setDraft(null)
+    setEditingIds([])
+  }
+
   const saveSession = async (request: ManualWorkSessionRequest) => {
     try {
-      if (editing) await updateWorkSession(editing.id, request)
-      else await createWorkSession(request)
+      if (editingIds.length > 0) {
+        const [first, ...rest] = editingIds
+        await updateWorkSession(first, request)
+        await Promise.all(rest.map((id) => deleteWorkSession(id)))
+      } else {
+        await createWorkSession(request)
+      }
       ToastService.success({ title: t('business.toast.saved') })
-      sessionForm.onClose()
-      setEditing(null)
+      closeForm()
       await load()
     } catch (error) {
       ToastService.apiError(error, { title: t('business.toast.failed') })
     }
   }
 
-  const confirmDelete = async () => {
-    if (!deleting) return
+  const confirmDeleteDay = async () => {
+    if (!deletingDay) return
     try {
-      await deleteWorkSession(deleting.id)
+      await Promise.all((endedByDay.get(deletingDay) ?? []).map((session) => deleteWorkSession(session.id)))
       ToastService.success({ title: t('business.toast.deleted') })
-      setDeleting(null)
+      setDeletingDay(null)
       await load()
     } catch (error) {
       ToastService.apiError(error, { title: t('business.toast.failed') })
     }
-  }
-
-  const openSession = (session: WorkSession | null) => {
-    setEditing(session)
-    sessionForm.onOpen()
   }
 
   const elapsed = active ? liveWorkedSeconds(active, fetchedAt.current, now) : 0
@@ -213,7 +260,7 @@ export default function BusinessPage() {
                 <StopIcon size={18} weight="fill" aria-hidden="true" />{t('business.end')}
               </Box>
             )}
-            <Box {...heroButton} px={4} bg="transparent" color="white" onClick={() => openSession(null)} _hover={{ bg: 'rgba(255,255,255,.12)' }}>
+            <Box {...heroButton} px={4} bg="transparent" color="white" onClick={() => openAdd()} _hover={{ bg: 'rgba(255,255,255,.12)' }}>
               <PlusIcon size={16} weight="bold" aria-hidden="true" />{t('business.addManually')}
             </Box>
           </HStack>
@@ -280,6 +327,30 @@ export default function BusinessPage() {
                       <Text fontWeight={700} color={day.hourlyRate == null ? 'var(--pb-ink-faint)' : 'var(--nu-brand)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
                         {day.hourlyRate == null ? '—' : t('business.perHourValue', { amount: formatCurrency(day.hourlyRate) })}
                       </Text>
+                      <HStack spacing={0.5} flexShrink={0}>
+                        {!endedByDay.has(day.date) && (
+                          <IconButton
+                            aria-label={t('business.day.add')}
+                            icon={<PlusIcon size={16} weight="bold" />}
+                            size="sm" variant="ghost" borderRadius="full" color="var(--nu-brand)"
+                            onClick={() => openAdd(day.date)}
+                          />
+                        )}
+                        <IconButton
+                          aria-label={t('business.day.edit')}
+                          icon={<PencilSimpleIcon size={16} />}
+                          size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
+                          onClick={() => openEditDay(day.date)}
+                        />
+                        {endedByDay.has(day.date) && (
+                          <IconButton
+                            aria-label={t('business.day.delete')}
+                            icon={<TrashIcon size={16} />}
+                            size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
+                            onClick={() => setDeletingDay(day.date)}
+                          />
+                        )}
+                      </HStack>
                     </Flex>
                   )) : (
                     <Text py={6} textAlign="center" fontSize="sm" color="var(--pb-ink-soft)">{t('business.days.empty')}</Text>
@@ -287,59 +358,6 @@ export default function BusinessPage() {
                 </VStack>
               </NuSection>
 
-              <NuSection
-                title={t('business.sessions')}
-                subtitle={t('business.sessionsCaption')}
-                action={
-                  <IconButton
-                    aria-label={t('business.addManually')}
-                    icon={<PlusIcon size={18} weight="bold" />}
-                    onClick={() => openSession(null)}
-                    borderRadius="full"
-                    bg="var(--nu-surface)"
-                    color="var(--nu-brand)"
-                  />
-                }
-              >
-                <VStack spacing={0} align="stretch" divider={<Box h="1px" bg="var(--pb-hair)" />}>
-                  {summary?.sessions.length ? summary.sessions.map((session) => (
-                    <Flex key={session.id} py={3} align="center" gap={3}>
-                      <Box flex={1} minW={0}>
-                        <Text fontWeight={600} color="var(--pb-ink)">
-                          {formatDate(dateFromKey(session.workDate), { day: 'numeric', month: 'short' })}
-                          {' · '}
-                          {time(session.startedAt)}
-                          {' – '}
-                          {session.endedAt ? time(session.endedAt) : t('business.session.running')}
-                        </Text>
-                        <Text fontSize="sm" color="var(--pb-ink-soft)" noOfLines={1}>
-                          {formatDuration(session.id === active?.id ? elapsed : session.workedSeconds)}
-                          {session.breakSeconds > 0 && ` · ${t('business.session.break', { duration: formatDuration(session.breakSeconds) })}`}
-                          {session.note && ` · ${session.note}`}
-                        </Text>
-                      </Box>
-                      {session.status === 'ENDED' && (
-                        <HStack spacing={1}>
-                          <IconButton
-                            aria-label={t('business.session.edit')}
-                            icon={<PencilSimpleIcon size={16} />}
-                            size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
-                            onClick={() => openSession(session)}
-                          />
-                          <IconButton
-                            aria-label={t('business.session.delete')}
-                            icon={<TrashIcon size={16} />}
-                            size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
-                            onClick={() => setDeleting(session)}
-                          />
-                        </HStack>
-                      )}
-                    </Flex>
-                  )) : (
-                    <Text py={6} textAlign="center" fontSize="sm" color="var(--pb-ink-soft)">{t('business.days.empty')}</Text>
-                  )}
-                </VStack>
-              </NuSection>
             </>
           )}
         </Box>
@@ -347,15 +365,18 @@ export default function BusinessPage() {
 
       <WorkSessionModal
         isOpen={sessionForm.isOpen}
-        session={editing}
-        onClose={() => { sessionForm.onClose(); setEditing(null) }}
+        draft={draft}
+        isEdit={editingIds.length > 0}
+        onClose={closeForm}
         onSubmit={saveSession}
       />
       <ConfirmDeleteDialog
-        isOpen={deleting !== null}
-        onClose={() => setDeleting(null)}
-        onConfirm={confirmDelete}
-        title={t('business.session.deleteTitle')}
+        isOpen={deletingDay !== null}
+        onClose={() => setDeletingDay(null)}
+        onConfirm={confirmDeleteDay}
+        title={deletingDay
+          ? t('business.day.deleteTitle', { date: formatDate(dateFromKey(deletingDay), { weekday: 'short', day: 'numeric', month: 'short' }) })
+          : ''}
       />
       <AddTransactionModal
         isOpen={earningsForm.isOpen}
