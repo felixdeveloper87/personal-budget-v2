@@ -44,7 +44,7 @@ export const dashboardTransactionsTranslations: TranslationBundle = {
     'dashboard.goodAfternoon': 'Good afternoon',
     'dashboard.goodEvening': 'Good evening',
     'dashboard.monthlyBudgetSnapshot': 'Monthly budget snapshot',
-    'dashboard.netThisMonth': 'Net this monthTest',
+    'dashboard.netThisMonth': 'Net this month',
     'dashboard.outflow': 'Outflow',
     'dashboard.incomeUsed': 'Income used',
     'dashboard.ofIncomeSpent': 'of income spent',
