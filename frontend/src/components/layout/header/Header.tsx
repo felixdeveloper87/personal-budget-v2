@@ -17,6 +17,7 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */
 export const HEADER_HEIGHT = { base: '72px', md: '64px' } as const
+export const MOBILE_NAV_SAFE_HEIGHT = 'calc(56px + max(8px, env(safe-area-inset-bottom, 0px)))'
 
 interface HeaderProps {
   onOpenProfile?: () => void
@@ -26,8 +27,6 @@ interface HeaderProps {
   onPageChange?: (page: AppPage) => void
   /** When true the desktop NavBar is hidden (sidebar handles navigation). */
   hasSidebar?: boolean
-  /** Installed PWA shell: use the all-pages carousel at every viewport width. */
-  forceCarouselNav?: boolean
 }
 
 export default function Header({
@@ -37,7 +36,6 @@ export default function Header({
   currentPage = 'dashboard',
   onPageChange,
   hasSidebar = false,
-  forceCarouselNav = false,
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const ed = useEd()
@@ -212,7 +210,7 @@ export default function Header({
             )}
 
             {/* Desktop primary nav (md+). Hidden when sidebar is active. */}
-            {user && !hasSidebar && !forceCarouselNav && (
+            {user && !hasSidebar && (
               <Box
                 display={{ base: 'none', md: 'block' }}
                 flexShrink={0}
@@ -244,22 +242,6 @@ export default function Header({
             </Box>
           </Flex>
 
-          {/* Compact/PWA primary nav: every destination in one carousel. */}
-          {user && (
-            <Box
-              display={forceCarouselNav ? 'block' : { base: 'block', md: 'none' }}
-              pb={onBrand ? 1 : 3}
-              pt={onBrand ? 0 : 1}
-              mx={onBrand ? -2 : 0}
-            >
-              <NavBar
-                variant="mobile"
-                items={navItems}
-                currentPage={currentPage}
-                onPageChange={onPageChange}
-              />
-            </Box>
-          )}
         </Container>
         </OnBrandContext.Provider>
 
@@ -278,6 +260,38 @@ export default function Header({
           zIndex={3}
         />
       </Box>
+
+      {/* Mobile-only app navigation: every page lives in one bottom carousel. */}
+      {user && (
+        <OnBrandContext.Provider value={onBrand}>
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            position="fixed"
+            left={0}
+            right={0}
+            bottom={0}
+            zIndex={1100}
+            bg={ON_BRAND.bg}
+            borderTop="1px solid"
+            borderColor={ON_BRAND.line}
+            boxShadow="0 -10px 28px rgba(40, 0, 70, 0.18)"
+            px={2}
+            pt={1}
+            pb="max(8px, env(safe-area-inset-bottom, 0px))"
+            sx={{
+              paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+              paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+            }}
+          >
+            <NavBar
+              variant="mobile"
+              items={navItems}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
+            />
+          </Box>
+        </OnBrandContext.Provider>
+      )}
 
       {user && !isAdminOnly && (
         <SpotlightSearch isOpen={isSearchOpen} onClose={closeSearch} />

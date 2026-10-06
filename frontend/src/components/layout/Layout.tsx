@@ -2,13 +2,12 @@ import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@cha
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { EditorialProvider, editorialPalette } from '../../editorial'
-import { useStandalonePwa } from '../../hooks/useStandalonePwa'
 // The chrome (Sidebar, SearchTrigger, masthead date) reads the pb-* CSS vars
 // directly, so the token sheet must load with the shell, not only the dashboard.
 import '../../features/dashboard/theme/pb-tokens.css'
 import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
-import Header from './header/Header'
+import Header, { MOBILE_NAV_SAFE_HEIGHT } from './header/Header'
 import Sidebar, { SIDEBAR_COLLAPSED_W, SIDEBAR_EXPANDED_W } from './Sidebar'
 import type { AppPage } from './header/navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './header/navigation.config'
@@ -62,14 +61,11 @@ export default function Layout({
   const profileModal = useDisclosure()
   const settingsModal = useDisclosure()
   const { isCollapsed, toggle } = useSidebarCollapse()
-  const isStandalonePwa = useStandalonePwa()
 
-  // Installed PWAs keep the compact app shell at every width: one carousel
-  // owns all page navigation instead of switching to the desktop sidebar.
+  // Show sidebar for logged-in non-admin users on md+ screens.
   const isDesktopOrTablet = useBreakpointValue({ base: false, md: true }) ?? false
   const isAdmin = Boolean(user?.admin)
-  const usePwaCarousel = Boolean(user) && !isAdmin && isStandalonePwa
-  const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet && !usePwaCarousel
+  const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet
 
   // The whole user app wears the "Editorial · guilloché" identity (light/dark
   // variants). The provider lives here once, so the chrome and every shared
@@ -125,7 +121,6 @@ export default function Layout({
           currentPage={currentPage}
           onPageChange={onPageChange}
           hasSidebar={showSidebar}
-          forceCarouselNav={usePwaCarousel}
         />
 
         {/* Backdrop guilloché único — toda página herda o fundo da home
@@ -143,6 +138,9 @@ export default function Layout({
         </Box>
 
         {showFooter ? <Footer /> : null}
+
+        {/* Lets the final content/footer scroll fully above the fixed mobile nav. */}
+        {user && <Box display={{ base: 'block', md: 'none' }} flexShrink={0} h={MOBILE_NAV_SAFE_HEIGHT} />}
 
         <UserProfileModal
           isOpen={profileModal.isOpen}
