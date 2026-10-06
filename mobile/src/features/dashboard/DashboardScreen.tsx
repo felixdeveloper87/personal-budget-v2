@@ -372,7 +372,7 @@ export function DashboardScreen() {
           ) : summary ? (
             <View style={styles.section}>
               <View style={styles.sectionHeadingRow}>
-                <Text style={styles.sectionHeading}>Net this month</Text>
+                <Text style={styles.sectionHeading}>Net this month//test</Text>
                 <View style={styles.sectionMetaRow}>
                   <Text numberOfLines={1} style={styles.sectionMeta}>
                     {monthLabel(currentDate)} · Day {currentDate.getDate()} of {daysInMonth}

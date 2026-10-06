@@ -26,8 +26,6 @@ export function useRefreshOnReturn(): number {
       hiddenAt = null
       if (awayFor < AWAY_THRESHOLD_MS || isUserBusy()) return
       setRefreshKey((key) => key + 1)
-      // Also look for a new deploy; it is picked up on the next full reload.
-      void navigator.serviceWorker?.getRegistration().then((registration) => registration?.update()).catch(() => undefined)
     }
 
     document.addEventListener('visibilitychange', onVisibilityChange)

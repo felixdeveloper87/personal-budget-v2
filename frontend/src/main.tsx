@@ -15,6 +15,11 @@ import { AuthProvider } from './contexts/AuthContext'
 import { SearchProvider } from './contexts/SearchContext'
 import { AppToastContainer } from './services/toast'
 import { I18nProvider } from './i18n'
+import { reloadWhenNewVersionTakesOver } from './utils/pwa'
+
+if (!window.location.pathname.startsWith('/reports/print')) {
+  reloadWhenNewVersionTakesOver()
+}
 
 // The print/export page is a standalone route (no app shell). The project has no
 // router, so we branch on the pathname — nginx already falls back to index.html.

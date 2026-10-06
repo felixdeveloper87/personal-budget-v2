@@ -29,3 +29,49 @@ export async function reloadApp(): Promise<void> {
   }
   window.location.reload()
 }
+
+/**
+ * Makes a new deploy show up without the user doing anything.
+ *
+ * The service worker serves the cached version first and installs the new one
+ * in the background; it then takes control (skipWaiting + clientsClaim), but
+ * the open page keeps running the old code. iOS also tends to resume the
+ * installed app instead of relaunching it. So: check for updates whenever the
+ * app returns to the foreground, and reload once a new version takes over —
+ * straight away, or as soon as the app is backgrounded if the user is busy.
+ */
+export function reloadWhenNewVersionTakesOver(): void {
+  if (!('serviceWorker' in navigator)) return
+  // The very first install also fires controllerchange; only a replacement counts.
+  let hadController = Boolean(navigator.serviceWorker.controller)
+  let reloading = false
+  const reload = () => {
+    if (reloading) return
+    reloading = true
+    window.location.reload()
+  }
+
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadController) {
+      hadController = true
+      return
+    }
+    if (!isUserBusy()) {
+      reload()
+      return
+    }
+    const reloadWhenHidden = () => {
+      if (document.visibilityState !== 'hidden') return
+      document.removeEventListener('visibilitychange', reloadWhenHidden)
+      reload()
+    }
+    document.addEventListener('visibilitychange', reloadWhenHidden)
+  })
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return
+    void navigator.serviceWorker.getRegistration()
+      .then((registration) => registration?.update())
+      .catch(() => undefined)
+  })
+}
