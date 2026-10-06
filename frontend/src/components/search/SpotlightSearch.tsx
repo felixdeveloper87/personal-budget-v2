@@ -217,10 +217,21 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
       contentProps={{
         className: 'nu-dashboard',
         bg: 'var(--nu-page)',
-        maxH: { base: 'calc(100dvh - 24px)', sm: '78dvh' },
+        // Mobile: a centred card at 80% of the screen height. `size="full"`
+        // alone is 100vw wide, so with the side margins the right edge (and
+        // the close button) fell off screen; the width accounts for them.
+        w: { base: 'calc(100vw - 24px)', sm: '100%' },
+        maxW: { base: 'calc(100vw - 24px)', sm: undefined },
+        maxH: { base: '80dvh', sm: '78dvh' },
+        minH: 0,
         mx: { base: 3, sm: 0 },
-        my: { base: 3, sm: 0 },
+        my: 0,
         borderRadius: { base: '24px', md: '24px' },
+        // The shared modal styles force a full-screen height; cap it here.
+        sx: {
+          height: '80vh',
+          '@supports (height: 100dvh)': { height: '80dvh' },
+        },
       }}
     >
       <Flex direction="column" h="full" minH={0} bg="var(--nu-page)" position="relative">
