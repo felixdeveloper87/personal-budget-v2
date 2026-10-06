@@ -7,6 +7,7 @@ import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdPageState } from '../../../types'
 import { Check, Pencil, Trash2, X } from '../../../components/ui/icons'
 import { ModalHeader as AppModalHeader } from '../../../components/ui'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../../components/ui/modalLayout'
 
 export function MembersModal({
   isOpen,
@@ -94,7 +95,10 @@ export function MembersModal({
         maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
         my={{ base: 0, md: 16 }}
         borderRadius={{ base: 0, md: 'md' }}
+        containerProps={sheetContainerProps}
+        sx={SHEET_SX}
       >
+        <Box {...sheetGrabberProps} />
         <ChakraModalHeader p={0}>
           <AppModalHeader
             title={t('household.manage.title')}

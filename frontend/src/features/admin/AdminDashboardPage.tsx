@@ -41,6 +41,7 @@ import type { AppPage } from '../../components/layout/header/navigation.config'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../components/ui/modalLayout'
 
 interface AdminDashboardPageProps {
   onPageChange?: (page: AppPage) => void
@@ -181,7 +182,8 @@ export default function AdminDashboardPage({ onPageChange }: AdminDashboardPageP
     <Box pt={{ base: 6, md: 10 }} pb={PAGE_BOTTOM_PADDING} px={{ base: 3, md: 6 }}>
       <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={closeRemoveDialog}>
         <AlertDialogOverlay />
-        <AlertDialogContent mx={3}>
+        <AlertDialogContent mx={3} containerProps={sheetContainerProps} sx={SHEET_SX}>
+          <Box {...sheetGrabberProps} />
           <AlertDialogHeader>
             {pendingDelete && !pendingDelete.approved
               ? t('admin.dialog.rejectTitle')

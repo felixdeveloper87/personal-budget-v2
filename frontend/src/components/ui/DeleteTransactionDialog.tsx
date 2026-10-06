@@ -20,6 +20,7 @@ import { deleteTransaction } from '../../api'
 import { Transaction } from '../../types'
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from './modalLayout'
 
 interface DeleteTransactionDialogProps {
   transaction: Transaction | null
@@ -100,7 +101,10 @@ export default function DeleteTransactionDialog({
           maxW="440px"
           mx={4}
           overflow="hidden"
+          containerProps={sheetContainerProps}
+          sx={SHEET_SX}
         >
+          <Box {...sheetGrabberProps} />
           <AlertDialogHeader
             px={6}
             pt={5}

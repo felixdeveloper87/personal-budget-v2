@@ -46,6 +46,7 @@ import {
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
 
 /** Household notifications, in the order they happen through the week. */
 const HOUSEHOLD_SCHEDULE = [
@@ -529,7 +530,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
         closeOnOverlayClick={!deleting}
       >
         <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
-          <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4}>
+          <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
+            <Box {...sheetGrabberProps} />
             <AlertDialogHeader display="flex" alignItems="center" gap={3}>
               <Box
                 w={9}

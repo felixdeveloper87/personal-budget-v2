@@ -14,6 +14,7 @@ import {
 } from '@chakra-ui/react'
 import { EyeOff } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../../components/ui/modalLayout'
 
 interface HideSpendingPaceDialogProps {
   isOpen: boolean
@@ -49,7 +50,10 @@ export default function HideSpendingPaceDialog({
           maxW="440px"
           mx={4}
           overflow="hidden"
+          containerProps={sheetContainerProps}
+          sx={SHEET_SX}
         >
+          <Box {...sheetGrabberProps} />
           <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
             <Box
               w={9}

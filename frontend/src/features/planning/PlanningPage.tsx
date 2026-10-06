@@ -230,7 +230,7 @@ function BudgetFormModal({
       isOpen={isOpen}
       onClose={onClose}
       size={{ base: 'full', sm: 'md' }}
-      contentProps={{ className: 'nu-dashboard', maxH: { base: 'calc(100dvh - 24px)', sm: '78dvh' } }}
+      contentProps={{ className: 'nu-dashboard', maxH: { md: '78dvh' } }}
       header={<ModalHeader title={t(budget ? 'planning.budget.editTitle' : 'planning.budget.title')} caption={monthLabel} onClose={onClose} />}
     >
       <VStack spacing={4} align="stretch" p={5} bg="var(--nu-page)">
