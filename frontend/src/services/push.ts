@@ -4,6 +4,7 @@ import {
   removePushSubscriptionOnLogout,
   savePushSubscription,
 } from '../api'
+import { isStandalone } from '../utils/pwa'
 
 /**
  * Browser side of Web Push. The service worker (public/push-sw.js) shows the
@@ -32,11 +33,6 @@ function isIos(): boolean {
   const ua = navigator.userAgent
   // iPadOS reports itself as a Mac with touch.
   return /iPad|iPhone|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1)
-}
-
-function isStandalone(): boolean {
-  return window.matchMedia?.('(display-mode: standalone)').matches
-    || (navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
 /** Resolves the active registration, or null when no service worker runs (e.g. Vite dev). */

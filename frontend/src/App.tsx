@@ -15,7 +15,9 @@ import PlanningPage from './pages/PlanningPage'
 import HouseholdPage from './pages/HouseholdPage'
 import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
-import { useState, useEffect, useCallback } from 'react'
+import { Fragment, useState, useEffect, useCallback } from 'react'
+import PullToRefresh from './components/layout/PullToRefresh'
+import { useRefreshOnReturn } from './hooks/useRefreshOnReturn'
 import type { AppPage } from './components/layout/header/navigation.config'
 import { useI18n } from './i18n'
 
@@ -68,6 +70,7 @@ function authTabFromBrowserLocation(): 'signIn' | 'signUp' | null {
 }
 
 function AppContent() {
+  const refreshKey = useRefreshOnReturn()
   const { user, loading } = useAuth()
   const { t } = useI18n()
   const [showAuth, setShowAuth] = useState(() => authTabFromBrowserLocation() !== null)
@@ -161,26 +164,35 @@ function AppContent() {
   if (user) {
     if (user.admin) {
       return (
-        <Layout
-          currentPage="admin"
-          onPageChange={navigateToPage}
-          showFooter={false}
-        >
-          <AdminDashboardPage onPageChange={navigateToPage} />
-        </Layout>
+        <>
+          <Layout
+            currentPage="admin"
+            onPageChange={navigateToPage}
+            showFooter={false}
+          >
+            <AdminDashboardPage key={refreshKey} onPageChange={navigateToPage} />
+          </Layout>
+          <PullToRefresh />
+        </>
       )
     }
 
     const renderPage = PAGE_RENDERERS[currentPage] ?? PAGE_RENDERERS.dashboard
     return (
-      <Layout currentPage={currentPage} onPageChange={navigateToPage}>
-        {renderPage({
-          onPageChange: navigateToPage,
-          cardStatementTarget,
-          onOpenCardStatement: openCardStatement,
-          onCardStatementTargetHandled: () => setCardStatementTarget(null),
-        })}
-      </Layout>
+      <>
+        <Layout currentPage={currentPage} onPageChange={navigateToPage}>
+          {/* A new key after a long time away remounts the page so it refetches. */}
+          <Fragment key={refreshKey}>
+            {renderPage({
+              onPageChange: navigateToPage,
+              cardStatementTarget,
+              onOpenCardStatement: openCardStatement,
+              onCardStatementTargetHandled: () => setCardStatementTarget(null),
+            })}
+          </Fragment>
+        </Layout>
+        <PullToRefresh />
+      </>
     )
   }
 
