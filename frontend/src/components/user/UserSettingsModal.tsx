@@ -17,7 +17,6 @@ import {
   VStack,
   useColorModeValue,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
 import { ModalHeader, PremiumModal } from '../ui'
@@ -46,8 +45,6 @@ interface UserSettingsModalProps {
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
   const { locale, setLocale, t } = useI18n()
   const ed = useEd()
-  const toast = useToast()
-
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
@@ -117,13 +114,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   }
 
   const showComingSoon = () => {
-    toast({
+    ToastService.info({
       title: t('settings.comingSoon'),
       description: t('settings.comingSoonDescription'),
-      status: 'info',
       duration: 2500,
-      isClosable: true,
-      position: 'top',
     })
   }
 
