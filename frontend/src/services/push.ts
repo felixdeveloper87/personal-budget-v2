@@ -55,6 +55,12 @@ async function currentSubscription(): Promise<PushSubscription | null> {
   return reg ? reg.pushManager.getSubscription() : null
 }
 
+/** Only what the backend stores; toJSON() also carries expirationTime and more. */
+function toRequest(subscription: PushSubscription): PushSubscriptionJSON {
+  const { endpoint, keys } = subscription.toJSON()
+  return { endpoint, keys: { p256dh: keys?.p256dh ?? '', auth: keys?.auth ?? '' } }
+}
+
 function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
   const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=')
   const binary = atob(padded)
@@ -100,7 +106,7 @@ export async function enablePush(): Promise<PushState> {
     userVisibleOnly: true,
     applicationServerKey: base64UrlToBytes(config.publicKey),
   })
-  await savePushSubscription(subscription.toJSON())
+  await savePushSubscription(toRequest(subscription))
   return 'on'
 }
 
@@ -120,7 +126,7 @@ export async function disablePush(): Promise<PushState> {
 export async function syncPushSubscription(): Promise<void> {
   if (!isPushSupported() || Notification.permission !== 'granted') return
   const subscription = await currentSubscription()
-  if (subscription) await savePushSubscription(subscription.toJSON())
+  if (subscription) await savePushSubscription(toRequest(subscription))
 }
 
 /** Stops this device receiving the signed-out user's notifications. Best effort. */
