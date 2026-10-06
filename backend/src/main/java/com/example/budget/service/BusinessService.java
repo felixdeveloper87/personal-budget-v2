@@ -197,8 +197,9 @@ public class BusinessService {
 
     /**
      * Daily cost from the last three complete months (in October: July to
-     * September). Working days are the days with earnings in that window, so
-     * holidays, days off and extra days all count as they really happened.
+     * September). Costs count on their payment date, when the money left (a card
+     * purchase on its bill date). Working days are the days with earnings in that
+     * window, by transaction date, so days off and extra days count as they happened.
      */
     @Transactional(readOnly = true)
     public CostBasis costBasis(Long userId, LocalDate today) {
@@ -206,7 +207,7 @@ public class BusinessService {
         LocalDate windowFrom = current.minusMonths(COST_WINDOW_MONTHS).atDay(1);
         LocalDate windowTo = current.minusMonths(1).atEndOfMonth();
         BigDecimal spend = transactionRepository
-                .sumByDayForCategory(userId, TransactionType.EXPENSE, COST_CATEGORY, windowFrom, windowTo)
+                .sumByPaymentDateForCategory(userId, TransactionType.EXPENSE, COST_CATEGORY, windowFrom, windowTo)
                 .stream()
                 .map(row -> (BigDecimal) row[1])
                 .reduce(BigDecimal.ZERO, BigDecimal::add);

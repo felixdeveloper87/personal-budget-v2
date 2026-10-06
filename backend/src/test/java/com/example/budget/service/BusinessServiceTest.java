@@ -130,7 +130,7 @@ class BusinessServiceTest {
                 USER, TransactionType.INCOME, BusinessService.EARNINGS_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(earningDays(60));
-        when(transactionRepository.sumByDayForCategory(
+        when(transactionRepository.sumByPaymentDateForCategory(
                 USER, TransactionType.EXPENSE, BusinessService.COST_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(List.<Object[]>of(
@@ -152,7 +152,7 @@ class BusinessServiceTest {
                 USER, TransactionType.INCOME, BusinessService.EARNINGS_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(earningDays(64));
-        when(transactionRepository.sumByDayForCategory(
+        when(transactionRepository.sumByPaymentDateForCategory(
                 USER, TransactionType.EXPENSE, BusinessService.COST_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(List.<Object[]>of(new Object[] {LocalDate.of(2026, 8, 1), new BigDecimal("1256")}));
