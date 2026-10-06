@@ -27,6 +27,7 @@ import { ToastService } from '../../services/toast'
 import {
   AlertTriangle,
   Bell,
+  Home,
   Download,
   Globe,
   Settings,
@@ -37,6 +38,17 @@ import {
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
+
+/** Household notifications, in the order they happen through the week. */
+const HOUSEHOLD_SCHEDULE = [
+  'activity',
+  'cleaningWeek',
+  'bins',
+  'binsFinal',
+  'cleaningUnfinished',
+  'cleaningDone',
+  'payments',
+] as const
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -269,9 +281,9 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             </VStack>
           </Box>
 
-          {/* Notifications */}
+          {/* Household: everything the shared-home core sends, for people who only use that part */}
           <Box>
-            <SectionTitle icon={Bell} label={t('settings.notifications')} />
+            <SectionTitle icon={Home} label={t('settings.household')} />
             <VStack
               spacing={0}
               align="stretch"
@@ -304,6 +316,37 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   />
                 </HStack>
               </SettingRow>
+              <Box px={4} py={3.5} bg={rowBg}>
+                <Text fontSize="xs" fontWeight={600} color={mutedColor} mb={2}>
+                  {t('settings.household.whatYouGet')}
+                </Text>
+                <VStack spacing={1.5} align="stretch">
+                  {HOUSEHOLD_SCHEDULE.map((item) => (
+                    <HStack key={item} spacing={3} align="baseline">
+                      <Text fontSize="xs" fontWeight={700} color={textColor} minW="84px" flexShrink={0}>
+                        {t(`settings.household.when.${item}`)}
+                      </Text>
+                      <Text fontSize="xs" color={mutedColor}>
+                        {t(`settings.household.what.${item}`)}
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              </Box>
+            </VStack>
+          </Box>
+
+          {/* Notifications */}
+          <Box>
+            <SectionTitle icon={Bell} label={t('settings.notifications')} />
+            <VStack
+              spacing={0}
+              align="stretch"
+              border="1px solid"
+              borderColor={borderColor}
+              borderRadius="xl"
+              overflow="hidden"
+            >
               <SettingRow
                 label={t('settings.emailReports')}
                 description={t('settings.emailReportsDescription')}
