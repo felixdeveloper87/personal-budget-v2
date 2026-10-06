@@ -12,7 +12,8 @@ export default defineConfig(({ mode }) => {
         // New deploys activate on the next load; no prompt needed.
         registerType: 'autoUpdate',
         injectRegister: 'auto',
-        includeAssets: ['favicon.svg', 'apple-touch-icon-180x180.png'],
+        // workbox.globPatterns already precaches every icon; avoid duplicate entries.
+        includeManifestIcons: false,
         manifest: {
           id: '/',
           name: 'Personal Budget',
@@ -39,7 +40,10 @@ export default defineConfig(({ mode }) => {
             'pwa-*.png',
             'maskable-icon-*.png',
             'apple-touch-icon-*.png',
+            'badge-*.png',
           ],
+          // Push and notification-click handlers live in public/push-sw.js.
+          importScripts: ['push-sw.js'],
           // The main bundle is ~2.2 MB, above Workbox's 2 MiB default.
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
           navigateFallback: '/index.html',

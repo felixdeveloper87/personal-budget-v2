@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class HouseholdPaymentEmailServiceTest {
+    @Mock private PushNotificationService pushNotificationService;
     @Mock private HouseholdRepository householdRepository;
     @Mock private HouseholdMemberRepository memberRepository;
     @Mock private HouseholdExpenseRepository expenseRepository;
@@ -50,6 +51,7 @@ class HouseholdPaymentEmailServiceTest {
                 settlementRepository,
                 resendEmailClient,
                 emailTemplate,
+                pushNotificationService,
                 "Europe/London");
     }
 

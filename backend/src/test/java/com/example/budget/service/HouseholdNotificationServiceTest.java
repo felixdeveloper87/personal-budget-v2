@@ -14,10 +14,13 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class HouseholdNotificationServiceTest {
+    @Mock private PushNotificationService pushNotificationService;
     @Mock
     private HouseholdNotificationRepository notificationRepository;
     @Mock
@@ -39,7 +42,8 @@ class HouseholdNotificationServiceTest {
     void setUp() {
         service = new HouseholdNotificationService(
                 notificationRepository,
-                memberRepository);
+                memberRepository,
+                pushNotificationService);
     }
 
     @Test
@@ -143,5 +147,57 @@ class HouseholdNotificationServiceTest {
                 null,
                 "cleaning-week-assigned:42");
         verify(notificationRepository, never()).save(any());
+    }
+
+    @Test
+    void storedNotificationIsMirroredAsAPushToTheRecipient() {
+        User recipientUser = mock(User.class);
+        when(recipientUser.getId()).thenReturn(77L);
+        when(pushNotificationService.isEnabled()).thenReturn(true);
+        when(actor.getId()).thenReturn(10L);
+        when(actor.getDisplayName()).thenReturn("Maria");
+        when(recipient.getId()).thenReturn(11L);
+        when(recipient.isActive()).thenReturn(true);
+        when(recipient.getHousehold()).thenReturn(household);
+        when(recipient.getUser()).thenReturn(recipientUser);
+        when(household.getName()).thenReturn("Flat 1");
+        when(household.getCurrency()).thenReturn("GBP");
+
+        service.notifyMember(
+                recipient,
+                actor,
+                HouseholdNotificationType.SETTLEMENT_CONFIRMED,
+                30L,
+                null,
+                new BigDecimal("20.00"));
+
+        ArgumentCaptor<PushNotificationService.PushMessage> captor =
+                ArgumentCaptor.forClass(PushNotificationService.PushMessage.class);
+        verify(pushNotificationService).sendToUser(eq(77L), captor.capture());
+        assertThat(captor.getValue().title()).isEqualTo("Flat 1");
+        assertThat(captor.getValue().body()).isEqualTo("Maria confirmed your £20.00 transfer.");
+        assertThat(captor.getValue().url()).isEqualTo("/household");
+    }
+
+    @Test
+    void duplicateDedupedNotificationDoesNotPushAgain() {
+        when(recipient.getId()).thenReturn(11L);
+        when(recipient.isActive()).thenReturn(true);
+        when(recipient.getHousehold()).thenReturn(household);
+        when(household.getId()).thenReturn(1L);
+        when(notificationRepository.insertIfAbsent(
+                any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(0);
+
+        service.notifyMemberOnce(
+                recipient,
+                null,
+                HouseholdNotificationType.CLEANING_WEEK_ASSIGNED,
+                42L,
+                "2026-08-17",
+                null,
+                "cleaning-week-assigned:42");
+
+        verify(pushNotificationService, never()).sendToUser(any(), any());
     }
 }

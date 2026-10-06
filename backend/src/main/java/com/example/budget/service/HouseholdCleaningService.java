@@ -50,6 +50,12 @@ public class HouseholdCleaningService {
                     CleaningDutyDefinition::key,
                     Function.identity()));
 
+    /** Human label for a stored duty key, falling back to the key itself. */
+    static String dutyLabel(String dutyKey) {
+        CleaningDutyDefinition duty = dutyKey == null ? null : DUTIES_BY_KEY.get(dutyKey);
+        return duty != null ? duty.label() : dutyKey;
+    }
+
     /** Maps stored completion keys to the remaining task labels for reminders. */
     static List<String> incompleteDutyLabels(Set<String> completedDutyKeys) {
         return DUTIES.stream()

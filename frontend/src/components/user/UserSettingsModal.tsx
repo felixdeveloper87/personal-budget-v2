@@ -36,6 +36,7 @@ import {
 } from '../ui/icons'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
+import { usePushNotifications } from '../../hooks/usePushNotifications'
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -44,6 +45,16 @@ interface UserSettingsModalProps {
 
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
   const { locale, setLocale, t } = useI18n()
+  const push = usePushNotifications(isOpen)
+  const pushDescription = {
+    unsupported: t('settings.push.unsupported'),
+    'needs-install': t('settings.push.needsInstall'),
+    unavailable: t('settings.push.unavailable'),
+    denied: t('settings.push.blocked'),
+    off: t('settings.push.description'),
+    on: t('settings.push.description'),
+  }[push.state ?? 'off']
+  const pushToggleable = push.state === 'on' || push.state === 'off'
   const ed = useEd()
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
@@ -269,6 +280,30 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               borderRadius="xl"
               overflow="hidden"
             >
+              <SettingRow label={t('settings.push')} description={pushDescription}>
+                <HStack spacing={3}>
+                  {push.state === 'on' && (
+                    <Button
+                      size="xs"
+                      variant="link"
+                      color={textColor}
+                      fontWeight={600}
+                      onClick={() => void push.sendTest()}
+                      isDisabled={push.busy}
+                    >
+                      {t('settings.push.sendTest')}
+                    </Button>
+                  )}
+                  <Switch
+                    aria-label={t('settings.push')}
+                    isChecked={push.state === 'on'}
+                    isDisabled={!pushToggleable || push.busy}
+                    onChange={(e) => void push.setEnabled(e.target.checked)}
+                    colorScheme="blue"
+                    size="md"
+                  />
+                </HStack>
+              </SettingRow>
               <SettingRow
                 label={t('settings.emailReports')}
                 description={t('settings.emailReportsDescription')}

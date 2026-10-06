@@ -36,6 +36,7 @@ public class HouseholdPaymentEmailService {
     private final HouseholdSettlementRepository settlementRepository;
     private final ResendEmailClient resendEmailClient;
     private final HouseholdPaymentEmailTemplate emailTemplate;
+    private final PushNotificationService pushNotificationService;
     private final ZoneId emailZone;
 
     public HouseholdPaymentEmailService(
@@ -46,6 +47,7 @@ public class HouseholdPaymentEmailService {
             HouseholdSettlementRepository settlementRepository,
             ResendEmailClient resendEmailClient,
             HouseholdPaymentEmailTemplate emailTemplate,
+            PushNotificationService pushNotificationService,
             @org.springframework.beans.factory.annotation.Value("${app.household.payment.email-zone:Europe/London}") String emailZone) {
         this.householdRepository = householdRepository;
         this.memberRepository = memberRepository;
@@ -54,6 +56,7 @@ public class HouseholdPaymentEmailService {
         this.settlementRepository = settlementRepository;
         this.resendEmailClient = resendEmailClient;
         this.emailTemplate = emailTemplate;
+        this.pushNotificationService = pushNotificationService;
         this.emailZone = ZoneId.of(emailZone);
     }
 
@@ -110,6 +113,11 @@ public class HouseholdPaymentEmailService {
 
         debtsByDebtor.forEach((debtorId, debts) -> {
             HouseholdMember debtor = memberById.get(debtorId);
+            if (pushNotificationService.isEnabled()) {
+                pushNotificationService.sendToUser(
+                        debtor.getUser().getId(),
+                        HouseholdPushMessages.paymentReminder(household.getName(), household.getCurrency(), debts));
+            }
             String email = communicationEmail(debtor);
             if (email == null) {
                 return;

@@ -26,6 +26,8 @@ interface HeaderProps {
   onPageChange?: (page: AppPage) => void
   /** When true the desktop NavBar is hidden (sidebar handles navigation). */
   hasSidebar?: boolean
+  /** Installed PWA shell: use the all-pages carousel at every viewport width. */
+  forceCarouselNav?: boolean
 }
 
 export default function Header({
@@ -35,6 +37,7 @@ export default function Header({
   currentPage = 'dashboard',
   onPageChange,
   hasSidebar = false,
+  forceCarouselNav = false,
 }: HeaderProps) {
   const { user, logout } = useAuth()
   const ed = useEd()
@@ -209,7 +212,7 @@ export default function Header({
             )}
 
             {/* Desktop primary nav (md+). Hidden when sidebar is active. */}
-            {user && !hasSidebar && (
+            {user && !hasSidebar && !forceCarouselNav && (
               <Box
                 display={{ base: 'none', md: 'block' }}
                 flexShrink={0}
@@ -241,9 +244,14 @@ export default function Header({
             </Box>
           </Flex>
 
-          {/* Mobile primary nav: four frequent destinations plus a More menu. */}
+          {/* Compact/PWA primary nav: every destination in one carousel. */}
           {user && (
-            <Box display={{ base: 'block', md: 'none' }} pb={onBrand ? 1 : 3} pt={onBrand ? 0 : 1} mx={onBrand ? -2 : 0}>
+            <Box
+              display={forceCarouselNav ? 'block' : { base: 'block', md: 'none' }}
+              pb={onBrand ? 1 : 3}
+              pt={onBrand ? 0 : 1}
+              mx={onBrand ? -2 : 0}
+            >
               <NavBar
                 variant="mobile"
                 items={navItems}

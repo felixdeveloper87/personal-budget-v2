@@ -807,3 +807,41 @@ export async function getHouseholdAttachmentBlob(
 }
 
 export default api
+
+// ----------------------------------------------------
+// 🔔 WEB PUSH
+// ----------------------------------------------------
+
+export interface PushConfig {
+  enabled: boolean
+  publicKey?: string
+}
+
+export async function getPushConfig(): Promise<PushConfig> {
+  const { data } = await api.get<PushConfig>('/push/config')
+  return data
+}
+
+export async function savePushSubscription(subscription: PushSubscriptionJSON): Promise<void> {
+  await api.post('/push/subscriptions', subscription)
+}
+
+export async function removePushSubscription(endpoint: string): Promise<void> {
+  await api.post('/push/subscriptions/remove', { endpoint })
+}
+
+/**
+ * Logout variant: the session is already cleared locally, so it carries the old
+ * token itself and skips the shared interceptors (no "session expired" toast).
+ */
+export async function removePushSubscriptionOnLogout(endpoint: string, token: string): Promise<void> {
+  await axios.post(
+    `${api.defaults.baseURL}/push/subscriptions/remove`,
+    { endpoint },
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+}
+
+export async function sendTestPush(): Promise<void> {
+  await api.post('/push/test')
+}

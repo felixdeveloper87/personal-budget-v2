@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 class HouseholdCleaningEmailServiceTest {
+    @Mock private PushNotificationService pushNotificationService;
     @Mock private HouseholdCleaningRotationRepository rotationRepository;
     @Mock private HouseholdCleaningRotationMemberRepository rotationMemberRepository;
     @Mock private HouseholdCleaningAssignmentRepository assignmentRepository;
@@ -63,6 +64,7 @@ class HouseholdCleaningEmailServiceTest {
                 deliveryRepository,
                 resendEmailClient,
                 emailTemplate,
+                pushNotificationService,
                 "Europe/London");
     }
 

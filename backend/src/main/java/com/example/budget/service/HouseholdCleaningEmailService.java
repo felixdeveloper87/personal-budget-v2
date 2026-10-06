@@ -39,6 +39,7 @@ public class HouseholdCleaningEmailService {
     private final HouseholdCleaningEmailDeliveryRepository deliveryRepository;
     private final ResendEmailClient resendEmailClient;
     private final HouseholdCleaningEmailTemplate emailTemplate;
+    private final PushNotificationService pushNotificationService;
     private final ZoneId emailZone;
 
     public HouseholdCleaningEmailService(
@@ -49,6 +50,7 @@ public class HouseholdCleaningEmailService {
             HouseholdCleaningEmailDeliveryRepository deliveryRepository,
             ResendEmailClient resendEmailClient,
             HouseholdCleaningEmailTemplate emailTemplate,
+            PushNotificationService pushNotificationService,
             @org.springframework.beans.factory.annotation.Value("${app.household.cleaning.email-zone:Europe/London}") String emailZone) {
         this.rotationRepository = rotationRepository;
         this.rotationMemberRepository = rotationMemberRepository;
@@ -57,6 +59,7 @@ public class HouseholdCleaningEmailService {
         this.deliveryRepository = deliveryRepository;
         this.resendEmailClient = resendEmailClient;
         this.emailTemplate = emailTemplate;
+        this.pushNotificationService = pushNotificationService;
         this.emailZone = ZoneId.of(emailZone);
     }
 
@@ -140,6 +143,14 @@ public class HouseholdCleaningEmailService {
             return;
         }
         HouseholdMember member = assignment.getAssignedMember();
+        if (pushNotificationService.isEnabled()) {
+            pushNotificationService.sendToUser(
+                    member.getUser().getId(),
+                    HouseholdPushMessages.cleaningAssigned(
+                            assignment.getRotation().getHousehold().getName(),
+                            assignment.getId(),
+                            assignment.getWeekStart()));
+        }
         String recipient = communicationEmail(member);
         if (recipient == null) {
             log.info("Skipping cleaning assignment email for member {}: no communication email", member.getId());
@@ -169,6 +180,17 @@ public class HouseholdCleaningEmailService {
             return;
         }
         HouseholdMember member = assignment.getAssignedMember();
+        if (pushNotificationService.isEnabled()) {
+            pushNotificationService.sendToUser(
+                    member.getUser().getId(),
+                    HouseholdPushMessages.cleaningIncomplete(
+                            assignment.getRotation().getHousehold().getName(),
+                            completed,
+                            CLEANING_DUTY_COUNT,
+                            HouseholdCleaningService.incompleteDutyLabels(completions.stream()
+                                    .map(HouseholdCleaningDutyCompletion::getDutyKey)
+                                    .collect(Collectors.toSet()))));
+        }
         String recipient = communicationEmail(member);
         if (recipient == null) {
             log.info("Skipping cleaning completion reminder for member {}: no communication email", member.getId());

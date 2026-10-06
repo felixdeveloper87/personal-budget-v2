@@ -2,6 +2,7 @@ import { Box, Flex, useBreakpointValue, useColorMode, useDisclosure } from '@cha
 import { useCallback, useMemo, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'
 import { EditorialProvider, editorialPalette } from '../../editorial'
+import { useStandalonePwa } from '../../hooks/useStandalonePwa'
 // The chrome (Sidebar, SearchTrigger, masthead date) reads the pb-* CSS vars
 // directly, so the token sheet must load with the shell, not only the dashboard.
 import '../../features/dashboard/theme/pb-tokens.css'
@@ -61,11 +62,14 @@ export default function Layout({
   const profileModal = useDisclosure()
   const settingsModal = useDisclosure()
   const { isCollapsed, toggle } = useSidebarCollapse()
+  const isStandalonePwa = useStandalonePwa()
 
-  // Show sidebar for logged-in non-admin users on md+ screens
+  // Installed PWAs keep the compact app shell at every width: one carousel
+  // owns all page navigation instead of switching to the desktop sidebar.
   const isDesktopOrTablet = useBreakpointValue({ base: false, md: true }) ?? false
   const isAdmin = Boolean(user?.admin)
-  const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet
+  const usePwaCarousel = Boolean(user) && !isAdmin && isStandalonePwa
+  const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet && !usePwaCarousel
 
   // The whole user app wears the "Editorial · guilloché" identity (light/dark
   // variants). The provider lives here once, so the chrome and every shared
@@ -121,6 +125,7 @@ export default function Layout({
           currentPage={currentPage}
           onPageChange={onPageChange}
           hasSidebar={showSidebar}
+          forceCarouselNav={usePwaCarousel}
         />
 
         {/* Backdrop guilloché único — toda página herda o fundo da home

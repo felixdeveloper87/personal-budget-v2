@@ -11,12 +11,19 @@ const rounded = readFileSync(join(publicDir, 'favicon.svg'), 'utf8')
 // The P already sits inside the maskable safe zone (80% centre circle).
 const fullBleed = rounded.replace(/\s+rx="\d+"/, '')
 
+// Android status-bar badge: only the alpha channel is used, so draw the P
+// as a white silhouette on transparent.
+const badge = rounded
+  .replace(/<rect[^>]*\/>/, '')
+  .replace(/fill="#[0-9a-fA-F]{6}"/g, 'fill="#ffffff"')
+
 const outputs = [
   { file: 'pwa-64x64.png', svg: rounded, size: 64 },
   { file: 'pwa-192x192.png', svg: rounded, size: 192 },
   { file: 'pwa-512x512.png', svg: rounded, size: 512 },
   { file: 'maskable-icon-512x512.png', svg: fullBleed, size: 512 },
   { file: 'apple-touch-icon-180x180.png', svg: fullBleed, size: 180 },
+  { file: 'badge-96x96.png', svg: badge, size: 96 },
 ]
 
 for (const { file, svg, size } of outputs) {
