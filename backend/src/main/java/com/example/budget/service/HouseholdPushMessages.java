@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Currency;
-import java.util.List;
 import java.util.Locale;
 
 /**
@@ -51,57 +50,27 @@ final class HouseholdPushMessages {
             case SETTLEMENT_CONFIRMED -> actor + " confirmed your " + total + " transfer.";
             case SETTLEMENT_REJECTED -> actor + " rejected your " + total + " transfer.";
             case SETTLEMENT_CANCELLED -> actor + " cancelled a " + total + " transfer to you.";
+            case SETTLEMENT_REMINDER -> subject != null
+                    ? "Reminder: you still owe " + subject + " " + total + ". Settle up when you can."
+                    : "Reminder: you still owe " + total + " in household payments. Settle up when you can.";
             case MEMBER_JOINED -> (subject == null ? "A new member" : subject) + " joined the household.";
             case MEMBER_REMOVED -> (subject == null ? "A member" : subject) + " was removed from the household.";
             case CLEANING_WEEK_ASSIGNED -> "It's your cleaning week, starting " + weekDate(subject) + ".";
             case CLEANING_DUTY_COMPLETED -> actor + " completed " + HouseholdCleaningService.dutyLabel(subject) + ".";
             case CLEANING_WEEK_COMPLETED -> actor + " completed all cleaning tasks for the week.";
+            case CLEANING_WEEK_REMINDER -> "Reminder: your cleaning checklist for this week is not finished yet.";
         };
 
         String tag = switch (type) {
             case EXPENSE_CREATED, EXPENSE_UPDATED, EXPENSE_VOIDED -> "household-expense-" + referenceId;
             case SETTLEMENT_CREATED, SETTLEMENT_CONFIRMED, SETTLEMENT_REJECTED, SETTLEMENT_CANCELLED ->
                     "household-settlement-" + referenceId;
-            case CLEANING_WEEK_ASSIGNED -> cleaningWeekTag(referenceId);
+            case CLEANING_WEEK_ASSIGNED -> "cleaning-week-" + referenceId;
+            case CLEANING_WEEK_REMINDER -> "cleaning-week-reminder-" + referenceId;
+            case SETTLEMENT_REMINDER -> "household-settlement-reminder";
             default -> null;
         };
         return new PushMessage(title, body, URL, tag);
-    }
-
-    static PushMessage cleaningAssigned(String householdName, Long assignmentId, LocalDate weekStart) {
-        return new PushMessage(
-                householdName,
-                "It's your cleaning week, starting " + WEEK_DATE.format(weekStart) + ".",
-                URL,
-                cleaningWeekTag(assignmentId));
-    }
-
-    static PushMessage cleaningIncomplete(String householdName, long completed, int total, List<String> remaining) {
-        String preview = remaining.isEmpty() ? "" : " Still to do: " + String.join(", ", remaining.stream().limit(3).toList())
-                + (remaining.size() > 3 ? " and more." : ".");
-        return new PushMessage(
-                householdName,
-                "Your cleaning checklist is " + completed + "/" + total + " done." + preview,
-                URL,
-                "cleaning-incomplete");
-    }
-
-    static PushMessage paymentReminder(String householdName, String currency, List<HouseholdPaymentEmailTemplate.Debt> debts) {
-        String body;
-        if (debts.size() == 1) {
-            HouseholdPaymentEmailTemplate.Debt debt = debts.get(0);
-            body = "You owe " + debt.creditorName() + " " + money(debt.amount(), currency) + ". Settle up when you can.";
-        } else {
-            BigDecimal total = debts.stream()
-                    .map(HouseholdPaymentEmailTemplate.Debt::amount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-            body = "You owe " + money(total, currency) + " across " + debts.size() + " members. Settle up when you can.";
-        }
-        return new PushMessage(householdName, body, URL, "household-payment-reminder");
-    }
-
-    private static String cleaningWeekTag(Long assignmentId) {
-        return "cleaning-week-" + assignmentId;
     }
 
     private static String weekDate(String isoDate) {

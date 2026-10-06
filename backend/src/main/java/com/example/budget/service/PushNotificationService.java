@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Sends Web Push notifications to every browser a user has subscribed.
- * Disabled until both VAPID keys are configured, like the Resend e-mail client.
+ * Disabled until both VAPID keys are configured.
  */
 @Service
 public class PushNotificationService {

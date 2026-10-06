@@ -57,8 +57,8 @@ const { toast, ToastContainer } = createStandaloneToast({ theme })
 const SNACKBAR = {
   bg: '#1f1f24',
   border: 'rgba(255, 255, 255, 0.08)',
-  title: '#ffffff',
-  description: 'rgba(255, 255, 255, 0.72)',
+  titleColor: '#ffffff',
+  descriptionColor: 'rgba(255, 255, 255, 0.72)',
   action: '#d6b4f7',
   actionHover: 'rgba(214, 180, 247, 0.14)',
   close: 'rgba(255, 255, 255, 0.6)',
@@ -135,11 +135,11 @@ function NubankToast({
         </Box>
 
         <Box minW={0} flex={1} py={0.5}>
-          <Text color={SNACKBAR.title} fontSize="sm" fontWeight={600} lineHeight="1.35">
+          <Text color={SNACKBAR.titleColor} fontSize="sm" fontWeight={600} lineHeight="1.35">
             {title}
           </Text>
           {description && (
-            <Text color={SNACKBAR.description} fontSize="13px" lineHeight="1.4" mt={0.5}>
+            <Text color={SNACKBAR.descriptionColor} fontSize="13px" lineHeight="1.4" mt={0.5}>
               {description}
             </Text>
           )}
@@ -183,7 +183,7 @@ function NubankToast({
             justifyContent="center"
             color={SNACKBAR.close}
             transition="background 0.15s ease, color 0.15s ease"
-            _hover={{ bg: 'rgba(255, 255, 255, 0.1)', color: SNACKBAR.title }}
+            _hover={{ bg: 'rgba(255, 255, 255, 0.1)', color: SNACKBAR.titleColor }}
             _focusVisible={{ outline: 'none', boxShadow: `0 0 0 2px ${SNACKBAR.action}` }}
             onClick={() => toast.close(id)}
           >

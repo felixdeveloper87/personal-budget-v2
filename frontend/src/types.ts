@@ -246,17 +246,11 @@ export interface User {
 export interface AdminUserRow {
   id: number
   email: string
-  /** Optional address used for communications; never used to sign in. */
-  communicationEmail: string | null
   name: string
   createdAt: string
   approved: boolean
   admin: boolean
   plan: UserPlan
-}
-
-export interface CommunicationEmailSendResponse {
-  recipientCount: number
 }
 
 // Auth Requests
@@ -445,11 +439,13 @@ export type HouseholdNotificationType =
   | 'SETTLEMENT_CONFIRMED'
   | 'SETTLEMENT_REJECTED'
   | 'SETTLEMENT_CANCELLED'
+  | 'SETTLEMENT_REMINDER'
   | 'MEMBER_JOINED'
   | 'MEMBER_REMOVED'
   | 'CLEANING_WEEK_ASSIGNED'
   | 'CLEANING_DUTY_COMPLETED'
   | 'CLEANING_WEEK_COMPLETED'
+  | 'CLEANING_WEEK_REMINDER'
 
 export interface HouseholdMember {
   id: number

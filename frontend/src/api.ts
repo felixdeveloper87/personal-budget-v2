@@ -15,7 +15,6 @@ import {
   CreateRecurringTransactionRequest,
   UpdateRecurringTransactionRequest,
   AdminUserRow,
-  CommunicationEmailSendResponse,
   PaymentMethod,
   PaymentMethodRequest,
   PeriodType,
@@ -166,29 +165,6 @@ export async function approveAdminUser(id: number): Promise<AdminUserRow> {
 
 export async function updateAdminUserPlan(id: number, plan: UserPlan): Promise<AdminUserRow> {
   const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/plan`, { plan })
-  return data
-}
-
-export async function updateAdminUserCommunicationEmail(
-  id: number,
-  communicationEmail: string,
-): Promise<AdminUserRow> {
-  const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/communication-email`, {
-    communicationEmail,
-  })
-  return data
-}
-
-export async function sendCommunicationEmail(
-  subject: string,
-  text: string,
-  recipientUserIds: number[],
-): Promise<CommunicationEmailSendResponse> {
-  const { data } = await api.post<CommunicationEmailSendResponse>('/admin/communications/email', {
-    subject,
-    text,
-    recipientUserIds,
-  })
   return data
 }
 
