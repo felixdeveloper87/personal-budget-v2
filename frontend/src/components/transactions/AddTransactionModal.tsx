@@ -17,6 +17,8 @@ interface AddTransactionModalProps {
   isOpen: boolean
   onClose: () => void
   type: 'INCOME' | 'EXPENSE'
+  /** Preselected category for the form. */
+  initialCategory?: string
   transactions: Transaction[]
   onTransactionCreated: () => void
   onRefresh: () => void
@@ -26,6 +28,7 @@ export default function AddTransactionModal({
   isOpen,
   onClose,
   type,
+  initialCategory,
   transactions,
   onTransactionCreated,
   onRefresh,
@@ -60,6 +63,7 @@ export default function AddTransactionModal({
         onCreated={handleTransactionCreated}
         onTransactionDeleted={onRefresh}
         initialType={type}
+        initialCategory={initialCategory}
         showRecentTransactions={false}
         compact
       />

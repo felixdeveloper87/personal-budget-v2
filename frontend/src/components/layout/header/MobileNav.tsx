@@ -34,8 +34,8 @@ interface MobileNavProps {
 const PRIMARY_IDS: ReadonlyArray<AppPage> = [
   'dashboard',
   'household',
-  'all-transactions',
-  'planning',
+  'earnings',
+  'behaviour',
 ]
 
 function tapFeedback() {

@@ -67,6 +67,8 @@ interface TransactionFormProps {
   onTransactionDeleted?: () => void
   transactions: Transaction[]
   initialType?: 'INCOME' | 'EXPENSE'
+  /** Preselected category, e.g. "Business" when adding earnings from the Business tab. */
+  initialCategory?: string
   showRecentTransactions?: boolean
   compact?: boolean
 }
@@ -82,6 +84,7 @@ export default function TransactionForm({
   onTransactionDeleted,
   transactions,
   initialType = 'INCOME',
+  initialCategory,
   showRecentTransactions = true,
   compact = false,
 }: TransactionFormProps) {
@@ -93,7 +96,7 @@ export default function TransactionForm({
   // 🗓️ Controlled form states
   const [date, setDate] = useState(() => toLocalYYYYMMDD())
   const [type, setType] = useState<'INCOME' | 'EXPENSE'>(initialType)
-  const [category, setCategory] = useState(type === 'INCOME' ? 'Salary' : 'Groceries')
+  const [category, setCategory] = useState(initialCategory ?? (type === 'INCOME' ? 'Salary' : 'Groceries'))
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState(0)
   const [loading, setLoading] = useState(false)
