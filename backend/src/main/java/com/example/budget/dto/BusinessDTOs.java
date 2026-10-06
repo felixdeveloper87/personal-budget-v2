@@ -35,15 +35,45 @@ public final class BusinessDTOs {
             @Min(0) @Max(1440) Integer breakMinutes,
             @Size(max = 255) String note) {}
 
-    /** hourlyRate is null when there are no hours or no earnings to divide. */
-    public record DaySummary(LocalDate date, long workedSeconds, BigDecimal earned, BigDecimal hourlyRate) {}
+    /**
+     * hourlyRate is earned per hour; profitRate is (earned - cost) per hour.
+     * Both are null when there are no hours or no earnings yet. cost is the
+     * daily cost, charged on days that have earnings.
+     */
+    public record DaySummary(
+            LocalDate date,
+            long workedSeconds,
+            BigDecimal earned,
+            BigDecimal hourlyRate,
+            BigDecimal cost,
+            BigDecimal profit,
+            BigDecimal profitRate) {}
 
-    public record Totals(long workedSeconds, BigDecimal earned, BigDecimal hourlyRate) {}
+    public record Totals(
+            long workedSeconds,
+            BigDecimal earned,
+            BigDecimal hourlyRate,
+            BigDecimal cost,
+            BigDecimal profit,
+            BigDecimal profitRate) {}
+
+    /**
+     * How the daily cost is worked out: spend in the cost category over the last
+     * three complete months, divided by the days with earnings in that window.
+     */
+    public record CostBasis(
+            String category,
+            LocalDate windowFrom,
+            LocalDate windowTo,
+            BigDecimal windowSpend,
+            int workingDays,
+            BigDecimal dailyCost) {}
 
     public record Summary(
             LocalDate from,
             LocalDate to,
             Totals totals,
+            CostBasis costBasis,
             List<DaySummary> days,
             List<WorkSessionDTO> sessions) {}
 }

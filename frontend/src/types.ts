@@ -653,14 +653,37 @@ export interface BusinessDaySummary {
   date: string
   workedSeconds: number
   earned: number
-  /** Null when the day has no hours or no earnings yet. */
+  /** Earned per hour. Null when the day has no hours or no earnings yet. */
   hourlyRate: number | null
+  /** Daily running cost, charged on days with earnings. */
+  cost: number
+  profit: number
+  /** (earned - cost) per hour. Null when the day has no hours or no earnings yet. */
+  profitRate: number | null
+}
+
+/** Daily cost = cost-category spend over the last 3 complete months / days with earnings. */
+export interface BusinessCostBasis {
+  category: string
+  windowFrom: string
+  windowTo: string
+  windowSpend: number
+  workingDays: number
+  dailyCost: number
 }
 
 export interface BusinessSummary {
   from: string
   to: string
-  totals: { workedSeconds: number; earned: number; hourlyRate: number | null }
+  totals: {
+    workedSeconds: number
+    earned: number
+    hourlyRate: number | null
+    cost: number
+    profit: number
+    profitRate: number | null
+  }
+  costBasis: BusinessCostBasis
   days: BusinessDaySummary[]
   sessions: WorkSession[]
 }

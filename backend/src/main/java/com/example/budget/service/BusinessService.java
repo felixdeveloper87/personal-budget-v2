@@ -1,5 +1,6 @@
 package com.example.budget.service;
 
+import com.example.budget.dto.BusinessDTOs.CostBasis;
 import com.example.budget.dto.BusinessDTOs.DaySummary;
 import com.example.budget.dto.BusinessDTOs.ManualSessionRequest;
 import com.example.budget.dto.BusinessDTOs.Summary;
@@ -19,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,13 +30,20 @@ import java.util.TreeMap;
 
 /**
  * Business time tracking. Sessions are timed live (start / pause / resume / end)
- * or entered by hand; "earned" is the income recorded in the Salary category,
- * so the hourly rate is earned divided by hours worked, per day and per period.
+ * or entered by hand; "earned" is the income recorded in the Salary category.
+ * Costs are the expenses in the Transport category over the last three complete
+ * months, divided by the days with earnings in those months: a cost per working
+ * day, so a one-off (a new tyre) is spread out instead of sinking the day it was
+ * bought. Profit = earned - cost.
  */
 @Service
 public class BusinessService {
     /** Income category whose transactions count as earnings (the add-income default). */
     public static final String EARNINGS_CATEGORY = "Salary";
+    /** Expense category treated as business running costs. */
+    public static final String COST_CATEGORY = "Transport";
+    /** How many complete months the daily cost averages over. */
+    static final int COST_WINDOW_MONTHS = 3;
     private static final int MAX_RANGE_DAYS = 400;
 
     private final WorkSessionRepository sessionRepository;
@@ -143,31 +152,82 @@ public class BusinessService {
             earnedByDay.put((LocalDate) row[0], (BigDecimal) row[1]);
         }
 
-        // Days with work or earnings, newest first.
+        CostBasis costBasis = costBasis(userId, LocalDate.now(clock));
+        BigDecimal dailyCost = costBasis.dailyCost();
+
+        // Days with work or earnings, newest first. The daily cost is charged on
+        // days with earnings: a day whose income is not entered yet stays neutral.
         TreeMap<LocalDate, DaySummary> days = new TreeMap<>(java.util.Comparator.reverseOrder());
         for (LocalDate day : union(secondsByDay.keySet(), earnedByDay.keySet())) {
             long seconds = secondsByDay.getOrDefault(day, 0L);
             BigDecimal earned = earnedByDay.getOrDefault(day, BigDecimal.ZERO);
-            days.put(day, new DaySummary(day, seconds, earned, hourlyRate(earned, seconds)));
+            BigDecimal cost = earned.signum() > 0 ? dailyCost : BigDecimal.ZERO;
+            BigDecimal profit = earned.subtract(cost);
+            days.put(day, new DaySummary(
+                    day, seconds, earned, hourlyRate(earned, seconds),
+                    cost, profit, earned.signum() > 0 ? rate(profit, seconds) : null));
         }
 
         long totalSeconds = secondsByDay.values().stream().mapToLong(Long::longValue).sum();
         BigDecimal totalEarned = earnedByDay.values().stream().reduce(BigDecimal.ZERO, BigDecimal::add);
-        // The overall rate only counts days that have both hours and earnings,
-        // so a day whose income is not entered yet does not drag the rate down.
-        long pairedSeconds = days.values().stream()
+        BigDecimal totalCost = days.values().stream().map(DaySummary::cost).reduce(BigDecimal.ZERO, BigDecimal::add);
+        // The overall rates only count days that have both hours and earnings,
+        // so a day whose income is not entered yet does not drag them down.
+        List<DaySummary> paired = days.values().stream()
                 .filter(day -> day.workedSeconds() > 0 && day.earned().signum() > 0)
-                .mapToLong(DaySummary::workedSeconds).sum();
-        BigDecimal pairedEarned = days.values().stream()
-                .filter(day -> day.workedSeconds() > 0 && day.earned().signum() > 0)
-                .map(DaySummary::earned).reduce(BigDecimal.ZERO, BigDecimal::add);
+                .toList();
+        long pairedSeconds = paired.stream().mapToLong(DaySummary::workedSeconds).sum();
+        BigDecimal pairedEarned = paired.stream().map(DaySummary::earned).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal pairedProfit = paired.stream().map(DaySummary::profit).reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return new Summary(
                 from,
                 to,
-                new Totals(totalSeconds, totalEarned, hourlyRate(pairedEarned, pairedSeconds)),
+                new Totals(
+                        totalSeconds,
+                        totalEarned,
+                        hourlyRate(pairedEarned, pairedSeconds),
+                        totalCost,
+                        totalEarned.subtract(totalCost),
+                        paired.isEmpty() ? null : rate(pairedProfit, pairedSeconds)),
+                costBasis,
                 new ArrayList<>(days.values()),
                 sessions.stream().map(session -> toDto(session, now)).toList());
+    }
+
+    /**
+     * Daily cost from the last three complete months (in October: July to
+     * September). Working days are the days with earnings in that window, so
+     * holidays, days off and extra days all count as they really happened.
+     */
+    @Transactional(readOnly = true)
+    public CostBasis costBasis(Long userId, LocalDate today) {
+        YearMonth current = YearMonth.from(today);
+        LocalDate windowFrom = current.minusMonths(COST_WINDOW_MONTHS).atDay(1);
+        LocalDate windowTo = current.minusMonths(1).atEndOfMonth();
+        BigDecimal spend = transactionRepository
+                .sumByDayForCategory(userId, TransactionType.EXPENSE, COST_CATEGORY, windowFrom, windowTo)
+                .stream()
+                .map(row -> (BigDecimal) row[1])
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        int workingDays = (int) transactionRepository
+                .sumByDayForCategory(userId, TransactionType.INCOME, EARNINGS_CATEGORY, windowFrom, windowTo)
+                .stream()
+                .filter(row -> ((BigDecimal) row[1]).signum() > 0)
+                .count();
+        BigDecimal dailyCost = workingDays > 0
+                ? spend.divide(BigDecimal.valueOf(workingDays), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+        return new CostBasis(COST_CATEGORY, windowFrom, windowTo, spend, workingDays, dailyCost);
+    }
+
+    /** Signed per-hour rate (profit can be negative), or null without hours. */
+    static BigDecimal rate(BigDecimal amount, long seconds) {
+        if (seconds <= 0 || amount == null) {
+            return null;
+        }
+        return amount.multiply(BigDecimal.valueOf(3600))
+                .divide(BigDecimal.valueOf(seconds), 2, RoundingMode.HALF_UP);
     }
 
     static BigDecimal hourlyRate(BigDecimal earned, long seconds) {

@@ -59,7 +59,7 @@ const heroButton = {
 } as const
 
 export default function BusinessPage() {
-  const { t, formatCurrency, formatDate } = useI18n()
+  const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const [period, setPeriod] = useState<Period>('week')
   const [active, setActive] = useState<WorkSession | null>(null)
   const [summary, setSummary] = useState<BusinessSummary | null>(null)
@@ -204,7 +204,10 @@ export default function BusinessPage() {
   const today = summary?.days.find((day) => day.date === todayKey)
   const todaySeconds = (today?.workedSeconds ?? 0) + liveExtra
   const todayEarned = today?.earned ?? 0
-  const todayRate = todayEarned > 0 && todaySeconds > 0 ? todayEarned / (todaySeconds / 3600) : null
+  const todayCost = today?.cost ?? 0
+  const todayProfit = todayEarned - todayCost
+  // Live: today's hours keep growing while the timer runs.
+  const todayProfitRate = todayEarned > 0 && todaySeconds > 0 ? todayProfit / (todaySeconds / 3600) : null
 
   const time = (iso: string) => formatDate(new Date(iso), { hour: '2-digit', minute: '2-digit' })
   const statusLine = !active
@@ -280,7 +283,8 @@ export default function BusinessPage() {
                   items={[
                     { label: t('business.stat.hours'), value: formatDuration(todaySeconds) },
                     { label: t('business.stat.earned'), value: formatCurrency(todayEarned) },
-                    { label: t('business.stat.perHour'), value: rate(todayRate), highlight: true },
+                    { label: t('business.stat.profit'), value: formatCurrency(todayProfit) },
+                    { label: t('business.stat.profitPerHour'), value: rate(todayProfitRate), highlight: true },
                   ]}
                 />
                 {todaySeconds > 0 && todayEarned === 0 && (
@@ -307,9 +311,23 @@ export default function BusinessPage() {
                     items={[
                       { label: t('business.stat.hours'), value: formatDuration(summary.totals.workedSeconds + liveExtra) },
                       { label: t('business.stat.earned'), value: formatCurrency(summary.totals.earned) },
-                      { label: t('business.stat.perHour'), value: rate(summary.totals.hourlyRate), highlight: true },
+                      { label: t('business.stat.profit'), value: formatCurrency(summary.totals.profit) },
+                      { label: t('business.stat.profitPerHour'), value: rate(summary.totals.profitRate), highlight: true },
                     ]}
                   />
+                )}
+                {summary && (
+                  <Text mt={3} fontSize="sm" color="var(--pb-ink-soft)">
+                    {summary.costBasis.workingDays > 0
+                      ? t('business.costLine', {
+                        cost: formatCurrency(summary.costBasis.dailyCost),
+                        category: categoryLabel(summary.costBasis.category),
+                        spend: formatCurrency(summary.costBasis.windowSpend),
+                        months: `${formatDate(dateFromKey(summary.costBasis.windowFrom), { month: 'short' })}–${formatDate(dateFromKey(summary.costBasis.windowTo), { month: 'short' })}`,
+                        days: summary.costBasis.workingDays,
+                      })
+                      : t('business.costLineEmpty', { category: categoryLabel(summary.costBasis.category) })}
+                  </Text>
                 )}
                 <VStack mt={5} spacing={0} align="stretch" divider={<Box h="1px" bg="var(--pb-hair)" />}>
                   {summary?.days.length ? summary.days.map((day) => (
@@ -322,10 +340,11 @@ export default function BusinessPage() {
                           {formatDuration(day.workedSeconds + (day.date === todayKey ? liveExtra : 0))}
                           {' · '}
                           {formatCurrency(day.earned)}
+                          {day.cost > 0 && ` · ${t('business.day.profit', { amount: formatCurrency(day.profit) })}`}
                         </Text>
                       </Box>
-                      <Text fontWeight={700} color={day.hourlyRate == null ? 'var(--pb-ink-faint)' : 'var(--nu-brand)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                        {day.hourlyRate == null ? '—' : t('business.perHourValue', { amount: formatCurrency(day.hourlyRate) })}
+                      <Text fontWeight={700} color={day.profitRate == null ? 'var(--pb-ink-faint)' : day.profitRate < 0 ? 'var(--pb-coral)' : 'var(--nu-brand)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {day.profitRate == null ? '—' : t('business.perHourValue', { amount: formatCurrency(day.profitRate) })}
                       </Text>
                       <HStack spacing={0.5} flexShrink={0}>
                         {!endedByDay.has(day.date) && (
@@ -392,7 +411,7 @@ export default function BusinessPage() {
 
 function StatRow({ items }: { items: Array<{ label: string; value: string; highlight?: boolean }> }) {
   return (
-    <SimpleGrid columns={3} spacing={3}>
+    <SimpleGrid columns={{ base: 2, md: items.length }} spacing={3}>
       {items.map((item) => (
         <Box key={item.label} p={{ base: 3, md: 4 }} borderRadius="16px" bg={item.highlight ? 'var(--nu-brand)' : 'var(--nu-surface)'}>
           <Text fontSize="xs" color={item.highlight ? 'rgba(255,255,255,.8)' : 'var(--pb-ink-soft)'} noOfLines={1}>{item.label}</Text>
