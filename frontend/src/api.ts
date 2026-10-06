@@ -36,6 +36,9 @@ import {
   HouseholdExpenseRequest,
   HouseholdSettlementRequest,
   HouseholdCleaningRotationRequest,
+  WorkSession,
+  ManualWorkSessionRequest,
+  BusinessSummary,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -833,5 +836,53 @@ export async function getPushPreferences(): Promise<PushPreferences> {
 
 export async function updatePushPreferences(preferences: PushPreferences): Promise<PushPreferences> {
   const { data } = await api.put<PushPreferences>('/push/preferences', preferences)
+  return data
+}
+
+// ----------------------------------------------------
+// 💼 BUSINESS (time tracking + hourly rate)
+// ----------------------------------------------------
+
+export async function getActiveWorkSession(): Promise<WorkSession | null> {
+  const response = await api.get<WorkSession>('/business/sessions/active')
+  return response.status === 204 ? null : response.data
+}
+
+export async function startWorkSession(workDate: string): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>('/business/sessions/start', { workDate })
+  return data
+}
+
+export async function pauseWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/pause`)
+  return data
+}
+
+export async function resumeWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/resume`)
+  return data
+}
+
+export async function endWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/end`)
+  return data
+}
+
+export async function createWorkSession(request: ManualWorkSessionRequest): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>('/business/sessions', request)
+  return data
+}
+
+export async function updateWorkSession(id: number, request: ManualWorkSessionRequest): Promise<WorkSession> {
+  const { data } = await api.put<WorkSession>(`/business/sessions/${id}`, request)
+  return data
+}
+
+export async function deleteWorkSession(id: number): Promise<void> {
+  await api.delete(`/business/sessions/${id}`)
+}
+
+export async function getBusinessSummary(from: string, to: string): Promise<BusinessSummary> {
+  const { data } = await api.get<BusinessSummary>('/business/summary', { params: { from, to } })
   return data
 }

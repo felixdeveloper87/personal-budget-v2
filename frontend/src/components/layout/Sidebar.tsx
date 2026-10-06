@@ -50,6 +50,11 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
     itemIds: ['planning', 'commitments', 'goals'],
   },
   {
+    labelKey: 'sidebar.group.business',
+    fallbackLabel: 'Business',
+    itemIds: ['business'],
+  },
+  {
     labelKey: 'sidebar.group.reports',
     fallbackLabel: 'Reports',
     itemIds: ['reports'],

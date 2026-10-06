@@ -7,6 +7,7 @@ import SpotlightSearch from '../../search/SpotlightSearch'
 import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
+import MobileNav from './MobileNav'
 import NavBar from './NavBar'
 import UserMenu from './UserMenu'
 import { ON_BRAND, OnBrandContext } from './onBrand'
@@ -17,7 +18,7 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */
 export const HEADER_HEIGHT = { base: '72px', md: '64px' } as const
-export const MOBILE_NAV_SAFE_HEIGHT = 'calc(56px + max(8px, env(safe-area-inset-bottom, 0px)))'
+export const MOBILE_NAV_SAFE_HEIGHT = 'calc(70px + max(8px, env(safe-area-inset-bottom, 0px)))'
 
 interface HeaderProps {
   onOpenProfile?: () => void
@@ -261,7 +262,7 @@ export default function Header({
         />
       </Box>
 
-      {/* Mobile-only app navigation: every page lives in one bottom carousel. */}
+      {/* Mobile-only app navigation: stable primary actions + complete menu sheet. */}
       {user && (
         <OnBrandContext.Provider value={onBrand}>
           <Box
@@ -274,17 +275,16 @@ export default function Header({
             bg={ON_BRAND.bg}
             borderTop="1px solid"
             borderColor={ON_BRAND.line}
-            boxShadow="0 -10px 28px rgba(40, 0, 70, 0.18)"
+            boxShadow="0 -12px 34px rgba(40, 0, 70, 0.26)"
             px={2}
-            pt={1}
+            pt={1.5}
             pb="max(8px, env(safe-area-inset-bottom, 0px))"
             sx={{
               paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
               paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
             }}
           >
-            <NavBar
-              variant="mobile"
+            <MobileNav
               items={navItems}
               currentPage={currentPage}
               onPageChange={onPageChange}

@@ -13,6 +13,7 @@ import CommitmentsPage from './pages/CommitmentsPage'
 import GoalsPage from './pages/GoalsPage'
 import PlanningPage from './pages/PlanningPage'
 import HouseholdPage from './pages/HouseholdPage'
+import BusinessPage from './pages/BusinessPage'
 import { AuthModal, Layout } from './components'
 import LandingV3 from './pages/landing-v3/LandingV3'
 import { Fragment, useState, useEffect, useCallback } from 'react'
@@ -45,6 +46,7 @@ const PAGE_RENDERERS: Record<AppPage, (args: PageRenderArgs) => JSX.Element> = {
   commitments: ({ onPageChange }) => <CommitmentsPage onPageChange={onPageChange} />,
   behaviour: () => <BehaviourPage />,
   earnings: () => <EarningsPage />,
+  business: () => <BusinessPage />,
   'all-transactions': () => <AllTransactionsPage />,
   payments: ({ onOpenCardStatement }) => <PaymentsPage onOpenCardStatement={onOpenCardStatement} />,
   goals: () => <GoalsPage />,

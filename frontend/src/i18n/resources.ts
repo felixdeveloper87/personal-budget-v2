@@ -11,6 +11,7 @@ import { commonUiTranslations } from './locales/commonUi'
 import { householdTranslations } from './locales/household'
 import { categoriesRecurringTranslations } from './locales/categoriesRecurring'
 import { planningGoalsTranslations } from './locales/planningGoals'
+import { businessTranslations } from './locales/business'
 
 // Feature bundles are deliberately kept separate. This makes the gradual
 // migration of the existing UI reviewable and avoids one enormous locale file.
@@ -27,6 +28,7 @@ const bundles: TranslationBundle[] = [
   categoriesRecurringTranslations,
   planningGoalsTranslations,
   reportTranslations,
+  businessTranslations,
 ]
 
 const mergeLocale = (locale: keyof TranslationBundle): TranslationDictionary =>

@@ -87,6 +87,20 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);
 
+    /** Income per day in one category (the Business tab's "earned"). */
+    @Query("SELECT t.transactionDate, SUM(t.amount) FROM Transaction t " +
+                    "WHERE t.user.id = :userId " +
+                    "AND t.type = :type " +
+                    "AND LOWER(t.category) = LOWER(:category) " +
+                    "AND t.transactionDate BETWEEN :from AND :to " +
+                    "GROUP BY t.transactionDate")
+    List<Object[]> sumByDayForCategory(
+                    @Param("userId") Long userId,
+                    @Param("type") TransactionType type,
+                    @Param("category") String category,
+                    @Param("from") LocalDate from,
+                    @Param("to") LocalDate to);
+
     /** Expenses whose money leaves on {@code date}, for the "due tomorrow" push. */
     @Query("SELECT t FROM Transaction t " +
                     "JOIN FETCH t.user " +

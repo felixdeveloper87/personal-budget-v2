@@ -622,3 +622,45 @@ export interface HouseholdCleaningRotationRequest {
   active: boolean
   participantMemberIds: number[]
 }
+
+// Business tab: time tracking + hourly rate
+export type WorkSessionStatus = 'RUNNING' | 'PAUSED' | 'ENDED'
+
+export interface WorkSession {
+  id: number
+  /** Local calendar day the session belongs to (yyyy-mm-dd). */
+  workDate: string
+  /** ISO instants. */
+  startedAt: string
+  endedAt: string | null
+  pausedAt: string | null
+  breakSeconds: number
+  /** Excludes breaks; for an open session it is as of when the server answered. */
+  workedSeconds: number
+  status: WorkSessionStatus
+  note: string | null
+}
+
+export interface ManualWorkSessionRequest {
+  workDate: string
+  startedAt: string
+  endedAt: string
+  breakMinutes: number
+  note?: string | null
+}
+
+export interface BusinessDaySummary {
+  date: string
+  workedSeconds: number
+  earned: number
+  /** Null when the day has no hours or no earnings yet. */
+  hourlyRate: number | null
+}
+
+export interface BusinessSummary {
+  from: string
+  to: string
+  totals: { workedSeconds: number; earned: number; hourlyRate: number | null }
+  days: BusinessDaySummary[]
+  sessions: WorkSession[]
+}
