@@ -87,6 +87,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);
 
+    /** Expenses whose money leaves on {@code date}, for the "due tomorrow" push. */
+    @Query("SELECT t FROM Transaction t " +
+                    "JOIN FETCH t.user " +
+                    "LEFT JOIN FETCH t.paymentMethod " +
+                    "WHERE t.type = :type " +
+                    "AND t.paymentDate = :date " +
+                    "ORDER BY t.user.id, t.amount DESC, t.id")
+    List<Transaction> findByTypeAndPaymentDate(
+                    @Param("type") TransactionType type,
+                    @Param("date") LocalDate date);
+
     @Query("SELECT t FROM Transaction t " +
                     "JOIN FETCH t.user " +
                     "WHERE t.status = :status " +

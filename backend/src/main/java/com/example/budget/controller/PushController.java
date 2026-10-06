@@ -2,6 +2,7 @@ package com.example.budget.controller;
 
 import com.example.budget.dto.PushSubscriptionRequest;
 import com.example.budget.model.User;
+import com.example.budget.repository.UserRepository;
 import com.example.budget.service.PushNotificationService;
 import com.example.budget.service.PushNotificationService.PushMessage;
 import jakarta.validation.Valid;
@@ -18,9 +19,33 @@ import java.util.Map;
 @CrossOrigin
 public class PushController {
     private final PushNotificationService pushNotificationService;
+    private final UserRepository userRepository;
 
-    public PushController(PushNotificationService pushNotificationService) {
+    public PushController(PushNotificationService pushNotificationService, UserRepository userRepository) {
         this.pushNotificationService = pushNotificationService;
+        this.userRepository = userRepository;
+    }
+
+    /** Per-user push preferences. They apply to every device the user subscribed. */
+    @GetMapping("/preferences")
+    public PreferencesResponse preferences(Authentication authentication) {
+        User user = currentUser(authentication);
+        return new PreferencesResponse(user.isPushBillsDue());
+    }
+
+    @PutMapping("/preferences")
+    public PreferencesResponse updatePreferences(
+            @RequestBody PreferencesResponse request,
+            Authentication authentication) {
+        User user = currentUser(authentication);
+        user.setPushBillsDue(request.billsDue());
+        return new PreferencesResponse(userRepository.save(user).isPushBillsDue());
+    }
+
+    private User currentUser(Authentication authentication) {
+        Long id = ((User) authentication.getPrincipal()).getId();
+        return userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
 
     @GetMapping("/config")
@@ -72,4 +97,6 @@ public class PushController {
     }
 
     public record RemoveRequest(@NotBlank String endpoint) {}
+
+    public record PreferencesResponse(boolean billsDue) {}
 }

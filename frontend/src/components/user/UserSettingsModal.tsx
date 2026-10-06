@@ -10,7 +10,14 @@ import {
   Divider,
   HStack,
   Icon,
+  IconButton,
   Input,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Portal,
   Select,
   Switch,
   Text,
@@ -19,6 +26,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
+import { InfoIcon } from '@phosphor-icons/react'
 import { ModalHeader, PremiumModal } from '../ui'
 import ImportCsvModal from '../transactions/ImportCsvModal'
 import { deleteAllUserData } from '../../api'
@@ -170,11 +178,13 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
   const SettingRow = ({
     label,
+    labelAddon,
     description,
     children,
     noBorder,
   }: {
     label: string
+    labelAddon?: React.ReactNode
     description?: string
     children: React.ReactNode
     noBorder?: boolean
@@ -191,7 +201,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       gap={4}
     >
       <Box minW={0} flex={1}>
-        <Text fontSize="sm" fontWeight={600} color={textColor}>{label}</Text>
+        <HStack spacing={1}>
+          <Text fontSize="sm" fontWeight={600} color={textColor}>{label}</Text>
+          {labelAddon}
+        </HStack>
         {description && (
           <Text fontSize="xs" color={mutedColor} mt={0.5}>{description}</Text>
         )}
@@ -292,7 +305,53 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               borderRadius="xl"
               overflow="hidden"
             >
-              <SettingRow label={t('settings.push')} description={pushDescription}>
+              <SettingRow
+                label={t('settings.push')}
+                description={pushDescription}
+                labelAddon={(
+                  <Popover placement="bottom-start" isLazy>
+                    <PopoverTrigger>
+                      <IconButton
+                        aria-label={t('settings.household.whatYouGet')}
+                        icon={<InfoIcon size={16} weight="bold" />}
+                        size="xs"
+                        variant="ghost"
+                        borderRadius="full"
+                        minW="22px"
+                        h="22px"
+                        color={mutedColor}
+                      />
+                    </PopoverTrigger>
+                    <Portal>
+                      <PopoverContent
+                        w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
+                        bg={rowBg}
+                        borderColor={borderColor}
+                        borderRadius="xl"
+                      >
+                        <PopoverArrow bg={rowBg} />
+                        <PopoverBody p={4}>
+                          <Text fontSize="xs" fontWeight={600} color={mutedColor} mb={2}>
+                            {t('settings.household.whatYouGet')}
+                          </Text>
+                          <VStack spacing={1.5} align="stretch">
+                            {HOUSEHOLD_SCHEDULE.map((item) => (
+                              <HStack key={item} spacing={3} align="baseline">
+                                <Text fontSize="xs" fontWeight={700} color={textColor} minW="84px" flexShrink={0}>
+                                  {t(`settings.household.when.${item}`)}
+                                </Text>
+                                <Text fontSize="xs" color={mutedColor}>
+                                  {t(`settings.household.what.${item}`)}
+                                </Text>
+                              </HStack>
+                            ))}
+                          </VStack>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Portal>
+                  </Popover>
+                )}
+              >
                 <HStack spacing={3}>
                   {push.state === 'on' && (
                     <Button
@@ -316,23 +375,6 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   />
                 </HStack>
               </SettingRow>
-              <Box px={4} py={3.5} bg={rowBg}>
-                <Text fontSize="xs" fontWeight={600} color={mutedColor} mb={2}>
-                  {t('settings.household.whatYouGet')}
-                </Text>
-                <VStack spacing={1.5} align="stretch">
-                  {HOUSEHOLD_SCHEDULE.map((item) => (
-                    <HStack key={item} spacing={3} align="baseline">
-                      <Text fontSize="xs" fontWeight={700} color={textColor} minW="84px" flexShrink={0}>
-                        {t(`settings.household.when.${item}`)}
-                      </Text>
-                      <Text fontSize="xs" color={mutedColor}>
-                        {t(`settings.household.what.${item}`)}
-                      </Text>
-                    </HStack>
-                  ))}
-                </VStack>
-              </Box>
             </VStack>
           </Box>
 
@@ -347,6 +389,21 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               borderRadius="xl"
               overflow="hidden"
             >
+              <SettingRow
+                label={t('settings.billsDue')}
+                description={push.state === 'on'
+                  ? t('settings.billsDueDescription')
+                  : t('settings.billsDueNeedsPush')}
+              >
+                <Switch
+                  aria-label={t('settings.billsDue')}
+                  isChecked={push.preferences?.billsDue ?? true}
+                  isDisabled={!push.preferences}
+                  onChange={(e) => void push.setPreference('billsDue', e.target.checked)}
+                  colorScheme="blue"
+                  size="md"
+                />
+              </SettingRow>
               <SettingRow
                 label={t('settings.emailReports')}
                 description={t('settings.emailReportsDescription')}

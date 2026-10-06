@@ -821,3 +821,17 @@ export async function removePushSubscriptionOnLogout(endpoint: string, token: st
 export async function sendTestPush(): Promise<void> {
   await api.post('/push/test')
 }
+
+export interface PushPreferences {
+  billsDue: boolean
+}
+
+export async function getPushPreferences(): Promise<PushPreferences> {
+  const { data } = await api.get<PushPreferences>('/push/preferences')
+  return data
+}
+
+export async function updatePushPreferences(preferences: PushPreferences): Promise<PushPreferences> {
+  const { data } = await api.put<PushPreferences>('/push/preferences', preferences)
+  return data
+}

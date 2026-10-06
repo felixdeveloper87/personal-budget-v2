@@ -66,6 +66,10 @@ public class User {
     @Column(name = "planned_monthly_variable_expense")
     private BigDecimal plannedMonthlyVariableExpense;
 
+    /** Push the "due tomorrow" reminder for scheduled expenses. */
+    @Column(name = "push_bills_due", nullable = false)
+    private boolean pushBillsDue = true;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
@@ -169,6 +173,14 @@ public class User {
 
     public void setPlannedMonthlyVariableExpense(BigDecimal plannedMonthlyVariableExpense) {
         this.plannedMonthlyVariableExpense = plannedMonthlyVariableExpense;
+    }
+
+    public boolean isPushBillsDue() {
+        return pushBillsDue;
+    }
+
+    public void setPushBillsDue(boolean pushBillsDue) {
+        this.pushBillsDue = pushBillsDue;
     }
 
     public List<Transaction> getTransactions() {

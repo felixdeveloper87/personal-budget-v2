@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { sendTestPush } from '../api'
+import { getPushPreferences, sendTestPush, updatePushPreferences, type PushPreferences } from '../api'
 import { disablePush, enablePush, getPushState, type PushState } from '../services/push'
 import { ToastService } from '../services/toast'
 import { translateNow } from '../i18n'
@@ -8,13 +8,27 @@ import { translateNow } from '../i18n'
 export function usePushNotifications(active: boolean) {
   const [state, setState] = useState<PushState | null>(null)
   const [busy, setBusy] = useState(false)
+  const [preferences, setPreferences] = useState<PushPreferences | null>(null)
 
   useEffect(() => {
     if (!active) return
     let cancelled = false
     void getPushState().then((next) => { if (!cancelled) setState(next) })
+    void getPushPreferences()
+      .then((next) => { if (!cancelled) setPreferences(next) })
+      .catch(() => undefined)
     return () => { cancelled = true }
   }, [active])
+
+  const setPreference = useCallback(async (key: keyof PushPreferences, value: boolean) => {
+    setPreferences((current) => (current ? { ...current, [key]: value } : current))
+    try {
+      setPreferences(await updatePushPreferences({ ...(preferences ?? { billsDue: true }), [key]: value }))
+    } catch (error) {
+      setPreferences((current) => (current ? { ...current, [key]: !value } : current))
+      ToastService.apiError(error, { title: translateNow('settings.push.errorTitle') })
+    }
+  }, [preferences])
 
   const setEnabled = useCallback(async (enabled: boolean) => {
     setBusy(true)
@@ -49,5 +63,5 @@ export function usePushNotifications(active: boolean) {
     }
   }, [])
 
-  return { state, busy, setEnabled, sendTest }
+  return { state, busy, setEnabled, sendTest, preferences, setPreference }
 }
