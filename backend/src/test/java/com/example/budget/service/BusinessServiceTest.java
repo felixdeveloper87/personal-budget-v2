@@ -107,7 +107,7 @@ class BusinessServiceTest {
         when(sessionRepository.findByUserIdAndWorkDateBetweenOrderByStartedAtDesc(USER, DAY, DAY.plusDays(1)))
                 .thenReturn(List.of(tuesday, monday));
         when(transactionRepository.sumByDayForCategory(
-                USER, TransactionType.INCOME, BusinessService.BUSINESS_CATEGORY, DAY, DAY.plusDays(1)))
+                USER, TransactionType.INCOME, BusinessService.EARNINGS_CATEGORY, DAY, DAY.plusDays(1)))
                 .thenReturn(List.<Object[]>of(new Object[] {DAY, new BigDecimal("135.00")}));
 
         Summary summary = service.summary(USER, DAY, DAY.plusDays(1));

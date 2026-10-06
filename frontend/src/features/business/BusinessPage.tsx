@@ -361,7 +361,6 @@ export default function BusinessPage() {
         isOpen={earningsForm.isOpen}
         onClose={earningsForm.onClose}
         type="INCOME"
-        initialCategory="Business"
         transactions={[]}
         onTransactionCreated={() => { earningsForm.onClose(); void load() }}
         onRefresh={() => void load()}

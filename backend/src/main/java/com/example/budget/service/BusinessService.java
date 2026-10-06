@@ -28,13 +28,13 @@ import java.util.TreeMap;
 
 /**
  * Business time tracking. Sessions are timed live (start / pause / resume / end)
- * or entered by hand; "earned" is the income recorded in the Business category,
+ * or entered by hand; "earned" is the income recorded in the Salary category,
  * so the hourly rate is earned divided by hours worked, per day and per period.
  */
 @Service
 public class BusinessService {
-    /** Income category whose transactions count as business earnings. */
-    public static final String BUSINESS_CATEGORY = "Business";
+    /** Income category whose transactions count as earnings (the add-income default). */
+    public static final String EARNINGS_CATEGORY = "Salary";
     private static final int MAX_RANGE_DAYS = 400;
 
     private final WorkSessionRepository sessionRepository;
@@ -139,7 +139,7 @@ public class BusinessService {
         }
         Map<LocalDate, BigDecimal> earnedByDay = new HashMap<>();
         for (Object[] row : transactionRepository.sumByDayForCategory(
-                userId, TransactionType.INCOME, BUSINESS_CATEGORY, from, to)) {
+                userId, TransactionType.INCOME, EARNINGS_CATEGORY, from, to)) {
             earnedByDay.put((LocalDate) row[0], (BigDecimal) row[1]);
         }
 
