@@ -213,14 +213,13 @@ export default function SpotlightSearch({ isOpen, onClose }: SpotlightSearchProp
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'xl', md: '2xl' }}
+      size={{ base: 'xl', md: '2xl' }}
       contentProps={{
         className: 'nu-dashboard',
         bg: 'var(--nu-page)',
-        maxH: { base: 'calc(100dvh - 24px)', sm: '78dvh' },
-        mx: { base: 3, sm: 0 },
-        my: { base: 3, sm: 0 },
-        borderRadius: { base: '24px', md: '24px' },
+        // Mobile size comes from ui/modalLayout.ts (bottom sheet).
+        maxH: { md: '78dvh' },
+        borderRadius: { md: '24px' },
       }}
     >
       <Flex direction="column" h="full" minH={0} bg="var(--nu-page)" position="relative">

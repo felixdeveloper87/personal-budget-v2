@@ -12,6 +12,7 @@ import {
   CreditCard,
   Home,
   TrendingUp,
+  Briefcase,
   type LucideIcon,
 } from '../../ui/icons'
 
@@ -25,6 +26,7 @@ export type AppPage =
   | 'commitments'
   | 'behaviour'
   | 'earnings'
+  | 'business'
   | 'all-transactions'
   | 'payments'
   | 'goals'
@@ -87,6 +89,13 @@ export const NAV_ITEMS: ReadonlyArray<NavItem> = [
     shortLabel: 'Earnings',
     icon: TrendingUp,
     description: 'Income by source and period',
+  },
+  {
+    id: 'business',
+    label: 'Business',
+    shortLabel: 'Business',
+    icon: Briefcase,
+    description: 'Hours worked and what you earn per hour',
   },
   {
     id: 'payments',

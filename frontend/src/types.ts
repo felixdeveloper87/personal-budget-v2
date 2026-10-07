@@ -246,17 +246,11 @@ export interface User {
 export interface AdminUserRow {
   id: number
   email: string
-  /** Optional address used for communications; never used to sign in. */
-  communicationEmail: string | null
   name: string
   createdAt: string
   approved: boolean
   admin: boolean
   plan: UserPlan
-}
-
-export interface CommunicationEmailSendResponse {
-  recipientCount: number
 }
 
 // Auth Requests
@@ -445,11 +439,15 @@ export type HouseholdNotificationType =
   | 'SETTLEMENT_CONFIRMED'
   | 'SETTLEMENT_REJECTED'
   | 'SETTLEMENT_CANCELLED'
+  | 'SETTLEMENT_REMINDER'
   | 'MEMBER_JOINED'
   | 'MEMBER_REMOVED'
   | 'CLEANING_WEEK_ASSIGNED'
   | 'CLEANING_DUTY_COMPLETED'
   | 'CLEANING_WEEK_COMPLETED'
+  | 'CLEANING_WEEK_REMINDER'
+  | 'CLEANING_BINS_REMINDER'
+  | 'CLEANING_BINS_FINAL_REMINDER'
 
 export interface HouseholdMember {
   id: number
@@ -623,4 +621,69 @@ export interface HouseholdCleaningRotationRequest {
   startDate: string
   active: boolean
   participantMemberIds: number[]
+}
+
+// Business tab: time tracking + hourly rate
+export type WorkSessionStatus = 'RUNNING' | 'PAUSED' | 'ENDED'
+
+export interface WorkSession {
+  id: number
+  /** Local calendar day the session belongs to (yyyy-mm-dd). */
+  workDate: string
+  /** ISO instants. */
+  startedAt: string
+  endedAt: string | null
+  pausedAt: string | null
+  breakSeconds: number
+  /** Excludes breaks; for an open session it is as of when the server answered. */
+  workedSeconds: number
+  status: WorkSessionStatus
+  note: string | null
+}
+
+export interface ManualWorkSessionRequest {
+  workDate: string
+  startedAt: string
+  endedAt: string
+  breakMinutes: number
+  note?: string | null
+}
+
+export interface BusinessDaySummary {
+  date: string
+  workedSeconds: number
+  earned: number
+  /** Earned per hour. Null when the day has no hours or no earnings yet. */
+  hourlyRate: number | null
+  /** Daily running cost, charged on days with earnings. */
+  cost: number
+  profit: number
+  /** (earned - cost) per hour. Null when the day has no hours or no earnings yet. */
+  profitRate: number | null
+}
+
+/** Daily cost = cost-category spend over the last 3 complete months / days with earnings. */
+export interface BusinessCostBasis {
+  category: string
+  windowFrom: string
+  windowTo: string
+  windowSpend: number
+  workingDays: number
+  dailyCost: number
+}
+
+export interface BusinessSummary {
+  from: string
+  to: string
+  totals: {
+    workedSeconds: number
+    earned: number
+    hourlyRate: number | null
+    cost: number
+    profit: number
+    profitRate: number | null
+  }
+  costBasis: BusinessCostBasis
+  days: BusinessDaySummary[]
+  sessions: WorkSession[]
 }

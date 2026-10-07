@@ -87,6 +87,48 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
     List<Transaction> findByUserAndPaymentDateBetweenOrderByPaymentDateAscIdAsc(
                     User user, LocalDate start, LocalDate end);
 
+    /** Total per day for one type and category (the Business tab's "earned"). */
+    @Query("SELECT t.transactionDate, SUM(t.amount) FROM Transaction t " +
+                    "WHERE t.user.id = :userId " +
+                    "AND t.type = :type " +
+                    "AND LOWER(t.category) = LOWER(:category) " +
+                    "AND t.transactionDate BETWEEN :from AND :to " +
+                    "GROUP BY t.transactionDate")
+    List<Object[]> sumByDayForCategory(
+                    @Param("userId") Long userId,
+                    @Param("type") TransactionType type,
+                    @Param("category") String category,
+                    @Param("from") LocalDate from,
+                    @Param("to") LocalDate to);
+
+    /**
+     * Total per payment date for one type and category: when the money actually
+     * left (a card purchase counts on its bill date). Used for business costs.
+     */
+    @Query("SELECT t.paymentDate, SUM(t.amount) FROM Transaction t " +
+                    "WHERE t.user.id = :userId " +
+                    "AND t.type = :type " +
+                    "AND LOWER(t.category) = LOWER(:category) " +
+                    "AND t.paymentDate BETWEEN :from AND :to " +
+                    "GROUP BY t.paymentDate")
+    List<Object[]> sumByPaymentDateForCategory(
+                    @Param("userId") Long userId,
+                    @Param("type") TransactionType type,
+                    @Param("category") String category,
+                    @Param("from") LocalDate from,
+                    @Param("to") LocalDate to);
+
+    /** Expenses whose money leaves on {@code date}, for the "due tomorrow" push. */
+    @Query("SELECT t FROM Transaction t " +
+                    "JOIN FETCH t.user " +
+                    "LEFT JOIN FETCH t.paymentMethod " +
+                    "WHERE t.type = :type " +
+                    "AND t.paymentDate = :date " +
+                    "ORDER BY t.user.id, t.amount DESC, t.id")
+    List<Transaction> findByTypeAndPaymentDate(
+                    @Param("type") TransactionType type,
+                    @Param("date") LocalDate date);
+
     @Query("SELECT t FROM Transaction t " +
                     "JOIN FETCH t.user " +
                     "WHERE t.status = :status " +

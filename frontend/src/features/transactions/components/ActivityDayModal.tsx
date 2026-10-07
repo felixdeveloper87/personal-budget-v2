@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Box, Flex, HStack, Modal, ModalBody, ModalCloseButton, ModalContent, ModalOverlay, Text } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../../components/ui/modalLayout'
 
 type ActivityDayModalProps = {
   isOpen: boolean
@@ -44,7 +45,10 @@ export default function ActivityDayModal({
         boxShadow="var(--pb-shadow-lift)"
         overflow="hidden"
         aria-label={label}
+        containerProps={sheetContainerProps}
+        sx={SHEET_SX}
       >
+        <Box {...sheetGrabberProps} />
         <ModalCloseButton
           zIndex={2}
           mt={1}

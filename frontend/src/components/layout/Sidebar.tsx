@@ -23,6 +23,7 @@ import {
 } from './header/navigation.config'
 import { HEADER_HEIGHT } from './header/Header'
 import UserMenu from './header/UserMenu'
+import BrandMark from '../brand/BrandMark'
 import { useI18n } from '../../i18n'
 
 /* -------------------------------------------------------------------------- */
@@ -47,6 +48,11 @@ const NAVIGATION_GROUPS: ReadonlyArray<{
     labelKey: 'sidebar.group.planning',
     fallbackLabel: 'Planning',
     itemIds: ['planning', 'commitments', 'goals'],
+  },
+  {
+    labelKey: 'sidebar.group.business',
+    fallbackLabel: 'Business',
+    itemIds: ['business'],
   },
   {
     labelKey: 'sidebar.group.reports',
@@ -302,27 +308,59 @@ function SidebarHeader({
       {isCollapsed ? (
         <Flex justify="center">
           <Tooltip label={t('sidebar.expand')} hasArrow placement="right" openDelay={200}>
-            <IconButton
+            <Box
+              as="button"
+              type="button"
               aria-label={t('sidebar.expand')}
-              icon={<Icon as={CaretDoubleLeft} weight="bold" boxSize={3.5} transform="rotate(180deg)" />}
-              size="sm"
-              variant="ghost"
-              borderRadius="full"
-              h="36px"
-              w="36px"
-              minW="36px"
-              transition={TRANSITION}
               onClick={onToggle}
-              {...toggleStyles}
-              border="0"
-              bg="transparent"
-              _hover={{ bg: 'transparent', transform: 'scale(1.04)' }}
-            />
+              role="group"
+              position="relative"
+              display="grid"
+              placeItems="center"
+              h="40px"
+              w="40px"
+              borderRadius="12px"
+              transition={TRANSITION}
+              _hover={{ bg: 'var(--pb-sidebar-active-bg)' }}
+              _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-sidebar-accent)' }}
+            >
+              <Box transition="opacity 0.2s ease" _groupHover={{ opacity: 0 }}>
+                <BrandMark size={26} />
+              </Box>
+              <Icon
+                as={CaretDoubleLeft}
+                weight="bold"
+                boxSize={3.5}
+                transform="rotate(180deg)"
+                position="absolute"
+                color="var(--pb-ink)"
+                opacity={0}
+                transition="opacity 0.2s ease"
+                _groupHover={{ opacity: 1 }}
+              />
+            </Box>
           </Tooltip>
         </Flex>
       ) : (
         <Flex align="center" justify="space-between" gap={2}>
-          <Box minW={0} />
+          <Box
+            as="button"
+            type="button"
+            aria-label="Personal Budget"
+            onClick={() => onPageChange?.('dashboard')}
+            minW={0}
+            flex={1}
+            maxW="168px"
+            py={1}
+            borderRadius="8px"
+            cursor="pointer"
+            transition="opacity 0.2s ease, transform 0.2s ease"
+            _hover={{ opacity: 0.85 }}
+            _active={{ transform: 'scale(0.98)' }}
+            _focusVisible={{ outline: 'none', boxShadow: '0 0 0 2px var(--pb-sidebar-accent)' }}
+          >
+            <BrandMark variant="title" size="100%" />
+          </Box>
 
           <Tooltip label={t('sidebar.collapse')} hasArrow placement="right" openDelay={400}>
             <IconButton

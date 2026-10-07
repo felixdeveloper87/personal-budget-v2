@@ -7,6 +7,7 @@ import SpotlightSearch from '../../search/SpotlightSearch'
 import HeaderActions from './HeaderActions'
 import LandingNav from './LandingNav'
 import Logo from './Logo'
+import MobileNav from './MobileNav'
 import NavBar from './NavBar'
 import UserMenu from './UserMenu'
 import { ON_BRAND, OnBrandContext } from './onBrand'
@@ -17,6 +18,7 @@ import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */
 export const HEADER_HEIGHT = { base: '72px', md: '64px' } as const
+export const MOBILE_NAV_SAFE_HEIGHT = 'calc(70px + max(8px, env(safe-area-inset-bottom, 0px)))'
 
 interface HeaderProps {
   onOpenProfile?: () => void
@@ -241,17 +243,6 @@ export default function Header({
             </Box>
           </Flex>
 
-          {/* Mobile primary nav: four frequent destinations plus a More menu. */}
-          {user && (
-            <Box display={{ base: 'block', md: 'none' }} pb={onBrand ? 1 : 3} pt={onBrand ? 0 : 1} mx={onBrand ? -2 : 0}>
-              <NavBar
-                variant="mobile"
-                items={navItems}
-                currentPage={currentPage}
-                onPageChange={onPageChange}
-              />
-            </Box>
-          )}
         </Container>
         </OnBrandContext.Provider>
 
@@ -270,6 +261,37 @@ export default function Header({
           zIndex={3}
         />
       </Box>
+
+      {/* Mobile-only app navigation: stable primary actions + complete menu sheet. */}
+      {user && (
+        <OnBrandContext.Provider value={onBrand}>
+          <Box
+            display={{ base: 'block', md: 'none' }}
+            position="fixed"
+            left={0}
+            right={0}
+            bottom={0}
+            zIndex={1100}
+            bg={ON_BRAND.bg}
+            borderTop="1px solid"
+            borderColor={ON_BRAND.line}
+            boxShadow="0 -12px 34px rgba(40, 0, 70, 0.26)"
+            px={2}
+            pt={1.5}
+            pb="max(8px, env(safe-area-inset-bottom, 0px))"
+            sx={{
+              paddingLeft: 'max(8px, env(safe-area-inset-left, 0px))',
+              paddingRight: 'max(8px, env(safe-area-inset-right, 0px))',
+            }}
+          >
+            <MobileNav
+              items={navItems}
+              currentPage={currentPage}
+              onPageChange={onPageChange}
+            />
+          </Box>
+        </OnBrandContext.Provider>
+      )}
 
       {user && !isAdminOnly && (
         <SpotlightSearch isOpen={isSearchOpen} onClose={closeSearch} />

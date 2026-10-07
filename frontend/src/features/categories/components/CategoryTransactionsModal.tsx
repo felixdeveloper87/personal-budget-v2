@@ -30,7 +30,7 @@ export default function CategoryTransactionsModal({
       isOpen={cat != null}
       onClose={onClose}
       size={{ base: 'full', sm: 'md', md: 'md' }}
-      contentProps={{ className: 'nu-dashboard', maxH: { base: 'calc(100dvh - 24px)', sm: '78dvh' } }}
+      contentProps={{ className: 'nu-dashboard', maxH: { md: '78dvh' } }}
       header={
         cat && (
           <ModalHeader

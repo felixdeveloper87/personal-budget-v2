@@ -16,12 +16,15 @@ import java.util.stream.Collectors;
 public class HouseholdNotificationService {
     private final HouseholdNotificationRepository notificationRepository;
     private final HouseholdMemberRepository memberRepository;
+    private final PushNotificationService pushNotificationService;
 
     public HouseholdNotificationService(
             HouseholdNotificationRepository notificationRepository,
-            HouseholdMemberRepository memberRepository) {
+            HouseholdMemberRepository memberRepository,
+            PushNotificationService pushNotificationService) {
         this.notificationRepository = notificationRepository;
         this.memberRepository = memberRepository;
+        this.pushNotificationService = pushNotificationService;
     }
 
     public void notifyHousehold(
@@ -171,7 +174,7 @@ public class HouseholdNotificationService {
             return;
         }
         if (dedupeKey != null) {
-            notificationRepository.insertIfAbsent(
+            int inserted = notificationRepository.insertIfAbsent(
                     recipient.getHousehold().getId(),
                     recipient.getId(),
                     actor != null ? actor.getId() : null,
@@ -181,6 +184,9 @@ public class HouseholdNotificationService {
                     amount,
                     recipientAmount,
                     dedupeKey);
+            if (inserted > 0) {
+                push(recipient, actor, type, referenceId, subject, amount, recipientAmount);
+            }
             return;
         }
 
@@ -195,6 +201,35 @@ public class HouseholdNotificationService {
         notification.setRecipientAmount(recipientAmount);
         notification.setDedupeKey(dedupeKey);
         notificationRepository.save(notification);
+        push(recipient, actor, type, referenceId, subject, amount, recipientAmount);
+    }
+
+    /** Mirrors each stored in-app notification as a Web Push to the recipient's devices. */
+    private void push(
+            HouseholdMember recipient,
+            HouseholdMember actor,
+            HouseholdNotificationType type,
+            Long referenceId,
+            String subject,
+            BigDecimal amount,
+            BigDecimal recipientAmount) {
+        // Single ticked tasks stay in the inbox only; the household is pushed
+        // once, when the whole week is done (CLEANING_WEEK_COMPLETED).
+        if (!pushNotificationService.isEnabled() || type == HouseholdNotificationType.CLEANING_DUTY_COMPLETED) {
+            return;
+        }
+        Household household = recipient.getHousehold();
+        pushNotificationService.sendToUser(
+                recipient.getUser().getId(),
+                HouseholdPushMessages.forNotification(
+                        type,
+                        household.getName(),
+                        household.getCurrency(),
+                        actor != null ? actor.getDisplayName() : null,
+                        referenceId,
+                        subject,
+                        amount,
+                        recipientAmount));
     }
 
     public record Inbox(

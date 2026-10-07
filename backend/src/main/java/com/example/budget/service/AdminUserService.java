@@ -2,7 +2,6 @@ package com.example.budget.service;
 
 import com.example.budget.dto.AdminUserResponse;
 import com.example.budget.dto.UpdateUserPlanRequest;
-import com.example.budget.dto.UpdateCommunicationEmailRequest;
 import com.example.budget.exception.AccessDeniedException;
 import com.example.budget.exception.EntityNotFoundException;
 import com.example.budget.model.User;
@@ -47,16 +46,6 @@ public class AdminUserService {
         return toResponse(userRepository.save(user));
     }
 
-    @Transactional
-    public AdminUserResponse updateCommunicationEmail(Long userId, UpdateCommunicationEmailRequest request, User principal) {
-        requireAdmin(principal);
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User", userId));
-        String email = request.getCommunicationEmail();
-        user.setCommunicationEmail(email == null || email.isBlank() ? null : email.trim().toLowerCase());
-        return toResponse(userRepository.save(user));
-    }
-
     /**
      * Permanently removes a user (reject pending signups or delete an account). Not allowed on self.
      */
@@ -81,7 +70,6 @@ public class AdminUserService {
         return new AdminUserResponse(
                 u.getId(),
                 u.getEmail(),
-                u.getCommunicationEmail(),
                 u.getName(),
                 u.getCreatedAt(),
                 u.isApproved(),

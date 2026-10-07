@@ -23,13 +23,6 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    /**
-     * Optional address used only for product communications.  It intentionally
-     * does not participate in authentication, password resets or JWTs.
-     */
-    @Column(name = "communication_email")
-    private String communicationEmail;
-
     @JsonIgnore
     @Column(nullable = false)
     private String password;
@@ -73,6 +66,10 @@ public class User {
     @Column(name = "planned_monthly_variable_expense")
     private BigDecimal plannedMonthlyVariableExpense;
 
+    /** Push the "due tomorrow" reminder for scheduled expenses. */
+    @Column(name = "push_bills_due", nullable = false)
+    private boolean pushBillsDue = true;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Transaction> transactions;
@@ -104,14 +101,6 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getCommunicationEmail() {
-        return communicationEmail;
-    }
-
-    public void setCommunicationEmail(String communicationEmail) {
-        this.communicationEmail = communicationEmail;
     }
 
     public String getPassword() {
@@ -184,6 +173,14 @@ public class User {
 
     public void setPlannedMonthlyVariableExpense(BigDecimal plannedMonthlyVariableExpense) {
         this.plannedMonthlyVariableExpense = plannedMonthlyVariableExpense;
+    }
+
+    public boolean isPushBillsDue() {
+        return pushBillsDue;
+    }
+
+    public void setPushBillsDue(boolean pushBillsDue) {
+        this.pushBillsDue = pushBillsDue;
     }
 
     public List<Transaction> getTransactions() {

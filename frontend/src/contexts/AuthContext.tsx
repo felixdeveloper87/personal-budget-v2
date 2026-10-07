@@ -10,6 +10,7 @@ import {
 import { User, LoginRequest, RegisterRequest } from '../types'
 import { login, register, type RegisterOutcome } from '../api'
 import { isJwtExpired, AUTH_SESSION_INVALID_EVENT } from '../utils/jwtExpiry'
+import { detachPushOnLogout, syncPushSubscription } from '../services/push'
 
 interface AuthContextType {
   user: User | null
@@ -87,9 +88,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // --- Logout: clear session + state ---
   const logout = useCallback(() => {
+    detachPushOnLogout(storedToken())
     setUser(null)
     localStorage.removeItem('user')
   }, [])
+
+  // Point this device's push subscription at whoever is signed in now.
+  useEffect(() => {
+    if (user?.token) void syncPushSubscription().catch(() => undefined)
+  }, [user?.token])
 
   // --- Context value memoized for performance ---
   const contextValue = useMemo(
@@ -117,4 +124,13 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
+}
+
+function storedToken(): string | undefined {
+  try {
+    const raw = localStorage.getItem('user')
+    return raw ? (JSON.parse(raw) as { token?: string }).token : undefined
+  } catch {
+    return undefined
+  }
 }

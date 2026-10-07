@@ -9,6 +9,7 @@ import {
 import TransactionForm from './TransactionForm/TransactionForm'
 import { Transaction } from '../../types'
 import { PremiumModal } from '../ui'
+import { SHEET_HEIGHT, SHEET_RADIUS, sheetGrabberProps } from '../ui/modalLayout'
 import TransactionModalHeader from './TransactionModalHeader'
 import { useEditorialPalette } from '../../editorial'
 
@@ -78,15 +79,16 @@ export default function AddTransactionModal({
         className="nu-dashboard"
         w="full"
         maxW="100vw"
-        h="92dvh"
-        maxH="92dvh"
+        h={SHEET_HEIGHT}
+        maxH={SHEET_HEIGHT}
         bg={ed.modal}
         borderTop="1px solid"
         borderColor={ed.lineStrong}
-        borderRadius="22px 22px 0 0"
+        borderRadius={`${SHEET_RADIUS} ${SHEET_RADIUS} 0 0`}
         boxShadow="0 -20px 50px -20px rgba(20, 35, 32, 0.35)"
         overflow="hidden"
       >
+        <Box {...sheetGrabberProps} />
         <TransactionModalHeader type={type} onClose={onClose} useMobileSafeArea={false} />
         <DrawerBody
           display="flex"

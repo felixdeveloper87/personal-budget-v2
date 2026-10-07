@@ -1,26 +1,22 @@
 import React from 'react'
 import {
   Box,
-  Button,
-  CloseButton,
   HStack,
   Spinner,
   Text,
-  VStack,
   createStandaloneToast,
   type ToastId,
   type ToastPosition,
 } from '@chakra-ui/react'
 import axios, { type AxiosError } from 'axios'
 import {
-  AlertCircle,
-  AlertTriangle,
-  CheckCircle2,
-  RefreshCw,
-  X,
-  Zap,
-  type LucideIcon,
-} from '../components/ui/icons'
+  CheckIcon,
+  ExclamationMarkIcon,
+  InfoIcon,
+  XIcon,
+  type Icon as PhosphorIcon,
+} from '@phosphor-icons/react'
+import { X } from '../components/ui/icons'
 import theme from '../theme'
 import { getCurrentLocale, translateNow } from '../i18n'
 
@@ -50,44 +46,30 @@ interface ApiErrorMessage {
   dedupeKey: string
 }
 
-const DEFAULT_POSITION: ToastPosition = 'top-right'
+const DEFAULT_POSITION: ToastPosition = 'bottom'
 const DEDUPE_WINDOW_MS = 3500
 const activeKeys = new Map<string, number>()
 
 const { toast, ToastContainer } = createStandaloneToast({ theme })
 
-const STATUS_TOKENS = {
-  success: {
-    icon: CheckCircle2,
-    fg: 'var(--pb-income-2)',
-    bg: 'var(--pb-tint-income)',
-  },
-  error: {
-    icon: AlertCircle,
-    fg: 'var(--pb-coral)',
-    bg: 'var(--pb-tint-coral)',
-  },
-  warning: {
-    icon: AlertTriangle,
-    fg: 'var(--pb-gold)',
-    bg: 'var(--pb-tint-gold)',
-  },
-  info: {
-    icon: Zap,
-    fg: 'var(--pb-forest-2)',
-    bg: 'var(--pb-tint-green)',
-  },
-  loading: {
-    icon: RefreshCw,
-    fg: 'var(--pb-forest-2)',
-    bg: 'var(--pb-tint-green)',
-  },
+/* Nubank-style snackbar: a dark card with white copy, a round status badge
+   and a lilac text action. It stays dark in both colour modes. */
+const SNACKBAR = {
+  bg: '#1f1f24',
+  border: 'rgba(255, 255, 255, 0.08)',
+  titleColor: '#ffffff',
+  descriptionColor: 'rgba(255, 255, 255, 0.72)',
+  action: '#d6b4f7',
+  actionHover: 'rgba(214, 180, 247, 0.14)',
+  close: 'rgba(255, 255, 255, 0.6)',
 } as const
 
-type StatusToken = {
-  icon: LucideIcon
-  fg: string
-  bg: string
+const STATUS_BADGE: Record<ToastStatus, { icon: PhosphorIcon | null; bg: string; fg: string }> = {
+  success: { icon: CheckIcon, bg: '#820ad1', fg: '#ffffff' },
+  error: { icon: XIcon, bg: '#e5484d', fg: '#ffffff' },
+  warning: { icon: ExclamationMarkIcon, bg: '#f5b83d', fg: '#1f1f24' },
+  info: { icon: InfoIcon, bg: '#820ad1', fg: '#ffffff' },
+  loading: { icon: null, bg: 'rgba(255, 255, 255, 0.12)', fg: '#ffffff' },
 }
 
 function buildKey(options: AppToastOptions): string {
@@ -106,7 +88,7 @@ function shouldShow(options: AppToastOptions): boolean {
   return true
 }
 
-function PremiumToast({
+function NubankToast({
   id,
   title,
   description,
@@ -114,90 +96,99 @@ function PremiumToast({
   isClosable = true,
   action,
 }: AppToastOptions & { id: ToastId }) {
-  const tokens = STATUS_TOKENS[status]
-  const StatusIcon = tokens.icon as StatusToken['icon']
-  const bg = 'var(--pb-surface)'
-  const border = 'var(--pb-hair-2)'
-  const titleColor = 'var(--pb-ink)'
-  const descColor = 'var(--pb-ink-soft)'
-  const actionBg = 'var(--pb-surface-2)'
-  const actionHover = 'var(--pb-surface-3)'
+  const badge = STATUS_BADGE[status]
+  const BadgeIcon = badge.icon
+  const urgent = status === 'error' || status === 'warning'
 
   return (
     <Box
-      role={status === 'error' || status === 'warning' ? 'alert' : 'status'}
-      aria-live={status === 'error' || status === 'warning' ? 'assertive' : 'polite'}
-      w={{ base: 'calc(100vw - 24px)', sm: '390px' }}
-      maxW="390px"
-      bg={bg}
+      role={urgent ? 'alert' : 'status'}
+      aria-live={urgent ? 'assertive' : 'polite'}
+      w={{ base: 'calc(100vw - 24px)', sm: 'auto' }}
+      minW={{ sm: '320px' }}
+      maxW={{ base: 'calc(100vw - 24px)', sm: '440px' }}
+      bg={SNACKBAR.bg}
       border="1px solid"
-      borderColor={border}
-      borderRadius="xl"
-      boxShadow="var(--pb-shadow-lift)"
-      backdropFilter="blur(18px) saturate(145%)"
+      borderColor={SNACKBAR.border}
+      borderRadius="16px"
+      boxShadow="0 12px 32px -8px rgba(15, 10, 25, 0.45), 0 2px 6px rgba(15, 10, 25, 0.2)"
+      fontFamily="var(--pb-serif)"
       overflow="hidden"
     >
-      <HStack align="flex-start" spacing={3} p={4}>
+      <HStack align="center" spacing={3} pl={4} pr={isClosable ? 2 : 4} py={3}>
         <Box
-          w={9}
-          h={9}
-          borderRadius="lg"
-          bg={tokens.bg}
-          color={tokens.fg}
+          w="28px"
+          h="28px"
+          borderRadius="full"
+          bg={badge.bg}
+          color={badge.fg}
           display="flex"
           alignItems="center"
           justifyContent="center"
           flexShrink={0}
         >
-          {status === 'loading' ? (
-            <Spinner size="sm" thickness="2px" speed="0.75s" />
+          {BadgeIcon ? (
+            <BadgeIcon size={15} weight="bold" aria-hidden="true" />
           ) : (
-            <StatusIcon size={18} weight="duotone" aria-hidden="true" />
+            <Spinner size="xs" thickness="2px" speed="0.75s" />
           )}
         </Box>
 
-        <VStack align="stretch" spacing={2} minW={0} flex={1}>
-          <Box minW={0}>
-            <Text color={titleColor} fontSize="sm" fontWeight={750} lineHeight="1.25">
-              {title}
+        <Box minW={0} flex={1} py={0.5}>
+          <Text color={SNACKBAR.titleColor} fontSize="sm" fontWeight={600} lineHeight="1.35">
+            {title}
+          </Text>
+          {description && (
+            <Text color={SNACKBAR.descriptionColor} fontSize="13px" lineHeight="1.4" mt={0.5}>
+              {description}
             </Text>
-            {description && (
-              <Text color={descColor} fontSize="sm" lineHeight="1.45" mt={0.5}>
-                {description}
-              </Text>
-            )}
-          </Box>
-
-          {action && (
-            <Button
-              alignSelf="flex-start"
-              size="xs"
-              h="28px"
-              px={3}
-              borderRadius="md"
-              bg={actionBg}
-              color={titleColor}
-              fontWeight={700}
-              onClick={() => {
-                action.onClick()
-                toast.close(id)
-              }}
-              _hover={{ bg: actionHover }}
-            >
-              {action.label}
-            </Button>
           )}
-        </VStack>
+        </Box>
+
+        {action && (
+          <Box
+            as="button"
+            type="button"
+            flexShrink={0}
+            px={2.5}
+            h="32px"
+            borderRadius="full"
+            color={SNACKBAR.action}
+            fontSize="sm"
+            fontWeight={700}
+            whiteSpace="nowrap"
+            transition="background 0.15s ease"
+            _hover={{ bg: SNACKBAR.actionHover }}
+            _focusVisible={{ outline: 'none', boxShadow: `0 0 0 2px ${SNACKBAR.action}` }}
+            onClick={() => {
+              action.onClick()
+              toast.close(id)
+            }}
+          >
+            {action.label}
+          </Box>
+        )}
 
         {isClosable && (
-          <CloseButton
+          <Box
+            as="button"
+            type="button"
             aria-label={translateNow('toast.dismiss')}
-            size="sm"
-            mt={-1}
-            mr={-1}
-            color={descColor}
+            flexShrink={0}
+            w="32px"
+            h="32px"
+            borderRadius="full"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            color={SNACKBAR.close}
+            transition="background 0.15s ease, color 0.15s ease"
+            _hover={{ bg: 'rgba(255, 255, 255, 0.1)', color: SNACKBAR.titleColor }}
+            _focusVisible={{ outline: 'none', boxShadow: `0 0 0 2px ${SNACKBAR.action}` }}
             onClick={() => toast.close(id)}
-          />
+          >
+            <XIcon size={16} weight="bold" aria-hidden="true" />
+          </Box>
         )}
       </HStack>
     </Box>
@@ -212,7 +203,9 @@ function show(options: AppToastOptions): ToastId | undefined {
     position: options.position ?? DEFAULT_POSITION,
     duration: options.duration === undefined ? durationFor(options.status ?? 'info') : options.duration,
     isClosable: options.isClosable ?? true,
-    render: ({ id }) => <PremiumToast {...options} id={id ?? options.id ?? buildKey(options)} />,
+    // Clears the iOS home indicator when the app runs installed as a PWA.
+    containerStyle: { marginBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))' },
+    render: ({ id }) => <NubankToast {...options} id={id ?? options.id ?? buildKey(options)} />,
   })
 }
 

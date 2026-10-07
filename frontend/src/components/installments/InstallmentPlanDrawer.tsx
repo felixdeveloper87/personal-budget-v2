@@ -48,6 +48,7 @@ import { ToastService } from '../../services/toast'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
 
 interface InstallmentPlanDrawerProps {
   plan: InstallmentPlan | null
@@ -530,7 +531,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       {/* Edit plan modal */}
       <Modal isOpen={editDisclosure.isOpen} onClose={editDisclosure.onClose} isCentered>
         <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
-        <ModalContent bg={dialogBg} borderRadius="xl" mx={4}>
+        <ModalContent bg={dialogBg} borderRadius="xl" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
+          <Box {...sheetGrabberProps} />
           <ModalHeader px={6} pt={5} pb={3}>
             <HStack spacing={3}>
               <Box
@@ -661,7 +663,10 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             maxW="440px"
             mx={4}
             overflow="hidden"
+            containerProps={sheetContainerProps}
+            sx={SHEET_SX}
           >
+            <Box {...sheetGrabberProps} />
             <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
               <Box
                 w={9}

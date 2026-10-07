@@ -49,6 +49,7 @@ import type {
   HouseholdAttachment,
   HouseholdPageState,
 } from '../../types'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../../components/ui/modalLayout'
 
 const MAX_FILES = 5
 const MAX_FILE_SIZE = 5 * 1024 * 1024
@@ -755,7 +756,10 @@ export function AttachmentGalleryModal({
           maxH={{ base: '100dvh', md: 'calc(100vh - 7.5rem)' }}
           my={{ base: 0, md: 16 }}
           borderRadius={{ base: 0, md: 'md' }}
+          containerProps={sheetContainerProps}
+          sx={SHEET_SX}
         >
+          <Box {...sheetGrabberProps} />
           <ChakraModalHeader p={0}>
             <AppModalHeader
               title={t('household.attachments.title')}

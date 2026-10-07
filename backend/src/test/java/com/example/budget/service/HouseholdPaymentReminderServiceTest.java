@@ -4,6 +4,7 @@ import com.example.budget.model.Household;
 import com.example.budget.model.HouseholdExpense;
 import com.example.budget.model.HouseholdExpenseShare;
 import com.example.budget.model.HouseholdMember;
+import com.example.budget.model.HouseholdNotificationType;
 import com.example.budget.model.HouseholdSettlement;
 import com.example.budget.model.HouseholdSettlementStatus;
 import com.example.budget.model.User;
@@ -23,41 +24,43 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HouseholdPaymentEmailServiceTest {
+class HouseholdPaymentReminderServiceTest {
     @Mock private HouseholdRepository householdRepository;
     @Mock private HouseholdMemberRepository memberRepository;
     @Mock private HouseholdExpenseRepository expenseRepository;
     @Mock private HouseholdExpenseShareRepository shareRepository;
     @Mock private HouseholdSettlementRepository settlementRepository;
-    @Mock private ResendEmailClient resendEmailClient;
-    @Mock private HouseholdPaymentEmailTemplate emailTemplate;
+    @Mock private HouseholdNotificationService notificationService;
 
-    private HouseholdPaymentEmailService service;
+    private HouseholdPaymentReminderService service;
 
     @BeforeEach
     void setUp() {
-        service = new HouseholdPaymentEmailService(
+        service = new HouseholdPaymentReminderService(
                 householdRepository,
                 memberRepository,
                 expenseRepository,
                 shareRepository,
                 settlementRepository,
-                resendEmailClient,
-                emailTemplate,
+                notificationService,
                 "Europe/London");
     }
 
     @Test
-    void reminderUsesTheBalanceAfterCompletedPayments() {
-        Household household = household("Flat 1");
-        HouseholdMember payer = member(1L, household, "Leandro", "leandro@example.com");
-        HouseholdMember debtor = member(2L, household, "Maria", "maria@example.com");
+    void remindsTheDebtorOfTheBalanceAfterCompletedPayments() {
+        Household household = household();
+        HouseholdMember payer = member(1L, household, "Leandro");
+        HouseholdMember debtor = member(2L, household, "Maria");
         HouseholdExpense expense = new HouseholdExpense();
         expense.setHousehold(household);
         expense.setPayer(payer);
@@ -79,36 +82,43 @@ class HouseholdPaymentEmailServiceTest {
         when(shareRepository.findByExpenseIn(List.of(expense))).thenReturn(List.of(share));
         when(settlementRepository.findByHouseholdOrderBySettlementDateDescIdDesc(household))
                 .thenReturn(List.of(completed));
-        when(emailTemplate.paymentReminder(eq("Maria"), eq("Flat 1"), anyList(), eq("GBP")))
-                .thenReturn(new HouseholdPaymentEmailTemplate.EmailContent("text", "<html>reminder</html>"));
 
-        service.sendPaymentReminders(LocalDate.of(2026, 9, 15));
+        service.sendPaymentReminders(LocalDate.of(2026, 9, 28));
 
-        verify(emailTemplate).paymentReminder(
-                eq("Maria"), eq("Flat 1"),
-                eq(List.of(new HouseholdPaymentEmailTemplate.Debt("Leandro", new BigDecimal("15.00")))),
-                eq("GBP"));
-        verify(resendEmailClient).sendHtmlBatch(
-                eq(List.of("maria@example.com")),
-                eq("Household payment reminder"),
-                eq("text"),
-                eq("<html>reminder</html>"));
+        verify(notificationService).notifyMemberOnce(
+                eq(debtor),
+                isNull(),
+                eq(HouseholdNotificationType.SETTLEMENT_REMINDER),
+                isNull(),
+                eq("Leandro"),
+                argThat(amount -> amount.compareTo(new BigDecimal("15.00")) == 0),
+                eq("settlement-reminder:2026-09-28"));
+        verify(notificationService, never()).notifyMemberOnce(
+                eq(payer), any(), any(), any(), any(), any(), any());
     }
 
-    private Household household(String name) {
+    @Test
+    void doesNothingOutsideTheReminderDays() {
+        service.sendPaymentReminders(LocalDate.of(2026, 9, 15));
+        service.sendPaymentReminders(LocalDate.of(2026, 10, 31));
+
+        verifyNoInteractions(householdRepository, notificationService);
+    }
+
+    private Household household() {
         Household household = new Household();
-        household.setName(name);
+        household.setName("Flat 1");
         household.setCurrency("GBP");
         return household;
     }
 
-    private HouseholdMember member(Long id, Household household, String name, String communicationEmail) {
+    private HouseholdMember member(Long id, Household household, String name) {
         User user = new User("login@example.com", "secret", name);
-        user.setCommunicationEmail(communicationEmail);
         HouseholdMember member = new HouseholdMember();
         ReflectionTestUtils.setField(member, "id", id);
         member.setHousehold(household);
         member.setUser(user);
+        member.setDisplayName(name);
         return member;
     }
 }

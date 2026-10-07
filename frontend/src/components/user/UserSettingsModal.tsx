@@ -10,16 +10,23 @@ import {
   Divider,
   HStack,
   Icon,
+  IconButton,
   Input,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Portal,
   Select,
   Switch,
   Text,
   VStack,
   useColorModeValue,
   useDisclosure,
-  useToast,
 } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
+import { InfoIcon } from '@phosphor-icons/react'
 import { ModalHeader, PremiumModal } from '../ui'
 import ImportCsvModal from '../transactions/ImportCsvModal'
 import { deleteAllUserData } from '../../api'
@@ -28,6 +35,7 @@ import { ToastService } from '../../services/toast'
 import {
   AlertTriangle,
   Bell,
+  Home,
   Download,
   Globe,
   Settings,
@@ -37,6 +45,19 @@ import {
 } from '../ui/icons'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
+import { usePushNotifications } from '../../hooks/usePushNotifications'
+import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
+
+/** Household notifications, in the order they happen through the week. */
+const HOUSEHOLD_SCHEDULE = [
+  'activity',
+  'cleaningWeek',
+  'bins',
+  'binsFinal',
+  'cleaningUnfinished',
+  'cleaningDone',
+  'payments',
+] as const
 
 interface UserSettingsModalProps {
   isOpen: boolean
@@ -45,9 +66,17 @@ interface UserSettingsModalProps {
 
 export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModalProps) {
   const { locale, setLocale, t } = useI18n()
+  const push = usePushNotifications(isOpen)
+  const pushDescription = {
+    unsupported: t('settings.push.unsupported'),
+    'needs-install': t('settings.push.needsInstall'),
+    unavailable: t('settings.push.unavailable'),
+    denied: t('settings.push.blocked'),
+    off: t('settings.push.description'),
+    on: t('settings.push.description'),
+  }[push.state ?? 'off']
+  const pushToggleable = push.state === 'on' || push.state === 'off'
   const ed = useEd()
-  const toast = useToast()
-
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
@@ -117,13 +146,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   }
 
   const showComingSoon = () => {
-    toast({
+    ToastService.info({
       title: t('settings.comingSoon'),
       description: t('settings.comingSoonDescription'),
-      status: 'info',
       duration: 2500,
-      isClosable: true,
-      position: 'top',
     })
   }
 
@@ -153,11 +179,13 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
 
   const SettingRow = ({
     label,
+    labelAddon,
     description,
     children,
     noBorder,
   }: {
     label: string
+    labelAddon?: React.ReactNode
     description?: string
     children: React.ReactNode
     noBorder?: boolean
@@ -174,7 +202,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
       gap={4}
     >
       <Box minW={0} flex={1}>
-        <Text fontSize="sm" fontWeight={600} color={textColor}>{label}</Text>
+        <HStack spacing={1}>
+          <Text fontSize="sm" fontWeight={600} color={textColor}>{label}</Text>
+          {labelAddon}
+        </HStack>
         {description && (
           <Text fontSize="xs" color={mutedColor} mt={0.5}>{description}</Text>
         )}
@@ -264,6 +295,90 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             </VStack>
           </Box>
 
+          {/* Household: everything the shared-home core sends, for people who only use that part */}
+          <Box>
+            <SectionTitle icon={Home} label={t('settings.household')} />
+            <VStack
+              spacing={0}
+              align="stretch"
+              border="1px solid"
+              borderColor={borderColor}
+              borderRadius="xl"
+              overflow="hidden"
+            >
+              <SettingRow
+                label={t('settings.push')}
+                description={pushDescription}
+                labelAddon={(
+                  <Popover placement="bottom-start" isLazy>
+                    <PopoverTrigger>
+                      <IconButton
+                        aria-label={t('settings.household.whatYouGet')}
+                        icon={<InfoIcon size={16} weight="bold" />}
+                        size="xs"
+                        variant="ghost"
+                        borderRadius="full"
+                        minW="22px"
+                        h="22px"
+                        color={mutedColor}
+                      />
+                    </PopoverTrigger>
+                    <Portal>
+                      <PopoverContent
+                        w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
+                        bg={rowBg}
+                        borderColor={borderColor}
+                        borderRadius="xl"
+                      >
+                        <PopoverArrow bg={rowBg} />
+                        <PopoverBody p={4}>
+                          <Text fontSize="xs" fontWeight={600} color={mutedColor} mb={2}>
+                            {t('settings.household.whatYouGet')}
+                          </Text>
+                          <VStack spacing={1.5} align="stretch">
+                            {HOUSEHOLD_SCHEDULE.map((item) => (
+                              <HStack key={item} spacing={3} align="baseline">
+                                <Text fontSize="xs" fontWeight={700} color={textColor} minW="84px" flexShrink={0}>
+                                  {t(`settings.household.when.${item}`)}
+                                </Text>
+                                <Text fontSize="xs" color={mutedColor}>
+                                  {t(`settings.household.what.${item}`)}
+                                </Text>
+                              </HStack>
+                            ))}
+                          </VStack>
+                        </PopoverBody>
+                      </PopoverContent>
+                    </Portal>
+                  </Popover>
+                )}
+              >
+                <HStack spacing={3}>
+                  {push.state === 'on' && (
+                    <Button
+                      size="xs"
+                      variant="link"
+                      color={textColor}
+                      fontWeight={600}
+                      onClick={() => void push.sendTest()}
+                      isDisabled={push.busy}
+                    >
+                      {t('settings.push.sendTest')}
+                    </Button>
+                  )}
+                  <Switch
+                    aria-label={t('settings.push')}
+                    isChecked={push.state === 'on'}
+                    isDisabled={!pushToggleable || push.busy}
+                    onChange={(e) => void push.setEnabled(e.target.checked)}
+                    colorScheme="blue"
+                    size="md"
+                  />
+                </HStack>
+              </SettingRow>
+            </VStack>
+          </Box>
+
           {/* Notifications */}
           <Box>
             <SectionTitle icon={Bell} label={t('settings.notifications')} />
@@ -275,6 +390,21 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
               borderRadius="xl"
               overflow="hidden"
             >
+              <SettingRow
+                label={t('settings.billsDue')}
+                description={push.state === 'on'
+                  ? t('settings.billsDueDescription')
+                  : t('settings.billsDueNeedsPush')}
+              >
+                <Switch
+                  aria-label={t('settings.billsDue')}
+                  isChecked={push.preferences?.billsDue ?? true}
+                  isDisabled={!push.preferences}
+                  onChange={(e) => void push.setPreference('billsDue', e.target.checked)}
+                  colorScheme="blue"
+                  size="md"
+                />
+              </SettingRow>
               <SettingRow
                 label={t('settings.emailReports')}
                 description={t('settings.emailReportsDescription')}
@@ -400,7 +530,8 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
         closeOnOverlayClick={!deleting}
       >
         <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
-          <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4}>
+          <AlertDialogContent bg={surfaceBg} borderRadius="xl" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
+            <Box {...sheetGrabberProps} />
             <AlertDialogHeader display="flex" alignItems="center" gap={3}>
               <Box
                 w={9}

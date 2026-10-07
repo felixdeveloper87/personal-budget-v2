@@ -15,7 +15,6 @@ import {
   CreateRecurringTransactionRequest,
   UpdateRecurringTransactionRequest,
   AdminUserRow,
-  CommunicationEmailSendResponse,
   PaymentMethod,
   PaymentMethodRequest,
   PeriodType,
@@ -37,6 +36,9 @@ import {
   HouseholdExpenseRequest,
   HouseholdSettlementRequest,
   HouseholdCleaningRotationRequest,
+  WorkSession,
+  ManualWorkSessionRequest,
+  BusinessSummary,
 } from './types'
 import { AUTH_SESSION_INVALID_EVENT } from './utils/jwtExpiry'
 import { ToastService } from './services/toast'
@@ -166,29 +168,6 @@ export async function approveAdminUser(id: number): Promise<AdminUserRow> {
 
 export async function updateAdminUserPlan(id: number, plan: UserPlan): Promise<AdminUserRow> {
   const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/plan`, { plan })
-  return data
-}
-
-export async function updateAdminUserCommunicationEmail(
-  id: number,
-  communicationEmail: string,
-): Promise<AdminUserRow> {
-  const { data } = await api.patch<AdminUserRow>(`/admin/users/${id}/communication-email`, {
-    communicationEmail,
-  })
-  return data
-}
-
-export async function sendCommunicationEmail(
-  subject: string,
-  text: string,
-  recipientUserIds: number[],
-): Promise<CommunicationEmailSendResponse> {
-  const { data } = await api.post<CommunicationEmailSendResponse>('/admin/communications/email', {
-    subject,
-    text,
-    recipientUserIds,
-  })
   return data
 }
 
@@ -807,3 +786,103 @@ export async function getHouseholdAttachmentBlob(
 }
 
 export default api
+
+// ----------------------------------------------------
+// 🔔 WEB PUSH
+// ----------------------------------------------------
+
+export interface PushConfig {
+  enabled: boolean
+  publicKey?: string
+}
+
+export async function getPushConfig(): Promise<PushConfig> {
+  const { data } = await api.get<PushConfig>('/push/config')
+  return data
+}
+
+export async function savePushSubscription(subscription: PushSubscriptionJSON): Promise<void> {
+  await api.post('/push/subscriptions', subscription)
+}
+
+export async function removePushSubscription(endpoint: string): Promise<void> {
+  await api.post('/push/subscriptions/remove', { endpoint })
+}
+
+/**
+ * Logout variant: the session is already cleared locally, so it carries the old
+ * token itself and skips the shared interceptors (no "session expired" toast).
+ */
+export async function removePushSubscriptionOnLogout(endpoint: string, token: string): Promise<void> {
+  await axios.post(
+    `${api.defaults.baseURL}/push/subscriptions/remove`,
+    { endpoint },
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+}
+
+export async function sendTestPush(): Promise<void> {
+  await api.post('/push/test')
+}
+
+export interface PushPreferences {
+  billsDue: boolean
+}
+
+export async function getPushPreferences(): Promise<PushPreferences> {
+  const { data } = await api.get<PushPreferences>('/push/preferences')
+  return data
+}
+
+export async function updatePushPreferences(preferences: PushPreferences): Promise<PushPreferences> {
+  const { data } = await api.put<PushPreferences>('/push/preferences', preferences)
+  return data
+}
+
+// ----------------------------------------------------
+// 💼 BUSINESS (time tracking + hourly rate)
+// ----------------------------------------------------
+
+export async function getActiveWorkSession(): Promise<WorkSession | null> {
+  const response = await api.get<WorkSession>('/business/sessions/active')
+  return response.status === 204 ? null : response.data
+}
+
+export async function startWorkSession(workDate: string): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>('/business/sessions/start', { workDate })
+  return data
+}
+
+export async function pauseWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/pause`)
+  return data
+}
+
+export async function resumeWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/resume`)
+  return data
+}
+
+export async function endWorkSession(id: number): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>(`/business/sessions/${id}/end`)
+  return data
+}
+
+export async function createWorkSession(request: ManualWorkSessionRequest): Promise<WorkSession> {
+  const { data } = await api.post<WorkSession>('/business/sessions', request)
+  return data
+}
+
+export async function updateWorkSession(id: number, request: ManualWorkSessionRequest): Promise<WorkSession> {
+  const { data } = await api.put<WorkSession>(`/business/sessions/${id}`, request)
+  return data
+}
+
+export async function deleteWorkSession(id: number): Promise<void> {
+  await api.delete(`/business/sessions/${id}`)
+}
+
+export async function getBusinessSummary(from: string, to: string): Promise<BusinessSummary> {
+  const { data } = await api.get<BusinessSummary>('/business/summary', { params: { from, to } })
+  return data
+}

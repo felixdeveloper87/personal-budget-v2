@@ -11,6 +11,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { ReactNode } from 'react'
 import { useEd } from '../../editorial'
 import { safariStyles, getResponsiveStyles } from './ui'
+import { sheetContainerProps, sheetContentProps, sheetGrabberProps } from './modalLayout'
 
 export interface PremiumModalProps extends Omit<ModalProps, 'children'> {
     children: ReactNode
@@ -58,6 +59,26 @@ export default function PremiumModal({
     const resolvedShadow = ed
         ? 'var(--pb-modal-shadow)'
         : shadow
+    // Mobile sizing lives in modalLayout.ts: every modal is a bottom sheet there.
+    const { sx: contentSheetSx } = sheetContentProps({
+        sx: {
+            ...safariStyles.modal,
+            ...(ed
+                ? {
+                    '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: 'none',
+                        borderRadius: 'inherit',
+                        boxShadow: `inset 0 1px 0 ${ed.line}`,
+                        zIndex: 3,
+                    },
+                }
+                : {}),
+            ...(contentSx && typeof contentSx === 'object' ? contentSx : {}),
+        },
+    })
 
     return (
         <Modal
@@ -99,24 +120,10 @@ export default function PremiumModal({
                 my={{ base: 0, md: 0 }}
                 {...responsiveStyles.modal}
                 {...restContentProps}
-                sx={{
-                    ...safariStyles.modal,
-                    ...(ed
-                        ? {
-                            '&::after': {
-                                content: '""',
-                                position: 'absolute',
-                                inset: 0,
-                                pointerEvents: 'none',
-                                borderRadius: 'inherit',
-                                boxShadow: `inset 0 1px 0 ${ed.line}`,
-                                zIndex: 3,
-                            },
-                        }
-                        : {}),
-                    ...(contentSx && typeof contentSx === 'object' ? contentSx : {}),
-                }}
+                containerProps={{ ...sheetContainerProps, ...restContentProps.containerProps }}
+                sx={contentSheetSx}
             >
+                <Box {...sheetGrabberProps} />
                 {header && (
                     <Box
                         position="relative"

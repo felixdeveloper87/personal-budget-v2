@@ -7,7 +7,7 @@ import { EditorialProvider, editorialPalette } from '../../editorial'
 import '../../features/dashboard/theme/pb-tokens.css'
 import { UserProfileModal, UserSettingsModal } from '../user'
 import Footer from './Footer'
-import Header from './header/Header'
+import Header, { MOBILE_NAV_SAFE_HEIGHT } from './header/Header'
 import Sidebar, { SIDEBAR_COLLAPSED_W, SIDEBAR_EXPANDED_W } from './Sidebar'
 import type { AppPage } from './header/navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './header/navigation.config'
@@ -62,7 +62,7 @@ export default function Layout({
   const settingsModal = useDisclosure()
   const { isCollapsed, toggle } = useSidebarCollapse()
 
-  // Show sidebar for logged-in non-admin users on md+ screens
+  // Show sidebar for logged-in non-admin users on md+ screens.
   const isDesktopOrTablet = useBreakpointValue({ base: false, md: true }) ?? false
   const isAdmin = Boolean(user?.admin)
   const showSidebar = Boolean(user) && !isAdmin && isDesktopOrTablet
@@ -138,6 +138,9 @@ export default function Layout({
         </Box>
 
         {showFooter ? <Footer /> : null}
+
+        {/* Lets the final content/footer scroll fully above the fixed mobile nav. */}
+        {user && <Box display={{ base: 'block', md: 'none' }} flexShrink={0} h={MOBILE_NAV_SAFE_HEIGHT} />}
 
         <UserProfileModal
           isOpen={profileModal.isOpen}

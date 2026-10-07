@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 public class AdminUserResponse {
     private Long id;
     private String email;
-    private String communicationEmail;
     private String name;
     private LocalDateTime createdAt;
     private boolean approved;
@@ -17,11 +16,10 @@ public class AdminUserResponse {
     public AdminUserResponse() {
     }
 
-    public AdminUserResponse(Long id, String email, String communicationEmail, String name, LocalDateTime createdAt,
+    public AdminUserResponse(Long id, String email, String name, LocalDateTime createdAt,
                              boolean approved, boolean admin, UserPlan plan) {
         this.id = id;
         this.email = email;
-        this.communicationEmail = communicationEmail;
         this.name = name;
         this.createdAt = createdAt;
         this.approved = approved;
@@ -45,13 +43,6 @@ public class AdminUserResponse {
         this.email = email;
     }
 
-    public String getCommunicationEmail() {
-        return communicationEmail;
-    }
-
-    public void setCommunicationEmail(String communicationEmail) {
-        this.communicationEmail = communicationEmail;
-    }
 
     public String getName() {
         return name;
