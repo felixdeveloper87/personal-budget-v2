@@ -1,8 +1,9 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
-import { Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, HStack, IconButton, Input, Text, VStack, usePrefersReducedMotion } from '@chakra-ui/react'
+import { useEffect, useState, type ElementType, type FormEvent, type ReactNode } from 'react'
+import { Box, Button, Checkbox, Flex, FormControl, FormErrorMessage, HStack, Icon, IconButton, Input, SimpleGrid, Text, VStack, usePrefersReducedMotion } from '@chakra-ui/react'
 import { createHouseholdExpense, deleteHouseholdExpense, updateHouseholdExpense, uploadHouseholdExpenseAttachments } from '../../../api'
-import { Check, Plus, ShoppingCart, Trash2, Users, X } from '../../../components/ui/icons'
+import { Calculator, Calendar, Check, FileText, Plus, ShoppingCart, Tag, Trash2, Users, X } from '../../../components/ui/icons'
 import { PremiumModal } from '../../../components/ui'
+import { useThemeColors } from '../../../hooks/useThemeColors'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdExpense, HouseholdExpenseRequest, HouseholdPageState } from '../../../types'
@@ -11,20 +12,6 @@ import { today } from '../householdDates'
 import { CATEGORIES, getHouseholdCategoryConfig } from './expenseConfig'
 
 const DETAIL_CATEGORIES = new Set(['Groceries', 'Cleaning', 'Repairs', 'Garden', 'Other'])
-const CATEGORY_TONES: Record<string, { background: string; color: string }> = {
-  Groceries: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Electricity: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Water: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Gas: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Internet: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Cleaning: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Rent: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  'Council tax': { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Repairs: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Garden: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-  Other: { background: 'var(--pb-tint-green)', color: 'var(--pb-forest)' },
-}
-
 export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }: {
   isOpen: boolean
   onClose: () => void
@@ -43,6 +30,7 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
   const [deleting, setDeleting] = useState(false)
   const [hasSubmitted, setHasSubmitted] = useState(false)
   const prefersReducedMotion = usePrefersReducedMotion()
+  const colors = useThemeColors()
 
   useEffect(() => {
     if (!isOpen) return
@@ -172,168 +160,125 @@ export function ExpenseModal({ isOpen, onClose, household, expense, onChanged }:
         className: 'nu-dashboard',
         w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
         h: { base: '80dvh', md: '80vh' }, maxH: { base: '80dvh', md: '80vh' },
-        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', bg: 'var(--pb-surface-2)',
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', bg: 'var(--nu-page, #ffffff)',
       }}
       header={<ExpenseSheetHeader householdName={household.name} editing={Boolean(expense)} saving={saving} onClose={onClose} />}
     >
       <Box as="form" id="household-expense-form" onSubmit={submit} overflowY="auto" flex={1} minH={0}
-        px={4} pt={3.5} pb={5.5} bg="var(--pb-surface-2)" sx={{ WebkitOverflowScrolling: 'touch' }}>
-        <VStack align="stretch" spacing={3.5}>
-          <Box p={4.5} borderRadius="24px" bg="var(--pb-tint-green)" border="1px solid var(--pb-hair-2)">
-            <Text color="var(--pb-forest)" fontSize="12px" fontWeight={600}>{t('household.expenseModal.totalAmount')}</Text>
-            <Flex align="center" minH="68px" gap={2}>
-              <Text flexShrink={0} color="var(--pb-forest)" fontSize="28px" fontWeight={600}>{mark}</Text>
-              <Input variant="unstyled" inputMode="decimal" value={amount}
-                onChange={(event) => setAmount(event.target.value.replace(/[^0-9.,]/g, ''))}
-                placeholder={t('household.expenseModal.amountPlaceholder')} minW={0} h="64px" color="var(--pb-ink)"
-                fontSize={{ base: '38px', sm: '42px' }} fontWeight={800} letterSpacing="-1.5px"
-                _placeholder={{ color: 'var(--pb-ink-faint)' }} />
-              <SplitHint count={participantIds.size} compact={false} />
-            </Flex>
-            <SplitHint count={participantIds.size} compact />
-            <Box pt={3.5} borderTop="1px solid var(--pb-hair-2)">
-              <Text mb={2} color="var(--pb-ink-soft)" fontSize="12px" fontWeight={600}>{t('household.expenseModal.expenseDate')}</Text>
-              <Input type="date" value={expenseDate} onChange={(event) => setExpenseDate(event.target.value)} h="50px"
-                bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="14px" color="var(--pb-ink)" fontSize="13px" fontWeight={600}
-                _focusVisible={{ borderColor: 'var(--pb-forest)', boxShadow: '0 0 0 2px rgba(130,10,209,.2)' }} />
-            </Box>
-            {hasSubmitted && !amountIsValid && <Text mt={2} color="var(--pb-coral)" fontSize="11px" fontWeight={600}>{t('household.expenseModal.invalidAmount')}</Text>}
-          </Box>
+        bg="var(--nu-page, #ffffff)" p={{ base: 3, sm: 5, md: 6 }} sx={{ WebkitOverflowScrolling: 'touch' }}>
+        <VStack align="stretch" spacing={3}>
+          <FieldCard icon={Calculator} label={t('household.expenseModal.totalAmount')}
+            right={
+              <HStack spacing={1} justify="flex-end" whiteSpace="nowrap" px={2} py={1} borderRadius="10px" bg="#f3e8fc">
+                <Text color="#820ad1" fontSize="lg" fontWeight={800}>{mark}</Text>
+                <Input variant="unstyled" inputMode="decimal" value={amount}
+                  onChange={(event) => setAmount(event.target.value.replace(/[^0-9.,]/g, ''))}
+                  placeholder="0.00" aria-label={t('household.expenseModal.totalAmount')}
+                  w={{ base: '68px', sm: '80px' }} minW={{ base: '68px', sm: '80px' }} flex="none" p={0}
+                  color="#820ad1" fontSize="22px" fontWeight={800} lineHeight="1.1" textAlign="left"
+                  sx={{ fontVariantNumeric: 'tabular-nums', _placeholder: { color: colors.text.secondary, opacity: 0.8 } }} />
+              </HStack>
+            }>
+            <HStack spacing={1.5} color={colors.text.secondary}>
+              <Users size={14} aria-hidden="true" />
+              <Text fontSize="xs">{participantIds.size >= 2 ? t('household.expenseModal.dividedBy', { count: formatNumber(participantIds.size) }) : t('household.expenseModal.selectWhoSplits')}</Text>
+            </HStack>
+            {hasSubmitted && !amountIsValid && <Text color="red.400" fontSize="xs" fontWeight={600}>{t('household.expenseModal.invalidAmount')}</Text>}
+          </FieldCard>
 
-          <FormCard>
-            <SectionHeading title={t('household.expenseModal.aboutTitle')} hint={t('household.expenseModal.aboutHint')} />
-            <Flex mt={3.5} gap={2} flexWrap="wrap">
-              {visibleCategories.map((item) => {
+          <FieldCard icon={Calendar} label={t('household.expenseModal.expenseDate')}
+            right={
+              <Input type="date" value={expenseDate} onChange={(event) => setExpenseDate(event.target.value)} size="sm"
+                w="auto" bg={colors.bgSecondary} border="none" borderRadius="lg" color={colors.text.primary} fontSize="sm" fontWeight={600}
+                _focusVisible={{ boxShadow: '0 0 0 2px rgba(130,10,209,.2)' }} />
+            } />
+
+          <FieldCard icon={Tag} label={t('household.expenseModal.aboutTitle')}>
+            <SimpleGrid columns={2} spacing={2}>
+              {visibleCategories.map((item, index) => {
                 const selected = category === item
                 const CategoryIcon = getHouseholdCategoryConfig(item).icon
-                const tone = CATEGORY_TONES[item] ?? CATEGORY_TONES.Other
+                const spanLast = visibleCategories.length % 2 === 1 && index === visibleCategories.length - 1
                 return (
-                  <Button key={item} type="button" h="60px" minW={0} pl={2} pr={4.5} py={2.5} gap={2.5} borderRadius="18px"
-                    border="1px solid" borderColor={selected ? 'var(--pb-forest)' : 'var(--pb-hair)'} bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
-                    color={selected ? 'var(--pb-income)' : 'var(--pb-ink-soft)'} aria-pressed={selected} onClick={() => chooseCategory(item)}
-                    transition={prefersReducedMotion ? 'none' : 'transform .16s ease, background .16s ease'}
-                    _hover={{ bg: selected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)', transform: 'translateY(-1px)' }}>
-                    <Flex w="36px" h="36px" align="center" justify="center" borderRadius="12px"
-                      bg={selected ? 'var(--pb-forest)' : tone.background} color={selected ? 'white' : tone.color}>
-                      <CategoryIcon size={20} weight="duotone" aria-hidden="true" />
-                    </Flex>
-                    <Text fontSize="12px" fontWeight={selected ? 800 : 650}>{t(`household.category.${item}`, undefined, item)}</Text>
+                  <Button key={item} type="button" variant="ghost" h={{ base: 10, sm: 11 }} px={3} minW={0}
+                    gridColumn={spanLast ? 'span 2' : undefined} justifyContent="flex-start" borderRadius="xl"
+                    leftIcon={<CategoryIcon size={16} weight="duotone" aria-hidden="true" />} iconSpacing={2}
+                    border="1px solid" borderColor={selected ? '#820ad1' : colors.border}
+                    bg={selected ? colors.bgSecondary : 'transparent'}
+                    color={selected ? colors.text.primary : colors.text.secondary}
+                    fontSize="xs" fontWeight={selected ? 600 : 500} aria-pressed={selected}
+                    onClick={() => chooseCategory(item)}
+                    transition={prefersReducedMotion ? 'none' : undefined}
+                    _hover={{ bg: colors.bgSecondary }} _active={{ bg: colors.bgSecondary }}>
+                    <Text as="span" flex={1} textAlign="left" noOfLines={1}>{t(`household.category.${item}`, undefined, item)}</Text>
                     {selected && <Check size={12} weight="bold" aria-hidden="true" />}
                   </Button>
                 )
               })}
-            </Flex>
-            {requiresDescription ? (
-              <FormControl mt={4} isInvalid={hasSubmitted && !descriptionIsValid}>
-                <Text as="label" display="block" mb={2} color="var(--pb-ink-soft)" fontSize="12px" fontWeight={600}>{t('household.expenseModal.whatWasIt')}</Text>
-                <Input value={description} maxLength={255} onChange={(event) => setDescription(event.target.value)}
-                  placeholder={t(`household.expenseModal.placeholder.${category}`, undefined, t('household.expenseModal.descriptionPlaceholder'))}
-                  minH="50px" bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="14px"
-                  _focusVisible={{ borderColor: 'var(--pb-forest)', boxShadow: '0 0 0 2px rgba(130,10,209,.2)' }} />
-                <FormErrorMessage fontSize="11px">{t('household.expenseModal.descriptionRequired')}</FormErrorMessage>
-              </FormControl>
-            ) : (
-              <HStack mt={4} px={3} py={2.75} borderRadius="13px" bg="var(--pb-tint-green)" spacing={2}>
-                <Check size={15} weight="bold" color="var(--pb-forest)" aria-hidden="true" />
-                <Text color="var(--pb-ink-soft)" fontSize="12px" lineHeight="17px">{t('household.expenseModal.autoDescription', { description: resolvedDescription })}</Text>
-              </HStack>
-            )}
-          </FormCard>
+            </SimpleGrid>
+          </FieldCard>
 
-          <FormCard>
-            <Flex align="center" justify="space-between" gap={2}>
-              <SectionHeading title={t('household.expenseModal.whoSplits')} hint={t('household.expenseModal.whoSplitsHint')} />
-              <Text px={2.25} py={1.5} borderRadius="10px" bg="var(--pb-tint-green)" color="var(--pb-income)" fontSize="11px" fontWeight={800}>
-                {formatNumber(participantIds.size)}/{formatNumber(household.members.length)}
-              </Text>
-            </Flex>
-            <FormControl mt={3.5} isInvalid={hasSubmitted && !participantsAreValid}>
-              <Box
-                overflowX="auto"
-                overscrollBehaviorX="contain"
-                mx={-1}
-                px={1}
-                pb={1}
-                sx={{
-                  scrollSnapType: 'x mandatory',
-                  scrollbarWidth: 'none',
-                  WebkitOverflowScrolling: 'touch',
-                  '&::-webkit-scrollbar': { display: 'none' },
-                }}
-              >
-                <HStack align="stretch" spacing={2} w="max-content">
-                  {household.members.map((member) => {
-                    const isPayer = member.id === payerMemberId
-                    const selected = participantIds.has(member.id)
-                    return (
-                      <Flex
-                        as="label"
-                        key={member.id}
-                        w="174px"
-                        minW="174px"
-                        minH="64px"
-                        px={2.5}
-                        py={2}
-                        align="center"
-                        border="1px solid"
-                        borderColor={selected ? 'var(--pb-tint-green)' : 'var(--pb-hair)'}
-                        borderRadius="15px"
-                        bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
-                        cursor={isPayer ? 'default' : 'pointer'}
-                        scrollSnapAlign="start"
-                      >
-                        <Flex w="38px" h="38px" mr={2.5} flexShrink={0} align="center" justify="center" borderRadius="full"
-                          bg={selected ? 'var(--pb-tint-green)' : 'var(--pb-hair)'} color={selected ? 'var(--pb-income)' : 'var(--pb-ink-faint)'} fontSize="14px" fontWeight={700}>
-                          {member.name.trim().charAt(0).toUpperCase()}
-                        </Flex>
-                        <Text flex={1} minW={0} color="var(--pb-ink)" fontSize="12px" fontWeight={650} noOfLines={1}>
-                          {isPayer ? `${t('household.common.you')} \u00B7 ${t('household.expenseModal.paid')}` : member.name}
-                        </Text>
-                        <Checkbox isChecked={selected} isDisabled={isPayer} ml={1.5} onChange={(event) => {
-                          setParticipantIds((current) => {
-                            const next = new Set(current)
-                            if (event.target.checked) next.add(member.id)
-                            else next.delete(member.id)
-                            return next
-                          })
-                        }} sx={{
-                          '.chakra-checkbox__control': { w: '24px', h: '24px', borderRadius: '12px', borderWidth: '1.5px', borderColor: 'var(--pb-hair-2)', bg: selected ? 'var(--pb-forest)' : 'transparent', color: 'white' },
-                          '.chakra-checkbox__control[data-checked]': { bg: 'var(--pb-forest)', borderColor: 'var(--pb-forest)' },
-                          '.chakra-checkbox__control[data-disabled]': { opacity: 1 },
-                        }} />
-                      </Flex>
-                    )
-                  })}
-                </HStack>
-              </Box>
-              <FormErrorMessage fontSize="11px" fontWeight={600}>{t('household.expenseModal.selectParticipants')}</FormErrorMessage>
+          {requiresDescription ? (
+            <FieldCard icon={FileText} label={t('household.expenseModal.whatWasIt')}
+              right={
+                <FormControl isInvalid={hasSubmitted && !descriptionIsValid} flex={1} minW={0}>
+                  <Input value={description} maxLength={255} onChange={(event) => setDescription(event.target.value)}
+                    placeholder={t(`household.expenseModal.placeholder.${category}`, undefined, t('household.expenseModal.descriptionPlaceholder'))}
+                    variant="unstyled" textAlign="right" color={colors.text.primary} fontSize={{ base: 'sm', sm: 'md' }} fontWeight={500}
+                    _placeholder={{ color: colors.text.secondary, opacity: 0.75 }} />
+                  <FormErrorMessage justifyContent="flex-end" fontSize="xs">{t('household.expenseModal.descriptionRequired')}</FormErrorMessage>
+                </FormControl>
+              } />
+          ) : (
+            <FieldCard icon={FileText} label={t('household.expenseModal.whatWasIt')}
+              right={<Text fontSize="sm" fontWeight={500} color={colors.text.primary} noOfLines={1}>{resolvedDescription}</Text>} />
+          )}
+
+          <FieldCard icon={Users} label={t('household.expenseModal.whoSplits')}
+            right={<Text fontSize="sm" fontWeight={700} color={colors.text.primary}>{formatNumber(participantIds.size)}/{formatNumber(household.members.length)}</Text>}>
+            <FormControl isInvalid={hasSubmitted && !participantsAreValid}>
+              <SimpleGrid columns={2} spacing={2}>
+                {household.members.map((member, index) => {
+                  const isPayer = member.id === payerMemberId
+                  const selected = participantIds.has(member.id)
+                  const spanLast = household.members.length % 2 === 1 && index === household.members.length - 1
+                  return (
+                    <Flex as="label" key={member.id} minH={{ base: 10, sm: 11 }} px={3} align="center" gap={2}
+                      gridColumn={spanLast ? 'span 2' : undefined}
+                      border="1px solid" borderColor={selected ? '#820ad1' : colors.border} borderRadius="xl"
+                      bg={selected ? colors.bgSecondary : 'transparent'} cursor={isPayer ? 'default' : 'pointer'}>
+                      <Text flex={1} minW={0} fontSize="xs" fontWeight={selected ? 600 : 500}
+                        color={selected ? colors.text.primary : colors.text.secondary} noOfLines={1}>
+                        {isPayer ? `${t('household.common.you')} \u00B7 ${t('household.expenseModal.paid')}` : member.name}
+                      </Text>
+                      <Checkbox isChecked={selected} isDisabled={isPayer} colorScheme="purple" onChange={(event) => {
+                        setParticipantIds((current) => {
+                          const next = new Set(current)
+                          if (event.target.checked) next.add(member.id)
+                          else next.delete(member.id)
+                          return next
+                        })
+                      }} sx={{ '.chakra-checkbox__control[data-disabled]': { opacity: 1 } }} />
+                    </Flex>
+                  )
+                })}
+              </SimpleGrid>
+              <FormErrorMessage fontSize="xs" fontWeight={600}>{t('household.expenseModal.selectParticipants')}</FormErrorMessage>
             </FormControl>
             {participantsAreValid && amountIsValid && (
-              <Box mt={3.5} p={3.5} borderRadius="16px" bg="var(--pb-tint-green)">
-                <HStack spacing={1.75} color="var(--pb-forest)"><Users size={17} aria-hidden="true" /><Text fontSize="11px">{t('household.expenseModal.approximatelyPerPerson')}</Text></HStack>
-                <Text mt={1.5} color="var(--pb-income)" fontSize="25px" fontWeight={800} letterSpacing="-.5px">{formatCurrency(preview)}</Text>
-                <Text mt={1} color="var(--pb-ink-soft)" fontSize="10px">{t('household.expenseModal.roundingHint')}</Text>
-              </Box>
+              <Text fontSize="xs" color={colors.text.secondary}>
+                {t('household.expenseModal.approximatelyPerPerson')}{' '}
+                <Text as="span" fontSize="sm" fontWeight={800} color="#820ad1">{formatCurrency(preview)}</Text>
+              </Text>
             )}
-          </FormCard>
+          </FieldCard>
 
-          <FormCard>
-            <AttachmentPicker files={files} onChange={setFiles}
-              existingCount={(expense?.attachments ?? []).filter((attachment) => attachment.status === 'AVAILABLE').length} />
-          </FormCard>
+          <AttachmentPicker files={files} onChange={setFiles}
+            existingCount={(expense?.attachments ?? []).filter((attachment) => attachment.status === 'AVAILABLE').length} />
         </VStack>
       </Box>
     </PremiumModal>
   )
-
-  function SplitHint({ count, compact }: { count: number; compact: boolean }) {
-    return (
-      <HStack flexShrink={0} spacing={1} color="var(--pb-forest)" display={{ base: compact ? 'flex' : 'none', sm: compact ? 'none' : 'flex' }} mb={compact ? 3 : 0}>
-        <Users size={14} aria-hidden="true" />
-        <Text fontSize="11px">{count >= 2 ? t('household.expenseModal.dividedBy', { count: formatNumber(count) }) : t('household.expenseModal.selectWhoSplits')}</Text>
-      </HStack>
-    )
-  }
 }
 
 function ExpenseSheetHeader({ householdName, editing, saving, onClose }: { householdName: string; editing: boolean; saving: boolean; onClose: () => void }) {
@@ -362,15 +307,24 @@ function ExpenseSheetHeader({ householdName, editing, saving, onClose }: { house
   )
 }
 
-function FormCard({ children }: { children: ReactNode }) {
-  return <Box p={4} bg="var(--pb-surface-2)" border="1px solid var(--pb-hair)" borderRadius="22px">{children}</Box>
-}
-
-function SectionHeading({ title, hint }: { title: string; hint: string }) {
+function FieldCard({ icon, label, right, children }: { icon: ElementType; label: string; right?: ReactNode; children?: ReactNode }) {
+  const colors = useThemeColors()
   return (
-    <Box>
-      <Text color="var(--pb-ink)" fontSize="15px" fontWeight={700} letterSpacing="-.2px">{title}</Text>
-      <Text mt={1} color="var(--pb-ink-soft)" fontSize="11px" lineHeight="16px">{hint}</Text>
+    <Box borderRadius="2xl" bg={colors.inputBg} border="2px solid" borderColor={colors.border}
+      _focusWithin={{ borderColor: '#820ad1', boxShadow: '0 0 0 3px #820ad120' }} transition="border-color 0.3s ease, box-shadow 0.3s ease">
+      <VStack align="stretch" spacing={3} px={{ base: 3, sm: 4 }} py={{ base: 3, sm: 4 }}>
+        <HStack justify="space-between" spacing={3} align="center">
+          <HStack spacing={2.5} flexShrink={0}>
+            <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="#820ad1"
+              display="flex" alignItems="center" justifyContent="center" flexShrink={0} aria-hidden>
+              <Icon as={icon} boxSize={{ base: 4, sm: 5 }} sx={{ '& svg': { display: 'block' } }} />
+            </Box>
+            <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="600" color={colors.text.secondary} lineHeight="1.1" whiteSpace="nowrap">{label}</Text>
+          </HStack>
+          {right && <Flex flex={1} minW={0} justify="flex-end">{right}</Flex>}
+        </HStack>
+        {children}
+      </VStack>
     </Box>
   )
 }
