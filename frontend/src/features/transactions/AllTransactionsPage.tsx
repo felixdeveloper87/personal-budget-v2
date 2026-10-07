@@ -1,6 +1,6 @@
 import { Box, VStack, Spinner, Text } from '@chakra-ui/react'
 import AllTransactionsSection from '../../sections/AllTransactionsSection'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { hasActiveFilters } from '../../utils/filters'
 import { useAuth } from '../../contexts/AuthContext'
 import { useSearch } from '../../contexts/SearchContext'
@@ -10,6 +10,7 @@ import { mergeTransactionsWithFutureInstallments } from '../../utils/installment
 import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
+import '../dashboard/theme/pb-tokens.css'
 
 export default function AllTransactionsPage() {
   const { t } = useI18n()
@@ -19,7 +20,6 @@ export default function AllTransactionsPage() {
   const { user } = useAuth()
   const { filters } = useSearch()
 
-  const spinnerColor = 'var(--pb-forest-2)'
   const textColor = 'var(--pb-ink-soft)'
 
   const loadData = async () => {
@@ -58,48 +58,30 @@ export default function AllTransactionsPage() {
     loadData()
   }, [user?.token, filters])
 
-  if (loading) {
-    return (
-      <Box
-        px={{ base: 2, md: 4, lg: 6 }}
-        pt={{ base: 4, md: 7 }}
-        pb={PAGE_BOTTOM_PADDING}
-        maxW="appContent"
-        mx="auto"
-      >
-        <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-          <VStack py={20} spacing={4}>
-            <Spinner
-              size="xl"
-              color={spinnerColor}
-              thickness="3px"
-              speed="0.8s"
-            />
-            <Text fontSize="sm" fontWeight={500} color={textColor}>
-              {t('transactions.loading')}
-            </Text>
-          </VStack>
-        </VStack>
+  const sheet = (children: ReactNode) => (
+    <Box maxW="appContent" mx="auto" px={{ base: 0, md: 4, lg: 6 }} pt={{ base: 0, md: 5 }} pb={PAGE_BOTTOM_PADDING} minW={0}>
+      <Box className="nu-dashboard" bg="var(--nu-page)" borderRadius={{ base: 0, md: '24px' }} overflow="hidden">
+        {children}
       </Box>
+    </Box>
+  )
+
+  if (loading) {
+    return sheet(
+      <VStack py={20} spacing={4}>
+        <Spinner size="xl" color="var(--nu-brand, #820ad1)" thickness="3px" speed="0.8s" />
+        <Text fontSize="sm" fontWeight={500} color={textColor}>
+          {t('transactions.loading')}
+        </Text>
+      </VStack>,
     )
   }
 
-  return (
-    <Box
-      px={{ base: 2, md: 4, lg: 6 }}
-      pt={{ base: 4, md: 7 }}
-      pb={PAGE_BOTTOM_PADDING}
-      maxW="appContent"
-      mx="auto"
-      minW={0}
-    >
-      <VStack align="stretch" spacing={{ base: 4, md: 5 }}>
-        <AllTransactionsSection
-          transactions={transactions}
-          hasFilters={hasActiveFilters(filters)}
-          onRefresh={loadData}
-        />
-      </VStack>
-    </Box>
+  return sheet(
+    <AllTransactionsSection
+      transactions={transactions}
+      hasFilters={hasActiveFilters(filters)}
+      onRefresh={loadData}
+    />,
   )
 }
