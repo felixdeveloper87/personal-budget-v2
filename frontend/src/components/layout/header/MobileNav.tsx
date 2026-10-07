@@ -279,8 +279,8 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
       <Flex
         align="center"
         justify="center"
-        w={active ? '38px' : '34px'}
-        h="32px"
+        w={active ? '46px' : '40px'}
+        h="36px"
         borderRadius="full"
         bg={active ? 'rgba(255,255,255,0.20)' : 'transparent'}
         boxShadow={active ? 'inset 0 0 0 1px rgba(255,255,255,0.12)' : 'none'}
@@ -288,7 +288,7 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
       >
         <Icon
           as={icon}
-          boxSize={active ? '23px' : '22px'}
+          boxSize={active ? '28px' : '27px'}
           weight={active ? 'fill' : 'regular'}
           opacity={active ? 1 : 0.74}
           transition={reducedMotion ? 'none' : 'transform 180ms ease, opacity 180ms ease'}
