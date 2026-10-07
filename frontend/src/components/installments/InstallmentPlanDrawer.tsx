@@ -32,7 +32,6 @@ import {
   AlertTriangle,
   Calendar,
   CheckCircle2,
-  CreditCard,
   Pencil,
   Trash2,
   X,
@@ -45,6 +44,7 @@ import {
   updateInstallmentPlan,
 } from '../../api'
 import { ToastService } from '../../services/toast'
+import PlanLogo from './PlanLogo'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
@@ -342,18 +342,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
           py="1.1rem"
           borderBottom="1px solid var(--pb-hair)"
         >
-          <Box
-            w="44px"
-            h="44px"
-            borderRadius="12px"
-            display="grid"
-            placeItems="center"
-            bg={isPast ? 'var(--pb-surface-2)' : 'var(--pb-tint-green)'}
-            color={isPast ? 'var(--pb-ink-faint)' : 'var(--pb-forest-2)'}
-            border="1px solid var(--pb-hair)"
-            flexShrink={0}
-          >
-            <Icon as={CreditCard} boxSize="21px" weight="duotone" />
+          <Box opacity={isPast ? 0.7 : 1} flexShrink={0}>
+            <PlanLogo name={title} category={firstTransaction?.category} size={44} />
           </Box>
           <Box flex={1} minW={0}>
             <Text fontFamily="var(--pb-serif)" fontSize="1.2rem" fontWeight={500} color="var(--pb-ink)" noOfLines={2}>

@@ -118,6 +118,17 @@ const SUGGESTED_MERCHANT_NAMES = new Set(
   Object.values(MERCHANTS).flatMap((items) => items?.map((item) => item.name) ?? []),
 )
 
+const MERCHANT_DOMAIN_BY_NAME = new Map<string, string>(
+  Object.values(MERCHANTS).flatMap((items) =>
+    (items ?? []).filter((item) => item.domain).map((item) => [item.name.trim().toLowerCase(), item.domain as string] as const),
+  ),
+)
+
+/** Domain of a suggested merchant (e.g. "Tesco" → tesco.com), or null when it isn't one. */
+export function findMerchantDomain(name: string): string | null {
+  return MERCHANT_DOMAIN_BY_NAME.get(name.trim().toLowerCase()) ?? null
+}
+
 interface ExpenseQuickAddProps {
   category: string
   description: string
