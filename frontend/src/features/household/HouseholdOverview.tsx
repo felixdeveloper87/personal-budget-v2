@@ -2,6 +2,7 @@ import { Box, Button, Flex, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../types'
 import { getHouseholdCategoryConfig } from './expenses/expenseConfig'
+import { PayerInitials } from './expenses/PayerInitials'
 
 export function HouseholdOverview({
   household,
@@ -57,7 +58,7 @@ export function HouseholdOverview({
   )
 }
 
-/** One line: category icon, description, date, total. */
+/** One line: category icon, description, payer initials, date, total. */
 function RecentExpenseRow({ expense }: { expense: HouseholdExpense }) {
   const { formatCurrency, formatDate, t } = useI18n()
   const category = getHouseholdCategoryConfig(expense.category)
@@ -75,6 +76,7 @@ function RecentExpenseRow({ expense }: { expense: HouseholdExpense }) {
       <Text flex={1} minW={0} fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
         {expense.description || categoryLabel}
       </Text>
+      <PayerInitials name={expense.payerName} />
       <Text flexShrink={0} fontSize="xs" color="var(--pb-ink-faint)">
         {formatDate(expense.expenseDate, { day: 'numeric', month: 'short' })}
       </Text>

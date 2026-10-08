@@ -3,13 +3,14 @@ import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../../types'
 import { Pencil, ReceiptText, Upload } from '../../../components/ui/icons'
 import { getHouseholdCategoryConfig } from './expenseConfig'
+import { PayerInitials } from './PayerInitials'
 
 const BRAND = '#820ad1'
 
 /**
  * One expense in two lines:
  *   [icon] description   [proof] [edit]  £ total
- *          3 Oct                Your share £ x
+ *          (LF) 3 Oct           Your share £ x
  */
 export function ExpenseCard({
   expense,
@@ -73,8 +74,9 @@ export function ExpenseCard({
             </Text>
           </Flex>
 
-          {/* Line 2: date, your share */}
+          {/* Line 2: payer initials, date, your share */}
           <Flex mt={0.5} align="center" gap={2}>
+            <PayerInitials name={expense.payerName} />
             <Text flex={1} minW={0} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
               {formatDate(expense.expenseDate, { day: 'numeric', month: 'short' })}
             </Text>
