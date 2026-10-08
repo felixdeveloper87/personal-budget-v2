@@ -1,10 +1,14 @@
-import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, HStack, Icon, Spinner, Text, VStack } from '@chakra-ui/react'
 import { useState } from 'react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningAssignment } from '../../../types'
-import { Check, CheckCircle2, Clock } from '../../../components/ui/icons'
-import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { Check, Clock } from '../../../components/ui/icons'
+import { PremiumModal } from '../../../components/ui'
+import NuModalHeader from '../../../components/ui/NuModalHeader'
 import type { DisplayedCleaningDuty } from './cleaningConfig'
+
+const BRAND = '#820ad1'
+const ROW_HEIGHT = '56px'
 
 export function CleaningDutiesModal({
   isOpen,
@@ -45,140 +49,82 @@ export function CleaningDutiesModal({
       ? t('household.cleaning.dutiesCurrentUser')
       : t('household.cleaning.dutiesOther', { name: current.assignedMemberName })
     : t('household.cleaning.dutiesGeneric')
+  const pendingDuties = duties.filter((duty) => !duty.completed)
+  const completedDuties = duties.filter((duty) => duty.completed)
+  const renderDuties = (list: DisplayedCleaningDuty[]) => (
+    <VStack align="stretch" spacing={0} divider={<Box h="1px" bg="var(--pb-hair)" />}>
+      {list.map((duty) => (
+        <CleaningDutyCard
+          key={duty.key}
+          duty={duty}
+          assignmentId={current?.id ?? null}
+          busyDutyKey={busyDutyKey}
+          onToggleDuty={onToggleDuty}
+        />
+      ))}
+    </VStack>
+  )
+
   return (
     <PremiumModal
       isOpen={isOpen}
-      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
-      size={{ base: 'full', md: '2xl' }}
+      size="full"
+      contentProps={{
+        className: 'nu-dashboard',
+        w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
+        h: 'auto', maxH: { base: '85dvh', md: '80vh' },
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', overflow: 'hidden', bg: 'var(--nu-page, #ffffff)',
+      }}
       header={
-        <ModalHeader
+        <NuModalHeader
           title={t('household.cleaning.dutiesModalTitle')}
-          caption={t('household.cleaning.dutiesModalCaption')}
+          caption={guidance}
           onClose={onClose}
-          rightSlot={
-            <Badge
-              bg="var(--pb-tint-income)"
-              color="var(--pb-income)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="full"
-              px={3}
-              py={1}
-              textTransform="none"
-            >
-              {progressLabel}
-            </Badge>
-          }
         />
       }
-      footer={
-        <Flex justify="flex-end" w="full">
-          <Button
-            h="44px"
-            w={{ base: 'full', sm: 'auto' }}
-            px={5}
-            borderRadius="11px"
-            bg="var(--pb-forest-2)"
-            color="var(--pb-on-accent)"
-            onClick={onClose}
-            _hover={{ bg: 'var(--pb-forest)' }}
-          >
-            {t('household.common.done')}
-          </Button>
-        </Flex>
-      }
     >
-      <Box px={{ base: 4, sm: 5, md: 6 }} py={{ base: 4, md: 5 }}>
-        <Box
-          mb={6}
-          p={{ base: 5, md: 6 }}
-          borderRadius="24px"
-          bgGradient="linear(to-br, var(--pb-forest-2), var(--pb-forest))"
-          color="white"
-          boxShadow="0 8px 32px -8px rgba(0,0,0,0.15)"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          <Flex
-            direction={{ base: 'column', sm: 'row' }}
-            align={{ base: 'stretch', sm: 'center' }}
-            justify="space-between"
-            gap={4}
-          >
-            <Box>
-              <Text fontSize="12px" fontWeight={700} color="rgba(255,255,255,0.7)">
-                {t('household.cleaning.dutiesTitle')}
-              </Text>
-              <Text mt={1} color="white" fontSize="md" fontWeight={500} lineHeight={1.4}>
-                {guidance}
-              </Text>
-            </Box>
-            <HStack flexShrink={0} spacing={2} px={3.5} py={2} bg="rgba(255,255,255,0.15)" borderRadius="full" backdropFilter="blur(10px)">
-              <Icon as={CheckCircle2} boxSize={4} weight="fill" color="var(--pb-gold)" />
-              <Text fontSize="12px" fontWeight={700}>
-                {progressLabel}
-              </Text>
-            </HStack>
+      <Box overflowY="auto" flex={1} minH={0} bg="var(--nu-page, #ffffff)" pb="env(safe-area-inset-bottom, 0px)"
+        sx={{ WebkitOverflowScrolling: 'touch' }}>
+        <Box px={{ base: 4, md: 6 }} py={3} borderBottom="1px solid var(--pb-hair)" aria-live="polite" aria-atomic="true">
+          <Flex align="center" justify="space-between" mb={1.5}>
+            <Text fontSize="xs" fontWeight={700} color="var(--pb-ink-soft)">{t('household.cleaning.dutiesTitle')}</Text>
+            <Text fontSize="xs" fontWeight={800} color={BRAND}>{progressLabel}</Text>
           </Flex>
-          <Box
-            mt={5}
-            h="6px"
-            overflow="hidden"
-            borderRadius="full"
-            bg="rgba(0,0,0,0.2)"
-            aria-hidden="true"
-          >
+          <Box h="6px" overflow="hidden" borderRadius="full" bg="var(--pb-hair)" aria-hidden="true">
             <Box
               h="full"
               w={`${duties.length ? (completedDutyCount / duties.length) * 100 : 0}%`}
               borderRadius="full"
-              bg="var(--pb-gold)"
+              bg={BRAND}
               transition="width 400ms cubic-bezier(0.4, 0, 0.2, 1)"
             />
           </Box>
         </Box>
 
-        <VStack spacing={6} align="stretch">
-          {duties.filter(d => !d.completed).length > 0 && (
-            <Box>
-              <Text mb={3} fontSize="12px" fontWeight={700} color="var(--pb-ink-faint)">
-                {t('household.cleaning.inProgress')}
-              </Text>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                {duties.filter(d => !d.completed).map((duty) => (
-                  <CleaningDutyCard
-                    key={duty.key}
-                    duty={duty}
-                    assignmentId={current?.id ?? null}
-                    busyDutyKey={busyDutyKey}
-                    onToggleDuty={onToggleDuty}
-                  />
-                ))}
-              </SimpleGrid>
-            </Box>
-          )}
-
-          {duties.filter(d => d.completed).length > 0 && (
-            <Box>
-              <Text mb={3} fontSize="12px" fontWeight={700} color="var(--pb-ink-faint)">
-                {t('household.cleaning.completed')}
-              </Text>
-              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                {duties.filter(d => d.completed).map((duty) => (
-                  <CleaningDutyCard
-                    key={duty.key}
-                    duty={duty}
-                    assignmentId={current?.id ?? null}
-                    busyDutyKey={busyDutyKey}
-                    onToggleDuty={onToggleDuty}
-                  />
-                ))}
-              </SimpleGrid>
-            </Box>
-          )}
-        </VStack>
+        {pendingDuties.length > 0 && (
+          <Box>
+            <SectionLabel>{t('household.cleaning.inProgress')}</SectionLabel>
+            {renderDuties(pendingDuties)}
+          </Box>
+        )}
+        {completedDuties.length > 0 && (
+          <Box>
+            <SectionLabel>{t('household.cleaning.completed')}</SectionLabel>
+            {renderDuties(completedDuties)}
+          </Box>
+        )}
       </Box>
     </PremiumModal>
+  )
+}
+
+function SectionLabel({ children }: { children: string }) {
+  return (
+    <Text px={{ base: 4, md: 6 }} pt={3} pb={1} fontSize="11px" fontWeight={700} letterSpacing=".04em"
+      textTransform="uppercase" color="var(--pb-ink-faint)">
+      {children}
+    </Text>
   )
 }
 
@@ -205,18 +151,14 @@ function CleaningDutyCard({
 
   return (
     <Box
-      h={expanded ? 'auto' : { base: '78px', md: '82px' }}
+      h={expanded ? 'auto' : ROW_HEIGHT}
       overflow="hidden"
-      borderRadius="16px"
-      border="1px solid"
-      borderColor={duty.completed ? 'transparent' : duty.timed ? 'var(--pb-gold)' : 'var(--pb-hair)'}
-      bg={duty.completed ? 'var(--pb-surface-2)' : duty.timed ? 'var(--pb-tint-gold)' : 'var(--pb-surface)'}
+      bg={!duty.completed && duty.timed ? 'var(--pb-tint-gold)' : undefined}
       opacity={duty.completed ? 0.7 : 1}
-      boxShadow="0 4px 12px rgba(0,0,0,0.03)"
-      transition="height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)"
+      transition="height 0.35s cubic-bezier(0.4, 0, 0.2, 1)"
       sx={{ interpolateSize: 'allow-keywords' }}
     >
-      <Flex w="full" h={{ base: '78px', md: '82px' }} pl={4} align="center" gap={3.5}>
+      <Flex w="full" h={ROW_HEIGHT} pl={{ base: 4, md: 6 }} align="center" gap={3}>
         {/* The circle is the checkbox: residents tick a duty off right here. */}
         <Flex
           as={canToggle ? 'button' : 'span'}
@@ -231,8 +173,8 @@ function CleaningDutyCard({
               onClick: () => onToggleDuty(assignmentId, duty.key, !duty.completed),
             }
             : { 'aria-hidden': true })}
-          w={10}
-          h={10}
+          w={7}
+          h={7}
           flexShrink={0}
           align="center"
           justify="center"
@@ -249,8 +191,8 @@ function CleaningDutyCard({
           _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
         >
           {isBusy
-            ? <Spinner size="sm" color={duty.completed ? 'white' : 'var(--nu-brand)'} />
-            : duty.completed && <Icon as={Check} boxSize={5} weight="bold" />}
+            ? <Spinner size="xs" color={duty.completed ? 'white' : 'var(--nu-brand)'} />
+            : duty.completed && <Icon as={Check} boxSize={4} weight="bold" />}
         </Flex>
         <Flex
           as="button"
@@ -258,7 +200,7 @@ function CleaningDutyCard({
           flex={1}
           minW={0}
           h="full"
-          pr={4}
+          pr={{ base: 4, md: 6 }}
           align="center"
           gap={3}
           textAlign="left"
@@ -273,6 +215,7 @@ function CleaningDutyCard({
               fontSize="sm"
               fontWeight={600}
               lineHeight={1.25}
+              noOfLines={1}
               textDecoration={duty.completed ? 'line-through' : undefined}
             >
               {label}
@@ -303,8 +246,9 @@ function CleaningDutyCard({
 
       <Box
         id={detailId}
-        px={4}
-        pb={4}
+        pl={{ base: 14, md: 16 }}
+        pr={{ base: 4, md: 6 }}
+        pb={3}
         aria-hidden={!expanded}
         opacity={expanded ? 1 : 0}
         pointerEvents={expanded ? 'auto' : 'none'}
