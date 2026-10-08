@@ -662,12 +662,14 @@ export interface BusinessDaySummary {
   profitRate: number | null
 }
 
-/** Daily cost = cost-category spend over the last 3 complete months / days with earnings. */
+/** Daily cost = (running-cost spend + maintenance allowance) over the last 3 complete months / days with earnings. */
 export interface BusinessCostBasis {
   category: string
   windowFrom: string
   windowTo: string
   windowSpend: number
+  /** Estimated tyres/brake pads/general upkeep for the window (not recorded spend). */
+  windowMaintenance: number
   workingDays: number
   dailyCost: number
 }

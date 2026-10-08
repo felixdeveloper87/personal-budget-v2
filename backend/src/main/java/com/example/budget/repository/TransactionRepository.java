@@ -102,16 +102,17 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
                     @Param("to") LocalDate to);
 
     /**
-     * Total per payment date for one type and category: when the money actually
-     * left (a card purchase counts on its bill date). Used for business costs.
+     * Total per description for one type and category, by payment date: when the
+     * money actually left (a card purchase counts on its bill date). Used for
+     * business costs, which keep only some descriptions (petrol, oil, insurance).
      */
-    @Query("SELECT t.paymentDate, SUM(t.amount) FROM Transaction t " +
+    @Query("SELECT t.description, SUM(t.amount) FROM Transaction t " +
                     "WHERE t.user.id = :userId " +
                     "AND t.type = :type " +
                     "AND LOWER(t.category) = LOWER(:category) " +
                     "AND t.paymentDate BETWEEN :from AND :to " +
-                    "GROUP BY t.paymentDate")
-    List<Object[]> sumByPaymentDateForCategory(
+                    "GROUP BY t.description")
+    List<Object[]> sumByDescriptionForCategoryPaidBetween(
                     @Param("userId") Long userId,
                     @Param("type") TransactionType type,
                     @Param("category") String category,

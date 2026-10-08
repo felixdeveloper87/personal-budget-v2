@@ -66,6 +66,7 @@ public final class BusinessDTOs {
             LocalDate windowFrom,
             LocalDate windowTo,
             BigDecimal windowSpend,
+            BigDecimal windowMaintenance,
             int workingDays,
             BigDecimal dailyCost) {}
 

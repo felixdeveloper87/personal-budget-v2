@@ -125,37 +125,43 @@ class BusinessServiceTest {
 
     @Test
     void dailyCostAveragesTheLastThreeCompleteMonthsOverDaysWithEarnings() {
-        // October: July to September, £440 + £426 + £390 over 60 days with earnings.
+        // October: July to September, petrol £440 + oil £426 + insurance £390 over 60 days with earnings.
         when(transactionRepository.sumByDayForCategory(
                 USER, TransactionType.INCOME, BusinessService.EARNINGS_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(earningDays(60));
-        when(transactionRepository.sumByPaymentDateForCategory(
+        when(transactionRepository.sumByDescriptionForCategoryPaidBetween(
                 USER, TransactionType.EXPENSE, BusinessService.COST_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(List.<Object[]>of(
-                        new Object[] {LocalDate.of(2026, 7, 10), new BigDecimal("440")},
-                        new Object[] {LocalDate.of(2026, 8, 10), new BigDecimal("426")},
-                        new Object[] {LocalDate.of(2026, 9, 10), new BigDecimal("390")}));
+                        new Object[] {"Petrol", new BigDecimal("440")},
+                        new Object[] {"Oil change ", new BigDecimal("426")},
+                        new Object[] {"Bike insurance  (Installment 3/8)", new BigDecimal("390")},
+                        // Long-lasting parts and blank descriptions stay out of the average.
+                        new Object[] {"Front tyre and Muffs (Installment 1/3)", new BigDecimal("40")},
+                        new Object[] {"Break pad, front", new BigDecimal("30")},
+                        new Object[] {null, new BigDecimal("12")}));
 
         CostBasis basis = service.costBasis(USER, DAY);
 
         assertThat(basis.windowSpend()).isEqualByComparingTo("1256");
+        // Tyres 60.67 + 36.40, pads 19.50 + 19.50 over 5,200 mi, plus 3 x £40.
+        assertThat(basis.windowMaintenance()).isEqualByComparingTo("256.07");
         assertThat(basis.workingDays()).isEqualTo(60);
-        assertThat(basis.dailyCost()).isEqualByComparingTo("20.93");
+        assertThat(basis.dailyCost()).isEqualByComparingTo("25.20");
     }
 
     @Test
     void profitChargesTheDailyCostOnDaysWithEarnings() {
-        // £1,256 over 64 days with earnings = £19.63 a day.
+        // £999.93 spent + £256.07 maintenance = £1,256 over 64 days with earnings = £19.63 a day.
         when(transactionRepository.sumByDayForCategory(
                 USER, TransactionType.INCOME, BusinessService.EARNINGS_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
                 .thenReturn(earningDays(64));
-        when(transactionRepository.sumByPaymentDateForCategory(
+        when(transactionRepository.sumByDescriptionForCategoryPaidBetween(
                 USER, TransactionType.EXPENSE, BusinessService.COST_CATEGORY,
                 LocalDate.of(2026, 7, 1), LocalDate.of(2026, 9, 30)))
-                .thenReturn(List.<Object[]>of(new Object[] {LocalDate.of(2026, 8, 1), new BigDecimal("1256")}));
+                .thenReturn(List.<Object[]>of(new Object[] {"Petrol", new BigDecimal("999.93")}));
         WorkSession worked = ended(DAY, NINE, NINE.plus(Duration.ofMinutes(390)), 0); // 6h30
         WorkSession pending = ended(DAY.plusDays(1), NINE.plus(Duration.ofDays(1)),
                 NINE.plus(Duration.ofDays(1)).plus(Duration.ofHours(4)), 0); // no earnings yet

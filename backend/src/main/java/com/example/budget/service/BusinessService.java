@@ -25,16 +25,19 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
 /**
  * Business time tracking. Sessions are timed live (start / pause / resume / end)
  * or entered by hand; "earned" is the income recorded in the Salary category.
- * Costs are the expenses in the Transport category over the last three complete
- * months, divided by the days with earnings in those months: a cost per working
- * day, so a one-off (a new tyre) is spread out instead of sinking the day it was
- * bought. Profit = earned - cost.
+ * Costs are the running costs in the Transport category (petrol, oil, bike
+ * insurance) over the last three complete months, divided by the days with
+ * earnings in those months: a cost per working day. Parts that last longer than
+ * the window (tyres, brake pads, belts) are left out of the spend and come in
+ * instead as an estimated maintenance allowance from mileage and part lifespans.
+ * Profit = earned - cost.
  */
 @Service
 public class BusinessService {
@@ -42,6 +45,23 @@ public class BusinessService {
     public static final String EARNINGS_CATEGORY = "Salary";
     /** Expense category treated as business running costs. */
     public static final String COST_CATEGORY = "Transport";
+    /**
+     * Description prefixes (case-insensitive) of the running costs within
+     * {@link #COST_CATEGORY}; installments keep the prefix ("Bike insurance (Installment 2/8)").
+     */
+    static final List<String> RUNNING_COST_PREFIXES = List.of("petrol", "oil", "bike insurance");
+    /** Weekly mileage the maintenance allowance assumes. */
+    static final int MILES_PER_WEEK = 400;
+    /** Wear parts: price and how many miles each one lasts. */
+    static final List<WearPart> WEAR_PARTS = List.of(
+            new WearPart(new BigDecimal("70"), 6_000),   // rear tyre
+            new WearPart(new BigDecimal("70"), 10_000),  // front tyre
+            new WearPart(new BigDecimal("30"), 8_000),   // front brake pads
+            new WearPart(new BigDecimal("30"), 8_000));  // rear brake pads
+    /** Flat monthly allowance for everything else (accessories, belt, muffs...). */
+    static final BigDecimal GENERAL_MAINTENANCE_PER_MONTH = new BigDecimal("40");
+
+    record WearPart(BigDecimal price, int lifeMiles) {}
     /** How many complete months the daily cost averages over. */
     static final int COST_WINDOW_MONTHS = 3;
     private static final int MAX_RANGE_DAYS = 400;
@@ -197,7 +217,8 @@ public class BusinessService {
 
     /**
      * Daily cost from the last three complete months (in October: July to
-     * September). Costs count on their payment date, when the money left (a card
+     * September): the running costs paid in it plus the maintenance allowance
+     * for it. Costs count on their payment date, when the money left (a card
      * purchase on its bill date). Working days are the days with earnings in that
      * window, by transaction date, so days off and extra days count as they happened.
      */
@@ -207,19 +228,44 @@ public class BusinessService {
         LocalDate windowFrom = current.minusMonths(COST_WINDOW_MONTHS).atDay(1);
         LocalDate windowTo = current.minusMonths(1).atEndOfMonth();
         BigDecimal spend = transactionRepository
-                .sumByPaymentDateForCategory(userId, TransactionType.EXPENSE, COST_CATEGORY, windowFrom, windowTo)
+                .sumByDescriptionForCategoryPaidBetween(userId, TransactionType.EXPENSE, COST_CATEGORY, windowFrom, windowTo)
                 .stream()
+                .filter(row -> isRunningCost((String) row[0]))
                 .map(row -> (BigDecimal) row[1])
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal maintenance = maintenanceAllowance(COST_WINDOW_MONTHS);
         int workingDays = (int) transactionRepository
                 .sumByDayForCategory(userId, TransactionType.INCOME, EARNINGS_CATEGORY, windowFrom, windowTo)
                 .stream()
                 .filter(row -> ((BigDecimal) row[1]).signum() > 0)
                 .count();
         BigDecimal dailyCost = workingDays > 0
-                ? spend.divide(BigDecimal.valueOf(workingDays), 2, RoundingMode.HALF_UP)
+                ? spend.add(maintenance).divide(BigDecimal.valueOf(workingDays), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
-        return new CostBasis(COST_CATEGORY, windowFrom, windowTo, spend, workingDays, dailyCost);
+        return new CostBasis(COST_CATEGORY, windowFrom, windowTo, spend, maintenance, workingDays, dailyCost);
+    }
+
+    /**
+     * Estimated maintenance over {@code months}: each wear part's price times the
+     * share of its lifespan ridden (400 mi a week = 5,200 mi in three months),
+     * plus the flat general allowance. About £85 a month.
+     */
+    static BigDecimal maintenanceAllowance(int months) {
+        BigDecimal miles = BigDecimal.valueOf((long) MILES_PER_WEEK * 52 * months)
+                .divide(BigDecimal.valueOf(12), 4, RoundingMode.HALF_UP);
+        BigDecimal wear = WEAR_PARTS.stream()
+                .map(part -> part.price().multiply(miles)
+                        .divide(BigDecimal.valueOf(part.lifeMiles()), 2, RoundingMode.HALF_UP))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return wear.add(GENERAL_MAINTENANCE_PER_MONTH.multiply(BigDecimal.valueOf(months)));
+    }
+
+    static boolean isRunningCost(String description) {
+        if (description == null) {
+            return false;
+        }
+        String normalized = description.trim().toLowerCase(Locale.ROOT);
+        return RUNNING_COST_PREFIXES.stream().anyMatch(normalized::startsWith);
     }
 
     /** Signed per-hour rate (profit can be negative), or null without hours. */

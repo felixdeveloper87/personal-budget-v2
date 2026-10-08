@@ -323,6 +323,7 @@ export default function BusinessPage() {
                         cost: formatCurrency(summary.costBasis.dailyCost),
                         category: categoryLabel(summary.costBasis.category),
                         spend: formatCurrency(summary.costBasis.windowSpend),
+                        maintenance: formatCurrency(summary.costBasis.windowMaintenance),
                         months: `${formatDate(dateFromKey(summary.costBasis.windowFrom), { month: 'short' })}–${formatDate(dateFromKey(summary.costBasis.windowTo), { month: 'short' })}`,
                         days: summary.costBasis.workingDays,
                       })
