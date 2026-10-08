@@ -107,21 +107,40 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
   )
 }
 
-/** "(243 ⓘ)" — tapping it explains the points are the total spent and drive the ranking. */
-export function PointsBadge({ member, fontSize = 'md' }: { member: HouseholdMember; fontSize?: string }) {
+/**
+ * "(243 ⓘ)", or a "243 pts ⓘ" pill — tapping it explains the points are the
+ * total spent and drive the ranking.
+ */
+export function PointsBadge({ member, fontSize = 'md', variant = 'inline' }: {
+  member: HouseholdMember
+  fontSize?: string
+  variant?: 'inline' | 'pill'
+}) {
   const { formatCurrency, formatNumber, t } = useI18n()
   const points = memberPoints(member)
   return (
     <Popover placement="bottom-start" isLazy>
       <PopoverTrigger>
-        <Box
-          as="button" type="button" flexShrink={0} display="inline-flex" alignItems="center" gap={0.5}
-          fontWeight={800} fontSize={fontSize} color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
-          aria-label={t('household.members.pointsInfoAria')}
-        >
-          ({formatNumber(points)}
-          <Info size={13} weight="bold" aria-hidden="true" />)
-        </Box>
+        {variant === 'pill' ? (
+          <Box
+            as="button" type="button" flexShrink={0} display="inline-flex" alignItems="center" gap={1}
+            px={2} py={0.5} borderRadius="full" bg="#f3e8fc"
+            fontWeight={800} fontSize={fontSize} color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
+            aria-label={t('household.members.pointsInfoAria')}
+          >
+            {t('household.members.points', { points: formatNumber(points) })}
+            <Info size={12} weight="bold" aria-hidden="true" />
+          </Box>
+        ) : (
+          <Box
+            as="button" type="button" flexShrink={0} display="inline-flex" alignItems="center" gap={0.5}
+            fontWeight={800} fontSize={fontSize} color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
+            aria-label={t('household.members.pointsInfoAria')}
+          >
+            ({formatNumber(points)}
+            <Info size={13} weight="bold" aria-hidden="true" />)
+          </Box>
+        )}
       </PopoverTrigger>
       <Portal>
         <PopoverContent w="260px" borderRadius="16px" borderColor="var(--pb-hair)" boxShadow="0 12px 32px -12px rgba(0,0,0,.25)">

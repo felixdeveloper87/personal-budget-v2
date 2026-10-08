@@ -43,27 +43,34 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           return (
             <Box
               key={member.id} role="listitem"
-              flex="0 0 200px" minW="200px" px={3} py={2.5}
-              borderRadius="14px" bg="var(--pb-surface)"
+              flex="0 0 220px" minW="220px" p={3.5}
+              borderRadius="18px" bg="var(--pb-surface)"
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
-              <HStack spacing={1} minW={0}>
-                <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
-                <PointsBadge member={member} fontSize="sm" />
-                <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-ink-soft)">
+              <Flex align="center" gap={2} minW={0}>
+                <Flex
+                  w="26px" h="26px" flexShrink={0} align="center" justify="center" borderRadius="full"
+                  bg="#f3e8fc" color="#820ad1" fontSize="11px" fontWeight={800}
+                >
                   {t('household.members.rank', { rank: formatNumber(memberRank(member, household.members)) })}
-                </Text>
-              </HStack>
-              <HStack mt={1} spacing={1.5} align="baseline" color={accent}>
-                <Text fontSize="md" fontWeight={700} lineHeight={1.2} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                </Flex>
+                <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
+              </Flex>
+
+              <Box mt={3} color={accent}>
+                <Text fontSize="11px" fontWeight={700}>{status}</Text>
+                <Text fontSize="xl" fontWeight={800} letterSpacing="-.02em" lineHeight={1.15} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(Math.abs(member.balance))}
                 </Text>
-                <Text fontSize="2xs" fontWeight={700}>{status}</Text>
-              </HStack>
-              <Text mt={0.5} fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1}>
-                {t('household.members.monthSpent', { amount: formatCurrency(member.monthPaid) })}
-              </Text>
+              </Box>
+
+              <Flex mt={3} pt={2.5} borderTop="1px solid var(--pb-hair)" align="center" justify="space-between" gap={2}>
+                <Text fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1} minW={0}>
+                  {t('household.members.monthSpentShort', { amount: formatCurrency(member.monthPaid) })}
+                </Text>
+                <PointsBadge member={member} fontSize="2xs" variant="pill" />
+              </Flex>
             </Box>
           )
         })}
