@@ -1,7 +1,7 @@
 import { Box, Flex, HStack, SimpleGrid, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdMember } from '../../../types'
-import { CheckCircle2, ShoppingCart, TrendingDown, TrendingUp } from '../../../components/ui/icons'
+import { CheckCircle2, TrendingDown, TrendingUp } from '../../../components/ui/icons'
 import { PremiumModal } from '../../../components/ui'
 import NuModalHeader from '../../../components/ui/NuModalHeader'
 
@@ -23,7 +23,6 @@ export function MembersOverviewModal({
 }) {
   const { formatNumber, t } = useI18n()
   const totalPurchases = household.members.reduce((sum, member) => sum + member.purchaseCount, 0)
-  const maxPurchases = Math.max(1, ...household.members.map((member) => member.purchaseCount))
 
   return (
     <PremiumModal
@@ -60,7 +59,6 @@ export function MembersOverviewModal({
               key={member.id}
               member={member}
               isCurrent={member.id === household.currentMemberId}
-              maxPurchases={maxPurchases}
             />
           ))}
         </VStack>
@@ -69,7 +67,7 @@ export function MembersOverviewModal({
   )
 }
 
-function MemberRow({ member, isCurrent, maxPurchases }: { member: HouseholdMember; isCurrent: boolean; maxPurchases: number }) {
+function MemberRow({ member, isCurrent }: { member: HouseholdMember; isCurrent: boolean }) {
   const { formatCurrency, formatDate, formatNumber, t } = useI18n()
   const isReceiving = member.balance > 0.005
   const isPaying = member.balance < -0.005
@@ -97,7 +95,11 @@ function MemberRow({ member, isCurrent, maxPurchases }: { member: HouseholdMembe
           </HStack>
           <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
             {member.lastPurchaseDate
-              ? t('household.members.lastPurchase', {
+              ? t('household.members.purchaseSummary', {
+                purchases: t(
+                  member.purchaseCount === 1 ? 'household.members.purchases.one' : 'household.members.purchases.other',
+                  { count: formatNumber(member.purchaseCount) },
+                ),
                 date: formatDate(member.lastPurchaseDate, { day: 'numeric', month: 'short' }),
               })
               : t('household.members.noPurchases')}
@@ -115,17 +117,7 @@ function MemberRow({ member, isCurrent, maxPurchases }: { member: HouseholdMembe
       </Flex>
 
       <Box mt={3} pl={{ base: 0, sm: '56px' }}>
-        <Flex align="center" justify="space-between" mb={1.5}>
-          <HStack spacing={1.5} color="var(--pb-ink-soft)">
-            <ShoppingCart size={13} weight="duotone" aria-hidden="true" />
-            <Text fontSize="xs" fontWeight={600}>{t('household.members.purchasesPosted')}</Text>
-          </HStack>
-          <Text fontSize="xs" fontWeight={800} color={BRAND}>{formatNumber(member.purchaseCount)}</Text>
-        </Flex>
-        <Box h="6px" borderRadius="full" bg="var(--pb-hair)" overflow="hidden">
-          <Box h="full" borderRadius="full" bg={BRAND} w={`${(member.purchaseCount / maxPurchases) * 100}%`} transition="width .4s ease" />
-        </Box>
-        <SimpleGrid columns={3} spacing={2} mt={3}>
+        <SimpleGrid columns={3} spacing={2}>
           <Stat label={t('household.members.paid')} value={formatCurrency(member.totalPaid)} />
           <Stat label={t('household.members.assignedShare')} value={formatCurrency(member.totalShare)} />
           <Stat label={t('household.members.thisMonth')} value={formatCurrency(member.monthPaid)} />

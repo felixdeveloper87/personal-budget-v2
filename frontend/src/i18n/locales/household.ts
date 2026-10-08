@@ -205,8 +205,7 @@ export const householdTranslations: TranslationBundle = {
     'household.members.sheetCaption': '{{members}} · {{purchases}} posted',
     'household.members.purchases.one': '1 purchase',
     'household.members.purchases.other': '{{count}} purchases',
-    'household.members.purchasesPosted': 'Purchases posted',
-    'household.members.lastPurchase': 'Last purchase {{date}}',
+    'household.members.purchaseSummary': '{{purchases}} · last on {{date}}',
     'household.members.noPurchases': 'No purchases posted yet',
 
     'household.expenses.eyebrow': 'Household expenses',
@@ -656,8 +655,7 @@ export const householdTranslations: TranslationBundle = {
     'household.members.sheetCaption': '{{members}} · {{purchases}} lançadas',
     'household.members.purchases.one': '1 compra',
     'household.members.purchases.other': '{{count}} compras',
-    'household.members.purchasesPosted': 'Compras lançadas',
-    'household.members.lastPurchase': 'Última compra em {{date}}',
+    'household.members.purchaseSummary': '{{purchases}} · última em {{date}}',
     'household.members.noPurchases': 'Nenhuma compra lançada ainda',
 
     'household.expenses.eyebrow': 'Despesas da casa',
