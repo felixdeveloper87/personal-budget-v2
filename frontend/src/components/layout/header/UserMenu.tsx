@@ -31,6 +31,8 @@ interface UserMenuProps {
   compact?: boolean
   /** Adapt the trigger to the sidebar's account area. */
   sidebar?: boolean
+  /** Text-only trigger (no avatar): this label followed by a dropdown chevron. */
+  label?: string
 }
 
 export default function UserMenu({
@@ -41,6 +43,7 @@ export default function UserMenu({
   placement = 'bottom-end',
   compact = false,
   sidebar = false,
+  label,
 }: UserMenuProps) {
   const { t } = useI18n()
   const { colorMode } = useColorMode()
@@ -80,8 +83,38 @@ export default function UserMenu({
     transition: 'background 0.18s ease, color 0.18s ease, transform 0.18s ease',
   } as const
 
+  const textTrigger = label ? (
+    <MenuButton
+      as={Box}
+      role="button"
+      aria-label={t('userMenu.open')}
+      cursor="pointer"
+      minW={0}
+      px={1}
+      py={1}
+      borderRadius="10px"
+      transition="background 0.2s ease"
+      _hover={{ bg: onBrand ? ON_BRAND.controlBg : ed.controlHoverBg }}
+      _focusVisible={{ outline: 'none', boxShadow: onBrand ? ON_BRAND.focus : `0 0 0 3px ${jade}38` }}
+    >
+      <HStack spacing={1.5} minW={0}>
+        <Text
+          color={onBrand ? ON_BRAND.ink : text}
+          fontSize={{ base: 'md', sm: 'lg' }}
+          fontWeight={700}
+          letterSpacing="-0.01em"
+          noOfLines={1}
+        >
+          {label}
+        </Text>
+        <Icon as={ChevronDown} boxSize={4} color={onBrand ? ON_BRAND.ink : muted} flexShrink={0} />
+      </HStack>
+    </MenuButton>
+  ) : null
+
   return (
     <Menu placement={placement} autoSelect={false}>
+      {textTrigger ?? (
       <MenuButton
         as={Box}
         role="button"
@@ -154,6 +187,7 @@ export default function UserMenu({
           {!compact && <Icon as={ChevronDown} boxSize={3.5} color={onBrand ? ON_BRAND.inkSoft : muted} flexShrink={0} />}
         </HStack>
       </MenuButton>
+      )}
 
       <Portal>
         <MenuList

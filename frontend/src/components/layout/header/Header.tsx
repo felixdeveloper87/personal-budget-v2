@@ -186,20 +186,17 @@ export default function Header({
                 />
               </Box>
             ) : onBrand ? (
-              // Account badge + greeting lead the purple bar (Nubank-style).
-              <HStack spacing={2.5} minW={0} flexShrink={1}>
+              // The greeting leads the purple bar and opens the account menu (Nubank-style).
+              <Box minW={0} flexShrink={1}>
                 <UserMenu
                   user={user}
-                  compact
+                  label={greeting}
                   placement="bottom-start"
                   onOpenProfile={onOpenProfile}
                   onOpenSettings={onOpenSettings}
                   onLogout={logout}
                 />
-                <Text color={ON_BRAND.ink} fontSize={{ base: 'md', sm: 'lg' }} fontWeight={700} letterSpacing="-0.01em" noOfLines={1}>
-                  {greeting}
-                </Text>
-              </HStack>
+              </Box>
             ) : (
               <Logo user={user} />
             )}
