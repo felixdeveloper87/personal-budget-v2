@@ -1,13 +1,32 @@
-import { Badge, Box, Button, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
-import { ArrowRight } from '../../../components/ui/icons'
+import { Box, Button, Flex, Text, VStack } from '@chakra-ui/react'
+import { ArrowsLeftRight } from '@phosphor-icons/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdSettlement, HouseholdSettlementStatus } from '../../../types'
 
-const statusColors: Record<HouseholdSettlementStatus, { background: string; color: string }> = {
+/** Icon circle colours per status: the only status cue on the one-line rows. */
+export const settlementStatusColors: Record<HouseholdSettlementStatus, { background: string; color: string }> = {
   CONFIRMED: { background: 'var(--pb-tint-income)', color: 'var(--pb-income)' },
   PENDING: { background: '#FBF1DC', color: '#8A5A00' },
   REJECTED: { background: 'var(--pb-tint-coral)', color: 'var(--pb-coral)' },
   CANCELLED: { background: 'var(--pb-surface-3)', color: 'var(--pb-ink-soft)' },
+}
+
+/** Rejected / cancelled transfers never moved money. */
+export const settlementVoided = (status: HouseholdSettlementStatus) => status === 'REJECTED' || status === 'CANCELLED'
+
+/** Status-coloured transfer icon, same size as the expense category icons. */
+export function SettlementIcon({ status, size = 28 }: { status: HouseholdSettlementStatus; size?: number }) {
+  const { t } = useI18n()
+  const palette = settlementStatusColors[status]
+  const label = t(`household.status.${status}`, undefined, status)
+  return (
+    <Flex
+      w={`${size}px`} h={`${size}px`} flexShrink={0} align="center" justify="center" borderRadius="full"
+      bg={palette.background} color={palette.color} title={label}
+    >
+      <ArrowsLeftRight size={Math.round(size * 0.52)} weight="bold" aria-hidden="true" />
+    </Flex>
+  )
 }
 
 export function HouseholdPayments({
@@ -36,15 +55,10 @@ export function HouseholdPayments({
 
         {recentPayments.length > 0 && (
           <Button
-            minH="44px"
-            px={{ base: 3, md: 4 }}
-            borderRadius="13px"
-            bg="var(--pb-tint-green)"
-            color="var(--pb-forest-2)"
-            aria-label={t('household.settlements.openAria')}
-            onClick={onViewPayments}
-            _hover={{ bg: 'var(--pb-surface-3)', transform: 'translateY(-1px)' }}
-            _active={{ transform: 'translateY(0)' }}
+            h="40px" px={4} borderRadius="full" flexShrink={0}
+            bg="var(--nu-brand-tint)" color="var(--nu-brand)" fontSize="sm" fontWeight={600}
+            aria-label={t('household.settlements.openAria')} onClick={onViewPayments}
+            _hover={{ bg: '#ead6fa' }}
           >
             {t('household.settlements.viewAll')}
           </Button>
@@ -52,22 +66,14 @@ export function HouseholdPayments({
       </Flex>
 
       {recentPayments.length > 0 ? (
-        <HStack
-          align="stretch"
-          spacing={2}
-          overflowX="auto"
-          overscrollBehaviorX="contain"
-          pb={0.5}
-          sx={{
-            scrollSnapType: 'x mandatory',
-            scrollbarWidth: 'none',
-            '&::-webkit-scrollbar': { display: 'none' },
-          }}
+        <VStack
+          align="stretch" spacing={0} borderRadius="18px" bg="var(--pb-surface)" overflow="hidden"
+          divider={<Box h="1px" bg="var(--pb-hair)" />}
         >
           {recentPayments.map((payment) => (
-            <PaymentCard key={payment.id} payment={payment} />
+            <PaymentRow key={payment.id} payment={payment} />
           ))}
-        </HStack>
+        </VStack>
       ) : (
         <Box p={5} border="1px solid var(--pb-hair)" borderRadius="18px" bg="var(--pb-surface)">
           <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)">
@@ -82,50 +88,30 @@ export function HouseholdPayments({
   )
 }
 
-function PaymentCard({ payment }: { payment: HouseholdSettlement }) {
+/** One line: status icon, "from → to", date, amount. */
+function PaymentRow({ payment }: { payment: HouseholdSettlement }) {
   const { formatCurrency, formatDate, t } = useI18n()
-  const palette = statusColors[payment.status]
+  const voided = settlementVoided(payment.status)
 
   return (
-    <VStack
-      as="article"
-      align="stretch"
-      spacing={2}
-      w="192px"
-      minW="192px"
-      p="11px"
-      border="1px solid var(--pb-hair)"
-      borderRadius="16px"
-      bg="var(--pb-surface-2)"
-      scrollSnapAlign="start"
+    <Flex
+      align="center" gap={2.5} px={3} py={2}
       aria-label={`${t('household.record.paymentTitle', { from: payment.fromMemberName, to: payment.toMemberName })}. ${formatCurrency(payment.amount)}. ${t(`household.status.${payment.status}`, undefined, payment.status)}.`}
     >
-      <HStack spacing={1.75} minW={0}>
-        <Flex w="28px" h="28px" flexShrink={0} align="center" justify="center" borderRadius="10px" bg="var(--pb-tint-green)" color="var(--pb-income)">
-          <Icon as={ArrowRight} boxSize="15px" weight="bold" />
-        </Flex>
-        <Box minW={0} flex={1}>
-          <Text fontSize="11px" lineHeight="16px" color="var(--pb-ink-soft)" noOfLines={1}>
-            {t('household.settlements.from')} <Text as="span" color="var(--pb-ink)" fontWeight={600}>{payment.fromMemberName}</Text>
-          </Text>
-          <Text fontSize="11px" lineHeight="16px" color="var(--pb-ink-soft)" noOfLines={1}>
-            {t('household.settlements.to')} <Text as="span" color="var(--pb-ink)" fontWeight={600}>{payment.toMemberName}</Text>
-          </Text>
-        </Box>
-      </HStack>
-
-      <Flex align="center" justify="space-between" gap={1.5} minW={0}>
-        <Text flex={1} minW={0} fontSize="17px" lineHeight={1.2} fontWeight={800} letterSpacing="-0.4px" color="var(--pb-ink)" noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>
-          {formatCurrency(payment.amount)}
-        </Text>
-        <Badge flexShrink={0} px={1.25} py={0.75} borderRadius="7px" bg={palette.background} color={palette.color} fontSize="9px" fontWeight={700} textTransform="none">
-          {t(`household.status.${payment.status}`, undefined, payment.status)}
-        </Badge>
-      </Flex>
-
-      <Text fontSize="10px" lineHeight="13px" color="var(--pb-ink-faint)">
-        {formatDate(payment.settlementDate, { day: '2-digit', month: 'short', year: 'numeric' })}
+      <SettlementIcon status={payment.status} />
+      <Text flex={1} minW={0} fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>
+        {payment.fromMemberName} → {payment.toMemberName}
       </Text>
-    </VStack>
+      <Text flexShrink={0} fontSize="xs" color="var(--pb-ink-faint)">
+        {formatDate(payment.settlementDate, { day: 'numeric', month: 'short' })}
+      </Text>
+      <Text
+        flexShrink={0} minW="64px" textAlign="right" fontSize="sm" fontWeight={800}
+        color={voided ? 'var(--pb-ink-faint)' : 'var(--pb-ink)'} textDecoration={voided ? 'line-through' : undefined}
+        style={{ fontVariantNumeric: 'tabular-nums' }}
+      >
+        {formatCurrency(payment.amount)}
+      </Text>
+    </Flex>
   )
 }

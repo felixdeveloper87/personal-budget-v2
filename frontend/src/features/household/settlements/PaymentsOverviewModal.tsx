@@ -1,9 +1,14 @@
 import { useMemo } from 'react'
-import { Badge, Box, Button, Flex, HStack, Icon, SimpleGrid, Stack, Text, VStack } from '@chakra-ui/react'
+import { Box, Flex, Icon, IconButton, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdSettlement } from '../../../types'
-import { Mail, Upload } from '../../../components/ui/icons'
-import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { Mail, ReceiptText, Upload } from '../../../components/ui/icons'
+import { PremiumModal } from '../../../components/ui'
+import NuModalHeader from '../../../components/ui/NuModalHeader'
+import { PayerInitials } from '../expenses/PayerInitials'
+import { SettlementIcon, settlementStatusColors, settlementVoided } from './HouseholdPayments'
+
+const BRAND = '#820ad1'
 
 export function PaymentsOverviewModal({
   isOpen,
@@ -31,221 +36,128 @@ export function PaymentsOverviewModal({
   return (
     <PremiumModal
       isOpen={isOpen}
-      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
-      size={{ base: 'full', md: '2xl' }}
+      size="full"
+      contentProps={{
+        className: 'nu-dashboard',
+        w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
+        h: 'auto', maxH: { base: '85dvh', md: '80vh' },
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', overflow: 'hidden', bg: 'var(--nu-page, #ffffff)',
+      }}
       header={
-        <ModalHeader
+        <NuModalHeader
           title={t('household.settlements.title')}
-          caption={t('household.settlements.description')}
+          caption={t(
+            household.settlements.length === 1 ? 'household.settlements.count.one' : 'household.settlements.count.other',
+            { count: formatNumber(household.settlements.length) },
+          )}
           onClose={onClose}
-          rightSlot={
-            <Badge
-              bg="var(--pb-tint-income)"
-              color="var(--pb-income)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="full"
-              px={3}
-              py={1}
-              textTransform="none"
-            >
-              {t(
-                household.settlements.length === 1
-                  ? 'household.settlements.count.one'
-                  : 'household.settlements.count.other',
-                { count: formatNumber(household.settlements.length) },
-              )}
-            </Badge>
-          }
         />
       }
-      footer={
-        <Flex justify="flex-end" w="full">
-          <Button
-            h="44px"
-            w={{ base: 'full', sm: 'auto' }}
-            px={5}
-            borderRadius="11px"
-            bg="var(--pb-forest-2)"
-            color="var(--pb-on-accent)"
-            onClick={onClose}
-            _hover={{ bg: 'var(--pb-forest)' }}
-          >
-            {t('household.common.close')}
-          </Button>
-        </Flex>
-      }
     >
-      <Box p={{ base: 3, sm: 4, md: 5 }} bg="var(--pb-surface-2)">
+      <Box overflowY="auto" flex={1} minH={0} bg="var(--nu-page, #ffffff)" pb="env(safe-area-inset-bottom, 0px)"
+        sx={{ WebkitOverflowScrolling: 'touch' }}>
         {household.settlements.length === 0 ? (
-          <VStack
-            py={9}
-            px={4}
-            spacing={3}
-            border="1px dashed var(--pb-hair-2)"
-            borderRadius="14px"
-            bg="var(--pb-surface)"
-          >
-            <Flex
-              w={11}
-              h={11}
-              align="center"
-              justify="center"
-              borderRadius="full"
-              bg="var(--pb-tint-green)"
-              color="var(--pb-forest-2)"
-            >
+          <VStack py={12} px={6} spacing={3} textAlign="center">
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
               <Icon as={Mail} boxSize={6} weight="duotone" />
             </Flex>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="lg"
-              fontWeight={500}
-              textAlign="center"
-            >
+            <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
               {t('household.settlements.emptyTitle')}
             </Text>
-            <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
               {t('household.settlements.emptyDescription')}
             </Text>
           </VStack>
         ) : (
-          <VStack spacing={6} align="stretch">
-            {settlementsByMonth.map(([monthKey, settlements]) => {
-              const [year, month] = monthKey.split('-')
-              const monthDate = new Date(Number(year), Number(month) - 1, 1)
-              const monthName = formatDate(monthDate, { month: 'long', year: 'numeric' })
-              const monthLabel = monthName.charAt(0).toUpperCase() + monthName.slice(1)
-              // Rejected / cancelled transfers never moved money, so they stay out of the month total.
-              const monthTotal = settlements
-                .filter((settlement) => settlement.status !== 'REJECTED' && settlement.status !== 'CANCELLED')
-                .reduce((total, settlement) => total + settlement.amount, 0)
+          settlementsByMonth.map(([monthKey, settlements]) => {
+            const [year, month] = monthKey.split('-')
+            const monthDate = new Date(Number(year), Number(month) - 1, 1)
+            const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+            // Rejected / cancelled transfers never moved money, so they stay out of the month total.
+            const monthTotal = settlements
+              .filter((settlement) => !settlementVoided(settlement.status))
+              .reduce((total, settlement) => total + settlement.amount, 0)
 
-              return (
-                <Box key={monthKey}>
-                  <Flex align="baseline" justify="space-between" gap={3} mb={3}>
-                    <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">
-                      {monthLabel}
-                    </Text>
-                    <Text fontSize="xs" color="var(--pb-ink-soft)" flexShrink={0}>
-                      {t(
-                        settlements.length === 1
-                          ? 'household.settlements.count.one'
-                          : 'household.settlements.count.other',
-                        { count: formatNumber(settlements.length) },
-                      )}
-                      {' · '}
-                      <Text as="span" fontWeight={700} color="var(--pb-ink)">{formatCurrency(monthTotal)}</Text>
-                    </Text>
-                  </Flex>
-                  <SimpleGrid columns={{ base: 1, xl: 2 }} spacing={2.5}>
-                    {settlements.map((settlement) => {
-                      const statusAccent = settlement.status === 'CONFIRMED'
-                        ? 'var(--pb-income)'
-                        : settlement.status === 'PENDING'
-                          ? 'var(--pb-gold)'
-                          : 'var(--pb-ink-faint)'
-                      const statusTint = settlement.status === 'CONFIRMED'
-                        ? 'var(--pb-tint-income)'
-                        : settlement.status === 'PENDING'
-                          ? 'var(--pb-tint-gold)'
-                          : 'var(--pb-surface-3)'
-
-                      return (
-                        <Stack
-                          key={settlement.id}
-                          direction="column"
-                          justify="space-between"
-                          gap={3}
-                          minH="142px"
-                          p={3}
-                          borderRadius="14px"
-                          border="1px solid"
-                          borderColor="var(--pb-hair)"
-                          bg="var(--pb-surface)"
-                        >
-                          <Flex
-                            direction={{ base: 'column', sm: 'row' }}
-                            align={{ base: 'stretch', sm: 'flex-start' }}
-                            justify="space-between"
-                            gap={3}
-                          >
-                            <Box minW={0}>
-                              <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
-                                {t('household.record.paymentTitle', {
-                                  from: settlement.fromMemberName,
-                                  to: settlement.toMemberName,
-                                })}
-                              </Text>
-                              <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">
-                                {formatDate(settlement.settlementDate, {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })}
-                              </Text>
-                            </Box>
-                            <Text
-                              flexShrink={0}
-                              fontFamily="var(--pb-serif)"
-                              fontSize="xl"
-                              fontWeight={500}
-                              color="var(--pb-ink)"
-                              style={{ fontVariantNumeric: 'tabular-nums' }}
-                            >
-                              {formatCurrency(settlement.amount)}
-                            </Text>
-                          </Flex>
-
-                          <Flex align="center" justify="space-between" gap={2} flexWrap="wrap">
-                            <HStack spacing={1.5} flexWrap="wrap">
-                              <Badge
-                                borderRadius="full"
-                                px={2.5}
-                                py={1}
-                                bg={statusTint}
-                                color={statusAccent}
-                                textTransform="capitalize"
-                              >
-                                {t(
-                                  `household.status.${settlement.status}`,
-                                  undefined,
-                                  settlement.status,
-                                )}
-                              </Badge>
-                            </HStack>
-
-                            <HStack spacing={1} flexWrap="wrap" justify="flex-end">
-                              {((settlement.attachments ?? []).length > 0
-                                || settlement.canAttach) && (
-                                  <Button
-                                    aria-label={t('household.settlements.proofAria', {
-                                      name: settlement.fromMemberName,
-                                    })}
-                                    h="34px"
-                                    px={2.5}
-                                    borderRadius="9px"
-                                    variant="ghost"
-                                    leftIcon={<Icon as={Upload} boxSize={3.5} />}
-                                    onClick={() => onOpenAttachments(settlement.id)}
-                                  >
-                                    {t('household.settlements.proof', {
-                                      count: formatNumber((settlement.attachments ?? []).length),
-                                    })}
-                                  </Button>
-                                )}
-                            </HStack>
-                          </Flex>
-                        </Stack>
-                      )
-                    })}
-                  </SimpleGrid>
-                </Box>
-              )
-            })}
-          </VStack>
+            return (
+              <Box key={monthKey}>
+                <Flex
+                  px={{ base: 4, md: 6 }} pt={3} pb={1} align="center" justify="space-between"
+                  fontSize="11px" fontWeight={700} letterSpacing=".04em" textTransform="uppercase" color="var(--pb-ink-faint)"
+                >
+                  <Text>{monthLabel}</Text>
+                  <Text style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(monthTotal)}</Text>
+                </Flex>
+                <VStack align="stretch" spacing={0} divider={<Box h="1px" bg="var(--pb-hair)" />}>
+                  {settlements.map((settlement) => (
+                    <SettlementRow key={settlement.id} settlement={settlement} onOpenAttachments={onOpenAttachments} />
+                  ))}
+                </VStack>
+              </Box>
+            )
+          })
         )}
       </Box>
     </PremiumModal>
+  )
+}
+
+/**
+ * Two lines, like the expenses:
+ *   [icon] Vagner → Leandro        [proof]  £ amount
+ *          (VB) 3 Oct · Pending
+ */
+function SettlementRow({ settlement, onOpenAttachments }: {
+  settlement: HouseholdSettlement
+  onOpenAttachments: (settlementId: number) => void
+}) {
+  const { formatCurrency, formatDate, formatNumber, t } = useI18n()
+  const attachmentCount = (settlement.attachments ?? []).length
+  const canOpenProof = attachmentCount > 0 || settlement.canAttach
+  const voided = settlementVoided(settlement.status)
+  const palette = settlementStatusColors[settlement.status]
+
+  return (
+    <Box px={{ base: 4, md: 6 }} py={2.5}>
+      <Flex align="center" gap={3}>
+        <SettlementIcon status={settlement.status} size={36} />
+        <Box minW={0} flex={1}>
+          <Flex align="center" gap={1.5}>
+            <Text flex={1} minW={0} fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}
+              title={t('household.record.paymentTitle', { from: settlement.fromMemberName, to: settlement.toMemberName })}>
+              {settlement.fromMemberName} → {settlement.toMemberName}
+            </Text>
+            {canOpenProof && (
+              <IconButton
+                aria-label={t('household.settlements.proofAria', { name: settlement.fromMemberName })}
+                title={t('household.settlements.proof', { count: formatNumber(attachmentCount) })}
+                icon={<Icon as={attachmentCount > 0 ? ReceiptText : Upload} boxSize={4} weight={attachmentCount > 0 ? 'fill' : 'bold'} />}
+                size="xs" w="28px" minW="28px" h="28px" borderRadius="full" variant="ghost"
+                color={attachmentCount > 0 ? BRAND : 'var(--pb-ink-faint)'}
+                _hover={{ bg: '#f3e8fc', color: BRAND }}
+                onClick={() => onOpenAttachments(settlement.id)}
+              />
+            )}
+            <Text
+              flexShrink={0} ml={1} fontSize="md" fontWeight={800} letterSpacing="-.02em"
+              color={voided ? 'var(--pb-ink-faint)' : 'var(--pb-ink)'} textDecoration={voided ? 'line-through' : undefined}
+              style={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {formatCurrency(settlement.amount)}
+            </Text>
+          </Flex>
+          <Flex mt={0.5} align="center" gap={2}>
+            <PayerInitials name={settlement.fromMemberName} />
+            <Text fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
+              {formatDate(settlement.settlementDate, { day: 'numeric', month: 'short' })}
+              {' · '}
+              <Text as="span" fontWeight={700} color={palette.color}>
+                {t(`household.status.${settlement.status}`, undefined, settlement.status)}
+              </Text>
+            </Text>
+          </Flex>
+        </Box>
+      </Flex>
+    </Box>
   )
 }
