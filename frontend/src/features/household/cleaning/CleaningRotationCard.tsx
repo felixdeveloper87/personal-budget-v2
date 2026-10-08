@@ -1,5 +1,5 @@
 import { Box, Button, Flex, HStack, Icon, IconButton, Text, useDisclosure, VStack } from '@chakra-ui/react'
-import { Broom, Gear } from '../../../components/ui/icons'
+import { Broom, Check, Gear } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
@@ -34,6 +34,7 @@ export function CleaningRotationCard({
     name: week.assignedMemberId === currentMemberId ? t('household.common.you') : week.assignedMemberName,
   }))
   const currentIsUser = current?.assignedMemberId === currentMemberId
+  const currentIsComplete = current?.status === 'COMPLETED'
   const displayedDuties: DisplayedCleaningDuty[] = current?.duties?.length
     ? current.duties.map((duty) => ({ ...duty, timed: duty.key === 'rubbish_out' }))
     : CLEANING_DUTIES.map((duty) => ({
@@ -43,6 +44,7 @@ export function CleaningRotationCard({
       canToggle: false,
       completedAt: null,
     }))
+  const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
   const displayDate = (value: string) => formatDate(value, { day: 'numeric', month: 'short' })
 
   const emptyTitle = !rotation.configured
@@ -106,9 +108,24 @@ export function CleaningRotationCard({
           >
             {/* This week: name, "This week", dates. */}
             <Box px={4} py={3}>
-              <Text fontSize="lg" fontWeight={700} lineHeight={1.15} color="var(--pb-ink)" noOfLines={1}>
-                {currentIsUser ? t('household.common.you') : current.assignedMemberName}
-              </Text>
+              <HStack spacing={2} minW={0}>
+                <Text fontSize="lg" fontWeight={700} lineHeight={1.15} color="var(--pb-ink)" noOfLines={1} minW={0}>
+                  {currentIsUser ? t('household.common.you') : current.assignedMemberName}
+                </Text>
+                <HStack
+                  flexShrink={0} spacing={1} px={2} py={0.5} borderRadius="full" aria-live="polite"
+                  bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--nu-brand-tint)'}
+                  color={currentIsComplete ? 'var(--pb-income)' : 'var(--nu-brand)'}
+                >
+                  {currentIsComplete && <Icon as={Check} boxSize={3} weight="bold" />}
+                  <Text fontSize="xs" fontWeight={700}>
+                    {t('household.cleaning.progress', {
+                      completed: formatNumber(completedDutyCount),
+                      total: formatNumber(displayedDuties.length),
+                    })}
+                  </Text>
+                </HStack>
+              </HStack>
               <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
                 {t('household.cleaning.thisWeek')}
                 {' · '}
