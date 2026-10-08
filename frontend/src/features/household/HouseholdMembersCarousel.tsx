@@ -2,7 +2,6 @@ import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
 import { memberRank, PointsBadge } from './members/MembersOverviewModal'
-import { HouseholdDebtTicker } from './HouseholdDebtTicker'
 
 export function HouseholdMembersCarousel({ household, onViewBalances }: {
   household: HouseholdDashboard
@@ -72,8 +71,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           )
         })}
       </HStack>
-
-      <HouseholdDebtTicker debts={household.debts} onOpen={onViewBalances} />
 
       {debtsYouOwe.length > 0 && (
         /* Same pending-payment alert as the mobile app: whole card opens the balances. */

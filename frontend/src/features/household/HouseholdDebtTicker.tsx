@@ -37,7 +37,7 @@ export function HouseholdDebtTicker({ debts, onOpen }: { debts: HouseholdDebt[];
 
   return (
     <Flex
-      as="button" type="button" onClick={onOpen} w="full" mt={3} h="40px" align="stretch" overflow="hidden"
+      as="button" type="button" onClick={onOpen} w="full" h="40px" align="stretch" overflow="hidden"
       borderRadius="12px" bg="#1f1f24" textAlign="left" aria-label={`${t('household.ticker.label')}: ${summary}`}
       _focusVisible={{ outline: `2px solid ${BRAND}`, outlineOffset: '2px' }}
       sx={{
