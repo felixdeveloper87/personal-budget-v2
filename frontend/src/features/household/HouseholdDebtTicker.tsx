@@ -50,6 +50,7 @@ export function HouseholdDebtTicker({ members, debts, onOpen }: {
       headlines={debts.length ? headlines : []}
       emptyText={t('household.ticker.allSettled')}
       ariaLabel={`${t('household.ticker.label')}: ${summary}`}
+      secondsPerItem={6}
       onClick={onOpen}
     />
   )

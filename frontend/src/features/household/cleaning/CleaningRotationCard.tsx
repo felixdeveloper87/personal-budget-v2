@@ -4,7 +4,6 @@ import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
 import { CleaningDutiesModal } from './CleaningDutiesModal'
-import { NewsTicker } from '../components/NewsTicker'
 import { CLEANING_DUTIES, type DisplayedCleaningDuty } from './cleaningConfig'
 
 export function CleaningRotationCard({
@@ -138,19 +137,23 @@ export function CleaningRotationCard({
           )}
 
           {rotation.configured && rotation.active && upcoming.length > 0 && (
-            <Box mt={3.5}>
-              <NewsTicker
-                tone="soft"
-                label={t('household.cleaning.comingNext')}
-                headlines={upcoming.map((week) => (
-                  <Text as="span" whiteSpace="nowrap" fontSize="sm">
-                    <Text as="b" fontWeight={800}>{week.name}</Text>
-                    <Text as="span" color="var(--pb-ink-soft)"> · {displayDate(week.weekStart)}</Text>
-                  </Text>
+            <Box mt={3.5} pt={3} borderTop="1px solid var(--pb-hair)">
+              <Text fontSize="xs" fontWeight={700} color="var(--pb-ink-soft)">{t('household.cleaning.comingNext')}</Text>
+              <HStack
+                mt={2} spacing={2} align="stretch" overflowX="auto" role="list"
+                aria-label={t('household.cleaning.comingNext')}
+                sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
+              >
+                {upcoming.map((week) => (
+                  <Box
+                    key={week.weekStart} role="listitem" flex="0 0 auto" minW="128px" maxW="180px" px={3} py={2}
+                    borderRadius="12px" bg="var(--nu-brand-tint)" sx={{ scrollSnapAlign: 'start' }}
+                  >
+                    <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{week.name}</Text>
+                    <Text fontSize="xs" color="var(--pb-ink-soft)">{displayDate(week.weekStart)}</Text>
+                  </Box>
                 ))}
-                ariaLabel={`${t('household.cleaning.comingNext')}: ${upcoming
-                  .map((week) => `${week.name}, ${displayDate(week.weekStart)}`).join('. ')}`}
-              />
+              </HStack>
             </Box>
           )}
         </Box>

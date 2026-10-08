@@ -2,26 +2,26 @@ import { Box, Flex, Text } from '@chakra-ui/react'
 import { Fragment, type ReactNode } from 'react'
 
 const BRAND = '#820ad1'
-/** Seconds each headline stays on the bar, so a longer list scrolls at the same speed. */
+/** Default seconds each headline stays on the bar, so a longer list scrolls at the same speed. */
 const SECONDS_PER_ITEM = 5
 
 const TONES = {
   /** White CNN-style bar with a purple label and a blinking red dot (the "Live" balances bar). */
   live: { bg: 'white', ink: 'var(--pb-ink)', separator: 'var(--pb-hair-2)', labelBg: BRAND, labelInk: 'white', shadow: '6px 0 10px -6px rgba(130,10,209,.35)' },
-  /** Soft lilac bar for calmer info (the cleaning "Next" turns). */
-  soft: { bg: '#f3e8fc', ink: 'var(--pb-ink)', separator: 'rgba(130,10,209,.3)', labelBg: '#e4cdf7', labelInk: BRAND, shadow: '6px 0 10px -6px rgba(130,10,209,.25)' },
 } as const
 
 /**
  * Headline bar: a fixed label on the left and the headlines scrolling on a loop.
  * The track holds the headlines twice and slides by half its width, so the loop is seamless.
  */
-export function NewsTicker({ label, headlines, ariaLabel, emptyText, tone = 'live', onClick }: {
+export function NewsTicker({ label, headlines, ariaLabel, emptyText, tone = 'live', secondsPerItem = SECONDS_PER_ITEM, onClick }: {
   label: string
   headlines: ReactNode[]
   ariaLabel: string
   emptyText?: string
   tone?: keyof typeof TONES
+  /** Seconds per headline: higher is slower. */
+  secondsPerItem?: number
   onClick?: () => void
 }) {
   const colors = TONES[tone]
@@ -64,7 +64,7 @@ export function NewsTicker({ label, headlines, ariaLabel, emptyText, tone = 'liv
           <Flex
             className="news-ticker-track" pl={4} w="max-content"
             sx={{
-              animation: `newsTicker ${Math.max(10, headlines.length * SECONDS_PER_ITEM)}s linear infinite`,
+              animation: `newsTicker ${Math.max(10, headlines.length * secondsPerItem)}s linear infinite`,
               '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           >
