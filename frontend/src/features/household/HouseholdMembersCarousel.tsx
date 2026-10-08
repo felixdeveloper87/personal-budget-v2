@@ -43,7 +43,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           return (
             <Box
               key={member.id} role="listitem"
-              flex="0 0 220px" minW="220px" p={3.5}
+              flex="0 0 220px" minW="220px" px={3.5} py={3}
               borderRadius="18px" bg="var(--pb-surface)"
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
@@ -58,14 +58,12 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
                 <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
               </Flex>
 
-              <Box mt={3} color={accent}>
-                <Text fontSize="11px" fontWeight={700}>{status}</Text>
-                <Text fontSize="xl" fontWeight={800} letterSpacing="-.02em" lineHeight={1.15} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {formatCurrency(Math.abs(member.balance))}
-                </Text>
-              </Box>
+              <Text mt={1.5} color={accent} fontSize="xl" fontWeight={800} letterSpacing="-.02em" lineHeight={1.15}
+                style={{ fontVariantNumeric: 'tabular-nums' }}>
+                {formatCurrency(Math.abs(member.balance))}
+              </Text>
 
-              <Flex mt={3} pt={2.5} borderTop="1px solid var(--pb-hair)" align="center" justify="space-between" gap={2}>
+              <Flex mt={2} pt={2} borderTop="1px solid var(--pb-hair)" align="center" justify="space-between" gap={2}>
                 <Text fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1} minW={0}>
                   {t('household.members.monthSpentShort', { amount: formatCurrency(member.monthPaid) })}
                 </Text>
