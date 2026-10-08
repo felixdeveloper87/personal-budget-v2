@@ -264,8 +264,8 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
         <Icon
           as={icon}
           boxSize={active ? '28px' : '27px'}
-          weight={active ? 'fill' : 'regular'}
-          opacity={active ? 1 : 0.74}
+          weight={active ? 'fill' : 'bold'}
+          opacity={active ? 1 : 0.92}
           transition={reducedMotion ? 'none' : 'transform 180ms ease, opacity 180ms ease'}
           transform={active ? 'translateY(-1px)' : 'none'}
         />
@@ -275,9 +275,9 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
         px={1}
         fontSize="10px"
         lineHeight="12px"
-        fontWeight={active ? 800 : 600}
+        fontWeight={active ? 800 : 700}
         letterSpacing={active ? '0' : '0.01em'}
-        opacity={active ? 1 : 0.72}
+        opacity={active ? 1 : 0.9}
         noOfLines={1}
       >
         {label}

@@ -15,6 +15,9 @@ import SearchTrigger from './SearchTrigger'
 import type { AppPage } from './navigation.config'
 import { ADMIN_NAV_ITEM, NAV_ITEMS } from './navigation.config'
 
+/** Bottom tab bar on phones: a lighter purple than the top app bar. */
+const MOBILE_NAV_BG = '#9b3de0'
+
 /** Chrome bar height — shared so the sidebar's brand block lines up with the
  * header's bottom edge (their dividers sit on the same baseline). */
 export const HEADER_HEIGHT = { base: '72px', md: '64px' } as const
@@ -272,10 +275,10 @@ export default function Header({
             right={0}
             bottom={0}
             zIndex={1100}
-            bg={ON_BRAND.bg}
+            bg={MOBILE_NAV_BG}
             borderTop="1px solid"
             borderColor={ON_BRAND.line}
-            boxShadow="0 -12px 34px rgba(40, 0, 70, 0.26)"
+            boxShadow="0 -12px 34px rgba(40, 0, 70, 0.18)"
             px={2}
             pt={1.5}
             pb="max(8px, env(safe-area-inset-bottom, 0px))"
