@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Flex, HStack, IconButton, SimpleGrid, Spinner, Text, VStack, useDisclosure } from '@chakra-ui/react'
 import {
   BriefcaseIcon,
+  CurrencyGbpIcon,
   PauseIcon,
   PencilSimpleIcon,
   PlayIcon,
@@ -25,7 +26,7 @@ import { ToastService } from '../../services/toast'
 import { useI18n } from '../../i18n'
 import { ConfirmDeleteDialog } from '../../components/ui'
 import AddTransactionModal from '../../components/transactions/AddTransactionModal'
-import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
+import NuHero, { NuHeroBadge, NuHeroGlow, NuHeroShortcut } from '../dashboard/components/NuHero'
 import { NuSection, NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 import '../dashboard/theme/pb-tokens.css'
 import WorkSessionModal, { type WorkSessionDraft } from './WorkSessionModal'
@@ -40,23 +41,6 @@ import {
 } from './businessTime'
 
 type Period = 'week' | 'month'
-
-const heroButton = {
-  as: 'button',
-  type: 'button',
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gap: 2,
-  h: '48px',
-  px: 6,
-  borderRadius: 'full',
-  fontSize: '15px',
-  fontWeight: 650,
-  transition: 'transform .12s ease, background .15s ease',
-  _active: { transform: 'scale(0.97)' },
-  _disabled: { opacity: 0.6, cursor: 'not-allowed' },
-} as const
 
 export default function BusinessPage() {
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
@@ -221,53 +205,51 @@ export default function BusinessPage() {
   return (
     <Box>
       <NuHero
+        compact
+        decoration={<NuHeroGlow />}
         title={t('nav.business.label')}
         action={<NuHeroBadge><BriefcaseIcon size={18} weight="bold" aria-hidden="true" /></NuHeroBadge>}
       >
-        <VStack mt={{ base: 3, md: 4 }} align={{ base: 'stretch', md: 'flex-start' }} spacing={4}>
-          <Box>
-            <Text fontSize="sm" color="rgba(255,255,255,.78)">{statusLine}</Text>
-            <Text
-              mt={0.5}
-              fontSize={{ base: '2.75rem', md: '3.25rem' }}
-              fontWeight={700}
-              letterSpacing="-0.02em"
-              lineHeight={1.05}
-              color="white"
-              opacity={active?.status === 'PAUSED' ? 0.7 : 1}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-              aria-live="off"
-            >
-              {formatClock(elapsed)}
-            </Text>
-          </Box>
+        <Box mt={{ base: 3, md: 4 }}>
+          <Text fontSize="sm" color="rgba(255,255,255,.78)">{statusLine}</Text>
+          <Text
+            mt={0.5}
+            fontSize={{ base: '2.6rem', md: '3.2rem' }}
+            fontWeight={800}
+            letterSpacing="-0.03em"
+            lineHeight={1}
+            color="white"
+            opacity={active?.status === 'PAUSED' ? 0.7 : 1}
+            style={{ fontVariantNumeric: 'tabular-nums' }}
+            aria-live="off"
+          >
+            {formatClock(elapsed)}
+          </Text>
+        </Box>
 
-          <HStack spacing={3} flexWrap="wrap">
-            {!active && (
-              <Box {...heroButton} bg="white" color="#820ad1" onClick={start} disabled={busy || loading}>
-                <PlayIcon size={18} weight="fill" aria-hidden="true" />{t('business.start')}
-              </Box>
-            )}
-            {active?.status === 'RUNNING' && (
-              <Box {...heroButton} bg="white" color="#820ad1" onClick={pause} disabled={busy}>
-                <PauseIcon size={18} weight="fill" aria-hidden="true" />{t('business.pause')}
-              </Box>
-            )}
-            {active?.status === 'PAUSED' && (
-              <Box {...heroButton} bg="white" color="#820ad1" onClick={resume} disabled={busy}>
-                <PlayIcon size={18} weight="fill" aria-hidden="true" />{t('business.resume')}
-              </Box>
-            )}
-            {active && (
-              <Box {...heroButton} bg="rgba(255,255,255,.16)" color="white" border="1px solid rgba(255,255,255,.35)" onClick={end} disabled={busy}>
-                <StopIcon size={18} weight="fill" aria-hidden="true" />{t('business.end')}
-              </Box>
-            )}
-            <Box {...heroButton} px={4} bg="transparent" color="white" onClick={() => openAdd()} _hover={{ bg: 'rgba(255,255,255,.12)' }}>
-              <PlusIcon size={16} weight="bold" aria-hidden="true" />{t('business.addManually')}
-            </Box>
-          </HStack>
-        </VStack>
+        {/* Nubank-style shortcuts */}
+        <HStack mt={{ base: 5, md: 6 }} spacing={{ base: 2, md: 3 }} align="flex-start">
+          {!active && (
+            <NuHeroShortcut primary label={t('business.start')} onClick={start} disabled={busy || loading}
+              icon={<PlayIcon size={20} weight="fill" aria-hidden="true" />} />
+          )}
+          {active?.status === 'RUNNING' && (
+            <NuHeroShortcut primary label={t('business.pause')} onClick={pause} disabled={busy}
+              icon={<PauseIcon size={20} weight="fill" aria-hidden="true" />} />
+          )}
+          {active?.status === 'PAUSED' && (
+            <NuHeroShortcut primary label={t('business.resume')} onClick={resume} disabled={busy}
+              icon={<PlayIcon size={20} weight="fill" aria-hidden="true" />} />
+          )}
+          {active && (
+            <NuHeroShortcut label={t('business.end')} onClick={end} disabled={busy}
+              icon={<StopIcon size={20} weight="fill" aria-hidden="true" />} />
+          )}
+          <NuHeroShortcut label={t('business.shortcut.manual')} onClick={() => openAdd()}
+            icon={<PlusIcon size={20} weight="bold" aria-hidden="true" />} />
+          <NuHeroShortcut label={t('business.shortcut.earnings')} onClick={earningsForm.onOpen}
+            icon={<CurrencyGbpIcon size={20} weight="bold" aria-hidden="true" />} />
+        </HStack>
       </NuHero>
 
       <Box {...NU_SHEET_WRAP}>
@@ -281,10 +263,10 @@ export default function BusinessPage() {
               <NuSection title={t('business.today')} subtitle={t('business.todayCaption')}>
                 <StatRow
                   items={[
-                    { label: t('business.stat.hours'), value: formatDuration(todaySeconds) },
-                    { label: t('business.stat.earned'), value: formatCurrency(todayEarned) },
-                    { label: t('business.stat.profit'), value: formatCurrency(todayProfit) },
-                    { label: t('business.stat.profitPerHour'), value: rate(todayProfitRate), highlight: true },
+                    { label: t('business.statShort.hours'), value: formatDuration(todaySeconds) },
+                    { label: t('business.statShort.earned'), value: formatCurrency(todayEarned) },
+                    { label: t('business.statShort.profit'), value: formatCurrency(todayProfit) },
+                    { label: t('business.statShort.profitPerHour'), value: rate(todayProfitRate), highlight: true },
                   ]}
                 />
                 {todaySeconds > 0 && todayEarned === 0 && (
@@ -309,15 +291,15 @@ export default function BusinessPage() {
                 {summary && (
                   <StatRow
                     items={[
-                      { label: t('business.stat.hours'), value: formatDuration(summary.totals.workedSeconds + liveExtra) },
-                      { label: t('business.stat.earned'), value: formatCurrency(summary.totals.earned) },
-                      { label: t('business.stat.profit'), value: formatCurrency(summary.totals.profit) },
-                      { label: t('business.stat.profitPerHour'), value: rate(summary.totals.profitRate), highlight: true },
+                      { label: t('business.statShort.hours'), value: formatDuration(summary.totals.workedSeconds + liveExtra) },
+                      { label: t('business.statShort.earned'), value: formatCurrency(summary.totals.earned) },
+                      { label: t('business.statShort.profit'), value: formatCurrency(summary.totals.profit) },
+                      { label: t('business.statShort.profitPerHour'), value: rate(summary.totals.profitRate), highlight: true },
                     ]}
                   />
                 )}
                 {summary && (
-                  <Text mt={3} fontSize="sm" color="var(--pb-ink-soft)">
+                  <Text mt={2.5} fontSize="xs" lineHeight={1.5} color="var(--pb-ink-soft)">
                     {summary.costBasis.workingDays > 0
                       ? t('business.costLine', {
                         cost: formatCurrency(summary.costBasis.dailyCost),
@@ -330,50 +312,53 @@ export default function BusinessPage() {
                       : t('business.costLineEmpty', { category: categoryLabel(summary.costBasis.category) })}
                   </Text>
                 )}
-                <VStack mt={5} spacing={0} align="stretch" divider={<Box h="1px" bg="var(--pb-hair)" />}>
+                <VStack
+                  mt={4} spacing={0} align="stretch" borderRadius="18px" bg="var(--nu-surface)" overflow="hidden"
+                  divider={<Box h="1px" bg="var(--pb-hair)" />}
+                >
                   {summary?.days.length ? summary.days.map((day) => (
-                    <Flex key={day.date} py={3} align="center" gap={3}>
-                      <Box flex={1} minW={0}>
-                        <Text fontWeight={600} color="var(--pb-ink)" textTransform="capitalize">
-                          {formatDate(dateFromKey(day.date), { weekday: 'short', day: 'numeric', month: 'short' })}
-                        </Text>
-                        <Text fontSize="sm" color="var(--pb-ink-soft)">
-                          {formatDuration(day.workedSeconds + (day.date === todayKey ? liveExtra : 0))}
-                          {' · '}
-                          {formatCurrency(day.earned)}
-                          {day.cost > 0 && ` · ${t('business.day.profit', { amount: formatCurrency(day.profit) })}`}
-                        </Text>
-                      </Box>
-                      <Text fontWeight={700} color={day.profitRate == null ? 'var(--pb-ink-faint)' : day.profitRate < 0 ? 'var(--pb-coral)' : 'var(--nu-brand)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                    <Flex
+                      key={day.date} pl={3} pr={1} py={1.5} align="center" gap={2.5}
+                      title={day.cost > 0 ? t('business.day.profit', { amount: formatCurrency(day.profit) }) : undefined}
+                    >
+                      <Text w={{ base: '78px', md: '96px' }} flexShrink={0} fontSize="sm" fontWeight={700} color="var(--pb-ink)" textTransform="capitalize" noOfLines={1}>
+                        {formatDate(dateFromKey(day.date), { weekday: 'short', day: 'numeric' })}
+                      </Text>
+                      <Text flex={1} minW={0} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                        {formatDuration(day.workedSeconds + (day.date === todayKey ? liveExtra : 0))}
+                        {' · '}
+                        {formatCurrency(day.earned)}
+                      </Text>
+                      <Text flexShrink={0} fontSize="sm" fontWeight={800} color={day.profitRate == null ? 'var(--pb-ink-faint)' : day.profitRate < 0 ? 'var(--pb-coral)' : 'var(--nu-brand)'} style={{ fontVariantNumeric: 'tabular-nums' }}>
                         {day.profitRate == null ? '—' : t('business.perHourValue', { amount: formatCurrency(day.profitRate) })}
                       </Text>
-                      <HStack spacing={0.5} flexShrink={0}>
+                      <HStack spacing={0} flexShrink={0}>
                         {!endedByDay.has(day.date) && (
                           <IconButton
                             aria-label={t('business.day.add')}
                             icon={<PlusIcon size={16} weight="bold" />}
-                            size="sm" variant="ghost" borderRadius="full" color="var(--nu-brand)"
+                            size="sm" minW="32px" w="32px" h="32px" variant="ghost" borderRadius="full" color="var(--nu-brand)"
                             onClick={() => openAdd(day.date)}
                           />
                         )}
                         <IconButton
                           aria-label={t('business.day.edit')}
                           icon={<PencilSimpleIcon size={16} />}
-                          size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
+                          size="sm" minW="32px" w="32px" h="32px" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
                           onClick={() => openEditDay(day.date)}
                         />
                         {endedByDay.has(day.date) && (
                           <IconButton
                             aria-label={t('business.day.delete')}
                             icon={<TrashIcon size={16} />}
-                            size="sm" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
+                            size="sm" minW="32px" w="32px" h="32px" variant="ghost" borderRadius="full" color="var(--pb-ink-soft)"
                             onClick={() => setDeletingDay(day.date)}
                           />
                         )}
                       </HStack>
                     </Flex>
                   )) : (
-                    <Text py={6} textAlign="center" fontSize="sm" color="var(--pb-ink-soft)">{t('business.days.empty')}</Text>
+                    <Text py={5} textAlign="center" fontSize="sm" color="var(--pb-ink-soft)">{t('business.days.empty')}</Text>
                   )}
                 </VStack>
               </NuSection>
@@ -410,17 +395,22 @@ export default function BusinessPage() {
   )
 }
 
+/** Four figures side by side in one rounded strip; the highlighted one in purple. */
 function StatRow({ items }: { items: Array<{ label: string; value: string; highlight?: boolean }> }) {
   return (
-    <SimpleGrid columns={{ base: 2, md: items.length }} spacing={3}>
+    <SimpleGrid
+      columns={items.length} borderRadius="18px" bg="var(--nu-surface)" overflow="hidden"
+      sx={{ '& > div + div': { borderLeft: '1px solid var(--pb-hair)' } }}
+    >
       {items.map((item) => (
-        <Box key={item.label} p={{ base: 3, md: 4 }} borderRadius="16px" bg={item.highlight ? 'var(--nu-brand)' : 'var(--nu-surface)'}>
-          <Text fontSize="xs" color={item.highlight ? 'rgba(255,255,255,.8)' : 'var(--pb-ink-soft)'} noOfLines={1}>{item.label}</Text>
+        <Box key={item.label} px={{ base: 2.5, md: 4 }} py={{ base: 2.5, md: 3 }} minW={0}>
+          <Text fontSize="11px" fontWeight={600} color="var(--pb-ink-soft)" noOfLines={1}>{item.label}</Text>
           <Text
-            mt={1}
-            fontSize={{ base: 'md', md: 'xl' }}
-            fontWeight={700}
-            color={item.highlight ? 'white' : 'var(--pb-ink)'}
+            mt={0.5}
+            fontSize={{ base: 'sm', md: 'lg' }}
+            fontWeight={800}
+            letterSpacing="-0.02em"
+            color={item.highlight ? 'var(--nu-brand)' : 'var(--pb-ink)'}
             noOfLines={1}
             style={{ fontVariantNumeric: 'tabular-nums' }}
           >

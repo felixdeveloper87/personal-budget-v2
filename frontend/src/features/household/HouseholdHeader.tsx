@@ -4,7 +4,7 @@ import { ArrowsLeftRight } from '@phosphor-icons/react'
 import { Bell, Broom, Calendar, ChevronLeft, ChevronRight, Gear, Plus, TrendingDown, TrendingUp, Users } from '../../components/ui/icons'
 import type { HouseholdDashboard } from '../../types'
 import { useI18n } from '../../i18n'
-import NuHero from '../dashboard/components/NuHero'
+import NuHero, { NuHeroGlow, NuHeroShortcut } from '../dashboard/components/NuHero'
 
 interface HouseholdHeaderProps {
   household: HouseholdDashboard
@@ -75,7 +75,7 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
 
   return (
     <NuHero
-      decoration={<HeroGlow />}
+      decoration={<NuHeroGlow />}
       title={(
           <Box minW={0}>
             <HStack spacing={1.5}>
@@ -138,50 +138,22 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
 
         {/* Nubank-style shortcuts */}
         <HStack mt={{ base: 5, md: 6 }} spacing={{ base: 0, md: 3 }} justify={{ base: 'space-between', md: 'flex-start' }} align="flex-start">
-          {shortcuts.map((shortcut) => {
-            const primary = shortcut.key === 'expense'
-            return (
-              <Flex
-                key={shortcut.key} as="button" type="button" onClick={shortcut.onClick}
-                direction="column" align="center" gap={1.5} w={{ base: '64px', md: '72px' }} flexShrink={0}
-                _focusVisible={{ outline: 'none', '& .shortcut-circle': { boxShadow: '0 0 0 3px rgba(255,255,255,0.55)' } }}
-              >
-                <Flex
-                  className="shortcut-circle" position="relative" w="52px" h="52px" align="center" justify="center" borderRadius="full"
-                  bg={primary ? 'white' : 'rgba(255,255,255,0.16)'}
-                  color={primary ? 'var(--pb-hero)' : 'white'}
-                  border={primary ? 'none' : '1px solid rgba(255,255,255,0.18)'}
-                  transition="transform 120ms ease, background 160ms ease"
-                  _hover={{ bg: primary ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.24)' }}
-                  _active={{ transform: 'scale(0.94)' }}
-                >
-                  <Icon as={shortcut.icon} boxSize={5} weight="bold" aria-hidden="true" />
-                  {shortcut.badge ? (
-                    <Flex aria-hidden="true" position="absolute" top="-2px" right="-2px" minW="18px" h="18px" px={1} borderRadius="full" bg="#ff6b57" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>
-                      {shortcut.badge > 99 ? '99+' : formatNumber(shortcut.badge)}
-                    </Flex>
-                  ) : null}
+          {shortcuts.map((shortcut) => (
+            <NuHeroShortcut
+              key={shortcut.key}
+              label={shortcut.label}
+              primary={shortcut.key === 'expense'}
+              onClick={shortcut.onClick}
+              icon={<Icon as={shortcut.icon} boxSize={5} weight="bold" aria-hidden="true" />}
+              badge={shortcut.badge ? (
+                <Flex aria-hidden="true" position="absolute" top="-2px" right="-2px" minW="18px" h="18px" px={1} borderRadius="full" bg="#ff6b57" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>
+                  {shortcut.badge > 99 ? '99+' : formatNumber(shortcut.badge)}
                 </Flex>
-                <Text fontSize="11px" fontWeight={700} color="white" noOfLines={1}>{shortcut.label}</Text>
-              </Flex>
-            )
-          })}
+              ) : undefined}
+            />
+          ))}
         </HStack>
     </NuHero>
-  )
-}
-
-/** Depth for the purple hero without line art: a diagonal deepening plus a soft glow behind the headline figure. */
-function HeroGlow() {
-  return (
-    <Box
-      aria-hidden="true" position="absolute" inset={0} zIndex={-1} pointerEvents="none"
-      bg={[
-        'radial-gradient(60% 70% at 18% 62%, rgba(214, 160, 255, 0.28) 0%, rgba(214, 160, 255, 0) 70%)',
-        'radial-gradient(50% 60% at 100% 0%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 70%)',
-        'linear-gradient(135deg, #8a12dc 0%, #820ad1 45%, #6c05b5 100%)',
-      ].join(', ')}
-    />
   )
 }
 
