@@ -54,9 +54,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
                 <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-ink-soft)">
                   {t('household.members.rank', { rank: formatNumber(memberRank(member, household.members)) })}
                 </Text>
-                {member.id === household.currentMemberId && (
-                  <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-forest)">{t('household.common.you')}</Text>
-                )}
               </HStack>
               <HStack mt={1} spacing={1.5} align="baseline" color={accent}>
                 <Text fontSize="md" fontWeight={700} lineHeight={1.2} style={{ fontVariantNumeric: 'tabular-nums' }}>

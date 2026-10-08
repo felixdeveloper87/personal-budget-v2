@@ -661,7 +661,7 @@ export const householdTranslations: TranslationBundle = {
     'household.members.paid': 'Gastou',
     'household.members.assignedShare': 'Sua parte',
     'household.members.monthSpent': 'Gastou este mês {{amount}}',
-    'household.members.pointsInfo': '{{amount}} é o total que {{name}} já gastou com a casa. Cada £1 vale 1 ponto, e o ranking é baseado nisso.',
+    'household.members.pointsInfo': '{{amount}} é o total que {{name}} já gastou. Cada £1 vale 1 ponto, e o ranking é baseado nisso.',
     'household.members.pointsInfoAria': 'Como funcionam os pontos',
     'household.members.rank': '{{rank}}º',
     'household.members.sheetCaption': '{{members}} · {{purchases}} lançadas',
