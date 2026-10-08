@@ -114,6 +114,15 @@ export default function HouseholdPage() {
     paymentsOverviewModal.onOpen()
   }
 
+  const scrollToCleaning = () => {
+    requestAnimationFrame(() => {
+      document.getElementById('household-cleaning')?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }
+
   const openNotificationCleaning = () => {
     notificationsModal.onClose()
     requestAnimationFrame(() => {
@@ -155,6 +164,8 @@ export default function HouseholdPage() {
         onManage={membersModal.onOpen}
         onMembersOverview={membersOverviewModal.onOpen}
         onNotifications={notificationsModal.onOpen}
+        onViewBalances={balancesOverviewModal.onOpen}
+        onOpenCleaning={scrollToCleaning}
       />
 
       {/* White sheet with rounded top tucked over the purple header. */}

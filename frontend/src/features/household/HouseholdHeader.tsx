@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Box, Button, Flex, Grid, HStack, Icon, IconButton, Text } from '@chakra-ui/react'
-import { Bell, Calendar, ChevronLeft, ChevronRight, Gear, Plus, TrendingDown, TrendingUp, Users } from '../../components/ui/icons'
+import { Box, Button, Flex, HStack, Icon, IconButton, Text } from '@chakra-ui/react'
+import { ArrowsLeftRight } from '@phosphor-icons/react'
+import { Bell, Broom, Calendar, ChevronLeft, ChevronRight, Gear, Plus, TrendingDown, TrendingUp, Users } from '../../components/ui/icons'
 import type { HouseholdDashboard } from '../../types'
 import { useI18n } from '../../i18n'
 import NuHero from '../dashboard/components/NuHero'
@@ -11,11 +12,13 @@ interface HouseholdHeaderProps {
   onManage: () => void
   onMembersOverview: () => void
   onNotifications: () => void
+  onViewBalances: () => void
+  onOpenCleaning: () => void
 }
 
 const monthKey = (date: Date) => date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0')
 
-export default function HouseholdHeader({ household, onAddExpense, onManage, onMembersOverview, onNotifications }: HouseholdHeaderProps) {
+export default function HouseholdHeader({ household, onAddExpense, onManage, onMembersOverview, onNotifications, onViewBalances, onOpenCleaning }: HouseholdHeaderProps) {
   const { formatDate, formatNumber, t } = useI18n()
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date()
@@ -60,9 +63,19 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
     if (monthKey(candidate) <= currentMonthKey) setSelectedMonth(candidate)
   }
 
+  const shortcuts: Array<{ key: string; label: string; icon: typeof Plus; onClick: () => void; badge?: number }> = [
+    { key: 'expense', label: t('household.header.shortcut.expense'), icon: Plus, onClick: onAddExpense },
+    { key: 'transfer', label: t('household.header.shortcut.transfer'), icon: ArrowsLeftRight, onClick: onViewBalances },
+    { key: 'tasks', label: t('household.header.shortcut.tasks'), icon: Broom, onClick: onOpenCleaning },
+    { key: 'alerts', label: t('household.header.shortcut.alerts'), icon: Bell, onClick: onNotifications, badge: household.unreadNotificationCount },
+    ...(household.currentMemberRole === 'OWNER'
+      ? [{ key: 'settings', label: t('household.header.shortcut.settings'), icon: Gear, onClick: onManage }]
+      : []),
+  ]
+
   return (
     <NuHero
-      decoration={<HouseLineArt />}
+      decoration={<HeroGlow />}
       title={(
           <Box minW={0}>
             <HStack spacing={1.5}>
@@ -99,68 +112,94 @@ export default function HouseholdHeader({ household, onAddExpense, onManage, onM
       )}
     >
 
-        {/* Month spending · your position */}
-        <Grid mt={{ base: 4, md: 5 }} templateColumns={{ base: 'minmax(0, 1fr) minmax(0, 1fr)', md: 'minmax(0, 1.2fr) minmax(0, 1fr)' }} gap={{ base: 4, md: 8 }} maxW={{ md: '720px' }}>
-          <Box minW={0} aria-live="polite" aria-atomic="true">
-            <Text fontSize="sm" color={soft}>{t('household.header.monthSpending')}</Text>
-            <Flex align="center" gap={2} mt={0.5} wrap="wrap">
-              <Text fontSize={{ base: '1.6rem', md: '2.4rem' }} fontWeight={700} letterSpacing="-0.02em" lineHeight={1.1} overflowWrap="anywhere" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                {money(spending)}
-              </Text>
-              <Box
-                aria-label={comparisonLabel}
-                title={comparisonLabel}
-                borderRadius="full"
-                px={2}
-                py={0.5}
-                bg="rgba(255,255,255,0.16)"
-                color={change !== null && change > 0 ? bad : change !== null && change < 0 ? good : soft}
-                fontSize="xs"
-                fontWeight={700}
-              >
-                {changeLabel}
-              </Box>
-            </Flex>
-            <Text mt={1} fontSize="xs" color={soft}>{t(change === null ? 'household.header.noPreviousSpending' : 'household.header.vsPreviousMonth')}</Text>
+        {/* One headline figure: your position. Month spending is the supporting line. */}
+        <Box mt={{ base: 4, md: 5 }} maxW={{ md: '720px' }}>
+          <Text fontSize="sm" fontWeight={600} color={positionColor}>{positionLabel}</Text>
+          <Box mt={0.5} role="img" aria-label={money(Math.abs(net))}>
+            <SplitMoney value={Math.abs(net)} currency={household.currency || 'GBP'} />
           </Box>
-          <Box minW={0}>
-            <Text fontSize="sm" fontWeight={600} color={positionColor}>{positionLabel}</Text>
-            {net !== 0 ? (
-              <Flex align="center" gap={1} mt={0.5}>
-                <Text color={positionColor} fontSize={{ base: '1.6rem', md: '2.4rem' }} fontWeight={700} lineHeight={1.1} overflowWrap="anywhere" sx={{ fontVariantNumeric: 'tabular-nums' }}>
-                  {money(Math.abs(net))}
-                </Text>
-                <Icon as={net > 0 ? TrendingUp : TrendingDown} boxSize={4} color={positionColor} flexShrink={0} aria-hidden="true" />
-              </Flex>
-            ) : null}
-            <Text mt={1} fontSize="xs" color={soft}>{t(net === 0 && hasOutstanding ? 'household.header.position.evenWithOutstanding' : 'household.header.netBalance')}</Text>
-          </Box>
-        </Grid>
+          <Flex mt={1.5} align="center" gap={1.5} wrap="wrap" fontSize="xs" color={soft} aria-live="polite" aria-atomic="true">
+            <Text>{t('household.header.monthSpending')}</Text>
+            <Text fontWeight={700} color="white" sx={{ fontVariantNumeric: 'tabular-nums' }}>{money(spending)}</Text>
+            <Text aria-hidden="true">·</Text>
+            {change === null ? (
+              <Text>{t('household.header.noPreviousSpending')}</Text>
+            ) : (
+              <HStack spacing={1} aria-label={comparisonLabel} title={comparisonLabel}>
+                {change !== 0 && (
+                  <Icon as={change > 0 ? TrendingUp : TrendingDown} boxSize={3.5} color={change > 0 ? bad : good} aria-hidden="true" />
+                )}
+                <Text fontWeight={700} color={change > 0 ? bad : change < 0 ? good : soft}>{changeLabel}</Text>
+                <Text>{t('household.header.vsPreviousMonth')}</Text>
+              </HStack>
+            )}
+          </Flex>
+        </Box>
 
-        {/* Actions */}
-        <Flex mt={{ base: 4, md: 5 }} gap={2} align="center" maxW={{ md: '720px' }}>
-          <Button
-            onClick={onAddExpense}
-            leftIcon={<Icon as={Plus} boxSize={4} />}
-            flex={{ base: 1, md: 'initial' }}
-            px={6}
-            h="44px"
-            borderRadius="full"
-            bg="white"
-            color="var(--pb-hero)"
-            fontSize="sm"
-            fontWeight={700}
-            _hover={{ bg: 'rgba(255,255,255,0.9)' }}
-          >
-            {t('household.header.addExpense')}
-          </Button>
-          <Box position="relative" ml={{ md: 1 }}>
-            <IconButton aria-label={t('household.notifications.openAria', { count: formatNumber(household.unreadNotificationCount) })} onClick={onNotifications} icon={<Icon as={Bell} boxSize={5} />} w="44px" h="44px" borderRadius="full" {...glass} />
-            {household.unreadNotificationCount > 0 ? <Flex aria-hidden="true" pointerEvents="none" position="absolute" top="-3px" right="-3px" minW="18px" h="18px" px={1} borderRadius="full" bg="#ff6b57" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>{household.unreadNotificationCount > 99 ? '99+' : formatNumber(household.unreadNotificationCount)}</Flex> : null}
-          </Box>
-          {household.currentMemberRole === 'OWNER' ? <IconButton aria-label={t('household.header.manageAria', { name: household.name })} onClick={onManage} icon={<Icon as={Gear} boxSize={5} />} w="44px" h="44px" borderRadius="full" {...glass} /> : null}
-        </Flex>
+        {/* Nubank-style shortcuts */}
+        <HStack mt={{ base: 5, md: 6 }} spacing={{ base: 0, md: 3 }} justify={{ base: 'space-between', md: 'flex-start' }} align="flex-start">
+          {shortcuts.map((shortcut) => {
+            const primary = shortcut.key === 'expense'
+            return (
+              <Flex
+                key={shortcut.key} as="button" type="button" onClick={shortcut.onClick}
+                direction="column" align="center" gap={1.5} w={{ base: '64px', md: '72px' }} flexShrink={0}
+                _focusVisible={{ outline: 'none', '& .shortcut-circle': { boxShadow: '0 0 0 3px rgba(255,255,255,0.55)' } }}
+              >
+                <Flex
+                  className="shortcut-circle" position="relative" w="52px" h="52px" align="center" justify="center" borderRadius="full"
+                  bg={primary ? 'white' : 'rgba(255,255,255,0.16)'}
+                  color={primary ? 'var(--pb-hero)' : 'white'}
+                  border={primary ? 'none' : '1px solid rgba(255,255,255,0.18)'}
+                  transition="transform 120ms ease, background 160ms ease"
+                  _hover={{ bg: primary ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.24)' }}
+                  _active={{ transform: 'scale(0.94)' }}
+                >
+                  <Icon as={shortcut.icon} boxSize={5} weight="bold" aria-hidden="true" />
+                  {shortcut.badge ? (
+                    <Flex aria-hidden="true" position="absolute" top="-2px" right="-2px" minW="18px" h="18px" px={1} borderRadius="full" bg="#ff6b57" color="white" align="center" justify="center" fontSize="9px" fontWeight={700}>
+                      {shortcut.badge > 99 ? '99+' : formatNumber(shortcut.badge)}
+                    </Flex>
+                  ) : null}
+                </Flex>
+                <Text fontSize="11px" fontWeight={700} color="white" noOfLines={1}>{shortcut.label}</Text>
+              </Flex>
+            )
+          })}
+        </HStack>
     </NuHero>
+  )
+}
+
+/** Depth for the purple hero without line art: a diagonal deepening plus a soft glow behind the headline figure. */
+function HeroGlow() {
+  return (
+    <Box
+      aria-hidden="true" position="absolute" inset={0} zIndex={-1} pointerEvents="none"
+      bg={[
+        'radial-gradient(60% 70% at 18% 62%, rgba(214, 160, 255, 0.28) 0%, rgba(214, 160, 255, 0) 70%)',
+        'radial-gradient(50% 60% at 100% 0%, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 70%)',
+        'linear-gradient(135deg, #8a12dc 0%, #820ad1 45%, #6c05b5 100%)',
+      ].join(', ')}
+    />
+  )
+}
+
+/** "£29,67" with the symbol and the pence set smaller, banking-app style. */
+function SplitMoney({ value, currency }: { value: number; currency: string }) {
+  const { locale } = useI18n()
+  const parts = new Intl.NumberFormat(locale, { style: 'currency', currency }).formatToParts(value)
+  const small = { fontSize: { base: '1.1rem', md: '1.5rem' }, fontWeight: 700, opacity: 0.85 } as const
+  return (
+    <Text as="span" display="inline-flex" alignItems="baseline" lineHeight={1} letterSpacing="-0.03em" color="white" aria-hidden="true"
+      sx={{ fontVariantNumeric: 'tabular-nums' }}>
+      {parts.map((part, index) => {
+        if (part.type === 'literal') return null
+        if (part.type === 'currency') return <Text as="span" key={index} {...small} mr="2px">{part.value}</Text>
+        if (part.type === 'decimal' || part.type === 'fraction') return <Text as="span" key={index} {...small}>{part.value}</Text>
+        return <Text as="span" key={index} fontSize={{ base: '2.6rem', md: '3.2rem' }} fontWeight={800}>{part.value}</Text>
+      })}
+    </Text>
   )
 }
 
