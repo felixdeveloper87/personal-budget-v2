@@ -124,14 +124,14 @@ export function PointsBadge({ member, fontSize = 'md' }: { member: HouseholdMemb
         </Box>
       </PopoverTrigger>
       <Portal>
-      <PopoverContent w="260px" borderRadius="16px" borderColor="var(--pb-hair)" boxShadow="0 12px 32px -12px rgba(0,0,0,.25)">
-        <PopoverArrow />
-        <PopoverBody px={4} py={3}>
-          <Text fontSize="sm" color="var(--pb-ink)">
-            {t('household.members.pointsInfo', { name: member.name, amount: formatCurrency(member.totalPaid), points: formatNumber(points) })}
-          </Text>
-        </PopoverBody>
-      </PopoverContent>
+        <PopoverContent w="260px" borderRadius="16px" borderColor="var(--pb-hair)" boxShadow="0 12px 32px -12px rgba(0,0,0,.25)">
+          <PopoverArrow />
+          <PopoverBody px={4} py={3}>
+            <Text fontSize="sm" color="var(--pb-ink)">
+              {t('household.members.pointsInfo', { name: member.name, amount: formatCurrency(member.totalPaid), points: formatNumber(points) })}
+            </Text>
+          </PopoverBody>
+        </PopoverContent>
       </Portal>
     </Popover>
   )
