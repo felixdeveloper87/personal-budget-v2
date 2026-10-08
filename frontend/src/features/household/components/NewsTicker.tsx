@@ -6,8 +6,8 @@ const BRAND = '#820ad1'
 const SECONDS_PER_ITEM = 5
 
 const TONES = {
-  /** Dark CNN-style bar with a blinking red dot (the "Live" balances bar). */
-  live: { bg: '#1f1f24', ink: 'white', separator: 'rgba(255,255,255,.45)', labelBg: BRAND, labelInk: 'white', shadow: '8px 0 12px -6px rgba(0,0,0,.6)' },
+  /** White CNN-style bar with a purple label and a blinking red dot (the "Live" balances bar). */
+  live: { bg: 'white', ink: 'var(--pb-ink)', separator: 'var(--pb-hair-2)', labelBg: BRAND, labelInk: 'white', shadow: '6px 0 10px -6px rgba(130,10,209,.35)' },
   /** Soft lilac bar for calmer info (the cleaning "Next" turns). */
   soft: { bg: '#f3e8fc', ink: 'var(--pb-ink)', separator: 'rgba(130,10,209,.3)', labelBg: '#e4cdf7', labelInk: BRAND, shadow: '6px 0 10px -6px rgba(130,10,209,.25)' },
 } as const
@@ -41,6 +41,7 @@ export function NewsTicker({ label, headlines, ariaLabel, emptyText, tone = 'liv
       {...(onClick ? { as: 'button', type: 'button', onClick } : { role: 'group' })}
       w="full" h="40px" align="stretch" overflow="hidden"
       borderRadius="12px" bg={colors.bg} color={colors.ink} textAlign="left" aria-label={ariaLabel}
+      border={tone === 'live' ? '1px solid var(--pb-hair)' : undefined}
       _focusVisible={{ outline: `2px solid ${BRAND}`, outlineOffset: '2px' }}
       sx={{
         '@keyframes newsTicker': { from: { transform: 'translateX(0)' }, to: { transform: 'translateX(-50%)' } },

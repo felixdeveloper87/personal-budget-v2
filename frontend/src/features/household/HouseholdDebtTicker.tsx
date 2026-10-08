@@ -3,6 +3,9 @@ import { useI18n } from '../../i18n'
 import type { HouseholdDebt, HouseholdMember } from '../../types'
 import { NewsTicker } from './components/NewsTicker'
 
+/** Light purple for the names, readable on the white bar. */
+const NAME_COLOR = '#a03ee0'
+
 /**
  * CNN-style headline bar, one headline per member: "Priscila owes Vinicius,
  * Vagner and Leandro" or "Leandro doesn't owe anyone". Scrolls on a loop; opens the balances.
@@ -22,16 +25,16 @@ export function HouseholdDebtTicker({ members, debts, onOpen }: {
     return { name: member.name, creditors: creditors.length ? list(creditors) : null }
   })
   const headlines = items.map(({ name, creditors }) => (
-    <Text as="span" whiteSpace="nowrap" fontSize="sm" color="white">
-      <Text as="b" fontWeight={800}>{name}</Text>
+    <Text as="span" whiteSpace="nowrap" fontSize="sm">
+      <Text as="b" fontWeight={800} color={NAME_COLOR}>{name}</Text>
       {' '}
       {creditors ? (
         <>
           {t('household.ticker.owesTo')}{' '}
-          <Text as="b" fontWeight={800} color="#ffd166">{creditors}</Text>
+          <Text as="b" fontWeight={800} color={NAME_COLOR}>{creditors}</Text>
         </>
       ) : (
-        <Text as="span" color="rgba(255,255,255,.75)">{t('household.ticker.owesNobody')}</Text>
+        <Text as="span" color="var(--pb-ink-soft)">{t('household.ticker.owesNobody')}</Text>
       )}
     </Text>
   ))
