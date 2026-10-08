@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
-import { Badge, Box, Button, Flex, HStack, Icon, Stack, Text, VisuallyHidden, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, HStack, Icon, Text, VisuallyHidden, VStack } from '@chakra-ui/react'
 import { createHouseholdSettlement } from '../../../api'
 import { useI18n } from '../../../i18n'
 import { ToastService } from '../../../services/toast'
 import type { HouseholdDashboard, HouseholdDebt, HouseholdPageState } from '../../../types'
 import { Check } from '../../../components/ui/icons'
-import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { PremiumModal } from '../../../components/ui'
+import NuModalHeader from '../../../components/ui/NuModalHeader'
 import { today } from '../householdDates'
 
+const BRAND = '#820ad1'
 const HOLD_DURATION_MS = 3_000
 const SUCCESS_FEEDBACK_MS = 900
 
@@ -30,92 +32,40 @@ export function BalancesOverviewModal({
     0,
   )
   const hasOpenBalances = household.debts.length > 0
+  const involvesYou = (debt: HouseholdDebt) =>
+    debt.fromMemberId === household.currentMemberId || debt.toMemberId === household.currentMemberId
+  // Your own balances first: they are the ones you can act on.
+  const debts = [...household.debts].sort((a, b) => Number(involvesYou(b)) - Number(involvesYou(a)))
 
   return (
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', md: 'xl' }}
+      size="full"
       contentProps={{
         className: 'nu-dashboard',
-        alignSelf: { base: 'flex-end', md: 'center' },
-        w: { base: '100%', md: 'min(640px, calc(100vw - 3rem))' },
-        maxW: { base: '100%', md: '640px' },
-        h: 'auto',
-        maxH: { base: '85dvh', md: 'min(720px, calc(100vh - 5rem))' },
-        mx: { base: 0, md: 4 },
-        mt: { base: '15dvh', md: 0 },
-        mb: 0,
-        borderRadius: { base: '28px 28px 0 0', md: '22px' },
+        w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
+        h: 'auto', maxH: { base: '85dvh', md: '80vh' },
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', overflow: 'hidden', bg: 'var(--nu-page, #ffffff)',
       }}
       header={
-        <ModalHeader
+        <NuModalHeader
           title={t('household.balances.title')}
-          caption={t('household.balances.description')}
+          caption={hasOpenBalances
+            ? t('household.balances.open', { amount: formatCurrency(outstandingTotal) })
+            : t('household.balances.allSettled')}
           onClose={onClose}
-          rightSlot={
-            <Badge
-              bg={hasOpenBalances ? 'var(--pb-tint-coral)' : 'var(--pb-tint-income)'}
-              color={hasOpenBalances ? 'var(--pb-coral)' : 'var(--pb-income)'}
-              border="1px solid var(--pb-hair)"
-              borderRadius="full"
-              px={3}
-              py={1}
-              textTransform="none"
-            >
-              {hasOpenBalances
-                ? t('household.balances.open', {
-                  amount: formatCurrency(outstandingTotal),
-                })
-                : t('household.balances.allSettled')}
-            </Badge>
-          }
         />
       }
-      footer={
-        <Flex justify="flex-end" w="full">
-          <Button
-            h="44px"
-            w={{ base: 'full', sm: 'auto' }}
-            px={5}
-            borderRadius="11px"
-            bg="var(--pb-forest-2)"
-            color="var(--pb-on-accent)"
-            onClick={onClose}
-            _hover={{ bg: 'var(--pb-forest)' }}
-          >
-            {t('household.common.close')}
-          </Button>
-        </Flex>
-      }
     >
-      <Box p={{ base: 3, sm: 4, md: 5 }} bg="var(--pb-surface-2)">
+      <Box overflowY="auto" flex={1} minH={0} bg="var(--nu-page, #ffffff)" pb="env(safe-area-inset-bottom, 0px)"
+        sx={{ WebkitOverflowScrolling: 'touch' }}>
         {!hasOpenBalances ? (
-          <VStack
-            py={9}
-            px={4}
-            spacing={3}
-            border="1px dashed var(--pb-hair-2)"
-            borderRadius="14px"
-            bg="var(--pb-surface)"
-          >
-            <Flex
-              w={11}
-              h={11}
-              align="center"
-              justify="center"
-              borderRadius="full"
-              bg="var(--pb-tint-income)"
-              color="var(--pb-income)"
-            >
-              <Icon as={Check} boxSize={5} weight="bold" />
+          <VStack py={12} px={6} spacing={3}>
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
+              <Icon as={Check} boxSize={6} weight="bold" />
             </Flex>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="lg"
-              fontWeight={500}
-              textAlign="center"
-            >
+            <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)" textAlign="center">
               {t('household.balances.everyoneSettled')}
             </Text>
             <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">
@@ -123,93 +73,51 @@ export function BalancesOverviewModal({
             </Text>
           </VStack>
         ) : (
-          <VStack align="stretch" spacing={2.5}>
-            {household.debts.map((debt) => {
+          <VStack align="stretch" spacing={0} divider={<Box h="1px" bg="var(--pb-hair)" />}>
+            {debts.map((debt) => {
               const youPay = debt.fromMemberId === household.currentMemberId
               const youReceive = debt.toMemberId === household.currentMemberId
               const accent = youPay
                 ? 'var(--pb-coral)'
                 : youReceive
                   ? 'var(--pb-income)'
-                  : 'var(--pb-ink-soft)'
-              const tint = youPay
-                ? 'var(--pb-tint-coral)'
-                : youReceive
-                  ? 'var(--pb-tint-income)'
-                  : 'var(--pb-surface)'
+                  : 'var(--pb-ink)'
 
               return (
-                <Stack
+                <Box
                   key={`${debt.fromMemberId}-${debt.toMemberId}`}
-                  direction={{ base: 'column', sm: 'row' }}
-                  align={{ base: 'stretch', sm: 'center' }}
-                  justify="space-between"
-                  gap={3}
-                  p={{ base: 3.5, sm: 4 }}
-                  borderRadius="14px"
-                  border="1px solid var(--pb-hair)"
-                  bg="var(--pb-surface)"
+                  px={{ base: 4, md: 6 }}
+                  py={3.5}
+                  bg={youPay || youReceive ? 'rgba(130, 10, 209, 0.04)' : undefined}
                 >
-                  <Box minW={0}>
-                    <HStack spacing={2} flexWrap="wrap">
-                      <Text fontWeight={700} color="var(--pb-ink)" noOfLines={1}>
+                  <Flex align="center" gap={3}>
+                    <Box minW={0} flex={1}>
+                      <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" noOfLines={1}>
                         {youPay
-                          ? t('household.balances.youOweName', {
-                            name: debt.toMemberName,
-                          })
+                          ? t('household.balances.youOweName', { name: debt.toMemberName })
                           : youReceive
-                            ? t('household.balances.owesYou', {
-                              name: debt.fromMemberName,
-                            })
-                            : t('household.balances.memberOwes', {
-                              from: debt.fromMemberName,
-                              to: debt.toMemberName,
-                            })}
+                            ? t('household.balances.owesYou', { name: debt.fromMemberName })
+                            : t('household.balances.memberOwes', { from: debt.fromMemberName, to: debt.toMemberName })}
                       </Text>
-                      {(youPay || youReceive) && (
-                        <Badge
-                          borderRadius="full"
-                          px={2}
-                          bg={tint}
-                          color={accent}
-                          textTransform="none"
-                        >
-                          {youPay
-                            ? t('household.balances.youPay')
-                            : t('household.balances.youReceive')}
-                        </Badge>
-                      )}
-                    </HStack>
-                    <Text mt={0.5} color="var(--pb-ink-faint)" fontSize="xs">
-                      {youPay
-                        ? t('household.balances.payHint')
-                        : youReceive
-                          ? t('household.balances.receiveHint')
-                          : t('household.balances.otherHint')}
-                    </Text>
-                  </Box>
-                  <HStack
-                    justify={{ base: 'space-between', sm: 'flex-end' }}
-                    spacing={3}
-                  >
-                    <Text
-                      fontFamily="var(--pb-serif)"
-                      fontSize="xl"
-                      fontWeight={500}
-                      color={accent}
-                      style={{ fontVariantNumeric: 'tabular-nums' }}
-                    >
+                      <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="xs" noOfLines={1}>
+                        {youPay
+                          ? t('household.balances.payHint')
+                          : youReceive
+                            ? t('household.balances.receiveHint')
+                            : t('household.balances.otherHint')}
+                      </Text>
+                    </Box>
+                    <Text flexShrink={0} fontSize="lg" fontWeight={800} letterSpacing="-.02em" color={accent}
+                      style={{ fontVariantNumeric: 'tabular-nums' }}>
                       {formatCurrency(debt.amount)}
                     </Text>
-                    {youPay && (
-                      <HoldToPayButton
-                        householdId={household.id}
-                        debt={debt}
-                        onChanged={onChanged}
-                      />
-                    )}
-                  </HStack>
-                </Stack>
+                  </Flex>
+                  {youPay && (
+                    <Box mt={3}>
+                      <HoldToPayButton householdId={household.id} debt={debt} onChanged={onChanged} />
+                    </Box>
+                  )}
+                </Box>
               )
             })}
           </VStack>
@@ -364,14 +272,14 @@ function HoldToPayButton({
   return (
     <>
       <Button
-        h="38px"
-        minW="132px"
-        px={3.5}
+        h="48px"
+        w="full"
+        px={5}
         position="relative"
         overflow="hidden"
-        borderRadius="10px"
-        bg={phase === 'success' ? 'var(--pb-income)' : 'var(--pb-forest-2)'}
-        color="var(--pb-on-accent)"
+        borderRadius="full"
+        bg={phase === 'success' ? 'var(--pb-income)' : BRAND}
+        color="white"
         aria-label={accessibleLabel}
         aria-busy={phase === 'saving'}
         isDisabled={phase === 'saving' || phase === 'success'}
@@ -391,7 +299,7 @@ function HoldToPayButton({
           WebkitTouchCallout: 'none',
         }}
         _hover={{
-          bg: phase === 'success' ? 'var(--pb-income)' : 'var(--pb-forest)',
+          bg: phase === 'success' ? 'var(--pb-income)' : '#6d08b0',
           transform: phase === 'idle' ? 'translateY(-1px)' : 'none',
         }}
         _disabled={{ opacity: 1, cursor: 'default' }}
