@@ -163,6 +163,10 @@ export const householdTranslations: TranslationBundle = {
     'household.paymentAlert.detail.other': 'You have {{count}} transfers to make, totalling {{amount}}.',
     'household.paymentAlert.action': 'Review',
 
+    'household.ticker.label': 'Live',
+    'household.ticker.owes': 'owes',
+    'household.ticker.to': 'to',
+    'household.ticker.allSettled': 'Everyone is settled up',
     'household.balances.eyebrow': 'Open balances',
     'household.balances.title': 'Who owes whom',
     'household.balances.description': 'Balances between housemates after recorded transfers.',
@@ -614,6 +618,10 @@ export const householdTranslations: TranslationBundle = {
     'household.paymentAlert.detail.other': 'Você tem {{count}} transferências a fazer, totalizando {{amount}}.',
     'household.paymentAlert.action': 'Revisar',
 
+    'household.ticker.label': 'Ao vivo',
+    'household.ticker.owes': 'deve',
+    'household.ticker.to': 'para',
+    'household.ticker.allSettled': 'Todo mundo está em dia',
     'household.balances.eyebrow': 'Saldos em aberto',
     'household.balances.title': 'Quem deve a quem',
     'household.balances.description': 'Saldos entre moradores após as transferências registradas.',
