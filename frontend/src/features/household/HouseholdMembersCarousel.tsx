@@ -1,7 +1,9 @@
 import { Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react'
+import { ArrowDown, ArrowUp, CheckCircle } from '@phosphor-icons/react'
 import { ChevronRight } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
+import { memberRank, PointsBadge } from './members/MembersOverviewModal'
 
 export function HouseholdMembersCarousel({ household, onViewBalances }: {
   household: HouseholdDashboard
@@ -46,7 +48,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           const receiving = member.balance > 0.005
           const paying = member.balance < -0.005
           const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
-          const tint = receiving ? 'var(--pb-tint-income)' : paying ? 'var(--pb-tint-coral)' : 'var(--pb-surface-2)'
+          const BalanceIcon = receiving ? ArrowUp : paying ? ArrowDown : CheckCircle
           const status = receiving
             ? t('household.members.toReceive')
             : paying ? t('household.members.toPay') : t('household.members.settled')
@@ -54,23 +56,30 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           return (
             <Box
               key={member.id} role="listitem"
-              flex="0 0 178px" minW="178px" px={3} py={2.5}
+              flex="0 0 200px" minW="200px" px={3} py={2.5}
               borderRadius="14px" bg="var(--pb-surface)"
               sx={{ scrollSnapAlign: 'start' }}
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
-              <HStack spacing={1.5} minW={0}>
+              <HStack spacing={1} minW={0}>
                 <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
+                <PointsBadge member={member} fontSize="sm" />
+                <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-ink-soft)">
+                  {t('household.members.rank', { rank: formatNumber(memberRank(member, household.members)) })}
+                </Text>
                 {member.id === household.currentMemberId && (
                   <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-forest)">{t('household.common.you')}</Text>
                 )}
               </HStack>
-              <HStack mt={1} spacing={2} justify="space-between">
-                <Text fontSize="md" fontWeight={700} lineHeight={1.2} color={accent} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              <HStack mt={1} spacing={1} color={accent} title={status}>
+                <BalanceIcon size={14} weight="bold" aria-hidden="true" />
+                <Text fontSize="md" fontWeight={700} lineHeight={1.2} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(Math.abs(member.balance))}
                 </Text>
-                <Text flexShrink={0} px={2} py={0.5} borderRadius="full" bg={tint} color={accent} fontSize="2xs" fontWeight={700}>{status}</Text>
               </HStack>
+              <Text mt={0.5} fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1}>
+                {t('household.members.monthSpent', { amount: formatCurrency(member.monthPaid) })}
+              </Text>
             </Box>
           )
         })}

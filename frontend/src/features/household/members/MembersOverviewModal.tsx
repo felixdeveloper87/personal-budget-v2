@@ -8,8 +8,13 @@ import NuModalHeader from '../../../components/ui/NuModalHeader'
 const BRAND = '#820ad1'
 
 /** Points: £1 spent = 1 point. */
-function points(member: HouseholdMember) {
+export function memberPoints(member: HouseholdMember) {
   return Math.round(member.totalPaid)
+}
+
+/** Ranking position by points; ties share a position (1, 1, 3). */
+export function memberRank(member: HouseholdMember, members: HouseholdMember[]) {
+  return 1 + members.filter((other) => memberPoints(other) > memberPoints(member)).length
 }
 
 export function MembersOverviewModal({
@@ -23,9 +28,6 @@ export function MembersOverviewModal({
 }) {
   const { formatNumber, t } = useI18n()
   const totalPurchases = household.members.reduce((sum, member) => sum + member.purchaseCount, 0)
-  // Ties share a position (1, 1, 3).
-  const rankOf = (member: HouseholdMember) =>
-    1 + household.members.filter((other) => points(other) > points(member)).length
 
   return (
     <PremiumModal
@@ -62,7 +64,7 @@ export function MembersOverviewModal({
               key={member.id}
               member={member}
               isCurrent={member.id === household.currentMemberId}
-              rank={rankOf(member)}
+              rank={memberRank(member, household.members)}
             />
           ))}
         </VStack>
@@ -86,7 +88,7 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
       <Box minW={0} flex={1}>
         <HStack spacing={1.5} minW={0}>
           <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
-          <PointsBadge member={member} points={points(member)} />
+          <PointsBadge member={member} />
           <Text flexShrink={0} fontWeight={700} fontSize="xs" color="var(--pb-ink-soft)">
             {t('household.members.rank', { rank: formatNumber(rank) })}
           </Text>
@@ -107,14 +109,15 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
 }
 
 /** "(243 ⓘ)" — tapping it explains the points are the total spent and drive the ranking. */
-function PointsBadge({ member, points }: { member: HouseholdMember; points: number }) {
+export function PointsBadge({ member, fontSize = 'md' }: { member: HouseholdMember; fontSize?: string }) {
   const { formatCurrency, formatNumber, t } = useI18n()
+  const points = memberPoints(member)
   return (
     <Popover placement="bottom-start" isLazy>
       <PopoverTrigger>
         <Box
           as="button" type="button" flexShrink={0} display="inline-flex" alignItems="center" gap={0.5}
-          fontWeight={800} fontSize="md" color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
+          fontWeight={800} fontSize={fontSize} color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}
           aria-label={t('household.members.pointsInfoAria')}
         >
           ({formatNumber(points)}
