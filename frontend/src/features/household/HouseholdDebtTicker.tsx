@@ -5,7 +5,7 @@ import type { HouseholdDebt, HouseholdMember } from '../../types'
 
 const BRAND = '#820ad1'
 /** Seconds each headline stays on the bar, so a longer list scrolls at the same speed. */
-const SECONDS_PER_ITEM = 7
+const SECONDS_PER_ITEM = 5
 
 /**
  * CNN-style headline bar, one headline per member: "Priscila owes Vinicius,
@@ -82,7 +82,7 @@ export function HouseholdDebtTicker({ members, debts, onOpen }: {
           <Flex
             className="household-ticker-track" pl={4} w="max-content"
             sx={{
-              animation: `householdTicker ${Math.max(15, items.length * SECONDS_PER_ITEM)}s linear infinite`,
+              animation: `householdTicker ${Math.max(10, items.length * SECONDS_PER_ITEM)}s linear infinite`,
               '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           >

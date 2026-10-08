@@ -24,7 +24,10 @@ import {
   Wallet,
   type LucideIcon,
 } from '../../components/ui/icons'
-import { ModalHeader, PremiumModal } from '../../components/ui'
+import { PremiumModal } from '../../components/ui'
+import NuModalHeader from '../../components/ui/NuModalHeader'
+
+const BRAND = '#820ad1'
 
 type NotificationAction = 'expenses' | 'payments' | 'cleaning' | null
 
@@ -165,71 +168,67 @@ export function HouseholdNotificationsModal({
   isMarkingRead,
   ...navigation
 }: HouseholdNotificationsModalProps) {
-  const ed = useEd()
   const { formatNumber, t } = useI18n()
 
   return (
     <PremiumModal
       isOpen={isOpen}
-      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
-      size={{ base: 'full', md: 'xl' }}
+      size="full"
+      contentProps={{
+        className: 'nu-dashboard',
+        w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
+        h: 'auto', maxH: { base: '85dvh', md: '80vh' },
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', overflow: 'hidden', bg: 'var(--nu-page, #ffffff)',
+      }}
       header={(
-        <ModalHeader
+        <NuModalHeader
           title={t('household.notifications.title')}
-          caption={t('household.notifications.historyCaption')}
+          caption={unreadCount > 0
+            ? t(
+              unreadCount === 1 ? 'household.notifications.unread.one' : 'household.notifications.unread.other',
+              { count: formatNumber(unreadCount) },
+            )
+            : t('household.notifications.historyCaption')}
           onClose={onClose}
-          rightSlot={unreadCount > 0 ? (
-            <Text
-              px={2.5}
-              py={1.5}
-              borderRadius="full"
-              bg="var(--pb-tint-gold)"
-              color="var(--pb-gold)"
-              fontFamily="var(--pb-mono)"
-              fontSize="9px"
-              fontWeight={700}
-            >
-              {t('household.notifications.unreadBadge', {
-                count: formatNumber(unreadCount),
-              })}
-            </Text>
-          ) : undefined}
         />
       )}
-      footer={unreadCount > 0 ? (
-        <Button
-          w="full"
-          bg="#820ad1" color="white" borderRadius="full" _hover={{ bg: '#6e08b3' }} _active={{ bg: '#6e08b3' }}
-          leftIcon={<CheckCircle2 size={17} />}
-          isLoading={isMarkingRead}
-          onClick={onMarkAllRead}
-        >
-          {t('household.notifications.markAllRead')}
-        </Button>
-      ) : undefined}
     >
-      {notifications.length > 0 ? (
-        <NotificationList notifications={notifications} {...navigation} />
-      ) : (
-        <VStack spacing={3} px={6} py={16} textAlign="center">
-          <Flex
-            w={12}
-            h={12}
-            align="center"
-            justify="center"
-            borderRadius="full"
-            bg="var(--pb-tint-green)"
-            color="var(--pb-income)"
-          >
-            <Icon as={CheckCircle2} boxSize={6} weight="duotone" />
+      <Box overflowY="auto" flex={1} minH={0} bg="var(--nu-page, #ffffff)" pb="env(safe-area-inset-bottom, 0px)"
+        sx={{ WebkitOverflowScrolling: 'touch' }}>
+        {unreadCount > 0 && (
+          <Flex justify="flex-end" px={{ base: 4, md: 6 }} py={2} borderBottom="1px solid var(--pb-hair)">
+            <Button
+              size="sm"
+              variant="ghost"
+              color={BRAND}
+              borderRadius="full"
+              fontWeight={700}
+              leftIcon={<CheckCircle2 size={15} />}
+              isLoading={isMarkingRead}
+              onClick={onMarkAllRead}
+              _hover={{ bg: '#f3e8fc' }}
+            >
+              {t('household.notifications.markAllRead')}
+            </Button>
           </Flex>
-          <Text fontWeight={800}>{t('household.notifications.emptyTitle')}</Text>
-          <Text color={ed?.muted ?? 'gray.500'} fontSize="sm">
-            {t('household.notifications.emptyDescription')}
-          </Text>
-        </VStack>
-      )}
+        )}
+        {notifications.length > 0 ? (
+          <NotificationList notifications={notifications} {...navigation} />
+        ) : (
+          <VStack spacing={3} px={6} py={12} textAlign="center">
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color={BRAND}>
+              <Icon as={CheckCircle2} boxSize={6} weight="duotone" />
+            </Flex>
+            <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
+              {t('household.notifications.emptyTitle')}
+            </Text>
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
+              {t('household.notifications.emptyDescription')}
+            </Text>
+          </VStack>
+        )}
+      </Box>
     </PremiumModal>
   )
 }
@@ -274,7 +273,6 @@ function NotificationRow({
   compact: boolean
   onOpen?: () => void
 }) {
-  const ed = useEd()
   const { formatCurrency, formatDate, t } = useI18n()
   const NotificationIcon = notificationIcon(notification.type)
   const actor = notification.actorName ?? t('household.notifications.householdActor')
@@ -307,30 +305,22 @@ function NotificationRow({
   return (
     <Flex
       gap={3}
-      align="flex-start"
-      px={{ base: 4, md: 5 }}
-      py={compact ? 3.5 : 4}
-      bg={notification.readAt == null ? 'var(--pb-surface-2)' : 'transparent'}
+      align="center"
+      px={{ base: 4, md: 6 }}
+      py={compact ? 2.5 : 3}
+      bg={notification.readAt == null ? 'rgba(130, 10, 209, 0.04)' : 'transparent'}
     >
       <Flex
-        w={9}
-        h={9}
+        w={8}
+        h={8}
         flexShrink={0}
         align="center"
         justify="center"
         borderRadius="full"
-        bg={notification.type.startsWith('SETTLEMENT_')
-          ? 'var(--pb-tint-gold)'
-          : notification.type.startsWith('EXPENSE_')
-            ? 'var(--pb-tint-coral)'
-            : 'var(--pb-tint-green)'}
-        color={notification.type.startsWith('SETTLEMENT_')
-          ? 'var(--pb-gold)'
-          : notification.type.startsWith('EXPENSE_')
-            ? 'var(--pb-coral)'
-            : 'var(--pb-income)'}
+        bg="#f3e8fc"
+        color={BRAND}
       >
-        <NotificationIcon size={18} weight="duotone" aria-hidden="true" />
+        <NotificationIcon size={16} weight="duotone" aria-hidden="true" />
       </Flex>
       <Box minW={0} flex={1}>
         <HStack spacing={2} align="flex-start">
@@ -341,15 +331,15 @@ function NotificationRow({
               h="6px"
               flexShrink={0}
               borderRadius="full"
-              bg="var(--pb-coral)"
+              bg={BRAND}
               aria-label={t('household.notifications.unreadLabel')}
             />
           )}
-          <Text color={ed?.cream ?? 'inherit'} fontSize="sm" fontWeight={notification.readAt == null ? 750 : 600}>
+          <Text color="var(--pb-ink)" fontSize="sm" lineHeight={1.35} fontWeight={notification.readAt == null ? 700 : 500}>
             {message}
           </Text>
         </HStack>
-        <Text mt={1} color={ed?.muted ?? 'gray.500'} fontSize="xs">
+        <Text mt={0.5} color="var(--pb-ink-soft)" fontSize="11px">
           {formatDate(notification.createdAt, {
             day: 'numeric',
             month: 'short',
@@ -363,8 +353,12 @@ function NotificationRow({
           size="xs"
           variant="ghost"
           flexShrink={0}
+          color={BRAND}
+          borderRadius="full"
+          fontWeight={700}
           rightIcon={<ChevronRight size={13} />}
           onClick={onOpen}
+          _hover={{ bg: '#f3e8fc' }}
         >
           {t(`household.notifications.action.${action}`)}
         </Button>
