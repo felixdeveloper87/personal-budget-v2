@@ -245,6 +245,7 @@ export const householdTranslations: TranslationBundle = {
 
     'household.settlements.eyebrow': 'Between housemates',
     'household.settlements.title': 'Transfers',
+    'household.settlements.recentTitle': 'Recent transfers',
     'household.settlements.description': 'Money sent between housemates to settle balances. Each recorded transfer updates balances immediately.',
     'household.settlements.count.one': '1 transfer',
     'household.settlements.count.other': '{{count}} transfers',
@@ -703,6 +704,7 @@ export const householdTranslations: TranslationBundle = {
 
     'household.settlements.eyebrow': 'Entre moradores',
     'household.settlements.title': 'Transferências',
+    'household.settlements.recentTitle': 'Transferências recentes',
     'household.settlements.description': 'Dinheiro enviado entre moradores para acertar saldos. Cada transferência registrada atualiza os saldos na hora.',
     'household.settlements.count.one': '1 transferência',
     'household.settlements.count.other': '{{count}} transferências',

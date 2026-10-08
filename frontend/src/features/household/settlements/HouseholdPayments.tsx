@@ -49,7 +49,7 @@ export function HouseholdPayments({
             {t('household.settlements.eyebrow')}
           </Text>
           <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">
-            {t('household.settlements.title')}
+            {t('household.settlements.recentTitle')}
           </Text>
         </Box>
 
