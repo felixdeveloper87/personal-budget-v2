@@ -7,11 +7,6 @@ import NuModalHeader from '../../../components/ui/NuModalHeader'
 
 const BRAND = '#820ad1'
 
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/)
-  return ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase()
-}
-
 export function MembersOverviewModal({
   isOpen,
   onClose,
@@ -80,18 +75,10 @@ function MemberRow({ member, isCurrent }: { member: HouseholdMember; isCurrent: 
   return (
     <Box px={{ base: 4, md: 6 }} py={4} bg={isCurrent ? 'rgba(130, 10, 209, 0.04)' : undefined}>
       <Flex align="center" gap={3}>
-        <Flex
-          w="44px" h="44px" flexShrink={0} align="center" justify="center" borderRadius="full"
-          bg={isCurrent ? BRAND : '#f3e8fc'} color={isCurrent ? 'white' : BRAND}
-          fontSize="sm" fontWeight={800} letterSpacing="-.02em"
-        >
-          {initials(member.name)}
-        </Flex>
         <Box minW={0} flex={1}>
           <HStack spacing={1.5} minW={0}>
             <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
             {isCurrent && <Tag>{t('household.common.you')}</Tag>}
-            {member.role === 'OWNER' && <Tag>{t('household.common.owner')}</Tag>}
           </HStack>
           <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
             {member.lastPurchaseDate
@@ -116,7 +103,7 @@ function MemberRow({ member, isCurrent }: { member: HouseholdMember; isCurrent: 
         </Box>
       </Flex>
 
-      <Box mt={3} pl={{ base: 0, sm: '56px' }}>
+      <Box mt={3}>
         <SimpleGrid columns={3} spacing={2}>
           <Stat label={t('household.members.paid')} value={formatCurrency(member.totalPaid)} />
           <Stat label={t('household.members.assignedShare')} value={formatCurrency(member.totalShare)} />
