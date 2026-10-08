@@ -242,7 +242,12 @@ public class BusinessService {
         BigDecimal dailyCost = workingDays > 0
                 ? spend.add(maintenance).divide(BigDecimal.valueOf(workingDays), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
-        return new CostBasis(COST_CATEGORY, windowFrom, windowTo, spend, maintenance, workingDays, dailyCost);
+        BigDecimal months = BigDecimal.valueOf(COST_WINDOW_MONTHS);
+        return new CostBasis(COST_CATEGORY, windowFrom, windowTo, spend, maintenance, workingDays,
+                spend.divide(months, 2, RoundingMode.HALF_UP),
+                maintenance.divide(months, 2, RoundingMode.HALF_UP),
+                BigDecimal.valueOf(workingDays).divide(months, 1, RoundingMode.HALF_UP),
+                dailyCost);
     }
 
     /**

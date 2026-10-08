@@ -321,11 +321,11 @@ export default function BusinessPage() {
                     {summary.costBasis.workingDays > 0
                       ? t('business.costLine', {
                         cost: formatCurrency(summary.costBasis.dailyCost),
-                        total: formatCurrency(summary.costBasis.windowSpend + summary.costBasis.windowMaintenance),
-                        spend: formatCurrency(summary.costBasis.windowSpend),
-                        maintenance: formatCurrency(summary.costBasis.windowMaintenance),
+                        total: formatCurrency(summary.costBasis.monthlySpend + summary.costBasis.monthlyMaintenance),
+                        spend: formatCurrency(summary.costBasis.monthlySpend),
+                        maintenance: formatCurrency(summary.costBasis.monthlyMaintenance),
                         months: `${formatDate(dateFromKey(summary.costBasis.windowFrom), { month: 'short' })}–${formatDate(dateFromKey(summary.costBasis.windowTo), { month: 'short' })}`,
-                        days: summary.costBasis.workingDays,
+                        days: summary.costBasis.monthlyWorkingDays,
                       })
                       : t('business.costLineEmpty', { category: categoryLabel(summary.costBasis.category) })}
                   </Text>

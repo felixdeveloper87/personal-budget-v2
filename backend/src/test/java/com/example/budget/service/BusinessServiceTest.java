@@ -149,6 +149,9 @@ class BusinessServiceTest {
         assertThat(basis.windowMaintenance()).isEqualByComparingTo("256.07");
         assertThat(basis.workingDays()).isEqualTo(60);
         assertThat(basis.dailyCost()).isEqualByComparingTo("25.20");
+        assertThat(basis.monthlySpend()).isEqualByComparingTo("418.67");
+        assertThat(basis.monthlyMaintenance()).isEqualByComparingTo("85.36");
+        assertThat(basis.monthlyWorkingDays()).isEqualByComparingTo("20");
     }
 
     @Test

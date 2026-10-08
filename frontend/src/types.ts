@@ -671,6 +671,10 @@ export interface BusinessCostBasis {
   /** Estimated tyres/brake pads/general upkeep for the window (not recorded spend). */
   windowMaintenance: number
   workingDays: number
+  /** windowSpend, windowMaintenance and workingDays averaged per month of the window. */
+  monthlySpend: number
+  monthlyMaintenance: number
+  monthlyWorkingDays: number
   dailyCost: number
 }
 

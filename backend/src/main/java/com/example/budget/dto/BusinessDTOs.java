@@ -58,8 +58,10 @@ public final class BusinessDTOs {
             BigDecimal profitRate) {}
 
     /**
-     * How the daily cost is worked out: spend in the cost category over the last
-     * three complete months, divided by the days with earnings in that window.
+     * How the daily cost is worked out: running-cost spend plus the maintenance
+     * allowance over the last three complete months, divided by the days with
+     * earnings in that window. The monthly fields are the same figures averaged
+     * per month, for display.
      */
     public record CostBasis(
             String category,
@@ -68,6 +70,9 @@ public final class BusinessDTOs {
             BigDecimal windowSpend,
             BigDecimal windowMaintenance,
             int workingDays,
+            BigDecimal monthlySpend,
+            BigDecimal monthlyMaintenance,
+            BigDecimal monthlyWorkingDays,
             BigDecimal dailyCost) {}
 
     public record Summary(
