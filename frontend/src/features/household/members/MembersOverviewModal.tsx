@@ -78,6 +78,10 @@ function MemberRow({ member, isCurrent }: { member: HouseholdMember; isCurrent: 
         <Box minW={0} flex={1}>
           <HStack spacing={1.5} minW={0}>
             <Text fontWeight={700} fontSize="md" color="var(--pb-ink)" noOfLines={1}>{member.name}</Text>
+            {/* Points: £1 spent = 1 point. */}
+            <Text flexShrink={0} fontWeight={800} fontSize="md" color={BRAND} style={{ fontVariantNumeric: 'tabular-nums' }}>
+              ({formatNumber(Math.round(member.totalPaid))})
+            </Text>
             {isCurrent && <Tag>{t('household.common.you')}</Tag>}
           </HStack>
           <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)" noOfLines={1}>
