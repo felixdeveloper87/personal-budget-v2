@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class HouseholdCleaningService {
-    private static final int UPCOMING_WEEK_COUNT = 3;
+    private static final int UPCOMING_WEEK_COUNT = 4;
     private static final List<CleaningDutyDefinition> DUTIES = List.of(
             new CleaningDutyDefinition("shower_room", "Clean the shower room", null),
             new CleaningDutyDefinition("toilet_wc", "Clean the toilet / WC", null),

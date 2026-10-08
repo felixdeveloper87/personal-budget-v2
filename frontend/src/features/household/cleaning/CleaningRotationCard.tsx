@@ -1,10 +1,14 @@
-import { Box, Button, Flex, HStack, Icon, IconButton, Text, useDisclosure } from '@chakra-ui/react'
-import { Check, Gear } from '../../../components/ui/icons'
+import { Box, Button, Flex, HStack, Icon, IconButton, Text, useDisclosure, VStack } from '@chakra-ui/react'
+import { Broom, Gear } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
 import { CleaningDutiesModal } from './CleaningDutiesModal'
 import { CLEANING_DUTIES, type DisplayedCleaningDuty } from './cleaningConfig'
+
+/** Light turquoise for the cleaning icons on the "next" rows. */
+const TURQUOISE = '#14b8a6'
+const TURQUOISE_TINT = '#d5f5f1'
 
 export function CleaningRotationCard({
   rotation,
@@ -25,12 +29,11 @@ export function CleaningRotationCard({
   const dutiesModal = useDisclosure()
   const current = rotation.currentWeek
   const next = rotation.upcomingWeeks[0]
-  const upcoming = rotation.upcomingWeeks.slice(0, 3).map((week) => ({
+  const upcoming = rotation.upcomingWeeks.slice(0, 4).map((week) => ({
     weekStart: week.weekStart,
     name: week.assignedMemberId === currentMemberId ? t('household.common.you') : week.assignedMemberName,
   }))
   const currentIsUser = current?.assignedMemberId === currentMemberId
-  const currentIsComplete = current?.status === 'COMPLETED'
   const displayedDuties: DisplayedCleaningDuty[] = current?.duties?.length
     ? current.duties.map((duty) => ({ ...duty, timed: duty.key === 'rubbish_out' }))
     : CLEANING_DUTIES.map((duty) => ({
@@ -40,7 +43,6 @@ export function CleaningRotationCard({
       canToggle: false,
       completedAt: null,
     }))
-  const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
   const displayDate = (value: string) => formatDate(value, { day: 'numeric', month: 'short' })
 
   const emptyTitle = !rotation.configured
@@ -97,62 +99,39 @@ export function CleaningRotationCard({
           </HStack>
         </Flex>
 
-        <Box p={4} borderRadius="18px" bg="var(--pb-surface)">
-          {rotation.configured && rotation.active && current ? (
-            <Box>
-              <HStack spacing={3} minW={0}>
-                <Box minW={0} flex={1}>
-                  <Text fontSize="xs" color="var(--pb-ink-soft)">
-                    {currentIsUser ? t('household.cleaning.yourWeek') : t('household.cleaning.onDuty')}
-                    {' · '}
-                    {displayDate(current.weekStart)} – {displayDate(current.weekEnd)}
-                  </Text>
-                  <Text mt={0.5} fontSize="lg" fontWeight={700} lineHeight={1.15} color="var(--pb-ink)" noOfLines={1}>
-                    {current.assignedMemberName}
-                  </Text>
-                </Box>
-                <HStack
-                  flexShrink={0} spacing={1} px={2.5} py={1} borderRadius="full" aria-live="polite"
-                  bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--nu-brand-tint)'}
-                  color={currentIsComplete ? 'var(--pb-income)' : 'var(--nu-brand)'}
-                >
-                  {currentIsComplete && <Icon as={Check} boxSize={3} weight="bold" />}
-                  <Text fontSize="xs" fontWeight={700}>
-                    {t('household.cleaning.progress', {
-                      completed: formatNumber(completedDutyCount),
-                      total: formatNumber(displayedDuties.length),
-                    })}
-                  </Text>
-                </HStack>
-              </HStack>
+        {rotation.configured && rotation.active && current ? (
+          <VStack
+            align="stretch" spacing={0} borderRadius="18px" bg="var(--pb-surface)" overflow="hidden"
+            divider={<Box h="1px" bg="var(--pb-hair)" />}
+          >
+            {/* This week: name, "This week", dates. */}
+            <Box px={4} py={3}>
+              <Text fontSize="lg" fontWeight={700} lineHeight={1.15} color="var(--pb-ink)" noOfLines={1}>
+                {currentIsUser ? t('household.common.you') : current.assignedMemberName}
+              </Text>
+              <Text mt={0.5} fontSize="xs" color="var(--pb-ink-soft)">
+                {t('household.cleaning.thisWeek')}
+                {' · '}
+                {displayDate(current.weekStart)} – {displayDate(current.weekEnd)}
+              </Text>
             </Box>
-          ) : (
-            <Box>
-              <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">{emptyTitle}</Text>
-              <Text mt={1.5} fontSize="sm" lineHeight={1.55} color="var(--pb-ink-soft)">{emptyDescription}</Text>
-            </Box>
-          )}
-
-          {rotation.configured && rotation.active && upcoming.length > 0 && (
-            <Box mt={3.5} pt={3} borderTop="1px solid var(--pb-hair)">
-              <Text fontSize="xs" fontWeight={700} color="var(--pb-ink-soft)">{t('household.cleaning.comingNext')}</Text>
-              <HStack
-                mt={1.5} spacing={5} align="stretch" overflowX="auto" role="list"
-                aria-label={t('household.cleaning.comingNext')}
-                sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
-              >
-                {upcoming.map((week) => (
-                  <Box
-                    key={week.weekStart} role="listitem" flex="0 0 auto" maxW="160px" sx={{ scrollSnapAlign: 'start' }}
-                  >
-                    <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{week.name}</Text>
-                    <Text fontSize="xs" color="var(--pb-ink-soft)">{displayDate(week.weekStart)}</Text>
-                  </Box>
-                ))}
-              </HStack>
-            </Box>
-          )}
-        </Box>
+            {/* Next people, one line each, like the recent activity. */}
+            {upcoming.map((week) => (
+              <Flex key={week.weekStart} align="center" gap={2.5} px={3} py={2}>
+                <Flex w="28px" h="28px" flexShrink={0} align="center" justify="center" borderRadius="full" bg={TURQUOISE_TINT} color={TURQUOISE}>
+                  <Broom size={15} weight="duotone" aria-hidden="true" />
+                </Flex>
+                <Text flex={1} minW={0} fontSize="sm" fontWeight={600} color="var(--pb-ink)" noOfLines={1}>{week.name}</Text>
+                <Text flexShrink={0} fontSize="xs" color="var(--pb-ink-faint)">{displayDate(week.weekStart)}</Text>
+              </Flex>
+            ))}
+          </VStack>
+        ) : (
+          <Box p={4} borderRadius="18px" bg="var(--pb-surface)">
+            <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">{emptyTitle}</Text>
+            <Text mt={1.5} fontSize="sm" lineHeight={1.55} color="var(--pb-ink-soft)">{emptyDescription}</Text>
+          </Box>
+        )}
       </Box>
 
       <CleaningDutiesModal
