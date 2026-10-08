@@ -1,9 +1,10 @@
 import { useMemo } from 'react'
-import { Badge, Box, Button, Flex, Icon, SimpleGrid, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Flex, Icon, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdExpense } from '../../../types'
 import { Plus, ReceiptText } from '../../../components/ui/icons'
-import { ModalHeader, PremiumModal } from '../../../components/ui'
+import { PremiumModal } from '../../../components/ui'
+import NuModalHeader from '../../../components/ui/NuModalHeader'
 import { ExpenseCard } from './ExpenseCard'
 
 export function RecentExpensesModal({
@@ -36,126 +37,77 @@ export function RecentExpensesModal({
   return (
     <PremiumModal
       isOpen={isOpen}
-      contentProps={{ className: 'nu-dashboard' }}
       onClose={onClose}
-      size={{ base: 'full', md: '2xl' }}
+      size="full"
+      contentProps={{
+        className: 'nu-dashboard',
+        w: { base: '100%', md: 'min(640px, calc(100vw - 32px))' }, maxW: '640px',
+        h: 'auto', maxH: { base: '85dvh', md: '80vh' },
+        mt: 'auto', mb: 0, mx: 'auto', borderRadius: '32px 32px 0 0', overflow: 'hidden', bg: 'var(--nu-page, #ffffff)',
+      }}
       header={
-        <ModalHeader
+        <NuModalHeader
           title={t('household.expenses.title')}
-          caption={t('household.expenses.description')}
+          caption={t(
+            household.expenses.length === 1 ? 'household.expenses.count.one' : 'household.expenses.count.other',
+            { count: formatNumber(household.expenses.length) },
+          )}
           onClose={onClose}
-          rightSlot={
-            <Badge
-              bg="var(--pb-tint-green)"
-              color="var(--pb-forest-2)"
-              border="1px solid var(--pb-hair)"
-              borderRadius="full"
-              px={3}
-              py={1}
-              textTransform="none"
-            >
-              {t(
-                household.expenses.length === 1
-                  ? 'household.expenses.count.one'
-                  : 'household.expenses.count.other',
-                { count: formatNumber(household.expenses.length) },
-              )}
-            </Badge>
-          }
         />
       }
-      footer={
-        <Flex justify="flex-end" w="full">
-          <Button
-            h="44px"
-            w={{ base: 'full', sm: 'auto' }}
-            px={5}
-            borderRadius="11px"
-            bg="var(--pb-forest-2)"
-            color="var(--pb-on-accent)"
-            onClick={onClose}
-            _hover={{ bg: 'var(--pb-forest)' }}
-          >
-            {t('household.common.close')}
-          </Button>
-        </Flex>
-      }
     >
-      <Box p={{ base: 3, sm: 4, md: 5 }} bg="var(--pb-surface-2)">
+      <Box overflowY="auto" flex={1} minH={0} bg="var(--nu-page, #ffffff)" pb="env(safe-area-inset-bottom, 0px)"
+        sx={{ WebkitOverflowScrolling: 'touch' }}>
         {household.expenses.length === 0 ? (
-          <VStack
-            py={9}
-            px={4}
-            spacing={3}
-            border="1px dashed var(--pb-hair-2)"
-            borderRadius="14px"
-            bg="var(--pb-surface)"
-          >
-            <Flex
-              w={11}
-              h={11}
-              align="center"
-              justify="center"
-              borderRadius="full"
-              bg="var(--pb-tint-green)"
-              color="var(--pb-forest-2)"
-            >
+          <VStack py={12} px={6} spacing={3} textAlign="center">
+            <Flex w="56px" h="56px" align="center" justify="center" borderRadius="full" bg="#f3e8fc" color="#820ad1">
               <Icon as={ReceiptText} boxSize={6} weight="duotone" />
             </Flex>
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="lg"
-              fontWeight={500}
-              textAlign="center"
-            >
+            <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" color="var(--pb-ink)">
               {t('household.expenses.emptyTitle')}
             </Text>
-            <Text color="var(--pb-ink-soft)" fontSize="sm" textAlign="center">
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
               {t('household.expenses.emptyDescription')}
             </Text>
             <Button
-              h="40px"
+              h="44px" px={5} borderRadius="full" bg="#820ad1" color="white"
               leftIcon={<Icon as={Plus} boxSize={4} />}
-              bg="var(--pb-forest-2)"
-              color="var(--pb-on-accent)"
               onClick={onAddExpense}
-              _hover={{ bg: 'var(--pb-forest)' }}
+              _hover={{ bg: '#6d08b0' }}
             >
               {t('household.expenses.addFirst')}
             </Button>
           </VStack>
         ) : (
-          <VStack spacing={6} align="stretch">
-            {expensesByMonth.map(([monthKey, expenses]) => {
-              const [year, month] = monthKey.split('-')
-              const monthDate = new Date(Number(year), Number(month) - 1, 1)
-              const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+          expensesByMonth.map(([monthKey, expenses]) => {
+            const [year, month] = monthKey.split('-')
+            const monthDate = new Date(Number(year), Number(month) - 1, 1)
+            const monthLabel = formatDate(monthDate, { month: 'long', year: 'numeric' })
+            const monthTotal = expenses.reduce((total, expense) => total + expense.amount, 0)
 
-              return (
-                <Box key={monthKey}>
-                  <Text
-                    fontSize="xs"
-                    fontWeight={700}
-                    color="var(--pb-ink-faint)"
-                    mb={3}
-                  >
-                    {monthLabel}
-                  </Text>
-                  <SimpleGrid columns={{ base: 1, md: 2 }} spacing={3}>
-                    {expenses.map((expense) => (
-                      <ExpenseCard
-                        key={expense.id}
-                        expense={expense}
-                        household={household}
-                        onEditExpense={onEditExpense}
-                        onOpenAttachments={onOpenAttachments}
-                      />
-                    ))}
-                  </SimpleGrid>
-                </Box>
-              )
-            })}
-          </VStack>
+            return (
+              <Box key={monthKey}>
+                <Flex
+                  px={{ base: 4, md: 6 }} pt={3} pb={1} align="center" justify="space-between"
+                  fontSize="11px" fontWeight={700} letterSpacing=".04em" textTransform="uppercase" color="var(--pb-ink-faint)"
+                >
+                  <Text>{monthLabel}</Text>
+                  <Text style={{ fontVariantNumeric: 'tabular-nums' }}>{formatCurrency(monthTotal)}</Text>
+                </Flex>
+                <VStack align="stretch" spacing={0} divider={<Box h="1px" bg="var(--pb-hair)" />}>
+                  {expenses.map((expense) => (
+                    <ExpenseCard
+                      key={expense.id}
+                      expense={expense}
+                      household={household}
+                      onEditExpense={onEditExpense}
+                      onOpenAttachments={onOpenAttachments}
+                    />
+                  ))}
+                </VStack>
+              </Box>
+            )
+          })
         )}
       </Box>
     </PremiumModal>
