@@ -1,5 +1,4 @@
-import { Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react'
-import { ChevronRight } from '../../components/ui/icons'
+import { Box, Flex, HStack, Text } from '@chakra-ui/react'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
 import { memberRank, PointsBadge } from './members/MembersOverviewModal'
@@ -19,24 +18,14 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
 
   return (
     <Box id="household-members" scrollMarginTop="90px">
-      <Flex align="center" justify="space-between" gap={3}>
-        <Box minW={0}>
-          <Text fontSize="xs" color="var(--pb-ink-soft)">
-            {t('household.members.eyebrow')}
-          </Text>
-          <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">
-            {t('household.members.title')}
-          </Text>
-        </Box>
-        <Button
-          flexShrink={0} minH="44px" px={{ base: 3, md: 4 }} borderRadius="13px"
-          bg="var(--pb-tint-green)" color="var(--pb-forest-2)" rightIcon={<Icon as={ChevronRight} boxSize={4} />}
-          aria-label={t('household.balances.openAria')} onClick={onViewBalances}
-          _hover={{ bg: 'var(--pb-surface-3)', transform: 'translateY(-1px)' }} _active={{ transform: 'translateY(0)' }}
-        >
-          {t('household.balances.title')}
-        </Button>
-      </Flex>
+      <Box minW={0}>
+        <Text fontSize="xs" color="var(--pb-ink-soft)">
+          {t('household.members.eyebrow')}
+        </Text>
+        <Text mt={1} fontFamily="var(--pb-serif)" fontSize={{ base: 'xl', md: '2xl' }} fontWeight={600} lineHeight={1.1} color="var(--pb-ink)">
+          {t('household.members.title')}
+        </Text>
+      </Box>
       <Text mt={1.5} fontSize="xs" color="var(--pb-ink-soft)">{t('household.members.description')}</Text>
 
       <HStack
