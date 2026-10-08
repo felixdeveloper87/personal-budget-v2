@@ -369,7 +369,7 @@ export function DashboardScreen() {
                 <Text style={styles.retryText}>Try again</Text>
               </Pressable>
             </View>
-          ) : summary ? (
+          ) : summary ? (°
             <View style={styles.section}>
               <View style={styles.sectionHeadingRow}>
                 <Text style={styles.sectionHeading}>Net this month</Text>
