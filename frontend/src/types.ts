@@ -458,6 +458,11 @@ export interface HouseholdMember {
   totalPaid: number
   totalShare: number
   balance: number
+  /** Purchases this member posted as payer (all time). */
+  purchaseCount: number
+  lastPurchaseDate: string | null
+  /** What this member paid for the household in the current month. */
+  monthPaid: number
 }
 
 export interface HouseholdMemberInvitation {

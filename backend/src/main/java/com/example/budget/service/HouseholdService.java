@@ -432,6 +432,18 @@ public class HouseholdService {
             paid.computeIfPresent(expense.getPayer().getId(), (id, value) ->
                     value.add(expense.getAmount()));
         }
+        Map<Long, Integer> purchaseCounts = new HashMap<>();
+        Map<Long, LocalDate> lastPurchase = new HashMap<>();
+        Map<Long, BigDecimal> monthPaid = zeroMap(members);
+        for (HouseholdExpense expense : state.expenses()) {
+            Long payerId = expense.getPayer().getId();
+            purchaseCounts.merge(payerId, 1, Integer::sum);
+            lastPurchase.merge(payerId, expense.getExpenseDate(),
+                    (a, b) -> a.isAfter(b) ? a : b);
+            if (YearMonth.from(expense.getExpenseDate()).equals(currentMonth)) {
+                monthPaid.computeIfPresent(payerId, (id, value) -> value.add(expense.getAmount()));
+            }
+        }
         for (HouseholdExpenseShare share : activeShares) {
             assigned.computeIfPresent(share.getMember().getId(), (id, value) ->
                     value.add(share.getAmount()));
@@ -452,7 +464,10 @@ public class HouseholdService {
                         member.getRole().name(),
                         amount(paid.get(member.getId())),
                         amount(assigned.get(member.getId())),
-                        amount(balances.get(member.getId()))))
+                        amount(balances.get(member.getId())),
+                        purchaseCounts.getOrDefault(member.getId(), 0),
+                        lastPurchase.get(member.getId()),
+                        amount(monthPaid.get(member.getId()))))
                 .toList();
 
         List<HouseholdPageDTO.MemberInvitation> memberInvitationDTOs =

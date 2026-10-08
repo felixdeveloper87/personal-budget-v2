@@ -42,7 +42,12 @@ public record HouseholdPageDTO(
             String role,
             BigDecimal totalPaid,
             BigDecimal totalShare,
-            BigDecimal balance
+            BigDecimal balance,
+            /** Purchases this member posted as payer (all time, voided ones excluded). */
+            int purchaseCount,
+            LocalDate lastPurchaseDate,
+            /** What this member paid for the household in the current month. */
+            BigDecimal monthPaid
     ) {}
 
     public record MemberInvitation(
