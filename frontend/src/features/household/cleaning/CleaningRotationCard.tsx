@@ -140,14 +140,13 @@ export function CleaningRotationCard({
             <Box mt={3.5} pt={3} borderTop="1px solid var(--pb-hair)">
               <Text fontSize="xs" fontWeight={700} color="var(--pb-ink-soft)">{t('household.cleaning.comingNext')}</Text>
               <HStack
-                mt={2} spacing={2} align="stretch" overflowX="auto" role="list"
+                mt={1.5} spacing={5} align="stretch" overflowX="auto" role="list"
                 aria-label={t('household.cleaning.comingNext')}
                 sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
               >
                 {upcoming.map((week) => (
                   <Box
-                    key={week.weekStart} role="listitem" flex="0 0 auto" minW="128px" maxW="180px" px={3} py={2}
-                    borderRadius="12px" bg="var(--nu-brand-tint)" sx={{ scrollSnapAlign: 'start' }}
+                    key={week.weekStart} role="listitem" flex="0 0 auto" maxW="160px" sx={{ scrollSnapAlign: 'start' }}
                   >
                     <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1}>{week.name}</Text>
                     <Text fontSize="xs" color="var(--pb-ink-soft)">{displayDate(week.weekStart)}</Text>
