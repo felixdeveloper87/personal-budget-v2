@@ -11,11 +11,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
   const ranked = household.members
     .map((member) => ({ member, rank: memberRank(member, household.members) }))
     .sort((a, b) => a.rank - b.rank)
-  const balanceAccent = (balance: number) =>
-    balance > 0.005 ? 'var(--pb-income)' : balance < -0.005 ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
-  const balanceStatus = (balance: number) => t(balance > 0.005
-    ? 'household.members.toReceive'
-    : balance < -0.005 ? 'household.members.toPay' : 'household.members.settled')
   const rankBadge = (rank: number) => (
     <Flex
       w="26px" h="26px" flexShrink={0} align="center" justify="center" borderRadius="full"
@@ -53,15 +48,10 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
         {ranked.map(({ member, rank }) => (
           <Flex
             key={member.id} role="listitem" align="center" gap={2.5} px={3} py={2.5}
-            aria-label={`${member.name}. ${balanceStatus(member.balance)}: ${formatCurrency(Math.abs(member.balance))}`}
           >
             {rankBadge(rank)}
             <Text flex={1} fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
             <PointsBadge member={member} fontSize="2xs" variant="pill" />
-            <Text flexShrink={0} minW="64px" textAlign="right" color={balanceAccent(member.balance)} fontSize="md" fontWeight={800}
-              letterSpacing="-.02em" style={{ fontVariantNumeric: 'tabular-nums' }}>
-              {formatCurrency(Math.abs(member.balance))}
-            </Text>
           </Flex>
         ))}
       </VStack>
@@ -73,28 +63,19 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
         sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', '&::-webkit-scrollbar': { display: 'none' } }}
       >
         {ranked.map(({ member, rank }) => {
-          const accent = balanceAccent(member.balance)
-          const status = balanceStatus(member.balance)
-
           return (
             <Box
               key={member.id} role="listitem"
               flex="0 0 220px" minW="220px" px={3.5} py={3}
               borderRadius="18px" bg="var(--pb-surface)"
               sx={{ scrollSnapAlign: 'start' }}
-              aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
               <Flex align="center" gap={2} minW={0}>
                 {rankBadge(rank)}
                 <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
               </Flex>
 
-              <Text mt={1.5} color={accent} fontSize="xl" fontWeight={800} letterSpacing="-.02em" lineHeight={1.15}
-                style={{ fontVariantNumeric: 'tabular-nums' }}>
-                {formatCurrency(Math.abs(member.balance))}
-              </Text>
-
-              <Flex mt={2} pt={2} borderTop="1px solid var(--pb-hair)" align="center" justify="space-between" gap={2}>
+              <Flex mt={2.5} pt={2} borderTop="1px solid var(--pb-hair)" align="center" justify="space-between" gap={2}>
                 <Text fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1} minW={0}>
                   {t('household.members.monthSpentShort', { amount: formatCurrency(member.monthPaid) })}
                 </Text>
