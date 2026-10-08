@@ -1,4 +1,4 @@
-import { Box, Flex, HStack, Text } from '@chakra-ui/react'
+import { Box, Flex, HStack, Text, VStack } from '@chakra-ui/react'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
 import { memberRank, PointsBadge } from './members/MembersOverviewModal'
@@ -8,6 +8,22 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
   onViewBalances: () => void
 }) {
   const { formatCurrency, formatNumber, t } = useI18n()
+  const ranked = household.members
+    .map((member) => ({ member, rank: memberRank(member, household.members) }))
+    .sort((a, b) => a.rank - b.rank)
+  const balanceAccent = (balance: number) =>
+    balance > 0.005 ? 'var(--pb-income)' : balance < -0.005 ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
+  const balanceStatus = (balance: number) => t(balance > 0.005
+    ? 'household.members.toReceive'
+    : balance < -0.005 ? 'household.members.toPay' : 'household.members.settled')
+  const rankBadge = (rank: number) => (
+    <Flex
+      w="26px" h="26px" flexShrink={0} align="center" justify="center" borderRadius="full"
+      bg="#f3e8fc" color="#820ad1" fontSize="11px" fontWeight={800}
+    >
+      {t('household.members.rank', { rank: formatNumber(rank) })}
+    </Flex>
+  )
   const debtsYouOwe = household.debts.filter((debt) => debt.fromMemberId === household.currentMemberId)
   const totalYouOwe = debtsYouOwe.reduce((total, debt) => total + debt.amount, 0)
   const alertTitle = t(debtsYouOwe.length === 1 ? 'household.paymentAlert.title.one' : 'household.paymentAlert.title.other')
@@ -27,18 +43,38 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
       </Box>
       <Text mt={1.5} fontSize="xs" color="var(--pb-ink-soft)">{t('household.members.description')}</Text>
 
+      {/* Mobile: one line per member, in ranking order. */}
+      <VStack
+        display={{ base: 'flex', md: 'none' }} mt={3.5} spacing={0} align="stretch"
+        borderRadius="18px" bg="var(--pb-surface)" overflow="hidden"
+        divider={<Box h="1px" bg="var(--pb-hair)" />}
+        role="list" aria-label={t('household.members.title')}
+      >
+        {ranked.map(({ member, rank }) => (
+          <Flex
+            key={member.id} role="listitem" align="center" gap={2.5} px={3} py={2.5}
+            aria-label={`${member.name}. ${balanceStatus(member.balance)}: ${formatCurrency(Math.abs(member.balance))}`}
+          >
+            {rankBadge(rank)}
+            <Text flex={1} fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
+            <PointsBadge member={member} fontSize="2xs" variant="pill" />
+            <Text flexShrink={0} minW="64px" textAlign="right" color={balanceAccent(member.balance)} fontSize="md" fontWeight={800}
+              letterSpacing="-.02em" style={{ fontVariantNumeric: 'tabular-nums' }}>
+              {formatCurrency(Math.abs(member.balance))}
+            </Text>
+          </Flex>
+        ))}
+      </VStack>
+
       <HStack
+        display={{ base: 'none', md: 'flex' }}
         mt={3.5} pb={1.5} spacing={2.5} align="stretch" overflowX="auto" overflowY="hidden"
         role="list" aria-label={t('household.members.title')}
         sx={{ scrollSnapType: 'x mandatory', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch', '&::-webkit-scrollbar': { display: 'none' } }}
       >
-        {household.members.map((member) => {
-          const receiving = member.balance > 0.005
-          const paying = member.balance < -0.005
-          const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
-          const status = receiving
-            ? t('household.members.toReceive')
-            : paying ? t('household.members.toPay') : t('household.members.settled')
+        {ranked.map(({ member, rank }) => {
+          const accent = balanceAccent(member.balance)
+          const status = balanceStatus(member.balance)
 
           return (
             <Box
@@ -49,12 +85,7 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
               aria-label={`${member.name}. ${status}: ${formatCurrency(Math.abs(member.balance))}`}
             >
               <Flex align="center" gap={2} minW={0}>
-                <Flex
-                  w="26px" h="26px" flexShrink={0} align="center" justify="center" borderRadius="full"
-                  bg="#f3e8fc" color="#820ad1" fontSize="11px" fontWeight={800}
-                >
-                  {t('household.members.rank', { rank: formatNumber(memberRank(member, household.members)) })}
-                </Flex>
+                {rankBadge(rank)}
                 <Text fontSize="sm" fontWeight={700} color="var(--pb-ink)" noOfLines={1} minW={0}>{member.name}</Text>
               </Flex>
 
