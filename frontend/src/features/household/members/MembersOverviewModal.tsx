@@ -1,5 +1,5 @@
-import { Box, Flex, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger, Text, VStack } from '@chakra-ui/react'
-import { ArrowDown, ArrowUp, CheckCircle, Info } from '@phosphor-icons/react'
+import { Box, Flex, HStack, Popover, PopoverArrow, PopoverBody, PopoverContent, PopoverTrigger, Portal, Text, VStack } from '@chakra-ui/react'
+import { Info } from '@phosphor-icons/react'
 import { useI18n } from '../../../i18n'
 import type { HouseholdDashboard, HouseholdMember } from '../../../types'
 import { PremiumModal } from '../../../components/ui'
@@ -78,7 +78,6 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
   const isReceiving = member.balance > 0.005
   const isPaying = member.balance < -0.005
   const accent = isReceiving ? 'var(--pb-income)' : isPaying ? 'var(--pb-coral)' : 'var(--pb-ink-faint)'
-  const BalanceIcon = isReceiving ? ArrowUp : isPaying ? ArrowDown : CheckCircle
   const balanceLabel = t(
     isReceiving ? 'household.members.toReceive' : isPaying ? 'household.members.toPay' : 'household.members.settled',
   )
@@ -98,12 +97,12 @@ function MemberRow({ member, isCurrent, rank }: { member: HouseholdMember; isCur
           {t('household.members.monthSpent', { amount: formatCurrency(member.monthPaid) })}
         </Text>
       </Box>
-      <HStack spacing={1} flexShrink={0} color={accent} title={balanceLabel}>
-        <BalanceIcon size={16} weight="bold" aria-label={balanceLabel} />
-        <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" style={{ fontVariantNumeric: 'tabular-nums' }}>
+      <Box flexShrink={0} textAlign="right" color={accent}>
+        <Text fontSize="lg" fontWeight={800} letterSpacing="-.02em" lineHeight={1.2} style={{ fontVariantNumeric: 'tabular-nums' }}>
           {formatCurrency(Math.abs(member.balance))}
         </Text>
-      </HStack>
+        <Text fontSize="11px" fontWeight={700}>{balanceLabel}</Text>
+      </Box>
     </Flex>
   )
 }
@@ -124,6 +123,7 @@ export function PointsBadge({ member, fontSize = 'md' }: { member: HouseholdMemb
           <Info size={13} weight="bold" aria-hidden="true" />)
         </Box>
       </PopoverTrigger>
+      <Portal>
       <PopoverContent w="260px" borderRadius="16px" borderColor="var(--pb-hair)" boxShadow="0 12px 32px -12px rgba(0,0,0,.25)">
         <PopoverArrow />
         <PopoverBody px={4} py={3}>
@@ -132,6 +132,7 @@ export function PointsBadge({ member, fontSize = 'md' }: { member: HouseholdMemb
           </Text>
         </PopoverBody>
       </PopoverContent>
+      </Portal>
     </Popover>
   )
 }

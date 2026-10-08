@@ -1,5 +1,4 @@
 import { Box, Button, Flex, HStack, Icon, Text } from '@chakra-ui/react'
-import { ArrowDown, ArrowUp, CheckCircle } from '@phosphor-icons/react'
 import { ChevronRight } from '../../components/ui/icons'
 import { useI18n } from '../../i18n'
 import type { HouseholdDashboard } from '../../types'
@@ -49,7 +48,6 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
           const receiving = member.balance > 0.005
           const paying = member.balance < -0.005
           const accent = receiving ? 'var(--pb-income)' : paying ? 'var(--pb-coral)' : 'var(--pb-ink-soft)'
-          const BalanceIcon = receiving ? ArrowUp : paying ? ArrowDown : CheckCircle
           const status = receiving
             ? t('household.members.toReceive')
             : paying ? t('household.members.toPay') : t('household.members.settled')
@@ -72,11 +70,11 @@ export function HouseholdMembersCarousel({ household, onViewBalances }: {
                   <Text flexShrink={0} fontSize="2xs" fontWeight={700} color="var(--pb-forest)">{t('household.common.you')}</Text>
                 )}
               </HStack>
-              <HStack mt={1} spacing={1} color={accent} title={status}>
-                <BalanceIcon size={14} weight="bold" aria-hidden="true" />
+              <HStack mt={1} spacing={1.5} align="baseline" color={accent}>
                 <Text fontSize="md" fontWeight={700} lineHeight={1.2} style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {formatCurrency(Math.abs(member.balance))}
                 </Text>
+                <Text fontSize="2xs" fontWeight={700}>{status}</Text>
               </HStack>
               <Text mt={0.5} fontSize="2xs" color="var(--pb-ink-soft)" noOfLines={1}>
                 {t('household.members.monthSpent', { amount: formatCurrency(member.monthPaid) })}
