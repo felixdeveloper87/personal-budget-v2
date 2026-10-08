@@ -2,9 +2,7 @@ import {
   Box,
   Drawer,
   DrawerBody,
-  DrawerCloseButton,
   DrawerContent,
-  DrawerHeader,
   DrawerOverlay,
   Flex,
   HStack,
@@ -17,6 +15,7 @@ import {
 import { useMemo, useRef } from 'react'
 import { useI18n } from '../../../i18n'
 import { DotsThreeOutline } from '../../ui/icons'
+import NuModalHeader from '../../ui/NuModalHeader'
 import { ON_BRAND } from './onBrand'
 import {
   localizeNavigationItems,
@@ -146,37 +145,23 @@ export default function MobileNav({ currentPage, onPageChange, items }: MobileNa
         finalFocusRef={menuButtonRef}
         returnFocusOnClose
       >
-        <DrawerOverlay bg="rgba(20, 0, 32, 0.54)" backdropFilter="blur(6px)" />
+        <DrawerOverlay bg="var(--pb-overlay, rgba(20, 0, 32, 0.54))" backdropFilter="blur(8px)" />
         <DrawerContent
-          borderTopRadius="28px"
-          bg="var(--pb-solid)"
+          className="nu-dashboard"
+          borderTopRadius="22px"
+          bg="var(--nu-page, #ffffff)"
           color="var(--pb-ink)"
-          maxH="min(78dvh, 680px)"
-          boxShadow="0 -20px 60px rgba(40, 0, 70, 0.24)"
+          maxH="min(82dvh, 720px)"
+          boxShadow="0 -20px 50px -20px rgba(20, 35, 32, 0.35)"
           overflow="hidden"
           sx={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
         >
-          <Box aria-hidden w="42px" h="4px" borderRadius="full" bg="var(--pb-hair-2)" mx="auto" mt={3} />
-          <DrawerCloseButton
-            top={5}
-            right={4}
-            boxSize="40px"
-            borderRadius="full"
-            aria-label={t('mobileNav.closeMenu')}
-            _hover={{ bg: 'var(--pb-hover)' }}
-          />
-          <DrawerHeader px={5} pt={4} pb={3} pr={16}>
-            <Text fontSize="xl" fontWeight={800} letterSpacing="-0.025em">
-              {t('mobileNav.title')}
-            </Text>
-            <Text mt={1} color="var(--pb-muted)" fontSize="sm" fontWeight={500}>
-              {t('mobileNav.description')}
-            </Text>
-          </DrawerHeader>
-          <DrawerBody px={4} pt={1} pb={5} overflowY="auto">
+          <NuModalHeader title={t('mobileNav.title')} caption={t('mobileNav.description')} onClose={menu.onClose} />
+          <DrawerBody p={3} overflowY="auto">
             <SimpleGrid columns={2} spacing={2.5}>
-              {localizedItems.map((item) => {
+              {localizedItems.map((item, index) => {
                 const active = activeId === navItemIdFor(item.id)
+                const spanLast = localizedItems.length % 2 === 1 && index === localizedItems.length - 1
                 return (
                   <Box
                     key={item.id}
@@ -184,38 +169,28 @@ export default function MobileNav({ currentPage, onPageChange, items }: MobileNa
                     type="button"
                     aria-current={active ? 'page' : undefined}
                     onClick={() => selectPage(item.id, true)}
+                    gridColumn={spanLast ? 'span 2' : undefined}
                     textAlign="left"
-                    minH="94px"
-                    p={3.5}
-                    borderRadius="20px"
-                    border="1px solid"
-                    borderColor={active ? 'rgba(130, 10, 209, 0.28)' : 'var(--pb-hair)'}
-                    bg={active ? 'rgba(130, 10, 209, 0.09)' : 'var(--pb-surface)'}
-                    color={active ? '#820ad1' : 'var(--pb-ink)'}
-                    position="relative"
-                    overflow="hidden"
-                    transition={reducedMotion ? 'none' : 'transform 140ms ease, border-color 180ms ease, background 180ms ease'}
-                    _hover={{ borderColor: 'rgba(130, 10, 209, 0.32)', bg: 'rgba(130, 10, 209, 0.07)' }}
+                    minH="104px"
+                    px={{ base: 3, sm: 4 }}
+                    py={3}
+                    borderRadius="2xl"
+                    border="2px solid"
+                    borderColor={active ? '#820ad1' : 'var(--pb-hair)'}
+                    bg={active ? 'var(--pb-surface-2)' : 'var(--pb-control, var(--pb-surface))'}
+                    color="var(--pb-ink)"
+                    transition={reducedMotion ? 'none' : 'transform 140ms ease, border-color 0.3s ease, box-shadow 0.3s ease'}
+                    _hover={{ borderColor: '#820ad1' }}
                     _active={{ transform: reducedMotion ? 'none' : 'scale(0.97)' }}
-                    _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px rgba(130, 10, 209, 0.24)' }}
+                    _focusVisible={{ outline: 'none', boxShadow: '0 0 0 3px #820ad120', borderColor: '#820ad1' }}
                   >
-                    {active && (
-                      <Box
-                        aria-hidden
-                        position="absolute"
-                        top={0}
-                        left={4}
-                        right={4}
-                        h="3px"
-                        borderBottomRadius="full"
-                        bg="#820ad1"
-                      />
-                    )}
-                    <Icon as={item.icon} boxSize="24px" weight={active ? 'fill' : 'regular'} />
-                    <Text mt={2} fontSize="sm" fontWeight={active ? 800 : 700} lineHeight="shorter" noOfLines={1}>
+                    <Flex w={8} h={8} align="center" justify="center" borderRadius="xl" bg="var(--pb-surface-2)" color="#820ad1">
+                      <Icon as={item.icon} boxSize={4} weight={active ? 'fill' : 'regular'} />
+                    </Flex>
+                    <Text mt={2} fontSize="sm" fontWeight={600} lineHeight="shorter" noOfLines={1}>
                       {item.label}
                     </Text>
-                    <Text mt={1} color="var(--pb-muted)" fontSize="11px" fontWeight={500} lineHeight="short" noOfLines={2}>
+                    <Text mt={1} color="var(--pb-ink-soft)" fontSize="xs" fontWeight={500} lineHeight="short" noOfLines={2}>
                       {item.description}
                     </Text>
                   </Box>
@@ -279,8 +254,8 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
       <Flex
         align="center"
         justify="center"
-        w={active ? '38px' : '34px'}
-        h="32px"
+        w={active ? '46px' : '40px'}
+        h="36px"
         borderRadius="full"
         bg={active ? 'rgba(255,255,255,0.20)' : 'transparent'}
         boxShadow={active ? 'inset 0 0 0 1px rgba(255,255,255,0.12)' : 'none'}
@@ -288,7 +263,7 @@ function MobileNavContent({ icon, label, active, reducedMotion }: MobileNavConte
       >
         <Icon
           as={icon}
-          boxSize={active ? '23px' : '22px'}
+          boxSize={active ? '28px' : '27px'}
           weight={active ? 'fill' : 'regular'}
           opacity={active ? 1 : 0.74}
           transition={reducedMotion ? 'none' : 'transform 180ms ease, opacity 180ms ease'}

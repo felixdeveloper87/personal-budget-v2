@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { Box, Flex, HStack, Icon, Text, VStack } from '@chakra-ui/react'
-import { CheckCircle2, ChevronRight, CreditCard } from '../ui/icons'
+import { CheckCircle2, ChevronRight } from '../ui/icons'
+import PlanLogo from './PlanLogo'
 import { InstallmentPlan } from '../../types'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useI18n } from '../../i18n'
@@ -80,19 +81,9 @@ export default function InstallmentPlanCard({
     >
       {!isPast && <Box position="absolute" left={0} top={0} bottom={0} w="3px" bg="var(--pb-forest-2)" />}
       <Flex align="center" gap="0.85rem" pl={isPast ? '0.95rem' : '1.1rem'} pr="0.85rem" py="0.8rem">
-        <Flex
-          w="38px"
-          h="38px"
-          flexShrink={0}
-          align="center"
-          justify="center"
-          borderRadius="11px"
-          bg={isPast ? 'var(--pb-surface-2)' : 'var(--pb-tint-green)'}
-          color={isPast ? 'var(--pb-ink-faint)' : 'var(--pb-forest-2)'}
-          border="1px solid var(--pb-hair)"
-        >
-          <Icon as={CreditCard} boxSize={5} weight="duotone" />
-        </Flex>
+        <Box opacity={isPast ? 0.7 : 1} flexShrink={0}>
+          <PlanLogo name={title} category={firstTransaction?.category} size={38} />
+        </Box>
 
         <Box flex={1} minW={0}>
           <Text fontWeight={600} fontSize="sm" color="var(--pb-ink)" noOfLines={1} lineHeight="1.3">

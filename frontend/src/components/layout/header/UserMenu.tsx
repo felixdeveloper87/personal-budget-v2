@@ -16,6 +16,7 @@ import {
 } from '@chakra-ui/react'
 import { ChevronDown, ChevronRight, LogOut, Settings, User } from '../../ui/icons'
 import { editorialPalette, useEd } from '../../../editorial'
+import { useThemeColors } from '../../../hooks/useThemeColors'
 import { useI18n } from '../../../i18n'
 import type { UserPlan } from '../../../types'
 import { ON_BRAND, useOnBrand } from './onBrand'
@@ -45,6 +46,7 @@ export default function UserMenu({
   const { colorMode } = useColorMode()
   const ed = useEd() ?? editorialPalette(colorMode)
   const onBrand = useOnBrand()
+  const colors = useThemeColors()
   const plan: UserPlan = user?.plan ?? 'STANDARD'
   const displayName = user?.name || t('user.defaultName')
   const displayEmail = user?.email || ''
@@ -157,185 +159,116 @@ export default function UserMenu({
         <MenuList
           zIndex={9999}
           minW="292px"
-          bg={surface}
-          color={text}
-          textStyle="body"
-          border="1px solid"
-          borderColor={lineStrong}
-          borderRadius="16px"
-          boxShadow="0 28px 70px -24px rgba(0,0,0,0.72)"
+          bg={colors.cardBg}
+          color={colors.text.primary}
+          border="2px solid"
+          borderColor={colors.border}
+          borderRadius="2xl"
+          boxShadow="0 28px 70px -24px rgba(40, 0, 70, 0.45)"
           overflow="hidden"
           p={0}
         >
-        <Box h="3px" bg={`linear-gradient(90deg, ${jade}, ${gold})`} />
+          <Box bg={NU_PURPLE} px={4} py={4} position="relative" overflow="hidden">
+            <Box
+              aria-hidden="true"
+              position="absolute"
+              top="-90px"
+              right="-70px"
+              w="220px"
+              h="220px"
+              borderRadius="full"
+              border="1px solid rgba(255,255,255,0.14)"
+              boxShadow="0 0 0 36px rgba(255,255,255,0.03), 0 0 0 37px rgba(255,255,255,0.1)"
+              pointerEvents="none"
+            />
+            <Text position="relative" mb={2.5} fontSize="xs" color="rgba(255,255,255,0.84)">
+              {t('userMenu.yourAccount')}
+            </Text>
+            <HStack spacing={3} position="relative">
+              <Box p="2px" borderRadius="full" bg="rgba(255,255,255,0.32)" flexShrink={0}>
+                <Avatar size="md" name={displayName} bg="white" color={NU_PURPLE} fontWeight={700} />
+              </Box>
+              <VStack spacing={1} align="start" flex={1} minW={0}>
+                <HStack spacing={2} w="full">
+                  <Text fontSize="lg" fontWeight={700} letterSpacing="-0.02em" lineHeight="1.1" color="white" noOfLines={1}>
+                    {displayName}
+                  </Text>
+                  <Badge
+                    flexShrink={0}
+                    px={2}
+                    py={0.5}
+                    borderRadius="full"
+                    bg="rgba(255,255,255,0.18)"
+                    color="white"
+                    border="1px solid rgba(255,255,255,0.28)"
+                    fontSize="2xs"
+                    fontWeight={700}
+                    textTransform="none"
+                  >
+                    {planLabel}
+                  </Badge>
+                </HStack>
+                {displayEmail && (
+                  <Text w="full" fontSize="xs" color="rgba(255,255,255,0.84)" noOfLines={1}>
+                    {displayEmail}
+                  </Text>
+                )}
+              </VStack>
+            </HStack>
+          </Box>
 
-        <Box
-          px={4}
-          py={3.5}
-          bg={raised}
-          borderBottom="1px solid"
-          borderColor={line}
-          backgroundImage={`linear-gradient(135deg, ${jade}0D 0%, transparent 56%, ${gold}0D 100%)`}
-        >
-          <Text
-            mb={2.5}
-            textStyle="mono"
-            fontSize="2xs"
-            fontWeight={700}
-            color={muted}
-            letterSpacing="0.14em"
-            textTransform="uppercase"
-          >
-            {t('userMenu.yourAccount')}
-          </Text>
-          <HStack spacing={3}>
-            <Box p="2px" borderRadius="full" background={avatarGradient} flexShrink={0}>
-              <Avatar size="md" name={displayName} bg={surface} color={jade} fontWeight={700} />
-            </Box>
-            <VStack spacing={1} align="start" flex={1} minW={0}>
-              <HStack spacing={2} w="full">
-                <Text
-                  textStyle="display"
-                  fontSize="lg"
-                  lineHeight="1"
-                  color={text}
-                  noOfLines={1}
-                >
-                  {displayName}
-                </Text>
-                <Badge
-                  flexShrink={0}
-                  px={2}
-                  py={0.5}
-                  borderRadius="full"
-                  bg={planBg}
-                  color={planColor}
-                  border="1px solid"
-                  borderColor={line}
-                  textStyle="mono"
-                  fontSize="2xs"
-                  fontWeight={600}
-                  textTransform="uppercase"
-                  letterSpacing="0.06em"
-                >
-                  {planLabel}
-                </Badge>
-              </HStack>
-              {displayEmail && (
-                <Text
-                  w="full"
-                  textStyle="mono"
-                  fontSize="2xs"
-                  color={muted}
-                  letterSpacing="0.025em"
-                  noOfLines={1}
-                >
-                  {displayEmail}
-                </Text>
-              )}
+          <Box p={2} bg="var(--nu-page, transparent)">
+            <VStack align="stretch" spacing={2}>
+              <NuMenuRow icon={User} title={t('userMenu.profile')} caption={t('userMenu.profileDescription')} onClick={onOpenProfile} />
+              <NuMenuRow icon={Settings} title={t('userMenu.settings')} caption={t('userMenu.settingsDescription')} onClick={onOpenSettings} />
+              <NuMenuRow icon={LogOut} title={t('userMenu.signOut')} danger onClick={onLogout} />
             </VStack>
-          </HStack>
-        </Box>
-
-        <Box p={1.5}>
-          <Text
-            px={3}
-            pt={1.5}
-            pb={1}
-            textStyle="mono"
-            fontSize="2xs"
-            fontWeight={600}
-            color={muted}
-            letterSpacing="0.1em"
-            textTransform="uppercase"
-          >
-            {t('userMenu.account')}
-          </Text>
-          <MenuItem
-            {...menuItem}
-            onClick={onOpenProfile}
-            _hover={{ bg: ed.jadeSoft, color: jade, transform: 'translateX(2px)' }}
-            _focus={{ bg: ed.jadeSoft, color: jade }}
-          >
-            <Flex align="center" gap={3} w="full">
-              <Flex
-                align="center"
-                justify="center"
-                boxSize="32px"
-                borderRadius="9px"
-                bg={`${jade}16`}
-                color={jade}
-                flexShrink={0}
-              >
-                <Icon as={User} boxSize={4} />
-              </Flex>
-              <Box flex={1} minW={0}>
-                <Text lineHeight={1.15}>{t('userMenu.profile')}</Text>
-                <Text mt={0.5} fontSize="xs" fontWeight={400} color={muted} lineHeight={1.1}>
-                  {t('userMenu.profileDescription')}
-                </Text>
-              </Box>
-              <Icon as={ChevronRight} boxSize={3.5} color={muted} flexShrink={0} />
-            </Flex>
-          </MenuItem>
-          <MenuItem
-            {...menuItem}
-            onClick={onOpenSettings}
-            _hover={{ bg: ed.jadeSoft, color: jade, transform: 'translateX(2px)' }}
-            _focus={{ bg: ed.jadeSoft, color: jade }}
-          >
-            <Flex align="center" gap={3} w="full">
-              <Flex
-                align="center"
-                justify="center"
-                boxSize="32px"
-                borderRadius="9px"
-                bg={`${gold}16`}
-                color={gold}
-                flexShrink={0}
-              >
-                <Icon as={Settings} boxSize={4} />
-              </Flex>
-              <Box flex={1} minW={0}>
-                <Text lineHeight={1.15}>{t('userMenu.settings')}</Text>
-                <Text mt={0.5} fontSize="xs" fontWeight={400} color={muted} lineHeight={1.1}>
-                  {t('userMenu.settingsDescription')}
-                </Text>
-              </Box>
-              <Icon as={ChevronRight} boxSize={3.5} color={muted} flexShrink={0} />
-            </Flex>
-          </MenuItem>
-        </Box>
-
-        <Box h="1px" bg={line} mx={3} />
-
-        <Box p={1.5}>
-          <MenuItem
-            {...menuItem}
-            h="46px"
-            onClick={onLogout}
-            color={red}
-            _hover={{ bg: `${red}12`, color: red, transform: 'translateX(2px)' }}
-            _focus={{ bg: `${red}12`, color: red }}
-          >
-            <Flex align="center" gap={3} w="full">
-              <Flex
-                align="center"
-                justify="center"
-                boxSize="30px"
-                borderRadius="9px"
-                bg={`${red}12`}
-                flexShrink={0}
-              >
-                <Icon as={LogOut} boxSize={4} />
-              </Flex>
-              <Text flex={1}>{t('userMenu.signOut')}</Text>
-              <Icon as={ChevronRight} boxSize={3.5} color={red} />
-            </Flex>
-          </MenuItem>
-        </Box>
+          </Box>
         </MenuList>
       </Portal>
     </Menu>
+  )
+}
+
+const NU_PURPLE = '#820ad1'
+
+interface NuMenuRowProps {
+  icon: typeof User
+  title: string
+  caption?: string
+  danger?: boolean
+  onClick?: () => void
+}
+
+function NuMenuRow({ icon, title, caption, danger, onClick }: NuMenuRowProps) {
+  const colors = useThemeColors()
+  const accent = danger ? '#d6336c' : NU_PURPLE
+  return (
+    <MenuItem
+      onClick={onClick}
+      bg={colors.inputBg}
+      border="2px solid"
+      borderColor={colors.border}
+      borderRadius="2xl"
+      px={{ base: 3, sm: 4 }}
+      py={3}
+      h="auto"
+      color={danger ? accent : colors.text.primary}
+      _hover={{ bg: colors.bgSecondary, borderColor: accent }}
+      _focus={{ bg: colors.bgSecondary, borderColor: accent }}
+      transition="border-color 0.3s ease, background 0.2s ease"
+    >
+      <Flex align="center" gap={2.5} w="full">
+        <Flex w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color={accent}
+          align="center" justify="center" flexShrink={0} aria-hidden>
+          <Icon as={icon} boxSize={{ base: 4, sm: 5 }} />
+        </Flex>
+        <Box flex={1} minW={0}>
+          <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={600} lineHeight="1.1">{title}</Text>
+          {caption && <Text mt={1} fontSize="xs" fontWeight={500} color={colors.text.secondary} lineHeight="1.2">{caption}</Text>}
+        </Box>
+        <Icon as={ChevronRight} boxSize={3.5} color={colors.text.secondary} flexShrink={0} />
+      </Flex>
+    </MenuItem>
   )
 }

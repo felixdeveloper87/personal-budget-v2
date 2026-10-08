@@ -7,7 +7,6 @@ import {
   AlertDialogOverlay,
   Box,
   Button,
-  Divider,
   HStack,
   Icon,
   IconButton,
@@ -27,7 +26,8 @@ import {
 } from '@chakra-ui/react'
 import { useRef, useState } from 'react'
 import { InfoIcon } from '@phosphor-icons/react'
-import { ModalHeader, PremiumModal } from '../ui'
+import { PremiumModal } from '../ui'
+import NuModalHeader from '../ui/NuModalHeader'
 import ImportCsvModal from '../transactions/ImportCsvModal'
 import { deleteAllUserData } from '../../api'
 import { exportAllData } from '../../utils/export'
@@ -43,7 +43,7 @@ import {
   Trash2,
   Upload,
 } from '../ui/icons'
-import { useEd } from '../../editorial'
+import { useThemeColors } from '../../hooks/useThemeColors'
 import { useI18n } from '../../i18n'
 import { usePushNotifications } from '../../hooks/usePushNotifications'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
@@ -76,7 +76,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     on: t('settings.push.description'),
   }[push.state ?? 'off']
   const pushToggleable = push.state === 'on' || push.state === 'off'
-  const ed = useEd()
+  const colors = useThemeColors()
   const [dateFormat, setDateFormat] = useState('DD/MM/YYYY')
   const [emailReports, setEmailReports] = useState(true)
   const [monthlySummary, setMonthlySummary] = useState(true)
@@ -89,28 +89,12 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   const importDialog = useDisclosure()
   const cancelDeleteRef = useRef<HTMLButtonElement>(null)
 
-  const fallbackSurfaceBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const fallbackBodyBg = useColorModeValue('gray.50', '#0a0a0a')
-  const surfaceBg = ed?.solid ?? fallbackSurfaceBg
-  const bodyBg = ed?.bg ?? fallbackBodyBg
-  const textColorBase = useColorModeValue('gray.900', 'gray.50')
-  const textColor = ed?.cream ?? textColorBase
-  const mutedColorBase = useColorModeValue('gray.500', 'gray.400')
-  const mutedColor = ed?.muted ?? mutedColorBase
-  const borderColorBase = useColorModeValue('gray.100', 'whiteAlpha.100')
-  const borderColor = ed?.line ?? borderColorBase
-  const rowBgBase = useColorModeValue('white', 'whiteAlpha.50')
-  const rowBg = ed?.panel ?? rowBgBase
-  const rowHoverBgBase = useColorModeValue('gray.50', 'whiteAlpha.80')
-  const rowHoverBg = ed?.hoverBg ?? rowHoverBgBase
-  const sectionTitleColorBase = useColorModeValue('gray.700', 'gray.200')
-  const sectionTitleColor = ed?.muted ?? sectionTitleColorBase
-  const iconBgBase = useColorModeValue('gray.50', 'whiteAlpha.50')
-  const iconBg = ed?.jadeSoft ?? iconBgBase
-  const dangerBgBase = useColorModeValue('red.50', 'rgba(220,38,38,0.05)')
-  const dangerBg = ed ? 'var(--pb-tint-coral)' : dangerBgBase
-  const dangerBorderBase = useColorModeValue('red.100', 'rgba(220,38,38,0.15)')
-  const dangerBorder = ed ? 'var(--pb-tint-coral)' : dangerBorderBase
+  const surfaceBg = colors.cardBg
+  const textColor = colors.text.primary
+  const mutedColor = colors.text.secondary
+  const borderColor = colors.border
+  const dangerBg = useColorModeValue('red.50', 'rgba(220,38,38,0.08)')
+  const dangerBorder = useColorModeValue('red.100', 'rgba(220,38,38,0.2)')
 
   const handleExport = async () => {
     setExporting(true)
@@ -154,24 +138,12 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
   }
 
   const SectionTitle = ({ icon, label }: { icon: typeof Settings; label: string }) => (
-    <HStack spacing={2} mb={2}>
-      <Box
-        p={1.5}
-        borderRadius="md"
-        bg={iconBg}
-        border="1px solid"
-        borderColor={borderColor}
-        flexShrink={0}
-      >
-        <Icon as={icon} boxSize={3.5} color={mutedColor} />
+    <HStack spacing={2.5} mb={2.5}>
+      <Box role="presentation" w={{ base: 8, sm: 10 }} h={{ base: 8, sm: 10 }} borderRadius="xl" bg={colors.bgSecondary} color="#820ad1"
+        display="flex" alignItems="center" justifyContent="center" flexShrink={0} aria-hidden>
+        <Icon as={icon} boxSize={{ base: 4, sm: 5 }} sx={{ '& svg': { display: 'block' } }} />
       </Box>
-      <Text
-        fontSize="xs"
-        fontWeight={700}
-        color={sectionTitleColor}
-        letterSpacing="0.06em"
-        textTransform="uppercase"
-      >
+      <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight="600" color={colors.text.secondary} lineHeight="1.1">
         {label}
       </Text>
     </HStack>
@@ -191,19 +163,19 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     noBorder?: boolean
   }) => (
     <HStack
-      px={4}
+      px={{ base: 3, sm: 4 }}
       py={3.5}
-      bg={rowBg}
+      bg="transparent"
       justify="space-between"
       borderBottom={noBorder ? undefined : '1px solid'}
       borderColor={borderColor}
-      _hover={{ bg: rowHoverBg }}
+      _hover={{ bg: colors.bgSecondary }}
       transition="background 0.15s ease"
       gap={4}
     >
       <Box minW={0} flex={1}>
         <HStack spacing={1}>
-          <Text fontSize="sm" fontWeight={600} color={textColor}>{label}</Text>
+          <Text fontSize={{ base: 'sm', sm: 'md' }} fontWeight={600} color={textColor}>{label}</Text>
           {labelAddon}
         </HStack>
         {description && (
@@ -219,21 +191,15 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
     <PremiumModal
       isOpen={isOpen}
       onClose={onClose}
-      size={{ base: 'full', sm: 'lg', md: 'xl', lg: '2xl' }}
-      header={
-        <ModalHeader
-          title={t('settings.title')}
-          caption={t('settings.caption')}
-          onClose={onClose}
-        />
-      }
+      size={{ base: 'full', md: 'xl' }}
+      contentProps={{ className: 'nu-dashboard' }}
+      header={<NuModalHeader title={t('settings.title')} caption={t('settings.caption')} onClose={onClose} />}
     >
-      <Box flex="1" bg={bodyBg} overflowY="auto">
+      <Box flex="1" bg="var(--nu-page, #ffffff)" overflowY="auto">
         <VStack
-          spacing={5}
+          spacing={4}
           align="stretch"
-          px={{ base: 4, sm: 6, md: 8 }}
-          py={{ base: 4, sm: 6, md: 8 }}
+          p={{ base: 3, sm: 5, md: 6 }}
         >
 
           {/* Preferences */}
@@ -242,9 +208,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             <VStack
               spacing={0}
               align="stretch"
-              border="1px solid"
+              bg={colors.inputBg}
+              border="2px solid"
               borderColor={borderColor}
-              borderRadius="xl"
+              borderRadius="2xl"
               overflow="hidden"
             >
               <SettingRow
@@ -301,9 +268,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             <VStack
               spacing={0}
               align="stretch"
-              border="1px solid"
+              bg={colors.inputBg}
+              border="2px solid"
               borderColor={borderColor}
-              borderRadius="xl"
+              borderRadius="2xl"
               overflow="hidden"
             >
               <SettingRow
@@ -326,11 +294,11 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                     <Portal>
                       <PopoverContent
                         w={{ base: 'calc(100vw - 32px)', sm: '380px' }}
-                        bg={rowBg}
+                        bg={colors.cardBg}
                         borderColor={borderColor}
                         borderRadius="xl"
                       >
-                        <PopoverArrow bg={rowBg} />
+                        <PopoverArrow bg={colors.cardBg} />
                         <PopoverBody p={4}>
                           <Text fontSize="xs" fontWeight={600} color={mutedColor} mb={2}>
                             {t('settings.household.whatYouGet')}
@@ -371,7 +339,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                     isChecked={push.state === 'on'}
                     isDisabled={!pushToggleable || push.busy}
                     onChange={(e) => void push.setEnabled(e.target.checked)}
-                    colorScheme="blue"
+                    colorScheme="purple"
                     size="md"
                   />
                 </HStack>
@@ -385,9 +353,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             <VStack
               spacing={0}
               align="stretch"
-              border="1px solid"
+              bg={colors.inputBg}
+              border="2px solid"
               borderColor={borderColor}
-              borderRadius="xl"
+              borderRadius="2xl"
               overflow="hidden"
             >
               <SettingRow
@@ -401,7 +370,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                   isChecked={push.preferences?.billsDue ?? true}
                   isDisabled={!push.preferences}
                   onChange={(e) => void push.setPreference('billsDue', e.target.checked)}
-                  colorScheme="blue"
+                  colorScheme="purple"
                   size="md"
                 />
               </SettingRow>
@@ -412,7 +381,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={emailReports}
                   onChange={(e) => { setEmailReports(e.target.checked); showComingSoon() }}
-                  colorScheme="blue"
+                  colorScheme="purple"
                   size="md"
                 />
               </SettingRow>
@@ -423,7 +392,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={monthlySummary}
                   onChange={(e) => { setMonthlySummary(e.target.checked); showComingSoon() }}
-                  colorScheme="blue"
+                  colorScheme="purple"
                   size="md"
                 />
               </SettingRow>
@@ -435,7 +404,7 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
                 <Switch
                   isChecked={budgetAlerts}
                   onChange={(e) => { setBudgetAlerts(e.target.checked); showComingSoon() }}
-                  colorScheme="blue"
+                  colorScheme="purple"
                   size="md"
                 />
               </SettingRow>
@@ -448,9 +417,10 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             <VStack
               spacing={0}
               align="stretch"
-              border="1px solid"
+              bg={colors.inputBg}
+              border="2px solid"
               borderColor={borderColor}
-              borderRadius="xl"
+              borderRadius="2xl"
               overflow="hidden"
             >
               <SettingRow
@@ -487,15 +457,13 @@ export default function UserSettingsModal({ isOpen, onClose }: UserSettingsModal
             </VStack>
           </Box>
 
-          <Divider borderColor={borderColor} />
-
           {/* Danger zone */}
           <Box
             p={4}
             bg={dangerBg}
-            border="1px solid"
+            border="2px solid"
             borderColor={dangerBorder}
-            borderRadius="xl"
+            borderRadius="2xl"
           >
             <HStack spacing={2} mb={1}>
               <Icon as={AlertTriangle} boxSize={4} color="red.500" />

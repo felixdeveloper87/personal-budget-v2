@@ -14,7 +14,8 @@ import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import Segmented from '../dashboard/components/Segmented'
 import { NuSection, PAGE_BOTTOM_PADDING } from '../dashboard/components/nu'
-import { CommitmentLogo, NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitments/components/nuCommitments'
+import PlanLogo from '../../components/installments/PlanLogo'
+import { NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitments/components/nuCommitments'
 import { useI18n } from '../../i18n'
 
 type InstallmentView = 'plans' | 'statements'
@@ -210,7 +211,7 @@ function PlanList({ plans, onOpen }: { plans: InstallmentPlan[]; onOpen: (plan: 
                 <CheckCircle2 size={20} strokeWidth={2.2} aria-hidden="true" />
               </Flex>
             ) : (
-              <CommitmentLogo name={title} category={plan.transactions[0]?.category} />
+              <PlanLogo name={title} category={plan.transactions[0]?.category} />
             )}
             title={title}
             caption={caption}
