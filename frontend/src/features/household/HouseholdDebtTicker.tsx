@@ -1,26 +1,48 @@
 import { Box, Flex, Text } from '@chakra-ui/react'
 import { Fragment } from 'react'
 import { useI18n } from '../../i18n'
-import type { HouseholdDebt } from '../../types'
+import type { HouseholdDebt, HouseholdMember } from '../../types'
 
 const BRAND = '#820ad1'
 /** Seconds each headline stays on the bar, so a longer list scrolls at the same speed. */
 const SECONDS_PER_ITEM = 7
 
-/** CNN-style headline bar: who owes whom, scrolling on a loop. Opens the balances. */
-export function HouseholdDebtTicker({ debts, onOpen }: { debts: HouseholdDebt[]; onOpen: () => void }) {
-  const { formatCurrency, t } = useI18n()
-  const headlines = debts.map((debt) => (
+/**
+ * CNN-style headline bar, one headline per member: "Priscila owes Vinicius,
+ * Vagner and Leandro" or "Leandro doesn't owe anyone". Scrolls on a loop; opens the balances.
+ */
+export function HouseholdDebtTicker({ members, debts, onOpen }: {
+  members: HouseholdMember[]
+  debts: HouseholdDebt[]
+  onOpen: () => void
+}) {
+  const { t } = useI18n()
+  // "A, B and C" (no Intl.ListFormat in this TS lib).
+  const list = (names: string[]) => names.length < 2
+    ? names.join('')
+    : `${names.slice(0, -1).join(', ')} ${t('household.ticker.and')} ${names[names.length - 1]}`
+  const items = members.map((member) => {
+    const creditors = debts.filter((debt) => debt.fromMemberId === member.id).map((debt) => debt.toMemberName)
+    return { name: member.name, creditors: creditors.length ? list(creditors) : null }
+  })
+  const headlines = items.map(({ name, creditors }) => (
     <Text as="span" whiteSpace="nowrap" fontSize="sm" color="white">
-      <Text as="b" fontWeight={800}>{debt.fromMemberName}</Text>
-      {' '}{t('household.ticker.owes')}{' '}
-      <Text as="b" fontWeight={800} color="#ffd166">{formatCurrency(debt.amount)}</Text>
-      {' '}{t('household.ticker.to')}{' '}
-      <Text as="b" fontWeight={800}>{debt.toMemberName}</Text>
+      <Text as="b" fontWeight={800}>{name}</Text>
+      {' '}
+      {creditors ? (
+        <>
+          {t('household.ticker.owesTo')}{' '}
+          <Text as="b" fontWeight={800} color="#ffd166">{creditors}</Text>
+        </>
+      ) : (
+        <Text as="span" color="rgba(255,255,255,.75)">{t('household.ticker.owesNobody')}</Text>
+      )}
     </Text>
   ))
   const summary = debts.length
-    ? debts.map((debt) => `${debt.fromMemberName} ${t('household.ticker.owes')} ${formatCurrency(debt.amount)} ${t('household.ticker.to')} ${debt.toMemberName}`).join('. ')
+    ? items.map(({ name, creditors }) => creditors
+      ? `${name} ${t('household.ticker.owesTo')} ${creditors}`
+      : `${name} ${t('household.ticker.owesNobody')}`).join('. ')
     : t('household.ticker.allSettled')
 
   // The track holds the headlines twice and slides by half its width, so the loop is seamless.
@@ -60,7 +82,7 @@ export function HouseholdDebtTicker({ debts, onOpen }: { debts: HouseholdDebt[];
           <Flex
             className="household-ticker-track" pl={4} w="max-content"
             sx={{
-              animation: `householdTicker ${Math.max(15, debts.length * SECONDS_PER_ITEM)}s linear infinite`,
+              animation: `householdTicker ${Math.max(15, items.length * SECONDS_PER_ITEM)}s linear infinite`,
               '@media (prefers-reduced-motion: reduce)': { animation: 'none' },
             }}
           >

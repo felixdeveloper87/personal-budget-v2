@@ -164,8 +164,9 @@ export const householdTranslations: TranslationBundle = {
     'household.paymentAlert.action': 'Review',
 
     'household.ticker.label': 'Live',
-    'household.ticker.owes': 'owes',
-    'household.ticker.to': 'to',
+    'household.ticker.owesTo': 'owes',
+    'household.ticker.owesNobody': "doesn't owe anyone",
+    'household.ticker.and': 'and',
     'household.ticker.allSettled': 'Everyone is settled up',
     'household.balances.eyebrow': 'Open balances',
     'household.balances.title': 'Who owes whom',
@@ -621,8 +622,9 @@ export const householdTranslations: TranslationBundle = {
     'household.paymentAlert.action': 'Revisar',
 
     'household.ticker.label': 'Ao vivo',
-    'household.ticker.owes': 'deve',
-    'household.ticker.to': 'para',
+    'household.ticker.owesTo': 'deve para',
+    'household.ticker.owesNobody': 'não deve para ninguém',
+    'household.ticker.and': 'e',
     'household.ticker.allSettled': 'Todo mundo está em dia',
     'household.balances.eyebrow': 'Saldos em aberto',
     'household.balances.title': 'Quem deve a quem',

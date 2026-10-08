@@ -170,7 +170,7 @@ export default function HouseholdPage() {
         py={{ base: 5, md: 6 }}
         boxShadow={{ base: 'none', md: '0 1px 2px rgba(31,31,36,0.04), 0 18px 48px -24px rgba(31,31,36,0.18)' }}
       >
-        <HouseholdDebtTicker debts={household.debts} onOpen={balancesOverviewModal.onOpen} />
+        <HouseholdDebtTicker members={household.members} debts={household.debts} onOpen={balancesOverviewModal.onOpen} />
 
         <HouseholdMembersCarousel
           household={household}
