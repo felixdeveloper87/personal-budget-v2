@@ -1,10 +1,10 @@
 import { Box, Button, Flex, HStack, Icon, IconButton, Text, useDisclosure } from '@chakra-ui/react'
-import { Broom, Check, Gear, Repeat } from '../../../components/ui/icons'
+import { Broom, Check, Gear } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
-import { CleaningCardArtwork } from './CleaningCardArtwork'
 import { CleaningDutiesModal } from './CleaningDutiesModal'
+import { NewsTicker } from '../components/NewsTicker'
 import { CLEANING_DUTIES, type DisplayedCleaningDuty } from './cleaningConfig'
 
 export function CleaningRotationCard({
@@ -26,6 +26,10 @@ export function CleaningRotationCard({
   const dutiesModal = useDisclosure()
   const current = rotation.currentWeek
   const next = rotation.upcomingWeeks[0]
+  const upcoming = rotation.upcomingWeeks.slice(0, 3).map((week) => ({
+    weekStart: week.weekStart,
+    name: week.assignedMemberId === currentMemberId ? t('household.common.you') : week.assignedMemberName,
+  }))
   const currentIsUser = current?.assignedMemberId === currentMemberId
   const currentIsComplete = current?.status === 'COMPLETED'
   const displayedDuties: DisplayedCleaningDuty[] = current?.duties?.length
@@ -38,7 +42,6 @@ export function CleaningRotationCard({
       completedAt: null,
     }))
   const completedDutyCount = displayedDuties.filter((duty) => duty.completed).length
-  const progress = displayedDuties.length ? (completedDutyCount / displayedDuties.length) * 100 : 0
   const displayDate = (value: string) => formatDate(value, { day: 'numeric', month: 'short' })
 
   const emptyTitle = !rotation.configured
@@ -95,15 +98,14 @@ export function CleaningRotationCard({
           </HStack>
         </Flex>
 
-        <Box position="relative" overflow="hidden" p={{ base: 4, md: 5 }} borderRadius="16px" bg="var(--pb-surface)">
-          <CleaningCardArtwork />
+        <Box p={4} borderRadius="18px" bg="var(--pb-surface)">
           {rotation.configured && rotation.active && current ? (
-            <Box position="relative">
+            <Box>
               <HStack spacing={3} minW={0}>
                 <Flex w="40px" h="40px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)">
                   <Icon as={Broom} boxSize={5} weight="bold" />
                 </Flex>
-                <Box minW={0}>
+                <Box minW={0} flex={1}>
                   <Text fontSize="xs" color="var(--pb-ink-soft)">
                     {currentIsUser ? t('household.cleaning.yourWeek') : t('household.cleaning.onDuty')}
                     {' · '}
@@ -113,51 +115,43 @@ export function CleaningRotationCard({
                     {current.assignedMemberName}
                   </Text>
                 </Box>
-              </HStack>
-
-              <Box mt={4} maxW={{ base: 'full', md: '70%' }}>
-                <Flex align="center" justify="space-between" gap={3}>
-                  <Text fontSize="sm" fontWeight={600} color="var(--pb-ink)" aria-live="polite">
+                <HStack
+                  flexShrink={0} spacing={1} px={2.5} py={1} borderRadius="full" aria-live="polite"
+                  bg={currentIsComplete ? 'var(--pb-tint-income)' : 'var(--nu-brand-tint)'}
+                  color={currentIsComplete ? 'var(--pb-income)' : 'var(--nu-brand)'}
+                >
+                  {currentIsComplete && <Icon as={Check} boxSize={3} weight="bold" />}
+                  <Text fontSize="xs" fontWeight={700}>
                     {t('household.cleaning.progress', {
                       completed: formatNumber(completedDutyCount),
                       total: formatNumber(displayedDuties.length),
                     })}
                   </Text>
-                  {currentIsComplete && (
-                    <HStack spacing={1} px={2} py={0.5} borderRadius="full" bg="var(--pb-tint-income)" color="var(--pb-income)">
-                      <Icon as={Check} boxSize={3} weight="bold" />
-                      <Text fontSize="2xs" fontWeight={700}>{t('household.cleaning.allDone')}</Text>
-                    </HStack>
-                  )}
-                </Flex>
-                <Box
-                  mt={2} h="6px" overflow="hidden" borderRadius="full" bg="var(--nu-track)"
-                  role="progressbar" aria-label={t('household.cleaning.progress', {
-                    completed: formatNumber(completedDutyCount),
-                    total: formatNumber(displayedDuties.length),
-                  })}
-                  aria-valuemin={0} aria-valuemax={displayedDuties.length} aria-valuenow={completedDutyCount}
-                >
-                  <Box h="full" w={`${progress}%`} borderRadius="full" bg="var(--nu-brand)" transition="width 300ms ease" />
-                </Box>
-              </Box>
+                </HStack>
+              </HStack>
             </Box>
           ) : (
-            <Box position="relative" maxW={{ base: 'full', md: '70%' }}>
+            <Box>
               <Text fontSize="md" fontWeight={700} color="var(--pb-ink)">{emptyTitle}</Text>
               <Text mt={1.5} fontSize="sm" lineHeight={1.55} color="var(--pb-ink-soft)">{emptyDescription}</Text>
             </Box>
           )}
 
-          {rotation.configured && rotation.active && next && (
-            <HStack position="relative" mt={4} pt={3} spacing={2} borderTop="1px solid var(--pb-hair-2)" color="var(--pb-ink-soft)">
-              <Icon as={Repeat} boxSize={4} flexShrink={0} />
-              <Text fontSize="xs" noOfLines={1}>
-                {t('household.cleaning.comingNext')}: <Text as="span" fontWeight={600} color="var(--pb-ink)">
-                  {next.assignedMemberId === currentMemberId ? t('household.common.you') : next.assignedMemberName}
-                </Text> · {displayDate(next.weekStart)}
-              </Text>
-            </HStack>
+          {rotation.configured && rotation.active && upcoming.length > 0 && (
+            <Box mt={3.5}>
+              <NewsTicker
+                tone="soft"
+                label={t('household.cleaning.comingNext')}
+                headlines={upcoming.map((week) => (
+                  <Text as="span" whiteSpace="nowrap" fontSize="sm">
+                    <Text as="b" fontWeight={800}>{week.name}</Text>
+                    <Text as="span" color="var(--pb-ink-soft)"> · {displayDate(week.weekStart)}</Text>
+                  </Text>
+                ))}
+                ariaLabel={`${t('household.cleaning.comingNext')}: ${upcoming
+                  .map((week) => `${week.name}, ${displayDate(week.weekStart)}`).join('. ')}`}
+              />
+            </Box>
           )}
         </Box>
       </Box>
