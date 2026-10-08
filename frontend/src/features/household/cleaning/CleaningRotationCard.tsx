@@ -1,5 +1,5 @@
 import { Box, Button, Flex, HStack, Icon, IconButton, Text, useDisclosure } from '@chakra-ui/react'
-import { Broom, Check, Gear } from '../../../components/ui/icons'
+import { Check, Gear } from '../../../components/ui/icons'
 import { useI18n } from '../../../i18n'
 import type { HouseholdCleaningRotation, HouseholdMember } from '../../../types'
 import { today } from '../householdDates'
@@ -101,9 +101,6 @@ export function CleaningRotationCard({
           {rotation.configured && rotation.active && current ? (
             <Box>
               <HStack spacing={3} minW={0}>
-                <Flex w="40px" h="40px" flexShrink={0} align="center" justify="center" borderRadius="full" bg="var(--nu-brand-tint)" color="var(--nu-brand)">
-                  <Icon as={Broom} boxSize={5} weight="bold" />
-                </Flex>
                 <Box minW={0} flex={1}>
                   <Text fontSize="xs" color="var(--pb-ink-soft)">
                     {currentIsUser ? t('household.cleaning.yourWeek') : t('household.cleaning.onDuty')}
