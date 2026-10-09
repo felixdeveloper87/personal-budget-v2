@@ -1,7 +1,7 @@
-import { Box, Flex, Grid, HStack, Skeleton, Text, VStack } from '@chakra-ui/react'
-import { useMemo, useState } from 'react'
+import { Box, Flex, Grid, HStack, Icon, Skeleton, Text, VStack } from '@chakra-ui/react'
+import { useEffect, useMemo, useState } from 'react'
 import { useReducedMotion } from 'framer-motion'
-import { TrendingUp } from 'lucide-react'
+import { TrendingUp, X } from 'lucide-react'
 
 import { useDashboardData } from '../../hooks/useDashboardData'
 import { getPreviousPeriodDate, usePeriodData } from '../../hooks/usePeriodData'
@@ -11,7 +11,6 @@ import '../dashboard/theme/pb-tokens.css'
 
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
 import PeriodNavBar from '../dashboard/components/PeriodNavBar'
-import ActivityDayModal from '../transactions/components/ActivityDayModal'
 import ActivityDayTransactionRow from '../transactions/components/ActivityDayTransactionRow'
 import ActivityIntensityStrip, { type ChartDay } from '../transactions/components/ActivityIntensityStrip'
 import { toViewModel } from '../transactions/transactions.utils'
@@ -79,6 +78,10 @@ export default function EarningsPage() {
   } = usePeriodNavigator()
   const { transactions, loading } = useDashboardData(selectedDate, selectedPeriod)
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
+
+  useEffect(() => {
+    setSelectedDay(null)
+  }, [selectedDate, selectedPeriod])
 
   const periodData = usePeriodData(transactions, null, selectedPeriod, selectedDate, 'activity')
   const previousDate = useMemo(
@@ -206,6 +209,16 @@ export default function EarningsPage() {
             )}
           </MotionBox>
 
+          {selectedDay && (
+            <MotionBox variants={riseV}>
+              <SelectedDayIncomes
+                day={selectedDay}
+                incomes={selectedDayIncomes}
+                onClose={() => setSelectedDay(null)}
+              />
+            </MotionBox>
+          )}
+
           <MotionBox variants={riseV}>
             {loading ? (
               <Box px={{ base: 4, md: 6 }} pb={6}>
@@ -227,13 +240,6 @@ export default function EarningsPage() {
         </MotionBox>
       </Box>
 
-      {selectedDay && (
-        <SelectedDayIncomes
-          day={selectedDay}
-          incomes={selectedDayIncomes}
-          onClose={() => setSelectedDay(null)}
-        />
-      )}
     </Box>
   )
 }
@@ -254,35 +260,88 @@ function SelectedDayIncomes({
     day: 'numeric',
     month: 'long',
   })
+  const transactionCount = t(
+    incomes.length === 1 ? 'transactions.count' : 'transactions.countPlural',
+    { count: incomes.length },
+  )
 
   return (
-    <ActivityDayModal
-      isOpen
-      onClose={onClose}
-      label={t('earnings.day.label', { date: dayLabel })}
-      tone="income"
-      title={dayLabel}
-      totalLabel={t('earnings.day.total')}
-      total={formatCurrency(total)}
-      count={incomes.length}
-      dateContext={t('earnings.day.dateContext')}
-    >
-      <VStack align="stretch" spacing={2}>
+    <Box borderTop="1px solid var(--pb-hair)" borderBottom="1px solid var(--pb-hair)" bg="var(--nu-page)">
+      <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 5 }} bg="rgba(130, 10, 209, 0.035)">
+        <Flex align="flex-start" justify="space-between" gap={4}>
+          <Box minW={0}>
+            <Text
+              color="var(--nu-brand)"
+              fontSize="10px"
+              fontWeight={700}
+              letterSpacing="0.08em"
+              lineHeight={1.2}
+              textTransform="uppercase"
+            >
+              {t('transactions.selectedDay')}
+            </Text>
+            <Text mt={1} color="var(--pb-ink)" fontSize={{ base: 'md', md: 'lg' }} fontWeight={600} lineHeight={1.25}>
+              {dayLabel}
+            </Text>
+            <Text mt={1} color="var(--pb-ink-soft)" fontSize="12px" lineHeight={1.3}>
+              {transactionCount} · {t('earnings.day.dateContext')}
+            </Text>
+          </Box>
+
+          <Flex
+            as="button"
+            type="button"
+            aria-label={t('common.close')}
+            onClick={onClose}
+            flexShrink={0}
+            align="center"
+            justify="center"
+            w="32px"
+            h="32px"
+            mt="-4px"
+            mr="-6px"
+            borderRadius="full"
+            color="var(--nu-brand)"
+            bg="transparent"
+            transition="background-color .14s ease"
+            _hover={{ bg: 'rgba(130, 10, 209, 0.08)' }}
+            _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
+          >
+            <Icon as={X} boxSize="17px" strokeWidth={2.25} />
+          </Flex>
+        </Flex>
+
+        <Flex mt={3} pt={3} borderTop="1px solid rgba(130, 10, 209, 0.1)" align="center" justify="space-between" gap={4}>
+          <Text color="var(--pb-ink-soft)" fontSize="12px" fontWeight={500}>
+            {t('earnings.day.total')}
+          </Text>
+          <Text color="var(--nu-positive)" fontSize="lg" fontWeight={700} letterSpacing="-0.01em" style={{ fontVariantNumeric: 'tabular-nums' }}>
+            +{formatCurrency(total)}
+          </Text>
+        </Flex>
+      </Box>
+
+      <Box px={{ base: 4, md: 6 }}>
         {incomes.length === 0 ? (
-          <Box border="1px dashed var(--pb-hair-2)" borderRadius="14px" p={4} bg="var(--pb-surface-2)">
-            <Text fontFamily="var(--pb-serif)" fontStyle="italic" color="var(--pb-ink-soft)">
+          <Box py={5}>
+            <Text color="var(--pb-ink-soft)" fontSize="sm">
               {t('earnings.day.empty')}
             </Text>
           </Box>
         ) : (
-          <VStack align="stretch" spacing={2}>
+          <VStack role="list" align="stretch" spacing={0}>
             {incomes.map((income) => (
-              <ActivityDayTransactionRow key={income.id} transaction={income} tone="income" />
+              <ActivityDayTransactionRow
+                key={income.id}
+                appearance="nu"
+                transaction={income}
+                tone="income"
+              />
             ))}
           </VStack>
         )}
-      </VStack>
-    </ActivityDayModal>
+      </Box>
+    </Box>
   )
 }
 
