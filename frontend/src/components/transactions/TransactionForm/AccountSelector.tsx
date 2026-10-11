@@ -2,13 +2,12 @@ import {
   Box,
   FormControl,
   FormLabel,
-  HStack,
   Text,
   VStack,
   useColorModeValue,
 } from '@chakra-ui/react'
 import AccountAvatar from '../../accounts/AccountAvatar'
-import ChipCarousel from './ChipCarousel'
+import PagedGrid, { tileStyle } from './PagedGrid'
 import { FinancialAccount } from '../../../types'
 import { useI18n } from '../../../i18n'
 
@@ -30,10 +29,6 @@ export default function AccountSelector({
   const { t, formatCurrency } = useI18n()
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200')
   const captionColor = useColorModeValue('gray.500', 'gray.400')
-  const cardBg = useColorModeValue('white', 'whiteAlpha.50')
-  const selectedBg = useColorModeValue('blue.50', 'whiteAlpha.100')
-  const nameColor = useColorModeValue('gray.800', 'gray.100')
-  const accent = '#820ad1'
 
   const activeAccounts = accounts.filter((account) => account.active)
   const selected = activeAccounts.find((account) => account.id === value)
@@ -49,58 +44,36 @@ export default function AccountSelector({
           </Text>
         </Box>
       ) : (
-        // Single horizontal line of real-icon account chips; scrolls (carousel)
-        // when there are more accounts than fit, with chevrons on wider screens.
-        <ChipCarousel>
-          {activeAccounts.map((account) => {
+        <PagedGrid
+          items={activeAccounts}
+          getKey={(account) => String(account.id)}
+          initialIndex={activeAccounts.findIndex((account) => account.id === value)}
+          label={t('form.balanceAccount')}
+          renderItem={(account) => {
             const isSelected = account.id === value
             return (
               <Box
-                key={account.id}
                 as="button"
                 type="button"
-                role="group"
+                aria-pressed={isSelected}
                 onClick={() => onChange(account.id)}
-                textAlign="left"
-                flex="0 0 auto"
-                minW="172px"
-                maxW="220px"
-                borderRadius="xl"
-                px={3}
-                py={2.5}
-                border="2px solid"
-                borderColor={isSelected ? accent : borderColor}
-                bg={isSelected ? selectedBg : cardBg}
-                boxShadow={isSelected ? `0 12px 30px -18px ${accent}` : 'none'}
-                transition="border-color 0.18s ease, box-shadow 0.18s ease"
-                sx={{ scrollSnapAlign: 'start' }}
-                _hover={{ borderColor: accent }}
-                _focusVisible={{ outline: '2px solid', outlineColor: accent, outlineOffset: '2px' }}
+                {...tileStyle(isSelected)}
               >
-                <HStack spacing={2.5} align="center">
-                  <AccountAvatar account={account} size={34} />
-                  <VStack align="flex-start" spacing={0} minW={0}>
-                    <Text
-                      noOfLines={2}
-                      lineHeight="1.2"
-                      fontWeight={700}
-                      fontSize="sm"
-                      color={nameColor}
-                      _groupHover={{ textDecoration: 'underline' }}
-                    >
-                      {account.name}
+                <AccountAvatar account={account} size={32} />
+                <VStack align="flex-start" spacing={0} minW={0} ml={2}>
+                  <Text noOfLines={2} lineHeight="1.15" fontWeight={800} fontSize="sm" wordBreak="break-word">
+                    {account.name}
+                  </Text>
+                  {showBalances && (
+                    <Text noOfLines={1} fontSize="xs" fontWeight={600} color={captionColor}>
+                      {formatCurrency(account.currentBalance)}
                     </Text>
-                    {showBalances && (
-                      <Text noOfLines={1} fontSize="xs" color={captionColor}>
-                        {formatCurrency(account.currentBalance)}
-                      </Text>
-                    )}
-                  </VStack>
-                </HStack>
+                  )}
+                </VStack>
               </Box>
             )
-          })}
-        </ChipCarousel>
+          }}
+        />
       )}
 
       {showBalances && (
