@@ -164,13 +164,16 @@ export default function ExpenseQuickAdd({
       <Grid templateColumns="repeat(3, minmax(0, 1fr))" gap={2}>
         {CATEGORIES.map((item) => {
           const selected = category === item
-          const label = item === 'Entertainment' ? 'Leisure' : categoryLabel(item)
+          const label = item === 'Entertainment' ? t('category.short.Entertainment') : categoryLabel(item)
           return (
             <Button
               key={item}
               minW={0}
-              h="42px"
+              h="auto"
+              minH="42px"
               px={2}
+              py={1.5}
+              whiteSpace="normal"
               borderRadius="14px"
               border="1px solid"
               borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
@@ -181,9 +184,9 @@ export default function ExpenseQuickAdd({
               aria-pressed={selected}
               _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
             >
-              <Box as="span" overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap">
+              <Text as="span" noOfLines={2} lineHeight="1.15" textAlign="center" wordBreak="break-word">
                 {label}
-              </Box>
+              </Text>
             </Button>
           )
         })}
@@ -200,9 +203,12 @@ export default function ExpenseQuickAdd({
               return (
                 <Button
                   key={merchant.name}
-                  h="54px"
+                  h="auto"
+                  minH="54px"
                   minW={0}
                   px={2}
+                  py={1.5}
+                  whiteSpace="normal"
                   justifyContent="flex-start"
                   borderRadius="15px"
                   border="1px solid"
@@ -214,9 +220,18 @@ export default function ExpenseQuickAdd({
                   _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
                 >
                   <MerchantLogo category={category} domain={merchant.domain} name={merchant.name} size={32} />
-                  <Box as="span" ml={2} minW={0} overflow="hidden" textOverflow="ellipsis" whiteSpace="nowrap" fontWeight={800}>
+                  <Text
+                    as="span"
+                    ml={2}
+                    minW={0}
+                    noOfLines={2}
+                    lineHeight="1.15"
+                    textAlign="left"
+                    wordBreak="break-word"
+                    fontWeight={800}
+                  >
                     {merchant.name}
-                  </Box>
+                  </Text>
                 </Button>
               )
             })}

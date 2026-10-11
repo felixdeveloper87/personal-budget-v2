@@ -85,7 +85,7 @@ export default function IncomeModeSelector({ value, onChange }: IncomeModeSelect
                     fontWeight={800}
                     fontSize={{ base: 'xs', sm: 'sm' }}
                     lineHeight="shorter"
-                    noOfLines={1}
+                    noOfLines={2}
                   >
                     {t(mode.titleKey)}
                   </Text>
@@ -104,7 +104,7 @@ export default function IncomeModeSelector({ value, onChange }: IncomeModeSelect
                   color={colors.text.secondary}
                   fontSize={{ base: '10px', sm: '11px' }}
                   lineHeight="1.25"
-                  noOfLines={2}
+                  noOfLines={3}
                 >
                   {t(mode.captionKey)}
                 </Text>

@@ -96,7 +96,8 @@ export default function PaymentMethodSelector({
               </Box>
               <VStack align="flex-start" spacing={0} minW={0}>
                 <Text
-                  noOfLines={1}
+                  noOfLines={2}
+                  lineHeight="1.2"
                   fontWeight={700}
                   fontSize="sm"
                   color={nameColor}
@@ -136,7 +137,8 @@ export default function PaymentMethodSelector({
                   )}
                   <VStack align="flex-start" spacing={0} minW={0}>
                     <Text
-                      noOfLines={1}
+                      noOfLines={2}
+                      lineHeight="1.2"
                       fontWeight={700}
                       fontSize="sm"
                       color={nameColor}

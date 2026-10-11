@@ -81,7 +81,8 @@ export default function AccountSelector({
                   <AccountAvatar account={account} size={34} />
                   <VStack align="flex-start" spacing={0} minW={0}>
                     <Text
-                      noOfLines={1}
+                      noOfLines={2}
+                      lineHeight="1.2"
                       fontWeight={700}
                       fontSize="sm"
                       color={nameColor}
