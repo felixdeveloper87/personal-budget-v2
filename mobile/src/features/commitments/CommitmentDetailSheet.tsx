@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { nu } from "@/components/dashboard/nuTheme";
 import { useAuth } from "@/contexts/AuthContext";
-import { ApiError, cancelRecurringTransaction, deleteInstallmentPlan, listAccounts, listPaymentMethods, updateInstallmentPlan, updateRecurringTransaction, type CreditCardPaymentMethod } from "@/services/api";
+import { ApiError, cancelRecurringTransaction, closeInstallmentPlan, deleteInstallmentPlan, listAccounts, listPaymentMethods, updateInstallmentPlan, updateRecurringTransaction, type CreditCardPaymentMethod } from "@/services/api";
 import type { FinancialAccount, InstallmentPlan, RecurringTransaction } from "@/types/finance";
 import { planProgress, planTitle } from "./commitmentSummary";
 import { dateLabel, money, parseAmount, validDate } from "./format";
@@ -56,6 +56,23 @@ export function CommitmentDetailSheet({ selected, onClose, onChanged }: { select
     return () => { active = false; };
   }, [editing, user, logout, optionsRetry, originalAccountId, originalPaymentId]);
 
+  // Ending early only differs from deleting when some installments are paid and some still to come.
+  const canClose = Boolean(schedule && schedule.elapsed.length > 0 && schedule.upcoming.length > 0);
+
+  async function closePlan() {
+    if (!user || !plan || busy.current) return;
+    busy.current = true;
+    setSaving(true);
+    setError(null);
+    try {
+      await closeInstallmentPlan(user.token, plan.id);
+      onChanged();
+    } catch (cause) {
+      if (cause instanceof ApiError && cause.status === 401) { await logout(); return; }
+      setError(cause instanceof Error ? cause.message : "Não foi possível encerrar. Tente novamente.");
+    } finally { busy.current = false; setSaving(false); }
+  }
+
   async function mutate(remove = false) {
     if (!user || busy.current) return;
     const value = parseAmount(amount);
@@ -98,9 +115,16 @@ export function CommitmentDetailSheet({ selected, onClose, onChanged }: { select
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
           <Text style={styles.value}>{money(rule?.amount ?? plan?.installmentValue ?? 0)}<Text style={styles.perMonth}> / mês</Text></Text>
           {error ? <Text accessibilityRole="alert" style={styles.error}>{error}</Text> : null}
-          {confirmDelete ? <View style={styles.confirm}>
+          {confirmDelete && canClose && schedule ? <View style={styles.confirm}>
+            <Text style={styles.sectionTitle}>O que você quer fazer?</Text>
+            <Button disabled={saving} onPress={() => void closePlan()} label={saving ? "Aguarde…" : "Encerrar parcelamento"} />
+            <Text style={styles.caption}>{`Remove as ${schedule.upcoming.length} parcelas futuras. As ${schedule.elapsed.length} já pagas continuam no histórico e o saldo não muda. Use para quitação antecipada ou compra cancelada.`}</Text>
+            <Button danger disabled={saving} onPress={() => void mutate(true)} label="Excluir tudo" />
+            <Text style={styles.caption}>{`Apaga todas as ${schedule.transactions.length} parcelas, inclusive as já pagas. O saldo da conta e os relatórios desses meses vão mudar. Use se o parcelamento foi cadastrado por engano.`}</Text>
+            <Button secondary disabled={saving} onPress={() => { setConfirmDelete(false); setError(null); }} label="Voltar" />
+          </View> : confirmDelete ? <View style={styles.confirm}>
             <Text style={styles.sectionTitle}>{rule ? "Cancelar recorrência?" : "Excluir parcelamento?"}</Text>
-            <Text style={styles.caption}>{rule ? "A regra será encerrada e os lançamentos futuros gerados por ela serão removidos. O histórico até hoje será preservado." : "O plano e seus lançamentos serão excluídos. Esta ação não pode ser desfeita."}</Text>
+            <Text style={styles.caption}>{rule ? "A regra será encerrada e os lançamentos futuros gerados por ela serão removidos. O histórico até hoje será preservado." : schedule?.elapsed.length ? "Todas as parcelas serão excluídas, inclusive as já pagas. O saldo da conta e os relatórios passados vão mudar." : "O plano e seus lançamentos serão excluídos. Esta ação não pode ser desfeita."}</Text>
             <Button danger disabled={saving} onPress={() => void mutate(true)} label={saving ? "Aguarde…" : "Confirmar"} />
             <Button secondary disabled={saving} onPress={() => { setConfirmDelete(false); setError(null); }} label="Voltar" />
           </View> : editing ? <View style={styles.form}>
@@ -155,7 +179,7 @@ export function CommitmentDetailSheet({ selected, onClose, onChanged }: { select
               </>}
             </View>
             {canEdit ? <Button label="Editar compromisso" onPress={() => setEditing(true)} /> : null}
-            {rule?.active || plan ? <Button secondary danger label={rule ? "Cancelar recorrência" : "Excluir parcelamento"} onPress={() => setConfirmDelete(true)} /> : null}
+            {rule?.active || plan ? <Button secondary danger label={rule ? "Cancelar recorrência" : canClose ? "Encerrar parcelamento" : "Excluir parcelamento"} onPress={() => setConfirmDelete(true)} /> : null}
             {plan && schedule ? <View style={styles.schedule}>
               <Text style={styles.sectionTitle}>Calendário de parcelas</Text><Text style={styles.caption}>O calendário indica os vencimentos previstos, sem confirmar a quitação.</Text>
               {schedule.transactions.map((tx) => <View key={tx.id} style={styles.transaction}>

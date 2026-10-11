@@ -34,6 +34,7 @@ import {
 } from '../ui/icons'
 import { FinancialAccount, InstallmentPlan, PaymentMethod } from '../../types'
 import {
+  closeInstallmentPlan,
   deleteInstallmentPlan,
   listAccounts,
   listPaymentMethods,
@@ -76,6 +77,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const [showAllSchedule, setShowAllSchedule] = useState(false)
 
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
   const [draftInstallmentValue, setDraftInstallmentValue] = useState('')
   const [draftTotalAmount, setDraftTotalAmount] = useState('')
@@ -167,6 +169,36 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const progressPct = p.totalInstallments > 0
     ? Math.min(100, Math.round((paidCount / p.totalInstallments) * 100))
     : 0
+  const upcomingCount = p.transactions.length - paidCount
+  const upcomingTotal = sortedTransactions
+    .filter((item) => new Date(item.date) >= new Date())
+    .reduce((sum, item) => sum + item.amount, 0)
+  // Ending early only differs from deleting when some installments are paid and some still to come.
+  const canClose = paidCount > 0 && upcomingCount > 0
+
+  const handleClose = async () => {
+    setIsClosing(true)
+    try {
+      await closeInstallmentPlan(p.id)
+      ToastService.success({
+        title: t('installments.drawer.closedTitle'),
+        description: t('installments.drawer.closedDescription', { count: upcomingCount }),
+        duration: 2500,
+        dedupeKey: `installment-plan-closed:${p.id}`,
+      })
+      deleteDisclosure.onClose()
+      onChanged()
+      onClose()
+    } catch (err: unknown) {
+      ToastService.apiError(err, {
+        title: t('installments.drawer.closeError'),
+        duration: 3000,
+        dedupeKey: `installment-plan-close-failed:${p.id}`,
+      })
+    } finally {
+      setIsClosing(false)
+    }
+  }
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -286,7 +318,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               {t('installments.drawer.editPlan')}
             </NuSheetButton>
             <NuSheetButton tone="danger" px={5} leftIcon={<Icon as={Trash2} boxSize={4} />} onClick={deleteDisclosure.onOpen}>
-              {t('installments.drawer.delete')}
+              {canClose ? t('installments.drawer.end') : t('installments.drawer.delete')}
             </NuSheetButton>
           </>
         }
@@ -516,7 +548,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </Box>
               <VStack align="flex-start" spacing={0}>
                 <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
-                  {t('installments.drawer.deleteModal.title')}
+                  {canClose ? t('installments.drawer.endModal.title') : t('installments.drawer.deleteModal.title')}
                 </Text>
                 <Text fontSize="xs" color={captionColor}>
                   {t('installments.drawer.deleteModal.subtitle')}
@@ -525,9 +557,63 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             </AlertDialogHeader>
 
             <AlertDialogBody px={6} pb={4}>
-              <Text fontSize="sm" color={captionColor}>
-                {t('installments.drawer.deleteModal.body', { count: p.totalInstallments })}
-              </Text>
+              {canClose ? (
+                <VStack align="stretch" spacing={2.5}>
+                  <Box
+                    as="button"
+                    type="button"
+                    onClick={handleClose}
+                    disabled={isClosing || isDeleting}
+                    textAlign="left"
+                    p={4}
+                    borderRadius="16px"
+                    border="1.5px solid"
+                    borderColor={NU_SHEET_COLORS.brand}
+                    bg={NU_SHEET_COLORS.brandSoft}
+                    opacity={isDeleting ? 0.5 : 1}
+                    _hover={{ bg: '#ead6fb' }}
+                    _focusVisible={{ outline: `2px solid ${NU_SHEET_COLORS.brand}`, outlineOffset: '2px' }}
+                  >
+                    <Text fontSize="sm" fontWeight={800} color={NU_SHEET_COLORS.brand}>
+                      {isClosing ? t('installments.drawer.endModal.closing') : t('installments.drawer.endModal.closeTitle')}
+                    </Text>
+                    <Text mt={1} fontSize="xs" color={NU_SHEET_COLORS.ink} lineHeight={1.5}>
+                      {t('installments.drawer.endModal.closeBody', {
+                        upcoming: upcomingCount,
+                        amount: formatCurrency(upcomingTotal),
+                        paid: paidCount,
+                      })}
+                    </Text>
+                  </Box>
+                  <Box
+                    as="button"
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={isClosing || isDeleting}
+                    textAlign="left"
+                    p={4}
+                    borderRadius="16px"
+                    border="1.5px solid #ececf1"
+                    bg="white"
+                    opacity={isClosing ? 0.5 : 1}
+                    _hover={{ borderColor: NU_SHEET_COLORS.danger, bg: NU_SHEET_COLORS.dangerSoft }}
+                    _focusVisible={{ outline: `2px solid ${NU_SHEET_COLORS.danger}`, outlineOffset: '2px' }}
+                  >
+                    <Text fontSize="sm" fontWeight={800} color={NU_SHEET_COLORS.danger}>
+                      {isDeleting ? t('installments.drawer.deleteModal.deleting') : t('installments.drawer.endModal.deleteTitle')}
+                    </Text>
+                    <Text mt={1} fontSize="xs" color={NU_SHEET_COLORS.inkSoft} lineHeight={1.5}>
+                      {t('installments.drawer.endModal.deleteBody', { count: p.transactions.length, paid: paidCount })}
+                    </Text>
+                  </Box>
+                </VStack>
+              ) : (
+                <Text fontSize="sm" color={captionColor}>
+                  {paidCount > 0
+                    ? t('installments.drawer.deleteModal.bodyPaid', { count: p.transactions.length })
+                    : t('installments.drawer.deleteModal.body', { count: p.transactions.length })}
+                </Text>
+              )}
             </AlertDialogBody>
 
             <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
@@ -541,19 +627,21 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               >
                 {t('installments.drawer.cancel')}
               </Button>
-              <Button
-                onClick={handleDelete}
-                isLoading={isDeleting}
-                loadingText={t('installments.drawer.deleteModal.deleting')}
-                colorScheme="red"
-                h="44px"
-                px={6}
-                borderRadius="full"
-                fontSize="sm"
-                fontWeight={700}
-              >
-                {t('installments.drawer.delete')}
-              </Button>
+              {!canClose && (
+                <Button
+                  onClick={handleDelete}
+                  isLoading={isDeleting}
+                  loadingText={t('installments.drawer.deleteModal.deleting')}
+                  colorScheme="red"
+                  h="44px"
+                  px={6}
+                  borderRadius="full"
+                  fontSize="sm"
+                  fontWeight={700}
+                >
+                  {t('installments.drawer.delete')}
+                </Button>
+              )}
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>

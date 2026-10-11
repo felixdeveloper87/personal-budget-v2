@@ -8,6 +8,7 @@ import com.example.budget.model.User;
 import com.example.budget.service.InstallmentPlanService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,6 +104,23 @@ public class InstallmentPlanController {
             Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         return installmentPlanService.assignAccount(id, request, user);
+    }
+
+    /**
+     * Ends an installment plan early: removes the installments still to come and
+     * keeps the ones already paid (balance and history stay intact).
+     *
+     * @return 200 with the updated plan, or 204 when nothing had been paid yet and
+     *         the plan was removed entirely
+     */
+    @PostMapping("/{id}/close")
+    public ResponseEntity<InstallmentPlanDTO> closeInstallmentPlan(
+            @PathVariable Long id,
+            Authentication authentication) {
+        User user = (User) authentication.getPrincipal();
+        return installmentPlanService.close(id, user)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     /**

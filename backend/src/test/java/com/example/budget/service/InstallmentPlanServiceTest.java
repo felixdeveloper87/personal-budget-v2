@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -357,6 +358,64 @@ class InstallmentPlanServiceTest {
         verify(cacheInvalidation).evictInstallmentPlansList(20L);
         verify(cacheInvalidation).evictTransactionsList(20L);
         verify(cacheInvalidation).evictMonthlySummary(owner, t1.getPaymentDate());
+    }
+
+    @Test
+    void close_removesOnlyUpcomingInstallmentsAndShrinksTotals() {
+        LocalDate today = LocalDate.now();
+        Transaction paid1 = installment(1, today.minusMonths(2), "100.00");
+        Transaction paid2 = installment(2, today, "100.00");
+        Transaction upcoming = installment(3, today.plusMonths(1), "100.00");
+        InstallmentPlan plan = new InstallmentPlan(3, new BigDecimal("300.00"), new BigDecimal("100.00"), owner);
+        ReflectionTestUtils.setField(plan, "id", 31L);
+        plan.setTransactions(new ArrayList<>(List.of(paid1, paid2, upcoming)));
+
+        when(installmentPlanRepository.findById(31L)).thenReturn(Optional.of(plan));
+        when(installmentPlanRepository.save(plan)).thenReturn(plan);
+
+        assertThat(installmentPlanService.close(31L, owner)).isPresent();
+
+        assertThat(plan.getTransactions()).containsExactly(paid1, paid2);
+        assertThat(plan.getTotalInstallments()).isEqualTo(2);
+        assertThat(plan.getTotalAmount()).isEqualByComparingTo("200.00");
+        verify(installmentPlanRepository, never()).delete(any(InstallmentPlan.class));
+        verify(cacheInvalidation).evictMonthlySummary(owner, upcoming.getPaymentDate());
+        verify(cacheInvalidation).evictInstallmentPlansList(20L);
+    }
+
+    @Test
+    void close_withNothingPaidYetDeletesThePlan() {
+        Transaction upcoming = installment(1, LocalDate.now().plusDays(3), "50.00");
+        InstallmentPlan plan = new InstallmentPlan(1, new BigDecimal("50.00"), new BigDecimal("50.00"), owner);
+        ReflectionTestUtils.setField(plan, "id", 32L);
+        plan.setTransactions(new ArrayList<>(List.of(upcoming)));
+
+        when(installmentPlanRepository.findById(32L)).thenReturn(Optional.of(plan));
+
+        assertThat(installmentPlanService.close(32L, owner)).isEmpty();
+
+        verify(installmentPlanRepository).delete(plan);
+    }
+
+    @Test
+    void close_throwsWhenWrongOwner() {
+        User other = new User();
+        other.setId(99L);
+        InstallmentPlan plan = new InstallmentPlan(1, BigDecimal.TEN, BigDecimal.TEN, other);
+        ReflectionTestUtils.setField(plan, "id", 33L);
+        when(installmentPlanRepository.findById(33L)).thenReturn(Optional.of(plan));
+
+        assertThatThrownBy(() -> installmentPlanService.close(33L, owner))
+                .isInstanceOf(AccessDeniedException.class);
+    }
+
+    private static Transaction installment(int number, LocalDate paymentDate, String amount) {
+        Transaction tx = new Transaction();
+        tx.setInstallmentNumber(number);
+        tx.setDateTime(paymentDate.atTime(12, 0));
+        tx.setPaymentDate(paymentDate);
+        tx.setAmount(new BigDecimal(amount));
+        return tx;
     }
 
     @SuppressWarnings("unchecked")

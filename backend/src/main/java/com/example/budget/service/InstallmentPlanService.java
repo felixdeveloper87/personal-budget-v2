@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Service for installment plan operations.
@@ -265,6 +266,59 @@ public class InstallmentPlanService {
         for (Transaction t : linked) {
             cacheInvalidation.evictMonthlySummary(user, t.getPaymentDate());
         }
+    }
+
+    /**
+     * Ends an installment plan early (paid off ahead of time, purchase cancelled):
+     * removes only the installments still to come — those due after today — and
+     * keeps the ones already paid, so the account balance and past reports stay
+     * intact. The plan's totals shrink to what was actually paid.
+     *
+     * If nothing has been paid yet there is no history to keep, so the whole plan
+     * is deleted and an empty result is returned.
+     *
+     * @param id Installment plan ID to close
+     * @param user User attempting to close the plan
+     * @return the updated plan, or empty when the plan was removed entirely
+     * @throws EntityNotFoundException if plan is not found
+     * @throws AccessDeniedException if user is not the owner
+     */
+    @Transactional
+    public Optional<InstallmentPlanDTO> close(Long id, User user) {
+        InstallmentPlan plan = installmentPlanRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("InstallmentPlan", id));
+
+        validateUserOwnership(plan, user);
+
+        LocalDate today = LocalDate.now();
+        List<Transaction> upcoming = plan.getTransactions().stream()
+                .filter(tx -> tx.getPaymentDate() != null && tx.getPaymentDate().isAfter(today))
+                .toList();
+        List<Transaction> paid = plan.getTransactions().stream()
+                .filter(tx -> !upcoming.contains(tx))
+                .toList();
+
+        if (paid.isEmpty()) {
+            delete(id, user);
+            return Optional.empty();
+        }
+
+        // orphanRemoval deletes the detached upcoming installments.
+        plan.getTransactions().removeAll(upcoming);
+        plan.setTotalInstallments(paid.size());
+        plan.setTotalAmount(paid.stream()
+                .map(Transaction::getAmount)
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        InstallmentPlan saved = installmentPlanRepository.save(plan);
+        cacheInvalidation.evictInstallmentPlansList(user.getId());
+        cacheInvalidation.evictTransactionsList(user.getId());
+        upcoming.stream()
+                .map(Transaction::getPaymentDate)
+                .distinct()
+                .forEach(date -> cacheInvalidation.evictMonthlySummary(user, date));
+        return Optional.of(installmentPlanMapper.toDTO(saved));
     }
 
     /**

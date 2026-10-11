@@ -149,6 +149,11 @@ export async function deleteInstallmentPlan(token: string, id: number): Promise<
   return request<void>(`/installment-plans/${id}`, { token, method: "DELETE" });
 }
 
+/** Ends a plan early: drops upcoming installments, keeps paid ones. Undefined when the plan was removed (204). */
+export async function closeInstallmentPlan(token: string, id: number): Promise<InstallmentPlan | undefined> {
+  return request<InstallmentPlan | undefined>(`/installment-plans/${id}/close`, { token, method: "POST" });
+}
+
 interface TransactionFilters {
   type?: "income" | "expense";
   startDate?: string;

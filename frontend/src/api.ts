@@ -418,9 +418,16 @@ export async function assignInstallmentPlanAccount(
   return data
 }
 
-// Delete installment plan → DELETE /installment-plans/:id
+// Delete installment plan and every installment, paid ones included → DELETE /installment-plans/:id
 export async function deleteInstallmentPlan(id: number): Promise<void> {
   await api.delete(`/installment-plans/${id}`)
+}
+
+// End a plan early: drops the upcoming installments, keeps the paid ones → POST /installment-plans/:id/close
+// Resolves to null when nothing had been paid yet and the plan was removed entirely (204).
+export async function closeInstallmentPlan(id: number): Promise<InstallmentPlan | null> {
+  const { data, status } = await api.post<InstallmentPlan>(`/installment-plans/${id}/close`)
+  return status === 204 ? null : data
 }
 
 // ----------------------------------------------------
