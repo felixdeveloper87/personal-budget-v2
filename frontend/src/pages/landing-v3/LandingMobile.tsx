@@ -147,7 +147,7 @@ export default function LandingMobile({ onRequestAccess, onSignIn }: LandingMobi
       <BrandWaves className="pbm-art" />
 
       <div className="pbm-top">
-        <BrandMark variant="title" colorMode="dark" size={148} />
+        <BrandMark variant="title" colorMode="dark" size={196} />
         <OnBrandContext.Provider value>
           <LanguageToggle />
         </OnBrandContext.Provider>
