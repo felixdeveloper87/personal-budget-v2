@@ -27,6 +27,7 @@ import { EditorialProvider } from '../../editorial'
 import { useI18n } from '../../i18n'
 import './LandingV3.css'
 import './LandingNu.css'
+import LandingMobile from './LandingMobile'
 import {
   createLandingV3Config,
   type LandingFeatureKind,
@@ -39,6 +40,22 @@ interface LandingV3Props {
 }
 
 const LANDING_STYLE = { ...paletteCssVariables(LIGHT_PALETTE), colorScheme: 'light' } as CSSProperties
+
+const MOBILE_QUERY = '(max-width: 720px)'
+
+function useIsMobile() {
+  const [mobile, setMobile] = useState(() => window.matchMedia(MOBILE_QUERY).matches)
+
+  useEffect(() => {
+    const query = window.matchMedia(MOBILE_QUERY)
+    const update = () => setMobile(query.matches)
+    update()
+    query.addEventListener('change', update)
+    return () => query.removeEventListener('change', update)
+  }, [])
+
+  return mobile
+}
 
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false)
@@ -516,7 +533,12 @@ function HouseholdPreview({ household }: { household: LandingV3Content['househol
   )
 }
 
-export default function LandingV3({ onRequestAccess, onSignIn }: LandingV3Props) {
+export default function LandingV3(props: LandingV3Props) {
+  const mobile = useIsMobile()
+  return mobile ? <LandingMobile {...props} /> : <LandingDesktop {...props} />
+}
+
+function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
   const { t, formatCurrency } = useI18n()
   const content = useMemo(
     () => createLandingV3Config(t, formatCurrency),

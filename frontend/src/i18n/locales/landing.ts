@@ -3,6 +3,9 @@ import type { TranslationBundle } from '../types'
 export const landingTranslations: TranslationBundle = {
   'en-GB': {
     'landing.brand.tagline': 'Clarity for your money',
+    'landing.mobile.title': 'Clarity for your money',
+    'landing.mobile.subtitle': 'Accounts, spending, commitments and household costs in one calm view.',
+    'landing.mobile.note': 'Free access · No card required',
     'landing.a11y.skipContent': 'Skip to content',
     'landing.a11y.mainNavigation': 'Main navigation',
     'landing.a11y.home': 'Personal Budget home',
@@ -162,6 +165,9 @@ export const landingTranslations: TranslationBundle = {
 
   'pt-BR': {
     'landing.brand.tagline': 'Clareza para o seu dinheiro',
+    'landing.mobile.title': 'Clareza para o seu dinheiro',
+    'landing.mobile.subtitle': 'Contas, gastos, compromissos e custos da casa em uma visão única e tranquila.',
+    'landing.mobile.note': 'Acesso gratuito · Não requer cartão',
     'landing.a11y.skipContent': 'Pular para o conteúdo',
     'landing.a11y.mainNavigation': 'Navegação principal',
     'landing.a11y.home': 'Página inicial do Personal Budget',
