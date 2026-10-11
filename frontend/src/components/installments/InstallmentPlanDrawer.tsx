@@ -1,11 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Box,
   Button,
   Flex,
@@ -14,20 +8,13 @@ import {
   HStack,
   Icon,
   Input,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Select,
+  SimpleGrid,
   Text,
-  useColorModeValue,
   useDisclosure,
   VStack,
 } from '@chakra-ui/react'
 import {
-  AlertTriangle,
   CheckCircle2,
   Pencil,
   Trash2,
@@ -44,12 +31,10 @@ import { ToastService } from '../../services/toast'
 import PlanLogo from './PlanLogo'
 import { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { getInstallmentPlanTitle } from '../../utils/installments'
-import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
-import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
 import PremiumModal from '../ui/PremiumModal'
 import NuModalHeader from '../ui/NuModalHeader'
-import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
+import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton } from '../ui/NuDetailSheet'
 
 interface InstallmentPlanDrawerProps {
   plan: InstallmentPlan | null
@@ -95,7 +80,6 @@ function fieldLabel(label: string) {
  * schedule plus edit/delete actions.
  */
 export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: InstallmentPlanDrawerProps) {
-  const ed = useEd()
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const open = plan != null
   const [displayPlan, setDisplayPlan] = useState<InstallmentPlan | null>(plan)
@@ -113,21 +97,6 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const [draftPaymentMethodId, setDraftPaymentMethodId] = useState<number | null>(null)
   const editDisclosure = useDisclosure()
   const deleteDisclosure = useDisclosure()
-  const cancelRef = React.useRef<HTMLButtonElement>(null)
-
-  // ---- Editorial-aware tokens for the Chakra Modal / AlertDialog overlays ----
-  const titleColorBase = useColorModeValue('gray.900', 'gray.50')
-  const titleColor = ed ? ed.cream : titleColorBase
-  const captionColorBase = useColorModeValue('gray.500', 'gray.400')
-  const captionColor = ed ? ed.muted : captionColorBase
-  const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
-  const dividerColor = ed ? ed.line : dividerColorBase
-  const fallbackDialogBg = useColorModeValue('#ffffff', '#0a0a0a')
-  const dialogBg = ed?.solid ?? fallbackDialogBg
-  const warningChipBgBase = useColorModeValue('red.50', 'rgba(239,68,68,0.14)')
-  const warningChipBg = ed ? 'var(--pb-tint-coral)' : warningChipBgBase
-  const warningChipFgBase = useColorModeValue('red.600', 'red.300')
-  const warningChipFg = ed ? ed.red : warningChipFgBase
 
   // Keep the last plan mounted while the close transition plays out.
   useEffect(() => {
