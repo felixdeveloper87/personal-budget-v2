@@ -31,6 +31,18 @@
   width: 100%;
   height: 72%;
   pointer-events: none;
+  animation: pbm-waves-in 1100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pbm-waves-in {
+  from {
+    opacity: 0.35;
+    transform: translate3d(0, -7%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .pb-waves__spots > *,
@@ -82,9 +94,19 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-top: 32px;
-  animation: pbm-rise 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  padding-top: 28px;
 }
+
+/* Copy rises in a short stagger behind the card. */
+.pbm-bottom > * {
+  animation: pbm-rise 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.pbm-bottom > h1 { animation-delay: 320ms; }
+.pbm-bottom > p { animation-delay: 400ms; }
+.pbm-bottom > .pbm-actions { animation-delay: 480ms; }
+.pbm-bottom > .pbm-note,
+.pbm-bottom > .pbm-explore { animation-delay: 600ms; }
 
 @keyframes pbm-rise {
   from {
@@ -98,7 +120,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pbm-bottom {
+  .pbm-bottom > * {
     animation: none;
   }
 }
@@ -215,4 +237,309 @@
   outline: 2px solid #ffffff;
   outline-offset: 2px;
   border-radius: 8px;
+}
+
+/* ---------- Balance stage ----------
+   A forecast card peeks behind the balance card; the purchase toast lands
+   on the front card's corner. Timings match LandingMobile.tsx
+   (count-up at 450ms, purchase at 2100ms). */
+.pbm-stage {
+  position: relative;
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 28px auto 0;
+  padding-bottom: 26px;
+}
+
+.pbm-card {
+  border-radius: 24px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pbm-card--back {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  height: 78px;
+  margin: 0 14px -38px;
+  padding: 12px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+  animation: pbm-card-in 700ms 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pbm-card--back small {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.74rem;
+}
+
+.pbm-card--back b {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.pbm-card--front {
+  position: relative;
+  overflow: hidden;
+  padding: 16px 18px 0;
+  background: #ffffff;
+  color: #1f1f24;
+  box-shadow: 0 28px 50px -24px rgba(30, 0, 60, 0.65);
+  animation: pbm-card-in 760ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pbm-card-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.pbm-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pbm-card__head small {
+  color: #6b6b76;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.pbm-card__eye {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  margin: -4px -6px -4px 0;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: #f5f5f8;
+  color: #6b6b76;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.pbm-card__eye:active {
+  transform: scale(0.92);
+}
+
+.pbm-card__eye[aria-pressed="true"] {
+  background: var(--nu-brand-tint);
+  color: var(--nu-brand);
+}
+
+.pbm-card__eye:focus-visible {
+  outline: 2px solid var(--nu-brand);
+  outline-offset: 2px;
+}
+
+.pbm-card__amount {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  margin-top: 4px;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.pbm-card__mask {
+  display: block;
+  width: 62%;
+  height: 22px;
+  border-radius: 999px;
+  background: #ececf1;
+  animation: pbm-fade 220ms ease both;
+}
+
+@keyframes pbm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.pbm-card__delta {
+  display: block;
+  color: #0f8a5f;
+  font-size: 0.8rem;
+  font-weight: 600;
+  animation: pbm-fade 400ms 1500ms ease both;
+}
+
+.pbm-spark {
+  display: block;
+  width: calc(100% + 36px);
+  height: 58px;
+  margin: 8px -18px 0;
+  overflow: visible;
+}
+
+.pbm-spark__line {
+  fill: none;
+  stroke: var(--nu-brand);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  animation: pbm-draw 1200ms 520ms cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+.pbm-spark__area {
+  animation: pbm-fade 700ms 1100ms ease both;
+}
+
+.pbm-spark__dot {
+  fill: var(--nu-brand);
+  stroke: #ffffff;
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pbm-pop 420ms 1650ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes pbm-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pbm-pop {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Purchase notification: springs onto the card's bottom corner. */
+.pbm-toast {
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(86%, 300px);
+  padding: 10px 14px 10px 10px;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #1f1f24;
+  box-shadow:
+    0 0 0 1px rgba(31, 31, 36, 0.05),
+    0 18px 36px -16px rgba(30, 0, 60, 0.55);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translate3d(0, -18px, 0) scale(0.92);
+  transition:
+    opacity 260ms ease,
+    transform 560ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pbm-toast.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.pbm-toast__icon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--nu-brand-tint);
+  color: var(--nu-brand);
+}
+
+.pbm-toast__copy {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.pbm-toast__copy small {
+  color: #8a8a95;
+  font-size: 0.7rem;
+}
+
+.pbm-toast__copy b {
+  overflow: hidden;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pbm-toast > strong {
+  color: #c2412d;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+/* Short screens: trim the stage before it crowds the CTAs. */
+@media (max-height: 780px) {
+  .pbm-card--back {
+    display: none;
+  }
+
+  .pbm-spark {
+    height: 40px;
+  }
+}
+
+@media (max-height: 690px) {
+  .pbm-stage {
+    margin-top: 16px;
+  }
+
+  .pbm-spark,
+  .pbm-card__delta {
+    display: none;
+  }
+
+  .pbm-card--front {
+    padding-bottom: 14px;
+  }
+
+  .pbm-bottom > .pbm-note {
+    display: none;
+  }
+}
+
+@media (max-height: 580px) {
+  .pbm-stage {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pbm-art,
+  .pbm-card--back,
+  .pbm-card--front,
+  .pbm-card__mask,
+  .pbm-card__delta,
+  .pbm-spark__area,
+  .pbm-spark__dot {
+    animation: none;
+  }
+
+  .pbm-spark__line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .pbm-toast {
+    transition: none;
+  }
 }
