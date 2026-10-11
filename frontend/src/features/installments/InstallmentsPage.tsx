@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Box, Flex, HStack, Spinner, Text } from '@chakra-ui/react'
 import { CalendarClock, CheckCircle2, CreditCard } from 'lucide-react'
 
@@ -19,6 +19,8 @@ import { NuEmpty, NuListRow, NuPill, NuProgress, NuStatStrip } from '../commitme
 import { useI18n } from '../../i18n'
 
 type InstallmentView = 'plans' | 'statements'
+
+const COMPLETED_PREVIEW = 5
 
 interface InstallmentsPageProps {
   onPageChange?: (page: AppPage) => void
@@ -60,6 +62,7 @@ export default function InstallmentsPage({ embedded = false, onDataChange }: Ins
   const [loading, setLoading] = useState(true)
   const [selectedPlan, setSelectedPlan] = useState<InstallmentPlan | null>(null)
   const [view, setView] = useState<InstallmentView>('plans')
+  const [showAllCompleted, setShowAllCompleted] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -82,7 +85,9 @@ export default function InstallmentsPage({ embedded = false, onDataChange }: Ins
 
   const summary = useMemo(() => {
     const active = plans.filter((plan) => !isInstallmentPlanCompleted(plan))
-    const completed = plans.filter(isInstallmentPlanCompleted)
+    // Most recently finished first, so the collapsed list shows the latest ones.
+    const lastDue = (plan: InstallmentPlan) => plan.transactions.reduce((latest, tx) => (tx.date > latest ? tx.date : latest), '')
+    const completed = plans.filter(isInstallmentPlanCompleted).sort((a, b) => lastDue(b).localeCompare(lastDue(a)))
     const now = Date.now()
     const remaining = active.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() >= now).reduce((total, item) => total + item.amount, 0), 0)
     const paid = plans.reduce((sum, plan) => sum + plan.transactions.filter((item) => new Date(item.date).getTime() < now).reduce((total, item) => total + item.amount, 0), 0)
@@ -91,8 +96,8 @@ export default function InstallmentsPage({ embedded = false, onDataChange }: Ins
   }, [plans])
 
   const statements = useMemo<StatementMonth[]>(
-    () => buildStatements(summary.active, t('installments.planFallback')),
-    [summary.active, t],
+    () => buildStatements(plans, t('installments.planFallback')),
+    [plans, t],
   )
 
   const body = (
@@ -131,7 +136,33 @@ export default function InstallmentsPage({ embedded = false, onDataChange }: Ins
                 {summary.completed.length > 0 && (
                   <MotionBox variants={riseV}>
                     <NuSection title={t('installments.sections.completed')} subtitle={t('installments.sections.completedCaption')}>
-                      <PlanList plans={summary.completed} onOpen={setSelectedPlan} />
+                      <PlanList
+                        plans={showAllCompleted ? summary.completed : summary.completed.slice(0, COMPLETED_PREVIEW)}
+                        onOpen={setSelectedPlan}
+                      />
+                      {summary.completed.length > COMPLETED_PREVIEW && (
+                        <Flex justify="center" pt={3}>
+                          <Box
+                            as="button"
+                            type="button"
+                            onClick={() => setShowAllCompleted((value) => !value)}
+                            aria-expanded={showAllCompleted}
+                            px={5}
+                            h="40px"
+                            borderRadius="full"
+                            bg="var(--nu-surface)"
+                            color="var(--nu-brand)"
+                            fontSize="sm"
+                            fontWeight={700}
+                            _hover={{ bg: 'var(--nu-surface-hover)' }}
+                            _focusVisible={{ outline: '2px solid var(--nu-brand)', outlineOffset: '2px' }}
+                          >
+                            {showAllCompleted
+                              ? t('installments.sections.showLess')
+                              : t('installments.sections.showMore', { count: summary.completed.length - COMPLETED_PREVIEW })}
+                          </Box>
+                        </Flex>
+                      )}
                     </NuSection>
                   </MotionBox>
                 )}
@@ -239,15 +270,19 @@ interface StatementItem {
   label: string
 }
 
+type StatementStatus = 'closed' | 'open' | 'upcoming'
+
 interface StatementMonth {
   key: string
   date: Date
   total: number
+  status: StatementStatus
   items: StatementItem[]
 }
 
-/** Group active-plan installments by the calendar month they fall due, from the
- *  current month onward. Each month becomes a "statement" of what is owed. */
+/** Group every plan's installments (completed plans included) by the calendar
+ *  month they fall due. Each month becomes a "statement": past months are
+ *  closed, the current one is open, later ones are upcoming. */
 function buildStatements(plans: InstallmentPlan[], fallbackPlanLabel: string): StatementMonth[] {
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -258,9 +293,11 @@ function buildStatements(plans: InstallmentPlan[], fallbackPlanLabel: string): S
     for (const tx of plan.transactions) {
       const due = new Date(`${tx.date}T00:00:00`)
       const monthStart = new Date(due.getFullYear(), due.getMonth(), 1)
-      if (monthStart < startOfMonth) continue
       const key = `${due.getFullYear()}-${String(due.getMonth() + 1).padStart(2, '0')}`
-      const bucket = map.get(key) ?? { key, date: monthStart, total: 0, items: [] }
+      const status: StatementStatus = monthStart < startOfMonth
+        ? 'closed'
+        : monthStart.getTime() === startOfMonth.getTime() ? 'open' : 'upcoming'
+      const bucket = map.get(key) ?? { key, date: monthStart, total: 0, status, items: [] }
       bucket.total += tx.amount
       bucket.items.push({
         id: tx.id,
@@ -278,26 +315,55 @@ function buildStatements(plans: InstallmentPlan[], fallbackPlanLabel: string): S
   return months
 }
 
-/** Month chips (Nubank fatura tabs) over the selected month's instalment list. */
+const STATUS_STYLE: Record<StatementStatus, { bg: string; color: string }> = {
+  closed: { bg: 'var(--nu-positive-tint)', color: 'var(--nu-positive)' },
+  open: { bg: 'var(--nu-brand-tint, #f3e8fc)', color: 'var(--nu-brand)' },
+  upcoming: { bg: 'var(--nu-surface)', color: 'var(--pb-ink-soft)' },
+}
+
+/** The month a statements view opens on: the current one, else the next due, else the latest. */
+function defaultStatementKey(months: StatementMonth[]): string {
+  return (months.find((m) => m.status !== 'closed') ?? months[months.length - 1])?.key ?? ''
+}
+
+/** Month chips (Nubank fatura tabs) over the selected month's instalment list.
+ *  Past (closed) statements sit to the left; the row opens on the current month. */
 function InstallmentStatements({ months }: { months: StatementMonth[] }) {
   const { t, locale, formatCurrency, formatDate } = useI18n()
-  const [selectedKey, setSelectedKey] = useState<string>(() => months[0]?.key ?? '')
+  const [selectedKey, setSelectedKey] = useState<string>(() => defaultStatementKey(months))
+  const chipsRef = useRef<HTMLDivElement>(null)
 
-  // Keep the selection valid as data loads/changes; fall back to the first month.
+  // Keep the selection valid as data loads/changes.
   useEffect(() => {
     if (months.length > 0 && !months.some((m) => m.key === selectedKey)) {
-      setSelectedKey(months[0].key)
+      setSelectedKey(defaultStatementKey(months))
     }
   }, [months, selectedKey])
 
+  // Start the chip row on the current month so past statements are a swipe left.
+  useEffect(() => {
+    const row = chipsRef.current
+    const chip = row?.querySelector<HTMLElement>('[aria-pressed="true"]')
+    if (row && chip) row.scrollLeft = chip.offsetLeft - row.offsetLeft - 16
+    // Only on mount — later taps shouldn't jump the row.
+  }, [])
+
   const selected = months.find((m) => m.key === selectedKey) ?? months[0]
   if (!selected) return null
+  const hasPast = months.some((m) => m.status === 'closed')
+  const firstOpenIndex = months.findIndex((m) => m.status !== 'closed')
 
   const monthTitle = formatDate(selected.date, { month: 'long', year: 'numeric' })
 
   return (
     <NuSection title={t('installments.statements.title')} subtitle={t('installments.statements.subtitle')}>
+      {hasPast && (
+        <Text mb={2} fontSize="xs" color="var(--pb-ink-soft)">
+          {t('installments.statements.pastHint')}
+        </Text>
+      )}
       <HStack
+        ref={chipsRef}
         as="nav"
         aria-label={t('installments.statements.monthsAria')}
         spacing={2}
@@ -307,11 +373,13 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
         pb={1}
         sx={{ scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}
       >
-        {months.map((month) => {
+        {months.map((month, index) => {
           const isActive = month.key === selected.key
+          const isPast = month.status === 'closed'
           return (
             <Box
               as="button"
+              ml={index > 0 && index === firstOpenIndex ? 3 : 0}
               type="button"
               key={month.key}
               onClick={() => setSelectedKey(month.key)}
@@ -321,7 +389,7 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
               py={2}
               borderRadius="full"
               bg={isActive ? 'var(--nu-brand)' : 'var(--nu-surface)'}
-              color={isActive ? 'white' : 'var(--pb-ink)'}
+              color={isActive ? 'white' : isPast ? 'var(--pb-ink-soft)' : 'var(--pb-ink)'}
               fontSize="sm"
               fontWeight={isActive ? 700 : 500}
               textTransform="capitalize"
@@ -344,9 +412,24 @@ function InstallmentStatements({ months }: { months: StatementMonth[] }) {
             {formatCurrency(selected.total)}
           </Text>
         </Box>
-        <Text fontSize="sm" color="var(--pb-ink-soft)" flexShrink={0}>
-          {t(selected.items.length === 1 ? 'installments.paymentCount.one' : 'installments.paymentCount.other', { count: selected.items.length })}
-        </Text>
+        <Box textAlign="right" flexShrink={0}>
+          <Text
+            as="span"
+            display="inline-block"
+            px={2.5}
+            py={0.5}
+            borderRadius="full"
+            bg={STATUS_STYLE[selected.status].bg}
+            color={STATUS_STYLE[selected.status].color}
+            fontSize="xs"
+            fontWeight={700}
+          >
+            {t(`installments.statements.status.${selected.status}`)}
+          </Text>
+          <Text mt={1} fontSize="sm" color="var(--pb-ink-soft)">
+            {t(selected.items.length === 1 ? 'installments.paymentCount.one' : 'installments.paymentCount.other', { count: selected.items.length })}
+          </Text>
+        </Box>
       </Flex>
 
       <Box mt={3}>
