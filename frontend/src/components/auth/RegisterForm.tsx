@@ -22,6 +22,7 @@ import {
 } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import AuthAltAction from './AuthAltAction'
 import { EMAIL_REGEX, MIN_PASSWORD_LENGTH } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
@@ -275,7 +276,15 @@ export default function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             {t('auth.register.submit')}
           </Button>
 
-          <Text textAlign="center" color={C.inkSoft} fontFamily={F.body} fontSize="sm">
+          <AuthAltAction label={t('auth.tab.signIn.label')} onClick={onSwitchToLogin} />
+
+          <Text
+            display={{ base: 'none', md: 'block' }}
+            textAlign="center"
+            color={C.inkSoft}
+            fontFamily={F.body}
+            fontSize="sm"
+          >
             {t('auth.register.hasAccount')}{' '}
             <Button
               type="button"

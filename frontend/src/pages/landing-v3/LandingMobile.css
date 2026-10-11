@@ -33,37 +33,20 @@
   pointer-events: none;
 }
 
-.pbm-art__wave--back {
-  fill: var(--nu-brand-deep);
-}
-
-.pbm-art__wave--front {
-  fill: var(--nu-brand-darker);
-  opacity: 0.55;
-}
-
-.pbm-art__spots {
-  fill: var(--nu-brand-darker);
-}
-
-.pbm-art__bubbles {
-  fill: rgba(255, 255, 255, 0.16);
-}
-
-.pbm-art__spots > *,
-.pbm-art__bubbles > * {
+.pb-waves__spots > *,
+.pb-waves__bubbles > * {
   transform-box: fill-box;
   transform-origin: center;
   animation: pbm-float 7s ease-in-out infinite;
 }
 
-.pbm-art__spots > :nth-child(2n),
-.pbm-art__bubbles > :nth-child(2n) {
+.pb-waves__spots > :nth-child(2n),
+.pb-waves__bubbles > :nth-child(2n) {
   animation-duration: 9s;
   animation-delay: -3s;
 }
 
-.pbm-art__spots > :nth-child(3n) {
+.pb-waves__spots > :nth-child(3n) {
   animation-duration: 11s;
   animation-delay: -5s;
 }
@@ -79,8 +62,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pbm-art__spots > *,
-  .pbm-art__bubbles > * {
+  .pb-waves__spots > *,
+  .pb-waves__bubbles > * {
     animation: none;
   }
 }

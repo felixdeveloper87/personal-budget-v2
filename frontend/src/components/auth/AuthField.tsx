@@ -27,6 +27,22 @@ export interface AuthFieldProps {
   name?: string
 }
 
+// Below md the form sits on the purple-topped mobile sheet: underline fields,
+// label kept for screen readers only (the placeholder + icon carry it visually).
+const MOBILE = '@media (max-width: 47.99em)'
+
+const VISUALLY_HIDDEN = {
+  position: 'absolute',
+  width: '1px',
+  height: '1px',
+  margin: '-1px',
+  padding: 0,
+  overflow: 'hidden',
+  clip: 'rect(0 0 0 0)',
+  whiteSpace: 'nowrap',
+  border: 0,
+} as const
+
 const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthField(
   {
     label,
@@ -57,6 +73,7 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
         fontFamily={F.body}
         fontSize="sm"
         fontWeight={600}
+        sx={{ [MOBILE]: VISUALLY_HIDDEN }}
       >
         {label}
       </FormLabel>
@@ -65,6 +82,8 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           pointerEvents="none"
           h="52px"
           zIndex={1}
+          w={{ base: '24px', md: 10 }}
+          justifyContent={{ base: 'flex-start', md: 'center' }}
           color={hasError ? C.danger : C.inkFaint}
           transition="color 0.18s ease"
         >
@@ -83,27 +102,31 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
           h="52px"
           pl={11}
           pr={rightElement ? 11 : 4}
-          bg={C.surface}
+          bg={{ base: 'transparent', md: C.surface }}
           border="1.5px solid"
-          borderColor="transparent"
+          borderColor={{ base: 'transparent', md: 'transparent' }}
+          borderBottomColor={{ base: C.lineStrong, md: 'transparent' }}
           color={C.ink}
           fontFamily={F.body}
           fontSize="md"
-          borderRadius="14px"
+          borderRadius={{ base: 0, md: '14px' }}
           _placeholder={{ color: C.inkFaint }}
-          _hover={{ bg: C.surfaceHover }}
+          _hover={{ bg: { base: 'transparent', md: C.surfaceHover } }}
           _focus={{
-            borderColor: C.brand,
+            borderColor: { base: 'transparent', md: C.brand },
+            borderBottomColor: C.brand,
             boxShadow: 'none',
-            bg: C.panel,
+            bg: { base: 'transparent', md: C.panel },
           }}
           _focusVisible={{
-            borderColor: C.brand,
+            borderColor: { base: 'transparent', md: C.brand },
+            borderBottomColor: C.brand,
             boxShadow: 'none',
-            bg: C.panel,
+            bg: { base: 'transparent', md: C.panel },
           }}
           _invalid={{
-            borderColor: C.danger,
+            borderColor: { base: 'transparent', md: C.danger },
+            borderBottomColor: C.danger,
             boxShadow: 'none',
           }}
           _disabled={{ opacity: 0.5, cursor: 'not-allowed' }}
@@ -112,6 +135,10 @@ const AuthField = forwardRef<HTMLInputElement, AuthFieldProps>(function AuthFiel
             caretColor: C.brand,
             paddingInlineStart: '46px !important',
             paddingInlineEnd: rightElement ? '46px !important' : '16px !important',
+            [MOBILE]: {
+              paddingInlineStart: '32px !important',
+              paddingInlineEnd: rightElement ? '40px !important' : '4px !important',
+            },
             '&:-webkit-autofill': {
               WebkitTextFillColor: C.ink,
               WebkitBoxShadow: `0 0 0 1000px ${C.panel} inset`,

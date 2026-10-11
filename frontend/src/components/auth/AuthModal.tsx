@@ -11,14 +11,16 @@ import {
   Button,
   Flex,
   HStack,
+  IconButton,
   Skeleton,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import { Check, Download, Lock, ShieldCheck } from '../ui/icons'
+import { Check, ChevronLeft, Download, Lock, ShieldCheck } from '../ui/icons'
 import { AppCloseButton, PremiumModal } from '../ui'
 import { BRAND } from '../layout/header/brand.config'
 import BrandMark from '../brand/BrandMark'
+import BrandWaves from '../brand/BrandWaves'
 import LoginForm from './LoginForm'
 import PasswordResetForm from './PasswordResetForm'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
@@ -162,6 +164,77 @@ function AuthAside({ tab }: { tab: AuthTabConfig }) {
   )
 }
 
+/** Mobile-only purple top: waves, back chevron and a big title, closing on a
+ *  wavy white edge that the form sheet continues from. */
+function AuthMobileHero({ tab, onBack }: { tab: AuthTabConfig; onBack: () => void }) {
+  const { t } = useI18n()
+
+  return (
+    <Flex
+      display={{ base: 'flex', md: 'none' }}
+      position="relative"
+      flexDirection="column"
+      minH="clamp(250px, 40dvh, 360px)"
+      overflow="hidden"
+      px={5}
+      pt="max(0.75rem, calc(env(safe-area-inset-top, 0px) + 0.5rem))"
+      pb="64px"
+      bg={C.brandBand}
+      color={C.onBrand}
+    >
+      <BrandWaves
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+      />
+
+      <IconButton
+        aria-label={t('auth.back')}
+        icon={<ChevronLeft size={22} weight="bold" />}
+        onClick={onBack}
+        position="relative"
+        alignSelf="flex-start"
+        ml={-2}
+        variant="ghost"
+        color={C.onBrand}
+        borderRadius="full"
+        _hover={{ bg: 'rgba(255,255,255,0.14)' }}
+        _active={{ bg: 'rgba(255,255,255,0.2)' }}
+        _focusVisible={{ boxShadow: '0 0 0 3px rgba(255,255,255,0.6)' }}
+      />
+
+      <Box position="relative" mt="auto" pt={6}>
+        <Text
+          as="h2"
+          maxW="12ch"
+          fontFamily={F.body}
+          fontSize="clamp(2rem, 9vw, 2.5rem)"
+          fontWeight={700}
+          letterSpacing="-0.035em"
+          lineHeight={1.04}
+        >
+          {tab.kicker}
+        </Text>
+        <Text mt={2.5} maxW="34ch" color="rgba(255,255,255,0.84)" fontFamily={F.body} fontSize="sm" lineHeight={1.5}>
+          {tab.description}
+        </Text>
+      </Box>
+
+      <Box
+        as="svg"
+        aria-hidden="true"
+        viewBox="0 0 390 48"
+        preserveAspectRatio="none"
+        position="absolute"
+        left={0}
+        bottom="-1px"
+        w="100%"
+        h="48px"
+      >
+        <path fill={C.page} d="M0 30C70 6 140 4 210 22C280 40 330 44 390 16V48H0Z" />
+      </Box>
+    </Flex>
+  )
+}
+
 export default function AuthModal({
   isOpen,
   onClose,
@@ -257,6 +330,7 @@ export default function AuthModal({
 
         <Flex minW={0} minH={0} flexDirection="column" bg={C.page}>
           <Flex
+            display={{ base: 'none', md: 'flex' }}
             align="center"
             justify="space-between"
             gap={4}
@@ -288,7 +362,7 @@ export default function AuthModal({
             />
           </Flex>
 
-          <Box px={{ base: 5, sm: 7, md: 8 }} pt={{ base: 5, md: 6 }}>
+          <Box display={{ base: 'none', md: 'block' }} px={{ base: 5, sm: 7, md: 8 }} pt={{ base: 5, md: 6 }}>
             <HStack
               display={isAuthTab ? 'flex' : 'none'}
               role="tablist"
@@ -335,8 +409,6 @@ export default function AuthModal({
             flex={1}
             minH={0}
             overflowY="auto"
-            px={{ base: 5, sm: 7, md: 8 }}
-            pt={{ base: 7, md: 8 }}
             pb={{
               base: 'max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))',
               md: 8,
@@ -348,8 +420,14 @@ export default function AuthModal({
               '&::-webkit-scrollbar-thumb': { bg: C.lineStrong, borderRadius: '999px' },
             }}
           >
+            <AuthMobileHero
+              tab={activeTab}
+              onBack={view === 'forgotPassword' ? () => setView('signIn') : onClose}
+            />
             <Box
               key={view}
+              px={{ base: 5, sm: 7, md: 8 }}
+              pt={{ base: 3, md: 8 }}
               role="tabpanel"
               id="auth-panel"
               aria-labelledby={isAuthTab ? `auth-tab-${view}` : undefined}
@@ -365,6 +443,7 @@ export default function AuthModal({
                 },
               }}
             >
+              <Box display={{ base: 'none', md: 'block' }}>
               <Text
                 color={C.brand}
                 fontFamily={F.body}
@@ -396,6 +475,7 @@ export default function AuthModal({
               >
                 {activeTab.description}
               </Text>
+              </Box>
 
               {view === 'signIn' && (
                 <LoginForm

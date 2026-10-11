@@ -11,6 +11,7 @@ import {
 import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail, ShieldCheck } from '../ui/icons'
 import { useAuth } from '../../contexts/AuthContext'
 import AuthField from './AuthField'
+import AuthAltAction from './AuthAltAction'
 import { EMAIL_REGEX } from './auth.constants'
 import { ToastService, getApiErrorMessage } from '../../services/toast'
 import { AUTH_COLORS as C, AUTH_FONTS as F } from './authTheme'
@@ -212,7 +213,16 @@ export default function LoginForm({ onSwitchToRegister, onForgotPassword }: Logi
             </Text>
           </HStack>
 
-          <Text textAlign="center" color={C.inkSoft} fontFamily={F.body} fontSize="sm" pt={1}>
+          <AuthAltAction label={t('auth.tab.signUp.label')} onClick={onSwitchToRegister} />
+
+          <Text
+            display={{ base: 'none', md: 'block' }}
+            textAlign="center"
+            color={C.inkSoft}
+            fontFamily={F.body}
+            fontSize="sm"
+            pt={1}
+          >
             {t('auth.login.noAccount')}{' '}
             <Button
               type="button"
