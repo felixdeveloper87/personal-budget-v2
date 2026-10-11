@@ -49,16 +49,16 @@ interface AuthModalProps {
   initialTab?: AuthTab
 }
 
-function BrandLockup({ onBrand = false, compact = false }: { onBrand?: boolean; compact?: boolean }) {
+function BrandLockup({ onBrand = false }: { onBrand?: boolean }) {
   const { t } = useI18n()
   return (
     <HStack spacing={3} minW={0}>
-      <BrandMark size={compact ? 34 : 44} colorMode={onBrand ? 'dark' : 'light'} />
+      <BrandMark size={44} colorMode={onBrand ? 'dark' : 'light'} />
       <VStack align="flex-start" spacing={0.5} minW={0}>
         <Text
           color={onBrand ? C.onBrand : C.ink}
           fontFamily={F.body}
-          fontSize={compact ? 'md' : 'lg'}
+          fontSize="lg"
           fontWeight={700}
           letterSpacing="-0.02em"
           lineHeight={1.1}
@@ -334,17 +334,10 @@ export default function AuthModal({
             align="center"
             justify="space-between"
             gap={4}
-            px={{ base: 5, sm: 7, md: 8 }}
-            pt={{
-              base: 'max(1rem, calc(env(safe-area-inset-top, 0px) + 0.55rem))',
-              md: 6,
-            }}
+            px={8}
+            pt={6}
           >
-            <Box display={{ base: 'block', md: 'none' }} minW={0}>
-              <BrandLockup compact />
-            </Box>
             <Text
-              display={{ base: 'none', md: 'block' }}
               color={C.inkFaint}
               fontFamily={F.body}
               fontSize="sm"
@@ -362,7 +355,7 @@ export default function AuthModal({
             />
           </Flex>
 
-          <Box display={{ base: 'none', md: 'block' }} px={{ base: 5, sm: 7, md: 8 }} pt={{ base: 5, md: 6 }}>
+          <Box display={{ base: 'none', md: 'block' }} px={8} pt={6}>
             <HStack
               display={isAuthTab ? 'flex' : 'none'}
               role="tablist"

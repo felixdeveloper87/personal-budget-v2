@@ -2,10 +2,7 @@
    waves up top, headline + two pill CTAs pinned to the bottom. */
 .pbm {
   --nu-brand: #820ad1;
-  --nu-brand-deep: #6e08b3;
-  --nu-brand-darker: #5a0791;
   --nu-brand-tint: #f3e8fc;
-  --nu-lilac: #e2c2fb;
 
   position: relative;
   display: flex;

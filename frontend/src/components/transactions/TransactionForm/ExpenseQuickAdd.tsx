@@ -1,5 +1,5 @@
-import { Button, Text, VStack } from '@chakra-ui/react'
-import PagedGrid from './PagedGrid'
+import { Box, Text, VStack } from '@chakra-ui/react'
+import PagedGrid, { tileStyle } from './PagedGrid'
 import MerchantLogo from '../../ui/MerchantLogo'
 import { useI18n } from '../../../i18n'
 import DescriptionInput from './DescriptionInput'
@@ -171,28 +171,21 @@ export default function ExpenseQuickAdd({
           const selected = category === item
           const label = item === 'Entertainment' ? t('category.short.Entertainment') : categoryLabel(item)
           return (
-            <Button
-              flex={1}
-              minW={0}
-              h="auto"
-              minH="42px"
-              px={2}
-              py={1.5}
-              whiteSpace="normal"
-              borderRadius="14px"
-              border="1px solid"
-              borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
-              bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
-              color={selected ? '#820ad1' : 'var(--pb-ink)'}
-              fontWeight={selected ? 800 : 650}
-              onClick={() => selectCategory(item)}
+            <Box
+              as="button"
+              type="button"
               aria-pressed={selected}
-              _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
+              onClick={() => selectCategory(item)}
+              {...tileStyle(selected)}
+              minH="42px"
+              justifyContent="center"
+              fontSize="sm"
+              fontWeight={selected ? 800 : 650}
             >
               <Text as="span" noOfLines={2} lineHeight="1.15" textAlign="center" wordBreak="break-word">
                 {label}
               </Text>
-            </Button>
+            </Box>
           )
         }}
       />
@@ -211,23 +204,13 @@ export default function ExpenseQuickAdd({
             renderItem={(merchant) => {
               const selected = description === merchant.name
               return (
-                <Button
-                  flex={1}
-                  h="auto"
-                  minH="54px"
-                  minW={0}
-                  px={2}
-                  py={1.5}
-                  whiteSpace="normal"
-                  justifyContent="flex-start"
-                  borderRadius="15px"
-                  border="1px solid"
-                  borderColor={selected ? '#820ad1' : 'var(--pb-hair)'}
-                  bg={selected ? '#f3e8fc' : 'var(--pb-surface)'}
-                  color={selected ? '#820ad1' : 'var(--pb-ink)'}
-                  onClick={() => onDescriptionChange(selected ? '' : merchant.name)}
+                <Box
+                  as="button"
+                  type="button"
                   aria-pressed={selected}
-                  _hover={{ borderColor: '#820ad1', bg: selected ? '#f3e8fc' : '#f8f1fe' }}
+                  onClick={() => onDescriptionChange(selected ? '' : merchant.name)}
+                  {...tileStyle(selected)}
+                  fontSize="sm"
                 >
                   <MerchantLogo category={category} domain={merchant.domain} name={merchant.name} size={32} />
                   <Text
@@ -242,7 +225,7 @@ export default function ExpenseQuickAdd({
                   >
                     {merchant.name}
                   </Text>
-                </Button>
+                </Box>
               )
             }}
           />

@@ -30,7 +30,6 @@ const readStoredLocale = (): AppLocale => {
 interface I18nContextValue {
   locale: AppLocale
   setLocale: (locale: AppLocale) => void
-  toggleLocale: () => void
   t: (key: string, values?: TranslationValues, fallback?: string) => string
   formatCurrency: (value: number, options?: Intl.NumberFormatOptions) => string
   formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string
@@ -46,14 +45,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((nextLocale: AppLocale) => {
     setLocaleState(nextLocale)
     try { localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale) } catch { /* storage is optional */ }
-  }, [])
-
-  const toggleLocale = useCallback(() => {
-    setLocaleState((current) => {
-      const nextLocale: AppLocale = current === 'en-GB' ? 'pt-BR' : 'en-GB'
-      try { localStorage.setItem(LOCALE_STORAGE_KEY, nextLocale) } catch { /* storage is optional */ }
-      return nextLocale
-    })
   }, [])
 
   useLayoutEffect(() => {
@@ -92,7 +83,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const value = useMemo<I18nContextValue>(() => ({
     locale,
     setLocale,
-    toggleLocale,
     t,
     formatCurrency: (amount, options) => formatGbp(amount, locale, options),
     formatNumber: (number, options) => formatLocalNumber(number, locale, options),
@@ -104,7 +94,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       return formatLocalDate(date, locale, options)
     },
     categoryLabel: (category) => t(`category.${category}`, undefined, category),
-  }), [locale, setLocale, t, toggleLocale])
+  }), [locale, setLocale, t])
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>
 }
