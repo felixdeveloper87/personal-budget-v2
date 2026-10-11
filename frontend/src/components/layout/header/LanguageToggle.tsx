@@ -64,7 +64,8 @@ export default function LanguageToggle() {
     <Tooltip label={label} hasArrow openDelay={300}>
       <IconButton
         aria-label={label}
-        icon={switchToPortuguese ? <BrazilFlag /> : <UnitedKingdomFlag />}
+        // Shows the current language; the label/tooltip names the switch.
+        icon={switchToPortuguese ? <UnitedKingdomFlag /> : <BrazilFlag />}
         onClick={toggleLocale}
         variant="ghost"
         h="40px"
