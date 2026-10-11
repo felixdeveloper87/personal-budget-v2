@@ -140,35 +140,210 @@
   outline-color: #ffffff;
 }
 
-/* ---------- Navigation ---------- */
-.pbv3--nu .pbv3-nav__inner,
-.pbv3--nu .pbv3-nav.is-elevated .pbv3-nav__inner,
-.pbv3--nu .pbv3-nav.is-menu-open .pbv3-nav__inner {
-  border-color: transparent;
+/* ---------- Navigation ----------
+   Full-width bar, Nubank-site style: transparent with white type over the
+   purple hero, solid white with purple accents once the white sections
+   start. Plain text links with a short underline on the active one.
+   Prefixed with .pbv3.pbv3--nu .pbv3-nav to outrank the base sheet's
+   state + media-query selectors. */
+.pbv3.pbv3--nu .pbv3-nav {
+  padding-top: env(safe-area-inset-top, 0px);
   background: #ffffff;
-  box-shadow: 0 10px 30px -18px rgba(40, 0, 70, 0.45);
+  box-shadow: 0 1px 0 rgba(31, 31, 36, 0.08);
+  color: var(--pb-ink);
+  pointer-events: auto;
 }
 
-.pbv3--nu .pbv3-nav__links {
-  background: var(--nu-surface);
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand {
+  background: transparent;
+  box-shadow: none;
+  color: #ffffff;
 }
 
-.pbv3--nu .pbv3-nav__links a > span {
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__inner {
+  min-height: 76px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-brand {
+  width: 190px;
+}
+
+/* Links: plain text, pill hover, short underline when active. */
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links {
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a {
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 999px;
+  color: rgba(31, 31, 36, 0.7);
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a > span {
   display: none;
 }
 
-.pbv3--nu .pbv3-nav__links a.is-active {
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a > b {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a::after {
+  bottom: 5px;
+  width: 18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--nu-brand);
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a:hover {
+  background: var(--nu-surface);
+  color: var(--pb-ink);
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__links a.is-active {
+  background: transparent;
+  color: var(--nu-brand);
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__links a {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__links a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__links a.is-active {
+  color: #ffffff;
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__links a::after {
+  background: #ffffff;
+}
+
+/* Actions */
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__actions {
+  gap: 8px;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__signin {
+  min-height: 42px;
+  padding-inline: 16px;
+  border-color: transparent;
+  border-radius: 999px;
+  color: var(--pb-ink);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__signin:hover {
+  background: var(--nu-surface);
+  color: var(--nu-brand);
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__signin {
+  color: #ffffff;
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__signin:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__cta {
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--nu-brand);
+  color: #ffffff;
+  box-shadow: none;
+  font-size: 0.9rem;
+  transform: none;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__cta i {
+  width: auto;
+  height: auto;
+  background: transparent;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__cta:hover {
+  background: var(--nu-brand-deep);
+  box-shadow: none;
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__cta:hover i {
+  background: transparent;
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__cta {
   background: #ffffff;
   color: var(--nu-brand);
 }
 
-.pbv3--nu .pbv3-nav__cta {
-  background: var(--nu-brand);
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__cta:hover {
+  background: var(--nu-brand-tint);
+}
+
+.pbv3.pbv3--nu .pbv3-nav .pbv3-nav__menu-toggle {
+  border-color: var(--nu-surface-hover);
+  border-radius: 999px;
+  color: var(--pb-ink);
+}
+
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand .pbv3-nav__menu-toggle {
+  border-color: rgba(255, 255, 255, 0.4);
   color: #ffffff;
 }
 
-.pbv3--nu .pbv3-nav__cta:hover {
-  background: var(--nu-brand-deep);
+.pbv3.pbv3--nu .pbv3-nav.is-on-brand :focus-visible {
+  outline-color: #ffffff;
+}
+
+/* Below 680px the bar only appears after the splash (always solid white). */
+@media (max-width: 680px) {
+  .pbv3.pbv3--nu .pbv3-nav .pbv3-nav__inner {
+    min-height: 64px;
+  }
+
+  .pbv3.pbv3--nu .pbv3-nav .pbv3-brand {
+    width: clamp(135px, 40vw, 170px);
+  }
+
+  .pbv3.pbv3--nu .pbv3-nav .pbv3-nav__signin {
+    padding-inline: 10px;
+  }
+}
+
+.pbv3--nu .pbv3-nav-menu {
+  border-color: transparent;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px -24px rgba(40, 0, 70, 0.35);
+}
+
+.pbv3--nu .pbv3-nav-menu__links a.is-active,
+.pbv3--nu .pbv3-nav-menu__links a:hover {
+  background: var(--nu-brand-tint);
+  color: var(--nu-brand);
+}
+
+.pbv3--nu .pbv3-nav-menu__links a > span,
+.pbv3--nu .pbv3-nav-menu__links a > svg {
+  color: var(--nu-brand);
 }
 
 /* ---------- Hero: purple band ---------- */
@@ -444,6 +619,8 @@
 .pbv3--nu .pbv3-nav {
   transition:
     padding 260ms ease,
+    background 240ms ease,
+    box-shadow 240ms ease,
     opacity 220ms ease,
     transform 260ms ease,
     visibility 0s linear 0s;
@@ -455,6 +632,8 @@
   transform: translate3d(0, -100%, 0);
   transition:
     padding 260ms ease,
+    background 240ms ease,
+    box-shadow 240ms ease,
     opacity 220ms ease,
     transform 260ms ease,
     visibility 0s linear 260ms;

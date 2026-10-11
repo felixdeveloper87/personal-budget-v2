@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import BrandMark from '../../components/brand/BrandMark'
 import LanguageToggle from '../../components/layout/header/LanguageToggle'
+import { OnBrandContext } from '../../components/layout/header/onBrand'
 import { LightMode } from '@chakra-ui/react'
 import { LIGHT_PALETTE, paletteCssVariables } from '../../palette'
 import { EditorialProvider } from '../../editorial'
@@ -75,11 +76,12 @@ function BrandSeal({ className = '' }: { className?: string }) {
   return <BrandMark className={`pbv3-seal ${className}`} />
 }
 
-function BrandLockup({ footer = false }: { footer?: boolean }) {
+function BrandLockup({ footer = false, onBrand = false }: { footer?: boolean; onBrand?: boolean }) {
+  const colorMode = onBrand ? 'dark' : 'light'
   return (
     <span className={`pbv3-brand${footer ? ' pbv3-brand--footer' : ''}`}>
-      <BrandMark variant="title" size="100%" className="pbv3-brand__artwork" />
-      <BrandMark variant="title" size="100%" className="pbv3-brand__mobile" />
+      <BrandMark variant="title" size="100%" colorMode={colorMode} className="pbv3-brand__artwork" />
+      <BrandMark variant="title" size="100%" colorMode={colorMode} className="pbv3-brand__mobile" />
     </span>
   )
 }
@@ -565,6 +567,7 @@ function LandingPage({
   const reducedMotion = useReducedMotion()
   const [navElevated, setNavElevated] = useState(false)
   const [pastSplash, setPastSplash] = useState(false)
+  const [overHero, setOverHero] = useState(true)
   const [navMenuOpen, setNavMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
 
@@ -573,6 +576,9 @@ function LandingPage({
       setNavElevated(window.scrollY > 24)
       // On phones the splash owns the first screen; the nav slides in once it's gone.
       setPastSplash(window.scrollY > window.innerHeight * 0.8)
+      // Transparent over the purple hero, solid white once the white sections start.
+      const hero = document.getElementById('top')
+      setOverHero(hero ? hero.getBoundingClientRect().bottom > 76 : false)
 
       const activationLine = window.innerHeight * 0.36
       let nextActive = ''
@@ -649,6 +655,8 @@ function LandingPage({
     return () => observer.disconnect()
   }, [reducedMotion])
 
+  const navOnBrand = overHero && !navMenuOpen
+
   const handleHeroPointerMove = (event: ReactPointerEvent<HTMLElement>) => {
     if (reducedMotion || !window.matchMedia('(pointer: fine)').matches) return
     const bounds = event.currentTarget.getBoundingClientRect()
@@ -672,7 +680,7 @@ function LandingPage({
       </a>
 
       <nav
-        className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}${mobile && !pastSplash && !navMenuOpen ? ' is-hidden' : ''}`}
+        className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}${mobile && !pastSplash && !navMenuOpen ? ' is-hidden' : ''}${navOnBrand ? ' is-on-brand' : ''}`}
         aria-label={t('landing.a11y.mainNavigation')}
       >
         <div className="pbv3-shell pbv3-nav__inner">
@@ -682,7 +690,7 @@ function LandingPage({
             aria-label={t('landing.a11y.home')}
             onClick={() => setNavMenuOpen(false)}
           >
-            <BrandLockup />
+            <BrandLockup onBrand={navOnBrand} />
           </a>
 
           <div className="pbv3-nav__links" aria-label={t('landing.a11y.pageSections')}>
@@ -700,7 +708,9 @@ function LandingPage({
           </div>
 
           <div className="pbv3-nav__actions">
-            <LanguageToggle />
+            <OnBrandContext.Provider value={navOnBrand}>
+              <LanguageToggle />
+            </OnBrandContext.Provider>
             <button className="pbv3-nav__signin" type="button" onClick={onSignIn}>
               {hero.signInCta}
             </button>
