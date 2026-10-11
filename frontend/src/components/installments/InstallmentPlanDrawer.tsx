@@ -352,7 +352,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                     {transaction.installmentNumber}/{p.totalInstallments} · {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
                   </Text>
                 </Box>
-                <Text fontSize="sm" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                <Text fontSize="sm" fontWeight={700}>
                   {formatCurrency(transaction.amount)}
                 </Text>
               </Flex>

@@ -184,7 +184,6 @@ export default function NuDetailSheet({
                 letterSpacing="-0.03em"
                 lineHeight={1.1}
                 noOfLines={1}
-                sx={{ fontVariantNumeric: 'tabular-nums' }}
               >
                 {amount}
               </Text>
@@ -248,7 +247,7 @@ export function NuFacts({ items }: { items: Array<{ label: string; value: string
           <Text fontSize="xs" color={NU.inkSoft} noOfLines={1}>
             {item.label}
           </Text>
-          <Text mt={0.5} fontSize="sm" fontWeight={700} noOfLines={2} lineHeight={1.25} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+          <Text mt={0.5} fontSize="sm" fontWeight={700} noOfLines={2} lineHeight={1.25}>
             {item.value}
           </Text>
         </Box>

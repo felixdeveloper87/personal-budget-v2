@@ -21,11 +21,11 @@ export function NuStatStrip({ stats }: { stats: Array<{ label: string; value: st
           <Text fontSize={{ base: 'xs', md: 'sm' }} color="var(--pb-ink-soft)" noOfLines={1}>{stat.label}</Text>
           <Text
             mt={0.5}
-            fontSize={{ base: 'md', md: 'lg' }}
+            fontSize={{ base: 'sm', md: 'md' }}
             fontWeight={700}
+            letterSpacing="-0.01em"
             color={stat.tone === 'positive' ? 'var(--nu-positive)' : stat.tone === 'negative' ? 'var(--nu-negative)' : 'var(--pb-ink)'}
             noOfLines={1}
-            sx={{ fontVariantNumeric: 'tabular-nums' }}
           >
             {stat.value}
           </Text>
