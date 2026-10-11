@@ -41,6 +41,7 @@ import {
 } from '../../api'
 import { ToastService } from '../../services/toast'
 import PlanLogo from './PlanLogo'
+import { isInstallmentPlanCompleted } from './InstallmentPlanCard'
 import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
@@ -58,12 +59,6 @@ function getPlanStartDate(plan: InstallmentPlan): string {
   return plan.transactions
     .slice()
     .sort((a, b) => a.installmentNumber - b.installmentNumber)[0]?.date || new Date().toISOString().slice(0, 10)
-}
-
-function isPlanCompleted(plan: InstallmentPlan): boolean {
-  if (plan.transactions.length === 0) return false
-  const now = Date.now()
-  return plan.transactions.every((t) => new Date(t.date).getTime() < now)
 }
 
 const SCHEDULE_PREVIEW = 4
@@ -164,7 +159,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   if (!displayPlan) return null
 
   const p = displayPlan
-  const isPast = isPlanCompleted(p)
+  const isPast = isInstallmentPlanCompleted(p)
   const firstTransaction = p.transactions[0]
   const title = firstTransaction?.description
     ? getInstallmentPlanTitle(firstTransaction.description)
