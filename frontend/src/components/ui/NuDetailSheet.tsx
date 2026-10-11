@@ -290,4 +290,16 @@ export function NuSheetButton({ tone, ...props }: ButtonProps & { tone: 'primary
   return <Button {...nuButtonProps(tone)} {...props} />
 }
 
+/** Flat grey Nubank input/select style for the sheet's edit forms. */
+export const NU_FIELD = {
+  h: '44px',
+  borderRadius: '12px',
+  bg: NU.surface,
+  border: '1.5px solid transparent',
+  fontSize: 'sm',
+  _hover: { bg: '#ededf2' },
+  _focus: { bg: 'white', borderColor: NU.brand, boxShadow: 'none' },
+  _focusVisible: { bg: 'white', borderColor: NU.brand, boxShadow: 'none' },
+} as const
+
 export { NU as NU_SHEET_COLORS }

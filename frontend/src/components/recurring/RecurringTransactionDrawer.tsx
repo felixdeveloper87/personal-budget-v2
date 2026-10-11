@@ -37,7 +37,7 @@ import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import '../../features/dashboard/theme/pb-tokens.css'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
-import NuDetailSheet, { NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
+import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
 
 interface RecurringTransactionDrawerProps {
   recurringTransaction: RecurringTransaction | null
@@ -45,17 +45,6 @@ interface RecurringTransactionDrawerProps {
   /** Reload the list after the rule is edited or cancelled. */
   onChanged: () => void | Promise<void>
 }
-
-const NU_FIELD = {
-  h: '44px',
-  borderRadius: '12px',
-  bg: NU_SHEET_COLORS.surface,
-  border: '1.5px solid transparent',
-  fontSize: 'sm',
-  _hover: { bg: '#ededf2' },
-  _focus: { bg: 'white', borderColor: NU_SHEET_COLORS.brand, boxShadow: 'none' },
-  _focusVisible: { bg: 'white', borderColor: NU_SHEET_COLORS.brand, boxShadow: 'none' },
-} as const
 
 /**
  * Detail sheet for a single fixed payment / income (Nubank style, see

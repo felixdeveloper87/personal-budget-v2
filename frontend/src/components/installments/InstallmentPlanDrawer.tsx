@@ -47,7 +47,9 @@ import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
-import NuDetailSheet, { NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
+import PremiumModal from '../ui/PremiumModal'
+import NuModalHeader from '../ui/NuModalHeader'
+import NuDetailSheet, { NU_FIELD, NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
 
 interface InstallmentPlanDrawerProps {
   plan: InstallmentPlan | null
@@ -63,6 +65,29 @@ function getPlanStartDate(plan: InstallmentPlan): string {
 }
 
 const SCHEDULE_PREVIEW = 4
+
+/** PremiumModal content for the plan's nested modals: bottom sheet on phones, centred card above. */
+const NU_MODAL_CONTENT = {
+  className: 'nu-dashboard',
+  w: { base: '100%', md: 'min(480px, calc(100vw - 32px))' },
+  maxW: '480px',
+  h: 'auto',
+  maxH: { base: '85dvh', md: '80vh' },
+  mt: 'auto',
+  mb: { base: 0, md: 'auto' },
+  mx: 'auto',
+  borderRadius: { base: '32px 32px 0 0', md: '28px' },
+  overflow: 'hidden',
+  bg: 'var(--nu-page, #ffffff)',
+}
+
+function fieldLabel(label: string) {
+  return (
+    <FormLabel mb={1} fontSize="xs" color={NU_SHEET_COLORS.inkSoft} fontWeight={600}>
+      {label}
+    </FormLabel>
+  )
+}
 
 /**
  * Detail sheet for a single installment plan (Nubank style, see
@@ -394,258 +419,228 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
       </NuDetailSheet>
 
       {/* Edit plan modal */}
-      <Modal isOpen={editDisclosure.isOpen} onClose={editDisclosure.onClose} isCentered>
-        <ModalOverlay bg="blackAlpha.600" backdropFilter="blur(8px)" />
-        <ModalContent bg={dialogBg} borderRadius="xl" mx={4} containerProps={sheetContainerProps} sx={SHEET_SX}>
-          <Box {...sheetGrabberProps} />
-          <ModalHeader px={6} pt={5} pb={3}>
-            <HStack spacing={3}>
-              <Box
-                w={9}
-                h={9}
-                borderRadius="lg"
-                bg={NU_SHEET_COLORS.brandSoft}
-                color={NU_SHEET_COLORS.brand}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
-              >
-                <Icon as={Pencil} boxSize={4} />
-              </Box>
-              <VStack align="flex-start" spacing={0}>
-                <Text fontWeight={700} fontSize="md" color={titleColor}>
-                  {t('installments.drawer.editModal.title')}
-                </Text>
-                <Text fontSize="xs" color={captionColor}>
-                  {t('installments.drawer.editModal.subtitle')}
-                </Text>
-              </VStack>
-            </HStack>
-          </ModalHeader>
-          <ModalBody px={6} pb={4}>
-            <VStack align="stretch" spacing={4}>
-              <FormControl>
-                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  {t('installments.drawer.account')}
-                </FormLabel>
-                <Select
-                  size="sm"
-                  value={draftAccountId ?? ''}
-                  onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
-                  placeholder={t('installments.drawer.editModal.selectAccount')}
-                >
-                  {accounts.filter((account) => account.active).map((account) => (
-                    <option key={account.id} value={account.id}>{account.name}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  {t('installments.drawer.editModal.paymentMethod')}
-                </FormLabel>
-                <Select
-                  size="sm"
-                  value={draftPaymentMethodId ?? ''}
-                  onChange={(event) => {
-                    const nextId = event.target.value ? Number(event.target.value) : null
-                    setDraftPaymentMethodId(nextId)
-                    const card = paymentMethods.find((method) => method.id === nextId)
-                    if (card?.settlementAccountId) {
-                      setDraftAccountId(card.settlementAccountId)
-                    }
-                  }}
-                >
-                  <option value="">{t('installments.drawer.editModal.noPaymentMethod')}</option>
-                  {paymentMethods.filter((method) => method.active).map((method) => (
-                    <option key={method.id} value={method.id}>{method.name}</option>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl>
-                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  {t('installments.drawer.editModal.firstDate')}
-                </FormLabel>
-                <Input
-                  type="date"
-                  value={draftStartDate}
-                  onChange={(event) => setDraftStartDate(event.target.value)}
-                  size="sm"
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  {t('installments.drawer.editModal.purchaseTotal')}
-                </FormLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={draftTotalAmount}
-                  onChange={(event) => handleTotalAmountChange(event.target.value)}
-                  size="sm"
-                />
-              </FormControl>
-              <FormControl>
-                <FormLabel fontSize="xs" color={captionColor} fontWeight={700}>
-                  {t('installments.drawer.editModal.amountPerInstallment')}
-                </FormLabel>
-                <Input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={draftInstallmentValue}
-                  onChange={(event) => handleInstallmentValueChange(event.target.value)}
-                  size="sm"
-                />
-              </FormControl>
-            </VStack>
-          </ModalBody>
-          <ModalFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
-            <Button {...nuButtonProps('ghost')} h="44px" onClick={editDisclosure.onClose}>
-              {t('installments.drawer.cancel')}
-            </Button>
-            <Button {...nuButtonProps('primary')} h="44px" px={6} onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
-              {t('installments.drawer.editModal.save')}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-
-      {/* Destructive confirmation */}
-      <AlertDialog
-        isOpen={deleteDisclosure.isOpen}
-        leastDestructiveRef={cancelRef}
-        onClose={deleteDisclosure.onClose}
-        isCentered
-        motionPreset="slideInBottom"
+      <PremiumModal
+        isOpen={editDisclosure.isOpen}
+        onClose={editDisclosure.onClose}
+        size="full"
+        contentProps={{ ...NU_MODAL_CONTENT, maxW: '520px', w: { base: '100%', md: 'min(520px, calc(100vw - 32px))' } }}
+        header={
+          <NuModalHeader
+            title={t('installments.drawer.editModal.title')}
+            caption={t('installments.drawer.editModal.subtitle')}
+            onClose={editDisclosure.onClose}
+          />
+        }
       >
-        <AlertDialogOverlay bg="blackAlpha.600" backdropFilter="blur(8px)">
-          <AlertDialogContent
-            bg={dialogBg}
-            borderRadius="xl"
-            boxShadow="0 20px 60px -20px rgba(0,0,0,0.4)"
-            maxW="440px"
-            mx={4}
-            overflow="hidden"
-            containerProps={sheetContainerProps}
-            sx={SHEET_SX}
-          >
-            <Box {...sheetGrabberProps} />
-            <AlertDialogHeader px={6} pt={5} pb={3} display="flex" alignItems="center" gap={3}>
-              <Box
-                w={9}
-                h={9}
-                borderRadius="lg"
-                bg={warningChipBg}
-                color={warningChipFg}
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                flexShrink={0}
+        <Box
+          overflowY="auto"
+          flex={1}
+          minH={0}
+          px={{ base: 4, md: 6 }}
+          pt={5}
+          pb="max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))"
+        >
+          <SimpleGrid columns={2} spacing={3}>
+            <FormControl gridColumn="span 2">
+              {fieldLabel(t('installments.drawer.account'))}
+              <Select
+                {...NU_FIELD}
+                value={draftAccountId ?? ''}
+                onChange={(event) => setDraftAccountId(event.target.value ? Number(event.target.value) : null)}
+                placeholder={t('installments.drawer.editModal.selectAccount')}
               >
-                <Icon as={AlertTriangle} boxSize={4} strokeWidth={2.25} />
-              </Box>
-              <VStack align="flex-start" spacing={0}>
-                <Text fontWeight={700} fontSize="md" color={titleColor} lineHeight="1.2">
-                  {canClose ? t('installments.drawer.endModal.title') : t('installments.drawer.deleteModal.title')}
-                </Text>
-                <Text fontSize="xs" color={captionColor}>
-                  {t('installments.drawer.deleteModal.subtitle')}
-                </Text>
-              </VStack>
-            </AlertDialogHeader>
-
-            <AlertDialogBody px={6} pb={4}>
-              {canClose ? (
-                <VStack align="stretch" spacing={2.5}>
-                  <Box
-                    as="button"
-                    type="button"
-                    onClick={handleClose}
-                    disabled={isClosing || isDeleting}
-                    textAlign="left"
-                    p={4}
-                    borderRadius="16px"
-                    border="1.5px solid"
-                    borderColor={NU_SHEET_COLORS.brand}
-                    bg={NU_SHEET_COLORS.brandSoft}
-                    opacity={isDeleting ? 0.5 : 1}
-                    _hover={{ bg: '#ead6fb' }}
-                    _focusVisible={{ outline: `2px solid ${NU_SHEET_COLORS.brand}`, outlineOffset: '2px' }}
-                  >
-                    <Text fontSize="sm" fontWeight={800} color={NU_SHEET_COLORS.brand}>
-                      {isClosing ? t('installments.drawer.endModal.closing') : t('installments.drawer.endModal.closeTitle')}
-                    </Text>
-                    <Text mt={1} fontSize="xs" color={NU_SHEET_COLORS.ink} lineHeight={1.5}>
-                      {t('installments.drawer.endModal.closeBody', {
-                        upcoming: upcomingCount,
-                        amount: formatCurrency(upcomingTotal),
-                        paid: paidCount,
-                      })}
-                    </Text>
-                  </Box>
-                  <Box
-                    as="button"
-                    type="button"
-                    onClick={handleDelete}
-                    disabled={isClosing || isDeleting}
-                    textAlign="left"
-                    p={4}
-                    borderRadius="16px"
-                    border="1.5px solid #ececf1"
-                    bg="white"
-                    opacity={isClosing ? 0.5 : 1}
-                    _hover={{ borderColor: NU_SHEET_COLORS.danger, bg: NU_SHEET_COLORS.dangerSoft }}
-                    _focusVisible={{ outline: `2px solid ${NU_SHEET_COLORS.danger}`, outlineOffset: '2px' }}
-                  >
-                    <Text fontSize="sm" fontWeight={800} color={NU_SHEET_COLORS.danger}>
-                      {isDeleting ? t('installments.drawer.deleteModal.deleting') : t('installments.drawer.endModal.deleteTitle')}
-                    </Text>
-                    <Text mt={1} fontSize="xs" color={NU_SHEET_COLORS.inkSoft} lineHeight={1.5}>
-                      {t('installments.drawer.endModal.deleteBody', { count: p.transactions.length, paid: paidCount })}
-                    </Text>
-                  </Box>
-                </VStack>
-              ) : (
-                <Text fontSize="sm" color={captionColor}>
-                  {paidCount > 0
-                    ? t('installments.drawer.deleteModal.bodyPaid', { count: p.transactions.length })
-                    : t('installments.drawer.deleteModal.body', { count: p.transactions.length })}
-                </Text>
-              )}
-            </AlertDialogBody>
-
-            <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
-              <Button
-                ref={cancelRef}
-                onClick={deleteDisclosure.onClose}
-                variant="ghost"
-                fontSize="sm"
-                fontWeight={600}
-                color={captionColor}
+                {accounts.filter((account) => account.active).map((account) => (
+                  <option key={account.id} value={account.id}>{account.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl gridColumn="span 2">
+              {fieldLabel(t('installments.drawer.editModal.paymentMethod'))}
+              <Select
+                {...NU_FIELD}
+                value={draftPaymentMethodId ?? ''}
+                onChange={(event) => {
+                  const nextId = event.target.value ? Number(event.target.value) : null
+                  setDraftPaymentMethodId(nextId)
+                  const card = paymentMethods.find((method) => method.id === nextId)
+                  if (card?.settlementAccountId) {
+                    setDraftAccountId(card.settlementAccountId)
+                  }
+                }}
               >
-                {t('installments.drawer.cancel')}
-              </Button>
-              {!canClose && (
-                <Button
-                  onClick={handleDelete}
-                  isLoading={isDeleting}
-                  loadingText={t('installments.drawer.deleteModal.deleting')}
-                  colorScheme="red"
-                  h="44px"
-                  px={6}
-                  borderRadius="full"
-                  fontSize="sm"
-                  fontWeight={700}
-                >
-                  {t('installments.drawer.delete')}
-                </Button>
-              )}
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
+                <option value="">{t('installments.drawer.editModal.noPaymentMethod')}</option>
+                {paymentMethods.filter((method) => method.active).map((method) => (
+                  <option key={method.id} value={method.id}>{method.name}</option>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl gridColumn="span 2">
+              {fieldLabel(t('installments.drawer.editModal.firstDate'))}
+              <Input {...NU_FIELD} type="date" value={draftStartDate} onChange={(event) => setDraftStartDate(event.target.value)} />
+            </FormControl>
+            <FormControl>
+              {fieldLabel(t('installments.drawer.editModal.purchaseTotal'))}
+              <Input
+                {...NU_FIELD}
+                type="number"
+                min={0}
+                step="0.01"
+                fontWeight={700}
+                value={draftTotalAmount}
+                onChange={(event) => handleTotalAmountChange(event.target.value)}
+              />
+            </FormControl>
+            <FormControl>
+              {fieldLabel(t('installments.drawer.editModal.amountPerInstallment'))}
+              <Input
+                {...NU_FIELD}
+                type="number"
+                min={0}
+                step="0.01"
+                fontWeight={700}
+                value={draftInstallmentValue}
+                onChange={(event) => handleInstallmentValueChange(event.target.value)}
+              />
+            </FormControl>
+          </SimpleGrid>
+
+          <HStack mt={6} spacing={2}>
+            <NuSheetButton tone="ghost" onClick={editDisclosure.onClose} isDisabled={isSavingPlan}>
+              {t('installments.drawer.cancel')}
+            </NuSheetButton>
+            <NuSheetButton
+              tone="primary"
+              flex={1}
+              onClick={handleSavePlan}
+              isLoading={isSavingPlan}
+              isDisabled={!draftAccountId}
+            >
+              {t('installments.drawer.editModal.save')}
+            </NuSheetButton>
+          </HStack>
+        </Box>
+      </PremiumModal>
+
+      {/* End / delete chooser */}
+      <PremiumModal
+        isOpen={deleteDisclosure.isOpen}
+        onClose={deleteDisclosure.onClose}
+        size="full"
+        contentProps={NU_MODAL_CONTENT}
+        header={
+          <NuModalHeader
+            title={canClose ? t('installments.drawer.endModal.title') : t('installments.drawer.deleteModal.title')}
+            caption={title}
+            onClose={deleteDisclosure.onClose}
+          />
+        }
+      >
+        <Box
+          overflowY="auto"
+          flex={1}
+          minH={0}
+          px={{ base: 4, md: 6 }}
+          pt={5}
+          pb="max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 1rem))"
+        >
+          {canClose ? (
+            <VStack align="stretch" spacing={3}>
+              <EndOption
+                tone="primary"
+                title={isClosing ? t('installments.drawer.endModal.closing') : t('installments.drawer.endModal.closeTitle')}
+                body={t('installments.drawer.endModal.closeBody', {
+                  upcoming: upcomingCount,
+                  paid: paidCount,
+                  count: p.transactions.length,
+                  amount: formatCurrency(upcomingTotal),
+                })}
+                disabled={isClosing || isDeleting}
+                dimmed={isDeleting}
+                onClick={handleClose}
+              />
+              <EndOption
+                tone="danger"
+                title={isDeleting ? t('installments.drawer.deleteModal.deleting') : t('installments.drawer.endModal.deleteTitle')}
+                body={t('installments.drawer.endModal.deleteBody', { count: p.transactions.length, paid: paidCount })}
+                disabled={isClosing || isDeleting}
+                dimmed={isClosing}
+                onClick={handleDelete}
+              />
+            </VStack>
+          ) : (
+            <Text fontSize="sm" color={NU_SHEET_COLORS.inkSoft} lineHeight={1.6}>
+              {paidCount > 0
+                ? t('installments.drawer.deleteModal.bodyPaid', { count: p.transactions.length })
+                : t('installments.drawer.deleteModal.body', { count: p.transactions.length })}
+            </Text>
+          )}
+
+          <HStack mt={5} spacing={2}>
+            <NuSheetButton tone="ghost" flex={canClose ? 1 : undefined} onClick={deleteDisclosure.onClose} isDisabled={isClosing || isDeleting}>
+              {t('installments.drawer.cancel')}
+            </NuSheetButton>
+            {!canClose && (
+              <NuSheetButton
+                tone="danger"
+                flex={1}
+                leftIcon={<Icon as={Trash2} boxSize={4} />}
+                onClick={handleDelete}
+                isLoading={isDeleting}
+                loadingText={t('installments.drawer.deleteModal.deleting')}
+              >
+                {t('installments.drawer.delete')}
+              </NuSheetButton>
+            )}
+          </HStack>
+        </Box>
+      </PremiumModal>
     </>
+  )
+}
+
+/** One choice in the end/delete chooser: tinted card with a title and an explanation. */
+function EndOption({
+  tone,
+  title,
+  body,
+  disabled,
+  dimmed,
+  onClick,
+}: {
+  tone: 'primary' | 'danger'
+  title: string
+  body: string
+  disabled: boolean
+  dimmed: boolean
+  onClick: () => void
+}) {
+  const primary = tone === 'primary'
+  const accent = primary ? NU_SHEET_COLORS.brand : NU_SHEET_COLORS.danger
+  return (
+    <Box
+      as="button"
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      textAlign="left"
+      w="full"
+      p={4}
+      borderRadius="18px"
+      border="1.5px solid"
+      borderColor={primary ? accent : '#ececf1'}
+      bg={primary ? NU_SHEET_COLORS.brandSoft : 'white'}
+      opacity={dimmed ? 0.5 : 1}
+      cursor={disabled ? 'default' : 'pointer'}
+      transition="background-color .15s ease, border-color .15s ease"
+      _hover={disabled ? undefined : { borderColor: accent, bg: primary ? '#ead6fb' : NU_SHEET_COLORS.dangerSoft }}
+      _focusVisible={{ outline: `2px solid ${accent}`, outlineOffset: '2px' }}
+    >
+      <Text fontSize="md" fontWeight={800} letterSpacing="-0.01em" color={accent}>
+        {title}
+      </Text>
+      <Text mt={1} fontSize="sm" color={primary ? NU_SHEET_COLORS.ink : NU_SHEET_COLORS.inkSoft} lineHeight={1.5}>
+        {body}
+      </Text>
+    </Box>
   )
 }
