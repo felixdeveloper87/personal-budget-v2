@@ -535,10 +535,14 @@ function HouseholdPreview({ household }: { household: LandingV3Content['househol
 
 export default function LandingV3(props: LandingV3Props) {
   const mobile = useIsMobile()
-  return mobile ? <LandingMobile {...props} /> : <LandingDesktop {...props} />
+  return <LandingPage {...props} mobile={mobile} />
 }
 
-function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
+function LandingPage({
+  onRequestAccess,
+  onSignIn,
+  mobile,
+}: LandingV3Props & { mobile: boolean }) {
   const { t, formatCurrency } = useI18n()
   const content = useMemo(
     () => createLandingV3Config(t, formatCurrency),
@@ -560,12 +564,15 @@ function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
   const navToggleRef = useRef<HTMLButtonElement>(null)
   const reducedMotion = useReducedMotion()
   const [navElevated, setNavElevated] = useState(false)
+  const [pastSplash, setPastSplash] = useState(false)
   const [navMenuOpen, setNavMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
 
   useEffect(() => {
     const update = () => {
       setNavElevated(window.scrollY > 24)
+      // On phones the splash owns the first screen; the nav slides in once it's gone.
+      setPastSplash(window.scrollY > window.innerHeight * 0.8)
 
       const activationLine = window.innerHeight * 0.36
       let nextActive = ''
@@ -665,7 +672,7 @@ function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
       </a>
 
       <nav
-        className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}`}
+        className={`pbv3-nav${navElevated ? ' is-elevated' : ''}${navMenuOpen ? ' is-menu-open' : ''}${mobile && !pastSplash && !navMenuOpen ? ' is-hidden' : ''}`}
         aria-label={t('landing.a11y.mainNavigation')}
       >
         <div className="pbv3-shell pbv3-nav__inner">
@@ -748,6 +755,9 @@ function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
       </nav>
 
       <main id="main-content">
+        {mobile ? (
+          <LandingMobile onRequestAccess={onRequestAccess} onSignIn={onSignIn} />
+        ) : (
         <header
           className="pbv3-hero"
           id="top"
@@ -789,6 +799,7 @@ function LandingDesktop({ onRequestAccess, onSignIn }: LandingV3Props) {
             <i />
           </a>
         </header>
+        )}
 
         <section
           className="pbv3-proof"

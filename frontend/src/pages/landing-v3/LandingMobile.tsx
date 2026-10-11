@@ -1,4 +1,4 @@
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import BrandMark from '../../components/brand/BrandMark'
 import LanguageToggle from '../../components/layout/header/LanguageToggle'
 import { OnBrandContext } from '../../components/layout/header/onBrand'
@@ -50,17 +50,17 @@ export default function LandingMobile({ onRequestAccess, onSignIn }: LandingMobi
   const { t } = useI18n()
 
   return (
-    <div className="pbm">
+    <header className="pbm" id="top">
       <SplashArtwork />
 
-      <header className="pbm-top">
+      <div className="pbm-top">
         <BrandMark variant="title" colorMode="dark" size={148} />
         <OnBrandContext.Provider value>
           <LanguageToggle />
         </OnBrandContext.Provider>
-      </header>
+      </div>
 
-      <main className="pbm-bottom">
+      <div className="pbm-bottom">
         <h1>{t('landing.mobile.title')}</h1>
         <p>{t('landing.mobile.subtitle')}</p>
 
@@ -75,7 +75,11 @@ export default function LandingMobile({ onRequestAccess, onSignIn }: LandingMobi
         </div>
 
         <small className="pbm-note">{t('landing.mobile.note')}</small>
-      </main>
-    </div>
+        <a className="pbm-explore" href="#proof">
+          {t('landing.hero.secondaryCta')}
+          <ChevronDown size={16} aria-hidden="true" />
+        </a>
+      </div>
+    </header>
   )
 }

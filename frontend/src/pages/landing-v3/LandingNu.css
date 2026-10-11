@@ -439,3 +439,23 @@
   color: var(--pb-ink);
   font-weight: 700;
 }
+
+/* ---------- Mobile: nav hidden while the splash fills the screen ---------- */
+.pbv3--nu .pbv3-nav {
+  transition:
+    padding 260ms ease,
+    opacity 220ms ease,
+    transform 260ms ease,
+    visibility 0s linear 0s;
+}
+
+.pbv3--nu .pbv3-nav.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate3d(0, -100%, 0);
+  transition:
+    padding 260ms ease,
+    opacity 220ms ease,
+    transform 260ms ease,
+    visibility 0s linear 260ms;
+}

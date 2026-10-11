@@ -193,3 +193,43 @@
   line-height: 1.4;
   text-align: center;
 }
+
+.pbm-explore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  align-self: center;
+  margin-top: 18px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pbm-explore svg {
+  animation: pbm-nudge 1.8s ease-in-out infinite;
+}
+
+@keyframes pbm-nudge {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, 4px, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pbm-explore svg {
+    animation: none;
+  }
+}
+
+.pbm-explore:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
