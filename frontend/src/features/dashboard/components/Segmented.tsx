@@ -4,6 +4,8 @@ import { EYEBROW_CASE } from './eyebrow'
 export interface SegmentedOption<T extends string> {
   value: T
   label: string
+  /** Small count pill after the label (e.g. active items). Hidden when 0/undefined. */
+  badge?: number
 }
 
 interface SegmentedProps<T extends string> {
@@ -82,6 +84,28 @@ export default function Segmented<T extends string>({
           _hover={{ color: summary ? 'var(--pb-summary-ink)' : 'var(--pb-ink)' }}
         >
           {opt.label}
+          {opt.badge ? (
+            <Box
+              as="span"
+              display="inline-grid"
+              placeItems="center"
+              minW="18px"
+              h="18px"
+              ml="6px"
+              px="5px"
+              borderRadius="999px"
+              bg={summary ? '#ffffff' : 'var(--nu-brand, #820ad1)'}
+              color={summary ? 'var(--nu-brand, #820ad1)' : '#ffffff'}
+              fontSize="10.5px"
+              fontWeight={800}
+              letterSpacing={0}
+              lineHeight={1}
+              verticalAlign="1px"
+              sx={{ fontVariantNumeric: 'tabular-nums' }}
+            >
+              {opt.badge}
+            </Box>
+          ) : null}
         </Box>
       ))}
     </HStack>

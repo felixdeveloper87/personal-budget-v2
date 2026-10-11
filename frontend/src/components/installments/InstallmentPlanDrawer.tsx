@@ -1,5 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogBody,
@@ -14,7 +13,6 @@ import {
   FormLabel,
   HStack,
   Icon,
-  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -30,11 +28,9 @@ import {
 } from '@chakra-ui/react'
 import {
   AlertTriangle,
-  Calendar,
   CheckCircle2,
   Pencil,
   Trash2,
-  X,
 } from '../ui/icons'
 import { FinancialAccount, InstallmentPlan, PaymentMethod } from '../../types'
 import {
@@ -49,6 +45,7 @@ import { getInstallmentPlanTitle } from '../../utils/installments'
 import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
+import NuDetailSheet, { NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
 
 interface InstallmentPlanDrawerProps {
   plan: InstallmentPlan | null
@@ -69,38 +66,19 @@ function isPlanCompleted(plan: InstallmentPlan): boolean {
   return plan.transactions.every((t) => new Date(t.date).getTime() < now)
 }
 
-function DetailRow({ k, v }: { k: string; v: string }) {
-  return (
-    <Flex justify="space-between" align="baseline" gap="1rem" py=".6rem" borderBottom="1px solid var(--pb-hair)">
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="10.5px"
-        letterSpacing="0.06em"
-        textTransform="uppercase"
-        color="var(--pb-ink-faint)"
-        flexShrink={0}
-      >
-        {k}
-      </Text>
-      <Text fontFamily="var(--pb-serif)" fontSize=".98rem" color="var(--pb-ink)" textAlign="right" noOfLines={2}>
-        {v}
-      </Text>
-    </Flex>
-  )
-}
+const SCHEDULE_PREVIEW = 4
 
 /**
- * Right-side detail panel for a single installment plan — mirrors the
- * Transactions page drawer. Opens when a plan row is clicked and hosts the
- * full installment schedule plus edit/delete actions.
+ * Detail sheet for a single installment plan (Nubank style, see
+ * NuDetailSheet). Opens when a plan row is clicked and hosts the installment
+ * schedule plus edit/delete actions.
  */
 export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: InstallmentPlanDrawerProps) {
   const ed = useEd()
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const open = plan != null
   const [displayPlan, setDisplayPlan] = useState<InstallmentPlan | null>(plan)
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const lastFocused = useRef<Element | null>(null)
+  const [showAllSchedule, setShowAllSchedule] = useState(false)
 
   const [isDeleting, setIsDeleting] = useState(false)
   const [isSavingPlan, setIsSavingPlan] = useState(false)
@@ -120,10 +98,6 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   const titleColor = ed ? ed.cream : titleColorBase
   const captionColorBase = useColorModeValue('gray.500', 'gray.400')
   const captionColor = ed ? ed.muted : captionColorBase
-  const accentBgBase = useColorModeValue('blue.50', 'rgba(37,99,235,0.16)')
-  const accentBg = ed ? ed.jadeSoft : accentBgBase
-  const accentFgBase = useColorModeValue('blue.700', 'blue.300')
-  const accentFg = ed ? ed.jade : accentFgBase
   const dividerColorBase = useColorModeValue('blackAlpha.100', 'whiteAlpha.100')
   const dividerColor = ed ? ed.line : dividerColorBase
   const fallbackDialogBg = useColorModeValue('#ffffff', '#0a0a0a')
@@ -145,6 +119,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
   // Reset edit drafts whenever a different plan is opened.
   useEffect(() => {
     if (!plan) return
+    setShowAllSchedule(false)
     setDraftInstallmentValue(String(plan.installmentValue))
     setDraftTotalAmount(String(plan.totalAmount))
     setDraftStartDate(getPlanStartDate(plan))
@@ -167,22 +142,6 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
         })
       })
   }, [editDisclosure.isOpen, displayPlan, t])
-
-  // Escape to close + focus management.
-  useEffect(() => {
-    if (!open) return
-    lastFocused.current = document.activeElement
-    const t = window.setTimeout(() => closeRef.current?.focus(), 40)
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !editDisclosure.isOpen && !deleteDisclosure.isOpen) onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      window.clearTimeout(t)
-      document.removeEventListener('keydown', onKey)
-      if (lastFocused.current instanceof HTMLElement) lastFocused.current.focus()
-    }
-  }, [open, onClose, editDisclosure.isOpen, deleteDisclosure.isOpen])
 
   const sortedTransactions = useMemo(
     () =>
@@ -294,229 +253,118 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
     }
   }
 
-  return createPortal(
-    <Box position="fixed" inset={0} zIndex={1400} aria-hidden={!open} pointerEvents={open ? 'auto' : 'none'}>
-      {/* Backdrop */}
-      <Box
-        position="absolute"
-        inset={0}
-        bg="rgba(23,37,28,.34)"
-        backdropFilter="blur(2px)"
-        opacity={open ? 1 : 0}
-        transition="opacity 0.32s cubic-bezier(.2,.7,.2,1)"
-        onClick={onClose}
-      />
+  const visibleTransactions = showAllSchedule
+    ? sortedTransactions
+    : (() => {
+        // Collapsed: the next few unpaid installments (or the last few once done).
+        const upcoming = sortedTransactions.filter((item) => new Date(item.date) >= new Date())
+        return (upcoming.length ? upcoming : sortedTransactions.slice(-SCHEDULE_PREVIEW)).slice(0, SCHEDULE_PREVIEW)
+      })()
 
-      {/* Panel */}
-      <Box
-        role="dialog"
-        aria-modal={open ? 'true' : undefined}
-        aria-label={t('installments.drawer.detailAria', { title })}
-        position="absolute"
-        bg="var(--pb-surface)"
-        boxShadow="var(--pb-shadow-lift)"
-        overflowY="auto"
-        left={{ base: 0, sm: 'auto' }}
-        right={0}
-        bottom={0}
-        top={{ base: 'auto', sm: 0 }}
-        w={{ base: '100%', sm: 'min(460px, 92vw)' }}
-        maxH={{ base: '90vh', sm: '100%' }}
-        borderTopRadius={{ base: '22px', sm: 0 }}
-        transform={{
-          base: open ? 'translateY(0)' : 'translateY(101%)',
-          sm: open ? 'translateX(0)' : 'translateX(101%)',
-        }}
-        transition="transform 0.32s cubic-bezier(.2,.7,.2,1)"
-      >
-        {/* Mobile handle */}
-        <Flex justify="center" pt="0.6rem" display={{ base: 'flex', sm: 'none' }}>
-          <Box w="40px" h="4px" borderRadius="999px" bg="var(--pb-hair-2)" />
-        </Flex>
-
-        {/* Header */}
-        <Flex
-          align="flex-start"
-          gap=".75rem"
-          px="clamp(1.1rem,4vw,1.5rem)"
-          py="1.1rem"
-          borderBottom="1px solid var(--pb-hair)"
-        >
-          <Box opacity={isPast ? 0.7 : 1} flexShrink={0}>
-            <PlanLogo name={title} category={firstTransaction?.category} size={44} />
+  return (
+    <>
+      <NuDetailSheet
+        open={open}
+        onClose={onClose}
+        ariaLabel={t('installments.drawer.detailAria', { title })}
+        escapeDisabled={editDisclosure.isOpen || deleteDisclosure.isOpen}
+        media={<PlanLogo name={title} category={firstTransaction?.category} size={44} />}
+        title={title}
+        caption={firstTransaction?.category ? categoryLabel(firstTransaction.category) : undefined}
+        amountLabel={t('installments.drawer.perInstallment')}
+        amount={formatCurrency(p.installmentValue)}
+        badge={
+          <NuSheetBadge tone={isPast ? 'muted' : 'light'}>
+            {isPast
+              ? t('installments.drawer.completedPlan')
+              : t('installments.progress.paid', { paid: paidCount, total: p.totalInstallments })}
+          </NuSheetBadge>
+        }
+        headerExtra={
+          <Box h="6px" w="full" bg="rgba(255,255,255,0.22)" borderRadius="full" overflow="hidden" aria-hidden="true">
+            <Box h="full" w={`${isPast ? 100 : progressPct}%`} bg="white" borderRadius="full" transition="width 0.4s ease" />
           </Box>
-          <Box flex={1} minW={0}>
-            <Text fontFamily="var(--pb-serif)" fontSize="1.2rem" fontWeight={500} color="var(--pb-ink)" noOfLines={2}>
-              {title}
-            </Text>
-            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.06em">
-              {firstTransaction?.category ? categoryLabel(firstTransaction.category) : t('installments.plan.fallbackTitle')}
-            </Text>
-          </Box>
-          <VStack spacing="0.4rem" align="flex-end">
-            <IconButton
-              ref={closeRef}
-              aria-label={t('installments.drawer.closeAria')}
-              icon={<Icon as={X} boxSize="18px" />}
-              size="sm"
-              variant="ghost"
-              borderRadius="999px"
-              color="var(--pb-ink-soft)"
-              _hover={{ bg: 'var(--pb-surface-2)' }}
-              onClick={onClose}
-            />
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="1.5rem"
-              fontWeight={500}
-              color="var(--pb-ink)"
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-              whiteSpace="nowrap"
-            >
-              {formatCurrency(p.installmentValue)}
-            </Text>
-          </VStack>
-        </Flex>
-
-        {/* Body */}
-        <Box px="clamp(1.1rem,4vw,1.5rem)" py="1.1rem">
-          {/* Progress / status */}
-          {isPast ? (
-            <HStack
-              justify="space-between"
-              align="center"
-              px=".9rem"
-              py=".75rem"
-              borderRadius="14px"
-              bg="var(--pb-tint-income)"
-              color="var(--pb-income)"
-            >
-              <HStack spacing="0.5rem">
-                <Icon as={CheckCircle2} boxSize="16px" />
-                <Text fontSize=".9rem" fontWeight={600}>{t('installments.drawer.completedPlan')}</Text>
-              </HStack>
-              <Text fontSize=".9rem">{t('installments.progress.paid', { paid: p.totalInstallments, total: p.totalInstallments })}</Text>
-            </HStack>
-          ) : (
-            <Box>
-              <Flex justify="space-between" align="baseline" mb="0.5rem">
-                <Text fontSize=".85rem" fontWeight={600} color="var(--pb-ink-soft)">
-                  {t('installments.progress.paid', { paid: paidCount, total: p.totalInstallments })}
-                </Text>
-                <Text fontSize="1rem" fontWeight={700} color="var(--pb-forest-2)">{progressPct}%</Text>
-              </Flex>
-              <Box h="6px" w="full" bg="var(--pb-surface-3)" borderRadius="full" overflow="hidden">
-                <Box h="full" w={`${progressPct}%`} bg="var(--pb-forest-2)" borderRadius="full" transition="width 0.4s ease" />
-              </Box>
-            </Box>
-          )}
-
-          {/* Detail rows */}
-          <Box mt="1.1rem" borderTop="1px solid var(--pb-hair)">
-            <DetailRow k={t('installments.drawer.perInstallment')} v={formatCurrency(p.installmentValue)} />
-            <DetailRow k={t('installments.drawer.total')} v={formatCurrency(p.totalAmount)} />
-            <DetailRow k={t('installments.drawer.installments')} v={`${p.totalInstallments}`} />
-            <DetailRow k={t('installments.drawer.card')} v={p.paymentMethodName ?? t('installments.drawer.noCardLinked')} />
-            <DetailRow k={t('installments.drawer.account')} v={p.accountName ?? t('installments.drawer.notLinked')} />
-          </Box>
-
-          {/* Action buttons */}
-          <HStack spacing="0.6rem" mt="1.1rem">
-            <Button
-              flex={1}
-              h="42px"
-              borderRadius="12px"
-              fontSize="sm"
-              fontWeight={600}
-              leftIcon={<Icon as={Pencil} boxSize={4} />}
-              bg="var(--pb-surface-2)"
-              color="var(--pb-ink)"
-              border="1px solid var(--pb-hair)"
-              _hover={{ bg: 'var(--pb-surface-3)' }}
-              onClick={editDisclosure.onOpen}
-            >
+        }
+        footer={
+          <>
+            <NuSheetButton tone="primary" flex={1} leftIcon={<Icon as={Pencil} boxSize={4} />} onClick={editDisclosure.onOpen}>
               {t('installments.drawer.editPlan')}
-            </Button>
-            <Button
-              h="42px"
-              px={4}
-              borderRadius="12px"
-              fontSize="sm"
-              fontWeight={600}
-              leftIcon={<Icon as={Trash2} boxSize={4} />}
-              bg="var(--pb-tint-coral)"
-              color="var(--pb-coral)"
-              border="1px solid var(--pb-hair)"
-              _hover={{ bg: 'var(--pb-tint-coral)', borderColor: 'var(--pb-coral)' }}
-              onClick={deleteDisclosure.onOpen}
-            >
+            </NuSheetButton>
+            <NuSheetButton tone="danger" px={5} leftIcon={<Icon as={Trash2} boxSize={4} />} onClick={deleteDisclosure.onOpen}>
               {t('installments.drawer.delete')}
-            </Button>
-          </HStack>
+            </NuSheetButton>
+          </>
+        }
+      >
+        <NuFacts
+          items={[
+            { label: t('installments.drawer.total'), value: formatCurrency(p.totalAmount) },
+            { label: t('installments.drawer.installments'), value: `${p.totalInstallments}× ${formatCurrency(p.installmentValue)}` },
+            { label: t('installments.drawer.card'), value: p.paymentMethodName ?? t('installments.drawer.noCardLinked') },
+            { label: t('installments.drawer.account'), value: p.accountName ?? t('installments.drawer.notLinked') },
+          ]}
+        />
 
-          {/* Installment schedule */}
-          <Text
-            fontFamily="var(--pb-mono)"
-            fontSize="10px"
-            letterSpacing="0.16em"
-            textTransform="uppercase"
-            color="var(--pb-ink-faint)"
-            mt="1.4rem"
-            mb="0.6rem"
-          >
+        <Flex mt={5} mb={2} align="center" justify="space-between">
+          <Text fontSize="sm" fontWeight={700}>
             {t('installments.drawer.schedule')}
           </Text>
-          <VStack align="stretch" spacing="0.5rem">
-            {sortedTransactions.map((transaction) => {
-              const isPaid = new Date(transaction.date) < new Date()
-              const formattedDate = formatDate(new Date(transaction.date), {
-                day: '2-digit',
-                month: 'short',
-                year: 'numeric',
-              })
-              return (
-                <HStack
-                  key={transaction.id}
-                  justify="space-between"
-                  align="center"
-                  px=".85rem"
-                  py=".6rem"
-                  borderRadius="12px"
-                  bg={isPaid ? 'var(--pb-tint-income)' : 'var(--pb-surface-2)'}
-                  border="1px solid var(--pb-hair)"
-                  gap={2}
+          {sortedTransactions.length > SCHEDULE_PREVIEW && (
+            <Button
+              variant="link"
+              size="sm"
+              color={NU_SHEET_COLORS.brand}
+              fontWeight={700}
+              onClick={() => setShowAllSchedule((value) => !value)}
+            >
+              {showAllSchedule
+                ? t('installments.drawer.showLess')
+                : t('installments.drawer.showAll', { count: sortedTransactions.length })}
+            </Button>
+          )}
+        </Flex>
+        <VStack align="stretch" spacing={0}>
+          {visibleTransactions.map((transaction) => {
+            const isPaid = new Date(transaction.date) < new Date()
+            return (
+              <Flex
+                key={transaction.id}
+                align="center"
+                gap={3}
+                py={2.5}
+                borderBottom="1px solid #ececf1"
+                _last={{ borderBottom: 0 }}
+              >
+                <Box
+                  w="34px"
+                  h="34px"
+                  flexShrink={0}
+                  display="grid"
+                  placeItems="center"
+                  borderRadius="full"
+                  bg={isPaid ? '#e3f4ec' : NU_SHEET_COLORS.brandSoft}
+                  color={isPaid ? '#0f8a5f' : NU_SHEET_COLORS.brand}
+                  fontSize="xs"
+                  fontWeight={800}
                 >
-                  <HStack spacing="0.6rem" minW={0}>
-                    <Icon as={Calendar} boxSize="14px" color="var(--pb-ink-faint)" flexShrink={0} />
-                    <VStack align="flex-start" spacing={0} minW={0}>
-                      <Text fontSize=".88rem" fontWeight={600} color="var(--pb-ink)">{formattedDate}</Text>
-                      <Text fontSize="10px" color="var(--pb-ink-faint)">
-                        {transaction.installmentNumber}/{p.totalInstallments}
-                      </Text>
-                    </VStack>
-                  </HStack>
-                  <HStack spacing="0.55rem" flexShrink={0}>
-                    <Text fontSize=".9rem" fontWeight={700} color="var(--pb-ink)" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                      {formatCurrency(transaction.amount)}
-                    </Text>
-                    <Text
-                      fontSize="10px"
-                      fontWeight={600}
-                      px="0.5rem"
-                      py="0.15rem"
-                      borderRadius="999px"
-                      bg={isPaid ? 'var(--pb-tint-income)' : 'var(--pb-surface-3)'}
-                      color={isPaid ? 'var(--pb-income)' : 'var(--pb-ink-soft)'}
-                    >
-                      {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
-                    </Text>
-                  </HStack>
-                </HStack>
-              )
-            })}
-          </VStack>
-        </Box>
-      </Box>
+                  {isPaid ? <Icon as={CheckCircle2} boxSize="16px" /> : transaction.installmentNumber}
+                </Box>
+                <Box flex={1} minW={0}>
+                  <Text fontSize="sm" fontWeight={700}>
+                    {formatDate(new Date(transaction.date), { day: '2-digit', month: 'short', year: 'numeric' })}
+                  </Text>
+                  <Text fontSize="xs" color={NU_SHEET_COLORS.inkSoft}>
+                    {transaction.installmentNumber}/{p.totalInstallments} · {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
+                  </Text>
+                </Box>
+                <Text fontSize="sm" fontWeight={700} sx={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {formatCurrency(transaction.amount)}
+                </Text>
+              </Flex>
+            )
+          })}
+        </VStack>
+      </NuDetailSheet>
 
       {/* Edit plan modal */}
       <Modal isOpen={editDisclosure.isOpen} onClose={editDisclosure.onClose} isCentered>
@@ -529,8 +377,8 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                 w={9}
                 h={9}
                 borderRadius="lg"
-                bg={accentBg}
-                color={accentFg}
+                bg={NU_SHEET_COLORS.brandSoft}
+                color={NU_SHEET_COLORS.brand}
                 display="flex"
                 alignItems="center"
                 justifyContent="center"
@@ -627,10 +475,10 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             </VStack>
           </ModalBody>
           <ModalFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
-            <Button variant="ghost" fontSize="sm" color={captionColor} onClick={editDisclosure.onClose}>
+            <Button {...nuButtonProps('ghost')} h="44px" onClick={editDisclosure.onClose}>
               {t('installments.drawer.cancel')}
             </Button>
-            <Button colorScheme="blue" fontSize="sm" onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
+            <Button {...nuButtonProps('primary')} h="44px" px={6} onClick={handleSavePlan} isLoading={isSavingPlan} isDisabled={!draftAccountId}>
               {t('installments.drawer.editModal.save')}
             </Button>
           </ModalFooter>
@@ -702,9 +550,12 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                 onClick={handleDelete}
                 isLoading={isDeleting}
                 loadingText={t('installments.drawer.deleteModal.deleting')}
+                colorScheme="red"
+                h="44px"
+                px={6}
+                borderRadius="full"
                 fontSize="sm"
                 fontWeight={700}
-                colorScheme="red"
               >
                 {t('installments.drawer.delete')}
               </Button>
@@ -712,7 +563,6 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
-    </Box>,
-    document.body,
+    </>
   )
 }

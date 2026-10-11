@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import React, { useEffect, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogBody,
@@ -9,12 +8,9 @@ import {
   AlertDialogOverlay,
   Box,
   Button,
-  Flex,
   FormControl,
   FormLabel,
-  HStack,
   Icon,
-  IconButton,
   Input,
   Select,
   SimpleGrid,
@@ -23,7 +19,7 @@ import {
   useDisclosure,
   VStack,
 } from '@chakra-ui/react'
-import { AlertTriangle, Check, Pencil, Trash2, TrendingDown, TrendingUp, X } from '../ui/icons'
+import { AlertTriangle, Check, Pencil, Trash2, TrendingDown, TrendingUp } from '../ui/icons'
 import {
   cancelRecurringTransaction,
   listAccounts,
@@ -41,6 +37,7 @@ import { useEd } from '../../editorial'
 import { useI18n } from '../../i18n'
 import '../../features/dashboard/theme/pb-tokens.css'
 import { SHEET_SX, sheetContainerProps, sheetGrabberProps } from '../ui/modalLayout'
+import NuDetailSheet, { NU_SHEET_COLORS, NuFacts, NuSheetBadge, NuSheetButton, nuButtonProps } from '../ui/NuDetailSheet'
 
 interface RecurringTransactionDrawerProps {
   recurringTransaction: RecurringTransaction | null
@@ -49,30 +46,21 @@ interface RecurringTransactionDrawerProps {
   onChanged: () => void | Promise<void>
 }
 
-function DetailRow({ k, v }: { k: string; v: string }) {
-  return (
-    <Flex justify="space-between" align="baseline" gap="1rem" py=".6rem" borderBottom="1px solid var(--pb-hair)">
-      <Text
-        fontFamily="var(--pb-mono)"
-        fontSize="10.5px"
-        letterSpacing="0.06em"
-        textTransform="uppercase"
-        color="var(--pb-ink-faint)"
-        flexShrink={0}
-      >
-        {k}
-      </Text>
-      <Text fontFamily="var(--pb-serif)" fontSize=".98rem" color="var(--pb-ink)" textAlign="right" noOfLines={2}>
-        {v}
-      </Text>
-    </Flex>
-  )
-}
+const NU_FIELD = {
+  h: '44px',
+  borderRadius: '12px',
+  bg: NU_SHEET_COLORS.surface,
+  border: '1.5px solid transparent',
+  fontSize: 'sm',
+  _hover: { bg: '#ededf2' },
+  _focus: { bg: 'white', borderColor: NU_SHEET_COLORS.brand, boxShadow: 'none' },
+  _focusVisible: { bg: 'white', borderColor: NU_SHEET_COLORS.brand, boxShadow: 'none' },
+} as const
 
 /**
- * Right-side detail panel for a single fixed payment / income — mirrors the
- * Transactions page drawer. Opens when a rule row is clicked and hosts inline
- * editing plus the cancel action.
+ * Detail sheet for a single fixed payment / income (Nubank style, see
+ * NuDetailSheet). Opens when a rule row is clicked and hosts inline editing
+ * plus the cancel action.
  */
 export default function RecurringTransactionDrawer({
   recurringTransaction,
@@ -83,8 +71,6 @@ export default function RecurringTransactionDrawer({
   const { t, formatCurrency, formatDate, categoryLabel } = useI18n()
   const open = recurringTransaction != null
   const [displayItem, setDisplayItem] = useState<RecurringTransaction | null>(recurringTransaction)
-  const closeRef = useRef<HTMLButtonElement>(null)
-  const lastFocused = useRef<Element | null>(null)
 
   const [isCancelling, setIsCancelling] = useState(false)
   const [isSavingAmount, setIsSavingAmount] = useState(false)
@@ -151,29 +137,11 @@ export default function RecurringTransactionDrawer({
       })
   }, [isEditing, displayItem, t])
 
-  // Escape to close + focus management.
-  useEffect(() => {
-    if (!open) return
-    lastFocused.current = document.activeElement
-    const t = window.setTimeout(() => closeRef.current?.focus(), 40)
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !deleteDisclosure.isOpen) onClose()
-    }
-    document.addEventListener('keydown', onKey)
-    return () => {
-      window.clearTimeout(t)
-      document.removeEventListener('keydown', onKey)
-      if (lastFocused.current instanceof HTMLElement) lastFocused.current.focus()
-    }
-  }, [open, onClose, deleteDisclosure.isOpen])
-
   if (!displayItem) return null
 
   const r = displayItem
   const isIncome = r.type === 'INCOME'
   const typeIcon = isIncome ? TrendingUp : TrendingDown
-  const amountColor = isIncome ? 'var(--pb-income-2)' : 'var(--pb-coral)'
-  const accentTint = isIncome ? 'var(--pb-tint-income)' : 'var(--pb-tint-coral)'
 
   const resetDrafts = () => {
     setDraftAmount(String(r.amount))
@@ -259,257 +227,135 @@ export default function RecurringTransactionDrawer({
     }
   }
 
-  return createPortal(
-    <Box position="fixed" inset={0} zIndex={1400} aria-hidden={!open} pointerEvents={open ? 'auto' : 'none'}>
-      {/* Backdrop */}
-      <Box
-        position="absolute"
-        inset={0}
-        bg="rgba(23,37,28,.34)"
-        backdropFilter="blur(2px)"
-        opacity={open ? 1 : 0}
-        transition="opacity 0.32s cubic-bezier(.2,.7,.2,1)"
-        onClick={onClose}
-      />
+  const fieldLabel = (label: string) => (
+    <FormLabel mb={1} fontSize="xs" color={NU_SHEET_COLORS.inkSoft} fontWeight={600}>
+      {label}
+    </FormLabel>
+  )
 
-      {/* Panel */}
-      <Box
-        role="dialog"
-        aria-modal={open ? 'true' : undefined}
-        aria-label={t('recurring.detailAria', { description: r.description })}
-        position="absolute"
-        bg="var(--pb-surface)"
-        boxShadow="var(--pb-shadow-lift)"
-        overflowY="auto"
-        left={{ base: 0, sm: 'auto' }}
-        right={0}
-        bottom={0}
-        top={{ base: 'auto', sm: 0 }}
-        w={{ base: '100%', sm: 'min(460px, 92vw)' }}
-        maxH={{ base: '90vh', sm: '100%' }}
-        borderTopRadius={{ base: '22px', sm: 0 }}
-        transform={{
-          base: open ? 'translateY(0)' : 'translateY(101%)',
-          sm: open ? 'translateX(0)' : 'translateX(101%)',
+  const footer = !r.active ? undefined : isEditing ? (
+    <>
+      <NuSheetButton
+        tone="ghost"
+        onClick={() => {
+          resetDrafts()
+          setIsEditing(false)
         }}
-        transition="transform 0.32s cubic-bezier(.2,.7,.2,1)"
       >
-        {/* Mobile handle */}
-        <Flex justify="center" pt="0.6rem" display={{ base: 'flex', sm: 'none' }}>
-          <Box w="40px" h="4px" borderRadius="999px" bg="var(--pb-hair-2)" />
-        </Flex>
+        {t('common.cancel')}
+      </NuSheetButton>
+      <NuSheetButton
+        tone="primary"
+        flex={1}
+        leftIcon={<Icon as={Check} boxSize={4} />}
+        onClick={handleSaveAmount}
+        isLoading={isSavingAmount}
+        isDisabled={!draftAccountId}
+      >
+        {t('common.save')}
+      </NuSheetButton>
+    </>
+  ) : (
+    <>
+      <NuSheetButton tone="primary" flex={1} leftIcon={<Icon as={Pencil} boxSize={4} />} onClick={() => setIsEditing(true)}>
+        {t('common.edit')}
+      </NuSheetButton>
+      <NuSheetButton tone="danger" px={5} leftIcon={<Icon as={Trash2} boxSize={4} />} onClick={deleteDisclosure.onOpen}>
+        {t('recurring.cancelRule')}
+      </NuSheetButton>
+    </>
+  )
 
-        {/* Header */}
-        <Flex
-          align="flex-start"
-          gap=".75rem"
-          px="clamp(1.1rem,4vw,1.5rem)"
-          py="1.1rem"
-          borderBottom="1px solid var(--pb-hair)"
-        >
-          <Box
-            w="44px"
-            h="44px"
-            borderRadius="12px"
-            display="grid"
-            placeItems="center"
-            bg={accentTint}
-            color={amountColor}
-            border="1px solid var(--pb-hair)"
-            flexShrink={0}
-          >
-            <Icon as={typeIcon} boxSize="21px" weight="duotone" />
-          </Box>
-          <Box flex={1} minW={0}>
-            <Text fontFamily="var(--pb-serif)" fontSize="1.2rem" fontWeight={500} color="var(--pb-ink)" noOfLines={2}>
-              {r.description}
-            </Text>
-            <Text fontFamily="var(--pb-mono)" fontSize="10.5px" color="var(--pb-ink-faint)" textTransform="uppercase" letterSpacing="0.06em">
-              {categoryLabel(r.category)}
-            </Text>
-          </Box>
-          <VStack spacing="0.4rem" align="flex-end">
-            <IconButton
-              ref={closeRef}
-              aria-label={t('recurring.closeDetail')}
-              icon={<Icon as={X} boxSize="18px" />}
-              size="sm"
-              variant="ghost"
-              borderRadius="999px"
-              color="var(--pb-ink-soft)"
-              _hover={{ bg: 'var(--pb-surface-2)' }}
-              onClick={onClose}
-            />
-            <Text
-              fontFamily="var(--pb-serif)"
-              fontSize="1.5rem"
-              fontWeight={500}
-              color={amountColor}
-              style={{ fontVariantNumeric: 'tabular-nums' }}
-              whiteSpace="nowrap"
-            >
-              {isIncome ? '+' : '−'}{formatCurrency(r.amount)}
-            </Text>
-          </VStack>
-        </Flex>
-
-        {/* Body */}
-        <Box px="clamp(1.1rem,4vw,1.5rem)" py="1.1rem">
-          {/* Status */}
-          <HStack
-            justify="space-between"
-            align="center"
-            px=".9rem"
-            py=".7rem"
-            borderRadius="14px"
-            bg={r.active ? 'var(--pb-tint-green)' : 'var(--pb-surface-2)'}
-            color={r.active ? 'var(--pb-forest-2)' : 'var(--pb-ink-soft)'}
-          >
-            <Text fontSize=".9rem" fontWeight={600}>
-              {r.active ? t('recurring.activeRule') : t('recurring.cancelled')}
-            </Text>
-            <Text fontSize=".85rem" color="var(--pb-ink-soft)">
-              {t(isIncome ? 'type.INCOME' : 'type.EXPENSE')} · {t('recurring.monthly')}
-            </Text>
-          </HStack>
-
-          {isEditing ? (
-            <VStack align="stretch" spacing={3} mt="1.1rem">
-              <SimpleGrid columns={{ base: 1, sm: 3 }} spacing={3}>
-                <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.amount')}</FormLabel>
-                  <Input value={draftAmount} onChange={(e) => setDraftAmount(e.target.value)} type="number" min={0} step="0.01" size="sm" fontWeight={700} />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.startDate')}</FormLabel>
-                  <Input value={draftStartDate} onChange={(e) => setDraftStartDate(e.target.value)} type="date" size="sm" />
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.paymentDay')}</FormLabel>
-                  <Input value={draftDayOfMonth} onChange={(e) => setDraftDayOfMonth(e.target.value)} type="number" min={1} max={31} step={1} size="sm" />
-                </FormControl>
-              </SimpleGrid>
-              <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={3}>
-                <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.account')}</FormLabel>
-                  <Select
-                    size="sm"
-                    value={draftAccountId ?? ''}
-                    onChange={(e) => setDraftAccountId(e.target.value ? Number(e.target.value) : null)}
-                    placeholder={t('recurring.selectAccount')}
-                  >
-                    {accounts.filter((a) => a.active).map((a) => (
-                      <option key={a.id} value={a.id}>{a.name}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl>
-                  <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>{t('recurring.paymentMethod')}</FormLabel>
-                  <Select
-                    size="sm"
-                    value={draftPaymentMethodId ?? ''}
-                    onChange={(e) => setDraftPaymentMethodId(e.target.value ? Number(e.target.value) : null)}
-                  >
-                    <option value="">{t('recurring.noPaymentMethod')}</option>
-                    {paymentMethods.filter((m) => m.active).map((m) => (
-                      <option key={m.id} value={m.id}>{m.name}</option>
-                    ))}
-                  </Select>
-                </FormControl>
-              </SimpleGrid>
+  return (
+    <>
+      <NuDetailSheet
+        open={open}
+        onClose={onClose}
+        ariaLabel={t('recurring.detailAria', { description: r.description })}
+        escapeDisabled={deleteDisclosure.isOpen}
+        media={<Icon as={typeIcon} boxSize="22px" weight="bold" />}
+        title={r.description}
+        caption={`${categoryLabel(r.category)} · ${t(isIncome ? 'type.INCOME' : 'type.EXPENSE')}`}
+        amountLabel={t('recurring.monthlyAmount')}
+        amount={`${isIncome ? '+' : '−'}${formatCurrency(r.amount)}`}
+        badge={
+          <NuSheetBadge tone={r.active ? 'light' : 'muted'}>
+            {r.active ? t('recurring.activeRule') : t('recurring.cancelled')}
+          </NuSheetBadge>
+        }
+        footer={footer}
+      >
+        {isEditing ? (
+          <VStack align="stretch" spacing={3}>
+            <SimpleGrid columns={2} spacing={3}>
               <FormControl>
-                <FormLabel fontSize="2xs" color="var(--pb-ink-soft)" fontWeight={700}>
-                  {t('recurring.applyChangesFrom')}
-                </FormLabel>
-                <Select
-                  size="sm"
-                  value={draftApplyFrom}
-                  onChange={(e) => setDraftApplyFrom(e.target.value as RecurringUpdateScope)}
-                >
+                {fieldLabel(t('recurring.amount'))}
+                <Input {...NU_FIELD} value={draftAmount} onChange={(e) => setDraftAmount(e.target.value)} type="number" min={0} step="0.01" fontWeight={700} />
+              </FormControl>
+              <FormControl>
+                {fieldLabel(t('recurring.paymentDay'))}
+                <Input {...NU_FIELD} value={draftDayOfMonth} onChange={(e) => setDraftDayOfMonth(e.target.value)} type="number" min={1} max={31} step={1} />
+              </FormControl>
+              <FormControl>
+                {fieldLabel(t('recurring.startDate'))}
+                <Input {...NU_FIELD} value={draftStartDate} onChange={(e) => setDraftStartDate(e.target.value)} type="date" />
+              </FormControl>
+              <FormControl>
+                {fieldLabel(t('recurring.applyChangesFrom'))}
+                <Select {...NU_FIELD} value={draftApplyFrom} onChange={(e) => setDraftApplyFrom(e.target.value as RecurringUpdateScope)}>
                   <option value="CURRENT_MONTH">{t('recurring.currentAndFuture')}</option>
                   <option value="NEXT_MONTH">{t('recurring.nextMonthOnwards')}</option>
                 </Select>
-                <Text mt={1} fontSize="2xs" color="var(--pb-ink-faint)">
-                  {t('recurring.applyHelp')}
-                </Text>
               </FormControl>
-              <HStack spacing={2}>
-                <Button
-                  size="sm"
-                  colorScheme="teal"
-                  onClick={handleSaveAmount}
-                  isLoading={isSavingAmount}
-                  isDisabled={!draftAccountId}
-                  leftIcon={<Icon as={Check} boxSize={3.5} />}
+              <FormControl>
+                {fieldLabel(t('recurring.account'))}
+                <Select
+                  {...NU_FIELD}
+                  value={draftAccountId ?? ''}
+                  onChange={(e) => setDraftAccountId(e.target.value ? Number(e.target.value) : null)}
+                  placeholder={t('recurring.selectAccount')}
                 >
-                  {t('common.save')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  color="var(--pb-ink-soft)"
-                  onClick={() => {
-                    resetDrafts()
-                    setIsEditing(false)
-                  }}
+                  {accounts.filter((a) => a.active).map((a) => (
+                    <option key={a.id} value={a.id}>{a.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl>
+                {fieldLabel(t('recurring.paymentMethod'))}
+                <Select
+                  {...NU_FIELD}
+                  value={draftPaymentMethodId ?? ''}
+                  onChange={(e) => setDraftPaymentMethodId(e.target.value ? Number(e.target.value) : null)}
                 >
-                  {t('common.cancel')}
-                </Button>
-              </HStack>
-            </VStack>
-          ) : (
-            <>
-              {/* Detail rows */}
-              <Box mt="1.1rem" borderTop="1px solid var(--pb-hair)">
-                <DetailRow k={t('recurring.monthlyAmount')} v={formatCurrency(r.amount)} />
-                <DetailRow k={t('recurring.paymentDay')} v={t('recurring.dayNumber', { day: r.dayOfMonth })} />
-                <DetailRow k={t('recurring.nextPayment')} v={r.nextRunDate
+                  <option value="">{t('recurring.noPaymentMethod')}</option>
+                  {paymentMethods.filter((m) => m.active).map((m) => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </Select>
+              </FormControl>
+            </SimpleGrid>
+            <Text fontSize="xs" color={NU_SHEET_COLORS.inkSoft}>
+              {t('recurring.applyHelp')}
+            </Text>
+          </VStack>
+        ) : (
+          <NuFacts
+            items={[
+              { label: t('recurring.paymentDay'), value: t('recurring.dayNumber', { day: r.dayOfMonth }) },
+              {
+                label: t('recurring.nextPayment'),
+                value: r.nextRunDate
                   ? formatDate(r.nextRunDate, { day: '2-digit', month: 'short', year: 'numeric' })
-                  : t('recurring.notScheduled')} />
-                <DetailRow k={t('recurring.startDate')} v={formatDate(r.startDate, { day: '2-digit', month: 'short', year: 'numeric' })} />
-                <DetailRow k={t('recurring.account')} v={r.accountName ?? t('recurring.notLinked')} />
-                <DetailRow k={t('recurring.card')} v={r.paymentMethodName ?? t('recurring.noCardLinked')} />
-              </Box>
-
-              {/* Actions */}
-              {r.active && (
-                <HStack spacing="0.6rem" mt="1.1rem">
-                  <Button
-                    flex={1}
-                    h="42px"
-                    borderRadius="12px"
-                    fontSize="sm"
-                    fontWeight={600}
-                    leftIcon={<Icon as={Pencil} boxSize={4} />}
-                    bg="var(--pb-surface-2)"
-                    color="var(--pb-ink)"
-                    border="1px solid var(--pb-hair)"
-                    _hover={{ bg: 'var(--pb-surface-3)' }}
-                    onClick={() => setIsEditing(true)}
-                  >
-                    {t('common.edit')}
-                  </Button>
-                  <Button
-                    h="42px"
-                    px={4}
-                    borderRadius="12px"
-                    fontSize="sm"
-                    fontWeight={600}
-                    leftIcon={<Icon as={Trash2} boxSize={4} />}
-                    bg="var(--pb-tint-coral)"
-                    color="var(--pb-coral)"
-                    border="1px solid var(--pb-hair)"
-                    _hover={{ bg: 'var(--pb-tint-coral)', borderColor: 'var(--pb-coral)' }}
-                    onClick={deleteDisclosure.onOpen}
-                  >
-                    {t('recurring.cancelRule')}
-                  </Button>
-                </HStack>
-              )}
-            </>
-          )}
-        </Box>
-      </Box>
+                  : t('recurring.notScheduled'),
+              },
+              { label: t('recurring.startDate'), value: formatDate(r.startDate, { day: '2-digit', month: 'short', year: 'numeric' }) },
+              { label: t('recurring.frequency'), value: t('recurring.monthly') },
+              { label: t('recurring.account'), value: r.accountName ?? t('recurring.notLinked') },
+              { label: t('recurring.card'), value: r.paymentMethodName ?? t('recurring.noCardLinked') },
+            ]}
+          />
+        )}
+      </NuDetailSheet>
 
       {/* Cancel confirmation */}
       <AlertDialog
@@ -554,17 +400,16 @@ export default function RecurringTransactionDrawer({
             </AlertDialogBody>
 
             <AlertDialogFooter px={6} py={4} borderTop="1px solid" borderColor={dividerColor} gap={2}>
-              <Button ref={cancelRef} onClick={deleteDisclosure.onClose} variant="ghost" fontSize="sm" color={captionColor}>
+              <Button ref={cancelRef} onClick={deleteDisclosure.onClose} {...nuButtonProps('ghost')} h="44px">
                 {t('recurring.keepActive')}
               </Button>
-              <Button colorScheme="red" onClick={handleCancel} isLoading={isCancelling} fontSize="sm">
+              <Button colorScheme="red" onClick={handleCancel} isLoading={isCancelling} h="44px" px={6} borderRadius="full" fontSize="sm" fontWeight={700}>
                 {t('recurring.cancelPayment')}
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialogOverlay>
       </AlertDialog>
-    </Box>,
-    document.body,
+    </>
   )
 }

@@ -11,11 +11,12 @@ import { useI18n } from '../../i18n'
 
 import '../dashboard/theme/pb-tokens.css'
 import { containerV, MotionBox, riseV } from '../dashboard/components/motion'
-import Segmented from '../dashboard/components/Segmented'
+import Segmented, { type SegmentedOption } from '../dashboard/components/Segmented'
 import NuHero, { NuHeroBadge } from '../dashboard/components/NuHero'
 
 import FixedPaymentsPage from '../../pages/FixedPaymentsPage'
 import InstallmentsPage, { currentMonthInstallmentTotal } from '../../pages/InstallmentsPage'
+import { isInstallmentPlanCompleted } from '../../components/installments/InstallmentPlanCard'
 import { NU_SHEET_PB, NU_SHEET_WRAP } from '../dashboard/components/nu'
 
 export type CommitmentsTab = 'fixed' | 'installments'
@@ -61,6 +62,7 @@ export default function CommitmentsPage({ onPageChange, initialTab = 'fixed' }: 
       fixedMonthly,
       installmentsMonthly,
       total: fixedMonthly + installmentsMonthly,
+      activeInstallments: plans.filter((plan) => !isInstallmentPlanCompleted(plan)).length,
     }
   }, [recurring, plans])
 
@@ -104,6 +106,7 @@ interface SummaryShape {
   fixedMonthly: number
   installmentsMonthly: number
   total: number
+  activeInstallments: number
 }
 
 function SummaryHero({
@@ -116,9 +119,9 @@ function SummaryHero({
   onTabChange: (tab: CommitmentsTab) => void
 }) {
   const { t, formatCurrency } = useI18n()
-  const tabOptions: Array<{ value: CommitmentsTab; label: string }> = [
+  const tabOptions: Array<SegmentedOption<CommitmentsTab>> = [
     { value: 'fixed', label: t('commitments.fixedPayments') },
-    { value: 'installments', label: t('commitments.instalments') },
+    { value: 'installments', label: t('commitments.instalments'), badge: summary.activeInstallments },
   ]
   return (
     <Flex mt={{ base: 3, md: 4 }} direction={{ base: 'column', md: 'row' }} align={{ base: 'stretch', md: 'flex-end' }} justify="space-between" gap={{ base: 4, md: 8 }}>
