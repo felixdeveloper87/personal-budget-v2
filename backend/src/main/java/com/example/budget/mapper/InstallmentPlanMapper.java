@@ -71,7 +71,7 @@ public class InstallmentPlanMapper {
                 ))
                 .toList();
 
-        return new InstallmentPlanDTO(
+        InstallmentPlanDTO dto = new InstallmentPlanDTO(
                 plan.getId(),
                 plan.getTotalInstallments(),
                 plan.getTotalAmount(),
@@ -83,6 +83,8 @@ public class InstallmentPlanMapper {
                 plan.getPaymentMethod() != null ? plan.getPaymentMethod().getName() : null,
                 transactionDTOs
         );
+        dto.setCancelledInstallments(plan.getCancelledInstallments());
+        return dto;
     }
 
     /**

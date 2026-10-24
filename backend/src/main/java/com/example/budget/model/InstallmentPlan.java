@@ -23,6 +23,10 @@ public class InstallmentPlan {
     @Column(nullable = false)
     private int totalInstallments;
 
+    /** Installments dropped when the plan was ended early (0 if never ended). */
+    @Column(name = "cancelled_installments", nullable = false)
+    private int cancelledInstallments;
+
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal totalAmount;
 
@@ -66,6 +70,14 @@ public class InstallmentPlan {
 
     public void setTotalInstallments(int totalInstallments) {
         this.totalInstallments = totalInstallments;
+    }
+
+    public int getCancelledInstallments() {
+        return cancelledInstallments;
+    }
+
+    public void setCancelledInstallments(int cancelledInstallments) {
+        this.cancelledInstallments = cancelledInstallments;
     }
 
     public BigDecimal getTotalAmount() {

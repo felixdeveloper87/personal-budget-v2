@@ -306,6 +306,7 @@ public class InstallmentPlanService {
         // orphanRemoval deletes the detached upcoming installments.
         plan.getTransactions().removeAll(upcoming);
         plan.setTotalInstallments(paid.size());
+        plan.setCancelledInstallments(plan.getCancelledInstallments() + upcoming.size());
         plan.setTotalAmount(paid.stream()
                 .map(Transaction::getAmount)
                 .filter(Objects::nonNull)

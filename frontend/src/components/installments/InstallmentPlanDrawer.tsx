@@ -49,6 +49,15 @@ function getPlanStartDate(plan: InstallmentPlan): string {
     .sort((a, b) => a.installmentNumber - b.installmentNumber)[0]?.date || new Date().toISOString().slice(0, 10)
 }
 
+/** Adds whole months to a YYYY-MM-DD date, clamping to the month's last day. */
+function addMonths(date: string, months: number): string {
+  const [y, m, d] = date.split('-').map(Number)
+  const target = new Date(Date.UTC(y, m - 1 + months, 1))
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate()
+  target.setUTCDate(Math.min(d, lastDay))
+  return target.toISOString().slice(0, 10)
+}
+
 const SCHEDULE_PREVIEW = 4
 
 /** PremiumModal content for the plan's nested modals: bottom sheet on phones, centred card above. */
@@ -146,6 +155,18 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
     [displayPlan],
   )
 
+  // Installments removed when the plan was ended early: rebuilt from the last
+  // kept one so the schedule still shows what was never paid.
+  const cancelledRows = useMemo(() => {
+    const count = displayPlan?.cancelledInstallments ?? 0
+    const last = sortedTransactions[sortedTransactions.length - 1]
+    if (!displayPlan || count <= 0 || !last) return []
+    return Array.from({ length: count }, (_, i) => ({
+      installmentNumber: last.installmentNumber + i + 1,
+      date: addMonths(last.date, i + 1),
+    }))
+  }, [displayPlan, sortedTransactions])
+
   const paidCount = useMemo(() => {
     if (!displayPlan) return 0
     const now = new Date()
@@ -156,6 +177,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
 
   const p = displayPlan
   const isPast = isInstallmentPlanCompleted(p)
+  const originalTotal = p.totalInstallments + cancelledRows.length
   const firstTransaction = p.transactions[0]
   const title = firstTransaction?.description
     ? getInstallmentPlanTitle(firstTransaction.description)
@@ -274,12 +296,15 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
     }
   }
 
+  // Collapsed and ended early: a couple of the cancelled ones after the last paid.
+  const visibleCancelled = showAllSchedule ? cancelledRows : isPast ? cancelledRows.slice(0, 2) : []
   const visibleTransactions = showAllSchedule
     ? sortedTransactions
     : (() => {
         // Collapsed: the next few unpaid installments (or the last few once done).
         const upcoming = sortedTransactions.filter((item) => new Date(item.date) >= new Date())
-        return (upcoming.length ? upcoming : sortedTransactions.slice(-SCHEDULE_PREVIEW)).slice(0, SCHEDULE_PREVIEW)
+        const preview = SCHEDULE_PREVIEW - visibleCancelled.length
+        return (upcoming.length ? upcoming : sortedTransactions.slice(-preview)).slice(0, preview)
       })()
 
   return (
@@ -297,7 +322,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
         badge={
           <NuSheetBadge tone={isPast ? 'muted' : 'light'}>
             {isPast
-              ? t('installments.drawer.completedPlan')
+              ? t(cancelledRows.length ? 'installments.drawer.endedPlan' : 'installments.drawer.completedPlan')
               : t('installments.progress.paid', { paid: paidCount, total: p.totalInstallments })}
           </NuSheetBadge>
         }
@@ -330,7 +355,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
           <Text fontSize="sm" fontWeight={700}>
             {t('installments.drawer.schedule')}
           </Text>
-          {sortedTransactions.length > SCHEDULE_PREVIEW && (
+          {sortedTransactions.length + cancelledRows.length > SCHEDULE_PREVIEW && (
             <Button
               variant="link"
               size="sm"
@@ -340,7 +365,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
             >
               {showAllSchedule
                 ? t('installments.drawer.showLess')
-                : t('installments.drawer.showAll', { count: sortedTransactions.length })}
+                : t('installments.drawer.showAll', { count: sortedTransactions.length + cancelledRows.length })}
             </Button>
           )}
         </Flex>
@@ -375,7 +400,7 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
                     {formatDate(new Date(transaction.date), { day: '2-digit', month: 'short', year: 'numeric' })}
                   </Text>
                   <Text fontSize="xs" color={NU_SHEET_COLORS.inkSoft}>
-                    {transaction.installmentNumber}/{p.totalInstallments} · {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
+                    {transaction.installmentNumber}/{originalTotal} · {t(isPaid ? 'installments.status.paid' : 'installments.status.pending')}
                   </Text>
                 </Box>
                 <Text fontSize="sm" fontWeight={700}>
@@ -384,6 +409,45 @@ export default function InstallmentPlanDrawer({ plan, onClose, onChanged }: Inst
               </Flex>
             )
           })}
+          {/* Ended early: the dropped installments, muted and struck through. */}
+          {visibleCancelled.map((row) => (
+            <Flex
+              key={`cancelled-${row.installmentNumber}`}
+              align="center"
+              gap={3}
+              py={2}
+              borderBottom="1px solid #ececf1"
+              _last={{ borderBottom: 0 }}
+              opacity={0.45}
+            >
+              <Box
+                w="34px"
+                h="34px"
+                flexShrink={0}
+                display="grid"
+                placeItems="center"
+                borderRadius="full"
+                border="1px dashed"
+                borderColor={NU_SHEET_COLORS.inkSoft}
+                color={NU_SHEET_COLORS.inkSoft}
+                fontSize="xs"
+                fontWeight={700}
+              >
+                {row.installmentNumber}
+              </Box>
+              <Box flex={1} minW={0}>
+                <Text fontSize="sm" fontWeight={600} textDecoration="line-through">
+                  {formatDate(new Date(row.date), { day: '2-digit', month: 'short', year: 'numeric' })}
+                </Text>
+                <Text fontSize="xs" color={NU_SHEET_COLORS.inkSoft}>
+                  {row.installmentNumber}/{originalTotal} · {t('installments.status.cancelled')}
+                </Text>
+              </Box>
+              <Text fontSize="sm" fontWeight={600} color={NU_SHEET_COLORS.inkSoft} textDecoration="line-through">
+                {formatCurrency(p.installmentValue)}
+              </Text>
+            </Flex>
+          ))}
         </VStack>
       </NuDetailSheet>
 

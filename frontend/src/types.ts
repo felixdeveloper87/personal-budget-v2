@@ -282,6 +282,8 @@ export interface InstallmentPlan {
   paymentMethodId?: number | null
   paymentMethodName?: string | null
   transactions: InstallmentTransaction[]
+  /** Installments dropped when the plan was ended early. */
+  cancelledInstallments?: number
 }
 
 export interface InstallmentTransaction {

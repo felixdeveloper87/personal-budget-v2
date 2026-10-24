@@ -21,6 +21,7 @@ public class InstallmentPlanDTO {
     private Long paymentMethodId;
     private String paymentMethodName;
     private List<InstallmentTransactionDTO> transactions;
+    private int cancelledInstallments;
 
     public InstallmentPlanDTO() {
     }
@@ -97,6 +98,14 @@ public class InstallmentPlanDTO {
     public String getAccountName() { return accountName; }
     public Long getPaymentMethodId() { return paymentMethodId; }
     public String getPaymentMethodName() { return paymentMethodName; }
+
+    public int getCancelledInstallments() {
+        return cancelledInstallments;
+    }
+
+    public void setCancelledInstallments(int cancelledInstallments) {
+        this.cancelledInstallments = cancelledInstallments;
+    }
 
     public List<InstallmentTransactionDTO> getTransactions() {
         return transactions;
