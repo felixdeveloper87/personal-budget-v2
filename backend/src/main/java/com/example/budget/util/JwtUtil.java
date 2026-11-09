@@ -2,6 +2,7 @@ package com.example.budget.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,17 +22,36 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret:mySecretKey123456789012345678901234567890}")
+    /** Minimum secret length (in UTF-8 bytes) accepted at startup. */
+    static final int MIN_SECRET_BYTES = 32;
+
+    @Value("${jwt.secret}")
     private String secret;
 
     @Value("${jwt.expiration:86400000}") // 24 hours in milliseconds
     private long expiration;
 
     /**
+     * Fails fast on startup when JWT_SECRET is missing or too short.
+     * <p>Docker Compose substitutes an unset {@code ${JWT_SECRET}} with an empty string, which
+     * would otherwise produce a predictable signing key (SHA-512 of "") and let anyone forge tokens.
+     */
+    @PostConstruct
+    void validateSecret() {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET is not set. Define it in the environment (.env).");
+        }
+        if (secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException("JWT_SECRET must be at least " + MIN_SECRET_BYTES
+                    + " bytes long. Generate one with: openssl rand -base64 64");
+        }
+    }
+
+    /**
      * Gets the signing key for JWT tokens.
-     * <p>JJWT rejects HS512 keys shorter than 512 bits. Short {@code JWT_SECRET} values
-     * (common in local {@code .env}) are hashed with SHA-512 so login/register never blow up with
-     * {@code WeakKeyException}. Secrets that are already 64+ UTF-8 bytes are used as-is.
+     * <p>JJWT rejects HS512 keys shorter than 512 bits. Secrets between 32 and 63 UTF-8 bytes
+     * (shorter ones are rejected at startup) are hashed with SHA-512 to reach the required size.
+     * Secrets that are already 64+ UTF-8 bytes are used as-is.
      *
      * @return SecretKey for HMAC-SHA512 signing
      */
